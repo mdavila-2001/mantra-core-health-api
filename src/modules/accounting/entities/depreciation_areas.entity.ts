@@ -1,0 +1,48 @@
+import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { randomUUID } from 'node:crypto';
+
+@Entity({ schema: 'accounting', tableName: 'depreciation_areas' })
+export class DepreciationAreas {
+  @PrimaryKey({ type: 'uuid' })
+  id: string = randomUUID();
+
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
+  tenantId!: string;
+
+  @Property({ columnType: 'varchar' })
+  code!: string;
+
+  @Property({ columnType: 'varchar' })
+  name!: string;
+
+  @Property({ fieldName: 'accounting_principle_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  accountingPrincipleConceptId!: string;
+
+  @Property({ fieldName: 'currency_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  currencyConceptId!: string;
+
+  @Property({
+    fieldName: 'posts_to_general_ledger',
+    type: 'boolean',
+    nullable: true,
+  })
+  postsToGeneralLedger?: boolean;
+
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  statusConceptId!: string;
+
+  @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
+  createdAt!: Date;
+
+  @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
+  updatedAt!: Date;
+
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  createdByUserId?: string;
+
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  updatedByUserId?: string;
+
+  @Property({ fieldName: 'row_version', columnType: 'int', version: true })
+  rowVersion!: number;
+}

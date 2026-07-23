@@ -1,0 +1,47 @@
+import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { randomUUID } from 'node:crypto';
+
+@Entity({ schema: 'audit', tableName: 'catalog_products_history' })
+export class CatalogProductsHistory {
+  @PrimaryKey({ fieldName: 'history_id', type: 'uuid' })
+  historyId: string = randomUUID();
+
+  @Property({ fieldName: 'catalog_products_id', type: 'uuid' }) // FK → ads.catalog_products
+  catalogProductsId!: string;
+
+  @Property({ fieldName: 'row_version', columnType: 'int', version: true })
+  rowVersion!: number;
+
+  @Property({ fieldName: 'operation_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  operationConceptId!: string;
+
+  @Property({
+    fieldName: 'valid_from',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  validFrom?: Date;
+
+  @Property({
+    fieldName: 'valid_to',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  validTo?: Date;
+
+  @Property({ fieldName: 'data_snapshot', type: 'json', columnType: 'jsonb' })
+  dataSnapshot!: unknown;
+
+  @Property({ fieldName: 'changed_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  changedByUserId?: string;
+
+  @Property({
+    fieldName: 'change_reason_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  changeReasonConceptId?: string;
+
+  @Property({ fieldName: 'recorded_at', columnType: 'timestamptz' })
+  recordedAt!: Date;
+}
