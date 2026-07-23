@@ -15,7 +15,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,8 +26,29 @@ services:
     networks:
       - mantra-redesa-network
 
+  # One-shot: aplica SQL/ (apply_all → apply_deferred) y los stores PG de
+  # NoSQL/ (58 TimescaleDB, 59 pgvector) solo si las tablas no existen.
+  postgres-init:
+    image: timescale/timescaledb-ha:pg18
+    container_name: postgres-init
+    restart: "no"
+    entrypoint: ["bash", "/init/bin/init-postgres.sh"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ../SQL:/init/SQL:ro
+      - ../NoSQL:/init/NoSQL:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   mongodb:
-    image: mongo:7.0
+    image: mongo:8.0
     container_name: mongodb
     restart: always
     ports:
@@ -42,13 +63,31 @@ services:
     networks:
       - mantra-redesa-network
 
+  # One-shot: crea las colecciones del módulo 55 document_store
+  # (validadores $jsonSchema + índices) solo si no existen.
+  mongo-init:
+    image: mongo:8.0
+    container_name: mongo-init
+    restart: "no"
+    entrypoint: ["bash", "/init/bin/init-mongo.sh"]
+    environment:
+      MONGO_DB: ${MONGO_DB:-salud_document_store}
+    volumes:
+      - ../NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   redis:
-    image: redis:7.4-alpine
+    image: redis:8.8-alpine
     container_name: redis
     restart: always
     command: redis-server --save 60 1 --loglevel notice
     ports:
-      - "6380:6379"
+      - "${REDIS_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -60,7 +99,7 @@ services:
       - mantra-redesa-network
 
   opensearch:
-    image: opensearchproject/opensearch:2.18.0
+    image: opensearchproject/opensearch:3.7.0
     container_name: opensearch
     restart: always
     environment:
@@ -91,16 +130,35 @@ services:
     networks:
       - mantra-redesa-network
 
+  # One-shot: crea los índices del módulo 57 search_platform desde los
+  # *.mapping.json solo si no existen.
+  opensearch-init:
+    image: curlimages/curl:8.11.1
+    container_name: opensearch-init
+    restart: "no"
+    entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
+    volumes:
+      - ../NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   minio:
-    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
+    # Última release de MinIO community con consola de administración completa.
+    # RELEASE.2025-05-24 en adelante reduce la consola a un navegador de objetos
+    # y el proyecto fue archivado en 2026 — no actualizar más allá de esta versión.
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: minio
     restart: always
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: mantra
-      MINIO_ROOT_PASSWORD: DArkSide
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     ports:
-      - "9002:9000"
+      - "${MINIO_PORT:-9002}:9000"
       - "9003:9001"
     volumes:
       - minio_data:/data
