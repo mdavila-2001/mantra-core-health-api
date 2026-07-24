@@ -1,0 +1,58 @@
+import type { IndexTuple } from '../catalog.types';
+
+/**
+ * Índices secundarios declarados por el modelo oficial para el schema `common`.
+ * 48 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * no editar a mano: regenerar con `yarn orm:catalog`.
+ */
+export const commonIndexes: readonly IndexTuple[] = [
+  // [tabla, nombre, columnas, único, método]
+  ['addresses', 'ix_addresses_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_use_concept_id', ['use_concept_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_type_concept_id', ['type_concept_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_administrative_area_concept_id', ['administrative_area_concept_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_country_concept_id', ['country_concept_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['addresses', 'ix_addresses_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['contact_points', 'ix_contact_points_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
+  ['contact_points', 'ix_contact_points_system_concept_id', ['system_concept_id'], false, 'btree'],
+  ['contact_points', 'ix_contact_points_use_concept_id', ['use_concept_id'], false, 'btree'],
+  ['contact_points', 'ix_contact_points_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['contact_points', 'ix_contact_points_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['file_derivatives', 'ix_file_derivatives_source_file_version_id', ['source_file_version_id'], false, 'btree'],
+  ['file_derivatives', 'ix_file_derivatives_derivative_file_version_id', ['derivative_file_version_id'], false, 'btree'],
+  ['file_derivatives', 'ix_file_derivatives_derivative_type_concept_id', ['derivative_type_concept_id'], false, 'btree'],
+  ['file_derivatives', 'ix_file_derivatives_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['file_links', 'ix_file_links_file_id', ['file_id'], false, 'btree'],
+  ['file_links', 'ix_file_links_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
+  ['file_links', 'ix_file_links_link_role_concept_id', ['link_role_concept_id'], false, 'btree'],
+  ['file_links', 'ix_file_links_visibility_concept_id', ['visibility_concept_id'], false, 'btree'],
+  ['file_links', 'ix_file_links_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['file_links', 'ix_file_links_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_file_id', ['file_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_storage_provider_concept_id', ['storage_provider_concept_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_storage_region_concept_id', ['storage_region_concept_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_checksum_algorithm_concept_id', ['checksum_algorithm_concept_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_encryption_status_concept_id', ['encryption_status_concept_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_malware_scan_status_concept_id', ['malware_scan_status_concept_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_integrity_status_concept_id', ['integrity_status_concept_id'], false, 'btree'],
+  ['file_versions', 'ix_file_versions_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['file_versions', 'uq_file_versions_file_id_version_number', ['file_id', 'version_number'], true, 'btree'],
+  ['files', 'ix_files_tenant_id', ['tenant_id'], false, 'btree'],
+  ['files', 'ix_files_category_concept_id', ['category_concept_id'], false, 'btree'],
+  ['files', 'ix_files_sensitivity_concept_id', ['sensitivity_concept_id'], false, 'btree'],
+  ['files', 'ix_files_lifecycle_status_concept_id', ['lifecycle_status_concept_id'], false, 'btree'],
+  ['files', 'ix_files_current_version_id', ['current_version_id'], false, 'btree'],
+  ['files', 'ix_files_retention_class_concept_id', ['retention_class_concept_id'], false, 'btree'],
+  ['files', 'ix_files_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['files', 'ix_files_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['files', 'ix_files_tenant_id_lifecycle_status_concept_id', ['tenant_id', 'lifecycle_status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_use_concept_id', ['use_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_type_concept_id', ['type_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_issuer_country_concept_id', ['issuer_country_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_assigner_tenant_id', ['assigner_tenant_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+];

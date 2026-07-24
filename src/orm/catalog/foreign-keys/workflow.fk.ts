@@ -1,0 +1,58 @@
+import type { ForeignKeyTuple } from '../catalog.types';
+
+/**
+ * Claves foráneas declaradas por el modelo oficial para el schema `workflow`.
+ * 48 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * no editar a mano: regenerar con `yarn orm:catalog`.
+ */
+export const workflowForeignKeys: readonly ForeignKeyTuple[] = [
+  // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['state_definitions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['state_definitions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_definitions', 'state_machine_definition_id', 'workflow', 'state_machine_definitions', 'id'],
+  ['state_definitions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_definitions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['state_machine_definitions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['state_machine_definitions', 'state_value_set_id', 'terminology', 'value_sets', 'id'],
+  ['state_machine_definitions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_machine_definitions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['state_transition_definitions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['state_transition_definitions', 'from_state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_transition_definitions', 'purpose_of_use_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_transition_definitions', 'required_permission_id', 'authz', 'permissions', 'id'],
+  ['state_transition_definitions', 'state_machine_definition_id', 'workflow', 'state_machine_definitions', 'id'],
+  ['state_transition_definitions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_transition_definitions', 'to_state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_transition_definitions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['state_transition_events', 'actor_tenant_id', 'directory', 'tenants', 'id'],
+  ['state_transition_events', 'actor_user_id', 'iam', 'users', 'id'],
+  ['state_transition_events', 'from_state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_transition_events', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_transition_events', 'state_machine_definition_id', 'workflow', 'state_machine_definitions', 'id'],
+  ['state_transition_events', 'to_state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['transition_guards', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['transition_guards', 'guard_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['transition_guards', 'state_transition_definition_id', 'workflow', 'state_transition_definitions', 'id'],
+  ['transition_guards', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['transition_guards', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['transition_side_effects', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['transition_side_effects', 'execution_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['transition_side_effects', 'side_effect_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['transition_side_effects', 'state_transition_definition_id', 'workflow', 'state_transition_definitions', 'id'],
+  ['transition_side_effects', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['transition_side_effects', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['workflow_instances', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['workflow_instances', 'current_state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['workflow_instances', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['workflow_instances', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['workflow_instances', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['workflow_instances', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['workflow_tasks', 'assigned_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['workflow_tasks', 'assigned_user_id', 'iam', 'users', 'id'],
+  ['workflow_tasks', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['workflow_tasks', 'required_permission_id', 'authz', 'permissions', 'id'],
+  ['workflow_tasks', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['workflow_tasks', 'task_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['workflow_tasks', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['workflow_tasks', 'workflow_instance_id', 'workflow', 'workflow_instances', 'id'],
+];

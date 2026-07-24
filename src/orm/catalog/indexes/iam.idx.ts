@@ -1,0 +1,57 @@
+import type { IndexTuple } from '../catalog.types';
+
+/**
+ * Índices secundarios declarados por el modelo oficial para el schema `iam`.
+ * 47 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * no editar a mano: regenerar con `yarn orm:catalog`.
+ */
+export const iamIndexes: readonly IndexTuple[] = [
+  // [tabla, nombre, columnas, único, método]
+  ['authentication_credentials', 'ix_authentication_credentials_user_id', ['user_id'], false, 'btree'],
+  ['authentication_credentials', 'ix_authentication_credentials_method_concept_id', ['method_concept_id'], false, 'btree'],
+  ['authentication_credentials', 'ix_authentication_credentials_hash_algorithm_concept_id', ['hash_algorithm_concept_id'], false, 'btree'],
+  ['authentication_credentials', 'ix_authentication_credentials_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['authentication_credentials', 'ix_authentication_credentials_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['authentication_credentials', 'ix_authentication_credentials_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['devices', 'uq_devices_device_fingerprint', ['device_fingerprint'], true, 'btree'],
+  ['devices', 'ix_devices_user_id', ['user_id'], false, 'btree'],
+  ['devices', 'ix_devices_platform_concept_id', ['platform_concept_id'], false, 'btree'],
+  ['devices', 'ix_devices_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['devices', 'ix_devices_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['mfa_factors', 'ix_mfa_factors_user_id', ['user_id'], false, 'btree'],
+  ['mfa_factors', 'ix_mfa_factors_factor_type_concept_id', ['factor_type_concept_id'], false, 'btree'],
+  ['mfa_factors', 'ix_mfa_factors_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['mfa_factors', 'ix_mfa_factors_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['mfa_factors', 'ix_mfa_factors_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['refresh_tokens', 'uq_refresh_tokens_token_hash', ['token_hash'], true, 'btree'],
+  ['refresh_tokens', 'ix_refresh_tokens_session_id', ['session_id'], false, 'btree'],
+  ['refresh_tokens', 'ix_refresh_tokens_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['refresh_tokens', 'ix_refresh_tokens_replaced_by_id', ['replaced_by_id'], false, 'btree'],
+  ['refresh_tokens', 'ix_refresh_tokens_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['refresh_tokens', 'ix_refresh_tokens_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['refresh_tokens', 'ix_refresh_tokens_session_state', ['session_id', 'state_concept_id', 'expires_at'], false, 'btree'],
+  ['security_events', 'ix_security_events_user_id', ['user_id'], false, 'btree'],
+  ['security_events', 'ix_security_events_event_type_concept_id', ['event_type_concept_id'], false, 'btree'],
+  ['security_events', 'ix_security_events_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
+  ['security_events', 'ix_security_events_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['sessions', 'uq_sessions_token_id', ['token_id'], true, 'btree'],
+  ['sessions', 'ix_sessions_user_id', ['user_id'], false, 'btree'],
+  ['sessions', 'ix_sessions_device_id', ['device_id'], false, 'btree'],
+  ['sessions', 'ix_sessions_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['sessions', 'ix_sessions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['sessions', 'ix_sessions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['sessions', 'ix_sessions_user_state_expiry', ['user_id', 'state_concept_id', 'expires_at'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_user_id', ['user_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_role_concept_id', ['role_concept_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['user_global_roles', 'ix_user_global_roles_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['users', 'ix_users_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['users', 'ix_users_preferred_language_concept_id', ['preferred_language_concept_id'], false, 'btree'],
+  ['users', 'ix_users_residence_country_concept_id', ['residence_country_concept_id'], false, 'btree'],
+  ['users', 'ix_users_data_residency_region_concept_id', ['data_residency_region_concept_id'], false, 'btree'],
+  ['users', 'ix_users_mfa_status_concept_id', ['mfa_status_concept_id'], false, 'btree'],
+  ['users', 'ix_users_legal_basis_concept_id', ['legal_basis_concept_id'], false, 'btree'],
+  ['users', 'ix_users_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['users', 'ix_users_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+];

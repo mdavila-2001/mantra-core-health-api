@@ -17,7 +17,7 @@ export class ReportParameters {
 
   @Property({
     fieldName: 'data_type',
-    columnType: '"terminology"."technical_data_type"',
+    columnType: 'terminology.technical_data_type',
   })
   dataType!: string;
 

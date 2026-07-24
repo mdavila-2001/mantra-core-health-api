@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
-import { databaseEnvSchema } from './config/database.env';
+import { OrmModule, ormEnvSchema } from './orm';
+import { LoggingModule, loggingEnvSchema } from './logging';
 import { IamModule } from './modules/iam/iam.module';
 import { DirectoryModule } from './modules/directory/directory.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -59,14 +59,25 @@ import { SystemOpsModule } from './modules/system_ops/system_ops.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { TimeSeriesModule } from './modules/time_series/time_series.module';
+import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
 
 @Module({
   imports: [
+    // Validación del entorno antes que nada: si falta una credencial de base de
+    // datos o `LOG_LEVEL` trae un valor inválido, el proceso debe morir aquí y no
+    // en la primera consulta ni en la primera línea de log. Se concatenan los dos
+    // esquemas Joi (persistencia + logging) en la única validación global.
     ConfigModule.forRoot({
       isGlobal: true,
-      validationSchema: databaseEnvSchema,
+      validationSchema: ormEnvSchema.concat(loggingEnvSchema),
     }),
-    DatabaseModule,
+    // Logging estructurado con pino para todas las capas. Va primero para que el
+    // logger de peticiones y el `PinoLogger` estén disponibles desde el arranque.
+    LoggingModule,
+    // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
+    // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
+    OrmModule,
     IamModule,
     DirectoryModule,
     ProfilesModule,
@@ -122,6 +133,8 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     TelemetryModule,
     TrackingModule,
     WorkflowModule,
+    TimeSeriesModule,
+    VectorRagModule,
   ],
   controllers: [AppController],
   providers: [AppService],

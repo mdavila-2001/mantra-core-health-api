@@ -19,7 +19,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "orm": "mikro-orm",
-    "orm:gen:iam": "mikro-orm generate-entities --config ./src/mikro-orm-generator.config.ts --schema iam --save --path ./src/modules/iam/entities"
+    "orm:gen": "mikro-orm generate-entities --config ./src/orm/config/orm.generator.config.ts --save",
+    "orm:catalog": "node tools/catalog/generate-catalog.mjs",
+    "orm:entities:missing": "node tools/catalog/generate-missing-entities.mjs",
+    "orm:audit": "node tools/catalog/audit-fidelity.mjs graphify-out/fidelity-audit.json",
+    "orm:schema:dump": "ORM_SCHEMA_SYNC=dry-run node dist/main"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",

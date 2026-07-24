@@ -1,0 +1,55 @@
+import type { ForeignKeyTuple } from '../catalog.types';
+
+/**
+ * Claves foráneas declaradas por el modelo oficial para el schema `health_context`.
+ * 45 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * no editar a mano: regenerar con `yarn orm:catalog`.
+ */
+export const healthContextForeignKeys: readonly ForeignKeyTuple[] = [
+  // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['context_agents', 'agent_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_agents', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['context_agents', 'owner_tenant_id', 'directory', 'tenants', 'id'],
+  ['context_agents', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_agents', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['context_collection_runs', 'agent_id', 'automation', 'agents', 'id'],
+  ['context_collection_runs', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_collection_runs', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['context_collection_runs', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_collection_runs', 'trigger_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_fact_evidence', 'health_context_fact_id', 'health_context', 'health_context_facts', 'id'],
+  ['context_fact_evidence', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['context_fact_evidence', 'source_observation_id', 'clinical', 'observations', 'id'],
+  ['context_quality_reviews', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_quality_reviews', 'review_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_quality_reviews', 'reviewed_by_user_id', 'iam', 'users', 'id'],
+  ['context_quality_reviews', 'reviewer_agent_id', 'automation', 'agents', 'id'],
+  ['context_source_observations', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['context_source_observations', 'raw_payload_file_id', 'common', 'files', 'id'],
+  ['context_source_observations', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['context_source_observations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_context_schedules', 'agent_id', 'automation', 'agents', 'id'],
+  ['country_context_schedules', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_context_schedules', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['country_context_schedules', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_context_schedules', 'timezone_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_context_schedules', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['country_health_context_versions', 'country_health_context_id', 'health_context', 'country_health_contexts', 'id'],
+  ['country_health_context_versions', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['country_health_context_versions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_health_contexts', 'context_domain_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_health_contexts', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_health_contexts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['country_health_contexts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['country_health_contexts', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['health_context_facts', 'metric_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['health_context_facts', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['health_context_facts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['health_context_facts', 'unit_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['health_context_sources', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['health_context_sources', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['health_context_sources', 'source_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['health_context_sources', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['health_context_sources', 'trust_tier_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['health_context_sources', 'updated_by_user_id', 'iam', 'users', 'id'],
+];

@@ -20,7 +20,7 @@ export class ReportColumns {
 
   @Property({
     fieldName: 'data_type',
-    columnType: '"terminology"."technical_data_type"',
+    columnType: 'terminology.technical_data_type',
     nullable: true,
   })
   dataType?: string;

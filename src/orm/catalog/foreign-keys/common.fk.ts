@@ -1,0 +1,55 @@
+import type { ForeignKeyTuple } from '../catalog.types';
+
+/**
+ * Claves foráneas declaradas por el modelo oficial para el schema `common`.
+ * 45 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * no editar a mano: regenerar con `yarn orm:catalog`.
+ */
+export const commonForeignKeys: readonly ForeignKeyTuple[] = [
+  // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['addresses', 'administrative_area_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['addresses', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['addresses', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['addresses', 'owner_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['addresses', 'type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['addresses', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['addresses', 'use_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['contact_points', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['contact_points', 'owner_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['contact_points', 'system_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['contact_points', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['contact_points', 'use_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_derivatives', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['file_derivatives', 'derivative_file_version_id', 'common', 'file_versions', 'id'],
+  ['file_derivatives', 'derivative_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_derivatives', 'source_file_version_id', 'common', 'file_versions', 'id'],
+  ['file_links', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['file_links', 'file_id', 'common', 'files', 'id'],
+  ['file_links', 'link_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_links', 'owner_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_links', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['file_links', 'visibility_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_versions', 'checksum_algorithm_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_versions', 'encryption_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_versions', 'file_id', 'common', 'files', 'id'],
+  ['file_versions', 'integrity_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_versions', 'malware_scan_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_versions', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['file_versions', 'storage_provider_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['file_versions', 'storage_region_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['files', 'lifecycle_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'retention_class_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'sensitivity_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['files', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['files', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['identifiers', 'assigner_tenant_id', 'directory', 'tenants', 'id'],
+  ['identifiers', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['identifiers', 'issuer_country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identifiers', 'owner_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identifiers', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identifiers', 'type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identifiers', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['identifiers', 'use_concept_id', 'terminology', 'catalog_concepts', 'id'],
+];

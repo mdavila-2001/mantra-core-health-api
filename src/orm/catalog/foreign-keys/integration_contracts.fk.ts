@@ -1,0 +1,53 @@
+import type { ForeignKeyTuple } from '../catalog.types';
+
+/**
+ * Claves foráneas declaradas por el modelo oficial para el schema `integration_contracts`.
+ * 43 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * no editar a mano: regenerar con `yarn orm:catalog`.
+ */
+export const integrationContractsForeignKeys: readonly ForeignKeyTuple[] = [
+  // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['contract_webhook_subscriptions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['contract_webhook_subscriptions', 'event_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['contract_webhook_subscriptions', 'integration_contract_id', 'integration_contracts', 'integration_contracts', 'id'],
+  ['contract_webhook_subscriptions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['contract_webhook_subscriptions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['integration_auth_profiles', 'auth_profile_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_auth_profiles', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['integration_auth_profiles', 'integration_contract_id', 'integration_contracts', 'integration_contracts', 'id'],
+  ['integration_auth_profiles', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_auth_profiles', 'token_binding_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_auth_profiles', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['integration_contract_versions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['integration_contract_versions', 'integration_contract_id', 'integration_contracts', 'integration_contracts', 'id'],
+  ['integration_contract_versions', 'openapi_file_id', 'common', 'files', 'id'],
+  ['integration_contract_versions', 'request_schema_file_id', 'common', 'files', 'id'],
+  ['integration_contract_versions', 'response_schema_file_id', 'common', 'files', 'id'],
+  ['integration_contract_versions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'allowed_purpose_value_set_id', 'terminology', 'value_sets', 'id'],
+  ['integration_contracts', 'capability_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['integration_contracts', 'data_classification_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'external_provider_id', 'integrations', 'external_providers', 'id'],
+  ['integration_contracts', 'legal_basis_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['integration_exchange_attempts', 'integration_exchange_record_id', 'integration_contracts', 'integration_exchange_records', 'id'],
+  ['integration_exchange_attempts', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_exchange_attempts', 'retry_decision_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_exchange_records', 'direction_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_exchange_records', 'integration_contract_version_id', 'integration_contracts', 'integration_contract_versions', 'id'],
+  ['integration_exchange_records', 'message_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_exchange_records', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_exchange_records', 'payload_file_id', 'common', 'files', 'id'],
+  ['integration_exchange_records', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_idempotency_records', 'integration_contract_id', 'integration_contracts', 'integration_contracts', 'id'],
+  ['integration_idempotency_records', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_idempotency_records', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_sync_cursors', 'integration_contract_id', 'integration_contracts', 'integration_contracts', 'id'],
+  ['integration_sync_cursors', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['webhook_delivery_evidence', 'integration_exchange_record_id', 'integration_contracts', 'integration_exchange_records', 'id'],
+  ['webhook_delivery_evidence', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['webhook_delivery_evidence', 'signature_verification_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['webhook_delivery_evidence', 'webhook_subscription_id', 'integrations', 'webhook_subscriptions', 'id'],
+];

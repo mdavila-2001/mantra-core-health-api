@@ -34,6 +34,14 @@ export class EntityRegistry {
   })
   historyTable?: string;
 
+  // Especificación de particionado físico aplicada a esta tabla. El modelo
+  // oficial la declara para que el registro de entidades sepa, sin consultar el
+  // catálogo de PostgreSQL, si la tabla está particionada y bajo qué estrategia.
+  // Ausente en la BD introspectada de 2026-07-21; su tabla destino
+  // (system_ops.partition_specs) también faltaba y se materializa en este cambio.
+  @Property({ fieldName: 'partition_spec_id', type: 'uuid', nullable: true }) // FK → system_ops.partition_specs
+  partitionSpecId?: string;
+
   @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true }) // FK → system_ops.retention_policies
   retentionPolicyId?: string;
 

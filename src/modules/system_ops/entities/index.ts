@@ -13,6 +13,7 @@ export * from './governance_change_log.entity';
 export * from './legal_holds.entity';
 export * from './operational_framework_controls.entity';
 export * from './operational_frameworks.entity';
+export * from './partition_specs.entity';
 export * from './record_revisions.entity';
 export * from './remediation_actions.entity';
 export * from './remediation_plans.entity';

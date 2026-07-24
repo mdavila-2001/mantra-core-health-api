@@ -15,6 +15,23 @@ export class CompanyBankAccounts {
   @Property({ fieldName: 'bank_name', columnType: 'varchar' })
   bankName!: string;
 
+  // Titular de la cuenta: el modelo oficial lo declara para poder validar que el
+  // beneficiario del pago coincide con la razón social de la empresa (control
+  // antifraude en tesorería). Ausente en la BD introspectada de 2026-07-21.
+  @Property({
+    fieldName: 'account_holder_name',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  accountHolderName?: string;
+
+  @Property({
+    fieldName: 'account_holder_tax_id',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  accountHolderTaxId?: string;
+
   @Property({
     fieldName: 'bank_identifier_code',
     columnType: 'varchar',
