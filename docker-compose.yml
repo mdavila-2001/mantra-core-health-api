@@ -22,12 +22,12 @@ services:
     image: timescale/timescaledb-ha:pg18
     restart: always
     environment:
-      # Sembrado desde las variables de la app: una sola fuente de verdad.
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      # Variables nativas del contenedor. Deben coincidir con DB_* que usa la app.
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${DB_PORT:-5433}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -40,19 +40,18 @@ services:
 
   # One-shot: aplica SQL/ (apply_all → apply_deferred) y los stores PG de
   # NoSQL/ (58 TimescaleDB, 59 pgvector) solo si las tablas no existen.
-  # Las rutas de origen son configurables por si el árbol SQL/NoSQL vive fuera
-  # del repo (cada dev las ajusta en .env — SQL_INIT_DIR / NOSQL_INIT_DIR).
+  # El esquema vive integrado en el repo bajo database/ (ruta fija, no por env).
   postgres-init:
     image: timescale/timescaledb-ha:pg18
     restart: "no"
     entrypoint: ["bash", "/init/bin/init-postgres.sh"]
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ${SQL_INIT_DIR:-./database/SQL}:/init/SQL:ro
-      - ${NOSQL_INIT_DIR:-./database/NoSQL}:/init/NoSQL:ro
+      - ./database/SQL:/init/SQL:ro
+      - ./database/NoSQL:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
@@ -84,7 +83,7 @@ services:
     environment:
       MONGO_DB: ${MONGO_DB:-salud_document_store}
     volumes:
-      - ${NOSQL_INIT_DIR:-./database/NoSQL}/55_document_store_mongodb:/init/mongo:ro
+      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
@@ -146,7 +145,7 @@ services:
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
-      - ${NOSQL_INIT_DIR:-./database/NoSQL}/57_search_platform_opensearch:/init/os:ro
+      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:

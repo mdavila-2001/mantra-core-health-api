@@ -1,0 +1,184 @@
+@startuml SALUD_Module_04_directory
+title Module 04 — Tenants, Organizations, Sites and Directory\n(schema: directory)
+skinparam shadowing false
+skinparam linetype ortho
+skinparam packageStyle rectangle
+hide circle
+
+' ------------------------------------------------------------------------------
+' SOURCE CONSOLIDATED: diagram_04_directory.puml
+' ------------------------------------------------------------------------------
+note as BIZ_diagram_04_directory
+  BUSINESS PURPOSE
+  Models each client organization and its sites, and keeps every
+  organization's data strictly isolated. Supports anything from a single
+  independent doctor to multi-site hospital networks, diagnostic units,
+  pharmacies, insurers, brokers and external authorities. Specialized entities
+  keep their own tenant/data boundary even when hosted at another site.
+end note
+
+entity tenants {
+  * id : uuid <<PK>>
+  --
+  * code : varchar <<UK>>
+  * tenant_type_concept_id : uuid <<FK>>
+  * legal_name : varchar
+    trade_name : varchar
+  * legal_entity_type_concept_id : uuid <<FK>>
+  * status_concept_id : uuid <<FK>>
+  * verification_status_concept_id : uuid <<FK>>
+    country_concept_id : uuid <<FK>>
+    jurisdiction_concept_id : uuid <<FK>>
+    data_residency_region_concept_id : uuid <<FK>>
+    currency_concept_id : uuid <<FK>>
+    time_zone : varchar
+    parent_tenant_id : uuid <<FK>>
+  * created_at : timestamptz
+  * updated_at : timestamptz
+    created_by_user_id : uuid <<FK>>
+    updated_by_user_id : uuid <<FK>>
+  * row_version : integer
+}
+entity branches {
+  * id : uuid <<PK>>
+  --
+  * tenant_id : uuid <<FK>>
+  * code : varchar
+  * name : varchar
+  * branch_type_concept_id : uuid <<FK>>
+  * status_concept_id : uuid <<FK>>
+    time_zone : varchar
+    latitude : numeric
+    longitude : numeric
+  * created_at : timestamptz
+  * updated_at : timestamptz
+    created_by_user_id : uuid <<FK>>
+    updated_by_user_id : uuid <<FK>>
+  * row_version : integer
+}
+entity tenant_memberships {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  * tenant_id : uuid <<FK>>
+    primary_branch_id : uuid <<FK>>
+  * tenant_role_concept_id : uuid <<FK>>
+  * status_concept_id : uuid <<FK>>
+  * access_scope_concept_id : uuid <<FK>>
+  * start_date : timestamptz
+    end_date : timestamptz
+    invited_by_user_id : uuid <<FK>>
+  * created_at : timestamptz
+  * updated_at : timestamptz
+    created_by_user_id : uuid <<FK>>
+    updated_by_user_id : uuid <<FK>>
+  * row_version : integer
+}
+entity branch_memberships {
+  * id : uuid <<PK>>
+  --
+  * tenant_membership_id : uuid <<FK>>
+  * branch_id : uuid <<FK>>
+    local_role_concept_id : uuid <<FK>>
+  * status_concept_id : uuid <<FK>>
+  * created_at : timestamptz
+  * updated_at : timestamptz
+    created_by_user_id : uuid <<FK>>
+    updated_by_user_id : uuid <<FK>>
+  * row_version : integer
+}
+
+tenants |o--o{ tenants : parent
+tenants ||--o{ branches
+tenants ||--o{ tenant_memberships
+tenant_memberships ||--o{ branch_memberships
+branches ||--o{ branch_memberships
+
+note as DEP_diagram_04_directory
+  TENANT IDENTITY RULE
+  Hospital, diagnostic unit, pharmacy, insurer and broker identities are explicit
+  extensions of tenants. A host-site relationship never merges tenants.
+
+  Connects to other modules via:
+  access_policies, geofences, insurance_claims, practices,
+  provider_connections, roles, tenant_catalog_policies,
+  tenant_concept_config, tenants_history, users
+end note
+
+
+package "Physical Indexes" {
+entity "INDEXES · tenants" as idxset_tenants <<INDEX_SET>> {
+  PK pk_tenants : (id) UNIQUE BTREE
+  UK uq_tenants_code : (code) UNIQUE BTREE
+  IX ix_tenants_tenant_type_concept_id : (tenant_type_concept_id) BTREE
+  IX ix_tenants_legal_entity_type_concept_id : (legal_entity_type_concept_id) BTREE
+  IX ix_tenants_status_concept_id : (status_concept_id) BTREE
+  IX ix_tenants_verification_status_concept_id : (verification_status_concept_id) BTREE
+  IX ix_tenants_country_concept_id : (country_concept_id) BTREE
+  IX ix_tenants_jurisdiction_concept_id : (jurisdiction_concept_id) BTREE
+  IX ix_tenants_data_residency_region_concept_id : (data_residency_region_concept_id) BTREE
+  IX ix_tenants_currency_concept_id : (currency_concept_id) BTREE
+  IX ix_tenants_parent_tenant_id : (parent_tenant_id) BTREE
+  IX ix_tenants_created_by_user_id : (created_by_user_id) BTREE
+  IX ix_tenants_updated_by_user_id : (updated_by_user_id) BTREE
+  GIN gin_tenants_search : to_tsvector('simple', concat_ws(' ', code)) GIN
+}
+
+tenants .. idxset_tenants : indexed by
+
+entity "INDEXES · branches" as idxset_branches <<INDEX_SET>> {
+  PK pk_branches : (id) UNIQUE BTREE
+  IX ix_branches_tenant_id : (tenant_id) BTREE
+  IX ix_branches_branch_type_concept_id : (branch_type_concept_id) BTREE
+  IX ix_branches_status_concept_id : (status_concept_id) BTREE
+  IX ix_branches_created_by_user_id : (created_by_user_id) BTREE
+  IX ix_branches_updated_by_user_id : (updated_by_user_id) BTREE
+  IX ix_branches_tenant_id_status_concept_id : (tenant_id, status_concept_id, updated_at DESC) BTREE
+  GIN gin_branches_search : to_tsvector('simple', concat_ws(' ', name, code)) GIN
+  GIST gist_branches_location : geography_point GIST
+}
+
+branches .. idxset_branches : indexed by
+
+entity "INDEXES · tenant_memberships" as idxset_tenant_memberships <<INDEX_SET>> {
+  PK pk_tenant_memberships : (id) UNIQUE BTREE
+  IX ix_tenant_memberships_user_id : (user_id) BTREE
+  IX ix_tenant_memberships_tenant_id : (tenant_id) BTREE
+  IX ix_tenant_memberships_primary_branch_id : (primary_branch_id) BTREE
+  IX ix_tenant_memberships_tenant_role_concept_id : (tenant_role_concept_id) BTREE
+  IX ix_tenant_memberships_status_concept_id : (status_concept_id) BTREE
+  IX ix_tenant_memberships_access_scope_concept_id : (access_scope_concept_id) BTREE
+  IX ix_tenant_memberships_invited_by_user_id : (invited_by_user_id) BTREE
+  IX ix_tenant_memberships_created_by_user_id : (created_by_user_id) BTREE
+  IX ix_tenant_memberships_updated_by_user_id : (updated_by_user_id) BTREE
+  IX ix_tenant_memberships_tenant_id_status_concept_id : (tenant_id, status_concept_id, updated_at DESC) BTREE
+}
+
+tenant_memberships .. idxset_tenant_memberships : indexed by
+
+entity "INDEXES · branch_memberships" as idxset_branch_memberships <<INDEX_SET>> {
+  PK pk_branch_memberships : (id) UNIQUE BTREE
+  IX ix_branch_memberships_tenant_membership_id : (tenant_membership_id) BTREE
+  IX ix_branch_memberships_branch_id : (branch_id) BTREE
+  IX ix_branch_memberships_local_role_concept_id : (local_role_concept_id) BTREE
+  IX ix_branch_memberships_status_concept_id : (status_concept_id) BTREE
+  IX ix_branch_memberships_created_by_user_id : (created_by_user_id) BTREE
+  IX ix_branch_memberships_updated_by_user_id : (updated_by_user_id) BTREE
+}
+
+branch_memberships .. idxset_branch_memberships : indexed by
+}
+
+
+note as PHYSICAL_INDEX_POLICY
+  PHYSICAL INDEX POLICY
+  - Primary and unique indexes enforce identity and business keys.
+  - Every foreign key used for joins/deletes has a supporting BTREE index.
+  - Tenant/patient/status/time composites support RLS and operational queues.
+  - GIN/GiST/BRIN are used only for justified search, range, geospatial or append-only access.
+  - Partial indexes reference stable seeded concept IDs/functions in migrations, never labels.
+  - Final inclusion is verified with representative EXPLAIN (ANALYZE, BUFFERS), write cost,
+    cardinality and production-like load tests; unused/redundant indexes are rejected.
+end note
+
+@enduml
