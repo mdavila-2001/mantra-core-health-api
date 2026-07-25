@@ -1,0 +1,71 @@
+import { Injectable } from '@nestjs/common';
+import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { loadAuthEnv } from './auth.env';
+import type { JwtPayload } from './jwt-payload.interface';
+
+/** Par de tokens emitido al abrir o rotar una sesión. */
+export interface IssuedTokens {
+  accessToken: string;
+  /** Refresh token en crudo; solo se devuelve al cliente, nunca se persiste. */
+  refreshToken: string;
+  /** Hash SHA-256 del refresh token; es lo que se guarda en la base de datos. */
+  refreshTokenHash: string;
+  /** Identificador de sesión (`token_id`) embebido en el access token. */
+  sessionTokenId: string;
+  expiresAt: Date;
+}
+
+/**
+ * Fábrica y verificador de tokens de sesión. Aísla la política criptográfica
+ * (firma, hashing del refresh, expiración) del resto de la capa IAM, de modo que
+ * los servicios razonen sobre sesiones sin manipular secretos directamente.
+ */
+@Injectable()
+export class TokenService {
+  private readonly env = loadAuthEnv();
+
+  constructor(private readonly jwt: JwtService) {}
+
+  /** Firma un access token para el sujeto y sesión indicados. */
+  signAccessToken(userId: string, sessionTokenId: string, roles: string[]): string {
+    const payload: JwtPayload = { sub: userId, sid: sessionTokenId, roles, typ: 'access' };
+    // `expiresIn` acepta un string tipo `15m`; el tipo de la librería exige un
+    // literal `StringValue`, así que se afirma la forma de las opciones.
+    const options = { secret: this.env.secret, expiresIn: this.env.accessTtl } as JwtSignOptions;
+    return this.jwt.sign(payload, options);
+  }
+
+  /**
+   * Genera un refresh token de alta entropía. Se persiste únicamente su hash:
+   * una filtración de la tabla no basta para suplantar sesiones, y la
+   * comparación en el refresh se hace por hash del valor presentado.
+   */
+  issueRefreshToken(): { raw: string; hash: string } {
+    const raw = randomBytes(48).toString('base64url');
+    return { raw, hash: this.hashRefreshToken(raw) };
+  }
+
+  /** Hash determinista del refresh token para búsqueda y comparación. */
+  hashRefreshToken(raw: string): string {
+    return createHash('sha256').update(raw).digest('hex');
+  }
+
+  /**
+   * Construye el conjunto completo de tokens de una nueva sesión: id de sesión,
+   * access token firmado, refresh token y su hash, y la fecha de expiración del
+   * refresh derivada de `JWT_REFRESH_TTL_DAYS`.
+   */
+  issueSessionTokens(userId: string, roles: string[]): IssuedTokens {
+    const sessionTokenId = randomUUID();
+    const { raw, hash } = this.issueRefreshToken();
+    const expiresAt = new Date(Date.now() + this.env.refreshTtlDays * 24 * 60 * 60 * 1000);
+    return {
+      accessToken: this.signAccessToken(userId, sessionTokenId, roles),
+      refreshToken: raw,
+      refreshTokenHash: hash,
+      sessionTokenId,
+      expiresAt,
+    };
+  }
+}
