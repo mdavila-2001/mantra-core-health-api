@@ -2,7 +2,6 @@
 /dist
 /node_modules
 /build
-/graphify.out
 /.claude
 
 # Logs
@@ -57,11 +56,9 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# graphify — versionar el grafo (graph.json/report/html) pero no cachés ni rutas de máquina
-graphify-out/cache/
-graphify-out/.graphify_python
-graphify-out/.graphify_root
-graphify-out/.needs_update
+# graphify — grafo generado (artefacto local, se regenera con `graphify update .`).
+# No se versiona. Anclado a la raíz; el de src se ignora aparte.
+/graphify-out/
 src/graphify-out/
 
 # Claude Code — configuración y skills locales por usuario. Cada desarrollador usa
@@ -72,15 +69,13 @@ CLAUDE.md
 # Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
 /temp
 
-# database/ — se versiona la salida generada (SQL/ y NoSQL/), el toolkit y los .puml.
-# El vault Obsidian (~36 MB, solo necesario para REGENERAR, no en runtime) queda fuera.
-database/Mantra Core Health Vault/
-# Cachés de Python del toolkit de generación.
-database/**/__pycache__/
+# database/ y docs/ de la RAÍZ — documentación y artefactos generados, no código.
+# No se versionan (viven en local). Anclados con "/" inicial para que la regla NO
+# ignore por accidente otras carpetas del mismo nombre en el árbol (p. ej. src/database).
+/database/
+/docs/
+# Cachés de Python (toolkit de generación).
 *.pyc
-
-# graphify — backups fechados (artefacto local, no versionar)
-graphify-out/20*/
 
 # prompt 
 CLAUDE.md
