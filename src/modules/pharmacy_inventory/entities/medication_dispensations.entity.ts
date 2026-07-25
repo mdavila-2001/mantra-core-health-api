@@ -22,7 +22,7 @@ export class MedicationDispensations {
   }) // FK → clinical.medication_requests
   medicationRequestId?: string;
 
-  @Property({ fieldName: 'insurance_claim_id', type: 'uuid', nullable: true }) // FK → insurance.insurance_claims (inferida)
+  @Property({ fieldName: 'insurance_claim_id', type: 'uuid', nullable: true }) // FK → insurance.insurance_claims
   insuranceClaimId?: string;
 
   @Property({
@@ -46,7 +46,7 @@ export class MedicationDispensations {
     fieldName: 'dispenser_practitioner_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   dispenserPractitionerProfileId?: string;
 
   @Property({

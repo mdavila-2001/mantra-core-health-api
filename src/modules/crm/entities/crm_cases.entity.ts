@@ -30,7 +30,7 @@ export class CrmCases {
   @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
-  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices (inferida)
+  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices
   invoiceId?: string;
 
   @Property({ fieldName: 'case_type_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
@@ -45,7 +45,7 @@ export class CrmCases {
   @Property({ fieldName: 'owner_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   ownerUserId?: string;
 
-  @Property({ fieldName: 'parent_case_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_case_id', type: 'uuid', nullable: true }) // FK → crm.crm_cases
   parentCaseId?: string;
 
   @Property({

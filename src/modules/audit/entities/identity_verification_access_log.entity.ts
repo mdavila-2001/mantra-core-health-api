@@ -6,7 +6,7 @@ export class IdentityVerificationAccessLog {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'verification_case_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'verification_case_id', type: 'uuid' }) // FK → identity_assurance.identity_verification_cases
   verificationCaseId!: string;
 
   @Property({ fieldName: 'actor_user_id', type: 'uuid' }) // FK → iam.users

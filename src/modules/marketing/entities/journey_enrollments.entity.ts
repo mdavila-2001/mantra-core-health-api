@@ -15,7 +15,7 @@ export class JourneyEnrollments {
   @Property({ fieldName: 'member_ref_id', type: 'uuid' })
   memberRefId!: string;
 
-  @Property({ fieldName: 'current_step_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_step_id', type: 'uuid', nullable: true }) // FK → marketing.journey_steps
   currentStepId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

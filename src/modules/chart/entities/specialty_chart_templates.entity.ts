@@ -18,7 +18,7 @@ export class SpecialtyChartTemplates {
   @Property({ columnType: 'varchar' })
   name!: string;
 
-  @Property({ fieldName: 'section_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'section_id', type: 'uuid', nullable: true }) // FK → forms.dynamic_field_sections
   sectionId?: string;
 
   @Property({ columnType: 'int' })

@@ -9,10 +9,10 @@ export class Purchases {
   @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
   practiceId!: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK → accounting.journal_transactions
   transactionId?: string;
 
-  @Property({ fieldName: 'vendor_id', type: 'uuid', nullable: true }) // FK → billing.vendors (inferida)
+  @Property({ fieldName: 'vendor_id', type: 'uuid', nullable: true }) // FK → billing.vendors
   vendorId?: string;
 
   @Property({ fieldName: 'bill_id', type: 'uuid', nullable: true }) // FK → billing.bills

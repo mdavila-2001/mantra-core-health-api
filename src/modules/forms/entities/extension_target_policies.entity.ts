@@ -9,7 +9,7 @@ export class ExtensionTargetPolicies {
   @Property({ fieldName: 'target_resource_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   targetResourceConceptId!: string;
 
-  @Property({ fieldName: 'definition_set_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'definition_set_id', type: 'uuid' }) // FK → forms.field_definition_sets
   definitionSetId!: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

@@ -12,7 +12,7 @@ export class PractitionerDelegateAssignments {
   @Property({ fieldName: 'practitioner_role_assignment_id', type: 'uuid' }) // FK → practice.practitioner_role_assignments
   practitionerRoleAssignmentId!: string;
 
-  @Property({ fieldName: 'delegate_user_assignment_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'delegate_user_assignment_id', type: 'uuid' }) // FK → delegated_access.organization_user_assignments
   delegateUserAssignmentId!: string;
 
   @Property({ fieldName: 'delegated_permission_set_id', type: 'uuid' }) // FK → delegated_access.delegated_permission_sets

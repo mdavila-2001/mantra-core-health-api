@@ -15,7 +15,7 @@ export class CountryHealthContextVersions {
   @Property({ fieldName: 'version_number', columnType: 'int' })
   versionNumber!: number;
 
-  @Property({ fieldName: 'collection_run_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'collection_run_id', type: 'uuid' }) // FK → health_context.context_collection_runs
   collectionRunId!: string;
 
   @Property({ fieldName: 'schema_version', columnType: 'varchar' })

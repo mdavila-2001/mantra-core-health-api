@@ -33,7 +33,7 @@ export class MessageQueues {
   })
   visibilityTimeoutS?: number;
 
-  @Property({ fieldName: 'dead_letter_queue_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'dead_letter_queue_id', type: 'uuid', nullable: true }) // FK → messaging.message_queues
   deadLetterQueueId?: string;
 
   @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

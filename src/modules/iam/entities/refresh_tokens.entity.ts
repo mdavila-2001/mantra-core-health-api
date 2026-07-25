@@ -15,7 +15,7 @@ export class RefreshTokens {
   @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   stateConceptId!: string;
 
-  @Property({ fieldName: 'replaced_by_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'replaced_by_id', type: 'uuid', nullable: true }) // FK → iam.refresh_tokens
   replacedById?: string;
 
   @Property({ fieldName: 'expires_at', columnType: 'timestamptz' })

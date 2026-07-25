@@ -21,7 +21,7 @@ export class Procedures {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
-  @Property({ fieldName: 'performer_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'performer_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   performerProfileId?: string;
 
   @Property({
@@ -56,7 +56,7 @@ export class Procedures {
   @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces
   careSpaceId?: string;
 
-  @Property({ fieldName: 'recorder_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'recorder_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   recorderProfileId?: string;
 
   @Property({ fieldName: 'outcome_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts

@@ -9,10 +9,10 @@ export class OpportunityStageHistory {
   @Property({ fieldName: 'opportunity_id', type: 'uuid' }) // FK → crm.opportunities
   opportunityId!: string;
 
-  @Property({ fieldName: 'from_stage_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'from_stage_id', type: 'uuid', nullable: true }) // FK → crm.pipeline_stages
   fromStageId?: string;
 
-  @Property({ fieldName: 'to_stage_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'to_stage_id', type: 'uuid' }) // FK → crm.pipeline_stages
   toStageId!: string;
 
   @Property({

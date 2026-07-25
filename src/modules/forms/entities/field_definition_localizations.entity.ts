@@ -6,7 +6,7 @@ export class FieldDefinitionLocalizations {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK → forms.dynamic_field_definitions
   fieldId!: string;
 
   @Property({ fieldName: 'language_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

@@ -6,7 +6,7 @@ export class SegmentsHistory {
   @PrimaryKey({ fieldName: 'history_id', type: 'uuid' })
   historyId: string = randomUUID();
 
-  @Property({ fieldName: 'segments_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'segments_id', type: 'uuid' }) // FK → accounting.segments
   segmentsId!: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

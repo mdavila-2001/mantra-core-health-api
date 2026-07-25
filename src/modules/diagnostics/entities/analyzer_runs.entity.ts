@@ -15,7 +15,7 @@ export class AnalyzerRuns {
   @Property({ fieldName: 'run_identifier', columnType: 'varchar' })
   runIdentifier!: string;
 
-  @Property({ fieldName: 'reagent_lot_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'reagent_lot_id', type: 'uuid', nullable: true }) // FK → pharmacy_inventory.inventory_lots
   reagentLotId?: string;
 
   @Property({
@@ -29,7 +29,7 @@ export class AnalyzerRuns {
     fieldName: 'quality_control_run_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → diagnostics.analyzer_runs
   qualityControlRunId?: string;
 
   @Property({ fieldName: 'started_at', columnType: 'timestamptz' })
@@ -45,7 +45,7 @@ export class AnalyzerRuns {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
-  @Property({ fieldName: 'operator_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'operator_profile_id', type: 'uuid', nullable: true }) // FK → profiles.provider_operator_profiles
   operatorProfileId?: string;
 
   @Property({

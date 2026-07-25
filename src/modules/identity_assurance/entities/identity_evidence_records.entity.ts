@@ -15,7 +15,7 @@ export class IdentityEvidenceRecords {
   @Property({ fieldName: 'evidence_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   evidenceTypeConceptId!: string;
 
-  @Property({ fieldName: 'issuer_authority_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'issuer_authority_id', type: 'uuid', nullable: true }) // FK → identity_assurance.identity_authorities
   issuerAuthorityId?: string;
 
   @Property({

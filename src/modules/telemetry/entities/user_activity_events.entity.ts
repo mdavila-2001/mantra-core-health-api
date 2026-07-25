@@ -6,7 +6,7 @@ export class UserActivityEvents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'event_schema_definition_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'event_schema_definition_id', type: 'uuid' }) // FK → telemetry.activity_event_schema_definitions
   eventSchemaDefinitionId!: string;
 
   @Property({ fieldName: 'analytics_subject_id', type: 'uuid', nullable: true }) // FK → telemetry.analytics_subjects
@@ -74,7 +74,7 @@ export class UserActivityEvents {
     fieldName: 'security_audit_event_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → iam.security_events
   securityAuditEventId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

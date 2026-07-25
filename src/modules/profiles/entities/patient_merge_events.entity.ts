@@ -21,7 +21,7 @@ export class PatientMergeEvents {
   @Property({ fieldName: 'approved_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   approvedByUserId?: string;
 
-  @Property({ fieldName: 'reversal_of_event_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'reversal_of_event_id', type: 'uuid', nullable: true }) // FK → profiles.patient_merge_events
   reversalOfEventId?: string;
 
   @Property({ fieldName: 'recorded_at', columnType: 'timestamptz' })

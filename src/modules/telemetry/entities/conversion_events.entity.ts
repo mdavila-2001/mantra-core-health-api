@@ -15,7 +15,7 @@ export class ConversionEvents {
   @Property({ fieldName: 'session_journey_id', type: 'uuid', nullable: true }) // FK → telemetry.session_journeys
   sessionJourneyId?: string;
 
-  @Property({ fieldName: 'completion_event_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'completion_event_id', type: 'uuid', nullable: true }) // FK → telemetry.user_activity_events
   completionEventId?: string;
 
   @Property({

@@ -72,7 +72,7 @@ export class ImagingStudies {
     fieldName: 'referring_practitioner_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   referringPractitionerProfileId?: string;
 
   @Property({ fieldName: 'custodian_tenant_id', type: 'uuid' }) // FK → directory.tenants

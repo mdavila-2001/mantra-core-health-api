@@ -9,7 +9,7 @@ export class OperatingRoomUtilizationEvents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'operating_room_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'operating_room_id', type: 'uuid' }) // FK → practice.care_spaces
   operatingRoomId!: string;
 
   @Property({ fieldName: 'procedure_case_id', type: 'uuid', nullable: true }) // FK → procedures_perioperative.procedure_cases

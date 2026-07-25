@@ -31,7 +31,7 @@ export class HealthExportManifests {
   }) // FK → polyglot_storage.encryption_profiles
   encryptionProfileId?: string;
 
-  @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true }) // FK → system_ops.retention_policies
   retentionPolicyId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

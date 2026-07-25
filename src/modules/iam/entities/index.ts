@@ -1,3 +1,6 @@
+export * from './account_lockouts.entity';
+export * from './api_key_scopes.entity';
+export * from './api_keys.entity';
 export * from './authentication_credentials.entity';
 export * from './devices.entity';
 export * from './mfa_factors.entity';

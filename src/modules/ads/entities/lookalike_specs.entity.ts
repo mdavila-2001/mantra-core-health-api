@@ -9,7 +9,7 @@ export class LookalikeSpecs {
   @Property({ fieldName: 'ad_account_id', type: 'uuid' }) // FK → ads.ad_accounts
   adAccountId!: string;
 
-  @Property({ fieldName: 'source_audience_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_audience_id', type: 'uuid' }) // FK → ads.custom_audiences
   sourceAudienceId!: string;
 
   @Property({ fieldName: 'country_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -29,7 +29,7 @@ export class LookalikeSpecs {
     fieldName: 'generated_audience_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → ads.custom_audiences
   generatedAudienceId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

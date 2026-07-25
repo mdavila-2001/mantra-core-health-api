@@ -6,10 +6,10 @@ export class TestSchedules {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'suite_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'suite_id', type: 'uuid' }) // FK → qa_lab.test_suites
   suiteId!: string;
 
-  @Property({ fieldName: 'environment_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'environment_id', type: 'uuid' }) // FK → qa_lab.test_environments
   environmentId!: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
@@ -44,7 +44,7 @@ export class TestSchedules {
   @Property({ fieldName: 'is_enabled', type: 'boolean', nullable: true })
   isEnabled?: boolean;
 
-  @Property({ fieldName: 'last_run_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'last_run_id', type: 'uuid', nullable: true }) // FK → qa_lab.test_runs
   lastRunId?: string;
 
   @Property({

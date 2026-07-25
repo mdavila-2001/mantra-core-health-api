@@ -9,10 +9,10 @@ export class DiagnosticStudyComponents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'parent_offering_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_offering_id', type: 'uuid' }) // FK → diagnostic_units.diagnostic_study_offerings
   parentOfferingId!: string;
 
-  @Property({ fieldName: 'component_offering_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'component_offering_id', type: 'uuid' }) // FK → diagnostic_units.diagnostic_study_offerings
   componentOfferingId!: string;
 
   @Property({ fieldName: 'component_role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

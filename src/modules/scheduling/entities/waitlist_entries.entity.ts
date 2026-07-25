@@ -12,7 +12,7 @@ export class WaitlistEntries {
   @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
   patientProfileId!: string;
 
-  @Property({ fieldName: 'resource_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'resource_id', type: 'uuid', nullable: true }) // FK → scheduling.schedulable_resources
   resourceId?: string;
 
   @Property({ fieldName: 'service_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
@@ -38,7 +38,7 @@ export class WaitlistEntries {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
-  @Property({ fieldName: 'fulfilled_booking_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'fulfilled_booking_id', type: 'uuid', nullable: true }) // FK → scheduling.appointment_bookings
   fulfilledBookingId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

@@ -21,7 +21,7 @@ export class AdPlatformConnections {
   @Property({ fieldName: 'connection_name', columnType: 'varchar' })
   connectionName!: string;
 
-  @Property({ fieldName: 'credential_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'credential_id', type: 'uuid' }) // FK → integrations.provider_credentials
   credentialId!: string;
 
   @Property({ fieldName: 'api_version', columnType: 'varchar', nullable: true })
@@ -45,7 +45,7 @@ export class AdPlatformConnections {
     fieldName: 'webhook_verification_secret_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → system_ops.encryption_keys
   webhookVerificationSecretId?: string;
 
   @Property({

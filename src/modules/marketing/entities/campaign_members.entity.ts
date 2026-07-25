@@ -54,10 +54,10 @@ export class CampaignMembers {
   }) // FK → marketing.segment_members
   sourceSegmentMemberId?: string;
 
-  @Property({ fieldName: 'first_dispatch_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'first_dispatch_id', type: 'uuid', nullable: true }) // FK → marketing.campaign_dispatches
   firstDispatchId?: string;
 
-  @Property({ fieldName: 'last_dispatch_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'last_dispatch_id', type: 'uuid', nullable: true }) // FK → marketing.campaign_dispatches
   lastDispatchId?: string;
 
   @Property({

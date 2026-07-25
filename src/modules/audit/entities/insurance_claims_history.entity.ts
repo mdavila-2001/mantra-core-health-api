@@ -6,7 +6,7 @@ export class InsuranceClaimsHistory {
   @PrimaryKey({ fieldName: 'history_id', type: 'uuid' })
   historyId: string = randomUUID();
 
-  @Property({ fieldName: 'insurance_claim_id', type: 'uuid' }) // FK → insurance.insurance_claims (inferida)
+  @Property({ fieldName: 'insurance_claim_id', type: 'uuid' }) // FK → insurance.insurance_claims
   insuranceClaimId!: string;
 
   @Property({ fieldName: 'revision_no', columnType: 'int' })

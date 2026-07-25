@@ -12,7 +12,7 @@ export class ActivityEventSchemaDefinitions {
   @Property({ fieldName: 'schema_version', columnType: 'int' })
   schemaVersion!: number;
 
-  @Property({ fieldName: 'purpose_definition_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'purpose_definition_id', type: 'uuid' }) // FK → telemetry.tracking_purpose_definitions
   purposeDefinitionId!: string;
 
   @Property({ fieldName: 'portal_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

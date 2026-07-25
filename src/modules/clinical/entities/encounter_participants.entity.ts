@@ -9,7 +9,7 @@ export class EncounterParticipants {
   @Property({ fieldName: 'encounter_id', type: 'uuid' }) // FK → clinical.encounters
   encounterId!: string;
 
-  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   practitionerProfileId!: string;
 
   @Property({ fieldName: 'participant_role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

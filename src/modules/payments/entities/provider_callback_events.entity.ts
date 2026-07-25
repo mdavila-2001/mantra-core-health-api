@@ -69,7 +69,7 @@ export class ProviderCallbackEvents {
     fieldName: 'duplicate_of_event_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → payments.provider_callback_events
   duplicateOfEventId?: string;
 
   @Property({

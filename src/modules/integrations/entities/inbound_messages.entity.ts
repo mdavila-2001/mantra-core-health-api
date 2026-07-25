@@ -6,10 +6,10 @@ export class InboundMessages {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'connection_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'connection_id', type: 'uuid' }) // FK → integrations.provider_connections
   connectionId!: string;
 
-  @Property({ fieldName: 'endpoint_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'endpoint_id', type: 'uuid', nullable: true }) // FK → integrations.integration_endpoints
   endpointId?: string;
 
   @Property({

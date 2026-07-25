@@ -12,7 +12,7 @@ export class PharmacyIntegrationConnections {
   @Property({ fieldName: 'pharmacy_site_id', type: 'uuid', nullable: true }) // FK → pharmacy.pharmacy_sites
   pharmacySiteId?: string;
 
-  @Property({ fieldName: 'connection_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'connection_id', type: 'uuid' }) // FK → pharmacy.pharmacy_integration_connections
   connectionId!: string;
 
   @Property({ fieldName: 'integration_mode_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

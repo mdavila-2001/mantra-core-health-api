@@ -9,7 +9,7 @@ export class AnesthesiaPlans {
   @Property({ fieldName: 'procedure_case_id', type: 'uuid' }) // FK → procedures_perioperative.procedure_cases
   procedureCaseId!: string;
 
-  @Property({ fieldName: 'anesthesiologist_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'anesthesiologist_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   anesthesiologistProfileId!: string;
 
   @Property({ fieldName: 'anesthesia_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

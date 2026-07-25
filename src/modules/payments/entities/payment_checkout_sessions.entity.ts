@@ -45,7 +45,7 @@ export class PaymentCheckoutSessions {
   })
   failureReturnUrl?: string;
 
-  @Property({ fieldName: 'callback_endpoint_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'callback_endpoint_id', type: 'uuid', nullable: true }) // FK → payments.provider_callback_endpoints
   callbackEndpointId?: string;
 
   @Property({ fieldName: 'expires_at', columnType: 'timestamptz' })

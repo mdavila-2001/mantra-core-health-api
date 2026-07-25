@@ -6,10 +6,10 @@ export class AdapterTrackingCapabilities {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK → messaging.messaging_providers
   providerId!: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'canonical_event_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

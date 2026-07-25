@@ -6,13 +6,13 @@ export class AdapterInboundEvents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK → messaging.messaging_providers
   providerId!: string;
 
   @Property({ fieldName: 'provider_channel_config_id', type: 'uuid' }) // FK → messaging.provider_channel_configs
   providerChannelConfigId!: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'ingestion_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -86,7 +86,7 @@ export class AdapterInboundEvents {
   @Property({ fieldName: 'mapping_version', columnType: 'int', nullable: true })
   mappingVersion?: number;
 
-  @Property({ fieldName: 'delivery_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'delivery_id', type: 'uuid', nullable: true }) // FK → messaging.notification_deliveries
   deliveryId?: string;
 
   @Property({

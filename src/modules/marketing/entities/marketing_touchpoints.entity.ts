@@ -51,14 +51,14 @@ export class MarketingTouchpoints {
   @Property({ fieldName: 'recorded_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   recordedByUserId?: string;
 
-  @Property({ fieldName: 'dispatch_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'dispatch_id', type: 'uuid', nullable: true }) // FK → marketing.campaign_dispatches
   dispatchId?: string;
 
   @Property({
     fieldName: 'dispatch_recipient_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → marketing.campaign_dispatch_recipients
   dispatchRecipientId?: string;
 
   @Property({

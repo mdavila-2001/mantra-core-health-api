@@ -38,7 +38,7 @@ export class OperativeFindings {
     fieldName: 'recorded_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   recordedByProfileId?: string;
 
   @Property({ fieldName: 'recorded_at', columnType: 'timestamptz' })

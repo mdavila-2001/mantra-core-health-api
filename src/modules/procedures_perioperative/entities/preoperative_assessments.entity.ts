@@ -15,7 +15,7 @@ export class PreoperativeAssessments {
   @Property({ fieldName: 'assessment_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   assessmentTypeConceptId!: string;
 
-  @Property({ fieldName: 'assessed_by_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'assessed_by_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   assessedByProfileId!: string;
 
   @Property({ fieldName: 'assessed_at', columnType: 'timestamptz' })

@@ -39,7 +39,7 @@ export class ContentTemplates {
     fieldName: 'messaging_template_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → messaging.message_templates
   messagingTemplateId?: string;
 
   @Property({ columnType: 'int' })

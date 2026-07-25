@@ -6,7 +6,7 @@ export class ChartTemplateAssignments {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'template_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'template_id', type: 'uuid' }) // FK → chart.specialty_chart_templates
   templateId!: string;
 
   @Property({ fieldName: 'practice_id', type: 'uuid', nullable: true }) // FK → practice.practices
@@ -16,7 +16,7 @@ export class ChartTemplateAssignments {
     fieldName: 'practitioner_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   practitionerProfileId?: string;
 
   @Property({ fieldName: 'is_default', type: 'boolean' })

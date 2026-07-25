@@ -6,7 +6,7 @@ export class JournalTransactionsHistory {
   @PrimaryKey({ fieldName: 'history_id', type: 'uuid' })
   historyId: string = randomUUID();
 
-  @Property({ fieldName: 'journal_transaction_id', type: 'uuid' }) // FK → accounting.journal_transactions (inferida)
+  @Property({ fieldName: 'journal_transaction_id', type: 'uuid' }) // FK → accounting.journal_transactions
   journalTransactionId!: string;
 
   @Property({ fieldName: 'revision_no', columnType: 'int' })

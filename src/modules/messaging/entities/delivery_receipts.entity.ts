@@ -6,7 +6,7 @@ export class DeliveryReceipts {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'delivery_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'delivery_id', type: 'uuid' }) // FK → messaging.notification_deliveries
   deliveryId!: string;
 
   @Property({ fieldName: 'receipt_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

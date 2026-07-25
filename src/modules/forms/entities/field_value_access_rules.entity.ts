@@ -6,10 +6,10 @@ export class FieldValueAccessRules {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK → forms.dynamic_field_definitions
   fieldId!: string;
 
-  @Property({ fieldName: 'assignment_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'assignment_id', type: 'uuid', nullable: true }) // FK → forms.field_assignments
   assignmentId?: string;
 
   @Property({ fieldName: 'purpose_of_use_value_set_id', type: 'uuid' }) // FK → terminology.value_sets

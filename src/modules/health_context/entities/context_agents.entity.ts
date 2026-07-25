@@ -15,7 +15,7 @@ export class ContextAgents {
   @Property({ fieldName: 'agent_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   agentTypeConceptId!: string;
 
-  @Property({ fieldName: 'provider_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid', nullable: true }) // FK → integrations.external_providers
   providerId?: string;
 
   @Property({

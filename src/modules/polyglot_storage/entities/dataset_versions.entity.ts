@@ -18,7 +18,7 @@ export class DatasetVersions {
   @Property({ fieldName: 'compatibility_mode', columnType: 'varchar' })
   compatibilityMode!: string;
 
-  @Property({ fieldName: 'schema_document_file_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'schema_document_file_id', type: 'uuid' }) // FK → common.files
   schemaDocumentFileId!: string;
 
   @Property({ fieldName: 'effective_from', columnType: 'timestamptz' })

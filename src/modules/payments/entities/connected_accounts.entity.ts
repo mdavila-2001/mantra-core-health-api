@@ -9,7 +9,7 @@ export class ConnectedAccounts {
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
-  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK → payments.payment_gateways
   gatewayId!: string;
 
   @Property({ fieldName: 'payee_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

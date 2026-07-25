@@ -12,14 +12,14 @@ export class TenantStorageBindings {
   @Property({ fieldName: 'dataset_definition_id', type: 'uuid' }) // FK → polyglot_storage.dataset_definitions
   datasetDefinitionId!: string;
 
-  @Property({ fieldName: 'primary_placement_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'primary_placement_id', type: 'uuid' }) // FK → polyglot_storage.dataset_placements
   primaryPlacementId!: string;
 
   @Property({
     fieldName: 'secondary_placement_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → polyglot_storage.dataset_placements
   secondaryPlacementId?: string;
 
   @Property({ fieldName: 'tenant_partition_key', columnType: 'varchar' })

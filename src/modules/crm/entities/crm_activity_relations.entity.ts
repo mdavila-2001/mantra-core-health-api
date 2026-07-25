@@ -33,7 +33,7 @@ export class CrmActivityRelations {
   @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
-  @Property({ fieldName: 'case_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'case_id', type: 'uuid', nullable: true }) // FK → crm.crm_cases
   caseId?: string;
 
   @Property({ fieldName: 'related_user_id', type: 'uuid', nullable: true }) // FK → iam.users

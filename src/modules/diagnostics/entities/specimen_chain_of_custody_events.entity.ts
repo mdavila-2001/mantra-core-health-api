@@ -45,7 +45,7 @@ export class SpecimenChainOfCustodyEvents {
   @Property({ fieldName: 'to_party_id', type: 'uuid', nullable: true })
   toPartyId?: string;
 
-  @Property({ fieldName: 'location_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'location_id', type: 'uuid', nullable: true }) // FK → diagnostics.dicom_object_locations
   locationId?: string;
 
   @Property({

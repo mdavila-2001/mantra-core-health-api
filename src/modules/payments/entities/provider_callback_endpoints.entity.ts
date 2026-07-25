@@ -22,7 +22,7 @@ export class ProviderCallbackEndpoints {
     fieldName: 'verification_secret_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → system_ops.encryption_keys
   verificationSecretId?: string;
 
   @Property({

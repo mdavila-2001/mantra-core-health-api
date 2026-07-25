@@ -15,7 +15,7 @@ export class HealthSourceConnections {
   @Property({ fieldName: 'endpoint_uri', columnType: 'varchar' })
   endpointUri!: string;
 
-  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK → integrations.provider_credentials
   credentialId?: string;
 
   @Property({ fieldName: 'network_policy_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)

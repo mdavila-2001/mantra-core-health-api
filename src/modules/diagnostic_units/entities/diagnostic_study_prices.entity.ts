@@ -6,7 +6,7 @@ export class DiagnosticStudyPrices {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'price_schedule_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'price_schedule_id', type: 'uuid' }) // FK → diagnostic_units.diagnostic_price_schedules
   priceScheduleId!: string;
 
   @Property({ fieldName: 'diagnostic_study_offering_id', type: 'uuid' }) // FK → diagnostic_units.diagnostic_study_offerings

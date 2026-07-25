@@ -9,7 +9,7 @@ export class Subscriptions {
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
-  @Property({ fieldName: 'plan_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'plan_id', type: 'uuid' }) // FK → payments.subscription_plans
   planId!: string;
 
   @Property({ fieldName: 'subscriber_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -59,7 +59,7 @@ export class Subscriptions {
   })
   canceledAt?: Date;
 
-  @Property({ fieldName: 'mandate_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'mandate_id', type: 'uuid', nullable: true }) // FK → payments.payment_mandates
   mandateId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

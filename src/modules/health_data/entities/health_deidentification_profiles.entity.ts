@@ -60,7 +60,7 @@ export class HealthDeidentificationProfiles {
     fieldName: 'reidentification_key_secret_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → system_ops.encryption_keys
   reidentificationKeySecretId?: string;
 
   @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

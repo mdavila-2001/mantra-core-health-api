@@ -21,7 +21,7 @@ export class CountryHealthContexts {
   @Property({ columnType: 'text', nullable: true })
   description?: string;
 
-  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK → health_context.country_health_context_versions
   currentVersionId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

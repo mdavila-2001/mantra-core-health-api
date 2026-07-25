@@ -12,7 +12,7 @@ export class Opportunities {
   @Property({ fieldName: 'pipeline_id', type: 'uuid' }) // FK → crm.pipelines
   pipelineId!: string;
 
-  @Property({ fieldName: 'stage_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'stage_id', type: 'uuid' }) // FK → crm.pipeline_stages
   stageId!: string;
 
   @Property({ columnType: 'varchar' })

@@ -9,7 +9,7 @@ export class Sales {
   @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
   practiceId!: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK → accounting.journal_transactions
   transactionId?: string;
 
   @Property({
@@ -22,7 +22,7 @@ export class Sales {
   @Property({ fieldName: 'customer_id', type: 'uuid', nullable: true })
   customerId?: string;
 
-  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices (inferida)
+  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices
   invoiceId?: string;
 
   @Property({ fieldName: 'sale_date', columnType: 'date' })

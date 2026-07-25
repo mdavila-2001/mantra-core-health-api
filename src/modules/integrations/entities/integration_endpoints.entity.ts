@@ -6,7 +6,7 @@ export class IntegrationEndpoints {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK → integrations.external_providers
   providerId!: string;
 
   @Property({ columnType: 'varchar' })

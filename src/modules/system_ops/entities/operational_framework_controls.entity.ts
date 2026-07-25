@@ -9,7 +9,7 @@ export class OperationalFrameworkControls {
   @Property({ fieldName: 'operational_framework_id', type: 'uuid' }) // FK → system_ops.operational_frameworks
   operationalFrameworkId!: string;
 
-  @Property({ fieldName: 'parent_control_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_control_id', type: 'uuid', nullable: true }) // FK → system_ops.operational_framework_controls
   parentControlId?: string;
 
   @Property({ fieldName: 'control_code', columnType: 'varchar' })

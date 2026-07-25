@@ -18,7 +18,7 @@ export class ConsentEvidence {
   @Property({ fieldName: 'document_file_id', type: 'uuid', nullable: true }) // FK → common.files
   documentFileId?: string;
 
-  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK → chart.clinical_note_signatures
   signatureId?: string;
 
   @Property({

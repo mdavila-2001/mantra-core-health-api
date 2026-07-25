@@ -41,7 +41,7 @@ export class AdExperiments {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
-  @Property({ fieldName: 'winner_variant_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'winner_variant_id', type: 'uuid', nullable: true }) // FK → ads.experiment_variants
   winnerVariantId?: string;
 
   @Property({

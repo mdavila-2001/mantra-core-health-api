@@ -9,7 +9,7 @@ export class AdIdentityAssets {
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
-  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK → ads.ad_platform_connections
   platformConnectionId!: string;
 
   @Property({ fieldName: 'identity_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

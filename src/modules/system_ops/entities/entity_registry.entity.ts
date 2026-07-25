@@ -12,10 +12,10 @@ export class EntityRegistry {
   @Property({ fieldName: 'table_name', columnType: 'varchar' })
   tableName!: string;
 
-  @Property({ fieldName: 'domain_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'domain_id', type: 'uuid', nullable: true }) // FK → system_ops.data_domains
   domainId?: string;
 
-  @Property({ fieldName: 'classification_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'classification_id', type: 'uuid', nullable: true }) // FK → system_ops.data_classifications
   classificationId?: string;
 
   @Property({ fieldName: 'is_append_only', type: 'boolean' })
@@ -36,6 +36,9 @@ export class EntityRegistry {
 
   @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true }) // FK → system_ops.retention_policies
   retentionPolicyId?: string;
+
+  @Property({ fieldName: 'partition_spec_id', type: 'uuid', nullable: true }) // FK → system_ops.partition_specs
+  partitionSpecId?: string;
 
   @Property({ fieldName: 'write_policy_id', type: 'uuid', nullable: true }) // FK → system_ops.write_policies
   writePolicyId?: string;

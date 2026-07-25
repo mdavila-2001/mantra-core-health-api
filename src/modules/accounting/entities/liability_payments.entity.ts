@@ -9,7 +9,7 @@ export class LiabilityPayments {
   @Property({ fieldName: 'liability_id', type: 'uuid' }) // FK → accounting.liabilities
   liabilityId!: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK → accounting.journal_transactions
   transactionId?: string;
 
   @Property({ columnType: 'numeric' })

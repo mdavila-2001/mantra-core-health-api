@@ -51,7 +51,7 @@ export class ProcedureComplications {
     fieldName: 'reported_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   reportedByProfileId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

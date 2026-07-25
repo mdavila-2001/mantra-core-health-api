@@ -6,7 +6,7 @@ export class TestFixtures {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'suite_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'suite_id', type: 'uuid', nullable: true }) // FK → qa_lab.test_suites
   suiteId?: string;
 
   @Property({ fieldName: 'test_case_id', type: 'uuid', nullable: true }) // FK → qa_lab.test_cases

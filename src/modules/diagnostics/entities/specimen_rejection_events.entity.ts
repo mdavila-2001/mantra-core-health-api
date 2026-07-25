@@ -19,7 +19,7 @@ export class SpecimenRejectionEvents {
     fieldName: 'rejected_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   rejectedByProfileId?: string;
 
   @Property({ columnType: 'text', nullable: true })

@@ -21,10 +21,10 @@ export class Runbooks {
   @Property({ fieldName: 'runbook_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   runbookTypeConceptId!: string;
 
-  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK → platform_ops.runbook_versions
   currentVersionId?: string;
 
-  @Property({ fieldName: 'owner_team_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'owner_team_id', type: 'uuid', nullable: true }) // FK → platform_ops.operational_teams
   ownerTeamId?: string;
 
   @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

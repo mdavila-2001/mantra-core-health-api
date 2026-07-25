@@ -29,7 +29,7 @@ export class HealthProvenanceRecords {
   })
   occurredEndAt?: Date;
 
-  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK → health_data.health_source_systems
   sourceSystemId?: string;
 
   @Property({
@@ -57,7 +57,7 @@ export class HealthProvenanceRecords {
   })
   policyUrisJson?: unknown;
 
-  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK → chart.clinical_note_signatures
   signatureId?: string;
 
   @Property({ fieldName: 'content_hash', columnType: 'varchar' })

@@ -6,10 +6,10 @@ export class FieldDependencies {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'target_field_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'target_field_id', type: 'uuid' }) // FK → forms.dynamic_field_definitions
   targetFieldId!: string;
 
-  @Property({ fieldName: 'source_field_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_field_id', type: 'uuid' }) // FK → forms.dynamic_field_definitions
   sourceFieldId!: string;
 
   @Property({ fieldName: 'operator_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

@@ -9,10 +9,10 @@ export class CanonicalResourceRelationships {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'source_resource_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_resource_id', type: 'uuid' }) // FK → health_data.canonical_health_resources
   sourceResourceId!: string;
 
-  @Property({ fieldName: 'target_resource_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'target_resource_id', type: 'uuid' }) // FK → health_data.canonical_health_resources
   targetResourceId!: string;
 
   @Property({ fieldName: 'relationship_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

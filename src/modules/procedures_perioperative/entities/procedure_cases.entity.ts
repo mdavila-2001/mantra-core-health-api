@@ -44,27 +44,27 @@ export class ProcedureCases {
     fieldName: 'requested_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   requestedByProfileId?: string;
 
   @Property({
     fieldName: 'primary_surgeon_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   primarySurgeonProfileId?: string;
 
   @Property({
     fieldName: 'anesthesiologist_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   anesthesiologistProfileId?: string;
 
   @Property({ fieldName: 'practice_site_id', type: 'uuid', nullable: true }) // FK → practice.practice_sites
   practiceSiteId?: string;
 
-  @Property({ fieldName: 'operating_room_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'operating_room_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces
   operatingRoomId?: string;
 
   @Property({

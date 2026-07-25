@@ -36,7 +36,7 @@ export class MediaAnnotations {
   })
   confidenceScore?: string;
 
-  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   authorProfileId?: string;
 
   @Property({

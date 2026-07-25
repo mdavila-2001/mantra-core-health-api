@@ -6,7 +6,7 @@ export class QueuedJobs {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'queue_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'queue_id', type: 'uuid' }) // FK → messaging.message_queues
   queueId!: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

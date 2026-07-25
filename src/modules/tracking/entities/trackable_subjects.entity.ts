@@ -28,7 +28,7 @@ export class TrackableSubjects {
   }) // FK → terminology.catalog_concepts
   currentStatusConceptId?: string;
 
-  @Property({ fieldName: 'current_milestone_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_milestone_id', type: 'uuid', nullable: true }) // FK → tracking.milestone_definitions
   currentMilestoneId?: string;
 
   @Property({ fieldName: 'priority_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts

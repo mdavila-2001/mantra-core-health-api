@@ -22,7 +22,7 @@ export class AnalyticsSubjects {
     fieldName: 'rotated_from_subject_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → telemetry.analytics_subjects
   rotatedFromSubjectId?: string;
 
   @Property({

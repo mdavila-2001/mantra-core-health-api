@@ -24,10 +24,10 @@ export class LaboratoryAccessions {
   @Property({ fieldName: 'received_at', columnType: 'timestamptz' })
   receivedAt!: Date;
 
-  @Property({ fieldName: 'receiving_site_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'receiving_site_id', type: 'uuid', nullable: true }) // FK → diagnostic_units.diagnostic_unit_sites
   receivingSiteId?: string;
 
-  @Property({ fieldName: 'laboratory_unit_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'laboratory_unit_id', type: 'uuid', nullable: true }) // FK → diagnostic_units.diagnostic_units
   laboratoryUnitId?: string;
 
   @Property({ fieldName: 'priority_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -36,7 +36,7 @@ export class LaboratoryAccessions {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
-  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK → health_data.health_source_systems
   sourceSystemId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

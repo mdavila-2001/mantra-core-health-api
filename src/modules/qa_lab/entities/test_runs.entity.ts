@@ -6,10 +6,10 @@ export class TestRuns {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'suite_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'suite_id', type: 'uuid' }) // FK → qa_lab.test_suites
   suiteId!: string;
 
-  @Property({ fieldName: 'environment_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'environment_id', type: 'uuid' }) // FK → qa_lab.test_environments
   environmentId!: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

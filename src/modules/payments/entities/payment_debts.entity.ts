@@ -18,7 +18,7 @@ export class PaymentDebts {
   @Property({ fieldName: 'patient_profile_id', type: 'uuid', nullable: true }) // FK → profiles.patient_profiles
   patientProfileId?: string;
 
-  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
   @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices

@@ -9,7 +9,7 @@ export class ComponentTools {
   @Property({ fieldName: 'service_component_id', type: 'uuid' }) // FK → platform_ops.service_components
   serviceComponentId!: string;
 
-  @Property({ fieldName: 'tool_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'tool_id', type: 'uuid' }) // FK → platform_ops.tool_registry
   toolId!: string;
 
   @Property({ fieldName: 'usage_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

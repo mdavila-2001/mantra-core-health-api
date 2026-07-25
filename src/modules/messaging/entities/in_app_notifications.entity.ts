@@ -90,7 +90,7 @@ export class InAppNotifications {
     fieldName: 'dispatch_recipient_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → marketing.campaign_dispatch_recipients
   dispatchRecipientId?: string;
 
   @Property({ fieldName: 'available_at', columnType: 'timestamptz' })

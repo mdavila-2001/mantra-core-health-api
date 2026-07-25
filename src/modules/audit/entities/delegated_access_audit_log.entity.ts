@@ -9,14 +9,14 @@ export class DelegatedAccessAuditLog {
   @Property({ fieldName: 'delegate_user_id', type: 'uuid' }) // FK → iam.users
   delegateUserId!: string;
 
-  @Property({ fieldName: 'delegating_practitioner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'delegating_practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   delegatingPractitionerProfileId!: string;
 
   @Property({
     fieldName: 'delegated_assignment_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → delegated_access.practitioner_delegate_assignments
   delegatedAssignmentId?: string;
 
   @Property({ fieldName: 'patient_profile_id', type: 'uuid', nullable: true }) // FK → profiles.patient_profiles

@@ -15,7 +15,7 @@ export class CollectionAds {
   @Property({ fieldName: 'layout_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   layoutConceptId!: string;
 
-  @Property({ fieldName: 'hero_creative_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'hero_creative_id', type: 'uuid', nullable: true }) // FK → ads.ad_creatives
   heroCreativeId?: string;
 
   @Property({ fieldName: 'product_set_id', type: 'uuid', nullable: true }) // FK → ads.product_sets

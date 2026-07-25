@@ -34,7 +34,7 @@ export class ProcedureCaseStatusHistory {
     fieldName: 'workflow_transition_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → workflow.state_transition_events
   workflowTransitionId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

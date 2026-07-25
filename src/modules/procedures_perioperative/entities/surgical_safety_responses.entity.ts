@@ -31,7 +31,7 @@ export class SurgicalSafetyResponses {
     fieldName: 'responded_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   respondedByProfileId?: string;
 
   @Property({ fieldName: 'responded_at', columnType: 'timestamptz' })

@@ -12,7 +12,7 @@ export class AdAccountUsers {
   @Property({ fieldName: 'user_id', type: 'uuid', nullable: true }) // FK → iam.users
   userId?: string;
 
-  @Property({ fieldName: 'partner_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'partner_id', type: 'uuid', nullable: true }) // FK → ads.ad_partners
   partnerId?: string;
 
   @Property({ fieldName: 'role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

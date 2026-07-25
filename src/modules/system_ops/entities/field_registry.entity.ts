@@ -12,7 +12,7 @@ export class FieldRegistry {
   @Property({ fieldName: 'column_name', columnType: 'varchar' })
   columnName!: string;
 
-  @Property({ fieldName: 'classification_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'classification_id', type: 'uuid', nullable: true }) // FK → system_ops.data_classifications
   classificationId?: string;
 
   @Property({ fieldName: 'is_pii', type: 'boolean', nullable: true })

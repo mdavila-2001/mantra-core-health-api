@@ -15,17 +15,17 @@ export class SpecimenContainerEvents {
   @Property({ fieldName: 'event_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   eventTypeConceptId!: string;
 
-  @Property({ fieldName: 'source_location_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_location_id', type: 'uuid', nullable: true }) // FK → diagnostics.dicom_object_locations
   sourceLocationId?: string;
 
   @Property({
     fieldName: 'destination_location_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → practice.care_spaces
   destinationLocationId?: string;
 
-  @Property({ fieldName: 'actor_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'actor_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   actorProfileId?: string;
 
   @Property({

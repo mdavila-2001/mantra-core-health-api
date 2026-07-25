@@ -9,7 +9,7 @@ export class PaymentTransactions {
   @Property({ fieldName: 'payment_intent_id', type: 'uuid' }) // FK → payments.payment_intents
   paymentIntentId!: string;
 
-  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK → payments.payment_gateways
   gatewayId!: string;
 
   @Property({ fieldName: 'transaction_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -48,7 +48,7 @@ export class PaymentTransactions {
   }) // FK → erp.business_partners
   payeeBusinessPartnerId?: string;
 
-  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
   @Property({

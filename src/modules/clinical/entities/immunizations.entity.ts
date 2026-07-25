@@ -38,7 +38,7 @@ export class Immunizations {
     fieldName: 'administered_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   administeredByProfileId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

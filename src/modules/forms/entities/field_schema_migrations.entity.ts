@@ -6,13 +6,13 @@ export class FieldSchemaMigrations {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'definition_set_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'definition_set_id', type: 'uuid' }) // FK → forms.field_definition_sets
   definitionSetId!: string;
 
-  @Property({ fieldName: 'from_version_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'from_version_id', type: 'uuid' }) // FK → forms.field_definition_set_versions
   fromVersionId!: string;
 
-  @Property({ fieldName: 'to_version_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'to_version_id', type: 'uuid' }) // FK → forms.field_definition_set_versions
   toVersionId!: string;
 
   @Property({ fieldName: 'migration_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
