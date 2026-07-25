@@ -19,6 +19,7 @@
     "test:integration": "ORM_SCHEMA_SYNC=off node --experimental-vm-modules node_modules/.bin/jest --config ./test/jest-integration.json",
     "test:integration:cov": "ORM_SCHEMA_SYNC=off node --experimental-vm-modules node_modules/.bin/jest --config ./test/jest-integration.json --coverage",
     "test:cov:merged": "node --experimental-vm-modules node_modules/.bin/jest --coverage && yarn test:integration:cov && node tools/coverage/merge-coverage.mjs",
+    "smoke": "ORM_SCHEMA_SYNC=off node --experimental-vm-modules node_modules/.bin/jest --config ./test/jest-smoke.json",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "orm": "mikro-orm",

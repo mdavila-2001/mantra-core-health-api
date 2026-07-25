@@ -80,3 +80,7 @@ CLAUDE.md
 # prompt 
 CLAUDE.md
 /coverage-integration
+
+# Salidas del smoke test (artefactos generados)
+/output.smoke.test.json
+/output.smoke.test.csv
