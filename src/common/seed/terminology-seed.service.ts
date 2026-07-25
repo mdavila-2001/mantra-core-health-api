@@ -8,7 +8,15 @@ import {
   TerminologySources,
 } from '../../modules/terminology/entities';
 import { Tenants } from '../../modules/directory/entities';
-import { CONCEPT_DEFS, CONCEPTS, SEED, type ConceptName } from '../constants/concepts';
+import { ProcessingPurposes } from '../../modules/consent/entities';
+import {
+  CONCEPT_DEFS,
+  CONCEPTS,
+  SEED,
+  deterministicId,
+  type ConceptName,
+} from '../constants/concepts';
+import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
 /**
  * Materializa el catálogo de conceptos internos que el resto del sistema
@@ -103,22 +111,31 @@ export class TerminologySeedService implements OnApplicationBootstrap {
       await em.flush();
     }
 
-    // Nivel 2: conceptos. Se consultan de golpe los ya presentes para no emitir
-    // una query por cada uno (evita el patrón N+1 en el arranque).
-    const names = Object.keys(CONCEPT_DEFS) as ConceptName[];
-    const ids = names.map((n) => CONCEPTS[n]);
+    // Nivel 2: conceptos. Une el catálogo base (transversal) con los conceptos
+    // que declara cada módulo de dominio (MODULE_CONCEPT_SEEDS). Se deduplica por
+    // id y se consultan de golpe los ya presentes para evitar el patrón N+1.
+    const catalog = new Map<string, { code: string; display: string }>();
+    for (const name of Object.keys(CONCEPT_DEFS) as ConceptName[]) {
+      catalog.set(CONCEPTS[name], {
+        code: CONCEPT_DEFS[name].code,
+        display: CONCEPT_DEFS[name].display,
+      });
+    }
+    for (const seed of MODULE_CONCEPT_SEEDS) {
+      catalog.set(deterministicId(seed.key), { code: seed.code, display: seed.display });
+    }
+
+    const ids = [...catalog.keys()];
     const existing = await em.find(CatalogConcepts, { id: { $in: ids } });
     const existingIds = new Set(existing.map((c) => c.id));
 
-    for (const name of names) {
-      const id = CONCEPTS[name];
+    for (const [id, def] of catalog) {
       if (existingIds.has(id)) continue;
-      const definition = CONCEPT_DEFS[name];
       em.create(CatalogConcepts, {
         id,
         codeSystemVersionId: SEED.codeSystemVersionId,
-        code: definition.code,
-        display: definition.display,
+        code: def.code,
+        display: def.display,
         abstract: false,
         selectable: true,
         createdAt: now,
@@ -138,6 +155,21 @@ export class TerminologySeedService implements OnApplicationBootstrap {
         legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_COMPANY,
         statusConceptId: CONCEPTS.TENANT_ACTIVE,
         verificationStatusConceptId: CONCEPTS.TENANT_VERIFIED,
+        createdAt: now,
+        updatedAt: now,
+      }, { partial: true });
+      inserted++;
+      await em.flush();
+    }
+
+    // Nivel 4: propósito de procesamiento por defecto (consent).
+    if (!(await em.findOne(ProcessingPurposes, { id: SEED.processingPurposeId }))) {
+      em.create(ProcessingPurposes, {
+        id: SEED.processingPurposeId,
+        code: SEED.processingPurposeCode,
+        name: 'General care',
+        purposeCategoryConceptId: CONCEPTS.PURPOSE_CATEGORY_CARE,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
         createdAt: now,
         updatedAt: now,
       }, { partial: true });

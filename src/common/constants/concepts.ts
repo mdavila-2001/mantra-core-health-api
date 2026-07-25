@@ -67,6 +67,15 @@ export const SEED = {
    */
   tenantId: deterministicId('seed:tenant:default'),
   tenantCode: 'DEFAULT',
+  /**
+   * Propósito de procesamiento por defecto. Existe porque varias tablas de consent
+   * (`consents`, `hipaa_authorizations`, `patient_objections`, ...) tienen una FK
+   * NOT NULL a `consent.processing_purposes` y el módulo consent no incluye un caso
+   * de uso para crear propósitos: sin al menos uno sembrado no se puede capturar
+   * un consentimiento.
+   */
+  processingPurposeId: deterministicId('seed:processing-purpose:default'),
+  processingPurposeCode: 'GENERAL_CARE',
 };
 
 /**
@@ -202,6 +211,9 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   DERIVATIVE_OCR: def('common:derivative:ocr', 'OCR', 'OCR text'),
   LINK_ROLE_ATTACHMENT: def('common:link-role:attachment', 'ATTACHMENT', 'Attachment'),
   VISIBILITY_INTERNAL: def('common:visibility:internal', 'INTERNAL', 'Internal'),
+
+  // --- Consent: categoría de propósito de procesamiento (para el seed) ---
+  PURPOSE_CATEGORY_CARE: def('consent:purpose-category:care', 'CARE', 'Direct care'),
 
   // --- Directory: tenant por defecto ---
   TENANT_TYPE_PROVIDER: def('directory:tenant-type:provider', 'PROVIDER', 'Healthcare provider'),

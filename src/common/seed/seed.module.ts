@@ -7,6 +7,7 @@ import {
   TerminologySources,
 } from '../../modules/terminology/entities';
 import { Tenants } from '../../modules/directory/entities';
+import { ProcessingPurposes } from '../../modules/consent/entities';
 import { TerminologySeedService } from './terminology-seed.service';
 
 /**
@@ -22,6 +23,7 @@ import { TerminologySeedService } from './terminology-seed.service';
       CodeSystemVersions,
       CatalogConcepts,
       Tenants,
+      ProcessingPurposes,
     ]),
   ],
   providers: [TerminologySeedService],

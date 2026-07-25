@@ -6,6 +6,9 @@ import type { Server } from 'node:http';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { bootstrapTestApp, type TestContext } from '../integration/harness';
 import { CatalogConcepts } from '../../src/modules/terminology/entities';
+import { SEED } from '../../src/common';
+import { ALL_SMOKE } from './registry';
+import type { SmokeCase, SmokeCtx } from './smoke-kit';
 
 /**
  * Smoke test de los 30 endpoints implementados (IAM 12, Common 11, Terminology 7).
@@ -101,6 +104,51 @@ describe('Smoke test — 30 endpoints', () => {
         note: `excepción: ${error instanceof Error ? error.message : String(error)}`,
       });
       return null;
+    }
+  }
+
+  /** Ejecuta un `SmokeCase` del registro (módulos 04+) compartiendo `ctx.vars`. */
+  async function runRegistryCase(smokeCtx: SmokeCtx, c: SmokeCase): Promise<void> {
+    const started = Date.now();
+    const path = c.path(smokeCtx);
+    try {
+      let req = request(server)[c.method](path);
+      if (c.auth !== false) req = req.set('Authorization', `Bearer ${smokeCtx.adminToken}`);
+      if (c.body) req = req.send(c.body(smokeCtx) as object);
+      const res = await req;
+      const durationMs = Date.now() - started;
+      const codeOk = c.expectedCode ? res.body?.code === c.expectedCode : true;
+      const pass = res.status === c.expectedStatus && codeOk;
+      if (pass && c.capture && res.body) c.capture(res.body, smokeCtx);
+      results.push({
+        module: c.module,
+        endpoint: c.endpoint,
+        testCase: c.name,
+        method: c.method.toUpperCase(),
+        path,
+        expectedStatus: c.expectedStatus,
+        actualStatus: res.status,
+        pass,
+        errorCode: res.body?.code ?? null,
+        durationMs,
+        note: pass
+          ? ''
+          : `esperaba ${c.expectedStatus}${c.expectedCode ? '/' + c.expectedCode : ''}, recibió ${res.status}/${res.body?.code ?? '-'}`,
+      });
+    } catch (error) {
+      results.push({
+        module: c.module,
+        endpoint: c.endpoint,
+        testCase: c.name,
+        method: c.method.toUpperCase(),
+        path,
+        expectedStatus: c.expectedStatus,
+        actualStatus: 0,
+        pass: false,
+        errorCode: null,
+        durationMs: Date.now() - started,
+        note: `excepción: ${error instanceof Error ? error.message : String(error)}`,
+      });
     }
   }
 
@@ -509,6 +557,22 @@ describe('Smoke test — 30 endpoints', () => {
       expectedStatus: 409,
       expectedCode: 'CONFLICT',
     });
+
+    // ------------------------------------------------------------------
+    // Módulos adicionales (04+): registro de casos aportado por cada módulo.
+    // ------------------------------------------------------------------
+    const smokeCtx: SmokeCtx = {
+      server,
+      orm,
+      adminToken: admin,
+      adminUserId: ctx.adminUserId,
+      tenantId: SEED.tenantId,
+      vars: {},
+      u,
+    };
+    for (const smokeCase of ALL_SMOKE) {
+      await runRegistryCase(smokeCtx, smokeCase);
+    }
 
     // Señal de salud global: la batería no debe tener fallos.
     const failed = results.filter((r) => !r.pass);

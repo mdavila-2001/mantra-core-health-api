@@ -1,12 +1,74 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { AuthzController } from './authz.controller';
-import { AuthzService } from './authz.service';
 import * as entities from './entities';
+import {
+  AuthzCatalogController,
+  AuthzPoliciesController,
+  AuthzRolesController,
+  AuthzGrantsController,
+  AuthzClinicalController,
+  AuthzPdpController,
+} from './controllers';
+import {
+  AuthzCatalogService,
+  AuthzPoliciesService,
+  AuthzRolesService,
+  AuthzGrantsService,
+  AuthzClinicalService,
+  AuthzPdpService,
+} from './services';
+import {
+  PermissionCategoriesRepository,
+  PermissionsRepository,
+  AccessPoliciesRepository,
+  RolesRepository,
+  RolePermissionsRepository,
+  UserRoleAssignmentsRepository,
+  UserPermissionGrantsRepository,
+  ClinicalAccessGrantsRepository,
+  BreakGlassSessionsRepository,
+  FieldPermissionsRepository,
+  ResourceScopeGrantsRepository,
+} from './repositories';
 
+/**
+ * Módulo 06 — Authorization, Purpose of Use and Field Masking.
+ *
+ * Catálogo de permisos, políticas ABAC, roles con herencia, asignaciones y
+ * excepciones, accesos clínicos con propósito de uso, break-the-glass,
+ * enmascaramiento de campos, grants polimórficos y el PDP (invalidación de cache
+ * y evaluación de decisiones efectivas).
+ */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [AuthzController],
-  providers: [AuthzService],
+  controllers: [
+    AuthzCatalogController,
+    AuthzPoliciesController,
+    AuthzRolesController,
+    AuthzGrantsController,
+    AuthzClinicalController,
+    AuthzPdpController,
+  ],
+  providers: [
+    // Repositorios
+    PermissionCategoriesRepository,
+    PermissionsRepository,
+    AccessPoliciesRepository,
+    RolesRepository,
+    RolePermissionsRepository,
+    UserRoleAssignmentsRepository,
+    UserPermissionGrantsRepository,
+    ClinicalAccessGrantsRepository,
+    BreakGlassSessionsRepository,
+    FieldPermissionsRepository,
+    ResourceScopeGrantsRepository,
+    // Servicios
+    AuthzCatalogService,
+    AuthzPoliciesService,
+    AuthzRolesService,
+    AuthzGrantsService,
+    AuthzClinicalService,
+    AuthzPdpService,
+  ],
 })
 export class AuthzModule {}
