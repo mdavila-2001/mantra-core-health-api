@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `telemetry`.
- * 63 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 73 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
@@ -10,9 +10,11 @@ export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
   ['activity_event_schema_definitions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['activity_event_schema_definitions', 'pii_classification_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['activity_event_schema_definitions', 'portal_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['activity_event_schema_definitions', 'purpose_definition_id', 'telemetry', 'tracking_purpose_definitions', 'id'],
   ['activity_event_schema_definitions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['analytics_subjects', 'created_from_consent_id', 'consent', 'consents', 'id'],
   ['analytics_subjects', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['analytics_subjects', 'rotated_from_subject_id', 'telemetry', 'analytics_subjects', 'id'],
   ['analytics_subjects', 'user_id', 'iam', 'users', 'id'],
   ['client_contexts', 'analytics_subject_id', 'telemetry', 'analytics_subjects', 'id'],
   ['client_contexts', 'browser_family_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -24,20 +26,26 @@ export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
   ['client_contexts', 'session_id', 'iam', 'sessions', 'id'],
   ['client_contexts', 'session_journey_id', 'telemetry', 'session_journeys', 'id'],
   ['conversion_events', 'analytics_subject_id', 'telemetry', 'analytics_subjects', 'id'],
+  ['conversion_events', 'completion_event_id', 'telemetry', 'user_activity_events', 'id'],
   ['conversion_events', 'funnel_definition_id', 'telemetry', 'funnel_definitions', 'id'],
   ['conversion_events', 'session_journey_id', 'telemetry', 'session_journeys', 'id'],
   ['funnel_definitions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['funnel_definitions', 'portal_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['funnel_definitions', 'purpose_definition_id', 'telemetry', 'tracking_purpose_definitions', 'id'],
   ['funnel_definitions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['funnel_definitions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['funnel_steps', 'event_schema_definition_id', 'telemetry', 'activity_event_schema_definitions', 'id'],
   ['funnel_steps', 'funnel_definition_id', 'telemetry', 'funnel_definitions', 'id'],
   ['session_journeys', 'analytics_subject_id', 'telemetry', 'analytics_subjects', 'id'],
+  ['session_journeys', 'entry_event_id', 'telemetry', 'user_activity_events', 'id'],
+  ['session_journeys', 'exit_event_id', 'telemetry', 'user_activity_events', 'id'],
   ['session_journeys', 'journey_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['session_journeys', 'portal_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['session_journeys', 'session_id', 'iam', 'sessions', 'id'],
   ['tracking_consents', 'created_by_user_id', 'iam', 'users', 'id'],
   ['tracking_consents', 'decision_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tracking_consents', 'jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['tracking_consents', 'purpose_definition_id', 'telemetry', 'tracking_purpose_definitions', 'id'],
   ['tracking_consents', 'user_id', 'iam', 'users', 'id'],
   ['tracking_disclosure_acceptances', 'acceptance_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tracking_disclosure_acceptances', 'session_id', 'iam', 'sessions', 'id'],
@@ -57,7 +65,9 @@ export const telemetryForeignKeys: readonly ForeignKeyTuple[] = [
   ['user_activity_event_properties', 'value_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['user_activity_events', 'analytics_subject_id', 'telemetry', 'analytics_subjects', 'id'],
   ['user_activity_events', 'device_id', 'iam', 'devices', 'id'],
+  ['user_activity_events', 'event_schema_definition_id', 'telemetry', 'activity_event_schema_definitions', 'id'],
   ['user_activity_events', 'portal_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['user_activity_events', 'security_audit_event_id', 'iam', 'security_events', 'id'],
   ['user_activity_events', 'session_id', 'iam', 'sessions', 'id'],
   ['user_activity_events', 'target_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['user_activity_events', 'tenant_id', 'directory', 'tenants', 'id'],

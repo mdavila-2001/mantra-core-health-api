@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `diagnostic_units`.
- * 66 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 69 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -22,8 +22,10 @@ export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   ['diagnostic_price_schedules', 'price_schedule_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_price_schedules', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_price_schedules', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['diagnostic_study_components', 'component_offering_id', 'diagnostic_units', 'diagnostic_study_offerings', 'id'],
   ['diagnostic_study_components', 'component_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_study_components', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['diagnostic_study_components', 'parent_offering_id', 'diagnostic_units', 'diagnostic_study_offerings', 'id'],
   ['diagnostic_study_offerings', 'body_site_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_study_offerings', 'created_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_study_offerings', 'diagnostic_unit_id', 'diagnostic_units', 'diagnostic_units', 'id'],
@@ -34,6 +36,7 @@ export const diagnosticUnitsForeignKeys: readonly ForeignKeyTuple[] = [
   ['diagnostic_study_offerings', 'study_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_study_offerings', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_study_prices', 'diagnostic_study_offering_id', 'diagnostic_units', 'diagnostic_study_offerings', 'id'],
+  ['diagnostic_study_prices', 'price_schedule_id', 'diagnostic_units', 'diagnostic_price_schedules', 'id'],
   ['diagnostic_study_prices', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['diagnostic_study_prices', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['diagnostic_unit_accreditations', 'accreditation_concept_id', 'terminology', 'catalog_concepts', 'id'],

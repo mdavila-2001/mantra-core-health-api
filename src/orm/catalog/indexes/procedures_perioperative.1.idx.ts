@@ -32,6 +32,9 @@ export const proceduresPerioperativeIndexes1: readonly IndexTuple[] = [
   ['implant_identifiers', 'ix_implant_identifiers_procedure_implant_id', ['procedure_implant_id'], false, 'btree'],
   ['implant_identifiers', 'ix_implant_identifiers_identifier_type_concept_id', ['identifier_type_concept_id'], false, 'btree'],
   ['implant_identifiers', 'uk_implant_identifiers_type_value', ['identifier_type_concept_id', 'identifier_value'], true, 'btree'],
+  ['instrument_sets', 'ix_instrument_sets_tenant_id', ['tenant_id'], false, 'btree'],
+  ['instrument_sets', 'ix_instrument_sets_set_type_concept_id', ['set_type_concept_id'], false, 'btree'],
+  ['instrument_sets', 'ix_instrument_sets_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['operating_room_utilization_events', 'ix_operating_room_utilization_events_operating_room_id', ['operating_room_id'], false, 'btree'],
   ['operating_room_utilization_events', 'ix_operating_room_utilization_events_procedure_case_id', ['procedure_case_id'], false, 'btree'],
   ['operating_room_utilization_events', 'ix_operating_room_utilization_events_event_type_concept_id', ['event_type_concept_id'], false, 'btree'],
@@ -184,7 +187,4 @@ export const proceduresPerioperativeIndexes1: readonly IndexTuple[] = [
   ['procedure_charge_items', 'ix_procedure_charge_items_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['procedure_charge_items', 'ix_procedure_charge_items_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_procedure_case_id', ['procedure_case_id'], false, 'btree'],
-  ['procedure_complications', 'ix_procedure_complications_procedure_id', ['procedure_id'], false, 'btree'],
-  ['procedure_complications', 'ix_procedure_complications_complication_code_concept_id', ['complication_code_concept_id'], false, 'btree'],
-  ['procedure_complications', 'ix_procedure_complications_severity_concept_id', ['severity_concept_id'], false, 'btree'],
 ];

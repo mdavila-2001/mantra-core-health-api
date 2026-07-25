@@ -2,11 +2,15 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `system_ops`.
- * 159 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 177 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const systemOpsIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['accepted_risks', 'ix_accepted_risks_tenant_id', ['tenant_id'], false, 'btree'],
+  ['accepted_risks', 'ix_accepted_risks_severity_concept_id', ['severity_concept_id'], false, 'btree'],
+  ['accepted_risks', 'ix_accepted_risks_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['accepted_risks', 'ix_accepted_risks_accepted_by_user_id', ['accepted_by_user_id'], false, 'btree'],
   ['anonymization_rules', 'uq_anonymization_rules_code', ['code'], true, 'btree'],
   ['anonymization_rules', 'ix_anonymization_rules_technique_concept_id', ['technique_concept_id'], false, 'btree'],
   ['anonymization_rules', 'ix_anonymization_rules_created_by_user_id', ['created_by_user_id'], false, 'btree'],
@@ -34,6 +38,10 @@ export const systemOpsIndexes: readonly IndexTuple[] = [
   ['backup_policies', 'ix_backup_policies_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['backup_policies', 'ix_backup_policies_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['backup_policies', 'ix_backup_policies_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['breach_notifications', 'ix_breach_notifications_security_incident_id', ['security_incident_id'], false, 'btree'],
+  ['breach_notifications', 'ix_breach_notifications_authority_concept_id', ['authority_concept_id'], false, 'btree'],
+  ['breach_notifications', 'ix_breach_notifications_deadline_at', ['deadline_at'], false, 'btree'],
+  ['breach_notifications', 'ix_breach_notifications_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['cross_border_transfer_events', 'ix_cross_border_transfer_events_tenant_id', ['tenant_id'], false, 'btree'],
   ['cross_border_transfer_events', 'ix_cross_border_transfer_events_data_category_concept_id', ['data_category_concept_id'], false, 'btree'],
   ['cross_border_transfer_events', 'ix_cross_border_transfer_events_source_region_concept_id', ['source_region_concept_id'], false, 'btree'],
@@ -64,6 +72,10 @@ export const systemOpsIndexes: readonly IndexTuple[] = [
   ['draft_records', 'ix_draft_records_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['draft_records', 'ix_draft_records_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['draft_records', 'ix_draft_records_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['encryption_keys', 'uk_encryption_keys_key_alias', ['key_alias'], true, 'btree'],
+  ['encryption_keys', 'ix_encryption_keys_purpose_concept_id', ['key_purpose_concept_id'], false, 'btree'],
+  ['encryption_keys', 'ix_encryption_keys_next_rotation_at', ['next_rotation_at'], false, 'btree'],
+  ['encryption_keys', 'ix_encryption_keys_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['entity_registry', 'ix_entity_registry_domain_id', ['domain_id'], false, 'btree'],
   ['entity_registry', 'ix_entity_registry_classification_id', ['classification_id'], false, 'btree'],
   ['entity_registry', 'ix_entity_registry_retention_policy_id', ['retention_policy_id'], false, 'btree'],
@@ -80,6 +92,8 @@ export const systemOpsIndexes: readonly IndexTuple[] = [
   ['governance_change_log', 'ix_governance_change_log_action_concept_id', ['action_concept_id'], false, 'btree'],
   ['governance_change_log', 'ix_governance_change_log_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
   ['governance_change_log', 'ix_governance_change_log_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['key_rotation_events', 'ix_key_rotation_events_encryption_key_id', ['encryption_key_id'], false, 'btree'],
+  ['key_rotation_events', 'ix_key_rotation_events_occurred_at', ['occurred_at'], false, 'btree'],
   ['legal_holds', 'ix_legal_holds_tenant_id', ['tenant_id'], false, 'btree'],
   ['legal_holds', 'ix_legal_holds_target_type_concept_id', ['target_type_concept_id'], false, 'btree'],
   ['legal_holds', 'ix_legal_holds_reason_concept_id', ['reason_concept_id'], false, 'btree'],
@@ -140,6 +154,10 @@ export const systemOpsIndexes: readonly IndexTuple[] = [
   ['retention_policies', 'ix_retention_policies_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['retention_policies', 'ix_retention_policies_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['retention_policies', 'ix_retention_policies_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['security_incidents', 'uk_security_incidents_code', ['code'], true, 'btree'],
+  ['security_incidents', 'ix_security_incidents_severity_concept_id', ['severity_concept_id'], false, 'btree'],
+  ['security_incidents', 'ix_security_incidents_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['security_incidents', 'ix_security_incidents_detected_at', ['detected_at'], false, 'btree'],
   ['tenant_residency_bindings', 'ix_tenant_residency_bindings_tenant_id', ['tenant_id'], false, 'btree'],
   ['tenant_residency_bindings', 'ix_tenant_residency_bindings_residency_policy_id', ['residency_policy_id'], false, 'btree'],
   ['tenant_residency_bindings', 'ix_tenant_residency_bindings_primary_region_concept_id', ['primary_region_concept_id'], false, 'btree'],

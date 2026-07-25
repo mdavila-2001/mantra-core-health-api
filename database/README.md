@@ -60,3 +60,32 @@ Ver `.gitignore` de la raíz. Se versiona la **salida generada** (`SQL/`, `NoSQL
 es lo que necesita el arranque en cualquier máquina sin correr Python— y el toolkit y
 los `.puml`. El **vault Obsidian** (36 MB, ~9k notas) queda fuera de git por peso: solo
 hace falta para regenerar, no en runtime.
+
+## Fuente autoritativa del esquema PostgreSQL (importante)
+
+El esquema relacional que usa la aplicación NO lo define este `database/`, sino el
+**bootstrap del ORM** en `src/orm`: la app, al arrancar con `ORM_SCHEMA_SYNC=safe`,
+materializa en 7 capas todo el esquema (extensiones, schemas, tipos, tablas, ~7381
+índices, ~6438 FKs, hypertables) desde el catálogo y las entidades, que a su vez se
+generan de la bóveda Obsidian con `yarn orm:catalog` / `yarn orm:entities:missing`
+(ver skills `orm-catalog` y `mikro-orm-migrations`). Es idempotente y no destructivo;
+verificado: 15127 objetos aplicados y fidelidad 1179 entidades = 1179 tablas.
+
+Consecuencia práctica:
+
+- **La concordancia con la bóveda se logra por el pipeline del ORM**, no por este toolkit.
+  Cuando el modelo cambie, se corre `yarn orm:audit` → `orm:entities:missing` → `orm:catalog`,
+  y la app materializa el nuevo esquema al arrancar.
+- **`database/SQL/` y `database/NoSQL/` pueden quedar desfasados** respecto a la bóveda:
+  el toolkit `salud-db` parsea `.puml` (`Mantra Core Health Context/`), y una bóveda
+  actualizada puede no traer `.puml` nuevos. Como el modelo solo crece (altas de entidades
+  y columnas; sin bajas ni cambios de tipo — ver `yarn orm:audit`), el `SQL/` generado es un
+  **subconjunto estricto**: `postgres-init` lo pre-siembra y el bootstrap de la app completa
+  el resto al arrancar. No hay conflicto, pero el pre-seed no está completo.
+- Para que el **pre-seed de docker** (`postgres-init`) quede 100 % concordante hacen falta
+  `.puml` actualizados del nuevo modelo. Los stores NoSQL (`mongo-init`, `opensearch-init`)
+  dependen igualmente de esos `.puml`; el ORM no los cubre (solo PostgreSQL).
+
+En resumen: para desarrollo, `docker compose up` levanta la infra y la app materializa el
+esquema PG concordante al primer arranque. El `database/SQL/NoSQL` es un acelerador opcional
+de pre-seed, no la fuente de verdad.

@@ -2,11 +2,18 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `crm` (parte 2/2).
- * 38 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 47 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const crmForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['opportunities', 'stage_id', 'crm', 'pipeline_stages', 'id'],
+  ['opportunities', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['opportunities', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['opportunities', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['opportunity_contact_roles', 'contact_id', 'crm', 'contacts', 'id'],
+  ['opportunity_contact_roles', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['opportunity_contact_roles', 'opportunity_id', 'crm', 'opportunities', 'id'],
   ['opportunity_contact_roles', 'role_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['opportunity_contact_roles', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['opportunity_line_items', 'contract_line_item_id', 'erp', 'contract_line_items', 'id'],
@@ -17,8 +24,10 @@ export const crmForeignKeys2: readonly ForeignKeyTuple[] = [
   ['opportunity_line_items', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['opportunity_line_items', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['opportunity_stage_history', 'changed_by_user_id', 'iam', 'users', 'id'],
+  ['opportunity_stage_history', 'from_stage_id', 'crm', 'pipeline_stages', 'id'],
   ['opportunity_stage_history', 'opportunity_id', 'crm', 'opportunities', 'id'],
   ['opportunity_stage_history', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['opportunity_stage_history', 'to_stage_id', 'crm', 'pipeline_stages', 'id'],
   ['partnership_agreements', 'agreement_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['partnership_agreements', 'contract_id', 'erp', 'contracts', 'id'],
   ['partnership_agreements', 'created_by_user_id', 'iam', 'users', 'id'],

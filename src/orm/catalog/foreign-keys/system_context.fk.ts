@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `system_context`.
- * 49 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 51 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const systemContextForeignKeys: readonly ForeignKeyTuple[] = [
@@ -45,11 +45,13 @@ export const systemContextForeignKeys: readonly ForeignKeyTuple[] = [
   ['system_context_refresh_runs', 'trigger_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['system_context_versions', 'generated_by_agent_id', 'automation', 'agents', 'id'],
   ['system_context_versions', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['system_context_versions', 'refresh_run_id', 'system_context', 'system_context_refresh_runs', 'id'],
   ['system_context_versions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['system_context_versions', 'system_context_id', 'system_context', 'system_contexts', 'id'],
   ['system_contexts', 'context_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['system_contexts', 'country_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['system_contexts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['system_contexts', 'current_version_id', 'system_context', 'system_context_versions', 'id'],
   ['system_contexts', 'locale_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['system_contexts', 'refresh_policy_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['system_contexts', 'scope_type_concept_id', 'terminology', 'catalog_concepts', 'id'],

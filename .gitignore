@@ -3,6 +3,7 @@
 /node_modules
 /build
 /graphify.out
+/.claude
 
 # Logs
 logs
@@ -63,8 +64,10 @@ graphify-out/.graphify_root
 graphify-out/.needs_update
 src/graphify-out/
 
-# Claude Code — settings locales por usuario (no compartidos)
-.claude/settings.local.json
+# Claude Code — configuración y skills locales por usuario. Cada desarrollador usa
+# las suyas; no se versionan para no chocar con las de otros devs.
+.claude/
+CLAUDE.md
 
 # Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
 /temp
@@ -78,3 +81,6 @@ database/**/__pycache__/
 
 # graphify — backups fechados (artefacto local, no versionar)
 graphify-out/20*/
+
+# prompt 
+CLAUDE.md

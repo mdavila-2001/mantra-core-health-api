@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `workflow`.
- * 48 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 49 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const workflowForeignKeys: readonly ForeignKeyTuple[] = [
@@ -30,6 +30,7 @@ export const workflowForeignKeys: readonly ForeignKeyTuple[] = [
   ['state_transition_events', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['state_transition_events', 'state_machine_definition_id', 'workflow', 'state_machine_definitions', 'id'],
   ['state_transition_events', 'to_state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['state_transition_events', 'transition_definition_id', 'workflow', 'state_transition_definitions', 'id'],
   ['transition_guards', 'created_by_user_id', 'iam', 'users', 'id'],
   ['transition_guards', 'guard_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['transition_guards', 'state_transition_definition_id', 'workflow', 'state_transition_definitions', 'id'],

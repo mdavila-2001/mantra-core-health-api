@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `organization_extensions`.
- * 49 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 50 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const organizationExtensionsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -40,6 +40,7 @@ export const organizationExtensionsForeignKeys: readonly ForeignKeyTuple[] = [
   ['hospitals', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['organization_affiliations', 'affiliation_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['organization_affiliations', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['organization_affiliations', 'data_use_agreement_id', 'organization_extensions', 'data_use_agreements', 'id'],
   ['organization_affiliations', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
   ['organization_affiliations', 'host_practice_site_id', 'practice', 'practice_sites', 'id'],
   ['organization_affiliations', 'participating_tenant_id', 'directory', 'tenants', 'id'],

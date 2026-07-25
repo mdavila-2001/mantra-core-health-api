@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `common`.
- * 45 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 46 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const commonForeignKeys: readonly ForeignKeyTuple[] = [
@@ -39,6 +39,7 @@ export const commonForeignKeys: readonly ForeignKeyTuple[] = [
   ['file_versions', 'storage_region_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['files', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['files', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['files', 'current_version_id', 'common', 'file_versions', 'id'],
   ['files', 'lifecycle_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['files', 'retention_class_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['files', 'sensitivity_concept_id', 'terminology', 'catalog_concepts', 'id'],

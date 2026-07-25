@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `profiles`.
- * 109 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 116 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
@@ -32,6 +32,7 @@ export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
   ['jurisdiction_authorizations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['jurisdiction_authorizations', 'jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['jurisdiction_authorizations', 'practice_scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['jurisdiction_authorizations', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['jurisdiction_authorizations', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['jurisdiction_authorizations', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['patient_identity_links', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -46,8 +47,10 @@ export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
   ['patient_merge_events', 'merged_patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['patient_merge_events', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['patient_merge_events', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['patient_merge_events', 'reversal_of_event_id', 'profiles', 'patient_merge_events', 'id'],
   ['patient_merge_events', 'surviving_patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['patient_portal_proxies', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['patient_portal_proxies', 'legal_basis_record_id', 'consent', 'processing_legal_bases', 'id'],
   ['patient_portal_proxies', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['patient_portal_proxies', 'proxy_user_id', 'iam', 'users', 'id'],
   ['patient_portal_proxies', 'related_person_id', 'profiles', 'related_persons', 'id'],
@@ -86,11 +89,14 @@ export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
   ['persons', 'vital_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_languages', 'created_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_languages', 'language_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_languages', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['practitioner_languages', 'proficiency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_languages', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_specialties', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_specialties', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['practitioner_specialties', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_specialties', 'specialty_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_specialties', 'supporting_credential_id', 'profiles', 'professional_credentials', 'id'],
   ['practitioner_specialties', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_specialties', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['professional_credentials', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -98,6 +104,7 @@ export const profilesForeignKeys: readonly ForeignKeyTuple[] = [
   ['professional_credentials', 'file_id', 'common', 'files', 'id'],
   ['professional_credentials', 'issuing_authority_tenant_id', 'directory', 'tenants', 'id'],
   ['professional_credentials', 'issuing_country_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['professional_credentials', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['professional_credentials', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['professional_credentials', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['professional_credentials', 'verified_by_user_id', 'iam', 'users', 'id'],

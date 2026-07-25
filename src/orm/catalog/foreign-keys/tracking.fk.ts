@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `tracking`.
- * 49 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 51 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const trackingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -28,6 +28,7 @@ export const trackingForeignKeys: readonly ForeignKeyTuple[] = [
   ['shipment_handoffs', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['shipment_handoffs', 'shipment_id', 'tracking', 'shipments', 'id'],
   ['shipments', 'assigned_courier_user_id', 'iam', 'users', 'id'],
+  ['shipments', 'carrier_id', 'tracking', 'tracking_carriers', 'id'],
   ['shipments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['shipments', 'destination_address_id', 'common', 'addresses', 'id'],
   ['shipments', 'origin_address_id', 'common', 'addresses', 'id'],
@@ -37,6 +38,7 @@ export const trackingForeignKeys: readonly ForeignKeyTuple[] = [
   ['shipments', 'tracked_subject_id', 'geo', 'tracked_subjects', 'id'],
   ['shipments', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['trackable_subjects', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['trackable_subjects', 'current_milestone_id', 'tracking', 'milestone_definitions', 'id'],
   ['trackable_subjects', 'current_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['trackable_subjects', 'priority_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['trackable_subjects', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],

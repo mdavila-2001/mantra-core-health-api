@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `delegated_access`.
- * 50 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 51 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const delegatedAccessForeignKeys: readonly ForeignKeyTuple[] = [
@@ -52,6 +52,7 @@ export const delegatedAccessForeignKeys: readonly ForeignKeyTuple[] = [
   ['practitioner_delegate_assignments', 'appointment_scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_delegate_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_delegate_assignments', 'delegate_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_delegate_assignments', 'delegate_user_assignment_id', 'delegated_access', 'organization_user_assignments', 'id'],
   ['practitioner_delegate_assignments', 'delegated_permission_set_id', 'delegated_access', 'delegated_permission_sets', 'id'],
   ['practitioner_delegate_assignments', 'patient_scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_delegate_assignments', 'practitioner_role_assignment_id', 'practice', 'practitioner_role_assignments', 'id'],

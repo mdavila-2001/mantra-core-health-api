@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `system_ops`.
- * 129 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 134 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -10,6 +10,7 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['anonymization_rules', 'created_by_user_id', 'iam', 'users', 'id'],
   ['anonymization_rules', 'technique_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['anonymization_rules', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['assessment_control_results', 'accepted_risk_id', 'system_ops', 'accepted_risks', 'id'],
   ['assessment_control_results', 'assessor_user_id', 'iam', 'users', 'id'],
   ['assessment_control_results', 'created_by_user_id', 'iam', 'users', 'id'],
   ['assessment_control_results', 'maturity_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -54,12 +55,15 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['draft_records', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['draft_records', 'tenant_id', 'directory', 'tenants', 'id'],
   ['draft_records', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['entity_registry', 'classification_id', 'system_ops', 'data_classifications', 'id'],
   ['entity_registry', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['entity_registry', 'domain_id', 'system_ops', 'data_domains', 'id'],
   ['entity_registry', 'retention_policy_id', 'system_ops', 'retention_policies', 'id'],
   ['entity_registry', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['entity_registry', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['entity_registry', 'write_policy_id', 'system_ops', 'write_policies', 'id'],
   ['field_registry', 'anonymization_rule_id', 'system_ops', 'anonymization_rules', 'id'],
+  ['field_registry', 'classification_id', 'system_ops', 'data_classifications', 'id'],
   ['field_registry', 'created_by_user_id', 'iam', 'users', 'id'],
   ['field_registry', 'entity_registry_id', 'system_ops', 'entity_registry', 'id'],
   ['field_registry', 'masking_strategy_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -75,6 +79,7 @@ export const systemOpsForeignKeys: readonly ForeignKeyTuple[] = [
   ['legal_holds', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['operational_framework_controls', 'created_by_user_id', 'iam', 'users', 'id'],
   ['operational_framework_controls', 'operational_framework_id', 'system_ops', 'operational_frameworks', 'id'],
+  ['operational_framework_controls', 'parent_control_id', 'system_ops', 'operational_framework_controls', 'id'],
   ['operational_framework_controls', 'pillar_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['operational_framework_controls', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['operational_framework_controls', 'updated_by_user_id', 'iam', 'users', 'id'],

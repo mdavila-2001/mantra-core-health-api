@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `consent`.
- * 79 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 81 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const consentForeignKeys: readonly ForeignKeyTuple[] = [
@@ -17,6 +17,7 @@ export const consentForeignKeys: readonly ForeignKeyTuple[] = [
   ['consent_evidence', 'document_file_id', 'common', 'files', 'id'],
   ['consent_evidence', 'evidence_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['consent_evidence', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['consent_evidence', 'signature_id', 'chart', 'clinical_note_signatures', 'id'],
   ['consent_evidence', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['consent_provisions', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['consent_provisions', 'actor_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -34,6 +35,7 @@ export const consentForeignKeys: readonly ForeignKeyTuple[] = [
   ['consents', 'granted_by_related_person_id', 'profiles', 'related_persons', 'id'],
   ['consents', 'granted_by_user_id', 'iam', 'users', 'id'],
   ['consents', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['consents', 'processing_legal_basis_id', 'consent', 'processing_legal_bases', 'id'],
   ['consents', 'processing_purpose_id', 'consent', 'processing_purposes', 'id'],
   ['consents', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['consents', 'tenant_id', 'directory', 'tenants', 'id'],

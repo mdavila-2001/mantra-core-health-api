@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `practice`.
- * 75 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 80 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
@@ -10,11 +10,13 @@ export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
   ['care_spaces', 'clinical_unit_id', 'practice', 'clinical_units', 'id'],
   ['care_spaces', 'created_by_user_id', 'iam', 'users', 'id'],
   ['care_spaces', 'operational_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['care_spaces', 'parent_space_id', 'practice', 'care_spaces', 'id'],
   ['care_spaces', 'practice_site_id', 'practice', 'practice_sites', 'id'],
   ['care_spaces', 'space_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_spaces', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_spaces', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['clinical_units', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['clinical_units', 'parent_unit_id', 'practice', 'clinical_units', 'id'],
   ['clinical_units', 'practice_site_id', 'practice', 'practice_sites', 'id'],
   ['clinical_units', 'service_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['clinical_units', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -72,14 +74,17 @@ export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
   ['practitioner_role_assignments', 'healthcare_service_id', 'practice', 'healthcare_services', 'id'],
   ['practitioner_role_assignments', 'practice_id', 'practice', 'practices', 'id'],
   ['practitioner_role_assignments', 'practice_site_id', 'practice', 'practice_sites', 'id'],
+  ['practitioner_role_assignments', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['practitioner_role_assignments', 'role_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_role_assignments', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_role_assignments', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_role_assignments', 'supervisor_practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['practitioner_role_assignments', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_support_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_support_assignments', 'practitioner_role_assignment_id', 'practice', 'practitioner_role_assignments', 'id'],
   ['practitioner_support_assignments', 'scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_support_assignments', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['practitioner_support_assignments', 'support_profile_id', 'profiles', 'secretary_profiles', 'profile_id'],
   ['practitioner_support_assignments', 'support_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['practitioner_support_assignments', 'updated_by_user_id', 'iam', 'users', 'id'],
 ];

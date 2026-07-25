@@ -2,11 +2,15 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `organization_extensions`.
- * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 59 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const organizationExtensionsIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['data_use_agreements', 'ix_data_use_agreements_tenant_id', ['tenant_id'], false, 'btree'],
+  ['data_use_agreements', 'ix_data_use_agreements_counterparty_org_id', ['counterparty_org_id'], false, 'btree'],
+  ['data_use_agreements', 'ix_data_use_agreements_purpose_concept_id', ['purpose_concept_id'], false, 'btree'],
+  ['data_use_agreements', 'ix_data_use_agreements_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['facility_licenses', 'ix_facility_licenses_tenant_id', ['tenant_id'], false, 'btree'],
   ['facility_licenses', 'ix_facility_licenses_practice_site_id', ['practice_site_id'], false, 'btree'],
   ['facility_licenses', 'ix_facility_licenses_facility_type_concept_id', ['facility_type_concept_id'], false, 'btree'],

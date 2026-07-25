@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `pharmacy_inventory`.
- * 126 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 130 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
@@ -35,6 +35,7 @@ export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['inventory_ledger_entries', 'source_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['inventory_locations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['inventory_locations', 'location_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['inventory_locations', 'parent_location_id', 'pharmacy_inventory', 'inventory_locations', 'id'],
   ['inventory_locations', 'pharmacy_site_id', 'pharmacy', 'pharmacy_sites', 'id'],
   ['inventory_locations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['inventory_locations', 'temperature_zone_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -64,6 +65,7 @@ export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['inventory_reservations', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['inventory_reservations', 'pharmacy_id', 'pharmacy', 'pharmacies', 'id'],
   ['inventory_reservations', 'pharmacy_site_id', 'pharmacy', 'pharmacy_sites', 'id'],
+  ['inventory_reservations', 'quotation_id', 'pharmacy_inventory', 'purchase_quotations', 'id'],
   ['inventory_reservations', 'reservation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['inventory_reservations', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['inventory_serials', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -82,6 +84,8 @@ export const pharmacyInventoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['medication_dispensation_lines', 'pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
   ['medication_dispensations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['medication_dispensations', 'dispensation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['medication_dispensations', 'dispenser_practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['medication_dispensations', 'insurance_claim_id', 'insurance', 'insurance_claims', 'id'],
   ['medication_dispensations', 'inventory_reservation_id', 'pharmacy_inventory', 'inventory_reservations', 'id'],
   ['medication_dispensations', 'medication_request_id', 'clinical', 'medication_requests', 'id'],
   ['medication_dispensations', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],

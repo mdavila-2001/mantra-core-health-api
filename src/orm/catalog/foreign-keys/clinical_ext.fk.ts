@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical_ext`.
- * 79 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 84 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
@@ -16,11 +16,13 @@ export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
   ['care_team_members', 'care_team_id', 'clinical_ext', 'care_teams', 'id'],
   ['care_team_members', 'created_by_user_id', 'iam', 'users', 'id'],
   ['care_team_members', 'member_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['care_team_members', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['care_team_members', 'related_person_id', 'profiles', 'related_persons', 'id'],
   ['care_team_members', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_team_members', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['care_teams', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_teams', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['care_teams', 'episode_id', 'clinical', 'care_episodes', 'id'],
   ['care_teams', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['care_teams', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_teams', 'tenant_id', 'directory', 'tenants', 'id'],
@@ -36,6 +38,7 @@ export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
   ['clinical_alerts', 'encounter_id', 'clinical', 'encounters', 'id'],
   ['clinical_alerts', 'overridden_by_user_id', 'iam', 'users', 'id'],
   ['clinical_alerts', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['clinical_alerts', 'rule_id', 'clinical_ext', 'cds_rules', 'id'],
   ['clinical_alerts', 'severity_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['clinical_alerts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['clinical_alerts', 'trigger_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -74,10 +77,12 @@ export const clinicalExtForeignKeys: readonly ForeignKeyTuple[] = [
   ['referrals', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['referrals', 'priority_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['referrals', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['referrals', 'referring_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['referrals', 'service_request_id', 'clinical', 'service_requests', 'id'],
   ['referrals', 'source_encounter_id', 'clinical', 'encounters', 'id'],
   ['referrals', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['referrals', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['referrals', 'target_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['referrals', 'target_tenant_id', 'directory', 'tenants', 'id'],
   ['referrals', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['virtual_encounters', 'created_by_user_id', 'iam', 'users', 'id'],

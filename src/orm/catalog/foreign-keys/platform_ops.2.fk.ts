@@ -2,11 +2,16 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `platform_ops` (parte 2/2).
- * 29 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 34 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const platformOpsForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['service_components', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['service_components', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['service_dependencies', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['service_dependencies', 'criticality_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_dependencies', 'dependency_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_dependencies', 'downstream_service_component_id', 'platform_ops', 'service_components', 'id'],
   ['service_dependencies', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_dependencies', 'updated_by_user_id', 'iam', 'users', 'id'],

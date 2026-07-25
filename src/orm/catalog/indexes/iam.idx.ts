@@ -2,11 +2,21 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `iam`.
- * 47 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 57 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const iamIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['account_lockouts', 'ix_account_lockouts_user_id', ['user_id'], false, 'btree'],
+  ['account_lockouts', 'ix_account_lockouts_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['account_lockouts', 'ix_account_lockouts_locked_until', ['locked_until'], false, 'btree'],
+  ['api_key_scopes', 'ix_api_key_scopes_api_key_id', ['api_key_id'], false, 'btree'],
+  ['api_key_scopes', 'uk_api_key_scopes_key_scope', ['api_key_id', 'scope_concept_id', 'resource'], true, 'btree'],
+  ['api_keys', 'uk_api_keys_key_prefix', ['key_prefix'], true, 'btree'],
+  ['api_keys', 'ix_api_keys_tenant_id', ['tenant_id'], false, 'btree'],
+  ['api_keys', 'ix_api_keys_owner_user_id', ['owner_user_id'], false, 'btree'],
+  ['api_keys', 'ix_api_keys_service_principal_id', ['service_principal_id'], false, 'btree'],
+  ['api_keys', 'ix_api_keys_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['authentication_credentials', 'ix_authentication_credentials_user_id', ['user_id'], false, 'btree'],
   ['authentication_credentials', 'ix_authentication_credentials_method_concept_id', ['method_concept_id'], false, 'btree'],
   ['authentication_credentials', 'ix_authentication_credentials_hash_algorithm_concept_id', ['hash_algorithm_concept_id'], false, 'btree'],

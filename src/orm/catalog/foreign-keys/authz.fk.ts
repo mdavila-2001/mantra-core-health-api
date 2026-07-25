@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `authz`.
- * 66 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 67 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const authzForeignKeys: readonly ForeignKeyTuple[] = [
@@ -30,6 +30,7 @@ export const authzForeignKeys: readonly ForeignKeyTuple[] = [
   ['permission_categories', 'created_by_user_id', 'iam', 'users', 'id'],
   ['permission_categories', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['permissions', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['permissions', 'category_id', 'authz', 'permission_categories', 'id'],
   ['permissions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['permissions', 'default_scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['permissions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],

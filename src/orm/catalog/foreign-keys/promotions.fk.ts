@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `promotions`.
- * 68 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 71 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const promotionsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -27,6 +27,7 @@ export const promotionsForeignKeys: readonly ForeignKeyTuple[] = [
   ['earning_rules', 'period_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['earning_rules', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['loyalty_memberships', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['loyalty_memberships', 'current_tier_id', 'promotions', 'loyalty_tiers', 'id'],
   ['loyalty_memberships', 'loyalty_program_id', 'promotions', 'loyalty_programs', 'id'],
   ['loyalty_memberships', 'member_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['loyalty_memberships', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -42,8 +43,10 @@ export const promotionsForeignKeys: readonly ForeignKeyTuple[] = [
   ['loyalty_tiers', 'loyalty_program_id', 'promotions', 'loyalty_programs', 'id'],
   ['loyalty_tiers', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['member_referrals', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['member_referrals', 'referee_reward_ledger_id', 'promotions', 'loyalty_memberships', 'id'],
   ['member_referrals', 'referee_user_id', 'iam', 'users', 'id'],
   ['member_referrals', 'referral_program_id', 'promotions', 'referral_programs', 'id'],
+  ['member_referrals', 'referrer_reward_ledger_id', 'promotions', 'loyalty_memberships', 'id'],
   ['member_referrals', 'referrer_user_id', 'iam', 'users', 'id'],
   ['member_referrals', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['member_referrals', 'updated_by_user_id', 'iam', 'users', 'id'],

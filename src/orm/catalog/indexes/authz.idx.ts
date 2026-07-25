@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `authz`.
- * 76 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 84 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const authzIndexes: readonly IndexTuple[] = [
@@ -13,6 +13,11 @@ export const authzIndexes: readonly IndexTuple[] = [
   ['access_policies', 'ix_access_policies_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['access_policies', 'ix_access_policies_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['access_policies', 'ix_access_policies_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
+  ['break_glass_sessions', 'ix_break_glass_sessions_user_id', ['user_id'], false, 'btree'],
+  ['break_glass_sessions', 'ix_break_glass_sessions_tenant_id', ['tenant_id'], false, 'btree'],
+  ['break_glass_sessions', 'ix_break_glass_sessions_patient_ref_id', ['patient_ref_id'], false, 'btree'],
+  ['break_glass_sessions', 'ix_break_glass_sessions_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['break_glass_sessions', 'ix_break_glass_sessions_review_outcome_concept_id', ['review_outcome_concept_id'], false, 'btree'],
   ['clinical_access_grants', 'ix_clinical_access_grants_patient_profile_id', ['patient_profile_id'], false, 'btree'],
   ['clinical_access_grants', 'ix_clinical_access_grants_granted_user_id', ['granted_user_id'], false, 'btree'],
   ['clinical_access_grants', 'ix_clinical_access_grants_tenant_id', ['tenant_id'], false, 'btree'],
@@ -30,6 +35,9 @@ export const authzIndexes: readonly IndexTuple[] = [
   ['field_permissions', 'ix_field_permissions_mask_strategy_concept_id', ['mask_strategy_concept_id'], false, 'btree'],
   ['field_permissions', 'ix_field_permissions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['field_permissions', 'ix_field_permissions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['ip_access_rules', 'ix_ip_access_rules_tenant_id', ['tenant_id'], false, 'btree'],
+  ['ip_access_rules', 'ix_ip_access_rules_scope_concept_id', ['scope_concept_id'], false, 'btree'],
+  ['ip_access_rules', 'ix_ip_access_rules_rule_type_concept_id', ['rule_type_concept_id'], false, 'btree'],
   ['permission_categories', 'uq_permission_categories_code', ['code'], true, 'btree'],
   ['permission_categories', 'ix_permission_categories_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['permission_categories', 'ix_permission_categories_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],

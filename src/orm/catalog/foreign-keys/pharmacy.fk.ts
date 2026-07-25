@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `pharmacy`.
- * 63 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 64 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
@@ -21,6 +21,7 @@ export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
   ['pharmacy_external_product_mappings', 'pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
   ['pharmacy_external_product_mappings', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_external_product_mappings', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_integration_connections', 'connection_id', 'pharmacy', 'pharmacy_integration_connections', 'id'],
   ['pharmacy_integration_connections', 'created_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_integration_connections', 'integration_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_integration_connections', 'inventory_authority_concept_id', 'terminology', 'catalog_concepts', 'id'],

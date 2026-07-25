@@ -10,6 +10,9 @@ export const paymentsIndexes1: readonly IndexTuple[] = [
   ['callback_verification_runs', 'ix_callback_verification_runs_provider_callback_event_id', ['provider_callback_event_id'], false, 'btree'],
   ['callback_verification_runs', 'ix_callback_verification_runs_verification_method_concept_id', ['verification_method_concept_id'], false, 'btree'],
   ['callback_verification_runs', 'ix_callback_verification_runs_result_concept_id', ['result_concept_id'], false, 'btree'],
+  ['cash_registers', 'ix_cash_registers_tenant_id', ['tenant_id'], false, 'btree'],
+  ['cash_registers', 'ix_cash_registers_care_space_id', ['care_space_id'], false, 'btree'],
+  ['cash_registers', 'ix_cash_registers_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['cashier_payment_contexts', 'ix_cashier_payment_contexts_tenant_id', ['tenant_id'], false, 'btree'],
   ['cashier_payment_contexts', 'ix_cashier_payment_contexts_payment_checkout_session_id', ['payment_checkout_session_id'], false, 'btree'],
   ['cashier_payment_contexts', 'ix_cashier_payment_contexts_cashier_user_id', ['cashier_user_id'], false, 'btree'],
@@ -184,7 +187,4 @@ export const paymentsIndexes1: readonly IndexTuple[] = [
   ['payment_mandates', 'ix_payment_mandates_mandate_type_concept_id', ['mandate_type_concept_id'], false, 'btree'],
   ['payment_mandates', 'ix_payment_mandates_payment_method_id', ['payment_method_id'], false, 'btree'],
   ['payment_mandates', 'ix_payment_mandates_scheme_concept_id', ['scheme_concept_id'], false, 'btree'],
-  ['payment_mandates', 'ix_payment_mandates_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['payment_mandates', 'ix_payment_mandates_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['payment_mandates', 'ix_payment_mandates_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];

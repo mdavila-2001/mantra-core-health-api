@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `education`.
- * 85 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 88 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const educationForeignKeys: readonly ForeignKeyTuple[] = [
@@ -33,6 +33,7 @@ export const educationForeignKeys: readonly ForeignKeyTuple[] = [
   ['cme_credit_records', 'certificate_id', 'education', 'certificates', 'id'],
   ['cme_credit_records', 'created_by_user_id', 'iam', 'users', 'id'],
   ['cme_credit_records', 'jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['cme_credit_records', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['cme_credit_records', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['cme_credit_records', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['cme_credit_records', 'updated_by_user_id', 'iam', 'users', 'id'],
@@ -69,6 +70,7 @@ export const educationForeignKeys: readonly ForeignKeyTuple[] = [
   ['courses', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['courses', 'tenant_id', 'directory', 'tenants', 'id'],
   ['courses', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['enrollments', 'cohort_id', 'education', 'course_cohorts', 'id'],
   ['enrollments', 'course_id', 'education', 'courses', 'id'],
   ['enrollments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['enrollments', 'enrollment_source_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -78,6 +80,7 @@ export const educationForeignKeys: readonly ForeignKeyTuple[] = [
   ['enrollments', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['instructors', 'created_by_user_id', 'iam', 'users', 'id'],
   ['instructors', 'photo_file_id', 'common', 'files', 'id'],
+  ['instructors', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['instructors', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['instructors', 'tenant_id', 'directory', 'tenants', 'id'],
   ['instructors', 'updated_by_user_id', 'iam', 'users', 'id'],

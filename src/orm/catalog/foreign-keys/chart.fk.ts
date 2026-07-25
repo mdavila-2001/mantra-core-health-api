@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `chart`.
- * 59 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 70 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const chartForeignKeys: readonly ForeignKeyTuple[] = [
@@ -12,6 +12,7 @@ export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   ['care_plan_activities', 'created_by_user_id', 'iam', 'users', 'id'],
   ['care_plan_activities', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_plan_activities', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['care_plans', 'author_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['care_plans', 'condition_id', 'clinical', 'conditions', 'id'],
   ['care_plans', 'created_by_user_id', 'iam', 'users', 'id'],
   ['care_plans', 'encounter_id', 'clinical', 'encounters', 'id'],
@@ -21,10 +22,14 @@ export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   ['care_plans', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['chart_template_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['chart_template_assignments', 'practice_id', 'practice', 'practices', 'id'],
+  ['chart_template_assignments', 'practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['chart_template_assignments', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['chart_template_assignments', 'template_id', 'chart', 'specialty_chart_templates', 'id'],
   ['chart_template_assignments', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['clinical_note_headers', 'confidentiality_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['clinical_note_headers', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['clinical_note_headers', 'current_released_version_id', 'chart', 'clinical_note_versions', 'id'],
+  ['clinical_note_headers', 'current_version_id', 'chart', 'clinical_note_versions', 'id'],
   ['clinical_note_headers', 'encounter_id', 'clinical', 'encounters', 'id'],
   ['clinical_note_headers', 'lifecycle_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['clinical_note_headers', 'note_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -33,10 +38,15 @@ export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   ['clinical_note_headers', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['clinical_note_signatures', 'clinical_note_version_id', 'chart', 'clinical_note_versions', 'id'],
   ['clinical_note_signatures', 'signature_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['clinical_note_signatures', 'signer_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['clinical_note_versions', 'amendment_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['clinical_note_versions', 'author_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['clinical_note_versions', 'clinical_note_id', 'chart', 'clinical_note_headers', 'id'],
   ['clinical_note_versions', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['clinical_note_versions', 'release_eligibility_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['clinical_note_versions', 'signed_by_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['clinical_note_versions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['clinical_note_versions', 'supersedes_version_id', 'chart', 'clinical_note_versions', 'id'],
   ['document_record_files', 'content_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['document_record_files', 'created_by_user_id', 'iam', 'users', 'id'],
   ['document_record_files', 'document_record_id', 'chart', 'document_records', 'id'],
@@ -62,6 +72,7 @@ export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   ['physical_exam_findings', 'created_by_user_id', 'iam', 'users', 'id'],
   ['physical_exam_findings', 'finding_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['specialty_chart_templates', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['specialty_chart_templates', 'section_id', 'forms', 'dynamic_field_sections', 'id'],
   ['specialty_chart_templates', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['specialty_chart_templates', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['specialty_chart_templates', 'tenant_id', 'directory', 'tenants', 'id'],

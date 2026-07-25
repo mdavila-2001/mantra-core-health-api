@@ -2,18 +2,31 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `payments` (parte 2/2).
- * 119 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 138 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const paymentsForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['payment_transactions', 'failure_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payment_transactions', 'gateway_id', 'payments', 'payment_gateways', 'id'],
+  ['payment_transactions', 'journal_transaction_id', 'accounting', 'journal_transactions', 'id'],
+  ['payment_transactions', 'payee_business_partner_id', 'erp', 'business_partners', 'id'],
+  ['payment_transactions', 'payer_business_partner_id', 'erp', 'business_partners', 'id'],
+  ['payment_transactions', 'payment_intent_id', 'payments', 'payment_intents', 'id'],
+  ['payment_transactions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payment_transactions', 'transaction_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payment_transactions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['payment_webhook_events', 'gateway_connection_id', 'payments', 'gateway_connections', 'id'],
+  ['payment_webhook_events', 'gateway_id', 'payments', 'payment_gateways', 'id'],
   ['payment_webhook_events', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['payment_webhook_events', 'related_intent_id', 'payments', 'payment_intents', 'id'],
   ['payout_items', 'created_by_user_id', 'iam', 'users', 'id'],
   ['payout_items', 'payout_id', 'payments', 'payouts', 'id'],
   ['payout_items', 'source_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['payout_items', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['payouts', 'created_by_user_id', 'iam', 'users', 'id'],
   ['payouts', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payouts', 'gateway_id', 'payments', 'payment_gateways', 'id'],
   ['payouts', 'journal_transaction_id', 'accounting', 'journal_transactions', 'id'],
   ['payouts', 'payee_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['payouts', 'practice_id', 'practice', 'practices', 'id'],
@@ -34,6 +47,8 @@ export const paymentsForeignKeys2: readonly ForeignKeyTuple[] = [
   ['provider_callback_endpoints', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['provider_callback_endpoints', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['provider_callback_endpoints', 'verification_method_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['provider_callback_endpoints', 'verification_secret_id', 'system_ops', 'encryption_keys', 'id'],
+  ['provider_callback_events', 'duplicate_of_event_id', 'payments', 'provider_callback_events', 'id'],
   ['provider_callback_events', 'payment_checkout_session_id', 'payments', 'payment_checkout_sessions', 'id'],
   ['provider_callback_events', 'payment_transaction_id', 'payments', 'payment_transactions', 'id'],
   ['provider_callback_events', 'processing_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -62,6 +77,7 @@ export const paymentsForeignKeys2: readonly ForeignKeyTuple[] = [
   ['reconciliation_exceptions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['reconciliation_exceptions', 'wallet_ledger_entry_id', 'payments', 'wallet_ledger_entries', 'id'],
   ['reconciliation_runs', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['reconciliation_runs', 'gateway_id', 'payments', 'payment_gateways', 'id'],
   ['reconciliation_runs', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reconciliation_runs', 'tenant_id', 'directory', 'tenants', 'id'],
   ['reconciliation_runs', 'updated_by_user_id', 'iam', 'users', 'id'],
@@ -82,6 +98,7 @@ export const paymentsForeignKeys2: readonly ForeignKeyTuple[] = [
   ['settlement_lines', 'created_by_user_id', 'iam', 'users', 'id'],
   ['settlement_lines', 'payment_transaction_id', 'payments', 'payment_transactions', 'id'],
   ['settlement_lines', 'refund_id', 'payments', 'refunds', 'id'],
+  ['settlement_lines', 'settlement_id', 'payments', 'gateway_settlements', 'id'],
   ['settlement_lines', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['subscription_plans', 'billing_interval_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['subscription_plans', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -92,7 +109,9 @@ export const paymentsForeignKeys2: readonly ForeignKeyTuple[] = [
   ['subscription_plans', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['subscription_plans', 'usage_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['subscriptions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['subscriptions', 'mandate_id', 'payments', 'payment_mandates', 'id'],
   ['subscriptions', 'payment_method_id', 'payments', 'payment_methods', 'id'],
+  ['subscriptions', 'plan_id', 'payments', 'subscription_plans', 'id'],
   ['subscriptions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['subscriptions', 'subscriber_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['subscriptions', 'tenant_id', 'directory', 'tenants', 'id'],

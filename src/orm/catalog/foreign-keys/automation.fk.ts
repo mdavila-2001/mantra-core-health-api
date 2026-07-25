@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `automation`.
- * 97 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 100 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const automationForeignKeys: readonly ForeignKeyTuple[] = [
@@ -90,12 +90,15 @@ export const automationForeignKeys: readonly ForeignKeyTuple[] = [
   ['workflow_runs', 'created_by_user_id', 'iam', 'users', 'id'],
   ['workflow_runs', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['workflow_runs', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['workflow_runs', 'trigger_id', 'automation', 'automation_triggers', 'id'],
   ['workflow_runs', 'trigger_source_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['workflow_runs', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['workflow_runs', 'workflow_id', 'automation', 'workflows', 'id'],
   ['workflow_steps', 'agent_id', 'automation', 'agents', 'id'],
   ['workflow_steps', 'agent_tool_id', 'automation', 'agent_tools', 'id'],
   ['workflow_steps', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['workflow_steps', 'on_failure_step_id', 'automation', 'workflow_steps', 'id'],
+  ['workflow_steps', 'on_success_step_id', 'automation', 'workflow_steps', 'id'],
   ['workflow_steps', 'step_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['workflow_steps', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['workflow_steps', 'workflow_id', 'automation', 'workflows', 'id'],

@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `qa_lab`.
- * 71 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 79 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const qaLabForeignKeys: readonly ForeignKeyTuple[] = [
@@ -36,8 +36,10 @@ export const qaLabForeignKeys: readonly ForeignKeyTuple[] = [
   ['test_case_results', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['test_cases', 'case_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['test_cases', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['test_cases', 'endpoint_id', 'integrations', 'integration_endpoints', 'id'],
   ['test_cases', 'http_method_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['test_cases', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['test_cases', 'suite_id', 'qa_lab', 'test_suites', 'id'],
   ['test_cases', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['test_defects', 'assigned_to_user_id', 'iam', 'users', 'id'],
   ['test_defects', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -57,18 +59,24 @@ export const qaLabForeignKeys: readonly ForeignKeyTuple[] = [
   ['test_fixtures', 'created_by_user_id', 'iam', 'users', 'id'],
   ['test_fixtures', 'file_id', 'common', 'files', 'id'],
   ['test_fixtures', 'fixture_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['test_fixtures', 'suite_id', 'qa_lab', 'test_suites', 'id'],
   ['test_fixtures', 'test_case_id', 'qa_lab', 'test_cases', 'id'],
   ['test_fixtures', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['test_runs', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['test_runs', 'environment_id', 'qa_lab', 'test_environments', 'id'],
   ['test_runs', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['test_runs', 'suite_id', 'qa_lab', 'test_suites', 'id'],
   ['test_runs', 'tenant_id', 'directory', 'tenants', 'id'],
   ['test_runs', 'trigger_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['test_runs', 'triggered_by_user_id', 'iam', 'users', 'id'],
   ['test_runs', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['test_schedules', 'concurrency_policy_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['test_schedules', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['test_schedules', 'environment_id', 'qa_lab', 'test_environments', 'id'],
+  ['test_schedules', 'last_run_id', 'qa_lab', 'test_runs', 'id'],
   ['test_schedules', 'notify_channel_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['test_schedules', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['test_schedules', 'suite_id', 'qa_lab', 'test_suites', 'id'],
   ['test_schedules', 'tenant_id', 'directory', 'tenants', 'id'],
   ['test_schedules', 'trigger_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['test_schedules', 'updated_by_user_id', 'iam', 'users', 'id'],

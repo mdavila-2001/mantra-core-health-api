@@ -18,6 +18,15 @@ export class SubscriptionPlans {
   @Property({ columnType: 'varchar' })
   name!: string;
 
+  @Property({ fieldName: 'tier_concept_id', type: 'uuid' })
+  tierConceptId!: string;
+
+  @Property({ fieldName: 'is_default', type: 'boolean', nullable: true })
+  isDefault?: boolean;
+
+  @Property({ fieldName: 'is_public', type: 'boolean', nullable: true })
+  isPublic?: boolean;
+
   @Property({ fieldName: 'billing_interval_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   billingIntervalConceptId!: string;
 

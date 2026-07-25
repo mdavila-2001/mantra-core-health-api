@@ -2,11 +2,14 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `procedures_perioperative` (parte 2/2).
- * 66 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 72 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['procedure_complications', 'ix_procedure_complications_procedure_id', ['procedure_id'], false, 'btree'],
+  ['procedure_complications', 'ix_procedure_complications_complication_code_concept_id', ['complication_code_concept_id'], false, 'btree'],
+  ['procedure_complications', 'ix_procedure_complications_severity_concept_id', ['severity_concept_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_relatedness_concept_id', ['relatedness_concept_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_condition_id', ['condition_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
@@ -55,6 +58,9 @@ export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   ['sterility_verification_checks', 'ix_sterility_verification_checks_result_concept_id', ['result_concept_id'], false, 'btree'],
   ['sterility_verification_checks', 'ix_sterility_verification_checks_sterilization_load_id', ['sterilization_load_id'], false, 'btree'],
   ['sterility_verification_checks', 'ix_sterility_verification_checks_instrument_set_id', ['instrument_set_id'], false, 'btree'],
+  ['sterilization_loads', 'ix_sterilization_loads_tenant_id', ['tenant_id'], false, 'btree'],
+  ['sterilization_loads', 'ix_sterilization_loads_method_concept_id', ['method_concept_id'], false, 'btree'],
+  ['sterilization_loads', 'ix_sterilization_loads_result_concept_id', ['result_concept_id'], false, 'btree'],
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_procedure_case_id', ['procedure_case_id'], false, 'btree'],
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_checklist_type_concept_id', ['checklist_type_concept_id'], false, 'btree'],
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_status_concept_id', ['status_concept_id'], false, 'btree'],

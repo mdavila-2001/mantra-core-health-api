@@ -2,11 +2,20 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `audit` (parte 3/3).
- * 142 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 152 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const auditForeignKeys3: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['payment_transactions_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payment_transactions_history', 'payment_transaction_id', 'payments', 'payment_transactions', 'id'],
+  ['payouts_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payouts_history', 'changed_by_user_id', 'iam', 'users', 'id'],
+  ['payouts_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payouts_history', 'payout_id', 'payments', 'payouts', 'id'],
+  ['pharmacy_inventory_access_log', 'action_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_inventory_access_log', 'actor_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_inventory_access_log', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_inventory_access_log', 'pharmacy_id', 'pharmacy', 'pharmacies', 'id'],
   ['pharmacy_inventory_access_log', 'purpose_of_use_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_inventory_access_log', 'target_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -93,6 +102,7 @@ export const auditForeignKeys3: readonly ForeignKeyTuple[] = [
   ['segments_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['segments_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['segments_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['segments_history', 'segments_id', 'accounting', 'segments', 'id'],
   ['service_reviews_history', 'change_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_reviews_history', 'changed_by_user_id', 'iam', 'users', 'id'],
   ['service_reviews_history', 'operation_concept_id', 'terminology', 'catalog_concepts', 'id'],

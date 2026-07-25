@@ -7,6 +7,11 @@ import type { ForeignKeyTuple } from '../catalog.types';
  */
 export const erpForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['contracts', 'governing_jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['contracts', 'master_agreement_id', 'crm', 'partnership_agreements', 'id'],
+  ['contracts', 'owner_user_id', 'iam', 'users', 'id'],
+  ['contracts', 'owning_cost_center_id', 'accounting', 'cost_centers', 'id'],
+  ['contracts', 'owning_department_id', 'erp', 'departments', 'id'],
   ['contracts', 'owning_profit_center_id', 'accounting', 'profit_centers', 'id'],
   ['contracts', 'parent_contract_id', 'erp', 'contracts', 'id'],
   ['contracts', 'primary_business_partner_id', 'erp', 'business_partners', 'id'],
@@ -122,6 +127,7 @@ export const erpForeignKeys2: readonly ForeignKeyTuple[] = [
   ['lease_valuations', 'accounting_principle_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['lease_valuations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['lease_valuations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['lease_valuations', 'journal_transaction_id', 'accounting', 'journal_transactions', 'id'],
   ['lease_valuations', 'lease_contract_id', 'erp', 'lease_contracts', 'id'],
   ['lease_valuations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['performance_reviews', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -181,10 +187,4 @@ export const erpForeignKeys2: readonly ForeignKeyTuple[] = [
   ['purchase_requisition_items', 'cost_center_id', 'accounting', 'cost_centers', 'id'],
   ['purchase_requisition_items', 'created_by_user_id', 'iam', 'users', 'id'],
   ['purchase_requisition_items', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['purchase_requisition_items', 'item_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['purchase_requisition_items', 'profit_center_id', 'accounting', 'profit_centers', 'id'],
-  ['purchase_requisition_items', 'project_id', 'erp', 'projects', 'id'],
-  ['purchase_requisition_items', 'purchase_requisition_id', 'erp', 'purchase_requisitions', 'id'],
-  ['purchase_requisition_items', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['purchase_requisition_items', 'unit_concept_id', 'terminology', 'catalog_concepts', 'id'],
 ];

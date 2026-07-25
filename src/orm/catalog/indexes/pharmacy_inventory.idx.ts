@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `pharmacy_inventory`.
- * 140 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 144 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const pharmacyInventoryIndexes: readonly IndexTuple[] = [
@@ -147,4 +147,8 @@ export const pharmacyInventoryIndexes: readonly IndexTuple[] = [
   ['pharmacy_suppliers', 'ix_pharmacy_suppliers_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['pharmacy_suppliers', 'ix_pharmacy_suppliers_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['pharmacy_suppliers', 'ix_pharmacy_suppliers_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['purchase_quotations', 'ix_purchase_quotations_tenant_id', ['tenant_id'], false, 'btree'],
+  ['purchase_quotations', 'ix_purchase_quotations_pharmacy_site_id', ['pharmacy_site_id'], false, 'btree'],
+  ['purchase_quotations', 'ix_purchase_quotations_supplier_partner_id', ['supplier_partner_id'], false, 'btree'],
+  ['purchase_quotations', 'ix_purchase_quotations_status_concept_id', ['status_concept_id'], false, 'btree'],
 ];

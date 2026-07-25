@@ -2,11 +2,17 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `erp` (parte 3/3).
- * 63 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 69 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const erpForeignKeys3: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['purchase_requisition_items', 'item_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['purchase_requisition_items', 'profit_center_id', 'accounting', 'profit_centers', 'id'],
+  ['purchase_requisition_items', 'project_id', 'erp', 'projects', 'id'],
+  ['purchase_requisition_items', 'purchase_requisition_id', 'erp', 'purchase_requisitions', 'id'],
+  ['purchase_requisition_items', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['purchase_requisition_items', 'unit_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['purchase_requisition_items', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['purchase_requisition_items', 'wbs_element_id', 'erp', 'wbs_elements', 'id'],
   ['purchase_requisitions', 'approval_status_concept_id', 'terminology', 'catalog_concepts', 'id'],

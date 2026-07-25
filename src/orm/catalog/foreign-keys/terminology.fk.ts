@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `terminology`.
- * 67 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 69 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
@@ -15,6 +15,7 @@ export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
   ['catalog_import_batches', 'code_system_version_id', 'terminology', 'code_system_versions', 'id'],
   ['catalog_import_batches', 'file_id', 'common', 'files', 'id'],
   ['catalog_import_batches', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['catalog_import_batches', 'source_id', 'terminology', 'terminology_sources', 'id'],
   ['catalog_import_batches', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['code_system_versions', 'code_system_id', 'terminology', 'code_systems', 'id'],
   ['code_system_versions', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -22,6 +23,7 @@ export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
   ['code_system_versions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['code_systems', 'content_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['code_systems', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['code_systems', 'source_id', 'terminology', 'terminology_sources', 'id'],
   ['code_systems', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['code_systems', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['concept_designations', 'concept_id', 'terminology', 'catalog_concepts', 'id'],

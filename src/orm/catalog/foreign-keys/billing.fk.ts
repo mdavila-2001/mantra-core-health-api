@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `billing`.
- * 130 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 137 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -31,6 +31,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['bills', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['bills', 'supplier_business_partner_id', 'erp', 'business_partners', 'id'],
   ['bills', 'supplier_subledger_account_id', 'accounting', 'subledger_accounts', 'id'],
+  ['bills', 'transaction_id', 'accounting', 'journal_transactions', 'id'],
   ['bills', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['bills', 'vendor_id', 'billing', 'vendors', 'id'],
   ['budget_lines', 'account_id', 'accounting', 'accounts', 'id'],
@@ -76,6 +77,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['invoices', 'practice_id', 'practice', 'practices', 'id'],
   ['invoices', 'sales_order_id', 'erp', 'sales_orders', 'id'],
   ['invoices', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['invoices', 'transaction_id', 'accounting', 'journal_transactions', 'id'],
   ['invoices', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['patient_statements', 'created_by_user_id', 'iam', 'users', 'id'],
   ['patient_statements', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
@@ -86,6 +88,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['payable_payment_allocations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['payable_payment_allocations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['payable_payment_allocations', 'open_item_id', 'accounting', 'open_items', 'id'],
+  ['payable_payment_allocations', 'payment_made_id', 'billing', 'payments_made', 'id'],
   ['payments_made', 'bill_id', 'billing', 'bills', 'id'],
   ['payments_made', 'clearing_document_id', 'accounting', 'clearing_documents', 'id'],
   ['payments_made', 'company_bank_account_id', 'accounting', 'company_bank_accounts', 'id'],
@@ -94,6 +97,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['payments_made', 'payment_transaction_id', 'payments', 'payment_transactions', 'id'],
   ['payments_made', 'practice_id', 'practice', 'practices', 'id'],
   ['payments_made', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payments_made', 'transaction_id', 'payments', 'payment_transactions', 'id'],
   ['payments_made', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['payments_made', 'vendor_id', 'billing', 'vendors', 'id'],
   ['payments_received', 'clearing_document_id', 'accounting', 'clearing_documents', 'id'],
@@ -105,14 +109,17 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['payments_received', 'payment_transaction_id', 'payments', 'payment_transactions', 'id'],
   ['payments_received', 'practice_id', 'practice', 'practices', 'id'],
   ['payments_received', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payments_received', 'transaction_id', 'payments', 'payment_transactions', 'id'],
   ['payments_received', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['receivable_payment_allocations', 'clearing_item_id', 'accounting', 'clearing_items', 'id'],
   ['receivable_payment_allocations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['receivable_payment_allocations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['receivable_payment_allocations', 'invoice_id', 'billing', 'invoices', 'id'],
   ['receivable_payment_allocations', 'open_item_id', 'accounting', 'open_items', 'id'],
+  ['receivable_payment_allocations', 'payment_received_id', 'billing', 'payments_received', 'id'],
   ['reimbursements', 'created_by_user_id', 'iam', 'users', 'id'],
   ['reimbursements', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['reimbursements', 'transaction_id', 'accounting', 'journal_transactions', 'id'],
   ['reimbursements', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['service_catalog', 'created_by_user_id', 'iam', 'users', 'id'],
   ['service_catalog', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],

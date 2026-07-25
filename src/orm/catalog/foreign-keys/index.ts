@@ -16,7 +16,8 @@ import { clinicalForeignKeys1 } from './clinical.1.fk';
 import { clinicalForeignKeys2 } from './clinical.2.fk';
 import { clinicalExtForeignKeys } from './clinical_ext.fk';
 import { commonForeignKeys } from './common.fk';
-import { communityForeignKeys } from './community.fk';
+import { communityForeignKeys1 } from './community.1.fk';
+import { communityForeignKeys2 } from './community.2.fk';
 import { consentForeignKeys } from './consent.fk';
 import { crmForeignKeys1 } from './crm.1.fk';
 import { crmForeignKeys2 } from './crm.2.fk';
@@ -81,7 +82,7 @@ export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly Forei
   clinical: [clinicalForeignKeys1, clinicalForeignKeys2],
   clinical_ext: [clinicalExtForeignKeys],
   common: [commonForeignKeys],
-  community: [communityForeignKeys],
+  community: [communityForeignKeys1, communityForeignKeys2],
   consent: [consentForeignKeys],
   crm: [crmForeignKeys1, crmForeignKeys2],
   delegated_access: [delegatedAccessForeignKeys],

@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `iam`.
- * 41 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 42 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const iamForeignKeys: readonly ForeignKeyTuple[] = [
@@ -23,6 +23,7 @@ export const iamForeignKeys: readonly ForeignKeyTuple[] = [
   ['mfa_factors', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['mfa_factors', 'user_id', 'iam', 'users', 'id'],
   ['refresh_tokens', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['refresh_tokens', 'replaced_by_id', 'iam', 'refresh_tokens', 'id'],
   ['refresh_tokens', 'session_id', 'iam', 'sessions', 'id'],
   ['refresh_tokens', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['refresh_tokens', 'updated_by_user_id', 'iam', 'users', 'id'],

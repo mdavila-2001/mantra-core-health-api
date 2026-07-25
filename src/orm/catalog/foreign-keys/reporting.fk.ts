@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `reporting`.
- * 65 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 70 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const reportingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -30,15 +30,18 @@ export const reportingForeignKeys: readonly ForeignKeyTuple[] = [
   ['report_data_sources', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['report_definitions', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['report_definitions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['report_definitions', 'data_source_id', 'reporting', 'report_data_sources', 'id'],
   ['report_definitions', 'default_output_format_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['report_definitions', 'required_permission_id', 'authz', 'permissions', 'id'],
   ['report_definitions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['report_definitions', 'tenant_id', 'directory', 'tenants', 'id'],
   ['report_definitions', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['report_distributions', 'channel_id', 'messaging', 'message_channels', 'id'],
   ['report_distributions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['report_distributions', 'recipient_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['report_distributions', 'recipient_user_id', 'iam', 'users', 'id'],
   ['report_distributions', 'report_execution_id', 'reporting', 'report_executions', 'id'],
+  ['report_distributions', 'schedule_id', 'reporting', 'report_schedules', 'id'],
   ['report_distributions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['report_distributions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['report_executions', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -47,6 +50,7 @@ export const reportingForeignKeys: readonly ForeignKeyTuple[] = [
   ['report_executions', 'report_definition_id', 'reporting', 'report_definitions', 'id'],
   ['report_executions', 'report_version_id', 'reporting', 'report_versions', 'id'],
   ['report_executions', 'requested_by_user_id', 'iam', 'users', 'id'],
+  ['report_executions', 'schedule_id', 'reporting', 'report_schedules', 'id'],
   ['report_executions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['report_executions', 'tenant_id', 'directory', 'tenants', 'id'],
   ['report_executions', 'trigger_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -64,6 +68,7 @@ export const reportingForeignKeys: readonly ForeignKeyTuple[] = [
   ['report_snapshots', 'created_by_user_id', 'iam', 'users', 'id'],
   ['report_snapshots', 'report_execution_id', 'reporting', 'report_executions', 'id'],
   ['report_snapshots', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['report_subscriptions', 'channel_id', 'messaging', 'message_channels', 'id'],
   ['report_subscriptions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['report_subscriptions', 'report_schedule_id', 'reporting', 'report_schedules', 'id'],
   ['report_subscriptions', 'subscriber_user_id', 'iam', 'users', 'id'],
