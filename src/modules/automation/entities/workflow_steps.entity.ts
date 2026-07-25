@@ -21,10 +21,10 @@ export class WorkflowSteps {
   @Property({ fieldName: 'agent_tool_id', type: 'uuid', nullable: true }) // FK → automation.agent_tools
   agentToolId?: string;
 
-  @Property({ fieldName: 'on_success_step_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'on_success_step_id', type: 'uuid', nullable: true }) // FK → automation.workflow_steps
   onSuccessStepId?: string;
 
-  @Property({ fieldName: 'on_failure_step_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'on_failure_step_id', type: 'uuid', nullable: true }) // FK → automation.workflow_steps
   onFailureStepId?: string;
 
   @Property({

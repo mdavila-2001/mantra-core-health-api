@@ -36,7 +36,7 @@ export class ProcedureCaseMilestones {
     fieldName: 'recorded_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   recordedByProfileId?: string;
 
   @Property({ columnType: 'text', nullable: true })

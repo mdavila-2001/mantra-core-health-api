@@ -12,7 +12,7 @@ export class CampaignDispatches {
   @Property({ fieldName: 'campaign_id', type: 'uuid' }) // FK → ads.campaigns
   campaignId!: string;
 
-  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK → marketing.campaign_schedules
   scheduleId?: string;
 
   @Property({ fieldName: 'journey_id', type: 'uuid', nullable: true }) // FK → marketing.journeys

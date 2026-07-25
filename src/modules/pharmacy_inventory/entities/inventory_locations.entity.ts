@@ -9,7 +9,7 @@ export class InventoryLocations {
   @Property({ fieldName: 'pharmacy_site_id', type: 'uuid' }) // FK → pharmacy.pharmacy_sites
   pharmacySiteId!: string;
 
-  @Property({ fieldName: 'parent_location_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_location_id', type: 'uuid', nullable: true }) // FK → pharmacy_inventory.inventory_locations
   parentLocationId?: string;
 
   @Property({ columnType: 'varchar' })

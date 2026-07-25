@@ -25,7 +25,7 @@ export class OmopMappingRules {
     fieldName: 'vocabulary_mapping_set_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → health_data.omop_mapping_sets
   vocabularyMappingSetId?: string;
 
   @Property({ type: 'boolean', nullable: true })

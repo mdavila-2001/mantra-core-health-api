@@ -29,7 +29,7 @@ export class Consents {
     fieldName: 'processing_legal_basis_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → consent.processing_legal_bases
   processingLegalBasisId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

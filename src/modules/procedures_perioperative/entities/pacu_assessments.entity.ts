@@ -12,7 +12,7 @@ export class PacuAssessments {
   @Property({ fieldName: 'assessed_at', columnType: 'timestamptz' })
   assessedAt!: Date;
 
-  @Property({ fieldName: 'assessed_by_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'assessed_by_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   assessedByProfileId!: string;
 
   @Property({ fieldName: 'aldrete_score', columnType: 'int', nullable: true })

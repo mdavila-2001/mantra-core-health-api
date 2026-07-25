@@ -12,7 +12,7 @@ export class FormInstances {
   @Property({ fieldName: 'resource_id', type: 'uuid' })
   resourceId!: string;
 
-  @Property({ fieldName: 'tenant_context_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'tenant_context_id', type: 'uuid', nullable: true }) // FK → system_context.system_contexts
   tenantContextId?: string;
 
   @Property({ fieldName: 'schema_version', columnType: 'int' })

@@ -35,7 +35,7 @@ export class MedicationRequests {
     fieldName: 'prescriber_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   prescriberProfileId?: string;
 
   @Property({ fieldName: 'dose_text', columnType: 'varchar', nullable: true })

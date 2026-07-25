@@ -18,7 +18,7 @@ export class CashierPaymentContexts {
   @Property({ fieldName: 'cash_register_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   cashRegisterId?: string;
 
-  @Property({ fieldName: 'site_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'site_id', type: 'uuid', nullable: true }) // FK → practice.practice_sites
   siteId?: string;
 
   @Property({

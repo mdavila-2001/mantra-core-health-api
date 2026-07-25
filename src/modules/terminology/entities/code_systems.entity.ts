@@ -6,7 +6,7 @@ export class CodeSystems {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'source_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_id', type: 'uuid' }) // FK → terminology.terminology_sources
   sourceId!: string;
 
   @Property({ fieldName: 'internal_code', columnType: 'varchar' })

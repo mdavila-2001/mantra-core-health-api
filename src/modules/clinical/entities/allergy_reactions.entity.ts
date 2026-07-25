@@ -6,7 +6,7 @@ export class AllergyReactions {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'allergy_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'allergy_id', type: 'uuid' }) // FK → clinical.allergy_intolerances
   allergyId!: string;
 
   @Property({ fieldName: 'manifestation_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

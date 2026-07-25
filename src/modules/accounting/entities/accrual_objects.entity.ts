@@ -15,7 +15,7 @@ export class AccrualObjects {
   @Property({ fieldName: 'accrual_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   accrualTypeConceptId!: string;
 
-  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
   @Property({ fieldName: 'business_partner_id', type: 'uuid', nullable: true }) // FK → erp.business_partners

@@ -12,7 +12,7 @@ export class MedicationRecords {
   @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
   patientProfileId!: string;
 
-  @Property({ fieldName: 'request_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'request_id', type: 'uuid', nullable: true }) // FK → clinical.medication_requests
   requestId?: string;
 
   @Property({ fieldName: 'medication_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

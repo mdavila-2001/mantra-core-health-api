@@ -26,7 +26,7 @@ export class MarketingSegments {
   })
   definitionJson?: unknown;
 
-  @Property({ fieldName: 'source_read_model_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_read_model_id', type: 'uuid', nullable: true }) // FK → read_models.read_model_definitions
   sourceReadModelId?: string;
 
   @Property({ fieldName: 'estimated_size', type: 'bigint', nullable: true })

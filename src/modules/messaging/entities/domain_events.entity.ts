@@ -35,7 +35,7 @@ export class DomainEvents {
   @Property({ fieldName: 'correlation_id', columnType: 'varchar' })
   correlationId!: string;
 
-  @Property({ fieldName: 'causation_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'causation_id', type: 'uuid', nullable: true }) // FK → messaging.domain_events
   causationId?: string;
 
   @Property({

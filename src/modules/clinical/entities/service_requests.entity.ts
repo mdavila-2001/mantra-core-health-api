@@ -30,7 +30,7 @@ export class ServiceRequests {
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
-  @Property({ fieldName: 'requester_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'requester_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   requesterProfileId?: string;
 
   @Property({ fieldName: 'performer_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

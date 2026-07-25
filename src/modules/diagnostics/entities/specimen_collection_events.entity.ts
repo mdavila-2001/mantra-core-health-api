@@ -15,10 +15,10 @@ export class SpecimenCollectionEvents {
   @Property({ fieldName: 'event_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   eventTypeConceptId!: string;
 
-  @Property({ fieldName: 'collector_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'collector_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   collectorProfileId?: string;
 
-  @Property({ fieldName: 'collection_site_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'collection_site_id', type: 'uuid', nullable: true }) // FK → practice.practice_sites
   collectionSiteId?: string;
 
   @Property({ fieldName: 'body_site_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts

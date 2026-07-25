@@ -6,7 +6,7 @@ export class BookableSlots {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'resource_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'resource_id', type: 'uuid' }) // FK → scheduling.schedulable_resources
   resourceId!: string;
 
   @Property({ fieldName: 'schedule_template_id', type: 'uuid', nullable: true }) // FK → scheduling.schedule_templates

@@ -6,7 +6,7 @@ export class ProviderConnections {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK → integrations.external_providers
   providerId!: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
@@ -27,7 +27,7 @@ export class ProviderConnections {
   })
   configJson?: unknown;
 
-  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK → integrations.provider_credentials
   credentialId?: string;
 
   @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

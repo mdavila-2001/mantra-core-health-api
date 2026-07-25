@@ -6,7 +6,7 @@ export class ContractsHistory {
   @PrimaryKey({ fieldName: 'history_id', type: 'uuid' })
   historyId: string = randomUUID();
 
-  @Property({ fieldName: 'contract_id', type: 'uuid' }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid' }) // FK → erp.contracts
   contractId!: string;
 
   @Property({ fieldName: 'revision_no', columnType: 'int' })

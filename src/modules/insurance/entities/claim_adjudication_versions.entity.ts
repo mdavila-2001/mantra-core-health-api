@@ -47,7 +47,7 @@ export class ClaimAdjudicationVersions {
     fieldName: 'supersedes_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → insurance.claim_adjudication_versions
   supersedesVersionId?: string;
 
   @Property({ fieldName: 'adjudicated_at', columnType: 'timestamptz' })

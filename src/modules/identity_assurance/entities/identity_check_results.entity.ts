@@ -33,7 +33,7 @@ export class IdentityCheckResults {
   })
   sourceResponseHash?: string;
 
-  @Property({ fieldName: 'supersedes_result_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'supersedes_result_id', type: 'uuid', nullable: true }) // FK → identity_assurance.identity_check_results
   supersedesResultId?: string;
 
   @Property({ fieldName: 'checked_at', columnType: 'timestamptz' })

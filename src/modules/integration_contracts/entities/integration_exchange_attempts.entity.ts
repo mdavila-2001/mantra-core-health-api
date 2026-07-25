@@ -15,7 +15,7 @@ export class IntegrationExchangeAttempts {
   @Property({ fieldName: 'attempt_number', columnType: 'int' })
   attemptNumber!: number;
 
-  @Property({ fieldName: 'endpoint_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'endpoint_id', type: 'uuid', nullable: true }) // FK → integrations.integration_endpoints
   endpointId?: string;
 
   @Property({

@@ -9,10 +9,10 @@ export class ContractAmendments {
   @Property({ fieldName: 'contract_id', type: 'uuid' }) // FK → erp.contracts
   contractId!: string;
 
-  @Property({ fieldName: 'base_version_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'base_version_id', type: 'uuid' }) // FK → erp.contract_versions
   baseVersionId!: string;
 
-  @Property({ fieldName: 'resulting_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'resulting_version_id', type: 'uuid', nullable: true }) // FK → erp.contract_versions
   resultingVersionId?: string;
 
   @Property({ fieldName: 'amendment_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

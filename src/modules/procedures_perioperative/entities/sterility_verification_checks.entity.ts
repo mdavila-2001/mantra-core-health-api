@@ -18,7 +18,7 @@ export class SterilityVerificationChecks {
   @Property({ fieldName: 'checked_at', columnType: 'timestamptz' })
   checkedAt!: Date;
 
-  @Property({ fieldName: 'checked_by_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'checked_by_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   checkedByProfileId!: string;
 
   @Property({ fieldName: 'result_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

@@ -6,7 +6,7 @@ export class CampaignDispatchRecipients {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'dispatch_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'dispatch_id', type: 'uuid' }) // FK → marketing.campaign_dispatches
   dispatchId!: string;
 
   @Property({ fieldName: 'member_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -19,13 +19,13 @@ export class CampaignDispatchRecipients {
     fieldName: 'recipient_endpoint_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → crm.contact_channel_endpoints
   recipientEndpointId?: string;
 
   @Property({ fieldName: 'recipient_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   recipientUserId?: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'language_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
@@ -79,7 +79,7 @@ export class CampaignDispatchRecipients {
   }) // FK → messaging.notification_requests
   notificationRequestId?: string;
 
-  @Property({ fieldName: 'current_delivery_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_delivery_id', type: 'uuid', nullable: true }) // FK → messaging.notification_deliveries
   currentDeliveryId?: string;
 
   @Property({ fieldName: 'current_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

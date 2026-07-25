@@ -12,7 +12,7 @@ export class Artifacts {
   @Property({ fieldName: 'service_component_id', type: 'uuid', nullable: true }) // FK → platform_ops.service_components
   serviceComponentId?: string;
 
-  @Property({ fieldName: 'produced_by_tool_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'produced_by_tool_id', type: 'uuid', nullable: true }) // FK → platform_ops.tool_registry
   producedByToolId?: string;
 
   @Property({ fieldName: 'artifact_ref', columnType: 'varchar' })

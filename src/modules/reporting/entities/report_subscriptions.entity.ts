@@ -12,7 +12,7 @@ export class ReportSubscriptions {
   @Property({ fieldName: 'subscriber_user_id', type: 'uuid' }) // FK → iam.users
   subscriberUserId!: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'is_active', type: 'boolean' })

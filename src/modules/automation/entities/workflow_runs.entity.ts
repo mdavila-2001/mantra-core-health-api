@@ -9,7 +9,7 @@ export class WorkflowRuns {
   @Property({ fieldName: 'workflow_id', type: 'uuid' }) // FK → automation.workflows
   workflowId!: string;
 
-  @Property({ fieldName: 'trigger_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'trigger_id', type: 'uuid', nullable: true }) // FK → automation.automation_triggers
   triggerId?: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

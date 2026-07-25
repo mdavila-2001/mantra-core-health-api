@@ -6,6 +6,7 @@ export * from './bookable_slots.entity';
 export * from './booking_cancellations.entity';
 export * from './booking_policies.entity';
 export * from './booking_reschedules.entity';
+export * from './calendar_absences.entity';
 export * from './practitioner_schedules.entity';
 export * from './schedulable_resources.entity';
 export * from './schedule_rules.entity';

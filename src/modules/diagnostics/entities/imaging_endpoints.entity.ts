@@ -15,7 +15,7 @@ export class ImagingEndpoints {
   @Property({ fieldName: 'base_uri', columnType: 'text' })
   baseUri!: string;
 
-  @Property({ fieldName: 'connection_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'connection_id', type: 'uuid', nullable: true }) // FK → integrations.provider_connections
   connectionId?: string;
 
   @Property({

@@ -9,7 +9,7 @@ export class Shipments {
   @Property({ fieldName: 'trackable_subject_id', type: 'uuid' }) // FK → tracking.trackable_subjects
   trackableSubjectId!: string;
 
-  @Property({ fieldName: 'carrier_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'carrier_id', type: 'uuid', nullable: true }) // FK → tracking.tracking_carriers
   carrierId?: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

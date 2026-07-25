@@ -6,10 +6,10 @@ export class ContentHashtags {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'hashtag_id', type: 'uuid' }) // FK → community.hashtags
+  @Property({ fieldName: 'hashtag_id', type: 'uuid' })  // FK → community.hashtags
   hashtagId!: string;
 
-  @Property({ fieldName: 'content_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'content_type_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
   contentTypeConceptId!: string;
 
   @Property({ fieldName: 'content_ref_id', type: 'uuid' })
@@ -21,12 +21,13 @@ export class ContentHashtags {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
 }

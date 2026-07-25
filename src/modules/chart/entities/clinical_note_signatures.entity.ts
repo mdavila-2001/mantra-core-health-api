@@ -9,7 +9,7 @@ export class ClinicalNoteSignatures {
   @Property({ fieldName: 'clinical_note_version_id', type: 'uuid' }) // FK → chart.clinical_note_versions
   clinicalNoteVersionId!: string;
 
-  @Property({ fieldName: 'signer_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'signer_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   signerProfileId!: string;
 
   @Property({ fieldName: 'signature_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

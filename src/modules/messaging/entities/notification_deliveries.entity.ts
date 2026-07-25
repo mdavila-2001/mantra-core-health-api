@@ -9,10 +9,10 @@ export class NotificationDeliveries {
   @Property({ fieldName: 'notification_request_id', type: 'uuid' }) // FK → messaging.notification_requests
   notificationRequestId!: string;
 
-  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK → messaging.messaging_providers
   providerId!: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'attempt_number', columnType: 'int' })
@@ -150,7 +150,7 @@ export class NotificationDeliveries {
   })
   lastEventAt?: Date;
 
-  @Property({ fieldName: 'last_event_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'last_event_id', type: 'uuid', nullable: true }) // FK → messaging.delivery_tracking_events
   lastEventId?: string;
 
   @Property({

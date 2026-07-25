@@ -12,7 +12,7 @@ export class CareSpaces {
   @Property({ fieldName: 'clinical_unit_id', type: 'uuid', nullable: true }) // FK → practice.clinical_units
   clinicalUnitId?: string;
 
-  @Property({ fieldName: 'parent_space_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces
   parentSpaceId?: string;
 
   @Property({ columnType: 'varchar' })

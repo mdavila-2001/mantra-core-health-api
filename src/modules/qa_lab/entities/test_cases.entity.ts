@@ -6,7 +6,7 @@ export class TestCases {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'suite_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'suite_id', type: 'uuid' }) // FK → qa_lab.test_suites
   suiteId!: string;
 
   @Property({ columnType: 'varchar' })
@@ -18,7 +18,7 @@ export class TestCases {
   @Property({ fieldName: 'case_type_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   caseTypeConceptId?: string;
 
-  @Property({ fieldName: 'endpoint_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'endpoint_id', type: 'uuid', nullable: true }) // FK → integrations.integration_endpoints
   endpointId?: string;
 
   @Property({

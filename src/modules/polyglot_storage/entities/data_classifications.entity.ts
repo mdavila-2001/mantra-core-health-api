@@ -24,10 +24,10 @@ export class PolyglotStorageDataClassifications {
   @Property({ fieldName: 'contains_financial_data', type: 'boolean' })
   containsFinancialData!: boolean;
 
-  @Property({ fieldName: 'default_encryption_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'default_encryption_profile_id', type: 'uuid' }) // FK → polyglot_storage.encryption_profiles
   defaultEncryptionProfileId!: string;
 
-  @Property({ fieldName: 'default_retention_policy_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'default_retention_policy_id', type: 'uuid' }) // FK → polyglot_storage.retention_policies
   defaultRetentionPolicyId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

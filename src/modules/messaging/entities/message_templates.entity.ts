@@ -12,7 +12,7 @@ export class MessageTemplates {
   @Property({ columnType: 'varchar' })
   code!: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'language_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts

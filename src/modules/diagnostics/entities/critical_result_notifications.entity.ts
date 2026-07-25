@@ -28,13 +28,13 @@ export class CriticalResultNotifications {
     fieldName: 'detected_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   detectedByProfileId?: string;
 
   @Property({ fieldName: 'notification_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   notificationStatusConceptId!: string;
 
-  @Property({ fieldName: 'notified_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'notified_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   notifiedProfileId?: string;
 
   @Property({
@@ -48,7 +48,7 @@ export class CriticalResultNotifications {
     fieldName: 'acknowledged_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   acknowledgedByProfileId?: string;
 
   @Property({
@@ -72,7 +72,7 @@ export class CriticalResultNotifications {
     fieldName: 'communication_evidence_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → messaging.notification_deliveries
   communicationEvidenceId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

@@ -29,10 +29,10 @@ export class SessionJourneys {
   })
   endedAt?: Date;
 
-  @Property({ fieldName: 'entry_event_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'entry_event_id', type: 'uuid', nullable: true }) // FK → telemetry.user_activity_events
   entryEventId?: string;
 
-  @Property({ fieldName: 'exit_event_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'exit_event_id', type: 'uuid', nullable: true }) // FK → telemetry.user_activity_events
   exitEventId?: string;
 
   @Property({ fieldName: 'event_count', columnType: 'int', nullable: true })

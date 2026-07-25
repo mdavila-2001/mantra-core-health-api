@@ -12,7 +12,7 @@ export class PatientIdentityMembers {
   @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
   patientProfileId!: string;
 
-  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK → health_data.health_source_systems
   sourceSystemId?: string;
 
   @Property({

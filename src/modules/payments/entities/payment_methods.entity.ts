@@ -15,7 +15,7 @@ export class PaymentMethods {
   @Property({ fieldName: 'owner_ref_id', type: 'uuid' })
   ownerRefId!: string;
 
-  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK → payments.payment_gateways
   gatewayId!: string;
 
   @Property({ fieldName: 'method_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

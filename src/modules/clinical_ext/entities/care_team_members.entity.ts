@@ -13,7 +13,7 @@ export class CareTeamMembers {
     fieldName: 'practitioner_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   practitionerProfileId?: string;
 
   @Property({ fieldName: 'related_person_id', type: 'uuid', nullable: true }) // FK → profiles.related_persons

@@ -6,7 +6,7 @@ export class CmeCreditRecords {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   practitionerProfileId!: string;
 
   @Property({ fieldName: 'certificate_id', type: 'uuid', nullable: true }) // FK → education.certificates

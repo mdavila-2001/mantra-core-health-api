@@ -12,7 +12,7 @@ export class Ads {
   @Property({ columnType: 'varchar' })
   name!: string;
 
-  @Property({ fieldName: 'creative_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'creative_id', type: 'uuid' }) // FK → ads.ad_creatives
   creativeId!: string;
 
   @Property({

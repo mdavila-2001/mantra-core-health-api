@@ -18,7 +18,7 @@ export class PatientPortalProxies {
   @Property({ fieldName: 'scope_value_set_id', type: 'uuid' }) // FK → terminology.value_sets
   scopeValueSetId!: string;
 
-  @Property({ fieldName: 'legal_basis_record_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'legal_basis_record_id', type: 'uuid' }) // FK → consent.processing_legal_bases
   legalBasisRecordId!: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

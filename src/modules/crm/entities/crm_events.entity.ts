@@ -41,10 +41,10 @@ export class CrmEvents {
   @Property({ fieldName: 'organizer_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   organizerUserId?: string;
 
-  @Property({ fieldName: 'recurrence_rule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'recurrence_rule_id', type: 'uuid', nullable: true }) // FK → crm.crm_recurrence_rules
   recurrenceRuleId?: string;
 
-  @Property({ fieldName: 'parent_event_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_event_id', type: 'uuid', nullable: true }) // FK → crm.crm_events
   parentEventId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

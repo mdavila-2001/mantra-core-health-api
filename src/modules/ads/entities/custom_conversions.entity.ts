@@ -9,7 +9,7 @@ export class CustomConversions {
   @Property({ fieldName: 'ad_account_id', type: 'uuid' }) // FK → ads.ad_accounts
   adAccountId!: string;
 
-  @Property({ fieldName: 'pixel_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'pixel_id', type: 'uuid', nullable: true }) // FK → ads.tracking_pixels
   pixelId?: string;
 
   @Property({ columnType: 'varchar' })

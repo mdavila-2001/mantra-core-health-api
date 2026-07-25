@@ -48,7 +48,7 @@ export class PaymentsReceived {
   }) // FK → accounting.company_bank_accounts
   companyBankAccountId?: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK → payments.payment_transactions
   transactionId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

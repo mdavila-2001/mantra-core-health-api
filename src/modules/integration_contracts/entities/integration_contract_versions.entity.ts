@@ -32,7 +32,7 @@ export class IntegrationContractVersions {
   @Property({ fieldName: 'openapi_file_id', type: 'uuid', nullable: true }) // FK → common.files
   openapiFileId?: string;
 
-  @Property({ fieldName: 'mapping_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'mapping_profile_id', type: 'uuid', nullable: true }) // FK → integration_contracts.integration_auth_profiles
   mappingProfileId?: string;
 
   @Property({

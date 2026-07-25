@@ -15,7 +15,7 @@ export class BillingDocumentLinks {
   @Property({ fieldName: 'bill_id', type: 'uuid', nullable: true }) // FK → billing.bills
   billId?: string;
 
-  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
   @Property({ fieldName: 'sales_order_id', type: 'uuid', nullable: true }) // FK → erp.sales_orders

@@ -18,7 +18,7 @@ export class Payouts {
   @Property({ fieldName: 'payee_ref_id', type: 'uuid' })
   payeeRefId!: string;
 
-  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK → payments.payment_gateways
   gatewayId!: string;
 
   @Property({ columnType: 'numeric' })

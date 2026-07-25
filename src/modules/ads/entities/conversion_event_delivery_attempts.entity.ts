@@ -9,7 +9,7 @@ export class ConversionEventDeliveryAttempts {
   @Property({ fieldName: 'server_conversion_event_id', type: 'uuid' }) // FK → ads.server_conversion_events
   serverConversionEventId!: string;
 
-  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK → ads.ad_platform_connections
   platformConnectionId!: string;
 
   @Property({ fieldName: 'attempt_number', columnType: 'int' })

@@ -9,7 +9,7 @@ export class PartnerRelationships {
   @Property({ fieldName: 'business_manager_id', type: 'uuid' }) // FK → ads.business_managers
   businessManagerId!: string;
 
-  @Property({ fieldName: 'partner_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'partner_id', type: 'uuid' }) // FK → ads.ad_partners
   partnerId!: string;
 
   @Property({ fieldName: 'relationship_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

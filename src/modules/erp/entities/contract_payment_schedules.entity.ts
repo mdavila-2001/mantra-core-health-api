@@ -42,7 +42,7 @@ export class ContractPaymentSchedules {
   }) // FK → terminology.catalog_concepts
   paymentDirectionConceptId?: string;
 
-  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices (inferida)
+  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices
   invoiceId?: string;
 
   @Property({ fieldName: 'bill_id', type: 'uuid', nullable: true }) // FK → billing.bills

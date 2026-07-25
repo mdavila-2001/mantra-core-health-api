@@ -49,7 +49,7 @@ export class ProcedureCancellations {
   })
   rescheduleRequired?: boolean;
 
-  @Property({ fieldName: 'replacement_case_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'replacement_case_id', type: 'uuid', nullable: true }) // FK → procedures_perioperative.procedure_cases
   replacementCaseId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

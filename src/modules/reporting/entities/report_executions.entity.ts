@@ -12,7 +12,7 @@ export class ReportExecutions {
   @Property({ fieldName: 'report_version_id', type: 'uuid', nullable: true }) // FK → reporting.report_versions
   reportVersionId?: string;
 
-  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK → reporting.report_schedules
   scheduleId?: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

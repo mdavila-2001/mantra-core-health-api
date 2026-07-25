@@ -12,7 +12,7 @@ export class InsightQueryRuns {
   @Property({ fieldName: 'ad_account_id', type: 'uuid' }) // FK → ads.ad_accounts
   adAccountId!: string;
 
-  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK → ads.ad_platform_connections
   platformConnectionId!: string;
 
   @Property({ fieldName: 'requested_at', columnType: 'timestamptz' })

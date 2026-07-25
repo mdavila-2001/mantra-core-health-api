@@ -30,7 +30,7 @@ export class SystemContexts {
   @Property({ fieldName: 'locale_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   localeConceptId?: string;
 
-  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK → system_context.system_context_versions
   currentVersionId?: string;
 
   @Property({

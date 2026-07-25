@@ -6,13 +6,13 @@ export class Mentions {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'source_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'source_type_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
   sourceTypeConceptId!: string;
 
   @Property({ fieldName: 'source_ref_id', type: 'uuid' })
   sourceRefId!: string;
 
-  @Property({ fieldName: 'mentioned_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'mentioned_profile_id', type: 'uuid' })  // FK → community.public_profiles
   mentionedProfileId!: string;
 
   @Property({ fieldName: 'offset_start', columnType: 'int', nullable: true })
@@ -21,7 +21,7 @@ export class Mentions {
   @Property({ fieldName: 'offset_end', columnType: 'int', nullable: true })
   offsetEnd?: number;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -30,12 +30,13 @@ export class Mentions {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
 }

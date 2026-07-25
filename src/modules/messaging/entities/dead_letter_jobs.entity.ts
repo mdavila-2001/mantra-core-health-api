@@ -6,10 +6,10 @@ export class DeadLetterJobs {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'queue_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'queue_id', type: 'uuid' }) // FK → messaging.message_queues
   queueId!: string;
 
-  @Property({ fieldName: 'original_job_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'original_job_id', type: 'uuid' }) // FK → messaging.queued_jobs
   originalJobId!: string;
 
   @Property({ fieldName: 'failure_reason_text', columnType: 'text' })

@@ -6,7 +6,7 @@ export class SettlementLines {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'settlement_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'settlement_id', type: 'uuid' }) // FK → payments.gateway_settlements
   settlementId!: string;
 
   @Property({

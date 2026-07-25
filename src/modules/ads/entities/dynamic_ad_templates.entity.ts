@@ -39,7 +39,7 @@ export class DynamicAdTemplates {
   }) // FK → terminology.catalog_concepts
   callToActionConceptId?: string;
 
-  @Property({ fieldName: 'creative_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'creative_id', type: 'uuid', nullable: true }) // FK → ads.ad_creatives
   creativeId?: string;
 
   @Property({

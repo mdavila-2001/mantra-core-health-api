@@ -54,7 +54,7 @@ export class LeaseValuations {
     fieldName: 'journal_transaction_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → accounting.journal_transactions (inferida)
+  }) // FK → accounting.journal_transactions
   journalTransactionId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

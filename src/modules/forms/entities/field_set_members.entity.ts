@@ -6,13 +6,13 @@ export class FieldSetMembers {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'definition_set_version_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'definition_set_version_id', type: 'uuid' }) // FK → forms.field_definition_set_versions
   definitionSetVersionId!: string;
 
-  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK → forms.dynamic_field_definitions
   fieldId!: string;
 
-  @Property({ fieldName: 'section_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'section_id', type: 'uuid', nullable: true }) // FK → forms.dynamic_field_sections
   sectionId?: string;
 
   @Property({ type: 'boolean', nullable: true })

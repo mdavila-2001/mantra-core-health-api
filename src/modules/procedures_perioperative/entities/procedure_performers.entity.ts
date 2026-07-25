@@ -12,7 +12,7 @@ export class ProcedurePerformers {
   @Property({ fieldName: 'procedure_id', type: 'uuid' }) // FK → clinical.procedures
   procedureId!: string;
 
-  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   practitionerProfileId!: string;
 
   @Property({ fieldName: 'performer_role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

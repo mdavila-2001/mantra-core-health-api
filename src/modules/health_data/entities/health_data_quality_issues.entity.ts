@@ -23,7 +23,7 @@ export class HealthDataQualityIssues {
     fieldName: 'canonical_resource_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → health_data.canonical_health_resource_versions
   canonicalResourceVersionId?: string;
 
   @Property({ fieldName: 'field_path', columnType: 'varchar' })

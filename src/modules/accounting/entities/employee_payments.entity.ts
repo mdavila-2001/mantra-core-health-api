@@ -12,7 +12,7 @@ export class EmployeePayments {
   @Property({ fieldName: 'fiscal_period_id', type: 'uuid', nullable: true }) // FK → accounting.fiscal_periods
   fiscalPeriodId?: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK → accounting.journal_transactions
   transactionId?: string;
 
   @Property({ fieldName: 'gross_amount', columnType: 'numeric' })

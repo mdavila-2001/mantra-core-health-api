@@ -6,7 +6,7 @@ export class FieldDefinitionSetVersions {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'definition_set_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'definition_set_id', type: 'uuid' }) // FK → forms.field_definition_sets
   definitionSetId!: string;
 
   @Property({ fieldName: 'semantic_version', columnType: 'varchar' })

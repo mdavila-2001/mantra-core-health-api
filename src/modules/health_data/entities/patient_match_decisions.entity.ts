@@ -21,7 +21,7 @@ export class PatientMatchDecisions {
   @Property({ fieldName: 'reason_text', columnType: 'text', nullable: true })
   reasonText?: string;
 
-  @Property({ fieldName: 'resulting_cluster_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'resulting_cluster_id', type: 'uuid', nullable: true }) // FK → health_data.patient_identity_clusters
   resultingClusterId?: string;
 
   @Property({

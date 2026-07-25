@@ -6,7 +6,7 @@ export class PixelEvents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'pixel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'pixel_id', type: 'uuid' }) // FK → ads.tracking_pixels
   pixelId!: string;
 
   @Property({ fieldName: 'event_name', columnType: 'varchar' })

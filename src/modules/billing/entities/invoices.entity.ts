@@ -66,13 +66,13 @@ export class Invoices {
   }) // FK → accounting.subledger_accounts
   customerSubledgerAccountId?: string;
 
-  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
   @Property({ fieldName: 'sales_order_id', type: 'uuid', nullable: true }) // FK → erp.sales_orders
   salesOrderId?: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK → accounting.journal_transactions
   transactionId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

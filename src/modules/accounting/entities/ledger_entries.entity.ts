@@ -6,7 +6,7 @@ export class LedgerEntries {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid' }) // FK → accounting.journal_transactions
   transactionId!: string;
 
   @Property({ fieldName: 'account_id', type: 'uuid' }) // FK → accounting.accounts

@@ -15,7 +15,7 @@ export class DatasetDefinitions {
   @Property({ fieldName: 'owning_module_code', columnType: 'varchar' })
   owningModuleCode!: string;
 
-  @Property({ fieldName: 'data_classification_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'data_classification_id', type: 'uuid' }) // FK → polyglot_storage.data_classifications
   dataClassificationId!: string;
 
   @Property({ fieldName: 'source_of_truth', columnType: 'varchar' })

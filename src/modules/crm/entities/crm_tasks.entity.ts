@@ -28,7 +28,7 @@ export class CrmTasks {
   @Property({ fieldName: 'is_recurring', type: 'boolean', nullable: true })
   isRecurring?: boolean;
 
-  @Property({ fieldName: 'recurrence_rule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'recurrence_rule_id', type: 'uuid', nullable: true }) // FK → crm.crm_recurrence_rules
   recurrenceRuleId?: string;
 
   @Property({

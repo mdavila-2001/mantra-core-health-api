@@ -16,6 +16,20 @@ export class CompanyBankAccounts {
   bankName!: string;
 
   @Property({
+    fieldName: 'account_holder_name',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  accountHolderName?: string;
+
+  @Property({
+    fieldName: 'account_holder_tax_id',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  accountHolderTaxId?: string;
+
+  @Property({
     fieldName: 'bank_identifier_code',
     columnType: 'varchar',
     nullable: true,
