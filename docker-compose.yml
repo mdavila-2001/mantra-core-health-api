@@ -1,16 +1,28 @@
 # =========================================================================
 # Mantra Core Technologies
 # Product: REDESA Health Ecosystem
-# Footprint: Infrastructure Configuration
+# Footprint: Infrastructure Configuration (desarrollo local)
+# -------------------------------------------------------------------------
+# Portabilidad (Mac / Windows / Linux):
+#   - Todas las credenciales y puertos salen de .env (copiar de .env.example).
+#     Postgres se siembra con las MISMAS variables que usa la app (DB_*), así
+#     no hay dos juegos de credenciales que mantener sincronizados.
+#   - La persistencia usa VOLÚMENES NOMBRADOS gestionados por Docker: funcionan
+#     igual en cualquier SO y evitan los problemas de permisos/rutas de los
+#     bind-mounts de base de datos en Windows/macOS. Los datos sobreviven a
+#     `docker compose down` y a reinicios. Para borrarlos: `docker compose down -v`.
+#     Para relocalizar a una carpeta del host, ver el bloque comentado al final.
+#   - Los scripts de docker/db-init/*.sh DEBEN quedar con fin de línea LF; eso lo
+#     garantiza .gitattributes (`*.sh text eol=lf`) para los que trabajan en Windows.
 # =========================================================================
-name: mantra-redesa
+name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
 
 services:
   postgres:
     image: timescale/timescaledb-ha:pg18
-    container_name: postgres
     restart: always
     environment:
+      # Variables nativas del contenedor. Deben coincidir con DB_* que usa la app.
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -28,9 +40,9 @@ services:
 
   # One-shot: aplica SQL/ (apply_all → apply_deferred) y los stores PG de
   # NoSQL/ (58 TimescaleDB, 59 pgvector) solo si las tablas no existen.
+  # El esquema vive integrado en el repo bajo database/ (ruta fija, no por env).
   postgres-init:
     image: timescale/timescaledb-ha:pg18
-    container_name: postgres-init
     restart: "no"
     entrypoint: ["bash", "/init/bin/init-postgres.sh"]
     environment:
@@ -38,8 +50,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ../SQL:/init/SQL:ro
-      - ../NoSQL:/init/NoSQL:ro
+      - ./database/SQL:/init/SQL:ro
+      - ./database/NoSQL:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
@@ -49,10 +61,9 @@ services:
 
   mongodb:
     image: mongo:8.0
-    container_name: mongodb
     restart: always
     ports:
-      - "27018:27017"
+      - "${MONGO_PORT:-27018}:27017"
     volumes:
       - mongodb_data:/data/db
     healthcheck:
@@ -67,13 +78,12 @@ services:
   # (validadores $jsonSchema + índices) solo si no existen.
   mongo-init:
     image: mongo:8.0
-    container_name: mongo-init
     restart: "no"
     entrypoint: ["bash", "/init/bin/init-mongo.sh"]
     environment:
       MONGO_DB: ${MONGO_DB:-salud_document_store}
     volumes:
-      - ../NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
@@ -83,7 +93,6 @@ services:
 
   redis:
     image: redis:8.8-alpine
-    container_name: redis
     restart: always
     command: redis-server --save 60 1 --loglevel notice
     ports:
@@ -100,7 +109,6 @@ services:
 
   opensearch:
     image: opensearchproject/opensearch:3.7.0
-    container_name: opensearch
     restart: always
     environment:
       - cluster.name=mantra-redesa-cluster
@@ -118,8 +126,8 @@ services:
         soft: 65536
         hard: 65536
     ports:
-      - "9201:9200"
-      - "9601:9600"
+      - "${OPENSEARCH_PORT:-9201}:9200"
+      - "${OPENSEARCH_MONITOR_PORT:-9601}:9600"
     volumes:
       - opensearch_data:/usr/share/opensearch/data
     healthcheck:
@@ -134,11 +142,10 @@ services:
   # *.mapping.json solo si no existen.
   opensearch-init:
     image: curlimages/curl:8.11.1
-    container_name: opensearch-init
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
-      - ../NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:
@@ -151,7 +158,6 @@ services:
     # RELEASE.2025-05-24 en adelante reduce la consola a un navegador de objetos
     # y el proyecto fue archivado en 2026 — no actualizar más allá de esta versión.
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
-    container_name: minio
     restart: always
     command: server /data --console-address ":9001"
     environment:
@@ -159,7 +165,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     ports:
       - "${MINIO_PORT:-9002}:9000"
-      - "9003:9001"
+      - "${MINIO_CONSOLE_PORT:-9003}:9001"
     volumes:
       - minio_data:/data
     healthcheck:
@@ -170,18 +176,35 @@ services:
     networks:
       - mantra-redesa-network
 
+# -------------------------------------------------------------------------
+# Volúmenes de datos (persistentes, gestionados por Docker).
+# Los nombres llevan el prefijo del proyecto para no colisionar con otros
+# stacks en la misma máquina. Para inspeccionar: `docker volume ls`.
+#
+# ¿Quieres los datos en una carpeta concreta del host en lugar del área de
+# Docker? Descomenta driver/driver_opts en el volumen deseado y crea la carpeta
+# (en Windows usa una ruta tipo //c/Users/tu-usuario/redesa-data/postgres):
+#
+#   postgres_data:
+#     name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_postgres_data
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ${POSTGRES_DATA_DIR:-./data/postgres}
+# -------------------------------------------------------------------------
 volumes:
   postgres_data:
-    name: postgres_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_postgres_data
   mongodb_data:
-    name: mongodb_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_mongodb_data
   redis_data:
-    name: redis_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_redis_data
   opensearch_data:
-    name: opensearch_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_opensearch_data
   minio_data:
-    name: minio_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_minio_data
 
 networks:
   mantra-redesa-network:
-    name: mantra-redesa-network
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}-network

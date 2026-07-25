@@ -1,4 +1,5 @@
 export * from './callback_verification_runs.entity';
+export * from './cash_registers.entity';
 export * from './cashier_payment_contexts.entity';
 export * from './connected_accounts.entity';
 export * from './fee_schedules.entity';

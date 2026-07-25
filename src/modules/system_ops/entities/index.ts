@@ -1,3 +1,4 @@
+export * from './accepted_risks.entity';
 export * from './anonymization_rules.entity';
 export * from './assessment_control_results.entity';
 export * from './assessment_findings.entity';

@@ -7,7 +7,16 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    ignores: ['eslint.config.mjs'],
+    // El catálogo generado (`yarn orm:catalog`) queda fuera del linter por el
+    // mismo motivo que fuera de Prettier: son ~13 300 tuplas de una línea y
+    // reformatearlas multiplica por siete el tamaño de cada archivo, rompiendo
+    // el límite de 300 líneas del proyecto. Ver .prettierignore.
+    ignores: [
+      'eslint.config.mjs',
+      'src/orm/catalog/indexes/**',
+      'src/orm/catalog/foreign-keys/**',
+      'src/orm/catalog/schemas.catalog.ts',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
