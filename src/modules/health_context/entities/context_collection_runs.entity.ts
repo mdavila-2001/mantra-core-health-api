@@ -6,7 +6,7 @@ export class ContextCollectionRuns {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK → health_context.country_context_schedules
   scheduleId?: string;
 
   @Property({ fieldName: 'agent_id', type: 'uuid' }) // FK → automation.agents

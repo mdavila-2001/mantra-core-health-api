@@ -21,7 +21,7 @@ export class ReportDefinitions {
   @Property({ fieldName: 'category_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   categoryConceptId?: string;
 
-  @Property({ fieldName: 'data_source_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'data_source_id', type: 'uuid' }) // FK → reporting.report_data_sources
   dataSourceId!: string;
 
   @Property({

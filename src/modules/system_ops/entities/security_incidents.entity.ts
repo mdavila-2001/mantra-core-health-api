@@ -9,19 +9,19 @@ export class SecurityIncidents {
   @Property({ columnType: 'varchar' })
   code!: string;
 
-  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
   tenantId?: string;
 
-  @Property({ fieldName: 'severity_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'severity_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   severityConceptId!: string;
 
-  @Property({ fieldName: 'category_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'category_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   categoryConceptId!: string;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
-  @Property({ fieldName: 'vector_concept_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'vector_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   vectorConceptId?: string;
 
   @Property({
@@ -47,7 +47,7 @@ export class SecurityIncidents {
 
   @Property({
     fieldName: 'affected_records_estimate',
-    columnType: 'bigint',
+    type: 'bigint',
     nullable: true,
   })
   affectedRecordsEstimate?: string;
@@ -55,14 +55,14 @@ export class SecurityIncidents {
   @Property({ fieldName: 'is_reportable', type: 'boolean', nullable: true })
   isReportable?: boolean;
 
-  @Property({ fieldName: 'assigned_to_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'assigned_to_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   assignedToUserId?: string;
 
   @Property({
     fieldName: 'data_classification_id',
     type: 'uuid',
     nullable: true,
-  })
+  }) // FK → system_ops.data_classifications
   dataClassificationId?: string;
 
   @Property({ columnType: 'varchar', nullable: true })
@@ -74,10 +74,10 @@ export class SecurityIncidents {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

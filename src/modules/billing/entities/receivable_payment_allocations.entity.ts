@@ -6,7 +6,7 @@ export class ReceivablePaymentAllocations {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'payment_received_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'payment_received_id', type: 'uuid' }) // FK → billing.payments_received
   paymentReceivedId!: string;
 
   @Property({ fieldName: 'invoice_id', type: 'uuid' }) // FK → billing.invoices

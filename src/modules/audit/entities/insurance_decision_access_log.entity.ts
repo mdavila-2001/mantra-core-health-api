@@ -15,14 +15,14 @@ export class InsuranceDecisionAccessLog {
   @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
   patientProfileId!: string;
 
-  @Property({ fieldName: 'claim_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'claim_id', type: 'uuid', nullable: true }) // FK → insurance.insurance_claims
   claimId?: string;
 
   @Property({
     fieldName: 'authorization_request_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → insurance.prior_authorization_requests
   authorizationRequestId?: string;
 
   @Property({ fieldName: 'action_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

@@ -12,7 +12,7 @@ export class IdentityChecks {
   @Property({ fieldName: 'check_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   checkTypeConceptId!: string;
 
-  @Property({ fieldName: 'authority_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'authority_id', type: 'uuid', nullable: true }) // FK → identity_assurance.identity_authorities
   authorityId?: string;
 
   @Property({ type: 'boolean', nullable: true })

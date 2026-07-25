@@ -6,7 +6,7 @@ export class InvoicesHistory {
   @PrimaryKey({ fieldName: 'history_id', type: 'uuid' })
   historyId: string = randomUUID();
 
-  @Property({ fieldName: 'invoice_id', type: 'uuid' }) // FK → billing.invoices (inferida)
+  @Property({ fieldName: 'invoice_id', type: 'uuid' }) // FK → billing.invoices
   invoiceId!: string;
 
   @Property({ fieldName: 'revision_no', columnType: 'int' })

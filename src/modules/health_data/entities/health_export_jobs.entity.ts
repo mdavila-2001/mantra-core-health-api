@@ -31,7 +31,7 @@ export class HealthExportJobs {
     fieldName: 'deidentification_run_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → health_data.health_deidentification_runs
   deidentificationRunId?: string;
 
   @Property({ fieldName: 'requested_at', columnType: 'timestamptz' })

@@ -6,7 +6,7 @@ export class ProviderSigningKeys {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK → auth_providers.identity_providers
   providerId!: string;
 
   @Property({ fieldName: 'key_id', columnType: 'varchar' })

@@ -29,7 +29,7 @@ export class IntegrationSyncCursors {
     fieldName: 'last_successful_exchange_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → integration_contracts.integration_exchange_records
   lastSuccessfulExchangeId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

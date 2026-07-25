@@ -6,10 +6,10 @@ export class ProviderChannelConfigs {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provider_id', type: 'uuid' }) // FK → messaging.messaging_providers
   providerId!: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
@@ -22,7 +22,7 @@ export class ProviderChannelConfigs {
   })
   senderIdentity?: string;
 
-  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK → integrations.provider_credentials
   credentialId?: string;
 
   @Property({
@@ -75,7 +75,7 @@ export class ProviderChannelConfigs {
     fieldName: 'webhook_secret_credential_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → integrations.provider_credentials
   webhookSecretCredentialId?: string;
 
   @Property({

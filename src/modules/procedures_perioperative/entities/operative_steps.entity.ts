@@ -25,7 +25,7 @@ export class OperativeSteps {
     fieldName: 'performed_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   performedByProfileId?: string;
 
   @Property({

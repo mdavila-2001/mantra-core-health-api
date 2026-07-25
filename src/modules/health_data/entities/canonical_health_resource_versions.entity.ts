@@ -62,14 +62,14 @@ export class CanonicalHealthResourceVersions {
   @Property({ fieldName: 'content_hash', columnType: 'varchar' })
   contentHash!: string;
 
-  @Property({ fieldName: 'provenance_record_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provenance_record_id', type: 'uuid', nullable: true }) // FK → health_data.health_provenance_records
   provenanceRecordId?: string;
 
   @Property({
     fieldName: 'supersedes_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → health_data.canonical_health_resource_versions
   supersedesVersionId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

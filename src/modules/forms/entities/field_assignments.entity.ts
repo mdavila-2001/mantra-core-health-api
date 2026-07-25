@@ -6,7 +6,7 @@ export class FieldAssignments {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK → forms.dynamic_field_definitions
   fieldId!: string;
 
   @Property({ fieldName: 'target_resource_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -25,7 +25,7 @@ export class FieldAssignments {
   @Property({ fieldName: 'branch_id', type: 'uuid', nullable: true }) // FK → directory.branches
   branchId?: string;
 
-  @Property({ fieldName: 'section_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'section_id', type: 'uuid' }) // FK → forms.dynamic_field_sections
   sectionId!: string;
 
   @Property({ type: 'boolean' })

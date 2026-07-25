@@ -51,10 +51,10 @@ export class JournalEntryAssignments {
   @Property({ fieldName: 'liability_id', type: 'uuid', nullable: true }) // FK → accounting.liabilities
   liabilityId?: string;
 
-  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
-  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices (inferida)
+  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices
   invoiceId?: string;
 
   @Property({ fieldName: 'bill_id', type: 'uuid', nullable: true }) // FK → billing.bills
@@ -101,7 +101,7 @@ export class JournalEntryAssignments {
   }) // FK → terminology.catalog_concepts
   assignmentSourceConceptId?: string;
 
-  @Property({ fieldName: 'derived_by_rule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'derived_by_rule_id', type: 'uuid', nullable: true }) // FK → accounting.account_determination_rules
   derivedByRuleId?: string;
 
   @Property({ fieldName: 'is_statistical', type: 'boolean', nullable: true })

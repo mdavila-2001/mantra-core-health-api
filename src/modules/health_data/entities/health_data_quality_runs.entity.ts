@@ -23,7 +23,7 @@ export class HealthDataQualityRuns {
     fieldName: 'canonical_resource_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → health_data.canonical_health_resources
   canonicalResourceId?: string;
 
   @Property({ fieldName: 'started_at', columnType: 'timestamptz' })

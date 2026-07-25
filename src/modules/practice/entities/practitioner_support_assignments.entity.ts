@@ -9,7 +9,7 @@ export class PractitionerSupportAssignments {
   @Property({ fieldName: 'practitioner_role_assignment_id', type: 'uuid' }) // FK → practice.practitioner_role_assignments
   practitionerRoleAssignmentId!: string;
 
-  @Property({ fieldName: 'support_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'support_profile_id', type: 'uuid' }) // FK → profiles.secretary_profiles
   supportProfileId!: string;
 
   @Property({ fieldName: 'support_role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

@@ -9,7 +9,7 @@ export class CareTeams {
   @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
   patientProfileId!: string;
 
-  @Property({ fieldName: 'episode_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'episode_id', type: 'uuid', nullable: true }) // FK → clinical.care_episodes
   episodeId?: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants

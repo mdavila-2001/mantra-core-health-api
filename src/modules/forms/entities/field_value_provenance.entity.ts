@@ -40,7 +40,7 @@ export class FieldValueProvenance {
   @Property({ fieldName: 'import_batch_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
   importBatchId?: string;
 
-  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   authorProfileId?: string;
 
   @Property({ fieldName: 'entered_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users

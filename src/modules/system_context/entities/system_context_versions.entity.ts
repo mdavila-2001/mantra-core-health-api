@@ -12,7 +12,7 @@ export class SystemContextVersions {
   @Property({ fieldName: 'version_number', columnType: 'int' })
   versionNumber!: number;
 
-  @Property({ fieldName: 'refresh_run_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'refresh_run_id', type: 'uuid', nullable: true }) // FK → system_context.system_context_refresh_runs
   refreshRunId?: string;
 
   @Property({ fieldName: 'schema_version', columnType: 'varchar' })

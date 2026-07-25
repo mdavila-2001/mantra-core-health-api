@@ -6,7 +6,7 @@ export class ReportDistributions {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'schedule_id', type: 'uuid', nullable: true }) // FK → reporting.report_schedules
   scheduleId?: string;
 
   @Property({ fieldName: 'report_execution_id', type: 'uuid', nullable: true }) // FK → reporting.report_executions
@@ -25,7 +25,7 @@ export class ReportDistributions {
   })
   recipientAddress?: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

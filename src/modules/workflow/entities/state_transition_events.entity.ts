@@ -9,7 +9,7 @@ export class StateTransitionEvents {
   @Property({ fieldName: 'state_machine_definition_id', type: 'uuid' }) // FK → workflow.state_machine_definitions
   stateMachineDefinitionId!: string;
 
-  @Property({ fieldName: 'transition_definition_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transition_definition_id', type: 'uuid' }) // FK → workflow.state_transition_definitions
   transitionDefinitionId!: string;
 
   @Property({ fieldName: 'aggregate_id', type: 'uuid' })

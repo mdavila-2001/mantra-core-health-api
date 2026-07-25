@@ -6,13 +6,13 @@ export class ClinicalNoteVersions {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'clinical_note_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'clinical_note_id', type: 'uuid' }) // FK → chart.clinical_note_headers
   clinicalNoteId!: string;
 
   @Property({ fieldName: 'version_number', columnType: 'int' })
   versionNumber!: number;
 
-  @Property({ fieldName: 'author_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'author_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   authorProfileId!: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -49,7 +49,7 @@ export class ClinicalNoteVersions {
     fieldName: 'supersedes_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → chart.clinical_note_versions
   supersedesVersionId?: string;
 
   @Property({
@@ -66,7 +66,7 @@ export class ClinicalNoteVersions {
   })
   amendmentReasonText?: string;
 
-  @Property({ fieldName: 'signed_by_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'signed_by_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   signedByProfileId?: string;
 
   @Property({

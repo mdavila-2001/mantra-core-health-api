@@ -38,7 +38,7 @@ export class ClinicalMedia {
     fieldName: 'captured_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   capturedByProfileId?: string;
 
   @Property({ fieldName: 'device_id', type: 'uuid', nullable: true }) // FK → iam.devices

@@ -12,7 +12,7 @@ export class DynamicFieldSections {
   @Property({ columnType: 'varchar' })
   name!: string;
 
-  @Property({ fieldName: 'parent_section_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_section_id', type: 'uuid', nullable: true }) // FK → forms.dynamic_field_sections
   parentSectionId?: string;
 
   @Property({ columnType: 'int', nullable: true })

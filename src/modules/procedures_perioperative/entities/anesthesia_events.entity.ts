@@ -22,7 +22,7 @@ export class AnesthesiaEvents {
     fieldName: 'medication_administration_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → clinical.medication_records
   medicationAdministrationId?: string;
 
   @Property({ fieldName: 'observation_id', type: 'uuid', nullable: true }) // FK → clinical.observations
@@ -35,7 +35,7 @@ export class AnesthesiaEvents {
     fieldName: 'performed_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   performedByProfileId?: string;
 
   @Property({

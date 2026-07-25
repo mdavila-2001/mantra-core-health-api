@@ -21,10 +21,10 @@ export class CanonicalHealthResources {
   @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters
   encounterId?: string;
 
-  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK → health_data.health_source_systems
   sourceSystemId?: string;
 
-  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK → health_data.canonical_health_resource_versions
   currentVersionId?: string;
 
   @Property({ fieldName: 'lifecycle_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -46,7 +46,7 @@ export class CanonicalHealthResources {
   })
   purposeRestrictionsJson?: unknown;
 
-  @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true }) // FK → system_ops.retention_policies
   retentionPolicyId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

@@ -6,7 +6,7 @@ export class BookingCancellations {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'booking_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'booking_id', type: 'uuid' }) // FK → scheduling.appointment_bookings
   bookingId!: string;
 
   @Property({ fieldName: 'reason_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

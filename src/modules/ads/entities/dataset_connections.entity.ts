@@ -9,7 +9,7 @@ export class DatasetConnections {
   @Property({ fieldName: 'conversion_dataset_id', type: 'uuid' }) // FK → ads.conversion_datasets
   conversionDatasetId!: string;
 
-  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK → ads.ad_platform_connections
   platformConnectionId!: string;
 
   @Property({ fieldName: 'tracking_pixel_id', type: 'uuid', nullable: true }) // FK → ads.tracking_pixels
@@ -29,7 +29,7 @@ export class DatasetConnections {
     fieldName: 'test_event_code_secret_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → system_ops.encryption_keys
   testEventCodeSecretId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

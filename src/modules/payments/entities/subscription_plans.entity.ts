@@ -18,7 +18,7 @@ export class SubscriptionPlans {
   @Property({ columnType: 'varchar' })
   name!: string;
 
-  @Property({ fieldName: 'tier_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'tier_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   tierConceptId!: string;
 
   @Property({ fieldName: 'is_default', type: 'boolean', nullable: true })

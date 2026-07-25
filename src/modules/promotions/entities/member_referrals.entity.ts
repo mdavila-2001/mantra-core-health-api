@@ -39,14 +39,14 @@ export class MemberReferrals {
     fieldName: 'referrer_reward_ledger_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → promotions.loyalty_memberships
   referrerRewardLedgerId?: string;
 
   @Property({
     fieldName: 'referee_reward_ledger_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → promotions.loyalty_memberships
   refereeRewardLedgerId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

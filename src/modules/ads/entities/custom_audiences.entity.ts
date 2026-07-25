@@ -33,7 +33,7 @@ export class CustomAudiences {
     fieldName: 'lookalike_source_audience_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → ads.custom_audiences
   lookalikeSourceAudienceId?: string;
 
   @Property({
@@ -47,7 +47,7 @@ export class CustomAudiences {
   @Property({ fieldName: 'approximate_count', type: 'bigint', nullable: true })
   approximateCount?: string;
 
-  @Property({ fieldName: 'data_source_pixel_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'data_source_pixel_id', type: 'uuid', nullable: true }) // FK → ads.tracking_pixels
   dataSourcePixelId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

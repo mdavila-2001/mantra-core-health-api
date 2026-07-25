@@ -35,7 +35,7 @@ export class ClaimAppealDecisions {
     fieldName: 'supersedes_decision_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → insurance.claim_appeal_decisions
   supersedesDecisionId?: string;
 
   @Property({

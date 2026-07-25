@@ -6,7 +6,7 @@ export class ContextQualityReviews {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'context_version_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'context_version_id', type: 'uuid' }) // FK → health_context.country_health_context_versions
   contextVersionId!: string;
 
   @Property({ fieldName: 'reviewer_agent_id', type: 'uuid', nullable: true }) // FK → automation.agents

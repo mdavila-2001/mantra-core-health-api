@@ -12,7 +12,7 @@ export class ClearingDocuments {
   @Property({ fieldName: 'clearing_number', columnType: 'varchar' })
   clearingNumber!: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid' }) // FK → accounting.journal_transactions
   transactionId!: string;
 
   @Property({ fieldName: 'clearing_date', columnType: 'date', nullable: true })

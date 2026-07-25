@@ -6,24 +6,24 @@ export class BreachNotifications {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'security_incident_id', type: 'uuid' })
+  @Property({ fieldName: 'security_incident_id', type: 'uuid' }) // FK → system_ops.security_incidents
   securityIncidentId!: string;
 
-  @Property({ fieldName: 'authority_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'authority_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   authorityConceptId!: string;
 
   @Property({
     fieldName: 'jurisdiction_concept_id',
     type: 'uuid',
     nullable: true,
-  })
+  }) // FK → terminology.catalog_concepts
   jurisdictionConceptId?: string;
 
   @Property({
     fieldName: 'regulation_concept_id',
     type: 'uuid',
     nullable: true,
-  })
+  }) // FK → terminology.catalog_concepts
   regulationConceptId?: string;
 
   @Property({
@@ -51,7 +51,7 @@ export class BreachNotifications {
     fieldName: 'notification_channel_concept_id',
     type: 'uuid',
     nullable: true,
-  })
+  }) // FK → terminology.catalog_concepts
   notificationChannelConceptId?: string;
 
   @Property({
@@ -64,7 +64,7 @@ export class BreachNotifications {
   @Property({ fieldName: 'subjects_notified', type: 'boolean', nullable: true })
   subjectsNotified?: boolean;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -73,10 +73,10 @@ export class BreachNotifications {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

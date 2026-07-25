@@ -6,7 +6,7 @@ export class ApiKeys {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'tenant_id', type: 'uuid' })
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
   @Property({ columnType: 'varchar' })
@@ -18,13 +18,13 @@ export class ApiKeys {
   @Property({ fieldName: 'key_hash', columnType: 'varchar' })
   keyHash!: string;
 
-  @Property({ fieldName: 'hash_algorithm_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'hash_algorithm_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   hashAlgorithmConceptId!: string;
 
-  @Property({ fieldName: 'owner_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'owner_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   ownerUserId?: string;
 
-  @Property({ fieldName: 'service_principal_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'service_principal_id', type: 'uuid', nullable: true }) // FK → authz.service_principals
   servicePrincipalId?: string;
 
   @Property({
@@ -55,7 +55,7 @@ export class ApiKeys {
   })
   rateLimitPerMin?: number;
 
-  @Property({ fieldName: 'ip_access_rule_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'ip_access_rule_id', type: 'uuid', nullable: true }) // FK → authz.ip_access_rules
   ipAccessRuleId?: string;
 
   @Property({
@@ -65,10 +65,10 @@ export class ApiKeys {
   })
   revokedAt?: Date;
 
-  @Property({ fieldName: 'revoked_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'revoked_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   revokedByUserId?: string;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -77,10 +77,10 @@ export class ApiKeys {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

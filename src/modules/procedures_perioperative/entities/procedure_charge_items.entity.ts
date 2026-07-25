@@ -18,7 +18,7 @@ export class ProcedureChargeItems {
   @Property({ fieldName: 'charge_item_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   chargeItemTypeConceptId!: string;
 
-  @Property({ fieldName: 'billable_item_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'billable_item_id', type: 'uuid' }) // FK → billing.service_catalog
   billableItemId!: string;
 
   @Property({ columnType: 'numeric(20,6)', nullable: true })
@@ -42,7 +42,7 @@ export class ProcedureChargeItems {
     fieldName: 'billing_claim_line_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → insurance.insurance_claim_lines
   billingClaimLineId?: string;
 
   @Property({ fieldName: 'invoice_line_id', type: 'uuid', nullable: true }) // FK → billing.invoice_lines

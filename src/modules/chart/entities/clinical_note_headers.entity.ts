@@ -18,14 +18,14 @@ export class ClinicalNoteHeaders {
   @Property({ fieldName: 'lifecycle_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   lifecycleStatusConceptId!: string;
 
-  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK → chart.clinical_note_versions
   currentVersionId?: string;
 
   @Property({
     fieldName: 'current_released_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → chart.clinical_note_versions
   currentReleasedVersionId?: string;
 
   @Property({

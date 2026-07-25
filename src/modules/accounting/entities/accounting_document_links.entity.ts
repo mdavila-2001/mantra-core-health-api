@@ -6,19 +6,19 @@ export class AccountingDocumentLinks {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'source_transaction_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_transaction_id', type: 'uuid' }) // FK → accounting.journal_transactions
   sourceTransactionId!: string;
 
-  @Property({ fieldName: 'target_transaction_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'target_transaction_id', type: 'uuid' }) // FK → accounting.journal_transactions
   targetTransactionId!: string;
 
   @Property({ fieldName: 'relation_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   relationTypeConceptId!: string;
 
-  @Property({ fieldName: 'source_line_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_line_id', type: 'uuid', nullable: true }) // FK → accounting.accrual_schedule_lines
   sourceLineId?: string;
 
-  @Property({ fieldName: 'target_line_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'target_line_id', type: 'uuid', nullable: true }) // FK → accounting.accrual_schedule_lines
   targetLineId?: string;
 
   @Property({

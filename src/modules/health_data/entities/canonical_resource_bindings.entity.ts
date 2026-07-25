@@ -21,7 +21,7 @@ export class CanonicalResourceBindings {
   @Property({ fieldName: 'binding_status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   bindingStatusConceptId!: string;
 
-  @Property({ fieldName: 'mapping_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'mapping_version_id', type: 'uuid', nullable: true }) // FK → health_data.canonical_health_resource_versions
   mappingVersionId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

@@ -12,9 +12,6 @@ export class BusinessPartnerBankAccounts {
   @Property({ fieldName: 'bank_name', columnType: 'varchar' })
   bankName!: string;
 
-  // Titular declarado por el socio de negocio. Sirve para el control de "name
-  // matching" exigido por los bancos antes de emitir una transferencia.
-  // Ausente en la BD introspectada de 2026-07-21.
   @Property({
     fieldName: 'account_holder_name',
     columnType: 'varchar',

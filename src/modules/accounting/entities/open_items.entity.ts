@@ -25,13 +25,13 @@ export class OpenItems {
   })
   documentNumber?: string;
 
-  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices (inferida)
+  @Property({ fieldName: 'invoice_id', type: 'uuid', nullable: true }) // FK → billing.invoices
   invoiceId?: string;
 
   @Property({ fieldName: 'bill_id', type: 'uuid', nullable: true }) // FK → billing.bills
   billId?: string;
 
-  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts (inferida)
+  @Property({ fieldName: 'contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   contractId?: string;
 
   @Property({ fieldName: 'baseline_date', columnType: 'date', nullable: true })

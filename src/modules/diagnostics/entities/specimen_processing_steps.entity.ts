@@ -25,7 +25,7 @@ export class SpecimenProcessingSteps {
   })
   performedAt?: Date;
 
-  @Property({ fieldName: 'performer_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'performer_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   performerProfileId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

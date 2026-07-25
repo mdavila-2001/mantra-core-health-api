@@ -6,7 +6,7 @@ export class ExternalAdObjectSnapshots {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'platform_connection_id', type: 'uuid' }) // FK → ads.ad_platform_connections
   platformConnectionId!: string;
 
   @Property({ fieldName: 'object_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

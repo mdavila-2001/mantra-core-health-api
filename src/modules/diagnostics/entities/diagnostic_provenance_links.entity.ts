@@ -24,10 +24,10 @@ export class DiagnosticProvenanceLinks {
   @Property({ fieldName: 'activity_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   activityConceptId!: string;
 
-  @Property({ fieldName: 'agent_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'agent_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   agentProfileId?: string;
 
-  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK → health_data.health_source_systems
   sourceSystemId?: string;
 
   @Property({ fieldName: 'recorded_at', columnType: 'timestamptz' })

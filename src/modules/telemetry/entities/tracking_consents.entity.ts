@@ -9,7 +9,7 @@ export class TrackingConsents {
   @Property({ fieldName: 'user_id', type: 'uuid' }) // FK → iam.users
   userId!: string;
 
-  @Property({ fieldName: 'purpose_definition_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'purpose_definition_id', type: 'uuid' }) // FK → telemetry.tracking_purpose_definitions
   purposeDefinitionId!: string;
 
   @Property({ fieldName: 'decision_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

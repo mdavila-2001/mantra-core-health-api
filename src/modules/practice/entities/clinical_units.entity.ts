@@ -9,7 +9,7 @@ export class ClinicalUnits {
   @Property({ fieldName: 'practice_site_id', type: 'uuid' }) // FK → practice.practice_sites
   practiceSiteId!: string;
 
-  @Property({ fieldName: 'parent_unit_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_unit_id', type: 'uuid', nullable: true }) // FK → practice.clinical_units
   parentUnitId?: string;
 
   @Property({ columnType: 'varchar' })

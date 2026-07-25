@@ -15,7 +15,7 @@ export class PostoperativeFollowups {
   @Property({ fieldName: 'followup_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   followupTypeConceptId!: string;
 
-  @Property({ fieldName: 'appointment_id', type: 'uuid', nullable: true }) // FK → clinical.appointments (inferida)
+  @Property({ fieldName: 'appointment_id', type: 'uuid', nullable: true }) // FK → clinical.appointments
   appointmentId?: string;
 
   @Property({ fieldName: 'due_at', columnType: 'timestamptz', nullable: true })
@@ -32,7 +32,7 @@ export class PostoperativeFollowups {
     fieldName: 'completed_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   completedByProfileId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

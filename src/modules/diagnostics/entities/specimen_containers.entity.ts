@@ -46,7 +46,7 @@ export class SpecimenContainers {
   }) // FK → terminology.catalog_concepts
   specimenQuantityUnitConceptId?: string;
 
-  @Property({ fieldName: 'parent_container_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'parent_container_id', type: 'uuid', nullable: true }) // FK → diagnostics.specimen_containers
   parentContainerId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

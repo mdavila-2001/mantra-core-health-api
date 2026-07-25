@@ -30,7 +30,7 @@ export class CarePlans {
   @Property({ fieldName: 'end_date', columnType: 'date', nullable: true })
   endDate?: Date;
 
-  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   authorProfileId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

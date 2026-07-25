@@ -6,7 +6,7 @@ export class PractitionerRoleAssignments {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   practitionerProfileId!: string;
 
   @Property({ fieldName: 'practice_id', type: 'uuid' }) // FK → practice.practices
@@ -35,7 +35,7 @@ export class PractitionerRoleAssignments {
     fieldName: 'supervisor_practitioner_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   supervisorPractitionerProfileId?: string;
 
   @Property({

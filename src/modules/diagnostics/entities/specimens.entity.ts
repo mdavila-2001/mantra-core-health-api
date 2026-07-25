@@ -49,7 +49,7 @@ export class Specimens {
   })
   receivedAt?: Date;
 
-  @Property({ fieldName: 'collector_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'collector_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   collectorProfileId?: string;
 
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

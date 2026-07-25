@@ -29,7 +29,7 @@ export class IntegrationIdempotencyRecords {
     fieldName: 'first_exchange_record_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → integration_contracts.integration_exchange_records
   firstExchangeRecordId?: string;
 
   @Property({

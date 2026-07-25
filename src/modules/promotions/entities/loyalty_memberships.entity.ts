@@ -15,7 +15,7 @@ export class LoyaltyMemberships {
   @Property({ fieldName: 'member_ref_id', type: 'uuid' })
   memberRefId!: string;
 
-  @Property({ fieldName: 'current_tier_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_tier_id', type: 'uuid', nullable: true }) // FK → promotions.loyalty_tiers
   currentTierId?: string;
 
   @Property({

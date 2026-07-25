@@ -9,7 +9,7 @@ export class Permissions {
   @Property({ columnType: 'varchar' })
   code!: string;
 
-  @Property({ fieldName: 'category_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'category_id', type: 'uuid', nullable: true }) // FK → authz.permission_categories
   categoryId?: string;
 
   @Property({ columnType: 'varchar' })

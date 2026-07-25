@@ -15,7 +15,7 @@ export class OperativeReports {
   @Property({ fieldName: 'report_version', columnType: 'int' })
   reportVersion!: number;
 
-  @Property({ fieldName: 'author_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'author_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   authorProfileId!: string;
 
   @Property({ fieldName: 'authored_at', columnType: 'timestamptz' })
@@ -82,7 +82,7 @@ export class OperativeReports {
   })
   signedAt?: Date;
 
-  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK → chart.clinical_note_signatures
   signatureId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

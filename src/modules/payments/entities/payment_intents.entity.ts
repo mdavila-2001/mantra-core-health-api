@@ -12,7 +12,7 @@ export class PaymentIntents {
   @Property({ fieldName: 'practice_id', type: 'uuid', nullable: true }) // FK → practice.practices
   practiceId?: string;
 
-  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK → payments.payment_gateways
   gatewayId!: string;
 
   @Property({

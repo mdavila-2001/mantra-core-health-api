@@ -15,10 +15,10 @@ export class FieldValues {
   @Property({ fieldName: 'resource_id', type: 'uuid' })
   resourceId!: string;
 
-  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'field_id', type: 'uuid' }) // FK → forms.dynamic_field_definitions
   fieldId!: string;
 
-  @Property({ fieldName: 'assignment_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'assignment_id', type: 'uuid', nullable: true }) // FK → forms.field_assignments
   assignmentId?: string;
 
   @Property({ fieldName: 'instance_group_id', type: 'uuid', nullable: true })
@@ -124,7 +124,7 @@ export class FieldValues {
   @Property({ fieldName: 'value_version', columnType: 'int', nullable: true })
   valueVersion?: number;
 
-  @Property({ fieldName: 'supersedes_value_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'supersedes_value_id', type: 'uuid', nullable: true }) // FK → forms.field_values
   supersedesValueId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

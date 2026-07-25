@@ -6,7 +6,7 @@ export class TenantWebConfigs {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'tenant_id', type: 'uuid' })
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
   @Property({ columnType: 'varchar' })
@@ -19,7 +19,7 @@ export class TenantWebConfigs {
     fieldName: 'primary_language_concept_id',
     type: 'uuid',
     nullable: true,
-  })
+  }) // FK → terminology.catalog_concepts
   primaryLanguageConceptId?: string;
 
   @Property({
@@ -57,7 +57,7 @@ export class TenantWebConfigs {
   @Property({ fieldName: 'is_published', type: 'boolean', nullable: true })
   isPublished?: boolean;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -66,10 +66,10 @@ export class TenantWebConfigs {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

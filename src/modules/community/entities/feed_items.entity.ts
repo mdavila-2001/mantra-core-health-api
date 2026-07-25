@@ -6,19 +6,19 @@ export class FeedItems {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'owner_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'owner_profile_id', type: 'uuid' })  // FK → community.public_profiles
   ownerProfileId!: string;
 
-  @Property({ fieldName: 'item_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'item_type_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
   itemTypeConceptId!: string;
 
-  @Property({ fieldName: 'source_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'source_type_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
   sourceTypeConceptId!: string;
 
   @Property({ fieldName: 'source_ref_id', type: 'uuid' })
   sourceRefId!: string;
 
-  @Property({ fieldName: 'origin_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'origin_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
   originConceptId!: string;
 
   @Property({ fieldName: 'rank_score', columnType: 'numeric', nullable: true })
@@ -30,11 +30,7 @@ export class FeedItems {
   @Property({ fieldName: 'is_hidden', type: 'boolean', nullable: true })
   isHidden?: boolean;
 
-  @Property({
-    fieldName: 'surfaced_at',
-    columnType: 'timestamptz',
-    nullable: true,
-  })
+  @Property({ fieldName: 'surfaced_at', columnType: 'timestamptz', nullable: true })
   surfacedAt?: Date;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -43,12 +39,13 @@ export class FeedItems {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
 }

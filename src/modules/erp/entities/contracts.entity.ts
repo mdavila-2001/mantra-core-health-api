@@ -84,13 +84,13 @@ export class Contracts {
   }) // FK → erp.business_partners
   primaryBusinessPartnerId?: string;
 
-  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true }) // FK → erp.contract_versions
   currentVersionId?: string;
 
   @Property({ fieldName: 'parent_contract_id', type: 'uuid', nullable: true }) // FK → erp.contracts
   parentContractId?: string;
 
-  @Property({ fieldName: 'master_agreement_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'master_agreement_id', type: 'uuid', nullable: true }) // FK → crm.partnership_agreements
   masterAgreementId?: string;
 
   @Property({ fieldName: 'owning_department_id', type: 'uuid', nullable: true }) // FK → erp.departments

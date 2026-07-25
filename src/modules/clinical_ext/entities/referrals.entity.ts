@@ -12,10 +12,10 @@ export class Referrals {
   @Property({ fieldName: 'source_encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters
   sourceEncounterId?: string;
 
-  @Property({ fieldName: 'referring_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'referring_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   referringProfileId?: string;
 
-  @Property({ fieldName: 'target_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'target_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   targetProfileId?: string;
 
   @Property({ fieldName: 'target_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

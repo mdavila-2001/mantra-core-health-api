@@ -32,14 +32,14 @@ export class DiagnosticReportVersions {
   @Property({ fieldName: 'performer_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
   performerTenantId?: string;
 
-  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'author_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   authorProfileId?: string;
 
   @Property({
     fieldName: 'supersedes_version_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → diagnostics.diagnostic_report_versions
   supersedesVersionId?: string;
 
   @Property({
@@ -79,9 +79,9 @@ export class DiagnosticReportVersions {
   @Property({ fieldName: 'custodian_tenant_id', type: 'uuid' }) // FK → directory.tenants
   custodianTenantId!: string;
 
-  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_system_id', type: 'uuid', nullable: true }) // FK → health_data.health_source_systems
   sourceSystemId?: string;
 
-  @Property({ fieldName: 'provenance_record_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'provenance_record_id', type: 'uuid', nullable: true }) // FK → health_data.health_provenance_records
   provenanceRecordId?: string;
 }

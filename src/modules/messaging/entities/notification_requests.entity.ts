@@ -19,10 +19,10 @@ export class NotificationRequests {
   })
   recipientAddress?: string;
 
-  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'channel_id', type: 'uuid' }) // FK → messaging.message_channels
   channelId!: string;
 
-  @Property({ fieldName: 'template_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'template_id', type: 'uuid', nullable: true }) // FK → messaging.message_templates
   templateId?: string;
 
   @Property({ fieldName: 'domain_event_id', type: 'uuid', nullable: true }) // FK → messaging.domain_events
@@ -87,14 +87,14 @@ export class NotificationRequests {
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 
-  @Property({ fieldName: 'dispatch_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'dispatch_id', type: 'uuid', nullable: true }) // FK → marketing.campaign_dispatches
   dispatchId?: string;
 
   @Property({
     fieldName: 'dispatch_recipient_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → marketing.campaign_dispatch_recipients
   dispatchRecipientId?: string;
 
   @Property({ fieldName: 'recipient_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -107,7 +107,7 @@ export class NotificationRequests {
     fieldName: 'recipient_endpoint_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → crm.contact_channel_endpoints
   recipientEndpointId?: string;
 
   @Property({ fieldName: 'source_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

@@ -6,10 +6,10 @@ export class ContextSourceObservations {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'collection_run_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'collection_run_id', type: 'uuid' }) // FK → health_context.context_collection_runs
   collectionRunId!: string;
 
-  @Property({ fieldName: 'source_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'source_id', type: 'uuid' }) // FK → health_context.health_context_sources
   sourceId!: string;
 
   @Property({ fieldName: 'country_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

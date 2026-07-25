@@ -35,7 +35,7 @@ export class PostoperativeOrders {
     fieldName: 'verified_by_profile_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   verifiedByProfileId?: string;
 
   @Property({

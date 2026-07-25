@@ -19,10 +19,10 @@ export class LaboratoryWorkOrders {
     fieldName: 'assigned_laboratory_unit_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → diagnostic_units.diagnostic_units
   assignedLaboratoryUnitId?: string;
 
-  @Property({ fieldName: 'assigned_profile_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'assigned_profile_id', type: 'uuid', nullable: true }) // FK → profiles.health_practitioner_profiles
   assignedProfileId?: string;
 
   @Property({ fieldName: 'priority_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

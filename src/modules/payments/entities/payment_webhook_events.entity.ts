@@ -6,7 +6,7 @@ export class PaymentWebhookEvents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK → payments.payment_gateways
   gatewayId!: string;
 
   @Property({
@@ -38,7 +38,7 @@ export class PaymentWebhookEvents {
   @Property({ type: 'boolean', nullable: true })
   processed?: boolean;
 
-  @Property({ fieldName: 'related_intent_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'related_intent_id', type: 'uuid', nullable: true }) // FK → payments.payment_intents
   relatedIntentId?: string;
 
   @Property({

@@ -9,7 +9,7 @@ export class ClaimReversals {
   @Property({ fieldName: 'insurance_claim_id', type: 'uuid' }) // FK → insurance.insurance_claims
   insuranceClaimId!: string;
 
-  @Property({ fieldName: 'reversed_adjudication_version_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'reversed_adjudication_version_id', type: 'uuid' }) // FK → insurance.claim_adjudication_versions
   reversedAdjudicationVersionId!: string;
 
   @Property({ fieldName: 'reversal_reason_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
@@ -25,7 +25,7 @@ export class ClaimReversals {
   @Property({ fieldName: 'currency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   currencyConceptId?: string;
 
-  @Property({ fieldName: 'replacement_claim_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'replacement_claim_id', type: 'uuid', nullable: true }) // FK → insurance.insurance_claims
   replacementClaimId?: string;
 
   @Property({

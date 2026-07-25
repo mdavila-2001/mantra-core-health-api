@@ -6,7 +6,7 @@ export class GatewayConnections {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'gateway_id', type: 'uuid' }) // FK → payments.payment_gateways
   gatewayId!: string;
 
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
@@ -25,7 +25,7 @@ export class GatewayConnections {
   })
   merchantRef?: string;
 
-  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'credential_id', type: 'uuid', nullable: true }) // FK → integrations.provider_credentials
   credentialId?: string;
 
   @Property({

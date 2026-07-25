@@ -15,7 +15,7 @@ export class ProcedureMedicationUses {
   @Property({ fieldName: 'procedure_id', type: 'uuid', nullable: true }) // FK → clinical.procedures
   procedureId?: string;
 
-  @Property({ fieldName: 'medication_administration_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'medication_administration_id', type: 'uuid' }) // FK → clinical.medication_records
   medicationAdministrationId!: string;
 
   @Property({ fieldName: 'use_role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

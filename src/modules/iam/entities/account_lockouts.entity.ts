@@ -6,13 +6,13 @@ export class AccountLockouts {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'user_id', type: 'uuid' })
+  @Property({ fieldName: 'user_id', type: 'uuid' }) // FK → iam.users
   userId!: string;
 
-  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
   tenantId?: string;
 
-  @Property({ fieldName: 'reason_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'reason_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   reasonConceptId!: string;
 
   @Property({ fieldName: 'failed_attempts', columnType: 'int', nullable: true })
@@ -39,13 +39,13 @@ export class AccountLockouts {
   })
   unlockedAt?: Date;
 
-  @Property({ fieldName: 'unlocked_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'unlocked_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   unlockedByUserId?: string;
 
   @Property({ fieldName: 'source_ip', columnType: 'varchar', nullable: true })
   sourceIp?: string;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -54,10 +54,10 @@ export class AccountLockouts {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

@@ -6,10 +6,10 @@ export class KeyRotationEvents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'encryption_key_id', type: 'uuid' })
+  @Property({ fieldName: 'encryption_key_id', type: 'uuid' }) // FK → system_ops.encryption_keys
   encryptionKeyId!: string;
 
-  @Property({ fieldName: 'event_type_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'event_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   eventTypeConceptId!: string;
 
   @Property({ fieldName: 'from_version', columnType: 'int', nullable: true })
@@ -21,7 +21,7 @@ export class KeyRotationEvents {
   @Property({ columnType: 'varchar', nullable: true })
   reason?: string;
 
-  @Property({ fieldName: 'performed_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'performed_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   performedByUserId?: string;
 
   @Property({ fieldName: 'occurred_at', columnType: 'timestamptz' })

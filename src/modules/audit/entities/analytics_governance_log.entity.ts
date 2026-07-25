@@ -16,7 +16,7 @@ export class AnalyticsGovernanceLog {
     fieldName: 'purpose_definition_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → telemetry.tracking_purpose_definitions
   purposeDefinitionId?: string;
 
   @Property({

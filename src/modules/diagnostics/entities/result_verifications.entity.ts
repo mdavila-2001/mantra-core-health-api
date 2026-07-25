@@ -21,7 +21,7 @@ export class ResultVerifications {
   @Property({ fieldName: 'result_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   resultConceptId!: string;
 
-  @Property({ fieldName: 'verified_by_profile_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'verified_by_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   verifiedByProfileId!: string;
 
   @Property({ fieldName: 'verified_at', columnType: 'timestamptz' })
@@ -38,10 +38,10 @@ export class ResultVerifications {
     fieldName: 'previous_verification_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → diagnostics.result_verifications
   previousVerificationId?: string;
 
-  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'signature_id', type: 'uuid', nullable: true }) // FK → chart.clinical_note_signatures
   signatureId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

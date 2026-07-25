@@ -16,7 +16,7 @@ export class CareEpisodes {
     fieldName: 'responsible_practitioner_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → profiles.health_practitioner_profiles
   responsiblePractitionerId?: string;
 
   @Property({ fieldName: 'type_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts

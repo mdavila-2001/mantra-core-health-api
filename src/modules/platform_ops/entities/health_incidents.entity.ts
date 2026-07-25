@@ -27,7 +27,7 @@ export class HealthIncidents {
   @Property({ columnType: 'varchar' })
   title!: string;
 
-  @Property({ fieldName: 'detected_by_run_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'detected_by_run_id', type: 'uuid', nullable: true }) // FK → platform_ops.health_check_runs
   detectedByRunId?: string;
 
   @Property({

@@ -9,7 +9,7 @@ export class Enrollments {
   @Property({ fieldName: 'course_id', type: 'uuid' }) // FK → education.courses
   courseId!: string;
 
-  @Property({ fieldName: 'cohort_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'cohort_id', type: 'uuid', nullable: true }) // FK → education.course_cohorts
   cohortId?: string;
 
   @Property({ fieldName: 'learner_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts

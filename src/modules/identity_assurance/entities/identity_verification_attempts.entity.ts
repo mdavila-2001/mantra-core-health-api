@@ -18,10 +18,10 @@ export class IdentityVerificationAttempts {
   @Property({ fieldName: 'attempt_number', columnType: 'int' })
   attemptNumber!: number;
 
-  @Property({ fieldName: 'request_message_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'request_message_id', type: 'uuid', nullable: true }) // FK → integrations.outbound_messages
   requestMessageId?: string;
 
-  @Property({ fieldName: 'response_message_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'response_message_id', type: 'uuid', nullable: true }) // FK → integrations.inbound_messages
   responseMessageId?: string;
 
   @Property({

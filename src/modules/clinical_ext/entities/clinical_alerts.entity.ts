@@ -31,7 +31,7 @@ export class ClinicalAlerts {
   @Property({ fieldName: 'trigger_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   triggerConceptId?: string;
 
-  @Property({ fieldName: 'rule_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'rule_id', type: 'uuid', nullable: true }) // FK → clinical_ext.cds_rules
   ruleId?: string;
 
   @Property({ fieldName: 'detail_text', columnType: 'text', nullable: true })

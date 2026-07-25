@@ -31,7 +31,7 @@ export class EncryptionProfiles {
   })
   deterministicFieldsJson!: unknown;
 
-  @Property({ fieldName: 'rotation_policy_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'rotation_policy_id', type: 'uuid' }) // FK → polyglot_storage.key_rotation_policies
   rotationPolicyId!: string;
 
   @Property({ columnType: 'varchar' })

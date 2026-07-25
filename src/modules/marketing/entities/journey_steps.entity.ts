@@ -36,10 +36,10 @@ export class JourneySteps {
   })
   conditionJson?: unknown;
 
-  @Property({ fieldName: 'next_step_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'next_step_id', type: 'uuid', nullable: true }) // FK → marketing.journey_steps
   nextStepId?: string;
 
-  @Property({ fieldName: 'branch_step_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'branch_step_id', type: 'uuid', nullable: true }) // FK → marketing.journey_steps
   branchStepId?: string;
 
   @Property({ columnType: 'int', nullable: true })

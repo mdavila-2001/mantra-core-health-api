@@ -6,7 +6,7 @@ export class IntegrationFieldMappings {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'endpoint_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'endpoint_id', type: 'uuid' }) // FK → integrations.integration_endpoints
   endpointId!: string;
 
   @Property({ fieldName: 'source_path', columnType: 'varchar' })

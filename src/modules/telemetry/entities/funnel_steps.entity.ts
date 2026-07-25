@@ -12,7 +12,7 @@ export class FunnelSteps {
   @Property({ fieldName: 'step_number', columnType: 'int' })
   stepNumber!: number;
 
-  @Property({ fieldName: 'event_schema_definition_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'event_schema_definition_id', type: 'uuid' }) // FK → telemetry.activity_event_schema_definitions
   eventSchemaDefinitionId!: string;
 
   @Property({

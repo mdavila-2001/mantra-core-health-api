@@ -6,7 +6,7 @@ export class TransactionFiles {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid' }) // FK → accounting.journal_transactions
   transactionId!: string;
 
   @Property({ fieldName: 'file_id', type: 'uuid' }) // FK → common.files

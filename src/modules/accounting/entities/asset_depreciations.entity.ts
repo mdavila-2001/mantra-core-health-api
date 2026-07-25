@@ -22,7 +22,7 @@ export class AssetDepreciations {
   })
   bookValueAfter?: string;
 
-  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'transaction_id', type: 'uuid', nullable: true }) // FK → accounting.journal_transactions
   transactionId?: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

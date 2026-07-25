@@ -6,7 +6,7 @@ export class HealthContextFacts {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'context_version_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'context_version_id', type: 'uuid' }) // FK → health_context.country_health_context_versions
   contextVersionId!: string;
 
   @Property({ fieldName: 'fact_key', columnType: 'varchar' })

@@ -9,13 +9,13 @@ export class EncryptionKeys {
   @Property({ fieldName: 'key_alias', columnType: 'varchar' })
   keyAlias!: string;
 
-  @Property({ fieldName: 'key_purpose_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'key_purpose_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   keyPurposeConceptId!: string;
 
-  @Property({ fieldName: 'algorithm_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'algorithm_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   algorithmConceptId!: string;
 
-  @Property({ fieldName: 'provider_concept_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'provider_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   providerConceptId?: string;
 
   @Property({
@@ -52,10 +52,10 @@ export class EncryptionKeys {
   })
   nextRotationAt?: Date;
 
-  @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'retention_policy_id', type: 'uuid', nullable: true }) // FK → system_ops.retention_policies
   retentionPolicyId?: string;
 
-  @Property({ fieldName: 'state_concept_id', type: 'uuid' })
+  @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   stateConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -64,10 +64,10 @@ export class EncryptionKeys {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })

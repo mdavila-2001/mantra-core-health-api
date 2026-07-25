@@ -6,23 +6,23 @@ export class DeliveryTrackingEvents {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'delivery_id', type: 'uuid' }) // FK (destino no resuelto)
+  @Property({ fieldName: 'delivery_id', type: 'uuid' }) // FK → messaging.notification_deliveries
   deliveryId!: string;
 
   @Property({ fieldName: 'notification_request_id', type: 'uuid' }) // FK → messaging.notification_requests
   notificationRequestId!: string;
 
-  @Property({ fieldName: 'dispatch_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'dispatch_id', type: 'uuid', nullable: true }) // FK → marketing.campaign_dispatches
   dispatchId?: string;
 
   @Property({
     fieldName: 'dispatch_recipient_id',
     type: 'uuid',
     nullable: true,
-  }) // FK (destino no resuelto)
+  }) // FK → marketing.campaign_dispatch_recipients
   dispatchRecipientId?: string;
 
-  @Property({ fieldName: 'inbound_event_id', type: 'uuid', nullable: true }) // FK (destino no resuelto)
+  @Property({ fieldName: 'inbound_event_id', type: 'uuid', nullable: true }) // FK → messaging.adapter_inbound_events
   inboundEventId?: string;
 
   @Property({ fieldName: 'canonical_event_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
