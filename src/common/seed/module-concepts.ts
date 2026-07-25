@@ -3,6 +3,10 @@ import { DIRECTORY_CONCEPT_SEEDS } from '../../modules/directory/directory.conce
 import { PROFILES_CONCEPT_SEEDS } from '../../modules/profiles/profiles.concepts';
 import { AUTHZ_CONCEPT_SEEDS } from '../../modules/authz/authz.concepts';
 import { CONSENT_CONCEPT_SEEDS } from '../../modules/consent/consent.concepts';
+import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
+import { CLINICAL_CONCEPT_SEEDS } from '../../modules/clinical/clinical.concepts';
+import { AUDIT_CONCEPT_SEEDS } from '../../modules/audit/audit.concepts';
+import { SYSTEM_OPS_CONCEPT_SEEDS } from '../../modules/system_ops/system_ops.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -20,4 +24,8 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...PROFILES_CONCEPT_SEEDS,
   ...AUTHZ_CONCEPT_SEEDS,
   ...CONSENT_CONCEPT_SEEDS,
+  ...FORMS_CONCEPT_SEEDS,
+  ...CLINICAL_CONCEPT_SEEDS,
+  ...AUDIT_CONCEPT_SEEDS,
+  ...SYSTEM_OPS_CONCEPT_SEEDS,
 ];

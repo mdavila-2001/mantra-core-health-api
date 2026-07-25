@@ -318,7 +318,9 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     body: (c) => ({
       patientProfileId: patient(c),
       tenantId: c.tenantId,
-      encounterId: c.adminUserId,
+      // El encuentro real lo aporta el módulo clinical (corre antes en el registro);
+      // si no estuviera disponible, el caso quedaría dependiente de ese id.
+      encounterId: c.vars.clinEncounterId ?? c.adminUserId,
       decision: 'ACCEPTED',
     }),
     expectedStatus: 201,

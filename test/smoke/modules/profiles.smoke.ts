@@ -40,10 +40,19 @@ export const PROFILES_SMOKE: SmokeCase[] = [
 
   // ---- UC-05-02: vincular cuenta de portal ----------------------------------
   {
+    // El vínculo tiene un índice único parcial por user_id activo; se crea un
+    // usuario fresco por corrida para que el smoke sea re-ejecutable sin colisión.
+    module: 'Profiles', endpoint: 'POST /iam/users',
+    name: 'setup: usuario para vínculo de cuenta',
+    method: 'post', path: () => '/iam/users',
+    body: (c) => ({ displayName: 'Link User', email: `link-${c.u}@example.com`, password: 'Str0ng-Passw0rd!' }),
+    expectedStatus: 201, capture: (b, c) => { c.vars.linkUserId = String(b.id); },
+  },
+  {
     module: 'Profiles', endpoint: 'POST /profiles/persons/{personId}/account-links',
     name: 'happy: vincular cuenta',
     method: 'post', path: (c) => `/profiles/persons/${c.vars.personId}/account-links`,
-    body: (c) => ({ userId: c.adminUserId }), expectedStatus: 201,
+    body: (c) => ({ userId: c.vars.linkUserId }), expectedStatus: 201,
   },
   {
     module: 'Profiles', endpoint: 'POST /profiles/persons/{personId}/account-links',

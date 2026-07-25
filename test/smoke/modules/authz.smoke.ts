@@ -110,7 +110,7 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'happy: publica política',
     method: 'post',
     path: (c) => `/authz/tenants/${c.tenantId}/access-policies`,
-    body: (c) => ({ name: `no-export-${c.u}`, effect: 'DENY', targetResource: 'patient.record', priority: 10 }),
+    body: (c) => ({ name: `no-export-${c.u}`, effect: 'DENY', targetResource: `patient.record.${c.u}`, priority: 10 }),
     expectedStatus: 201,
   },
 
