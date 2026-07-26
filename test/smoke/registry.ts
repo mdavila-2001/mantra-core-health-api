@@ -23,6 +23,9 @@ import { IDENTITY_ASSURANCE_SMOKE } from './modules/identity_assurance.smoke';
 import { DELEGATED_ACCESS_SMOKE } from './modules/delegated_access.smoke';
 import { READ_MODELS_SMOKE } from './modules/read_models.smoke';
 import { INTEGRATION_CONTRACTS_SMOKE } from './modules/integration_contracts.smoke';
+import { PHARMACY_INVENTORY_SMOKE } from './modules/pharmacy_inventory.smoke';
+import { INSURANCE_SMOKE } from './modules/insurance.smoke';
+import { TELEMETRY_SMOKE } from './modules/telemetry.smoke';
 
 /**
  * Registro de casos de smoke por módulo. El orquestador añade aquí una línea por
@@ -61,4 +64,7 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...DELEGATED_ACCESS_SMOKE,
   ...READ_MODELS_SMOKE,
   ...INTEGRATION_CONTRACTS_SMOKE,
+  ...PHARMACY_INVENTORY_SMOKE,
+  ...INSURANCE_SMOKE,
+  ...TELEMETRY_SMOKE,
 ];
