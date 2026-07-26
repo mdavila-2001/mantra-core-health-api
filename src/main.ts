@@ -1,4 +1,6 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 
@@ -33,6 +35,30 @@ async function bootstrap() {
   // servicios) queda enrutado a pino.
   app.useLogger(app.get(Logger));
   app.flushLogs();
+
+  // Validación global de DTO. `whitelist` + `forbidNonWhitelisted` cierran el
+  // mass-assignment: cualquier propiedad no declarada en el DTO se rechaza en
+  // lugar de filtrarse a la capa de dominio. `transform` habilita la coerción de
+  // tipos declarada con class-transformer (p. ej. query params numéricos).
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  // OpenAPI/Swagger en /docs. La misma especificación que documenta README y
+  // Postman: contrato único de la API. Bearer JWT declarado como esquema global.
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('REDESA Health API')
+    .setDescription('Mantra Core Technologies - REDESA Health Ecosystem')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }

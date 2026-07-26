@@ -1,0 +1,49 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { ObservationsService } from '../services';
+import {
+  AmendObservationDto,
+  CreateObservationDto,
+  ObservationResponseDto,
+} from '../dto';
+
+/** Endpoints de observaciones clínicas (registro y enmienda). */
+@ApiTags('clinical-observations')
+@ApiBearerAuth()
+@Controller('clinical/observations')
+export class ClinicalObservationsController {
+  constructor(private readonly observationsService: ObservationsService) {}
+
+  /** UC-08-03. */
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Registrar una observación con componentes y ejecutantes' })
+  record(
+    @Body() dto: CreateObservationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ObservationResponseDto> {
+    return this.observationsService.record(dto, actor);
+  }
+
+  /** UC-08-04. */
+  @Patch(':id/amend')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Corregir/enmendar una observación (value contract)' })
+  amend(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AmendObservationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ObservationResponseDto> {
+    return this.observationsService.amend(id, dto, actor);
+  }
+}

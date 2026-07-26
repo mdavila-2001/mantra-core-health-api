@@ -1,0 +1,2 @@
+export * from './profiles-patients.controller';
+export * from './profiles-practitioners.controller';

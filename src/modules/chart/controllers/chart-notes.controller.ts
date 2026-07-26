@@ -1,0 +1,135 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { ChartNotesService } from '../services';
+import {
+  AddVersionDto,
+  AmendNoteDto,
+  CosignVersionDto,
+  CreateNoteDto,
+  ExamFindingsDto,
+  ExamFindingsResultDto,
+  NoteVersionResponseDto,
+  ReleaseResultDto,
+  ReleaseVersionDto,
+  SignVersionDto,
+  WithholdVersionDto,
+} from '../dto';
+
+/**
+ * Endpoints de notas clínicas versionadas (`/charts/notes`). Capa fina: valida
+ * parámetros y delega en `ChartNotesService`. La autenticación la impone el guard
+ * global; el acceso por paciente (grants) se valida aguas arriba.
+ */
+@ApiTags('chart-notes')
+@ApiBearerAuth()
+@Controller('charts/notes')
+export class ChartNotesController {
+  constructor(private readonly notesService: ChartNotesService) {}
+
+  /** UC-15-01. */
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear una nota clínica versionada (borrador SOAP)' })
+  createNote(
+    @Body() dto: CreateNoteDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<NoteVersionResponseDto> {
+    return this.notesService.createNote(dto, actor);
+  }
+
+  /** UC-15-02. */
+  @Put(':noteId/versions')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Editar borrador creando una nueva versión inmutable' })
+  addVersion(
+    @Param('noteId', ParseUUIDPipe) noteId: string,
+    @Body() dto: AddVersionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<NoteVersionResponseDto> {
+    return this.notesService.addVersion(noteId, dto, actor);
+  }
+
+  /** UC-15-03. */
+  @Post(':noteId/versions/:versionId/sign')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Firmar una versión y sellar su contenido' })
+  signVersion(
+    @Param('noteId', ParseUUIDPipe) noteId: string,
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @Body() dto: SignVersionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<NoteVersionResponseDto> {
+    return this.notesService.signVersion(noteId, versionId, dto, actor);
+  }
+
+  /** UC-15-04. */
+  @Post(':noteId/versions/:versionId/cosign')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Cofirmar una versión firmada (cadena de firmas)' })
+  cosignVersion(
+    @Param('noteId', ParseUUIDPipe) noteId: string,
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @Body() dto: CosignVersionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<NoteVersionResponseDto> {
+    return this.notesService.cosignVersion(noteId, versionId, dto, actor);
+  }
+
+  /** UC-15-05. */
+  @Post(':noteId/amendments')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Enmendar una nota firmada (addendum versionado)' })
+  amendNote(
+    @Param('noteId', ParseUUIDPipe) noteId: string,
+    @Body() dto: AmendNoteDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<NoteVersionResponseDto> {
+    return this.notesService.amendNote(noteId, dto, actor);
+  }
+
+  /** UC-15-06. */
+  @Post('versions/:versionId/release')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Liberar una versión al paciente' })
+  releaseVersion(
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @Body() dto: ReleaseVersionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReleaseResultDto> {
+    return this.notesService.releaseVersion(versionId, dto, actor);
+  }
+
+  /** UC-15-07. */
+  @Post('versions/:versionId/withhold')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Retener una versión del paciente (motivo legal)' })
+  withholdVersion(
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @Body() dto: WithholdVersionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReleaseResultDto> {
+    return this.notesService.withholdVersion(versionId, dto, actor);
+  }
+
+  /** UC-15-08. */
+  @Post('versions/:versionId/exam-findings')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Registrar hallazgos de examen físico' })
+  recordExamFindings(
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @Body() dto: ExamFindingsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ExamFindingsResultDto> {
+    return this.notesService.recordExamFindings(versionId, dto, actor);
+  }
+}

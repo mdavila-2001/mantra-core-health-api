@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { OrmModule, ormEnvSchema } from './orm';
 import { LoggingModule, loggingEnvSchema } from './logging';
+import { AllExceptionsFilter, AuthModule, authEnvSchema } from './common';
+import { SeedModule } from './common/seed/seed.module';
 import { IamModule } from './modules/iam/iam.module';
 import { DirectoryModule } from './modules/directory/directory.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -70,14 +73,20 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
     // esquemas Joi (persistencia + logging) en la única validación global.
     ConfigModule.forRoot({
       isGlobal: true,
-      validationSchema: ormEnvSchema.concat(loggingEnvSchema),
+      validationSchema: ormEnvSchema.concat(loggingEnvSchema).concat(authEnvSchema),
     }),
     // Logging estructurado con pino para todas las capas. Va primero para que el
     // logger de peticiones y el `PinoLogger` estén disponibles desde el arranque.
     LoggingModule,
+    // Autenticación/autorización transversal: estrategia JWT, guards globales y
+    // emisión de tokens. Global, se aplica a todos los dominios.
+    AuthModule,
     // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
     // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
     OrmModule,
+    // Datos estructurales iniciales (catálogo de conceptos internos). Va tras
+    // OrmModule para que el esquema esté materializado cuando corre el seed.
+    SeedModule,
     IamModule,
     DirectoryModule,
     ProfilesModule,
@@ -137,6 +146,11 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
     VectorRagModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Filtro global de excepciones: homogeneiza el contrato de error y decide
+    // qué se registra y qué se oculta al cliente. Ver AllExceptionsFilter.
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+  ],
 })
 export class AppModule {}
