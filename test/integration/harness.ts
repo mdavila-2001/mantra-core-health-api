@@ -2,10 +2,46 @@ import { ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MikroORM } from '@mikro-orm/postgresql';
 import type { INestApplication } from '@nestjs/common';
+import pg from 'pg';
 import { AppModule } from '../../src/app.module';
 import { CONCEPTS, TokenService, createdBy } from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
+
+/**
+ * Vacía todos los datos de negocio antes de un arranque, dejando la base limpia
+ * para que la corrida sea reproducible: sin esto, los recursos con constraints
+ * de unicidad (p. ej. una farmacia por tenant, una política por recurso) chocan
+ * en la segunda ejecución del smoke. El seed de conceptos/tenant/propósito y el
+ * admin se rematerializan en el arranque, así que truncar es seguro.
+ *
+ * Trunca toda tabla de los esquemas de negocio (no del sistema) con CASCADE para
+ * respetar las FK. Solo debe usarse contra la base de pruebas del `.env`.
+ */
+export async function resetBusinessData(): Promise<void> {
+  const client = new pg.Client({
+    host: process.env.DB_HOST ?? 'localhost',
+    port: Number(process.env.DB_PORT ?? 5434),
+    user: process.env.DB_USER ?? 'mantra',
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME ?? 'mantra_redesa_health',
+  });
+  await client.connect();
+  try {
+    const { rows } = await client.query<{ qualified: string }>(
+      `select format('%I.%I', table_schema, table_name) as qualified
+         from information_schema.tables
+        where table_type = 'BASE TABLE'
+          and table_schema not in ('pg_catalog', 'information_schema', 'public', 'pg_toast')`,
+    );
+    if (rows.length > 0) {
+      const list = rows.map((r) => r.qualified).join(', ');
+      await client.query(`TRUNCATE ${list} RESTART IDENTITY CASCADE`);
+    }
+  } finally {
+    await client.end();
+  }
+}
 
 /**
  * Arranque de una instancia real de NestJS para las pruebas de integración.
@@ -26,8 +62,15 @@ export interface TestContext {
 /** Id determinista del administrador de pruebas (FK válida para created_by). */
 export const TEST_ADMIN_ID = '00000000-0000-4000-8000-000000000001';
 
-export async function bootstrapTestApp(): Promise<TestContext> {
+export async function bootstrapTestApp(
+  opts: { reset?: boolean } = {},
+): Promise<TestContext> {
   process.env.ORM_SCHEMA_SYNC = process.env.ORM_SCHEMA_SYNC ?? 'off';
+
+  // Reset opcional (lo usa el smoke) para una corrida reproducible desde cero.
+  if (opts.reset) {
+    await resetBusinessData();
+  }
 
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],

@@ -25,7 +25,7 @@ const runUuid = (u: number, tag: string): string =>
 
 // hospitals.tenant_id es FK a directory.tenants → usar el tenant sembrado.
 const hospitalTenant = (c: SmokeCtx) => c.tenantId;
-const hospitalPractice = (c: SmokeCtx) => runUuid(c.u, 'b');
+const hospitalPractice = (c: SmokeCtx) => c.vars.pracPracticeId;
 // data_boundaries.tenant_id también es FK a directory.tenants → tenant sembrado.
 // (Las afiliaciones exigen dos tenants distintos; con uno solo su happy-path queda
 // documentado como limitación por falta de un segundo tenant sembrado.)

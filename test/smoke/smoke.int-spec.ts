@@ -45,7 +45,9 @@ describe('Smoke test — 30 endpoints', () => {
   let server: Server;
 
   beforeAll(async () => {
-    ctx = await bootstrapTestApp();
+    // reset: parte de una base limpia para que el smoke sea reproducible entre
+    // corridas (evita colisiones de unicidad por datos acumulados).
+    ctx = await bootstrapTestApp({ reset: true });
     orm = ctx.orm;
     server = ctx.app.getHttpServer();
   });

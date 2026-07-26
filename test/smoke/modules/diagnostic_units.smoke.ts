@@ -1,5 +1,6 @@
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
+import { CONCEPTS } from '../../../src/common';
 
 /**
  * Smoke del módulo 23 — Diagnostic Units, Studies, Specialists and Prices.
@@ -23,11 +24,13 @@ import { UUID_ABSENT } from '../smoke-kit';
 // UUID fijos para FK cross-módulo no forzadas / *_concept_id aportados por cliente.
 // practice_site_id SÍ es FK a practice.practice_sites → usar el sitio sembrado por
 // el smoke de practice (ctx.vars.pracSiteId), que corre antes en el registro.
-const STUDY_CONCEPT = '33333333-3333-4333-8333-333333333333';
-const SPECIALTY_CONCEPT = '44444444-4444-4444-8444-444444444444';
-const ACCREDITATION_CONCEPT = '55555555-5555-4555-8555-555555555555';
-const EQUIPMENT_TYPE = '66666666-6666-4666-8666-666666666666';
-const MODALITY_CONCEPT = '77777777-7777-4777-8777-777777777777';
+// Estos *_concept_id SÍ son FK a terminology.catalog_concepts → usar un concepto
+// realmente sembrado. PRACTITIONER_ROLE no es FK forzada (uuid libre por corrida).
+const STUDY_CONCEPT = CONCEPTS.STATE_ACTIVE;
+const SPECIALTY_CONCEPT = CONCEPTS.STATE_ACTIVE;
+const ACCREDITATION_CONCEPT = CONCEPTS.STATE_ACTIVE;
+const EQUIPMENT_TYPE = CONCEPTS.STATE_ACTIVE;
+const MODALITY_CONCEPT = CONCEPTS.STATE_ACTIVE;
 const PRACTITIONER_ROLE = '88888888-8888-4888-8888-888888888888';
 
 export const DIAGNOSTIC_UNITS_SMOKE: SmokeCase[] = [
