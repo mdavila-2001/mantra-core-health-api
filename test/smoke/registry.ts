@@ -15,6 +15,10 @@ import { ACCOUNTING_SMOKE } from './modules/accounting.smoke';
 import { BILLING_SMOKE } from './modules/billing.smoke';
 import { CLINICAL_EXT_SMOKE } from './modules/clinical_ext.smoke';
 import { COMMUNITY_SMOKE } from './modules/community.smoke';
+import { ORGANIZATION_EXTENSIONS_SMOKE } from './modules/organization_extensions.smoke';
+import { DIAGNOSTIC_UNITS_SMOKE } from './modules/diagnostic_units.smoke';
+import { PHARMACY_SMOKE } from './modules/pharmacy.smoke';
+import { DIAGNOSTICS_SMOKE } from './modules/diagnostics.smoke';
 
 /**
  * Registro de casos de smoke por módulo. El orquestador añade aquí una línea por
@@ -45,4 +49,8 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...BILLING_SMOKE,
   ...CLINICAL_EXT_SMOKE,
   ...COMMUNITY_SMOKE,
+  ...ORGANIZATION_EXTENSIONS_SMOKE,
+  ...DIAGNOSTIC_UNITS_SMOKE,
+  ...PHARMACY_SMOKE,
+  ...DIAGNOSTICS_SMOKE,
 ];

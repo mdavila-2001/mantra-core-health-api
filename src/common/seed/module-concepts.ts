@@ -15,6 +15,10 @@ import { ACCOUNTING_CONCEPT_SEEDS } from '../../modules/accounting/accounting.co
 import { BILLING_CONCEPT_SEEDS } from '../../modules/billing/billing.concepts';
 import { CLINICAL_EXT_CONCEPT_SEEDS } from '../../modules/clinical_ext/clinical_ext.concepts';
 import { COMMUNITY_CONCEPT_SEEDS } from '../../modules/community/community.concepts';
+import { ORGANIZATION_EXTENSIONS_CONCEPT_SEEDS } from '../../modules/organization_extensions/organization_extensions.concepts';
+import { DIAGNOSTIC_UNITS_CONCEPT_SEEDS } from '../../modules/diagnostic_units/diagnostic_units.concepts';
+import { PHARMACY_CONCEPT_SEEDS } from '../../modules/pharmacy/pharmacy.concepts';
+import { DIAGNOSTICS_CONCEPT_SEEDS } from '../../modules/diagnostics/diagnostics.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -44,4 +48,8 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...BILLING_CONCEPT_SEEDS,
   ...CLINICAL_EXT_CONCEPT_SEEDS,
   ...COMMUNITY_CONCEPT_SEEDS,
+  ...ORGANIZATION_EXTENSIONS_CONCEPT_SEEDS,
+  ...DIAGNOSTIC_UNITS_CONCEPT_SEEDS,
+  ...PHARMACY_CONCEPT_SEEDS,
+  ...DIAGNOSTICS_CONCEPT_SEEDS,
 ];

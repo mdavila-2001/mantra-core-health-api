@@ -27,7 +27,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/invoices:issue-from-encounter',
     body: (c) => ({
-      practiceId: c.tenantId,
+      practiceId: c.vars.pracPracticeId,
       patientProfileId: c.vars.patientProfileId,
       tenantId: c.tenantId,
       lines: [
@@ -47,7 +47,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/invoices:issue-from-encounter',
     body: (c) => ({
-      practiceId: c.tenantId,
+      practiceId: c.vars.pracPracticeId,
       patientProfileId: c.vars.patientProfileId,
       lines: [{ description: 'Procedimiento', quantity: '1', unitPrice: '100.00' }],
     }),
@@ -63,7 +63,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/invoices:issue-from-encounter',
     body: (c) => ({
-      practiceId: c.tenantId,
+      practiceId: c.vars.pracPracticeId,
       patientProfileId: c.vars.patientProfileId,
       lines: [{ description: 'Servicio', quantity: '1', unitPrice: '80.00' }],
     }),
@@ -79,7 +79,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/invoices:issue-from-encounter',
     auth: false,
-    body: (c) => ({ practiceId: c.tenantId, patientProfileId: c.vars.patientProfileId, lines: [{ quantity: '1', unitPrice: '1' }] }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, patientProfileId: c.vars.patientProfileId, lines: [{ quantity: '1', unitPrice: '1' }] }),
     expectedStatus: 401,
   },
   {
@@ -88,7 +88,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     name: 'límite: sin líneas -> 400',
     method: 'post',
     path: () => '/billing/invoices:issue-from-encounter',
-    body: (c) => ({ practiceId: c.tenantId, patientProfileId: c.vars.patientProfileId, lines: [] }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, patientProfileId: c.vars.patientProfileId, lines: [] }),
     expectedStatus: 400,
   },
 
@@ -102,7 +102,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/payments-received:apply',
     body: (c) => ({
-      practiceId: c.tenantId,
+      practiceId: c.vars.pracPracticeId,
       patientProfileId: c.vars.patientProfileId,
       amount: '60.00',
       allocations: [{ invoiceId: c.vars.billingInvoiceId, allocatedAmount: '60.00' }],
@@ -119,7 +119,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/payments-received:apply',
     body: (c) => ({
-      practiceId: c.tenantId,
+      practiceId: c.vars.pracPracticeId,
       amount: '10.00',
       allocations: [{ invoiceId: c.vars.billingInvoiceId, allocatedAmount: '50.00' }],
     }),
@@ -132,7 +132,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/payments-received:apply',
     auth: false,
-    body: (c) => ({ practiceId: c.tenantId, amount: '1.00', allocations: [{ invoiceId: c.vars.billingInvoiceId, allocatedAmount: '1.00' }] }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, amount: '1.00', allocations: [{ invoiceId: c.vars.billingInvoiceId, allocatedAmount: '1.00' }] }),
     expectedStatus: 401,
   },
 
@@ -222,7 +222,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/patient-statements:generate',
     body: (c) => ({
-      practiceId: c.tenantId,
+      practiceId: c.vars.pracPracticeId,
       patientProfileId: c.vars.patientProfileId,
       periodStart: '2026-07-01',
       periodEnd: '2026-07-31',
@@ -237,7 +237,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/patient-statements:generate',
     body: (c) => ({
-      practiceId: c.tenantId,
+      practiceId: c.vars.pracPracticeId,
       patientProfileId: c.vars.patientProfileId,
       periodStart: '2026-07-01',
       periodEnd: '2026-07-31',
@@ -326,7 +326,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     name: 'happy: registra KPI DSO',
     method: 'post',
     path: () => '/billing/kpi-snapshots:compute',
-    body: (c) => ({ practiceId: c.tenantId, kpiCode: `DSO-${c.u}`, valueNumeric: '42.50' }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, kpiCode: `DSO-${c.u}`, valueNumeric: '42.50' }),
     expectedStatus: 201,
   },
   {
@@ -336,7 +336,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/kpi-snapshots:compute',
     auth: false,
-    body: (c) => ({ practiceId: c.tenantId, kpiCode: 'DSO', valueNumeric: '1.0' }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, kpiCode: 'DSO', valueNumeric: '1.0' }),
     expectedStatus: 401,
   },
 
@@ -372,7 +372,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/bills',
     auth: false,
-    body: (c) => ({ practiceId: c.tenantId, vendorId: UUID_ABSENT, billNumber: 'B-1', lines: [{ quantity: '1', unitPrice: '1.00' }] }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, vendorId: UUID_ABSENT, billNumber: 'B-1', lines: [{ quantity: '1', unitPrice: '1.00' }] }),
     expectedStatus: 401,
   },
   {
@@ -381,7 +381,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     name: 'límite: vendor inexistente -> 404 (happy-path exige vendor sembrado)',
     method: 'post',
     path: () => '/billing/bills',
-    body: (c) => ({ practiceId: c.tenantId, vendorId: UUID_ABSENT, billNumber: `B-${c.u}`, lines: [{ quantity: '1', unitPrice: '1.00' }] }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, vendorId: UUID_ABSENT, billNumber: `B-${c.u}`, lines: [{ quantity: '1', unitPrice: '1.00' }] }),
     expectedStatus: 404,
   },
 
@@ -395,7 +395,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/billing/payments-made:execute',
     auth: false,
-    body: (c) => ({ practiceId: c.tenantId, amount: '1.00', allocations: [{ billId: UUID_ABSENT, allocatedAmount: '1.00' }] }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, amount: '1.00', allocations: [{ billId: UUID_ABSENT, allocatedAmount: '1.00' }] }),
     expectedStatus: 401,
   },
   {
@@ -404,7 +404,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     name: 'límite: bill inexistente -> 404 (happy-path exige bill sembrado)',
     method: 'post',
     path: () => '/billing/payments-made:execute',
-    body: (c) => ({ practiceId: c.tenantId, amount: '10.00', allocations: [{ billId: UUID_ABSENT, allocatedAmount: '10.00' }] }),
+    body: (c) => ({ practiceId: c.vars.pracPracticeId, amount: '10.00', allocations: [{ billId: UUID_ABSENT, allocatedAmount: '10.00' }] }),
     expectedStatus: 404,
   },
 ];
