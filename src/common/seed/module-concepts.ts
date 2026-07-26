@@ -7,6 +7,10 @@ import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
 import { CLINICAL_CONCEPT_SEEDS } from '../../modules/clinical/clinical.concepts';
 import { AUDIT_CONCEPT_SEEDS } from '../../modules/audit/audit.concepts';
 import { SYSTEM_OPS_CONCEPT_SEEDS } from '../../modules/system_ops/system_ops.concepts';
+import { GEO_CONCEPT_SEEDS } from '../../modules/geo/geo.concepts';
+import { PRACTICE_CONCEPT_SEEDS } from '../../modules/practice/practice.concepts';
+import { CHART_CONCEPT_SEEDS } from '../../modules/chart/chart.concepts';
+import { INTEGRATIONS_CONCEPT_SEEDS } from '../../modules/integrations/integrations.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -28,4 +32,8 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...CLINICAL_CONCEPT_SEEDS,
   ...AUDIT_CONCEPT_SEEDS,
   ...SYSTEM_OPS_CONCEPT_SEEDS,
+  ...GEO_CONCEPT_SEEDS,
+  ...PRACTICE_CONCEPT_SEEDS,
+  ...CHART_CONCEPT_SEEDS,
+  ...INTEGRATIONS_CONCEPT_SEEDS,
 ];

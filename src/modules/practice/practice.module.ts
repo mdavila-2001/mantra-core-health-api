@@ -1,12 +1,69 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { PracticeController } from './practice.controller';
-import { PracticeService } from './practice.service';
 import * as entities from './entities';
+import {
+  PracticesController,
+  SitesController,
+  AccreditationsController,
+  RoleAssignmentsController,
+  InventoryItemsController,
+} from './controllers';
+import {
+  PracticeSitesService,
+  PracticeAccreditationsService,
+  ClinicalStructureService,
+  PracticeSettingsService,
+  PracticeWorkforceService,
+  PracticeInventoryService,
+} from './services';
+import {
+  PracticesRepository,
+  PracticeSitesRepository,
+  PracticeAccreditationsRepository,
+  ClinicalUnitsRepository,
+  CareSpacesRepository,
+  HealthcareServicesRepository,
+  PracticeSettingsRepository,
+  PractitionerRoleAssignmentsRepository,
+  PractitionerSupportAssignmentsRepository,
+  InventoryItemsRepository,
+  InventoryMovementsRepository,
+} from './repositories';
 
+/**
+ * Módulo Practice (14): organizaciones de atención, sitios, unidades clínicas,
+ * espacios, servicios de salud, personal (roles y apoyo), acreditaciones,
+ * ajustes e inventario. Implementa UC-14-01..12 (más un bootstrap de práctica).
+ */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [PracticeController],
-  providers: [PracticeService],
+  controllers: [
+    PracticesController,
+    SitesController,
+    AccreditationsController,
+    RoleAssignmentsController,
+    InventoryItemsController,
+  ],
+  providers: [
+    // Repositorios
+    PracticesRepository,
+    PracticeSitesRepository,
+    PracticeAccreditationsRepository,
+    ClinicalUnitsRepository,
+    CareSpacesRepository,
+    HealthcareServicesRepository,
+    PracticeSettingsRepository,
+    PractitionerRoleAssignmentsRepository,
+    PractitionerSupportAssignmentsRepository,
+    InventoryItemsRepository,
+    InventoryMovementsRepository,
+    // Servicios
+    PracticeSitesService,
+    PracticeAccreditationsService,
+    ClinicalStructureService,
+    PracticeSettingsService,
+    PracticeWorkforceService,
+    PracticeInventoryService,
+  ],
 })
 export class PracticeModule {}
