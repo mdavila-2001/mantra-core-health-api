@@ -35,8 +35,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
       name: 'Secretary permission set',
       delegateType: 'SECRETARY',
       items: [
-        { permissionId: PERMISSION_A },
-        { permissionId: PERMISSION_STEP_UP, requiresStepUpAuthentication: true },
+        { permissionId: c.vars.authzPermissionId, requiresStepUpAuthentication: true },
       ],
     }),
     expectedStatus: 201,
@@ -51,7 +50,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/delegated-permission-sets',
     auth: false,
-    body: (c) => ({ tenantId: c.tenantId, code: `DA-X-${c.u}`, name: 'X', items: [{ permissionId: PERMISSION_A }] }),
+    body: (c) => ({ tenantId: c.tenantId, code: `DA-X-${c.u}`, name: 'X', items: [{ permissionId: c.vars.authzPermissionId }] }),
     expectedStatus: 401,
   },
   {
@@ -71,7 +70,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'happy: publica v2',
     method: 'post',
     path: (c) => `/delegated-permission-sets/${c.vars.daSetId}/versions`,
-    body: () => ({ items: [{ permissionId: PERMISSION_A }] }),
+    body: (c) => ({ items: [{ permissionId: c.vars.authzPermissionId }] }),
     expectedStatus: 201,
   },
   {
@@ -80,7 +79,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'límite: set inexistente -> 404',
     method: 'post',
     path: () => `/delegated-permission-sets/${UUID_ABSENT}/versions`,
-    body: () => ({ items: [{ permissionId: PERMISSION_A }] }),
+    body: (c) => ({ items: [{ permissionId: c.vars.authzPermissionId }] }),
     expectedStatus: 404,
   },
 
@@ -90,7 +89,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /org/{tenant_membership_id}/user-assignments',
     name: 'happy: asigna usuario org (scoped)',
     method: 'post',
-    path: (c) => `/org/${c.adminUserId}/user-assignments`,
+    path: (c) => `/org/${c.vars.dirMembershipId}/user-assignments`,
     body: (c) => ({ role: 'SECRETARY', accessScope: 'TENANT', supervisorUserId: c.adminUserId }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -102,7 +101,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /org/{tenant_membership_id}/user-assignments',
     name: 'límite: solapamiento rol+scope activo -> 409',
     method: 'post',
-    path: (c) => `/org/${c.adminUserId}/user-assignments`,
+    path: (c) => `/org/${c.vars.dirMembershipId}/user-assignments`,
     body: () => ({ role: 'SECRETARY', accessScope: 'TENANT' }),
     expectedStatus: 409,
   },
@@ -111,7 +110,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /org/{tenant_membership_id}/user-assignments',
     name: 'límite: sin auth -> 401',
     method: 'post',
-    path: (c) => `/org/${c.adminUserId}/user-assignments`,
+    path: (c) => `/org/${c.vars.dirMembershipId}/user-assignments`,
     auth: false,
     body: () => ({ role: 'NURSE' }),
     expectedStatus: 401,

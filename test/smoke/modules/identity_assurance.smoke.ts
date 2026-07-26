@@ -51,14 +51,14 @@ export const IDENTITY_ASSURANCE_SMOKE: SmokeCase[] = [
   {
     module: 'IdentityAssurance', endpoint: 'POST /identity/authorities/{id}/endpoints', name: 'happy: publicar endpoint',
     method: 'post', path: (c) => `/identity/authorities/${c.vars.idaAuthorityId}/endpoints`,
-    body: () => ({ integrationEndpointId: CID, capabilityConceptId: CID }),
+    body: (c) => ({ integrationEndpointId: c.vars.integEndpointId, capabilityConceptId: CID }),
     expectedStatus: 201,
     capture: (b, c) => { c.vars.idaEndpointId = String(b.id); },
   },
   {
     module: 'IdentityAssurance', endpoint: 'POST /identity/authorities/{id}/endpoints', name: 'límite: autoridad inexistente',
     method: 'post', path: () => `/identity/authorities/${UUID_ABSENT}/endpoints`,
-    body: () => ({ integrationEndpointId: CID, capabilityConceptId: CID }),
+    body: (c) => ({ integrationEndpointId: c.vars.integEndpointId, capabilityConceptId: CID }),
     expectedStatus: 404,
   },
 

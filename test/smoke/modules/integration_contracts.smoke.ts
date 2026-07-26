@@ -14,13 +14,13 @@ export const INTEGRATION_CONTRACTS_SMOKE: SmokeCase[] = [
   {
     module: 'IntegrationContracts', endpoint: 'POST /integration/contracts', name: 'happy: define contrato',
     method: 'post', path: () => '/integration/contracts',
-    body: (c) => ({ externalProviderId: c.tenantId, contractCode: `IC-${c.u}` }),
+    body: (c) => ({ externalProviderId: c.vars.integProviderId, contractCode: `IC-${c.u}` }),
     expectedStatus: 201, capture: (b, c) => { c.vars.icContractId = String(b.id); },
   },
   {
     module: 'IntegrationContracts', endpoint: 'POST /integration/contracts', name: 'límite: sin autenticación',
     method: 'post', path: () => '/integration/contracts', auth: false,
-    body: (c) => ({ externalProviderId: c.tenantId, contractCode: `x-${c.u}` }), expectedStatus: 401,
+    body: (c) => ({ externalProviderId: c.vars.integProviderId, contractCode: `x-${c.u}` }), expectedStatus: 401,
   },
   {
     module: 'IntegrationContracts', endpoint: 'POST /integration/contracts', name: 'límite: falta externalProviderId',
