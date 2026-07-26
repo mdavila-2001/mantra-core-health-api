@@ -23,6 +23,9 @@ import { PHARMACY_INVENTORY_CONCEPT_SEEDS } from '../../modules/pharmacy_invento
 import { INSURANCE_CONCEPT_SEEDS } from '../../modules/insurance/insurance.concepts';
 import { IDENTITY_ASSURANCE_CONCEPT_SEEDS } from '../../modules/identity_assurance/identity_assurance.concepts';
 import { TELEMETRY_CONCEPT_SEEDS } from '../../modules/telemetry/telemetry.concepts';
+import { DELEGATED_ACCESS_CONCEPT_SEEDS } from '../../modules/delegated_access/delegated_access.concepts';
+import { READ_MODELS_CONCEPT_SEEDS } from '../../modules/read_models/read_models.concepts';
+import { INTEGRATION_CONTRACTS_CONCEPT_SEEDS } from '../../modules/integration_contracts/integration_contracts.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -60,4 +63,7 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...INSURANCE_CONCEPT_SEEDS,
   ...IDENTITY_ASSURANCE_CONCEPT_SEEDS,
   ...TELEMETRY_CONCEPT_SEEDS,
+  ...DELEGATED_ACCESS_CONCEPT_SEEDS,
+  ...READ_MODELS_CONCEPT_SEEDS,
+  ...INTEGRATION_CONTRACTS_CONCEPT_SEEDS,
 ];

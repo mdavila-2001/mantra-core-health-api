@@ -20,6 +20,9 @@ import { DIAGNOSTIC_UNITS_SMOKE } from './modules/diagnostic_units.smoke';
 import { PHARMACY_SMOKE } from './modules/pharmacy.smoke';
 import { DIAGNOSTICS_SMOKE } from './modules/diagnostics.smoke';
 import { IDENTITY_ASSURANCE_SMOKE } from './modules/identity_assurance.smoke';
+import { DELEGATED_ACCESS_SMOKE } from './modules/delegated_access.smoke';
+import { READ_MODELS_SMOKE } from './modules/read_models.smoke';
+import { INTEGRATION_CONTRACTS_SMOKE } from './modules/integration_contracts.smoke';
 
 /**
  * Registro de casos de smoke por módulo. El orquestador añade aquí una línea por
@@ -55,4 +58,7 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...PHARMACY_SMOKE,
   ...DIAGNOSTICS_SMOKE,
   ...IDENTITY_ASSURANCE_SMOKE,
+  ...DELEGATED_ACCESS_SMOKE,
+  ...READ_MODELS_SMOKE,
+  ...INTEGRATION_CONTRACTS_SMOKE,
 ];

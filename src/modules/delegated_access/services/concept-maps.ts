@@ -1,0 +1,72 @@
+import { CONCEPTS } from '../../../common';
+import { DELEG } from '../delegated_access.concepts';
+
+/**
+ * Traducciones de los enums legibles que aceptan los DTO a los `*_concept_id`
+ * concretos. Aislarlas aquí mantiene los servicios centrados en la regla de
+ * negocio y evita esparcir literales de concepto por el código.
+ */
+
+export const ASSIGNMENT_ROLE_CONCEPT: Record<string, string> = {
+  STAFF: DELEG.ASSIGN_ROLE_STAFF,
+  SECRETARY: DELEG.ASSIGN_ROLE_SECRETARY,
+  ASSISTANT: DELEG.ASSIGN_ROLE_ASSISTANT,
+  NURSE: DELEG.ASSIGN_ROLE_NURSE,
+  BILLING: DELEG.ASSIGN_ROLE_BILLING,
+};
+
+export const ACCESS_SCOPE_CONCEPT: Record<string, string> = {
+  TENANT: DELEG.SCOPE_TENANT,
+  PRACTICE: DELEG.SCOPE_PRACTICE,
+  SITE: DELEG.SCOPE_SITE,
+  UNIT: DELEG.SCOPE_UNIT,
+};
+
+export const DELEGATE_TYPE_CONCEPT: Record<string, string> = {
+  SECRETARY: DELEG.DELEGATE_TYPE_SECRETARY,
+  ASSISTANT: DELEG.DELEGATE_TYPE_ASSISTANT,
+  NURSE: DELEG.DELEGATE_TYPE_NURSE,
+  BILLING: DELEG.DELEGATE_TYPE_BILLING,
+};
+
+export const DELEGATE_ROLE_CONCEPT: Record<string, string> = {
+  ASSISTANT: DELEG.DELEGATE_ROLE_ASSISTANT,
+  SECRETARY: DELEG.DELEGATE_ROLE_SECRETARY,
+  NURSE: DELEG.DELEGATE_ROLE_NURSE,
+};
+
+export const PATIENT_SCOPE_CONCEPT: Record<string, string> = {
+  ASSIGNED: DELEG.PATIENT_SCOPE_ASSIGNED,
+  ALL: DELEG.PATIENT_SCOPE_ALL,
+};
+
+export const APPOINTMENT_SCOPE_CONCEPT: Record<string, string> = {
+  TODAY: DELEG.APPOINTMENT_SCOPE_TODAY,
+  ALL: DELEG.APPOINTMENT_SCOPE_ALL,
+};
+
+export const GRANT_TYPE_CONCEPT: Record<string, string> = {
+  PRE_AUTHORIZED: DELEG.GRANT_TYPE_PREAUTHORIZED,
+  APPROVED: DELEG.GRANT_TYPE_APPROVED,
+};
+
+export const PURPOSE_OF_USE_CONCEPT: Record<string, string> = {
+  TREATMENT: DELEG.PURPOSE_TREATMENT,
+  BILLING: DELEG.PURPOSE_BILLING,
+  OPERATIONS: DELEG.PURPOSE_OPERATIONS,
+};
+
+export const RESOURCE_TYPE_CONCEPT: Record<string, string> = {
+  CLINICAL_NOTE: DELEG.RESOURCE_CLINICAL_NOTE,
+  APPOINTMENT: DELEG.RESOURCE_APPOINTMENT,
+  PRESCRIPTION: DELEG.RESOURCE_PRESCRIPTION,
+};
+
+/** Estados de agregado reutilizados (transversales + suspendido propio). */
+export const STATUS = {
+  ACTIVE: CONCEPTS.STATE_ACTIVE,
+  REVOKED: CONCEPTS.STATE_REVOKED,
+  EXPIRED: CONCEPTS.STATE_EXPIRED,
+  PENDING: CONCEPTS.STATE_PENDING,
+  SUSPENDED: DELEG.STATE_SUSPENDED,
+};

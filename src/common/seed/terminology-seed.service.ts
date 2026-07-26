@@ -122,7 +122,12 @@ export class TerminologySeedService implements OnApplicationBootstrap {
       });
     }
     for (const seed of MODULE_CONCEPT_SEEDS) {
-      catalog.set(deterministicId(seed.key), { code: seed.code, display: seed.display });
+      // El `code` almacenado es la CLAVE del concepto (única globalmente), no el
+      // `seed.code` humano: `catalog_concepts` tiene UNIQUE(code_system_version_id,
+      // code) y varios módulos declaran códigos genéricos coincidentes (p. ej.
+      // "ACTIVE"). Los servicios referencian los conceptos por id (mapa `ids`), no
+      // por este código, así que usar la clave garantiza unicidad sin efectos.
+      catalog.set(deterministicId(seed.key), { code: seed.key, display: seed.display });
     }
 
     const ids = [...catalog.keys()];
