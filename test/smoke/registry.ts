@@ -11,6 +11,10 @@ import { GEO_SMOKE } from './modules/geo.smoke';
 import { PRACTICE_SMOKE } from './modules/practice.smoke';
 import { CHART_SMOKE } from './modules/chart.smoke';
 import { INTEGRATIONS_SMOKE } from './modules/integrations.smoke';
+import { ACCOUNTING_SMOKE } from './modules/accounting.smoke';
+import { BILLING_SMOKE } from './modules/billing.smoke';
+import { CLINICAL_EXT_SMOKE } from './modules/clinical_ext.smoke';
+import { COMMUNITY_SMOKE } from './modules/community.smoke';
 
 /**
  * Registro de casos de smoke por módulo. El orquestador añade aquí una línea por
@@ -37,4 +41,8 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...PRACTICE_SMOKE,
   ...CHART_SMOKE,
   ...INTEGRATIONS_SMOKE,
+  ...ACCOUNTING_SMOKE,
+  ...BILLING_SMOKE,
+  ...CLINICAL_EXT_SMOKE,
+  ...COMMUNITY_SMOKE,
 ];
