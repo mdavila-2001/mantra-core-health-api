@@ -84,7 +84,7 @@ export const CHART_SMOKE: SmokeCase[] = [
     name: 'happy: firmar versión',
     method: 'post',
     path: (c) => `/charts/notes/${c.vars.chartNoteId}/versions/${c.vars.chartVersionId}/sign`,
-    body: (c) => ({ signerProfileId: c.vars.practitionerProfileId ?? c.vars.patientProfileId }),
+    body: (c) => ({ signerProfileId: c.practitionerSubtypeId }),
     expectedStatus: 201,
   },
   {
@@ -92,7 +92,7 @@ export const CHART_SMOKE: SmokeCase[] = [
     name: 'límite: doble firma (ya no es borrador)',
     method: 'post',
     path: (c) => `/charts/notes/${c.vars.chartNoteId}/versions/${c.vars.chartVersionId}/sign`,
-    body: (c) => ({ signerProfileId: c.vars.practitionerProfileId ?? c.vars.patientProfileId }),
+    body: (c) => ({ signerProfileId: c.practitionerSubtypeId }),
     expectedStatus: 422,
   },
 
@@ -233,8 +233,8 @@ export const CHART_SMOKE: SmokeCase[] = [
   {
     module: 'Chart', endpoint: 'POST /charts/templates/{templateId}/assignments',
     name: 'happy: asignar plantilla (default)',
-    method: 'post', path: (c) => `/charts/templates/${UUID_ABSENT}/assignments`,
-    body: (c) => ({ practitionerProfileId: c.vars.practitionerProfileId, isDefault: true }),
+    method: 'post', path: (c) => `/charts/templates/${c.chartTemplateId}/assignments`,
+    body: (c) => ({ practitionerProfileId: c.practitionerSubtypeId, isDefault: true }),
     expectedStatus: 201,
   },
   {

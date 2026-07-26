@@ -36,8 +36,7 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
       tenantId: c.tenantId,
       name: 'Equipo longitudinal',
       members: [
-        { practitionerProfileId: c.vars.practitionerProfileId ?? c.vars.patientProfileId, memberRoleConceptId: CID, isResponsible: true },
-        { practitionerProfileId: c.vars.patientProfileId, memberRoleConceptId: CID2 },
+        { practitionerProfileId: c.practitionerSubtypeId, memberRoleConceptId: CID, isResponsible: true },
       ],
     }),
     expectedStatus: 201,
