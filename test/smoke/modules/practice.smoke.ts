@@ -154,7 +154,7 @@ export const PRACTICE_SMOKE: SmokeCase[] = [
   {
     module: 'Practice', endpoint: 'POST /role-assignments/{roleId}/support-assignments', name: 'happy: adjuntar apoyo',
     method: 'post', path: (c) => `/role-assignments/${c.vars.pracRoleId}/support-assignments`,
-    body: (c) => ({ supportProfileId: c.adminUserId }), expectedStatus: 201,
+    body: (c) => ({ supportProfileId: c.secretaryProfileId }), expectedStatus: 201,
   },
   {
     module: 'Practice', endpoint: 'POST /role-assignments/{roleId}/support-assignments', name: 'límite: rol inexistente',

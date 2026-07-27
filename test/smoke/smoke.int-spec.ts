@@ -569,6 +569,10 @@ describe('Smoke test — 30 endpoints', () => {
       adminToken: admin,
       adminUserId: ctx.adminUserId,
       tenantId: SEED.tenantId,
+      practitionerSubtypeId: ctx.practitionerSubtypeId,
+      secretaryProfileId: ctx.secretaryProfileId,
+      patientSubtypeId: ctx.patientSubtypeId,
+      chartTemplateId: ctx.chartTemplateId,
       vars: {},
       u,
     };
