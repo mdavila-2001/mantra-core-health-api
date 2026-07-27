@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException, touch, type AuthenticatedUser } from '../../../common';
+import {
+  ResourceNotFoundException,
+  touch,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PRAC } from '../practice.concepts';
-import { PracticesRepository, PracticeSettingsRepository } from '../repositories';
+import {
+  PracticesRepository,
+  PracticeSettingsRepository,
+} from '../repositories';
 import { UpsertSettingDto, SettingResponseDto } from '../dto';
 
 /** UC-14-07: configura (upsert) un ajuste de práctica por (practice_id, setting_key). */
@@ -25,15 +32,26 @@ export class PracticeSettingsService {
     dto: UpsertSettingDto,
     actor: AuthenticatedUser,
   ): Promise<SettingResponseDto> {
-    this.logger.info({ operation: 'practice.setting.upsert', practiceId, settingKey }, 'Upserting setting');
+    this.logger.info(
+      { operation: 'practice.setting.upsert', practiceId, settingKey },
+      'Upserting setting',
+    );
     return this.em.transactional(async (tx) => {
       const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice) throw new ResourceNotFoundException('Práctica no encontrada', { practiceId });
+      if (!practice)
+        throw new ResourceNotFoundException('Práctica no encontrada', {
+          practiceId,
+        });
 
-      const existing = await this.settingsRepo.findByPracticeAndKey(tx, practiceId, settingKey);
+      const existing = await this.settingsRepo.findByPracticeAndKey(
+        tx,
+        practiceId,
+        settingKey,
+      );
       if (existing) {
         existing.valueJson = dto.valueJson;
-        existing.categoryConceptId = dto.categoryConceptId ?? existing.categoryConceptId;
+        existing.categoryConceptId =
+          dto.categoryConceptId ?? existing.categoryConceptId;
         touch(existing, actor.id);
         await tx.flush();
         return { id: existing.id, practiceId, settingKey, created: false };
@@ -43,7 +61,8 @@ export class PracticeSettingsService {
         practiceId,
         settingKey,
         valueJson: dto.valueJson,
-        categoryConceptId: dto.categoryConceptId ?? PRAC.SETTING_CATEGORY_GENERAL,
+        categoryConceptId:
+          dto.categoryConceptId ?? PRAC.SETTING_CATEGORY_GENERAL,
         actorUserId: actor.id,
       });
       await tx.flush();

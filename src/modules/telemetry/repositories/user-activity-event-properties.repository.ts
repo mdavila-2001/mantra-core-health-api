@@ -19,7 +19,10 @@ export interface CreateActivityEventPropertyData {
 /** Acceso a `telemetry.user_activity_event_properties`. */
 @Injectable()
 export class UserActivityEventPropertiesRepository {
-  create(em: EntityManager, data: CreateActivityEventPropertyData): UserActivityEventProperties {
+  create(
+    em: EntityManager,
+    data: CreateActivityEventPropertyData,
+  ): UserActivityEventProperties {
     return em.create(
       UserActivityEventProperties,
       {

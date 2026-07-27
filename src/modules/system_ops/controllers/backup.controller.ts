@@ -15,7 +15,9 @@ export class BackupController {
   @Post('backup-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Definir una política de backup (RPO/RTO/inmutabilidad)' })
+  @ApiOperation({
+    summary: 'Definir una política de backup (RPO/RTO/inmutabilidad)',
+  })
   createPolicy(
     @Body() dto: CreateBackupPolicyDto,
     @CurrentUser() actor: AuthenticatedUser,

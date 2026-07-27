@@ -123,7 +123,10 @@ export class ObservationsRepository {
     );
   }
 
-  createComponent(em: EntityManager, data: CreateComponentData): ObservationComponents {
+  createComponent(
+    em: EntityManager,
+    data: CreateComponentData,
+  ): ObservationComponents {
     return em.create(
       ObservationComponents,
       {
@@ -172,7 +175,10 @@ export class ObservationsRepository {
     );
   }
 
-  createPerformer(em: EntityManager, data: CreatePerformerData): ObservationPerformers {
+  createPerformer(
+    em: EntityManager,
+    data: CreatePerformerData,
+  ): ObservationPerformers {
     return em.create(
       ObservationPerformers,
       {
@@ -201,7 +207,14 @@ export class ObservationsRepository {
     );
   }
 
-  findComponents(em: EntityManager, observationId: string): Promise<ObservationComponents[]> {
-    return em.find(ObservationComponents, { observationId }, { orderBy: { ordinal: 'asc' } });
+  findComponents(
+    em: EntityManager,
+    observationId: string,
+  ): Promise<ObservationComponents[]> {
+    return em.find(
+      ObservationComponents,
+      { observationId },
+      { orderBy: { ordinal: 'asc' } },
+    );
   }
 }

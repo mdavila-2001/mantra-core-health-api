@@ -28,7 +28,10 @@ export class SyncCursorsRepository {
   }
 
   /** Crea la entidad de cursor en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateSyncCursorData): IntegrationSyncCursors {
+  create(
+    em: EntityManager,
+    data: CreateSyncCursorData,
+  ): IntegrationSyncCursors {
     const now = new Date();
     return em.create(
       IntegrationSyncCursors,

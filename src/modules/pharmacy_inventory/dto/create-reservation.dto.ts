@@ -43,7 +43,10 @@ export class CreateReservationDto {
   @IsUUID()
   patientProfileId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Solicitud de medicación' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Solicitud de medicación',
+  })
   @IsOptional()
   @IsUUID()
   medicationRequestId?: string;
@@ -53,7 +56,10 @@ export class CreateReservationDto {
   @IsUUID()
   quotationId?: string;
 
-  @ApiPropertyOptional({ description: 'Minutos hasta expiración (default 60)', minimum: 1 })
+  @ApiPropertyOptional({
+    description: 'Minutos hasta expiración (default 60)',
+    minimum: 1,
+  })
   @IsOptional()
   @IsInt()
   @Min(1)

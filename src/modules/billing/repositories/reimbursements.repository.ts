@@ -15,7 +15,10 @@ export interface CreateReimbursementData {
 /** Acceso a datos de `billing.reimbursements`. */
 @Injectable()
 export class ReimbursementsRepository {
-  findByClaim(em: EntityManager, claimId: string): Promise<Reimbursements | null> {
+  findByClaim(
+    em: EntityManager,
+    claimId: string,
+  ): Promise<Reimbursements | null> {
     return em.findOne(Reimbursements, { claimId });
   }
 

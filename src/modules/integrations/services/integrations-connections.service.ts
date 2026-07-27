@@ -56,21 +56,32 @@ export class IntegrationsConnectionsService {
     actor: AuthenticatedUser,
   ): Promise<ConnectionResponseDto> {
     this.logger.info(
-      { operation: 'integrations.connection.provision', providerId, tenantId: dto.tenantId },
+      {
+        operation: 'integrations.connection.provision',
+        providerId,
+        tenantId: dto.tenantId,
+      },
       'Provisioning connection',
     );
     return this.em.transactional(async (tx) => {
       const provider = await this.providersRepo.findById(tx, providerId);
-      if (!provider) throw new ResourceNotFoundException('Proveedor no encontrado', { providerId });
+      if (!provider)
+        throw new ResourceNotFoundException('Proveedor no encontrado', {
+          providerId,
+        });
       if (provider.stateConceptId !== INTEG.PROVIDER_ACTIVE) {
-        throw new PreconditionFailedException('El proveedor no está activo', { providerId });
+        throw new PreconditionFailedException('El proveedor no está activo', {
+          providerId,
+        });
       }
 
       const connection = this.connectionsRepo.create(tx, {
         providerId,
         tenantId: dto.tenantId,
         stateConceptId: INTEG.CONN_ACTIVE,
-        environmentConceptId: dto.environment ? ENVIRONMENT_CONCEPT_BY_CODE[dto.environment] : undefined,
+        environmentConceptId: dto.environment
+          ? ENVIRONMENT_CONCEPT_BY_CODE[dto.environment]
+          : undefined,
         configJson: dto.configJson,
         validFrom: new Date(),
         actorUserId: actor.id,
@@ -93,7 +104,10 @@ export class IntegrationsConnectionsService {
       touch(connection, actor.id);
 
       this.logger.info(
-        { operation: 'integrations.connection.provision', connectionId: connection.id },
+        {
+          operation: 'integrations.connection.provision',
+          connectionId: connection.id,
+        },
         'Connection provisioned',
       );
       return {
@@ -112,15 +126,27 @@ export class IntegrationsConnectionsService {
     dto: RotateCredentialDto,
     actor: AuthenticatedUser,
   ): Promise<CredentialRotationResponseDto> {
-    this.logger.info({ operation: 'integrations.credential.rotate', connectionId }, 'Rotating credential');
+    this.logger.info(
+      { operation: 'integrations.credential.rotate', connectionId },
+      'Rotating credential',
+    );
     return this.em.transactional(async (tx) => {
       const connection = await this.connectionsRepo.findById(tx, connectionId);
-      if (!connection) throw new ResourceNotFoundException('Conexión no encontrada', { connectionId });
+      if (!connection)
+        throw new ResourceNotFoundException('Conexión no encontrada', {
+          connectionId,
+        });
       if (connection.stateConceptId !== INTEG.CONN_ACTIVE) {
-        throw new PreconditionFailedException('La conexión no está activa', { connectionId });
+        throw new PreconditionFailedException('La conexión no está activa', {
+          connectionId,
+        });
       }
 
-      const current = await this.credentialsRepo.findActiveByConnection(tx, connectionId, INTEG.CRED_ACTIVE);
+      const current = await this.credentialsRepo.findActiveByConnection(
+        tx,
+        connectionId,
+        INTEG.CRED_ACTIVE,
+      );
       const secretTypeConceptId = dto.secretType
         ? SECRET_TYPE_CONCEPT_BY_CODE[dto.secretType]
         : (current?.secretTypeConceptId ?? INTEG.SECRET_API_KEY);
@@ -155,17 +181,29 @@ export class IntegrationsConnectionsService {
     connectionId: string,
     actor: AuthenticatedUser,
   ): Promise<PauseConnectionResultDto> {
-    this.logger.info({ operation: 'integrations.connection.pause', connectionId }, 'Pausing connection');
+    this.logger.info(
+      { operation: 'integrations.connection.pause', connectionId },
+      'Pausing connection',
+    );
     return this.em.transactional(async (tx) => {
       const connection = await this.connectionsRepo.findById(tx, connectionId);
-      if (!connection) throw new ResourceNotFoundException('Conexión no encontrada', { connectionId });
+      if (!connection)
+        throw new ResourceNotFoundException('Conexión no encontrada', {
+          connectionId,
+        });
 
       // Transición idempotente: si ya está pausada, no-op.
       if (connection.stateConceptId === INTEG.CONN_PAUSED) {
-        return { connectionId, state: connection.stateConceptId, heldMessages: 0 };
+        return {
+          connectionId,
+          state: connection.stateConceptId,
+          heldMessages: 0,
+        };
       }
       if (connection.stateConceptId !== INTEG.CONN_ACTIVE) {
-        throw new PreconditionFailedException('La conexión no está activa', { connectionId });
+        throw new PreconditionFailedException('La conexión no está activa', {
+          connectionId,
+        });
       }
 
       connection.stateConceptId = INTEG.CONN_PAUSED;
@@ -179,10 +217,18 @@ export class IntegrationsConnectionsService {
       );
 
       this.logger.warn(
-        { operation: 'integrations.connection.pause', connectionId, heldMessages: held },
+        {
+          operation: 'integrations.connection.pause',
+          connectionId,
+          heldMessages: held,
+        },
         'Connection circuit opened',
       );
-      return { connectionId, state: connection.stateConceptId, heldMessages: held };
+      return {
+        connectionId,
+        state: connection.stateConceptId,
+        heldMessages: held,
+      };
     });
   }
 }

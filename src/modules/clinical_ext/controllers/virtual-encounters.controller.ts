@@ -25,7 +25,9 @@ import {
 @ApiBearerAuth()
 @Controller('virtual-encounters')
 export class VirtualEncountersController {
-  constructor(private readonly virtualEncountersService: VirtualEncountersService) {}
+  constructor(
+    private readonly virtualEncountersService: VirtualEncountersService,
+  ) {}
 
   /** UC-18-12 (alta). */
   @Post()

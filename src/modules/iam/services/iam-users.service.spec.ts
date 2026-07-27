@@ -29,7 +29,9 @@ function build() {
     activeSessionIdsForUser: mockFn().mockResolvedValue([]),
     revokeAllActiveForUser: mockFn().mockResolvedValue(0),
   };
-  const refreshRepo = { revokeActiveBySessionIds: mockFn().mockResolvedValue(0) };
+  const refreshRepo = {
+    revokeActiveBySessionIds: mockFn().mockResolvedValue(0),
+  };
   const lockoutsRepo = { create: mockFn() };
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -45,7 +47,18 @@ function build() {
     eventsRepo as any,
     logger as any,
   );
-  return { service, tx, em, usersRepo, credentialsRepo, rolesRepo, sessionsRepo, refreshRepo, lockoutsRepo, eventsRepo };
+  return {
+    service,
+    tx,
+    em,
+    usersRepo,
+    credentialsRepo,
+    rolesRepo,
+    sessionsRepo,
+    refreshRepo,
+    lockoutsRepo,
+    eventsRepo,
+  };
 }
 
 describe('IamUsersService', () => {
@@ -63,7 +76,7 @@ describe('IamUsersService', () => {
 
       const res = await d.service.createUser(
         { displayName: 'Ada', email: 'ada@x.io', password: 'password123' },
-        actor as any,
+        actor,
       );
 
       expect(res).toEqual({
@@ -77,13 +90,17 @@ describe('IamUsersService', () => {
       expect(d.rolesRepo.create).toHaveBeenCalled();
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT }),
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
+        }),
       );
     });
 
     it('rejects when the email already has an active password credential', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({ id: 'c1' });
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        id: 'c1',
+      });
 
       await expect(
         d.service.createUser(
@@ -99,24 +116,34 @@ describe('IamUsersService', () => {
     it('throws when the user does not exist', async () => {
       const d = build();
       d.usersRepo.findById.mockResolvedValue(null);
-      await expect(d.service.lock('missing', {}, actor as any)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.lock('missing', {}, actor as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('locks the user and revokes sessions', async () => {
       const d = build();
-      const user = { id: 'u1', statusConceptId: CONCEPTS.USER_ACTIVE, updatedAt: new Date() };
+      const user = {
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.usersRepo.findById.mockResolvedValue(user);
       d.sessionsRepo.activeSessionIdsForUser.mockResolvedValue(['s1']);
 
-      const res = await d.service.lock('u1', { reason: 'abuse' }, actor as any);
+      const res = await d.service.lock('u1', { reason: 'abuse' }, actor);
 
       expect(res).toEqual({ ok: true });
       expect(user.statusConceptId).toBe(CONCEPTS.USER_LOCKED);
       expect(d.lockoutsRepo.create).toHaveBeenCalled();
-      expect(d.sessionsRepo.revokeAllActiveForUser).toHaveBeenCalledWith(d.tx, 'u1');
-      expect(d.refreshRepo.revokeActiveBySessionIds).toHaveBeenCalledWith(d.tx, ['s1']);
+      expect(d.sessionsRepo.revokeAllActiveForUser).toHaveBeenCalledWith(
+        d.tx,
+        'u1',
+      );
+      expect(d.refreshRepo.revokeActiveBySessionIds).toHaveBeenCalledWith(
+        d.tx,
+        ['s1'],
+      );
     });
   });
 
@@ -127,7 +154,11 @@ describe('IamUsersService', () => {
       d.rolesRepo.findActive.mockResolvedValue({ id: 'r1' });
 
       await expect(
-        d.service.changeGlobalRole('u1', { role: 'SECURITY_ADMIN', action: 'GRANT' }, actor as any),
+        d.service.changeGlobalRole(
+          'u1',
+          { role: 'SECURITY_ADMIN', action: 'GRANT' },
+          actor as any,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -137,7 +168,11 @@ describe('IamUsersService', () => {
       d.rolesRepo.findActive.mockResolvedValue(null);
 
       await expect(
-        d.service.changeGlobalRole('u1', { role: 'SECURITY_ADMIN', action: 'REVOKE' }, actor as any),
+        d.service.changeGlobalRole(
+          'u1',
+          { role: 'SECURITY_ADMIN', action: 'REVOKE' },
+          actor as any,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -145,15 +180,23 @@ describe('IamUsersService', () => {
   describe('anonymize (UC-01-12)', () => {
     it('anonymizes the user and revokes credentials, sessions and roles', async () => {
       const d = build();
-      const user = { id: 'u1', displayName: 'Ada', statusConceptId: CONCEPTS.USER_ACTIVE, updatedAt: new Date() };
+      const user = {
+        id: 'u1',
+        displayName: 'Ada',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.usersRepo.findById.mockResolvedValue(user);
 
-      const res = await d.service.anonymize('u1', actor as any);
+      const res = await d.service.anonymize('u1', actor);
 
       expect(res).toEqual({ ok: true });
       expect(user.statusConceptId).toBe(CONCEPTS.USER_ANONYMIZED);
       expect(user.displayName).toBe('ANONYMIZED');
-      expect(d.credentialsRepo.revokeAllForUser).toHaveBeenCalledWith(d.tx, 'u1');
+      expect(d.credentialsRepo.revokeAllForUser).toHaveBeenCalledWith(
+        d.tx,
+        'u1',
+      );
       expect(d.rolesRepo.revokeAllForUser).toHaveBeenCalledWith(d.tx, 'u1');
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,

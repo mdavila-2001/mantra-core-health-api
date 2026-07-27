@@ -105,7 +105,9 @@ export class ProfilesPatientsController {
   @Post('patients/:profileId/related-persons')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar persona relacionada / contacto de emergencia' })
+  @ApiOperation({
+    summary: 'Registrar persona relacionada / contacto de emergencia',
+  })
   addRelatedPerson(
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @Body() dto: AddRelatedPersonDto,
@@ -131,7 +133,9 @@ export class ProfilesPatientsController {
   @Post('persons/:personId/decease')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Registrar defunción y anonimización de una persona' })
+  @ApiOperation({
+    summary: 'Registrar defunción y anonimización de una persona',
+  })
   decease(
     @Param('personId', ParseUUIDPipe) personId: string,
     @Body() dto: DeceasePersonDto,

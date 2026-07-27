@@ -3,13 +3,17 @@ import { IsBoolean, IsDateString, IsOptional } from 'class-validator';
 
 /** Cuerpo de `POST /profiles/persons/{personId}/decease` (UC-05-12). */
 export class DeceasePersonDto {
-  @ApiPropertyOptional({ description: 'Momento de defunción (ISO date-time)', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Momento de defunción (ISO date-time)',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   deceasedAt?: string;
 
   @ApiPropertyOptional({
-    description: 'Anonimiza la PII (borrado lógico del display_name) al registrar',
+    description:
+      'Anonimiza la PII (borrado lógico del display_name) al registrar',
     default: false,
   })
   @IsOptional()
@@ -25,7 +29,10 @@ export class DeceaseResponseDto {
   @ApiProperty({ description: 'Concept id del estado vital', format: 'uuid' })
   vitalStatus!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la persona', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la persona',
+    format: 'uuid',
+  })
   personStatus!: string;
 
   @ApiProperty({ type: String, format: 'date-time', nullable: true })

@@ -2,7 +2,10 @@ import { jest } from '@jest/globals';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { FormsAssignmentsService } from './forms-assignments.service';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -17,7 +20,12 @@ function build() {
   };
   const fieldsRepo = { findFieldById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new FormsAssignmentsService(em as any, assignmentsRepo as any, fieldsRepo as any, logger as any);
+  const service = new FormsAssignmentsService(
+    em as any,
+    assignmentsRepo,
+    fieldsRepo as any,
+    logger as any,
+  );
   return { service, tx, assignmentsRepo, fieldsRepo };
 }
 
@@ -31,7 +39,7 @@ describe('FormsAssignmentsService', () => {
       d.assignmentsRepo.createAssignment.mockReturnValue({ id: 'as1' });
 
       const res = await d.service.createAssignment(
-        { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
+        { fieldId: 'f1', targetResourceConceptId: 'rt-1' },
         actor,
       );
 
@@ -43,11 +51,16 @@ describe('FormsAssignmentsService', () => {
     it('rejects when the policy field budget is exceeded', async () => {
       const d = build();
       d.fieldsRepo.findFieldById.mockResolvedValue({ id: 'f1' });
-      d.assignmentsRepo.findActivePolicy.mockResolvedValue({ maximumFields: 1 });
+      d.assignmentsRepo.findActivePolicy.mockResolvedValue({
+        maximumFields: 1,
+      });
       d.assignmentsRepo.countActiveAssignments.mockResolvedValue(1);
 
       await expect(
-        d.service.createAssignment({ fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any, actor),
+        d.service.createAssignment(
+          { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.assignmentsRepo.createAssignment).not.toHaveBeenCalled();
     });
@@ -56,7 +69,10 @@ describe('FormsAssignmentsService', () => {
       const d = build();
       d.fieldsRepo.findFieldById.mockResolvedValue(null);
       await expect(
-        d.service.createAssignment({ fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any, actor),
+        d.service.createAssignment(
+          { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

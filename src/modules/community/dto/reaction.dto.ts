@@ -7,7 +7,10 @@ export class ReactionDto {
   @IsUUID()
   actorProfileId!: string;
 
-  @ApiProperty({ description: 'Tipo de objeto', enum: ['POST', 'COMMENT', 'REVIEW'] })
+  @ApiProperty({
+    description: 'Tipo de objeto',
+    enum: ['POST', 'COMMENT', 'REVIEW'],
+  })
   @IsIn(['POST', 'COMMENT', 'REVIEW'])
   reactableType!: 'POST' | 'COMMENT' | 'REVIEW';
 
@@ -15,7 +18,10 @@ export class ReactionDto {
   @IsUUID()
   reactableRefId!: string;
 
-  @ApiProperty({ description: 'Tipo de reacción', enum: ['LIKE', 'LOVE', 'INSIGHTFUL', 'CELEBRATE', 'SUPPORT'] })
+  @ApiProperty({
+    description: 'Tipo de reacción',
+    enum: ['LIKE', 'LOVE', 'INSIGHTFUL', 'CELEBRATE', 'SUPPORT'],
+  })
   @IsIn(['LIKE', 'LOVE', 'INSIGHTFUL', 'CELEBRATE', 'SUPPORT'])
   reactionType!: 'LIKE' | 'LOVE' | 'INSIGHTFUL' | 'CELEBRATE' | 'SUPPORT';
 }

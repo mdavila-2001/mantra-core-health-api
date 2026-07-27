@@ -31,7 +31,10 @@ export class DraftService {
   }
 
   /** UC-11-15: guarda un borrador (DRAFT) del que el actor es dueño. */
-  async createDraft(dto: CreateDraftDto, actor: AuthenticatedUser): Promise<DraftResponseDto> {
+  async createDraft(
+    dto: CreateDraftDto,
+    actor: AuthenticatedUser,
+  ): Promise<DraftResponseDto> {
     return this.em.transactional(async (tx) => {
       const draft = this.repo.create(tx, {
         schemaName: dto.schemaName,
@@ -46,7 +49,11 @@ export class DraftService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      return { id: draft.id, statusConceptId: draft.statusConceptId, publishedRecordId: undefined };
+      return {
+        id: draft.id,
+        statusConceptId: draft.statusConceptId,
+        publishedRecordId: undefined,
+      };
     });
   }
 
@@ -58,16 +65,25 @@ export class DraftService {
   ): Promise<DraftResponseDto> {
     return this.em.transactional(async (tx) => {
       const draft = await this.repo.findById(tx, id);
-      if (!draft) throw new ResourceNotFoundException('Borrador no encontrado', { id });
+      if (!draft)
+        throw new ResourceNotFoundException('Borrador no encontrado', { id });
       if (draft.ownerUserId !== actor.id) {
-        throw new PreconditionFailedException('Solo el dueño del borrador puede publicarlo', { id });
+        throw new PreconditionFailedException(
+          'Solo el dueño del borrador puede publicarlo',
+          { id },
+        );
       }
       if (draft.statusConceptId !== SYSOPS.DRAFT) {
-        throw new PreconditionFailedException('El borrador no está en estado DRAFT', { id });
+        throw new PreconditionFailedException(
+          'El borrador no está en estado DRAFT',
+          { id },
+        );
       }
 
       const publishedRecordId = draft.targetRecordId ?? randomUUID();
-      const operationConceptId = draft.targetRecordId ? SYSOPS.OP_UPDATE : SYSOPS.OP_INSERT;
+      const operationConceptId = draft.targetRecordId
+        ? SYSOPS.OP_UPDATE
+        : SYSOPS.OP_INSERT;
 
       draft.statusConceptId = SYSOPS.PUBLISHED;
       draft.publishedRecordId = publishedRecordId;
@@ -79,12 +95,22 @@ export class DraftService {
         tableName: draft.tableName,
         recordId: publishedRecordId,
         operationConceptId,
-        dataSnapshot: { payload: draft.payloadJson, publishReference: dto.publishReference },
+        dataSnapshot: {
+          payload: draft.payloadJson,
+          publishReference: dto.publishReference,
+        },
         changedByUserId: actor.id,
       });
 
-      this.logger.info({ operation: 'sysops.draft.publish', draftId: draft.id }, 'Draft published');
-      return { id: draft.id, statusConceptId: draft.statusConceptId, publishedRecordId };
+      this.logger.info(
+        { operation: 'sysops.draft.publish', draftId: draft.id },
+        'Draft published',
+      );
+      return {
+        id: draft.id,
+        statusConceptId: draft.statusConceptId,
+        publishedRecordId,
+      };
     });
   }
 }

@@ -18,8 +18,12 @@ export class IntegrationsWebhooksController {
   @Post('webhooks/inbound')
   @Public()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Recibir un mensaje entrante (idempotencia por firma)' })
-  receiveInbound(@Body() dto: InboundWebhookDto): Promise<InboundMessageResponseDto> {
+  @ApiOperation({
+    summary: 'Recibir un mensaje entrante (idempotencia por firma)',
+  })
+  receiveInbound(
+    @Body() dto: InboundWebhookDto,
+  ): Promise<InboundMessageResponseDto> {
     return this.webhooksService.receiveInbound(dto);
   }
 }

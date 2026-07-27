@@ -42,7 +42,10 @@ export interface CreateImagingStudyData {
  */
 @Injectable()
 export class ImagingRepository {
-  findEndpoint(em: EntityManager, id: string): Promise<ImagingEndpoints | null> {
+  findEndpoint(
+    em: EntityManager,
+    id: string,
+  ): Promise<ImagingEndpoints | null> {
     return em.findOne(ImagingEndpoints, { id });
   }
 
@@ -50,11 +53,17 @@ export class ImagingRepository {
     return em.findOne(ImagingStudies, { id });
   }
 
-  findStudyByUid(em: EntityManager, dicomStudyInstanceUid: string): Promise<ImagingStudies | null> {
+  findStudyByUid(
+    em: EntityManager,
+    dicomStudyInstanceUid: string,
+  ): Promise<ImagingStudies | null> {
     return em.findOne(ImagingStudies, { dicomStudyInstanceUid });
   }
 
-  createEndpoint(em: EntityManager, data: CreateImagingEndpointData): ImagingEndpoints {
+  createEndpoint(
+    em: EntityManager,
+    data: CreateImagingEndpointData,
+  ): ImagingEndpoints {
     return em.create(
       ImagingEndpoints,
       {

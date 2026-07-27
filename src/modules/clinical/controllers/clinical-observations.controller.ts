@@ -27,7 +27,9 @@ export class ClinicalObservationsController {
   /** UC-08-03. */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar una observación con componentes y ejecutantes' })
+  @ApiOperation({
+    summary: 'Registrar una observación con componentes y ejecutantes',
+  })
   record(
     @Body() dto: CreateObservationDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -38,7 +40,9 @@ export class ClinicalObservationsController {
   /** UC-08-04. */
   @Patch(':id/amend')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Corregir/enmendar una observación (value contract)' })
+  @ApiOperation({
+    summary: 'Corregir/enmendar una observación (value contract)',
+  })
   amend(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AmendObservationDto,

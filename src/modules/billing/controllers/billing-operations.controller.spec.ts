@@ -16,7 +16,13 @@ function build() {
     dunningService as any,
     kpiService as any,
   );
-  return { controller, ledgerService, reconciliationService, dunningService, kpiService };
+  return {
+    controller,
+    ledgerService,
+    reconciliationService,
+    dunningService,
+    kpiService,
+  };
 }
 
 describe('BillingOperationsController', () => {
@@ -24,27 +30,31 @@ describe('BillingOperationsController', () => {
     const d = build();
     const dto = { documentType: 'INVOICE', transactionId: 'txn1' };
     await d.controller.postToLedger('inv1', dto as any, actor);
-    expect(d.ledgerService.postToLedger).toHaveBeenCalledWith('inv1', dto, actor);
+    expect(d.ledgerService.postToLedger).toHaveBeenCalledWith(
+      'inv1',
+      dto,
+      actor,
+    );
   });
 
   it('delegates reconcile (UC-17-07)', async () => {
     const d = build();
     const dto = { clearingDocumentId: 'cd1' };
-    await d.controller.reconcile(dto as any, actor);
+    await d.controller.reconcile(dto, actor);
     expect(d.reconciliationService.clear).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates executeDunning (UC-17-10)', async () => {
     const d = build();
     const dto = { tenantId: 't1', runNumber: 'R-1', items: [] };
-    await d.controller.executeDunning(dto as any, actor);
+    await d.controller.executeDunning(dto, actor);
     expect(d.dunningService.execute).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates computeKpi (UC-17-12)', async () => {
     const d = build();
     const dto = { practiceId: 'pr1', kpiCode: 'DSO', valueNumeric: '1.0' };
-    await d.controller.computeKpi(dto as any, actor);
+    await d.controller.computeKpi(dto, actor);
     expect(d.kpiService.compute).toHaveBeenCalledWith(dto, actor);
   });
 });

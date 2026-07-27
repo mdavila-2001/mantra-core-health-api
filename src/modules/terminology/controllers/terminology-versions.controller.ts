@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { CodeSystemVersionsService } from '../services';
@@ -21,7 +29,9 @@ export class TerminologyVersionsController {
   @Post(':versionId/import')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'UC-03-03: importa conceptos en una versión en borrador' })
+  @ApiOperation({
+    summary: 'UC-03-03: importa conceptos en una versión en borrador',
+  })
   importConcepts(
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @Body() dto: ImportConceptsDto,
@@ -33,7 +43,9 @@ export class TerminologyVersionsController {
   @Post(':versionId/publish')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'UC-03-04: publica una versión (borrador → activa)' })
+  @ApiOperation({
+    summary: 'UC-03-04: publica una versión (borrador → activa)',
+  })
   publishVersion(
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @CurrentUser() user: AuthenticatedUser,

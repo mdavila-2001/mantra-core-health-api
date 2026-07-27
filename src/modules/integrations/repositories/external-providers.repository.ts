@@ -28,7 +28,10 @@ export class ExternalProvidersRepository {
   }
 
   /** Busca por código global (UK) para validar unicidad en el alta. */
-  findByCode(em: EntityManager, code: string): Promise<ExternalProviders | null> {
+  findByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<ExternalProviders | null> {
     return em.findOne(ExternalProviders, { code });
   }
 

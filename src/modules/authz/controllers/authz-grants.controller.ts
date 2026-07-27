@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { AuthzGrantsService } from '../services';
@@ -20,7 +28,9 @@ export class AuthzGrantsController {
   @Post('users/:userId/role-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Asignar un rol a un usuario con vigencia y ámbito' })
+  @ApiOperation({
+    summary: 'Asignar un rol a un usuario con vigencia y ámbito',
+  })
   assignRole(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: CreateRoleAssignmentDto,
@@ -46,7 +56,9 @@ export class AuthzGrantsController {
   @Post('resource-scope-grants')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Otorgar acceso a un recurso específico (grant polimórfico)' })
+  @ApiOperation({
+    summary: 'Otorgar acceso a un recurso específico (grant polimórfico)',
+  })
   grantResourceScope(
     @Body() dto: CreateResourceScopeGrantDto,
     @CurrentUser() actor: AuthenticatedUser,

@@ -47,7 +47,12 @@ export class ExchangeRateService {
         existing.source = dto.source;
         touch(existing, actor.id);
         await tx.flush();
-        return { id: existing.id, rate: existing.rate, validOn: existing.validOn, created: false };
+        return {
+          id: existing.id,
+          rate: existing.rate,
+          validOn: existing.validOn,
+          created: false,
+        };
       }
 
       const rate = this.ratesRepo.create(tx, {
@@ -59,7 +64,12 @@ export class ExchangeRateService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      return { id: rate.id, rate: rate.rate, validOn: rate.validOn, created: true };
+      return {
+        id: rate.id,
+        rate: rate.rate,
+        validOn: rate.validOn,
+        created: true,
+      };
     });
   }
 }

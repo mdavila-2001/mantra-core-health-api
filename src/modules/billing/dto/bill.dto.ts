@@ -28,32 +28,50 @@ export class BillLineInputDto {
   @IsNumberString()
   unitPrice!: string;
 
-  @ApiPropertyOptional({ description: 'Monto de impuesto de la línea', example: '0.00' })
+  @ApiPropertyOptional({
+    description: 'Monto de impuesto de la línea',
+    example: '0.00',
+  })
   @IsOptional()
   @IsNumberString()
   taxAmount?: string;
 
-  @ApiPropertyOptional({ description: 'Cuenta de gasto (accounting.accounts)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Cuenta de gasto (accounting.accounts)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   expenseAccountId?: string;
 
-  @ApiPropertyOptional({ description: 'Centro de costo (accounting.cost_centers)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Centro de costo (accounting.cost_centers)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   costCenterId?: string;
 
-  @ApiPropertyOptional({ description: 'Ítem de orden de compra (erp.purchase_order_items)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Ítem de orden de compra (erp.purchase_order_items)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   purchaseOrderItemId?: string;
 
-  @ApiPropertyOptional({ description: 'Ítem de recepción de bienes (erp.goods_receipt_items)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Ítem de recepción de bienes (erp.goods_receipt_items)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   goodsReceiptItemId?: string;
 
-  @ApiPropertyOptional({ description: 'Ítem de hoja de servicio (erp.service_entry_items)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Ítem de hoja de servicio (erp.service_entry_items)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   serviceEntryItemId?: string;
@@ -74,7 +92,9 @@ export class RegisterBillDto {
   @MaxLength(60)
   billNumber!: string;
 
-  @ApiPropertyOptional({ description: 'Fecha de emisión (ISO); por defecto hoy' })
+  @ApiPropertyOptional({
+    description: 'Fecha de emisión (ISO); por defecto hoy',
+  })
   @IsOptional()
   @IsDateString()
   issueDate?: string;
@@ -89,22 +109,35 @@ export class RegisterBillDto {
   @IsUUID()
   currencyConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Orden de compra (erp.purchase_orders)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Orden de compra (erp.purchase_orders)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   purchaseOrderId?: string;
 
-  @ApiPropertyOptional({ description: 'Contrato (erp.contracts)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Contrato (erp.contracts)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   contractId?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant (directory.tenants); requerido para el vínculo de documento', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Tenant (directory.tenants); requerido para el vínculo de documento',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiProperty({ type: [BillLineInputDto], description: 'Líneas (al menos una)' })
+  @ApiProperty({
+    type: [BillLineInputDto],
+    description: 'Líneas (al menos una)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

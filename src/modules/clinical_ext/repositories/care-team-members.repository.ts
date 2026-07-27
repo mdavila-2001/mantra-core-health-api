@@ -23,12 +23,18 @@ export class CareTeamMembersRepository {
   }
 
   /** Miembros de un equipo (para transferir liderazgo). */
-  findByTeam(em: EntityManager, careTeamId: string): Promise<CareTeamMembers[]> {
+  findByTeam(
+    em: EntityManager,
+    careTeamId: string,
+  ): Promise<CareTeamMembers[]> {
     return em.find(CareTeamMembers, { careTeamId });
   }
 
   /** Miembro responsable vigente del equipo, si existe. */
-  findResponsible(em: EntityManager, careTeamId: string): Promise<CareTeamMembers | null> {
+  findResponsible(
+    em: EntityManager,
+    careTeamId: string,
+  ): Promise<CareTeamMembers | null> {
     return em.findOne(CareTeamMembers, { careTeamId, isResponsible: true });
   }
 

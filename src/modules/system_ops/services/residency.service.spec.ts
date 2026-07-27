@@ -18,7 +18,12 @@ function build() {
   };
   const governanceRepo = { recordChange: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new ResidencyService(em as any, repo as any, governanceRepo as any, logger as any);
+  const service = new ResidencyService(
+    em as any,
+    repo as any,
+    governanceRepo as any,
+    logger as any,
+  );
   return { service, repo };
 }
 
@@ -36,7 +41,10 @@ describe('ResidencyService', () => {
       const d = build();
       d.repo.findPolicyByCode.mockResolvedValue(null);
       d.repo.createPolicy.mockReturnValue({ id: 'r2' });
-      const res = await d.service.createResidencyPolicy({ code: 'R' } as any, actor);
+      const res = await d.service.createResidencyPolicy(
+        { code: 'R' } as any,
+        actor,
+      );
       expect(res).toEqual({ id: 'r2' });
     });
   });
@@ -46,7 +54,11 @@ describe('ResidencyService', () => {
       const d = build();
       d.repo.createBinding.mockReturnValue({ id: 'b1' });
       const res = await d.service.createBinding(
-        { tenantId: 't', residencyPolicyId: 'r', primaryRegionConceptId: 'reg' } as any,
+        {
+          tenantId: 't',
+          residencyPolicyId: 'r',
+          primaryRegionConceptId: 'reg',
+        },
         actor,
       );
       expect(res).toEqual({ id: 'b1' });
@@ -66,7 +78,10 @@ describe('ResidencyService', () => {
       const d = build();
       d.repo.findTransferByReference.mockResolvedValue(null);
       d.repo.createTransfer.mockReturnValue({ id: 'e2' });
-      const res = await d.service.recordTransfer({ transferReference: 'REF' } as any, actor);
+      const res = await d.service.recordTransfer(
+        { transferReference: 'REF' } as any,
+        actor,
+      );
       expect(res).toEqual({ id: 'e2' });
     });
   });

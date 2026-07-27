@@ -33,7 +33,10 @@ export class CreateRoleDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Tenant propietario (omitir para rol de sistema)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant propietario (omitir para rol de sistema)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;

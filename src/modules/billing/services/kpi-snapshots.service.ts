@@ -20,9 +20,17 @@ export class KpiSnapshotsService {
     this.logger.setContext(KpiSnapshotsService.name);
   }
 
-  async compute(dto: ComputeKpiSnapshotDto, actor: AuthenticatedUser): Promise<KpiSnapshotResponseDto> {
+  async compute(
+    dto: ComputeKpiSnapshotDto,
+    actor: AuthenticatedUser,
+  ): Promise<KpiSnapshotResponseDto> {
     this.logger.info(
-      { operation: 'billing.kpi.compute', practiceId: dto.practiceId, kpiCode: dto.kpiCode, actorId: actor.id },
+      {
+        operation: 'billing.kpi.compute',
+        practiceId: dto.practiceId,
+        kpiCode: dto.kpiCode,
+        actorId: actor.id,
+      },
       'Computing financial KPI snapshot',
     );
     const computedAt = dto.computedAt ? new Date(dto.computedAt) : new Date();
@@ -36,10 +44,13 @@ export class KpiSnapshotsService {
         dto.fiscalPeriodId,
       );
       if (existing) {
-        throw new ConflictException('El snapshot de KPI ya fue calculado para esa marca', {
-          kpiCode: dto.kpiCode,
-          computedAt: computedAt.toISOString(),
-        });
+        throw new ConflictException(
+          'El snapshot de KPI ya fue calculado para esa marca',
+          {
+            kpiCode: dto.kpiCode,
+            computedAt: computedAt.toISOString(),
+          },
+        );
       }
 
       const snapshot = this.kpiRepo.create(tx, {
@@ -54,7 +65,11 @@ export class KpiSnapshotsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'billing.kpi.compute', snapshotId: snapshot.id, kpiCode: dto.kpiCode },
+        {
+          operation: 'billing.kpi.compute',
+          snapshotId: snapshot.id,
+          kpiCode: dto.kpiCode,
+        },
         'Financial KPI snapshot recorded',
       );
       return {

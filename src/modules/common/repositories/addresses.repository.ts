@@ -27,18 +27,22 @@ export interface CreateAddressData {
 export class AddressesRepository {
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateAddressData): Addresses {
-    return em.create(Addresses, {
-      ownerTypeConceptId: data.ownerTypeConceptId,
-      ownerId: data.ownerId,
-      lines: data.lines,
-      city: data.city,
-      postalCode: data.postalCode,
-      countryConceptId: data.countryConceptId,
-      useConceptId: data.useConceptId,
-      typeConceptId: data.typeConceptId,
-      ...createdBy(data.actorUserId),
-      // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
-      // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.
-    }, { partial: true });
+    return em.create(
+      Addresses,
+      {
+        ownerTypeConceptId: data.ownerTypeConceptId,
+        ownerId: data.ownerId,
+        lines: data.lines,
+        city: data.city,
+        postalCode: data.postalCode,
+        countryConceptId: data.countryConceptId,
+        useConceptId: data.useConceptId,
+        typeConceptId: data.typeConceptId,
+        ...createdBy(data.actorUserId),
+        // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
+        // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.
+      },
+      { partial: true },
+    );
   }
 }

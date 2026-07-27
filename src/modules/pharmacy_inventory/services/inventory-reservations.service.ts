@@ -11,12 +11,20 @@ import {
   StockPositionsRepository,
   LedgerRepository,
 } from '../repositories';
-import { CreateReservationDto, MovementResponseDto, ExpireReservationsResponseDto } from '../dto';
+import {
+  CreateReservationDto,
+  MovementResponseDto,
+  ExpireReservationsResponseDto,
+} from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
-const num = (v: string | null | undefined): number => (v == null ? 0 : Number(v));
-const recompute = (onHand: string, reserved: string, quarantine: string): string =>
-  String(num(onHand) - num(reserved) - num(quarantine));
+const num = (v: string | null | undefined): number =>
+  v == null ? 0 : Number(v);
+const recompute = (
+  onHand: string,
+  reserved: string,
+  quarantine: string,
+): string => String(num(onHand) - num(reserved) - num(quarantine));
 
 /** Reservas de stock (UC-25-04) y liberación de reservas vencidas (UC-25-05). */
 @Injectable()
@@ -38,11 +46,17 @@ export class InventoryReservationsService {
     actor: AuthenticatedUser,
   ): Promise<MovementResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.reservation.create', pharmacyId, lines: dto.lines.length },
+      {
+        operation: 'pharmacy_inventory.reservation.create',
+        pharmacyId,
+        lines: dto.lines.length,
+      },
       'Reserving stock',
     );
     return this.em.transactional(async (tx) => {
-      const expiresAt = new Date(Date.now() + (dto.expiresInMinutes ?? 60) * 60_000);
+      const expiresAt = new Date(
+        Date.now() + (dto.expiresInMinutes ?? 60) * 60_000,
+      );
       const reservation = this.reservationsRepo.create(tx, {
         pharmacyId,
         pharmacySiteId: dto.pharmacySiteId,
@@ -67,11 +81,14 @@ export class InventoryReservationsService {
         });
         const available = position ? num(position.availableQuantity) : 0;
         if (available < line.requestedQuantity) {
-          throw new PreconditionFailedException('Stock disponible insuficiente para reservar', {
-            productId: line.pharmacyProductId,
-            available,
-            requested: line.requestedQuantity,
-          });
+          throw new PreconditionFailedException(
+            'Stock disponible insuficiente para reservar',
+            {
+              productId: line.pharmacyProductId,
+              available,
+              requested: line.requestedQuantity,
+            },
+          );
         }
 
         const created = this.reservationsRepo.createLine(tx, {
@@ -102,7 +119,9 @@ export class InventoryReservationsService {
         });
         ledgerEntryIds.push(entry.id);
 
-        position!.reservedQuantity = String(num(position!.reservedQuantity) + line.requestedQuantity);
+        position!.reservedQuantity = String(
+          num(position!.reservedQuantity) + line.requestedQuantity,
+        );
         position!.availableQuantity = recompute(
           position!.onHandQuantity,
           position!.reservedQuantity,
@@ -118,10 +137,19 @@ export class InventoryReservationsService {
   }
 
   /** UC-25-05: worker idempotente que libera reservas CONFIRMED vencidas. */
-  async expire(actor: AuthenticatedUser): Promise<ExpireReservationsResponseDto> {
-    this.logger.info({ operation: 'pharmacy_inventory.reservation.expire' }, 'Expiring reservations');
+  async expire(
+    actor: AuthenticatedUser,
+  ): Promise<ExpireReservationsResponseDto> {
+    this.logger.info(
+      { operation: 'pharmacy_inventory.reservation.expire' },
+      'Expiring reservations',
+    );
     return this.em.transactional(async (tx) => {
-      const expired = await this.reservationsRepo.findExpired(tx, PINV.RESERVATION_CONFIRMED, new Date());
+      const expired = await this.reservationsRepo.findExpired(
+        tx,
+        PINV.RESERVATION_CONFIRMED,
+        new Date(),
+      );
       let count = 0;
 
       for (const reservation of expired) {
@@ -129,7 +157,10 @@ export class InventoryReservationsService {
         reservation.releasedAt = new Date();
         touch(reservation, actor.id);
 
-        const lines = await this.reservationsRepo.findLinesByReservation(tx, reservation.id);
+        const lines = await this.reservationsRepo.findLinesByReservation(
+          tx,
+          reservation.id,
+        );
         for (const rl of lines) {
           rl.statusConceptId = PINV.RES_LINE_RELEASED;
           touch(rl, actor.id);
@@ -140,7 +171,10 @@ export class InventoryReservationsService {
               pharmacyProductId: rl.pharmacyProductId,
               inventoryLotId: rl.inventoryLotId,
             });
-            const sequence = await this.ledgerRepo.nextSequence(tx, reservation.pharmacyId);
+            const sequence = await this.ledgerRepo.nextSequence(
+              tx,
+              reservation.pharmacyId,
+            );
             this.ledgerRepo.append(tx, {
               pharmacyId: reservation.pharmacyId,
               pharmacySiteId: reservation.pharmacySiteId,
@@ -155,7 +189,9 @@ export class InventoryReservationsService {
               recordedByUserId: actor.id,
             });
             if (position) {
-              position.reservedQuantity = String(num(position.reservedQuantity) - num(rl.reservedQuantity));
+              position.reservedQuantity = String(
+                num(position.reservedQuantity) - num(rl.reservedQuantity),
+              );
               position.availableQuantity = recompute(
                 position.onHandQuantity,
                 position.reservedQuantity,

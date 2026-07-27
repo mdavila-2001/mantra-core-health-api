@@ -33,11 +33,18 @@ export class ConsentSweepService {
 
   /** UC-07-11: expira las directivas vencidas y devuelve el conteo por tipo. */
   async sweep(actor: AuthenticatedUser): Promise<ExpirationSweepResultDto> {
-    this.logger.info({ operation: 'consent.sweep.run', actorId: actor.id }, 'Running expiration sweep');
+    this.logger.info(
+      { operation: 'consent.sweep.run', actorId: actor.id },
+      'Running expiration sweep',
+    );
     return this.em.transactional(async (tx) => {
       const now = new Date();
 
-      const consents = await this.consentsRepo.findExpirable(tx, CONS.CONSENT_ACTIVE, now);
+      const consents = await this.consentsRepo.findExpirable(
+        tx,
+        CONS.CONSENT_ACTIVE,
+        now,
+      );
       for (const consent of consents) {
         consent.statusConceptId = CONS.CONSENT_EXPIRED;
         touch(consent, actor.id);
@@ -51,7 +58,11 @@ export class ConsentSweepService {
         });
       }
 
-      const auths = await this.authRepo.findExpirable(tx, CONS.HIPAA_ACTIVE, now);
+      const auths = await this.authRepo.findExpirable(
+        tx,
+        CONS.HIPAA_ACTIVE,
+        now,
+      );
       for (const auth of auths) {
         auth.statusConceptId = CONS.HIPAA_EXPIRED;
         touch(auth, actor.id);
@@ -65,7 +76,11 @@ export class ConsentSweepService {
         });
       }
 
-      const restrictions = await this.restrictionsRepo.findExpirable(tx, CONS.RESTRICTION_ACTIVE, now);
+      const restrictions = await this.restrictionsRepo.findExpirable(
+        tx,
+        CONS.RESTRICTION_ACTIVE,
+        now,
+      );
       for (const restriction of restrictions) {
         restriction.statusConceptId = CONS.RESTRICTION_EXPIRED;
         touch(restriction, actor.id);
@@ -84,7 +99,10 @@ export class ConsentSweepService {
         expiredAuthorizations: auths.length,
         expiredRestrictions: restrictions.length,
       };
-      this.logger.info({ operation: 'consent.sweep.run', ...result }, 'Expiration sweep completed');
+      this.logger.info(
+        { operation: 'consent.sweep.run', ...result },
+        'Expiration sweep completed',
+      );
       return result;
     });
   }

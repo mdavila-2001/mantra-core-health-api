@@ -43,7 +43,8 @@ const DOWNLOAD_URL_TTL_MS = 15 * 60 * 1000;
  * Secreto de firma para las URL de descarga simuladas. En producción la firma la
  * genera el proveedor de almacenamiento (S3 presign); aquí basta un HMAC estable.
  */
-const DOWNLOAD_URL_SECRET = process.env.DOWNLOAD_URL_SECRET ?? 'redesa-dev-download-secret';
+const DOWNLOAD_URL_SECRET =
+  process.env.DOWNLOAD_URL_SECRET ?? 'redesa-dev-download-secret';
 
 /**
  * Casos de uso del subsistema de archivos (UC-02-05 … UC-02-11).
@@ -78,8 +79,8 @@ export class FilesService {
     return this.em.transactional(async (tx) => {
       const file = this.filesRepo.create(tx, {
         tenantId: SEED.tenantId,
-        categoryConceptId: CONCEPTS[`FILE_CATEGORY_${dto.category}` as ConceptName],
-        sensitivityConceptId: CONCEPTS[`SENSITIVITY_${dto.sensitivity}` as ConceptName],
+        categoryConceptId: CONCEPTS[`FILE_CATEGORY_${dto.category}`],
+        sensitivityConceptId: CONCEPTS[`SENSITIVITY_${dto.sensitivity}`],
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
         originalName: dto.originalName,
         actorUserId: actor.id,
@@ -109,7 +110,11 @@ export class FilesService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'common.file.create', fileId: file.id, versionId: version.id },
+        {
+          operation: 'common.file.create',
+          fileId: file.id,
+          versionId: version.id,
+        },
         'File created with version 1',
       );
       return this.fileToResponse(file, dto.category, dto.sensitivity);
@@ -133,7 +138,8 @@ export class FilesService {
         throw new ResourceNotFoundException('Archivo no encontrado');
       }
 
-      const nextNumber = (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
+      const nextNumber =
+        (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
       const version = this.fileVersionsRepo.create(tx, {
         fileId,
         versionNumber: nextNumber,
@@ -157,7 +163,12 @@ export class FilesService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'common.fileVersion.create', fileId, versionId: version.id, versionNumber: nextNumber },
+        {
+          operation: 'common.fileVersion.create',
+          fileId,
+          versionId: version.id,
+          versionNumber: nextNumber,
+        },
         'File version added and promoted',
       );
       return this.versionToResponse(version);
@@ -172,12 +183,21 @@ export class FilesService {
     actor: AuthenticatedUser,
   ): Promise<FileDerivativeResponseDto> {
     this.logger.info(
-      { operation: 'common.fileDerivative.create', fileId, versionId, type: dto.derivativeType },
+      {
+        operation: 'common.fileDerivative.create',
+        fileId,
+        versionId,
+        type: dto.derivativeType,
+      },
       'Creating derivative',
     );
 
     return this.em.transactional(async (tx) => {
-      const source = await this.fileVersionsRepo.findByFileAndId(tx, fileId, versionId);
+      const source = await this.fileVersionsRepo.findByFileAndId(
+        tx,
+        fileId,
+        versionId,
+      );
       if (!source) {
         throw new ResourceNotFoundException('Versión de archivo no encontrada');
       }
@@ -195,7 +215,8 @@ export class FilesService {
 
       // El derivado se materializa como una nueva versión del mismo archivo (la
       // columna file_versions.file_id es NOT NULL); nace ya LIMPIO.
-      const nextNumber = (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
+      const nextNumber =
+        (await this.fileVersionsRepo.maxVersionNumber(tx, fileId)) + 1;
       const derivativeVersion = this.fileVersionsRepo.create(tx, {
         fileId,
         versionNumber: nextNumber,
@@ -216,20 +237,23 @@ export class FilesService {
       const derivative = this.fileDerivativesRepo.create(tx, {
         sourceFileVersionId: versionId,
         derivativeFileVersionId: derivativeVersion.id,
-        derivativeTypeConceptId: CONCEPTS[`DERIVATIVE_${dto.derivativeType}` as ConceptName],
+        derivativeTypeConceptId: CONCEPTS[`DERIVATIVE_${dto.derivativeType}`],
         actorUserId: actor.id,
       });
       await tx.flush();
 
       this.logger.info(
-        { operation: 'common.fileDerivative.create', derivativeId: derivative.id },
+        {
+          operation: 'common.fileDerivative.create',
+          derivativeId: derivative.id,
+        },
         'Derivative created',
       );
       return {
         id: derivative.id,
         sourceFileVersionId: derivative.sourceFileVersionId,
         derivativeFileVersionId: derivative.derivativeFileVersionId,
-        derivativeType: dto.derivativeType as DerivativeType,
+        derivativeType: dto.derivativeType,
         createdAt: derivative.createdAt,
       };
     });
@@ -254,10 +278,12 @@ export class FilesService {
 
       const link = this.fileLinksRepo.create(tx, {
         fileId,
-        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}` as ConceptName],
+        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}`],
         ownerId: dto.ownerId,
         linkRoleConceptId: CONCEPTS.LINK_ROLE_ATTACHMENT,
-        visibilityConceptId: dto.visibility ? CONCEPTS.VISIBILITY_INTERNAL : undefined,
+        visibilityConceptId: dto.visibility
+          ? CONCEPTS.VISIBILITY_INTERNAL
+          : undefined,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -270,7 +296,7 @@ export class FilesService {
         id: link.id,
         fileId: link.fileId,
         ownerId: link.ownerId,
-        ownerType: dto.ownerType as OwnerType,
+        ownerType: dto.ownerType,
         createdAt: link.createdAt,
       };
     });
@@ -288,7 +314,11 @@ export class FilesService {
     dto: ScanResultDto,
   ): Promise<FileVersionResponseDto> {
     this.logger.info(
-      { operation: 'common.fileVersion.scanResult', versionId, result: dto.result },
+      {
+        operation: 'common.fileVersion.scanResult',
+        versionId,
+        result: dto.result,
+      },
       'Recording scan result',
     );
 
@@ -299,7 +329,9 @@ export class FilesService {
       }
 
       version.malwareScanStatusConceptId =
-        dto.result === ScanResult.CLEAN ? CONCEPTS.SCAN_CLEAN : CONCEPTS.SCAN_INFECTED;
+        dto.result === ScanResult.CLEAN
+          ? CONCEPTS.SCAN_CLEAN
+          : CONCEPTS.SCAN_INFECTED;
       version.verifiedAt = new Date();
       await tx.flush();
 
@@ -334,7 +366,9 @@ export class FilesService {
           { operation: 'common.file.delete', fileId },
           'Rejected delete under legal hold',
         );
-        throw new PreconditionFailedException('El archivo está bajo retención legal y no puede borrarse');
+        throw new PreconditionFailedException(
+          'El archivo está bajo retención legal y no puede borrarse',
+        );
       }
 
       const deletedAt = new Date();
@@ -371,19 +405,29 @@ export class FilesService {
     if (!file) {
       throw new ResourceNotFoundException('Archivo no encontrado');
     }
-    if (file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED) {
+    if (
+      file.deletedAt ||
+      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
+    ) {
       throw new PreconditionFailedException('El archivo está borrado');
     }
     if (!file.currentVersionId) {
-      throw new PreconditionFailedException('El archivo no tiene una versión vigente');
+      throw new PreconditionFailedException(
+        'El archivo no tiene una versión vigente',
+      );
     }
 
-    const version = await this.fileVersionsRepo.findById(forked, file.currentVersionId);
+    const version = await this.fileVersionsRepo.findById(
+      forked,
+      file.currentVersionId,
+    );
     if (!version) {
       throw new ResourceNotFoundException('Versión vigente no encontrada');
     }
     if (version.malwareScanStatusConceptId !== CONCEPTS.SCAN_CLEAN) {
-      throw new PreconditionFailedException('La versión vigente no ha superado el escaneo antimalware');
+      throw new PreconditionFailedException(
+        'La versión vigente no ha superado el escaneo antimalware',
+      );
     }
 
     const expiresAt = new Date(Date.now() + DOWNLOAD_URL_TTL_MS);

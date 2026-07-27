@@ -37,11 +37,17 @@ export class CarePlansRepository {
     return em.findOne(CarePlans, { id });
   }
 
-  findActivityById(em: EntityManager, id: string): Promise<CarePlanActivities | null> {
+  findActivityById(
+    em: EntityManager,
+    id: string,
+  ): Promise<CarePlanActivities | null> {
     return em.findOne(CarePlanActivities, { id });
   }
 
-  findActivitiesForPlan(em: EntityManager, carePlanId: string): Promise<CarePlanActivities[]> {
+  findActivitiesForPlan(
+    em: EntityManager,
+    carePlanId: string,
+  ): Promise<CarePlanActivities[]> {
     return em.find(CarePlanActivities, { carePlanId });
   }
 
@@ -64,7 +70,10 @@ export class CarePlansRepository {
     );
   }
 
-  createActivity(em: EntityManager, data: CreateActivityData): CarePlanActivities {
+  createActivity(
+    em: EntityManager,
+    data: CreateActivityData,
+  ): CarePlanActivities {
     return em.create(
       CarePlanActivities,
       {

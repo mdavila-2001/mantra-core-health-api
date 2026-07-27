@@ -6,7 +6,10 @@ const user: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 
 describe('TerminologyVersionsController', () => {
   function build() {
-    const service = { importConcepts: jest.fn(), publishVersion: jest.fn() } as any;
+    const service = {
+      importConcepts: jest.fn(),
+      publishVersion: jest.fn(),
+    } as any;
     const controller = new TerminologyVersionsController(service);
     return { controller, service };
   }
@@ -25,7 +28,11 @@ describe('TerminologyVersionsController', () => {
 
   it('publishVersion delega con el id de versión', async () => {
     const { controller, service } = build();
-    const expected = { id: 'v-1', state: 'TERM_ACTIVE', publishedAt: new Date() };
+    const expected = {
+      id: 'v-1',
+      state: 'TERM_ACTIVE',
+      publishedAt: new Date(),
+    };
     service.publishVersion.mockResolvedValue(expected);
 
     const result = await controller.publishVersion('v-1', user);

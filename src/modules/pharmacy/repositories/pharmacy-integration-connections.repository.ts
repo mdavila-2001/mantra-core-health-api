@@ -29,7 +29,10 @@ export interface CreateConnectionData {
 @Injectable()
 export class PharmacyIntegrationConnectionsRepository {
   /** Busca una conexión por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<PharmacyIntegrationConnections | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PharmacyIntegrationConnections | null> {
     return em.findOne(PharmacyIntegrationConnections, { id });
   }
 
@@ -39,11 +42,17 @@ export class PharmacyIntegrationConnectionsRepository {
     pharmacyId: string,
     connectionId: string,
   ): Promise<PharmacyIntegrationConnections | null> {
-    return em.findOne(PharmacyIntegrationConnections, { pharmacyId, connectionId });
+    return em.findOne(PharmacyIntegrationConnections, {
+      pharmacyId,
+      connectionId,
+    });
   }
 
   /** Crea la conexión en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateConnectionData): PharmacyIntegrationConnections {
+  create(
+    em: EntityManager,
+    data: CreateConnectionData,
+  ): PharmacyIntegrationConnections {
     const id = randomUUID();
     return em.create(
       PharmacyIntegrationConnections,

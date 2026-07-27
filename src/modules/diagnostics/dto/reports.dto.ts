@@ -17,7 +17,10 @@ export class ReportResultItemDto {
   @IsUUID()
   observationId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Rol del resultado (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Rol del resultado (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   resultRoleConceptId?: string;
@@ -35,7 +38,10 @@ export class ReportFileItemDto {
   @IsUUID()
   fileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Rol del contenido (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Rol del contenido (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   contentRoleConceptId?: string;
@@ -49,7 +55,10 @@ export class ReportFileItemDto {
 
 /** Cuerpo de `POST /diagnostics/reports/{reportId}/versions` (UC-20-07). */
 export class CreateReportVersionDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant custodio (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant custodio (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;
@@ -60,17 +69,26 @@ export class CreateReportVersionDto {
   @MaxLength(20000)
   conclusionText?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Autor (profesional validador)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Autor (profesional validador)',
+  })
   @IsOptional()
   @IsUUID()
   authorProfileId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Versión previa que enmienda' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Versión previa que enmienda',
+  })
   @IsOptional()
   @IsUUID()
   supersedesVersionId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Motivo de enmienda (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Motivo de enmienda (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   amendmentReasonConceptId?: string;
@@ -81,14 +99,20 @@ export class CreateReportVersionDto {
   @MaxLength(2000)
   amendmentReasonText?: string;
 
-  @ApiPropertyOptional({ type: [ReportResultItemDto], description: 'Observaciones enlazadas' })
+  @ApiPropertyOptional({
+    type: [ReportResultItemDto],
+    description: 'Observaciones enlazadas',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ReportResultItemDto)
   results?: ReportResultItemDto[];
 
-  @ApiPropertyOptional({ type: [ReportFileItemDto], description: 'Archivos adjuntos' })
+  @ApiPropertyOptional({
+    type: [ReportFileItemDto],
+    description: 'Archivos adjuntos',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -98,7 +122,10 @@ export class CreateReportVersionDto {
 
 /** Cuerpo de `POST /diagnostics/reports/{reportId}/versions/{versionId}/release` (UC-20-08). */
 export class ReleaseReportVersionDto {
-  @ApiPropertyOptional({ description: 'Visibilidad al paciente', enum: ['VISIBLE', 'HIDDEN'] })
+  @ApiPropertyOptional({
+    description: 'Visibilidad al paciente',
+    enum: ['VISIBLE', 'HIDDEN'],
+  })
   @IsOptional()
   @IsString()
   patientVisibility?: 'VISIBLE' | 'HIDDEN';
@@ -125,22 +152,34 @@ export class DetectCriticalResultDto {
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant custodio (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant custodio (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Criticidad (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Criticidad (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   criticalityConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Informe diagnóstico relacionado' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Informe diagnóstico relacionado',
+  })
   @IsOptional()
   @IsUUID()
   diagnosticReportId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Profesional que detecta' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Profesional que detecta',
+  })
   @IsOptional()
   @IsUUID()
   detectedByProfileId?: string;
@@ -158,7 +197,10 @@ export class AcknowledgeCriticalResultDto {
   @IsUUID()
   acknowledgedByProfileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Evidencia de comunicación' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Evidencia de comunicación',
+  })
   @IsOptional()
   @IsUUID()
   communicationEvidenceId?: string;

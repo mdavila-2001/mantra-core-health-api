@@ -58,7 +58,9 @@ export class CareGapsController {
   /** UC-18-11. */
   @Post('patients/:id/immunization-plan/project')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Proyectar el plan de inmunización y abrir brechas' })
+  @ApiOperation({
+    summary: 'Proyectar el plan de inmunización y abrir brechas',
+  })
   projectImmunizationPlan(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ProjectImmunizationPlanDto,
@@ -71,7 +73,9 @@ export class CareGapsController {
   @Post('immunization-schedules')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar una dosis del calendario de inmunización' })
+  @ApiOperation({
+    summary: 'Registrar una dosis del calendario de inmunización',
+  })
   createSchedule(
     @Body() dto: CreateImmunizationScheduleDto,
     @CurrentUser() actor: AuthenticatedUser,

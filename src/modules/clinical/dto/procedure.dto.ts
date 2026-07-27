@@ -3,11 +3,17 @@ import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /clinical/procedures` (UC-08-12). */
 export class CreateProcedureDto {
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
@@ -16,31 +22,49 @@ export class CreateProcedureDto {
   @IsUUID()
   encounterId?: string;
 
-  @ApiProperty({ description: 'Código del procedimiento (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Código del procedimiento (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   codeConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Profesional ejecutante', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Profesional ejecutante',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   performerProfileId?: string;
 
-  @ApiPropertyOptional({ description: 'Orden de servicio que lo origina', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Orden de servicio que lo origina',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   serviceRequestId?: string;
 
-  @ApiPropertyOptional({ description: 'Procedimiento padre (jerarquía)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Procedimiento padre (jerarquía)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   parentProcedureId?: string;
 
-  @ApiPropertyOptional({ description: 'Categoría (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Categoría (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   categoryConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Resultado (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Resultado (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   outcomeConceptId?: string;
@@ -55,17 +79,26 @@ export class CreateProcedureDto {
   @IsUUID()
   careSpaceId?: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de la ocurrencia', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de la ocurrencia',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   occurrenceStartAt?: string;
 
-  @ApiPropertyOptional({ description: 'Fin de la ocurrencia', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Fin de la ocurrencia',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   occurrenceEndAt?: string;
 
-  @ApiPropertyOptional({ description: 'Reporte operatorio (common.files)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Reporte operatorio (common.files)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   operativeReportFileId?: string;

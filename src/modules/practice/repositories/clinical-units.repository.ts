@@ -23,7 +23,10 @@ export class ClinicalUnitsRepository {
     return em.findOne(ClinicalUnits, { id });
   }
 
-  findBySite(em: EntityManager, practiceSiteId: string): Promise<ClinicalUnits[]> {
+  findBySite(
+    em: EntityManager,
+    practiceSiteId: string,
+  ): Promise<ClinicalUnits[]> {
     return em.find(ClinicalUnits, { practiceSiteId });
   }
 

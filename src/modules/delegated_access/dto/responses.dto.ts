@@ -38,7 +38,10 @@ export class DecisionResultDto {
   @ApiProperty({ description: 'Decisión aplicada (APPROVED|DENIED)' })
   decision!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Grant emitido si fue aprobada' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Grant emitido si fue aprobada',
+  })
   grantId?: string;
 }
 

@@ -1,18 +1,29 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsUUID } from 'class-validator';
 
-export const TPA_CHANNELS = ['DELEGATED', 'INSURANCE', 'IDENTITY', 'PHARMACY'] as const;
+export const TPA_CHANNELS = [
+  'DELEGATED',
+  'INSURANCE',
+  'IDENTITY',
+  'PHARMACY',
+] as const;
 
 /**
  * Cuerpo de `POST /audit/third-party-access` (UC-10-12). El `channel` decide en qué
  * log especializado se registra; cada canal exige sus FKs NOT NULL propias.
  */
 export class RecordThirdPartyAccessDto {
-  @ApiProperty({ description: 'Canal de acceso de tercero', enum: TPA_CHANNELS })
-  @IsIn(TPA_CHANNELS as unknown as string[])
+  @ApiProperty({
+    description: 'Canal de acceso de tercero',
+    enum: TPA_CHANNELS,
+  })
+  @IsIn(TPA_CHANNELS)
   channel!: string;
 
-  @ApiProperty({ description: 'Resultado del acceso', enum: ['SUCCESS', 'FAILURE'] })
+  @ApiProperty({
+    description: 'Resultado del acceso',
+    enum: ['SUCCESS', 'FAILURE'],
+  })
   @IsIn(['SUCCESS', 'FAILURE'])
   outcome!: string;
 
@@ -25,17 +36,26 @@ export class RecordThirdPartyAccessDto {
   purposeOfUse?: string;
 
   // --- DELEGATED ---
-  @ApiPropertyOptional({ description: 'DELEGATED: perfil de profesional delegante', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'DELEGATED: perfil de profesional delegante',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   delegatingPractitionerProfileId?: string;
 
-  @ApiPropertyOptional({ description: 'DELEGATED/INSURANCE: perfil de paciente', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'DELEGATED/INSURANCE: perfil de paciente',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   patientProfileId?: string;
 
-  @ApiPropertyOptional({ description: 'DELEGATED: asignación de delegación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'DELEGATED: asignación de delegación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   delegatedAssignmentId?: string;
@@ -46,7 +66,10 @@ export class RecordThirdPartyAccessDto {
   resourceId?: string;
 
   // --- INSURANCE ---
-  @ApiPropertyOptional({ description: 'INSURANCE: aseguradora', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'INSURANCE: aseguradora',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   insuranceCarrierId?: string;
@@ -56,13 +79,19 @@ export class RecordThirdPartyAccessDto {
   @IsUUID()
   claimId?: string;
 
-  @ApiPropertyOptional({ description: 'INSURANCE: solicitud de autorización', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'INSURANCE: solicitud de autorización',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   authorizationRequestId?: string;
 
   // --- IDENTITY ---
-  @ApiPropertyOptional({ description: 'IDENTITY: caso de verificación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'IDENTITY: caso de verificación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   verificationCaseId?: string;
@@ -73,7 +102,10 @@ export class RecordThirdPartyAccessDto {
   @IsUUID()
   pharmacyId?: string;
 
-  @ApiPropertyOptional({ description: 'PHARMACY: correlación end-to-end', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'PHARMACY: correlación end-to-end',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   correlationId?: string;

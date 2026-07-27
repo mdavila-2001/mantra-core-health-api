@@ -11,7 +11,10 @@ export class TrackedSubjectResponseDto {
   @ApiProperty({ description: 'Concept id del tipo de sujeto', format: 'uuid' })
   subjectType!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del sujeto', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del sujeto',
+    format: 'uuid',
+  })
   state!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

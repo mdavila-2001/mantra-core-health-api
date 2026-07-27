@@ -71,7 +71,10 @@ export class AuthzClinicalService {
     return this.em.transactional(async (tx) => {
       const validFrom = dto.validFrom ?? new Date();
       if (dto.validTo <= validFrom) {
-        throw new PreconditionFailedException('validTo debe ser posterior a validFrom', {});
+        throw new PreconditionFailedException(
+          'validTo debe ser posterior a validFrom',
+          {},
+        );
       }
       // Salvo tratamiento directo, se exige un consentimiento que respalde el acceso.
       if (dto.purposeOfUse !== 'TREATMENT' && !dto.consentId) {
@@ -81,12 +84,19 @@ export class AuthzClinicalService {
         );
       }
 
-      const existing = await this.grantsRepo.findActive(tx, patientProfileId, dto.grantedUserId);
+      const existing = await this.grantsRepo.findActive(
+        tx,
+        patientProfileId,
+        dto.grantedUserId,
+      );
       if (existing) {
-        throw new ConflictException('Ya existe un acceso clínico activo para ese usuario', {
-          patientProfileId,
-          grantedUserId: dto.grantedUserId,
-        });
+        throw new ConflictException(
+          'Ya existe un acceso clínico activo para ese usuario',
+          {
+            patientProfileId,
+            grantedUserId: dto.grantedUserId,
+          },
+        );
       }
 
       const grant = this.grantsRepo.create(tx, {
@@ -118,7 +128,11 @@ export class AuthzClinicalService {
     actor: AuthenticatedUser,
   ): Promise<AuthzIdResponseDto> {
     this.logger.warn(
-      { operation: 'authz.break-the-glass', patientProfileId, userId: actor.id },
+      {
+        operation: 'authz.break-the-glass',
+        patientProfileId,
+        userId: actor.id,
+      },
       'Break-the-glass emergency access invoked',
     );
     return this.em.transactional(async (tx) => {
@@ -168,17 +182,25 @@ export class AuthzClinicalService {
     );
     return this.em.transactional(async (tx) => {
       const grant = await this.grantsRepo.findById(tx, grantId);
-      if (!grant) throw new ResourceNotFoundException('Acceso clínico no encontrado', { grantId });
-      if (grant.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El acceso clínico no está activo', {
+      if (!grant)
+        throw new ResourceNotFoundException('Acceso clínico no encontrado', {
           grantId,
-          state: grant.stateConceptId,
         });
+      if (grant.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
+        throw new PreconditionFailedException(
+          'El acceso clínico no está activo',
+          {
+            grantId,
+            state: grant.stateConceptId,
+          },
+        );
       }
 
       const now = new Date();
       const expired = grant.validTo <= now;
-      grant.stateConceptId = expired ? CONCEPTS.STATE_EXPIRED : CONCEPTS.STATE_REVOKED;
+      grant.stateConceptId = expired
+        ? CONCEPTS.STATE_EXPIRED
+        : CONCEPTS.STATE_REVOKED;
       if (!expired) grant.validTo = now;
       touch(grant, actor.id);
       await tx.flush();

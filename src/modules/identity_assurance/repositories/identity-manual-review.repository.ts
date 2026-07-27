@@ -16,18 +16,28 @@ export interface CreateManualReviewData {
 /** Acceso a datos de `identity_assurance.identity_manual_review_cases`. */
 @Injectable()
 export class IdentityManualReviewCasesRepository {
-  findById(em: EntityManager, id: string): Promise<IdentityManualReviewCases | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IdentityManualReviewCases | null> {
     return em.findOne(IdentityManualReviewCases, { id });
   }
 
-  countOpenByCase(em: EntityManager, caseId: string, openStatusConceptId: string): Promise<number> {
+  countOpenByCase(
+    em: EntityManager,
+    caseId: string,
+    openStatusConceptId: string,
+  ): Promise<number> {
     return em.count(IdentityManualReviewCases, {
       identityVerificationCaseId: caseId,
       statusConceptId: openStatusConceptId,
     });
   }
 
-  create(em: EntityManager, data: CreateManualReviewData): IdentityManualReviewCases {
+  create(
+    em: EntityManager,
+    data: CreateManualReviewData,
+  ): IdentityManualReviewCases {
     return em.create(
       IdentityManualReviewCases,
       {

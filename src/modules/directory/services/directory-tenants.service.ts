@@ -47,8 +47,14 @@ export class DirectoryTenantsService {
   }
 
   /** UC-04-01: aprovisiona un tenant raíz (pending/unverified) con su membership owner. */
-  async provision(dto: CreateTenantDto, actor: AuthenticatedUser): Promise<TenantResponseDto> {
-    this.logger.info({ operation: 'directory.tenant.provision', actorId: actor.id }, 'Provisioning tenant');
+  async provision(
+    dto: CreateTenantDto,
+    actor: AuthenticatedUser,
+  ): Promise<TenantResponseDto> {
+    this.logger.info(
+      { operation: 'directory.tenant.provision', actorId: actor.id },
+      'Provisioning tenant',
+    );
     return this.em.transactional(async (tx) => {
       const clash = await this.tenantsRepo.findByCode(tx, dto.code);
       if (clash) {
@@ -56,15 +62,19 @@ export class DirectoryTenantsService {
           { operation: 'directory.tenant.provision', reason: 'code-in-use' },
           'Rejected tenant provision: code already exists',
         );
-        throw new ConflictException('El código de tenant ya existe', { code: dto.code });
+        throw new ConflictException('El código de tenant ya existe', {
+          code: dto.code,
+        });
       }
 
       const tenant = this.tenantsRepo.create(tx, {
         code: dto.code,
         legalName: dto.legalName,
         tradeName: dto.tradeName,
-        tenantTypeConceptId: dto.tenantTypeConceptId ?? CONCEPTS.TENANT_TYPE_PROVIDER,
-        legalEntityTypeConceptId: dto.legalEntityTypeConceptId ?? CONCEPTS.LEGAL_ENTITY_COMPANY,
+        tenantTypeConceptId:
+          dto.tenantTypeConceptId ?? CONCEPTS.TENANT_TYPE_PROVIDER,
+        legalEntityTypeConceptId:
+          dto.legalEntityTypeConceptId ?? CONCEPTS.LEGAL_ENTITY_COMPANY,
         statusConceptId: DIR.TENANT_PENDING,
         verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
         dataResidencyRegionConceptId: dto.dataResidencyRegionConceptId,
@@ -85,7 +95,10 @@ export class DirectoryTenantsService {
         actorUserId: actor.id,
       });
 
-      this.logger.info({ operation: 'directory.tenant.provision', tenantId: tenant.id }, 'Tenant provisioned');
+      this.logger.info(
+        { operation: 'directory.tenant.provision', tenantId: tenant.id },
+        'Tenant provisioned',
+      );
       return this.toResponse(tenant);
     });
   }
@@ -96,24 +109,37 @@ export class DirectoryTenantsService {
     dto: VerifyTenantDto,
     actor: AuthenticatedUser,
   ): Promise<TenantResponseDto> {
-    this.logger.info({ operation: 'directory.tenant.verify', tenantId, actorId: actor.id }, 'Verifying tenant');
+    this.logger.info(
+      { operation: 'directory.tenant.verify', tenantId, actorId: actor.id },
+      'Verifying tenant',
+    );
     return this.em.transactional(async (tx) => {
       const tenant = await this.tenantsRepo.findById(tx, tenantId);
-      if (!tenant) throw new ResourceNotFoundException('Tenant no encontrado', { tenantId });
-
-      if (tenant.statusConceptId !== DIR.TENANT_PENDING) {
-        throw new PreconditionFailedException('El tenant no está pendiente de verificación', {
+      if (!tenant)
+        throw new ResourceNotFoundException('Tenant no encontrado', {
           tenantId,
         });
+
+      if (tenant.statusConceptId !== DIR.TENANT_PENDING) {
+        throw new PreconditionFailedException(
+          'El tenant no está pendiente de verificación',
+          {
+            tenantId,
+          },
+        );
       }
 
       tenant.verificationStatusConceptId = CONCEPTS.TENANT_VERIFIED;
       tenant.statusConceptId = CONCEPTS.TENANT_ACTIVE;
       if (dto.countryConceptId) tenant.countryConceptId = dto.countryConceptId;
-      if (dto.jurisdictionConceptId) tenant.jurisdictionConceptId = dto.jurisdictionConceptId;
+      if (dto.jurisdictionConceptId)
+        tenant.jurisdictionConceptId = dto.jurisdictionConceptId;
       touch(tenant, actor.id);
 
-      this.logger.info({ operation: 'directory.tenant.verify', tenantId }, 'Tenant verified and activated');
+      this.logger.info(
+        { operation: 'directory.tenant.verify', tenantId },
+        'Tenant verified and activated',
+      );
       return this.toResponse(tenant);
     });
   }
@@ -125,29 +151,45 @@ export class DirectoryTenantsService {
     actor: AuthenticatedUser,
   ): Promise<TenantResponseDto> {
     this.logger.info(
-      { operation: 'directory.tenant.child', parentTenantId, actorId: actor.id },
+      {
+        operation: 'directory.tenant.child',
+        parentTenantId,
+        actorId: actor.id,
+      },
       'Creating child tenant',
     );
     return this.em.transactional(async (tx) => {
       const parent = await this.tenantsRepo.findById(tx, parentTenantId);
-      if (!parent) throw new ResourceNotFoundException('Tenant padre no encontrado', { parentTenantId });
+      if (!parent)
+        throw new ResourceNotFoundException('Tenant padre no encontrado', {
+          parentTenantId,
+        });
 
       if (parent.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
-        throw new PreconditionFailedException('El tenant padre no está activo', { parentTenantId });
+        throw new PreconditionFailedException(
+          'El tenant padre no está activo',
+          { parentTenantId },
+        );
       }
 
       const clash = await this.tenantsRepo.findByCode(tx, dto.code);
-      if (clash) throw new ConflictException('El código de tenant ya existe', { code: dto.code });
+      if (clash)
+        throw new ConflictException('El código de tenant ya existe', {
+          code: dto.code,
+        });
 
       const child = this.tenantsRepo.create(tx, {
         code: dto.code,
         legalName: dto.legalName,
-        tenantTypeConceptId: dto.tenantTypeConceptId ?? parent.tenantTypeConceptId,
-        legalEntityTypeConceptId: dto.legalEntityTypeConceptId ?? parent.legalEntityTypeConceptId,
+        tenantTypeConceptId:
+          dto.tenantTypeConceptId ?? parent.tenantTypeConceptId,
+        legalEntityTypeConceptId:
+          dto.legalEntityTypeConceptId ?? parent.legalEntityTypeConceptId,
         statusConceptId: CONCEPTS.TENANT_ACTIVE,
         verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
         dataResidencyRegionConceptId:
-          dto.dataResidencyRegionConceptId ?? parent.dataResidencyRegionConceptId,
+          dto.dataResidencyRegionConceptId ??
+          parent.dataResidencyRegionConceptId,
         parentTenantId: parent.id,
         actorUserId: actor.id,
       });
@@ -164,7 +206,10 @@ export class DirectoryTenantsService {
         actorUserId: actor.id,
       });
 
-      this.logger.info({ operation: 'directory.tenant.child', tenantId: child.id }, 'Child tenant created');
+      this.logger.info(
+        { operation: 'directory.tenant.child', tenantId: child.id },
+        'Child tenant created',
+      );
       return this.toResponse(child);
     });
   }
@@ -181,16 +226,25 @@ export class DirectoryTenantsService {
     );
     return this.em.transactional(async (tx) => {
       const tenant = await this.tenantsRepo.findById(tx, tenantId);
-      if (!tenant) throw new ResourceNotFoundException('Tenant no encontrado', { tenantId });
+      if (!tenant)
+        throw new ResourceNotFoundException('Tenant no encontrado', {
+          tenantId,
+        });
 
       if (tenant.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
-        throw new PreconditionFailedException('El tenant no está activo', { tenantId });
+        throw new PreconditionFailedException('El tenant no está activo', {
+          tenantId,
+        });
       }
 
       tenant.statusConceptId = DIR.TENANT_SUSPENDED;
       touch(tenant, actor.id);
 
-      const branches = await this.branchesRepo.findByTenantAndStatus(tx, tenantId, DIR.BRANCH_ACTIVE);
+      const branches = await this.branchesRepo.findByTenantAndStatus(
+        tx,
+        tenantId,
+        DIR.BRANCH_ACTIVE,
+      );
       for (const branch of branches) {
         branch.statusConceptId = DIR.BRANCH_SUSPENDED;
         touch(branch, actor.id);

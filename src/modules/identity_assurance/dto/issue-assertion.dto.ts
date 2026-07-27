@@ -3,21 +3,34 @@ import { IsInt, IsOptional, IsUUID, Min } from 'class-validator';
 
 /** Cuerpo de `POST /identity/verification-cases/{id}/assertions` (UC-27-10). */
 export class IssueAssertionDto {
-  @ApiProperty({ description: 'Autoridad emisora de la aserción', format: 'uuid' })
+  @ApiProperty({
+    description: 'Autoridad emisora de la aserción',
+    format: 'uuid',
+  })
   @IsUUID()
   issuerIdentityAuthorityId!: string;
 
-  @ApiPropertyOptional({ description: 'Concepto: tipo de aserción (por defecto identidad)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto: tipo de aserción (por defecto identidad)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   assertionTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto: nivel de aseguramiento alcanzado (por defecto el solicitado del caso)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Concepto: nivel de aseguramiento alcanzado (por defecto el solicitado del caso)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   assuranceLevelConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Vigencia de la aserción en horas (por defecto 8760 = 1 año)', default: 8760 })
+  @ApiPropertyOptional({
+    description: 'Vigencia de la aserción en horas (por defecto 8760 = 1 año)',
+    default: 8760,
+  })
   @IsOptional()
   @IsInt()
   @Min(1)

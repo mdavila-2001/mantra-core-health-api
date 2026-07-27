@@ -45,9 +45,15 @@ export class ConsentsService {
   }
 
   /** UC-07-01: captura un consentimiento activo con sus provisiones y evidencia de evento. */
-  async capture(dto: CreateConsentDto, actor: AuthenticatedUser): Promise<ConsentResponseDto> {
+  async capture(
+    dto: CreateConsentDto,
+    actor: AuthenticatedUser,
+  ): Promise<ConsentResponseDto> {
     this.logger.info(
-      { operation: 'consent.consent.capture', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'consent.consent.capture',
+        patientProfileId: dto.patientProfileId,
+      },
       'Capturing consent',
     );
     return this.em.transactional(async (tx) => {
@@ -62,10 +68,13 @@ export class ConsentsService {
           { operation: 'consent.consent.capture', reason: 'duplicate-active' },
           'Rejected consent capture: an active consent already exists for this purpose',
         );
-        throw new ConflictException('Ya existe un consentimiento activo para este propósito', {
-          patientProfileId: dto.patientProfileId,
-          processingPurposeId: dto.processingPurposeId,
-        });
+        throw new ConflictException(
+          'Ya existe un consentimiento activo para este propósito',
+          {
+            patientProfileId: dto.patientProfileId,
+            processingPurposeId: dto.processingPurposeId,
+          },
+        );
       }
 
       const now = new Date();
@@ -114,10 +123,16 @@ export class ConsentsService {
     dto: WithdrawConsentDto,
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'consent.consent.withdraw', consentId: id }, 'Withdrawing consent');
+    this.logger.info(
+      { operation: 'consent.consent.withdraw', consentId: id },
+      'Withdrawing consent',
+    );
     return this.em.transactional(async (tx) => {
       const consent = await this.consentsRepo.findById(tx, id);
-      if (!consent) throw new ResourceNotFoundException('Consentimiento no encontrado', { id });
+      if (!consent)
+        throw new ResourceNotFoundException('Consentimiento no encontrado', {
+          id,
+        });
       if (consent.statusConceptId !== CONS.CONSENT_ACTIVE) {
         throw new ConflictException('El consentimiento no está activo', {
           id,
@@ -158,7 +173,10 @@ export class ConsentsService {
     );
     return this.em.transactional(async (tx) => {
       const consent = await this.consentsRepo.findById(tx, id);
-      if (!consent) throw new ResourceNotFoundException('Consentimiento no encontrado', { id });
+      if (!consent)
+        throw new ResourceNotFoundException('Consentimiento no encontrado', {
+          id,
+        });
       if (consent.statusConceptId !== CONS.CONSENT_ACTIVE) {
         throw new ConflictException('El consentimiento no está activo', {
           id,
@@ -201,8 +219,10 @@ export class ConsentsService {
   ): void {
     this.provisionsRepo.create(tx, {
       consentId,
-      provisionTypeConceptId: provision.provisionTypeConceptId ?? CONS.PROVISION_TYPE_BASE,
-      actionConceptId: provision.action === 'DENY' ? CONS.ACTION_DENY : CONS.ACTION_PERMIT,
+      provisionTypeConceptId:
+        provision.provisionTypeConceptId ?? CONS.PROVISION_TYPE_BASE,
+      actionConceptId:
+        provision.action === 'DENY' ? CONS.ACTION_DENY : CONS.ACTION_PERMIT,
       dataClassConceptId: provision.dataClassConceptId,
       actorUserId: provision.actorUserId,
       actorRoleConceptId: provision.actorRoleConceptId,

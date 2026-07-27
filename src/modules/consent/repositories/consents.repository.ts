@@ -47,7 +47,11 @@ export class ConsentsRepository {
   }
 
   /** Consentimientos activos cuyo `valid_to` ya venció (barrido de expiración). */
-  findExpirable(em: EntityManager, activeStatusConceptId: string, now: Date): Promise<Consents[]> {
+  findExpirable(
+    em: EntityManager,
+    activeStatusConceptId: string,
+    now: Date,
+  ): Promise<Consents[]> {
     return em.find(Consents, {
       statusConceptId: activeStatusConceptId,
       validTo: { $ne: null, $lte: now },

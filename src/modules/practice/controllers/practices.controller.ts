@@ -116,7 +116,11 @@ export class PracticesController {
     @Body() dto: CreateHealthcareServiceDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<HealthcareServiceResponseDto> {
-    return this.structureService.publishHealthcareService(practiceId, dto, actor);
+    return this.structureService.publishHealthcareService(
+      practiceId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-14-07. */
@@ -137,7 +141,9 @@ export class PracticesController {
   @Post(':practiceId/role-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Asignar un rol de profesional a sitio/unidad/servicio' })
+  @ApiOperation({
+    summary: 'Asignar un rol de profesional a sitio/unidad/servicio',
+  })
   assignRole(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
     @Body() dto: CreateRoleAssignmentDto,

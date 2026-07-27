@@ -19,17 +19,26 @@ export class CreateImagingEndpointDto {
   @MaxLength(2000)
   baseUri!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tipo de endpoint (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tipo de endpoint (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   endpointTypeConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Región de almacenamiento (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Región de almacenamiento (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   storageRegionConceptId?: string;
@@ -42,7 +51,10 @@ export class StowInstanceDto {
   @MaxLength(200)
   dicomSopInstanceUid!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'SOP Class (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'SOP Class (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   sopClassConceptId?: string;
@@ -59,12 +71,17 @@ export class StowInstanceDto {
   @MaxLength(2000)
   retrievalUri?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Backend de almacenamiento del objeto binario' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Backend de almacenamiento del objeto binario',
+  })
   @IsOptional()
   @IsUUID()
   storageBackendId?: string;
 
-  @ApiPropertyOptional({ description: 'Object key en el backend (requerido si hay backend)' })
+  @ApiPropertyOptional({
+    description: 'Object key en el backend (requerido si hay backend)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
@@ -90,7 +107,10 @@ export class StowSeriesDto {
   @MaxLength(200)
   dicomSeriesInstanceUid!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Modalidad de la serie (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Modalidad de la serie (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   modalityConceptId?: string;
@@ -101,7 +121,10 @@ export class StowSeriesDto {
   @Min(0)
   seriesNumber?: number;
 
-  @ApiPropertyOptional({ type: [StowInstanceDto], description: 'Instancias SOP de la serie' })
+  @ApiPropertyOptional({
+    type: [StowInstanceDto],
+    description: 'Instancias SOP de la serie',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -124,7 +147,10 @@ export class StoreImagingStudyDto {
   @MaxLength(200)
   dicomStudyInstanceUid!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant custodio (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant custodio (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;
@@ -155,7 +181,10 @@ export class StoreImagingStudyDto {
 
 /** Cuerpo de `POST /diagnostics/imaging-studies/{id}/dose-events` (UC-20-13). */
 export class RecordDoseEventDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Serie de imagen relacionada' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Serie de imagen relacionada',
+  })
   @IsOptional()
   @IsUUID()
   imagingSeriesId?: string;
@@ -184,18 +213,26 @@ export class RecordDoseEventDto {
   @MaxLength(40)
   effectiveDoseMsv?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Unidad de dosis (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Unidad de dosis (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   unitConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'SOP Instance UID de origen (evita doble conteo)' })
+  @ApiPropertyOptional({
+    description: 'SOP Instance UID de origen (evita doble conteo)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   sourceSopInstanceUid?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Dispositivo/modalidad (device id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Dispositivo/modalidad (device id)',
+  })
   @IsOptional()
   @IsUUID()
   deviceId?: string;

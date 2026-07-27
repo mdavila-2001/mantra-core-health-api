@@ -46,7 +46,12 @@ export class BillsRepository {
     return em.findOne(Bills, { id });
   }
 
-  findByNumber(em: EntityManager, practiceId: string, vendorId: string, billNumber: string): Promise<Bills | null> {
+  findByNumber(
+    em: EntityManager,
+    practiceId: string,
+    vendorId: string,
+    billNumber: string,
+  ): Promise<Bills | null> {
     return em.findOne(Bills, { practiceId, vendorId, billNumber });
   }
 

@@ -20,7 +20,11 @@ export class BookmarksRepository {
     bookmarkableTypeConceptId: string,
     bookmarkableRefId: string,
   ): Promise<Bookmarks | null> {
-    return em.findOne(Bookmarks, { profileId, bookmarkableTypeConceptId, bookmarkableRefId });
+    return em.findOne(Bookmarks, {
+      profileId,
+      bookmarkableTypeConceptId,
+      bookmarkableRefId,
+    });
   }
 
   create(em: EntityManager, data: CreateBookmarkData): Bookmarks {

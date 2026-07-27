@@ -1,9 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /forms/definition-sets` (UC-09-01). */
 export class CreateDefinitionSetDto {
-  @ApiProperty({ description: 'URI de namespace único del set', maxLength: 500 })
+  @ApiProperty({
+    description: 'URI de namespace único del set',
+    maxLength: 500,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(500)
@@ -26,12 +35,18 @@ export class CreateDefinitionSetDto {
   @IsUUID()
   ownerTenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Dominio destino (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Dominio destino (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   targetDomainConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Versión semántica inicial', default: '1.0.0' })
+  @ApiPropertyOptional({
+    description: 'Versión semántica inicial',
+    default: '1.0.0',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(50)

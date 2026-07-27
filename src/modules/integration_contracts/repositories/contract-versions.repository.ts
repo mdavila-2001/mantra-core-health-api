@@ -20,16 +20,26 @@ export interface CreateVersionData {
 @Injectable()
 export class ContractVersionsRepository {
   /** Busca una versión por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<IntegrationContractVersions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IntegrationContractVersions | null> {
     return em.findOne(IntegrationContractVersions, { id });
   }
 
   /** Mayor `version_number` publicado para un contrato (0 si no hay ninguno). */
-  async maxVersionNumber(em: EntityManager, contractId: string): Promise<number> {
+  async maxVersionNumber(
+    em: EntityManager,
+    contractId: string,
+  ): Promise<number> {
     const rows = await em.find(
       IntegrationContractVersions,
       { integrationContractId: contractId },
-      { fields: ['versionNumber'], orderBy: { versionNumber: 'desc' }, limit: 1 },
+      {
+        fields: ['versionNumber'],
+        orderBy: { versionNumber: 'desc' },
+        limit: 1,
+      },
     );
     return rows.length ? rows[0].versionNumber : 0;
   }
@@ -60,7 +70,10 @@ export class ContractVersionsRepository {
   }
 
   /** Crea la entidad de versión en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateVersionData): IntegrationContractVersions {
+  create(
+    em: EntityManager,
+    data: CreateVersionData,
+  ): IntegrationContractVersions {
     return em.create(
       IntegrationContractVersions,
       {

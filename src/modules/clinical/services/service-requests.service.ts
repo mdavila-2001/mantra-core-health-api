@@ -1,8 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException, type AuthenticatedUser } from '../../../common';
-import { EncountersRepository, ServiceRequestsRepository } from '../repositories';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
+import {
+  EncountersRepository,
+  ServiceRequestsRepository,
+} from '../repositories';
 import { CreateServiceRequestDto, ServiceRequestResponseDto } from '../dto';
 import { CLIN } from '../clinical.concepts';
 
@@ -24,12 +30,18 @@ export class ServiceRequestsService {
     actor: AuthenticatedUser,
   ): Promise<ServiceRequestResponseDto> {
     this.logger.info(
-      { operation: 'clinical.service-request.create', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.service-request.create',
+        patientProfileId: dto.patientProfileId,
+      },
       'Placing service request',
     );
     return this.em.transactional(async (tx) => {
       if (dto.encounterId) {
-        const encounter = await this.encountersRepo.findById(tx, dto.encounterId);
+        const encounter = await this.encountersRepo.findById(
+          tx,
+          dto.encounterId,
+        );
         if (!encounter) {
           throw new ResourceNotFoundException('Encuentro no encontrado', {
             encounterId: dto.encounterId,
@@ -53,7 +65,10 @@ export class ServiceRequestsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'clinical.service-request.create', serviceRequestId: sr.id },
+        {
+          operation: 'clinical.service-request.create',
+          serviceRequestId: sr.id,
+        },
         'Service request placed',
       );
       return {

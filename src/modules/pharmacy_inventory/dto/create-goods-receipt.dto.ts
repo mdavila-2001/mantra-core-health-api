@@ -32,7 +32,10 @@ export class GoodsReceiptLineDto {
   @Min(0)
   receivedQuantity!: number;
 
-  @ApiPropertyOptional({ description: 'Cantidad aceptada (default = recibida)', minimum: 0 })
+  @ApiPropertyOptional({
+    description: 'Cantidad aceptada (default = recibida)',
+    minimum: 0,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)

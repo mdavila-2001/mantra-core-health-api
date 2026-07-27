@@ -13,22 +13,28 @@ function build() {
     deadLetter: mockFn(),
     correlate: mockFn(),
   };
-  const controller = new IntegrationsMessagesController(messagingService as any);
+  const controller = new IntegrationsMessagesController(
+    messagingService as any,
+  );
   return { controller, messagingService };
 }
 
 describe('IntegrationsMessagesController', () => {
   it('delegates enqueueOutbound (UC-12-05)', async () => {
     const d = build();
-    const dto = { connectionId: 'c1', idempotencyKey: 'k', requestPayloadJson: {} };
-    await d.controller.enqueueOutbound(dto as any, actor);
+    const dto = {
+      connectionId: 'c1',
+      idempotencyKey: 'k',
+      requestPayloadJson: {},
+    };
+    await d.controller.enqueueOutbound(dto, actor);
     expect(d.messagingService.enqueueOutbound).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates dispatch (UC-12-06)', async () => {
     const d = build();
     const dto = { simulateFailure: false };
-    await d.controller.dispatch('m1', dto as any, actor);
+    await d.controller.dispatch('m1', dto, actor);
     expect(d.messagingService.dispatch).toHaveBeenCalledWith('m1', dto, actor);
   });
 

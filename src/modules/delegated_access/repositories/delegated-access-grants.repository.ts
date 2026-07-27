@@ -21,7 +21,10 @@ export interface CreateGrantData {
 /** Acceso a datos de `delegated_access.delegated_access_grants`. */
 @Injectable()
 export class DelegatedAccessGrantsRepository {
-  findById(em: EntityManager, id: string): Promise<DelegatedAccessGrants | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DelegatedAccessGrants | null> {
     return em.findOne(DelegatedAccessGrants, { id });
   }
 
@@ -60,9 +63,11 @@ export class DelegatedAccessGrantsRepository {
       practitionerDelegateAssignmentId,
       purposeOfUseConceptId,
     };
-    if (patientProfileId !== undefined) where.patientProfileId = patientProfileId;
+    if (patientProfileId !== undefined)
+      where.patientProfileId = patientProfileId;
     if (encounterId !== undefined) where.encounterId = encounterId;
-    if (resourceTypeConceptId !== undefined) where.resourceTypeConceptId = resourceTypeConceptId;
+    if (resourceTypeConceptId !== undefined)
+      where.resourceTypeConceptId = resourceTypeConceptId;
     return em.findOne(DelegatedAccessGrants, where);
   }
 
@@ -77,8 +82,16 @@ export class DelegatedAccessGrantsRepository {
   ): Promise<number> {
     return em.nativeUpdate(
       DelegatedAccessGrants,
-      { practitionerDelegateAssignmentId, statusConceptId: activeStatusConceptId },
-      { statusConceptId: revokedStatusConceptId, validTo: now, updatedAt: now, updatedByUserId: actorUserId },
+      {
+        practitionerDelegateAssignmentId,
+        statusConceptId: activeStatusConceptId,
+      },
+      {
+        statusConceptId: revokedStatusConceptId,
+        validTo: now,
+        updatedAt: now,
+        updatedByUserId: actorUserId,
+      },
     );
   }
 

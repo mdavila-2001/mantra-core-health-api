@@ -8,55 +8,82 @@ const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT'] as const;
 export class CreateOrgUserAssignmentDto {
   @ApiPropertyOptional({ description: 'Rol de la asignación', enum: ROLES })
   @IsOptional()
-  @IsIn(ROLES as unknown as string[])
+  @IsIn(ROLES)
   role?: (typeof ROLES)[number];
 
   @ApiPropertyOptional({ description: 'Alcance de acceso', enum: SCOPES })
   @IsOptional()
-  @IsIn(SCOPES as unknown as string[])
+  @IsIn(SCOPES)
   accessScope?: (typeof SCOPES)[number];
 
-  @ApiPropertyOptional({ description: 'Nodo de scope: práctica', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nodo de scope: práctica',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   practiceId?: string;
 
-  @ApiPropertyOptional({ description: 'Nodo de scope: sede de práctica', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nodo de scope: sede de práctica',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   practiceSiteId?: string;
 
-  @ApiPropertyOptional({ description: 'Nodo de scope: unidad clínica', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nodo de scope: unidad clínica',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   clinicalUnitId?: string;
 
-  @ApiPropertyOptional({ description: 'Nodo de scope: care space', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nodo de scope: care space',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   careSpaceId?: string;
 
-  @ApiPropertyOptional({ description: 'Nodo de scope: unidad de diagnóstico', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nodo de scope: unidad de diagnóstico',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   diagnosticUnitId?: string;
 
-  @ApiPropertyOptional({ description: 'Nodo de scope: farmacia', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nodo de scope: farmacia',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   pharmacyId?: string;
 
-  @ApiPropertyOptional({ description: 'Supervisor responsable', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Supervisor responsable',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   supervisorUserId?: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia (ISO)', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia (ISO)',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   validFrom?: string;
 
-  @ApiPropertyOptional({ description: 'Fin de vigencia (ISO)', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Fin de vigencia (ISO)',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   validTo?: string;

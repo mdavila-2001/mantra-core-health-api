@@ -9,31 +9,49 @@ export type ProvisionAction = 'PERMIT' | 'DENY';
  * clase de datos, para qué actor/rol y con qué etiqueta de seguridad.
  */
 export class ConsentProvisionInputDto {
-  @ApiProperty({ description: 'Acción de la provisión', enum: ['PERMIT', 'DENY'] })
+  @ApiProperty({
+    description: 'Acción de la provisión',
+    enum: ['PERMIT', 'DENY'],
+  })
   @IsIn(['PERMIT', 'DENY'])
   action!: ProvisionAction;
 
-  @ApiPropertyOptional({ description: 'Clase de datos afectada (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Clase de datos afectada (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dataClassConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Actor concreto autorizado/denegado (user id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Actor concreto autorizado/denegado (user id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   actorUserId?: string;
 
-  @ApiPropertyOptional({ description: 'Rol del actor (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Rol del actor (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   actorRoleConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Propósito de uso (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Propósito de uso (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   purposeOfUseConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Etiqueta de seguridad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Etiqueta de seguridad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   securityLabelConceptId?: string;
@@ -48,7 +66,9 @@ export class ConsentProvisionInputDto {
   @IsISO8601()
   validTo?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de provisión (concept id); por defecto la base' })
+  @ApiPropertyOptional({
+    description: 'Tipo de provisión (concept id); por defecto la base',
+  })
   @IsOptional()
   @IsString()
   provisionTypeConceptId?: string;

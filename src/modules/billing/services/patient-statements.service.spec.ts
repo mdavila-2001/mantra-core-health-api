@@ -13,7 +13,13 @@ function build() {
   const invoicesRepo = { findByPatientInRange: mockFn() };
   const linksRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PatientStatementsService(em as any, statementsRepo as any, invoicesRepo as any, linksRepo as any, logger as any);
+  const service = new PatientStatementsService(
+    em as any,
+    statementsRepo,
+    invoicesRepo as any,
+    linksRepo,
+    logger as any,
+  );
   return { service, statementsRepo, invoicesRepo, linksRepo };
 }
 
@@ -25,10 +31,21 @@ describe('PatientStatementsService (UC-17-09)', () => {
       { id: 'i1', total: '100.00', paidTotal: '20.00' },
       { id: 'i2', total: '50.00', paidTotal: '0.00' },
     ]);
-    d.statementsRepo.create.mockImplementation((_tx: any, data: any) => ({ id: 's1', patientProfileId: data.patientProfileId, ...data }));
+    d.statementsRepo.create.mockImplementation((_tx: any, data: any) => ({
+      id: 's1',
+      patientProfileId: data.patientProfileId,
+      ...data,
+    }));
 
     const res = await d.service.generate(
-      { practiceId: 'pr1', patientProfileId: 'p1', periodStart: '2026-01-01', periodEnd: '2026-01-31', openingBalance: '10.00', tenantId: 't1' } as any,
+      {
+        practiceId: 'pr1',
+        patientProfileId: 'p1',
+        periodStart: '2026-01-01',
+        periodEnd: '2026-01-31',
+        openingBalance: '10.00',
+        tenantId: 't1',
+      },
       actor,
     );
 
@@ -43,7 +60,12 @@ describe('PatientStatementsService (UC-17-09)', () => {
     d.statementsRepo.findByPeriod.mockResolvedValue({ id: 'existing' });
     await expect(
       d.service.generate(
-        { practiceId: 'pr1', patientProfileId: 'p1', periodStart: '2026-01-01', periodEnd: '2026-01-31' } as any,
+        {
+          practiceId: 'pr1',
+          patientProfileId: 'p1',
+          periodStart: '2026-01-01',
+          periodEnd: '2026-01-31',
+        } as any,
         actor,
       ),
     ).rejects.toBeInstanceOf(ConflictException);

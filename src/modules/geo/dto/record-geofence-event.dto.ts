@@ -19,12 +19,19 @@ export class RecordGeofenceEventDto {
   @IsIn(['ENTER', 'EXIT'])
   eventType!: GeofenceEventTypeCode;
 
-  @ApiPropertyOptional({ description: 'Ping que originó el evento', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Ping que originó el evento',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   locationPingId?: string;
 
-  @ApiPropertyOptional({ description: 'Instante del cruce', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Instante del cruce',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   occurredAt?: Date;

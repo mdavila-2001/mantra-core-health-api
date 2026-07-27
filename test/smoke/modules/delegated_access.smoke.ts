@@ -35,7 +35,10 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
       name: 'Secretary permission set',
       delegateType: 'SECRETARY',
       items: [
-        { permissionId: c.vars.authzPermissionId, requiresStepUpAuthentication: true },
+        {
+          permissionId: c.vars.authzPermissionId,
+          requiresStepUpAuthentication: true,
+        },
       ],
     }),
     expectedStatus: 201,
@@ -50,7 +53,12 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/delegated-permission-sets',
     auth: false,
-    body: (c) => ({ tenantId: c.tenantId, code: `DA-X-${c.u}`, name: 'X', items: [{ permissionId: c.vars.authzPermissionId }] }),
+    body: (c) => ({
+      tenantId: c.tenantId,
+      code: `DA-X-${c.u}`,
+      name: 'X',
+      items: [{ permissionId: c.vars.authzPermissionId }],
+    }),
     expectedStatus: 401,
   },
   {
@@ -59,7 +67,12 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'límite: sin items -> 400',
     method: 'post',
     path: () => '/delegated-permission-sets',
-    body: (c) => ({ tenantId: c.tenantId, code: `DA-Y-${c.u}`, name: 'Y', items: [] }),
+    body: (c) => ({
+      tenantId: c.tenantId,
+      code: `DA-Y-${c.u}`,
+      name: 'Y',
+      items: [],
+    }),
     expectedStatus: 400,
   },
 
@@ -90,7 +103,11 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'happy: asigna usuario org (scoped)',
     method: 'post',
     path: (c) => `/org/${c.vars.dirMembershipId}/user-assignments`,
-    body: (c) => ({ role: 'SECRETARY', accessScope: 'TENANT', supervisorUserId: c.adminUserId }),
+    body: (c) => ({
+      role: 'SECRETARY',
+      accessScope: 'TENANT',
+      supervisorUserId: c.adminUserId,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.daOrgAssignmentId = String(b.id);
@@ -155,7 +172,10 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'límite: falta set -> 400',
     method: 'post',
     path: () => '/practitioner-delegates',
-    body: (c) => ({ practitionerRoleAssignmentId: ROLE_ASSIGNMENT, delegateUserAssignmentId: c.vars.daOrgAssignmentId }),
+    body: (c) => ({
+      practitionerRoleAssignmentId: ROLE_ASSIGNMENT,
+      delegateUserAssignmentId: c.vars.daOrgAssignmentId,
+    }),
     expectedStatus: 400,
   },
 
@@ -165,7 +185,8 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /practitioner-delegates/{id}/access-requests',
     name: 'happy: abre solicitud',
     method: 'post',
-    path: (c) => `/practitioner-delegates/${c.vars.daDelegateId}/access-requests`,
+    path: (c) =>
+      `/practitioner-delegates/${c.vars.daDelegateId}/access-requests`,
     body: (c) => ({
       requestedPermissionId: PERMISSION_A,
       patientProfileId: c.vars.patientProfileId,
@@ -181,8 +202,12 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /practitioner-delegates/{id}/access-requests',
     name: 'límite: solicitud pendiente duplicada -> 409',
     method: 'post',
-    path: (c) => `/practitioner-delegates/${c.vars.daDelegateId}/access-requests`,
-    body: (c) => ({ requestedPermissionId: PERMISSION_A, patientProfileId: c.vars.patientProfileId }),
+    path: (c) =>
+      `/practitioner-delegates/${c.vars.daDelegateId}/access-requests`,
+    body: (c) => ({
+      requestedPermissionId: PERMISSION_A,
+      patientProfileId: c.vars.patientProfileId,
+    }),
     expectedStatus: 409,
   },
   {
@@ -202,7 +227,12 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'happy: aprueba y emite grant',
     method: 'post',
     path: (c) => `/access-requests/${c.vars.daRequestId}/decision`,
-    body: () => ({ decision: 'APPROVED', purpose: 'TREATMENT', resourceType: 'CLINICAL_NOTE', validTo: FAR_FUTURE }),
+    body: () => ({
+      decision: 'APPROVED',
+      purpose: 'TREATMENT',
+      resourceType: 'CLINICAL_NOTE',
+      validTo: FAR_FUTURE,
+    }),
     expectedStatus: 200,
   },
   {
@@ -281,7 +311,10 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'límite: delegación inexistente -> 404',
     method: 'post',
     path: () => '/authz/effective-actor/evaluate',
-    body: () => ({ practitionerDelegateAssignmentId: UUID_ABSENT, purpose: 'TREATMENT' }),
+    body: () => ({
+      practitionerDelegateAssignmentId: UUID_ABSENT,
+      purpose: 'TREATMENT',
+    }),
     expectedStatus: 404,
   },
   {
@@ -291,7 +324,10 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/authz/effective-actor/evaluate',
     auth: false,
-    body: (c) => ({ practitionerDelegateAssignmentId: c.vars.daDelegateId, purpose: 'TREATMENT' }),
+    body: (c) => ({
+      practitionerDelegateAssignmentId: c.vars.daDelegateId,
+      purpose: 'TREATMENT',
+    }),
     expectedStatus: 401,
   },
 

@@ -46,7 +46,10 @@ export interface CreateCriticalNotificationData {
  */
 @Injectable()
 export class ReportsRepository {
-  findVersion(em: EntityManager, id: string): Promise<DiagnosticReportVersions | null> {
+  findVersion(
+    em: EntityManager,
+    id: string,
+  ): Promise<DiagnosticReportVersions | null> {
     return em.findOne(DiagnosticReportVersions, { id });
   }
 
@@ -58,21 +61,34 @@ export class ReportsRepository {
     return em.findOne(DiagnosticReportVersions, { id, diagnosticReportId });
   }
 
-  findCriticalNotification(em: EntityManager, id: string): Promise<CriticalResultNotifications | null> {
+  findCriticalNotification(
+    em: EntityManager,
+    id: string,
+  ): Promise<CriticalResultNotifications | null> {
     return em.findOne(CriticalResultNotifications, { id });
   }
 
   /** Mayor número de versión existente para un informe (0 si no hay). */
-  async maxVersionNumber(em: EntityManager, diagnosticReportId: string): Promise<number> {
+  async maxVersionNumber(
+    em: EntityManager,
+    diagnosticReportId: string,
+  ): Promise<number> {
     const rows = await em.find(
       DiagnosticReportVersions,
       { diagnosticReportId },
-      { fields: ['versionNumber'], orderBy: { versionNumber: 'desc' }, limit: 1 },
+      {
+        fields: ['versionNumber'],
+        orderBy: { versionNumber: 'desc' },
+        limit: 1,
+      },
     );
     return rows.length ? rows[0].versionNumber : 0;
   }
 
-  createVersion(em: EntityManager, data: CreateReportVersionData): DiagnosticReportVersions {
+  createVersion(
+    em: EntityManager,
+    data: CreateReportVersionData,
+  ): DiagnosticReportVersions {
     // Tabla sin created_at/updated_at: usa recorded_at + recorded_by_user_id.
     return em.create(
       DiagnosticReportVersions,
@@ -194,7 +210,10 @@ export class ReportsRepository {
   }
 
   /** ¿Existe ya una notificación crítica para esa observación? (evita doble alerta). */
-  async criticalExistsForObservation(em: EntityManager, observationId: string): Promise<boolean> {
+  async criticalExistsForObservation(
+    em: EntityManager,
+    observationId: string,
+  ): Promise<boolean> {
     const n = await em.count(CriticalResultNotifications, { observationId });
     return n > 0;
   }

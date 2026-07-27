@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { PharmacyProcurementService } from '../services';
@@ -38,7 +46,9 @@ export class PharmacyProcurementController {
   @Post(':pharmacyId/purchase-orders')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Emitir una orden de compra a proveedor (UC-25-01)' })
+  @ApiOperation({
+    summary: 'Emitir una orden de compra a proveedor (UC-25-01)',
+  })
   createPurchaseOrder(
     @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
     @Body() dto: CreatePurchaseOrderDto,

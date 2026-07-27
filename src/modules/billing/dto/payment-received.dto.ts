@@ -14,7 +14,10 @@ import {
 
 /** Asignación de un pago recibido a una factura (UC-17-02). */
 export class ReceivableAllocationInputDto {
-  @ApiProperty({ description: 'Factura destino (billing.invoices)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Factura destino (billing.invoices)',
+    format: 'uuid',
+  })
   @IsUUID()
   invoiceId!: string;
 
@@ -22,12 +25,18 @@ export class ReceivableAllocationInputDto {
   @IsNumberString()
   allocatedAmount!: string;
 
-  @ApiPropertyOptional({ description: 'Descuento por pronto pago', example: '0.00' })
+  @ApiPropertyOptional({
+    description: 'Descuento por pronto pago',
+    example: '0.00',
+  })
   @IsOptional()
   @IsNumberString()
   discountAmount?: string;
 
-  @ApiPropertyOptional({ description: 'Partida abierta del subledger (accounting.open_items)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Partida abierta del subledger (accounting.open_items)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   openItemId?: string;
@@ -39,7 +48,10 @@ export class ApplyPaymentReceivedDto {
   @IsUUID()
   practiceId!: string;
 
-  @ApiPropertyOptional({ description: 'Paciente pagador (profiles.patient_profiles)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Paciente pagador (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   patientProfileId?: string;
@@ -48,7 +60,10 @@ export class ApplyPaymentReceivedDto {
   @IsNumberString()
   amount!: string;
 
-  @ApiPropertyOptional({ description: 'Método de pago (concepto); por defecto efectivo', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Método de pago (concepto); por defecto efectivo',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   methodConceptId?: string;
@@ -64,12 +79,18 @@ export class ApplyPaymentReceivedDto {
   @MaxLength(120)
   reference?: string;
 
-  @ApiPropertyOptional({ description: 'Cuenta bancaria receptora (accounting.company_bank_accounts)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Cuenta bancaria receptora (accounting.company_bank_accounts)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   companyBankAccountId?: string;
 
-  @ApiProperty({ type: [ReceivableAllocationInputDto], description: 'Asignaciones por factura (al menos una)' })
+  @ApiProperty({
+    type: [ReceivableAllocationInputDto],
+    description: 'Asignaciones por factura (al menos una)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

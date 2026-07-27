@@ -20,12 +20,19 @@ export interface CreatePortalSurfaceData {
 /** Acceso a datos de `read_models.portal_surfaces`. */
 @Injectable()
 export class PortalSurfacesRepository {
-  findByCode(em: EntityManager, portalCode: string): Promise<PortalSurfaces | null> {
+  findByCode(
+    em: EntityManager,
+    portalCode: string,
+  ): Promise<PortalSurfaces | null> {
     return em.findOne(PortalSurfaces, { portalCode });
   }
 
   create(em: EntityManager, data: CreatePortalSurfaceData): PortalSurfaces {
     const { actorUserId, ...rest } = data;
-    return em.create(PortalSurfaces, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      PortalSurfaces,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

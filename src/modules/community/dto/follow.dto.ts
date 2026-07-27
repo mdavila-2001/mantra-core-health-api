@@ -7,7 +7,10 @@ export class CreateFollowDto {
   @IsUUID()
   followerProfileId!: string;
 
-  @ApiProperty({ description: 'Tipo de objeto seguido', enum: ['PROFILE', 'TOPIC', 'HASHTAG', 'GROUP'] })
+  @ApiProperty({
+    description: 'Tipo de objeto seguido',
+    enum: ['PROFILE', 'TOPIC', 'HASHTAG', 'GROUP'],
+  })
   @IsIn(['PROFILE', 'TOPIC', 'HASHTAG', 'GROUP'])
   followableType!: 'PROFILE' | 'TOPIC' | 'HASHTAG' | 'GROUP';
 
@@ -15,7 +18,10 @@ export class CreateFollowDto {
   @IsUUID()
   followableRefId!: string;
 
-  @ApiPropertyOptional({ description: 'Nivel de notificación', enum: ['ALL', 'HIGHLIGHTS', 'NONE'] })
+  @ApiPropertyOptional({
+    description: 'Nivel de notificación',
+    enum: ['ALL', 'HIGHLIGHTS', 'NONE'],
+  })
   @IsOptional()
   @IsIn(['ALL', 'HIGHLIGHTS', 'NONE'])
   notificationLevel?: 'ALL' | 'HIGHLIGHTS' | 'NONE';

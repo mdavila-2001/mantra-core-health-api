@@ -28,23 +28,44 @@ function build() {
     resourceGrantsRepo as any,
     logger as any,
   );
-  return { service, tx, rolesRepo, assignmentsRepo, permissionsRepo, permGrantsRepo, resourceGrantsRepo };
+  return {
+    service,
+    tx,
+    rolesRepo,
+    assignmentsRepo,
+    permissionsRepo,
+    permGrantsRepo,
+    resourceGrantsRepo,
+  };
 }
 
 describe('AuthzGrantsService', () => {
   describe('assignRole (UC-06-04)', () => {
     it('assigns an assignable role', async () => {
       const d = build();
-      d.rolesRepo.findById.mockResolvedValue({ id: 'role-1', isAssignable: true });
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        isAssignable: true,
+      });
       d.assignmentsRepo.findActive.mockResolvedValue(null);
-      d.assignmentsRepo.create.mockReturnValue({ id: 'a-1', createdAt: new Date() });
-      const res = await d.service.assignRole('user-1', { roleId: 'role-1' } as any, actor);
+      d.assignmentsRepo.create.mockReturnValue({
+        id: 'a-1',
+        createdAt: new Date(),
+      });
+      const res = await d.service.assignRole(
+        'user-1',
+        { roleId: 'role-1' },
+        actor,
+      );
       expect(res.id).toBe('a-1');
     });
 
     it('rejects a non-assignable role', async () => {
       const d = build();
-      d.rolesRepo.findById.mockResolvedValue({ id: 'role-1', isAssignable: false });
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        isAssignable: false,
+      });
       await expect(
         d.service.assignRole('user-1', { roleId: 'role-1' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -52,11 +73,18 @@ describe('AuthzGrantsService', () => {
 
     it('rejects invalid validity window', async () => {
       const d = build();
-      d.rolesRepo.findById.mockResolvedValue({ id: 'role-1', isAssignable: true });
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        isAssignable: true,
+      });
       await expect(
         d.service.assignRole(
           'user-1',
-          { roleId: 'role-1', validFrom: new Date('2026-02-01'), validTo: new Date('2026-01-01') } as any,
+          {
+            roleId: 'role-1',
+            validFrom: new Date('2026-02-01'),
+            validTo: new Date('2026-01-01'),
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -64,7 +92,10 @@ describe('AuthzGrantsService', () => {
 
     it('rejects a duplicated active assignment', async () => {
       const d = build();
-      d.rolesRepo.findById.mockResolvedValue({ id: 'role-1', isAssignable: true });
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        isAssignable: true,
+      });
       d.assignmentsRepo.findActive.mockResolvedValue({ id: 'existing' });
       await expect(
         d.service.assignRole('user-1', { roleId: 'role-1' } as any, actor),
@@ -85,10 +116,17 @@ describe('AuthzGrantsService', () => {
       const d = build();
       d.permissionsRepo.findById.mockResolvedValue({ id: 'perm-1' });
       d.permGrantsRepo.findActive.mockResolvedValue(null);
-      d.permGrantsRepo.create.mockReturnValue({ id: 'g-1', createdAt: new Date() });
+      d.permGrantsRepo.create.mockReturnValue({
+        id: 'g-1',
+        createdAt: new Date(),
+      });
       const res = await d.service.grantPermission(
         'user-1',
-        { permissionId: 'perm-1', effect: 'ALLOW', reason: 'temp coverage' } as any,
+        {
+          permissionId: 'perm-1',
+          effect: 'ALLOW',
+          reason: 'temp coverage',
+        } as any,
         actor,
       );
       expect(res.id).toBe('g-1');
@@ -99,7 +137,11 @@ describe('AuthzGrantsService', () => {
       d.permissionsRepo.findById.mockResolvedValue({ id: 'perm-1' });
       d.permGrantsRepo.findActive.mockResolvedValue({ id: 'existing' });
       await expect(
-        d.service.grantPermission('user-1', { permissionId: 'perm-1', effect: 'DENY', reason: 'x' } as any, actor),
+        d.service.grantPermission(
+          'user-1',
+          { permissionId: 'perm-1', effect: 'DENY', reason: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -109,7 +151,10 @@ describe('AuthzGrantsService', () => {
       const d = build();
       d.permissionsRepo.findById.mockResolvedValue({ id: 'perm-1' });
       d.resourceGrantsRepo.findExisting.mockResolvedValue(null);
-      d.resourceGrantsRepo.create.mockReturnValue({ id: 'rsg-1', createdAt: new Date() });
+      d.resourceGrantsRepo.create.mockReturnValue({
+        id: 'rsg-1',
+        createdAt: new Date(),
+      });
       const res = await d.service.grantResourceScope(
         {
           subjectType: 'USER',

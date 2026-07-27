@@ -41,17 +41,23 @@ export class ConsentEvidenceService {
     actor: AuthenticatedUser,
   ): Promise<ConsentEvidenceResponseDto> {
     this.logger.info(
-      { operation: 'consent.evidence.record', subjectType: dto.subjectType, subjectId: dto.subjectId },
+      {
+        operation: 'consent.evidence.record',
+        subjectType: dto.subjectType,
+        subjectId: dto.subjectId,
+      },
       'Recording consent evidence',
     );
     return this.em.transactional(async (tx) => {
       const evidence = this.evidenceRepo.create(tx, {
         subjectTypeConceptId: SUBJECT_TYPE_CONCEPT[dto.subjectType],
         subjectId: dto.subjectId,
-        evidenceTypeConceptId: dto.evidenceTypeConceptId ?? CONS.EVIDENCE_TYPE_SIGNATURE,
+        evidenceTypeConceptId:
+          dto.evidenceTypeConceptId ?? CONS.EVIDENCE_TYPE_SIGNATURE,
         documentFileId: dto.documentFileId,
         signatureId: dto.signatureId,
-        capturedChannelConceptId: dto.capturedChannelConceptId ?? CONS.CHANNEL_IN_PERSON,
+        capturedChannelConceptId:
+          dto.capturedChannelConceptId ?? CONS.CHANNEL_IN_PERSON,
         policySnapshotHash: dto.policySnapshotHash,
         evidenceHash: dto.evidenceHash,
         recordedByUserId: actor.id,

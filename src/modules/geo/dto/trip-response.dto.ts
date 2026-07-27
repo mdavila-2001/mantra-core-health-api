@@ -8,7 +8,10 @@ export class TripResponseDto {
   @ApiPropertyOptional({ format: 'uuid' })
   trackingSessionId?: string;
 
-  @ApiProperty({ description: 'Concept id del estado del viaje', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del viaje',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiPropertyOptional({ description: 'Distancia recorrida (m)' })

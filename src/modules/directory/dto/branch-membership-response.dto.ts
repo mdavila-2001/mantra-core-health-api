@@ -11,7 +11,10 @@ export class BranchMembershipResponseDto {
   @ApiProperty({ format: 'uuid' })
   branchId!: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del rol local', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del rol local',
+    format: 'uuid',
+  })
   localRole?: string;
 
   @ApiProperty({ description: 'Concept id del estado', format: 'uuid' })

@@ -3,20 +3,27 @@ import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /profiles/practitioners/{profileId}/specialties` (UC-05-06). */
 export class AddSpecialtyDto {
-  @ApiPropertyOptional({ description: 'Concept id de la especialidad', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de la especialidad',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   specialtyConceptId?: string;
 
   @ApiPropertyOptional({
-    description: 'Credencial de soporte (debe pertenecer al profesional y estar verificada)',
+    description:
+      'Credencial de soporte (debe pertenecer al profesional y estar verificada)',
     format: 'uuid',
   })
   @IsOptional()
   @IsUUID()
   supportingCredentialId?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del rol de especialidad', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del rol de especialidad',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   specialtyRoleConceptId?: string;
@@ -26,7 +33,9 @@ export class AddSpecialtyDto {
   @IsBoolean()
   isPrimary?: boolean;
 
-  @ApiPropertyOptional({ description: 'Certificada por junta (board certified)' })
+  @ApiPropertyOptional({
+    description: 'Certificada por junta (board certified)',
+  })
   @IsOptional()
   @IsBoolean()
   boardCertified?: boolean;
@@ -43,7 +52,10 @@ export class SpecialtyResponseDto {
   @ApiProperty()
   isPrimary!: boolean;
 
-  @ApiProperty({ description: 'Concept id del estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

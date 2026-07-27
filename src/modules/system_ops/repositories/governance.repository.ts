@@ -24,23 +24,39 @@ import { createdBy } from '../../../common';
 @Injectable()
 export class GovernanceRepository {
   // --- Dominios de datos (UPSERT por code) ---
-  findDomainByCode(em: EntityManager, code: string): Promise<DataDomains | null> {
+  findDomainByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<DataDomains | null> {
     return em.findOne(DataDomains, { code });
   }
 
   createDomain(
     em: EntityManager,
-    data: { code: string; name: string; ownerTeam?: string; actorUserId?: string },
+    data: {
+      code: string;
+      name: string;
+      ownerTeam?: string;
+      actorUserId?: string;
+    },
   ): DataDomains {
     return em.create(
       DataDomains,
-      { code: data.code, name: data.name, ownerTeam: data.ownerTeam, ...createdBy(data.actorUserId) },
+      {
+        code: data.code,
+        name: data.name,
+        ownerTeam: data.ownerTeam,
+        ...createdBy(data.actorUserId),
+      },
       { partial: true },
     );
   }
 
   // --- Clasificaciones de datos (UPSERT por code) ---
-  findClassificationByCode(em: EntityManager, code: string): Promise<SystemOpsDataClassifications | null> {
+  findClassificationByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<SystemOpsDataClassifications | null> {
     return em.findOne(SystemOpsDataClassifications, { code });
   }
 
@@ -74,7 +90,10 @@ export class GovernanceRepository {
   }
 
   // --- Registro de entidad ---
-  findEntityById(em: EntityManager, id: string): Promise<EntityRegistry | null> {
+  findEntityById(
+    em: EntityManager,
+    id: string,
+  ): Promise<EntityRegistry | null> {
     return em.findOne(EntityRegistry, { id });
   }
 
@@ -97,7 +116,11 @@ export class GovernanceRepository {
     },
   ): EntityRegistry {
     const { actorUserId, ...rest } = data;
-    return em.create(EntityRegistry, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      EntityRegistry,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   // --- Registro de campo ---
@@ -119,15 +142,25 @@ export class GovernanceRepository {
     },
   ): FieldRegistry {
     const { actorUserId, ...rest } = data;
-    return em.create(FieldRegistry, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FieldRegistry,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   // --- Políticas de escritura ---
-  findWritePolicyByCode(em: EntityManager, code: string): Promise<WritePolicies | null> {
+  findWritePolicyByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<WritePolicies | null> {
     return em.findOne(WritePolicies, { code });
   }
 
-  findWritePolicyById(em: EntityManager, id: string): Promise<WritePolicies | null> {
+  findWritePolicyById(
+    em: EntityManager,
+    id: string,
+  ): Promise<WritePolicies | null> {
     return em.findOne(WritePolicies, { id });
   }
 
@@ -148,15 +181,25 @@ export class GovernanceRepository {
     },
   ): WritePolicies {
     const { actorUserId, ...rest } = data;
-    return em.create(WritePolicies, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      WritePolicies,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   // --- Políticas de retención ---
-  findRetentionPolicyByCode(em: EntityManager, code: string): Promise<SystemOpsRetentionPolicies | null> {
+  findRetentionPolicyByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<SystemOpsRetentionPolicies | null> {
     return em.findOne(SystemOpsRetentionPolicies, { code });
   }
 
-  findRetentionPolicyById(em: EntityManager, id: string): Promise<SystemOpsRetentionPolicies | null> {
+  findRetentionPolicyById(
+    em: EntityManager,
+    id: string,
+  ): Promise<SystemOpsRetentionPolicies | null> {
     return em.findOne(SystemOpsRetentionPolicies, { id });
   }
 
@@ -182,7 +225,10 @@ export class GovernanceRepository {
   }
 
   // --- Reglas de anonimización ---
-  findAnonymizationRuleByCode(em: EntityManager, code: string): Promise<AnonymizationRules | null> {
+  findAnonymizationRuleByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<AnonymizationRules | null> {
     return em.findOne(AnonymizationRules, { code });
   }
 
@@ -197,7 +243,11 @@ export class GovernanceRepository {
     },
   ): AnonymizationRules {
     const { actorUserId, ...rest } = data;
-    return em.create(AnonymizationRules, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      AnonymizationRules,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   // --- Bitácora de cambios de gobierno (append-only) ---

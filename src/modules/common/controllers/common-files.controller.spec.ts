@@ -71,8 +71,18 @@ describe('CommonFilesController', () => {
       sizeBytes: 3,
       contentHash: 'h3',
     };
-    const result = await controller.createDerivative('file-1', 'ver-1', dto, user);
-    expect(service.createDerivative).toHaveBeenCalledWith('file-1', 'ver-1', dto, user);
+    const result = await controller.createDerivative(
+      'file-1',
+      'ver-1',
+      dto,
+      user,
+    );
+    expect(service.createDerivative).toHaveBeenCalledWith(
+      'file-1',
+      'ver-1',
+      dto,
+      user,
+    );
     expect(result).toEqual({ id: 'der-1' });
   });
 
@@ -90,7 +100,10 @@ describe('CommonFilesController', () => {
 
   it('delegates softDelete', async () => {
     const { service, controller } = build();
-    service.softDelete.mockResolvedValue({ id: 'file-1', deletedAt: new Date() });
+    service.softDelete.mockResolvedValue({
+      id: 'file-1',
+      deletedAt: new Date(),
+    });
     const result = await controller.softDelete('file-1', user);
     expect(service.softDelete).toHaveBeenCalledWith('file-1', user);
     expect(result.id).toBe('file-1');
@@ -98,7 +111,10 @@ describe('CommonFilesController', () => {
 
   it('delegates downloadUrl', async () => {
     const { service, controller } = build();
-    service.generateDownloadUrl.mockResolvedValue({ url: 'u', expiresAt: new Date() });
+    service.generateDownloadUrl.mockResolvedValue({
+      url: 'u',
+      expiresAt: new Date(),
+    });
     const result = await controller.downloadUrl('file-1');
     expect(service.generateDownloadUrl).toHaveBeenCalledWith('file-1');
     expect(result.url).toBe('u');

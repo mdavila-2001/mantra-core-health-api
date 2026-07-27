@@ -38,24 +38,31 @@ export class ContactPointsService {
     actor: AuthenticatedUser,
   ): Promise<ContactPointResponseDto> {
     this.logger.info(
-      { operation: 'common.contactPoint.create', ownerId: dto.ownerId, system: dto.system },
+      {
+        operation: 'common.contactPoint.create',
+        ownerId: dto.ownerId,
+        system: dto.system,
+      },
       'Creating contact point',
     );
 
     return this.em.transactional(async (tx) => {
       const contactPoint = this.contactPointsRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}` as ConceptName],
+        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}`],
         ownerId: dto.ownerId,
-        systemConceptId: CONCEPTS[`CONTACT_${dto.system}` as ConceptName],
+        systemConceptId: CONCEPTS[`CONTACT_${dto.system}`],
         value: dto.value,
-        useConceptId: dto.use ? CONCEPTS[`CONTACT_USE_${dto.use}` as ConceptName] : undefined,
+        useConceptId: dto.use ? CONCEPTS[`CONTACT_USE_${dto.use}`] : undefined,
         rank: dto.rank,
         actorUserId: actor.id,
       });
       await tx.flush();
 
       this.logger.info(
-        { operation: 'common.contactPoint.create', contactPointId: contactPoint.id },
+        {
+          operation: 'common.contactPoint.create',
+          contactPointId: contactPoint.id,
+        },
         'Contact point created',
       );
       return this.toResponse(contactPoint);
@@ -121,6 +128,8 @@ export class ContactPointsService {
   }
 
   private systemOf(conceptId: string): ContactSystem {
-    return conceptId === CONCEPTS.CONTACT_PHONE ? ContactSystem.PHONE : ContactSystem.EMAIL;
+    return conceptId === CONCEPTS.CONTACT_PHONE
+      ? ContactSystem.PHONE
+      : ContactSystem.EMAIL;
   }
 }

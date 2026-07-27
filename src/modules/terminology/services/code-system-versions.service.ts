@@ -9,7 +9,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { CatalogConceptsRepository, CodeSystemVersionsRepository } from '../repositories';
+import {
+  CatalogConceptsRepository,
+  CodeSystemVersionsRepository,
+} from '../repositories';
 import {
   type ImportConceptsDto,
   type ImportConceptsResponseDto,
@@ -42,14 +45,20 @@ export class CodeSystemVersionsService {
     actor: AuthenticatedUser,
   ): Promise<ImportConceptsResponseDto> {
     this.logger.info(
-      { operation: 'terminology.version.import', versionId, total: dto.concepts.length },
+      {
+        operation: 'terminology.version.import',
+        versionId,
+        total: dto.concepts.length,
+      },
       'Importando conceptos en versión',
     );
 
     return this.em.transactional(async (tx) => {
       const version = await this.versionsRepo.findById(tx, versionId);
       if (!version) {
-        throw new ResourceNotFoundException('Versión no encontrada', { versionId });
+        throw new ResourceNotFoundException('Versión no encontrada', {
+          versionId,
+        });
       }
       if (version.stateConceptId !== CONCEPTS.TERM_DRAFT) {
         this.logger.warn(
@@ -63,7 +72,11 @@ export class CodeSystemVersionsService {
       }
 
       const codes = dto.concepts.map((concept) => concept.code);
-      const existing = await this.conceptsRepo.findExistingCodes(tx, versionId, codes);
+      const existing = await this.conceptsRepo.findExistingCodes(
+        tx,
+        versionId,
+        codes,
+      );
 
       // `seen` cubre además los duplicados dentro del propio lote: la operación es
       // idempotente frente a códigos repetidos vengan de la base o de la petición.
@@ -88,7 +101,12 @@ export class CodeSystemVersionsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'terminology.version.import', versionId, inserted, skipped },
+        {
+          operation: 'terminology.version.import',
+          versionId,
+          inserted,
+          skipped,
+        },
         'Importación de conceptos completada',
       );
       return { inserted, skipped, total: dto.concepts.length };
@@ -108,14 +126,18 @@ export class CodeSystemVersionsService {
     return this.em.transactional(async (tx) => {
       const version = await this.versionsRepo.findById(tx, versionId);
       if (!version) {
-        throw new ResourceNotFoundException('Versión no encontrada', { versionId });
+        throw new ResourceNotFoundException('Versión no encontrada', {
+          versionId,
+        });
       }
       if (version.stateConceptId === CONCEPTS.TERM_ACTIVE) {
         this.logger.warn(
           { operation: 'terminology.version.publish', versionId },
           'Publicación rechazada: la versión ya está publicada',
         );
-        throw new ConflictException('La versión ya está publicada', { versionId });
+        throw new ConflictException('La versión ya está publicada', {
+          versionId,
+        });
       }
       if (version.stateConceptId !== CONCEPTS.TERM_DRAFT) {
         throw new PreconditionFailedException(

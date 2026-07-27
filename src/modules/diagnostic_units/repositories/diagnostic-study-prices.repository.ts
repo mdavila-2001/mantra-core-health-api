@@ -25,7 +25,10 @@ export interface CreatePriceData {
  */
 @Injectable()
 export class DiagnosticStudyPricesRepository {
-  findById(em: EntityManager, id: string): Promise<DiagnosticStudyPrices | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DiagnosticStudyPrices | null> {
     return em.findOne(DiagnosticStudyPrices, { id });
   }
 
@@ -51,7 +54,11 @@ export class DiagnosticStudyPricesRepository {
     const rows = await em.find(
       DiagnosticStudyPrices,
       { priceScheduleId, diagnosticStudyOfferingId },
-      { fields: ['versionNumber'], orderBy: { versionNumber: 'DESC' }, limit: 1 },
+      {
+        fields: ['versionNumber'],
+        orderBy: { versionNumber: 'DESC' },
+        limit: 1,
+      },
     );
     return rows.length ? rows[0].versionNumber : 0;
   }

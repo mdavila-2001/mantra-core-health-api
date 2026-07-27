@@ -33,10 +33,11 @@ describe('TerminologySeedService (integración)', () => {
     expect(second.inserted).toBe(0);
 
     const em = orm.em.fork();
-    const active = await em.getConnection().execute(
-      'select id from terminology.catalog_concepts where id = ?',
-      [CONCEPTS.USER_ACTIVE],
-    );
+    const active = await em
+      .getConnection()
+      .execute('select id from terminology.catalog_concepts where id = ?', [
+        CONCEPTS.USER_ACTIVE,
+      ]);
     expect(active).toHaveLength(1);
   });
 });

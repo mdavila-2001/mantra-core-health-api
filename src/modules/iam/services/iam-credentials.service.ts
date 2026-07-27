@@ -43,12 +43,19 @@ export class IamCredentialsService {
     actor: AuthenticatedUser,
   ): Promise<CredentialResponseDto> {
     this.logger.info(
-      { operation: 'iam.credential.federated-link', userId, provider: dto.identityProvider },
+      {
+        operation: 'iam.credential.federated-link',
+        userId,
+        provider: dto.identityProvider,
+      },
       'Linking federated credential',
     );
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
-      if (!user) throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      if (!user)
+        throw new ResourceNotFoundException('Usuario no encontrado', {
+          userId,
+        });
 
       const dup = await this.credentialsRepo.findFederated(
         tx,
@@ -93,12 +100,19 @@ export class IamCredentialsService {
       'Revoking credential',
     );
     return this.em.transactional(async (tx) => {
-      const cred = await this.credentialsRepo.findByIdAndUser(tx, credentialId, userId);
+      const cred = await this.credentialsRepo.findByIdAndUser(
+        tx,
+        credentialId,
+        userId,
+      );
       if (!cred) {
-        throw new ResourceNotFoundException('Credencial no encontrada para el usuario', {
-          userId,
-          credentialId,
-        });
+        throw new ResourceNotFoundException(
+          'Credencial no encontrada para el usuario',
+          {
+            userId,
+            credentialId,
+          },
+        );
       }
 
       cred.stateConceptId = CONCEPTS.STATE_REVOKED;

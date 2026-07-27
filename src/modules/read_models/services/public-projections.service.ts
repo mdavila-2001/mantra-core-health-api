@@ -20,7 +20,10 @@ export class PublicProjectionsService {
 
   /** GET /public/{slug}: detalle público por slug. */
   async getBySlug(slug: string): Promise<PublicProjectionResponseDto> {
-    this.logger.info({ operation: 'read_models.public.slug', slug }, 'Serving public projection');
+    this.logger.info(
+      { operation: 'read_models.public.slug', slug },
+      'Serving public projection',
+    );
     // Lectura eventualmente consistente: en ausencia de la MV física poblada, se
     // devuelve una proyección vacía con la marca de generación (sin PHI, sin sesión).
     const now = new Date();
@@ -33,11 +36,16 @@ export class PublicProjectionsService {
   }
 
   /** GET /public/directory: catálogo público filtrable por ciudad/especialidad. */
-  async searchDirectory(
-    filters: { city?: string; specialty?: string },
-  ): Promise<PublicProjectionResponseDto> {
+  async searchDirectory(filters: {
+    city?: string;
+    specialty?: string;
+  }): Promise<PublicProjectionResponseDto> {
     this.logger.info(
-      { operation: 'read_models.public.directory', city: filters.city, specialty: filters.specialty },
+      {
+        operation: 'read_models.public.directory',
+        city: filters.city,
+        specialty: filters.specialty,
+      },
       'Serving public directory projection',
     );
     const now = new Date();

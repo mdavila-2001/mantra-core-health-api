@@ -13,7 +13,10 @@ import {
 
 /** Un control (posiblemente jerárquico) dentro de un framework. */
 export class FrameworkControlDto {
-  @ApiProperty({ description: 'Código único del control dentro del framework', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único del control dentro del framework',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -25,7 +28,11 @@ export class FrameworkControlDto {
   @MaxLength(300)
   title!: string;
 
-  @ApiPropertyOptional({ description: 'Código del control padre (jerarquía dentro del mismo framework)', maxLength: 100 })
+  @ApiPropertyOptional({
+    description:
+      'Código del control padre (jerarquía dentro del mismo framework)',
+    maxLength: 100,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -67,7 +74,10 @@ export class CreateFrameworkDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ description: 'Proveedor del framework (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Proveedor del framework (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   providerConceptId!: string;
 

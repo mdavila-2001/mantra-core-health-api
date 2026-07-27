@@ -8,9 +8,17 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { PharmaciesRepository, PharmacyLicensesRepository } from '../repositories';
+import {
+  PharmaciesRepository,
+  PharmacyLicensesRepository,
+} from '../repositories';
 import { PHARM } from '../pharmacy.concepts';
-import { CreatePharmacyDto, PharmacyResponseDto, StatusResultDto, VerifyLicenseDto } from '../dto';
+import {
+  CreatePharmacyDto,
+  PharmacyResponseDto,
+  StatusResultDto,
+  VerifyLicenseDto,
+} from '../dto';
 
 /**
  * Identidad de farmacia y verificación regulatoria.
@@ -34,21 +42,35 @@ export class PharmaciesService {
   }
 
   /** UC-24-01: crea una farmacia (estado DRAFT / verificación PENDING) y su licencia inicial. */
-  async createPharmacy(dto: CreatePharmacyDto, actor: AuthenticatedUser): Promise<PharmacyResponseDto> {
+  async createPharmacy(
+    dto: CreatePharmacyDto,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyResponseDto> {
     this.logger.info(
       { operation: 'pharmacy.create', tenantId: dto.tenantId, code: dto.code },
       'Creating pharmacy',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.pharmaciesRepo.findByTenantAndCode(tx, dto.tenantId, dto.code);
+      const clash = await this.pharmaciesRepo.findByTenantAndCode(
+        tx,
+        dto.tenantId,
+        dto.code,
+      );
       if (clash) {
         this.logger.warn(
-          { operation: 'pharmacy.create', reason: 'code-in-use', code: dto.code },
+          {
+            operation: 'pharmacy.create',
+            reason: 'code-in-use',
+            code: dto.code,
+          },
           'Rejected pharmacy creation: code already used in tenant',
         );
-        throw new ConflictException('Ya existe una farmacia con ese código en el tenant', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe una farmacia con ese código en el tenant',
+          {
+            code: dto.code,
+          },
+        );
       }
 
       const pharmacy = this.pharmaciesRepo.create(tx, {
@@ -56,7 +78,8 @@ export class PharmaciesService {
         code: dto.code,
         legalName: dto.legalName,
         tradeName: dto.tradeName,
-        pharmacyTypeConceptId: dto.isRetail === false ? undefined : PHARM.PHARMACY_TYPE_RETAIL,
+        pharmacyTypeConceptId:
+          dto.isRetail === false ? undefined : PHARM.PHARMACY_TYPE_RETAIL,
         ownershipTypeConceptId: PHARM.OWNERSHIP_PRIVATE,
         defaultCurrencyConceptId: PHARM.CURRENCY_USD,
         verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
@@ -72,8 +95,12 @@ export class PharmaciesService {
         licenseNumber: dto.license.licenseNumber,
         issuingAuthorityTenantId: dto.license.issuingAuthorityTenantId,
         jurisdictionConceptId: dto.license.jurisdictionConceptId,
-        validFrom: dto.license.validFrom ? new Date(dto.license.validFrom) : undefined,
-        validTo: dto.license.validTo ? new Date(dto.license.validTo) : undefined,
+        validFrom: dto.license.validFrom
+          ? new Date(dto.license.validFrom)
+          : undefined,
+        validTo: dto.license.validTo
+          ? new Date(dto.license.validTo)
+          : undefined,
         evidenceFileId: dto.license.evidenceFileId,
         verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
         actorUserId: actor.id,
@@ -81,7 +108,11 @@ export class PharmaciesService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'pharmacy.create', pharmacyId: pharmacy.id, licenseId: license.id },
+        {
+          operation: 'pharmacy.create',
+          pharmacyId: pharmacy.id,
+          licenseId: license.id,
+        },
         'Pharmacy created',
       );
       return {
@@ -113,16 +144,24 @@ export class PharmaciesService {
     );
     return this.em.transactional(async (tx) => {
       const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy) throw new ResourceNotFoundException('Farmacia no encontrada', { pharmacyId });
+      if (!pharmacy)
+        throw new ResourceNotFoundException('Farmacia no encontrada', {
+          pharmacyId,
+        });
 
       const license = await this.licensesRepo.findById(tx, licenseId);
       if (!license || license.pharmacyId !== pharmacyId) {
-        throw new ResourceNotFoundException('Licencia no encontrada', { licenseId });
-      }
-      if (license.verificationStatusConceptId !== PHARM.VERIFICATION_PENDING) {
-        throw new PreconditionFailedException('La licencia no está pendiente de verificación', {
+        throw new ResourceNotFoundException('Licencia no encontrada', {
           licenseId,
         });
+      }
+      if (license.verificationStatusConceptId !== PHARM.VERIFICATION_PENDING) {
+        throw new PreconditionFailedException(
+          'La licencia no está pendiente de verificación',
+          {
+            licenseId,
+          },
+        );
       }
 
       license.verificationStatusConceptId = approve
@@ -147,7 +186,12 @@ export class PharmaciesService {
       }
 
       this.logger.info(
-        { operation: 'pharmacy.license.verify', pharmacyId, licenseId, approve },
+        {
+          operation: 'pharmacy.license.verify',
+          pharmacyId,
+          licenseId,
+          approve,
+        },
         'Pharmacy license verification applied',
       );
       return { ok: true };

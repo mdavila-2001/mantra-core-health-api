@@ -41,7 +41,11 @@ export class OrderSetsRepository {
   }
 
   itemsBySet(em: EntityManager, orderSetId: string): Promise<OrderSetItems[]> {
-    return em.find(OrderSetItems, { orderSetId }, { orderBy: { ordinal: 'asc' } });
+    return em.find(
+      OrderSetItems,
+      { orderSetId },
+      { orderBy: { ordinal: 'asc' } },
+    );
   }
 
   create(em: EntityManager, data: CreateOrderSetData): OrderSets {

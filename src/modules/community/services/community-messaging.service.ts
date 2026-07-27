@@ -36,11 +36,16 @@ export class CommunityMessagingService {
   }
 
   /** Bootstrap: crea una conversación y da de alta a sus participantes. */
-  async createConversation(dto: CreateConversationDto, actor: AuthenticatedUser): Promise<IdResponseDto> {
+  async createConversation(
+    dto: CreateConversationDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
       const conversation = this.conversationsRepo.createConversation(tx, {
         conversationTypeConceptId:
-          dto.conversationType === 'GROUP' ? COMM.CONVERSATION_GROUP : COMM.CONVERSATION_DIRECT,
+          dto.conversationType === 'GROUP'
+            ? COMM.CONVERSATION_GROUP
+            : COMM.CONVERSATION_DIRECT,
         groupId: dto.groupId,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: actor.id,
@@ -67,10 +72,19 @@ export class CommunityMessagingService {
     dto: SendMessageDto,
     actor: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
-    this.logger.info({ operation: 'community.message.send', conversationId }, 'Sending direct message');
+    this.logger.info(
+      { operation: 'community.message.send', conversationId },
+      'Sending direct message',
+    );
     return this.em.transactional(async (tx) => {
-      const conversation = await this.conversationsRepo.findConversationById(tx, conversationId);
-      if (!conversation) throw new ResourceNotFoundException('Conversación no encontrada', { conversationId });
+      const conversation = await this.conversationsRepo.findConversationById(
+        tx,
+        conversationId,
+      );
+      if (!conversation)
+        throw new ResourceNotFoundException('Conversación no encontrada', {
+          conversationId,
+        });
 
       const sender = await this.conversationsRepo.findActiveParticipant(
         tx,
@@ -79,14 +93,20 @@ export class CommunityMessagingService {
         CONCEPTS.STATE_ACTIVE,
       );
       if (!sender) {
-        throw new PreconditionFailedException('El remitente no es participante activo', {
-          conversationId,
-          senderProfileId: dto.senderProfileId,
-        });
+        throw new PreconditionFailedException(
+          'El remitente no es participante activo',
+          {
+            conversationId,
+            senderProfileId: dto.senderProfileId,
+          },
+        );
       }
 
       // No permitir DM si existe bloqueo con cualquier otro participante.
-      const participants = await this.conversationsRepo.findParticipants(tx, conversationId);
+      const participants = await this.conversationsRepo.findParticipants(
+        tx,
+        conversationId,
+      );
       for (const p of participants) {
         if (p.participantProfileId === dto.senderProfileId) continue;
         const blocked = await this.blocksRepo.existsBetween(
@@ -96,9 +116,12 @@ export class CommunityMessagingService {
           CONCEPTS.STATE_ACTIVE,
         );
         if (blocked) {
-          throw new PreconditionFailedException('Existe un bloqueo entre los participantes', {
-            conversationId,
-          });
+          throw new PreconditionFailedException(
+            'Existe un bloqueo entre los participantes',
+            {
+              conversationId,
+            },
+          );
         }
       }
 
@@ -108,7 +131,9 @@ export class CommunityMessagingService {
         senderProfileId: dto.senderProfileId,
         replyToMessageId: dto.replyToMessageId,
         contentTypeConceptId:
-          dto.contentType === 'MEDIA' ? COMM.MESSAGE_CONTENT_MEDIA : COMM.MESSAGE_CONTENT_TEXT,
+          dto.contentType === 'MEDIA'
+            ? COMM.MESSAGE_CONTENT_MEDIA
+            : COMM.MESSAGE_CONTENT_TEXT,
         bodyText: dto.bodyText,
         attachmentFileId: dto.attachmentFileId,
         statusConceptId: COMM.MESSAGE_SENT,
@@ -143,8 +168,14 @@ export class CommunityMessagingService {
     actor: AuthenticatedUser,
   ): Promise<ReadReceiptResponseDto> {
     return this.em.transactional(async (tx) => {
-      const conversation = await this.conversationsRepo.findConversationById(tx, conversationId);
-      if (!conversation) throw new ResourceNotFoundException('Conversación no encontrada', { conversationId });
+      const conversation = await this.conversationsRepo.findConversationById(
+        tx,
+        conversationId,
+      );
+      if (!conversation)
+        throw new ResourceNotFoundException('Conversación no encontrada', {
+          conversationId,
+        });
 
       const participant = await this.conversationsRepo.findActiveParticipant(
         tx,
@@ -153,15 +184,21 @@ export class CommunityMessagingService {
         CONCEPTS.STATE_ACTIVE,
       );
       if (!participant) {
-        throw new PreconditionFailedException('El perfil no es participante activo', {
-          conversationId,
-          recipientProfileId: dto.recipientProfileId,
-        });
+        throw new PreconditionFailedException(
+          'El perfil no es participante activo',
+          {
+            conversationId,
+            recipientProfileId: dto.recipientProfileId,
+          },
+        );
       }
 
       let messageId = dto.upToMessageId;
       if (!messageId) {
-        const last = await this.conversationsRepo.findLastMessage(tx, conversationId);
+        const last = await this.conversationsRepo.findLastMessage(
+          tx,
+          conversationId,
+        );
         messageId = last?.id;
       }
       if (!messageId) {

@@ -39,7 +39,9 @@ export class ChartNotesController {
   /** UC-15-01. */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear una nota clínica versionada (borrador SOAP)' })
+  @ApiOperation({
+    summary: 'Crear una nota clínica versionada (borrador SOAP)',
+  })
   createNote(
     @Body() dto: CreateNoteDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -50,7 +52,9 @@ export class ChartNotesController {
   /** UC-15-02. */
   @Put(':noteId/versions')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Editar borrador creando una nueva versión inmutable' })
+  @ApiOperation({
+    summary: 'Editar borrador creando una nueva versión inmutable',
+  })
   addVersion(
     @Param('noteId', ParseUUIDPipe) noteId: string,
     @Body() dto: AddVersionDto,

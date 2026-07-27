@@ -28,7 +28,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ObservationsService(
     em as any,
-    observationsRepo as any,
+    observationsRepo,
     encountersRepo as any,
     serviceRequestsRepo as any,
     logger as any,
@@ -60,7 +60,7 @@ describe('ObservationsService', () => {
           performers: [{ performerTypeConceptId: 'pt', performerId: 'hp1' }],
           referenceRanges: [{ lowValue: 60, highValue: 100 }],
           notes: ['nota'],
-        } as any,
+        },
         actor,
       );
 
@@ -92,7 +92,11 @@ describe('ObservationsService', () => {
       const d = build();
       await expect(
         d.service.record(
-          { custodianTenantId: 't1', patientProfileId: 'p1', codeConceptId: 'code1' } as any,
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -113,7 +117,11 @@ describe('ObservationsService', () => {
       const d = build();
       const o = obs();
       d.observationsRepo.findById.mockResolvedValue(o);
-      const res = await d.service.amend('obs1', { note: 'corrección', valueDecimal: 5 } as any, actor);
+      const res = await d.service.amend(
+        'obs1',
+        { note: 'corrección', valueDecimal: 5 },
+        actor,
+      );
       expect(o.statusConceptId).toBe(CLIN.OBSERVATION_AMENDED);
       expect(d.observationsRepo.createNote).toHaveBeenCalled();
       expect(res.status).toBe(CLIN.OBSERVATION_AMENDED);
@@ -140,9 +148,16 @@ describe('ObservationsService', () => {
 
     it('rejects on optimistic version mismatch', async () => {
       const d = build();
-      d.observationsRepo.findById.mockResolvedValue({ ...obs(), rowVersion: 4 });
+      d.observationsRepo.findById.mockResolvedValue({
+        ...obs(),
+        rowVersion: 4,
+      });
       await expect(
-        d.service.amend('obs1', { note: 'x', expectedRowVersion: 1 } as any, actor),
+        d.service.amend(
+          'obs1',
+          { note: 'x', expectedRowVersion: 1 } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);
     });
   });

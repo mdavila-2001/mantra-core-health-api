@@ -94,14 +94,15 @@ export async function bootstrapTestApp(
   // `app.get(MikroORM)` infiere el genérico con una tupla `readonly` de entidades
   // que no es asignable al `MikroORM` mutable esperado; es una varianza puramente
   // de tipos del contenedor, sin efecto en runtime. Se afirma el tipo en la frontera.
-  const orm = app.get(MikroORM) as unknown as MikroORM;
+  const orm = app.get(MikroORM);
   await seedAdmin(orm);
 
   const tokenService = app.get(TokenService);
-  const adminToken = tokenService.signAccessToken(TEST_ADMIN_ID, 'test-session', [
-    'SUPERADMIN',
-    'SECURITY_ADMIN',
-  ]);
+  const adminToken = tokenService.signAccessToken(
+    TEST_ADMIN_ID,
+    'test-session',
+    ['SUPERADMIN', 'SECURITY_ADMIN'],
+  );
 
   return { app, orm, adminUserId: TEST_ADMIN_ID, adminToken };
 }

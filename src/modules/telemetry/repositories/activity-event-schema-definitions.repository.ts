@@ -20,7 +20,10 @@ export interface CreateEventSchemaData {
 /** Acceso a `telemetry.activity_event_schema_definitions`. */
 @Injectable()
 export class ActivityEventSchemaDefinitionsRepository {
-  findById(em: EntityManager, id: string): Promise<ActivityEventSchemaDefinitions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ActivityEventSchemaDefinitions | null> {
     return em.findOne(ActivityEventSchemaDefinitions, { id });
   }
 
@@ -29,10 +32,16 @@ export class ActivityEventSchemaDefinitionsRepository {
     eventName: string,
     schemaVersion: number,
   ): Promise<ActivityEventSchemaDefinitions | null> {
-    return em.findOne(ActivityEventSchemaDefinitions, { eventName, schemaVersion });
+    return em.findOne(ActivityEventSchemaDefinitions, {
+      eventName,
+      schemaVersion,
+    });
   }
 
-  create(em: EntityManager, data: CreateEventSchemaData): ActivityEventSchemaDefinitions {
+  create(
+    em: EntityManager,
+    data: CreateEventSchemaData,
+  ): ActivityEventSchemaDefinitions {
     return em.create(
       ActivityEventSchemaDefinitions,
       {

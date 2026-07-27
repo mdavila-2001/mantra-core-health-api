@@ -22,7 +22,10 @@ describe('PublicProjectionsService (UC-30-10)', () => {
 
   it('serves the public directory filtered by city and specialty', async () => {
     const { service } = build();
-    const res = await service.searchDirectory({ city: 'Lima', specialty: 'cardiology' });
+    const res = await service.searchDirectory({
+      city: 'Lima',
+      specialty: 'cardiology',
+    });
     expect(res.slug).toContain('Lima');
     expect(res.slug).toContain('cardiology');
   });

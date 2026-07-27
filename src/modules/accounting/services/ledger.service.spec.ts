@@ -5,7 +5,11 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { LedgerService } from './ledger.service';
 import { ACCT } from '../accounting.concepts';
-import { ConflictException, PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  ConflictException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -36,16 +40,25 @@ function build() {
   };
   const accountsRepo = {
     findByCode: mockFn().mockResolvedValue(null),
-    create: mockFn(() => ({ id: 'a1', code: 'C', name: 'N', statusConceptId: 's', isPostable: true })),
+    create: mockFn(() => ({
+      id: 'a1',
+      code: 'C',
+      name: 'N',
+      statusConceptId: 's',
+      isPostable: true,
+    })),
     findActiveRule: mockFn(),
   };
   const fiscalRepo = {
-    findPeriodById: mockFn().mockResolvedValue({ id: 'fp1', statusConceptId: ACCT.PERIOD_OPEN }),
+    findPeriodById: mockFn().mockResolvedValue({
+      id: 'fp1',
+      statusConceptId: ACCT.PERIOD_OPEN,
+    }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new LedgerService(
     em as any,
-    journalRepo as any,
+    journalRepo,
     accountsRepo as any,
     fiscalRepo as any,
     logger as any,
@@ -84,9 +97,9 @@ describe('LedgerService', () => {
           { accountId: 'acc-c', direction: 'CREDIT', amount: '90.00' },
         ],
       };
-      await expect(d.service.postJournal(unbalanced as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.postJournal(unbalanced as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.journalRepo.createTransaction).not.toHaveBeenCalled();
     });
 
@@ -94,15 +107,24 @@ describe('LedgerService', () => {
       const d = build();
       d.journalRepo.findByTransactionNumber.mockResolvedValue({ id: 'dup' });
       await expect(
-        d.service.postJournal({ ...balanced, transactionNumber: 'JT-1' } as any, actor),
+        d.service.postJournal(
+          { ...balanced, transactionNumber: 'JT-1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('rechaza (422) postear en un periodo BLOQUEADO', async () => {
       const d = build();
-      d.fiscalRepo.findPeriodById.mockResolvedValue({ id: 'fp1', statusConceptId: ACCT.PERIOD_LOCKED });
+      d.fiscalRepo.findPeriodById.mockResolvedValue({
+        id: 'fp1',
+        statusConceptId: ACCT.PERIOD_LOCKED,
+      });
       await expect(
-        d.service.postJournal({ ...balanced, fiscalPeriodId: 'fp1' } as any, actor),
+        d.service.postJournal(
+          { ...balanced, fiscalPeriodId: 'fp1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
@@ -111,24 +133,32 @@ describe('LedgerService', () => {
     it('lanza 404 si el asiento no existe', async () => {
       const d = build();
       d.journalRepo.findTransactionById.mockResolvedValue(null);
-      await expect(d.service.reverseJournal('x', {}, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.reverseJournal('x', {}, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rechaza reversar un asiento no POSTEADO', async () => {
       const d = build();
-      d.journalRepo.findTransactionById.mockResolvedValue({ id: 't1', statusConceptId: ACCT.TXN_DRAFT });
-      await expect(d.service.reverseJournal('t1', {}, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        statusConceptId: ACCT.TXN_DRAFT,
+      });
+      await expect(
+        d.service.reverseJournal('t1', {}, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('rechaza (409) si ya fue reversado', async () => {
       const d = build();
-      d.journalRepo.findTransactionById.mockResolvedValue({ id: 't1', statusConceptId: ACCT.TXN_POSTED });
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        statusConceptId: ACCT.TXN_POSTED,
+      });
       d.journalRepo.findLink.mockResolvedValue({ id: 'link' });
-      await expect(d.service.reverseJournal('t1', {}, actor)).rejects.toBeInstanceOf(ConflictException);
+      await expect(
+        d.service.reverseJournal('t1', {}, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
   });
 
@@ -138,7 +168,13 @@ describe('LedgerService', () => {
       d.accountsRepo.findByCode.mockResolvedValue({ id: 'dup' });
       await expect(
         d.service.createAccount(
-          { practiceId: 'p1', code: 'C', name: 'N', accountType: 'ASSET', normalBalance: 'DEBIT' } as any,
+          {
+            practiceId: 'p1',
+            code: 'C',
+            name: 'N',
+            accountType: 'ASSET',
+            normalBalance: 'DEBIT',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -147,7 +183,13 @@ describe('LedgerService', () => {
     it('crea la cuenta cuando el código es único', async () => {
       const d = build();
       const res = await d.service.createAccount(
-        { practiceId: 'p1', code: 'C', name: 'N', accountType: 'ASSET', normalBalance: 'DEBIT' } as any,
+        {
+          practiceId: 'p1',
+          code: 'C',
+          name: 'N',
+          accountType: 'ASSET',
+          normalBalance: 'DEBIT',
+        } as any,
         actor,
       );
       expect(res.id).toBe('a1');
@@ -160,15 +202,29 @@ describe('LedgerService', () => {
       const d = build();
       d.accountsRepo.findActiveRule.mockResolvedValue(null);
       await expect(
-        d.service.determineAccounts({ tenantId: 't', postingScenarioConceptId: 's' } as any),
+        d.service.determineAccounts({
+          tenantId: 't',
+          postingScenarioConceptId: 's',
+        } as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('devuelve la cuenta objetivo de la regla', async () => {
       const d = build();
-      d.accountsRepo.findActiveRule.mockResolvedValue({ id: 'r1', targetAccountId: 'acc9', priority: 10 });
-      const res = await d.service.determineAccounts({ tenantId: 't', postingScenarioConceptId: 's' } as any);
-      expect(res).toEqual({ ruleId: 'r1', targetAccountId: 'acc9', priority: 10 });
+      d.accountsRepo.findActiveRule.mockResolvedValue({
+        id: 'r1',
+        targetAccountId: 'acc9',
+        priority: 10,
+      });
+      const res = await d.service.determineAccounts({
+        tenantId: 't',
+        postingScenarioConceptId: 's',
+      });
+      expect(res).toEqual({
+        ruleId: 'r1',
+        targetAccountId: 'acc9',
+        priority: 10,
+      });
     });
   });
 });

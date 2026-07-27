@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { InsuranceBackboneService } from '../services';
@@ -31,7 +39,10 @@ export class InsuranceBackboneController {
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Alta de aseguradora (soporte)' })
-  createCarrier(@Body() dto: CreateCarrierDto, @CurrentUser() actor: AuthenticatedUser): Promise<ResourceStatusDto> {
+  createCarrier(
+    @Body() dto: CreateCarrierDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
     return this.service.createCarrier(dto, actor);
   }
 
@@ -99,7 +110,10 @@ export class InsuranceBackboneController {
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Alta de broker (soporte)' })
-  createBroker(@Body() dto: CreateBrokerDto, @CurrentUser() actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  createBroker(
+    @Body() dto: CreateBrokerDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.service.createBroker(dto, actor);
   }
 

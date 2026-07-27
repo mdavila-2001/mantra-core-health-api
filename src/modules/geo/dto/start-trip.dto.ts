@@ -3,7 +3,10 @@ import { IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /geo/trips` (UC-13-06). */
 export class StartTripDto {
-  @ApiProperty({ description: 'Sesión de tracking OPEN a la que pertenece el viaje', format: 'uuid' })
+  @ApiProperty({
+    description: 'Sesión de tracking OPEN a la que pertenece el viaje',
+    format: 'uuid',
+  })
   @IsUUID()
   trackingSessionId!: string;
 

@@ -16,7 +16,10 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const governanceRepo = {
     existsByQueryHash: mockFn().mockResolvedValue(0),
-    record: mockFn().mockReturnValue({ id: 'g1', occurredAt: new Date('2026-01-01') }),
+    record: mockFn().mockReturnValue({
+      id: 'g1',
+      occurredAt: new Date('2026-01-01'),
+    }),
   };
   const dsarRepo = {
     create: mockFn().mockReturnValue({
@@ -32,8 +35,8 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ComplianceService(
     em as any,
-    governanceRepo as any,
-    dsarRepo as any,
+    governanceRepo,
+    dsarRepo,
     auditLogRepo as any,
     logger as any,
   );
@@ -44,7 +47,10 @@ describe('ComplianceService', () => {
   describe('exportEvidence (UC-10-07)', () => {
     it('registra gobernanza + provenance', async () => {
       const d = build();
-      const res = await d.service.exportEvidence({ entity: 'audit_log' } as any, actor);
+      const res = await d.service.exportEvidence(
+        { entity: 'audit_log' },
+        actor,
+      );
       expect(res).toMatchObject({ id: 'g1', auditLogId: 'a1' });
       expect(d.governanceRepo.record).toHaveBeenCalled();
     });
@@ -61,7 +67,7 @@ describe('ComplianceService', () => {
   describe('createDsar (UC-10-08)', () => {
     it('da de alta la solicitud en estado recibido', async () => {
       const d = build();
-      const res = await d.service.createDsar({ type: 'ACCESS' } as any, actor);
+      const res = await d.service.createDsar({ type: 'ACCESS' }, actor);
       expect(res).toMatchObject({ id: 'ds1', status: AUD.DSAR_RECEIVED });
       expect(d.tx.flush).toHaveBeenCalled();
       expect(d.auditLogRepo.append).toHaveBeenCalled();
@@ -104,7 +110,11 @@ describe('ComplianceService', () => {
         updatedAt: new Date(),
       };
       d.dsarRepo.findById.mockResolvedValue(entity);
-      const res = await d.service.updateDsar('ds1', { status: 'COMPLETED', resultFileId: 'f1' } as any, actor);
+      const res = await d.service.updateDsar(
+        'ds1',
+        { status: 'COMPLETED', resultFileId: 'f1' },
+        actor,
+      );
       expect(res.status).toBe(AUD.DSAR_COMPLETED);
       expect(entity.completedAt).toBeInstanceOf(Date);
       expect(entity.resultFileId).toBe('f1');

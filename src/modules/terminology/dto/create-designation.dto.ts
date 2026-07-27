@@ -28,7 +28,9 @@ export class ConceptPropertyInputDto {
   @IsNotEmpty()
   valueJson!: unknown;
 
-  @ApiPropertyOptional({ description: 'Tipo de dato técnico (enum terminology.technical_data_type)' })
+  @ApiPropertyOptional({
+    description: 'Tipo de dato técnico (enum terminology.technical_data_type)',
+  })
   @IsOptional()
   @IsString()
   dataType?: string;
@@ -42,12 +44,18 @@ export class CreateDesignationDto {
   @MaxLength(255)
   value!: string;
 
-  @ApiPropertyOptional({ description: 'Idioma de la designación', enum: ['ES', 'EN'] })
+  @ApiPropertyOptional({
+    description: 'Idioma de la designación',
+    enum: ['ES', 'EN'],
+  })
   @IsOptional()
   @IsIn(['ES', 'EN'])
   language?: DesignationLanguage;
 
-  @ApiPropertyOptional({ description: 'Tipo de designación', enum: ['PREFERRED', 'SYNONYM'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de designación',
+    enum: ['PREFERRED', 'SYNONYM'],
+  })
   @IsOptional()
   @IsIn(['PREFERRED', 'SYNONYM'])
   designationType?: DesignationType;
@@ -57,7 +65,10 @@ export class CreateDesignationDto {
   @IsBoolean()
   preferred?: boolean;
 
-  @ApiPropertyOptional({ type: [ConceptPropertyInputDto], description: 'Propiedades a adjuntar al concepto' })
+  @ApiPropertyOptional({
+    type: [ConceptPropertyInputDto],
+    description: 'Propiedades a adjuntar al concepto',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

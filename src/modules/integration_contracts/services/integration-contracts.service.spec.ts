@@ -29,8 +29,8 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new IntegrationContractsService(
     em as any,
-    contractsRepo as any,
-    versionsRepo as any,
+    contractsRepo,
+    versionsRepo,
     logger as any,
   );
   return { service, tx, em, contractsRepo, versionsRepo };
@@ -51,7 +51,7 @@ describe('IntegrationContractsService', () => {
       d.contractsRepo.create.mockReturnValue(created);
 
       const res = await d.service.createContract(
-        { externalProviderId: 'p1', contractCode: 'C1' } as any,
+        { externalProviderId: 'p1', contractCode: 'C1' },
         actor,
       );
 
@@ -75,9 +75,14 @@ describe('IntegrationContractsService', () => {
 
     it('rejects a duplicate code for the provider (409)', async () => {
       const d = build();
-      d.contractsRepo.findByCodeAndProvider.mockResolvedValue({ id: 'existing' });
+      d.contractsRepo.findByCodeAndProvider.mockResolvedValue({
+        id: 'existing',
+      });
       await expect(
-        d.service.createContract({ externalProviderId: 'p1', contractCode: 'C1' } as any, actor),
+        d.service.createContract(
+          { externalProviderId: 'p1', contractCode: 'C1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.contractsRepo.create).not.toHaveBeenCalled();
     });
@@ -86,7 +91,11 @@ describe('IntegrationContractsService', () => {
   describe('publishVersion (UC-31-02)', () => {
     it('publishes version max+1 in DRAFT and touches the contract', async () => {
       const d = build();
-      const contract = { id: 'c1', statusConceptId: ICON.CONTRACT_ACTIVE, updatedAt: new Date() };
+      const contract = {
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.contractsRepo.findById.mockResolvedValue(contract);
       d.versionsRepo.maxVersionNumber.mockResolvedValue(2);
       const version = {
@@ -97,43 +106,61 @@ describe('IntegrationContractsService', () => {
       };
       d.versionsRepo.create.mockReturnValue(version);
 
-      const res = await d.service.publishVersion('c1', {} as any, actor);
+      const res = await d.service.publishVersion('c1', {}, actor);
 
-      expect(res).toMatchObject({ id: 'v3', versionNumber: 3, status: ICON.VERSION_DRAFT });
+      expect(res).toMatchObject({
+        id: 'v3',
+        versionNumber: 3,
+        status: ICON.VERSION_DRAFT,
+      });
       expect(d.versionsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ versionNumber: 3, statusConceptId: ICON.VERSION_DRAFT }),
+        expect.objectContaining({
+          versionNumber: 3,
+          statusConceptId: ICON.VERSION_DRAFT,
+        }),
       );
     });
 
     it('throws not found when the contract is absent (404)', async () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue(null);
-      await expect(d.service.publishVersion('c1', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.publishVersion('c1', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects publishing when the contract is RETIRED (422)', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({ id: 'c1', statusConceptId: ICON.CONTRACT_RETIRED });
-      await expect(d.service.publishVersion('c1', {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      d.contractsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_RETIRED,
+      });
+      await expect(
+        d.service.publishVersion('c1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 
   describe('activateVersion (UC-31-10)', () => {
     it('activates a DRAFT version, supersedes the prior active and promotes the contract', async () => {
       const d = build();
-      const contract = { id: 'c1', statusConceptId: ICON.CONTRACT_DRAFT, updatedAt: new Date() };
-      const version = { id: 'v2', integrationContractId: 'c1', statusConceptId: ICON.VERSION_DRAFT };
+      const contract = {
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_DRAFT,
+        updatedAt: new Date(),
+      };
+      const version = {
+        id: 'v2',
+        integrationContractId: 'c1',
+        statusConceptId: ICON.VERSION_DRAFT,
+      };
       const prior = { id: 'v1', statusConceptId: ICON.VERSION_ACTIVE };
       d.contractsRepo.findById.mockResolvedValue(contract);
       d.versionsRepo.findById.mockResolvedValue(version);
       d.versionsRepo.findActiveByContract.mockResolvedValue(prior);
 
-      const res = await d.service.activateVersion('c1', 'v2', {} as any, actor);
+      const res = await d.service.activateVersion('c1', 'v2', {}, actor);
 
       expect(res).toEqual({ ok: true });
       expect(version.statusConceptId).toBe(ICON.VERSION_ACTIVE);
@@ -143,27 +170,34 @@ describe('IntegrationContractsService', () => {
 
     it('rejects activating a non-DRAFT version (422)', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({ id: 'c1', statusConceptId: ICON.CONTRACT_ACTIVE });
+      d.contractsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_ACTIVE,
+      });
       d.versionsRepo.findById.mockResolvedValue({
         id: 'v2',
         integrationContractId: 'c1',
         statusConceptId: ICON.VERSION_ACTIVE,
       });
-      await expect(d.service.activateVersion('c1', 'v2', {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.activateVersion('c1', 'v2', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 
   describe('retireContract (UC-31-11)', () => {
     it('retires the contract and supersedes its active versions', async () => {
       const d = build();
-      const contract = { id: 'c1', statusConceptId: ICON.CONTRACT_ACTIVE, updatedAt: new Date() };
+      const contract = {
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_ACTIVE,
+        updatedAt: new Date(),
+      };
       const av = { id: 'v1', statusConceptId: ICON.VERSION_ACTIVE };
       d.contractsRepo.findById.mockResolvedValue(contract);
       d.versionsRepo.findActiveVersions.mockResolvedValue([av]);
 
-      const res = await d.service.retireContract('c1', {} as any, actor);
+      const res = await d.service.retireContract('c1', {}, actor);
 
       expect(res).toEqual({ ok: true });
       expect(contract.statusConceptId).toBe(ICON.CONTRACT_RETIRED);
@@ -172,10 +206,13 @@ describe('IntegrationContractsService', () => {
 
     it('rejects retiring an already retired contract (422)', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({ id: 'c1', statusConceptId: ICON.CONTRACT_RETIRED });
-      await expect(d.service.retireContract('c1', {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      d.contractsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_RETIRED,
+      });
+      await expect(
+        d.service.retireContract('c1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 });

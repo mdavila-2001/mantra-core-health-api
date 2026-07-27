@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /**
  * Cuerpo de `POST /practices` (bootstrap de la organización raíz). No es un UC
@@ -7,7 +13,10 @@ import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-valida
  * casos de uso presuponen; se expone para poder crearla y encadenar recursos.
  */
 export class CreatePracticeDto {
-  @ApiProperty({ description: 'Tenant gestor (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant gestor (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 
@@ -23,12 +32,18 @@ export class CreatePracticeDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de tipo de práctica', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de tipo de práctica',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   typeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Usuario administrador (por defecto el actor)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Usuario administrador (por defecto el actor)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   adminUserId?: string;

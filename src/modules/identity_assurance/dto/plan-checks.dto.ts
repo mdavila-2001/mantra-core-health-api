@@ -15,12 +15,18 @@ export class PlanCheckItemDto {
   @IsUUID()
   checkTypeConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Autoridad contra la que se ejecuta el check', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Autoridad contra la que se ejecuta el check',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   authorityId?: string;
 
-  @ApiPropertyOptional({ description: '¿El check es obligatorio?', default: true })
+  @ApiPropertyOptional({
+    description: '¿El check es obligatorio?',
+    default: true,
+  })
   @IsOptional()
   @IsBoolean()
   required?: boolean;

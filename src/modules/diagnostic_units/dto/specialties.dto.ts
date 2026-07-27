@@ -23,7 +23,10 @@ export class SpecialtyItemDto {
 
 /** Cuerpo de `PUT /diagnostic-units/{id}/specialties` (UC-23-04). */
 export class SetSpecialtiesDto {
-  @ApiProperty({ type: [SpecialtyItemDto], description: 'Conjunto vigente de especialidades' })
+  @ApiProperty({
+    type: [SpecialtyItemDto],
+    description: 'Conjunto vigente de especialidades',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

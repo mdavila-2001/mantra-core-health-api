@@ -43,19 +43,32 @@ export class DiagnosticsReportsService {
     dto: CreateReportVersionDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.report.version', reportId }, 'Creating report version');
+    this.logger.info(
+      { operation: 'diagnostics.report.version', reportId },
+      'Creating report version',
+    );
     return this.em.transactional(async (tx) => {
       const tenantId = dto.custodianTenantId;
       if (!tenantId) {
-        throw new PreconditionFailedException('Falta el tenant custodio del informe', {});
+        throw new PreconditionFailedException(
+          'Falta el tenant custodio del informe',
+          {},
+        );
       }
       if (dto.supersedesVersionId) {
-        const prev = await this.repo.findVersionInReport(tx, reportId, dto.supersedesVersionId);
+        const prev = await this.repo.findVersionInReport(
+          tx,
+          reportId,
+          dto.supersedesVersionId,
+        );
         if (!prev) {
-          throw new ResourceNotFoundException('La versión que se enmienda no existe en este informe', {
-            reportId,
-            supersedesVersionId: dto.supersedesVersionId,
-          });
+          throw new ResourceNotFoundException(
+            'La versión que se enmienda no existe en este informe',
+            {
+              reportId,
+              supersedesVersionId: dto.supersedesVersionId,
+            },
+          );
         }
       }
 
@@ -112,17 +125,32 @@ export class DiagnosticsReportsService {
     dto: ReleaseReportVersionDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.report.release', reportId, versionId }, 'Releasing report version');
+    this.logger.info(
+      { operation: 'diagnostics.report.release', reportId, versionId },
+      'Releasing report version',
+    );
     return this.em.transactional(async (tx) => {
-      const version = await this.repo.findVersionInReport(tx, reportId, versionId);
+      const version = await this.repo.findVersionInReport(
+        tx,
+        reportId,
+        versionId,
+      );
       if (!version) {
-        throw new ResourceNotFoundException('Versión de informe no encontrada', { reportId, versionId });
+        throw new ResourceNotFoundException(
+          'Versión de informe no encontrada',
+          { reportId, versionId },
+        );
       }
       if (version.releaseEligibilityConceptId !== DIAG.RELEASE_ELIGIBLE) {
-        throw new PreconditionFailedException('La versión no es elegible para liberación', { versionId });
+        throw new PreconditionFailedException(
+          'La versión no es elegible para liberación',
+          { versionId },
+        );
       }
       if (version.clinicalStatusConceptId === DIAG.REPORT_FINAL) {
-        throw new ConflictException('La versión ya fue liberada', { versionId });
+        throw new ConflictException('La versión ya fue liberada', {
+          versionId,
+        });
       }
 
       const visibility =
@@ -153,19 +181,28 @@ export class DiagnosticsReportsService {
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
-      { operation: 'diagnostics.critical.detect', observationId: dto.observationId },
+      {
+        operation: 'diagnostics.critical.detect',
+        observationId: dto.observationId,
+      },
       'Detecting critical result',
     );
     return this.em.transactional(async (tx) => {
       const tenantId = dto.custodianTenantId;
       if (!tenantId) {
-        throw new PreconditionFailedException('Falta el tenant custodio de la notificación', {});
+        throw new PreconditionFailedException(
+          'Falta el tenant custodio de la notificación',
+          {},
+        );
       }
       // Evita doble alerta por observación.
       if (await this.repo.criticalExistsForObservation(tx, dto.observationId)) {
-        throw new ConflictException('Ya existe una notificación crítica para la observación', {
-          observationId: dto.observationId,
-        });
+        throw new ConflictException(
+          'Ya existe una notificación crítica para la observación',
+          {
+            observationId: dto.observationId,
+          },
+        );
       }
 
       const escalationDueAt = dto.escalationDueInMinutes
@@ -176,7 +213,8 @@ export class DiagnosticsReportsService {
         custodianTenantId: tenantId,
         patientProfileId: dto.patientProfileId,
         observationId: dto.observationId,
-        criticalityConceptId: dto.criticalityConceptId ?? DIAG.CRITICALITY_CRITICAL,
+        criticalityConceptId:
+          dto.criticalityConceptId ?? DIAG.CRITICALITY_CRITICAL,
         notificationStatusConceptId: DIAG.CRITICAL_PENDING,
         detectedAt: new Date(),
         diagnosticReportId: dto.diagnosticReportId,
@@ -186,7 +224,10 @@ export class DiagnosticsReportsService {
       });
       await tx.flush();
 
-      return { id: notification.id, status: notification.notificationStatusConceptId };
+      return {
+        id: notification.id,
+        status: notification.notificationStatusConceptId,
+      };
     });
   }
 
@@ -201,16 +242,27 @@ export class DiagnosticsReportsService {
       'Acknowledging critical notification',
     );
     return this.em.transactional(async (tx) => {
-      const notification = await this.repo.findCriticalNotification(tx, notificationId);
+      const notification = await this.repo.findCriticalNotification(
+        tx,
+        notificationId,
+      );
       if (!notification) {
-        throw new ResourceNotFoundException('Notificación crítica no encontrada', { notificationId });
+        throw new ResourceNotFoundException(
+          'Notificación crítica no encontrada',
+          { notificationId },
+        );
       }
-      if (notification.notificationStatusConceptId === DIAG.CRITICAL_ACKNOWLEDGED) {
-        throw new ConflictException('La notificación ya fue reconocida', { notificationId });
+      if (
+        notification.notificationStatusConceptId === DIAG.CRITICAL_ACKNOWLEDGED
+      ) {
+        throw new ConflictException('La notificación ya fue reconocida', {
+          notificationId,
+        });
       }
 
       const now = new Date();
-      const escalated = !!notification.escalationDueAt && notification.escalationDueAt < now;
+      const escalated =
+        !!notification.escalationDueAt && notification.escalationDueAt < now;
       notification.notificationStatusConceptId = escalated
         ? DIAG.CRITICAL_ESCALATED
         : DIAG.CRITICAL_ACKNOWLEDGED;
@@ -220,7 +272,10 @@ export class DiagnosticsReportsService {
       touch(notification, actor.id);
       await tx.flush();
 
-      return { id: notification.id, status: notification.notificationStatusConceptId };
+      return {
+        id: notification.id,
+        status: notification.notificationStatusConceptId,
+      };
     });
   }
 }

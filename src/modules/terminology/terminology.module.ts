@@ -6,12 +6,16 @@ import {
   TerminologyVersionsController,
   TerminologyConceptsController,
   TerminologyValueSetsController,
+  TerminologyFhirController,
+  TerminologyTenantCatalogController,
 } from './controllers';
 import {
   CodeSystemsService,
   CodeSystemVersionsService,
   ConceptsService,
   ValueSetsService,
+  ConceptMapsService,
+  TenantCatalogService,
 } from './services';
 import {
   TerminologySourcesRepository,
@@ -21,6 +25,8 @@ import {
   ConceptDesignationsRepository,
   ConceptRelationshipsRepository,
   ValueSetsRepository,
+  ConceptMapsRepository,
+  TenantCatalogRepository,
 } from './repositories';
 
 /**
@@ -38,12 +44,16 @@ import {
     TerminologyVersionsController,
     TerminologyConceptsController,
     TerminologyValueSetsController,
+    TerminologyFhirController,
+    TerminologyTenantCatalogController,
   ],
   providers: [
     CodeSystemsService,
     CodeSystemVersionsService,
     ConceptsService,
     ValueSetsService,
+    ConceptMapsService,
+    TenantCatalogService,
     TerminologySourcesRepository,
     CodeSystemsRepository,
     CodeSystemVersionsRepository,
@@ -51,6 +61,8 @@ import {
     ConceptDesignationsRepository,
     ConceptRelationshipsRepository,
     ValueSetsRepository,
+    ConceptMapsRepository,
+    TenantCatalogRepository,
   ],
 })
 export class TerminologyModule {}

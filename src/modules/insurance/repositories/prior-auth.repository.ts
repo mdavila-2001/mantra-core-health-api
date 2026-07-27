@@ -13,15 +13,28 @@ import {
  */
 @Injectable()
 export class PriorAuthRepository {
-  findRequest(em: EntityManager, id: string): Promise<PriorAuthorizationRequests | null> {
+  findRequest(
+    em: EntityManager,
+    id: string,
+  ): Promise<PriorAuthorizationRequests | null> {
     return em.findOne(PriorAuthorizationRequests, { id });
   }
 
-  createRequest(em: EntityManager, data: Record<string, unknown>): PriorAuthorizationRequests {
-    return em.create(PriorAuthorizationRequests, { ...data, ...createdBy(data.actorUserId as string) }, { partial: true });
+  createRequest(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): PriorAuthorizationRequests {
+    return em.create(
+      PriorAuthorizationRequests,
+      { ...data, ...createdBy(data.actorUserId as string) },
+      { partial: true },
+    );
   }
 
-  createItem(em: EntityManager, data: Record<string, unknown>): PriorAuthorizationItems {
+  createItem(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): PriorAuthorizationItems {
     return em.create(
       PriorAuthorizationItems,
       { ...data, createdAt: new Date() },
@@ -30,7 +43,10 @@ export class PriorAuthRepository {
   }
 
   /** Mayor `determination_version` existente para la solicitud (0 si ninguna). */
-  async maxDeterminationVersion(em: EntityManager, requestId: string): Promise<number> {
+  async maxDeterminationVersion(
+    em: EntityManager,
+    requestId: string,
+  ): Promise<number> {
     const last = await em.findOne(
       PriorAuthorizationDeterminations,
       { priorAuthorizationRequestId: requestId },
@@ -39,10 +55,17 @@ export class PriorAuthRepository {
     return last?.determinationVersion ?? 0;
   }
 
-  createDetermination(em: EntityManager, data: Record<string, unknown>): PriorAuthorizationDeterminations {
+  createDetermination(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): PriorAuthorizationDeterminations {
     return em.create(
       PriorAuthorizationDeterminations,
-      { ...data, decidedAt: new Date(), decidedByUserId: data.actorUserId as string | undefined },
+      {
+        ...data,
+        decidedAt: new Date(),
+        decidedByUserId: data.actorUserId as string | undefined,
+      },
       { partial: true },
     );
   }

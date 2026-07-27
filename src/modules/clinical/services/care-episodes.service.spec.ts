@@ -10,9 +10,17 @@ const actor = { id: 'user-1', roles: [] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const episodesRepo = { findActiveByPatient: mockFn(), create: mockFn(), findById: mockFn() };
+  const episodesRepo = {
+    findActiveByPatient: mockFn(),
+    create: mockFn(),
+    findById: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new CareEpisodesService(em as any, episodesRepo as any, logger as any);
+  const service = new CareEpisodesService(
+    em as any,
+    episodesRepo,
+    logger as any,
+  );
   return { service, tx, episodesRepo };
 }
 
@@ -31,7 +39,7 @@ describe('CareEpisodesService (UC-08-01)', () => {
     d.episodesRepo.create.mockReturnValue(created);
 
     const res = await d.service.open(
-      { patientProfileId: 'p1', tenantId: 't1' } as any,
+      { patientProfileId: 'p1', tenantId: 't1' },
       actor,
     );
 

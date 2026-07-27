@@ -42,7 +42,8 @@ export class OrgextFacilityLicensesService {
       'Registering facility license',
     );
     return this.em.transactional(async (tx) => {
-      const licenseTypeConceptId = dto.licenseTypeConceptId ?? ORGEXT.LICENSE_TYPE_OPERATING;
+      const licenseTypeConceptId =
+        dto.licenseTypeConceptId ?? ORGEXT.LICENSE_TYPE_OPERATING;
       const clash = await this.licensesRepo.findByNumber(
         tx,
         dto.tenantId,
@@ -63,7 +64,8 @@ export class OrgextFacilityLicensesService {
       const license = this.licensesRepo.create(tx, {
         tenantId: dto.tenantId,
         practiceSiteId: dto.practiceSiteId,
-        facilityTypeConceptId: dto.facilityTypeConceptId ?? ORGEXT.FACILITY_TYPE_HOSPITAL,
+        facilityTypeConceptId:
+          dto.facilityTypeConceptId ?? ORGEXT.FACILITY_TYPE_HOSPITAL,
         licenseTypeConceptId,
         licenseNumber: dto.licenseNumber,
         issuingAuthorityTenantId: dto.issuingAuthorityTenantId,
@@ -97,16 +99,24 @@ export class OrgextFacilityLicensesService {
     );
     return this.em.transactional(async (tx) => {
       const license = await this.licensesRepo.findById(tx, licenseId);
-      if (!license) throw new ResourceNotFoundException('Licencia no encontrada', { licenseId });
-
-      if (license.verificationStatusConceptId !== ORGEXT.LICENSE_PENDING) {
-        throw new PreconditionFailedException('La licencia no está en estado pendiente', {
+      if (!license)
+        throw new ResourceNotFoundException('Licencia no encontrada', {
           licenseId,
         });
+
+      if (license.verificationStatusConceptId !== ORGEXT.LICENSE_PENDING) {
+        throw new PreconditionFailedException(
+          'La licencia no está en estado pendiente',
+          {
+            licenseId,
+          },
+        );
       }
 
       license.verificationStatusConceptId =
-        dto.decision === 'VERIFY' ? ORGEXT.LICENSE_VERIFIED : ORGEXT.LICENSE_REJECTED;
+        dto.decision === 'VERIFY'
+          ? ORGEXT.LICENSE_VERIFIED
+          : ORGEXT.LICENSE_REJECTED;
       touch(license, actor.id);
 
       return { ok: true, status: license.verificationStatusConceptId };

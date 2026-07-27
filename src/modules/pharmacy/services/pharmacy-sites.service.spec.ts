@@ -17,7 +17,12 @@ function build() {
   const pharmaciesRepo = { findById: mockFn() };
   const sitesRepo = { findByPharmacyAndCode: mockFn(), create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PharmacySitesService(em as any, pharmaciesRepo as any, sitesRepo as any, logger as any);
+  const service = new PharmacySitesService(
+    em as any,
+    pharmaciesRepo as any,
+    sitesRepo as any,
+    logger as any,
+  );
   return { service, tx, pharmaciesRepo, sitesRepo };
 }
 
@@ -27,29 +32,40 @@ describe('PharmacySitesService (UC-24-02)', () => {
   it('throws when the pharmacy does not exist', async () => {
     const d = build();
     d.pharmaciesRepo.findById.mockResolvedValue(null);
-    await expect(d.service.createSite('ph1', dto, actor)).rejects.toBeInstanceOf(
-      ResourceNotFoundException,
-    );
+    await expect(
+      d.service.createSite('ph1', dto, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
   it('rejects when the pharmacy is not active (precondition)', async () => {
     const d = build();
-    d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_DRAFT });
-    await expect(d.service.createSite('ph1', dto, actor)).rejects.toBeInstanceOf(
-      PreconditionFailedException,
-    );
+    d.pharmaciesRepo.findById.mockResolvedValue({
+      id: 'ph1',
+      statusConceptId: PHARM.PHARMACY_DRAFT,
+    });
+    await expect(
+      d.service.createSite('ph1', dto, actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
   it('rejects a duplicated site code', async () => {
     const d = build();
-    d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_ACTIVE });
+    d.pharmaciesRepo.findById.mockResolvedValue({
+      id: 'ph1',
+      statusConceptId: PHARM.PHARMACY_ACTIVE,
+    });
     d.sitesRepo.findByPharmacyAndCode.mockResolvedValue({ id: 'existing' });
-    await expect(d.service.createSite('ph1', dto, actor)).rejects.toBeInstanceOf(ConflictException);
+    await expect(
+      d.service.createSite('ph1', dto, actor),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('creates the site on an active pharmacy', async () => {
     const d = build();
-    d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_ACTIVE });
+    d.pharmaciesRepo.findById.mockResolvedValue({
+      id: 'ph1',
+      statusConceptId: PHARM.PHARMACY_ACTIVE,
+    });
     d.sitesRepo.findByPharmacyAndCode.mockResolvedValue(null);
     d.sitesRepo.create.mockReturnValue({
       id: 's1',

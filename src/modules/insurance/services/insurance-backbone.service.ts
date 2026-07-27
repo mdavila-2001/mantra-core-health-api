@@ -41,7 +41,10 @@ export class InsuranceBackboneService {
     this.logger.setContext(InsuranceBackboneService.name);
   }
 
-  async createCarrier(dto: CreateCarrierDto, actor: AuthenticatedUser): Promise<ResourceStatusDto> {
+  async createCarrier(
+    dto: CreateCarrierDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
     return this.em.transactional(async (tx) => {
       const carrier = this.repo.createCarrier(tx, {
         tenantId: dto.tenantId,
@@ -53,15 +56,29 @@ export class InsuranceBackboneService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      this.logger.info({ operation: 'insurance.carrier.create', carrierId: carrier.id }, 'Carrier created');
-      return { id: carrier.id, status: carrier.statusConceptId, createdAt: carrier.createdAt };
+      this.logger.info(
+        { operation: 'insurance.carrier.create', carrierId: carrier.id },
+        'Carrier created',
+      );
+      return {
+        id: carrier.id,
+        status: carrier.statusConceptId,
+        createdAt: carrier.createdAt,
+      };
     });
   }
 
-  async createProduct(carrierId: string, dto: CreateProductDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  async createProduct(
+    carrierId: string,
+    dto: CreateProductDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
       const carrier = await this.repo.findCarrier(tx, carrierId);
-      if (!carrier) throw new ResourceNotFoundException('Aseguradora no encontrada', { carrierId });
+      if (!carrier)
+        throw new ResourceNotFoundException('Aseguradora no encontrada', {
+          carrierId,
+        });
       const product = this.repo.createProduct(tx, {
         insuranceCarrierId: carrierId,
         productCode: dto.productCode,
@@ -75,15 +92,24 @@ export class InsuranceBackboneService {
     });
   }
 
-  async createPlan(productId: string, dto: CreatePlanDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  async createPlan(
+    productId: string,
+    dto: CreatePlanDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
       const product = await this.repo.findProduct(tx, productId);
-      if (!product) throw new ResourceNotFoundException('Producto no encontrado', { productId });
+      if (!product)
+        throw new ResourceNotFoundException('Producto no encontrado', {
+          productId,
+        });
       const plan = this.repo.createPlan(tx, {
         insuranceProductId: productId,
         planCode: dto.planCode,
         name: dto.name,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : undefined,
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : undefined,
         statusConceptId: INS.PLAN_ACTIVE,
         actorUserId: actor.id,
       });
@@ -92,16 +118,23 @@ export class InsuranceBackboneService {
     });
   }
 
-  async createBenefit(planId: string, dto: CreatePlanBenefitDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  async createBenefit(
+    planId: string,
+    dto: CreatePlanBenefitDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
       const plan = await this.repo.findPlan(tx, planId);
-      if (!plan) throw new ResourceNotFoundException('Plan no encontrado', { planId });
+      if (!plan)
+        throw new ResourceNotFoundException('Plan no encontrado', { planId });
       const benefit = this.repo.createBenefit(tx, {
         insurancePlanId: planId,
         benefitCategoryConceptId: INS.BENEFIT_CATEGORY_GENERAL,
         coveragePercent: dto.coveragePercent,
         requiresPriorAuthorization: dto.requiresPriorAuthorization ?? false,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : new Date(),
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : new Date(),
         statusConceptId: INS.BENEFIT_ACTIVE,
         actorUserId: actor.id,
       });
@@ -110,16 +143,24 @@ export class InsuranceBackboneService {
     });
   }
 
-  async createProviderNetwork(dto: CreateProviderNetworkDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  async createProviderNetwork(
+    dto: CreateProviderNetworkDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
       const carrier = await this.repo.findCarrier(tx, dto.insuranceCarrierId);
-      if (!carrier) throw new ResourceNotFoundException('Aseguradora no encontrada', { carrierId: dto.insuranceCarrierId });
+      if (!carrier)
+        throw new ResourceNotFoundException('Aseguradora no encontrada', {
+          carrierId: dto.insuranceCarrierId,
+        });
       const network = this.repo.createProviderNetwork(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,
         networkCode: dto.networkCode,
         name: dto.name,
         networkTypeConceptId: INS.NETWORK_TYPE_PPO,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : undefined,
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : undefined,
         effectiveTo: dto.effectiveTo ? new Date(dto.effectiveTo) : undefined,
         statusConceptId: INS.NETWORK_ACTIVE,
         actorUserId: actor.id,
@@ -129,7 +170,10 @@ export class InsuranceBackboneService {
     });
   }
 
-  async createBroker(dto: CreateBrokerDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  async createBroker(
+    dto: CreateBrokerDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
       const broker = this.repo.createBroker(tx, {
         tenantId: dto.tenantId,
@@ -145,7 +189,10 @@ export class InsuranceBackboneService {
     });
   }
 
-  async createEmployerGroup(dto: CreateEmployerGroupDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  async createEmployerGroup(
+    dto: CreateEmployerGroupDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
       const group = this.repo.createEmployerGroup(tx, {
         tenantId: dto.tenantId,
@@ -159,18 +206,30 @@ export class InsuranceBackboneService {
     });
   }
 
-  async createAgreement(brokerId: string, dto: CreateBrokerAgreementDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  async createAgreement(
+    brokerId: string,
+    dto: CreateBrokerAgreementDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
       const broker = await this.repo.findBroker(tx, brokerId);
-      if (!broker) throw new ResourceNotFoundException('Broker no encontrado', { brokerId });
+      if (!broker)
+        throw new ResourceNotFoundException('Broker no encontrado', {
+          brokerId,
+        });
       const carrier = await this.repo.findCarrier(tx, dto.insuranceCarrierId);
-      if (!carrier) throw new ResourceNotFoundException('Aseguradora no encontrada', { carrierId: dto.insuranceCarrierId });
+      if (!carrier)
+        throw new ResourceNotFoundException('Aseguradora no encontrada', {
+          carrierId: dto.insuranceCarrierId,
+        });
       const agreement = this.repo.createAgreement(tx, {
         insuranceBrokerId: brokerId,
         insuranceCarrierId: dto.insuranceCarrierId,
         agreementCode: dto.agreementCode,
         commissionModelConceptId: INS.COMMISSION_MODEL_FLAT,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : undefined,
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : undefined,
         effectiveTo: dto.effectiveTo ? new Date(dto.effectiveTo) : undefined,
         statusConceptId: INS.AGREEMENT_ACTIVE,
         actorUserId: actor.id,
@@ -181,16 +240,31 @@ export class InsuranceBackboneService {
   }
 
   /** UC-26-01: alta de membresía de prestador en una red activa y vigente. */
-  async addMembership(networkId: string, dto: CreateMembershipDto, actor: AuthenticatedUser): Promise<ResourceStatusDto> {
-    this.logger.info({ operation: 'insurance.membership.add', networkId, actorId: actor.id }, 'Adding network membership');
+  async addMembership(
+    networkId: string,
+    dto: CreateMembershipDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
+    this.logger.info(
+      { operation: 'insurance.membership.add', networkId, actorId: actor.id },
+      'Adding network membership',
+    );
     return this.em.transactional(async (tx) => {
       const network = await this.repo.findProviderNetwork(tx, networkId);
-      if (!network) throw new ResourceNotFoundException('Red de prestadores no encontrada', { networkId });
+      if (!network)
+        throw new ResourceNotFoundException(
+          'Red de prestadores no encontrada',
+          { networkId },
+        );
       if (network.statusConceptId !== INS.NETWORK_ACTIVE) {
-        throw new PreconditionFailedException('La red no está activa', { networkId });
+        throw new PreconditionFailedException('La red no está activa', {
+          networkId,
+        });
       }
       if (network.effectiveTo && network.effectiveTo.getTime() < Date.now()) {
-        throw new PreconditionFailedException('La red está fuera de vigencia', { networkId });
+        throw new PreconditionFailedException('La red está fuera de vigencia', {
+          networkId,
+        });
       }
       const membership = this.repo.createMembership(tx, {
         providerNetworkId: networkId,
@@ -204,8 +278,15 @@ export class InsuranceBackboneService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      this.logger.info({ operation: 'insurance.membership.add', membershipId: membership.id }, 'Membership added');
-      return { id: membership.id, status: membership.statusConceptId, createdAt: membership.createdAt };
+      this.logger.info(
+        { operation: 'insurance.membership.add', membershipId: membership.id },
+        'Membership added',
+      );
+      return {
+        id: membership.id,
+        status: membership.statusConceptId,
+        createdAt: membership.createdAt,
+      };
     });
   }
 }

@@ -52,7 +52,9 @@ export class AuditController {
   @Post('data-access')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar acceso/lectura clínica (accounting WORM)' })
+  @ApiOperation({
+    summary: 'Registrar acceso/lectura clínica (accounting WORM)',
+  })
   recordDataAccess(
     @Body() dto: RecordDataAccessDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -64,7 +66,9 @@ export class AuditController {
   @Post('events')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar provenance de un cambio y sellar la cadena hash' })
+  @ApiOperation({
+    summary: 'Registrar provenance de un cambio y sellar la cadena hash',
+  })
   recordEvent(
     @Body() dto: RecordAuditEventDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -76,7 +80,9 @@ export class AuditController {
   @Get('history/:entity/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Consultar historial / línea de tiempo de un registro' })
+  @ApiOperation({
+    summary: 'Consultar historial / línea de tiempo de un registro',
+  })
   getHistory(
     @Param('entity') entity: string,
     @Param('id', ParseUUIDPipe) id: string,
@@ -90,7 +96,9 @@ export class AuditController {
   @Post('integrity/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Verificar integridad tamper-evidence de la cadena' })
+  @ApiOperation({
+    summary: 'Verificar integridad tamper-evidence de la cadena',
+  })
   verifyIntegrity(
     @Body() dto: VerifyIntegrityDto,
     @CurrentUser() actor: AuthenticatedUser,

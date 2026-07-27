@@ -6,25 +6,33 @@ export class ConversationParticipants {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'conversation_id', type: 'uuid' })  // FK → community.conversations
+  @Property({ fieldName: 'conversation_id', type: 'uuid' }) // FK → community.conversations
   conversationId!: string;
 
-  @Property({ fieldName: 'participant_profile_id', type: 'uuid' })  // FK → community.public_profiles
+  @Property({ fieldName: 'participant_profile_id', type: 'uuid' }) // FK → community.public_profiles
   participantProfileId!: string;
 
-  @Property({ fieldName: 'role_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   roleConceptId!: string;
 
-  @Property({ fieldName: 'joined_at', columnType: 'timestamptz', nullable: true })
+  @Property({
+    fieldName: 'joined_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
   joinedAt?: Date;
 
-  @Property({ fieldName: 'last_read_message_id', type: 'uuid', nullable: true })  // FK → community.direct_messages
+  @Property({ fieldName: 'last_read_message_id', type: 'uuid', nullable: true }) // FK → community.direct_messages
   lastReadMessageId?: string;
 
-  @Property({ fieldName: 'muted_until', columnType: 'timestamptz', nullable: true })
+  @Property({
+    fieldName: 'muted_until',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
   mutedUntil?: Date;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -33,13 +41,12 @@ export class ConversationParticipants {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
-
 }

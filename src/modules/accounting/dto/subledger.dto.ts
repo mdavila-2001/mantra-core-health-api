@@ -24,11 +24,17 @@ export class CreateOpenItemDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Subledger (cliente/proveedor) ya existente', format: 'uuid' })
+  @ApiProperty({
+    description: 'Subledger (cliente/proveedor) ya existente',
+    format: 'uuid',
+  })
   @IsUUID()
   subledgerAccountId!: string;
 
-  @ApiProperty({ description: 'Línea del mayor sobre cuenta de reconciliación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Línea del mayor sobre cuenta de reconciliación',
+    format: 'uuid',
+  })
   @IsUUID()
   ledgerEntryId!: string;
 
@@ -47,7 +53,10 @@ export class CreateOpenItemDto {
   @IsDateString()
   dueDate?: string;
 
-  @ApiProperty({ description: 'Importe original (= pendiente inicial)', example: '250.00' })
+  @ApiProperty({
+    description: 'Importe original (= pendiente inicial)',
+    example: '250.00',
+  })
   @IsNumberString()
   originalAmount!: string;
 
@@ -84,17 +93,26 @@ export class CreateClearingDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiPropertyOptional({ description: 'Número de clearing (único por tenant); autogenerado si se omite' })
+  @ApiPropertyOptional({
+    description:
+      'Número de clearing (único por tenant); autogenerado si se omite',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(60)
   clearingNumber?: string;
 
-  @ApiProperty({ description: 'Práctica del asiento de compensación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Práctica del asiento de compensación',
+    format: 'uuid',
+  })
   @IsUUID()
   practiceId!: string;
 
-  @ApiProperty({ description: 'Cuenta banco/tesorería del contra-asiento', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta banco/tesorería del contra-asiento',
+    format: 'uuid',
+  })
   @IsUUID()
   bankAccountId!: string;
 
@@ -107,7 +125,10 @@ export class CreateClearingDto {
   @IsDateString()
   clearingDate!: string;
 
-  @ApiProperty({ type: [ClearingItemInputDto], description: 'Partidas a compensar (>=1)' })
+  @ApiProperty({
+    type: [ClearingItemInputDto],
+    description: 'Partidas a compensar (>=1)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

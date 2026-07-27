@@ -17,13 +17,17 @@ import { VerifyAccreditationDto, AccreditationResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('accreditations')
 export class AccreditationsController {
-  constructor(private readonly accreditationsService: PracticeAccreditationsService) {}
+  constructor(
+    private readonly accreditationsService: PracticeAccreditationsService,
+  ) {}
 
   /** UC-14-03. */
   @Post(':id/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Verificar o caducar una acreditación (transición de estado)' })
+  @ApiOperation({
+    summary: 'Verificar o caducar una acreditación (transición de estado)',
+  })
   verify(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: VerifyAccreditationDto,

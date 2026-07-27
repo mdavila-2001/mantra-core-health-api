@@ -33,11 +33,20 @@ export class OrderSetsService {
   }
 
   /** Crea una plantilla de órdenes con sus ítems (precondición de UC-18-06). */
-  async create(dto: CreateOrderSetDto, actor: AuthenticatedUser): Promise<OrderSetResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.order_set.create', code: dto.code }, 'Creating order set');
+  async create(
+    dto: CreateOrderSetDto,
+    actor: AuthenticatedUser,
+  ): Promise<OrderSetResponseDto> {
+    this.logger.info(
+      { operation: 'clinical_ext.order_set.create', code: dto.code },
+      'Creating order set',
+    );
     return this.em.transactional(async (tx) => {
       const clash = await this.orderSetsRepo.findByCode(tx, dto.code);
-      if (clash) throw new ConflictException('El código de order set ya existe', { code: dto.code });
+      if (clash)
+        throw new ConflictException('El código de order set ya existe', {
+          code: dto.code,
+        });
 
       const orderSet = this.orderSetsRepo.create(tx, {
         tenantId: dto.tenantId,
@@ -55,7 +64,8 @@ export class OrderSetsService {
       const items = dto.items.map((item, idx) =>
         this.orderSetsRepo.createItem(tx, {
           orderSetId: orderSet.id,
-          itemTypeConceptId: item.itemTypeConceptId ?? CEXT.ORDER_ITEM_TYPE_SERVICE,
+          itemTypeConceptId:
+            item.itemTypeConceptId ?? CEXT.ORDER_ITEM_TYPE_SERVICE,
           codeConceptId: item.codeConceptId,
           defaultDoseText: item.defaultDoseText,
           defaultFrequencyText: item.defaultFrequencyText,
@@ -83,14 +93,23 @@ export class OrderSetsService {
     actor: AuthenticatedUser,
   ): Promise<ApplyOrderSetResponseDto> {
     this.logger.info(
-      { operation: 'clinical_ext.order_set.apply', orderSetId, actorId: actor.id },
+      {
+        operation: 'clinical_ext.order_set.apply',
+        orderSetId,
+        actorId: actor.id,
+      },
       'Applying order set',
     );
     return this.em.transactional(async (tx) => {
       const orderSet = await this.orderSetsRepo.findById(tx, orderSetId);
-      if (!orderSet) throw new ResourceNotFoundException('Order set no encontrado', { orderSetId });
+      if (!orderSet)
+        throw new ResourceNotFoundException('Order set no encontrado', {
+          orderSetId,
+        });
       if (orderSet.statusConceptId !== CEXT.ORDER_SET_ACTIVE) {
-        throw new PreconditionFailedException('El order set no está activo', { orderSetId });
+        throw new PreconditionFailedException('El order set no está activo', {
+          orderSetId,
+        });
       }
 
       const items = await this.orderSetsRepo.itemsBySet(tx, orderSetId);
@@ -99,9 +118,12 @@ export class OrderSetsService {
         : items.filter((i) => i.isSelectedDefault);
 
       if (selected.length === 0) {
-        throw new PreconditionFailedException('No hay ítems seleccionados para aplicar', {
-          orderSetId,
-        });
+        throw new PreconditionFailedException(
+          'No hay ítems seleccionados para aplicar',
+          {
+            orderSetId,
+          },
+        );
       }
 
       return {

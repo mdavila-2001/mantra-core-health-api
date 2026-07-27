@@ -8,6 +8,9 @@ export class CredentialResponseDto {
   @ApiProperty({ format: 'uuid' })
   userId!: string;
 
-  @ApiProperty({ description: 'Concept id del método de credencial', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del método de credencial',
+    format: 'uuid',
+  })
   method!: string;
 }

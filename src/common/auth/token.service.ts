@@ -28,11 +28,23 @@ export class TokenService {
   constructor(private readonly jwt: JwtService) {}
 
   /** Firma un access token para el sujeto y sesión indicados. */
-  signAccessToken(userId: string, sessionTokenId: string, roles: string[]): string {
-    const payload: JwtPayload = { sub: userId, sid: sessionTokenId, roles, typ: 'access' };
+  signAccessToken(
+    userId: string,
+    sessionTokenId: string,
+    roles: string[],
+  ): string {
+    const payload: JwtPayload = {
+      sub: userId,
+      sid: sessionTokenId,
+      roles,
+      typ: 'access',
+    };
     // `expiresIn` acepta un string tipo `15m`; el tipo de la librería exige un
     // literal `StringValue`, así que se afirma la forma de las opciones.
-    const options = { secret: this.env.secret, expiresIn: this.env.accessTtl } as JwtSignOptions;
+    const options = {
+      secret: this.env.secret,
+      expiresIn: this.env.accessTtl,
+    } as JwtSignOptions;
     return this.jwt.sign(payload, options);
   }
 
@@ -59,7 +71,9 @@ export class TokenService {
   issueSessionTokens(userId: string, roles: string[]): IssuedTokens {
     const sessionTokenId = randomUUID();
     const { raw, hash } = this.issueRefreshToken();
-    const expiresAt = new Date(Date.now() + this.env.refreshTtlDays * 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(
+      Date.now() + this.env.refreshTtlDays * 24 * 60 * 60 * 1000,
+    );
     return {
       accessToken: this.signAccessToken(userId, sessionTokenId, roles),
       refreshToken: raw,

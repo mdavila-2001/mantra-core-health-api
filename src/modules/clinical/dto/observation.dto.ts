@@ -15,7 +15,10 @@ import {
 
 /** Familia de valor común a observación y componente (mutuamente exclusiva). */
 class ObservationValueInput {
-  @ApiPropertyOptional({ description: 'Tipo de valor (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de valor (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   valueTypeConceptId?: string;
@@ -35,7 +38,10 @@ class ObservationValueInput {
   @IsString()
   valueText?: string;
 
-  @ApiPropertyOptional({ description: 'Valor codificado (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Valor codificado (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   valueConceptId?: string;
@@ -45,7 +51,10 @@ class ObservationValueInput {
   @IsNumber()
   quantityValue?: number;
 
-  @ApiPropertyOptional({ description: 'Unidad de la cantidad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Unidad de la cantidad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   quantityUnitConceptId?: string;
@@ -53,11 +62,17 @@ class ObservationValueInput {
 
 /** Componente de una observación (p. ej. sistólica/diastólica). */
 export class ObservationComponentInput extends ObservationValueInput {
-  @ApiProperty({ description: 'Código del componente (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Código del componente (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   codeConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Interpretación (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Interpretación (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   interpretationConceptId?: string;
@@ -65,15 +80,24 @@ export class ObservationComponentInput extends ObservationValueInput {
 
 /** Ejecutante de la observación. */
 export class ObservationPerformerInput {
-  @ApiProperty({ description: 'Tipo de ejecutante (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tipo de ejecutante (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   performerTypeConceptId!: string;
 
-  @ApiProperty({ description: 'Id del ejecutante (profesional/dispositivo)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Id del ejecutante (profesional/dispositivo)',
+    format: 'uuid',
+  })
   @IsUUID()
   performerId!: string;
 
-  @ApiPropertyOptional({ description: 'Rol del ejecutante (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Rol del ejecutante (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   performerRoleConceptId?: string;
@@ -104,11 +128,17 @@ export class ObservationReferenceRangeInput {
 
 /** Cuerpo de `POST /clinical/observations` (UC-08-03). */
 export class CreateObservationDto extends ObservationValueInput {
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
@@ -117,21 +147,33 @@ export class CreateObservationDto extends ObservationValueInput {
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ description: 'Orden de servicio que la origina', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Orden de servicio que la origina',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   basedOnServiceRequestId?: string;
 
-  @ApiProperty({ description: 'Código de la observación (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Código de la observación (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   codeConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Categoría (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Categoría (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   categoryConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Interpretación (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Interpretación (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   interpretationConceptId?: string;
@@ -141,7 +183,10 @@ export class CreateObservationDto extends ObservationValueInput {
   @IsUUID()
   methodConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Sitio anatómico (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sitio anatómico (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   bodySiteConceptId?: string;
@@ -151,12 +196,18 @@ export class CreateObservationDto extends ObservationValueInput {
   @IsUUID()
   sourceDeviceId?: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia clínica', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia clínica',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   effectiveStartAt?: string;
 
-  @ApiPropertyOptional({ description: 'Momento de emisión', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Momento de emisión',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   issuedAt?: string;
@@ -182,7 +233,10 @@ export class CreateObservationDto extends ObservationValueInput {
   @Type(() => ObservationReferenceRangeInput)
   referenceRanges?: ObservationReferenceRangeInput[];
 
-  @ApiPropertyOptional({ type: [String], description: 'Notas de la observación' })
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Notas de la observación',
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -195,13 +249,18 @@ export class AmendObservationDto extends ObservationValueInput {
   @IsString()
   note!: string;
 
-  @ApiPropertyOptional({ description: 'row_version esperado (bloqueo optimista)' })
+  @ApiPropertyOptional({
+    description: 'row_version esperado (bloqueo optimista)',
+  })
   @IsOptional()
   @IsInt()
   @Min(1)
   expectedRowVersion?: number;
 
-  @ApiPropertyOptional({ description: 'Interpretación revisada (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Interpretación revisada (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   interpretationConceptId?: string;

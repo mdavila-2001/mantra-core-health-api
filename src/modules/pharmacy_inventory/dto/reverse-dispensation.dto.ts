@@ -9,7 +9,10 @@ export class ReverseDispensationDto {
   @MaxLength(256)
   reason?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Ubicación a la que se reintegra el stock' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ubicación a la que se reintegra el stock',
+  })
   @IsOptional()
   @IsUUID()
   inventoryLocationId?: string;

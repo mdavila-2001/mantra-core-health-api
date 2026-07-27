@@ -29,7 +29,7 @@ function build() {
     requestsRepo as any,
     delegatesRepo as any,
     grantsRepo as any,
-    eventsRepo as any,
+    eventsRepo,
     logger as any,
   );
   return { service, tx, requestsRepo, delegatesRepo, grantsRepo, eventsRepo };
@@ -39,30 +39,57 @@ describe('AccessRequestsService', () => {
   describe('requestAccess (UC-29-04)', () => {
     it('opens a request and records ACCESS_REQUESTED', async () => {
       const d = build();
-      d.delegatesRepo.findById.mockResolvedValue({ id: 'del1', statusConceptId: STATUS.ACTIVE });
-      d.requestsRepo.create.mockReturnValue({ id: 'r1', statusConceptId: DELEG.REQUEST_OPEN, createdAt: new Date() });
-      const res = await d.service.requestAccess('del1', { requestedPermissionId: 'p1' } as any, actor);
+      d.delegatesRepo.findById.mockResolvedValue({
+        id: 'del1',
+        statusConceptId: STATUS.ACTIVE,
+      });
+      d.requestsRepo.create.mockReturnValue({
+        id: 'r1',
+        statusConceptId: DELEG.REQUEST_OPEN,
+        createdAt: new Date(),
+      });
+      const res = await d.service.requestAccess(
+        'del1',
+        { requestedPermissionId: 'p1' },
+        actor,
+      );
       expect(res.id).toBe('r1');
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: DELEG.EVENT_ACCESS_REQUESTED }),
+        expect.objectContaining({
+          eventTypeConceptId: DELEG.EVENT_ACCESS_REQUESTED,
+        }),
       );
     });
 
     it('rejects when the delegation is not active (precondition)', async () => {
       const d = build();
-      d.delegatesRepo.findById.mockResolvedValue({ id: 'del1', statusConceptId: STATUS.REVOKED });
+      d.delegatesRepo.findById.mockResolvedValue({
+        id: 'del1',
+        statusConceptId: STATUS.REVOKED,
+      });
       await expect(
-        d.service.requestAccess('del1', { requestedPermissionId: 'p1' } as any, actor),
+        d.service.requestAccess(
+          'del1',
+          { requestedPermissionId: 'p1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('rejects a duplicate pending request (conflict)', async () => {
       const d = build();
-      d.delegatesRepo.findById.mockResolvedValue({ id: 'del1', statusConceptId: STATUS.ACTIVE });
+      d.delegatesRepo.findById.mockResolvedValue({
+        id: 'del1',
+        statusConceptId: STATUS.ACTIVE,
+      });
       d.requestsRepo.findOpenDuplicate.mockResolvedValue({ id: 'dup' });
       await expect(
-        d.service.requestAccess('del1', { requestedPermissionId: 'p1' } as any, actor),
+        d.service.requestAccess(
+          'del1',
+          { requestedPermissionId: 'p1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -78,7 +105,10 @@ describe('AccessRequestsService', () => {
 
     it('rejects deciding a request that is not open (precondition)', async () => {
       const d = build();
-      d.requestsRepo.findById.mockResolvedValue({ id: 'r1', statusConceptId: DELEG.REQUEST_CLOSED });
+      d.requestsRepo.findById.mockResolvedValue({
+        id: 'r1',
+        statusConceptId: DELEG.REQUEST_CLOSED,
+      });
       await expect(
         d.service.decide('r1', { decision: 'APPROVED' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -94,13 +124,23 @@ describe('AccessRequestsService', () => {
       };
       d.requestsRepo.findById.mockResolvedValue(request);
       d.grantsRepo.create.mockReturnValue({ id: 'g1' });
-      const res = await d.service.decide('r1', { decision: 'APPROVED' } as any, actor);
+      const res = await d.service.decide(
+        'r1',
+        { decision: 'APPROVED' } as any,
+        actor,
+      );
       expect(request.statusConceptId).toBe(DELEG.REQUEST_CLOSED);
       expect(request.decisionConceptId).toBe(DELEG.DECISION_APPROVED);
-      expect(res).toEqual({ requestId: 'r1', decision: 'APPROVED', grantId: 'g1' });
+      expect(res).toEqual({
+        requestId: 'r1',
+        decision: 'APPROVED',
+        grantId: 'g1',
+      });
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: DELEG.EVENT_ACCESS_APPROVED }),
+        expect.objectContaining({
+          eventTypeConceptId: DELEG.EVENT_ACCESS_APPROVED,
+        }),
       );
     });
 
@@ -112,12 +152,22 @@ describe('AccessRequestsService', () => {
         practitionerDelegateAssignmentId: 'del1',
       };
       d.requestsRepo.findById.mockResolvedValue(request);
-      const res = await d.service.decide('r1', { decision: 'DENIED' } as any, actor);
-      expect(res).toEqual({ requestId: 'r1', decision: 'DENIED', grantId: undefined });
+      const res = await d.service.decide(
+        'r1',
+        { decision: 'DENIED' } as any,
+        actor,
+      );
+      expect(res).toEqual({
+        requestId: 'r1',
+        decision: 'DENIED',
+        grantId: undefined,
+      });
       expect(d.grantsRepo.create).not.toHaveBeenCalled();
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: DELEG.EVENT_ACCESS_DENIED }),
+        expect.objectContaining({
+          eventTypeConceptId: DELEG.EVENT_ACCESS_DENIED,
+        }),
       );
     });
   });

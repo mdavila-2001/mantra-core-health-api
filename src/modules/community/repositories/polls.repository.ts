@@ -68,13 +68,22 @@ export class PollsRepository {
     return em.findOne(PollVotes, { pollId, pollOptionId, voterProfileId });
   }
 
-  countVotesByVoter(em: EntityManager, pollId: string, voterProfileId: string): Promise<number> {
+  countVotesByVoter(
+    em: EntityManager,
+    pollId: string,
+    voterProfileId: string,
+  ): Promise<number> {
     return em.count(PollVotes, { pollId, voterProfileId });
   }
 
   createVote(
     em: EntityManager,
-    data: { pollId: string; pollOptionId: string; voterProfileId: string; actorUserId?: string },
+    data: {
+      pollId: string;
+      pollOptionId: string;
+      voterProfileId: string;
+      actorUserId?: string;
+    },
   ): PollVotes {
     return em.create(
       PollVotes,

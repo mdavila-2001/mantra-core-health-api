@@ -21,7 +21,12 @@ export const PERMISSION_ACTIONS = [
 export type PermissionAction = (typeof PERMISSION_ACTIONS)[number];
 
 /** Ámbitos por defecto de un permiso. */
-export const PERMISSION_SCOPES = ['SELF', 'BRANCH', 'TENANT', 'GLOBAL'] as const;
+export const PERMISSION_SCOPES = [
+  'SELF',
+  'BRANCH',
+  'TENANT',
+  'GLOBAL',
+] as const;
 export type PermissionScope = (typeof PERMISSION_SCOPES)[number];
 
 /** Cuerpo de `POST /authz/permissions` (UC-06-01). */
@@ -38,7 +43,10 @@ export class CreatePermissionDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ description: 'Recurso protegido (p. ej. patient, encounter)', maxLength: 150 })
+  @ApiProperty({
+    description: 'Recurso protegido (p. ej. patient, encounter)',
+    maxLength: 150,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(150)
@@ -53,7 +61,10 @@ export class CreatePermissionDto {
   @IsUUID()
   categoryId?: string;
 
-  @ApiPropertyOptional({ description: 'Ámbito por defecto', enum: PERMISSION_SCOPES })
+  @ApiPropertyOptional({
+    description: 'Ámbito por defecto',
+    enum: PERMISSION_SCOPES,
+  })
   @IsOptional()
   @IsIn(PERMISSION_SCOPES)
   defaultScope?: PermissionScope;
@@ -63,7 +74,9 @@ export class CreatePermissionDto {
   @IsBoolean()
   isFieldLevel?: boolean;
 
-  @ApiPropertyOptional({ description: 'Permiso peligroso (exige aprobación de segundo admin)' })
+  @ApiPropertyOptional({
+    description: 'Permiso peligroso (exige aprobación de segundo admin)',
+  })
   @IsOptional()
   @IsBoolean()
   isDangerous?: boolean;
@@ -73,7 +86,10 @@ export class CreatePermissionDto {
   @IsBoolean()
   isRoleRestricted?: boolean;
 
-  @ApiPropertyOptional({ description: 'Código de rol requerido si es restringido', maxLength: 100 })
+  @ApiPropertyOptional({
+    description: 'Código de rol requerido si es restringido',
+    maxLength: 100,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)

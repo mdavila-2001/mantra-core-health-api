@@ -10,12 +10,18 @@ export class RebuildFeedDto {
   @IsUUID()
   sourceRefId!: string;
 
-  @ApiProperty({ description: 'Perfiles destinatarios (seguidores)', type: [String] })
+  @ApiProperty({
+    description: 'Perfiles destinatarios (seguidores)',
+    type: [String],
+  })
   @IsArray()
   @IsUUID('4', { each: true })
   followerProfileIds!: string[];
 
-  @ApiPropertyOptional({ description: 'Origen del item', enum: ['FOLLOWING', 'GROUP', 'TOPIC', 'SUGGESTED', 'PROMOTED'] })
+  @ApiPropertyOptional({
+    description: 'Origen del item',
+    enum: ['FOLLOWING', 'GROUP', 'TOPIC', 'SUGGESTED', 'PROMOTED'],
+  })
   @IsOptional()
   @IsIn(['FOLLOWING', 'GROUP', 'TOPIC', 'SUGGESTED', 'PROMOTED'])
   origin?: 'FOLLOWING' | 'GROUP' | 'TOPIC' | 'SUGGESTED' | 'PROMOTED';

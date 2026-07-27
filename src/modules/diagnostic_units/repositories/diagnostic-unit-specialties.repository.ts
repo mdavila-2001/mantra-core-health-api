@@ -18,8 +18,14 @@ export interface UpsertSpecialtyData {
 @Injectable()
 export class DiagnosticUnitSpecialtiesRepository {
   /** Especialidades vigentes (valid_to nulo) de la unidad. */
-  findOpenForUnit(em: EntityManager, diagnosticUnitId: string): Promise<DiagnosticUnitSpecialties[]> {
-    return em.find(DiagnosticUnitSpecialties, { diagnosticUnitId, validTo: null });
+  findOpenForUnit(
+    em: EntityManager,
+    diagnosticUnitId: string,
+  ): Promise<DiagnosticUnitSpecialties[]> {
+    return em.find(DiagnosticUnitSpecialties, {
+      diagnosticUnitId,
+      validTo: null,
+    });
   }
 
   /** Especialidad vigente por (unidad, concepto), o `null`. */
@@ -35,7 +41,10 @@ export class DiagnosticUnitSpecialtiesRepository {
     });
   }
 
-  create(em: EntityManager, data: UpsertSpecialtyData): DiagnosticUnitSpecialties {
+  create(
+    em: EntityManager,
+    data: UpsertSpecialtyData,
+  ): DiagnosticUnitSpecialties {
     return em.create(
       DiagnosticUnitSpecialties,
       {
@@ -52,11 +61,17 @@ export class DiagnosticUnitSpecialtiesRepository {
   }
 
   /** Marca VERIFIED todas las especialidades vigentes de la unidad (UC-23-03). */
-  verifyOpenForUnit(em: EntityManager, diagnosticUnitId: string): Promise<number> {
+  verifyOpenForUnit(
+    em: EntityManager,
+    diagnosticUnitId: string,
+  ): Promise<number> {
     return em.nativeUpdate(
       DiagnosticUnitSpecialties,
       { diagnosticUnitId, validTo: null },
-      { verificationStatusConceptId: DUNIT.VERIFICATION_VERIFIED, updatedAt: new Date() },
+      {
+        verificationStatusConceptId: DUNIT.VERIFICATION_VERIFIED,
+        updatedAt: new Date(),
+      },
     );
   }
 }

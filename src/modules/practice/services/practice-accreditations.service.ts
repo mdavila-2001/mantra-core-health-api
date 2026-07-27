@@ -8,7 +8,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
-import { PracticesRepository, PracticeSitesRepository, PracticeAccreditationsRepository } from '../repositories';
+import {
+  PracticesRepository,
+  PracticeSitesRepository,
+  PracticeAccreditationsRepository,
+} from '../repositories';
 import {
   CreateAccreditationDto,
   VerifyAccreditationDto,
@@ -37,25 +41,35 @@ export class PracticeAccreditationsService {
     dto: CreateAccreditationDto,
     actor: AuthenticatedUser,
   ): Promise<AccreditationResponseDto> {
-    this.logger.info({ operation: 'practice.accreditation.create', practiceId }, 'Submitting accreditation');
+    this.logger.info(
+      { operation: 'practice.accreditation.create', practiceId },
+      'Submitting accreditation',
+    );
     return this.em.transactional(async (tx) => {
       const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice) throw new ResourceNotFoundException('Práctica no encontrada', { practiceId });
+      if (!practice)
+        throw new ResourceNotFoundException('Práctica no encontrada', {
+          practiceId,
+        });
 
       if (dto.practiceSiteId) {
         const site = await this.sitesRepo.findById(tx, dto.practiceSiteId);
         if (!site || site.practiceId !== practiceId) {
-          throw new PreconditionFailedException('El sitio no pertenece a la práctica', {
-            practiceId,
-            siteId: dto.practiceSiteId,
-          });
+          throw new PreconditionFailedException(
+            'El sitio no pertenece a la práctica',
+            {
+              practiceId,
+              siteId: dto.practiceSiteId,
+            },
+          );
         }
       }
 
       const accreditation = this.accreditationsRepo.create(tx, {
         practiceId,
         practiceSiteId: dto.practiceSiteId,
-        accreditationTypeConceptId: dto.accreditationTypeConceptId ?? PRAC.ACCRED_TYPE_ISO,
+        accreditationTypeConceptId:
+          dto.accreditationTypeConceptId ?? PRAC.ACCRED_TYPE_ISO,
         accreditationNumber: dto.accreditationNumber,
         issuerTenantId: dto.issuerTenantId,
         issuerName: dto.issuerName,
@@ -82,14 +96,23 @@ export class PracticeAccreditationsService {
     actor: AuthenticatedUser,
   ): Promise<AccreditationResponseDto> {
     const decision = dto.decision ?? 'VERIFIED';
-    this.logger.info({ operation: 'practice.accreditation.verify', id, decision }, 'Verifying accreditation');
+    this.logger.info(
+      { operation: 'practice.accreditation.verify', id, decision },
+      'Verifying accreditation',
+    );
     return this.em.transactional(async (tx) => {
       const accreditation = await this.accreditationsRepo.findById(tx, id);
-      if (!accreditation) throw new ResourceNotFoundException('Acreditación no encontrada', { id });
+      if (!accreditation)
+        throw new ResourceNotFoundException('Acreditación no encontrada', {
+          id,
+        });
 
       if (decision === 'VERIFIED') {
         if (accreditation.verificationStatusConceptId !== PRAC.ACCRED_PENDING) {
-          throw new PreconditionFailedException('La acreditación no está pendiente de verificación', { id });
+          throw new PreconditionFailedException(
+            'La acreditación no está pendiente de verificación',
+            { id },
+          );
         }
         accreditation.verificationStatusConceptId = PRAC.ACCRED_VERIFIED;
       } else {

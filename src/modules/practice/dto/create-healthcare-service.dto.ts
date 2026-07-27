@@ -8,7 +8,10 @@ export class CreateHealthcareServiceDto {
   @IsUUID()
   practiceSiteId?: string;
 
-  @ApiPropertyOptional({ description: 'Unidad clínica que lo presta', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Unidad clínica que lo presta',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   clinicalUnitId?: string;
@@ -18,7 +21,10 @@ export class CreateHealthcareServiceDto {
   @IsUUID()
   serviceConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de especialidad', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de especialidad',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   specialtyConceptId?: string;

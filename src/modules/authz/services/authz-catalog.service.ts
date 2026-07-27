@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ConflictException, type AuthenticatedUser } from '../../../common';
-import { PermissionCategoriesRepository, PermissionsRepository } from '../repositories';
+import {
+  PermissionCategoriesRepository,
+  PermissionsRepository,
+} from '../repositories';
 import {
   CreatePermissionCategoryDto,
   CreatePermissionDto,
@@ -50,11 +53,16 @@ export class AuthzCatalogService {
     dto: CreatePermissionCategoryDto,
     actor: AuthenticatedUser,
   ): Promise<AuthzIdResponseDto> {
-    this.logger.info({ operation: 'authz.permission-category.create', code: dto.code }, 'Creating permission category');
+    this.logger.info(
+      { operation: 'authz.permission-category.create', code: dto.code },
+      'Creating permission category',
+    );
     return this.em.transactional(async (tx) => {
       const clash = await this.categoriesRepo.findByCode(tx, dto.code);
       if (clash) {
-        throw new ConflictException('Ya existe una categoría con ese código', { code: dto.code });
+        throw new ConflictException('Ya existe una categoría con ese código', {
+          code: dto.code,
+        });
       }
       const category = this.categoriesRepo.create(tx, {
         code: dto.code,
@@ -64,7 +72,11 @@ export class AuthzCatalogService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      return { id: category.id, status: 'ACTIVE', createdAt: category.createdAt };
+      return {
+        id: category.id,
+        status: 'ACTIVE',
+        createdAt: category.createdAt,
+      };
     });
   }
 
@@ -73,11 +85,16 @@ export class AuthzCatalogService {
     dto: CreatePermissionDto,
     actor: AuthenticatedUser,
   ): Promise<AuthzIdResponseDto> {
-    this.logger.info({ operation: 'authz.permission.create', code: dto.code }, 'Creating permission');
+    this.logger.info(
+      { operation: 'authz.permission.create', code: dto.code },
+      'Creating permission',
+    );
     return this.em.transactional(async (tx) => {
       const clash = await this.permissionsRepo.findByCode(tx, dto.code);
       if (clash) {
-        throw new ConflictException('Ya existe un permiso con ese código', { code: dto.code });
+        throw new ConflictException('Ya existe un permiso con ese código', {
+          code: dto.code,
+        });
       }
       if (dto.categoryId) {
         const category = await this.categoriesRepo.findById(tx, dto.categoryId);
@@ -93,7 +110,9 @@ export class AuthzCatalogService {
         resource: dto.resource,
         actionConceptId: ACTION_CONCEPT[dto.action],
         categoryId: dto.categoryId,
-        defaultScopeConceptId: dto.defaultScope ? SCOPE_CONCEPT[dto.defaultScope] : undefined,
+        defaultScopeConceptId: dto.defaultScope
+          ? SCOPE_CONCEPT[dto.defaultScope]
+          : undefined,
         isFieldLevel: dto.isFieldLevel,
         isDangerous: dto.isDangerous,
         isRoleRestricted: dto.isRoleRestricted,
@@ -102,7 +121,11 @@ export class AuthzCatalogService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      return { id: permission.id, status: 'ACTIVE', createdAt: permission.createdAt };
+      return {
+        id: permission.id,
+        status: 'ACTIVE',
+        createdAt: permission.createdAt,
+      };
     });
   }
 }

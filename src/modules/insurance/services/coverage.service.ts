@@ -39,20 +39,38 @@ export class CoverageService {
   }
 
   /** UC-26-02: registrar cobertura del paciente y sus dependientes. */
-  async enrollCoverage(dto: CreateCoverageDto, actor: AuthenticatedUser): Promise<ResourceStatusDto> {
-    this.logger.info({ operation: 'insurance.coverage.enroll', actorId: actor.id }, 'Enrolling coverage');
+  async enrollCoverage(
+    dto: CreateCoverageDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
+    this.logger.info(
+      { operation: 'insurance.coverage.enroll', actorId: actor.id },
+      'Enrolling coverage',
+    );
     return this.em.transactional(async (tx) => {
       const plan = await this.catalog.findPlan(tx, dto.insurancePlanId);
-      if (!plan) throw new ResourceNotFoundException('Plan no encontrado', { planId: dto.insurancePlanId });
+      if (!plan)
+        throw new ResourceNotFoundException('Plan no encontrado', {
+          planId: dto.insurancePlanId,
+        });
       if (plan.statusConceptId !== INS.PLAN_ACTIVE) {
-        throw new PreconditionFailedException('El plan no está activo', { planId: dto.insurancePlanId });
+        throw new PreconditionFailedException('El plan no está activo', {
+          planId: dto.insurancePlanId,
+        });
       }
 
-      const clash = await this.repo.findByMemberAndPlan(tx, dto.memberIdentifier, dto.insurancePlanId);
+      const clash = await this.repo.findByMemberAndPlan(
+        tx,
+        dto.memberIdentifier,
+        dto.insurancePlanId,
+      );
       if (clash) {
-        throw new ConflictException('El afiliado ya tiene cobertura en ese plan', {
-          memberIdentifier: dto.memberIdentifier,
-        });
+        throw new ConflictException(
+          'El afiliado ya tiene cobertura en ese plan',
+          {
+            memberIdentifier: dto.memberIdentifier,
+          },
+        );
       }
 
       const coverage = this.repo.createCoverage(tx, {
@@ -92,23 +110,44 @@ export class CoverageService {
         });
       }
 
-      this.logger.info({ operation: 'insurance.coverage.enroll', coverageId: coverage.id }, 'Coverage enrolled');
-      return { id: coverage.id, status: coverage.statusConceptId, createdAt: coverage.createdAt };
+      this.logger.info(
+        { operation: 'insurance.coverage.enroll', coverageId: coverage.id },
+        'Coverage enrolled',
+      );
+      return {
+        id: coverage.id,
+        status: coverage.statusConceptId,
+        createdAt: coverage.createdAt,
+      };
     });
   }
 
   /** UC-26-03: solicitar elegibilidad y registrar la respuesta inmutable in_force. */
-  async requestEligibility(dto: CreateEligibilityRequestDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
-    this.logger.info({ operation: 'insurance.eligibility.request', actorId: actor.id }, 'Requesting eligibility');
+  async requestEligibility(
+    dto: CreateEligibilityRequestDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
+    this.logger.info(
+      { operation: 'insurance.eligibility.request', actorId: actor.id },
+      'Requesting eligibility',
+    );
     return this.em.transactional(async (tx) => {
       const coverage = await this.repo.findCoverage(tx, dto.patientCoverageId);
       if (!coverage) {
-        throw new ResourceNotFoundException('Cobertura no encontrada', { coverageId: dto.patientCoverageId });
+        throw new ResourceNotFoundException('Cobertura no encontrada', {
+          coverageId: dto.patientCoverageId,
+        });
       }
 
       if (dto.idempotencyKey) {
-        const existing = await this.repo.findRequestByIdempotency(tx, dto.idempotencyKey);
-        if (existing) throw new ConflictException('Solicitud de elegibilidad duplicada', { idempotencyKey: dto.idempotencyKey });
+        const existing = await this.repo.findRequestByIdempotency(
+          tx,
+          dto.idempotencyKey,
+        );
+        if (existing)
+          throw new ConflictException('Solicitud de elegibilidad duplicada', {
+            idempotencyKey: dto.idempotencyKey,
+          });
       }
 
       const request = this.repo.createEligibilityRequest(tx, {
@@ -139,20 +178,38 @@ export class CoverageService {
   }
 
   /** UC-26-09: determinar coordinación de beneficios (nueva versión supersede la vigente). */
-  async determineCob(dto: CreateCobDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
-    this.logger.info({ operation: 'insurance.cob.determine', actorId: actor.id }, 'Determining COB');
+  async determineCob(
+    dto: CreateCobDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
+    this.logger.info(
+      { operation: 'insurance.cob.determine', actorId: actor.id },
+      'Determining COB',
+    );
     return this.em.transactional(async (tx) => {
-      const primary = await this.repo.findCoverage(tx, dto.primaryPatientCoverageId);
+      const primary = await this.repo.findCoverage(
+        tx,
+        dto.primaryPatientCoverageId,
+      );
       if (!primary) {
-        throw new ResourceNotFoundException('Cobertura primaria no encontrada', {
-          coverageId: dto.primaryPatientCoverageId,
-        });
+        throw new ResourceNotFoundException(
+          'Cobertura primaria no encontrada',
+          {
+            coverageId: dto.primaryPatientCoverageId,
+          },
+        );
       }
       if (!dto.secondaryPatientCoverageId) {
-        throw new PreconditionFailedException('COB requiere al menos una cobertura secundaria', {});
+        throw new PreconditionFailedException(
+          'COB requiere al menos una cobertura secundaria',
+          {},
+        );
       }
 
-      const previous = await this.repo.latestActiveCob(tx, dto.patientProfileId);
+      const previous = await this.repo.latestActiveCob(
+        tx,
+        dto.patientProfileId,
+      );
       const nextVersion = (previous?.determinationVersion ?? 0) + 1;
       if (previous) {
         previous.effectiveTo = new Date();
@@ -165,7 +222,9 @@ export class CoverageService {
         tertiaryPatientCoverageId: dto.tertiaryPatientCoverageId,
         cobRuleConceptId: INS.COB_RULE_STANDARD,
         determinationVersion: nextVersion,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : new Date(),
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : new Date(),
         statusConceptId: INS.COB_ACTIVE,
         actorUserId: actor.id,
       });

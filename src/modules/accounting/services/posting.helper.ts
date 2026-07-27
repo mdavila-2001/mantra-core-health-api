@@ -48,13 +48,20 @@ export class PostingHelper {
   constructor(private readonly journalRepo: JournalRepository) {}
 
   async post(tx: EntityManager, req: PostingRequest): Promise<PostingResult> {
-    const debit = sumCents(req.lines.filter((l) => l.direction === 'DEBIT').map((l) => l.amount));
-    const credit = sumCents(req.lines.filter((l) => l.direction === 'CREDIT').map((l) => l.amount));
+    const debit = sumCents(
+      req.lines.filter((l) => l.direction === 'DEBIT').map((l) => l.amount),
+    );
+    const credit = sumCents(
+      req.lines.filter((l) => l.direction === 'CREDIT').map((l) => l.amount),
+    );
     if (debit <= 0 || debit !== credit) {
-      throw new PreconditionFailedException('El asiento generado no balancea (debe != haber)', {
-        debit: fromCents(debit),
-        credit: fromCents(credit),
-      });
+      throw new PreconditionFailedException(
+        'El asiento generado no balancea (debe != haber)',
+        {
+          debit: fromCents(debit),
+          credit: fromCents(credit),
+        },
+      );
     }
 
     const now = new Date();
@@ -82,7 +89,9 @@ export class PostingHelper {
         transactionId: transaction.id,
         accountId: line.accountId,
         directionConceptId:
-          line.direction === 'DEBIT' ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
+          line.direction === 'DEBIT'
+            ? ACCT.DIRECTION_DEBIT
+            : ACCT.DIRECTION_CREDIT,
         amount: line.amount,
         lineNo: lineNo++,
         costCenterId: line.costCenterId,

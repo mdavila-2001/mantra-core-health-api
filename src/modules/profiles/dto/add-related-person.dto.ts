@@ -18,28 +18,42 @@ export class AddRelatedPersonDto {
   @IsUUID()
   personId?: string;
 
-  @ApiPropertyOptional({ description: 'Nombre visible (si se crea la persona relacionada)' })
+  @ApiPropertyOptional({
+    description: 'Nombre visible (si se crea la persona relacionada)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(300)
   displayName?: string;
 
-  @ApiPropertyOptional({ description: 'Fecha de nacimiento (ISO date)', format: 'date' })
+  @ApiPropertyOptional({
+    description: 'Fecha de nacimiento (ISO date)',
+    format: 'date',
+  })
   @IsOptional()
   @IsDateString()
   birthDate?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del parentesco/relación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del parentesco/relación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   relationshipConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Es contacto de emergencia', default: false })
+  @ApiPropertyOptional({
+    description: 'Es contacto de emergencia',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isEmergencyContact?: boolean;
 
-  @ApiPropertyOptional({ description: 'Es tutor legal (único activo por paciente)', default: false })
+  @ApiPropertyOptional({
+    description: 'Es tutor legal (único activo por paciente)',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isLegalGuardian?: boolean;

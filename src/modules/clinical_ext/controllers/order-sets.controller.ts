@@ -31,7 +31,9 @@ export class OrderSetsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear una plantilla de órdenes (order set) con sus ítems' })
+  @ApiOperation({
+    summary: 'Crear una plantilla de órdenes (order set) con sus ítems',
+  })
   create(
     @Body() dto: CreateOrderSetDto,
     @CurrentUser() actor: AuthenticatedUser,

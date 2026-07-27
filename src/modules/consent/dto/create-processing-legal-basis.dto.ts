@@ -3,21 +3,31 @@ import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 /** Cuerpo de `POST /consent/processing-legal-bases` (UC-07-06). */
 export class CreateProcessingLegalBasisDto {
-  @ApiProperty({ description: 'Propósito de procesamiento activo', format: 'uuid' })
+  @ApiProperty({
+    description: 'Propósito de procesamiento activo',
+    format: 'uuid',
+  })
   @IsUUID()
   processingPurposeId!: string;
 
-  @ApiPropertyOptional({ description: 'Jurisdicción (concept id); por defecto Perú' })
+  @ApiPropertyOptional({
+    description: 'Jurisdicción (concept id); por defecto Perú',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Base legal general (concept id); por defecto consentimiento' })
+  @ApiPropertyOptional({
+    description: 'Base legal general (concept id); por defecto consentimiento',
+  })
   @IsOptional()
   @IsUUID()
   generalLegalBasisConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Condición de categoría especial (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Condición de categoría especial (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   specialCategoryConditionConceptId?: string;

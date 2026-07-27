@@ -26,7 +26,10 @@ export class CreateAccessPolicyDto {
   @IsIn(EFFECTS)
   effect!: Effect;
 
-  @ApiPropertyOptional({ description: 'Recurso objetivo (p. ej. patient.record)', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Recurso objetivo (p. ej. patient.record)',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -37,7 +40,9 @@ export class CreateAccessPolicyDto {
   @IsObject()
   conditionJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Prioridad de desempate (menor = antes)' })
+  @ApiPropertyOptional({
+    description: 'Prioridad de desempate (menor = antes)',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)

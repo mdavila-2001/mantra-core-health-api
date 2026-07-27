@@ -19,7 +19,10 @@ export class CreateCommissionStatementDto {
   @IsString()
   periodEnd!: string;
 
-  @ApiPropertyOptional({ description: 'Prima bruta del periodo', example: '10000.00' })
+  @ApiPropertyOptional({
+    description: 'Prima bruta del periodo',
+    example: '10000.00',
+  })
   @IsOptional()
   @IsNumberString()
   grossPremiumAmount?: string;

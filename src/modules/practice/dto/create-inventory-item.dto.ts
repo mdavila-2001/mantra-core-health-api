@@ -33,7 +33,10 @@ export class CreateInventoryItemDto {
   @IsDateString()
   expiryDate?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de unidad de medida', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de unidad de medida',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   unitConceptId?: string;

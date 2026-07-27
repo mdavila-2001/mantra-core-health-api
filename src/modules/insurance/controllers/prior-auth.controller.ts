@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { PriorAuthService } from '../services';
@@ -23,7 +31,10 @@ export class PriorAuthController {
   @Post('prior-authorization-requests')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Solicitar autorización previa con items' })
-  submit(@Body() dto: CreatePriorAuthRequestDto, @CurrentUser() actor: AuthenticatedUser): Promise<ResourceStatusDto> {
+  submit(
+    @Body() dto: CreatePriorAuthRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
     return this.service.submitRequest(dto, actor);
   }
 

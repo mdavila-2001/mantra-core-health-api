@@ -1,14 +1,27 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /telemetry/client-contexts` (UC-28-08). Solo hashes y buckets. */
 export class CreateClientContextDto {
-  @ApiPropertyOptional({ description: 'Journey de sesión existente a enlazar', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Journey de sesión existente a enlazar',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   sessionJourneyId?: string;
 
-  @ApiPropertyOptional({ description: 'Sesión (se usa para crear el journey si no existe)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sesión (se usa para crear el journey si no existe)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   sessionId?: string;
@@ -18,22 +31,34 @@ export class CreateClientContextDto {
   @IsUUID()
   analyticsSubjectId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de portal (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de portal (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   portalTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de dispositivo (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de dispositivo (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   deviceTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Familia de SO (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Familia de SO (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   osFamilyConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Familia de navegador (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Familia de navegador (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   browserFamilyConceptId?: string;
@@ -78,7 +103,10 @@ export class CreateClientContextDto {
   @MaxLength(100)
   regionCoarse?: string;
 
-  @ApiPropertyOptional({ description: 'Hash del prefijo de IP', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Hash del prefijo de IP',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -95,7 +123,10 @@ export class CreateClientContextDto {
   @IsBoolean()
   isBot?: boolean;
 
-  @ApiPropertyOptional({ description: 'Clasificación de dato (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Clasificación de dato (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dataClassificationConceptId?: string;
@@ -106,7 +137,10 @@ export class ClientContextResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Journey de sesión creado o enlazado' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Journey de sesión creado o enlazado',
+  })
   sessionJourneyId!: string;
 
   @ApiProperty()

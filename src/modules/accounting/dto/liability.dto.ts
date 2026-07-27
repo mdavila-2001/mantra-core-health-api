@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNumberString, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsNumberString,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 
 /** Cuerpo de `POST /accounting/liabilities/:id/payments` (UC-16-12). */
 export class PayLiabilityDto {
@@ -7,7 +12,10 @@ export class PayLiabilityDto {
   @IsUUID()
   practiceId!: string;
 
-  @ApiProperty({ description: 'Importe total pagado (= principal + interés)', example: '1200.00' })
+  @ApiProperty({
+    description: 'Importe total pagado (= principal + interés)',
+    example: '1200.00',
+  })
   @IsNumberString()
   amount!: string;
 
@@ -19,15 +27,24 @@ export class PayLiabilityDto {
   @IsNumberString()
   interestComponent!: string;
 
-  @ApiProperty({ description: 'Cuenta banco/tesorería (crédito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta banco/tesorería (crédito)',
+    format: 'uuid',
+  })
   @IsUUID()
   bankAccountId!: string;
 
-  @ApiProperty({ description: 'Cuenta de gasto por interés (débito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta de gasto por interés (débito)',
+    format: 'uuid',
+  })
   @IsUUID()
   interestExpenseAccountId!: string;
 
-  @ApiPropertyOptional({ description: 'Cuota (installment) a saldar', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Cuota (installment) a saldar',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   liabilityScheduleId?: string;

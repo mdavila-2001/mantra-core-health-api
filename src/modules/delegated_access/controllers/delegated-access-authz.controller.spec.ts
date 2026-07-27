@@ -20,7 +20,10 @@ describe('DelegatedAccessAuthzController', () => {
 
   it('delegates evaluate (UC-29-09)', async () => {
     const d = build();
-    const dto = { practitionerDelegateAssignmentId: 'del1', purpose: 'TREATMENT' };
+    const dto = {
+      practitionerDelegateAssignmentId: 'del1',
+      purpose: 'TREATMENT',
+    };
     await d.controller.evaluate(dto as any, actor);
     expect(d.service.evaluate).toHaveBeenCalledWith(dto, actor);
   });

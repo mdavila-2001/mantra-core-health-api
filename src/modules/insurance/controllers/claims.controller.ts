@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { ClaimsService } from '../services';
@@ -26,7 +34,10 @@ export class ClaimsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enviar reclamo con líneas (837)' })
-  submit(@Body() dto: CreateClaimDto, @CurrentUser() actor: AuthenticatedUser): Promise<ResourceStatusDto> {
+  submit(
+    @Body() dto: CreateClaimDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
     return this.service.submitClaim(dto, actor);
   }
 

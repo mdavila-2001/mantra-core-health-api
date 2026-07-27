@@ -15,7 +15,10 @@ export type BranchTypeCode = 'CLINIC' | 'OFFICE';
 
 /** Cuerpo de `POST /tenants/{tenantId}/branches` (UC-04-04). */
 export class CreateBranchDto {
-  @ApiProperty({ description: 'Código de la sede, único dentro del tenant', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código de la sede, único dentro del tenant',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -27,7 +30,10 @@ export class CreateBranchDto {
   @MaxLength(300)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de sede', enum: ['CLINIC', 'OFFICE'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de sede',
+    enum: ['CLINIC', 'OFFICE'],
+  })
   @IsOptional()
   @IsIn(['CLINIC', 'OFFICE'])
   branchType?: BranchTypeCode;
@@ -38,14 +44,24 @@ export class CreateBranchDto {
   @MaxLength(100)
   timeZone?: string;
 
-  @ApiPropertyOptional({ description: 'Latitud geográfica', example: -12.0464, minimum: -90, maximum: 90 })
+  @ApiPropertyOptional({
+    description: 'Latitud geográfica',
+    example: -12.0464,
+    minimum: -90,
+    maximum: 90,
+  })
   @IsOptional()
   @IsNumber()
   @Min(-90)
   @Max(90)
   latitude?: number;
 
-  @ApiPropertyOptional({ description: 'Longitud geográfica', example: -77.0428, minimum: -180, maximum: 180 })
+  @ApiPropertyOptional({
+    description: 'Longitud geográfica',
+    example: -77.0428,
+    minimum: -180,
+    maximum: 180,
+  })
   @IsOptional()
   @IsNumber()
   @Min(-180)

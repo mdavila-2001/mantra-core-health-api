@@ -20,11 +20,17 @@ export interface CreateAccreditationData {
 /** Acceso a datos de `diagnostic_units.diagnostic_unit_accreditations`. */
 @Injectable()
 export class DiagnosticUnitAccreditationsRepository {
-  findById(em: EntityManager, id: string): Promise<DiagnosticUnitAccreditations | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DiagnosticUnitAccreditations | null> {
     return em.findOne(DiagnosticUnitAccreditations, { id });
   }
 
-  create(em: EntityManager, data: CreateAccreditationData): DiagnosticUnitAccreditations {
+  create(
+    em: EntityManager,
+    data: CreateAccreditationData,
+  ): DiagnosticUnitAccreditations {
     return em.create(
       DiagnosticUnitAccreditations,
       {
@@ -44,11 +50,17 @@ export class DiagnosticUnitAccreditationsRepository {
   }
 
   /** Marca VERIFIED las acreditaciones vigentes de la unidad (UC-23-03). */
-  verifyOpenForUnit(em: EntityManager, diagnosticUnitId: string): Promise<number> {
+  verifyOpenForUnit(
+    em: EntityManager,
+    diagnosticUnitId: string,
+  ): Promise<number> {
     return em.nativeUpdate(
       DiagnosticUnitAccreditations,
       { diagnosticUnitId, validTo: null },
-      { verificationStatusConceptId: DUNIT.VERIFICATION_VERIFIED, updatedAt: new Date() },
+      {
+        verificationStatusConceptId: DUNIT.VERIFICATION_VERIFIED,
+        updatedAt: new Date(),
+      },
     );
   }
 }

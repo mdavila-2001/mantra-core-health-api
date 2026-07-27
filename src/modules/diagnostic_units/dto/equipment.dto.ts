@@ -32,24 +32,38 @@ export class CreateEquipmentDto {
   @MaxLength(200)
   serialNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Modalidad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Modalidad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   modalityConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Última calibración', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Última calibración',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   lastCalibrationAt?: Date;
 
-  @ApiPropertyOptional({ description: 'Próxima calibración', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Próxima calibración',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   nextCalibrationDueAt?: Date;
 
-  @ApiPropertyOptional({ description: 'Estado operativo (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Estado operativo (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   operationalStatusConceptId?: string;
@@ -69,19 +83,30 @@ export class UpdateEquipmentDto {
   @MaxLength(200)
   model?: string;
 
-  @ApiPropertyOptional({ description: 'Última calibración', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Última calibración',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   lastCalibrationAt?: Date;
 
-  @ApiPropertyOptional({ description: 'Próxima calibración', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Próxima calibración',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   nextCalibrationDueAt?: Date;
 
-  @ApiPropertyOptional({ description: 'Estado operativo (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Estado operativo (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   operationalStatusConceptId?: string;

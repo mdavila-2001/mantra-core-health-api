@@ -46,21 +46,33 @@ export class IdentityAssertionsService {
     return this.em.transactional(async (tx) => {
       const assertion = await this.assertionsRepo.findById(tx, assertionId);
       if (!assertion) {
-        throw new ResourceNotFoundException('Aserción de identidad no encontrada', { assertionId });
+        throw new ResourceNotFoundException(
+          'Aserción de identidad no encontrada',
+          { assertionId },
+        );
       }
       if (assertion.revokedAt) {
-        throw new ConflictException('La aserción ya está revocada', { assertionId });
+        throw new ConflictException('La aserción ya está revocada', {
+          assertionId,
+        });
       }
 
       const now = new Date();
       assertion.revokedAt = now;
-      assertion.revocationReasonConceptId = dto.revocationReasonConceptId ?? IDA.REVOCATION_FRAUD;
+      assertion.revocationReasonConceptId =
+        dto.revocationReasonConceptId ?? IDA.REVOCATION_FRAUD;
 
-      const kase = await this.casesRepo.findById(tx, assertion.identityVerificationCaseId);
+      const kase = await this.casesRepo.findById(
+        tx,
+        assertion.identityVerificationCaseId,
+      );
       if (!kase) {
-        throw new ResourceNotFoundException('Caso de verificación no encontrado', {
-          caseId: assertion.identityVerificationCaseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso de verificación no encontrado',
+          {
+            caseId: assertion.identityVerificationCaseId,
+          },
+        );
       }
       kase.statusConceptId = IDA.CASE_REVOKED;
       touch(kase, actor.id);
@@ -82,7 +94,11 @@ export class IdentityAssertionsService {
       }
 
       await tx.flush();
-      return { id: assertion.id, revokedAt: assertion.revokedAt, caseStatus: kase.statusConceptId };
+      return {
+        id: assertion.id,
+        revokedAt: assertion.revokedAt,
+        caseStatus: kase.statusConceptId,
+      };
     });
   }
 }

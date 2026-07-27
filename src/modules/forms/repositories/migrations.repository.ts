@@ -20,12 +20,19 @@ export interface CreateMigrationData {
 /** Acceso a datos de `forms.field_schema_migrations`. */
 @Injectable()
 export class MigrationsRepository {
-  findById(em: EntityManager, id: string): Promise<FieldSchemaMigrations | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<FieldSchemaMigrations | null> {
     return em.findOne(FieldSchemaMigrations, { id });
   }
 
   create(em: EntityManager, data: CreateMigrationData): FieldSchemaMigrations {
     const { actorUserId, ...rest } = data;
-    return em.create(FieldSchemaMigrations, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FieldSchemaMigrations,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

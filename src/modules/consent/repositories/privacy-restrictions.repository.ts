@@ -49,7 +49,10 @@ export class PrivacyRestrictionsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreatePrivacyRestrictionData): PrivacyRestrictions {
+  create(
+    em: EntityManager,
+    data: CreatePrivacyRestrictionData,
+  ): PrivacyRestrictions {
     return em.create(
       PrivacyRestrictions,
       {

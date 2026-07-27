@@ -27,11 +27,19 @@ function build() {
 describe('IdentityAssertionsService', () => {
   it('revokes a live assertion and marks the case revoked (UC-27-11)', async () => {
     const d = build();
-    const assertion: any = { id: 'as1', identityVerificationCaseId: 'k1', revokedAt: undefined };
-    const kase: any = { id: 'k1', statusConceptId: IDA.CASE_ASSERTED, updatedAt: new Date() };
+    const assertion: any = {
+      id: 'as1',
+      identityVerificationCaseId: 'k1',
+      revokedAt: undefined,
+    };
+    const kase: any = {
+      id: 'k1',
+      statusConceptId: IDA.CASE_ASSERTED,
+      updatedAt: new Date(),
+    };
     d.assertionsRepo.findById.mockResolvedValue(assertion);
     d.casesRepo.findById.mockResolvedValue(kase);
-    const res = await d.service.revoke('as1', {} as any, actor);
+    const res = await d.service.revoke('as1', {}, actor);
     expect(res.caseStatus).toBe(IDA.CASE_REVOKED);
     expect(assertion.revokedAt).toBeInstanceOf(Date);
     expect(assertion.revocationReasonConceptId).toBe(IDA.REVOCATION_FRAUD);
@@ -39,7 +47,13 @@ describe('IdentityAssertionsService', () => {
 
   it('rejects double revocation (conflict)', async () => {
     const d = build();
-    d.assertionsRepo.findById.mockResolvedValue({ id: 'as1', identityVerificationCaseId: 'k1', revokedAt: new Date() });
-    await expect(d.service.revoke('as1', {} as any, actor)).rejects.toBeInstanceOf(ConflictException);
+    d.assertionsRepo.findById.mockResolvedValue({
+      id: 'as1',
+      identityVerificationCaseId: 'k1',
+      revokedAt: new Date(),
+    });
+    await expect(
+      d.service.revoke('as1', {} as any, actor),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 });

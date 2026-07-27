@@ -21,20 +21,32 @@ export class CreateResidencyPolicyDto {
   @IsUUID()
   jurisdictionConceptId!: string;
 
-  @ApiProperty({ description: 'Clasificación de datos (system_ops.data_classifications.id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Clasificación de datos (system_ops.data_classifications.id)',
+    format: 'uuid',
+  })
   @IsUUID()
   dataClassificationId!: string;
 
-  @ApiProperty({ description: 'Value set de regiones de almacenamiento permitidas', format: 'uuid' })
+  @ApiProperty({
+    description: 'Value set de regiones de almacenamiento permitidas',
+    format: 'uuid',
+  })
   @IsUUID()
   allowedStorageRegionValueSetId!: string;
 
-  @ApiPropertyOptional({ description: 'Value set de regiones de procesamiento permitidas', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Value set de regiones de procesamiento permitidas',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   allowedProcessingRegionValueSetId?: string;
 
-  @ApiPropertyOptional({ description: 'Base de transferencia transfronteriza (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Base de transferencia transfronteriza (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   crossBorderTransferBasisConceptId?: string;
@@ -66,7 +78,11 @@ export class CreateTenantResidencyBindingDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Política de residencia (polyglot_storage.residency_policies.id)', format: 'uuid' })
+  @ApiProperty({
+    description:
+      'Política de residencia (polyglot_storage.residency_policies.id)',
+    format: 'uuid',
+  })
   @IsUUID()
   residencyPolicyId!: string;
 
@@ -74,7 +90,10 @@ export class CreateTenantResidencyBindingDto {
   @IsUUID()
   primaryRegionConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Región de recuperación ante desastres (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Región de recuperación ante desastres (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   disasterRecoveryRegionConceptId?: string;
@@ -91,7 +110,10 @@ export class CreateCrossBorderTransferDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Categoría de datos (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Categoría de datos (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   dataCategoryConceptId!: string;
 
@@ -103,7 +125,10 @@ export class CreateCrossBorderTransferDto {
   @IsUUID()
   destinationRegionConceptId!: string;
 
-  @ApiProperty({ description: 'Base de transferencia (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Base de transferencia (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   transferBasisConceptId!: string;
 
@@ -112,7 +137,10 @@ export class CreateCrossBorderTransferDto {
   @IsUUID()
   recipientTenantId?: string;
 
-  @ApiProperty({ description: 'Referencia idempotente de la transferencia', maxLength: 200 })
+  @ApiProperty({
+    description: 'Referencia idempotente de la transferencia',
+    maxLength: 200,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(200)

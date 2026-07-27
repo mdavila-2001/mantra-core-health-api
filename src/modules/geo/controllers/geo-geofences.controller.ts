@@ -35,7 +35,9 @@ export class GeoGeofencesController {
   @Post('geofence-events')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar un evento de entrada/salida de geofence' })
+  @ApiOperation({
+    summary: 'Registrar un evento de entrada/salida de geofence',
+  })
   recordEvent(
     @Body() dto: RecordGeofenceEventDto,
     @CurrentUser() actor: AuthenticatedUser,

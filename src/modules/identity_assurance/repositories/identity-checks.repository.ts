@@ -81,8 +81,15 @@ export class IdentityChecksRepository {
     });
   }
 
-  countByCaseAndStatus(em: EntityManager, caseId: string, statusConceptId: string): Promise<number> {
-    return em.count(IdentityChecks, { identityVerificationCaseId: caseId, statusConceptId });
+  countByCaseAndStatus(
+    em: EntityManager,
+    caseId: string,
+    statusConceptId: string,
+  ): Promise<number> {
+    return em.count(IdentityChecks, {
+      identityVerificationCaseId: caseId,
+      statusConceptId,
+    });
   }
 }
 
@@ -90,11 +97,16 @@ export class IdentityChecksRepository {
 @Injectable()
 export class IdentityVerificationAttemptsRepository {
   countByCase(em: EntityManager, caseId: string): Promise<number> {
-    return em.count(IdentityVerificationAttempts, { identityVerificationCaseId: caseId });
+    return em.count(IdentityVerificationAttempts, {
+      identityVerificationCaseId: caseId,
+    });
   }
 
   /** ¿Existe algún intento completado para el caso? (precondición de UC-27-06). */
-  async existsCompletedForCase(em: EntityManager, caseId: string): Promise<boolean> {
+  async existsCompletedForCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<boolean> {
     const n = await em.count(IdentityVerificationAttempts, {
       identityVerificationCaseId: caseId,
       completedAt: { $ne: null },
@@ -102,7 +114,10 @@ export class IdentityVerificationAttemptsRepository {
     return n > 0;
   }
 
-  create(em: EntityManager, data: CreateAttemptData): IdentityVerificationAttempts {
+  create(
+    em: EntityManager,
+    data: CreateAttemptData,
+  ): IdentityVerificationAttempts {
     return em.create(
       IdentityVerificationAttempts,
       {
@@ -132,7 +147,10 @@ export class IdentityCheckResultsRepository {
   }
 
   /** Última versión de resultado del check (para encadenar `supersedes_result_id`). */
-  findLatestByCheck(em: EntityManager, checkId: string): Promise<IdentityCheckResults | null> {
+  findLatestByCheck(
+    em: EntityManager,
+    checkId: string,
+  ): Promise<IdentityCheckResults | null> {
     return em.findOne(
       IdentityCheckResults,
       { identityCheckId: checkId },

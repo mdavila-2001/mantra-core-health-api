@@ -22,21 +22,29 @@ export interface CreatePolicyData {
 /** Acceso a datos de `identity_assurance.identity_verification_policies`. */
 @Injectable()
 export class IdentityVerificationPoliciesRepository {
-  findById(em: EntityManager, id: string): Promise<IdentityVerificationPolicies | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IdentityVerificationPolicies | null> {
     return em.findOne(IdentityVerificationPolicies, { id });
   }
 
-  create(em: EntityManager, data: CreatePolicyData): IdentityVerificationPolicies {
+  create(
+    em: EntityManager,
+    data: CreatePolicyData,
+  ): IdentityVerificationPolicies {
     return em.create(
       IdentityVerificationPolicies,
       {
         policyCode: data.policyCode,
         subjectTypeConceptId: data.subjectTypeConceptId,
         transactionRiskConceptId: data.transactionRiskConceptId,
-        requiredIdentityAssuranceLevelConceptId: data.requiredIdentityAssuranceLevelConceptId,
+        requiredIdentityAssuranceLevelConceptId:
+          data.requiredIdentityAssuranceLevelConceptId,
         requiredAuthenticatorAssuranceLevelConceptId:
           data.requiredAuthenticatorAssuranceLevelConceptId,
-        requiredFederationAssuranceLevelConceptId: data.requiredFederationAssuranceLevelConceptId,
+        requiredFederationAssuranceLevelConceptId:
+          data.requiredFederationAssuranceLevelConceptId,
         evidenceRequirementsJson: data.evidenceRequirementsJson,
         fraudControlsJson: data.fraudControlsJson,
         versionNumber: data.versionNumber,

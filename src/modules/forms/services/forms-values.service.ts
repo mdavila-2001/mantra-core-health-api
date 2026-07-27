@@ -7,7 +7,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { FieldValuesRepository, FormInstancesRepository } from '../repositories';
+import {
+  FieldValuesRepository,
+  FormInstancesRepository,
+} from '../repositories';
 import {
   CaptureValuesDto,
   CorrectValueDto,
@@ -42,14 +45,23 @@ export class FormsValuesService {
     actor: AuthenticatedUser,
   ): Promise<IdListResponseDto> {
     this.logger.info(
-      { operation: 'forms.value.capture', instanceId, count: dto.values.length },
+      {
+        operation: 'forms.value.capture',
+        instanceId,
+        count: dto.values.length,
+      },
       'Capturing field values',
     );
     return this.em.transactional(async (tx) => {
       const instance = await this.instancesRepo.findById(tx, instanceId);
-      if (!instance) throw new ResourceNotFoundException('Instancia no encontrada', { instanceId });
+      if (!instance)
+        throw new ResourceNotFoundException('Instancia no encontrada', {
+          instanceId,
+        });
       if (instance.stateConceptId !== FORMS.INSTANCE_OPEN) {
-        throw new PreconditionFailedException('La instancia no está abierta', { instanceId });
+        throw new PreconditionFailedException('La instancia no está abierta', {
+          instanceId,
+        });
       }
 
       const created = dto.values.map((v) =>
@@ -93,12 +105,18 @@ export class FormsValuesService {
     dto: CorrectValueDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    this.logger.info({ operation: 'forms.value.correct', valueId }, 'Correcting field value');
+    this.logger.info(
+      { operation: 'forms.value.correct', valueId },
+      'Correcting field value',
+    );
     return this.em.transactional(async (tx) => {
       const previous = await this.valuesRepo.findById(tx, valueId);
-      if (!previous) throw new ResourceNotFoundException('Valor no encontrado', { valueId });
+      if (!previous)
+        throw new ResourceNotFoundException('Valor no encontrado', { valueId });
       if (previous.valueStatusConceptId === FORMS.VALUE_SUPERSEDED) {
-        throw new PreconditionFailedException('El valor ya fue superado', { valueId });
+        throw new PreconditionFailedException('El valor ya fue superado', {
+          valueId,
+        });
       }
 
       const previousSnapshot = this.snapshot(previous);
@@ -139,16 +157,30 @@ export class FormsValuesService {
   }
 
   /** UC-09-10: importa valores externos (batch ETL) con su procedencia. */
-  async importValues(dto: ImportValuesDto, actor: AuthenticatedUser): Promise<IdListResponseDto> {
+  async importValues(
+    dto: ImportValuesDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdListResponseDto> {
     this.logger.info(
-      { operation: 'forms.value.import', importBatchId: dto.importBatchId, count: dto.items.length },
+      {
+        operation: 'forms.value.import',
+        importBatchId: dto.importBatchId,
+        count: dto.items.length,
+      },
       'Importing field values',
     );
     return this.em.transactional(async (tx) => {
-      const created: { id: string; snapshot: unknown; item: (typeof dto.items)[number] }[] = [];
+      const created: {
+        id: string;
+        snapshot: unknown;
+        item: (typeof dto.items)[number];
+      }[] = [];
 
       for (const item of dto.items) {
-        const instance = await this.instancesRepo.findById(tx, item.formInstanceId);
+        const instance = await this.instancesRepo.findById(
+          tx,
+          item.formInstanceId,
+        );
         if (!instance) {
           throw new ResourceNotFoundException('Instancia no encontrada', {
             formInstanceId: item.formInstanceId,

@@ -21,15 +21,24 @@ export interface CreateTrackingPurposeData {
 /** Acceso a `telemetry.tracking_purpose_definitions`. Stateless: recibe el `em`. */
 @Injectable()
 export class TrackingPurposeDefinitionsRepository {
-  findById(em: EntityManager, id: string): Promise<TrackingPurposeDefinitions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<TrackingPurposeDefinitions | null> {
     return em.findOne(TrackingPurposeDefinitions, { id });
   }
 
-  findByCode(em: EntityManager, purposeCode: string): Promise<TrackingPurposeDefinitions | null> {
+  findByCode(
+    em: EntityManager,
+    purposeCode: string,
+  ): Promise<TrackingPurposeDefinitions | null> {
     return em.findOne(TrackingPurposeDefinitions, { purposeCode });
   }
 
-  create(em: EntityManager, data: CreateTrackingPurposeData): TrackingPurposeDefinitions {
+  create(
+    em: EntityManager,
+    data: CreateTrackingPurposeData,
+  ): TrackingPurposeDefinitions {
     return em.create(
       TrackingPurposeDefinitions,
       {

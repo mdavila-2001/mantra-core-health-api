@@ -21,11 +21,17 @@ export type NetworkCode = 'CELLULAR' | 'WIFI';
 
 /** Un ping de ubicación individual dentro del batch. */
 export class LocationPingDto {
-  @ApiProperty({ description: 'Latitud en grados decimales', example: -12.0464 })
+  @ApiProperty({
+    description: 'Latitud en grados decimales',
+    example: -12.0464,
+  })
   @IsLatitude()
   latitude!: number;
 
-  @ApiProperty({ description: 'Longitud en grados decimales', example: -77.0428 })
+  @ApiProperty({
+    description: 'Longitud en grados decimales',
+    example: -77.0428,
+  })
   @IsLongitude()
   longitude!: number;
 
@@ -56,17 +62,27 @@ export class LocationPingDto {
   @Max(100)
   batteryPct?: number;
 
-  @ApiPropertyOptional({ description: 'Red de captura', enum: ['CELLULAR', 'WIFI'] })
+  @ApiPropertyOptional({
+    description: 'Red de captura',
+    enum: ['CELLULAR', 'WIFI'],
+  })
   @IsOptional()
   @IsIn(['CELLULAR', 'WIFI'])
   network?: NetworkCode;
 
-  @ApiPropertyOptional({ description: 'Dispositivo que capturó el ping', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Dispositivo que capturó el ping',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   deviceId?: string;
 
-  @ApiPropertyOptional({ description: 'Instante de captura en el dispositivo', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Instante de captura en el dispositivo',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   capturedAt?: Date;
@@ -74,7 +90,10 @@ export class LocationPingDto {
 
 /** Cuerpo de `POST /geo/tracked-subjects/{id}/pings` (UC-13-03, batch). */
 export class IngestPingsDto {
-  @ApiProperty({ type: [LocationPingDto], description: 'Batch de pings de alta frecuencia' })
+  @ApiProperty({
+    type: [LocationPingDto],
+    description: 'Batch de pings de alta frecuencia',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(1000)

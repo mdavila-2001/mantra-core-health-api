@@ -13,12 +13,19 @@ import {
 
 /** Una actividad inicial del plan de cuidado (UC-15-10). */
 export class CarePlanActivityInputDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id del tipo de actividad' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del tipo de actividad',
+  })
   @IsOptional()
   @IsUUID()
   activityConceptId?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time', description: 'Momento programado' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    description: 'Momento programado',
+  })
   @IsOptional()
   @IsDateString()
   scheduledAt?: string;
@@ -32,26 +39,41 @@ export class CarePlanActivityInputDto {
 
 /** Cuerpo de `POST /charts/care-plans` (UC-15-10). */
 export class CreateCarePlanDto {
-  @ApiProperty({ format: 'uuid', description: 'Perfil de paciente (profiles.patient_profiles)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Perfil de paciente (profiles.patient_profiles)',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Condición clínica asociada' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Condición clínica asociada',
+  })
   @IsOptional()
   @IsUUID()
   conditionId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Encuentro clínico asociado' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Encuentro clínico asociado',
+  })
   @IsOptional()
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id de la intención del plan' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id de la intención del plan',
+  })
   @IsOptional()
   @IsUUID()
   intentConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Perfil del clínico autor' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Perfil del clínico autor',
+  })
   @IsOptional()
   @IsUUID()
   authorProfileId?: string;
@@ -62,17 +84,28 @@ export class CreateCarePlanDto {
   @MaxLength(2000)
   goalText?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date', description: 'Fecha de inicio (YYYY-MM-DD)' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date',
+    description: 'Fecha de inicio (YYYY-MM-DD)',
+  })
   @IsOptional()
   @IsDateString()
   startDate?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date', description: 'Fecha de fin (YYYY-MM-DD)' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date',
+    description: 'Fecha de fin (YYYY-MM-DD)',
+  })
   @IsOptional()
   @IsDateString()
   endDate?: string;
 
-  @ApiPropertyOptional({ type: [CarePlanActivityInputDto], description: 'Actividades iniciales (0..n)' })
+  @ApiPropertyOptional({
+    type: [CarePlanActivityInputDto],
+    description: 'Actividades iniciales (0..n)',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -81,7 +114,8 @@ export class CreateCarePlanDto {
 }
 
 /** Nuevos estados admitidos al actualizar una actividad (UC-15-11). */
-export type ActivityStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type ActivityStatus =
+  'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 /** Cuerpo de `PATCH /charts/care-plans/{planId}/activities/{activityId}` (UC-15-11). */
 export class UpdateActivityDto {
@@ -110,7 +144,10 @@ export class CarePlanResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del plan', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del plan',
+    format: 'uuid',
+  })
   statusConceptId!: string;
 
   @ApiProperty({ description: 'Nº de actividades creadas' })
@@ -125,9 +162,15 @@ export class ActivityResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la actividad', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la actividad',
+    format: 'uuid',
+  })
   statusConceptId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del plan tras la actualización', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del plan tras la actualización',
+    format: 'uuid',
+  })
   planStatusConceptId!: string;
 }

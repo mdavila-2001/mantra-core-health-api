@@ -24,11 +24,17 @@ export class HealthcareServicesRepository {
     return em.findOne(HealthcareServices, { id });
   }
 
-  findBySite(em: EntityManager, practiceSiteId: string): Promise<HealthcareServices[]> {
+  findBySite(
+    em: EntityManager,
+    practiceSiteId: string,
+  ): Promise<HealthcareServices[]> {
     return em.find(HealthcareServices, { practiceSiteId });
   }
 
-  create(em: EntityManager, data: CreateHealthcareServiceData): HealthcareServices {
+  create(
+    em: EntityManager,
+    data: CreateHealthcareServiceData,
+  ): HealthcareServices {
     return em.create(
       HealthcareServices,
       {

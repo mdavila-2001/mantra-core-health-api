@@ -15,16 +15,25 @@ export interface CreatePermissionCategoryData {
 /** Acceso a datos de `authz.permission_categories` (catálogo global, sin tenant). */
 @Injectable()
 export class PermissionCategoriesRepository {
-  findByCode(em: EntityManager, code: string): Promise<PermissionCategories | null> {
+  findByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<PermissionCategories | null> {
     return em.findOne(PermissionCategories, { code });
   }
 
-  findById(em: EntityManager, id: string): Promise<PermissionCategories | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PermissionCategories | null> {
     return em.findOne(PermissionCategories, { id });
   }
 
   /** Crea la categoría (sin flush). */
-  create(em: EntityManager, data: CreatePermissionCategoryData): PermissionCategories {
+  create(
+    em: EntityManager,
+    data: CreatePermissionCategoryData,
+  ): PermissionCategories {
     return em.create(
       PermissionCategories,
       {

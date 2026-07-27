@@ -10,7 +10,10 @@ import {
 
 /** Cuerpo de `POST /diagnostic-units/{id}/accreditations` (UC-23-11). */
 export class CreateAccreditationDto {
-  @ApiProperty({ description: 'Tipo de acreditación (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tipo de acreditación (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   accreditationConceptId!: string;
 
@@ -35,13 +38,21 @@ export class CreateAccreditationDto {
   @IsUUID()
   evidenceFileId?: string;
 
-  @ApiPropertyOptional({ description: 'Vigente desde', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Vigente desde',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   validFrom?: Date;
 
-  @ApiPropertyOptional({ description: 'Vigente hasta', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Vigente hasta',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
@@ -50,24 +61,38 @@ export class CreateAccreditationDto {
 
 /** Cuerpo de `POST /diagnostic-unit-accreditations/{id}/renew` (UC-23-11). */
 export class RenewAccreditationDto {
-  @ApiPropertyOptional({ description: 'Nuevo nº de acreditación', maxLength: 100 })
+  @ApiPropertyOptional({
+    description: 'Nuevo nº de acreditación',
+    maxLength: 100,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   accreditationNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Nuevo archivo de evidencia', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nuevo archivo de evidencia',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   evidenceFileId?: string;
 
-  @ApiPropertyOptional({ description: 'Nueva vigencia desde', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Nueva vigencia desde',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   validFrom?: Date;
 
-  @ApiPropertyOptional({ description: 'Nueva vigencia hasta', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Nueva vigencia hasta',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()

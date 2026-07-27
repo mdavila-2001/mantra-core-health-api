@@ -7,7 +7,10 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { GovernanceRepository, RetentionExecutionRepository } from '../repositories';
+import {
+  GovernanceRepository,
+  RetentionExecutionRepository,
+} from '../repositories';
 import { SYSOPS } from '../system_ops.concepts';
 import { RetentionExecutionResponseDto, RunRetentionDto } from '../dto';
 
@@ -33,24 +36,43 @@ export class RetentionExecutionService {
   }
 
   /** UC-11-05: corre el barrido de retención de forma transaccional. */
-  async run(dto: RunRetentionDto, actor: AuthenticatedUser): Promise<RetentionExecutionResponseDto> {
+  async run(
+    dto: RunRetentionDto,
+    actor: AuthenticatedUser,
+  ): Promise<RetentionExecutionResponseDto> {
     this.logger.info(
-      { operation: 'sysops.retention.run', policyId: dto.retentionPolicyId, entityId: dto.entityRegistryId },
+      {
+        operation: 'sysops.retention.run',
+        policyId: dto.retentionPolicyId,
+        entityId: dto.entityRegistryId,
+      },
       'Running retention sweep',
     );
     return this.em.transactional(async (tx) => {
-      const policy = await this.governanceRepo.findRetentionPolicyById(tx, dto.retentionPolicyId);
+      const policy = await this.governanceRepo.findRetentionPolicyById(
+        tx,
+        dto.retentionPolicyId,
+      );
       if (!policy) {
-        throw new ResourceNotFoundException('Política de retención no encontrada', {
-          retentionPolicyId: dto.retentionPolicyId,
-        });
+        throw new ResourceNotFoundException(
+          'Política de retención no encontrada',
+          {
+            retentionPolicyId: dto.retentionPolicyId,
+          },
+        );
       }
       if (policy.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('La política de retención no está ACTIVE', {
-          retentionPolicyId: dto.retentionPolicyId,
-        });
+        throw new PreconditionFailedException(
+          'La política de retención no está ACTIVE',
+          {
+            retentionPolicyId: dto.retentionPolicyId,
+          },
+        );
       }
-      const entity = await this.governanceRepo.findEntityById(tx, dto.entityRegistryId);
+      const entity = await this.governanceRepo.findEntityById(
+        tx,
+        dto.entityRegistryId,
+      );
       if (!entity) {
         throw new ResourceNotFoundException('Entidad objetivo no encontrada', {
           entityRegistryId: dto.entityRegistryId,
@@ -67,7 +89,10 @@ export class RetentionExecutionService {
       await tx.flush();
 
       // Include UC-11-08: excluir objetivos bajo legal hold ACTIVE.
-      const activeHolds = await this.repo.countActiveHoldsForTarget(tx, entity.id);
+      const activeHolds = await this.repo.countActiveHoldsForTarget(
+        tx,
+        entity.id,
+      );
       if (activeHolds > 0) {
         execution.statusConceptId = SYSOPS.EXEC_SUCCEEDED;
         execution.finishedAt = new Date();
@@ -84,7 +109,9 @@ export class RetentionExecutionService {
       }
 
       // Barrido: mapea la disposición de la política a la operación de revisión.
-      const operationConceptId = this.dispositionToOperation(policy.dispositionConceptId);
+      const operationConceptId = this.dispositionToOperation(
+        policy.dispositionConceptId,
+      );
       this.repo.createRevision(tx, {
         schemaName: entity.schemaName,
         tableName: entity.tableName,
@@ -101,7 +128,8 @@ export class RetentionExecutionService {
       execution.statusConceptId = SYSOPS.EXEC_SUCCEEDED;
       execution.finishedAt = new Date();
       execution.totalScanned = '0';
-      execution.totalDeleted = operationConceptId === SYSOPS.OP_DELETE ? '0' : '0';
+      execution.totalDeleted =
+        operationConceptId === SYSOPS.OP_DELETE ? '0' : '0';
       execution.totalAnonymized = '0';
       execution.totalArchived = '0';
       return this.toResponse(execution, false);
@@ -109,13 +137,22 @@ export class RetentionExecutionService {
   }
 
   private dispositionToOperation(dispositionConceptId?: string): string {
-    if (dispositionConceptId === SYSOPS.DISPOSITION_DELETE) return SYSOPS.OP_DELETE;
-    if (dispositionConceptId === SYSOPS.DISPOSITION_ANONYMIZE) return SYSOPS.OP_ANONYMIZE;
+    if (dispositionConceptId === SYSOPS.DISPOSITION_DELETE)
+      return SYSOPS.OP_DELETE;
+    if (dispositionConceptId === SYSOPS.DISPOSITION_ANONYMIZE)
+      return SYSOPS.OP_ANONYMIZE;
     return SYSOPS.OP_UPDATE;
   }
 
   private toResponse(
-    e: { id: string; statusConceptId: string; totalScanned?: string; totalDeleted?: string; totalAnonymized?: string; totalArchived?: string },
+    e: {
+      id: string;
+      statusConceptId: string;
+      totalScanned?: string;
+      totalDeleted?: string;
+      totalAnonymized?: string;
+      totalArchived?: string;
+    },
     blocked: boolean,
   ): RetentionExecutionResponseDto {
     return {

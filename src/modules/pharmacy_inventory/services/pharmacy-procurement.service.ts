@@ -26,7 +26,8 @@ import {
 } from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
-const num = (v: string | null | undefined): number => (v == null ? 0 : Number(v));
+const num = (v: string | null | undefined): number =>
+  v == null ? 0 : Number(v);
 
 /**
  * Aprovisionamiento: proveedores (bootstrap), emisión de órdenes de compra
@@ -56,7 +57,10 @@ export class PharmacyProcurementService {
     dto: CreateSupplierDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    this.logger.info({ operation: 'pharmacy_inventory.supplier.create', pharmacyId }, 'Creating supplier');
+    this.logger.info(
+      { operation: 'pharmacy_inventory.supplier.create', pharmacyId },
+      'Creating supplier',
+    );
     return this.em.transactional(async (tx) => {
       const supplier = this.suppliersRepo.create(tx, {
         pharmacyId,
@@ -79,13 +83,22 @@ export class PharmacyProcurementService {
     actor: AuthenticatedUser,
   ): Promise<PurchaseOrderResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.purchase_order.create', pharmacyId, lines: dto.lines.length },
+      {
+        operation: 'pharmacy_inventory.purchase_order.create',
+        pharmacyId,
+        lines: dto.lines.length,
+      },
       'Placing purchase order',
     );
     return this.em.transactional(async (tx) => {
-      const supplier = await this.suppliersRepo.findById(tx, dto.pharmacySupplierId);
+      const supplier = await this.suppliersRepo.findById(
+        tx,
+        dto.pharmacySupplierId,
+      );
       if (!supplier) {
-        throw new ResourceNotFoundException('Proveedor no encontrado', { supplierId: dto.pharmacySupplierId });
+        throw new ResourceNotFoundException('Proveedor no encontrado', {
+          supplierId: dto.pharmacySupplierId,
+        });
       }
       if (supplier.statusConceptId !== PINV.SUPPLIER_ACTIVE) {
         throw new PreconditionFailedException('El proveedor no está activo', {
@@ -113,7 +126,10 @@ export class PharmacyProcurementService {
           pharmacyPurchaseOrderId: order.id,
           pharmacyProductId: line.pharmacyProductId,
           orderedQuantity: String(line.orderedQuantity),
-          unitCostAmount: line.unitCostAmount != null ? String(line.unitCostAmount) : undefined,
+          unitCostAmount:
+            line.unitCostAmount != null
+              ? String(line.unitCostAmount)
+              : undefined,
           statusConceptId: PINV.PO_LINE_ORDERED,
           actorUserId: actor.id,
         });
@@ -132,22 +148,35 @@ export class PharmacyProcurementService {
     actor: AuthenticatedUser,
   ): Promise<GoodsReceiptResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.goods_receipt.create', pharmacyId, poId: dto.pharmacyPurchaseOrderId },
+      {
+        operation: 'pharmacy_inventory.goods_receipt.create',
+        pharmacyId,
+        poId: dto.pharmacyPurchaseOrderId,
+      },
       'Posting goods receipt',
     );
     return this.em.transactional(async (tx) => {
-      const order = await this.ordersRepo.findById(tx, dto.pharmacyPurchaseOrderId);
+      const order = await this.ordersRepo.findById(
+        tx,
+        dto.pharmacyPurchaseOrderId,
+      );
       if (!order) {
         throw new ResourceNotFoundException('Orden de compra no encontrada', {
           poId: dto.pharmacyPurchaseOrderId,
         });
       }
-      if (order.statusConceptId !== PINV.PO_ORDERED && order.statusConceptId !== PINV.PO_PARTIAL) {
+      if (
+        order.statusConceptId !== PINV.PO_ORDERED &&
+        order.statusConceptId !== PINV.PO_PARTIAL
+      ) {
         throw new PreconditionFailedException('La orden no admite recepción', {
           poId: order.id,
         });
       }
-      const location = await this.locationsRepo.findById(tx, dto.inventoryLocationId);
+      const location = await this.locationsRepo.findById(
+        tx,
+        dto.inventoryLocationId,
+      );
       if (!location) {
         throw new ResourceNotFoundException('Ubicación destino no encontrada', {
           locationId: dto.inventoryLocationId,
@@ -170,7 +199,10 @@ export class PharmacyProcurementService {
       const ledgerEntryIds: string[] = [];
 
       for (const line of dto.lines) {
-        const poLine = await this.ordersRepo.findLineById(tx, line.pharmacyPurchaseOrderLineId);
+        const poLine = await this.ordersRepo.findLineById(
+          tx,
+          line.pharmacyPurchaseOrderLineId,
+        );
         if (!poLine) {
           throw new ResourceNotFoundException('Línea de orden no encontrada', {
             lineId: line.pharmacyPurchaseOrderLineId,
@@ -178,7 +210,11 @@ export class PharmacyProcurementService {
         }
 
         // UPSERT del lote por (producto, número de lote).
-        let lot = await this.lotsRepo.findByProductAndNumber(tx, line.pharmacyProductId, line.lotNumber);
+        let lot = await this.lotsRepo.findByProductAndNumber(
+          tx,
+          line.pharmacyProductId,
+          line.lotNumber,
+        );
         if (!lot) {
           lot = this.lotsRepo.create(tx, {
             pharmacyProductId: line.pharmacyProductId,
@@ -204,7 +240,10 @@ export class PharmacyProcurementService {
           ledgerSequence: sequence,
           movementTypeConceptId: PINV.MV_RECEIPT,
           quantityDelta: String(accepted),
-          unitCostAmount: line.unitCostAmount != null ? String(line.unitCostAmount) : undefined,
+          unitCostAmount:
+            line.unitCostAmount != null
+              ? String(line.unitCostAmount)
+              : undefined,
           sourceId: receipt.id,
           idempotencyKey: dto.idempotencyKey,
           recordedByUserId: actor.id,
@@ -228,9 +267,13 @@ export class PharmacyProcurementService {
             lastLedgerSequence: sequence,
           });
         } else {
-          position.onHandQuantity = String(num(position.onHandQuantity) + accepted);
+          position.onHandQuantity = String(
+            num(position.onHandQuantity) + accepted,
+          );
           position.availableQuantity = String(
-            num(position.onHandQuantity) - num(position.reservedQuantity) - num(position.quarantineQuantity),
+            num(position.onHandQuantity) -
+              num(position.reservedQuantity) -
+              num(position.quarantineQuantity),
           );
           position.lastLedgerSequence = sequence;
           position.updatedAt = new Date();
@@ -244,13 +287,21 @@ export class PharmacyProcurementService {
           inventoryLocationId: dto.inventoryLocationId,
           receivedQuantity: String(line.receivedQuantity),
           acceptedQuantity: String(accepted),
-          rejectedQuantity: line.rejectedQuantity != null ? String(line.rejectedQuantity) : undefined,
-          unitCostAmount: line.unitCostAmount != null ? String(line.unitCostAmount) : undefined,
+          rejectedQuantity:
+            line.rejectedQuantity != null
+              ? String(line.rejectedQuantity)
+              : undefined,
+          unitCostAmount:
+            line.unitCostAmount != null
+              ? String(line.unitCostAmount)
+              : undefined,
           actorUserId: actor.id,
         });
 
         // Avance de la línea de la orden.
-        poLine.receivedQuantity = String(num(poLine.receivedQuantity) + accepted);
+        poLine.receivedQuantity = String(
+          num(poLine.receivedQuantity) + accepted,
+        );
         poLine.statusConceptId =
           num(poLine.receivedQuantity) >= num(poLine.orderedQuantity)
             ? PINV.PO_LINE_RECEIVED
@@ -262,7 +313,12 @@ export class PharmacyProcurementService {
       touch(order, actor.id);
       await tx.flush();
 
-      return { id: receipt.id, receiptNumber: receipt.receiptNumber, lotIds, ledgerEntryIds };
+      return {
+        id: receipt.id,
+        receiptNumber: receipt.receiptNumber,
+        lotIds,
+        ledgerEntryIds,
+      };
     });
   }
 }

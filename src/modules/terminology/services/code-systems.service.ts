@@ -7,7 +7,11 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { CodeSystemsRepository, CodeSystemVersionsRepository, TerminologySourcesRepository } from '../repositories';
+import {
+  CodeSystemsRepository,
+  CodeSystemVersionsRepository,
+  TerminologySourcesRepository,
+} from '../repositories';
 import {
   type CreateCodeSystemDto,
   type CodeSystemResponseDto,
@@ -42,20 +46,32 @@ export class CodeSystemsService {
     actor: AuthenticatedUser,
   ): Promise<CodeSystemResponseDto> {
     this.logger.info(
-      { operation: 'terminology.code-system.create', internalCode: dto.internalCode },
+      {
+        operation: 'terminology.code-system.create',
+        internalCode: dto.internalCode,
+      },
       'Creando sistema de códigos',
     );
 
     return this.em.transactional(async (tx) => {
-      const duplicate = await this.codeSystemsRepo.findByInternalCode(tx, dto.internalCode);
+      const duplicate = await this.codeSystemsRepo.findByInternalCode(
+        tx,
+        dto.internalCode,
+      );
       if (duplicate) {
         this.logger.warn(
-          { operation: 'terminology.code-system.create', internalCode: dto.internalCode },
+          {
+            operation: 'terminology.code-system.create',
+            internalCode: dto.internalCode,
+          },
           'Código interno de sistema de códigos duplicado',
         );
-        throw new ConflictException('Ya existe un sistema de códigos con ese código interno', {
-          internalCode: dto.internalCode,
-        });
+        throw new ConflictException(
+          'Ya existe un sistema de códigos con ese código interno',
+          {
+            internalCode: dto.internalCode,
+          },
+        );
       }
 
       // Nivel 1: la fuente debe existir antes que el sistema de códigos porque
@@ -85,10 +101,17 @@ export class CodeSystemsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'terminology.code-system.create', codeSystemId: codeSystem.id },
+        {
+          operation: 'terminology.code-system.create',
+          codeSystemId: codeSystem.id,
+        },
         'Sistema de códigos creado',
       );
-      return { id: codeSystem.id, internalCode: codeSystem.internalCode, sourceId: source.id };
+      return {
+        id: codeSystem.id,
+        internalCode: codeSystem.internalCode,
+        sourceId: source.id,
+      };
     });
   }
 
@@ -99,26 +122,44 @@ export class CodeSystemsService {
     actor: AuthenticatedUser,
   ): Promise<CodeSystemVersionResponseDto> {
     this.logger.info(
-      { operation: 'terminology.code-system-version.create', codeSystemId, version: dto.version },
+      {
+        operation: 'terminology.code-system-version.create',
+        codeSystemId,
+        version: dto.version,
+      },
       'Creando versión de sistema de códigos',
     );
 
     return this.em.transactional(async (tx) => {
       const codeSystem = await this.codeSystemsRepo.findById(tx, codeSystemId);
       if (!codeSystem) {
-        throw new ResourceNotFoundException('Sistema de códigos no encontrado', { codeSystemId });
+        throw new ResourceNotFoundException(
+          'Sistema de códigos no encontrado',
+          { codeSystemId },
+        );
       }
 
-      const duplicate = await this.versionsRepo.findByCodeSystemAndVersion(tx, codeSystemId, dto.version);
+      const duplicate = await this.versionsRepo.findByCodeSystemAndVersion(
+        tx,
+        codeSystemId,
+        dto.version,
+      );
       if (duplicate) {
         this.logger.warn(
-          { operation: 'terminology.code-system-version.create', codeSystemId, version: dto.version },
+          {
+            operation: 'terminology.code-system-version.create',
+            codeSystemId,
+            version: dto.version,
+          },
           'Versión de sistema de códigos duplicada',
         );
-        throw new ConflictException('Ya existe esa versión para el sistema de códigos', {
-          codeSystemId,
-          version: dto.version,
-        });
+        throw new ConflictException(
+          'Ya existe esa versión para el sistema de códigos',
+          {
+            codeSystemId,
+            version: dto.version,
+          },
+        );
       }
 
       const version = this.versionsRepo.create(tx, {
@@ -131,7 +172,10 @@ export class CodeSystemsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'terminology.code-system-version.create', versionId: version.id },
+        {
+          operation: 'terminology.code-system-version.create',
+          versionId: version.id,
+        },
         'Versión de sistema de códigos creada',
       );
       return { id: version.id, version: version.version, state: 'TERM_DRAFT' };

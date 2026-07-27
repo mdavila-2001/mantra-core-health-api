@@ -8,7 +8,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { FormInstancesRepository, FieldValuesRepository } from '../repositories';
+import {
+  FormInstancesRepository,
+  FieldValuesRepository,
+} from '../repositories';
 import { OpenInstanceDto, FormInstanceResponseDto, OkResultDto } from '../dto';
 import { FORMS } from '../forms.concepts';
 
@@ -38,7 +41,8 @@ export class FormsInstancesService {
       'Opening form instance',
     );
     return this.em.transactional(async (tx) => {
-      const resourceTypeConceptId = dto.resourceTypeConceptId ?? FORMS.RESOURCE_TYPE_PATIENT;
+      const resourceTypeConceptId =
+        dto.resourceTypeConceptId ?? FORMS.RESOURCE_TYPE_PATIENT;
       const schemaVersion = dto.schemaVersion ?? 1;
 
       const dup = await this.instancesRepo.findByResourceAndVersion(
@@ -48,10 +52,13 @@ export class FormsInstancesService {
         schemaVersion,
       );
       if (dup) {
-        throw new ConflictException('Ya existe una instancia para el recurso y versión', {
-          resourceId: dto.resourceId,
-          schemaVersion,
-        });
+        throw new ConflictException(
+          'Ya existe una instancia para el recurso y versión',
+          {
+            resourceId: dto.resourceId,
+            schemaVersion,
+          },
+        );
       }
 
       const instance = this.instancesRepo.create(tx, {
@@ -68,21 +75,33 @@ export class FormsInstancesService {
         { operation: 'forms.instance.open', instanceId: instance.id },
         'Form instance opened',
       );
-      return { id: instance.id, schemaVersion: instance.schemaVersion, state: instance.stateConceptId! };
+      return {
+        id: instance.id,
+        schemaVersion: instance.schemaVersion,
+        state: instance.stateConceptId!,
+      };
     });
   }
 
   /** UC-09-11: cierra la instancia y finaliza sus valores preliminares. */
-  async closeInstance(instanceId: string, actor: AuthenticatedUser): Promise<OkResultDto> {
+  async closeInstance(
+    instanceId: string,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
     this.logger.info(
       { operation: 'forms.instance.close', instanceId },
       'Closing form instance',
     );
     return this.em.transactional(async (tx) => {
       const instance = await this.instancesRepo.findById(tx, instanceId);
-      if (!instance) throw new ResourceNotFoundException('Instancia no encontrada', { instanceId });
+      if (!instance)
+        throw new ResourceNotFoundException('Instancia no encontrada', {
+          instanceId,
+        });
       if (instance.stateConceptId !== FORMS.INSTANCE_OPEN) {
-        throw new PreconditionFailedException('La instancia no está abierta', { instanceId });
+        throw new PreconditionFailedException('La instancia no está abierta', {
+          instanceId,
+        });
       }
 
       const preliminaries = await this.valuesRepo.findPreliminaryByInstance(
@@ -100,7 +119,11 @@ export class FormsInstancesService {
       touch(instance, actor.id);
 
       this.logger.info(
-        { operation: 'forms.instance.close', instanceId, finalized: preliminaries.length },
+        {
+          operation: 'forms.instance.close',
+          instanceId,
+          finalized: preliminaries.length,
+        },
         'Form instance closed',
       );
       return { ok: true };

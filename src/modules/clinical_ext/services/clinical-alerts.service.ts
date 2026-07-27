@@ -27,13 +27,23 @@ export class ClinicalAlertsService {
   }
 
   /** UC-18-05: reconoce la alerta (active -> acknowledged). */
-  async acknowledge(alertId: string, actor: AuthenticatedUser): Promise<ClinicalAlertResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.alert.acknowledge', alertId }, 'Acknowledging alert');
+  async acknowledge(
+    alertId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ClinicalAlertResponseDto> {
+    this.logger.info(
+      { operation: 'clinical_ext.alert.acknowledge', alertId },
+      'Acknowledging alert',
+    );
     return this.em.transactional(async (tx) => {
       const alert = await this.loadActive(tx, alertId);
       alert.statusConceptId = CEXT.ALERT_ACKNOWLEDGED;
       touch(alert, actor.id);
-      return { id: alert.id, statusConceptId: alert.statusConceptId, overriddenAt: undefined };
+      return {
+        id: alert.id,
+        statusConceptId: alert.statusConceptId,
+        overriddenAt: undefined,
+      };
     });
   }
 
@@ -43,11 +53,17 @@ export class ClinicalAlertsService {
     dto: OverrideAlertDto,
     actor: AuthenticatedUser,
   ): Promise<ClinicalAlertResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.alert.override', alertId }, 'Overriding alert');
+    this.logger.info(
+      { operation: 'clinical_ext.alert.override', alertId },
+      'Overriding alert',
+    );
     return this.em.transactional(async (tx) => {
       const alert = await this.loadActive(tx, alertId);
 
-      if (alert.severityConceptId === CEXT.SEVERITY_HIGH && !dto.reason?.trim()) {
+      if (
+        alert.severityConceptId === CEXT.SEVERITY_HIGH &&
+        !dto.reason?.trim()
+      ) {
         throw new PreconditionFailedException(
           'El override de una alerta de alta severidad requiere un motivo',
           { alertId },
@@ -70,9 +86,14 @@ export class ClinicalAlertsService {
 
   private async loadActive(tx: EntityManager, alertId: string) {
     const alert = await this.alertsRepo.findById(tx, alertId);
-    if (!alert) throw new ResourceNotFoundException('Alerta clínica no encontrada', { alertId });
+    if (!alert)
+      throw new ResourceNotFoundException('Alerta clínica no encontrada', {
+        alertId,
+      });
     if (alert.statusConceptId !== CEXT.ALERT_ACTIVE) {
-      throw new PreconditionFailedException('La alerta no está activa', { alertId });
+      throw new PreconditionFailedException('La alerta no está activa', {
+        alertId,
+      });
     }
     return alert;
   }

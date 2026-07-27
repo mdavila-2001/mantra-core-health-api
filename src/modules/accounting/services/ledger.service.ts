@@ -11,7 +11,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
-import { JournalRepository, AccountsRepository, FiscalRepository } from '../repositories';
+import {
+  JournalRepository,
+  AccountsRepository,
+  FiscalRepository,
+} from '../repositories';
 import {
   PostJournalDto,
   LedgerLineDto,
@@ -69,7 +73,11 @@ export class LedgerService {
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
     this.logger.info(
-      { operation: 'accounting.journal.post', actorId: actor.id, lines: dto.lines.length },
+      {
+        operation: 'accounting.journal.post',
+        actorId: actor.id,
+        lines: dto.lines.length,
+      },
       'Posting journal transaction',
     );
 
@@ -78,26 +86,39 @@ export class LedgerService {
     return this.em.transactional(async (tx) => {
       // UC-16-05 (include): un asiento solo se postea en un periodo ABIERTO.
       if (dto.fiscalPeriodId) {
-        const period = await this.fiscalRepo.findPeriodById(tx, dto.fiscalPeriodId);
+        const period = await this.fiscalRepo.findPeriodById(
+          tx,
+          dto.fiscalPeriodId,
+        );
         if (!period) {
           throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
             fiscalPeriodId: dto.fiscalPeriodId,
           });
         }
         if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
-          throw new PreconditionFailedException('El periodo fiscal no está ABIERTO', {
-            fiscalPeriodId: dto.fiscalPeriodId,
-            status: period.statusConceptId,
-          });
+          throw new PreconditionFailedException(
+            'El periodo fiscal no está ABIERTO',
+            {
+              fiscalPeriodId: dto.fiscalPeriodId,
+              status: period.statusConceptId,
+            },
+          );
         }
       }
 
       const number = dto.transactionNumber ?? this.generateNumber('JT');
-      const clash = await this.journalRepo.findByTransactionNumber(tx, dto.practiceId, number);
+      const clash = await this.journalRepo.findByTransactionNumber(
+        tx,
+        dto.practiceId,
+        number,
+      );
       if (clash) {
-        throw new ConflictException('El número de asiento ya existe en la práctica', {
-          transactionNumber: number,
-        });
+        throw new ConflictException(
+          'El número de asiento ya existe en la práctica',
+          {
+            transactionNumber: number,
+          },
+        );
       }
 
       const now = new Date();
@@ -118,10 +139,20 @@ export class LedgerService {
       });
       await tx.flush();
 
-      await this.writeLines(tx, transaction.id, dto.lines, actor.id, dto.currencyConceptId);
+      await this.writeLines(
+        tx,
+        transaction.id,
+        dto.lines,
+        actor.id,
+        dto.currencyConceptId,
+      );
 
       this.logger.info(
-        { operation: 'accounting.journal.post', transactionId: transaction.id, total: fromCents(debitCents) },
+        {
+          operation: 'accounting.journal.post',
+          transactionId: transaction.id,
+          total: fromCents(debitCents),
+        },
         'Journal transaction posted',
       );
 
@@ -143,27 +174,48 @@ export class LedgerService {
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
     this.logger.info(
-      { operation: 'accounting.journal.reverse', transactionId, actorId: actor.id },
+      {
+        operation: 'accounting.journal.reverse',
+        transactionId,
+        actorId: actor.id,
+      },
       'Reversing journal transaction',
     );
 
     return this.em.transactional(async (tx) => {
-      const original = await this.journalRepo.findTransactionById(tx, transactionId);
+      const original = await this.journalRepo.findTransactionById(
+        tx,
+        transactionId,
+      );
       if (!original) {
-        throw new ResourceNotFoundException('Asiento no encontrado', { transactionId });
-      }
-      if (original.statusConceptId !== ACCT.TXN_POSTED) {
-        throw new PreconditionFailedException('Solo un asiento POSTEADO puede reversarse', {
+        throw new ResourceNotFoundException('Asiento no encontrado', {
           transactionId,
-          status: original.statusConceptId,
         });
       }
-      const existingLink = await this.journalRepo.findLink(tx, transactionId, ACCT.RELATION_REVERSES);
+      if (original.statusConceptId !== ACCT.TXN_POSTED) {
+        throw new PreconditionFailedException(
+          'Solo un asiento POSTEADO puede reversarse',
+          {
+            transactionId,
+            status: original.statusConceptId,
+          },
+        );
+      }
+      const existingLink = await this.journalRepo.findLink(
+        tx,
+        transactionId,
+        ACCT.RELATION_REVERSES,
+      );
       if (existingLink) {
-        throw new ConflictException('El asiento ya fue reversado', { transactionId });
+        throw new ConflictException('El asiento ya fue reversado', {
+          transactionId,
+        });
       }
 
-      const originalLines = await this.journalRepo.ledgerEntriesForTransaction(tx, transactionId);
+      const originalLines = await this.journalRepo.ledgerEntriesForTransaction(
+        tx,
+        transactionId,
+      );
       const now = new Date();
       const reversal = this.journalRepo.createTransaction(tx, {
         practiceId: original.practiceId,
@@ -202,7 +254,10 @@ export class LedgerService {
         });
         await tx.flush();
 
-        const originalAssignment = await this.journalRepo.assignmentForEntry(tx, line.id);
+        const originalAssignment = await this.journalRepo.assignmentForEntry(
+          tx,
+          line.id,
+        );
         this.journalRepo.createAssignment(tx, {
           ledgerEntryId: mirror.id,
           costCenterId: originalAssignment?.costCenterId ?? line.costCenterId,
@@ -245,19 +300,29 @@ export class LedgerService {
     actor: AuthenticatedUser,
   ): Promise<AccountingStatusDto> {
     return this.em.transactional(async (tx) => {
-      const transaction = await this.journalRepo.findTransactionById(tx, transactionId);
+      const transaction = await this.journalRepo.findTransactionById(
+        tx,
+        transactionId,
+      );
       if (!transaction) {
-        throw new ResourceNotFoundException('Asiento no encontrado', { transactionId });
+        throw new ResourceNotFoundException('Asiento no encontrado', {
+          transactionId,
+        });
       }
       const file = this.journalRepo.createFile(tx, {
         transactionId,
         fileId: dto.fileId,
-        categoryConceptId: dto.categoryConceptId ?? CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        categoryConceptId:
+          dto.categoryConceptId ?? CONCEPTS.FILE_CATEGORY_DOCUMENT,
         actorUserId: actor.id,
       });
       await tx.flush();
       this.logger.info(
-        { operation: 'accounting.journal.attach', transactionId, fileLinkId: file.id },
+        {
+          operation: 'accounting.journal.attach',
+          transactionId,
+          fileLinkId: file.id,
+        },
         'Document attached to transaction',
       );
       return { ok: true, id: file.id };
@@ -265,7 +330,9 @@ export class LedgerService {
   }
 
   /** UC-16-02: resuelve la cuenta objetivo por regla de determinación vigente. */
-  async determineAccounts(dto: DetermineAccountsDto): Promise<DeterminedAccountResponseDto> {
+  async determineAccounts(
+    dto: DetermineAccountsDto,
+  ): Promise<DeterminedAccountResponseDto> {
     const em = this.em.fork();
     const rule = await this.accountsRepo.findActiveRule(
       em,
@@ -274,10 +341,13 @@ export class LedgerService {
       ACCT.RULE_ACTIVE,
     );
     if (!rule) {
-      throw new ResourceNotFoundException('No hay regla de determinación vigente para el escenario', {
-        tenantId: dto.tenantId,
-        postingScenarioConceptId: dto.postingScenarioConceptId,
-      });
+      throw new ResourceNotFoundException(
+        'No hay regla de determinación vigente para el escenario',
+        {
+          tenantId: dto.tenantId,
+          postingScenarioConceptId: dto.postingScenarioConceptId,
+        },
+      );
     }
     return {
       ruleId: rule.id,
@@ -287,13 +357,23 @@ export class LedgerService {
   }
 
   /** Soporte: da de alta una cuenta del plan contable (necesaria para postear). */
-  async createAccount(dto: CreateAccountDto, actor: AuthenticatedUser): Promise<AccountResponseDto> {
+  async createAccount(
+    dto: CreateAccountDto,
+    actor: AuthenticatedUser,
+  ): Promise<AccountResponseDto> {
     return this.em.transactional(async (tx) => {
-      const clash = await this.accountsRepo.findByCode(tx, dto.practiceId, dto.code);
+      const clash = await this.accountsRepo.findByCode(
+        tx,
+        dto.practiceId,
+        dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe una cuenta con ese código en la práctica', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe una cuenta con ese código en la práctica',
+          {
+            code: dto.code,
+          },
+        );
       }
       const account = this.accountsRepo.create(tx, {
         practiceId: dto.practiceId,
@@ -336,7 +416,9 @@ export class LedgerService {
         transactionId,
         accountId: line.accountId,
         directionConceptId:
-          line.direction === 'DEBIT' ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
+          line.direction === 'DEBIT'
+            ? ACCT.DIRECTION_DEBIT
+            : ACCT.DIRECTION_CREDIT,
         amount: line.amount,
         lineNo: lineNo++,
         costCenterId: line.costCenterId,
@@ -360,17 +442,27 @@ export class LedgerService {
   }
 
   /** Valida partida doble: suma de débitos == suma de créditos. Lanza 422 si no. */
-  private assertBalanced(lines: LedgerLineDto[]): { debitCents: number; creditCents: number } {
-    const debitCents = sumCents(lines.filter((l) => l.direction === 'DEBIT').map((l) => l.amount));
-    const creditCents = sumCents(lines.filter((l) => l.direction === 'CREDIT').map((l) => l.amount));
+  private assertBalanced(lines: LedgerLineDto[]): {
+    debitCents: number;
+    creditCents: number;
+  } {
+    const debitCents = sumCents(
+      lines.filter((l) => l.direction === 'DEBIT').map((l) => l.amount),
+    );
+    const creditCents = sumCents(
+      lines.filter((l) => l.direction === 'CREDIT').map((l) => l.amount),
+    );
     if (debitCents <= 0) {
       throw new PreconditionFailedException('El asiento no tiene importe', {});
     }
     if (debitCents !== creditCents) {
-      throw new PreconditionFailedException('El asiento no balancea (debe != haber)', {
-        debit: fromCents(debitCents),
-        credit: fromCents(creditCents),
-      });
+      throw new PreconditionFailedException(
+        'El asiento no balancea (debe != haber)',
+        {
+          debit: fromCents(debitCents),
+          credit: fromCents(creditCents),
+        },
+      );
     }
     return { debitCents, creditCents };
   }

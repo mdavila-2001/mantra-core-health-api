@@ -4,17 +4,29 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { OrgextFacilityLicensesService } from './orgext-facility-licenses.service';
 import { ORGEXT } from '../organization_extensions.concepts';
-import { ConflictException, PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  ConflictException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const licensesRepo = { findById: mockFn(), findByNumber: mockFn(), create: mockFn() };
+  const licensesRepo = {
+    findById: mockFn(),
+    findByNumber: mockFn(),
+    create: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new OrgextFacilityLicensesService(em as any, licensesRepo as any, logger as any);
+  const service = new OrgextFacilityLicensesService(
+    em as any,
+    licensesRepo as any,
+    logger as any,
+  );
   return { service, tx, licensesRepo };
 }
 
@@ -33,7 +45,7 @@ describe('OrgextFacilityLicensesService', () => {
       d.licensesRepo.create.mockReturnValue(license);
 
       const res = await d.service.register(
-        { tenantId: 't1', licenseNumber: 'L-1' } as any,
+        { tenantId: 't1', licenseNumber: 'L-1' },
         actor,
       );
 
@@ -51,7 +63,10 @@ describe('OrgextFacilityLicensesService', () => {
       const d = build();
       d.licensesRepo.findByNumber.mockResolvedValue({ id: 'lic0' });
       await expect(
-        d.service.register({ tenantId: 't1', licenseNumber: 'L-1' } as any, actor),
+        d.service.register(
+          { tenantId: 't1', licenseNumber: 'L-1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.licensesRepo.create).not.toHaveBeenCalled();
     });
@@ -86,7 +101,11 @@ describe('OrgextFacilityLicensesService', () => {
       };
       d.licensesRepo.findById.mockResolvedValue(license);
 
-      const res = await d.service.verify('lic1', { decision: 'VERIFY' } as any, actor);
+      const res = await d.service.verify(
+        'lic1',
+        { decision: 'VERIFY' } as any,
+        actor,
+      );
 
       expect(res).toEqual({ ok: true, status: ORGEXT.LICENSE_VERIFIED });
       expect(license.verificationStatusConceptId).toBe(ORGEXT.LICENSE_VERIFIED);
@@ -101,7 +120,11 @@ describe('OrgextFacilityLicensesService', () => {
       };
       d.licensesRepo.findById.mockResolvedValue(license);
 
-      const res = await d.service.verify('lic1', { decision: 'REJECT' } as any, actor);
+      const res = await d.service.verify(
+        'lic1',
+        { decision: 'REJECT' } as any,
+        actor,
+      );
 
       expect(res.status).toBe(ORGEXT.LICENSE_REJECTED);
     });

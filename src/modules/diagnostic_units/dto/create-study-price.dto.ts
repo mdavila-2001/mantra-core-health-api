@@ -23,7 +23,10 @@ export class CreateStudyPriceDto {
   @IsNumberString()
   patientAmount?: string;
 
-  @ApiPropertyOptional({ description: 'Importe a aseguradora', example: '80.00' })
+  @ApiPropertyOptional({
+    description: 'Importe a aseguradora',
+    example: '80.00',
+  })
   @IsOptional()
   @IsNumberString()
   insurerAmount?: string;
@@ -43,7 +46,11 @@ export class CreateStudyPriceDto {
   @IsObject()
   pricingRuleJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Vigente desde', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Vigente desde',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()

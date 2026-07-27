@@ -93,7 +93,10 @@ export class CommunitySocialService {
     dto: CreatePublicProfileDto,
     actor: AuthenticatedUser,
   ): Promise<PublicProfileResponseDto> {
-    this.logger.info({ operation: 'community.profile.create', actorId: actor.id }, 'Creating public profile');
+    this.logger.info(
+      { operation: 'community.profile.create', actorId: actor.id },
+      'Creating public profile',
+    );
     return this.em.transactional(async (tx) => {
       const profile = this.profilesRepo.create(tx, {
         tenantId: dto.tenantId,
@@ -123,17 +126,25 @@ export class CommunitySocialService {
     dto: CreatePostDto,
     actor: AuthenticatedUser,
   ): Promise<PostResponseDto> {
-    this.logger.info({ operation: 'community.post.publish', profileId }, 'Publishing post');
+    this.logger.info(
+      { operation: 'community.post.publish', profileId },
+      'Publishing post',
+    );
     return this.em.transactional(async (tx) => {
       const author = await this.profilesRepo.findById(tx, profileId);
-      if (!author) throw new ResourceNotFoundException('Perfil autor no encontrado', { profileId });
+      if (!author)
+        throw new ResourceNotFoundException('Perfil autor no encontrado', {
+          profileId,
+        });
 
       const now = new Date();
       const post = this.postsRepo.create(tx, {
         authorPublicProfileId: profileId,
-        postTypeConceptId: dto.postType === 'POLL' ? COMM.POST_TYPE_POLL : COMM.POST_TYPE_TEXT,
+        postTypeConceptId:
+          dto.postType === 'POLL' ? COMM.POST_TYPE_POLL : COMM.POST_TYPE_TEXT,
         bodyText: dto.bodyText,
-        commentsEnabled: dto.commentsEnabled ?? author.commentsDefaultEnabled ?? true,
+        commentsEnabled:
+          dto.commentsEnabled ?? author.commentsDefaultEnabled ?? true,
         healthDataScreeningStatusConceptId: COMM.SCREENING_PASSED,
         moderationStatusConceptId: COMM.MODERATION_PENDING,
         publicationStatusConceptId: COMM.PUBLICATION_PUBLISHED,
@@ -158,7 +169,13 @@ export class CommunitySocialService {
       for (const raw of dto.hashtags ?? []) {
         const hashtag = await this.postsRepo.upsertHashtag(tx, raw, actor.id);
         await tx.flush(); // el vínculo necesita el id del hashtag persistido
-        this.postsRepo.linkHashtag(tx, hashtag.id, post.id, COMM.CONTENT_TYPE_POST, actor.id);
+        this.postsRepo.linkHashtag(
+          tx,
+          hashtag.id,
+          post.id,
+          COMM.CONTENT_TYPE_POST,
+          actor.id,
+        );
         hashtagCount++;
       }
 
@@ -173,7 +190,10 @@ export class CommunitySocialService {
         });
       }
 
-      this.logger.info({ operation: 'community.post.publish', postId: post.id }, 'Post published');
+      this.logger.info(
+        { operation: 'community.post.publish', postId: post.id },
+        'Post published',
+      );
       return {
         id: post.id,
         authorPublicProfileId: post.authorPublicProfileId,
@@ -186,18 +206,37 @@ export class CommunitySocialService {
   }
 
   /** UC-19-02: comenta (hilo anidado) e incrementa el contador del padre. */
-  async createComment(dto: CreateCommentDto, actor: AuthenticatedUser): Promise<CommentResponseDto> {
-    this.logger.info({ operation: 'community.comment.create', authorProfileId: dto.authorProfileId }, 'Creating comment');
+  async createComment(
+    dto: CreateCommentDto,
+    actor: AuthenticatedUser,
+  ): Promise<CommentResponseDto> {
+    this.logger.info(
+      {
+        operation: 'community.comment.create',
+        authorProfileId: dto.authorProfileId,
+      },
+      'Creating comment',
+    );
     return this.em.transactional(async (tx) => {
       const author = await this.profilesRepo.findById(tx, dto.authorProfileId);
-      if (!author) throw new ResourceNotFoundException('Perfil autor no encontrado', { profileId: dto.authorProfileId });
+      if (!author)
+        throw new ResourceNotFoundException('Perfil autor no encontrado', {
+          profileId: dto.authorProfileId,
+        });
 
       let parentCommentId: string | undefined;
       let rootCommentId: string | undefined;
       let threadDepth = 0;
       if (dto.parentCommentId) {
-        const parent = await this.commentsRepo.findById(tx, dto.parentCommentId);
-        if (!parent) throw new ResourceNotFoundException('Comentario padre no encontrado', { parentCommentId: dto.parentCommentId });
+        const parent = await this.commentsRepo.findById(
+          tx,
+          dto.parentCommentId,
+        );
+        if (!parent)
+          throw new ResourceNotFoundException(
+            'Comentario padre no encontrado',
+            { parentCommentId: dto.parentCommentId },
+          );
         parentCommentId = parent.id;
         rootCommentId = parent.rootCommentId ?? parent.id;
         threadDepth = (parent.threadDepth ?? 0) + 1;
@@ -207,7 +246,8 @@ export class CommunitySocialService {
 
       const comment = this.commentsRepo.create(tx, {
         authorProfileId: dto.authorProfileId,
-        commentableTypeConceptId: SOCIAL_OBJECT_CONCEPT_BY_CODE[dto.commentableType],
+        commentableTypeConceptId:
+          SOCIAL_OBJECT_CONCEPT_BY_CODE[dto.commentableType],
         commentableRefId: dto.commentableRefId,
         parentCommentId,
         rootCommentId,
@@ -235,12 +275,19 @@ export class CommunitySocialService {
         });
       }
 
-      return { id: comment.id, rootCommentId: rootCommentId ?? comment.id, threadDepth };
+      return {
+        id: comment.id,
+        rootCommentId: rootCommentId ?? comment.id,
+        threadDepth,
+      };
     });
   }
 
   /** UC-19-03: reacciona a un contenido (upsert una reacción por actor/objeto). */
-  async react(dto: ReactionDto, actor: AuthenticatedUser): Promise<ReactionResponseDto> {
+  async react(
+    dto: ReactionDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReactionResponseDto> {
     return this.em.transactional(async (tx) => {
       const reactableType = SOCIAL_OBJECT_CONCEPT_BY_CODE[dto.reactableType];
       const reactionType = REACTION_CONCEPT_BY_CODE[dto.reactionType];
@@ -253,7 +300,11 @@ export class CommunitySocialService {
       if (existing) {
         existing.reactionTypeConceptId = reactionType;
         touch(existing, actor.id);
-        return { id: existing.id, created: false, reactionType: dto.reactionType };
+        return {
+          id: existing.id,
+          created: false,
+          reactionType: dto.reactionType,
+        };
       }
       const reaction = this.reactionsRepo.create(tx, {
         actorProfileId: dto.actorProfileId,
@@ -268,11 +319,22 @@ export class CommunitySocialService {
   }
 
   /** UC-19-04: guarda un bookmark en una colección. */
-  async bookmark(dto: CreateBookmarkDto, actor: AuthenticatedUser): Promise<IdResponseDto> {
+  async bookmark(
+    dto: CreateBookmarkDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
       const type = SOCIAL_OBJECT_CONCEPT_BY_CODE[dto.bookmarkableType];
-      const dup = await this.bookmarksRepo.findByProfileTarget(tx, dto.profileId, type, dto.bookmarkableRefId);
-      if (dup) throw new ConflictException('El contenido ya está guardado', { bookmarkableRefId: dto.bookmarkableRefId });
+      const dup = await this.bookmarksRepo.findByProfileTarget(
+        tx,
+        dto.profileId,
+        type,
+        dto.bookmarkableRefId,
+      );
+      if (dup)
+        throw new ConflictException('El contenido ya está guardado', {
+          bookmarkableRefId: dto.bookmarkableRefId,
+        });
       const bookmark = this.bookmarksRepo.create(tx, {
         profileId: dto.profileId,
         bookmarkableTypeConceptId: type,
@@ -286,17 +348,33 @@ export class CommunitySocialService {
   }
 
   /** UC-19-05: sigue un objeto social (perfil, tópico, hashtag o grupo). */
-  async follow(dto: CreateFollowDto, actor: AuthenticatedUser): Promise<IdResponseDto> {
+  async follow(
+    dto: CreateFollowDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
-      if (dto.followableType === 'PROFILE' && dto.followableRefId === dto.followerProfileId) {
-        throw new PreconditionFailedException('No se puede seguir a uno mismo', {
-          followerProfileId: dto.followerProfileId,
-        });
+      if (
+        dto.followableType === 'PROFILE' &&
+        dto.followableRefId === dto.followerProfileId
+      ) {
+        throw new PreconditionFailedException(
+          'No se puede seguir a uno mismo',
+          {
+            followerProfileId: dto.followerProfileId,
+          },
+        );
       }
       const type = FOLLOWABLE_CONCEPT_BY_CODE[dto.followableType];
-      const dup = await this.followsRepo.findByFollowerTarget(tx, dto.followerProfileId, type, dto.followableRefId);
+      const dup = await this.followsRepo.findByFollowerTarget(
+        tx,
+        dto.followerProfileId,
+        type,
+        dto.followableRefId,
+      );
       if (dup && dup.statusConceptId === CONCEPTS.STATE_ACTIVE) {
-        throw new ConflictException('Ya sigue este objeto', { followableRefId: dto.followableRefId });
+        throw new ConflictException('Ya sigue este objeto', {
+          followableRefId: dto.followableRefId,
+        });
       }
       if (dup) {
         dup.statusConceptId = CONCEPTS.STATE_ACTIVE;
@@ -308,7 +386,8 @@ export class CommunitySocialService {
         followableTypeConceptId: type,
         followableRefId: dto.followableRefId,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
-        notificationLevelConceptId: NOTIFICATION_LEVEL_BY_CODE[dto.notificationLevel ?? 'ALL'],
+        notificationLevelConceptId:
+          NOTIFICATION_LEVEL_BY_CODE[dto.notificationLevel ?? 'ALL'],
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -317,20 +396,35 @@ export class CommunitySocialService {
   }
 
   /** UC-19-14: bloquea a un usuario y poda follows mutuos. */
-  async block(dto: CreateBlockDto, actor: AuthenticatedUser): Promise<IdResponseDto> {
+  async block(
+    dto: CreateBlockDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
       if (dto.blockerProfileId === dto.blockedProfileId) {
-        throw new PreconditionFailedException('No se puede bloquear a uno mismo', {
-          blockerProfileId: dto.blockerProfileId,
-        });
+        throw new PreconditionFailedException(
+          'No se puede bloquear a uno mismo',
+          {
+            blockerProfileId: dto.blockerProfileId,
+          },
+        );
       }
-      const dup = await this.blocksRepo.findByPair(tx, dto.blockerProfileId, dto.blockedProfileId);
-      if (dup) throw new ConflictException('El usuario ya está bloqueado', { blockedProfileId: dto.blockedProfileId });
+      const dup = await this.blocksRepo.findByPair(
+        tx,
+        dto.blockerProfileId,
+        dto.blockedProfileId,
+      );
+      if (dup)
+        throw new ConflictException('El usuario ya está bloqueado', {
+          blockedProfileId: dto.blockedProfileId,
+        });
 
       const block = this.blocksRepo.create(tx, {
         blockerProfileId: dto.blockerProfileId,
         blockedProfileId: dto.blockedProfileId,
-        reasonConceptId: dto.reason ? BLOCK_REASON_BY_CODE[dto.reason] : undefined,
+        reasonConceptId: dto.reason
+          ? BLOCK_REASON_BY_CODE[dto.reason]
+          : undefined,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: actor.id,
       });

@@ -8,7 +8,10 @@ export class UserResponseDto {
   @ApiProperty()
   displayName!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del usuario', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del usuario',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

@@ -1,27 +1,47 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsISO8601, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsISO8601,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /consent/privacy-restrictions` (UC-07-07). */
 export class CreatePrivacyRestrictionDto {
-  @ApiProperty({ description: 'Paciente titular (patient profile id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente titular (patient profile id)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiProperty({ description: 'Clase de datos restringida (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Clase de datos restringida (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   dataClassConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de restricción (concept id); por defecto bloqueo' })
+  @ApiPropertyOptional({
+    description: 'Tipo de restricción (concept id); por defecto bloqueo',
+  })
   @IsOptional()
   @IsUUID()
   restrictionTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de actor destino (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de actor destino (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   targetActorTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Actor destino concreto (id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Actor destino concreto (id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   targetActorId?: string;

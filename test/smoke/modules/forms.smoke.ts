@@ -68,7 +68,13 @@ export const FORMS_SMOKE: SmokeCase[] = [
       code: `field-${c.u}`,
       name: 'Alergias',
       dataType: 'string',
-      validationRules: [{ ruleType: 'REQUIRED', parameters: { required: true }, severity: 'ERROR' }],
+      validationRules: [
+        {
+          ruleType: 'REQUIRED',
+          parameters: { required: true },
+          severity: 'ERROR',
+        },
+      ],
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -81,7 +87,11 @@ export const FORMS_SMOKE: SmokeCase[] = [
     name: 'happy: declara segundo campo (fuente de dependencia)',
     method: 'post',
     path: () => '/forms/field-definitions',
-    body: (c) => ({ code: `field2-${c.u}`, name: 'Tiene alergias', dataType: 'boolean' }),
+    body: (c) => ({
+      code: `field2-${c.u}`,
+      name: 'Tiene alergias',
+      dataType: 'boolean',
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.formsSourceFieldId = String(b.id);
@@ -103,8 +113,11 @@ export const FORMS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /forms/definition-sets/{id}/versions/{ver}/publish',
     name: 'happy: publica versión con un miembro',
     method: 'post',
-    path: (c) => `/forms/definition-sets/${c.vars.formsSetId}/versions/${c.vars.formsVersionId}/publish`,
-    body: (c) => ({ members: [{ fieldId: c.vars.formsFieldId, required: true, ordinal: 0 }] }),
+    path: (c) =>
+      `/forms/definition-sets/${c.vars.formsSetId}/versions/${c.vars.formsVersionId}/publish`,
+    body: (c) => ({
+      members: [{ fieldId: c.vars.formsFieldId, required: true, ordinal: 0 }],
+    }),
     expectedStatus: 200,
   },
   {
@@ -112,7 +125,8 @@ export const FORMS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /forms/definition-sets/{id}/versions/{ver}/publish',
     name: 'límite: versión ya publicada -> 422',
     method: 'post',
-    path: (c) => `/forms/definition-sets/${c.vars.formsSetId}/versions/${c.vars.formsVersionId}/publish`,
+    path: (c) =>
+      `/forms/definition-sets/${c.vars.formsSetId}/versions/${c.vars.formsVersionId}/publish`,
     body: (c) => ({ members: [{ fieldId: c.vars.formsFieldId }] }),
     expectedStatus: 422,
   },
@@ -139,7 +153,11 @@ export const FORMS_SMOKE: SmokeCase[] = [
     name: 'límite: campo fuente inexistente -> 404',
     method: 'post',
     path: (c) => `/forms/fields/${c.vars.formsFieldId}/dependencies`,
-    body: () => ({ sourceFieldId: UUID_ABSENT, operator: 'EQ', behavior: 'SHOW' }),
+    body: () => ({
+      sourceFieldId: UUID_ABSENT,
+      operator: 'EQ',
+      behavior: 'SHOW',
+    }),
     expectedStatus: 404,
   },
 
@@ -171,7 +189,11 @@ export const FORMS_SMOKE: SmokeCase[] = [
     name: 'prep: value set para propósito de uso',
     method: 'post',
     path: () => '/terminology/value-sets',
-    body: (c) => ({ internalCode: `forms-pou-${c.u}`, name: 'Purpose of use', canonicalUrl: `http://x/forms/pou/${c.u}` }),
+    body: (c) => ({
+      internalCode: `forms-pou-${c.u}`,
+      name: 'Purpose of use',
+      canonicalUrl: `http://x/forms/pou/${c.u}`,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.formsValueSetId = String(b.id);
@@ -183,7 +205,11 @@ export const FORMS_SMOKE: SmokeCase[] = [
     name: 'happy: define regla de enmascarado',
     method: 'post',
     path: (c) => `/forms/fields/${c.vars.formsFieldId}/access-rules`,
-    body: (c) => ({ purposeOfUseValueSetId: c.vars.formsValueSetId, maskStrategy: 'REDACT', breakGlassAllowed: true }),
+    body: (c) => ({
+      purposeOfUseValueSetId: c.vars.formsValueSetId,
+      maskStrategy: 'REDACT',
+      breakGlassAllowed: true,
+    }),
     expectedStatus: 201,
   },
   {
@@ -221,7 +247,10 @@ export const FORMS_SMOKE: SmokeCase[] = [
     name: 'límite: campo inexistente -> 404',
     method: 'post',
     path: (c) => '/forms/assignments',
-    body: () => ({ fieldId: UUID_ABSENT, targetResourceConceptId: FORMS.RESOURCE_TYPE_PATIENT }),
+    body: () => ({
+      fieldId: UUID_ABSENT,
+      targetResourceConceptId: FORMS.RESOURCE_TYPE_PATIENT,
+    }),
     expectedStatus: 404,
   },
 
@@ -232,7 +261,10 @@ export const FORMS_SMOKE: SmokeCase[] = [
     name: 'happy: abre instancia para el recurso',
     method: 'post',
     path: () => '/forms/instances',
-    body: (c) => ({ resourceId: c.vars.patientProfileId ?? c.adminUserId, schemaVersion: 1 }),
+    body: (c) => ({
+      resourceId: c.vars.patientProfileId ?? c.adminUserId,
+      schemaVersion: 1,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.formsInstanceId = String(b.id);
@@ -257,7 +289,13 @@ export const FORMS_SMOKE: SmokeCase[] = [
     path: (c) => `/forms/instances/${c.vars.formsInstanceId}/values`,
     body: (c) => ({
       values: [
-        { fieldId: c.vars.formsFieldId, dataType: 'string', value: 'Penicilina', assignmentId: c.vars.formsAssignmentId, ordinal: 0 },
+        {
+          fieldId: c.vars.formsFieldId,
+          dataType: 'string',
+          value: 'Penicilina',
+          assignmentId: c.vars.formsAssignmentId,
+          ordinal: 0,
+        },
       ],
     }),
     expectedStatus: 201,
@@ -271,7 +309,11 @@ export const FORMS_SMOKE: SmokeCase[] = [
     name: 'límite: instancia inexistente -> 404',
     method: 'post',
     path: (c) => `/forms/instances/${UUID_ABSENT}/values`,
-    body: (c) => ({ values: [{ fieldId: c.vars.formsFieldId, dataType: 'string', value: 'x' }] }),
+    body: (c) => ({
+      values: [
+        { fieldId: c.vars.formsFieldId, dataType: 'string', value: 'x' },
+      ],
+    }),
     expectedStatus: 404,
   },
 
@@ -355,7 +397,10 @@ export const FORMS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: (c) =>
       `/forms/definition-sets/${c.vars.formsSetId}/migrations/${c.vars.formsInstanceId}/run`,
-    body: (c) => ({ fromVersionId: c.vars.formsVersionId, toVersionId: c.vars.formsVersionId }),
+    body: (c) => ({
+      fromVersionId: c.vars.formsVersionId,
+      toVersionId: c.vars.formsVersionId,
+    }),
     expectedStatus: 200,
   },
   {
@@ -363,8 +408,12 @@ export const FORMS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /forms/definition-sets/{id}/migrations/{migrationId}/run',
     name: 'límite: set inexistente -> 404',
     method: 'post',
-    path: (c) => `/forms/definition-sets/${UUID_ABSENT}/migrations/${c.vars.formsSetId}/run`,
-    body: (c) => ({ fromVersionId: c.vars.formsVersionId, toVersionId: c.vars.formsVersionId }),
+    path: (c) =>
+      `/forms/definition-sets/${UUID_ABSENT}/migrations/${c.vars.formsSetId}/run`,
+    body: (c) => ({
+      fromVersionId: c.vars.formsVersionId,
+      toVersionId: c.vars.formsVersionId,
+    }),
     expectedStatus: 404,
   },
 ];

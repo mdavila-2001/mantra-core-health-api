@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsNumberString, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsIn,
+  IsNumberString,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 /** UC-26-12: emitir decisión de apelación (inmutable). */
 export class CreateAppealDecisionDto {
@@ -7,7 +13,10 @@ export class CreateAppealDecisionDto {
   @IsIn(['UPHELD', 'OVERTURNED'])
   decision!: 'UPHELD' | 'OVERTURNED';
 
-  @ApiPropertyOptional({ description: 'Monto ajustado tras la decisión', example: '15.00' })
+  @ApiPropertyOptional({
+    description: 'Monto ajustado tras la decisión',
+    example: '15.00',
+  })
   @IsOptional()
   @IsNumberString()
   adjustedAmount?: string;

@@ -8,7 +8,10 @@ export interface ConceptSeed {
 }
 
 /** Forma de la definición por módulo: nombre lógico -> código + display. */
-export type ConceptDefinitions = Record<string, { code: string; display: string }>;
+export type ConceptDefinitions = Record<
+  string,
+  { code: string; display: string }
+>;
 
 /**
  * Declara los conceptos de un módulo y devuelve, en un solo paso:

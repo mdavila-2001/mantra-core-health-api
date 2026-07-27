@@ -38,12 +38,19 @@ export class FrontendPageViewsRepository {
   }
 
   /** Cuenta vistas que apuntan a una definición (guarda de retiro, UC-30-13). */
-  countByDefinition(em: EntityManager, readModelDefinitionId: string): Promise<number> {
+  countByDefinition(
+    em: EntityManager,
+    readModelDefinitionId: string,
+  ): Promise<number> {
     return em.count(FrontendPageViews, { readModelDefinitionId });
   }
 
   create(em: EntityManager, data: CreatePageViewData): FrontendPageViews {
     const { actorUserId, ...rest } = data;
-    return em.create(FrontendPageViews, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FrontendPageViews,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

@@ -8,7 +8,9 @@ export class CloseJourneyDto {
   @IsUUID()
   exitEventId?: string;
 
-  @ApiPropertyOptional({ description: 'Conteo final de eventos (si el worker lo consolida)' })
+  @ApiPropertyOptional({
+    description: 'Conteo final de eventos (si el worker lo consolida)',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)

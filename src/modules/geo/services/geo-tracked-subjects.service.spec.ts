@@ -19,16 +19,23 @@ function build() {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => forkEm),
   };
-  const subjectsRepo = { findById: mockFn(), findActiveBySubject: mockFn(), create: mockFn() };
-  const sessionsRepo = { findOpenBySubject: mockFn(), findAllOpenBySubject: mockFn().mockResolvedValue([]) };
+  const subjectsRepo = {
+    findById: mockFn(),
+    findActiveBySubject: mockFn(),
+    create: mockFn(),
+  };
+  const sessionsRepo = {
+    findOpenBySubject: mockFn(),
+    findAllOpenBySubject: mockFn().mockResolvedValue([]),
+  };
   const pingsRepo = { record: mockFn(), findLastBySubject: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new GeoTrackedSubjectsService(
     em as any,
-    subjectsRepo as any,
+    subjectsRepo,
     sessionsRepo as any,
-    pingsRepo as any,
+    pingsRepo,
     logger as any,
   );
   return { service, tx, em, forkEm, subjectsRepo, sessionsRepo, pingsRepo };
@@ -48,7 +55,7 @@ describe('GeoTrackedSubjectsService', () => {
       };
       d.subjectsRepo.create.mockReturnValue(created);
 
-      const res = await d.service.enroll({ subjectId: 'subj-1' } as any, actor);
+      const res = await d.service.enroll({ subjectId: 'subj-1' }, actor);
 
       expect(res).toEqual({
         id: 's1',
@@ -63,9 +70,9 @@ describe('GeoTrackedSubjectsService', () => {
     it('rejects when the subject is already tracked (conflict)', async () => {
       const d = build();
       d.subjectsRepo.findActiveBySubject.mockResolvedValue({ id: 'existing' });
-      await expect(d.service.enroll({ subjectId: 'subj-1' } as any, actor)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      await expect(
+        d.service.enroll({ subjectId: 'subj-1' } as any, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
       expect(d.subjectsRepo.create).not.toHaveBeenCalled();
     });
   });
@@ -73,12 +80,21 @@ describe('GeoTrackedSubjectsService', () => {
   describe('ingestPings (UC-13-03)', () => {
     it('records each ping when subject active and session open', async () => {
       const d = build();
-      d.subjectsRepo.findById.mockResolvedValue({ id: 's1', stateConceptId: GEO.SUBJECT_ACTIVE, deviceId: 'dev-1' });
+      d.subjectsRepo.findById.mockResolvedValue({
+        id: 's1',
+        stateConceptId: GEO.SUBJECT_ACTIVE,
+        deviceId: 'dev-1',
+      });
       d.sessionsRepo.findOpenBySubject.mockResolvedValue({ id: 'sess-1' });
 
       const res = await d.service.ingestPings(
         's1',
-        { pings: [{ latitude: -12, longitude: -77 }, { latitude: -12.1, longitude: -77.1 }] } as any,
+        {
+          pings: [
+            { latitude: -12, longitude: -77 },
+            { latitude: -12.1, longitude: -77.1 },
+          ],
+        },
         actor,
       );
 
@@ -88,18 +104,32 @@ describe('GeoTrackedSubjectsService', () => {
 
     it('rejects when the subject is suspended (precondition)', async () => {
       const d = build();
-      d.subjectsRepo.findById.mockResolvedValue({ id: 's1', stateConceptId: GEO.SUBJECT_SUSPENDED });
+      d.subjectsRepo.findById.mockResolvedValue({
+        id: 's1',
+        stateConceptId: GEO.SUBJECT_SUSPENDED,
+      });
       await expect(
-        d.service.ingestPings('s1', { pings: [{ latitude: 0, longitude: 0 }] } as any, actor),
+        d.service.ingestPings(
+          's1',
+          { pings: [{ latitude: 0, longitude: 0 }] } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('rejects when there is no open session (precondition)', async () => {
       const d = build();
-      d.subjectsRepo.findById.mockResolvedValue({ id: 's1', stateConceptId: GEO.SUBJECT_ACTIVE });
+      d.subjectsRepo.findById.mockResolvedValue({
+        id: 's1',
+        stateConceptId: GEO.SUBJECT_ACTIVE,
+      });
       d.sessionsRepo.findOpenBySubject.mockResolvedValue(null);
       await expect(
-        d.service.ingestPings('s1', { pings: [{ latitude: 0, longitude: 0 }] } as any, actor),
+        d.service.ingestPings(
+          's1',
+          { pings: [{ latitude: 0, longitude: 0 }] } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -107,7 +137,11 @@ describe('GeoTrackedSubjectsService', () => {
       const d = build();
       d.subjectsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.ingestPings('missing', { pings: [{ latitude: 0, longitude: 0 }] } as any, actor),
+        d.service.ingestPings(
+          'missing',
+          { pings: [{ latitude: 0, longitude: 0 }] } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -143,16 +177,26 @@ describe('GeoTrackedSubjectsService', () => {
       const d = build();
       d.subjectsRepo.findById.mockResolvedValue({ id: 's1' });
       d.pingsRepo.findLastBySubject.mockResolvedValue(null);
-      await expect(d.service.lastPosition('s1')).rejects.toBeInstanceOf(ResourceNotFoundException);
+      await expect(d.service.lastPosition('s1')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
     });
   });
 
   describe('revokeConsent (UC-13-10)', () => {
     it('suspends the subject and closes its open sessions', async () => {
       const d = build();
-      const subject = { id: 's1', stateConceptId: GEO.SUBJECT_ACTIVE, updatedAt: new Date() };
+      const subject = {
+        id: 's1',
+        stateConceptId: GEO.SUBJECT_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.subjectsRepo.findById.mockResolvedValue(subject);
-      const session = { id: 'sess-1', statusConceptId: GEO.SESSION_OPEN, updatedAt: new Date() };
+      const session = {
+        id: 'sess-1',
+        statusConceptId: GEO.SESSION_OPEN,
+        updatedAt: new Date(),
+      };
       d.sessionsRepo.findAllOpenBySubject.mockResolvedValue([session]);
 
       const res = await d.service.revokeConsent('s1', actor);
@@ -164,7 +208,10 @@ describe('GeoTrackedSubjectsService', () => {
 
     it('rejects when already suspended (precondition)', async () => {
       const d = build();
-      d.subjectsRepo.findById.mockResolvedValue({ id: 's1', stateConceptId: GEO.SUBJECT_SUSPENDED });
+      d.subjectsRepo.findById.mockResolvedValue({
+        id: 's1',
+        stateConceptId: GEO.SUBJECT_SUSPENDED,
+      });
       await expect(d.service.revokeConsent('s1', actor)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
@@ -173,9 +220,9 @@ describe('GeoTrackedSubjectsService', () => {
     it('throws when the subject does not exist', async () => {
       const d = build();
       d.subjectsRepo.findById.mockResolvedValue(null);
-      await expect(d.service.revokeConsent('missing', actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.revokeConsent('missing', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

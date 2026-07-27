@@ -20,7 +20,10 @@ export class PostMediaInputDto {
   @IsUUID()
   fileId!: string;
 
-  @ApiPropertyOptional({ description: 'Rol del medio', enum: ['IMAGE', 'VIDEO', 'DOCUMENT'] })
+  @ApiPropertyOptional({
+    description: 'Rol del medio',
+    enum: ['IMAGE', 'VIDEO', 'DOCUMENT'],
+  })
   @IsOptional()
   @IsString()
   mediaRole?: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
@@ -59,7 +62,10 @@ export class MentionInputDto {
 
 /** Cuerpo de `POST /community/profiles/{profileId}/posts` (UC-19-01). */
 export class CreatePostDto {
-  @ApiProperty({ description: 'Texto del post (sin PHI identificable)', maxLength: 5000 })
+  @ApiProperty({
+    description: 'Texto del post (sin PHI identificable)',
+    maxLength: 5000,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(5000)

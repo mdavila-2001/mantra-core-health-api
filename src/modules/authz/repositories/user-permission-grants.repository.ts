@@ -20,7 +20,10 @@ export interface CreatePermissionGrantData {
 /** Acceso a datos de `authz.user_permission_grants`. */
 @Injectable()
 export class UserPermissionGrantsRepository {
-  findById(em: EntityManager, id: string): Promise<UserPermissionGrants | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<UserPermissionGrants | null> {
     return em.findOne(UserPermissionGrants, { id });
   }
 
@@ -38,14 +41,20 @@ export class UserPermissionGrantsRepository {
   }
 
   /** Excepciones activas del usuario (para el PDP). */
-  findActiveForUser(em: EntityManager, userId: string): Promise<UserPermissionGrants[]> {
+  findActiveForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<UserPermissionGrants[]> {
     return em.find(UserPermissionGrants, {
       userId,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
     });
   }
 
-  create(em: EntityManager, data: CreatePermissionGrantData): UserPermissionGrants {
+  create(
+    em: EntityManager,
+    data: CreatePermissionGrantData,
+  ): UserPermissionGrants {
     return em.create(
       UserPermissionGrants,
       {

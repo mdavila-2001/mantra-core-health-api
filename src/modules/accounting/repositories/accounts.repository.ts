@@ -30,7 +30,11 @@ export class AccountsRepository {
     return em.findOne(Accounts, { id });
   }
 
-  findByCode(em: EntityManager, practiceId: string, code: string): Promise<Accounts | null> {
+  findByCode(
+    em: EntityManager,
+    practiceId: string,
+    code: string,
+  ): Promise<Accounts | null> {
     return em.findOne(Accounts, { practiceId, code });
   }
 

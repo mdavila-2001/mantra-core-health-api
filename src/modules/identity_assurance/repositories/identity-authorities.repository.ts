@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import {
-  IdentityAuthorities,
-  IdentityAuthorityEndpoints,
-} from '../entities';
+import { IdentityAuthorities, IdentityAuthorityEndpoints } from '../entities';
 import { createdBy } from '../../../common';
 
 /** Alta de una autoridad de identidad (UC-27-01). */
@@ -64,11 +61,17 @@ export class IdentityAuthoritiesRepository {
 /** Acceso a datos de `identity_assurance.identity_authority_endpoints`. */
 @Injectable()
 export class IdentityAuthorityEndpointsRepository {
-  findById(em: EntityManager, id: string): Promise<IdentityAuthorityEndpoints | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IdentityAuthorityEndpoints | null> {
     return em.findOne(IdentityAuthorityEndpoints, { id });
   }
 
-  create(em: EntityManager, data: CreateAuthorityEndpointData): IdentityAuthorityEndpoints {
+  create(
+    em: EntityManager,
+    data: CreateAuthorityEndpointData,
+  ): IdentityAuthorityEndpoints {
     return em.create(
       IdentityAuthorityEndpoints,
       {

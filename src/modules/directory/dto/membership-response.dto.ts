@@ -14,10 +14,16 @@ export class MembershipResponseDto {
   @ApiProperty({ description: 'Concept id del rol de tenant', format: 'uuid' })
   tenantRole!: string;
 
-  @ApiProperty({ description: 'Concept id del scope de acceso', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del scope de acceso',
+    format: 'uuid',
+  })
   accessScope!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la membresía', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la membresía',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiPropertyOptional({ description: 'Branch primaria', format: 'uuid' })

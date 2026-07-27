@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TelemetryEventsService } from '../services';
 import {
@@ -27,7 +35,9 @@ export class TelemetryEventsController {
   /** UC-28-07. */
   @Post('activity-events')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Capturar evento(s) de actividad consent-aware (batch)' })
+  @ApiOperation({
+    summary: 'Capturar evento(s) de actividad consent-aware (batch)',
+  })
   captureActivityEvents(
     @Body() dto: CaptureActivityEventsDto,
   ): Promise<ActivityEventsResponseDto> {
@@ -37,7 +47,9 @@ export class TelemetryEventsController {
   /** UC-28-08. */
   @Post('client-contexts')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar contexto de cliente/dispositivo + journey' })
+  @ApiOperation({
+    summary: 'Registrar contexto de cliente/dispositivo + journey',
+  })
   captureClientContext(
     @Body() dto: CreateClientContextDto,
   ): Promise<ClientContextResponseDto> {
@@ -47,8 +59,12 @@ export class TelemetryEventsController {
   /** UC-28-09. */
   @Post('web-vitals')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar métricas Core Web Vitals por ruta (batch)' })
-  recordWebVitals(@Body() dto: RecordWebVitalsDto): Promise<WebVitalsResponseDto> {
+  @ApiOperation({
+    summary: 'Registrar métricas Core Web Vitals por ruta (batch)',
+  })
+  recordWebVitals(
+    @Body() dto: RecordWebVitalsDto,
+  ): Promise<WebVitalsResponseDto> {
     return this.events.recordWebVitals(dto);
   }
 

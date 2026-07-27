@@ -12,7 +12,9 @@ import {
 @ApiBearerAuth()
 @Controller('consent/treatment-informed-consents')
 export class TreatmentInformedConsentsController {
-  constructor(private readonly treatmentService: TreatmentInformedConsentsService) {}
+  constructor(
+    private readonly treatmentService: TreatmentInformedConsentsService,
+  ) {}
 
   /** UC-07-08. */
   @Post()

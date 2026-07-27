@@ -7,16 +7,25 @@ export class CreateConversionEventDto {
   @IsUUID()
   funnelDefinitionId!: string;
 
-  @ApiProperty({ description: 'Sujeto de analítica que convierte', format: 'uuid' })
+  @ApiProperty({
+    description: 'Sujeto de analítica que convierte',
+    format: 'uuid',
+  })
   @IsUUID()
   analyticsSubjectId!: string;
 
-  @ApiPropertyOptional({ description: 'Journey de sesión asociado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Journey de sesión asociado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   sessionJourneyId?: string;
 
-  @ApiPropertyOptional({ description: 'Evento de actividad que completó el último paso', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Evento de actividad que completó el último paso',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   completionEventId?: string;

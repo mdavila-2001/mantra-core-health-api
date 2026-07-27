@@ -22,15 +22,19 @@ export interface CreateFileLinkData {
 export class FileLinksRepository {
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateFileLinkData): FileLinks {
-    return em.create(FileLinks, {
-      fileId: data.fileId,
-      ownerTypeConceptId: data.ownerTypeConceptId,
-      ownerId: data.ownerId,
-      linkRoleConceptId: data.linkRoleConceptId,
-      visibilityConceptId: data.visibilityConceptId,
-      ...createdBy(data.actorUserId),
-      // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
-      // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.
-    }, { partial: true });
+    return em.create(
+      FileLinks,
+      {
+        fileId: data.fileId,
+        ownerTypeConceptId: data.ownerTypeConceptId,
+        ownerId: data.ownerId,
+        linkRoleConceptId: data.linkRoleConceptId,
+        visibilityConceptId: data.visibilityConceptId,
+        ...createdBy(data.actorUserId),
+        // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
+        // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.
+      },
+      { partial: true },
+    );
   }
 }

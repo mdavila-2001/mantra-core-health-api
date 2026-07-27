@@ -11,10 +11,19 @@ describe('IdentityPoliciesService', () => {
     const tx = { flush: mockFn().mockResolvedValue(undefined) };
     const em = { transactional: mockFn((cb: any) => cb(tx)) };
     const policiesRepo = {
-      create: mockFn().mockReturnValue({ id: 'p1', policyCode: 'POL', statusConceptId: CONCEPTS.STATE_ACTIVE, createdAt: new Date() }),
+      create: mockFn().mockReturnValue({
+        id: 'p1',
+        policyCode: 'POL',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: new Date(),
+      }),
     };
     const logger = { setContext: mockFn(), info: mockFn() };
-    const service = new IdentityPoliciesService(em as any, policiesRepo as any, logger as any);
+    const service = new IdentityPoliciesService(
+      em as any,
+      policiesRepo as any,
+      logger as any,
+    );
 
     const res = await service.createPolicy(
       {
@@ -22,13 +31,16 @@ describe('IdentityPoliciesService', () => {
         subjectTypeConceptId: 's',
         transactionRiskConceptId: 'r',
         requiredIdentityAssuranceLevelConceptId: 'IAL2',
-      } as any,
+      },
       actor,
     );
     expect(res.id).toBe('p1');
     expect(policiesRepo.create).toHaveBeenCalledWith(
       tx,
-      expect.objectContaining({ versionNumber: 1, statusConceptId: CONCEPTS.STATE_ACTIVE }),
+      expect.objectContaining({
+        versionNumber: 1,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      }),
     );
   });
 });

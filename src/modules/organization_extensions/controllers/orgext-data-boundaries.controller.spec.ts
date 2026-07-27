@@ -7,7 +7,9 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
   const boundariesService = { define: mockFn() };
-  const controller = new OrgextDataBoundariesController(boundariesService as any);
+  const controller = new OrgextDataBoundariesController(
+    boundariesService as any,
+  );
   return { controller, boundariesService };
 }
 
@@ -16,7 +18,9 @@ describe('OrgextDataBoundariesController', () => {
     const d = build();
     const dto = { tenantId: 't1', dataControllerTenantId: 't1' };
     d.boundariesService.define.mockResolvedValue({ id: 'b1' });
-    await expect(d.controller.define(dto as any, actor)).resolves.toEqual({ id: 'b1' });
+    await expect(d.controller.define(dto as any, actor)).resolves.toEqual({
+      id: 'b1',
+    });
     expect(d.boundariesService.define).toHaveBeenCalledWith(dto, actor);
   });
 });

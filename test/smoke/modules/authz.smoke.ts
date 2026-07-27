@@ -69,7 +69,12 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'happy: compone rol',
     method: 'post',
     path: () => '/authz/roles',
-    body: (c) => ({ code: `NURSE-${c.u}`, name: 'Nurse', tenantId: c.tenantId, scope: 'TENANT' }),
+    body: (c) => ({
+      code: `NURSE-${c.u}`,
+      name: 'Nurse',
+      tenantId: c.tenantId,
+      scope: 'TENANT',
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.authzRoleId = String(b.id);
@@ -81,7 +86,15 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'happy: asigna permisos al rol',
     method: 'put',
     path: (c) => `/authz/roles/${c.vars.authzRoleId}/permissions`,
-    body: (c) => ({ permissions: [{ permissionId: c.vars.authzPermissionId, effect: 'ALLOW', scope: 'TENANT' }] }),
+    body: (c) => ({
+      permissions: [
+        {
+          permissionId: c.vars.authzPermissionId,
+          effect: 'ALLOW',
+          scope: 'TENANT',
+        },
+      ],
+    }),
     expectedStatus: 200,
   },
   {
@@ -90,7 +103,17 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'happy: enmascara campos',
     method: 'put',
     path: (c) => `/authz/roles/${c.vars.authzRoleId}/field-permissions`,
-    body: () => ({ fields: [{ entity: 'patient', columnName: 'ssn', canRead: true, canWrite: false, maskStrategy: 'REDACT' }] }),
+    body: () => ({
+      fields: [
+        {
+          entity: 'patient',
+          columnName: 'ssn',
+          canRead: true,
+          canWrite: false,
+          maskStrategy: 'REDACT',
+        },
+      ],
+    }),
     expectedStatus: 200,
   },
   {
@@ -99,7 +122,16 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'límite: canWrite sin canRead → 422',
     method: 'put',
     path: (c) => `/authz/roles/${c.vars.authzRoleId}/field-permissions`,
-    body: () => ({ fields: [{ entity: 'patient', columnName: 'dob', canRead: false, canWrite: true }] }),
+    body: () => ({
+      fields: [
+        {
+          entity: 'patient',
+          columnName: 'dob',
+          canRead: false,
+          canWrite: true,
+        },
+      ],
+    }),
     expectedStatus: 422,
   },
 
@@ -110,7 +142,12 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'happy: publica política',
     method: 'post',
     path: (c) => `/authz/tenants/${c.tenantId}/access-policies`,
-    body: (c) => ({ name: `no-export-${c.u}`, effect: 'DENY', targetResource: `patient.record.${c.u}`, priority: 10 }),
+    body: (c) => ({
+      name: `no-export-${c.u}`,
+      effect: 'DENY',
+      targetResource: `patient.record.${c.u}`,
+      priority: 10,
+    }),
     expectedStatus: 201,
   },
 
@@ -130,7 +167,12 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'happy: excepción de permiso',
     method: 'post',
     path: (c) => `/authz/users/${c.adminUserId}/permission-grants`,
-    body: (c) => ({ permissionId: c.vars.authzPermissionId, effect: 'ALLOW', reason: 'cobertura temporal', tenantId: c.tenantId }),
+    body: (c) => ({
+      permissionId: c.vars.authzPermissionId,
+      effect: 'ALLOW',
+      reason: 'cobertura temporal',
+      tenantId: c.tenantId,
+    }),
     expectedStatus: 201,
   },
 
@@ -158,7 +200,13 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'límite: validación (falta subjectType) → 400',
     method: 'post',
     path: () => '/authz/resource-scope-grants',
-    body: (c) => ({ subjectId: c.adminUserId, permissionId: c.vars.authzPermissionId, resourceType: 'PATIENT', resourceId: UUID_ABSENT, effect: 'ALLOW' }),
+    body: (c) => ({
+      subjectId: c.adminUserId,
+      permissionId: c.vars.authzPermissionId,
+      resourceType: 'PATIENT',
+      resourceId: UUID_ABSENT,
+      effect: 'ALLOW',
+    }),
     expectedStatus: 400,
   },
 
@@ -170,7 +218,13 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => `/authz/patients/${UUID_ABSENT}/clinical-access-grants`,
     auth: false,
-    body: (c) => ({ grantedUserId: c.adminUserId, tenantId: c.tenantId, purposeOfUse: 'TREATMENT', accessLevel: 'READ', validTo: '2999-01-01T00:00:00.000Z' }),
+    body: (c) => ({
+      grantedUserId: c.adminUserId,
+      tenantId: c.tenantId,
+      purposeOfUse: 'TREATMENT',
+      accessLevel: 'READ',
+      validTo: '2999-01-01T00:00:00.000Z',
+    }),
     expectedStatus: 401,
   },
   {
@@ -180,7 +234,10 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => `/authz/patients/${UUID_ABSENT}/break-the-glass`,
     auth: false,
-    body: (c) => ({ tenantId: c.tenantId, justification: 'paciente inconsciente en urgencias' }),
+    body: (c) => ({
+      tenantId: c.tenantId,
+      justification: 'paciente inconsciente en urgencias',
+    }),
     expectedStatus: 401,
   },
 
@@ -210,7 +267,13 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     name: 'happy: evalúa decisión',
     method: 'post',
     path: () => '/authz/decisions/evaluate',
-    body: (c) => ({ userId: c.adminUserId, tenantId: c.tenantId, resource: 'patient', action: 'READ', purposeOfUse: 'TREATMENT' }),
+    body: (c) => ({
+      userId: c.adminUserId,
+      tenantId: c.tenantId,
+      resource: 'patient',
+      action: 'READ',
+      purposeOfUse: 'TREATMENT',
+    }),
     expectedStatus: 200,
   },
   {
@@ -220,7 +283,12 @@ export const AUTHZ_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/authz/decisions/evaluate',
     auth: false,
-    body: (c) => ({ userId: c.adminUserId, tenantId: c.tenantId, resource: 'patient', action: 'READ' }),
+    body: (c) => ({
+      userId: c.adminUserId,
+      tenantId: c.tenantId,
+      resource: 'patient',
+      action: 'READ',
+    }),
     expectedStatus: 401,
   },
 ];

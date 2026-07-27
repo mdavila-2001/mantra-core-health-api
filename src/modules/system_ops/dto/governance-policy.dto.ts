@@ -25,11 +25,17 @@ export class CreateWritePolicyDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ description: 'Modo de inserción (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Modo de inserción (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   insertModeConceptId!: string;
 
-  @ApiProperty({ description: 'Modo de actualización (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Modo de actualización (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   updateModeConceptId!: string;
 
@@ -61,7 +67,10 @@ export class CreateWritePolicyDto {
 
 /** Cuerpo de `PATCH /admin/governance/entity-registry/{id}/write-policy` (UC-11-02). */
 export class ApplyWritePolicyDto {
-  @ApiProperty({ description: 'Política de escritura a vincular', format: 'uuid' })
+  @ApiProperty({
+    description: 'Política de escritura a vincular',
+    format: 'uuid',
+  })
   @IsUUID()
   writePolicyId!: string;
 
@@ -92,17 +101,26 @@ export class CreateRetentionPolicyDto {
   @Min(0)
   retentionPeriodDays?: number;
 
-  @ApiPropertyOptional({ description: 'Base legal (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Base legal (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   legalBasisConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Disposición al vencer (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Disposición al vencer (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dispositionConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Jurisdicción (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Jurisdicción (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
@@ -110,11 +128,17 @@ export class CreateRetentionPolicyDto {
 
 /** Cuerpo de `PATCH /admin/governance/entity-registry/{id}/retention` (UC-11-03). */
 export class ApplyRetentionPolicyDto {
-  @ApiProperty({ description: 'Política de retención a vincular', format: 'uuid' })
+  @ApiProperty({
+    description: 'Política de retención a vincular',
+    format: 'uuid',
+  })
   @IsUUID()
   retentionPolicyId!: string;
 
-  @ApiProperty({ description: 'Razón (obligatoria por gobierno)', maxLength: 500 })
+  @ApiProperty({
+    description: 'Razón (obligatoria por gobierno)',
+    maxLength: 500,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(500)
@@ -129,7 +153,10 @@ export class CreateAnonymizationRuleDto {
   @MaxLength(100)
   code!: string;
 
-  @ApiProperty({ description: 'Técnica de anonimización (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Técnica de anonimización (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   techniqueConceptId!: string;
 

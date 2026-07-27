@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /** Tipos de sujeto que un perfil público puede representar. */
 export type ProfileTargetType = 'USER' | 'PRACTITIONER' | 'ORGANIZATION';
@@ -14,11 +22,17 @@ export class CreatePublicProfileDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Id del sujeto proyectado (user/patient/org de otro módulo)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Id del sujeto proyectado (user/patient/org de otro módulo)',
+    format: 'uuid',
+  })
   @IsUUID()
   targetId!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de sujeto', enum: ['USER', 'PRACTITIONER', 'ORGANIZATION'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de sujeto',
+    enum: ['USER', 'PRACTITIONER', 'ORGANIZATION'],
+  })
   @IsOptional()
   @IsIn(['USER', 'PRACTITIONER', 'ORGANIZATION'])
   targetType?: ProfileTargetType;

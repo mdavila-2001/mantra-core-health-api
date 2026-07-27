@@ -72,21 +72,33 @@ export class CreateFieldDefinitionDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ enum: TECHNICAL_DATA_TYPES, description: 'Tipo de dato técnico' })
-  @IsIn(TECHNICAL_DATA_TYPES as unknown as string[])
+  @ApiProperty({
+    enum: TECHNICAL_DATA_TYPES,
+    description: 'Tipo de dato técnico',
+  })
+  @IsIn(TECHNICAL_DATA_TYPES)
   dataType!: TechnicalDataType;
 
-  @ApiPropertyOptional({ description: 'Sensibilidad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sensibilidad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   sensitivityConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto semántico (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto semántico (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   semanticConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Value set de valores permitidos', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Value set de valores permitidos',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   valueSetId?: string;
@@ -112,7 +124,10 @@ export class CreateFieldDefinitionDto {
   @MaxLength(1000)
   regex?: string;
 
-  @ApiPropertyOptional({ type: [ValidationRuleInputDto], description: 'Reglas de validación' })
+  @ApiPropertyOptional({
+    type: [ValidationRuleInputDto],
+    description: 'Reglas de validación',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

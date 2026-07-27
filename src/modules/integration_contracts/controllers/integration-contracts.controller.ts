@@ -80,7 +80,9 @@ export class IntegrationContractsController {
   /** UC-31-10. */
   @Post(':id/versions/:versionId/activate')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Activar una versión y transicionar el estado del contrato' })
+  @ApiOperation({
+    summary: 'Activar una versión y transicionar el estado del contrato',
+  })
   activateVersion(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('versionId', ParseUUIDPipe) versionId: string,
@@ -93,7 +95,9 @@ export class IntegrationContractsController {
   /** UC-31-03. */
   @Post(':id/auth-profiles')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Configurar perfil de autenticación sender-constrained' })
+  @ApiOperation({
+    summary: 'Configurar perfil de autenticación sender-constrained',
+  })
   configureAuthProfile(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateAuthProfileDto,
@@ -105,7 +109,9 @@ export class IntegrationContractsController {
   /** UC-31-11 (rotación de credenciales). */
   @Post(':id/auth-profiles/:apId/rotate')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Rotar las credenciales de un perfil de autenticación' })
+  @ApiOperation({
+    summary: 'Rotar las credenciales de un perfil de autenticación',
+  })
   rotateCredential(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('apId', ParseUUIDPipe) apId: string,
@@ -137,7 +143,12 @@ export class IntegrationContractsController {
     @Body() dto: ExecuteExchangeDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ExchangeRecordResponseDto> {
-    return this.exchangesService.executeExchange(id, idempotencyKey, dto, actor);
+    return this.exchangesService.executeExchange(
+      id,
+      idempotencyKey,
+      dto,
+      actor,
+    );
   }
 
   /** UC-31-06. */

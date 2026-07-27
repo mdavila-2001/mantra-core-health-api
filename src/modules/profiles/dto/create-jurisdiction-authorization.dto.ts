@@ -16,28 +16,43 @@ export class CreateJurisdictionAuthorizationDto {
   @MaxLength(100)
   licenseNumber!: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de jurisdicción', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de jurisdicción',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Autoridad regulatoria emisora', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Autoridad regulatoria emisora',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   regulatoryAuthority?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del alcance de práctica', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del alcance de práctica',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   practiceScopeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Vigente desde (ISO date)', format: 'date' })
+  @ApiPropertyOptional({
+    description: 'Vigente desde (ISO date)',
+    format: 'date',
+  })
   @IsOptional()
   @IsDateString()
   validFrom?: string;
 
-  @ApiPropertyOptional({ description: 'Vigente hasta (ISO date)', format: 'date' })
+  @ApiPropertyOptional({
+    description: 'Vigente hasta (ISO date)',
+    format: 'date',
+  })
   @IsOptional()
   @IsDateString()
   validTo?: string;
@@ -54,7 +69,10 @@ export class JurisdictionAuthorizationResponseDto {
   @ApiProperty()
   licenseNumber!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la licencia', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la licencia',
+    format: 'uuid',
+  })
   state!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

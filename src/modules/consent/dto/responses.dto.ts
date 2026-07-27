@@ -44,7 +44,10 @@ export class PatientObjectionResponseDto {
   @ApiProperty({ description: 'Estado (concept id)', format: 'uuid' })
   status!: string;
 
-  @ApiProperty({ description: 'Restricción de privacidad creada (si aplica)', nullable: true })
+  @ApiProperty({
+    description: 'Restricción de privacidad creada (si aplica)',
+    nullable: true,
+  })
   restrictionId!: string | null;
 
   @ApiProperty()
@@ -77,7 +80,10 @@ export class ProcessingLegalBasisResponseDto {
   @ApiProperty({ description: 'Estado (concept id)', format: 'uuid' })
   status!: string;
 
-  @ApiProperty({ description: 'Versión anterior cerrada (si la había)', nullable: true })
+  @ApiProperty({
+    description: 'Versión anterior cerrada (si la había)',
+    nullable: true,
+  })
   supersededId!: string | null;
 
   @ApiProperty()

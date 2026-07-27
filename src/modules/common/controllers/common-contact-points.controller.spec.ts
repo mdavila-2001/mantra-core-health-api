@@ -36,7 +36,11 @@ describe('CommonContactPointsController', () => {
 
     const result = await controller.verify('cp-1', { code: '000000' }, user);
 
-    expect(service.verify).toHaveBeenCalledWith('cp-1', { code: '000000' }, user);
+    expect(service.verify).toHaveBeenCalledWith(
+      'cp-1',
+      { code: '000000' },
+      user,
+    );
     expect(result).toEqual({ id: 'cp-1', verified: true });
   });
 });

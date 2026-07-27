@@ -3,7 +3,10 @@ import { IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /profiles/persons/{personId}/account-links` (UC-05-02). */
 export class LinkAccountDto {
-  @ApiProperty({ description: 'Usuario IAM a vincular con la persona', format: 'uuid' })
+  @ApiProperty({
+    description: 'Usuario IAM a vincular con la persona',
+    format: 'uuid',
+  })
   @IsUUID()
   userId!: string;
 
@@ -27,7 +30,10 @@ export class AccountLinkResponseDto {
   @ApiProperty({ format: 'uuid' })
   userId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del vínculo', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del vínculo',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

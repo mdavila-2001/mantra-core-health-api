@@ -12,7 +12,11 @@ import {
   OrganizationAffiliationsRepository,
   OrganizationDataBoundariesRepository,
 } from '../repositories';
-import { CreateAffiliationDto, AffiliationResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateAffiliationDto,
+  AffiliationResponseDto,
+  StatusResultDto,
+} from '../dto';
 import { ORGEXT } from '../organization_extensions.concepts';
 
 /**
@@ -64,7 +68,10 @@ export class OrgextAffiliationsService {
       );
       if (boundaries === 0) {
         this.logger.warn(
-          { operation: 'orgext.affiliation.declare', reason: 'no-data-boundary' },
+          {
+            operation: 'orgext.affiliation.declare',
+            reason: 'no-data-boundary',
+          },
           'Rejected affiliation: participating tenant has no active data boundary',
         );
         throw new PreconditionFailedException(
@@ -83,10 +90,13 @@ export class OrgextAffiliationsService {
         ORGEXT.AFFILIATION_ACTIVE,
       );
       if (duplicate) {
-        throw new ConflictException('Ya existe una afiliación activa de ese tipo', {
-          primaryTenantId: dto.primaryTenantId,
-          participatingTenantId: dto.participatingTenantId,
-        });
+        throw new ConflictException(
+          'Ya existe una afiliación activa de ese tipo',
+          {
+            primaryTenantId: dto.primaryTenantId,
+            participatingTenantId: dto.participatingTenantId,
+          },
+        );
       }
 
       const affiliation = this.affiliationsRepo.create(tx, {
@@ -105,7 +115,10 @@ export class OrgextAffiliationsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'orgext.affiliation.declare', affiliationId: affiliation.id },
+        {
+          operation: 'orgext.affiliation.declare',
+          affiliationId: affiliation.id,
+        },
         'Affiliation declared',
       );
       return this.toResponse(affiliation);
@@ -113,19 +126,29 @@ export class OrgextAffiliationsService {
   }
 
   /** UC-22-09: termina una afiliación activa y revoca accesos derivados. */
-  async terminate(affiliationId: string, actor: AuthenticatedUser): Promise<StatusResultDto> {
+  async terminate(
+    affiliationId: string,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
     this.logger.info(
       { operation: 'orgext.affiliation.terminate', affiliationId },
       'Terminating organization affiliation',
     );
     return this.em.transactional(async (tx) => {
-      const affiliation = await this.affiliationsRepo.findById(tx, affiliationId);
+      const affiliation = await this.affiliationsRepo.findById(
+        tx,
+        affiliationId,
+      );
       if (!affiliation) {
-        throw new ResourceNotFoundException('Afiliación no encontrada', { affiliationId });
+        throw new ResourceNotFoundException('Afiliación no encontrada', {
+          affiliationId,
+        });
       }
 
       if (affiliation.statusConceptId !== ORGEXT.AFFILIATION_ACTIVE) {
-        throw new PreconditionFailedException('La afiliación no está activa', { affiliationId });
+        throw new PreconditionFailedException('La afiliación no está activa', {
+          affiliationId,
+        });
       }
 
       affiliation.statusConceptId = ORGEXT.AFFILIATION_TERMINATED;
@@ -134,7 +157,11 @@ export class OrgextAffiliationsService {
 
       // Revocación de grants derivados (cross-módulo authz) — propagada por outbox.
       this.logger.info(
-        { operation: 'orgext.affiliation.terminate', affiliationId, revokeGrants: true },
+        {
+          operation: 'orgext.affiliation.terminate',
+          affiliationId,
+          revokeGrants: true,
+        },
         'Affiliation terminated; derived access grants revocation requested',
       );
       return { ok: true, status: affiliation.statusConceptId };

@@ -59,7 +59,11 @@ export class ReadModelDefinitionsService {
     actor: AuthenticatedUser,
   ): Promise<ReadModelDefinitionResponseDto> {
     this.logger.info(
-      { operation: 'read_models.definition.create', schema: dto.schemaName, object: dto.objectName },
+      {
+        operation: 'read_models.definition.create',
+        schema: dto.schemaName,
+        object: dto.objectName,
+      },
       'Publishing read model contract',
     );
     return this.em.transactional(async (tx) => {
@@ -78,7 +82,12 @@ export class ReadModelDefinitionsService {
         });
       }
 
-      const definitionHash = this.computeHash(dto.schemaName, dto.objectName, versionNumber, dto.dependencies);
+      const definitionHash = this.computeHash(
+        dto.schemaName,
+        dto.objectName,
+        versionNumber,
+        dto.dependencies,
+      );
       const definition = this.definitionsRepo.create(tx, {
         schemaName: dto.schemaName,
         objectName: dto.objectName,
@@ -112,14 +121,18 @@ export class ReadModelDefinitionsService {
           readModelDefinitionId: definition.id,
           sourceSchemaName: dep.sourceSchemaName,
           sourceObjectName: dep.sourceObjectName,
-          dependencyTypeConceptId: DEPENDENCY_TYPE_CONCEPT_BY_CODE[dep.dependencyType],
+          dependencyTypeConceptId:
+            DEPENDENCY_TYPE_CONCEPT_BY_CODE[dep.dependencyType],
           selectedColumnsJson: dep.selectedColumns,
           filteringRuleSummary: dep.filteringRuleSummary,
         });
       }
 
       this.logger.info(
-        { operation: 'read_models.definition.create', definitionId: definition.id },
+        {
+          operation: 'read_models.definition.create',
+          definitionId: definition.id,
+        },
         'Read model contract published',
       );
       return this.toDefinitionResponse(definition, dto.dependencies.length);
@@ -134,18 +147,31 @@ export class ReadModelDefinitionsService {
     actor: AuthenticatedUser,
   ): Promise<ReadModelDefinitionResponseDto> {
     this.logger.info(
-      { operation: 'read_models.definition.version', schema: schemaName, object: objectName },
+      {
+        operation: 'read_models.definition.version',
+        schema: schemaName,
+        object: objectName,
+      },
       'Creating new read model version',
     );
     return this.em.transactional(async (tx) => {
-      const existing = await this.definitionsRepo.findAllBySchemaObject(tx, schemaName, objectName);
+      const existing = await this.definitionsRepo.findAllBySchemaObject(
+        tx,
+        schemaName,
+        objectName,
+      );
       if (existing.length === 0) {
-        throw new ResourceNotFoundException('No existe una versión previa del read model', {
-          schemaName,
-          objectName,
-        });
+        throw new ResourceNotFoundException(
+          'No existe una versión previa del read model',
+          {
+            schemaName,
+            objectName,
+          },
+        );
       }
-      const hasActive = existing.some((d) => d.statusConceptId === RM.DEF_ACTIVE);
+      const hasActive = existing.some(
+        (d) => d.statusConceptId === RM.DEF_ACTIVE,
+      );
       if (!hasActive) {
         throw new PreconditionFailedException(
           'No hay una versión ACTIVE previa que respalde el corte de versión',
@@ -154,7 +180,12 @@ export class ReadModelDefinitionsService {
       }
       const nextVersion = existing[0].versionNumber + 1;
 
-      const definitionHash = this.computeHash(schemaName, objectName, nextVersion, dto.dependencies);
+      const definitionHash = this.computeHash(
+        schemaName,
+        objectName,
+        nextVersion,
+        dto.dependencies,
+      );
       const definition = this.definitionsRepo.create(tx, {
         schemaName,
         objectName,
@@ -182,7 +213,8 @@ export class ReadModelDefinitionsService {
           readModelDefinitionId: definition.id,
           sourceSchemaName: dep.sourceSchemaName,
           sourceObjectName: dep.sourceObjectName,
-          dependencyTypeConceptId: DEPENDENCY_TYPE_CONCEPT_BY_CODE[dep.dependencyType],
+          dependencyTypeConceptId:
+            DEPENDENCY_TYPE_CONCEPT_BY_CODE[dep.dependencyType],
           selectedColumnsJson: dep.selectedColumns,
           filteringRuleSummary: dep.filteringRuleSummary,
         });
@@ -193,39 +225,78 @@ export class ReadModelDefinitionsService {
   }
 
   /** UC-30-03: refresca la materialized view (REFRESH ... CONCURRENTLY, manual). */
-  async refresh(definitionId: string, actor: AuthenticatedUser): Promise<RefreshRunResponseDto> {
-    return this.runRefresh(definitionId, RM.REFRESH_TYPE_CONCURRENT, RM.RESULT_SUCCESS, actor, {
-      requireMaterialized: true,
-      operation: 'read_models.definition.refresh',
-    });
+  async refresh(
+    definitionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<RefreshRunResponseDto> {
+    return this.runRefresh(
+      definitionId,
+      RM.REFRESH_TYPE_CONCURRENT,
+      RM.RESULT_SUCCESS,
+      actor,
+      {
+        requireMaterialized: true,
+        operation: 'read_models.definition.refresh',
+      },
+    );
   }
 
   /** UC-30-04: backfill inicial de una nueva materialized view. */
-  async backfill(definitionId: string, actor: AuthenticatedUser): Promise<RefreshRunResponseDto> {
-    return this.runRefresh(definitionId, RM.REFRESH_TYPE_FULL_BACKFILL, RM.RESULT_SUCCESS, actor, {
-      requireMaterialized: true,
-      operation: 'read_models.definition.backfill',
-    });
+  async backfill(
+    definitionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<RefreshRunResponseDto> {
+    return this.runRefresh(
+      definitionId,
+      RM.REFRESH_TYPE_FULL_BACKFILL,
+      RM.RESULT_SUCCESS,
+      actor,
+      {
+        requireMaterialized: true,
+        operation: 'read_models.definition.backfill',
+      },
+    );
   }
 
   /** UC-30-06: invalida y recomputa el read model tras un cambio upstream. */
-  async invalidate(definitionId: string, actor: AuthenticatedUser): Promise<RefreshRunResponseDto> {
-    return this.runRefresh(definitionId, RM.REFRESH_TYPE_INCREMENTAL, RM.RESULT_SUCCESS, actor, {
-      requireMaterialized: false,
-      operation: 'read_models.definition.invalidate',
-    });
+  async invalidate(
+    definitionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<RefreshRunResponseDto> {
+    return this.runRefresh(
+      definitionId,
+      RM.REFRESH_TYPE_INCREMENTAL,
+      RM.RESULT_SUCCESS,
+      actor,
+      {
+        requireMaterialized: false,
+        operation: 'read_models.definition.invalidate',
+      },
+    );
   }
 
   /** UC-30-07: reconcilia el read model divergente contra la fuente canónica. */
-  async reconcile(definitionId: string, actor: AuthenticatedUser): Promise<RefreshRunResponseDto> {
-    return this.runRefresh(definitionId, RM.REFRESH_TYPE_RECONCILE, RM.RESULT_REPAIRED, actor, {
-      requireMaterialized: true,
-      operation: 'read_models.definition.reconcile',
-    });
+  async reconcile(
+    definitionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<RefreshRunResponseDto> {
+    return this.runRefresh(
+      definitionId,
+      RM.REFRESH_TYPE_RECONCILE,
+      RM.RESULT_REPAIRED,
+      actor,
+      {
+        requireMaterialized: true,
+        operation: 'read_models.definition.reconcile',
+      },
+    );
   }
 
   /** UC-30-13a: deprecación de una versión (ACTIVE -> DEPRECATED). */
-  async deprecate(definitionId: string, actor: AuthenticatedUser): Promise<OperationResultDto> {
+  async deprecate(
+    definitionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<OperationResultDto> {
     this.logger.info(
       { operation: 'read_models.definition.deprecate', definitionId },
       'Deprecating read model version',
@@ -233,10 +304,14 @@ export class ReadModelDefinitionsService {
     return this.em.transactional(async (tx) => {
       const definition = await this.definitionsRepo.findById(tx, definitionId);
       if (!definition) {
-        throw new ResourceNotFoundException('Read model no encontrado', { definitionId });
+        throw new ResourceNotFoundException('Read model no encontrado', {
+          definitionId,
+        });
       }
       if (definition.statusConceptId === RM.DEF_RETIRED) {
-        throw new PreconditionFailedException('La versión ya está retirada', { definitionId });
+        throw new PreconditionFailedException('La versión ya está retirada', {
+          definitionId,
+        });
       }
       definition.statusConceptId = RM.DEF_DEPRECATED;
       touch(definition, actor.id);
@@ -245,7 +320,10 @@ export class ReadModelDefinitionsService {
   }
 
   /** UC-30-13b: retiro de una versión (-> RETIRED). Guarda de FK: sin vistas apuntando. */
-  async retire(definitionId: string, actor: AuthenticatedUser): Promise<OperationResultDto> {
+  async retire(
+    definitionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<OperationResultDto> {
     this.logger.info(
       { operation: 'read_models.definition.retire', definitionId },
       'Retiring read model version',
@@ -253,9 +331,14 @@ export class ReadModelDefinitionsService {
     return this.em.transactional(async (tx) => {
       const definition = await this.definitionsRepo.findById(tx, definitionId);
       if (!definition) {
-        throw new ResourceNotFoundException('Read model no encontrado', { definitionId });
+        throw new ResourceNotFoundException('Read model no encontrado', {
+          definitionId,
+        });
       }
-      const referencing = await this.pageViewsRepo.countByDefinition(tx, definitionId);
+      const referencing = await this.pageViewsRepo.countByDefinition(
+        tx,
+        definitionId,
+      );
       if (referencing > 0) {
         throw new PreconditionFailedException(
           'No se puede retirar: hay vistas apuntando a esta versión',
@@ -271,7 +354,10 @@ export class ReadModelDefinitionsService {
   /** UC-30-12: detecta y reporta staleness/degradación de las MV. */
   async health(): Promise<ReadModelHealthResponseDto> {
     const em = this.em.fork();
-    const definitions = await this.definitionsRepo.findAllNotRetired(em, RM.DEF_RETIRED);
+    const definitions = await this.definitionsRepo.findAllNotRetired(
+      em,
+      RM.DEF_RETIRED,
+    );
     const now = Date.now();
     const items = await Promise.all(
       definitions.map(async (def) => {
@@ -280,7 +366,8 @@ export class ReadModelDefinitionsService {
         const stalenessSeconds = refreshedAt
           ? Math.max(0, Math.floor((now - refreshedAt.getTime()) / 1000))
           : Number.MAX_SAFE_INTEGER;
-        const threshold = def.maximumStalenessSeconds ?? Number.MAX_SAFE_INTEGER;
+        const threshold =
+          def.maximumStalenessSeconds ?? Number.MAX_SAFE_INTEGER;
         return {
           definitionId: def.id,
           schemaName: def.schemaName,
@@ -302,11 +389,16 @@ export class ReadModelDefinitionsService {
     actor: AuthenticatedUser,
     opts: { requireMaterialized: boolean; operation: string },
   ): Promise<RefreshRunResponseDto> {
-    this.logger.info({ operation: opts.operation, definitionId, actorId: actor.id }, 'Refresh run');
+    this.logger.info(
+      { operation: opts.operation, definitionId, actorId: actor.id },
+      'Refresh run',
+    );
     return this.em.transactional(async (tx) => {
       const definition = await this.definitionsRepo.findById(tx, definitionId);
       if (!definition) {
-        throw new ResourceNotFoundException('Read model no encontrado', { definitionId });
+        throw new ResourceNotFoundException('Read model no encontrado', {
+          definitionId,
+        });
       }
       if (
         opts.requireMaterialized &&
@@ -318,7 +410,9 @@ export class ReadModelDefinitionsService {
         );
       }
       if (definition.statusConceptId === RM.DEF_RETIRED) {
-        throw new PreconditionFailedException('La versión está retirada', { definitionId });
+        throw new PreconditionFailedException('La versión está retirada', {
+          definitionId,
+        });
       }
 
       const startedAt = new Date();
@@ -357,7 +451,9 @@ export class ReadModelDefinitionsService {
       schemaName,
       objectName,
       String(versionNumber),
-      ...dependencies.map((d) => `${d.sourceSchemaName}.${d.sourceObjectName}`).sort(),
+      ...dependencies
+        .map((d) => `${d.sourceSchemaName}.${d.sourceObjectName}`)
+        .sort(),
     ].join('|');
     return createHash('sha256').update(material).digest('hex');
   }

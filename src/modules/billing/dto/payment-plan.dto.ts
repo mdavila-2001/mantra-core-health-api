@@ -23,16 +23,26 @@ export class InstallmentInputDto {
 
 /** Cuerpo de `POST /billing/payment-plans` (UC-17-11). */
 export class CreatePaymentPlanDto {
-  @ApiProperty({ description: 'Factura origen con saldo (billing.invoices)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Factura origen con saldo (billing.invoices)',
+    format: 'uuid',
+  })
   @IsUUID()
   sourceInvoiceId!: string;
 
-  @ApiPropertyOptional({ description: 'Tenant (directory.tenants); requerido para vincular las cuotas', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Tenant (directory.tenants); requerido para vincular las cuotas',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiProperty({ type: [InstallmentInputDto], description: 'Cuotas; la suma debe igualar el saldo origen' })
+  @ApiProperty({
+    type: [InstallmentInputDto],
+    description: 'Cuotas; la suma debe igualar el saldo origen',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

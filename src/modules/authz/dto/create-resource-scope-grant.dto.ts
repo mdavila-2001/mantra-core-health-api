@@ -8,7 +8,12 @@ export const SUBJECT_TYPES = ['USER', 'ROLE', 'SERVICE'] as const;
 export type SubjectType = (typeof SUBJECT_TYPES)[number];
 
 /** Tipos de recurso de un grant polimórfico. */
-export const RESOURCE_TYPES = ['PATIENT', 'ENCOUNTER', 'DOCUMENT', 'RECORD'] as const;
+export const RESOURCE_TYPES = [
+  'PATIENT',
+  'ENCOUNTER',
+  'DOCUMENT',
+  'RECORD',
+] as const;
 export type ResourceType = (typeof RESOURCE_TYPES)[number];
 
 /** Cuerpo de `POST /authz/resource-scope-grants` (UC-06-09). */
@@ -17,7 +22,10 @@ export class CreateResourceScopeGrantDto {
   @IsIn(SUBJECT_TYPES)
   subjectType!: SubjectType;
 
-  @ApiProperty({ description: 'Id del sujeto (validado contra su value set)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Id del sujeto (validado contra su value set)',
+    format: 'uuid',
+  })
   @IsUUID()
   subjectId!: string;
 
@@ -42,13 +50,21 @@ export class CreateResourceScopeGrantDto {
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   validFrom?: Date;
 
-  @ApiPropertyOptional({ description: 'Fin de vigencia', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Fin de vigencia',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()

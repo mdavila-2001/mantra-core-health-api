@@ -39,7 +39,10 @@ export class ViewFieldInputDto {
   @MaxLength(128)
   fieldCode!: string;
 
-  @ApiProperty({ description: 'Columna origen del read model', example: 'display_name' })
+  @ApiProperty({
+    description: 'Columna origen del read model',
+    example: 'display_name',
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(128)
@@ -51,8 +54,11 @@ export class ViewFieldInputDto {
   @MaxLength(200)
   label!: string;
 
-  @ApiProperty({ description: 'Tipo técnico de dato', enum: DATA_TYPES as unknown as string[] })
-  @IsIn(DATA_TYPES as unknown as string[])
+  @ApiProperty({
+    description: 'Tipo técnico de dato',
+    enum: DATA_TYPES as unknown as string[],
+  })
+  @IsIn(DATA_TYPES)
   dataType!: string;
 
   @ApiPropertyOptional({ description: 'Máscara de formato' })
@@ -66,7 +72,10 @@ export class ViewFieldInputDto {
   @IsBoolean()
   sensitive?: boolean;
 
-  @ApiPropertyOptional({ description: 'Permiso requerido para verlo', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Permiso requerido para verlo',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   permissionId?: string;
@@ -105,7 +114,10 @@ export class ViewSortOptionInputDto {
   @IsIn(['FIRST', 'LAST'])
   nulls!: 'FIRST' | 'LAST';
 
-  @ApiPropertyOptional({ description: 'Tie-breaker estable', example: 'id ASC' })
+  @ApiPropertyOptional({
+    description: 'Tie-breaker estable',
+    example: 'id ASC',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -131,7 +143,10 @@ export class ViewActionInputDto {
   @MaxLength(200)
   label!: string;
 
-  @ApiProperty({ description: 'Tipo de acción', enum: ['NAVIGATE', 'MUTATION'] })
+  @ApiProperty({
+    description: 'Tipo de acción',
+    enum: ['NAVIGATE', 'MUTATION'],
+  })
   @IsIn(['NAVIGATE', 'MUTATION'])
   actionType!: 'NAVIGATE' | 'MUTATION';
 
@@ -265,7 +280,10 @@ export class PublishViewContractDto {
   requiresTenantContext?: boolean;
 
   // --- Vista ---
-  @ApiProperty({ description: 'Definición de read model ACTIVE a servir', format: 'uuid' })
+  @ApiProperty({
+    description: 'Definición de read model ACTIVE a servir',
+    format: 'uuid',
+  })
   @IsUUID()
   readModelDefinitionId!: string;
 
@@ -275,7 +293,10 @@ export class PublishViewContractDto {
   @MaxLength(128)
   viewCode!: string;
 
-  @ApiProperty({ description: 'Tipo de vista', enum: ['TABLE', 'DASHBOARD', 'DETAIL'] })
+  @ApiProperty({
+    description: 'Tipo de vista',
+    enum: ['TABLE', 'DASHBOARD', 'DETAIL'],
+  })
   @IsIn(['TABLE', 'DASHBOARD', 'DETAIL'])
   viewType!: 'TABLE' | 'DASHBOARD' | 'DETAIL';
 
@@ -303,14 +324,20 @@ export class PublishViewContractDto {
   @Type(() => ViewFieldInputDto)
   fields!: ViewFieldInputDto[];
 
-  @ApiPropertyOptional({ description: 'Opciones de orden', type: [ViewSortOptionInputDto] })
+  @ApiPropertyOptional({
+    description: 'Opciones de orden',
+    type: [ViewSortOptionInputDto],
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ViewSortOptionInputDto)
   sortOptions?: ViewSortOptionInputDto[];
 
-  @ApiPropertyOptional({ description: 'Acciones de fila', type: [ViewActionInputDto] })
+  @ApiPropertyOptional({
+    description: 'Acciones de fila',
+    type: [ViewActionInputDto],
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -324,7 +351,10 @@ export class PublishViewContractDto {
   @Type(() => ViewKpiInputDto)
   kpis?: ViewKpiInputDto[];
 
-  @ApiPropertyOptional({ description: 'Estados de UI', type: [ViewStateInputDto] })
+  @ApiPropertyOptional({
+    description: 'Estados de UI',
+    type: [ViewStateInputDto],
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

@@ -7,13 +7,21 @@ import {
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../common';
-import { LocationsRepository, StockPositionsRepository, LedgerRepository } from '../repositories';
+import {
+  LocationsRepository,
+  StockPositionsRepository,
+  LedgerRepository,
+} from '../repositories';
 import { CreateTransferDto, TransferResponseDto } from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
-const num = (v: string | null | undefined): number => (v == null ? 0 : Number(v));
-const recompute = (onHand: string, reserved: string, quarantine: string): string =>
-  String(num(onHand) - num(reserved) - num(quarantine));
+const num = (v: string | null | undefined): number =>
+  v == null ? 0 : Number(v);
+const recompute = (
+  onHand: string,
+  reserved: string,
+  quarantine: string,
+): string => String(num(onHand) - num(reserved) - num(quarantine));
 
 /** Transferencia de stock entre ubicaciones (UC-25-10): TRANSFER_OUT + TRANSFER_IN. */
 @Injectable()
@@ -35,17 +43,26 @@ export class InventoryTransfersService {
     actor: AuthenticatedUser,
   ): Promise<TransferResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.transfer.create', pharmacyId, from: dto.fromLocationId, to: dto.toLocationId },
+      {
+        operation: 'pharmacy_inventory.transfer.create',
+        pharmacyId,
+        from: dto.fromLocationId,
+        to: dto.toLocationId,
+      },
       'Transferring stock',
     );
     return this.em.transactional(async (tx) => {
       const from = await this.locationsRepo.findById(tx, dto.fromLocationId);
       if (!from) {
-        throw new ResourceNotFoundException('Ubicación origen no encontrada', { locationId: dto.fromLocationId });
+        throw new ResourceNotFoundException('Ubicación origen no encontrada', {
+          locationId: dto.fromLocationId,
+        });
       }
       const to = await this.locationsRepo.findById(tx, dto.toLocationId);
       if (!to) {
-        throw new ResourceNotFoundException('Ubicación destino no encontrada', { locationId: dto.toLocationId });
+        throw new ResourceNotFoundException('Ubicación destino no encontrada', {
+          locationId: dto.toLocationId,
+        });
       }
 
       const fromPosition = await this.stockRepo.findByKey(tx, {
@@ -54,10 +71,13 @@ export class InventoryTransfersService {
         inventoryLotId: dto.inventoryLotId,
       });
       if (!fromPosition || num(fromPosition.availableQuantity) < dto.quantity) {
-        throw new PreconditionFailedException('Stock disponible insuficiente en origen', {
-          available: fromPosition ? num(fromPosition.availableQuantity) : 0,
-          requested: dto.quantity,
-        });
+        throw new PreconditionFailedException(
+          'Stock disponible insuficiente en origen',
+          {
+            available: fromPosition ? num(fromPosition.availableQuantity) : 0,
+            requested: dto.quantity,
+          },
+        );
       }
 
       const correlationId = randomUUID();
@@ -91,7 +111,9 @@ export class InventoryTransfersService {
         recordedByUserId: actor.id,
       });
 
-      fromPosition.onHandQuantity = String(num(fromPosition.onHandQuantity) - dto.quantity);
+      fromPosition.onHandQuantity = String(
+        num(fromPosition.onHandQuantity) - dto.quantity,
+      );
       fromPosition.availableQuantity = recompute(
         fromPosition.onHandQuantity,
         fromPosition.reservedQuantity,
@@ -115,7 +137,9 @@ export class InventoryTransfersService {
           lastLedgerSequence: inSeq,
         });
       } else {
-        toPosition.onHandQuantity = String(num(toPosition.onHandQuantity) + dto.quantity);
+        toPosition.onHandQuantity = String(
+          num(toPosition.onHandQuantity) + dto.quantity,
+        );
         toPosition.availableQuantity = recompute(
           toPosition.onHandQuantity,
           toPosition.reservedQuantity,
@@ -126,7 +150,11 @@ export class InventoryTransfersService {
       }
       await tx.flush();
 
-      return { correlationId, outLedgerEntryId: outEntry.id, inLedgerEntryId: inEntry.id };
+      return {
+        correlationId,
+        outLedgerEntryId: outEntry.id,
+        inLedgerEntryId: inEntry.id,
+      };
     });
   }
 }

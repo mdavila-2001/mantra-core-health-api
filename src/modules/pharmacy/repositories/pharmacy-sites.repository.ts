@@ -27,7 +27,11 @@ export class PharmacySitesRepository {
   }
 
   /** Busca una sede por (pharmacy, code) para validar unicidad. */
-  findByPharmacyAndCode(em: EntityManager, pharmacyId: string, code: string): Promise<PharmacySites | null> {
+  findByPharmacyAndCode(
+    em: EntityManager,
+    pharmacyId: string,
+    code: string,
+  ): Promise<PharmacySites | null> {
     return em.findOne(PharmacySites, { pharmacyId, code });
   }
 
@@ -42,7 +46,8 @@ export class PharmacySitesRepository {
         name: data.name,
         pharmacySiteTypeConceptId: data.pharmacySiteTypeConceptId,
         dispensingModeConceptId: data.dispensingModeConceptId,
-        controlledSubstanceCapabilityConceptId: data.controlledSubstanceCapabilityConceptId,
+        controlledSubstanceCapabilityConceptId:
+          data.controlledSubstanceCapabilityConceptId,
         homeDeliveryAvailable: data.homeDeliveryAvailable,
         pickupAvailable: data.pickupAvailable,
         statusConceptId: data.statusConceptId,

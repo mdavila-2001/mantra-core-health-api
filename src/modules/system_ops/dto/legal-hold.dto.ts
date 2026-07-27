@@ -26,7 +26,10 @@ export class CreateLegalHoldDto {
   @IsUUID()
   reasonConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Referencia de la autoridad', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Referencia de la autoridad',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -40,7 +43,10 @@ export class CreateLegalHoldDto {
 
 /** Cuerpo de `POST /admin/governance/legal-holds/{id}/release` (UC-11-08). */
 export class ReleaseLegalHoldDto {
-  @ApiPropertyOptional({ description: 'Motivo del levantamiento', maxLength: 500 })
+  @ApiPropertyOptional({
+    description: 'Motivo del levantamiento',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
   @MinLength(1)

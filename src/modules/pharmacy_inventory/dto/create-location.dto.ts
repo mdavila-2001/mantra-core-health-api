@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /pharmacy/:siteId/inventory-locations` (bootstrap de ubicación). */
 export class CreateLocationDto {
@@ -13,7 +19,10 @@ export class CreateLocationDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Ubicación padre (jerarquía)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ubicación padre (jerarquía)',
+  })
   @IsOptional()
   @IsUUID()
   parentLocationId?: string;

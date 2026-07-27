@@ -83,7 +83,9 @@ export class CdsController {
   /** UC-18-04. */
   @Post('cds/check-interactions')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Detectar interacciones medicamentosas al prescribir' })
+  @ApiOperation({
+    summary: 'Detectar interacciones medicamentosas al prescribir',
+  })
   checkInteractions(
     @Body() dto: CheckInteractionsDto,
     @CurrentUser() actor: AuthenticatedUser,

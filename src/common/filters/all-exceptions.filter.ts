@@ -61,7 +61,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       // Error no anticipado: log completo (con stack), respuesta genérica.
       this.logger.error(
-        { err: exception, correlationId, path: request.url, method: request.method },
+        {
+          err: exception,
+          correlationId,
+          path: request.url,
+          method: request.method,
+        },
         'Unhandled exception',
       );
       body.message = 'Error interno del servidor';
@@ -69,7 +74,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       body.details = undefined;
     } else {
       this.logger.warn(
-        { correlationId, code, path: request.url, method: request.method, status },
+        {
+          correlationId,
+          code,
+          path: request.url,
+          method: request.method,
+          status,
+        },
         message,
       );
     }

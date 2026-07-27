@@ -7,7 +7,9 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
   const licensesService = { register: mockFn(), verify: mockFn() };
-  const controller = new OrgextFacilityLicensesController(licensesService as any);
+  const controller = new OrgextFacilityLicensesController(
+    licensesService as any,
+  );
   return { controller, licensesService };
 }
 
@@ -16,7 +18,9 @@ describe('OrgextFacilityLicensesController', () => {
     const d = build();
     const dto = { tenantId: 't1', licenseNumber: 'L-1' };
     d.licensesService.register.mockResolvedValue({ id: 'lic1' });
-    await expect(d.controller.register(dto as any, actor)).resolves.toEqual({ id: 'lic1' });
+    await expect(d.controller.register(dto as any, actor)).resolves.toEqual({
+      id: 'lic1',
+    });
     expect(d.licensesService.register).toHaveBeenCalledWith(dto, actor);
   });
 

@@ -10,21 +10,33 @@ import {
 
 /** Cuerpo de `POST /orgext/facility-licenses` (UC-22-05). */
 export class CreateFacilityLicenseDto {
-  @ApiProperty({ description: 'Tenant (directory) titular de la licencia', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant (directory) titular de la licencia',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 
-  @ApiPropertyOptional({ description: 'Sitio de práctica de la instalación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sitio de práctica de la instalación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   practiceSiteId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de instalación (concepto)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de instalación (concepto)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   facilityTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de licencia (concepto)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de licencia (concepto)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   licenseTypeConceptId?: string;
@@ -35,18 +47,27 @@ export class CreateFacilityLicenseDto {
   @MaxLength(120)
   licenseNumber!: string;
 
-  @ApiPropertyOptional({ description: 'Tenant de la autoridad emisora', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant de la autoridad emisora',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   issuingAuthorityTenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Nombre de la autoridad emisora', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Nombre de la autoridad emisora',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   issuingAuthorityName?: string;
 
-  @ApiPropertyOptional({ description: 'Jurisdicción (concepto)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Jurisdicción (concepto)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;

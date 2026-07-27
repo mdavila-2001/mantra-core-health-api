@@ -21,7 +21,10 @@ export interface CreateClinicalAccessGrantData {
 /** Acceso a datos de `authz.clinical_access_grants`. */
 @Injectable()
 export class ClinicalAccessGrantsRepository {
-  findById(em: EntityManager, id: string): Promise<ClinicalAccessGrants | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ClinicalAccessGrants | null> {
     return em.findOne(ClinicalAccessGrants, { id });
   }
 
@@ -51,7 +54,10 @@ export class ClinicalAccessGrantsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateClinicalAccessGrantData): ClinicalAccessGrants {
+  create(
+    em: EntityManager,
+    data: CreateClinicalAccessGrantData,
+  ): ClinicalAccessGrants {
     return em.create(
       ClinicalAccessGrants,
       {

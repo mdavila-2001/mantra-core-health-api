@@ -23,12 +23,18 @@ export interface CreateAuthProfileData {
 @Injectable()
 export class AuthProfilesRepository {
   /** Busca un perfil por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<IntegrationAuthProfiles | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IntegrationAuthProfiles | null> {
     return em.findOne(IntegrationAuthProfiles, { id });
   }
 
   /** Crea la entidad de perfil en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateAuthProfileData): IntegrationAuthProfiles {
+  create(
+    em: EntityManager,
+    data: CreateAuthProfileData,
+  ): IntegrationAuthProfiles {
     return em.create(
       IntegrationAuthProfiles,
       {

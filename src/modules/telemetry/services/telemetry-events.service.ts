@@ -81,16 +81,29 @@ export class TelemetryEventsService {
       let journey: SessionJourneys | null = null;
 
       for (const item of dto.events) {
-        const schema = await this.schemasRepo.findById(tx, item.eventSchemaDefinitionId);
+        const schema = await this.schemasRepo.findById(
+          tx,
+          item.eventSchemaDefinitionId,
+        );
         if (!schema) {
-          throw new ResourceNotFoundException('Esquema de evento no encontrado', {
-            eventSchemaDefinitionId: item.eventSchemaDefinitionId,
-          });
+          throw new ResourceNotFoundException(
+            'Esquema de evento no encontrado',
+            {
+              eventSchemaDefinitionId: item.eventSchemaDefinitionId,
+            },
+          );
         }
 
         // Gate de consentimiento: si hay usuario y el propósito lo requiere, exige
         // una decisión efectiva GRANTED; si la última es WITHDRAWN se descarta.
-        if (item.userId && !(await this.consentAllows(tx, item.userId, schema.purposeDefinitionId))) {
+        if (
+          item.userId &&
+          !(await this.consentAllows(
+            tx,
+            item.userId,
+            schema.purposeDefinitionId,
+          ))
+        ) {
           skipped += 1;
           continue;
         }
@@ -118,7 +131,10 @@ export class TelemetryEventsService {
           userId: item.userId,
           sessionId: item.sessionId,
           tenantId: item.tenantId,
-          portalTypeConceptId: item.portalTypeConceptId ?? schema.portalTypeConceptId ?? TELE.PORTAL_WEB,
+          portalTypeConceptId:
+            item.portalTypeConceptId ??
+            schema.portalTypeConceptId ??
+            TELE.PORTAL_WEB,
           eventName: item.eventName ?? schema.eventName,
           eventIdempotencyKey: idemKey,
           routeTemplate: item.routeTemplate,
@@ -135,9 +151,13 @@ export class TelemetryEventsService {
             propertyName: prop.propertyName,
             valueTypeConceptId: this.valueType(prop),
             valueString: prop.valueString,
-            valueNumber: prop.valueNumber !== undefined ? String(prop.valueNumber) : undefined,
+            valueNumber:
+              prop.valueNumber !== undefined
+                ? String(prop.valueNumber)
+                : undefined,
             valueBoolean: prop.valueBoolean,
-            dataClassificationConceptId: prop.dataClassificationConceptId ?? TELE.DATA_CLASS_INTERNAL,
+            dataClassificationConceptId:
+              prop.dataClassificationConceptId ?? TELE.DATA_CLASS_INTERNAL,
           });
         }
 
@@ -163,7 +183,10 @@ export class TelemetryEventsService {
   async captureClientContext(
     dto: CreateClientContextDto,
   ): Promise<ClientContextResponseDto> {
-    this.logger.info({ operation: 'telemetry.context.capture' }, 'Capturing client context');
+    this.logger.info(
+      { operation: 'telemetry.context.capture' },
+      'Capturing client context',
+    );
     return this.em.transactional(async (tx) => {
       const journey = await this.resolveJourney(tx, {
         sessionJourneyId: dto.sessionJourneyId,
@@ -191,7 +214,8 @@ export class TelemetryEventsService {
         ipPrefixHash: dto.ipPrefixHash,
         userAgentHash: dto.userAgentHash,
         isBot: dto.isBot ?? false,
-        dataClassificationConceptId: dto.dataClassificationConceptId ?? TELE.DATA_CLASS_INTERNAL,
+        dataClassificationConceptId:
+          dto.dataClassificationConceptId ?? TELE.DATA_CLASS_INTERNAL,
       });
 
       if (journey) {
@@ -202,14 +226,16 @@ export class TelemetryEventsService {
 
       return {
         id: context.id,
-        sessionJourneyId: journey!.id,
+        sessionJourneyId: journey.id,
         createdAt: context.createdAt,
       };
     });
   }
 
   /** UC-28-09: registra un batch de métricas Core Web Vitals por ruta. */
-  async recordWebVitals(dto: RecordWebVitalsDto): Promise<WebVitalsResponseDto> {
+  async recordWebVitals(
+    dto: RecordWebVitalsDto,
+  ): Promise<WebVitalsResponseDto> {
     this.logger.info(
       { operation: 'telemetry.webvitals.record', count: dto.metrics.length },
       'Recording web vitals',
@@ -220,9 +246,12 @@ export class TelemetryEventsService {
         if (m.sessionJourneyId) {
           const j = await this.journeysRepo.findById(tx, m.sessionJourneyId);
           if (!j) {
-            throw new ResourceNotFoundException('Journey de sesión no encontrado', {
-              sessionJourneyId: m.sessionJourneyId,
-            });
+            throw new ResourceNotFoundException(
+              'Journey de sesión no encontrado',
+              {
+                sessionJourneyId: m.sessionJourneyId,
+              },
+            );
           }
         }
         const vital = this.webVitalsRepo.create(tx, {
@@ -234,7 +263,9 @@ export class TelemetryEventsService {
           routeTemplate: m.routeTemplate,
           metricConceptId: METRIC_CONCEPT_BY_CODE[m.metric] ?? TELE.METRIC_LCP,
           metricValue: String(m.metricValue),
-          ratingConceptId: m.rating ? RATING_CONCEPT_BY_CODE[m.rating] : undefined,
+          ratingConceptId: m.rating
+            ? RATING_CONCEPT_BY_CODE[m.rating]
+            : undefined,
           navigationTypeConceptId: TELE.NAV_NAVIGATE,
           measuredAt: new Date(),
         });
@@ -250,21 +281,33 @@ export class TelemetryEventsService {
     dto: CreateConversionEventDto,
   ): Promise<ConversionEventResponseDto> {
     this.logger.info(
-      { operation: 'telemetry.conversion.record', funnelDefinitionId: dto.funnelDefinitionId },
+      {
+        operation: 'telemetry.conversion.record',
+        funnelDefinitionId: dto.funnelDefinitionId,
+      },
       'Recording conversion',
     );
     return this.em.transactional(async (tx) => {
-      const funnel = await this.funnelsRepo.findById(tx, dto.funnelDefinitionId);
+      const funnel = await this.funnelsRepo.findById(
+        tx,
+        dto.funnelDefinitionId,
+      );
       if (!funnel) {
         throw new ResourceNotFoundException('Funnel no encontrado', {
           funnelDefinitionId: dto.funnelDefinitionId,
         });
       }
-      const subject = await this.subjectsRepo.findById(tx, dto.analyticsSubjectId);
+      const subject = await this.subjectsRepo.findById(
+        tx,
+        dto.analyticsSubjectId,
+      );
       if (!subject) {
-        throw new ResourceNotFoundException('Sujeto de analítica no encontrado', {
-          analyticsSubjectId: dto.analyticsSubjectId,
-        });
+        throw new ResourceNotFoundException(
+          'Sujeto de analítica no encontrado',
+          {
+            analyticsSubjectId: dto.analyticsSubjectId,
+          },
+        );
       }
 
       const existing = await this.conversionsRepo.findExisting(
@@ -294,7 +337,10 @@ export class TelemetryEventsService {
       await tx.flush();
 
       if (dto.sessionJourneyId) {
-        const journey = await this.journeysRepo.findById(tx, dto.sessionJourneyId);
+        const journey = await this.journeysRepo.findById(
+          tx,
+          dto.sessionJourneyId,
+        );
         if (journey) {
           journey.journeyStatusConceptId = TELE.JOURNEY_CONVERTED;
           journey.updatedAt = now;
@@ -316,14 +362,21 @@ export class TelemetryEventsService {
     journeyId: string,
     dto: CloseJourneyDto,
   ): Promise<JourneyResponseDto> {
-    this.logger.info({ operation: 'telemetry.journey.close', journeyId }, 'Closing session journey');
+    this.logger.info(
+      { operation: 'telemetry.journey.close', journeyId },
+      'Closing session journey',
+    );
     return this.em.transactional(async (tx) => {
       const journey = await this.journeysRepo.findById(tx, journeyId);
       if (!journey) {
-        throw new ResourceNotFoundException('Journey de sesión no encontrado', { journeyId });
+        throw new ResourceNotFoundException('Journey de sesión no encontrado', {
+          journeyId,
+        });
       }
       if (journey.journeyStatusConceptId === TELE.JOURNEY_CLOSED) {
-        throw new PreconditionFailedException('El journey ya está cerrado', { journeyId });
+        throw new PreconditionFailedException('El journey ya está cerrado', {
+          journeyId,
+        });
       }
 
       const now = new Date();
@@ -366,7 +419,10 @@ export class TelemetryEventsService {
 
     const sessionId = opts.sessionId ?? randomUUID();
     if (opts.sessionId) {
-      const open = await this.journeysRepo.findOpenBySession(tx, opts.sessionId);
+      const open = await this.journeysRepo.findOpenBySession(
+        tx,
+        opts.sessionId,
+      );
       if (open) return open;
     }
 
@@ -387,7 +443,11 @@ export class TelemetryEventsService {
     userId: string,
     purposeDefinitionId: string,
   ): Promise<boolean> {
-    const latest = await this.consentsRepo.findLatest(tx, userId, purposeDefinitionId);
+    const latest = await this.consentsRepo.findLatest(
+      tx,
+      userId,
+      purposeDefinitionId,
+    );
     return latest?.decisionConceptId === TELE.DECISION_GRANTED;
   }
 

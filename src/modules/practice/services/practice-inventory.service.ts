@@ -8,7 +8,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
-import { InventoryItemsRepository, InventoryMovementsRepository } from '../repositories';
+import {
+  InventoryItemsRepository,
+  InventoryMovementsRepository,
+} from '../repositories';
 import {
   CreateInventoryItemDto,
   CreateMovementDto,
@@ -46,7 +49,10 @@ export class PracticeInventoryService {
     dto: CreateInventoryItemDto,
     actor: AuthenticatedUser,
   ): Promise<InventoryItemResponseDto> {
-    this.logger.info({ operation: 'practice.inventory.item.create', practiceId }, 'Creating inventory item');
+    this.logger.info(
+      { operation: 'practice.inventory.item.create', practiceId },
+      'Creating inventory item',
+    );
     return this.em.transactional(async (tx) => {
       const item = this.itemsRepo.create(tx, {
         practiceId,
@@ -79,25 +85,38 @@ export class PracticeInventoryService {
     actor: AuthenticatedUser,
   ): Promise<MovementResponseDto> {
     this.logger.info(
-      { operation: 'practice.inventory.movement.record', itemId, direction: dto.direction },
+      {
+        operation: 'practice.inventory.movement.record',
+        itemId,
+        direction: dto.direction,
+      },
       'Recording inventory movement',
     );
     return this.em.transactional(async (tx) => {
       const item = await this.itemsRepo.findById(tx, itemId);
-      if (!item) throw new ResourceNotFoundException('Insumo de inventario no encontrado', { itemId });
+      if (!item)
+        throw new ResourceNotFoundException(
+          'Insumo de inventario no encontrado',
+          { itemId },
+        );
       if (item.statusConceptId !== PRAC.INVENTORY_ACTIVE) {
-        throw new PreconditionFailedException('El insumo no está activo', { itemId });
+        throw new PreconditionFailedException('El insumo no está activo', {
+          itemId,
+        });
       }
 
       const current = Number(item.quantityOnHand);
       const delta = dto.direction === 'OUT' ? -dto.quantity : dto.quantity;
       const next = current + delta;
       if (next < 0) {
-        throw new PreconditionFailedException('Stock insuficiente para la salida', {
-          itemId,
-          quantityOnHand: item.quantityOnHand,
-          requested: dto.quantity,
-        });
+        throw new PreconditionFailedException(
+          'Stock insuficiente para la salida',
+          {
+            itemId,
+            quantityOnHand: item.quantityOnHand,
+            requested: dto.quantity,
+          },
+        );
       }
 
       const now = new Date();
@@ -117,9 +136,17 @@ export class PracticeInventoryService {
 
       await tx.flush();
 
-      if (item.reorderLevel !== undefined && item.reorderLevel !== null && next < Number(item.reorderLevel)) {
+      if (
+        item.reorderLevel !== undefined &&
+        item.reorderLevel !== null &&
+        next < Number(item.reorderLevel)
+      ) {
         this.logger.warn(
-          { operation: 'practice.inventory.lowstock', itemId, quantityOnHand: item.quantityOnHand },
+          {
+            operation: 'practice.inventory.lowstock',
+            itemId,
+            quantityOnHand: item.quantityOnHand,
+          },
           'Inventory item crossed reorder level',
         );
       }

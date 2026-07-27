@@ -1,10 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import type { AuthTypeCode, ProviderTypeCode } from '../integrations.concepts';
 
 /** Cuerpo de `POST /integrations/providers` (UC-12-01). */
 export class RegisterProviderDto {
-  @ApiProperty({ description: 'Código único global del proveedor', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único global del proveedor',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -16,7 +26,10 @@ export class RegisterProviderDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ description: 'Tipo de proveedor', enum: ['LAB', 'INSURER', 'GOV', 'GENERIC'] })
+  @ApiProperty({
+    description: 'Tipo de proveedor',
+    enum: ['LAB', 'INSURER', 'GOV', 'GENERIC'],
+  })
   @IsIn(['LAB', 'INSURER', 'GOV', 'GENERIC'])
   providerType!: ProviderTypeCode;
 
@@ -26,7 +39,10 @@ export class RegisterProviderDto {
   @MaxLength(2048)
   baseUrl?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de autenticación', enum: ['OAUTH2', 'API_KEY', 'HMAC'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de autenticación',
+    enum: ['OAUTH2', 'API_KEY', 'HMAC'],
+  })
   @IsOptional()
   @IsIn(['OAUTH2', 'API_KEY', 'HMAC'])
   authType?: AuthTypeCode;

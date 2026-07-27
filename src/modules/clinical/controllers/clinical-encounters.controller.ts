@@ -45,7 +45,9 @@ export class ClinicalEncountersController {
   /** UC-08-02. */
   @Post('encounters/check-in')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Check-in de un encuentro con participantes y ubicación' })
+  @ApiOperation({
+    summary: 'Check-in de un encuentro con participantes y ubicación',
+  })
   checkIn(
     @Body() dto: CheckInEncounterDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -56,7 +58,9 @@ export class ClinicalEncountersController {
   /** UC-08-14. */
   @Post('encounters/:id/close')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Cerrar un encuentro en curso (gatilla facturación)' })
+  @ApiOperation({
+    summary: 'Cerrar un encuentro en curso (gatilla facturación)',
+  })
   close(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CloseEncounterDto,

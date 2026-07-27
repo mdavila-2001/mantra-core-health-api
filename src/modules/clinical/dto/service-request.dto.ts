@@ -3,11 +3,17 @@ import { IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /clinical/service-requests` (UC-08-05). */
 export class CreateServiceRequestDto {
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
@@ -16,21 +22,33 @@ export class CreateServiceRequestDto {
   @IsUUID()
   encounterId?: string;
 
-  @ApiProperty({ description: 'Código del servicio pedido (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Código del servicio pedido (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   codeConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Categoría (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Categoría (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   categoryConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Prioridad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Prioridad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   priorityConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Profesional solicitante', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Profesional solicitante',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   requesterProfileId?: string;

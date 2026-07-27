@@ -23,7 +23,10 @@ export class MessageRetriesRepository {
    * Mayor `attempt_number` registrado para un mensaje; 0 si no hay reintentos.
    * Base para el siguiente número de intento (unique(msg, attempt) en BD).
    */
-  async maxAttempt(em: EntityManager, outboundMessageId: string): Promise<number> {
+  async maxAttempt(
+    em: EntityManager,
+    outboundMessageId: string,
+  ): Promise<number> {
     const rows = await em.find(
       MessageRetries,
       { outboundMessageId },

@@ -53,7 +53,10 @@ export class ModerationRepository {
    * `moderationDecisionsId` REAL (FK NOT NULL → community.moderation_decisions); por
    * eso el servicio solo la escribe cuando el cliente aporta ese id.
    */
-  recordHistory(em: EntityManager, data: RecordModerationHistoryData): ModerationDecisionsHistory {
+  recordHistory(
+    em: EntityManager,
+    data: RecordModerationHistoryData,
+  ): ModerationDecisionsHistory {
     return em.create(
       ModerationDecisionsHistory,
       {

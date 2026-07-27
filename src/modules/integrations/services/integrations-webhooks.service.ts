@@ -29,15 +29,25 @@ export class IntegrationsWebhooksService {
   }
 
   /** UC-12-09: registra un mensaje entrante con ACK rápido (procesamiento diferido). */
-  async receiveInbound(dto: InboundWebhookDto): Promise<InboundMessageResponseDto> {
+  async receiveInbound(
+    dto: InboundWebhookDto,
+  ): Promise<InboundMessageResponseDto> {
     this.logger.info(
-      { operation: 'integrations.webhook.inbound', connectionId: dto.connectionId },
+      {
+        operation: 'integrations.webhook.inbound',
+        connectionId: dto.connectionId,
+      },
       'Receiving inbound webhook',
     );
     return this.em.transactional(async (tx) => {
-      const connection = await this.connectionsRepo.findById(tx, dto.connectionId);
+      const connection = await this.connectionsRepo.findById(
+        tx,
+        dto.connectionId,
+      );
       if (!connection) {
-        throw new ResourceNotFoundException('Conexión no encontrada', { connectionId: dto.connectionId });
+        throw new ResourceNotFoundException('Conexión no encontrada', {
+          connectionId: dto.connectionId,
+        });
       }
 
       // De-duplicación de reentregas por firma dentro de la conexión.
@@ -49,10 +59,18 @@ export class IntegrationsWebhooksService {
         );
         if (existing) {
           this.logger.info(
-            { operation: 'integrations.webhook.inbound', messageId: existing.id, duplicate: true },
+            {
+              operation: 'integrations.webhook.inbound',
+              messageId: existing.id,
+              duplicate: true,
+            },
             'De-duplicated inbound webhook',
           );
-          return { id: existing.id, status: existing.statusConceptId, duplicate: true };
+          return {
+            id: existing.id,
+            status: existing.statusConceptId,
+            duplicate: true,
+          };
         }
       }
 
@@ -68,7 +86,11 @@ export class IntegrationsWebhooksService {
       });
       await tx.flush();
 
-      return { id: message.id, status: message.statusConceptId, duplicate: false };
+      return {
+        id: message.id,
+        status: message.statusConceptId,
+        duplicate: false,
+      };
     });
   }
 }

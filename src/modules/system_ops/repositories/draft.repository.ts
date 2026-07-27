@@ -30,7 +30,11 @@ export class DraftRepository {
     },
   ): DraftRecords {
     const { actorUserId, ...rest } = data;
-    return em.create(DraftRecords, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      DraftRecords,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createRevision(
@@ -46,7 +50,11 @@ export class DraftRepository {
   ): RecordRevisions {
     return em.create(
       RecordRevisions,
-      { ...data, recordedAt: new Date(), recordedByUserId: data.changedByUserId },
+      {
+        ...data,
+        recordedAt: new Date(),
+        recordedByUserId: data.changedByUserId,
+      },
       { partial: true },
     );
   }

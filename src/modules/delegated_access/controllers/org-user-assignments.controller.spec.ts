@@ -22,7 +22,7 @@ describe('OrgUserAssignmentsController', () => {
   it('delegates update (UC-29-10)', async () => {
     const d = build();
     const dto = { suspend: true };
-    await d.controller.update('a1', dto as any, actor);
+    await d.controller.update('a1', dto, actor);
     expect(d.service.updateAssignment).toHaveBeenCalledWith('a1', dto, actor);
   });
 });

@@ -32,15 +32,23 @@ export class PurchaseOrderLineDto {
 
 /** Cuerpo de `POST /pharmacy/:pharmacyId/purchase-orders` (UC-25-01). */
 export class CreatePurchaseOrderDto {
-  @ApiProperty({ format: 'uuid', description: 'Sede de farmacia (pharmacy_sites)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Sede de farmacia (pharmacy_sites)',
+  })
   @IsUUID()
   pharmacySiteId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Proveedor (pharmacy_suppliers)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Proveedor (pharmacy_suppliers)',
+  })
   @IsUUID()
   pharmacySupplierId!: string;
 
-  @ApiPropertyOptional({ description: 'Número de orden; se autogenera si se omite' })
+  @ApiPropertyOptional({
+    description: 'Número de orden; se autogenera si se omite',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(64)

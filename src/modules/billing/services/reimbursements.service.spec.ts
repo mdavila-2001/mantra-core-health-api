@@ -14,7 +14,13 @@ function build() {
   const invoicesRepo = { findById: mockFn() };
   const linksRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new ReimbursementsService(em as any, reimbursementsRepo as any, invoicesRepo as any, linksRepo as any, logger as any);
+  const service = new ReimbursementsService(
+    em as any,
+    reimbursementsRepo,
+    invoicesRepo as any,
+    linksRepo,
+    logger as any,
+  );
   return { service, reimbursementsRepo, invoicesRepo, linksRepo };
 }
 
@@ -22,11 +28,30 @@ describe('ReimbursementsService (UC-17-08)', () => {
   it('links the reimbursement and credits the invoice', async () => {
     const d = build();
     d.reimbursementsRepo.findByClaim.mockResolvedValue(null);
-    const invoice = { id: 'inv1', balance: '100.00', paidTotal: '0.00', statusConceptId: BILL.INVOICE_ISSUED, updatedAt: new Date() };
+    const invoice = {
+      id: 'inv1',
+      balance: '100.00',
+      paidTotal: '0.00',
+      statusConceptId: BILL.INVOICE_ISSUED,
+      updatedAt: new Date(),
+    };
     d.invoicesRepo.findById.mockResolvedValue(invoice);
-    d.reimbursementsRepo.create.mockReturnValue({ id: 'r1', claimId: 'c1', amount: '30.00', statusConceptId: BILL.REIMBURSEMENT_POSTED });
+    d.reimbursementsRepo.create.mockReturnValue({
+      id: 'r1',
+      claimId: 'c1',
+      amount: '30.00',
+      statusConceptId: BILL.REIMBURSEMENT_POSTED,
+    });
 
-    const res = await d.service.link({ claimId: 'c1', invoiceId: 'inv1', amount: '30.00', tenantId: 't1' } as any, actor);
+    const res = await d.service.link(
+      {
+        claimId: 'c1',
+        invoiceId: 'inv1',
+        amount: '30.00',
+        tenantId: 't1',
+      },
+      actor,
+    );
 
     expect(res.id).toBe('r1');
     expect(invoice.paidTotal).toBe('30.00');
@@ -39,7 +64,10 @@ describe('ReimbursementsService (UC-17-08)', () => {
     const d = build();
     d.reimbursementsRepo.findByClaim.mockResolvedValue({ id: 'existing' });
     await expect(
-      d.service.link({ claimId: 'c1', invoiceId: 'inv1', amount: '30.00' } as any, actor),
+      d.service.link(
+        { claimId: 'c1', invoiceId: 'inv1', amount: '30.00' } as any,
+        actor,
+      ),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
@@ -48,7 +76,10 @@ describe('ReimbursementsService (UC-17-08)', () => {
     d.reimbursementsRepo.findByClaim.mockResolvedValue(null);
     d.invoicesRepo.findById.mockResolvedValue(null);
     await expect(
-      d.service.link({ claimId: 'c1', invoiceId: 'missing', amount: '30.00' } as any, actor),
+      d.service.link(
+        { claimId: 'c1', invoiceId: 'missing', amount: '30.00' } as any,
+        actor,
+      ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 });

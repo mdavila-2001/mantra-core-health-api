@@ -40,7 +40,9 @@ export class CommunitySocialController {
   @Post('public-profiles')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear un perfil público (bootstrap del grafo social)' })
+  @ApiOperation({
+    summary: 'Crear un perfil público (bootstrap del grafo social)',
+  })
   createProfile(
     @Body() dto: CreatePublicProfileDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -74,8 +76,13 @@ export class CommunitySocialController {
   /** UC-19-03. */
   @Put('reactions')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reaccionar a contenido (upsert una reacción por actor/objeto)' })
-  react(@Body() dto: ReactionDto, @CurrentUser() actor: AuthenticatedUser): Promise<ReactionResponseDto> {
+  @ApiOperation({
+    summary: 'Reaccionar a contenido (upsert una reacción por actor/objeto)',
+  })
+  react(
+    @Body() dto: ReactionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReactionResponseDto> {
     return this.service.react(dto, actor);
   }
 
@@ -83,7 +90,10 @@ export class CommunitySocialController {
   @Post('bookmarks')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Guardar un bookmark en una colección' })
-  bookmark(@Body() dto: CreateBookmarkDto, @CurrentUser() actor: AuthenticatedUser): Promise<IdResponseDto> {
+  bookmark(
+    @Body() dto: CreateBookmarkDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.service.bookmark(dto, actor);
   }
 
@@ -91,7 +101,10 @@ export class CommunitySocialController {
   @Post('follows')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Seguir un objeto social' })
-  follow(@Body() dto: CreateFollowDto, @CurrentUser() actor: AuthenticatedUser): Promise<IdResponseDto> {
+  follow(
+    @Body() dto: CreateFollowDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.service.follow(dto, actor);
   }
 
@@ -99,7 +112,10 @@ export class CommunitySocialController {
   @Post('blocks')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Bloquear a un usuario' })
-  block(@Body() dto: CreateBlockDto, @CurrentUser() actor: AuthenticatedUser): Promise<IdResponseDto> {
+  block(
+    @Body() dto: CreateBlockDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.service.block(dto, actor);
   }
 }

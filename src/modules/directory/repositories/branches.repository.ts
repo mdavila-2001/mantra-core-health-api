@@ -25,7 +25,11 @@ export class BranchesRepository {
   }
 
   /** Busca una branch por (tenant, code) — clave única dentro del tenant. */
-  findByTenantAndCode(em: EntityManager, tenantId: string, code: string): Promise<Branches | null> {
+  findByTenantAndCode(
+    em: EntityManager,
+    tenantId: string,
+    code: string,
+  ): Promise<Branches | null> {
     return em.findOne(Branches, { tenantId, code });
   }
 

@@ -18,7 +18,10 @@ export interface CreateRecallHoldData {
 /** Acceso a datos de `pharmacy_inventory.inventory_recall_holds`. */
 @Injectable()
 export class RecallHoldsRepository {
-  findById(em: EntityManager, id: string): Promise<InventoryRecallHolds | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<InventoryRecallHolds | null> {
     return em.findOne(InventoryRecallHolds, { id });
   }
 

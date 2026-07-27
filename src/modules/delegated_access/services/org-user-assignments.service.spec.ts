@@ -21,11 +21,13 @@ function build() {
     findById: mockFn(),
     findOverdueActive: mockFn().mockResolvedValue([]),
   };
-  const delegatesRepo = { suspendByDelegateAssignment: mockFn().mockResolvedValue(0) };
+  const delegatesRepo = {
+    suspendByDelegateAssignment: mockFn().mockResolvedValue(0),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new OrgUserAssignmentsService(
     em as any,
-    assignmentsRepo as any,
+    assignmentsRepo,
     delegatesRepo as any,
     logger as any,
   );
@@ -36,10 +38,22 @@ describe('OrgUserAssignmentsService', () => {
   describe('createAssignment (UC-29-01)', () => {
     it('creates the assignment and flushes', async () => {
       const d = build();
-      const created = { id: 'a1', statusConceptId: STATUS.ACTIVE, createdAt: new Date('2026-01-01') };
+      const created = {
+        id: 'a1',
+        statusConceptId: STATUS.ACTIVE,
+        createdAt: new Date('2026-01-01'),
+      };
       d.assignmentsRepo.create.mockReturnValue(created);
-      const res = await d.service.createAssignment('m1', { role: 'SECRETARY' } as any, actor);
-      expect(res).toEqual({ id: 'a1', status: STATUS.ACTIVE, createdAt: created.createdAt });
+      const res = await d.service.createAssignment(
+        'm1',
+        { role: 'SECRETARY' } as any,
+        actor,
+      );
+      expect(res).toEqual({
+        id: 'a1',
+        status: STATUS.ACTIVE,
+        createdAt: created.createdAt,
+      });
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
     });
 
@@ -56,9 +70,9 @@ describe('OrgUserAssignmentsService', () => {
   describe('updateAssignment (UC-29-10)', () => {
     it('rejects when there is nothing to change (precondition)', async () => {
       const d = build();
-      await expect(d.service.updateAssignment('a1', {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.updateAssignment('a1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('throws when the assignment does not exist', async () => {
@@ -71,7 +85,10 @@ describe('OrgUserAssignmentsService', () => {
 
     it('rejects when the assignment is not active (precondition)', async () => {
       const d = build();
-      d.assignmentsRepo.findById.mockResolvedValue({ id: 'a1', statusConceptId: STATUS.SUSPENDED });
+      d.assignmentsRepo.findById.mockResolvedValue({
+        id: 'a1',
+        statusConceptId: STATUS.SUSPENDED,
+      });
       await expect(
         d.service.updateAssignment('a1', { suspend: true } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -85,7 +102,11 @@ describe('OrgUserAssignmentsService', () => {
         rowVersion: 3,
       });
       await expect(
-        d.service.updateAssignment('a1', { suspend: true, expectedRowVersion: 2 } as any, actor),
+        d.service.updateAssignment(
+          'a1',
+          { suspend: true, expectedRowVersion: 2 } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);
     });
 
@@ -98,7 +119,11 @@ describe('OrgUserAssignmentsService', () => {
         updatedAt: new Date(),
       };
       d.assignmentsRepo.findById.mockResolvedValue(assignment);
-      const res = await d.service.updateAssignment('a1', { suspend: true } as any, actor);
+      const res = await d.service.updateAssignment(
+        'a1',
+        { suspend: true },
+        actor,
+      );
       expect(res).toEqual({ ok: true });
       expect(assignment.statusConceptId).toBe(STATUS.SUSPENDED);
       expect(d.delegatesRepo.suspendByDelegateAssignment).toHaveBeenCalled();

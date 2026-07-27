@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
@@ -53,7 +61,9 @@ export class BillingReceivablesController {
   @Post('payments-received\\:apply')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Aplicar un pago recibido con asignación multi-factura' })
+  @ApiOperation({
+    summary: 'Aplicar un pago recibido con asignación multi-factura',
+  })
   applyPayment(
     @Body() dto: ApplyPaymentReceivedDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -65,7 +75,9 @@ export class BillingReceivablesController {
   @Post('invoices/:id\\:credit-note')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Emitir nota de crédito / castigo sobre una factura' })
+  @ApiOperation({
+    summary: 'Emitir nota de crédito / castigo sobre una factura',
+  })
   creditNote(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreditNoteDto,
@@ -78,7 +90,9 @@ export class BillingReceivablesController {
   @Post('reimbursements\\:link')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Vincular reembolso de reclamo de seguro a la factura' })
+  @ApiOperation({
+    summary: 'Vincular reembolso de reclamo de seguro a la factura',
+  })
   linkReimbursement(
     @Body() dto: LinkReimbursementDto,
     @CurrentUser() actor: AuthenticatedUser,

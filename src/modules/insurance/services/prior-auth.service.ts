@@ -41,12 +41,23 @@ export class PriorAuthService {
   }
 
   /** UC-26-04: solicitar autorización previa con 1..N ítems. */
-  async submitRequest(dto: CreatePriorAuthRequestDto, actor: AuthenticatedUser): Promise<ResourceStatusDto> {
-    this.logger.info({ operation: 'insurance.priorauth.submit', actorId: actor.id }, 'Submitting prior auth');
+  async submitRequest(
+    dto: CreatePriorAuthRequestDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
+    this.logger.info(
+      { operation: 'insurance.priorauth.submit', actorId: actor.id },
+      'Submitting prior auth',
+    );
     return this.em.transactional(async (tx) => {
-      const coverage = await this.coverage.findCoverage(tx, dto.patientCoverageId);
+      const coverage = await this.coverage.findCoverage(
+        tx,
+        dto.patientCoverageId,
+      );
       if (!coverage) {
-        throw new ResourceNotFoundException('Cobertura no encontrada', { coverageId: dto.patientCoverageId });
+        throw new ResourceNotFoundException('Cobertura no encontrada', {
+          coverageId: dto.patientCoverageId,
+        });
       }
 
       const request = this.repo.createRequest(tx, {
@@ -71,23 +82,50 @@ export class PriorAuthService {
         });
       }
 
-      return { id: request.id, status: request.statusConceptId, createdAt: request.createdAt };
+      return {
+        id: request.id,
+        status: request.statusConceptId,
+        createdAt: request.createdAt,
+      };
     });
   }
 
   /** UC-26-05: emitir determinación y transicionar la solicitud a DETERMINED. */
-  async issueDetermination(requestId: string, dto: CreateDeterminationDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
-    this.logger.info({ operation: 'insurance.priorauth.determine', requestId, actorId: actor.id }, 'Issuing determination');
+  async issueDetermination(
+    requestId: string,
+    dto: CreateDeterminationDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
+    this.logger.info(
+      {
+        operation: 'insurance.priorauth.determine',
+        requestId,
+        actorId: actor.id,
+      },
+      'Issuing determination',
+    );
     return this.em.transactional(async (tx) => {
       const request = await this.repo.findRequest(tx, requestId);
-      if (!request) throw new ResourceNotFoundException('Solicitud de autorización no encontrada', { requestId });
-      if (![INS.PRIOR_AUTH_SUBMITTED, INS.PRIOR_AUTH_IN_REVIEW].includes(request.statusConceptId)) {
-        throw new PreconditionFailedException('La solicitud no admite determinación en su estado actual', {
-          requestId,
-        });
+      if (!request)
+        throw new ResourceNotFoundException(
+          'Solicitud de autorización no encontrada',
+          { requestId },
+        );
+      if (
+        ![INS.PRIOR_AUTH_SUBMITTED, INS.PRIOR_AUTH_IN_REVIEW].includes(
+          request.statusConceptId,
+        )
+      ) {
+        throw new PreconditionFailedException(
+          'La solicitud no admite determinación en su estado actual',
+          {
+            requestId,
+          },
+        );
       }
 
-      const nextVersion = (await this.repo.maxDeterminationVersion(tx, requestId)) + 1;
+      const nextVersion =
+        (await this.repo.maxDeterminationVersion(tx, requestId)) + 1;
       const determination = this.repo.createDetermination(tx, {
         priorAuthorizationRequestId: requestId,
         determinationVersion: nextVersion,

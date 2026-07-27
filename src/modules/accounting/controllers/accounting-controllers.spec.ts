@@ -16,7 +16,7 @@ describe('Accounting controllers (delegación)', () => {
     const svc = { openFiscalYear: mockFn(), lockPeriod: mockFn() };
     const c = new AccountingFiscalController(svc as any);
     await c.openFiscalYear({ code: 'FY' } as any, actor);
-    await c.lockPeriod('per1', { reason: 'x' } as any, actor);
+    await c.lockPeriod('per1', { reason: 'x' }, actor);
     expect(svc.openFiscalYear).toHaveBeenCalledWith({ code: 'FY' }, actor);
     expect(svc.lockPeriod).toHaveBeenCalledWith('per1', { reason: 'x' }, actor);
   });
@@ -26,8 +26,14 @@ describe('Accounting controllers (delegación)', () => {
     const c = new AccountingAccrualController(svc as any);
     await c.createAccrualObject({ objectNumber: 'A' } as any, actor);
     await c.runAccruals({ accrualObjectId: 'a' } as any, actor);
-    expect(svc.createAccrualObject).toHaveBeenCalledWith({ objectNumber: 'A' }, actor);
-    expect(svc.runAccruals).toHaveBeenCalledWith({ accrualObjectId: 'a' }, actor);
+    expect(svc.createAccrualObject).toHaveBeenCalledWith(
+      { objectNumber: 'A' },
+      actor,
+    );
+    expect(svc.runAccruals).toHaveBeenCalledWith(
+      { accrualObjectId: 'a' },
+      actor,
+    );
   });
 
   it('Subledger delega createOpenItem (UC-16-08) y clear (UC-16-09)', async () => {
@@ -45,14 +51,21 @@ describe('Accounting controllers (delegación)', () => {
     await c.capitalize({ code: 'A' } as any, actor);
     await c.runDepreciation({ fiscalPeriodId: 'fp' } as any, actor);
     expect(svc.capitalize).toHaveBeenCalledWith({ code: 'A' }, actor);
-    expect(svc.runDepreciation).toHaveBeenCalledWith({ fiscalPeriodId: 'fp' }, actor);
+    expect(svc.runDepreciation).toHaveBeenCalledWith(
+      { fiscalPeriodId: 'fp' },
+      actor,
+    );
   });
 
   it('Liability delega pay (UC-16-12)', async () => {
     const svc = { payLiability: mockFn() };
     const c = new AccountingLiabilityController(svc as any);
     await c.pay('l1', { amount: '10' } as any, actor);
-    expect(svc.payLiability).toHaveBeenCalledWith('l1', { amount: '10' }, actor);
+    expect(svc.payLiability).toHaveBeenCalledWith(
+      'l1',
+      { amount: '10' },
+      actor,
+    );
   });
 
   it('ExchangeRate delega register (UC-16-14)', async () => {

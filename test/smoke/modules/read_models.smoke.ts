@@ -29,7 +29,11 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
       maximumStalenessSeconds: 300,
       containsPhi: false,
       dependencies: [
-        { sourceSchemaName: 'billing', sourceObjectName: 'bills', dependencyType: 'TABLE' },
+        {
+          sourceSchemaName: 'billing',
+          sourceObjectName: 'bills',
+          dependencyType: 'TABLE',
+        },
       ],
     }),
     expectedStatus: 201,
@@ -50,7 +54,13 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
       schemaName: 'read_models',
       objectName: `rm_x_${c.u}_v`,
       objectType: 'VIEW',
-      dependencies: [{ sourceSchemaName: 'a', sourceObjectName: 'b', dependencyType: 'TABLE' }],
+      dependencies: [
+        {
+          sourceSchemaName: 'a',
+          sourceObjectName: 'b',
+          dependencyType: 'TABLE',
+        },
+      ],
     }),
     expectedStatus: 401,
   },
@@ -79,7 +89,13 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
       schemaName: 'read_models',
       objectName: `rm_retire_${c.u}_v`,
       objectType: 'MATERIALIZED_VIEW',
-      dependencies: [{ sourceSchemaName: 'crm', sourceObjectName: 'accounts', dependencyType: 'TABLE' }],
+      dependencies: [
+        {
+          sourceSchemaName: 'crm',
+          sourceObjectName: 'accounts',
+          dependencyType: 'TABLE',
+        },
+      ],
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -104,17 +120,48 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
       viewType: 'TABLE',
       supportsCursorPagination: true,
       fields: [
-        { fieldCode: 'display_name', sourceColumn: 'display_name', label: 'Nombre', dataType: 'string', ordinal: 1 },
-        { fieldCode: 'ssn', sourceColumn: 'ssn', label: 'SSN', dataType: 'string', sensitive: true, ordinal: 2 },
+        {
+          fieldCode: 'display_name',
+          sourceColumn: 'display_name',
+          label: 'Nombre',
+          dataType: 'string',
+          ordinal: 1,
+        },
+        {
+          fieldCode: 'ssn',
+          sourceColumn: 'ssn',
+          label: 'SSN',
+          dataType: 'string',
+          sensitive: true,
+          ordinal: 2,
+        },
       ],
       sortOptions: [
-        { sortCode: 'name_asc', label: 'Nombre', sortExpression: 'display_name', direction: 'ASC', nulls: 'LAST', ordinal: 1 },
+        {
+          sortCode: 'name_asc',
+          label: 'Nombre',
+          sortExpression: 'display_name',
+          direction: 'ASC',
+          nulls: 'LAST',
+          ordinal: 1,
+        },
       ],
       actions: [
-        { actionCode: 'open', label: 'Abrir', actionType: 'NAVIGATE', ordinal: 1 },
+        {
+          actionCode: 'open',
+          label: 'Abrir',
+          actionType: 'NAVIGATE',
+          ordinal: 1,
+        },
       ],
       kpis: [
-        { kpiCode: 'total', label: 'Total', valueColumn: 'total', comparisonColumn: 'prev_total', ordinal: 1 },
+        {
+          kpiCode: 'total',
+          label: 'Total',
+          valueColumn: 'total',
+          comparisonColumn: 'prev_total',
+          ordinal: 1,
+        },
       ],
       states: [
         { stateType: 'EMPTY', title: 'Sin datos', message: 'No hay cuentas' },
@@ -139,7 +186,15 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
       readModelDefinitionId: UUID_ABSENT,
       viewCode: 'x',
       viewType: 'TABLE',
-      fields: [{ fieldCode: 'a', sourceColumn: 'a', label: 'A', dataType: 'string', ordinal: 1 }],
+      fields: [
+        {
+          fieldCode: 'a',
+          sourceColumn: 'a',
+          label: 'A',
+          dataType: 'string',
+          ordinal: 1,
+        },
+      ],
     }),
     expectedStatus: 404,
   },
@@ -147,28 +202,34 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
   // --- UC-30-05: servir el read model ---
   {
     module: 'ReadModels',
-    endpoint: 'GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data',
+    endpoint:
+      'GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data',
     name: 'happy: sirve datos con masking + staleness',
     method: 'get',
-    path: (c) => `/portals/rm-portal-${c.u}/routes/rm-route-${c.u}/views/account_list/data`,
+    path: (c) =>
+      `/portals/rm-portal-${c.u}/routes/rm-route-${c.u}/views/account_list/data`,
     expectedStatus: 200,
   },
   {
     module: 'ReadModels',
-    endpoint: 'GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data',
+    endpoint:
+      'GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data',
     name: 'límite: vista inexistente -> 404',
     method: 'get',
-    path: (c) => `/portals/rm-portal-${c.u}/routes/rm-route-${c.u}/views/ghost/data`,
+    path: (c) =>
+      `/portals/rm-portal-${c.u}/routes/rm-route-${c.u}/views/ghost/data`,
     expectedStatus: 404,
   },
 
   // --- UC-30-11: derivar available_actions_json ---
   {
     module: 'ReadModels',
-    endpoint: 'GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions',
+    endpoint:
+      'GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions',
     name: 'happy: deriva acciones para un estado',
     method: 'get',
-    path: (c) => `/portals/rm-portal-${c.u}/routes/rm-route-${c.u}/views/account_list/actions?state=OPEN`,
+    path: (c) =>
+      `/portals/rm-portal-${c.u}/routes/rm-route-${c.u}/views/account_list/actions?state=OPEN`,
     expectedStatus: 200,
   },
 
@@ -267,12 +328,17 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /read-models/definitions/{schema}/{object}/versions',
     name: 'happy: crea versión N+1',
     method: 'post',
-    path: (c) => `/read-models/definitions/${c.vars.rmSchema}/${c.vars.rmObject}/versions`,
+    path: (c) =>
+      `/read-models/definitions/${c.vars.rmSchema}/${c.vars.rmObject}/versions`,
     body: () => ({
       objectType: 'MATERIALIZED_VIEW',
       refreshMode: 'CONCURRENT',
       dependencies: [
-        { sourceSchemaName: 'billing', sourceObjectName: 'bills', dependencyType: 'TABLE' },
+        {
+          sourceSchemaName: 'billing',
+          sourceObjectName: 'bills',
+          dependencyType: 'TABLE',
+        },
       ],
     }),
     expectedStatus: 201,
@@ -285,7 +351,13 @@ export const READ_MODELS_SMOKE: SmokeCase[] = [
     path: () => `/read-models/definitions/read_models/rm_ghost_v/versions`,
     body: () => ({
       objectType: 'VIEW',
-      dependencies: [{ sourceSchemaName: 'a', sourceObjectName: 'b', dependencyType: 'TABLE' }],
+      dependencies: [
+        {
+          sourceSchemaName: 'a',
+          sourceObjectName: 'b',
+          dependencyType: 'TABLE',
+        },
+      ],
     }),
     expectedStatus: 404,
   },

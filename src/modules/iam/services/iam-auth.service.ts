@@ -58,10 +58,16 @@ export class IamAuthService {
 
   /** UC-01-04: autentica por email+contraseña y abre una sesión. */
   async login(dto: LoginDto, ip?: string): Promise<TokenResponseDto> {
-    this.logger.info({ operation: 'iam.auth.login', email: dto.email }, 'Login attempt');
+    this.logger.info(
+      { operation: 'iam.auth.login', email: dto.email },
+      'Login attempt',
+    );
     const readEm = this.em.fork();
 
-    const cred = await this.credentialsRepo.findActivePasswordBySubject(readEm, dto.email);
+    const cred = await this.credentialsRepo.findActivePasswordBySubject(
+      readEm,
+      dto.email,
+    );
     if (!cred || !cred.secretHash) {
       await this.recordLoginFailure(undefined, ip, 'no-credential');
       throw new UnauthorizedException('Credenciales inválidas');
@@ -73,7 +79,9 @@ export class IamAuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const passwordOk = await argon2.verify(cred.secretHash, dto.password).catch(() => false);
+    const passwordOk = await argon2
+      .verify(cred.secretHash, dto.password)
+      .catch(() => false);
     if (!passwordOk) {
       await this.handleFailedPassword(user.id, ip);
       throw new UnauthorizedException('Credenciales inválidas');
@@ -81,7 +89,9 @@ export class IamAuthService {
 
     return this.em.transactional(async (tx) => {
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
-      const roles = conceptIdsToRoleCodes(activeRoles.map((r) => r.roleConceptId));
+      const roles = conceptIdsToRoleCodes(
+        activeRoles.map((r) => r.roleConceptId),
+      );
       const issued = this.tokenService.issueSessionTokens(user.id, roles);
 
       const session = this.sessionsRepo.create(tx, {
@@ -112,7 +122,10 @@ export class IamAuthService {
         ip,
       });
 
-      this.logger.info({ operation: 'iam.auth.login', userId: user.id }, 'Login succeeded');
+      this.logger.info(
+        { operation: 'iam.auth.login', userId: user.id },
+        'Login succeeded',
+      );
       return {
         accessToken: issued.accessToken,
         refreshToken: issued.refreshToken,
@@ -131,7 +144,11 @@ export class IamAuthService {
     if (rt.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
       // Reuso: un token ya rotado/revocado se presenta de nuevo → revocar sesión.
       this.logger.warn(
-        { operation: 'iam.auth.refresh', sessionId: rt.sessionId, reason: 'token-reuse' },
+        {
+          operation: 'iam.auth.refresh',
+          sessionId: rt.sessionId,
+          reason: 'token-reuse',
+        },
         'Refresh token reuse detected',
       );
       await this.em.transactional(async (tx) => {
@@ -157,11 +174,22 @@ export class IamAuthService {
         throw new UnauthorizedException('Sesión no activa');
       }
 
-      const activeRoles = await this.rolesRepo.findActiveForUser(tx, session.userId);
-      const roles = conceptIdsToRoleCodes(activeRoles.map((r) => r.roleConceptId));
-      const accessToken = this.tokenService.signAccessToken(session.userId, session.tokenId, roles);
+      const activeRoles = await this.rolesRepo.findActiveForUser(
+        tx,
+        session.userId,
+      );
+      const roles = conceptIdsToRoleCodes(
+        activeRoles.map((r) => r.roleConceptId),
+      );
+      const accessToken = this.tokenService.signAccessToken(
+        session.userId,
+        session.tokenId,
+        roles,
+      );
       const { raw, hash } = this.tokenService.issueRefreshToken();
-      const expiresAt = new Date(Date.now() + this.authEnv.refreshTtlDays * 24 * 60 * 60 * 1000);
+      const expiresAt = new Date(
+        Date.now() + this.authEnv.refreshTtlDays * 24 * 60 * 60 * 1000,
+      );
 
       const oldRt = await this.refreshRepo.findByHash(tx, tokenHash);
       if (oldRt) {
@@ -188,10 +216,19 @@ export class IamAuthService {
 
   /** UC-01-08: revoca todas las sesiones activas del usuario actual. */
   async logoutAll(actor: AuthenticatedUser): Promise<LogoutAllResultDto> {
-    this.logger.info({ operation: 'iam.auth.logout-all', userId: actor.id }, 'Global logout');
+    this.logger.info(
+      { operation: 'iam.auth.logout-all', userId: actor.id },
+      'Global logout',
+    );
     return this.em.transactional(async (tx) => {
-      const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(tx, actor.id);
-      const revokedSessions = await this.sessionsRepo.revokeAllActiveForUser(tx, actor.id);
+      const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(
+        tx,
+        actor.id,
+      );
+      const revokedSessions = await this.sessionsRepo.revokeAllActiveForUser(
+        tx,
+        actor.id,
+      );
       await this.refreshRepo.revokeActiveBySessionIds(tx, sessionIds);
 
       this.eventsRepo.record(tx, {
@@ -207,7 +244,10 @@ export class IamAuthService {
 
   /** UC-01-11: expira sesiones y refresh tokens ya vencidos. */
   async purgeSessions(actor: AuthenticatedUser): Promise<PurgeResultDto> {
-    this.logger.info({ operation: 'iam.auth.purge', actorId: actor.id }, 'Purging expired sessions');
+    this.logger.info(
+      { operation: 'iam.auth.purge', actorId: actor.id },
+      'Purging expired sessions',
+    );
     return this.em.transactional(async (tx) => {
       const now = new Date();
       const expiredSessions = await this.sessionsRepo.purgeExpired(tx, now);
@@ -246,7 +286,10 @@ export class IamAuthService {
    * Contraseña incorrecta: registra el fallo y, si se alcanza el umbral, crea el
    * bloqueo de cuenta y revoca sesiones (realiza UC-01-07 de forma automática).
    */
-  private async handleFailedPassword(userId: string, ip: string | undefined): Promise<void> {
+  private async handleFailedPassword(
+    userId: string,
+    ip: string | undefined,
+  ): Promise<void> {
     await this.em.transactional(async (tx) => {
       this.eventsRepo.record(tx, {
         eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,
@@ -259,11 +302,20 @@ export class IamAuthService {
       await tx.flush();
 
       const user = await this.usersRepo.findById(tx, userId);
-      const failedCount = await this.eventsRepo.countFailedLoginsSince(tx, userId, user?.lastLoginAt);
+      const failedCount = await this.eventsRepo.countFailedLoginsSince(
+        tx,
+        userId,
+        user?.lastLoginAt,
+      );
 
       if (failedCount >= this.authEnv.lockThreshold) {
         this.logger.warn(
-          { operation: 'iam.auth.login', userId, failedCount, reason: 'lock-threshold' },
+          {
+            operation: 'iam.auth.login',
+            userId,
+            failedCount,
+            reason: 'lock-threshold',
+          },
           'Account locked after repeated failures',
         );
         if (user) {
@@ -271,7 +323,10 @@ export class IamAuthService {
           touch(user, userId);
         }
 
-        const existingLock = await this.lockoutsRepo.findActiveForUser(tx, userId);
+        const existingLock = await this.lockoutsRepo.findActiveForUser(
+          tx,
+          userId,
+        );
         if (existingLock) {
           existingLock.failedAttempts = failedCount;
           touch(existingLock, userId);
@@ -284,7 +339,10 @@ export class IamAuthService {
           });
         }
 
-        const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(tx, userId);
+        const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(
+          tx,
+          userId,
+        );
         await this.sessionsRepo.revokeAllActiveForUser(tx, userId);
         await this.refreshRepo.revokeActiveBySessionIds(tx, sessionIds);
 

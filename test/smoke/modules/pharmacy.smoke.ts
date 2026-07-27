@@ -40,7 +40,12 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/pharmacies',
     auth: false,
-    body: (c) => ({ tenantId: c.tenantId, code: `PH-X-${c.u}`, legalName: 'X', license: { licenseNumber: 'L' } }),
+    body: (c) => ({
+      tenantId: c.tenantId,
+      code: `PH-X-${c.u}`,
+      legalName: 'X',
+      license: { licenseNumber: 'L' },
+    }),
     expectedStatus: 401,
   },
   {
@@ -49,7 +54,11 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     name: 'límite: falta legalName -> 400',
     method: 'post',
     path: () => '/pharmacies',
-    body: (c) => ({ tenantId: c.tenantId, code: `PH-Y-${c.u}`, license: { licenseNumber: 'L' } }),
+    body: (c) => ({
+      tenantId: c.tenantId,
+      code: `PH-Y-${c.u}`,
+      license: { licenseNumber: 'L' },
+    }),
     expectedStatus: 400,
   },
 
@@ -59,7 +68,8 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify',
     name: 'happy: verifica licencia y activa la farmacia',
     method: 'post',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/licenses/${c.vars.pharmacyLicenseId}/verify`,
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/licenses/${c.vars.pharmacyLicenseId}/verify`,
     body: () => ({ approve: true }),
     expectedStatus: 200,
   },
@@ -68,7 +78,8 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify',
     name: 'límite: licencia inexistente -> 404',
     method: 'post',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/licenses/${UUID_ABSENT}/verify`,
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/licenses/${UUID_ABSENT}/verify`,
     body: () => ({ approve: true }),
     expectedStatus: 404,
   },
@@ -80,7 +91,11 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     name: 'happy: registra sede dispensadora',
     method: 'post',
     path: (c) => `/pharmacies/${c.vars.pharmacyId}/sites`,
-    body: (c) => ({ practiceSiteId: c.vars.pracSiteId, code: `SITE-${c.u}`, name: 'Sede Principal' }),
+    body: (c) => ({
+      practiceSiteId: c.vars.pracSiteId,
+      code: `SITE-${c.u}`,
+      name: 'Sede Principal',
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.pharmacySiteId = String(b.id);
@@ -92,7 +107,11 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     name: 'límite: farmacia inexistente -> 404',
     method: 'post',
     path: () => `/pharmacies/${UUID_ABSENT}/sites`,
-    body: (c) => ({ practiceSiteId: UUID_ABSENT, code: `SITE-X-${c.u}`, name: 'X' }),
+    body: (c) => ({
+      practiceSiteId: UUID_ABSENT,
+      code: `SITE-X-${c.u}`,
+      name: 'X',
+    }),
     expectedStatus: 404,
   },
 
@@ -132,7 +151,11 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     name: 'happy: crea lista de precios pública',
     method: 'post',
     path: (c) => `/pharmacies/${c.vars.pharmacyId}/price-lists`,
-    body: (c) => ({ code: `PL-${c.u}`, priceListType: 'PUBLIC', publicVisibility: true }),
+    body: (c) => ({
+      code: `PL-${c.u}`,
+      priceListType: 'PUBLIC',
+      publicVisibility: true,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.pharmacyPriceListId = String(b.id);
@@ -154,8 +177,13 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices',
     name: 'happy: fija precio (versión 1)',
     method: 'post',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/prices`,
-    body: (c) => ({ pharmacyProductId: c.vars.pharmacyProductId, unitAmount: 12.5, patientAmount: 12.5 }),
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/prices`,
+    body: (c) => ({
+      pharmacyProductId: c.vars.pharmacyProductId,
+      unitAmount: 12.5,
+      patientAmount: 12.5,
+    }),
     expectedStatus: 201,
   },
   {
@@ -163,7 +191,8 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices',
     name: 'límite: producto inexistente -> 404',
     method: 'post',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/prices`,
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/prices`,
     body: () => ({ pharmacyProductId: UUID_ABSENT, unitAmount: 5 }),
     expectedStatus: 404,
   },
@@ -175,7 +204,11 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     name: 'happy: establece conexión de integración',
     method: 'post',
     path: (c) => `/pharmacies/${c.vars.pharmacyId}/integration-connections`,
-    body: () => ({ integrationMode: 'REALTIME', supportsStockQuery: true, supportsPriceQuery: true }),
+    body: () => ({
+      integrationMode: 'REALTIME',
+      supportsStockQuery: true,
+      supportsPriceQuery: true,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.pharmacyConnectionId = String(b.id);
@@ -195,22 +228,30 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
   // --- UC-24-08: mapear producto externo ---
   {
     module: 'Pharmacy',
-    endpoint: 'POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings',
+    endpoint:
+      'POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings',
     name: 'happy: mapea producto a código externo',
     method: 'post',
     path: (c) =>
       `/pharmacies/${c.vars.pharmacyId}/integration-connections/${c.vars.pharmacyConnectionId}/product-mappings`,
-    body: (c) => ({ pharmacyProductId: c.vars.pharmacyProductId, externalProductCode: `EXT-${c.u}` }),
+    body: (c) => ({
+      pharmacyProductId: c.vars.pharmacyProductId,
+      externalProductCode: `EXT-${c.u}`,
+    }),
     expectedStatus: 201,
   },
   {
     module: 'Pharmacy',
-    endpoint: 'POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings',
+    endpoint:
+      'POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings',
     name: 'límite: mapeo duplicado -> 409',
     method: 'post',
     path: (c) =>
       `/pharmacies/${c.vars.pharmacyId}/integration-connections/${c.vars.pharmacyConnectionId}/product-mappings`,
-    body: (c) => ({ pharmacyProductId: c.vars.pharmacyProductId, externalProductCode: `EXT2-${c.u}` }),
+    body: (c) => ({
+      pharmacyProductId: c.vars.pharmacyProductId,
+      externalProductCode: `EXT2-${c.u}`,
+    }),
     expectedStatus: 409,
   },
 
@@ -240,7 +281,8 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'DELETE /pharmacies/{pharmacyId}/products/{productId}',
     name: 'happy: retira producto (soft-delete)',
     method: 'delete',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/products/${c.vars.pharmacyProductId}`,
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/products/${c.vars.pharmacyProductId}`,
     expectedStatus: 200,
   },
   {
@@ -248,7 +290,8 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'DELETE /pharmacies/{pharmacyId}/products/{productId}',
     name: 'límite: producto ya retirado -> 422',
     method: 'delete',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/products/${c.vars.pharmacyProductId}`,
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/products/${c.vars.pharmacyProductId}`,
     expectedStatus: 422,
   },
 
@@ -258,7 +301,8 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close',
     name: 'happy: cierra la lista de precios',
     method: 'post',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/close`,
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/close`,
     body: () => ({}),
     expectedStatus: 200,
   },
@@ -267,7 +311,8 @@ export const PHARMACY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close',
     name: 'límite: lista ya cerrada -> 422',
     method: 'post',
-    path: (c) => `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/close`,
+    path: (c) =>
+      `/pharmacies/${c.vars.pharmacyId}/price-lists/${c.vars.pharmacyPriceListId}/close`,
     body: () => ({}),
     expectedStatus: 422,
   },

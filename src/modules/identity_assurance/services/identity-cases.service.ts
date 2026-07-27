@@ -72,14 +72,26 @@ export class IdentityCasesService {
   }
 
   /** UC-27-02: abre un caso aplicando el nivel de aseguramiento de la política. */
-  async openCase(dto: OpenCaseDto, actor: AuthenticatedUser): Promise<CaseResponseDto> {
-    this.logger.info({ operation: 'ida.case.open', actorId: actor.id }, 'Opening verification case');
+  async openCase(
+    dto: OpenCaseDto,
+    actor: AuthenticatedUser,
+  ): Promise<CaseResponseDto> {
+    this.logger.info(
+      { operation: 'ida.case.open', actorId: actor.id },
+      'Opening verification case',
+    );
     return this.em.transactional(async (tx) => {
-      const policy = await this.policiesRepo.findById(tx, dto.identityVerificationPolicyId);
+      const policy = await this.policiesRepo.findById(
+        tx,
+        dto.identityVerificationPolicyId,
+      );
       if (!policy) {
-        throw new ResourceNotFoundException('Política de verificación no encontrada', {
-          policyId: dto.identityVerificationPolicyId,
-        });
+        throw new ResourceNotFoundException(
+          'Política de verificación no encontrada',
+          {
+            policyId: dto.identityVerificationPolicyId,
+          },
+        );
       }
 
       const now = new Date();
@@ -88,16 +100,24 @@ export class IdentityCasesService {
         subjectEntityId: dto.subjectEntityId,
         identityVerificationPolicyId: policy.id,
         requestedAssuranceLevelConceptId:
-          dto.requestedAssuranceLevelConceptId ?? policy.requiredIdentityAssuranceLevelConceptId,
+          dto.requestedAssuranceLevelConceptId ??
+          policy.requiredIdentityAssuranceLevelConceptId,
         statusConceptId: IDA.CASE_OPEN,
         riskScore: '0',
         openedAt: now,
-        expiresAt: new Date(now.getTime() + (dto.expiresInHours ?? 72) * MS_PER_HOUR),
+        expiresAt: new Date(
+          now.getTime() + (dto.expiresInHours ?? 72) * MS_PER_HOUR,
+        ),
         correlationId: dto.correlationId,
         actorUserId: actor.id,
       });
       await tx.flush();
-      return { id: kase.id, status: kase.statusConceptId, openedAt: kase.openedAt, expiresAt: kase.expiresAt };
+      return {
+        id: kase.id,
+        status: kase.statusConceptId,
+        openedAt: kase.openedAt,
+        expiresAt: kase.expiresAt,
+      };
     });
   }
 
@@ -107,14 +127,23 @@ export class IdentityCasesService {
     dto: SubmitEvidenceDto,
     actor: AuthenticatedUser,
   ): Promise<EvidenceResponseDto> {
-    this.logger.info({ operation: 'ida.case.evidence', actorId: actor.id, caseId }, 'Submitting evidence');
+    this.logger.info(
+      { operation: 'ida.case.evidence', actorId: actor.id, caseId },
+      'Submitting evidence',
+    );
     return this.em.transactional(async (tx) => {
       const kase = await this.loadCase(tx, caseId);
-      if (kase.statusConceptId !== IDA.CASE_OPEN && kase.statusConceptId !== IDA.CASE_IN_VERIFICATION) {
-        throw new PreconditionFailedException('El caso no admite evidencia en su estado actual', {
-          caseId,
-          status: kase.statusConceptId,
-        });
+      if (
+        kase.statusConceptId !== IDA.CASE_OPEN &&
+        kase.statusConceptId !== IDA.CASE_IN_VERIFICATION
+      ) {
+        throw new PreconditionFailedException(
+          'El caso no admite evidencia en su estado actual',
+          {
+            caseId,
+            status: kase.statusConceptId,
+          },
+        );
       }
 
       const evidence = this.evidenceRepo.create(tx, {
@@ -131,7 +160,11 @@ export class IdentityCasesService {
       });
       touch(kase, actor.id);
       await tx.flush();
-      return { id: evidence.id, verificationStatus: evidence.verificationStatusConceptId, createdAt: evidence.createdAt };
+      return {
+        id: evidence.id,
+        verificationStatus: evidence.verificationStatusConceptId,
+        createdAt: evidence.createdAt,
+      };
     });
   }
 
@@ -141,14 +174,20 @@ export class IdentityCasesService {
     dto: PlanChecksDto,
     actor: AuthenticatedUser,
   ): Promise<ChecksPlannedResponseDto> {
-    this.logger.info({ operation: 'ida.case.plan', actorId: actor.id, caseId }, 'Planning checks');
+    this.logger.info(
+      { operation: 'ida.case.plan', actorId: actor.id, caseId },
+      'Planning checks',
+    );
     return this.em.transactional(async (tx) => {
       const kase = await this.loadCase(tx, caseId);
       if (kase.statusConceptId !== IDA.CASE_OPEN) {
-        throw new PreconditionFailedException('Solo un caso abierto puede planificar checks', {
-          caseId,
-          status: kase.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'Solo un caso abierto puede planificar checks',
+          {
+            caseId,
+            status: kase.statusConceptId,
+          },
+        );
       }
 
       const checkIds: string[] = [];
@@ -178,7 +217,10 @@ export class IdentityCasesService {
     dto: RaiseFraudSignalDto,
     actor: AuthenticatedUser,
   ): Promise<FraudSignalResponseDto> {
-    this.logger.info({ operation: 'ida.case.fraud', actorId: actor.id, caseId }, 'Raising fraud signal');
+    this.logger.info(
+      { operation: 'ida.case.fraud', actorId: actor.id, caseId },
+      'Raising fraud signal',
+    );
     return this.em.transactional(async (tx) => {
       const kase = await this.loadCase(tx, caseId);
 
@@ -192,8 +234,13 @@ export class IdentityCasesService {
         resolutionConceptId: IDA.FRAUD_OPEN,
       });
 
-      const bump = dto.confidenceScore ? Number.parseFloat(dto.confidenceScore) : 0.5;
-      kase.riskScore = String(Number.parseFloat(kase.riskScore ?? '0') + (Number.isFinite(bump) ? bump : 0.5));
+      const bump = dto.confidenceScore
+        ? Number.parseFloat(dto.confidenceScore)
+        : 0.5;
+      kase.riskScore = String(
+        Number.parseFloat(kase.riskScore ?? '0') +
+          (Number.isFinite(bump) ? bump : 0.5),
+      );
       if (
         kase.statusConceptId === IDA.CASE_OPEN ||
         kase.statusConceptId === IDA.CASE_IN_VERIFICATION ||
@@ -203,7 +250,11 @@ export class IdentityCasesService {
       }
       touch(kase, actor.id);
       await tx.flush();
-      return { id: signal.id, resolution: signal.resolutionConceptId, caseStatus: kase.statusConceptId };
+      return {
+        id: signal.id,
+        resolution: signal.resolutionConceptId,
+        caseStatus: kase.statusConceptId,
+      };
     });
   }
 
@@ -213,21 +264,34 @@ export class IdentityCasesService {
     dto: OpenManualReviewDto,
     actor: AuthenticatedUser,
   ): Promise<ManualReviewResponseDto> {
-    this.logger.info({ operation: 'ida.case.review.open', actorId: actor.id, caseId }, 'Opening manual review');
+    this.logger.info(
+      { operation: 'ida.case.review.open', actorId: actor.id, caseId },
+      'Opening manual review',
+    );
     return this.em.transactional(async (tx) => {
       const kase = await this.loadCase(tx, caseId);
       if (
         kase.statusConceptId !== IDA.CASE_IN_VERIFICATION &&
         kase.statusConceptId !== IDA.CASE_AT_RISK
       ) {
-        throw new PreconditionFailedException('El caso no es escalable a revisión manual', {
-          caseId,
-          status: kase.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El caso no es escalable a revisión manual',
+          {
+            caseId,
+            status: kase.statusConceptId,
+          },
+        );
       }
-      const openReviews = await this.reviewRepo.countOpenByCase(tx, kase.id, IDA.REVIEW_OPEN);
+      const openReviews = await this.reviewRepo.countOpenByCase(
+        tx,
+        kase.id,
+        IDA.REVIEW_OPEN,
+      );
       if (openReviews > 0) {
-        throw new ConflictException('El caso ya tiene una revisión manual abierta', { caseId });
+        throw new ConflictException(
+          'El caso ya tiene una revisión manual abierta',
+          { caseId },
+        );
       }
 
       const review = this.reviewRepo.create(tx, {
@@ -241,7 +305,11 @@ export class IdentityCasesService {
       kase.statusConceptId = IDA.CASE_MANUAL_REVIEW;
       touch(kase, actor.id);
       await tx.flush();
-      return { id: review.id, status: review.statusConceptId, caseStatus: kase.statusConceptId };
+      return {
+        id: review.id,
+        status: review.statusConceptId,
+        caseStatus: kase.statusConceptId,
+      };
     });
   }
 
@@ -251,24 +319,41 @@ export class IdentityCasesService {
     dto: IssueAssertionDto,
     actor: AuthenticatedUser,
   ): Promise<AssertionResponseDto> {
-    this.logger.info({ operation: 'ida.case.assert', actorId: actor.id, caseId }, 'Issuing identity assertion');
+    this.logger.info(
+      { operation: 'ida.case.assert', actorId: actor.id, caseId },
+      'Issuing identity assertion',
+    );
     return this.em.transactional(async (tx) => {
       const kase = await this.loadCase(tx, caseId);
       if (kase.statusConceptId !== IDA.CASE_VERIFIED) {
-        throw new PreconditionFailedException('Solo un caso verificado puede emitir una aserción', {
-          caseId,
-          status: kase.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'Solo un caso verificado puede emitir una aserción',
+          {
+            caseId,
+            status: kase.statusConceptId,
+          },
+        );
       }
-      const completed = await this.checksRepo.countByCaseAndStatus(tx, kase.id, IDA.CHECK_COMPLETED);
+      const completed = await this.checksRepo.countByCaseAndStatus(
+        tx,
+        kase.id,
+        IDA.CHECK_COMPLETED,
+      );
       if (completed < 1) {
-        throw new PreconditionFailedException('No hay checks completados que sustenten la aserción', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'No hay checks completados que sustenten la aserción',
+          {
+            caseId,
+          },
+        );
       }
-      const assuranceLevel = dto.assuranceLevelConceptId ?? kase.requestedAssuranceLevelConceptId;
+      const assuranceLevel =
+        dto.assuranceLevelConceptId ?? kase.requestedAssuranceLevelConceptId;
       if (!assuranceLevel) {
-        throw new PreconditionFailedException('No se pudo determinar el nivel de aseguramiento', { caseId });
+        throw new PreconditionFailedException(
+          'No se pudo determinar el nivel de aseguramiento',
+          { caseId },
+        );
       }
 
       const now = new Date();
@@ -277,12 +362,15 @@ export class IdentityCasesService {
         issuerIdentityAuthorityId: dto.issuerIdentityAuthorityId,
         subjectTypeConceptId: kase.subjectTypeConceptId,
         subjectEntityId: kase.subjectEntityId,
-        assertionTypeConceptId: dto.assertionTypeConceptId ?? IDA.ASSERTION_IDENTITY,
+        assertionTypeConceptId:
+          dto.assertionTypeConceptId ?? IDA.ASSERTION_IDENTITY,
         assuranceLevelConceptId: assuranceLevel,
         assertionIdentifier: `IDA-ASSERT-${randomUUID()}`,
         assertionHash: randomUUID().replace(/-/g, ''),
         issuedAt: now,
-        expiresAt: new Date(now.getTime() + (dto.expiresInHours ?? 8760) * MS_PER_HOUR),
+        expiresAt: new Date(
+          now.getTime() + (dto.expiresInHours ?? 8760) * MS_PER_HOUR,
+        ),
       });
       kase.statusConceptId = IDA.CASE_ASSERTED;
       kase.completedAt = now;
@@ -300,15 +388,26 @@ export class IdentityCasesService {
 
   /** UC-27-12: barrido programado que expira los casos vencidos por lote. */
   async expireSweep(actor: AuthenticatedUser): Promise<ExpireSweepResponseDto> {
-    this.logger.info({ operation: 'ida.case.expire-sweep', actorId: actor.id }, 'Running expiration sweep');
+    this.logger.info(
+      { operation: 'ida.case.expire-sweep', actorId: actor.id },
+      'Running expiration sweep',
+    );
     return this.em.transactional(async (tx) => {
       const now = new Date();
-      const expirable = await this.casesRepo.findExpirable(tx, OPEN_CASE_STATES, now);
+      const expirable = await this.casesRepo.findExpirable(
+        tx,
+        OPEN_CASE_STATES,
+        now,
+      );
       const caseIds: string[] = [];
       for (const kase of expirable) {
         kase.statusConceptId = IDA.CASE_EXPIRED;
         touch(kase, actor.id);
-        const pending = await this.checksRepo.findPendingByCase(tx, kase.id, CANCELLABLE_CHECK_STATES);
+        const pending = await this.checksRepo.findPendingByCase(
+          tx,
+          kase.id,
+          CANCELLABLE_CHECK_STATES,
+        );
         for (const check of pending) {
           check.statusConceptId = IDA.CHECK_CANCELLED;
           touch(check, actor.id);
@@ -322,7 +421,11 @@ export class IdentityCasesService {
 
   private async loadCase(tx: EntityManager, caseId: string) {
     const kase = await this.casesRepo.findById(tx, caseId);
-    if (!kase) throw new ResourceNotFoundException('Caso de verificación no encontrado', { caseId });
+    if (!kase)
+      throw new ResourceNotFoundException(
+        'Caso de verificación no encontrado',
+        { caseId },
+      );
     return kase;
   }
 }

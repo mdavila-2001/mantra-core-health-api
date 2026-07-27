@@ -18,7 +18,7 @@ function build() {
   const service = new IamDevicesService(
     em as any,
     usersRepo as any,
-    devicesRepo as any,
+    devicesRepo,
     eventsRepo as any,
     logger as any,
   );
@@ -31,7 +31,11 @@ describe('IamDevicesService (UC-01-05)', () => {
     d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
     d.devicesRepo.create.mockReturnValue({ id: 'dev1' });
 
-    const res = await d.service.register('u1', { deviceFingerprint: 'fp' }, actor as any);
+    const res = await d.service.register(
+      'u1',
+      { deviceFingerprint: 'fp' },
+      actor,
+    );
 
     expect(res).toEqual({ id: 'dev1', userId: 'u1', trusted: false });
     expect(d.eventsRepo.record).not.toHaveBeenCalled();
@@ -45,13 +49,15 @@ describe('IamDevicesService (UC-01-05)', () => {
     const res = await d.service.register(
       'u1',
       { deviceFingerprint: 'fp', platform: 'IOS', trust: true },
-      actor as any,
+      actor,
     );
 
     expect(res.trusted).toBe(true);
     expect(d.eventsRepo.record).toHaveBeenCalledWith(
       d.tx,
-      expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_DEVICE_TRUST }),
+      expect.objectContaining({
+        eventTypeConceptId: CONCEPTS.SEC_DEVICE_TRUST,
+      }),
     );
   });
 

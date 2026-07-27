@@ -17,7 +17,10 @@ export class SetMemberInputDto {
   @IsUUID()
   fieldId!: string;
 
-  @ApiPropertyOptional({ description: 'Sección a la que pertenece', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sección a la que pertenece',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   sectionId?: string;
@@ -36,7 +39,10 @@ export class SetMemberInputDto {
 
 /** Cuerpo de `POST /forms/definition-sets/{id}/versions/{ver}/publish` (UC-09-03). */
 export class PublishVersionDto {
-  @ApiProperty({ type: [SetMemberInputDto], description: 'Miembros a componer' })
+  @ApiProperty({
+    type: [SetMemberInputDto],
+    description: 'Miembros a componer',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

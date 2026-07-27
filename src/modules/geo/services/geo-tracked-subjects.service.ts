@@ -21,10 +21,15 @@ import {
   LastPositionResponseDto,
   StatusResultDto,
 } from '../dto';
-import { GEO, SUBJECT_TYPE_CONCEPT_BY_CODE, NETWORK_CONCEPT_BY_CODE } from '../geo.concepts';
+import {
+  GEO,
+  SUBJECT_TYPE_CONCEPT_BY_CODE,
+  NETWORK_CONCEPT_BY_CODE,
+} from '../geo.concepts';
 
 /** Convierte un número opcional a la representación `numeric` (string) del ORM. */
-const num = (v?: number): string | undefined => (v === undefined || v === null ? undefined : String(v));
+const num = (v?: number): string | undefined =>
+  v === undefined || v === null ? undefined : String(v);
 
 /**
  * Casos de uso sobre `geo.tracked_subjects`: alta con consentimiento (UC-13-01),
@@ -52,9 +57,13 @@ export class GeoTrackedSubjectsService {
     dto: CreateTrackedSubjectDto,
     actor: AuthenticatedUser,
   ): Promise<TrackedSubjectResponseDto> {
-    this.logger.info({ operation: 'geo.subject.enroll', actorId: actor.id }, 'Enrolling tracked subject');
+    this.logger.info(
+      { operation: 'geo.subject.enroll', actorId: actor.id },
+      'Enrolling tracked subject',
+    );
     return this.em.transactional(async (tx) => {
-      const subjectTypeConceptId = SUBJECT_TYPE_CONCEPT_BY_CODE[dto.subjectType ?? 'PERSON'];
+      const subjectTypeConceptId =
+        SUBJECT_TYPE_CONCEPT_BY_CODE[dto.subjectType ?? 'PERSON'];
 
       const clash = await this.subjectsRepo.findActiveBySubject(
         tx,
@@ -83,7 +92,10 @@ export class GeoTrackedSubjectsService {
       });
       await tx.flush();
 
-      this.logger.info({ operation: 'geo.subject.enroll', subjectId: subject.id }, 'Tracked subject enrolled');
+      this.logger.info(
+        { operation: 'geo.subject.enroll', subjectId: subject.id },
+        'Tracked subject enrolled',
+      );
       return {
         id: subject.id,
         subjectId: subject.subjectId,
@@ -101,25 +113,42 @@ export class GeoTrackedSubjectsService {
     actor: AuthenticatedUser,
   ): Promise<IngestPingsResultDto> {
     this.logger.info(
-      { operation: 'geo.subject.pings', trackedSubjectId, count: dto.pings.length },
+      {
+        operation: 'geo.subject.pings',
+        trackedSubjectId,
+        count: dto.pings.length,
+      },
       'Ingesting location pings',
     );
     return this.em.transactional(async (tx) => {
       const subject = await this.subjectsRepo.findById(tx, trackedSubjectId);
-      if (!subject) throw new ResourceNotFoundException('Sujeto rastreado no encontrado', { trackedSubjectId });
+      if (!subject)
+        throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
+          trackedSubjectId,
+        });
 
       // Tras una revocación de consentimiento el sujeto queda SUSPENDED: rechaza ingesta.
       if (subject.stateConceptId !== GEO.SUBJECT_ACTIVE) {
-        throw new PreconditionFailedException('El sujeto no está activo para rastreo', {
-          trackedSubjectId,
-        });
+        throw new PreconditionFailedException(
+          'El sujeto no está activo para rastreo',
+          {
+            trackedSubjectId,
+          },
+        );
       }
 
-      const openSession = await this.sessionsRepo.findOpenBySubject(tx, trackedSubjectId, GEO.SESSION_OPEN);
+      const openSession = await this.sessionsRepo.findOpenBySubject(
+        tx,
+        trackedSubjectId,
+        GEO.SESSION_OPEN,
+      );
       if (!openSession) {
-        throw new PreconditionFailedException('No hay una sesión de tracking abierta para el sujeto', {
-          trackedSubjectId,
-        });
+        throw new PreconditionFailedException(
+          'No hay una sesión de tracking abierta para el sujeto',
+          {
+            trackedSubjectId,
+          },
+        );
       }
 
       for (const p of dto.pings) {
@@ -133,7 +162,9 @@ export class GeoTrackedSubjectsService {
           speedMps: num(p.speedMps),
           headingDeg: num(p.headingDeg),
           batteryPct: p.batteryPct,
-          networkConceptId: p.network ? NETWORK_CONCEPT_BY_CODE[p.network] : undefined,
+          networkConceptId: p.network
+            ? NETWORK_CONCEPT_BY_CODE[p.network]
+            : undefined,
           capturedAt: p.capturedAt,
           recordedByUserId: actor.id,
         });
@@ -144,16 +175,27 @@ export class GeoTrackedSubjectsService {
   }
 
   /** UC-13-09: última posición conocida del sujeto (lectura). */
-  async lastPosition(trackedSubjectId: string): Promise<LastPositionResponseDto> {
-    this.logger.info({ operation: 'geo.subject.last-position', trackedSubjectId }, 'Reading last known position');
+  async lastPosition(
+    trackedSubjectId: string,
+  ): Promise<LastPositionResponseDto> {
+    this.logger.info(
+      { operation: 'geo.subject.last-position', trackedSubjectId },
+      'Reading last known position',
+    );
     const em = this.em.fork();
 
     const subject = await this.subjectsRepo.findById(em, trackedSubjectId);
-    if (!subject) throw new ResourceNotFoundException('Sujeto rastreado no encontrado', { trackedSubjectId });
+    if (!subject)
+      throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
+        trackedSubjectId,
+      });
 
     const ping = await this.pingsRepo.findLastBySubject(em, trackedSubjectId);
     if (!ping) {
-      throw new ResourceNotFoundException('El sujeto no tiene posiciones registradas', { trackedSubjectId });
+      throw new ResourceNotFoundException(
+        'El sujeto no tiene posiciones registradas',
+        { trackedSubjectId },
+      );
     }
 
     return {
@@ -168,26 +210,43 @@ export class GeoTrackedSubjectsService {
   }
 
   /** UC-13-10: revoca consentimiento, suspende el sujeto y cierra sus sesiones OPEN. */
-  async revokeConsent(trackedSubjectId: string, actor: AuthenticatedUser): Promise<StatusResultDto> {
+  async revokeConsent(
+    trackedSubjectId: string,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'geo.subject.revoke-consent', trackedSubjectId, actorId: actor.id },
+      {
+        operation: 'geo.subject.revoke-consent',
+        trackedSubjectId,
+        actorId: actor.id,
+      },
       'Revoking location consent',
     );
     return this.em.transactional(async (tx) => {
       const subject = await this.subjectsRepo.findById(tx, trackedSubjectId);
-      if (!subject) throw new ResourceNotFoundException('Sujeto rastreado no encontrado', { trackedSubjectId });
-
-      if (subject.stateConceptId === GEO.SUBJECT_SUSPENDED) {
-        throw new PreconditionFailedException('El rastreo del sujeto ya está suspendido', {
+      if (!subject)
+        throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
           trackedSubjectId,
         });
+
+      if (subject.stateConceptId === GEO.SUBJECT_SUSPENDED) {
+        throw new PreconditionFailedException(
+          'El rastreo del sujeto ya está suspendido',
+          {
+            trackedSubjectId,
+          },
+        );
       }
 
       subject.stateConceptId = GEO.SUBJECT_SUSPENDED;
       touch(subject, actor.id);
 
       // Cierra en cascada las sesiones OPEN (UC-13-08 embebido).
-      const openSessions = await this.sessionsRepo.findAllOpenBySubject(tx, trackedSubjectId, GEO.SESSION_OPEN);
+      const openSessions = await this.sessionsRepo.findAllOpenBySubject(
+        tx,
+        trackedSubjectId,
+        GEO.SESSION_OPEN,
+      );
       const now = new Date();
       for (const session of openSessions) {
         session.statusConceptId = GEO.SESSION_CLOSED;
@@ -196,7 +255,11 @@ export class GeoTrackedSubjectsService {
       }
 
       this.logger.info(
-        { operation: 'geo.subject.revoke-consent', trackedSubjectId, closedSessions: openSessions.length },
+        {
+          operation: 'geo.subject.revoke-consent',
+          trackedSubjectId,
+          closedSessions: openSessions.length,
+        },
         'Location consent revoked and tracking paused',
       );
       return { ok: true };

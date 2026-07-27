@@ -41,11 +41,17 @@ export class SubledgerService {
     actor: AuthenticatedUser,
   ): Promise<OpenItemResponseDto> {
     this.logger.info(
-      { operation: 'accounting.openItem.create', subledgerAccountId: dto.subledgerAccountId },
+      {
+        operation: 'accounting.openItem.create',
+        subledgerAccountId: dto.subledgerAccountId,
+      },
       'Creating open item',
     );
     return this.em.transactional(async (tx) => {
-      const subledger = await this.subledgerRepo.findSubledgerById(tx, dto.subledgerAccountId);
+      const subledger = await this.subledgerRepo.findSubledgerById(
+        tx,
+        dto.subledgerAccountId,
+      );
       if (!subledger) {
         throw new ResourceNotFoundException('Subledger no encontrado', {
           subledgerAccountId: dto.subledgerAccountId,
@@ -57,7 +63,9 @@ export class SubledgerService {
         subledgerAccountId: dto.subledgerAccountId,
         ledgerEntryId: dto.ledgerEntryId,
         documentTypeConceptId:
-          dto.documentType === 'INVOICE' ? ACCT.DOC_TYPE_INVOICE : ACCT.DOC_TYPE_BILL,
+          dto.documentType === 'INVOICE'
+            ? ACCT.DOC_TYPE_INVOICE
+            : ACCT.DOC_TYPE_BILL,
         statusConceptId: ACCT.OPEN_ITEM_OPEN,
         documentNumber: dto.documentNumber,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
@@ -77,7 +85,10 @@ export class SubledgerService {
   }
 
   /** UC-16-09: compensa partidas abiertas y postea el asiento de banco. */
-  async clearOpenItems(dto: CreateClearingDto, actor: AuthenticatedUser): Promise<ClearingResponseDto> {
+  async clearOpenItems(
+    dto: CreateClearingDto,
+    actor: AuthenticatedUser,
+  ): Promise<ClearingResponseDto> {
     this.logger.info(
       { operation: 'accounting.clearing.create', items: dto.items.length },
       'Clearing open items',
@@ -87,14 +98,19 @@ export class SubledgerService {
       const loaded = [];
       let subledgerAccountId: string | null = null;
       for (const it of dto.items) {
-        const openItem = await this.subledgerRepo.findOpenItemById(tx, it.openItemId);
+        const openItem = await this.subledgerRepo.findOpenItemById(
+          tx,
+          it.openItemId,
+        );
         if (!openItem) {
           throw new ResourceNotFoundException('Partida abierta no encontrada', {
             openItemId: it.openItemId,
           });
         }
         if (openItem.statusConceptId === ACCT.OPEN_ITEM_CLEARED) {
-          throw new ConflictException('La partida ya está compensada', { openItemId: it.openItemId });
+          throw new ConflictException('La partida ya está compensada', {
+            openItemId: it.openItemId,
+          });
         }
         const cleared = toCents(it.clearedAmount);
         const outstanding = toCents(openItem.outstandingAmount ?? '0');
@@ -107,25 +123,45 @@ export class SubledgerService {
         }
         subledgerAccountId = subledgerAccountId ?? openItem.subledgerAccountId;
         if (openItem.subledgerAccountId !== subledgerAccountId) {
-          throw new PreconditionFailedException('Las partidas no comparten subledger', {
-            openItemId: it.openItemId,
-          });
+          throw new PreconditionFailedException(
+            'Las partidas no comparten subledger',
+            {
+              openItemId: it.openItemId,
+            },
+          );
         }
-        loaded.push({ input: it, entity: openItem, clearedCents: cleared, outstandingCents: outstanding });
+        loaded.push({
+          input: it,
+          entity: openItem,
+          clearedCents: cleared,
+          outstandingCents: outstanding,
+        });
       }
 
-      const subledger = await this.subledgerRepo.findSubledgerById(tx, subledgerAccountId as string);
+      const subledger = await this.subledgerRepo.findSubledgerById(
+        tx,
+        subledgerAccountId as string,
+      );
       if (!subledger) {
-        throw new ResourceNotFoundException('Subledger no encontrado', { subledgerAccountId });
+        throw new ResourceNotFoundException('Subledger no encontrado', {
+          subledgerAccountId,
+        });
       }
 
       const totalCleared = loaded.reduce((acc, l) => acc + l.clearedCents, 0);
       const number = dto.clearingNumber ?? this.posting.generateNumber('CLR');
-      const clash = await this.subledgerRepo.findClearingByNumber(tx, dto.tenantId, number);
+      const clash = await this.subledgerRepo.findClearingByNumber(
+        tx,
+        dto.tenantId,
+        number,
+      );
       if (clash) {
-        throw new ConflictException('El número de clearing ya existe en el tenant', {
-          clearingNumber: number,
-        });
+        throw new ConflictException(
+          'El número de clearing ya existe en el tenant',
+          {
+            clearingNumber: number,
+          },
+        );
       }
 
       // Asiento de banco: D banco / H cuenta de reconciliación del subledger.
@@ -137,7 +173,11 @@ export class SubledgerService {
         description: `Compensación ${number}`,
         reference: number,
         lines: [
-          { accountId: dto.bankAccountId, direction: 'DEBIT', amount: fromCents(totalCleared) },
+          {
+            accountId: dto.bankAccountId,
+            direction: 'DEBIT',
+            amount: fromCents(totalCleared),
+          },
           {
             accountId: subledger.reconciliationAccountId,
             direction: 'CREDIT',
@@ -171,7 +211,8 @@ export class SubledgerService {
         });
         const remaining = l.outstandingCents - l.clearedCents;
         l.entity.outstandingAmount = fromCents(remaining);
-        l.entity.statusConceptId = remaining === 0 ? ACCT.OPEN_ITEM_CLEARED : ACCT.OPEN_ITEM_PARTIAL;
+        l.entity.statusConceptId =
+          remaining === 0 ? ACCT.OPEN_ITEM_CLEARED : ACCT.OPEN_ITEM_PARTIAL;
         touch(l.entity, actor.id);
       }
 

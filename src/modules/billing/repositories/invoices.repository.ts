@@ -49,7 +49,11 @@ export class InvoicesRepository {
     return em.findOne(Invoices, { id });
   }
 
-  findByNumber(em: EntityManager, practiceId: string, invoiceNumber: string): Promise<Invoices | null> {
+  findByNumber(
+    em: EntityManager,
+    practiceId: string,
+    invoiceNumber: string,
+  ): Promise<Invoices | null> {
     return em.findOne(Invoices, { practiceId, invoiceNumber });
   }
 

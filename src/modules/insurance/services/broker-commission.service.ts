@@ -27,19 +27,36 @@ export class BrokerCommissionService {
     this.logger.setContext(BrokerCommissionService.name);
   }
 
-  async generate(dto: CreateCommissionStatementDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
-    this.logger.info({ operation: 'insurance.commission.generate', actorId: actor.id }, 'Generating commission statement');
+  async generate(
+    dto: CreateCommissionStatementDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
+    this.logger.info(
+      { operation: 'insurance.commission.generate', actorId: actor.id },
+      'Generating commission statement',
+    );
     return this.em.transactional(async (tx) => {
       const broker = await this.catalog.findBroker(tx, dto.insuranceBrokerId);
-      if (!broker) throw new ResourceNotFoundException('Broker no encontrado', { brokerId: dto.insuranceBrokerId });
-      const agreement = await this.catalog.findAgreement(tx, dto.brokerCarrierAgreementId);
-      if (!agreement) {
-        throw new ResourceNotFoundException('Acuerdo broker–aseguradora no encontrado', {
-          agreementId: dto.brokerCarrierAgreementId,
+      if (!broker)
+        throw new ResourceNotFoundException('Broker no encontrado', {
+          brokerId: dto.insuranceBrokerId,
         });
+      const agreement = await this.catalog.findAgreement(
+        tx,
+        dto.brokerCarrierAgreementId,
+      );
+      if (!agreement) {
+        throw new ResourceNotFoundException(
+          'Acuerdo broker–aseguradora no encontrado',
+          {
+            agreementId: dto.brokerCarrierAgreementId,
+          },
+        );
       }
       if (agreement.statusConceptId !== INS.AGREEMENT_ACTIVE) {
-        throw new PreconditionFailedException('El acuerdo no está activo', { agreementId: dto.brokerCarrierAgreementId });
+        throw new PreconditionFailedException('El acuerdo no está activo', {
+          agreementId: dto.brokerCarrierAgreementId,
+        });
       }
 
       const periodStart = new Date(dto.periodStart);
@@ -51,7 +68,11 @@ export class BrokerCommissionService {
         periodStart,
         periodEnd,
       );
-      if (clash) throw new ConflictException('Ya existe liquidación para el periodo', {});
+      if (clash)
+        throw new ConflictException(
+          'Ya existe liquidación para el periodo',
+          {},
+        );
 
       const statement = this.repo.createStatement(tx, {
         insuranceBrokerId: dto.insuranceBrokerId,

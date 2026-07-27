@@ -47,13 +47,19 @@ describe('IamCredentialsService', () => {
       const res = await d.service.linkFederated(
         'u1',
         { identityProvider: 'google', externalSubject: 'sub-123' },
-        actor as any,
+        actor,
       );
 
-      expect(res).toEqual({ id: 'c1', userId: 'u1', method: CONCEPTS.CRED_FEDERATED });
+      expect(res).toEqual({
+        id: 'c1',
+        userId: 'u1',
+        method: CONCEPTS.CRED_FEDERATED,
+      });
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_CRED_FEDERATED_LINK }),
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_CRED_FEDERATED_LINK,
+        }),
       );
     });
 
@@ -61,7 +67,11 @@ describe('IamCredentialsService', () => {
       const d = build();
       d.usersRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.linkFederated('u1', { identityProvider: 'g', externalSubject: 's' }, actor as any),
+        d.service.linkFederated(
+          'u1',
+          { identityProvider: 'g', externalSubject: 's' },
+          actor as any,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -70,7 +80,11 @@ describe('IamCredentialsService', () => {
       d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
       d.credentialsRepo.findFederated.mockResolvedValue({ id: 'dup' });
       await expect(
-        d.service.linkFederated('u1', { identityProvider: 'g', externalSubject: 's' }, actor as any),
+        d.service.linkFederated(
+          'u1',
+          { identityProvider: 'g', externalSubject: 's' },
+          actor as any,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.credentialsRepo.createFederated).not.toHaveBeenCalled();
     });
@@ -79,25 +93,31 @@ describe('IamCredentialsService', () => {
   describe('revokeCredential (UC-01-09)', () => {
     it('revokes a credential that belongs to the user', async () => {
       const d = build();
-      const cred = { id: 'c1', stateConceptId: CONCEPTS.STATE_ACTIVE, updatedAt: new Date() };
+      const cred = {
+        id: 'c1',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.credentialsRepo.findByIdAndUser.mockResolvedValue(cred);
 
-      const res = await d.service.revokeCredential('u1', 'c1', actor as any);
+      const res = await d.service.revokeCredential('u1', 'c1', actor);
 
       expect(res).toEqual({ ok: true });
       expect(cred.stateConceptId).toBe(CONCEPTS.STATE_REVOKED);
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_CRED_REVOKE }),
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_CRED_REVOKE,
+        }),
       );
     });
 
     it('throws when the credential is not found for the user', async () => {
       const d = build();
       d.credentialsRepo.findByIdAndUser.mockResolvedValue(null);
-      await expect(d.service.revokeCredential('u1', 'c1', actor as any)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.revokeCredential('u1', 'c1', actor as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

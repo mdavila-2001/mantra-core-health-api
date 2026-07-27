@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { AuthzPoliciesService } from '../services';
@@ -15,7 +23,9 @@ export class AuthzPoliciesController {
   @Post(':tenantId/access-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Definir una política de acceso ABAC con enmascaramiento' })
+  @ApiOperation({
+    summary: 'Definir una política de acceso ABAC con enmascaramiento',
+  })
   create(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Body() dto: CreateAccessPolicyDto,

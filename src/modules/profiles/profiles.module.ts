@@ -5,7 +5,10 @@ import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
 } from './controllers';
-import { ProfilesPatientsService, ProfilesPractitionersService } from './services';
+import {
+  ProfilesPatientsService,
+  ProfilesPractitionersService,
+} from './services';
 import {
   PersonsRepository,
   PersonProfilesRepository,

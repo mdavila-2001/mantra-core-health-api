@@ -27,7 +27,11 @@ export class ResourceScopeGrantsRepository {
     permissionId: string,
     resourceId: string,
   ): Promise<ResourceScopeGrants | null> {
-    return em.findOne(ResourceScopeGrants, { subjectId, permissionId, resourceId });
+    return em.findOne(ResourceScopeGrants, {
+      subjectId,
+      permissionId,
+      resourceId,
+    });
   }
 
   /** Grants de un sujeto sobre un recurso concreto (para el PDP). */
@@ -39,7 +43,10 @@ export class ResourceScopeGrantsRepository {
     return em.find(ResourceScopeGrants, { subjectId, resourceId });
   }
 
-  create(em: EntityManager, data: CreateResourceScopeGrantData): ResourceScopeGrants {
+  create(
+    em: EntityManager,
+    data: CreateResourceScopeGrantData,
+  ): ResourceScopeGrants {
     return em.create(
       ResourceScopeGrants,
       {

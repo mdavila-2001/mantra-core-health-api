@@ -34,14 +34,40 @@ export class ConceptRelationshipsRepository {
     });
   }
 
+  /**
+   * Aristas de un tipo dado cuyo origen está entre los conceptos indicados.
+   *
+   * La expansión con operador `is-a` necesita recorrer la jerarquía (UC-03-08), y
+   * traerla acotada a los conceptos de la versión evita cargar el grafo completo
+   * del catálogo para resolver una sola regla.
+   */
+  findByTypeForSources(
+    em: EntityManager,
+    relationshipTypeConceptId: string,
+    sourceConceptIds: string[],
+  ): Promise<ConceptRelationships[]> {
+    if (sourceConceptIds.length === 0) return Promise.resolve([]);
+    return em.find(ConceptRelationships, {
+      relationshipTypeConceptId,
+      sourceConceptId: { $in: sourceConceptIds },
+    });
+  }
+
   /** Crea la relación en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateConceptRelationshipData): ConceptRelationships {
-    return em.create(ConceptRelationships, {
-      sourceConceptId: data.sourceConceptId,
-      targetConceptId: data.targetConceptId,
-      relationshipTypeConceptId: data.relationshipTypeConceptId,
-      ordinal: data.ordinal,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+  create(
+    em: EntityManager,
+    data: CreateConceptRelationshipData,
+  ): ConceptRelationships {
+    return em.create(
+      ConceptRelationships,
+      {
+        sourceConceptId: data.sourceConceptId,
+        targetConceptId: data.targetConceptId,
+        relationshipTypeConceptId: data.relationshipTypeConceptId,
+        ordinal: data.ordinal,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 }

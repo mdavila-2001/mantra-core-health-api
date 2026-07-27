@@ -12,7 +12,12 @@ function build() {
   const practicesRepo = { findById: mockFn() };
   const settingsRepo = { findByPracticeAndKey: mockFn(), create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PracticeSettingsService(em as any, practicesRepo as any, settingsRepo as any, logger as any);
+  const service = new PracticeSettingsService(
+    em as any,
+    practicesRepo as any,
+    settingsRepo,
+    logger as any,
+  );
   return { service, tx, practicesRepo, settingsRepo };
 }
 
@@ -20,9 +25,9 @@ describe('PracticeSettingsService (UC-14-07)', () => {
   it('throws when the practice is missing', async () => {
     const d = build();
     d.practicesRepo.findById.mockResolvedValue(null);
-    await expect(d.service.upsert('p1', 'k', { valueJson: {} } as any, actor)).rejects.toBeInstanceOf(
-      ResourceNotFoundException,
-    );
+    await expect(
+      d.service.upsert('p1', 'k', { valueJson: {} } as any, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
   it('inserts when the key does not exist (created=true)', async () => {
@@ -30,16 +35,36 @@ describe('PracticeSettingsService (UC-14-07)', () => {
     d.practicesRepo.findById.mockResolvedValue({ id: 'p1' });
     d.settingsRepo.findByPracticeAndKey.mockResolvedValue(null);
     d.settingsRepo.create.mockReturnValue({ id: 'st1' });
-    const res = await d.service.upsert('p1', 'k', { valueJson: { a: 1 } } as any, actor);
-    expect(res).toEqual({ id: 'st1', practiceId: 'p1', settingKey: 'k', created: true });
+    const res = await d.service.upsert(
+      'p1',
+      'k',
+      { valueJson: { a: 1 } },
+      actor,
+    );
+    expect(res).toEqual({
+      id: 'st1',
+      practiceId: 'p1',
+      settingKey: 'k',
+      created: true,
+    });
   });
 
   it('updates when the key exists (created=false)', async () => {
     const d = build();
     d.practicesRepo.findById.mockResolvedValue({ id: 'p1' });
-    const existing = { id: 'st1', valueJson: { a: 1 }, categoryConceptId: 'c', updatedAt: new Date() };
+    const existing = {
+      id: 'st1',
+      valueJson: { a: 1 },
+      categoryConceptId: 'c',
+      updatedAt: new Date(),
+    };
     d.settingsRepo.findByPracticeAndKey.mockResolvedValue(existing);
-    const res = await d.service.upsert('p1', 'k', { valueJson: { a: 2 } } as any, actor);
+    const res = await d.service.upsert(
+      'p1',
+      'k',
+      { valueJson: { a: 2 } },
+      actor,
+    );
     expect(res.created).toBe(false);
     expect(existing.valueJson).toEqual({ a: 2 });
     expect(d.settingsRepo.create).not.toHaveBeenCalled();

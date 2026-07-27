@@ -1,19 +1,36 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /sites/{siteId}/care-spaces` (UC-14-05). */
 export class CreateCareSpaceDto {
-  @ApiPropertyOptional({ description: 'Unidad clínica (misma sede)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Unidad clínica (misma sede)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   clinicalUnitId?: string;
 
-  @ApiPropertyOptional({ description: 'Espacio padre (misma sede)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Espacio padre (misma sede)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   parentSpaceId?: string;
 
-  @ApiProperty({ description: 'Código único dentro de la sede', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único dentro de la sede',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -25,7 +42,10 @@ export class CreateCareSpaceDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de tipo de espacio', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de tipo de espacio',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   spaceTypeConceptId?: string;

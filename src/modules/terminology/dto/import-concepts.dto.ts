@@ -12,13 +12,19 @@ import {
 
 /** Un concepto individual dentro de una importación en bloque. */
 export class ImportConceptItemDto {
-  @ApiProperty({ description: 'Código del concepto dentro de la versión', maxLength: 255 })
+  @ApiProperty({
+    description: 'Código del concepto dentro de la versión',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
   code!: string;
 
-  @ApiProperty({ description: 'Texto de presentación del concepto', maxLength: 255 })
+  @ApiProperty({
+    description: 'Texto de presentación del concepto',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
@@ -32,7 +38,10 @@ export class ImportConceptItemDto {
 
 /** Importación en bloque de conceptos en una versión (UC-03-03). */
 export class ImportConceptsDto {
-  @ApiProperty({ type: [ImportConceptItemDto], description: 'Conceptos a importar' })
+  @ApiProperty({
+    type: [ImportConceptItemDto],
+    description: 'Conceptos a importar',
+  })
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
@@ -45,7 +54,9 @@ export class ImportConceptsResponseDto {
   @ApiProperty({ description: 'Conceptos insertados' })
   inserted!: number;
 
-  @ApiProperty({ description: 'Conceptos omitidos por existir ya en la versión' })
+  @ApiProperty({
+    description: 'Conceptos omitidos por existir ya en la versión',
+  })
   skipped!: number;
 
   @ApiProperty({ description: 'Conceptos recibidos en la petición' })

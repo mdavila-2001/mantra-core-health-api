@@ -24,7 +24,10 @@ export class CoverageController {
   @Post('patient-coverages')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar cobertura de paciente y dependientes' })
-  enroll(@Body() dto: CreateCoverageDto, @CurrentUser() actor: AuthenticatedUser): Promise<ResourceStatusDto> {
+  enroll(
+    @Body() dto: CreateCoverageDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
     return this.service.enrollCoverage(dto, actor);
   }
 
@@ -43,7 +46,10 @@ export class CoverageController {
   @Post('coordination-of-benefits')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Determinar coordinación de beneficios (COB)' })
-  determineCob(@Body() dto: CreateCobDto, @CurrentUser() actor: AuthenticatedUser): Promise<CreatedResourceDto> {
+  determineCob(
+    @Body() dto: CreateCobDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
     return this.service.determineCob(dto, actor);
   }
 }

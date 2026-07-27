@@ -23,7 +23,10 @@ export class ImmunizationsService {
     actor: AuthenticatedUser,
   ): Promise<ImmunizationResponseDto> {
     this.logger.info(
-      { operation: 'clinical.immunization.create', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.immunization.create',
+        patientProfileId: dto.patientProfileId,
+      },
       'Recording immunization',
     );
     return this.em.transactional(async (tx) => {
@@ -35,11 +38,14 @@ export class ImmunizationsService {
         dto.doseNumber,
       );
       if (existing) {
-        throw new ConflictException('Esa dosis de la vacuna ya fue registrada', {
-          patientProfileId: dto.patientProfileId,
-          vaccineConceptId: dto.vaccineConceptId,
-          doseNumber: dto.doseNumber ?? null,
-        });
+        throw new ConflictException(
+          'Esa dosis de la vacuna ya fue registrada',
+          {
+            patientProfileId: dto.patientProfileId,
+            vaccineConceptId: dto.vaccineConceptId,
+            doseNumber: dto.doseNumber ?? null,
+          },
+        );
       }
 
       const immunization = this.immunizationsRepo.create(tx, {
@@ -50,14 +56,19 @@ export class ImmunizationsService {
         doseNumber: dto.doseNumber,
         lotNumber: dto.lotNumber,
         routeConceptId: dto.routeConceptId,
-        administeredAt: dto.administeredAt ? new Date(dto.administeredAt) : new Date(),
+        administeredAt: dto.administeredAt
+          ? new Date(dto.administeredAt)
+          : new Date(),
         administeredByProfileId: dto.administeredByProfileId,
         actorUserId: actor.id,
       });
       await tx.flush();
 
       this.logger.info(
-        { operation: 'clinical.immunization.create', immunizationId: immunization.id },
+        {
+          operation: 'clinical.immunization.create',
+          immunizationId: immunization.id,
+        },
         'Immunization recorded',
       );
       return {

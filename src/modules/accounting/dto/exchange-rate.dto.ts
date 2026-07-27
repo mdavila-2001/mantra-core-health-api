@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNumberString, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsDateString,
+  IsNumberString,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /accounting/exchange-rates` (UC-16-14). */
 export class RegisterExchangeRateDto {
@@ -31,5 +38,6 @@ export class ExchangeRateResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty() rate!: string;
   @ApiProperty() validOn!: Date;
-  @ApiProperty({ description: '¿Se creó (true) o actualizó (false)?' }) created!: boolean;
+  @ApiProperty({ description: '¿Se creó (true) o actualizó (false)?' })
+  created!: boolean;
 }

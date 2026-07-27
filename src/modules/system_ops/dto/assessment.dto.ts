@@ -34,7 +34,10 @@ export class CreateWorkloadAssessmentDto {
   @MaxLength(200)
   workloadName!: string;
 
-  @ApiProperty({ description: 'Tipo de evaluación (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tipo de evaluación (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   assessmentTypeConceptId!: string;
 
@@ -48,7 +51,10 @@ export class CreateWorkloadAssessmentDto {
   @IsDateString()
   assessmentPeriodEnd?: string;
 
-  @ApiPropertyOptional({ description: 'Facilitador de la evaluación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Facilitador de la evaluación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   facilitatorUserId?: string;
@@ -56,7 +62,10 @@ export class CreateWorkloadAssessmentDto {
 
 /** Un resultado de control dentro de un PUT de resultados. */
 export class ControlResultItemDto {
-  @ApiProperty({ description: 'Control del framework evaluado', format: 'uuid' })
+  @ApiProperty({
+    description: 'Control del framework evaluado',
+    format: 'uuid',
+  })
   @IsUUID()
   operationalFrameworkControlId!: string;
 
@@ -64,7 +73,10 @@ export class ControlResultItemDto {
   @IsUUID()
   resultConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Nivel de madurez (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nivel de madurez (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   maturityLevelConceptId?: string;
@@ -145,7 +157,10 @@ export class CreateFindingDto {
   @IsUUID()
   severityConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Resultado de control del que deriva', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Resultado de control del que deriva',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   assessmentControlResultId?: string;
@@ -176,7 +191,10 @@ export class CreateRemediationPlanDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ description: 'Hallazgo al que responde el plan', format: 'uuid' })
+  @ApiProperty({
+    description: 'Hallazgo al que responde el plan',
+    format: 'uuid',
+  })
   @IsUUID()
   assessmentFindingId!: string;
 
@@ -206,7 +224,10 @@ export class VerifyRemediationActionDto {
 
 /** Cuerpo de `PATCH /admin/governance/findings/{id}` (UC-11-14). */
 export class UpdateFindingDto {
-  @ApiPropertyOptional({ description: 'Estado del hallazgo (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Estado del hallazgo (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   statusConceptId?: string;

@@ -11,7 +11,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const kpiRepo = { findExisting: mockFn(), create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new KpiSnapshotsService(em as any, kpiRepo as any, logger as any);
+  const service = new KpiSnapshotsService(em as any, kpiRepo, logger as any);
   return { service, kpiRepo };
 }
 
@@ -19,9 +19,17 @@ describe('KpiSnapshotsService (UC-17-12)', () => {
   it('records the snapshot when none exists for the key', async () => {
     const d = build();
     d.kpiRepo.findExisting.mockResolvedValue(null);
-    d.kpiRepo.create.mockReturnValue({ id: 'k1', kpiCode: 'DSO', valueNumeric: '42.50', recordedAt: new Date('2026-01-01') });
+    d.kpiRepo.create.mockReturnValue({
+      id: 'k1',
+      kpiCode: 'DSO',
+      valueNumeric: '42.50',
+      recordedAt: new Date('2026-01-01'),
+    });
 
-    const res = await d.service.compute({ practiceId: 'pr1', kpiCode: 'DSO', valueNumeric: '42.50' } as any, actor);
+    const res = await d.service.compute(
+      { practiceId: 'pr1', kpiCode: 'DSO', valueNumeric: '42.50' },
+      actor,
+    );
 
     expect(res.id).toBe('k1');
     expect(res.kpiCode).toBe('DSO');
@@ -31,7 +39,15 @@ describe('KpiSnapshotsService (UC-17-12)', () => {
     const d = build();
     d.kpiRepo.findExisting.mockResolvedValue({ id: 'existing' });
     await expect(
-      d.service.compute({ practiceId: 'pr1', kpiCode: 'DSO', valueNumeric: '42.50', computedAt: '2026-01-01T00:00:00.000Z' } as any, actor),
+      d.service.compute(
+        {
+          practiceId: 'pr1',
+          kpiCode: 'DSO',
+          valueNumeric: '42.50',
+          computedAt: '2026-01-01T00:00:00.000Z',
+        } as any,
+        actor,
+      ),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });

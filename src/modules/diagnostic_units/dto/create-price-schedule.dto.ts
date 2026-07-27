@@ -12,13 +12,19 @@ import {
 
 /** Cuerpo de `POST /diagnostic-units/{id}/price-schedules` (UC-23-06). */
 export class CreatePriceScheduleDto {
-  @ApiProperty({ description: 'Código único del cronograma en la unidad', maxLength: 60 })
+  @ApiProperty({
+    description: 'Código único del cronograma en la unidad',
+    maxLength: 60,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(60)
   code!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de cronograma (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de cronograma (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   priceScheduleTypeConceptId?: string;
@@ -43,13 +49,21 @@ export class CreatePriceScheduleDto {
   @IsUUID()
   currencyConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Vigente desde', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Vigente desde',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   validFrom?: Date;
 
-  @ApiPropertyOptional({ description: 'Vigente hasta', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Vigente hasta',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()

@@ -33,7 +33,11 @@ export interface CreateDunningItemData {
  */
 @Injectable()
 export class DunningRepository {
-  findRunByNumber(em: EntityManager, tenantId: string, runNumber: string): Promise<DunningRuns | null> {
+  findRunByNumber(
+    em: EntityManager,
+    tenantId: string,
+    runNumber: string,
+  ): Promise<DunningRuns | null> {
     return em.findOne(DunningRuns, { tenantId, runNumber });
   }
 

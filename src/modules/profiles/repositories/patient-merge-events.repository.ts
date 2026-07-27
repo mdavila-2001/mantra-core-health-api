@@ -26,7 +26,10 @@ export class PatientMergeEventsRepository {
   }
 
   /** Evento de reversión que ya apunte a un evento dado (impide revertir dos veces). */
-  findByReversalOf(em: EntityManager, eventId: string): Promise<PatientMergeEvents | null> {
+  findByReversalOf(
+    em: EntityManager,
+    eventId: string,
+  ): Promise<PatientMergeEvents | null> {
     return em.findOne(PatientMergeEvents, { reversalOfEventId: eventId });
   }
 

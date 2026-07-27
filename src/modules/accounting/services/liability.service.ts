@@ -43,11 +43,14 @@ export class LiabilityService {
     const interestCents = toCents(dto.interestComponent);
     const amountCents = toCents(dto.amount);
     if (principalCents + interestCents !== amountCents) {
-      throw new PreconditionFailedException('principal + interés no iguala el importe', {
-        amount: dto.amount,
-        principalComponent: dto.principalComponent,
-        interestComponent: dto.interestComponent,
-      });
+      throw new PreconditionFailedException(
+        'principal + interés no iguala el importe',
+        {
+          amount: dto.amount,
+          principalComponent: dto.principalComponent,
+          interestComponent: dto.interestComponent,
+        },
+      );
     }
     if (amountCents <= 0) {
       throw new PreconditionFailedException('El pago debe ser positivo', {});
@@ -56,7 +59,9 @@ export class LiabilityService {
     return this.em.transactional(async (tx) => {
       const liability = await this.liabilityRepo.findById(tx, liabilityId);
       if (!liability) {
-        throw new ResourceNotFoundException('Pasivo no encontrado', { liabilityId });
+        throw new ResourceNotFoundException('Pasivo no encontrado', {
+          liabilityId,
+        });
       }
       if (liability.statusConceptId !== ACCT.LIABILITY_ACTIVE) {
         throw new PreconditionFailedException('El pasivo no está ACTIVO', {
@@ -65,16 +70,25 @@ export class LiabilityService {
         });
       }
       if (!liability.accountId) {
-        throw new PreconditionFailedException('El pasivo no tiene cuenta contable', { liabilityId });
+        throw new PreconditionFailedException(
+          'El pasivo no tiene cuenta contable',
+          { liabilityId },
+        );
       }
 
       let schedule = null;
       if (dto.liabilityScheduleId) {
-        schedule = await this.liabilityRepo.findScheduleById(tx, dto.liabilityScheduleId);
+        schedule = await this.liabilityRepo.findScheduleById(
+          tx,
+          dto.liabilityScheduleId,
+        );
         if (!schedule || schedule.liabilityId !== liabilityId) {
-          throw new ResourceNotFoundException('Cuota no encontrada para el pasivo', {
-            liabilityScheduleId: dto.liabilityScheduleId,
-          });
+          throw new ResourceNotFoundException(
+            'Cuota no encontrada para el pasivo',
+            {
+              liabilityScheduleId: dto.liabilityScheduleId,
+            },
+          );
         }
       }
 
@@ -100,7 +114,11 @@ export class LiabilityService {
           liabilityId,
         });
       }
-      lines.push({ accountId: dto.bankAccountId, direction: 'CREDIT', amount: dto.amount });
+      lines.push({
+        accountId: dto.bankAccountId,
+        direction: 'CREDIT',
+        amount: dto.amount,
+      });
 
       const paidAt = dto.paidAt ? new Date(dto.paidAt) : new Date();
       const posted = await this.posting.post(tx, {
@@ -145,7 +163,8 @@ export class LiabilityService {
         });
       }
 
-      const outstanding = toCents(liability.outstandingAmount ?? '0') - principalCents;
+      const outstanding =
+        toCents(liability.outstandingAmount ?? '0') - principalCents;
       const remaining = Math.max(outstanding, 0);
       liability.outstandingAmount = fromCents(remaining);
       if (remaining === 0) {
@@ -154,7 +173,9 @@ export class LiabilityService {
       touch(liability, actor.id);
 
       if (schedule) {
-        schedule.paidAmount = fromCents(toCents(schedule.paidAmount ?? '0') + amountCents);
+        schedule.paidAmount = fromCents(
+          toCents(schedule.paidAmount ?? '0') + amountCents,
+        );
         schedule.statusConceptId = ACCT.LIAB_SCHEDULE_PAID;
         touch(schedule, actor.id);
       }

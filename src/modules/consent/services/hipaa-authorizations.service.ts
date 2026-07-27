@@ -9,7 +9,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { HipaaAuthorizationsRepository, ConsentEventsRepository } from '../repositories';
+import {
+  HipaaAuthorizationsRepository,
+  ConsentEventsRepository,
+} from '../repositories';
 import { CONS } from '../consent.concepts';
 import {
   CreateHipaaAuthorizationDto,
@@ -39,13 +42,19 @@ export class HipaaAuthorizationsService {
     actor: AuthenticatedUser,
   ): Promise<HipaaAuthorizationResponseDto> {
     this.logger.info(
-      { operation: 'consent.hipaa.grant', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'consent.hipaa.grant',
+        patientProfileId: dto.patientProfileId,
+      },
       'Granting HIPAA authorization',
     );
     if (dto.expirationType === 'DATE' && !dto.expiresAt) {
-      throw new PreconditionFailedException('expiresAt es obligatorio cuando expirationType=DATE', {
-        expirationType: dto.expirationType,
-      });
+      throw new PreconditionFailedException(
+        'expiresAt es obligatorio cuando expirationType=DATE',
+        {
+          expirationType: dto.expirationType,
+        },
+      );
     }
     if (dto.expirationType === 'EVENT' && !dto.expirationEventText) {
       throw new PreconditionFailedException(
@@ -63,7 +72,9 @@ export class HipaaAuthorizationsService {
         recipientDescription: dto.recipientDescription,
         informationDescription: dto.informationDescription,
         expirationTypeConceptId:
-          dto.expirationType === 'EVENT' ? CONS.EXPIRATION_TYPE_EVENT : CONS.EXPIRATION_TYPE_DATE,
+          dto.expirationType === 'EVENT'
+            ? CONS.EXPIRATION_TYPE_EVENT
+            : CONS.EXPIRATION_TYPE_DATE,
         expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
         expirationEventText: dto.expirationEventText,
         statusConceptId: CONS.HIPAA_ACTIVE,
@@ -81,7 +92,10 @@ export class HipaaAuthorizationsService {
         recordedByUserId: actor.id,
       });
 
-      this.logger.info({ operation: 'consent.hipaa.grant', authId: auth.id }, 'HIPAA authorization granted');
+      this.logger.info(
+        { operation: 'consent.hipaa.grant', authId: auth.id },
+        'HIPAA authorization granted',
+      );
       return {
         id: auth.id,
         patientProfileId: auth.patientProfileId,
@@ -93,10 +107,17 @@ export class HipaaAuthorizationsService {
 
   /** UC-07-05: revoca una autorización HIPAA activa. */
   async revoke(id: string, actor: AuthenticatedUser): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'consent.hipaa.revoke', authId: id }, 'Revoking HIPAA authorization');
+    this.logger.info(
+      { operation: 'consent.hipaa.revoke', authId: id },
+      'Revoking HIPAA authorization',
+    );
     return this.em.transactional(async (tx) => {
       const auth = await this.authRepo.findById(tx, id);
-      if (!auth) throw new ResourceNotFoundException('Autorización HIPAA no encontrada', { id });
+      if (!auth)
+        throw new ResourceNotFoundException(
+          'Autorización HIPAA no encontrada',
+          { id },
+        );
       if (auth.statusConceptId !== CONS.HIPAA_ACTIVE) {
         throw new ConflictException('La autorización no está activa', {
           id,

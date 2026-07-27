@@ -53,18 +53,30 @@ export class IamUsersService {
   }
 
   /** UC-01-01: crea un usuario con su credencial de contraseña y rol inicial. */
-  async createUser(dto: CreateUserDto, actor: AuthenticatedUser): Promise<UserResponseDto> {
-    this.logger.info({ operation: 'iam.user.create', actorId: actor.id }, 'Creating user');
+  async createUser(
+    dto: CreateUserDto,
+    actor: AuthenticatedUser,
+  ): Promise<UserResponseDto> {
+    this.logger.info(
+      { operation: 'iam.user.create', actorId: actor.id },
+      'Creating user',
+    );
     return this.em.transactional(async (tx) => {
-      const clash = await this.credentialsRepo.findActivePasswordBySubject(tx, dto.email);
+      const clash = await this.credentialsRepo.findActivePasswordBySubject(
+        tx,
+        dto.email,
+      );
       if (clash) {
         this.logger.warn(
           { operation: 'iam.user.create', reason: 'email-in-use' },
           'Rejected user creation: email already has an active credential',
         );
-        throw new ConflictException('El email ya tiene una credencial de contraseña activa', {
-          email: dto.email,
-        });
+        throw new ConflictException(
+          'El email ya tiene una credencial de contraseña activa',
+          {
+            email: dto.email,
+          },
+        );
       }
 
       const user = this.usersRepo.create(tx, {
@@ -100,7 +112,10 @@ export class IamUsersService {
         detailJson: { role: roleCode, reason: 'user-create' },
       });
 
-      this.logger.info({ operation: 'iam.user.create', userId: user.id }, 'User created');
+      this.logger.info(
+        { operation: 'iam.user.create', userId: user.id },
+        'User created',
+      );
       return {
         id: user.id,
         displayName: user.displayName,
@@ -111,11 +126,21 @@ export class IamUsersService {
   }
 
   /** UC-01-07: bloquea la cuenta y revoca sus sesiones activas. */
-  async lock(userId: string, dto: LockUserDto, actor: AuthenticatedUser): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'iam.user.lock', userId, actorId: actor.id }, 'Locking user');
+  async lock(
+    userId: string,
+    dto: LockUserDto,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    this.logger.info(
+      { operation: 'iam.user.lock', userId, actorId: actor.id },
+      'Locking user',
+    );
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
-      if (!user) throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      if (!user)
+        throw new ResourceNotFoundException('Usuario no encontrado', {
+          userId,
+        });
 
       user.statusConceptId = CONCEPTS.USER_LOCKED;
       touch(user, actor.id);
@@ -127,7 +152,10 @@ export class IamUsersService {
         actorUserId: actor.id,
       });
 
-      const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(tx, userId);
+      const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(
+        tx,
+        userId,
+      );
       await this.sessionsRepo.revokeAllActiveForUser(tx, userId);
       await this.refreshRepo.revokeActiveBySessionIds(tx, sessionIds);
 
@@ -150,19 +178,34 @@ export class IamUsersService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'iam.user.role', userId, role: dto.role, action: dto.action },
+      {
+        operation: 'iam.user.role',
+        userId,
+        role: dto.role,
+        action: dto.action,
+      },
       'Changing global role',
     );
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
-      if (!user) throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      if (!user)
+        throw new ResourceNotFoundException('Usuario no encontrado', {
+          userId,
+        });
 
       const roleConceptId = ROLE_CONCEPT_BY_CODE[dto.role];
       const active = await this.rolesRepo.findActive(tx, userId, roleConceptId);
 
       if (dto.action === 'GRANT') {
-        if (active) throw new ConflictException('El rol ya está concedido', { role: dto.role });
-        this.rolesRepo.create(tx, { userId, roleConceptId, actorUserId: actor.id });
+        if (active)
+          throw new ConflictException('El rol ya está concedido', {
+            role: dto.role,
+          });
+        this.rolesRepo.create(tx, {
+          userId,
+          roleConceptId,
+          actorUserId: actor.id,
+        });
         this.eventsRepo.record(tx, {
           eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
           outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
@@ -172,9 +215,12 @@ export class IamUsersService {
         });
       } else {
         if (!active) {
-          throw new ResourceNotFoundException('El usuario no tiene ese rol activo', {
-            role: dto.role,
-          });
+          throw new ResourceNotFoundException(
+            'El usuario no tiene ese rol activo',
+            {
+              role: dto.role,
+            },
+          );
         }
         active.stateConceptId = CONCEPTS.STATE_REVOKED;
         touch(active, actor.id);
@@ -192,11 +238,20 @@ export class IamUsersService {
   }
 
   /** UC-01-12: anonimiza (DSAR) la cuenta y revoca credenciales, sesiones y roles. */
-  async anonymize(userId: string, actor: AuthenticatedUser): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'iam.user.anonymize', userId, actorId: actor.id }, 'Anonymizing user');
+  async anonymize(
+    userId: string,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    this.logger.info(
+      { operation: 'iam.user.anonymize', userId, actorId: actor.id },
+      'Anonymizing user',
+    );
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
-      if (!user) throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      if (!user)
+        throw new ResourceNotFoundException('Usuario no encontrado', {
+          userId,
+        });
 
       user.statusConceptId = CONCEPTS.USER_ANONYMIZED;
       user.anonymizedAt = new Date();
@@ -204,7 +259,10 @@ export class IamUsersService {
       touch(user, actor.id);
 
       await this.credentialsRepo.revokeAllForUser(tx, userId);
-      const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(tx, userId);
+      const sessionIds = await this.sessionsRepo.activeSessionIdsForUser(
+        tx,
+        userId,
+      );
       await this.sessionsRepo.revokeAllActiveForUser(tx, userId);
       await this.refreshRepo.revokeActiveBySessionIds(tx, sessionIds);
       await this.rolesRepo.revokeAllForUser(tx, userId);

@@ -15,30 +15,49 @@ describe('RetentionExecutionController (UC-11-05)', () => {
   it('delegates run', async () => {
     const service = { run: mockFn() };
     const controller = new RetentionExecutionController(service as any);
-    await controller.run({ retentionPolicyId: 'p', entityRegistryId: 'e' } as any, actor);
-    expect(service.run).toHaveBeenCalledWith({ retentionPolicyId: 'p', entityRegistryId: 'e' }, actor);
+    await controller.run(
+      { retentionPolicyId: 'p', entityRegistryId: 'e' },
+      actor,
+    );
+    expect(service.run).toHaveBeenCalledWith(
+      { retentionPolicyId: 'p', entityRegistryId: 'e' },
+      actor,
+    );
   });
 });
 
 describe('ResidencyController (UC-11-06/07)', () => {
   function build() {
-    const service = { createResidencyPolicy: mockFn(), createBinding: mockFn(), recordTransfer: mockFn() };
+    const service = {
+      createResidencyPolicy: mockFn(),
+      createBinding: mockFn(),
+      recordTransfer: mockFn(),
+    };
     return { controller: new ResidencyController(service as any), service };
   }
   it('delegates createResidencyPolicy', async () => {
     const d = build();
     await d.controller.createResidencyPolicy({ code: 'r' } as any, actor);
-    expect(d.service.createResidencyPolicy).toHaveBeenCalledWith({ code: 'r' }, actor);
+    expect(d.service.createResidencyPolicy).toHaveBeenCalledWith(
+      { code: 'r' },
+      actor,
+    );
   });
   it('delegates createBinding', async () => {
     const d = build();
     await d.controller.createBinding({ tenantId: 't' } as any, actor);
-    expect(d.service.createBinding).toHaveBeenCalledWith({ tenantId: 't' }, actor);
+    expect(d.service.createBinding).toHaveBeenCalledWith(
+      { tenantId: 't' },
+      actor,
+    );
   });
   it('delegates recordTransfer', async () => {
     const d = build();
     await d.controller.recordTransfer({ transferReference: 'x' } as any, actor);
-    expect(d.service.recordTransfer).toHaveBeenCalledWith({ transferReference: 'x' }, actor);
+    expect(d.service.recordTransfer).toHaveBeenCalledWith(
+      { transferReference: 'x' },
+      actor,
+    );
   });
 });
 
@@ -54,8 +73,12 @@ describe('LegalHoldController (UC-11-08)', () => {
   });
   it('delegates release', async () => {
     const d = build();
-    await d.controller.release('h1', { reason: 'x' } as any, actor);
-    expect(d.service.release).toHaveBeenCalledWith('h1', { reason: 'x' }, actor);
+    await d.controller.release('h1', { reason: 'x' }, actor);
+    expect(d.service.release).toHaveBeenCalledWith(
+      'h1',
+      { reason: 'x' },
+      actor,
+    );
   });
 });
 
@@ -73,7 +96,10 @@ describe('RestoreTestController (UC-11-10)', () => {
     const service = { recordRestoreTest: mockFn() };
     const controller = new RestoreTestController(service as any);
     await controller.recordRestoreTest({ backupPolicyId: 'b' } as any, actor);
-    expect(service.recordRestoreTest).toHaveBeenCalledWith({ backupPolicyId: 'b' }, actor);
+    expect(service.recordRestoreTest).toHaveBeenCalledWith(
+      { backupPolicyId: 'b' },
+      actor,
+    );
   });
 });
 
@@ -93,37 +119,67 @@ describe('AssessmentController (UC-11-11..14)', () => {
   it('delegates publishFramework', async () => {
     const d = build();
     await d.controller.publishFramework({ code: 'c' } as any, actor);
-    expect(d.service.publishFramework).toHaveBeenCalledWith({ code: 'c' }, actor);
+    expect(d.service.publishFramework).toHaveBeenCalledWith(
+      { code: 'c' },
+      actor,
+    );
   });
   it('delegates createAssessment', async () => {
     const d = build();
     await d.controller.createAssessment({ tenantId: 't' } as any, actor);
-    expect(d.service.createAssessment).toHaveBeenCalledWith({ tenantId: 't' }, actor);
+    expect(d.service.createAssessment).toHaveBeenCalledWith(
+      { tenantId: 't' },
+      actor,
+    );
   });
   it('delegates putControlResults', async () => {
     const d = build();
-    await d.controller.putControlResults('a1', { results: [] } as any, actor);
-    expect(d.service.putControlResults).toHaveBeenCalledWith('a1', { results: [] }, actor);
+    await d.controller.putControlResults('a1', { results: [] }, actor);
+    expect(d.service.putControlResults).toHaveBeenCalledWith(
+      'a1',
+      { results: [] },
+      actor,
+    );
   });
   it('delegates createFinding', async () => {
     const d = build();
     await d.controller.createFinding('a1', { findingCode: 'f' } as any, actor);
-    expect(d.service.createFinding).toHaveBeenCalledWith('a1', { findingCode: 'f' }, actor);
+    expect(d.service.createFinding).toHaveBeenCalledWith(
+      'a1',
+      { findingCode: 'f' },
+      actor,
+    );
   });
   it('delegates createRemediationPlan', async () => {
     const d = build();
     await d.controller.createRemediationPlan('a1', { code: 'p' } as any, actor);
-    expect(d.service.createRemediationPlan).toHaveBeenCalledWith('a1', { code: 'p' }, actor);
+    expect(d.service.createRemediationPlan).toHaveBeenCalledWith(
+      'a1',
+      { code: 'p' },
+      actor,
+    );
   });
   it('delegates verifyAction', async () => {
     const d = build();
-    await d.controller.verifyAction('ra1', { verificationEvidenceJson: {} } as any, actor);
-    expect(d.service.verifyAction).toHaveBeenCalledWith('ra1', { verificationEvidenceJson: {} }, actor);
+    await d.controller.verifyAction(
+      'ra1',
+      { verificationEvidenceJson: {} },
+      actor,
+    );
+    expect(d.service.verifyAction).toHaveBeenCalledWith(
+      'ra1',
+      { verificationEvidenceJson: {} },
+      actor,
+    );
   });
   it('delegates updateFinding', async () => {
     const d = build();
-    await d.controller.updateFinding('f1', { ownerTeam: 'x' } as any, actor);
-    expect(d.service.updateFinding).toHaveBeenCalledWith('f1', { ownerTeam: 'x' }, actor);
+    await d.controller.updateFinding('f1', { ownerTeam: 'x' }, actor);
+    expect(d.service.updateFinding).toHaveBeenCalledWith(
+      'f1',
+      { ownerTeam: 'x' },
+      actor,
+    );
   });
 });
 
@@ -135,11 +191,18 @@ describe('DraftController (UC-11-15)', () => {
   it('delegates createDraft', async () => {
     const d = build();
     await d.controller.createDraft({ schemaName: 's' } as any, actor);
-    expect(d.service.createDraft).toHaveBeenCalledWith({ schemaName: 's' }, actor);
+    expect(d.service.createDraft).toHaveBeenCalledWith(
+      { schemaName: 's' },
+      actor,
+    );
   });
   it('delegates publishDraft', async () => {
     const d = build();
-    await d.controller.publishDraft('dr1', { publishReference: 'r' } as any, actor);
-    expect(d.service.publishDraft).toHaveBeenCalledWith('dr1', { publishReference: 'r' }, actor);
+    await d.controller.publishDraft('dr1', { publishReference: 'r' }, actor);
+    expect(d.service.publishDraft).toHaveBeenCalledWith(
+      'dr1',
+      { publishReference: 'r' },
+      actor,
+    );
   });
 });

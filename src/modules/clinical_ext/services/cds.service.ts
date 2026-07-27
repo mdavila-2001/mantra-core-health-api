@@ -45,11 +45,20 @@ export class CdsService {
   }
 
   /** Crea una regla CDS en borrador (precondición de la publicación, UC-18-13). */
-  async createRule(dto: CreateCdsRuleDto, actor: AuthenticatedUser): Promise<CdsRuleResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.cds_rule.create', code: dto.code }, 'Creating CDS rule');
+  async createRule(
+    dto: CreateCdsRuleDto,
+    actor: AuthenticatedUser,
+  ): Promise<CdsRuleResponseDto> {
+    this.logger.info(
+      { operation: 'clinical_ext.cds_rule.create', code: dto.code },
+      'Creating CDS rule',
+    );
     return this.em.transactional(async (tx) => {
       const clash = await this.rulesRepo.findByCode(tx, dto.code);
-      if (clash) throw new ConflictException('El código de regla ya existe', { code: dto.code });
+      if (clash)
+        throw new ConflictException('El código de regla ya existe', {
+          code: dto.code,
+        });
 
       const rule = this.rulesRepo.create(tx, {
         tenantId: dto.tenantId,
@@ -75,15 +84,23 @@ export class CdsService {
     dto: PublishRuleVersionDto,
     actor: AuthenticatedUser,
   ): Promise<CdsRuleResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.cds_rule.publish', ruleId }, 'Publishing CDS rule version');
+    this.logger.info(
+      { operation: 'clinical_ext.cds_rule.publish', ruleId },
+      'Publishing CDS rule version',
+    );
     return this.em.transactional(async (tx) => {
       const rule = await this.rulesRepo.findById(tx, ruleId);
-      if (!rule) throw new ResourceNotFoundException('Regla CDS no encontrada', { ruleId });
+      if (!rule)
+        throw new ResourceNotFoundException('Regla CDS no encontrada', {
+          ruleId,
+        });
 
       rule.version = (rule.version ?? 1) + 1;
       if (dto.logicJson !== undefined) rule.logicJson = dto.logicJson;
-      if (dto.messageTemplate !== undefined) rule.messageTemplate = dto.messageTemplate;
-      if (dto.severityConceptId !== undefined) rule.severityConceptId = dto.severityConceptId;
+      if (dto.messageTemplate !== undefined)
+        rule.messageTemplate = dto.messageTemplate;
+      if (dto.severityConceptId !== undefined)
+        rule.severityConceptId = dto.severityConceptId;
       rule.isActive = true;
       rule.statusConceptId = CEXT.CDS_RULE_ACTIVE;
       touch(rule, actor.id);
@@ -93,15 +110,27 @@ export class CdsService {
   }
 
   /** UC-18-13: rollback — retira la versión activa. */
-  async rollbackVersion(ruleId: string, actor: AuthenticatedUser): Promise<CdsRuleResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.cds_rule.rollback', ruleId }, 'Rolling back CDS rule');
+  async rollbackVersion(
+    ruleId: string,
+    actor: AuthenticatedUser,
+  ): Promise<CdsRuleResponseDto> {
+    this.logger.info(
+      { operation: 'clinical_ext.cds_rule.rollback', ruleId },
+      'Rolling back CDS rule',
+    );
     return this.em.transactional(async (tx) => {
       const rule = await this.rulesRepo.findById(tx, ruleId);
-      if (!rule) throw new ResourceNotFoundException('Regla CDS no encontrada', { ruleId });
-      if (rule.statusConceptId !== CEXT.CDS_RULE_ACTIVE) {
-        throw new PreconditionFailedException('Solo se puede hacer rollback de una regla activa', {
+      if (!rule)
+        throw new ResourceNotFoundException('Regla CDS no encontrada', {
           ruleId,
         });
+      if (rule.statusConceptId !== CEXT.CDS_RULE_ACTIVE) {
+        throw new PreconditionFailedException(
+          'Solo se puede hacer rollback de una regla activa',
+          {
+            ruleId,
+          },
+        );
       }
 
       rule.isActive = false;
@@ -113,13 +142,23 @@ export class CdsService {
   }
 
   /** UC-18-03: evalúa todas las reglas activas y genera una alerta por match. */
-  async evaluate(dto: EvaluateCdsDto, actor: AuthenticatedUser): Promise<AlertBatchResponseDto> {
+  async evaluate(
+    dto: EvaluateCdsDto,
+    actor: AuthenticatedUser,
+  ): Promise<AlertBatchResponseDto> {
     this.logger.info(
-      { operation: 'clinical_ext.cds.evaluate', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical_ext.cds.evaluate',
+        patientProfileId: dto.patientProfileId,
+      },
       'Evaluating CDS rules',
     );
     return this.em.transactional(async (tx) => {
-      const rules = await this.rulesRepo.findActive(tx, CEXT.CDS_RULE_ACTIVE, dto.tenantId);
+      const rules = await this.rulesRepo.findActive(
+        tx,
+        CEXT.CDS_RULE_ACTIVE,
+        dto.tenantId,
+      );
       const now = new Date();
       const alerts = rules.map((rule) =>
         this.alertsRepo.create(tx, {
@@ -161,7 +200,10 @@ export class CdsService {
     actor: AuthenticatedUser,
   ): Promise<AlertBatchResponseDto> {
     this.logger.info(
-      { operation: 'clinical_ext.cds.check_interactions', pairs: dto.substanceConceptIds.length },
+      {
+        operation: 'clinical_ext.cds.check_interactions',
+        pairs: dto.substanceConceptIds.length,
+      },
       'Checking drug interactions',
     );
     return this.em.transactional(async (tx) => {
@@ -171,7 +213,11 @@ export class CdsService {
 
       for (let i = 0; i < substances.length; i++) {
         for (let j = i + 1; j < substances.length; j++) {
-          const interaction = await this.interactionsRepo.findByPair(tx, substances[i], substances[j]);
+          const interaction = await this.interactionsRepo.findByPair(
+            tx,
+            substances[i],
+            substances[j],
+          );
           if (!interaction) continue;
           const alert = this.alertsRepo.create(tx, {
             patientProfileId: dto.patientProfileId,

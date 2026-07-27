@@ -113,7 +113,9 @@ export class AvailableActionDto {
   @ApiProperty({ description: 'Tipo de acción (concept id)' })
   actionType!: string;
 
-  @ApiProperty({ description: 'Habilitada para el estado + permisos del solicitante' })
+  @ApiProperty({
+    description: 'Habilitada para el estado + permisos del solicitante',
+  })
   enabled!: boolean;
 }
 
@@ -140,13 +142,22 @@ export class ServeViewDataResponseDto {
   @ApiProperty()
   viewCode!: string;
 
-  @ApiProperty({ description: 'Columnas servidas (con masking)', type: [ServedFieldDto] })
+  @ApiProperty({
+    description: 'Columnas servidas (con masking)',
+    type: [ServedFieldDto],
+  })
   fields!: ServedFieldDto[];
 
-  @ApiProperty({ description: 'Filas del read model (proyección)', type: [Object] })
+  @ApiProperty({
+    description: 'Filas del read model (proyección)',
+    type: [Object],
+  })
   data!: Record<string, unknown>[];
 
-  @ApiProperty({ description: 'Acciones disponibles derivadas', type: [AvailableActionDto] })
+  @ApiProperty({
+    description: 'Acciones disponibles derivadas',
+    type: [AvailableActionDto],
+  })
   availableActions!: AvailableActionDto[];
 
   @ApiPropertyOptional({ description: 'Cursor de la siguiente página' })
@@ -155,7 +166,9 @@ export class ServeViewDataResponseDto {
   @ApiPropertyOptional({ description: 'Última materialización de la MV' })
   refreshedAt?: Date | null;
 
-  @ApiProperty({ description: 'Antigüedad en segundos respecto a la última materialización' })
+  @ApiProperty({
+    description: 'Antigüedad en segundos respecto a la última materialización',
+  })
   stalenessSeconds!: number;
 
   @ApiProperty({ description: 'Marca de generación de la respuesta' })
@@ -200,7 +213,9 @@ export class PublicProjectionResponseDto {
   @ApiProperty({ description: 'Registros públicos aprobados', type: [Object] })
   records!: Record<string, unknown>[];
 
-  @ApiPropertyOptional({ description: 'Última materialización de la MV pública' })
+  @ApiPropertyOptional({
+    description: 'Última materialización de la MV pública',
+  })
   refreshedAt?: Date | null;
 
   @ApiProperty({ description: 'Marca de generación de la respuesta' })

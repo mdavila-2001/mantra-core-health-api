@@ -33,14 +33,20 @@ export class UserRoleAssignmentsRepository {
   }
 
   /** Asignaciones activas del usuario (para resolver roles efectivos en el PDP). */
-  findActiveForUser(em: EntityManager, userId: string): Promise<UserRoleAssignments[]> {
+  findActiveForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<UserRoleAssignments[]> {
     return em.find(UserRoleAssignments, {
       userId,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
     });
   }
 
-  create(em: EntityManager, data: CreateRoleAssignmentData): UserRoleAssignments {
+  create(
+    em: EntityManager,
+    data: CreateRoleAssignmentData,
+  ): UserRoleAssignments {
     return em.create(
       UserRoleAssignments,
       {

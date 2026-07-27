@@ -15,7 +15,10 @@ export interface AuditableCreate {
 }
 
 /** Construye los campos de auditoría para una operación de alta. */
-export function createdBy(userId?: string, now: Date = new Date()): AuditableCreate {
+export function createdBy(
+  userId?: string,
+  now: Date = new Date(),
+): AuditableCreate {
   return {
     createdAt: now,
     updatedAt: now,

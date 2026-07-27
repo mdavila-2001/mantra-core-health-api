@@ -7,7 +7,10 @@ export class CreateVirtualEncounterDto {
   @IsUUID()
   encounterId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Plataforma de telesalud (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Plataforma de telesalud (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   platformConceptId?: string;
@@ -27,7 +30,10 @@ export class CreateVirtualEncounterDto {
 
 /** Cuerpo de `PATCH /virtual-encounters/{id}/end` (UC-18-12, cierre). */
 export class EndVirtualEncounterDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Manifiesto de grabación (common.files)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Manifiesto de grabación (common.files)',
+  })
   @IsOptional()
   @IsUUID()
   recordingFileId?: string;
@@ -41,6 +47,9 @@ export class VirtualEncounterResponseDto {
   @ApiProperty({ format: 'uuid' })
   encounterId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Estado de la sesión (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado de la sesión (concept id)',
+  })
   statusConceptId!: string;
 }

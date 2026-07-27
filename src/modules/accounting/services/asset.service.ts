@@ -36,17 +36,27 @@ export class AssetService {
   }
 
   /** UC-16-10: capitaliza un activo y postea su asiento de alta. */
-  async capitalize(dto: CapitalizeAssetDto, actor: AuthenticatedUser): Promise<AssetResponseDto> {
+  async capitalize(
+    dto: CapitalizeAssetDto,
+    actor: AuthenticatedUser,
+  ): Promise<AssetResponseDto> {
     this.logger.info(
       { operation: 'accounting.asset.capitalize', code: dto.code },
       'Capitalizing asset',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.assetRepo.findByCode(tx, dto.practiceId, dto.code);
+      const clash = await this.assetRepo.findByCode(
+        tx,
+        dto.practiceId,
+        dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe un activo con ese código en la práctica', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un activo con ese código en la práctica',
+          {
+            code: dto.code,
+          },
+        );
       }
 
       const asset = this.assetRepo.createAsset(tx, {
@@ -103,7 +113,11 @@ export class AssetService {
             amount: dto.acquisitionCost,
             assetId: asset.id,
           },
-          { accountId: dto.offsetAccountId, direction: 'CREDIT', amount: dto.acquisitionCost },
+          {
+            accountId: dto.offsetAccountId,
+            direction: 'CREDIT',
+            amount: dto.acquisitionCost,
+          },
         ],
         actorUserId: actor.id,
       });
@@ -133,11 +147,18 @@ export class AssetService {
     actor: AuthenticatedUser,
   ): Promise<DepreciationRunResponseDto> {
     this.logger.info(
-      { operation: 'accounting.depreciation.run', periodId: dto.fiscalPeriodId },
+      {
+        operation: 'accounting.depreciation.run',
+        periodId: dto.fiscalPeriodId,
+      },
       'Running depreciation batch',
     );
     return this.em.transactional(async (tx) => {
-      let assets = await this.assetRepo.activeAssets(tx, dto.practiceId, ACCT.ASSET_ACTIVE);
+      let assets = await this.assetRepo.activeAssets(
+        tx,
+        dto.practiceId,
+        ACCT.ASSET_ACTIVE,
+      );
       if (dto.assetId) {
         assets = assets.filter((a) => a.id === dto.assetId);
       }
@@ -147,12 +168,18 @@ export class AssetService {
       for (const asset of assets) {
         if (!asset.usefulLifeMonths || asset.usefulLifeMonths <= 0) continue;
 
-        const already = await this.assetRepo.findDepreciation(tx, asset.id, dto.fiscalPeriodId);
+        const already = await this.assetRepo.findDepreciation(
+          tx,
+          asset.id,
+          dto.fiscalPeriodId,
+        );
         if (already) continue; // idempotencia: una depreciación por (activo, periodo)
 
         const cost = toCents(asset.acquisitionCost ?? '0');
         const salvage = toCents(asset.salvageValue ?? '0');
-        const bookValue = toCents(asset.bookValue ?? asset.acquisitionCost ?? '0');
+        const bookValue = toCents(
+          asset.bookValue ?? asset.acquisitionCost ?? '0',
+        );
         const depreciable = bookValue - salvage;
         if (depreciable <= 0) continue;
 
@@ -205,7 +232,9 @@ export class AssetService {
           actorUserId: actor.id,
         });
 
-        asset.accumulatedDepreciation = fromCents(toCents(asset.accumulatedDepreciation ?? '0') + amountCents);
+        asset.accumulatedDepreciation = fromCents(
+          toCents(asset.accumulatedDepreciation ?? '0') + amountCents,
+        );
         asset.bookValue = bookValueAfter;
         touch(asset, actor.id);
 
@@ -214,9 +243,12 @@ export class AssetService {
       }
 
       if (depreciated === 0) {
-        throw new PreconditionFailedException('No hay activos elegibles para depreciar en el periodo', {
-          fiscalPeriodId: dto.fiscalPeriodId,
-        });
+        throw new PreconditionFailedException(
+          'No hay activos elegibles para depreciar en el periodo',
+          {
+            fiscalPeriodId: dto.fiscalPeriodId,
+          },
+        );
       }
 
       return { depreciatedAssets: depreciated, transactionIds };

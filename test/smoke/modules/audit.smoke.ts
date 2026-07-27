@@ -61,7 +61,12 @@ export const AUDIT_SMOKE: SmokeCase[] = [
     name: 'happy: registra acceso clínico',
     method: 'post',
     path: () => '/audit/data-access',
-    body: (c) => ({ resourceType: 'clinical_note', tenantId: c.tenantId, purpose: 'care', purposeOfUse: 'TREATMENT' }),
+    body: (c) => ({
+      resourceType: 'clinical_note',
+      tenantId: c.tenantId,
+      purpose: 'care',
+      purposeOfUse: 'TREATMENT',
+    }),
     expectedStatus: 201,
   },
   {
@@ -138,7 +143,11 @@ export const AUDIT_SMOKE: SmokeCase[] = [
     name: 'happy: exporta evidencia',
     method: 'post',
     path: () => '/compliance/audit-export',
-    body: (c) => ({ entity: 'audit_log', queryHash: `qh-${c.u}`, affectedSubjectCount: 3 }),
+    body: (c) => ({
+      entity: 'audit_log',
+      queryHash: `qh-${c.u}`,
+      affectedSubjectCount: 3,
+    }),
     expectedStatus: 201,
   },
   {
@@ -242,7 +251,12 @@ export const AUDIT_SMOKE: SmokeCase[] = [
     name: 'happy: registra decisión de moderación WORM',
     method: 'post',
     path: () => '/moderation/decisions',
-    body: (c) => ({ targetType: 'CONTENT', targetId: c.adminUserId, action: 'REMOVE', reason: 'POLICY' }),
+    body: (c) => ({
+      targetType: 'CONTENT',
+      targetId: c.adminUserId,
+      action: 'REMOVE',
+      reason: 'POLICY',
+    }),
     expectedStatus: 201,
   },
   {
@@ -251,7 +265,11 @@ export const AUDIT_SMOKE: SmokeCase[] = [
     name: 'límite: action inválida -> 400',
     method: 'post',
     path: () => '/moderation/decisions',
-    body: (c) => ({ targetType: 'CONTENT', targetId: c.adminUserId, action: 'NUKE' }),
+    body: (c) => ({
+      targetType: 'CONTENT',
+      targetId: c.adminUserId,
+      action: 'NUKE',
+    }),
     expectedStatus: 400,
   },
 

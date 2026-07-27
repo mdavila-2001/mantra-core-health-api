@@ -31,11 +31,18 @@ export class BranchMembershipsRepository {
     branchId: string,
     statusConceptId: string,
   ): Promise<BranchMemberships | null> {
-    return em.findOne(BranchMemberships, { tenantMembershipId, branchId, statusConceptId });
+    return em.findOne(BranchMemberships, {
+      tenantMembershipId,
+      branchId,
+      statusConceptId,
+    });
   }
 
   /** Crea la entidad de asignación en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateBranchMembershipData): BranchMemberships {
+  create(
+    em: EntityManager,
+    data: CreateBranchMembershipData,
+  ): BranchMemberships {
     return em.create(
       BranchMemberships,
       {

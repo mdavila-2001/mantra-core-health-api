@@ -55,7 +55,10 @@ export class PaymentsReceivedRepository {
     );
   }
 
-  createAllocation(em: EntityManager, data: CreateReceivableAllocationData): ReceivablePaymentAllocations {
+  createAllocation(
+    em: EntityManager,
+    data: CreateReceivableAllocationData,
+  ): ReceivablePaymentAllocations {
     return em.create(
       ReceivablePaymentAllocations,
       {

@@ -1,17 +1,32 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /consent/patient-objections` (UC-07-03). */
 export class CreatePatientObjectionDto {
-  @ApiProperty({ description: 'Paciente titular (patient profile id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente titular (patient profile id)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiProperty({ description: 'Propósito de procesamiento objetado', format: 'uuid' })
+  @ApiProperty({
+    description: 'Propósito de procesamiento objetado',
+    format: 'uuid',
+  })
   @IsUUID()
   processingPurposeId!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de objeción (concept id); por defecto objeción a procesamiento' })
+  @ApiPropertyOptional({
+    description:
+      'Tipo de objeción (concept id); por defecto objeción a procesamiento',
+  })
   @IsOptional()
   @IsUUID()
   objectionTypeConceptId?: string;
@@ -28,14 +43,18 @@ export class CreatePatientObjectionDto {
   tenantId?: string;
 
   @ApiPropertyOptional({
-    description: 'Si true, materializa de inmediato una restricción de privacidad (include UC-07-07)',
+    description:
+      'Si true, materializa de inmediato una restricción de privacidad (include UC-07-07)',
     default: false,
   })
   @IsOptional()
   @IsBoolean()
   applyRestriction?: boolean;
 
-  @ApiPropertyOptional({ description: 'Clase de datos de la restricción inmediata (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Clase de datos de la restricción inmediata (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   restrictionDataClassConceptId?: string;

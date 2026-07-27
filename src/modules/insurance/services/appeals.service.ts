@@ -26,13 +26,30 @@ export class AppealsService {
     this.logger.setContext(AppealsService.name);
   }
 
-  async decide(disputeId: string, dto: CreateAppealDecisionDto, actor: AuthenticatedUser): Promise<CreatedResourceDto> {
-    this.logger.info({ operation: 'insurance.appeal.decide', disputeId, actorId: actor.id }, 'Deciding appeal');
+  async decide(
+    disputeId: string,
+    dto: CreateAppealDecisionDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
+    this.logger.info(
+      { operation: 'insurance.appeal.decide', disputeId, actorId: actor.id },
+      'Deciding appeal',
+    );
     return this.em.transactional(async (tx) => {
       const dispute = await this.repo.findDispute(tx, disputeId);
-      if (!dispute) throw new ResourceNotFoundException('Disputa no encontrada', { disputeId });
-      if (![INS.DISPUTE_OPEN, INS.DISPUTE_IN_REVIEW].includes(dispute.statusConceptId)) {
-        throw new PreconditionFailedException('La disputa no admite decisión en su estado actual', { disputeId });
+      if (!dispute)
+        throw new ResourceNotFoundException('Disputa no encontrada', {
+          disputeId,
+        });
+      if (
+        ![INS.DISPUTE_OPEN, INS.DISPUTE_IN_REVIEW].includes(
+          dispute.statusConceptId,
+        )
+      ) {
+        throw new PreconditionFailedException(
+          'La disputa no admite decisión en su estado actual',
+          { disputeId },
+        );
       }
 
       const previous = await this.repo.latestDecision(tx, disputeId);
@@ -41,7 +58,10 @@ export class AppealsService {
         claimDisputeId: disputeId,
         appealLevelConceptId: INS.APPEAL_LEVEL_FIRST,
         decisionVersion: nextVersion,
-        decisionConceptId: dto.decision === 'UPHELD' ? INS.APPEAL_DECISION_UPHELD : INS.APPEAL_DECISION_OVERTURNED,
+        decisionConceptId:
+          dto.decision === 'UPHELD'
+            ? INS.APPEAL_DECISION_UPHELD
+            : INS.APPEAL_DECISION_OVERTURNED,
         adjustedAmount: dto.adjustedAmount,
         rationaleText: dto.rationaleText,
         supersedesDecisionId: previous?.id,

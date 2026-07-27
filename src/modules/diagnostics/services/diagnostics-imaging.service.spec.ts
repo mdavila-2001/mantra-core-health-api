@@ -22,7 +22,7 @@ function build() {
     recordDoseEvent: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DiagnosticsImagingService(em as any, repo as any, logger as any);
+  const service = new DiagnosticsImagingService(em as any, repo, logger as any);
   return { service, tx, repo };
 }
 
@@ -33,7 +33,12 @@ describe('DiagnosticsImagingService', () => {
       d.repo.findEndpoint.mockResolvedValue(null);
       await expect(
         d.service.storeStudy(
-          { imagingEndpointId: 'e1', patientProfileId: 'p1', dicomStudyInstanceUid: 'u1', series: [] } as any,
+          {
+            imagingEndpointId: 'e1',
+            patientProfileId: 'p1',
+            dicomStudyInstanceUid: 'u1',
+            series: [],
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
@@ -45,7 +50,12 @@ describe('DiagnosticsImagingService', () => {
       d.repo.findStudyByUid.mockResolvedValue({ id: 'existing' });
       await expect(
         d.service.storeStudy(
-          { imagingEndpointId: 'e1', patientProfileId: 'p1', dicomStudyInstanceUid: 'u1', series: [] } as any,
+          {
+            imagingEndpointId: 'e1',
+            patientProfileId: 'p1',
+            dicomStudyInstanceUid: 'u1',
+            series: [],
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -55,7 +65,10 @@ describe('DiagnosticsImagingService', () => {
       const d = build();
       d.repo.findEndpoint.mockResolvedValue({ id: 'e1', tenantId: 't1' });
       d.repo.findStudyByUid.mockResolvedValue(null);
-      d.repo.createStudy.mockReturnValue({ id: 'st1', statusConceptId: DIAG.IMAGING_STUDY_STORED });
+      d.repo.createStudy.mockReturnValue({
+        id: 'st1',
+        statusConceptId: DIAG.IMAGING_STUDY_STORED,
+      });
       d.repo.createSeries.mockReturnValue({ id: 'se1' });
       d.repo.createInstance.mockReturnValue({ id: 'in1' });
 
@@ -64,8 +77,13 @@ describe('DiagnosticsImagingService', () => {
           imagingEndpointId: 'e1',
           patientProfileId: 'p1',
           dicomStudyInstanceUid: 'u1',
-          series: [{ dicomSeriesInstanceUid: 's-uid', instances: [{ dicomSopInstanceUid: 'i-uid' }] }],
-        } as any,
+          series: [
+            {
+              dicomSeriesInstanceUid: 's-uid',
+              instances: [{ dicomSopInstanceUid: 'i-uid' }],
+            },
+          ],
+        },
         actor,
       );
 
@@ -83,9 +101,9 @@ describe('DiagnosticsImagingService', () => {
     it('throws when study missing', async () => {
       const d = build();
       d.repo.findStudy.mockResolvedValue(null);
-      await expect(d.service.recordDoseEvent('missing', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.recordDoseEvent('missing', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('records a dose event on the study', async () => {
@@ -98,7 +116,11 @@ describe('DiagnosticsImagingService', () => {
         updatedAt: new Date(),
       });
       d.repo.recordDoseEvent.mockReturnValue({ id: 'dose1' });
-      const res = await d.service.recordDoseEvent('st1', { doseLengthProduct: '10' } as any, actor);
+      const res = await d.service.recordDoseEvent(
+        'st1',
+        { doseLengthProduct: '10' },
+        actor,
+      );
       expect(res.id).toBe('dose1');
     });
   });
@@ -113,8 +135,14 @@ describe('DiagnosticsImagingService', () => {
 
     it('creates an active endpoint', async () => {
       const d = build();
-      d.repo.createEndpoint.mockReturnValue({ id: 'e1', statusConceptId: DIAG.IMAGING_ENDPOINT_ACTIVE });
-      const res = await d.service.createEndpoint({ baseUri: 'http://x', tenantId: 't1' } as any, actor);
+      d.repo.createEndpoint.mockReturnValue({
+        id: 'e1',
+        statusConceptId: DIAG.IMAGING_ENDPOINT_ACTIVE,
+      });
+      const res = await d.service.createEndpoint(
+        { baseUri: 'http://x', tenantId: 't1' },
+        actor,
+      );
       expect(res).toEqual({ id: 'e1', status: DIAG.IMAGING_ENDPOINT_ACTIVE });
     });
   });

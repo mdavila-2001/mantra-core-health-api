@@ -29,7 +29,9 @@ import {
 @ApiBearerAuth()
 @Controller('integrations')
 export class IntegrationsMessagesController {
-  constructor(private readonly messagingService: IntegrationsMessagingService) {}
+  constructor(
+    private readonly messagingService: IntegrationsMessagingService,
+  ) {}
 
   /** UC-12-05. Productor de negocio (usuario autenticado). */
   @Post('messages\\:outbound')
@@ -83,7 +85,9 @@ export class IntegrationsMessagesController {
   @Post('messages/:id\\:correlate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Procesar callback/respuesta asíncrona del proveedor' })
+  @ApiOperation({
+    summary: 'Procesar callback/respuesta asíncrona del proveedor',
+  })
   correlate(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() actor: AuthenticatedUser,

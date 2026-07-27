@@ -34,7 +34,11 @@ export class AuthzClinicalController {
     @Body() dto: CreateClinicalAccessGrantDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AuthzIdResponseDto> {
-    return this.clinicalService.grantClinicalAccess(patientProfileId, dto, actor);
+    return this.clinicalService.grantClinicalAccess(
+      patientProfileId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-06-07 (emergencia; el clínico invocante queda registrado). */
@@ -53,7 +57,9 @@ export class AuthzClinicalController {
   @Delete('clinical-access-grants/:grantId')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Revocar o expirar una concesión de acceso clínico' })
+  @ApiOperation({
+    summary: 'Revocar o expirar una concesión de acceso clínico',
+  })
   revokeClinicalAccess(
     @Param('grantId', ParseUUIDPipe) grantId: string,
     @CurrentUser() actor: AuthenticatedUser,

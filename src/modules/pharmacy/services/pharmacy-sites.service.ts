@@ -38,16 +38,28 @@ export class PharmacySitesService {
     );
     return this.em.transactional(async (tx) => {
       const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy) throw new ResourceNotFoundException('Farmacia no encontrada', { pharmacyId });
+      if (!pharmacy)
+        throw new ResourceNotFoundException('Farmacia no encontrada', {
+          pharmacyId,
+        });
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
-        throw new PreconditionFailedException('La farmacia no está activa', { pharmacyId });
+        throw new PreconditionFailedException('La farmacia no está activa', {
+          pharmacyId,
+        });
       }
 
-      const clash = await this.sitesRepo.findByPharmacyAndCode(tx, pharmacyId, dto.code);
+      const clash = await this.sitesRepo.findByPharmacyAndCode(
+        tx,
+        pharmacyId,
+        dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe una sede con ese código en la farmacia', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe una sede con ese código en la farmacia',
+          {
+            code: dto.code,
+          },
+        );
       }
 
       const site = this.sitesRepo.create(tx, {
@@ -55,9 +67,12 @@ export class PharmacySitesService {
         practiceSiteId: dto.practiceSiteId,
         code: dto.code,
         name: dto.name,
-        pharmacySiteTypeConceptId: dto.pharmacySiteTypeConceptId ?? PHARM.SITE_TYPE_DISPENSING,
-        dispensingModeConceptId: dto.dispensingModeConceptId ?? PHARM.DISPENSING_MODE_ONSITE,
-        controlledSubstanceCapabilityConceptId: dto.controlledSubstanceCapabilityConceptId,
+        pharmacySiteTypeConceptId:
+          dto.pharmacySiteTypeConceptId ?? PHARM.SITE_TYPE_DISPENSING,
+        dispensingModeConceptId:
+          dto.dispensingModeConceptId ?? PHARM.DISPENSING_MODE_ONSITE,
+        controlledSubstanceCapabilityConceptId:
+          dto.controlledSubstanceCapabilityConceptId,
         homeDeliveryAvailable: dto.homeDeliveryAvailable,
         pickupAvailable: dto.pickupAvailable,
         statusConceptId: PHARM.SITE_ACTIVE,

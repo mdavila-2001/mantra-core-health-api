@@ -73,40 +73,54 @@ export class TerminologySeedService implements OnApplicationBootstrap {
     // porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid
     // planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.
     if (!(await em.findOne(TerminologySources, { id: SEED.sourceId }))) {
-      em.create(TerminologySources, {
-        id: SEED.sourceId,
-        code: SEED.sourceCode,
-        name: 'Mantra Core Internal Terminology',
-        createdAt: now,
-        updatedAt: now,
-      }, { partial: true });
+      em.create(
+        TerminologySources,
+        {
+          id: SEED.sourceId,
+          code: SEED.sourceCode,
+          name: 'Mantra Core Internal Terminology',
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
       inserted++;
       await em.flush();
     }
     if (!(await em.findOne(CodeSystems, { id: SEED.codeSystemId }))) {
-      em.create(CodeSystems, {
-        id: SEED.codeSystemId,
-        sourceId: SEED.sourceId,
-        internalCode: SEED.codeSystemInternalCode,
-        name: 'Mantra Core Internal Code System',
-        canonicalUrl: SEED.canonicalUrl,
-        caseSensitive: true,
-        createdAt: now,
-        updatedAt: now,
-      }, { partial: true });
+      em.create(
+        CodeSystems,
+        {
+          id: SEED.codeSystemId,
+          sourceId: SEED.sourceId,
+          internalCode: SEED.codeSystemInternalCode,
+          name: 'Mantra Core Internal Code System',
+          canonicalUrl: SEED.canonicalUrl,
+          caseSensitive: true,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
       inserted++;
       await em.flush();
     }
-    if (!(await em.findOne(CodeSystemVersions, { id: SEED.codeSystemVersionId }))) {
-      em.create(CodeSystemVersions, {
-        id: SEED.codeSystemVersionId,
-        codeSystemId: SEED.codeSystemId,
-        version: SEED.version,
-        publishedAt: now,
-        isDefault: true,
-        createdAt: now,
-        updatedAt: now,
-      }, { partial: true });
+    if (
+      !(await em.findOne(CodeSystemVersions, { id: SEED.codeSystemVersionId }))
+    ) {
+      em.create(
+        CodeSystemVersions,
+        {
+          id: SEED.codeSystemVersionId,
+          codeSystemId: SEED.codeSystemId,
+          version: SEED.version,
+          publishedAt: now,
+          isDefault: true,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
       inserted++;
       await em.flush();
     }
@@ -115,7 +129,7 @@ export class TerminologySeedService implements OnApplicationBootstrap {
     // que declara cada módulo de dominio (MODULE_CONCEPT_SEEDS). Se deduplica por
     // id y se consultan de golpe los ya presentes para evitar el patrón N+1.
     const catalog = new Map<string, { code: string; display: string }>();
-    for (const name of Object.keys(CONCEPT_DEFS) as ConceptName[]) {
+    for (const name of Object.keys(CONCEPT_DEFS)) {
       catalog.set(CONCEPTS[name], {
         code: CONCEPT_DEFS[name].code,
         display: CONCEPT_DEFS[name].display,
@@ -127,7 +141,10 @@ export class TerminologySeedService implements OnApplicationBootstrap {
       // code) y varios módulos declaran códigos genéricos coincidentes (p. ej.
       // "ACTIVE"). Los servicios referencian los conceptos por id (mapa `ids`), no
       // por este código, así que usar la clave garantiza unicidad sin efectos.
-      catalog.set(deterministicId(seed.key), { code: seed.key, display: seed.display });
+      catalog.set(deterministicId(seed.key), {
+        code: seed.key,
+        display: seed.display,
+      });
     }
 
     const ids = [...catalog.keys()];
@@ -136,54 +153,71 @@ export class TerminologySeedService implements OnApplicationBootstrap {
 
     for (const [id, def] of catalog) {
       if (existingIds.has(id)) continue;
-      em.create(CatalogConcepts, {
-        id,
-        codeSystemVersionId: SEED.codeSystemVersionId,
-        code: def.code,
-        display: def.display,
-        abstract: false,
-        selectable: true,
-        createdAt: now,
-        updatedAt: now,
-      }, { partial: true });
+      em.create(
+        CatalogConcepts,
+        {
+          id,
+          codeSystemVersionId: SEED.codeSystemVersionId,
+          code: def.code,
+          display: def.display,
+          abstract: false,
+          selectable: true,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
       inserted++;
     }
     await em.flush();
 
     // Nivel 3: tenant por defecto (depende de conceptos ya materializados).
     if (!(await em.findOne(Tenants, { id: SEED.tenantId }))) {
-      em.create(Tenants, {
-        id: SEED.tenantId,
-        code: SEED.tenantCode,
-        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PROVIDER,
-        legalName: 'Mantra Core Default Tenant',
-        legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_COMPANY,
-        statusConceptId: CONCEPTS.TENANT_ACTIVE,
-        verificationStatusConceptId: CONCEPTS.TENANT_VERIFIED,
-        createdAt: now,
-        updatedAt: now,
-      }, { partial: true });
+      em.create(
+        Tenants,
+        {
+          id: SEED.tenantId,
+          code: SEED.tenantCode,
+          tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PROVIDER,
+          legalName: 'Mantra Core Default Tenant',
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_COMPANY,
+          statusConceptId: CONCEPTS.TENANT_ACTIVE,
+          verificationStatusConceptId: CONCEPTS.TENANT_VERIFIED,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
       inserted++;
       await em.flush();
     }
 
     // Nivel 4: propósito de procesamiento por defecto (consent).
-    if (!(await em.findOne(ProcessingPurposes, { id: SEED.processingPurposeId }))) {
-      em.create(ProcessingPurposes, {
-        id: SEED.processingPurposeId,
-        code: SEED.processingPurposeCode,
-        name: 'General care',
-        purposeCategoryConceptId: CONCEPTS.PURPOSE_CATEGORY_CARE,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-        createdAt: now,
-        updatedAt: now,
-      }, { partial: true });
+    if (
+      !(await em.findOne(ProcessingPurposes, { id: SEED.processingPurposeId }))
+    ) {
+      em.create(
+        ProcessingPurposes,
+        {
+          id: SEED.processingPurposeId,
+          code: SEED.processingPurposeCode,
+          name: 'General care',
+          purposeCategoryConceptId: CONCEPTS.PURPOSE_CATEGORY_CARE,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
       inserted++;
       await em.flush();
     }
 
     if (inserted > 0) {
-      this.logger.info({ inserted }, 'Catálogo de conceptos internos materializado');
+      this.logger.info(
+        { inserted },
+        'Catálogo de conceptos internos materializado',
+      );
     }
     return { inserted };
   }
@@ -212,7 +246,10 @@ export class TerminologySeedService implements OnApplicationBootstrap {
       );
     }
     if (pending.length > 0) {
-      this.logger.info({ columns: pending.length }, 'Defaults de row_version asegurados');
+      this.logger.info(
+        { columns: pending.length },
+        'Defaults de row_version asegurados',
+      );
     }
   }
 }

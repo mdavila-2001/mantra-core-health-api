@@ -25,7 +25,9 @@ import {
 @ApiBearerAuth()
 @Controller('orgext/facility-licenses')
 export class OrgextFacilityLicensesController {
-  constructor(private readonly licensesService: OrgextFacilityLicensesService) {}
+  constructor(
+    private readonly licensesService: OrgextFacilityLicensesService,
+  ) {}
 
   /** UC-22-05. */
   @Post()

@@ -1,6 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsOptional, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 
 /** Un producto/lote a incluir en el snapshot de conteo. */
 export class CountSessionItemDto {
@@ -20,12 +26,17 @@ export class CreateCountSessionDto {
   @IsUUID()
   inventoryLocationId!: string;
 
-  @ApiPropertyOptional({ description: 'Congelar movimientos durante el conteo' })
+  @ApiPropertyOptional({
+    description: 'Congelar movimientos durante el conteo',
+  })
   @IsOptional()
   @IsBoolean()
   freeze?: boolean;
 
-  @ApiProperty({ type: [CountSessionItemDto], description: 'Productos/lotes a contar' })
+  @ApiProperty({
+    type: [CountSessionItemDto],
+    description: 'Productos/lotes a contar',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CountSessionItemDto)

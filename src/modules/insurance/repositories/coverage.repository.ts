@@ -18,7 +18,10 @@ import {
  */
 @Injectable()
 export class CoverageRepository {
-  findCoverage(em: EntityManager, id: string): Promise<PatientCoverages | null> {
+  findCoverage(
+    em: EntityManager,
+    id: string,
+  ): Promise<PatientCoverages | null> {
     return em.findOne(PatientCoverages, { id });
   }
 
@@ -30,24 +33,52 @@ export class CoverageRepository {
     return em.findOne(PatientCoverages, { memberIdentifier, insurancePlanId });
   }
 
-  countActiveByPatient(em: EntityManager, patientProfileId: string, statusConceptId: string): Promise<number> {
+  countActiveByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    statusConceptId: string,
+  ): Promise<number> {
     return em.count(PatientCoverages, { patientProfileId, statusConceptId });
   }
 
-  createCoverage(em: EntityManager, data: Record<string, unknown>): PatientCoverages {
-    return em.create(PatientCoverages, { ...data, ...createdBy(data.actorUserId as string) }, { partial: true });
+  createCoverage(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): PatientCoverages {
+    return em.create(
+      PatientCoverages,
+      { ...data, ...createdBy(data.actorUserId as string) },
+      { partial: true },
+    );
   }
 
-  createDependent(em: EntityManager, data: Record<string, unknown>): CoverageDependents {
-    return em.create(CoverageDependents, { ...data, ...createdBy(data.actorUserId as string) }, { partial: true });
+  createDependent(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): CoverageDependents {
+    return em.create(
+      CoverageDependents,
+      { ...data, ...createdBy(data.actorUserId as string) },
+      { partial: true },
+    );
   }
 
-  createBrokerClient(em: EntityManager, data: Record<string, unknown>): BrokerClients {
-    return em.create(BrokerClients, { ...data, ...createdBy(data.actorUserId as string) }, { partial: true });
+  createBrokerClient(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): BrokerClients {
+    return em.create(
+      BrokerClients,
+      { ...data, ...createdBy(data.actorUserId as string) },
+      { partial: true },
+    );
   }
 
   /** Devuelve la versión COB vigente (effective_to nulo) del paciente, si existe. */
-  latestActiveCob(em: EntityManager, patientProfileId: string): Promise<CoordinationOfBenefits | null> {
+  latestActiveCob(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<CoordinationOfBenefits | null> {
     return em.findOne(
       CoordinationOfBenefits,
       { patientProfileId, effectiveTo: null },
@@ -55,28 +86,52 @@ export class CoverageRepository {
     );
   }
 
-  createCob(em: EntityManager, data: Record<string, unknown>): CoordinationOfBenefits {
+  createCob(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): CoordinationOfBenefits {
     return em.create(
       CoordinationOfBenefits,
-      { ...data, createdAt: new Date(), createdByUserId: data.actorUserId as string | undefined },
+      {
+        ...data,
+        createdAt: new Date(),
+        createdByUserId: data.actorUserId as string | undefined,
+      },
       { partial: true },
     );
   }
 
   // --- Elegibilidad (UC-26-03) ---
-  findRequestByIdempotency(em: EntityManager, idempotencyKey: string): Promise<CoverageEligibilityRequests | null> {
+  findRequestByIdempotency(
+    em: EntityManager,
+    idempotencyKey: string,
+  ): Promise<CoverageEligibilityRequests | null> {
     return em.findOne(CoverageEligibilityRequests, { idempotencyKey });
   }
 
-  createEligibilityRequest(em: EntityManager, data: Record<string, unknown>): CoverageEligibilityRequests {
+  createEligibilityRequest(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): CoverageEligibilityRequests {
     return em.create(
       CoverageEligibilityRequests,
-      { ...data, createdAt: new Date(), createdByUserId: data.actorUserId as string | undefined },
+      {
+        ...data,
+        createdAt: new Date(),
+        createdByUserId: data.actorUserId as string | undefined,
+      },
       { partial: true },
     );
   }
 
-  createEligibilityResponse(em: EntityManager, data: Record<string, unknown>): CoverageEligibilityResponses {
-    return em.create(CoverageEligibilityResponses, { ...data }, { partial: true });
+  createEligibilityResponse(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): CoverageEligibilityResponses {
+    return em.create(
+      CoverageEligibilityResponses,
+      { ...data },
+      { partial: true },
+    );
   }
 }

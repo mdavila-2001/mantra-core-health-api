@@ -14,7 +14,10 @@ describe('PublicProjectionsController (UC-30-10)', () => {
   it('delegates searchDirectory', async () => {
     const d = build();
     await d.controller.searchDirectory('Lima', 'cardiology');
-    expect(d.service.searchDirectory).toHaveBeenCalledWith({ city: 'Lima', specialty: 'cardiology' });
+    expect(d.service.searchDirectory).toHaveBeenCalledWith({
+      city: 'Lima',
+      specialty: 'cardiology',
+    });
   });
 
   it('delegates getBySlug', async () => {

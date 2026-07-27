@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { PharmacyInventorySyncBatches, PharmacyInventorySyncItems } from '../entities';
+import {
+  PharmacyInventorySyncBatches,
+  PharmacyInventorySyncItems,
+} from '../entities';
 import { createdBy } from '../../../common';
 
 /** Datos de cabecera de un lote de sincronización ERP. */
@@ -29,15 +32,26 @@ export interface CreateSyncItemData {
 /** Acceso a datos de los lotes de sincronización ERP y sus items. */
 @Injectable()
 export class SyncRepository {
-  findBatchById(em: EntityManager, id: string): Promise<PharmacyInventorySyncBatches | null> {
+  findBatchById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PharmacyInventorySyncBatches | null> {
     return em.findOne(PharmacyInventorySyncBatches, { id });
   }
 
-  findItems(em: EntityManager, batchId: string): Promise<PharmacyInventorySyncItems[]> {
-    return em.find(PharmacyInventorySyncItems, { pharmacyInventorySyncBatchId: batchId });
+  findItems(
+    em: EntityManager,
+    batchId: string,
+  ): Promise<PharmacyInventorySyncItems[]> {
+    return em.find(PharmacyInventorySyncItems, {
+      pharmacyInventorySyncBatchId: batchId,
+    });
   }
 
-  createBatch(em: EntityManager, data: CreateSyncBatchData): PharmacyInventorySyncBatches {
+  createBatch(
+    em: EntityManager,
+    data: CreateSyncBatchData,
+  ): PharmacyInventorySyncBatches {
     return em.create(
       PharmacyInventorySyncBatches,
       {
@@ -53,7 +67,10 @@ export class SyncRepository {
     );
   }
 
-  createItem(em: EntityManager, data: CreateSyncItemData): PharmacyInventorySyncItems {
+  createItem(
+    em: EntityManager,
+    data: CreateSyncItemData,
+  ): PharmacyInventorySyncItems {
     return em.create(
       PharmacyInventorySyncItems,
       {

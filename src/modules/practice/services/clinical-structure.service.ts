@@ -48,30 +48,44 @@ export class ClinicalStructureService {
     dto: CreateClinicalUnitDto,
     actor: AuthenticatedUser,
   ): Promise<ClinicalUnitResponseDto> {
-    this.logger.info({ operation: 'practice.unit.create', siteId }, 'Creating clinical unit');
+    this.logger.info(
+      { operation: 'practice.unit.create', siteId },
+      'Creating clinical unit',
+    );
     return this.em.transactional(async (tx) => {
       const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site) throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      if (!site)
+        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
-        throw new PreconditionFailedException('El sitio no está activo', { siteId });
+        throw new PreconditionFailedException('El sitio no está activo', {
+          siteId,
+        });
       }
 
       if (dto.parentUnitId) {
         const parent = await this.unitsRepo.findById(tx, dto.parentUnitId);
         if (!parent || parent.practiceSiteId !== siteId) {
-          throw new PreconditionFailedException('La unidad padre no pertenece al sitio', {
-            siteId,
-            parentUnitId: dto.parentUnitId,
-          });
+          throw new PreconditionFailedException(
+            'La unidad padre no pertenece al sitio',
+            {
+              siteId,
+              parentUnitId: dto.parentUnitId,
+            },
+          );
         }
       }
 
-      const clash = (await this.unitsRepo.findBySite(tx, siteId)).find((u) => u.code === dto.code);
+      const clash = (await this.unitsRepo.findBySite(tx, siteId)).find(
+        (u) => u.code === dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe una unidad con ese código en el sitio', {
-          siteId,
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe una unidad con ese código en el sitio',
+          {
+            siteId,
+            code: dto.code,
+          },
+        );
       }
 
       const unit = this.unitsRepo.create(tx, {
@@ -102,39 +116,56 @@ export class ClinicalStructureService {
     dto: CreateCareSpaceDto,
     actor: AuthenticatedUser,
   ): Promise<CareSpaceResponseDto> {
-    this.logger.info({ operation: 'practice.space.create', siteId }, 'Creating care space');
+    this.logger.info(
+      { operation: 'practice.space.create', siteId },
+      'Creating care space',
+    );
     return this.em.transactional(async (tx) => {
       const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site) throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      if (!site)
+        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
-        throw new PreconditionFailedException('El sitio no está activo', { siteId });
+        throw new PreconditionFailedException('El sitio no está activo', {
+          siteId,
+        });
       }
 
       if (dto.clinicalUnitId) {
         const unit = await this.unitsRepo.findById(tx, dto.clinicalUnitId);
         if (!unit || unit.practiceSiteId !== siteId) {
-          throw new PreconditionFailedException('La unidad no pertenece al sitio', {
-            siteId,
-            clinicalUnitId: dto.clinicalUnitId,
-          });
+          throw new PreconditionFailedException(
+            'La unidad no pertenece al sitio',
+            {
+              siteId,
+              clinicalUnitId: dto.clinicalUnitId,
+            },
+          );
         }
       }
       if (dto.parentSpaceId) {
         const parent = await this.spacesRepo.findById(tx, dto.parentSpaceId);
         if (!parent || parent.practiceSiteId !== siteId) {
-          throw new PreconditionFailedException('El espacio padre no pertenece al sitio', {
-            siteId,
-            parentSpaceId: dto.parentSpaceId,
-          });
+          throw new PreconditionFailedException(
+            'El espacio padre no pertenece al sitio',
+            {
+              siteId,
+              parentSpaceId: dto.parentSpaceId,
+            },
+          );
         }
       }
 
-      const clash = (await this.spacesRepo.findBySite(tx, siteId)).find((s) => s.code === dto.code);
+      const clash = (await this.spacesRepo.findBySite(tx, siteId)).find(
+        (s) => s.code === dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe un espacio con ese código en el sitio', {
-          siteId,
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un espacio con ese código en el sitio',
+          {
+            siteId,
+            code: dto.code,
+          },
+        );
       }
 
       const space = this.spacesRepo.create(tx, {
@@ -167,21 +198,32 @@ export class ClinicalStructureService {
     dto: CreateHealthcareServiceDto,
     actor: AuthenticatedUser,
   ): Promise<HealthcareServiceResponseDto> {
-    this.logger.info({ operation: 'practice.service.publish', practiceId }, 'Publishing healthcare service');
+    this.logger.info(
+      { operation: 'practice.service.publish', practiceId },
+      'Publishing healthcare service',
+    );
     return this.em.transactional(async (tx) => {
       const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice) throw new ResourceNotFoundException('Práctica no encontrada', { practiceId });
+      if (!practice)
+        throw new ResourceNotFoundException('Práctica no encontrada', {
+          practiceId,
+        });
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
-        throw new PreconditionFailedException('La práctica no está activa', { practiceId });
+        throw new PreconditionFailedException('La práctica no está activa', {
+          practiceId,
+        });
       }
 
       if (dto.practiceSiteId) {
         const site = await this.sitesRepo.findById(tx, dto.practiceSiteId);
         if (!site || site.practiceId !== practiceId) {
-          throw new PreconditionFailedException('El sitio no pertenece a la práctica', {
-            practiceId,
-            siteId: dto.practiceSiteId,
-          });
+          throw new PreconditionFailedException(
+            'El sitio no pertenece a la práctica',
+            {
+              practiceId,
+              siteId: dto.practiceSiteId,
+            },
+          );
         }
       }
       if (dto.clinicalUnitId) {

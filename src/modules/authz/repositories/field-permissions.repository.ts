@@ -29,7 +29,10 @@ export class FieldPermissionsRepository {
   }
 
   /** Reglas de enmascaramiento de un conjunto de roles (para el PDP). */
-  findForRoles(em: EntityManager, roleIds: string[]): Promise<FieldPermissions[]> {
+  findForRoles(
+    em: EntityManager,
+    roleIds: string[],
+  ): Promise<FieldPermissions[]> {
     if (roleIds.length === 0) return Promise.resolve([]);
     return em.find(FieldPermissions, { roleId: { $in: roleIds } });
   }

@@ -64,7 +64,12 @@ describe('Smoke test — 30 endpoints', () => {
     testCase: string,
     method: 'post' | 'delete' | 'get' | 'patch',
     path: string,
-    opts: { body?: unknown; token?: string; expectedStatus: number; expectedCode?: string },
+    opts: {
+      body?: unknown;
+      token?: string;
+      expectedStatus: number;
+      expectedCode?: string;
+    },
   ): Promise<request.Response | null> {
     const started = Date.now();
     try {
@@ -73,7 +78,9 @@ describe('Smoke test — 30 endpoints', () => {
       if (opts.body !== undefined) req = req.send(opts.body as object);
       const res = await req;
       const durationMs = Date.now() - started;
-      const codeOk = opts.expectedCode ? res.body?.code === opts.expectedCode : true;
+      const codeOk = opts.expectedCode
+        ? res.body?.code === opts.expectedCode
+        : true;
       const pass = res.status === opts.expectedStatus && codeOk;
       results.push({
         module,
@@ -110,12 +117,16 @@ describe('Smoke test — 30 endpoints', () => {
   }
 
   /** Ejecuta un `SmokeCase` del registro (módulos 04+) compartiendo `ctx.vars`. */
-  async function runRegistryCase(smokeCtx: SmokeCtx, c: SmokeCase): Promise<void> {
+  async function runRegistryCase(
+    smokeCtx: SmokeCtx,
+    c: SmokeCase,
+  ): Promise<void> {
     const started = Date.now();
     const path = c.path(smokeCtx);
     try {
       let req = request(server)[c.method](path);
-      if (c.auth !== false) req = req.set('Authorization', `Bearer ${smokeCtx.adminToken}`);
+      if (c.auth !== false)
+        req = req.set('Authorization', `Bearer ${smokeCtx.adminToken}`);
       if (c.body) req = req.send(c.body(smokeCtx) as object);
       const res = await req;
       const durationMs = Date.now() - started;
@@ -166,176 +177,422 @@ describe('Smoke test — 30 endpoints', () => {
     const password = 'Str0ng-Passw0rd!';
 
     // UC-01-01 crear usuario
-    const created = await runCase('IAM', 'POST /iam/users', 'happy: datos completos', 'post', '/iam/users', {
-      token: admin,
-      body: { displayName: 'Smoke Main', email: mainEmail, password, timeZone: 'America/Lima', initialRole: 'USER' },
-      expectedStatus: 201,
-    });
+    const created = await runCase(
+      'IAM',
+      'POST /iam/users',
+      'happy: datos completos',
+      'post',
+      '/iam/users',
+      {
+        token: admin,
+        body: {
+          displayName: 'Smoke Main',
+          email: mainEmail,
+          password,
+          timeZone: 'America/Lima',
+          initialRole: 'USER',
+        },
+        expectedStatus: 201,
+      },
+    );
     const mainUserId: string = created?.body?.id ?? UUID_ABSENT;
-    await runCase('IAM', 'POST /iam/users', 'límite: sin autenticación', 'post', '/iam/users', {
-      body: { displayName: 'x', email: `x-${u}@e.com`, password },
-      expectedStatus: 401,
-    });
-    await runCase('IAM', 'POST /iam/users', 'límite: body inválido (falta email/password)', 'post', '/iam/users', {
-      token: admin,
-      body: { displayName: 'x' },
-      expectedStatus: 400,
-    });
-    await runCase('IAM', 'POST /iam/users', 'límite: email duplicado', 'post', '/iam/users', {
-      token: admin,
-      body: { displayName: 'dup', email: mainEmail, password },
-      expectedStatus: 409,
-      expectedCode: 'CONFLICT',
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users',
+      'límite: sin autenticación',
+      'post',
+      '/iam/users',
+      {
+        body: { displayName: 'x', email: `x-${u}@e.com`, password },
+        expectedStatus: 401,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users',
+      'límite: body inválido (falta email/password)',
+      'post',
+      '/iam/users',
+      {
+        token: admin,
+        body: { displayName: 'x' },
+        expectedStatus: 400,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users',
+      'límite: email duplicado',
+      'post',
+      '/iam/users',
+      {
+        token: admin,
+        body: { displayName: 'dup', email: mainEmail, password },
+        expectedStatus: 409,
+        expectedCode: 'CONFLICT',
+      },
+    );
 
     // Usuario "víctima" para operaciones destructivas.
     const victimEmail = `smoke-victim-${u}@example.com`;
-    const victim = await runCase('IAM', 'POST /iam/users', 'happy: segundo usuario (destructivo)', 'post', '/iam/users', {
-      token: admin,
-      body: { displayName: 'Smoke Victim', email: victimEmail, password, initialRole: 'USER' },
-      expectedStatus: 201,
-    });
+    const victim = await runCase(
+      'IAM',
+      'POST /iam/users',
+      'happy: segundo usuario (destructivo)',
+      'post',
+      '/iam/users',
+      {
+        token: admin,
+        body: {
+          displayName: 'Smoke Victim',
+          email: victimEmail,
+          password,
+          initialRole: 'USER',
+        },
+        expectedStatus: 201,
+      },
+    );
     const victimUserId: string = victim?.body?.id ?? UUID_ABSENT;
 
     // UC-01-04 login
-    const login = await runCase('IAM', 'POST /iam/auth/login', 'happy: credenciales válidas', 'post', '/iam/auth/login', {
-      body: { email: mainEmail, password },
-      expectedStatus: 200,
-    });
+    const login = await runCase(
+      'IAM',
+      'POST /iam/auth/login',
+      'happy: credenciales válidas',
+      'post',
+      '/iam/auth/login',
+      {
+        body: { email: mainEmail, password },
+        expectedStatus: 200,
+      },
+    );
     const mainRefresh: string = login?.body?.refreshToken ?? '';
-    await runCase('IAM', 'POST /iam/auth/login', 'límite: contraseña incorrecta', 'post', '/iam/auth/login', {
-      body: { email: mainEmail, password: 'wrong-pass' },
-      expectedStatus: 401,
-    });
-    await runCase('IAM', 'POST /iam/auth/login', 'límite: body inválido (falta password)', 'post', '/iam/auth/login', {
-      body: { email: mainEmail },
-      expectedStatus: 400,
-    });
-    await runCase('IAM', 'POST /iam/auth/login', 'límite: email inexistente', 'post', '/iam/auth/login', {
-      body: { email: `nope-${u}@e.com`, password },
-      expectedStatus: 401,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/auth/login',
+      'límite: contraseña incorrecta',
+      'post',
+      '/iam/auth/login',
+      {
+        body: { email: mainEmail, password: 'wrong-pass' },
+        expectedStatus: 401,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/auth/login',
+      'límite: body inválido (falta password)',
+      'post',
+      '/iam/auth/login',
+      {
+        body: { email: mainEmail },
+        expectedStatus: 400,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/auth/login',
+      'límite: email inexistente',
+      'post',
+      '/iam/auth/login',
+      {
+        body: { email: `nope-${u}@e.com`, password },
+        expectedStatus: 401,
+      },
+    );
 
     // UC-01-02 credencial federada
-    const fed = await runCase('IAM', 'POST /iam/users/:id/credentials/federated', 'happy: vincula OIDC', 'post', `/iam/users/${victimUserId}/credentials/federated`, {
-      token: admin,
-      body: { identityProvider: 'google', externalSubject: `google|${victimUserId}` },
-      expectedStatus: 201,
-    });
+    const fed = await runCase(
+      'IAM',
+      'POST /iam/users/:id/credentials/federated',
+      'happy: vincula OIDC',
+      'post',
+      `/iam/users/${victimUserId}/credentials/federated`,
+      {
+        token: admin,
+        body: {
+          identityProvider: 'google',
+          externalSubject: `google|${victimUserId}`,
+        },
+        expectedStatus: 201,
+      },
+    );
     const victimCredentialId: string = fed?.body?.id ?? UUID_ABSENT;
-    await runCase('IAM', 'POST /iam/users/:id/credentials/federated', 'límite: usuario inexistente', 'post', `/iam/users/${UUID_ABSENT}/credentials/federated`, {
-      token: admin,
-      body: { identityProvider: 'google', externalSubject: `google|ghost-${u}` },
-      expectedStatus: 404,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/credentials/federated', 'límite: UUID inválido', 'post', `/iam/users/${UUID_BAD}/credentials/federated`, {
-      token: admin,
-      body: { identityProvider: 'google', externalSubject: 'x' },
-      expectedStatus: 400,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/credentials/federated',
+      'límite: usuario inexistente',
+      'post',
+      `/iam/users/${UUID_ABSENT}/credentials/federated`,
+      {
+        token: admin,
+        body: {
+          identityProvider: 'google',
+          externalSubject: `google|ghost-${u}`,
+        },
+        expectedStatus: 404,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/credentials/federated',
+      'límite: UUID inválido',
+      'post',
+      `/iam/users/${UUID_BAD}/credentials/federated`,
+      {
+        token: admin,
+        body: { identityProvider: 'google', externalSubject: 'x' },
+        expectedStatus: 400,
+      },
+    );
 
     // UC-01-03 MFA
-    await runCase('IAM', 'POST /iam/users/:id/mfa-factors', 'happy: inscribe TOTP', 'post', `/iam/users/${mainUserId}/mfa-factors`, {
-      token: admin,
-      body: { factorType: 'TOTP', label: 'Authenticator' },
-      expectedStatus: 201,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/mfa-factors', 'límite: factorType inválido', 'post', `/iam/users/${mainUserId}/mfa-factors`, {
-      token: admin,
-      body: { factorType: 'CARRIER_PIGEON' },
-      expectedStatus: 400,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/mfa-factors', 'límite: sin autenticación', 'post', `/iam/users/${mainUserId}/mfa-factors`, {
-      body: { factorType: 'TOTP' },
-      expectedStatus: 401,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/mfa-factors',
+      'happy: inscribe TOTP',
+      'post',
+      `/iam/users/${mainUserId}/mfa-factors`,
+      {
+        token: admin,
+        body: { factorType: 'TOTP', label: 'Authenticator' },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/mfa-factors',
+      'límite: factorType inválido',
+      'post',
+      `/iam/users/${mainUserId}/mfa-factors`,
+      {
+        token: admin,
+        body: { factorType: 'CARRIER_PIGEON' },
+        expectedStatus: 400,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/mfa-factors',
+      'límite: sin autenticación',
+      'post',
+      `/iam/users/${mainUserId}/mfa-factors`,
+      {
+        body: { factorType: 'TOTP' },
+        expectedStatus: 401,
+      },
+    );
 
     // UC-01-05 dispositivo
-    await runCase('IAM', 'POST /iam/users/:id/devices', 'happy: dispositivo de confianza', 'post', `/iam/users/${mainUserId}/devices`, {
-      token: admin,
-      body: { deviceFingerprint: `fp-${u}`, platform: 'WEB', name: 'Chrome', trust: true },
-      expectedStatus: 201,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/devices', 'límite: sin autenticación', 'post', `/iam/users/${mainUserId}/devices`, {
-      body: { deviceFingerprint: `fp2-${u}` },
-      expectedStatus: 401,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/devices',
+      'happy: dispositivo de confianza',
+      'post',
+      `/iam/users/${mainUserId}/devices`,
+      {
+        token: admin,
+        body: {
+          deviceFingerprint: `fp-${u}`,
+          platform: 'WEB',
+          name: 'Chrome',
+          trust: true,
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/devices',
+      'límite: sin autenticación',
+      'post',
+      `/iam/users/${mainUserId}/devices`,
+      {
+        body: { deviceFingerprint: `fp2-${u}` },
+        expectedStatus: 401,
+      },
+    );
 
     // UC-01-06 refresh
-    await runCase('IAM', 'POST /iam/auth/token/refresh', 'happy: rota el token', 'post', '/iam/auth/token/refresh', {
-      body: { refreshToken: mainRefresh },
-      expectedStatus: 200,
-    });
-    await runCase('IAM', 'POST /iam/auth/token/refresh', 'límite: reuso del token rotado', 'post', '/iam/auth/token/refresh', {
-      body: { refreshToken: mainRefresh },
-      expectedStatus: 401,
-    });
-    await runCase('IAM', 'POST /iam/auth/token/refresh', 'límite: token inexistente', 'post', '/iam/auth/token/refresh', {
-      body: { refreshToken: randomUUID() },
-      expectedStatus: 401,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/auth/token/refresh',
+      'happy: rota el token',
+      'post',
+      '/iam/auth/token/refresh',
+      {
+        body: { refreshToken: mainRefresh },
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/auth/token/refresh',
+      'límite: reuso del token rotado',
+      'post',
+      '/iam/auth/token/refresh',
+      {
+        body: { refreshToken: mainRefresh },
+        expectedStatus: 401,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/auth/token/refresh',
+      'límite: token inexistente',
+      'post',
+      '/iam/auth/token/refresh',
+      {
+        body: { refreshToken: randomUUID() },
+        expectedStatus: 401,
+      },
+    );
 
     // UC-01-10 roles globales (sobre víctima)
-    await runCase('IAM', 'POST /iam/users/:id/global-roles', 'happy: concede rol', 'post', `/iam/users/${victimUserId}/global-roles`, {
-      token: admin,
-      body: { role: 'SECURITY_ADMIN', action: 'GRANT' },
-      expectedStatus: 200,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/global-roles', 'límite: rol inválido', 'post', `/iam/users/${victimUserId}/global-roles`, {
-      token: admin,
-      body: { role: 'WIZARD', action: 'GRANT' },
-      expectedStatus: 400,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/global-roles',
+      'happy: concede rol',
+      'post',
+      `/iam/users/${victimUserId}/global-roles`,
+      {
+        token: admin,
+        body: { role: 'SECURITY_ADMIN', action: 'GRANT' },
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/global-roles',
+      'límite: rol inválido',
+      'post',
+      `/iam/users/${victimUserId}/global-roles`,
+      {
+        token: admin,
+        body: { role: 'WIZARD', action: 'GRANT' },
+        expectedStatus: 400,
+      },
+    );
 
     // UC-01-09 revocar credencial (sobre víctima)
-    await runCase('IAM', 'POST /iam/users/:id/credentials/:cid/revoke', 'happy: revoca credencial', 'post', `/iam/users/${victimUserId}/credentials/${victimCredentialId}/revoke`, {
-      token: admin,
-      expectedStatus: 200,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/credentials/:cid/revoke', 'límite: credencial inexistente', 'post', `/iam/users/${victimUserId}/credentials/${UUID_ABSENT}/revoke`, {
-      token: admin,
-      expectedStatus: 404,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/credentials/:cid/revoke',
+      'happy: revoca credencial',
+      'post',
+      `/iam/users/${victimUserId}/credentials/${victimCredentialId}/revoke`,
+      {
+        token: admin,
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/credentials/:cid/revoke',
+      'límite: credencial inexistente',
+      'post',
+      `/iam/users/${victimUserId}/credentials/${UUID_ABSENT}/revoke`,
+      {
+        token: admin,
+        expectedStatus: 404,
+      },
+    );
 
     // UC-01-11 purga de sesiones
-    await runCase('IAM', 'POST /iam/auth/sessions/purge', 'happy: purga expiradas', 'post', '/iam/auth/sessions/purge', {
-      token: admin,
-      expectedStatus: 200,
-    });
-    await runCase('IAM', 'POST /iam/auth/sessions/purge', 'límite: sin autenticación', 'post', '/iam/auth/sessions/purge', {
-      expectedStatus: 401,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/auth/sessions/purge',
+      'happy: purga expiradas',
+      'post',
+      '/iam/auth/sessions/purge',
+      {
+        token: admin,
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/auth/sessions/purge',
+      'límite: sin autenticación',
+      'post',
+      '/iam/auth/sessions/purge',
+      {
+        expectedStatus: 401,
+      },
+    );
 
     // UC-01-07 bloqueo (sobre víctima)
-    await runCase('IAM', 'POST /iam/users/:id/lock', 'happy: bloquea cuenta', 'post', `/iam/users/${victimUserId}/lock`, {
-      token: admin,
-      body: { reason: 'smoke test' },
-      expectedStatus: 200,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/lock', 'límite: usuario inexistente', 'post', `/iam/users/${UUID_ABSENT}/lock`, {
-      token: admin,
-      body: { reason: 'x' },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/lock',
+      'happy: bloquea cuenta',
+      'post',
+      `/iam/users/${victimUserId}/lock`,
+      {
+        token: admin,
+        body: { reason: 'smoke test' },
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/lock',
+      'límite: usuario inexistente',
+      'post',
+      `/iam/users/${UUID_ABSENT}/lock`,
+      {
+        token: admin,
+        body: { reason: 'x' },
+        expectedStatus: 404,
+      },
+    );
 
     // UC-01-12 anonimización (sobre víctima)
-    await runCase('IAM', 'POST /iam/users/:id/anonymize', 'happy: DSAR', 'post', `/iam/users/${victimUserId}/anonymize`, {
-      token: admin,
-      expectedStatus: 200,
-    });
-    await runCase('IAM', 'POST /iam/users/:id/anonymize', 'límite: usuario inexistente', 'post', `/iam/users/${UUID_ABSENT}/anonymize`, {
-      token: admin,
-      expectedStatus: 404,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/anonymize',
+      'happy: DSAR',
+      'post',
+      `/iam/users/${victimUserId}/anonymize`,
+      {
+        token: admin,
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/users/:id/anonymize',
+      'límite: usuario inexistente',
+      'post',
+      `/iam/users/${UUID_ABSENT}/anonymize`,
+      {
+        token: admin,
+        expectedStatus: 404,
+      },
+    );
 
     // UC-01-08 logout global (admin, al final para no invalidar la sesión antes)
-    await runCase('IAM', 'POST /iam/auth/logout-all', 'happy: cierra todas las sesiones', 'post', '/iam/auth/logout-all', {
-      token: admin,
-      expectedStatus: 200,
-    });
-    await runCase('IAM', 'POST /iam/auth/logout-all', 'límite: sin autenticación', 'post', '/iam/auth/logout-all', {
-      expectedStatus: 401,
-    });
+    await runCase(
+      'IAM',
+      'POST /iam/auth/logout-all',
+      'happy: cierra todas las sesiones',
+      'post',
+      '/iam/auth/logout-all',
+      {
+        token: admin,
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'IAM',
+      'POST /iam/auth/logout-all',
+      'límite: sin autenticación',
+      'post',
+      '/iam/auth/logout-all',
+      {
+        expectedStatus: 401,
+      },
+    );
 
     // ------------------------------------------------------------------
     // COMMON
@@ -343,222 +600,579 @@ describe('Smoke test — 30 endpoints', () => {
     const owner = { ownerType: 'USER', ownerId: ctx.adminUserId };
 
     // UC-02-01 identificador
-    await runCase('Common', 'POST /common/identifiers', 'happy: identificador oficial', 'post', '/common/identifiers', {
-      token: admin,
-      body: { ...owner, type: 'NATIONAL_ID', system: `urn:pe:dni:${u}`, value: '12345678', use: 'OFFICIAL' },
-      expectedStatus: 201,
-    });
-    await runCase('Common', 'POST /common/identifiers', 'límite: duplicado', 'post', '/common/identifiers', {
-      token: admin,
-      body: { ...owner, type: 'NATIONAL_ID', system: `urn:pe:dni:${u}`, value: '12345678' },
-      expectedStatus: 409,
-      expectedCode: 'CONFLICT',
-    });
-    await runCase('Common', 'POST /common/identifiers', 'límite: sin autenticación', 'post', '/common/identifiers', {
-      body: { ...owner, type: 'MRN', value: 'x' },
-      expectedStatus: 401,
-    });
+    await runCase(
+      'Common',
+      'POST /common/identifiers',
+      'happy: identificador oficial',
+      'post',
+      '/common/identifiers',
+      {
+        token: admin,
+        body: {
+          ...owner,
+          type: 'NATIONAL_ID',
+          system: `urn:pe:dni:${u}`,
+          value: '12345678',
+          use: 'OFFICIAL',
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Common',
+      'POST /common/identifiers',
+      'límite: duplicado',
+      'post',
+      '/common/identifiers',
+      {
+        token: admin,
+        body: {
+          ...owner,
+          type: 'NATIONAL_ID',
+          system: `urn:pe:dni:${u}`,
+          value: '12345678',
+        },
+        expectedStatus: 409,
+        expectedCode: 'CONFLICT',
+      },
+    );
+    await runCase(
+      'Common',
+      'POST /common/identifiers',
+      'límite: sin autenticación',
+      'post',
+      '/common/identifiers',
+      {
+        body: { ...owner, type: 'MRN', value: 'x' },
+        expectedStatus: 401,
+      },
+    );
 
     // UC-02-02 contacto
-    const cp = await runCase('Common', 'POST /common/contact-points', 'happy: email', 'post', '/common/contact-points', {
-      token: admin,
-      body: { ...owner, system: 'EMAIL', value: `c-${u}@example.com`, use: 'HOME' },
-      expectedStatus: 201,
-    });
+    const cp = await runCase(
+      'Common',
+      'POST /common/contact-points',
+      'happy: email',
+      'post',
+      '/common/contact-points',
+      {
+        token: admin,
+        body: {
+          ...owner,
+          system: 'EMAIL',
+          value: `c-${u}@example.com`,
+          use: 'HOME',
+        },
+        expectedStatus: 201,
+      },
+    );
     const contactPointId: string = cp?.body?.id ?? UUID_ABSENT;
-    await runCase('Common', 'POST /common/contact-points', 'límite: body inválido (sin value)', 'post', '/common/contact-points', {
-      token: admin,
-      body: { ...owner, system: 'EMAIL' },
-      expectedStatus: 400,
-    });
+    await runCase(
+      'Common',
+      'POST /common/contact-points',
+      'límite: body inválido (sin value)',
+      'post',
+      '/common/contact-points',
+      {
+        token: admin,
+        body: { ...owner, system: 'EMAIL' },
+        expectedStatus: 400,
+      },
+    );
 
     // UC-02-03 verificar contacto
-    await runCase('Common', 'POST /common/contact-points/:id/verify', 'happy: verifica', 'post', `/common/contact-points/${contactPointId}/verify`, {
-      token: admin,
-      body: { code: '123456' },
-      expectedStatus: 200,
-    });
-    await runCase('Common', 'POST /common/contact-points/:id/verify', 'límite: inexistente', 'post', `/common/contact-points/${UUID_ABSENT}/verify`, {
-      token: admin,
-      body: { code: '123456' },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Common',
+      'POST /common/contact-points/:id/verify',
+      'happy: verifica',
+      'post',
+      `/common/contact-points/${contactPointId}/verify`,
+      {
+        token: admin,
+        body: { code: '123456' },
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'Common',
+      'POST /common/contact-points/:id/verify',
+      'límite: inexistente',
+      'post',
+      `/common/contact-points/${UUID_ABSENT}/verify`,
+      {
+        token: admin,
+        body: { code: '123456' },
+        expectedStatus: 404,
+      },
+    );
 
     // UC-02-04 dirección
-    await runCase('Common', 'POST /common/addresses', 'happy: dirección completa', 'post', '/common/addresses', {
-      token: admin,
-      body: { ...owner, lines: ['Av. Siempre Viva 742'], city: 'Lima', postalCode: '15001', country: 'PE' },
-      expectedStatus: 201,
-    });
-    await runCase('Common', 'POST /common/addresses', 'límite: sin autenticación', 'post', '/common/addresses', {
-      body: { ...owner, lines: ['x'] },
-      expectedStatus: 401,
-    });
+    await runCase(
+      'Common',
+      'POST /common/addresses',
+      'happy: dirección completa',
+      'post',
+      '/common/addresses',
+      {
+        token: admin,
+        body: {
+          ...owner,
+          lines: ['Av. Siempre Viva 742'],
+          city: 'Lima',
+          postalCode: '15001',
+          country: 'PE',
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Common',
+      'POST /common/addresses',
+      'límite: sin autenticación',
+      'post',
+      '/common/addresses',
+      {
+        body: { ...owner, lines: ['x'] },
+        expectedStatus: 401,
+      },
+    );
 
     // UC-02-05 archivo
-    const file = await runCase('Common', 'POST /common/files', 'happy: sube archivo + v1', 'post', '/common/files', {
-      token: admin,
-      body: { originalName: 'report.pdf', category: 'DOCUMENT', sensitivity: 'PHI', mimeType: 'application/pdf', sizeBytes: 20480, contentHash: 'a'.repeat(64), storageUri: `s3://bucket/r-${u}.pdf` },
-      expectedStatus: 201,
-    });
+    const file = await runCase(
+      'Common',
+      'POST /common/files',
+      'happy: sube archivo + v1',
+      'post',
+      '/common/files',
+      {
+        token: admin,
+        body: {
+          originalName: 'report.pdf',
+          category: 'DOCUMENT',
+          sensitivity: 'PHI',
+          mimeType: 'application/pdf',
+          sizeBytes: 20480,
+          contentHash: 'a'.repeat(64),
+          storageUri: `s3://bucket/r-${u}.pdf`,
+        },
+        expectedStatus: 201,
+      },
+    );
     const fileId: string = file?.body?.id ?? UUID_ABSENT;
     const versionId: string = file?.body?.currentVersionId ?? UUID_ABSENT;
-    await runCase('Common', 'POST /common/files', 'límite: body inválido (sin mimeType)', 'post', '/common/files', {
-      token: admin,
-      body: { originalName: 'x', category: 'DOCUMENT', sensitivity: 'NORMAL', sizeBytes: 1, contentHash: 'a'.repeat(64), storageUri: 's3://x' },
-      expectedStatus: 400,
-    });
+    await runCase(
+      'Common',
+      'POST /common/files',
+      'límite: body inválido (sin mimeType)',
+      'post',
+      '/common/files',
+      {
+        token: admin,
+        body: {
+          originalName: 'x',
+          category: 'DOCUMENT',
+          sensitivity: 'NORMAL',
+          sizeBytes: 1,
+          contentHash: 'a'.repeat(64),
+          storageUri: 's3://x',
+        },
+        expectedStatus: 400,
+      },
+    );
 
     // UC-02-09 escaneo (interno)
-    await runCase('Common', 'POST /internal/files/versions/:vid/scan-result', 'happy: CLEAN', 'post', `/internal/files/versions/${versionId}/scan-result`, {
-      token: admin,
-      body: { result: 'CLEAN' },
-      expectedStatus: 200,
-    });
-    await runCase('Common', 'POST /internal/files/versions/:vid/scan-result', 'límite: versión inexistente', 'post', `/internal/files/versions/${UUID_ABSENT}/scan-result`, {
-      token: admin,
-      body: { result: 'CLEAN' },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Common',
+      'POST /internal/files/versions/:vid/scan-result',
+      'happy: CLEAN',
+      'post',
+      `/internal/files/versions/${versionId}/scan-result`,
+      {
+        token: admin,
+        body: { result: 'CLEAN' },
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'Common',
+      'POST /internal/files/versions/:vid/scan-result',
+      'límite: versión inexistente',
+      'post',
+      `/internal/files/versions/${UUID_ABSENT}/scan-result`,
+      {
+        token: admin,
+        body: { result: 'CLEAN' },
+        expectedStatus: 404,
+      },
+    );
 
     // UC-02-07 derivado (requiere versión limpia)
-    await runCase('Common', 'POST /common/files/:id/versions/:vid/derivatives', 'happy: thumbnail desde versión limpia', 'post', `/common/files/${fileId}/versions/${versionId}/derivatives`, {
-      token: admin,
-      body: { derivativeType: 'THUMBNAIL', storageUri: `s3://bucket/thumb-${u}.png`, mimeType: 'image/png', sizeBytes: 2048, contentHash: 'c'.repeat(64) },
-      expectedStatus: 201,
-    });
+    await runCase(
+      'Common',
+      'POST /common/files/:id/versions/:vid/derivatives',
+      'happy: thumbnail desde versión limpia',
+      'post',
+      `/common/files/${fileId}/versions/${versionId}/derivatives`,
+      {
+        token: admin,
+        body: {
+          derivativeType: 'THUMBNAIL',
+          storageUri: `s3://bucket/thumb-${u}.png`,
+          mimeType: 'image/png',
+          sizeBytes: 2048,
+          contentHash: 'c'.repeat(64),
+        },
+        expectedStatus: 201,
+      },
+    );
 
     // UC-02-08 vínculo
-    await runCase('Common', 'POST /common/files/:id/links', 'happy: vincula a entidad', 'post', `/common/files/${fileId}/links`, {
-      token: admin,
-      body: { ownerType: 'PATIENT', ownerId: ctx.adminUserId, linkRole: 'ATTACHMENT', visibility: 'INTERNAL' },
-      expectedStatus: 201,
-    });
-    await runCase('Common', 'POST /common/files/:id/links', 'límite: archivo inexistente', 'post', `/common/files/${UUID_ABSENT}/links`, {
-      token: admin,
-      body: { ownerType: 'PATIENT', ownerId: ctx.adminUserId },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Common',
+      'POST /common/files/:id/links',
+      'happy: vincula a entidad',
+      'post',
+      `/common/files/${fileId}/links`,
+      {
+        token: admin,
+        body: {
+          ownerType: 'PATIENT',
+          ownerId: ctx.adminUserId,
+          linkRole: 'ATTACHMENT',
+          visibility: 'INTERNAL',
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Common',
+      'POST /common/files/:id/links',
+      'límite: archivo inexistente',
+      'post',
+      `/common/files/${UUID_ABSENT}/links`,
+      {
+        token: admin,
+        body: { ownerType: 'PATIENT', ownerId: ctx.adminUserId },
+        expectedStatus: 404,
+      },
+    );
 
     // UC-02-11 URL firmada (versión actual limpia)
-    await runCase('Common', 'POST /common/files/:id/download-url', 'happy: URL firmada', 'post', `/common/files/${fileId}/download-url`, {
-      token: admin,
-      expectedStatus: 201,
-    });
+    await runCase(
+      'Common',
+      'POST /common/files/:id/download-url',
+      'happy: URL firmada',
+      'post',
+      `/common/files/${fileId}/download-url`,
+      {
+        token: admin,
+        expectedStatus: 201,
+      },
+    );
 
     // UC-02-06 nueva versión
-    await runCase('Common', 'POST /common/files/:id/versions', 'happy: nueva versión', 'post', `/common/files/${fileId}/versions`, {
-      token: admin,
-      body: { mimeType: 'application/pdf', sizeBytes: 20500, contentHash: 'b'.repeat(64), storageUri: `s3://bucket/r2-${u}.pdf` },
-      expectedStatus: 201,
-    });
-    await runCase('Common', 'POST /common/files/:id/versions', 'límite: archivo inexistente', 'post', `/common/files/${UUID_ABSENT}/versions`, {
-      token: admin,
-      body: { mimeType: 'application/pdf', sizeBytes: 1, contentHash: 'b'.repeat(64), storageUri: 's3://x' },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Common',
+      'POST /common/files/:id/versions',
+      'happy: nueva versión',
+      'post',
+      `/common/files/${fileId}/versions`,
+      {
+        token: admin,
+        body: {
+          mimeType: 'application/pdf',
+          sizeBytes: 20500,
+          contentHash: 'b'.repeat(64),
+          storageUri: `s3://bucket/r2-${u}.pdf`,
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Common',
+      'POST /common/files/:id/versions',
+      'límite: archivo inexistente',
+      'post',
+      `/common/files/${UUID_ABSENT}/versions`,
+      {
+        token: admin,
+        body: {
+          mimeType: 'application/pdf',
+          sizeBytes: 1,
+          contentHash: 'b'.repeat(64),
+          storageUri: 's3://x',
+        },
+        expectedStatus: 404,
+      },
+    );
 
     // UC-02-10 borrado lógico
-    await runCase('Common', 'DELETE /common/files/:id', 'happy: soft-delete', 'delete', `/common/files/${fileId}`, {
-      token: admin,
-      expectedStatus: 200,
-    });
-    await runCase('Common', 'DELETE /common/files/:id', 'límite: inexistente', 'delete', `/common/files/${UUID_ABSENT}`, {
-      token: admin,
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Common',
+      'DELETE /common/files/:id',
+      'happy: soft-delete',
+      'delete',
+      `/common/files/${fileId}`,
+      {
+        token: admin,
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'Common',
+      'DELETE /common/files/:id',
+      'límite: inexistente',
+      'delete',
+      `/common/files/${UUID_ABSENT}`,
+      {
+        token: admin,
+        expectedStatus: 404,
+      },
+    );
 
     // ------------------------------------------------------------------
     // TERMINOLOGY
     // ------------------------------------------------------------------
-    const cs = await runCase('Terminology', 'POST /terminology/code-systems', 'happy: code system', 'post', '/terminology/code-systems', {
-      token: admin,
-      body: { internalCode: `icd10-${u}`, name: 'ICD-10 Local', canonicalUrl: `http://x/icd10/${u}`, sourceCode: `WHO-${u}`, sourceName: 'WHO' },
-      expectedStatus: 201,
-    });
+    const cs = await runCase(
+      'Terminology',
+      'POST /terminology/code-systems',
+      'happy: code system',
+      'post',
+      '/terminology/code-systems',
+      {
+        token: admin,
+        body: {
+          internalCode: `icd10-${u}`,
+          name: 'ICD-10 Local',
+          canonicalUrl: `http://x/icd10/${u}`,
+          sourceCode: `WHO-${u}`,
+          sourceName: 'WHO',
+        },
+        expectedStatus: 201,
+      },
+    );
     const codeSystemId: string = cs?.body?.id ?? UUID_ABSENT;
-    await runCase('Terminology', 'POST /terminology/code-systems', 'límite: internalCode duplicado', 'post', '/terminology/code-systems', {
-      token: admin,
-      body: { internalCode: `icd10-${u}`, name: 'dup', canonicalUrl: 'http://y', sourceCode: 'WHO', sourceName: 'WHO' },
-      expectedStatus: 409,
-      expectedCode: 'CONFLICT',
-    });
-    await runCase('Terminology', 'POST /terminology/code-systems', 'límite: sin autenticación', 'post', '/terminology/code-systems', {
-      body: { internalCode: 'x', name: 'x', canonicalUrl: 'x', sourceCode: 'x', sourceName: 'x' },
-      expectedStatus: 401,
-    });
+    await runCase(
+      'Terminology',
+      'POST /terminology/code-systems',
+      'límite: internalCode duplicado',
+      'post',
+      '/terminology/code-systems',
+      {
+        token: admin,
+        body: {
+          internalCode: `icd10-${u}`,
+          name: 'dup',
+          canonicalUrl: 'http://y',
+          sourceCode: 'WHO',
+          sourceName: 'WHO',
+        },
+        expectedStatus: 409,
+        expectedCode: 'CONFLICT',
+      },
+    );
+    await runCase(
+      'Terminology',
+      'POST /terminology/code-systems',
+      'límite: sin autenticación',
+      'post',
+      '/terminology/code-systems',
+      {
+        body: {
+          internalCode: 'x',
+          name: 'x',
+          canonicalUrl: 'x',
+          sourceCode: 'x',
+          sourceName: 'x',
+        },
+        expectedStatus: 401,
+      },
+    );
 
-    const ver = await runCase('Terminology', 'POST /terminology/code-systems/:id/versions', 'happy: versión DRAFT', 'post', `/terminology/code-systems/${codeSystemId}/versions`, {
-      token: admin,
-      body: { version: '2024', isDefault: true },
-      expectedStatus: 201,
-    });
+    const ver = await runCase(
+      'Terminology',
+      'POST /terminology/code-systems/:id/versions',
+      'happy: versión DRAFT',
+      'post',
+      `/terminology/code-systems/${codeSystemId}/versions`,
+      {
+        token: admin,
+        body: { version: '2024', isDefault: true },
+        expectedStatus: 201,
+      },
+    );
     const versionTermId: string = ver?.body?.id ?? UUID_ABSENT;
-    await runCase('Terminology', 'POST /terminology/code-systems/:id/versions', 'límite: code system inexistente', 'post', `/terminology/code-systems/${UUID_ABSENT}/versions`, {
-      token: admin,
-      body: { version: '2024' },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Terminology',
+      'POST /terminology/code-systems/:id/versions',
+      'límite: code system inexistente',
+      'post',
+      `/terminology/code-systems/${UUID_ABSENT}/versions`,
+      {
+        token: admin,
+        body: { version: '2024' },
+        expectedStatus: 404,
+      },
+    );
 
-    await runCase('Terminology', 'POST /terminology/versions/:versionId/import', 'happy: import batch', 'post', `/terminology/versions/${versionTermId}/import`, {
-      token: admin,
-      body: { concepts: [{ code: 'A00', display: 'Cholera' }, { code: 'A01', display: 'Typhoid fever' }] },
-      expectedStatus: 201,
-    });
-    await runCase('Terminology', 'POST /terminology/versions/:versionId/import', 'límite: body inválido (concepts vacío)', 'post', `/terminology/versions/${versionTermId}/import`, {
-      token: admin,
-      body: { concepts: [] },
-      expectedStatus: 400,
-    });
+    await runCase(
+      'Terminology',
+      'POST /terminology/versions/:versionId/import',
+      'happy: import batch',
+      'post',
+      `/terminology/versions/${versionTermId}/import`,
+      {
+        token: admin,
+        body: {
+          concepts: [
+            { code: 'A00', display: 'Cholera' },
+            { code: 'A01', display: 'Typhoid fever' },
+          ],
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Terminology',
+      'POST /terminology/versions/:versionId/import',
+      'límite: body inválido (concepts vacío)',
+      'post',
+      `/terminology/versions/${versionTermId}/import`,
+      {
+        token: admin,
+        body: { concepts: [] },
+        expectedStatus: 400,
+      },
+    );
 
     // Recuperar ids de concepto persistidos.
     const em = orm.em.fork();
-    const concepts = await em.find(CatalogConcepts, { codeSystemVersionId: versionTermId });
+    const concepts = await em.find(CatalogConcepts, {
+      codeSystemVersionId: versionTermId,
+    });
     const conceptA = concepts.find((c) => c.code === 'A00')?.id ?? UUID_ABSENT;
     const conceptB = concepts.find((c) => c.code === 'A01')?.id ?? UUID_ABSENT;
 
-    await runCase('Terminology', 'POST /terminology/versions/:versionId/publish', 'happy: DRAFT -> ACTIVE', 'post', `/terminology/versions/${versionTermId}/publish`, {
-      token: admin,
-      expectedStatus: 200,
-    });
-    await runCase('Terminology', 'POST /terminology/versions/:versionId/publish', 'límite: re-publicar versión activa', 'post', `/terminology/versions/${versionTermId}/publish`, {
-      token: admin,
-      expectedStatus: 409,
-    });
+    await runCase(
+      'Terminology',
+      'POST /terminology/versions/:versionId/publish',
+      'happy: DRAFT -> ACTIVE',
+      'post',
+      `/terminology/versions/${versionTermId}/publish`,
+      {
+        token: admin,
+        expectedStatus: 200,
+      },
+    );
+    await runCase(
+      'Terminology',
+      'POST /terminology/versions/:versionId/publish',
+      'límite: re-publicar versión activa',
+      'post',
+      `/terminology/versions/${versionTermId}/publish`,
+      {
+        token: admin,
+        expectedStatus: 409,
+      },
+    );
 
-    await runCase('Terminology', 'POST /terminology/concepts/:conceptId/designations', 'happy: designación preferida', 'post', `/terminology/concepts/${conceptA}/designations`, {
-      token: admin,
-      body: { value: 'Cólera', language: 'ES', designationType: 'PREFERRED', preferred: true },
-      expectedStatus: 201,
-    });
-    await runCase('Terminology', 'POST /terminology/concepts/:conceptId/designations', 'límite: concepto inexistente', 'post', `/terminology/concepts/${UUID_ABSENT}/designations`, {
-      token: admin,
-      body: { value: 'x' },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Terminology',
+      'POST /terminology/concepts/:conceptId/designations',
+      'happy: designación preferida',
+      'post',
+      `/terminology/concepts/${conceptA}/designations`,
+      {
+        token: admin,
+        body: {
+          value: 'Cólera',
+          language: 'ES',
+          designationType: 'PREFERRED',
+          preferred: true,
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Terminology',
+      'POST /terminology/concepts/:conceptId/designations',
+      'límite: concepto inexistente',
+      'post',
+      `/terminology/concepts/${UUID_ABSENT}/designations`,
+      {
+        token: admin,
+        body: { value: 'x' },
+        expectedStatus: 404,
+      },
+    );
 
-    await runCase('Terminology', 'POST /terminology/concepts/:conceptId/relationships', 'happy: IS_A', 'post', `/terminology/concepts/${conceptA}/relationships`, {
-      token: admin,
-      body: { targetConceptId: conceptB, relationshipType: 'IS_A' },
-      expectedStatus: 201,
-    });
-    await runCase('Terminology', 'POST /terminology/concepts/:conceptId/relationships', 'límite: target inexistente', 'post', `/terminology/concepts/${conceptA}/relationships`, {
-      token: admin,
-      body: { targetConceptId: UUID_ABSENT, relationshipType: 'IS_A' },
-      expectedStatus: 404,
-    });
+    await runCase(
+      'Terminology',
+      'POST /terminology/concepts/:conceptId/relationships',
+      'happy: IS_A',
+      'post',
+      `/terminology/concepts/${conceptA}/relationships`,
+      {
+        token: admin,
+        body: { targetConceptId: conceptB, relationshipType: 'IS_A' },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Terminology',
+      'POST /terminology/concepts/:conceptId/relationships',
+      'límite: target inexistente',
+      'post',
+      `/terminology/concepts/${conceptA}/relationships`,
+      {
+        token: admin,
+        body: { targetConceptId: UUID_ABSENT, relationshipType: 'IS_A' },
+        expectedStatus: 404,
+      },
+    );
 
-    await runCase('Terminology', 'POST /terminology/value-sets', 'happy: value set con reglas', 'post', '/terminology/value-sets', {
-      token: admin,
-      body: { internalCode: `vs-${u}`, name: 'Infectious', canonicalUrl: `http://x/vs/${u}`, rules: [{ codeSystemId, operator: 'IS_A', property: 'concept', value: 'A00', included: true }] },
-      expectedStatus: 201,
-    });
-    await runCase('Terminology', 'POST /terminology/value-sets', 'límite: internalCode duplicado', 'post', '/terminology/value-sets', {
-      token: admin,
-      body: { internalCode: `vs-${u}`, name: 'dup', canonicalUrl: 'http://y' },
-      expectedStatus: 409,
-      expectedCode: 'CONFLICT',
-    });
+    await runCase(
+      'Terminology',
+      'POST /terminology/value-sets',
+      'happy: value set con reglas',
+      'post',
+      '/terminology/value-sets',
+      {
+        token: admin,
+        body: {
+          internalCode: `vs-${u}`,
+          name: 'Infectious',
+          canonicalUrl: `http://x/vs/${u}`,
+          rules: [
+            {
+              codeSystemId,
+              operator: 'IS_A',
+              property: 'concept',
+              value: 'A00',
+              included: true,
+            },
+          ],
+        },
+        expectedStatus: 201,
+      },
+    );
+    await runCase(
+      'Terminology',
+      'POST /terminology/value-sets',
+      'límite: internalCode duplicado',
+      'post',
+      '/terminology/value-sets',
+      {
+        token: admin,
+        body: {
+          internalCode: `vs-${u}`,
+          name: 'dup',
+          canonicalUrl: 'http://y',
+        },
+        expectedStatus: 409,
+        expectedCode: 'CONFLICT',
+      },
+    );
 
     // ------------------------------------------------------------------
     // Módulos adicionales (04+): registro de casos aportado por cada módulo.
@@ -580,7 +1194,7 @@ describe('Smoke test — 30 endpoints', () => {
     const failed = results.filter((r) => !r.pass);
     if (failed.length > 0) {
       // No lanza: deja constancia en consola; el detalle vive en el JSON/CSV.
-      // eslint-disable-next-line no-console
+
       console.warn(`Smoke: ${failed.length}/${results.length} casos fallaron`);
     }
     expect(results.length).toBeGreaterThan(0);
@@ -590,7 +1204,10 @@ describe('Smoke test — 30 endpoints', () => {
 /** Vuelca los resultados a JSON y CSV en la raíz del repositorio. */
 function writeReports(): void {
   const passed = results.filter((r) => r.pass).length;
-  const byModule: Record<string, { total: number; passed: number; failed: number }> = {};
+  const byModule: Record<
+    string,
+    { total: number; passed: number; failed: number }
+  > = {};
   for (const r of results) {
     const m = (byModule[r.module] ??= { total: 0, passed: 0, failed: 0 });
     m.total++;
@@ -610,20 +1227,40 @@ function writeReports(): void {
   };
 
   const root = process.cwd();
-  writeFileSync(resolve(root, 'output.smoke.test.json'), JSON.stringify(report, null, 2), 'utf8');
+  writeFileSync(
+    resolve(root, 'output.smoke.test.json'),
+    JSON.stringify(report, null, 2),
+    'utf8',
+  );
   writeFileSync(resolve(root, 'output.smoke.test.csv'), toCsv(results), 'utf8');
 }
 
 /** Serializa los resultados a CSV con escape RFC-4180. */
 function toCsv(rows: CaseResult[]): string {
-  const headers = ['module', 'endpoint', 'testCase', 'method', 'path', 'expectedStatus', 'actualStatus', 'pass', 'errorCode', 'durationMs', 'note'];
+  const headers = [
+    'module',
+    'endpoint',
+    'testCase',
+    'method',
+    'path',
+    'expectedStatus',
+    'actualStatus',
+    'pass',
+    'errorCode',
+    'durationMs',
+    'note',
+  ];
   const escape = (v: unknown): string => {
     const s = v === null || v === undefined ? '' : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = [headers.join(',')];
   for (const r of rows) {
-    lines.push(headers.map((h) => escape((r as unknown as Record<string, unknown>)[h])).join(','));
+    lines.push(
+      headers
+        .map((h) => escape((r as unknown as Record<string, unknown>)[h]))
+        .join(','),
+    );
   }
   return lines.join('\n') + '\n';
 }

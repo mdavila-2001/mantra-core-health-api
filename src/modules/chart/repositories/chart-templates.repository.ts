@@ -25,7 +25,10 @@ export interface AssignmentScope {
  */
 @Injectable()
 export class ChartTemplatesRepository {
-  findTemplateById(em: EntityManager, id: string): Promise<SpecialtyChartTemplates | null> {
+  findTemplateById(
+    em: EntityManager,
+    id: string,
+  ): Promise<SpecialtyChartTemplates | null> {
     return em.findOne(SpecialtyChartTemplates, { id });
   }
 
@@ -43,7 +46,10 @@ export class ChartTemplatesRepository {
     });
   }
 
-  createAssignment(em: EntityManager, data: CreateAssignmentData): ChartTemplateAssignments {
+  createAssignment(
+    em: EntityManager,
+    data: CreateAssignmentData,
+  ): ChartTemplateAssignments {
     return em.create(
       ChartTemplateAssignments,
       {

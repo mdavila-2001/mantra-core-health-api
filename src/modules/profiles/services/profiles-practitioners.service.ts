@@ -63,7 +63,10 @@ export class ProfilesPractitionersService {
       'Onboarding practitioner',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.practitionersRepo.findByCode(tx, dto.practitionerCode);
+      const clash = await this.practitionersRepo.findByCode(
+        tx,
+        dto.practitionerCode,
+      );
       if (clash) {
         throw new ConflictException('El practitioner_code ya está en uso', {
           practitionerCode: dto.practitionerCode,
@@ -74,7 +77,10 @@ export class ProfilesPractitionersService {
       let personId = dto.personId;
       if (personId) {
         const existing = await this.personsRepo.findById(tx, personId);
-        if (!existing) throw new ResourceNotFoundException('Persona no encontrada', { personId });
+        if (!existing)
+          throw new ResourceNotFoundException('Persona no encontrada', {
+            personId,
+          });
       } else {
         const person = this.personsRepo.create(tx, {
           personStatusConceptId: PROF.PERSON_ACTIVE,
@@ -113,7 +119,8 @@ export class ProfilesPractitionersService {
       // Licencia inicial (UC-05-04) + credencial de soporte (verificable UC-05-05).
       const license = this.authorizationsRepo.create(tx, {
         practitionerProfileId: personId,
-        jurisdictionConceptId: dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
+        jurisdictionConceptId:
+          dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
         stateConceptId: PROF.AUTH_PENDING,
@@ -121,7 +128,8 @@ export class ProfilesPractitionersService {
       });
       const credential = this.credentialsRepo.create(tx, {
         practitionerProfileId: personId,
-        credentialTypeConceptId: dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
+        credentialTypeConceptId:
+          dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
         number: dto.credentialNumber,
         stateConceptId: PROF.CRED_PENDING,
         actorUserId: actor.id,
@@ -165,12 +173,15 @@ export class ProfilesPractitionersService {
     return this.em.transactional(async (tx) => {
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
-        throw new ResourceNotFoundException('Profesional no encontrado', { profileId });
+        throw new ResourceNotFoundException('Profesional no encontrado', {
+          profileId,
+        });
       }
 
       const authorization = this.authorizationsRepo.create(tx, {
         practitionerProfileId: profileId,
-        jurisdictionConceptId: dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
+        jurisdictionConceptId:
+          dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
         practiceScopeConceptId: dto.practiceScopeConceptId,
@@ -197,24 +208,35 @@ export class ProfilesPractitionersService {
     dto: VerifyCredentialDto,
     actor: AuthenticatedUser,
   ): Promise<CredentialResponseDto> {
-    this.logger.info({ operation: 'profiles.credential.verify', credentialId }, 'Verifying credential');
+    this.logger.info(
+      { operation: 'profiles.credential.verify', credentialId },
+      'Verifying credential',
+    );
     return this.em.transactional(async (tx) => {
       const credential = await this.credentialsRepo.findById(tx, credentialId);
       if (!credential) {
-        throw new ResourceNotFoundException('Credencial no encontrada', { credentialId });
-      }
-      if (credential.stateConceptId !== PROF.CRED_PENDING) {
-        throw new PreconditionFailedException('La credencial no está pendiente de verificación', {
+        throw new ResourceNotFoundException('Credencial no encontrada', {
           credentialId,
         });
+      }
+      if (credential.stateConceptId !== PROF.CRED_PENDING) {
+        throw new PreconditionFailedException(
+          'La credencial no está pendiente de verificación',
+          {
+            credentialId,
+          },
+        );
       }
 
       const now = new Date();
       const verified = dto.decision === 'VERIFIED';
-      credential.stateConceptId = verified ? PROF.CRED_VERIFIED : PROF.CRED_REJECTED;
+      credential.stateConceptId = verified
+        ? PROF.CRED_VERIFIED
+        : PROF.CRED_REJECTED;
       credential.verifiedByUserId = actor.id;
       credential.verifiedAt = now;
-      if (dto.verificationSourceUri) credential.verificationSourceUri = dto.verificationSourceUri;
+      if (dto.verificationSourceUri)
+        credential.verificationSourceUri = dto.verificationSourceUri;
       touch(credential, actor.id);
 
       // Si al verificar no quedan credenciales pendientes, habilita el perfil.
@@ -232,7 +254,8 @@ export class ProfilesPractitionersService {
             credential.practitionerProfileId,
           );
           if (practitioner) {
-            practitioner.verificationStatusConceptId = PROF.PRACT_VERIF_VERIFIED;
+            practitioner.verificationStatusConceptId =
+              PROF.PRACT_VERIF_VERIFIED;
             practitioner.practiceStatusConceptId = PROF.PRACTICE_ACTIVE;
             practitioner.acceptsNewPatients = true;
             touch(practitioner, actor.id);
@@ -257,15 +280,23 @@ export class ProfilesPractitionersService {
     dto: AddSpecialtyDto,
     actor: AuthenticatedUser,
   ): Promise<SpecialtyResponseDto> {
-    this.logger.info({ operation: 'profiles.specialty.add', profileId }, 'Adding specialty');
+    this.logger.info(
+      { operation: 'profiles.specialty.add', profileId },
+      'Adding specialty',
+    );
     return this.em.transactional(async (tx) => {
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
-        throw new ResourceNotFoundException('Profesional no encontrado', { profileId });
+        throw new ResourceNotFoundException('Profesional no encontrado', {
+          profileId,
+        });
       }
 
       if (dto.supportingCredentialId) {
-        const credential = await this.credentialsRepo.findById(tx, dto.supportingCredentialId);
+        const credential = await this.credentialsRepo.findById(
+          tx,
+          dto.supportingCredentialId,
+        );
         if (!credential || credential.practitionerProfileId !== profileId) {
           throw new PreconditionFailedException(
             'La credencial de soporte no pertenece al profesional',
@@ -273,19 +304,30 @@ export class ProfilesPractitionersService {
           );
         }
         if (credential.stateConceptId !== PROF.CRED_VERIFIED) {
-          throw new PreconditionFailedException('La credencial de soporte no está verificada', {
-            supportingCredentialId: dto.supportingCredentialId,
-          });
+          throw new PreconditionFailedException(
+            'La credencial de soporte no está verificada',
+            {
+              supportingCredentialId: dto.supportingCredentialId,
+            },
+          );
         }
       }
 
-      const specialtyConceptId = dto.specialtyConceptId ?? PROF.SPECIALTY_GENERAL;
-      const duplicate = await this.specialtiesRepo.findActive(tx, profileId, specialtyConceptId);
+      const specialtyConceptId =
+        dto.specialtyConceptId ?? PROF.SPECIALTY_GENERAL;
+      const duplicate = await this.specialtiesRepo.findActive(
+        tx,
+        profileId,
+        specialtyConceptId,
+      );
       if (duplicate) {
-        throw new ConflictException('El profesional ya tiene esa especialidad activa', {
-          profileId,
-          specialtyConceptId,
-        });
+        throw new ConflictException(
+          'El profesional ya tiene esa especialidad activa',
+          {
+            profileId,
+            specialtyConceptId,
+          },
+        );
       }
 
       const now = new Date();

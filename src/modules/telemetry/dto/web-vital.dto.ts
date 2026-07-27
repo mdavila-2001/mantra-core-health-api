@@ -18,7 +18,7 @@ import { WEB_VITAL_METRIC_CODES } from '../telemetry.concepts';
 /** Una métrica Core Web Vital dentro del batch. */
 export class WebVitalItemDto {
   @ApiProperty({ description: 'Métrica CWV', enum: WEB_VITAL_METRIC_CODES })
-  @IsIn(WEB_VITAL_METRIC_CODES as unknown as string[])
+  @IsIn(WEB_VITAL_METRIC_CODES)
   metric!: string;
 
   @ApiProperty({ description: 'Valor de la métrica (>= 0)' })
@@ -26,7 +26,10 @@ export class WebVitalItemDto {
   @Min(0)
   metricValue!: number;
 
-  @ApiPropertyOptional({ description: 'Rating', enum: ['GOOD', 'NEEDS_IMPROVEMENT', 'POOR'] })
+  @ApiPropertyOptional({
+    description: 'Rating',
+    enum: ['GOOD', 'NEEDS_IMPROVEMENT', 'POOR'],
+  })
   @IsOptional()
   @IsIn(['GOOD', 'NEEDS_IMPROVEMENT', 'POOR'])
   rating?: 'GOOD' | 'NEEDS_IMPROVEMENT' | 'POOR';
@@ -37,12 +40,18 @@ export class WebVitalItemDto {
   @MaxLength(300)
   routeTemplate?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de portal (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de portal (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   portalTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Evento de actividad relacionado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Evento de actividad relacionado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   userActivityEventId?: string;

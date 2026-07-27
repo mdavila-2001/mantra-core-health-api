@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  ConflictException,
-  type AuthenticatedUser,
-} from '../../../common';
+import { ConflictException, type AuthenticatedUser } from '../../../common';
 import { OrganizationDataBoundariesRepository } from '../repositories';
 import { CreateDataBoundaryDto, DataBoundaryResponseDto } from '../dto';
 import { ORGEXT } from '../organization_extensions.concepts';
@@ -35,7 +32,8 @@ export class OrgextDataBoundariesService {
       'Defining organization data boundary',
     );
     return this.em.transactional(async (tx) => {
-      const boundaryTypeConceptId = dto.boundaryTypeConceptId ?? ORGEXT.BOUNDARY_TYPE_RESIDENCY;
+      const boundaryTypeConceptId =
+        dto.boundaryTypeConceptId ?? ORGEXT.BOUNDARY_TYPE_RESIDENCY;
       const existing = await this.boundariesRepo.findActiveByTenantAndType(
         tx,
         dto.tenantId,
@@ -44,7 +42,10 @@ export class OrgextDataBoundariesService {
       );
       if (existing) {
         this.logger.warn(
-          { operation: 'orgext.data-boundary.define', reason: 'active-boundary-exists' },
+          {
+            operation: 'orgext.data-boundary.define',
+            reason: 'active-boundary-exists',
+          },
           'Rejected data boundary: an active boundary of this type already exists',
         );
         throw new ConflictException(
@@ -64,7 +65,9 @@ export class OrgextDataBoundariesService {
         isolationSchemaName: dto.isolationSchemaName,
         isolationPolicyVersion: dto.isolationPolicyVersion,
         statusConceptId: ORGEXT.BOUNDARY_ACTIVE,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : new Date(),
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : new Date(),
         actorUserId: actor.id,
       });
       await tx.flush();

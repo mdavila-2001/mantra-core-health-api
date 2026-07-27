@@ -58,36 +58,67 @@ export class IntegrationExchangesService {
   ): Promise<ExchangeRecordResponseDto> {
     const key = idempotencyKey ?? dto.idempotencyKey;
     this.logger.info(
-      { operation: 'integration.exchange.execute', contractId, actorId: actor.id },
+      {
+        operation: 'integration.exchange.execute',
+        contractId,
+        actorId: actor.id,
+      },
       'Executing idempotent inbound exchange',
     );
     if (!key) {
-      throw new PreconditionFailedException('Falta la clave de idempotencia (idempotency-key)', {
-        contractId,
-      });
+      throw new PreconditionFailedException(
+        'Falta la clave de idempotencia (idempotency-key)',
+        {
+          contractId,
+        },
+      );
     }
     return this.em.transactional(async (tx) => {
       const contract = await this.contractsRepo.findById(tx, contractId);
       if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', { contractId });
+        throw new ResourceNotFoundException('Contrato no encontrado', {
+          contractId,
+        });
       }
       // UC-31-05 include UC-31-10: se resuelve la versión ACTIVE vigente.
-      const version = await this.versionsRepo.findActiveByContract(tx, contractId, ICON.VERSION_ACTIVE);
+      const version = await this.versionsRepo.findActiveByContract(
+        tx,
+        contractId,
+        ICON.VERSION_ACTIVE,
+      );
       if (!version) {
-        throw new PreconditionFailedException('No hay versión ACTIVE del contrato', { contractId });
+        throw new PreconditionFailedException(
+          'No hay versión ACTIVE del contrato',
+          { contractId },
+        );
       }
 
-      const existing = await this.idempotencyRepo.findByKey(tx, contractId, key);
+      const existing = await this.idempotencyRepo.findByKey(
+        tx,
+        contractId,
+        key,
+      );
       if (existing) {
         // request_hash detecta mismatch de payload bajo la misma clave.
-        if (dto.requestHash && existing.requestHash && dto.requestHash !== existing.requestHash) {
-          throw new ConflictException('La clave de idempotencia se reusó con un payload distinto', {
-            contractId,
-            idempotencyKey: key,
-          });
+        if (
+          dto.requestHash &&
+          existing.requestHash &&
+          dto.requestHash !== existing.requestHash
+        ) {
+          throw new ConflictException(
+            'La clave de idempotencia se reusó con un payload distinto',
+            {
+              contractId,
+              idempotencyKey: key,
+            },
+          );
         }
         this.logger.info(
-          { operation: 'integration.exchange.execute', contractId, replay: true },
+          {
+            operation: 'integration.exchange.execute',
+            contractId,
+            replay: true,
+          },
           'Idempotent replay: returning existing exchange',
         );
         return {
@@ -136,7 +167,11 @@ export class IntegrationExchangesService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.exchange.execute', contractId, recordId: record.id },
+        {
+          operation: 'integration.exchange.execute',
+          contractId,
+          recordId: record.id,
+        },
         'Inbound exchange received',
       );
       return {
@@ -156,18 +191,27 @@ export class IntegrationExchangesService {
     actor: AuthenticatedUser,
   ): Promise<ExchangeAttemptResponseDto> {
     this.logger.info(
-      { operation: 'integration.exchange.attempt', contractId, recordId, actorId: actor.id },
+      {
+        operation: 'integration.exchange.attempt',
+        contractId,
+        recordId,
+        actorId: actor.id,
+      },
       'Recording exchange attempt',
     );
     return this.em.transactional(async (tx) => {
       const record = await this.recordsRepo.findById(tx, recordId);
       if (!record) {
-        throw new ResourceNotFoundException('Registro de intercambio no encontrado', { recordId });
+        throw new ResourceNotFoundException(
+          'Registro de intercambio no encontrado',
+          { recordId },
+        );
       }
 
       const now = new Date();
       const success = dto.outcome === 'SUCCESS';
-      const nextNumber = (await this.attemptsRepo.maxAttemptNumber(tx, recordId)) + 1;
+      const nextNumber =
+        (await this.attemptsRepo.maxAttemptNumber(tx, recordId)) + 1;
 
       const attempt = this.attemptsRepo.create(tx, {
         integrationExchangeRecordId: recordId,
@@ -177,22 +221,36 @@ export class IntegrationExchangesService {
         completedAt: now,
         httpStatus: dto.httpStatus,
         providerErrorCode: dto.providerErrorCode,
-        retryDecisionConceptId: success ? undefined : this.mapRetryDecision(dto.retryDecision),
+        retryDecisionConceptId: success
+          ? undefined
+          : this.mapRetryDecision(dto.retryDecision),
         traceId: dto.traceId,
         outcomeConceptId: success ? ICON.ATTEMPT_SUCCESS : ICON.ATTEMPT_FAILED,
       });
 
       record.responseHash = dto.responseHash;
       record.completedAt = success ? now : undefined;
-      record.outcomeConceptId = success ? ICON.OUTCOME_SUCCESS : ICON.OUTCOME_FAILED;
+      record.outcomeConceptId = success
+        ? ICON.OUTCOME_SUCCESS
+        : ICON.OUTCOME_FAILED;
 
       if (success) {
-        await this.completeIdempotency(tx, record.integrationContractVersionId, record, dto.responseReference);
+        await this.completeIdempotency(
+          tx,
+          record.integrationContractVersionId,
+          record,
+          dto.responseReference,
+        );
       }
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.exchange.attempt', recordId, attemptId: attempt.id, success },
+        {
+          operation: 'integration.exchange.attempt',
+          recordId,
+          attemptId: attempt.id,
+          success,
+        },
         'Exchange attempt recorded',
       );
       return {
@@ -218,19 +276,28 @@ export class IntegrationExchangesService {
     return this.em.transactional(async (tx) => {
       const record = await this.recordsRepo.findById(tx, recordId);
       if (!record) {
-        throw new ResourceNotFoundException('Registro de intercambio no encontrado', { recordId });
+        throw new ResourceNotFoundException(
+          'Registro de intercambio no encontrado',
+          { recordId },
+        );
       }
 
       const last = await this.attemptsRepo.lastAttempt(tx, recordId);
       if (!last || last.outcomeConceptId !== ICON.ATTEMPT_FAILED) {
-        throw new PreconditionFailedException('Solo se reintenta un intercambio con último intento FAILED', {
-          recordId,
-        });
+        throw new PreconditionFailedException(
+          'Solo se reintenta un intercambio con último intento FAILED',
+          {
+            recordId,
+          },
+        );
       }
       if (last.retryDecisionConceptId === ICON.RETRY_PERMANENT) {
-        throw new PreconditionFailedException('El último intento marcó fallo permanente (no reintentable)', {
-          recordId,
-        });
+        throw new PreconditionFailedException(
+          'El último intento marcó fallo permanente (no reintentable)',
+          {
+            recordId,
+          },
+        );
       }
 
       const now = new Date();
@@ -249,15 +316,27 @@ export class IntegrationExchangesService {
       });
 
       record.completedAt = success ? now : undefined;
-      record.outcomeConceptId = success ? ICON.OUTCOME_SUCCESS : ICON.OUTCOME_FAILED;
+      record.outcomeConceptId = success
+        ? ICON.OUTCOME_SUCCESS
+        : ICON.OUTCOME_FAILED;
 
       if (success) {
-        await this.completeIdempotency(tx, record.integrationContractVersionId, record, undefined);
+        await this.completeIdempotency(
+          tx,
+          record.integrationContractVersionId,
+          record,
+          undefined,
+        );
       }
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.exchange.retry', recordId, attemptId: attempt.id, success },
+        {
+          operation: 'integration.exchange.retry',
+          recordId,
+          attemptId: attempt.id,
+          success,
+        },
         'Exchange retried',
       );
       return {
@@ -278,16 +357,25 @@ export class IntegrationExchangesService {
     actor: AuthenticatedUser,
   ): Promise<SyncCursorResponseDto> {
     this.logger.info(
-      { operation: 'integration.cursor.advance', contractId, scope, actorId: actor.id },
+      {
+        operation: 'integration.cursor.advance',
+        contractId,
+        scope,
+        actorId: actor.id,
+      },
       'Advancing sync cursor',
     );
     return this.em.transactional(async (tx) => {
       const contract = await this.contractsRepo.findById(tx, contractId);
       if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', { contractId });
+        throw new ResourceNotFoundException('Contrato no encontrado', {
+          contractId,
+        });
       }
 
-      const watermarkAt = dto.watermarkAt ? new Date(dto.watermarkAt) : undefined;
+      const watermarkAt = dto.watermarkAt
+        ? new Date(dto.watermarkAt)
+        : undefined;
       let cursor = await this.cursorsRepo.findByScope(tx, contractId, scope);
       let created = false;
 
@@ -304,11 +392,14 @@ export class IntegrationExchangesService {
       } else {
         // Monotonía: rechaza un cursor_value regresivo o igual.
         if (dto.cursorValue <= cursor.cursorValue) {
-          throw new PreconditionFailedException('El cursor solo puede avanzar hacia adelante', {
-            contractId,
-            scope,
-            current: cursor.cursorValue,
-          });
+          throw new PreconditionFailedException(
+            'El cursor solo puede avanzar hacia adelante',
+            {
+              contractId,
+              scope,
+              current: cursor.cursorValue,
+            },
+          );
         }
         cursor.cursorValue = dto.cursorValue;
         cursor.watermarkAt = watermarkAt;
@@ -321,23 +412,37 @@ export class IntegrationExchangesService {
         { operation: 'integration.cursor.advance', contractId, scope, created },
         'Sync cursor advanced',
       );
-      return { id: cursor.id, cursorScope: scope, cursorValue: cursor.cursorValue, created };
+      return {
+        id: cursor.id,
+        cursorScope: scope,
+        cursorValue: cursor.cursorValue,
+        created,
+      };
     });
   }
 
   private mapRetryDecision(decision?: 'RETRYABLE' | 'PERMANENT'): string {
-    return decision === 'PERMANENT' ? ICON.RETRY_PERMANENT : ICON.RETRY_RETRYABLE;
+    return decision === 'PERMANENT'
+      ? ICON.RETRY_PERMANENT
+      : ICON.RETRY_RETRYABLE;
   }
 
   /** Cierra la idempotencia asociada al registro (status COMPLETED, response_reference). */
   private async completeIdempotency(
     tx: EntityManager,
     _versionId: string,
-    record: { id: string; idempotencyKey?: string; integrationContractVersionId: string },
+    record: {
+      id: string;
+      idempotencyKey?: string;
+      integrationContractVersionId: string;
+    },
     responseReference?: string,
   ): Promise<void> {
     if (!record.idempotencyKey) return;
-    const version = await this.versionsRepo.findById(tx, record.integrationContractVersionId);
+    const version = await this.versionsRepo.findById(
+      tx,
+      record.integrationContractVersionId,
+    );
     if (!version) return;
     const idem = await this.idempotencyRepo.findByKey(
       tx,

@@ -15,7 +15,9 @@ export class ComplianceController {
   @Post('audit-export')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Exportar evidencia de auditoría para cumplimiento' })
+  @ApiOperation({
+    summary: 'Exportar evidencia de auditoría para cumplimiento',
+  })
   exportEvidence(
     @Body() dto: CreateAuditExportDto,
     @CurrentUser() actor: AuthenticatedUser,

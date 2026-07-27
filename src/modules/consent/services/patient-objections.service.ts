@@ -45,7 +45,10 @@ export class PatientObjectionsService {
     actor: AuthenticatedUser,
   ): Promise<PatientObjectionResponseDto> {
     this.logger.info(
-      { operation: 'consent.objection.raise', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'consent.objection.raise',
+        patientProfileId: dto.patientProfileId,
+      },
       'Raising patient objection',
     );
     return this.em.transactional(async (tx) => {
@@ -56,10 +59,13 @@ export class PatientObjectionsService {
         CONS.OBJECTION_STATUS_RAISED,
       );
       if (open) {
-        throw new ConflictException('Ya existe una objeción abierta para este propósito', {
-          patientProfileId: dto.patientProfileId,
-          processingPurposeId: dto.processingPurposeId,
-        });
+        throw new ConflictException(
+          'Ya existe una objeción abierta para este propósito',
+          {
+            patientProfileId: dto.patientProfileId,
+            processingPurposeId: dto.processingPurposeId,
+          },
+        );
       }
 
       const now = new Date();
@@ -68,7 +74,8 @@ export class PatientObjectionsService {
         patientProfileId: dto.patientProfileId,
         tenantId,
         processingPurposeId: dto.processingPurposeId,
-        objectionTypeConceptId: dto.objectionTypeConceptId ?? CONS.OBJECTION_TYPE_PROCESSING,
+        objectionTypeConceptId:
+          dto.objectionTypeConceptId ?? CONS.OBJECTION_TYPE_PROCESSING,
         reasonText: dto.reasonText,
         statusConceptId: CONS.OBJECTION_STATUS_RAISED,
         raisedAt: now,
@@ -82,7 +89,8 @@ export class PatientObjectionsService {
           patientProfileId: dto.patientProfileId,
           tenantId,
           restrictionTypeConceptId: CONS.RESTRICTION_TYPE_BLOCK,
-          dataClassConceptId: dto.restrictionDataClassConceptId ?? CONS.DATA_CLASS_ALL,
+          dataClassConceptId:
+            dto.restrictionDataClassConceptId ?? CONS.DATA_CLASS_ALL,
           reasonText: dto.reasonText,
           statusConceptId: CONS.RESTRICTION_ACTIVE,
           validFrom: now,
@@ -111,7 +119,11 @@ export class PatientObjectionsService {
       });
 
       this.logger.info(
-        { operation: 'consent.objection.raise', objectionId: objection.id, restrictionId },
+        {
+          operation: 'consent.objection.raise',
+          objectionId: objection.id,
+          restrictionId,
+        },
         'Patient objection raised',
       );
       return {
@@ -131,12 +143,17 @@ export class PatientObjectionsService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'consent.objection.resolve', objectionId: id, resolution: dto.resolution },
+      {
+        operation: 'consent.objection.resolve',
+        objectionId: id,
+        resolution: dto.resolution,
+      },
       'Resolving patient objection',
     );
     return this.em.transactional(async (tx) => {
       const objection = await this.objectionsRepo.findById(tx, id);
-      if (!objection) throw new ResourceNotFoundException('Objeción no encontrada', { id });
+      if (!objection)
+        throw new ResourceNotFoundException('Objeción no encontrada', { id });
       if (objection.statusConceptId !== CONS.OBJECTION_STATUS_RAISED) {
         throw new ConflictException('La objeción no está abierta', {
           id,
@@ -148,7 +165,9 @@ export class PatientObjectionsService {
       objection.statusConceptId = CONS.OBJECTION_STATUS_RESOLVED;
       objection.resolvedAt = now;
       objection.resolutionConceptId =
-        dto.resolution === 'UPHELD' ? CONS.RESOLUTION_UPHELD : CONS.RESOLUTION_REJECTED;
+        dto.resolution === 'UPHELD'
+          ? CONS.RESOLUTION_UPHELD
+          : CONS.RESOLUTION_REJECTED;
       touch(objection, actor.id);
 
       // Si la objeción se rechaza, se levantan las restricciones activas asociadas.

@@ -35,18 +35,32 @@ function build() {
     em as any,
     definitionsRepo as any,
     dependenciesRepo as any,
-    runsRepo as any,
+    runsRepo,
     pageViewsRepo as any,
     logger as any,
   );
-  return { service, tx, em, definitionsRepo, dependenciesRepo, runsRepo, pageViewsRepo };
+  return {
+    service,
+    tx,
+    em,
+    definitionsRepo,
+    dependenciesRepo,
+    runsRepo,
+    pageViewsRepo,
+  };
 }
 
 const baseDto = {
   schemaName: 'read_models',
   objectName: 'crm_account_360_v',
   objectType: 'MATERIALIZED_VIEW' as const,
-  dependencies: [{ sourceSchemaName: 'crm', sourceObjectName: 'accounts', dependencyType: 'TABLE' as const }],
+  dependencies: [
+    {
+      sourceSchemaName: 'crm',
+      sourceObjectName: 'accounts',
+      dependencyType: 'TABLE' as const,
+    },
+  ],
 };
 
 describe('ReadModelDefinitionsService', () => {
@@ -64,7 +78,7 @@ describe('ReadModelDefinitionsService', () => {
         createdAt: new Date('2026-01-01'),
       });
 
-      const res = await d.service.createDefinition(baseDto as any, actor);
+      const res = await d.service.createDefinition(baseDto, actor);
 
       expect(res.id).toBe('def-1');
       expect(res.status).toBe(RM.DEF_ACTIVE);
@@ -75,11 +89,13 @@ describe('ReadModelDefinitionsService', () => {
 
     it('rejects a duplicate (schema, object, version) with a conflict', async () => {
       const d = build();
-      d.definitionsRepo.findBySchemaObjectVersion.mockResolvedValue({ id: 'x' });
+      d.definitionsRepo.findBySchemaObjectVersion.mockResolvedValue({
+        id: 'x',
+      });
 
-      await expect(d.service.createDefinition(baseDto as any, actor)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      await expect(
+        d.service.createDefinition(baseDto as any, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
       expect(d.definitionsRepo.create).not.toHaveBeenCalled();
     });
   });
@@ -90,7 +106,12 @@ describe('ReadModelDefinitionsService', () => {
       d.definitionsRepo.findAllBySchemaObject.mockResolvedValue([]);
 
       await expect(
-        d.service.createVersion('read_models', 'crm_account_360_v', baseDto as any, actor),
+        d.service.createVersion(
+          'read_models',
+          'crm_account_360_v',
+          baseDto as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -101,7 +122,12 @@ describe('ReadModelDefinitionsService', () => {
       ]);
 
       await expect(
-        d.service.createVersion('read_models', 'crm_account_360_v', baseDto as any, actor),
+        d.service.createVersion(
+          'read_models',
+          'crm_account_360_v',
+          baseDto as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -123,7 +149,7 @@ describe('ReadModelDefinitionsService', () => {
       const res = await d.service.createVersion(
         'read_models',
         'crm_account_360_v',
-        baseDto as any,
+        baseDto,
         actor,
       );
 
@@ -213,7 +239,11 @@ describe('ReadModelDefinitionsService', () => {
   describe('deprecate (UC-30-13)', () => {
     it('moves an ACTIVE definition to DEPRECATED', async () => {
       const d = build();
-      const def = { id: 'def-1', statusConceptId: RM.DEF_ACTIVE, updatedAt: new Date() };
+      const def = {
+        id: 'def-1',
+        statusConceptId: RM.DEF_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.definitionsRepo.findById.mockResolvedValue(def);
 
       const res = await d.service.deprecate('def-1', actor);
@@ -233,7 +263,10 @@ describe('ReadModelDefinitionsService', () => {
   describe('retire (UC-30-13)', () => {
     it('rejects retiring a definition still referenced by views (422)', async () => {
       const d = build();
-      d.definitionsRepo.findById.mockResolvedValue({ id: 'def-1', statusConceptId: RM.DEF_ACTIVE });
+      d.definitionsRepo.findById.mockResolvedValue({
+        id: 'def-1',
+        statusConceptId: RM.DEF_ACTIVE,
+      });
       d.pageViewsRepo.countByDefinition.mockResolvedValue(2);
 
       await expect(d.service.retire('def-1', actor)).rejects.toBeInstanceOf(
@@ -243,7 +276,11 @@ describe('ReadModelDefinitionsService', () => {
 
     it('retires a definition with no referencing views', async () => {
       const d = build();
-      const def = { id: 'def-1', statusConceptId: RM.DEF_DEPRECATED, updatedAt: new Date() };
+      const def = {
+        id: 'def-1',
+        statusConceptId: RM.DEF_DEPRECATED,
+        updatedAt: new Date(),
+      };
       d.definitionsRepo.findById.mockResolvedValue(def);
       d.pageViewsRepo.countByDefinition.mockResolvedValue(0);
 
@@ -257,7 +294,12 @@ describe('ReadModelDefinitionsService', () => {
     it('flags a definition as stale when it exceeds its staleness threshold', async () => {
       const d = build();
       d.definitionsRepo.findAllNotRetired.mockResolvedValue([
-        { id: 'def-1', schemaName: 's', objectName: 'o', maximumStalenessSeconds: 10 },
+        {
+          id: 'def-1',
+          schemaName: 's',
+          objectName: 'o',
+          maximumStalenessSeconds: 10,
+        },
       ]);
       d.runsRepo.findLatestByDefinition.mockResolvedValue({
         completedAt: new Date(Date.now() - 60_000),

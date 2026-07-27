@@ -14,7 +14,10 @@ export class AllergyReactionInput {
   @IsUUID()
   manifestationConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Severidad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Severidad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   severityConceptId?: string;
@@ -27,15 +30,24 @@ export class AllergyReactionInput {
 
 /** Cuerpo de `POST /clinical/allergy-intolerances` (UC-08-09). */
 export class CreateAllergyIntoleranceDto {
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiProperty({ description: 'Sustancia alergénica (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Sustancia alergénica (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   substanceConceptId!: string;
 
@@ -44,12 +56,18 @@ export class CreateAllergyIntoleranceDto {
   @IsUUID()
   typeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Categoría (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Categoría (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   categoryConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Criticidad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Criticidad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   criticalityConceptId?: string;
@@ -70,7 +88,11 @@ export class AllergyIntoleranceResponseDto {
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;
 
-  @ApiProperty({ description: 'Estado clínico (concept id)', format: 'uuid', nullable: true })
+  @ApiProperty({
+    description: 'Estado clínico (concept id)',
+    format: 'uuid',
+    nullable: true,
+  })
   clinicalStatus!: string | null;
 
   @ApiProperty({ type: [String], description: 'Ids de reacciones creadas' })

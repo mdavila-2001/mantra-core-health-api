@@ -33,10 +33,12 @@ export interface AppendLedgerData {
 export class LedgerRepository {
   /** Devuelve la siguiente secuencia monotónica para una farmacia. */
   async nextSequence(em: EntityManager, pharmacyId: string): Promise<string> {
-    const rows = await em.getConnection().execute<{ max: string | null }[]>(
-      'select max(ledger_sequence) as max from pharmacy_inventory.inventory_ledger_entries where pharmacy_id = ?',
-      [pharmacyId],
-    );
+    const rows = await em
+      .getConnection()
+      .execute<{ max: string | null }[]>(
+        'select max(ledger_sequence) as max from pharmacy_inventory.inventory_ledger_entries where pharmacy_id = ?',
+        [pharmacyId],
+      );
     const current = rows?.[0]?.max ? BigInt(rows[0].max) : 0n;
     return (current + 1n).toString();
   }

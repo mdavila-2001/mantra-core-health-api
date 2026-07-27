@@ -20,18 +20,25 @@ export interface CreateRefreshTokenData {
 export class RefreshTokensRepository {
   /** Crea un refresh token ACTIVO (sin flush). */
   create(em: EntityManager, data: CreateRefreshTokenData): RefreshTokens {
-    return em.create(RefreshTokens, {
-      sessionId: data.sessionId,
-      tokenHash: data.tokenHash,
-      stateConceptId: CONCEPTS.STATE_ACTIVE,
-      expiresAt: data.expiresAt,
-      replacedById: data.replacedById,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+    return em.create(
+      RefreshTokens,
+      {
+        sessionId: data.sessionId,
+        tokenHash: data.tokenHash,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        expiresAt: data.expiresAt,
+        replacedById: data.replacedById,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Busca un refresh token por su hash SHA-256. */
-  findByHash(em: EntityManager, tokenHash: string): Promise<RefreshTokens | null> {
+  findByHash(
+    em: EntityManager,
+    tokenHash: string,
+  ): Promise<RefreshTokens | null> {
     return em.findOne(RefreshTokens, { tokenHash });
   }
 
@@ -45,7 +52,10 @@ export class RefreshTokensRepository {
   }
 
   /** Revoca los refresh tokens ACTIVOS de un conjunto de sesiones. */
-  revokeActiveBySessionIds(em: EntityManager, sessionIds: string[]): Promise<number> {
+  revokeActiveBySessionIds(
+    em: EntityManager,
+    sessionIds: string[],
+  ): Promise<number> {
     if (sessionIds.length === 0) return Promise.resolve(0);
     return em.nativeUpdate(
       RefreshTokens,

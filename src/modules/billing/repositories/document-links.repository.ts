@@ -22,7 +22,10 @@ export interface CreateDocumentLinkData {
  */
 @Injectable()
 export class BillingDocumentLinksRepository {
-  create(em: EntityManager, data: CreateDocumentLinkData): BillingDocumentLinks {
+  create(
+    em: EntityManager,
+    data: CreateDocumentLinkData,
+  ): BillingDocumentLinks {
     return em.create(
       BillingDocumentLinks,
       {

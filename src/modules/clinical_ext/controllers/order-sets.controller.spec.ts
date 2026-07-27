@@ -15,14 +15,14 @@ describe('OrderSetsController', () => {
   it('delegates create', async () => {
     const d = build();
     const dto = { code: 'OS1', name: 'S', items: [] };
-    await d.controller.create(dto as any, actor);
+    await d.controller.create(dto, actor);
     expect(d.orderSetsService.create).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates apply (UC-18-06)', async () => {
     const d = build();
     const dto = { encounterId: 'e1', patientProfileId: 'p1' };
-    await d.controller.apply('os1', dto as any, actor);
+    await d.controller.apply('os1', dto, actor);
     expect(d.orderSetsService.apply).toHaveBeenCalledWith('os1', dto, actor);
   });
 });

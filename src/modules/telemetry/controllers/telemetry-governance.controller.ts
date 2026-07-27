@@ -40,7 +40,9 @@ export class TelemetryGovernanceController {
   @Post('event-schemas')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar esquema de evento de actividad (versionado)' })
+  @ApiOperation({
+    summary: 'Registrar esquema de evento de actividad (versionado)',
+  })
   registerEventSchema(
     @Body() dto: CreateEventSchemaDto,
     @CurrentUser() actor: AuthenticatedUser,

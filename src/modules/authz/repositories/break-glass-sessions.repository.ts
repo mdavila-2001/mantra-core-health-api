@@ -20,7 +20,10 @@ export interface CreateBreakGlassSessionData {
 /** Acceso a datos de `authz.break_glass_sessions`. */
 @Injectable()
 export class BreakGlassSessionsRepository {
-  create(em: EntityManager, data: CreateBreakGlassSessionData): BreakGlassSessions {
+  create(
+    em: EntityManager,
+    data: CreateBreakGlassSessionData,
+  ): BreakGlassSessions {
     return em.create(
       BreakGlassSessions,
       {

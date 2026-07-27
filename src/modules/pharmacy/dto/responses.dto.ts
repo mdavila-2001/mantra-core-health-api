@@ -20,10 +20,16 @@ export class PharmacyResponseDto {
   @ApiProperty({ description: 'Concept id del estado', format: 'uuid' })
   status!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 
-  @ApiProperty({ description: 'Id de la licencia inicial creada', format: 'uuid' })
+  @ApiProperty({
+    description: 'Id de la licencia inicial creada',
+    format: 'uuid',
+  })
   licenseId!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })
@@ -149,7 +155,10 @@ export class MappingResponseDto {
   @ApiProperty()
   externalProductCode!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

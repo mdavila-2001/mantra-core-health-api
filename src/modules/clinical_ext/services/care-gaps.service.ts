@@ -7,7 +7,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { CareGapsRepository, ImmunizationSchedulesRepository } from '../repositories';
+import {
+  CareGapsRepository,
+  ImmunizationSchedulesRepository,
+} from '../repositories';
 import {
   RecomputeCareGapsDto,
   CloseCareGapDto,
@@ -42,7 +45,10 @@ export class CareGapsService {
     actor: AuthenticatedUser,
   ): Promise<RecomputeCareGapsResponseDto> {
     this.logger.info(
-      { operation: 'clinical_ext.care_gap.recompute', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical_ext.care_gap.recompute',
+        patientProfileId: dto.patientProfileId,
+      },
       'Recomputing care gaps',
     );
     return this.em.transactional(async (tx) => {
@@ -83,12 +89,20 @@ export class CareGapsService {
     dto: CloseCareGapDto,
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'clinical_ext.care_gap.close', gapId }, 'Closing care gap');
+    this.logger.info(
+      { operation: 'clinical_ext.care_gap.close', gapId },
+      'Closing care gap',
+    );
     return this.em.transactional(async (tx) => {
       const gap = await this.gapsRepo.findById(tx, gapId);
-      if (!gap) throw new ResourceNotFoundException('Brecha de cuidado no encontrada', { gapId });
+      if (!gap)
+        throw new ResourceNotFoundException('Brecha de cuidado no encontrada', {
+          gapId,
+        });
       if (gap.statusConceptId !== CEXT.CARE_GAP_OPEN) {
-        throw new PreconditionFailedException('La brecha no está abierta', { gapId });
+        throw new PreconditionFailedException('La brecha no está abierta', {
+          gapId,
+        });
       }
 
       gap.statusConceptId = CEXT.CARE_GAP_CLOSED;
@@ -132,7 +146,9 @@ export class CareGapsService {
         if (existing) continue;
 
         const dueDate = new Date(birth);
-        dueDate.setUTCDate(dueDate.getUTCDate() + (schedule.recommendedAgeDays ?? 0));
+        dueDate.setUTCDate(
+          dueDate.getUTCDate() + (schedule.recommendedAgeDays ?? 0),
+        );
 
         const created = this.gapsRepo.create(tx, {
           patientProfileId,

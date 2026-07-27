@@ -46,11 +46,14 @@ export class AuthzPoliciesService {
           dto.priority,
         );
         if (clash) {
-          throw new ConflictException('Ya existe una política activa con esa prioridad para el recurso', {
-            tenantId,
-            targetResource: dto.targetResource,
-            priority: dto.priority,
-          });
+          throw new ConflictException(
+            'Ya existe una política activa con esa prioridad para el recurso',
+            {
+              tenantId,
+              targetResource: dto.targetResource,
+              priority: dto.priority,
+            },
+          );
         }
       }
       const policy = this.policiesRepo.create(tx, {

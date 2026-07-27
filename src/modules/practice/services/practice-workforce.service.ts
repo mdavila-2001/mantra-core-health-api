@@ -43,21 +43,32 @@ export class PracticeWorkforceService {
     dto: CreateRoleAssignmentDto,
     actor: AuthenticatedUser,
   ): Promise<RoleAssignmentResponseDto> {
-    this.logger.info({ operation: 'practice.role.assign', practiceId }, 'Assigning practitioner role');
+    this.logger.info(
+      { operation: 'practice.role.assign', practiceId },
+      'Assigning practitioner role',
+    );
     return this.em.transactional(async (tx) => {
       const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice) throw new ResourceNotFoundException('Práctica no encontrada', { practiceId });
+      if (!practice)
+        throw new ResourceNotFoundException('Práctica no encontrada', {
+          practiceId,
+        });
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
-        throw new PreconditionFailedException('La práctica no está activa', { practiceId });
+        throw new PreconditionFailedException('La práctica no está activa', {
+          practiceId,
+        });
       }
 
       if (dto.practiceSiteId) {
         const site = await this.sitesRepo.findById(tx, dto.practiceSiteId);
         if (!site || site.practiceId !== practiceId) {
-          throw new PreconditionFailedException('El sitio no pertenece a la práctica', {
-            practiceId,
-            siteId: dto.practiceSiteId,
-          });
+          throw new PreconditionFailedException(
+            'El sitio no pertenece a la práctica',
+            {
+              practiceId,
+              siteId: dto.practiceSiteId,
+            },
+          );
         }
       }
 
@@ -94,18 +105,29 @@ export class PracticeWorkforceService {
     dto: CreateSupportAssignmentDto,
     actor: AuthenticatedUser,
   ): Promise<SupportAssignmentResponseDto> {
-    this.logger.info({ operation: 'practice.support.attach', roleId }, 'Attaching support staff');
+    this.logger.info(
+      { operation: 'practice.support.attach', roleId },
+      'Attaching support staff',
+    );
     return this.em.transactional(async (tx) => {
       const role = await this.rolesRepo.findById(tx, roleId);
-      if (!role) throw new ResourceNotFoundException('Rol de profesional no encontrado', { roleId });
+      if (!role)
+        throw new ResourceNotFoundException(
+          'Rol de profesional no encontrado',
+          { roleId },
+        );
       if (role.statusConceptId !== PRAC.ROLE_ASSIGNMENT_ACTIVE) {
-        throw new PreconditionFailedException('El rol de profesional no está activo', { roleId });
+        throw new PreconditionFailedException(
+          'El rol de profesional no está activo',
+          { roleId },
+        );
       }
 
       const support = this.supportRepo.create(tx, {
         practitionerRoleAssignmentId: roleId,
         supportProfileId: dto.supportProfileId,
-        supportRoleConceptId: dto.supportRoleConceptId ?? PRAC.SUPPORT_ROLE_SECRETARY,
+        supportRoleConceptId:
+          dto.supportRoleConceptId ?? PRAC.SUPPORT_ROLE_SECRETARY,
         scopeConceptId: dto.scopeConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,

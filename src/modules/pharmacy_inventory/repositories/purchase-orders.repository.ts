@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { PharmacyPurchaseOrders, PharmacyPurchaseOrderLines } from '../entities';
+import {
+  PharmacyPurchaseOrders,
+  PharmacyPurchaseOrderLines,
+} from '../entities';
 import { createdBy } from '../../../common';
 
 /** Datos de cabecera de una orden de compra. */
@@ -30,19 +33,33 @@ export interface CreatePurchaseOrderLineData {
 /** Acceso a datos de las órdenes de compra de farmacia y sus líneas. */
 @Injectable()
 export class PurchaseOrdersRepository {
-  findById(em: EntityManager, id: string): Promise<PharmacyPurchaseOrders | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PharmacyPurchaseOrders | null> {
     return em.findOne(PharmacyPurchaseOrders, { id });
   }
 
-  findLinesByOrder(em: EntityManager, orderId: string): Promise<PharmacyPurchaseOrderLines[]> {
-    return em.find(PharmacyPurchaseOrderLines, { pharmacyPurchaseOrderId: orderId });
+  findLinesByOrder(
+    em: EntityManager,
+    orderId: string,
+  ): Promise<PharmacyPurchaseOrderLines[]> {
+    return em.find(PharmacyPurchaseOrderLines, {
+      pharmacyPurchaseOrderId: orderId,
+    });
   }
 
-  findLineById(em: EntityManager, id: string): Promise<PharmacyPurchaseOrderLines | null> {
+  findLineById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PharmacyPurchaseOrderLines | null> {
     return em.findOne(PharmacyPurchaseOrderLines, { id });
   }
 
-  create(em: EntityManager, data: CreatePurchaseOrderData): PharmacyPurchaseOrders {
+  create(
+    em: EntityManager,
+    data: CreatePurchaseOrderData,
+  ): PharmacyPurchaseOrders {
     return em.create(
       PharmacyPurchaseOrders,
       {
@@ -61,7 +78,10 @@ export class PurchaseOrdersRepository {
     );
   }
 
-  createLine(em: EntityManager, data: CreatePurchaseOrderLineData): PharmacyPurchaseOrderLines {
+  createLine(
+    em: EntityManager,
+    data: CreatePurchaseOrderLineData,
+  ): PharmacyPurchaseOrderLines {
     return em.create(
       PharmacyPurchaseOrderLines,
       {

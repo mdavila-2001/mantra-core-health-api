@@ -52,7 +52,9 @@ export class DiagnosticUnitsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Alta de unidad diagnóstica con sitios y acreditaciones' })
+  @ApiOperation({
+    summary: 'Alta de unidad diagnóstica con sitios y acreditaciones',
+  })
   create(
     @Body() dto: CreateDiagnosticUnitDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -102,7 +104,9 @@ export class DiagnosticUnitsController {
   @Post(':id/study-offerings')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Publicar oferta de estudio con componentes (panel)' })
+  @ApiOperation({
+    summary: 'Publicar oferta de estudio con componentes (panel)',
+  })
   createOffering(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateStudyOfferingDto,

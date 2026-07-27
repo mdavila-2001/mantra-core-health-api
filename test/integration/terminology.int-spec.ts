@@ -1,7 +1,10 @@
 import request from 'supertest';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
-import { CatalogConcepts, CodeSystemVersions } from '../../src/modules/terminology/entities';
+import {
+  CatalogConcepts,
+  CodeSystemVersions,
+} from '../../src/modules/terminology/entities';
 import { CONCEPTS } from '../../src/common';
 
 /**
@@ -33,7 +36,13 @@ describe('Terminology (integración)', () => {
     const res = await http()
       .post('/terminology/code-systems')
       .set(bearer(ctx.adminToken))
-      .send({ internalCode: `icd10-${uniq}`, name: 'ICD-10 Local', canonicalUrl: `http://x/icd10/${uniq}`, sourceCode: `WHO-${uniq}`, sourceName: 'WHO' })
+      .send({
+        internalCode: `icd10-${uniq}`,
+        name: 'ICD-10 Local',
+        canonicalUrl: `http://x/icd10/${uniq}`,
+        sourceCode: `WHO-${uniq}`,
+        sourceName: 'WHO',
+      })
       .expect(201);
     codeSystemId = res.body.id;
     expect(res.body.sourceId).toEqual(expect.any(String));
@@ -43,7 +52,13 @@ describe('Terminology (integración)', () => {
     await http()
       .post('/terminology/code-systems')
       .set(bearer(ctx.adminToken))
-      .send({ internalCode: `icd10-${uniq}`, name: 'dup', canonicalUrl: 'http://y', sourceCode: 'WHO', sourceName: 'WHO' })
+      .send({
+        internalCode: `icd10-${uniq}`,
+        name: 'dup',
+        canonicalUrl: 'http://y',
+        sourceCode: 'WHO',
+        sourceName: 'WHO',
+      })
       .expect(409);
   });
 
@@ -61,13 +76,20 @@ describe('Terminology (integración)', () => {
     const res = await http()
       .post(`/terminology/versions/${versionId}/import`)
       .set(bearer(ctx.adminToken))
-      .send({ concepts: [{ code: 'A00', display: 'Cholera' }, { code: 'A01', display: 'Typhoid fever' }] })
+      .send({
+        concepts: [
+          { code: 'A00', display: 'Cholera' },
+          { code: 'A01', display: 'Typhoid fever' },
+        ],
+      })
       .expect(201);
     expect(res.body.inserted).toBe(2);
 
     // Recupera los ids de concepto persistidos para las pruebas de designación/relación.
     const em = orm.em.fork();
-    const concepts = await em.find(CatalogConcepts, { codeSystemVersionId: versionId });
+    const concepts = await em.find(CatalogConcepts, {
+      codeSystemVersionId: versionId,
+    });
     conceptA = concepts.find((c) => c.code === 'A00')!.id;
     conceptB = concepts.find((c) => c.code === 'A01')!.id;
     expect(conceptA).toBeDefined();
@@ -98,7 +120,12 @@ describe('Terminology (integración)', () => {
     await http()
       .post(`/terminology/concepts/${conceptA}/designations`)
       .set(bearer(ctx.adminToken))
-      .send({ value: 'Cólera', language: 'ES', designationType: 'PREFERRED', preferred: true })
+      .send({
+        value: 'Cólera',
+        language: 'ES',
+        designationType: 'PREFERRED',
+        preferred: true,
+      })
       .expect(201);
   });
 
@@ -118,7 +145,15 @@ describe('Terminology (integración)', () => {
         internalCode: `vs-${uniq}`,
         name: 'Infectious diseases',
         canonicalUrl: `http://x/vs/${uniq}`,
-        rules: [{ codeSystemId, operator: 'IS_A', property: 'concept', value: 'A00', included: true }],
+        rules: [
+          {
+            codeSystemId,
+            operator: 'IS_A',
+            property: 'concept',
+            value: 'A00',
+            included: true,
+          },
+        ],
       })
       .expect(201);
     expect(res.body.versionId).toEqual(expect.any(String));
@@ -126,6 +161,15 @@ describe('Terminology (integración)', () => {
   });
 
   it('rechaza sin autenticación (401)', async () => {
-    await http().post('/terminology/code-systems').send({ internalCode: 'x', name: 'x', canonicalUrl: 'x', sourceCode: 'x', sourceName: 'x' }).expect(401);
+    await http()
+      .post('/terminology/code-systems')
+      .send({
+        internalCode: 'x',
+        name: 'x',
+        canonicalUrl: 'x',
+        sourceCode: 'x',
+        sourceName: 'x',
+      })
+      .expect(401);
   });
 });

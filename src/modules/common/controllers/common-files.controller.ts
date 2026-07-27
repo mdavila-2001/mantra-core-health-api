@@ -35,7 +35,9 @@ export class CommonFilesController {
   /** UC-02-05: crea un archivo y su primera versión. */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear un archivo con su versión inicial (UC-02-05)' })
+  @ApiOperation({
+    summary: 'Crear un archivo con su versión inicial (UC-02-05)',
+  })
   createFile(
     @Body() dto: CreateFileDto,
     @CurrentUser() user: AuthenticatedUser,

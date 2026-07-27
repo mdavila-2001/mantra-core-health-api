@@ -49,8 +49,14 @@ export class PracticeSitesService {
   }
 
   /** Bootstrap: da de alta la organización raíz (práctica). */
-  async createPractice(dto: CreatePracticeDto, actor: AuthenticatedUser): Promise<PracticeResponseDto> {
-    this.logger.info({ operation: 'practice.create', actorId: actor.id }, 'Creating practice');
+  async createPractice(
+    dto: CreatePracticeDto,
+    actor: AuthenticatedUser,
+  ): Promise<PracticeResponseDto> {
+    this.logger.info(
+      { operation: 'practice.create', actorId: actor.id },
+      'Creating practice',
+    );
     return this.em.transactional(async (tx) => {
       const practice = this.practicesRepo.create(tx, {
         tenantId: dto.tenantId,
@@ -64,7 +70,10 @@ export class PracticeSitesService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      this.logger.info({ operation: 'practice.create', practiceId: practice.id }, 'Practice created');
+      this.logger.info(
+        { operation: 'practice.create', practiceId: practice.id },
+        'Practice created',
+      );
       return {
         id: practice.id,
         code: practice.code,
@@ -80,20 +89,35 @@ export class PracticeSitesService {
     dto: CreateSiteDto,
     actor: AuthenticatedUser,
   ): Promise<SiteResponseDto> {
-    this.logger.info({ operation: 'practice.site.create', practiceId, actorId: actor.id }, 'Creating site');
+    this.logger.info(
+      { operation: 'practice.site.create', practiceId, actorId: actor.id },
+      'Creating site',
+    );
     return this.em.transactional(async (tx) => {
       const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice) throw new ResourceNotFoundException('Práctica no encontrada', { practiceId });
+      if (!practice)
+        throw new ResourceNotFoundException('Práctica no encontrada', {
+          practiceId,
+        });
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
-        throw new PreconditionFailedException('La práctica no está activa', { practiceId });
+        throw new PreconditionFailedException('La práctica no está activa', {
+          practiceId,
+        });
       }
 
-      const clash = await this.sitesRepo.findByPracticeAndCode(tx, practiceId, dto.code);
+      const clash = await this.sitesRepo.findByPracticeAndCode(
+        tx,
+        practiceId,
+        dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe un sitio con ese código en la práctica', {
-          practiceId,
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un sitio con ese código en la práctica',
+          {
+            practiceId,
+            code: dto.code,
+          },
+        );
       }
 
       const site = this.sitesRepo.create(tx, {
@@ -111,7 +135,10 @@ export class PracticeSitesService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      this.logger.info({ operation: 'practice.site.create', siteId: site.id }, 'Site created');
+      this.logger.info(
+        { operation: 'practice.site.create', siteId: site.id },
+        'Site created',
+      );
       return {
         id: site.id,
         practiceId: site.practiceId,
@@ -129,11 +156,17 @@ export class PracticeSitesService {
     siteId: string,
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'practice.site.decommission', practiceId, siteId }, 'Decommissioning site');
+    this.logger.info(
+      { operation: 'practice.site.decommission', practiceId, siteId },
+      'Decommissioning site',
+    );
     return this.em.transactional(async (tx) => {
       const site = await this.sitesRepo.findById(tx, siteId);
       if (!site || site.practiceId !== practiceId) {
-        throw new ResourceNotFoundException('Sitio no encontrado en la práctica', { practiceId, siteId });
+        throw new ResourceNotFoundException(
+          'Sitio no encontrado en la práctica',
+          { practiceId, siteId },
+        );
       }
       if (site.statusConceptId === PRAC.SITE_RETIRED) {
         throw new ConflictException('El sitio ya está retirado', { siteId });

@@ -16,33 +16,57 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const pharmaciesRepo = { findById: mockFn() };
   const productsRepo = { findById: mockFn() };
-  const connectionsRepo = { findByPharmacyAndConnection: mockFn(), findById: mockFn(), create: mockFn() };
-  const mappingsRepo = { findByConnectionAndProduct: mockFn(), create: mockFn() };
+  const connectionsRepo = {
+    findByPharmacyAndConnection: mockFn(),
+    findById: mockFn(),
+    create: mockFn(),
+  };
+  const mappingsRepo = {
+    findByConnectionAndProduct: mockFn(),
+    create: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PharmacyIntegrationService(
     em as any,
     pharmaciesRepo as any,
     productsRepo as any,
-    connectionsRepo as any,
+    connectionsRepo,
     mappingsRepo as any,
     logger as any,
   );
-  return { service, tx, pharmaciesRepo, productsRepo, connectionsRepo, mappingsRepo };
+  return {
+    service,
+    tx,
+    pharmaciesRepo,
+    productsRepo,
+    connectionsRepo,
+    mappingsRepo,
+  };
 }
 
 describe('PharmacyIntegrationService', () => {
   describe('createConnection (UC-24-07)', () => {
     it('rejects when the pharmacy is not active', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_DRAFT });
+      d.pharmaciesRepo.findById.mockResolvedValue({
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_DRAFT,
+      });
       await expect(
-        d.service.createConnection('ph1', { integrationMode: 'REALTIME' } as any, actor),
+        d.service.createConnection(
+          'ph1',
+          { integrationMode: 'REALTIME' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('creates a self-referencing connection', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_ACTIVE });
+      d.pharmaciesRepo.findById.mockResolvedValue({
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+      });
       d.connectionsRepo.create.mockReturnValue({
         id: 'conn1',
         pharmacyId: 'ph1',
@@ -55,7 +79,10 @@ describe('PharmacyIntegrationService', () => {
         { integrationMode: 'REALTIME', supportsStockQuery: true } as any,
         actor,
       );
-      expect(res).toMatchObject({ id: 'conn1', status: PHARM.CONNECTION_ACTIVE });
+      expect(res).toMatchObject({
+        id: 'conn1',
+        status: PHARM.CONNECTION_ACTIVE,
+      });
     });
   });
 
@@ -70,7 +97,12 @@ describe('PharmacyIntegrationService', () => {
         supportsPriceQuery: false,
       });
       await expect(
-        d.service.mapProduct('ph1', 'conn1', { pharmacyProductId: 'pr1', externalProductCode: 'X' } as any, actor),
+        d.service.mapProduct(
+          'ph1',
+          'conn1',
+          { pharmacyProductId: 'pr1', externalProductCode: 'X' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -87,9 +119,16 @@ describe('PharmacyIntegrationService', () => {
         pharmacyId: 'ph1',
         statusConceptId: PHARM.PRODUCT_ACTIVE,
       });
-      d.mappingsRepo.findByConnectionAndProduct.mockResolvedValue({ id: 'existing' });
+      d.mappingsRepo.findByConnectionAndProduct.mockResolvedValue({
+        id: 'existing',
+      });
       await expect(
-        d.service.mapProduct('ph1', 'conn1', { pharmacyProductId: 'pr1', externalProductCode: 'X' } as any, actor),
+        d.service.mapProduct(
+          'ph1',
+          'conn1',
+          { pharmacyProductId: 'pr1', externalProductCode: 'X' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -103,7 +142,12 @@ describe('PharmacyIntegrationService', () => {
       });
       d.productsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.mapProduct('ph1', 'conn1', { pharmacyProductId: 'pr1', externalProductCode: 'X' } as any, actor),
+        d.service.mapProduct(
+          'ph1',
+          'conn1',
+          { pharmacyProductId: 'pr1', externalProductCode: 'X' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -132,10 +176,13 @@ describe('PharmacyIntegrationService', () => {
       const res = await d.service.mapProduct(
         'ph1',
         'conn1',
-        { pharmacyProductId: 'pr1', externalProductCode: 'X' } as any,
+        { pharmacyProductId: 'pr1', externalProductCode: 'X' },
         actor,
       );
-      expect(res).toMatchObject({ id: 'map1', verificationStatus: PHARM.VERIFICATION_PENDING });
+      expect(res).toMatchObject({
+        id: 'map1',
+        verificationStatus: PHARM.VERIFICATION_PENDING,
+      });
     });
   });
 });

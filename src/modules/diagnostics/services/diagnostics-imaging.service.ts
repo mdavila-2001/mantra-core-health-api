@@ -38,14 +38,21 @@ export class DiagnosticsImagingService {
     dto: CreateImagingEndpointDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.imagingEndpoint.create', actorId: actor.id }, 'Creating imaging endpoint');
+    this.logger.info(
+      { operation: 'diagnostics.imagingEndpoint.create', actorId: actor.id },
+      'Creating imaging endpoint',
+    );
     return this.em.transactional(async (tx) => {
       if (!dto.tenantId) {
-        throw new ConflictException('Falta el tenant del endpoint de imagen', {});
+        throw new ConflictException(
+          'Falta el tenant del endpoint de imagen',
+          {},
+        );
       }
       const endpoint = this.repo.createEndpoint(tx, {
         tenantId: dto.tenantId,
-        endpointTypeConceptId: dto.endpointTypeConceptId ?? DIAG.IMAGING_ENDPOINT_STOW,
+        endpointTypeConceptId:
+          dto.endpointTypeConceptId ?? DIAG.IMAGING_ENDPOINT_STOW,
         baseUri: dto.baseUri,
         statusConceptId: DIAG.IMAGING_ENDPOINT_ACTIVE,
         storageRegionConceptId: dto.storageRegionConceptId,
@@ -57,20 +64,32 @@ export class DiagnosticsImagingService {
   }
 
   /** UC-20-11: ingesta idempotente de un estudio DICOM (STOW-RS). */
-  async storeStudy(dto: StoreImagingStudyDto, actor: AuthenticatedUser): Promise<ImagingStudyStoredDto> {
+  async storeStudy(
+    dto: StoreImagingStudyDto,
+    actor: AuthenticatedUser,
+  ): Promise<ImagingStudyStoredDto> {
     this.logger.info(
-      { operation: 'diagnostics.imagingStudy.store', studyUid: dto.dicomStudyInstanceUid },
+      {
+        operation: 'diagnostics.imagingStudy.store',
+        studyUid: dto.dicomStudyInstanceUid,
+      },
       'Storing DICOM study',
     );
     return this.em.transactional(async (tx) => {
       const endpoint = await this.repo.findEndpoint(tx, dto.imagingEndpointId);
       if (!endpoint) {
-        throw new ResourceNotFoundException('Endpoint de imagen no encontrado', {
-          imagingEndpointId: dto.imagingEndpointId,
-        });
+        throw new ResourceNotFoundException(
+          'Endpoint de imagen no encontrado',
+          {
+            imagingEndpointId: dto.imagingEndpointId,
+          },
+        );
       }
       // Reenvío idempotente: un mismo Study UID no se duplica.
-      const existing = await this.repo.findStudyByUid(tx, dto.dicomStudyInstanceUid);
+      const existing = await this.repo.findStudyByUid(
+        tx,
+        dto.dicomStudyInstanceUid,
+      );
       if (existing) {
         throw new ConflictException('El estudio DICOM ya fue almacenado', {
           dicomStudyInstanceUid: dto.dicomStudyInstanceUid,
@@ -147,10 +166,16 @@ export class DiagnosticsImagingService {
     dto: RecordDoseEventDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.dose.record', imagingStudyId }, 'Recording radiation dose event');
+    this.logger.info(
+      { operation: 'diagnostics.dose.record', imagingStudyId },
+      'Recording radiation dose event',
+    );
     return this.em.transactional(async (tx) => {
       const study = await this.repo.findStudy(tx, imagingStudyId);
-      if (!study) throw new ResourceNotFoundException('Estudio de imagen no encontrado', { imagingStudyId });
+      if (!study)
+        throw new ResourceNotFoundException('Estudio de imagen no encontrado', {
+          imagingStudyId,
+        });
 
       const event = this.repo.recordDoseEvent(tx, {
         custodianTenantId: study.custodianTenantId,

@@ -28,7 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   validate(payload: JwtPayload): AuthenticatedUser {
     if (payload.typ !== 'access') {
-      throw new UnauthorizedException('Tipo de token no válido para autenticación');
+      throw new UnauthorizedException(
+        'Tipo de token no válido para autenticación',
+      );
     }
     return {
       id: payload.sub,

@@ -36,7 +36,10 @@ export class PatientObjectionsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreatePatientObjectionData): PatientObjections {
+  create(
+    em: EntityManager,
+    data: CreatePatientObjectionData,
+  ): PatientObjections {
     return em.create(
       PatientObjections,
       {

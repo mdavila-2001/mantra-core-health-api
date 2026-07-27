@@ -47,14 +47,23 @@ export class PharmacyIntegrationService {
     actor: AuthenticatedUser,
   ): Promise<ConnectionResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy.connection.create', pharmacyId, mode: dto.integrationMode },
+      {
+        operation: 'pharmacy.connection.create',
+        pharmacyId,
+        mode: dto.integrationMode,
+      },
       'Creating integration connection',
     );
     return this.em.transactional(async (tx) => {
       const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy) throw new ResourceNotFoundException('Farmacia no encontrada', { pharmacyId });
+      if (!pharmacy)
+        throw new ResourceNotFoundException('Farmacia no encontrada', {
+          pharmacyId,
+        });
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
-        throw new PreconditionFailedException('La farmacia no está activa', { pharmacyId });
+        throw new PreconditionFailedException('La farmacia no está activa', {
+          pharmacyId,
+        });
       }
 
       if (dto.connectionId) {
@@ -64,9 +73,12 @@ export class PharmacyIntegrationService {
           dto.connectionId,
         );
         if (clash) {
-          throw new ConflictException('Ya existe una conexión para esa integración', {
-            connectionId: dto.connectionId,
-          });
+          throw new ConflictException(
+            'Ya existe una conexión para esa integración',
+            {
+              connectionId: dto.connectionId,
+            },
+          );
         }
       }
 
@@ -74,7 +86,8 @@ export class PharmacyIntegrationService {
         pharmacyId,
         pharmacySiteId: dto.pharmacySiteId,
         connectionId: dto.connectionId,
-        integrationModeConceptId: INTEGRATION_MODE_CONCEPT_BY_CODE[dto.integrationMode],
+        integrationModeConceptId:
+          INTEGRATION_MODE_CONCEPT_BY_CODE[dto.integrationMode],
         inventoryAuthorityConceptId: dto.inventoryAuthorityConceptId,
         supportsStockQuery: dto.supportsStockQuery,
         supportsPriceQuery: dto.supportsPriceQuery,
@@ -87,7 +100,11 @@ export class PharmacyIntegrationService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'pharmacy.connection.create', pharmacyId, connectionRowId: connection.id },
+        {
+          operation: 'pharmacy.connection.create',
+          pharmacyId,
+          connectionRowId: connection.id,
+        },
         'Integration connection created',
       );
       return {
@@ -108,16 +125,28 @@ export class PharmacyIntegrationService {
     actor: AuthenticatedUser,
   ): Promise<MappingResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy.mapping.create', pharmacyId, connectionRowId, productId: dto.pharmacyProductId },
+      {
+        operation: 'pharmacy.mapping.create',
+        pharmacyId,
+        connectionRowId,
+        productId: dto.pharmacyProductId,
+      },
       'Mapping product to external code',
     );
     return this.em.transactional(async (tx) => {
-      const connection = await this.connectionsRepo.findById(tx, connectionRowId);
+      const connection = await this.connectionsRepo.findById(
+        tx,
+        connectionRowId,
+      );
       if (!connection || connection.pharmacyId !== pharmacyId) {
-        throw new ResourceNotFoundException('Conexión no encontrada', { connectionRowId });
+        throw new ResourceNotFoundException('Conexión no encontrada', {
+          connectionRowId,
+        });
       }
       if (connection.statusConceptId !== PHARM.CONNECTION_ACTIVE) {
-        throw new PreconditionFailedException('La conexión no está activa', { connectionRowId });
+        throw new PreconditionFailedException('La conexión no está activa', {
+          connectionRowId,
+        });
       }
       if (!connection.supportsStockQuery && !connection.supportsPriceQuery) {
         throw new PreconditionFailedException(
@@ -126,7 +155,10 @@ export class PharmacyIntegrationService {
         );
       }
 
-      const product = await this.productsRepo.findById(tx, dto.pharmacyProductId);
+      const product = await this.productsRepo.findById(
+        tx,
+        dto.pharmacyProductId,
+      );
       if (!product || product.pharmacyId !== pharmacyId) {
         throw new ResourceNotFoundException('Producto no encontrado', {
           productId: dto.pharmacyProductId,
@@ -144,9 +176,12 @@ export class PharmacyIntegrationService {
         dto.pharmacyProductId,
       );
       if (clash) {
-        throw new ConflictException('El producto ya está mapeado en esta conexión', {
-          productId: dto.pharmacyProductId,
-        });
+        throw new ConflictException(
+          'El producto ya está mapeado en esta conexión',
+          {
+            productId: dto.pharmacyProductId,
+          },
+        );
       }
 
       const mapping = this.mappingsRepo.create(tx, {
@@ -166,7 +201,8 @@ export class PharmacyIntegrationService {
       );
       return {
         id: mapping.id,
-        pharmacyIntegrationConnectionId: mapping.pharmacyIntegrationConnectionId,
+        pharmacyIntegrationConnectionId:
+          mapping.pharmacyIntegrationConnectionId,
         pharmacyProductId: mapping.pharmacyProductId,
         externalProductCode: mapping.externalProductCode,
         verificationStatus: mapping.verificationStatusConceptId,

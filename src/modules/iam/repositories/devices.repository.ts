@@ -18,13 +18,17 @@ export interface CreateDeviceData {
 export class DevicesRepository {
   /** Crea un dispositivo (sin flush). */
   create(em: EntityManager, data: CreateDeviceData): Devices {
-    return em.create(Devices, {
-      userId: data.userId,
-      deviceFingerprint: data.deviceFingerprint,
-      platformConceptId: data.platformConceptId,
-      name: data.name,
-      trusted: data.trusted ?? false,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+    return em.create(
+      Devices,
+      {
+        userId: data.userId,
+        deviceFingerprint: data.deviceFingerprint,
+        platformConceptId: data.platformConceptId,
+        name: data.name,
+        trusted: data.trusted ?? false,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 }

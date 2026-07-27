@@ -13,7 +13,10 @@ export class DisputeRepository {
   }
 
   /** Última decisión de la disputa (para supersede y siguiente versión). */
-  latestDecision(em: EntityManager, disputeId: string): Promise<ClaimAppealDecisions | null> {
+  latestDecision(
+    em: EntityManager,
+    disputeId: string,
+  ): Promise<ClaimAppealDecisions | null> {
     return em.findOne(
       ClaimAppealDecisions,
       { claimDisputeId: disputeId },
@@ -21,10 +24,18 @@ export class DisputeRepository {
     );
   }
 
-  createAppealDecision(em: EntityManager, data: Record<string, unknown>): ClaimAppealDecisions {
+  createAppealDecision(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): ClaimAppealDecisions {
     return em.create(
       ClaimAppealDecisions,
-      { ...data, createdAt: new Date(), decidedAt: new Date(), decidedByReviewerUserId: data.actorUserId as string | undefined },
+      {
+        ...data,
+        createdAt: new Date(),
+        decidedAt: new Date(),
+        decidedByReviewerUserId: data.actorUserId as string | undefined,
+      },
       { partial: true },
     );
   }

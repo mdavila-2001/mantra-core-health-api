@@ -63,7 +63,11 @@ export class CreatePlanDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date', description: 'Vigencia desde (ISO date)' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date',
+    description: 'Vigencia desde (ISO date)',
+  })
   @IsOptional()
   @IsString()
   effectiveFrom?: string;
@@ -81,7 +85,10 @@ export class CreatePlanBenefitDto {
   @IsBoolean()
   requiresPriorAuthorization?: boolean;
 
-  @ApiPropertyOptional({ description: 'Porcentaje de cobertura', example: '80' })
+  @ApiPropertyOptional({
+    description: 'Porcentaje de cobertura',
+    example: '80',
+  })
   @IsOptional()
   @IsNumberString()
   coveragePercent?: string;
@@ -185,11 +192,17 @@ export class CreateBrokerAgreementDto {
 
 /** UC-26-01: alta de membresía de prestador en una red. */
 export class CreateMembershipDto {
-  @ApiProperty({ format: 'uuid', description: 'Entidad prestadora (práctica/hospital/etc.)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Entidad prestadora (práctica/hospital/etc.)',
+  })
   @IsUUID()
   providerEntityId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Referencia a práctica si aplica' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Referencia a práctica si aplica',
+  })
   @IsOptional()
   @IsUUID()
   practiceId?: string;

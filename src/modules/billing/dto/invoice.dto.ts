@@ -15,7 +15,10 @@ import {
 
 /** Línea de cargo a facturar (UC-17-01). */
 export class InvoiceLineInputDto {
-  @ApiPropertyOptional({ description: 'Servicio del catálogo (billing.service_catalog)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Servicio del catálogo (billing.service_catalog)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   serviceId?: string;
@@ -39,22 +42,34 @@ export class InvoiceLineInputDto {
   @IsNumberString()
   discount?: string;
 
-  @ApiPropertyOptional({ description: 'Código de impuesto (billing.tax_codes)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Código de impuesto (billing.tax_codes)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   taxCodeId?: string;
 
-  @ApiPropertyOptional({ description: 'Monto de impuesto de la línea', example: '0.00' })
+  @ApiPropertyOptional({
+    description: 'Monto de impuesto de la línea',
+    example: '0.00',
+  })
   @IsOptional()
   @IsNumberString()
   taxAmount?: string;
 
-  @ApiPropertyOptional({ description: 'Cuenta de ingreso (accounting.accounts)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Cuenta de ingreso (accounting.accounts)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   incomeAccountId?: string;
 
-  @ApiPropertyOptional({ description: 'Centro de costo (accounting.cost_centers)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Centro de costo (accounting.cost_centers)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   costCenterId?: string;
@@ -62,26 +77,39 @@ export class InvoiceLineInputDto {
 
 /** Cuerpo de `POST /billing/invoices:issue-from-encounter` (UC-17-01). */
 export class IssueInvoiceFromEncounterDto {
-  @ApiProperty({ description: 'Práctica emisora (practice.practices)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Práctica emisora (practice.practices)',
+    format: 'uuid',
+  })
   @IsUUID()
   practiceId!: string;
 
-  @ApiProperty({ description: 'Paciente facturado (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente facturado (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Encuentro origen (clinical.encounters)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Encuentro origen (clinical.encounters)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ description: 'Número de folio; si se omite se genera' })
+  @ApiPropertyOptional({
+    description: 'Número de folio; si se omite se genera',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(60)
   invoiceNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Fecha de emisión (ISO); por defecto hoy' })
+  @ApiPropertyOptional({
+    description: 'Fecha de emisión (ISO); por defecto hoy',
+  })
   @IsOptional()
   @IsDateString()
   issueDate?: string;
@@ -91,22 +119,35 @@ export class IssueInvoiceFromEncounterDto {
   @IsDateString()
   dueDate?: string;
 
-  @ApiPropertyOptional({ description: 'Moneda (terminology.catalog_concepts)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Moneda (terminology.catalog_concepts)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   currencyConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Reclamo de seguro asociado (para el vínculo de documento)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Reclamo de seguro asociado (para el vínculo de documento)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   claimId?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant (directory.tenants); requerido para registrar el vínculo de documento', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Tenant (directory.tenants); requerido para registrar el vínculo de documento',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiProperty({ type: [InvoiceLineInputDto], description: 'Líneas de cargo (al menos una)' })
+  @ApiProperty({
+    type: [InvoiceLineInputDto],
+    description: 'Líneas de cargo (al menos una)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
@@ -122,7 +163,10 @@ export class CreditNoteLineInputDto {
   @MaxLength(500)
   description?: string;
 
-  @ApiProperty({ description: 'Cantidad (positiva; se invierte el signo del total)', example: '1' })
+  @ApiProperty({
+    description: 'Cantidad (positiva; se invierte el signo del total)',
+    example: '1',
+  })
   @IsNumberString()
   quantity!: string;
 
@@ -143,17 +187,26 @@ export class CreditNoteDto {
   @MaxLength(500)
   reason!: string;
 
-  @ApiPropertyOptional({ description: 'Tenant (directory.tenants); requerido para registrar el vínculo CREDIT_OF', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Tenant (directory.tenants); requerido para registrar el vínculo CREDIT_OF',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Si es un castigo de saldo incobrable (write-off)' })
+  @ApiPropertyOptional({
+    description: 'Si es un castigo de saldo incobrable (write-off)',
+  })
   @IsOptional()
   @IsBoolean()
   writeOff?: boolean;
 
-  @ApiProperty({ type: [CreditNoteLineInputDto], description: 'Líneas a revertir' })
+  @ApiProperty({
+    type: [CreditNoteLineInputDto],
+    description: 'Líneas a revertir',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

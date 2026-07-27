@@ -28,7 +28,10 @@ export interface CreateOfferingData {
 /** Acceso a datos de `diagnostic_units.diagnostic_study_offerings`. */
 @Injectable()
 export class DiagnosticStudyOfferingsRepository {
-  findById(em: EntityManager, id: string): Promise<DiagnosticStudyOfferings | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DiagnosticStudyOfferings | null> {
     return em.findOne(DiagnosticStudyOfferings, { id });
   }
 
@@ -38,10 +41,16 @@ export class DiagnosticStudyOfferingsRepository {
     diagnosticUnitId: string,
     studyCode: string,
   ): Promise<DiagnosticStudyOfferings | null> {
-    return em.findOne(DiagnosticStudyOfferings, { diagnosticUnitId, studyCode });
+    return em.findOne(DiagnosticStudyOfferings, {
+      diagnosticUnitId,
+      studyCode,
+    });
   }
 
-  create(em: EntityManager, data: CreateOfferingData): DiagnosticStudyOfferings {
+  create(
+    em: EntityManager,
+    data: CreateOfferingData,
+  ): DiagnosticStudyOfferings {
     return em.create(
       DiagnosticStudyOfferings,
       {

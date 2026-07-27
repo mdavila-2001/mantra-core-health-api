@@ -20,14 +20,16 @@ describe('IamAuthController', () => {
     const d = build();
     const dto = { email: 'a@x.io', password: 'password123' };
     d.authService.login.mockResolvedValue({ accessToken: 'at' });
-    await expect(d.controller.login(dto as any, '1.2.3.4')).resolves.toEqual({ accessToken: 'at' });
+    await expect(d.controller.login(dto as any, '1.2.3.4')).resolves.toEqual({
+      accessToken: 'at',
+    });
     expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4');
   });
 
   it('delegates refresh (UC-01-06)', async () => {
     const d = build();
     const dto = { refreshToken: 'r' };
-    await d.controller.refresh(dto as any);
+    await d.controller.refresh(dto);
     expect(d.authService.refresh).toHaveBeenCalledWith(dto);
   });
 

@@ -36,7 +36,9 @@ export class ReadModelDefinitionsController {
   @Post('definitions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar y publicar un contrato de read model versionado' })
+  @ApiOperation({
+    summary: 'Registrar y publicar un contrato de read model versionado',
+  })
   createDefinition(
     @Body() dto: CreateReadModelDefinitionDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -61,7 +63,9 @@ export class ReadModelDefinitionsController {
   /** UC-30-12. */
   @Get('health')
   @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Detectar y reportar staleness/degradación de las MV' })
+  @ApiOperation({
+    summary: 'Detectar y reportar staleness/degradación de las MV',
+  })
   health(): Promise<ReadModelHealthResponseDto> {
     return this.service.health();
   }
@@ -70,7 +74,9 @@ export class ReadModelDefinitionsController {
   @Post(':definitionId/refresh')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refrescar la materialized view (REFRESH CONCURRENTLY, manual)' })
+  @ApiOperation({
+    summary: 'Refrescar la materialized view (REFRESH CONCURRENTLY, manual)',
+  })
   refresh(
     @Param('definitionId', ParseUUIDPipe) definitionId: string,
     @CurrentUser() actor: AuthenticatedUser,
@@ -94,7 +100,9 @@ export class ReadModelDefinitionsController {
   @Post(':definitionId/invalidate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Invalidar y recomputar el read model tras cambio upstream' })
+  @ApiOperation({
+    summary: 'Invalidar y recomputar el read model tras cambio upstream',
+  })
   invalidate(
     @Param('definitionId', ParseUUIDPipe) definitionId: string,
     @CurrentUser() actor: AuthenticatedUser,
@@ -106,7 +114,9 @@ export class ReadModelDefinitionsController {
   @Post(':definitionId/reconcile')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reconciliar read model divergente contra la fuente canónica' })
+  @ApiOperation({
+    summary: 'Reconciliar read model divergente contra la fuente canónica',
+  })
   reconcile(
     @Param('definitionId', ParseUUIDPipe) definitionId: string,
     @CurrentUser() actor: AuthenticatedUser,

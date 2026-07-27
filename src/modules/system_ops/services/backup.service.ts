@@ -8,7 +8,12 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { BackupRepository } from '../repositories';
-import { CreateBackupPolicyDto, CreateRestoreTestRunDto, IdResultDto, RestoreTestRunResponseDto } from '../dto';
+import {
+  CreateBackupPolicyDto,
+  CreateRestoreTestRunDto,
+  IdResultDto,
+  RestoreTestRunResponseDto,
+} from '../dto';
 
 /**
  * UC-11-09 (política de backup con RPO/RTO/inmutabilidad) y UC-11-10 (prueba de
@@ -26,7 +31,10 @@ export class BackupService {
   }
 
   /** UC-11-09: define una política de backup (RPO <= RTO, valores positivos). */
-  async createPolicy(dto: CreateBackupPolicyDto, actor: AuthenticatedUser): Promise<IdResultDto> {
+  async createPolicy(
+    dto: CreateBackupPolicyDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResultDto> {
     if (dto.rpoSeconds > dto.rtoSeconds) {
       throw new PreconditionFailedException('El RPO no puede superar al RTO', {
         rpoSeconds: dto.rpoSeconds,
@@ -48,7 +56,10 @@ export class BackupService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      this.logger.info({ operation: 'sysops.backup.policy', policyId: policy.id }, 'Backup policy defined');
+      this.logger.info(
+        { operation: 'sysops.backup.policy', policyId: policy.id },
+        'Backup policy defined',
+      );
       return { id: policy.id };
     });
   }
@@ -61,14 +72,20 @@ export class BackupService {
     return this.em.transactional(async (tx) => {
       const policy = await this.repo.findPolicyById(tx, dto.backupPolicyId);
       if (!policy) {
-        throw new ResourceNotFoundException('Política de backup no encontrada', {
-          backupPolicyId: dto.backupPolicyId,
-        });
+        throw new ResourceNotFoundException(
+          'Política de backup no encontrada',
+          {
+            backupPolicyId: dto.backupPolicyId,
+          },
+        );
       }
       if (policy.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('La política de backup no está ACTIVE', {
-          backupPolicyId: dto.backupPolicyId,
-        });
+        throw new PreconditionFailedException(
+          'La política de backup no está ACTIVE',
+          {
+            backupPolicyId: dto.backupPolicyId,
+          },
+        );
       }
 
       const objectiveBreached =
@@ -98,7 +115,11 @@ export class BackupService {
           'Restore objective breached',
         );
       }
-      return { id: run.id, outcomeConceptId: run.outcomeConceptId, objectiveBreached };
+      return {
+        id: run.id,
+        outcomeConceptId: run.outcomeConceptId,
+        objectiveBreached,
+      };
     });
   }
 }

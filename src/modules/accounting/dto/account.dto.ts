@@ -1,8 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Tipos de cuenta soportados por el plan contable de este módulo. */
-export type AccountType = 'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'EXPENSE';
+export type AccountType =
+  'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'EXPENSE';
 /** Saldo normal (débito o crédito). */
 export type NormalBalance = 'DEBIT' | 'CREDIT';
 
@@ -30,7 +38,10 @@ export class CreateAccountDto {
   @IsIn(['DEBIT', 'CREDIT'])
   normalBalance!: NormalBalance;
 
-  @ApiPropertyOptional({ description: '¿La cuenta admite posteos directos?', default: true })
+  @ApiPropertyOptional({
+    description: '¿La cuenta admite posteos directos?',
+    default: true,
+  })
   @IsOptional()
   @IsBoolean()
   isPostable?: boolean;

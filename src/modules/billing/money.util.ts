@@ -21,6 +21,9 @@ export function fromCents(cents: number): string {
 
 /** Suma una lista de importes (strings/numbers) y devuelve el string con 2 decimales. */
 export function sumAmounts(values: Array<string | number | undefined>): string {
-  const cents = values.reduce<number>((acc, v) => acc + (v == null ? 0 : toCents(v)), 0);
+  const cents = values.reduce<number>(
+    (acc, v) => acc + (v == null ? 0 : toCents(v)),
+    0,
+  );
   return fromCents(cents);
 }

@@ -19,12 +19,17 @@ export class CreateUserDto {
   @MaxLength(200)
   displayName!: string;
 
-  @ApiProperty({ description: 'Email que actúa como identidad de login', format: 'email' })
+  @ApiProperty({
+    description: 'Email que actúa como identidad de login',
+    format: 'email',
+  })
   @IsEmail()
   @MaxLength(320)
   email!: string;
 
-  @ApiProperty({ description: 'Contraseña en claro (se persiste solo su hash argon2id)' })
+  @ApiProperty({
+    description: 'Contraseña en claro (se persiste solo su hash argon2id)',
+  })
   @IsString()
   @MinLength(8)
   @MaxLength(200)
@@ -36,7 +41,10 @@ export class CreateUserDto {
   @MaxLength(100)
   timeZone?: string;
 
-  @ApiPropertyOptional({ description: 'Rol inicial', enum: ['USER', 'SECURITY_ADMIN'] })
+  @ApiPropertyOptional({
+    description: 'Rol inicial',
+    enum: ['USER', 'SECURITY_ADMIN'],
+  })
   @IsOptional()
   @IsIn(['USER', 'SECURITY_ADMIN'])
   initialRole?: InitialRole;

@@ -32,7 +32,12 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [AuditController, ComplianceController, PrivacyController, ModerationController],
+  controllers: [
+    AuditController,
+    ComplianceController,
+    PrivacyController,
+    ModerationController,
+  ],
   providers: [
     // Repositorios
     AuditLogRepository,

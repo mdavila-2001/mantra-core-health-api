@@ -40,23 +40,31 @@ export class PermissionSetsService {
     actor: AuthenticatedUser,
   ): Promise<PermissionSetVersionDto> {
     this.logger.info(
-      { operation: 'delegated_access.permission_set.create', tenantId: dto.tenantId, code: dto.code },
+      {
+        operation: 'delegated_access.permission_set.create',
+        tenantId: dto.tenantId,
+        code: dto.code,
+      },
       'Publishing delegated permission set',
     );
     return this.em.transactional(async (tx) => {
       const clash = await this.setsRepo.findByCode(tx, dto.tenantId, dto.code);
       if (clash) {
-        throw new ConflictException('Ya existe un set con ese código en el tenant', {
-          tenantId: dto.tenantId,
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un set con ese código en el tenant',
+          {
+            tenantId: dto.tenantId,
+            code: dto.code,
+          },
+        );
       }
 
       const set = this.setsRepo.create(tx, {
         tenantId: dto.tenantId,
         code: dto.code,
         name: dto.name,
-        delegateTypeConceptId: DELEGATE_TYPE_CONCEPT[dto.delegateType ?? 'SECRETARY'],
+        delegateTypeConceptId:
+          DELEGATE_TYPE_CONCEPT[dto.delegateType ?? 'SECRETARY'],
         description: dto.description,
         statusConceptId: STATUS.ACTIVE,
         actorUserId: actor.id,
@@ -75,10 +83,18 @@ export class PermissionSetsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'delegated_access.permission_set.create', setId: set.id, items: dto.items.length },
+        {
+          operation: 'delegated_access.permission_set.create',
+          setId: set.id,
+          items: dto.items.length,
+        },
         'Delegated permission set published',
       );
-      return { id: set.id, versionNumber: set.versionNumber, itemCount: dto.items.length };
+      return {
+        id: set.id,
+        versionNumber: set.versionNumber,
+        itemCount: dto.items.length,
+      };
     });
   }
 
@@ -89,12 +105,19 @@ export class PermissionSetsService {
     actor: AuthenticatedUser,
   ): Promise<PermissionSetVersionDto> {
     this.logger.info(
-      { operation: 'delegated_access.permission_set.version', setId: id, actorId: actor.id },
+      {
+        operation: 'delegated_access.permission_set.version',
+        setId: id,
+        actorId: actor.id,
+      },
       'Publishing new permission set version',
     );
     return this.em.transactional(async (tx) => {
       const set = await this.setsRepo.findById(tx, id);
-      if (!set) throw new ResourceNotFoundException('Set de permisos no encontrado', { setId: id });
+      if (!set)
+        throw new ResourceNotFoundException('Set de permisos no encontrado', {
+          setId: id,
+        });
 
       set.versionNumber += 1;
       set.statusConceptId = STATUS.ACTIVE;
@@ -112,10 +135,18 @@ export class PermissionSetsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'delegated_access.permission_set.version', setId: id, version: set.versionNumber },
+        {
+          operation: 'delegated_access.permission_set.version',
+          setId: id,
+          version: set.versionNumber,
+        },
         'Permission set version published',
       );
-      return { id: set.id, versionNumber: set.versionNumber, itemCount: dto.items.length };
+      return {
+        id: set.id,
+        versionNumber: set.versionNumber,
+        itemCount: dto.items.length,
+      };
     });
   }
 }

@@ -29,7 +29,9 @@ export class OrgUserAssignmentsController {
   @Post('org/:tenantMembershipId/user-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Asignar usuario de organización con alcance y vigencia' })
+  @ApiOperation({
+    summary: 'Asignar usuario de organización con alcance y vigencia',
+  })
   create(
     @Param('tenantMembershipId', ParseUUIDPipe) tenantMembershipId: string,
     @Body() dto: CreateOrgUserAssignmentDto,
@@ -42,7 +44,9 @@ export class OrgUserAssignmentsController {
   @Patch('org/user-assignments/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Reasignar supervisor / suspender asignación de organización' })
+  @ApiOperation({
+    summary: 'Reasignar supervisor / suspender asignación de organización',
+  })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateOrgUserAssignmentDto,

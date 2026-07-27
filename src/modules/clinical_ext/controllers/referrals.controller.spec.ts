@@ -15,7 +15,7 @@ describe('ReferralsController', () => {
   it('delegates create (UC-18-07)', async () => {
     const d = build();
     const dto = { patientProfileId: 'p1' };
-    await d.controller.create(dto as any, actor);
+    await d.controller.create(dto, actor);
     expect(d.referralsService.create).toHaveBeenCalledWith(dto, actor);
   });
 

@@ -10,7 +10,11 @@ export class FiscalRepository {
     return em.findOne(FiscalYears, { id });
   }
 
-  findYearByCode(em: EntityManager, practiceId: string, code: string): Promise<FiscalYears | null> {
+  findYearByCode(
+    em: EntityManager,
+    practiceId: string,
+    code: string,
+  ): Promise<FiscalYears | null> {
     return em.findOne(FiscalYears, { practiceId, code });
   }
 

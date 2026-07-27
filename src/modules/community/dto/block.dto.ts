@@ -11,7 +11,10 @@ export class CreateBlockDto {
   @IsUUID()
   blockedProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Razón del bloqueo', enum: ['HARASSMENT', 'SPAM', 'OTHER'] })
+  @ApiPropertyOptional({
+    description: 'Razón del bloqueo',
+    enum: ['HARASSMENT', 'SPAM', 'OTHER'],
+  })
   @IsOptional()
   @IsIn(['HARASSMENT', 'SPAM', 'OTHER'])
   reason?: 'HARASSMENT' | 'SPAM' | 'OTHER';

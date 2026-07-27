@@ -20,7 +20,10 @@ export class FunnelDefinitionsRepository {
     return em.findOne(FunnelDefinitions, { id });
   }
 
-  findByCode(em: EntityManager, funnelCode: string): Promise<FunnelDefinitions | null> {
+  findByCode(
+    em: EntityManager,
+    funnelCode: string,
+  ): Promise<FunnelDefinitions | null> {
     return em.findOne(FunnelDefinitions, { funnelCode });
   }
 

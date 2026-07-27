@@ -16,14 +16,23 @@ const actor = { id: 'admin-1', roles: ['SUPERADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const tenantsRepo = { findById: mockFn(), findByCode: mockFn(), create: mockFn() };
-  const membershipsRepo = { create: mockFn(), findByTenantAndStatus: mockFn().mockResolvedValue([]) };
-  const branchesRepo = { findByTenantAndStatus: mockFn().mockResolvedValue([]) };
+  const tenantsRepo = {
+    findById: mockFn(),
+    findByCode: mockFn(),
+    create: mockFn(),
+  };
+  const membershipsRepo = {
+    create: mockFn(),
+    findByTenantAndStatus: mockFn().mockResolvedValue([]),
+  };
+  const branchesRepo = {
+    findByTenantAndStatus: mockFn().mockResolvedValue([]),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryTenantsService(
     em as any,
-    tenantsRepo as any,
+    tenantsRepo,
     membershipsRepo as any,
     branchesRepo as any,
     logger as any,
@@ -47,7 +56,7 @@ describe('DirectoryTenantsService', () => {
       d.tenantsRepo.create.mockReturnValue(tenant);
 
       const res = await d.service.provision(
-        { code: 'ACME', legalName: 'Acme', ownerUserId: 'u1' } as any,
+        { code: 'ACME', legalName: 'Acme', ownerUserId: 'u1' },
         actor,
       );
 
@@ -56,7 +65,10 @@ describe('DirectoryTenantsService', () => {
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
       expect(d.membershipsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ tenantId: 't1', tenantRoleConceptId: DIR.ROLE_OWNER }),
+        expect.objectContaining({
+          tenantId: 't1',
+          tenantRoleConceptId: DIR.ROLE_OWNER,
+        }),
       );
     });
 
@@ -64,7 +76,10 @@ describe('DirectoryTenantsService', () => {
       const d = build();
       d.tenantsRepo.findByCode.mockResolvedValue({ id: 'x' });
       await expect(
-        d.service.provision({ code: 'ACME', legalName: 'Acme', ownerUserId: 'u1' } as any, actor),
+        d.service.provision(
+          { code: 'ACME', legalName: 'Acme', ownerUserId: 'u1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.tenantsRepo.create).not.toHaveBeenCalled();
     });
@@ -81,7 +96,9 @@ describe('DirectoryTenantsService', () => {
 
     it('rejects when the tenant is not pending (precondition)', async () => {
       const d = build();
-      d.tenantsRepo.findById.mockResolvedValue({ statusConceptId: CONCEPTS.TENANT_ACTIVE });
+      d.tenantsRepo.findById.mockResolvedValue({
+        statusConceptId: CONCEPTS.TENANT_ACTIVE,
+      });
       await expect(d.service.verify('t1', {}, actor)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
@@ -111,9 +128,15 @@ describe('DirectoryTenantsService', () => {
   describe('createChild (UC-04-03)', () => {
     it('rejects when the parent is not active', async () => {
       const d = build();
-      d.tenantsRepo.findById.mockResolvedValue({ statusConceptId: DIR.TENANT_PENDING });
+      d.tenantsRepo.findById.mockResolvedValue({
+        statusConceptId: DIR.TENANT_PENDING,
+      });
       await expect(
-        d.service.createChild('p1', { code: 'C', legalName: 'C', adminUserId: 'u1' } as any, actor),
+        d.service.createChild(
+          'p1',
+          { code: 'C', legalName: 'C', adminUserId: 'u1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -140,7 +163,7 @@ describe('DirectoryTenantsService', () => {
 
       const res = await d.service.createChild(
         'p1',
-        { code: 'C', legalName: 'C', adminUserId: 'u1' } as any,
+        { code: 'C', legalName: 'C', adminUserId: 'u1' },
         actor,
       );
 
@@ -156,7 +179,9 @@ describe('DirectoryTenantsService', () => {
   describe('suspend (UC-04-10)', () => {
     it('rejects when tenant is not active', async () => {
       const d = build();
-      d.tenantsRepo.findById.mockResolvedValue({ statusConceptId: DIR.TENANT_SUSPENDED });
+      d.tenantsRepo.findById.mockResolvedValue({
+        statusConceptId: DIR.TENANT_SUSPENDED,
+      });
       await expect(
         d.service.suspend('t1', { reason: 'x' }, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -164,10 +189,20 @@ describe('DirectoryTenantsService', () => {
 
     it('suspends the tenant and cascades to active branches and memberships', async () => {
       const d = build();
-      const tenant = { id: 't1', statusConceptId: CONCEPTS.TENANT_ACTIVE, updatedAt: new Date() };
+      const tenant = {
+        id: 't1',
+        statusConceptId: CONCEPTS.TENANT_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.tenantsRepo.findById.mockResolvedValue(tenant);
-      const branch = { statusConceptId: DIR.BRANCH_ACTIVE, updatedAt: new Date() };
-      const membership = { statusConceptId: DIR.MEMBERSHIP_ACTIVE, updatedAt: new Date() };
+      const branch = {
+        statusConceptId: DIR.BRANCH_ACTIVE,
+        updatedAt: new Date(),
+      };
+      const membership = {
+        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.branchesRepo.findByTenantAndStatus.mockResolvedValue([branch]);
       d.membershipsRepo.findByTenantAndStatus.mockResolvedValue([membership]);
 

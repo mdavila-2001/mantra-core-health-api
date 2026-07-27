@@ -3,12 +3,18 @@ import { IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /admin/tenants/{tenantId}/verification` (UC-04-02). */
 export class VerifyTenantDto {
-  @ApiPropertyOptional({ description: 'Concept id del país confirmado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del país confirmado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   countryConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de la jurisdicción confirmada', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de la jurisdicción confirmada',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;

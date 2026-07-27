@@ -37,7 +37,10 @@ export class ImmunizationSchedulesRepository {
     );
   }
 
-  create(em: EntityManager, data: CreateImmunizationScheduleData): ImmunizationSchedules {
+  create(
+    em: EntityManager,
+    data: CreateImmunizationScheduleData,
+  ): ImmunizationSchedules {
     return em.create(
       ImmunizationSchedules,
       {

@@ -9,7 +9,11 @@ import {
 
 /** Cuerpo de `POST /practices/{practiceId}/role-assignments` (UC-14-08). */
 export class CreateRoleAssignmentDto {
-  @ApiProperty({ description: 'Perfil del profesional (profiles.health_practitioner_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description:
+      'Perfil del profesional (profiles.health_practitioner_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   practitionerProfileId!: string;
 
@@ -33,7 +37,10 @@ export class CreateRoleAssignmentDto {
   @IsUUID()
   roleConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de especialidad', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de especialidad',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   specialtyConceptId?: string;
@@ -43,7 +50,9 @@ export class CreateRoleAssignmentDto {
   @IsUUID()
   supervisorPractitionerProfileId?: string;
 
-  @ApiPropertyOptional({ description: 'Porcentaje de reparto de ingresos (numérico)' })
+  @ApiPropertyOptional({
+    description: 'Porcentaje de reparto de ingresos (numérico)',
+  })
   @IsOptional()
   @IsNumberString()
   revenueSharePercent?: string;

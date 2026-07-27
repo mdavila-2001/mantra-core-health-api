@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { PractitionerDelegatesService, AccessRequestsService } from '../services';
+import {
+  PractitionerDelegatesService,
+  AccessRequestsService,
+} from '../services';
 import {
   CreatePractitionerDelegateDto,
   CreateAccessRequestDto,
@@ -75,7 +78,9 @@ export class PractitionerDelegatesController {
   @Post(':id/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Revocar delegación de forma inmediata (cascada authz)' })
+  @ApiOperation({
+    summary: 'Revocar delegación de forma inmediata (cascada authz)',
+  })
   revoke(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RevokeDelegationDto,

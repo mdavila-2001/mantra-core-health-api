@@ -1,13 +1,26 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsInt, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 
 /** Cuerpo de `POST /clinical/immunizations` (UC-08-13). */
 export class CreateImmunizationDto {
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
@@ -26,17 +39,26 @@ export class CreateImmunizationDto {
   @IsString()
   lotNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Vía de administración (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Vía de administración (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   routeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Momento de administración', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Momento de administración',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   administeredAt?: string;
 
-  @ApiPropertyOptional({ description: 'Profesional que administra', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Profesional que administra',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   administeredByProfileId?: string;

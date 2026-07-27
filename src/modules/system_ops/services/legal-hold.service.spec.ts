@@ -17,7 +17,12 @@ function build() {
   const repo = { findActive: mockFn(), create: mockFn(), findById: mockFn() };
   const governanceRepo = { recordChange: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new LegalHoldService(em as any, repo as any, governanceRepo as any, logger as any);
+  const service = new LegalHoldService(
+    em as any,
+    repo,
+    governanceRepo as any,
+    logger as any,
+  );
   return { service, repo };
 }
 
@@ -27,7 +32,15 @@ describe('LegalHoldService (UC-11-08)', () => {
       const d = build();
       d.repo.findActive.mockResolvedValue({ id: 'h1' });
       await expect(
-        d.service.place({ tenantId: 't', targetTypeConceptId: 'tt', targetId: 'x', reasonConceptId: 'r' } as any, actor),
+        d.service.place(
+          {
+            tenantId: 't',
+            targetTypeConceptId: 'tt',
+            targetId: 'x',
+            reasonConceptId: 'r',
+          } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -36,7 +49,12 @@ describe('LegalHoldService (UC-11-08)', () => {
       d.repo.findActive.mockResolvedValue(null);
       d.repo.create.mockReturnValue({ id: 'h2' });
       const res = await d.service.place(
-        { tenantId: 't', targetTypeConceptId: 'tt', targetId: 'x', reasonConceptId: 'r' } as any,
+        {
+          tenantId: 't',
+          targetTypeConceptId: 'tt',
+          targetId: 'x',
+          reasonConceptId: 'r',
+        },
         actor,
       );
       expect(res).toEqual({ id: 'h2' });
@@ -47,24 +65,31 @@ describe('LegalHoldService (UC-11-08)', () => {
     it('throws when the hold is missing', async () => {
       const d = build();
       d.repo.findById.mockResolvedValue(null);
-      await expect(d.service.release('h1', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.release('h1', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects releasing a non-active hold', async () => {
       const d = build();
-      d.repo.findById.mockResolvedValue({ id: 'h1', statusConceptId: CONCEPTS.STATE_REVOKED });
-      await expect(d.service.release('h1', {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      d.repo.findById.mockResolvedValue({
+        id: 'h1',
+        statusConceptId: CONCEPTS.STATE_REVOKED,
+      });
+      await expect(
+        d.service.release('h1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('releases an active hold', async () => {
       const d = build();
-      const hold: any = { id: 'h1', statusConceptId: CONCEPTS.STATE_ACTIVE, updatedAt: new Date() };
+      const hold: any = {
+        id: 'h1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.repo.findById.mockResolvedValue(hold);
-      const res = await d.service.release('h1', { reason: 'x' } as any, actor);
+      const res = await d.service.release('h1', { reason: 'x' }, actor);
       expect(res).toEqual({ ok: true });
       expect(hold.statusConceptId).toBe(CONCEPTS.STATE_REVOKED);
     });

@@ -38,7 +38,9 @@ export class AuthzPdpController {
   @Post('decisions/evaluate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Recalcular la decisión de autorización efectiva (PDP)' })
+  @ApiOperation({
+    summary: 'Recalcular la decisión de autorización efectiva (PDP)',
+  })
   evaluate(
     @Body() dto: EvaluateDecisionDto,
     @CurrentUser() actor: AuthenticatedUser,

@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { CONCEPTS, ResourceNotFoundException, type AuthenticatedUser } from '../../../common';
-import { HistoryRepository, DataAccessLogRepository, AuditLogRepository } from '../repositories';
+import {
+  CONCEPTS,
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
+import {
+  HistoryRepository,
+  DataAccessLogRepository,
+  AuditLogRepository,
+} from '../repositories';
 import { AUD } from '../audit.concepts';
 import { HistoryQueryDto, HistoryTimelineDto } from '../dto';
 
@@ -31,11 +39,19 @@ export class AuditHistoryService {
     actor: AuthenticatedUser,
   ): Promise<HistoryTimelineDto> {
     this.logger.info(
-      { operation: 'audit.history.read', actorId: actor.id, entity, id, asOf: query.as_of },
+      {
+        operation: 'audit.history.read',
+        actorId: actor.id,
+        entity,
+        id,
+        asOf: query.as_of,
+      },
       'Reading record history',
     );
     if (!this.historyRepo.isSupported(entity)) {
-      throw new ResourceNotFoundException('Entidad de historial no soportada', { entity });
+      throw new ResourceNotFoundException('Entidad de historial no soportada', {
+        entity,
+      });
     }
 
     return this.em.transactional(async (tx) => {

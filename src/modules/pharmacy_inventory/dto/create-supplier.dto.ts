@@ -3,7 +3,10 @@ import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 /** Cuerpo de `POST /pharmacy/:pharmacyId/suppliers` (bootstrap de proveedor). */
 export class CreateSupplierDto {
-  @ApiProperty({ format: 'uuid', description: 'Tenant del proveedor (directory.tenants)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Tenant del proveedor (directory.tenants)',
+  })
   @IsUUID()
   supplierTenantId!: string;
 

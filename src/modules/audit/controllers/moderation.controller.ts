@@ -2,7 +2,10 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ModerationService } from '../services';
-import { CreateModerationDecisionDto, ModerationDecisionResultDto } from '../dto';
+import {
+  CreateModerationDecisionDto,
+  ModerationDecisionResultDto,
+} from '../dto';
 
 /** Endpoint de moderación / gobernanza sobre `/moderation/*` (UC-10-11). */
 @ApiTags('audit-moderation')
@@ -15,7 +18,9 @@ export class ModerationController {
   @Post('decisions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar decisión de moderación / gobernanza analítica' })
+  @ApiOperation({
+    summary: 'Registrar decisión de moderación / gobernanza analítica',
+  })
   recordDecision(
     @Body() dto: CreateModerationDecisionDto,
     @CurrentUser() actor: AuthenticatedUser,

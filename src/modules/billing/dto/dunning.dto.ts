@@ -16,7 +16,10 @@ import {
 
 /** Ítem de morosidad: una factura vencida a incluir en la corrida (UC-17-10). */
 export class DunningItemInputDto {
-  @ApiProperty({ description: 'Factura morosa (billing.invoices)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Factura morosa (billing.invoices)',
+    format: 'uuid',
+  })
   @IsUUID()
   invoiceId!: string;
 
@@ -36,7 +39,10 @@ export class DunningItemInputDto {
   @IsNumberString()
   dunningFee?: string;
 
-  @ApiPropertyOptional({ description: 'Socio de negocio (erp.business_partners)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Socio de negocio (erp.business_partners)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   businessPartnerId?: string;
@@ -53,17 +59,25 @@ export class ExecuteDunningRunDto {
   @MaxLength(60)
   runNumber!: string;
 
-  @ApiPropertyOptional({ description: 'Fecha de la corrida (ISO); por defecto hoy' })
+  @ApiPropertyOptional({
+    description: 'Fecha de la corrida (ISO); por defecto hoy',
+  })
   @IsOptional()
   @IsDateString()
   runDate?: string;
 
-  @ApiPropertyOptional({ description: 'Nivel de morosidad (concepto)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Nivel de morosidad (concepto)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dunningLevelConceptId?: string;
 
-  @ApiProperty({ type: [DunningItemInputDto], description: 'Facturas morosas (al menos una)' })
+  @ApiProperty({
+    type: [DunningItemInputDto],
+    description: 'Facturas morosas (al menos una)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

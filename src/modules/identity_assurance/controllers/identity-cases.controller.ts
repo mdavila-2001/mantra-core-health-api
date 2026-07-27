@@ -40,8 +40,12 @@ export class IdentityCasesController {
   @Post('\\:expire-sweep')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Expirar por lote los casos vencidos (job programado)' })
-  expireSweep(@CurrentUser() actor: AuthenticatedUser): Promise<ExpireSweepResponseDto> {
+  @ApiOperation({
+    summary: 'Expirar por lote los casos vencidos (job programado)',
+  })
+  expireSweep(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ExpireSweepResponseDto> {
     return this.casesService.expireSweep(actor);
   }
 
@@ -113,7 +117,9 @@ export class IdentityCasesController {
   @Post(':id/assertions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Emitir una aserción de identidad con nivel de aseguramiento' })
+  @ApiOperation({
+    summary: 'Emitir una aserción de identidad con nivel de aseguramiento',
+  })
   issueAssertion(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: IssueAssertionDto,

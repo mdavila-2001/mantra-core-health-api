@@ -68,7 +68,9 @@ export class DiagnosticsSpecimensController {
   /** Soporte: alta de contenedor. */
   @Post('specimens/:id/containers')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar un contenedor de espécimen (soporte para custodia)' })
+  @ApiOperation({
+    summary: 'Registrar un contenedor de espécimen (soporte para custodia)',
+  })
   createContainer(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateContainerDto,
@@ -80,7 +82,9 @@ export class DiagnosticsSpecimensController {
   /** UC-20-03. */
   @Post('containers/:id/custody-events')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar cadena de custodia / traslado de contenedor' })
+  @ApiOperation({
+    summary: 'Registrar cadena de custodia / traslado de contenedor',
+  })
   custodyEvent(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ContainerCustodyEventDto,

@@ -15,7 +15,11 @@ function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const practicesRepo = { findById: mockFn(), create: mockFn() };
-  const sitesRepo = { findById: mockFn(), findByPracticeAndCode: mockFn(), create: mockFn() };
+  const sitesRepo = {
+    findById: mockFn(),
+    findByPracticeAndCode: mockFn(),
+    create: mockFn(),
+  };
   const unitsRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const spacesRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const servicesRepo = { findBySite: mockFn().mockResolvedValue([]) };
@@ -24,30 +28,49 @@ function build() {
 
   const service = new PracticeSitesService(
     em as any,
-    practicesRepo as any,
-    sitesRepo as any,
+    practicesRepo,
+    sitesRepo,
     unitsRepo as any,
     spacesRepo as any,
     servicesRepo as any,
     rolesRepo as any,
     logger as any,
   );
-  return { service, tx, practicesRepo, sitesRepo, unitsRepo, spacesRepo, servicesRepo, rolesRepo };
+  return {
+    service,
+    tx,
+    practicesRepo,
+    sitesRepo,
+    unitsRepo,
+    spacesRepo,
+    servicesRepo,
+    rolesRepo,
+  };
 }
 
 describe('PracticeSitesService', () => {
   describe('createPractice (bootstrap)', () => {
     it('creates and flushes the practice', async () => {
       const d = build();
-      const created = { id: 'p1', code: 'P-1', statusConceptId: PRAC.PRACTICE_ACTIVE, createdAt: new Date() };
+      const created = {
+        id: 'p1',
+        code: 'P-1',
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+        createdAt: new Date(),
+      };
       d.practicesRepo.create.mockReturnValue(created);
 
       const res = await d.service.createPractice(
-        { tenantId: 't1', code: 'P-1', name: 'Acme' } as any,
+        { tenantId: 't1', code: 'P-1', name: 'Acme' },
         actor,
       );
 
-      expect(res).toEqual({ id: 'p1', code: 'P-1', status: PRAC.PRACTICE_ACTIVE, createdAt: created.createdAt });
+      expect(res).toEqual({
+        id: 'p1',
+        code: 'P-1',
+        status: PRAC.PRACTICE_ACTIVE,
+        createdAt: created.createdAt,
+      });
       expect(d.tx.flush).toHaveBeenCalled();
     });
   });
@@ -63,7 +86,10 @@ describe('PracticeSitesService', () => {
 
     it('rejects when the practice is not active', async () => {
       const d = build();
-      d.practicesRepo.findById.mockResolvedValue({ id: 'p1', statusConceptId: 'other' });
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        statusConceptId: 'other',
+      });
       await expect(
         d.service.createSite('p1', { code: 'S-1', name: 'Site' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -71,7 +97,10 @@ describe('PracticeSitesService', () => {
 
     it('rejects a duplicated site code', async () => {
       const d = build();
-      d.practicesRepo.findById.mockResolvedValue({ id: 'p1', statusConceptId: PRAC.PRACTICE_ACTIVE });
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+      });
       d.sitesRepo.findByPracticeAndCode.mockResolvedValue({ id: 'dup' });
       await expect(
         d.service.createSite('p1', { code: 'S-1', name: 'Site' } as any, actor),
@@ -80,7 +109,10 @@ describe('PracticeSitesService', () => {
 
     it('creates a site with PLANNED operational status', async () => {
       const d = build();
-      d.practicesRepo.findById.mockResolvedValue({ id: 'p1', statusConceptId: PRAC.PRACTICE_ACTIVE });
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+      });
       d.sitesRepo.findByPracticeAndCode.mockResolvedValue(null);
       const created = {
         id: 's1',
@@ -92,7 +124,11 @@ describe('PracticeSitesService', () => {
       };
       d.sitesRepo.create.mockReturnValue(created);
 
-      const res = await d.service.createSite('p1', { code: 'S-1', name: 'Site' } as any, actor);
+      const res = await d.service.createSite(
+        'p1',
+        { code: 'S-1', name: 'Site' },
+        actor,
+      );
 
       expect(res.operationalStatus).toBe(PRAC.SITE_OP_PLANNED);
       expect(d.sitesRepo.create).toHaveBeenCalled();
@@ -104,9 +140,9 @@ describe('PracticeSitesService', () => {
     it('throws when the site is not in the practice', async () => {
       const d = build();
       d.sitesRepo.findById.mockResolvedValue({ id: 's1', practiceId: 'other' });
-      await expect(d.service.decommissionSite('p1', 's1', actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.decommissionSite('p1', 's1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('soft-deletes the site and cascades to children', async () => {
@@ -120,9 +156,20 @@ describe('PracticeSitesService', () => {
       };
       d.sitesRepo.findById.mockResolvedValue(site);
       const unit = { statusConceptId: PRAC.UNIT_ACTIVE, updatedAt: new Date() };
-      const space = { statusConceptId: PRAC.SPACE_ACTIVE, operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE, updatedAt: new Date() };
-      const svc = { statusConceptId: PRAC.SERVICE_ACTIVE, updatedAt: new Date() };
-      const role = { statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE, validTo: undefined, updatedAt: new Date() };
+      const space = {
+        statusConceptId: PRAC.SPACE_ACTIVE,
+        operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
+        updatedAt: new Date(),
+      };
+      const svc = {
+        statusConceptId: PRAC.SERVICE_ACTIVE,
+        updatedAt: new Date(),
+      };
+      const role = {
+        statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+        validTo: undefined,
+        updatedAt: new Date(),
+      };
       d.unitsRepo.findBySite.mockResolvedValue([unit]);
       d.spacesRepo.findBySite.mockResolvedValue([space]);
       d.servicesRepo.findBySite.mockResolvedValue([svc]);

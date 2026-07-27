@@ -78,7 +78,12 @@ export class PharmacyController {
     @Body() dto: VerifyLicenseDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
-    return this.pharmaciesService.verifyLicense(pharmacyId, licenseId, dto, actor);
+    return this.pharmaciesService.verifyLicense(
+      pharmacyId,
+      licenseId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-24-02. */
@@ -96,7 +101,9 @@ export class PharmacyController {
   /** UC-24-04. */
   @Post(':pharmacyId/products')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Publicar producto en catálogo con identificadores' })
+  @ApiOperation({
+    summary: 'Publicar producto en catálogo con identificadores',
+  })
   publishProduct(
     @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
     @Body() dto: CreateProductDto,
@@ -120,7 +127,9 @@ export class PharmacyController {
   /** UC-24-05. */
   @Post(':pharmacyId/price-lists')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear lista de precios (pública / por aseguradora)' })
+  @ApiOperation({
+    summary: 'Crear lista de precios (pública / por aseguradora)',
+  })
   createPriceList(
     @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
     @Body() dto: CreatePriceListDto,
@@ -139,7 +148,12 @@ export class PharmacyController {
     @Body() dto: CreatePriceDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PriceResponseDto> {
-    return this.pricingService.versionPrice(pharmacyId, priceListId, dto, actor);
+    return this.pricingService.versionPrice(
+      pharmacyId,
+      priceListId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-24-10. */

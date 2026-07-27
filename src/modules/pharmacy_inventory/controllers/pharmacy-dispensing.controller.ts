@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { MedicationDispensationsService } from '../services';
@@ -20,7 +28,9 @@ export class PharmacyDispensingController {
   @Post(':pharmacyId/dispensations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Dispensar una prescripción a un paciente (UC-25-03)' })
+  @ApiOperation({
+    summary: 'Dispensar una prescripción a un paciente (UC-25-03)',
+  })
   dispense(
     @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
     @Body() dto: CreateDispensationDto,

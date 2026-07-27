@@ -11,15 +11,24 @@ import {
   MinLength,
 } from 'class-validator';
 import { EFFECTS, type Effect } from './create-access-policy.dto';
-import { PERMISSION_SCOPES, type PermissionScope } from './create-permission.dto';
+import {
+  PERMISSION_SCOPES,
+  type PermissionScope,
+} from './create-permission.dto';
 
 /** Cuerpo de `POST /authz/users/{userId}/permission-grants` (UC-06-05). */
 export class CreatePermissionGrantDto {
-  @ApiProperty({ description: 'Permiso concedido/denegado excepcionalmente', format: 'uuid' })
+  @ApiProperty({
+    description: 'Permiso concedido/denegado excepcionalmente',
+    format: 'uuid',
+  })
   @IsUUID()
   permissionId!: string;
 
-  @ApiProperty({ description: 'Efecto (deny individual prevalece sobre allow de rol)', enum: EFFECTS })
+  @ApiProperty({
+    description: 'Efecto (deny individual prevalece sobre allow de rol)',
+    enum: EFFECTS,
+  })
   @IsIn(EFFECTS)
   effect!: Effect;
 
@@ -39,18 +48,29 @@ export class CreatePermissionGrantDto {
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Selector de recursos (JSON)', type: Object })
+  @ApiPropertyOptional({
+    description: 'Selector de recursos (JSON)',
+    type: Object,
+  })
   @IsOptional()
   @IsObject()
   resourceSelectorJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   validFrom?: Date;
 
-  @ApiPropertyOptional({ description: 'Fin de vigencia (acotado)', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Fin de vigencia (acotado)',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()

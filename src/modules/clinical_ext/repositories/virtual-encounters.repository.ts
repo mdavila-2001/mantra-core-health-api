@@ -21,11 +21,17 @@ export class VirtualEncountersRepository {
   }
 
   /** Sesión virtual asociada a un encuentro (constraint 1:1). */
-  findByEncounter(em: EntityManager, encounterId: string): Promise<VirtualEncounters | null> {
+  findByEncounter(
+    em: EntityManager,
+    encounterId: string,
+  ): Promise<VirtualEncounters | null> {
     return em.findOne(VirtualEncounters, { encounterId });
   }
 
-  create(em: EntityManager, data: CreateVirtualEncounterData): VirtualEncounters {
+  create(
+    em: EntityManager,
+    data: CreateVirtualEncounterData,
+  ): VirtualEncounters {
     return em.create(
       VirtualEncounters,
       {

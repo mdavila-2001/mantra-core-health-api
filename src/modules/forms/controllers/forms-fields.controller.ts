@@ -33,7 +33,9 @@ export class FormsFieldsController {
   /** UC-09-02. */
   @Post('field-definitions')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Declarar una definición de campo con reglas de validación' })
+  @ApiOperation({
+    summary: 'Declarar una definición de campo con reglas de validación',
+  })
   createFieldDefinition(
     @Body() dto: CreateFieldDefinitionDto,
     @CurrentUser() actor: AuthenticatedUser,

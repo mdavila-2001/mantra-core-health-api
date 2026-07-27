@@ -27,7 +27,9 @@ describe('ReadModelDefinitionsController', () => {
     const d = build();
     const dto = { schemaName: 's', objectName: 'o' };
     d.service.createDefinition.mockResolvedValue({ id: 'def-1' });
-    await expect(d.controller.createDefinition(dto as any, actor)).resolves.toEqual({ id: 'def-1' });
+    await expect(
+      d.controller.createDefinition(dto as any, actor),
+    ).resolves.toEqual({ id: 'def-1' });
     expect(d.service.createDefinition).toHaveBeenCalledWith(dto, actor);
   });
 
@@ -35,7 +37,12 @@ describe('ReadModelDefinitionsController', () => {
     const d = build();
     const dto = { objectType: 'VIEW' };
     await d.controller.createVersion('read_models', 'crm_v', dto as any, actor);
-    expect(d.service.createVersion).toHaveBeenCalledWith('read_models', 'crm_v', dto, actor);
+    expect(d.service.createVersion).toHaveBeenCalledWith(
+      'read_models',
+      'crm_v',
+      dto,
+      actor,
+    );
   });
 
   it('delegates refresh/backfill/invalidate/reconcile (UC-30-03/04/06/07)', async () => {

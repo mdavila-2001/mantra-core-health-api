@@ -33,19 +33,32 @@ export class PaymentsMadeService {
     this.logger.setContext(PaymentsMadeService.name);
   }
 
-  async execute(dto: ExecutePaymentMadeDto, actor: AuthenticatedUser): Promise<PaymentMadeResponseDto> {
+  async execute(
+    dto: ExecutePaymentMadeDto,
+    actor: AuthenticatedUser,
+  ): Promise<PaymentMadeResponseDto> {
     this.logger.info(
-      { operation: 'billing.payment-made.execute', practiceId: dto.practiceId, actorId: actor.id },
+      {
+        operation: 'billing.payment-made.execute',
+        practiceId: dto.practiceId,
+        actorId: actor.id,
+      },
       'Executing vendor payment',
     );
     return this.em.transactional(async (tx) => {
       const amountCents = toCents(dto.amount);
       if (amountCents <= 0) {
-        throw new PreconditionFailedException('El monto del pago debe ser positivo', { amount: dto.amount });
+        throw new PreconditionFailedException(
+          'El monto del pago debe ser positivo',
+          { amount: dto.amount },
+        );
       }
 
       const allocatedCents = dto.allocations.reduce(
-        (acc, a) => acc + toCents(a.allocatedAmount) + (a.withholdingAmount ? toCents(a.withholdingAmount) : 0),
+        (acc, a) =>
+          acc +
+          toCents(a.allocatedAmount) +
+          (a.withholdingAmount ? toCents(a.withholdingAmount) : 0),
         0,
       );
       if (allocatedCents > amountCents) {
@@ -70,18 +83,28 @@ export class PaymentsMadeService {
       const affected: AllocatedBillDto[] = [];
       for (const alloc of dto.allocations) {
         const bill = await this.billsRepo.findById(tx, alloc.billId);
-        if (!bill) throw new ResourceNotFoundException('Factura de proveedor no encontrada', { billId: alloc.billId });
+        if (!bill)
+          throw new ResourceNotFoundException(
+            'Factura de proveedor no encontrada',
+            { billId: alloc.billId },
+          );
 
         const balanceCents = toCents(bill.balance ?? '0');
         const allocCents = toCents(alloc.allocatedAmount);
         if (balanceCents <= 0) {
-          throw new PreconditionFailedException('La factura de proveedor no tiene saldo', { billId: bill.id });
+          throw new PreconditionFailedException(
+            'La factura de proveedor no tiene saldo',
+            { billId: bill.id },
+          );
         }
         if (allocCents > balanceCents) {
-          throw new PreconditionFailedException('La asignación excede el saldo de la factura de proveedor', {
-            billId: bill.id,
-            balance: bill.balance,
-          });
+          throw new PreconditionFailedException(
+            'La asignación excede el saldo de la factura de proveedor',
+            {
+              billId: bill.id,
+              balance: bill.balance,
+            },
+          );
         }
 
         this.paymentsRepo.createAllocation(tx, {
@@ -95,12 +118,18 @@ export class PaymentsMadeService {
           actorUserId: actor.id,
         });
 
-        const discountCents = alloc.discountAmount ? toCents(alloc.discountAmount) : 0;
+        const discountCents = alloc.discountAmount
+          ? toCents(alloc.discountAmount)
+          : 0;
         const newPaidCents = toCents(bill.paidTotal ?? '0') + allocCents;
-        const newBalanceCents = Math.max(0, balanceCents - allocCents - discountCents);
+        const newBalanceCents = Math.max(
+          0,
+          balanceCents - allocCents - discountCents,
+        );
         bill.paidTotal = fromCents(newPaidCents);
         bill.balance = fromCents(newBalanceCents);
-        bill.statusConceptId = newBalanceCents === 0 ? BILL.BILL_PAID : BILL.BILL_PARTIALLY_PAID;
+        bill.statusConceptId =
+          newBalanceCents === 0 ? BILL.BILL_PAID : BILL.BILL_PARTIALLY_PAID;
         touch(bill, actor.id);
 
         affected.push({
@@ -112,7 +141,11 @@ export class PaymentsMadeService {
       }
 
       this.logger.info(
-        { operation: 'billing.payment-made.execute', paymentId: payment.id, allocations: affected.length },
+        {
+          operation: 'billing.payment-made.execute',
+          paymentId: payment.id,
+          allocations: affected.length,
+        },
         'Vendor payment executed',
       );
       return {

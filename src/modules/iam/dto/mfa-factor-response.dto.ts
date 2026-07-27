@@ -8,7 +8,10 @@ export class MfaFactorResponseDto {
   @ApiProperty({ format: 'uuid' })
   userId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del factor', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del factor',
+    format: 'uuid',
+  })
   state!: string;
 
   @ApiPropertyOptional({ type: String, format: 'date-time' })

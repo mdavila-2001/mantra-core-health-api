@@ -9,12 +9,16 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const categoriesRepo = { findByCode: mockFn(), findById: mockFn(), create: mockFn() };
+  const categoriesRepo = {
+    findByCode: mockFn(),
+    findById: mockFn(),
+    create: mockFn(),
+  };
   const permissionsRepo = { findByCode: mockFn(), create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuthzCatalogService(
     em as any,
-    categoriesRepo as any,
+    categoriesRepo,
     permissionsRepo as any,
     logger as any,
   );
@@ -29,9 +33,16 @@ describe('AuthzCatalogService', () => {
       const created = { id: 'cat-1', createdAt: new Date('2026-01-01') };
       d.categoriesRepo.create.mockReturnValue(created);
 
-      const res = await d.service.createCategory({ code: 'CLINICAL', name: 'Clinical' } as any, actor);
+      const res = await d.service.createCategory(
+        { code: 'CLINICAL', name: 'Clinical' },
+        actor,
+      );
 
-      expect(res).toEqual({ id: 'cat-1', status: 'ACTIVE', createdAt: created.createdAt });
+      expect(res).toEqual({
+        id: 'cat-1',
+        status: 'ACTIVE',
+        createdAt: created.createdAt,
+      });
       expect(d.tx.flush).toHaveBeenCalled();
     });
 
@@ -39,7 +50,10 @@ describe('AuthzCatalogService', () => {
       const d = build();
       d.categoriesRepo.findByCode.mockResolvedValue({ id: 'cat-x' });
       await expect(
-        d.service.createCategory({ code: 'CLINICAL', name: 'Clinical' } as any, actor),
+        d.service.createCategory(
+          { code: 'CLINICAL', name: 'Clinical' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.categoriesRepo.create).not.toHaveBeenCalled();
     });
@@ -53,7 +67,12 @@ describe('AuthzCatalogService', () => {
       d.permissionsRepo.create.mockReturnValue(created);
 
       const res = await d.service.createPermission(
-        { code: 'patient.read', name: 'Read patient', resource: 'patient', action: 'READ' } as any,
+        {
+          code: 'patient.read',
+          name: 'Read patient',
+          resource: 'patient',
+          action: 'READ',
+        } as any,
         actor,
       );
 
@@ -67,7 +86,12 @@ describe('AuthzCatalogService', () => {
       d.permissionsRepo.findByCode.mockResolvedValue({ id: 'p-x' });
       await expect(
         d.service.createPermission(
-          { code: 'patient.read', name: 'x', resource: 'patient', action: 'READ' } as any,
+          {
+            code: 'patient.read',
+            name: 'x',
+            resource: 'patient',
+            action: 'READ',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);

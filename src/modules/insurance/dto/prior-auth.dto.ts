@@ -36,7 +36,10 @@ export class CreatePriorAuthRequestDto {
   @IsUUID()
   patientCoverageId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Entidad prestadora solicitante' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Entidad prestadora solicitante',
+  })
   @IsUUID()
   requestingProviderEntityId!: string;
 
@@ -46,7 +49,10 @@ export class CreatePriorAuthRequestDto {
   @MaxLength(120)
   idempotencyKey?: string;
 
-  @ApiProperty({ type: [PriorAuthItemDto], description: '1..N ítems solicitados' })
+  @ApiProperty({
+    type: [PriorAuthItemDto],
+    description: '1..N ítems solicitados',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

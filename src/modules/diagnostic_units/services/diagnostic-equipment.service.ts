@@ -47,17 +47,27 @@ export class DiagnosticEquipmentService {
     );
     return this.em.transactional(async (tx) => {
       const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site) throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      if (!site)
+        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
       if (site.statusConceptId !== DUNIT.SITE_ACTIVE) {
-        throw new PreconditionFailedException('El sitio no está activo', { siteId });
+        throw new PreconditionFailedException('El sitio no está activo', {
+          siteId,
+        });
       }
 
       if (dto.serialNumber) {
-        const clash = await this.equipmentRepo.findBySerial(tx, site.id, dto.serialNumber);
+        const clash = await this.equipmentRepo.findBySerial(
+          tx,
+          site.id,
+          dto.serialNumber,
+        );
         if (clash) {
-          throw new ConflictException('Ya existe un equipo con ese número de serie en el sitio', {
-            serialNumber: dto.serialNumber,
-          });
+          throw new ConflictException(
+            'Ya existe un equipo con ese número de serie en el sitio',
+            {
+              serialNumber: dto.serialNumber,
+            },
+          );
         }
       }
 
@@ -101,12 +111,16 @@ export class DiagnosticEquipmentService {
     return this.em.transactional(async (tx) => {
       const equipment = await this.equipmentRepo.findById(tx, equipmentId);
       if (!equipment) {
-        throw new ResourceNotFoundException('Equipo no encontrado', { equipmentId });
+        throw new ResourceNotFoundException('Equipo no encontrado', {
+          equipmentId,
+        });
       }
 
-      if (dto.manufacturer !== undefined) equipment.manufacturer = dto.manufacturer;
+      if (dto.manufacturer !== undefined)
+        equipment.manufacturer = dto.manufacturer;
       if (dto.model !== undefined) equipment.model = dto.model;
-      if (dto.lastCalibrationAt !== undefined) equipment.lastCalibrationAt = dto.lastCalibrationAt;
+      if (dto.lastCalibrationAt !== undefined)
+        equipment.lastCalibrationAt = dto.lastCalibrationAt;
       if (dto.nextCalibrationDueAt !== undefined) {
         equipment.nextCalibrationDueAt = dto.nextCalibrationDueAt;
       }

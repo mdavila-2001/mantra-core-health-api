@@ -20,7 +20,10 @@ export interface CreateWebhookSubscriptionData {
 @Injectable()
 export class WebhookSubscriptionsRepository {
   /** Busca una suscripción por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<ContractWebhookSubscriptions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ContractWebhookSubscriptions | null> {
     return em.findOne(ContractWebhookSubscriptions, { id });
   }
 
@@ -51,7 +54,10 @@ export class WebhookSubscriptionsRepository {
   }
 
   /** Crea la entidad de suscripción en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateWebhookSubscriptionData): ContractWebhookSubscriptions {
+  create(
+    em: EntityManager,
+    data: CreateWebhookSubscriptionData,
+  ): ContractWebhookSubscriptions {
     return em.create(
       ContractWebhookSubscriptions,
       {

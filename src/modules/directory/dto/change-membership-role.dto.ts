@@ -7,12 +7,18 @@ import type { AccessScopeCode, TenantRoleCode } from './create-membership.dto';
  * (UC-04-08: cambiar rol / scope de membresía). Debe traer al menos uno de los dos.
  */
 export class ChangeMembershipRoleDto {
-  @ApiPropertyOptional({ description: 'Nuevo rol de tenant', enum: ['OWNER', 'ADMIN', 'STAFF'] })
+  @ApiPropertyOptional({
+    description: 'Nuevo rol de tenant',
+    enum: ['OWNER', 'ADMIN', 'STAFF'],
+  })
   @IsOptional()
   @IsIn(['OWNER', 'ADMIN', 'STAFF'])
   role?: TenantRoleCode;
 
-  @ApiPropertyOptional({ description: 'Nuevo scope de acceso', enum: ['ALL_TENANT', 'BRANCH'] })
+  @ApiPropertyOptional({
+    description: 'Nuevo scope de acceso',
+    enum: ['ALL_TENANT', 'BRANCH'],
+  })
   @IsOptional()
   @IsIn(['ALL_TENANT', 'BRANCH'])
   accessScope?: AccessScopeCode;

@@ -13,7 +13,11 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const rolesRepo = { findByCode: mockFn(), findById: mockFn(), create: mockFn() };
+  const rolesRepo = {
+    findByCode: mockFn(),
+    findById: mockFn(),
+    create: mockFn(),
+  };
   const rolePermsRepo = {
     revokeAllForRole: mockFn().mockResolvedValue(0),
     create: mockFn(),
@@ -23,13 +27,20 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuthzRolesService(
     em as any,
-    rolesRepo as any,
+    rolesRepo,
     rolePermsRepo as any,
     permissionsRepo as any,
     fieldPermsRepo as any,
     logger as any,
   );
-  return { service, tx, rolesRepo, rolePermsRepo, permissionsRepo, fieldPermsRepo };
+  return {
+    service,
+    tx,
+    rolesRepo,
+    rolePermsRepo,
+    permissionsRepo,
+    fieldPermsRepo,
+  };
 }
 
 describe('AuthzRolesService', () => {
@@ -37,8 +48,15 @@ describe('AuthzRolesService', () => {
     it('creates a role when the code is free', async () => {
       const d = build();
       d.rolesRepo.findByCode.mockResolvedValue(null);
-      d.rolesRepo.create.mockReturnValue({ id: 'role-1', code: 'NURSE', createdAt: new Date() });
-      const res = await d.service.createRole({ code: 'NURSE', name: 'Nurse' } as any, actor);
+      d.rolesRepo.create.mockReturnValue({
+        id: 'role-1',
+        code: 'NURSE',
+        createdAt: new Date(),
+      });
+      const res = await d.service.createRole(
+        { code: 'NURSE', name: 'Nurse' },
+        actor,
+      );
       expect(res.id).toBe('role-1');
       expect(res.permissionCount).toBe(0);
     });
@@ -56,7 +74,10 @@ describe('AuthzRolesService', () => {
       d.rolesRepo.findByCode.mockResolvedValue(null);
       d.rolesRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.createRole({ code: 'NURSE', name: 'Nurse', parentRoleId: 'missing' } as any, actor),
+        d.service.createRole(
+          { code: 'NURSE', name: 'Nurse', parentRoleId: 'missing' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -64,14 +85,21 @@ describe('AuthzRolesService', () => {
   describe('setPermissions (UC-06-03)', () => {
     it('replaces bindings after validating permissions exist', async () => {
       const d = build();
-      d.rolesRepo.findById.mockResolvedValue({ id: 'role-1', code: 'NURSE', createdAt: new Date() });
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        code: 'NURSE',
+        createdAt: new Date(),
+      });
       d.permissionsRepo.findById.mockResolvedValue({ id: 'perm-1' });
       const res = await d.service.setPermissions(
         'role-1',
         { permissions: [{ permissionId: 'perm-1', effect: 'ALLOW' }] } as any,
         actor,
       );
-      expect(d.rolePermsRepo.revokeAllForRole).toHaveBeenCalledWith(d.tx, 'role-1');
+      expect(d.rolePermsRepo.revokeAllForRole).toHaveBeenCalledWith(
+        d.tx,
+        'role-1',
+      );
       expect(d.rolePermsRepo.create).toHaveBeenCalledTimes(1);
       expect(res.permissionCount).toBe(1);
     });
@@ -80,16 +108,28 @@ describe('AuthzRolesService', () => {
       const d = build();
       d.rolesRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.setPermissions('missing', { permissions: [{ permissionId: 'p', effect: 'ALLOW' }] } as any, actor),
+        d.service.setPermissions(
+          'missing',
+          { permissions: [{ permissionId: 'p', effect: 'ALLOW' }] } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('throws when a permission does not exist', async () => {
       const d = build();
-      d.rolesRepo.findById.mockResolvedValue({ id: 'role-1', code: 'NURSE', createdAt: new Date() });
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        code: 'NURSE',
+        createdAt: new Date(),
+      });
       d.permissionsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.setPermissions('role-1', { permissions: [{ permissionId: 'nope', effect: 'ALLOW' }] } as any, actor),
+        d.service.setPermissions(
+          'role-1',
+          { permissions: [{ permissionId: 'nope', effect: 'ALLOW' }] } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -101,7 +141,17 @@ describe('AuthzRolesService', () => {
       d.fieldPermsRepo.findOneByKey.mockResolvedValue(null);
       const res = await d.service.setFieldPermissions(
         'role-1',
-        { fields: [{ entity: 'patient', columnName: 'ssn', canRead: true, canWrite: false, maskStrategy: 'REDACT' }] } as any,
+        {
+          fields: [
+            {
+              entity: 'patient',
+              columnName: 'ssn',
+              canRead: true,
+              canWrite: false,
+              maskStrategy: 'REDACT',
+            },
+          ],
+        } as any,
         actor,
       );
       expect(res).toEqual({ ok: true, affected: 1 });
@@ -114,7 +164,16 @@ describe('AuthzRolesService', () => {
       await expect(
         d.service.setFieldPermissions(
           'role-1',
-          { fields: [{ entity: 'patient', columnName: 'ssn', canRead: false, canWrite: true }] } as any,
+          {
+            fields: [
+              {
+                entity: 'patient',
+                columnName: 'ssn',
+                canRead: false,
+                canWrite: true,
+              },
+            ],
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);

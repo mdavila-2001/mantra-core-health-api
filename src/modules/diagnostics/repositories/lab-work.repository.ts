@@ -50,11 +50,17 @@ export interface CreateAnalyzerRunData {
  */
 @Injectable()
 export class LabWorkRepository {
-  findWorkOrder(em: EntityManager, id: string): Promise<LaboratoryWorkOrders | null> {
+  findWorkOrder(
+    em: EntityManager,
+    id: string,
+  ): Promise<LaboratoryWorkOrders | null> {
     return em.findOne(LaboratoryWorkOrders, { id });
   }
 
-  findWorkOrderTest(em: EntityManager, id: string): Promise<LaboratoryWorkOrderTests | null> {
+  findWorkOrderTest(
+    em: EntityManager,
+    id: string,
+  ): Promise<LaboratoryWorkOrderTests | null> {
     return em.findOne(LaboratoryWorkOrderTests, { id });
   }
 
@@ -62,7 +68,10 @@ export class LabWorkRepository {
     return em.findOne(AnalyzerRuns, { id });
   }
 
-  createWorkOrder(em: EntityManager, data: CreateWorkOrderData): LaboratoryWorkOrders {
+  createWorkOrder(
+    em: EntityManager,
+    data: CreateWorkOrderData,
+  ): LaboratoryWorkOrders {
     return em.create(
       LaboratoryWorkOrders,
       {
@@ -78,7 +87,10 @@ export class LabWorkRepository {
     );
   }
 
-  createWorkOrderTest(em: EntityManager, data: CreateWorkOrderTestData): LaboratoryWorkOrderTests {
+  createWorkOrderTest(
+    em: EntityManager,
+    data: CreateWorkOrderTestData,
+  ): LaboratoryWorkOrderTests {
     return em.create(
       LaboratoryWorkOrderTests,
       {
@@ -95,7 +107,10 @@ export class LabWorkRepository {
     );
   }
 
-  createAnalyzerRun(em: EntityManager, data: CreateAnalyzerRunData): AnalyzerRuns {
+  createAnalyzerRun(
+    em: EntityManager,
+    data: CreateAnalyzerRunData,
+  ): AnalyzerRuns {
     return em.create(
       AnalyzerRuns,
       {
@@ -118,7 +133,10 @@ export class LabWorkRepository {
     analyzerRunId: string,
     messageControlId: string,
   ): Promise<AnalyzerResultMessages | null> {
-    return em.findOne(AnalyzerResultMessages, { analyzerRunId, messageControlId });
+    return em.findOne(AnalyzerResultMessages, {
+      analyzerRunId,
+      messageControlId,
+    });
   }
 
   /** Registra un mensaje de resultado (append-only, sin flush). */

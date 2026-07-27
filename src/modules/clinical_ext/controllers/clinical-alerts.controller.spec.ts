@@ -21,7 +21,7 @@ describe('ClinicalAlertsController (UC-18-05)', () => {
   it('delegates override', async () => {
     const d = build();
     const dto = { reason: 'x' };
-    await d.controller.override('a1', dto as any, actor);
+    await d.controller.override('a1', dto, actor);
     expect(d.alertsService.override).toHaveBeenCalledWith('a1', dto, actor);
   });
 });

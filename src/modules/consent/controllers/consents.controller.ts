@@ -33,7 +33,9 @@ export class ConsentsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Capturar consentimiento de directiva de privacidad' })
+  @ApiOperation({
+    summary: 'Capturar consentimiento de directiva de privacidad',
+  })
   capture(
     @Body() dto: CreateConsentDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -45,7 +47,10 @@ export class ConsentsController {
   @Post(':id/withdraw')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Revocar/retirar consentimiento y disparar re-evaluación de accesos' })
+  @ApiOperation({
+    summary:
+      'Revocar/retirar consentimiento y disparar re-evaluación de accesos',
+  })
   withdraw(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: WithdrawConsentDto,
@@ -58,7 +63,9 @@ export class ConsentsController {
   @Patch(':id/provisions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Actualizar provisiones granulares (data class / actor / acción)' })
+  @ApiOperation({
+    summary: 'Actualizar provisiones granulares (data class / actor / acción)',
+  })
   amendProvisions(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AmendProvisionsDto,

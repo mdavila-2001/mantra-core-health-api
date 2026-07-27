@@ -31,7 +31,10 @@ export class DiagnosticEquipmentRepository {
     diagnosticUnitSiteId: string,
     serialNumber: string,
   ): Promise<DiagnosticEquipment | null> {
-    return em.findOne(DiagnosticEquipment, { diagnosticUnitSiteId, serialNumber });
+    return em.findOne(DiagnosticEquipment, {
+      diagnosticUnitSiteId,
+      serialNumber,
+    });
   }
 
   create(em: EntityManager, data: CreateEquipmentData): DiagnosticEquipment {

@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { CodeSystemsService } from '../services';
@@ -33,7 +41,9 @@ export class TerminologyCodeSystemsController {
   @Post(':id/versions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'UC-03-02: crea una versión (borrador) de un sistema de códigos' })
+  @ApiOperation({
+    summary: 'UC-03-02: crea una versión (borrador) de un sistema de códigos',
+  })
   createVersion(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateCodeSystemVersionDto,

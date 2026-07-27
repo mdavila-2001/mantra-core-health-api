@@ -53,7 +53,11 @@ export class AuditLogRepository {
   }
 
   /** Hash de un eslabón: H(previous_hash || contenido || recorded_at). */
-  static hash(previousHash: string | undefined, content: string, recordedAt: Date): string {
+  static hash(
+    previousHash: string | undefined,
+    content: string,
+    recordedAt: Date,
+  ): string {
     return createHash('sha256')
       .update(`${previousHash ?? ''}|${content}|${recordedAt.toISOString()}`)
       .digest('hex');
@@ -82,7 +86,11 @@ export class AuditLogRepository {
     const tip = await this.findChainTip(em, data.tenantId);
     const previousHash = tip?.recordHash;
     const content = AuditLogRepository.content(data);
-    const recordHash = AuditLogRepository.hash(previousHash, content, recordedAt);
+    const recordHash = AuditLogRepository.hash(
+      previousHash,
+      content,
+      recordedAt,
+    );
     return em.create(
       AuditLog,
       {
@@ -105,7 +113,11 @@ export class AuditLogRepository {
   }
 
   /** Cadena ordenada (asc) de una partición para recomputar y cotejar (UC-10-06). */
-  findChain(em: EntityManager, tenantId?: string, limit = 1000): Promise<AuditLog[]> {
+  findChain(
+    em: EntityManager,
+    tenantId?: string,
+    limit = 1000,
+  ): Promise<AuditLog[]> {
     return em.find(
       AuditLog,
       { tenantId: tenantId ?? null },

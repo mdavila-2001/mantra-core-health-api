@@ -28,7 +28,9 @@ export class PatientObjectionsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar objeción del paciente y materializar restricción' })
+  @ApiOperation({
+    summary: 'Registrar objeción del paciente y materializar restricción',
+  })
   raise(
     @Body() dto: CreatePatientObjectionDto,
     @CurrentUser() actor: AuthenticatedUser,

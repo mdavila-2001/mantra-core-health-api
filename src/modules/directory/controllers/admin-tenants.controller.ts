@@ -33,7 +33,9 @@ export class AdminTenantsController {
   @Post()
   @Roles('SUPERADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Aprovisionar un tenant raíz con su membership owner' })
+  @ApiOperation({
+    summary: 'Aprovisionar un tenant raíz con su membership owner',
+  })
   provision(
     @Body() dto: CreateTenantDto,
     @CurrentUser() actor: AuthenticatedUser,

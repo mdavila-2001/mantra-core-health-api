@@ -31,7 +31,10 @@ export interface CreateDefinitionData {
  */
 @Injectable()
 export class ReadModelDefinitionsRepository {
-  findById(em: EntityManager, id: string): Promise<ReadModelDefinitions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ReadModelDefinitions | null> {
     return em.findOne(ReadModelDefinitions, { id });
   }
 
@@ -41,7 +44,11 @@ export class ReadModelDefinitionsRepository {
     objectName: string,
     versionNumber: number,
   ): Promise<ReadModelDefinitions | null> {
-    return em.findOne(ReadModelDefinitions, { schemaName, objectName, versionNumber });
+    return em.findOne(ReadModelDefinitions, {
+      schemaName,
+      objectName,
+      versionNumber,
+    });
   }
 
   /** Todas las versiones de un objeto lógico, de mayor a menor versión. */

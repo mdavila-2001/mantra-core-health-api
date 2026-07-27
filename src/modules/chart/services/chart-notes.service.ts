@@ -58,8 +58,14 @@ export class ChartNotesService {
   }
 
   /** UC-15-01: crea la cabecera y su versión 1 en estado borrador. */
-  async createNote(dto: CreateNoteDto, actor: AuthenticatedUser): Promise<NoteVersionResponseDto> {
-    this.logger.info({ operation: 'chart.note.create', actorId: actor.id }, 'Creating clinical note');
+  async createNote(
+    dto: CreateNoteDto,
+    actor: AuthenticatedUser,
+  ): Promise<NoteVersionResponseDto> {
+    this.logger.info(
+      { operation: 'chart.note.create', actorId: actor.id },
+      'Creating clinical note',
+    );
     return this.em.transactional(async (tx) => {
       const header = this.notesRepo.createHeader(tx, {
         patientProfileId: dto.patientProfileId,
@@ -91,10 +97,18 @@ export class ChartNotesService {
       touch(header, actor.id);
 
       this.logger.info(
-        { operation: 'chart.note.create', noteId: header.id, versionId: version.id },
+        {
+          operation: 'chart.note.create',
+          noteId: header.id,
+          versionId: version.id,
+        },
         'Clinical note drafted',
       );
-      return this.toVersionResponse(header.id, version, header.lifecycleStatusConceptId);
+      return this.toVersionResponse(
+        header.id,
+        version,
+        header.lifecycleStatusConceptId,
+      );
     });
   }
 
@@ -104,10 +118,16 @@ export class ChartNotesService {
     dto: AddVersionDto,
     actor: AuthenticatedUser,
   ): Promise<NoteVersionResponseDto> {
-    this.logger.info({ operation: 'chart.note.addVersion', noteId }, 'Adding note version');
+    this.logger.info(
+      { operation: 'chart.note.addVersion', noteId },
+      'Adding note version',
+    );
     return this.em.transactional(async (tx) => {
       const header = await this.notesRepo.findHeaderById(tx, noteId);
-      if (!header) throw new ResourceNotFoundException('Nota clínica no encontrada', { noteId });
+      if (!header)
+        throw new ResourceNotFoundException('Nota clínica no encontrada', {
+          noteId,
+        });
       if (header.lifecycleStatusConceptId !== CHART.NOTE_LIFECYCLE_DRAFT) {
         throw new PreconditionFailedException(
           'La nota ya no está en borrador; use una enmienda (UC-15-05)',
@@ -133,7 +153,11 @@ export class ChartNotesService {
 
       header.currentVersionId = version.id;
       touch(header, actor.id);
-      return this.toVersionResponse(noteId, version, header.lifecycleStatusConceptId);
+      return this.toVersionResponse(
+        noteId,
+        version,
+        header.lifecycleStatusConceptId,
+      );
     });
   }
 
@@ -144,11 +168,21 @@ export class ChartNotesService {
     dto: SignVersionDto,
     actor: AuthenticatedUser,
   ): Promise<NoteVersionResponseDto> {
-    this.logger.info({ operation: 'chart.note.sign', noteId, versionId }, 'Signing note version');
+    this.logger.info(
+      { operation: 'chart.note.sign', noteId, versionId },
+      'Signing note version',
+    );
     return this.em.transactional(async (tx) => {
-      const { header, version } = await this.loadNoteAndVersion(tx, noteId, versionId);
+      const { header, version } = await this.loadNoteAndVersion(
+        tx,
+        noteId,
+        versionId,
+      );
       if (version.statusConceptId !== CHART.VERSION_DRAFT) {
-        throw new PreconditionFailedException('La versión no está en borrador', { versionId });
+        throw new PreconditionFailedException(
+          'La versión no está en borrador',
+          { versionId },
+        );
       }
 
       const hash = this.contentHash(version);
@@ -169,7 +203,11 @@ export class ChartNotesService {
 
       header.lifecycleStatusConceptId = CHART.NOTE_LIFECYCLE_SIGNED;
       touch(header, actor.id);
-      return this.toVersionResponse(noteId, version, header.lifecycleStatusConceptId);
+      return this.toVersionResponse(
+        noteId,
+        version,
+        header.lifecycleStatusConceptId,
+      );
     });
   }
 
@@ -180,11 +218,21 @@ export class ChartNotesService {
     dto: CosignVersionDto,
     actor: AuthenticatedUser,
   ): Promise<NoteVersionResponseDto> {
-    this.logger.info({ operation: 'chart.note.cosign', noteId, versionId }, 'Cosigning note version');
+    this.logger.info(
+      { operation: 'chart.note.cosign', noteId, versionId },
+      'Cosigning note version',
+    );
     return this.em.transactional(async (tx) => {
-      const { header, version } = await this.loadNoteAndVersion(tx, noteId, versionId);
+      const { header, version } = await this.loadNoteAndVersion(
+        tx,
+        noteId,
+        versionId,
+      );
       if (version.statusConceptId !== CHART.VERSION_SIGNED) {
-        throw new PreconditionFailedException('La versión no está firmada (SIGNED)', { versionId });
+        throw new PreconditionFailedException(
+          'La versión no está firmada (SIGNED)',
+          { versionId },
+        );
       }
 
       const signatures = await this.notesRepo.findSignatures(tx, versionId);
@@ -192,7 +240,10 @@ export class ChartNotesService {
         (s) => s.signatureTypeConceptId === CHART.SIGNATURE_AUTHOR,
       );
       if (!hasAuthor) {
-        throw new PreconditionFailedException('Falta la firma primaria del autor', { versionId });
+        throw new PreconditionFailedException(
+          'Falta la firma primaria del autor',
+          { versionId },
+        );
       }
       const alreadyCosigned = signatures.some(
         (s) =>
@@ -218,7 +269,11 @@ export class ChartNotesService {
       version.statusConceptId = CHART.VERSION_COSIGNED;
       version.releaseEligibilityConceptId = CHART.ELIGIBILITY_ELIGIBLE;
       touch(header, actor.id);
-      return this.toVersionResponse(noteId, version, header.lifecycleStatusConceptId);
+      return this.toVersionResponse(
+        noteId,
+        version,
+        header.lifecycleStatusConceptId,
+      );
     });
   }
 
@@ -228,10 +283,16 @@ export class ChartNotesService {
     dto: AmendNoteDto,
     actor: AuthenticatedUser,
   ): Promise<NoteVersionResponseDto> {
-    this.logger.info({ operation: 'chart.note.amend', noteId }, 'Amending clinical note');
+    this.logger.info(
+      { operation: 'chart.note.amend', noteId },
+      'Amending clinical note',
+    );
     return this.em.transactional(async (tx) => {
       const header = await this.notesRepo.findHeaderById(tx, noteId);
-      if (!header) throw new ResourceNotFoundException('Nota clínica no encontrada', { noteId });
+      if (!header)
+        throw new ResourceNotFoundException('Nota clínica no encontrada', {
+          noteId,
+        });
       if (header.lifecycleStatusConceptId === CHART.NOTE_LIFECYCLE_DRAFT) {
         throw new PreconditionFailedException(
           'La nota no está firmada; edítela como borrador (UC-15-02)',
@@ -250,7 +311,8 @@ export class ChartNotesService {
         assessmentText: dto.assessmentText,
         planText: dto.planText,
         supersedesVersionId: header.currentVersionId,
-        amendmentReasonConceptId: dto.amendmentReasonConceptId ?? CHART.AMENDMENT_REASON_CORRECTION,
+        amendmentReasonConceptId:
+          dto.amendmentReasonConceptId ?? CHART.AMENDMENT_REASON_CORRECTION,
         amendmentReasonText: dto.amendmentReasonText,
         recordedByUserId: actor.id,
       });
@@ -259,7 +321,11 @@ export class ChartNotesService {
       header.currentVersionId = version.id;
       header.lifecycleStatusConceptId = CHART.NOTE_LIFECYCLE_AMENDED;
       touch(header, actor.id);
-      return this.toVersionResponse(noteId, version, header.lifecycleStatusConceptId);
+      return this.toVersionResponse(
+        noteId,
+        version,
+        header.lifecycleStatusConceptId,
+      );
     });
   }
 
@@ -269,24 +335,41 @@ export class ChartNotesService {
     dto: ReleaseVersionDto,
     actor: AuthenticatedUser,
   ): Promise<ReleaseResultDto> {
-    this.logger.info({ operation: 'chart.note.release', versionId }, 'Releasing note version');
+    this.logger.info(
+      { operation: 'chart.note.release', versionId },
+      'Releasing note version',
+    );
     return this.em.transactional(async (tx) => {
       const version = await this.notesRepo.findVersionById(tx, versionId);
-      if (!version) throw new ResourceNotFoundException('Versión de nota no encontrada', { versionId });
+      if (!version)
+        throw new ResourceNotFoundException('Versión de nota no encontrada', {
+          versionId,
+        });
       const signed =
         version.statusConceptId === CHART.VERSION_SIGNED ||
         version.statusConceptId === CHART.VERSION_COSIGNED;
       if (!signed) {
-        throw new PreconditionFailedException('La versión no está firmada', { versionId });
-      }
-      if (version.releaseEligibilityConceptId !== CHART.ELIGIBILITY_ELIGIBLE) {
-        throw new PreconditionFailedException('La versión no es elegible para liberación', {
+        throw new PreconditionFailedException('La versión no está firmada', {
           versionId,
         });
       }
+      if (version.releaseEligibilityConceptId !== CHART.ELIGIBILITY_ELIGIBLE) {
+        throw new PreconditionFailedException(
+          'La versión no es elegible para liberación',
+          {
+            versionId,
+          },
+        );
+      }
 
-      const header = await this.notesRepo.findHeaderById(tx, version.clinicalNoteId);
-      if (!header) throw new ResourceNotFoundException('Nota clínica no encontrada', { versionId });
+      const header = await this.notesRepo.findHeaderById(
+        tx,
+        version.clinicalNoteId,
+      );
+      if (!header)
+        throw new ResourceNotFoundException('Nota clínica no encontrada', {
+          versionId,
+        });
 
       const event = this.notesRepo.createReleaseEvent(tx, {
         clinicalNoteVersionId: versionId,
@@ -315,12 +398,24 @@ export class ChartNotesService {
     dto: WithholdVersionDto,
     actor: AuthenticatedUser,
   ): Promise<ReleaseResultDto> {
-    this.logger.info({ operation: 'chart.note.withhold', versionId }, 'Withholding note version');
+    this.logger.info(
+      { operation: 'chart.note.withhold', versionId },
+      'Withholding note version',
+    );
     return this.em.transactional(async (tx) => {
       const version = await this.notesRepo.findVersionById(tx, versionId);
-      if (!version) throw new ResourceNotFoundException('Versión de nota no encontrada', { versionId });
-      const header = await this.notesRepo.findHeaderById(tx, version.clinicalNoteId);
-      if (!header) throw new ResourceNotFoundException('Nota clínica no encontrada', { versionId });
+      if (!version)
+        throw new ResourceNotFoundException('Versión de nota no encontrada', {
+          versionId,
+        });
+      const header = await this.notesRepo.findHeaderById(
+        tx,
+        version.clinicalNoteId,
+      );
+      if (!header)
+        throw new ResourceNotFoundException('Nota clínica no encontrada', {
+          versionId,
+        });
 
       const event = this.notesRepo.createReleaseEvent(tx, {
         clinicalNoteVersionId: versionId,
@@ -353,12 +448,19 @@ export class ChartNotesService {
     actor: AuthenticatedUser,
   ): Promise<ExamFindingsResultDto> {
     this.logger.info(
-      { operation: 'chart.note.examFindings', versionId, count: dto.findings.length },
+      {
+        operation: 'chart.note.examFindings',
+        versionId,
+        count: dto.findings.length,
+      },
       'Recording exam findings',
     );
     return this.em.transactional(async (tx) => {
       const version = await this.notesRepo.findVersionById(tx, versionId);
-      if (!version) throw new ResourceNotFoundException('Versión de nota no encontrada', { versionId });
+      if (!version)
+        throw new ResourceNotFoundException('Versión de nota no encontrada', {
+          versionId,
+        });
       if (version.statusConceptId !== CHART.VERSION_DRAFT) {
         throw new PreconditionFailedException(
           'La versión ya está firmada; los hallazgos quedan sellados',
@@ -369,7 +471,8 @@ export class ChartNotesService {
       for (const f of dto.findings) {
         this.notesRepo.createExamFinding(tx, {
           clinicalNoteVersionId: versionId,
-          bodySystemConceptId: f.bodySystemConceptId ?? CHART.EXAM_BODY_SYSTEM_GENERAL,
+          bodySystemConceptId:
+            f.bodySystemConceptId ?? CHART.EXAM_BODY_SYSTEM_GENERAL,
           findingConceptId: f.findingConceptId,
           isNormal: f.isNormal,
           findingText: f.findingText,
@@ -385,13 +488,23 @@ export class ChartNotesService {
   }
 
   /** Carga versión y cabecera comprobando que la versión pertenece a la nota. */
-  private async loadNoteAndVersion(tx: EntityManager, noteId: string, versionId: string) {
+  private async loadNoteAndVersion(
+    tx: EntityManager,
+    noteId: string,
+    versionId: string,
+  ) {
     const version = await this.notesRepo.findVersionById(tx, versionId);
     if (!version || version.clinicalNoteId !== noteId) {
-      throw new ResourceNotFoundException('Versión de nota no encontrada', { noteId, versionId });
+      throw new ResourceNotFoundException('Versión de nota no encontrada', {
+        noteId,
+        versionId,
+      });
     }
     const header = await this.notesRepo.findHeaderById(tx, noteId);
-    if (!header) throw new ResourceNotFoundException('Nota clínica no encontrada', { noteId });
+    if (!header)
+      throw new ResourceNotFoundException('Nota clínica no encontrada', {
+        noteId,
+      });
     return { header, version };
   }
 

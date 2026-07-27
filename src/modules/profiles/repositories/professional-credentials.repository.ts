@@ -17,11 +17,17 @@ export interface CreateCredentialData {
 /** Acceso a datos de `profiles.professional_credentials`. */
 @Injectable()
 export class ProfessionalCredentialsRepository {
-  findById(em: EntityManager, id: string): Promise<ProfessionalCredentials | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ProfessionalCredentials | null> {
     return em.findOne(ProfessionalCredentials, { id });
   }
 
-  create(em: EntityManager, data: CreateCredentialData): ProfessionalCredentials {
+  create(
+    em: EntityManager,
+    data: CreateCredentialData,
+  ): ProfessionalCredentials {
     return em.create(
       ProfessionalCredentials,
       {

@@ -17,27 +17,46 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const personsRepo = { findById: mockFn(), create: mockFn() };
   const personProfilesRepo = { findById: mockFn(), create: mockFn() };
-  const practitionersRepo = { findById: mockFn(), findByCode: mockFn(), create: mockFn() };
+  const practitionersRepo = {
+    findById: mockFn(),
+    findByCode: mockFn(),
+    create: mockFn(),
+  };
   const authorizationsRepo = { create: mockFn() };
-  const credentialsRepo = { findById: mockFn(), create: mockFn(), countInStateExcept: mockFn().mockResolvedValue(0) };
-  const specialtiesRepo = { create: mockFn(), findActive: mockFn(), demotePrimary: mockFn().mockResolvedValue(0) };
+  const credentialsRepo = {
+    findById: mockFn(),
+    create: mockFn(),
+    countInStateExcept: mockFn().mockResolvedValue(0),
+  };
+  const specialtiesRepo = {
+    create: mockFn(),
+    findActive: mockFn(),
+    demotePrimary: mockFn().mockResolvedValue(0),
+  };
   const languagesRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesPractitionersService(
     em as any,
-    personsRepo as any,
+    personsRepo,
     personProfilesRepo as any,
-    practitionersRepo as any,
-    authorizationsRepo as any,
-    credentialsRepo as any,
-    specialtiesRepo as any,
-    languagesRepo as any,
+    practitionersRepo,
+    authorizationsRepo,
+    credentialsRepo,
+    specialtiesRepo,
+    languagesRepo,
     logger as any,
   );
   return {
-    service, tx, personsRepo, personProfilesRepo, practitionersRepo, authorizationsRepo,
-    credentialsRepo, specialtiesRepo, languagesRepo,
+    service,
+    tx,
+    personsRepo,
+    personProfilesRepo,
+    practitionersRepo,
+    authorizationsRepo,
+    credentialsRepo,
+    specialtiesRepo,
+    languagesRepo,
   };
 }
 
@@ -49,19 +68,30 @@ describe('ProfilesPractitionersService', () => {
       d.personsRepo.create.mockReturnValue({ id: 'per-1' });
       d.personProfilesRepo.create.mockReturnValue({ id: 'pp1' });
       d.practitionersRepo.create.mockReturnValue({
-        profileId: 'pp1', practitionerCode: 'HP-1',
+        profileId: 'pp1',
+        practitionerCode: 'HP-1',
         verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
-        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING, createdAt: new Date(),
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
       });
       d.authorizationsRepo.create.mockReturnValue({ id: 'lic-1' });
       d.credentialsRepo.create.mockReturnValue({ id: 'cred-1' });
 
       const res = await d.service.onboardPractitioner(
-        { practitionerCode: 'HP-1', licenseNumber: 'L1', credentialNumber: 'C1' } as any,
+        {
+          practitionerCode: 'HP-1',
+          licenseNumber: 'L1',
+          credentialNumber: 'C1',
+        },
         actor,
       );
 
-      expect(res).toMatchObject({ profileId: 'pp1', personId: 'per-1', licenseId: 'lic-1', credentialId: 'cred-1' });
+      expect(res).toMatchObject({
+        profileId: 'pp1',
+        personId: 'per-1',
+        licenseId: 'lic-1',
+        credentialId: 'cred-1',
+      });
       expect(d.languagesRepo.create).toHaveBeenCalled();
     });
 
@@ -70,7 +100,11 @@ describe('ProfilesPractitionersService', () => {
       d.practitionersRepo.findByCode.mockResolvedValue({ profileId: 'x' });
       await expect(
         d.service.onboardPractitioner(
-          { practitionerCode: 'HP-1', licenseNumber: 'L1', credentialNumber: 'C1' } as any,
+          {
+            practitionerCode: 'HP-1',
+            licenseNumber: 'L1',
+            credentialNumber: 'C1',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -82,7 +116,11 @@ describe('ProfilesPractitionersService', () => {
       const d = build();
       d.practitionersRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.addJurisdictionAuthorization('missing', { licenseNumber: 'L2' } as any, actor),
+        d.service.addJurisdictionAuthorization(
+          'missing',
+          { licenseNumber: 'L2' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -90,26 +128,42 @@ describe('ProfilesPractitionersService', () => {
   describe('verifyCredential (UC-05-05)', () => {
     it('rejects verifying a credential that is not pending (precondition)', async () => {
       const d = build();
-      d.credentialsRepo.findById.mockResolvedValue({ id: 'c1', stateConceptId: PROF.CRED_VERIFIED });
+      d.credentialsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        stateConceptId: PROF.CRED_VERIFIED,
+      });
       await expect(
-        d.service.verifyCredential('c1', { decision: 'VERIFIED' } as any, actor),
+        d.service.verifyCredential(
+          'c1',
+          { decision: 'VERIFIED' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('verifies the credential and activates the practitioner when none remain pending', async () => {
       const d = build();
       const credential = {
-        id: 'c1', stateConceptId: PROF.CRED_PENDING, practitionerProfileId: 'pp1', updatedAt: new Date(),
+        id: 'c1',
+        stateConceptId: PROF.CRED_PENDING,
+        practitionerProfileId: 'pp1',
+        updatedAt: new Date(),
       };
       d.credentialsRepo.findById.mockResolvedValue(credential);
       d.credentialsRepo.countInStateExcept.mockResolvedValue(0);
       const practitioner = { profileId: 'pp1', updatedAt: new Date() } as any;
       d.practitionersRepo.findById.mockResolvedValue(practitioner);
 
-      const res = await d.service.verifyCredential('c1', { decision: 'VERIFIED' } as any, actor);
+      const res = await d.service.verifyCredential(
+        'c1',
+        { decision: 'VERIFIED' } as any,
+        actor,
+      );
 
       expect(credential.stateConceptId).toBe(PROF.CRED_VERIFIED);
-      expect(practitioner.verificationStatusConceptId).toBe(PROF.PRACT_VERIF_VERIFIED);
+      expect(practitioner.verificationStatusConceptId).toBe(
+        PROF.PRACT_VERIF_VERIFIED,
+      );
       expect(res).toMatchObject({ id: 'c1', practitionerVerified: true });
     });
   });
@@ -119,10 +173,16 @@ describe('ProfilesPractitionersService', () => {
       const d = build();
       d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
       d.credentialsRepo.findById.mockResolvedValue({
-        id: 'c1', practitionerProfileId: 'pp1', stateConceptId: PROF.CRED_PENDING,
+        id: 'c1',
+        practitionerProfileId: 'pp1',
+        stateConceptId: PROF.CRED_PENDING,
       });
       await expect(
-        d.service.addSpecialty('pp1', { supportingCredentialId: 'c1' } as any, actor),
+        d.service.addSpecialty(
+          'pp1',
+          { supportingCredentialId: 'c1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -140,11 +200,22 @@ describe('ProfilesPractitionersService', () => {
       d.practitionersRepo.findById.mockResolvedValue({ profileId: 'pp1' });
       d.specialtiesRepo.findActive.mockResolvedValue(null);
       d.specialtiesRepo.create.mockReturnValue({
-        id: 's2', specialtyConceptId: PROF.SPECIALTY_GENERAL, isPrimary: true,
-        verificationStatusConceptId: PROF.SPEC_VERIF_PENDING, createdAt: new Date(),
+        id: 's2',
+        specialtyConceptId: PROF.SPECIALTY_GENERAL,
+        isPrimary: true,
+        verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+        createdAt: new Date(),
       });
-      const res = await d.service.addSpecialty('pp1', { isPrimary: true } as any, actor);
-      expect(d.specialtiesRepo.demotePrimary).toHaveBeenCalledWith(d.tx, 'pp1', expect.any(Date));
+      const res = await d.service.addSpecialty(
+        'pp1',
+        { isPrimary: true },
+        actor,
+      );
+      expect(d.specialtiesRepo.demotePrimary).toHaveBeenCalledWith(
+        d.tx,
+        'pp1',
+        expect.any(Date),
+      );
       expect(res).toMatchObject({ id: 's2', isPrimary: true });
     });
   });

@@ -14,7 +14,10 @@ export type MovementDirection = 'IN' | 'OUT' | 'ADJUST';
 
 /** Cuerpo de `POST /inventory-items/{itemId}/movements` (UC-14-11). */
 export class CreateMovementDto {
-  @ApiProperty({ description: 'Sentido del movimiento', enum: ['IN', 'OUT', 'ADJUST'] })
+  @ApiProperty({
+    description: 'Sentido del movimiento',
+    enum: ['IN', 'OUT', 'ADJUST'],
+  })
   @IsIn(['IN', 'OUT', 'ADJUST'])
   direction!: MovementDirection;
 
@@ -22,13 +25,19 @@ export class CreateMovementDto {
   @IsPositive()
   quantity!: number;
 
-  @ApiPropertyOptional({ description: 'Tipo de recurso relacionado', maxLength: 100 })
+  @ApiPropertyOptional({
+    description: 'Tipo de recurso relacionado',
+    maxLength: 100,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   relatedResourceType?: string;
 
-  @ApiPropertyOptional({ description: 'Id del recurso relacionado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Id del recurso relacionado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   relatedResourceId?: string;

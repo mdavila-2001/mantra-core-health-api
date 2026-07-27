@@ -24,7 +24,10 @@ export class CreateDraftDto {
   @MaxLength(100)
   tableName!: string;
 
-  @ApiPropertyOptional({ description: 'Registro destino a actualizar (si aplica)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Registro destino a actualizar (si aplica)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   targetRecordId?: string;
@@ -53,7 +56,10 @@ export class CreateDraftDto {
 
 /** Cuerpo de `POST /admin/governance/drafts/{id}/publish` (UC-11-15). */
 export class PublishDraftDto {
-  @ApiProperty({ description: 'Referencia idempotente de la publicación', maxLength: 200 })
+  @ApiProperty({
+    description: 'Referencia idempotente de la publicación',
+    maxLength: 200,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
@@ -68,6 +74,9 @@ export class DraftResponseDto {
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Id del registro materializado al publicar', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Id del registro materializado al publicar',
+    format: 'uuid',
+  })
   publishedRecordId?: string;
 }

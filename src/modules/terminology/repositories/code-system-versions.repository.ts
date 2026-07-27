@@ -34,14 +34,41 @@ export class CodeSystemVersionsRepository {
     return em.findOne(CodeSystemVersions, { codeSystemId, version });
   }
 
+  /**
+   * Versión vigente de un sistema de códigos: la marcada por defecto y activa.
+   *
+   * Tanto `$lookup` (UC-03-11) como la expansión de un value set (UC-03-08)
+   * resuelven códigos contra "la versión del sistema", y esa es por definición la
+   * `is_default` publicada. Sin este filtro se resolverían códigos contra
+   * borradores todavía no sellados.
+   */
+  findDefaultActiveVersion(
+    em: EntityManager,
+    codeSystemId: string,
+    activeStateConceptId: string,
+  ): Promise<CodeSystemVersions | null> {
+    return em.findOne(CodeSystemVersions, {
+      codeSystemId,
+      isDefault: true,
+      stateConceptId: activeStateConceptId,
+    });
+  }
+
   /** Crea la versión en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateCodeSystemVersionData): CodeSystemVersions {
-    return em.create(CodeSystemVersions, {
-      codeSystemId: data.codeSystemId,
-      version: data.version,
-      isDefault: data.isDefault,
-      stateConceptId: data.stateConceptId,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+  create(
+    em: EntityManager,
+    data: CreateCodeSystemVersionData,
+  ): CodeSystemVersions {
+    return em.create(
+      CodeSystemVersions,
+      {
+        codeSystemId: data.codeSystemId,
+        version: data.version,
+        isDefault: data.isDefault,
+        stateConceptId: data.stateConceptId,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 }

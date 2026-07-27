@@ -33,18 +33,27 @@ export class EncountersService {
   }
 
   /** UC-08-02: abre (check-in) un encuentro con participantes y ubicación. */
-  async checkIn(dto: CheckInEncounterDto, actor: AuthenticatedUser): Promise<EncounterResponseDto> {
+  async checkIn(
+    dto: CheckInEncounterDto,
+    actor: AuthenticatedUser,
+  ): Promise<EncounterResponseDto> {
     this.logger.info(
-      { operation: 'clinical.encounter.check-in', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.encounter.check-in',
+        patientProfileId: dto.patientProfileId,
+      },
       'Opening encounter',
     );
     return this.em.transactional(async (tx) => {
       if (dto.episodeId) {
         const episode = await this.episodesRepo.findById(tx, dto.episodeId);
         if (!episode) {
-          throw new ResourceNotFoundException('Episodio de cuidado no encontrado', {
-            episodeId: dto.episodeId,
-          });
+          throw new ResourceNotFoundException(
+            'Episodio de cuidado no encontrado',
+            {
+              episodeId: dto.episodeId,
+            },
+          );
         }
       }
 
@@ -71,7 +80,8 @@ export class EncountersService {
         const participant = this.encountersRepo.createParticipant(tx, {
           encounterId: encounter.id,
           practitionerProfileId: p.practitionerProfileId,
-          participantRoleConceptId: p.roleConceptId ?? CLIN.PARTICIPANT_ROLE_ATTENDER,
+          participantRoleConceptId:
+            p.roleConceptId ?? CLIN.PARTICIPANT_ROLE_ATTENDER,
           statusConceptId: CLIN.PARTICIPANT_ACTIVE,
           isResponsible: p.isResponsible ?? false,
           periodStart: now,
@@ -126,7 +136,9 @@ export class EncountersService {
     return this.em.transactional(async (tx) => {
       const encounter = await this.encountersRepo.findById(tx, encounterId);
       if (!encounter) {
-        throw new ResourceNotFoundException('Encuentro no encontrado', { encounterId });
+        throw new ResourceNotFoundException('Encuentro no encontrado', {
+          encounterId,
+        });
       }
       if (encounter.statusConceptId !== CLIN.ENCOUNTER_IN_PROGRESS) {
         throw new PreconditionFailedException('El encuentro no está en curso', {
@@ -134,11 +146,17 @@ export class EncountersService {
           status: encounter.statusConceptId,
         });
       }
-      if (dto.expectedRowVersion !== undefined && dto.expectedRowVersion !== encounter.rowVersion) {
-        throw new ConcurrencyConflictException('Versión del encuentro desactualizada', {
-          expected: dto.expectedRowVersion,
-          actual: encounter.rowVersion,
-        });
+      if (
+        dto.expectedRowVersion !== undefined &&
+        dto.expectedRowVersion !== encounter.rowVersion
+      ) {
+        throw new ConcurrencyConflictException(
+          'Versión del encuentro desactualizada',
+          {
+            expected: dto.expectedRowVersion,
+            actual: encounter.rowVersion,
+          },
+        );
       }
 
       const now = new Date();

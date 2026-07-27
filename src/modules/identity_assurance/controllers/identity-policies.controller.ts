@@ -14,7 +14,9 @@ export class IdentityPoliciesController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear una política de verificación de identidad (IAL/AAL)' })
+  @ApiOperation({
+    summary: 'Crear una política de verificación de identidad (IAL/AAL)',
+  })
   create(
     @Body() dto: CreatePolicyDto,
     @CurrentUser() actor: AuthenticatedUser,

@@ -10,7 +10,10 @@ import { IdentifierType, IdentifierUse, OwnerType } from './enums';
 
 /** Cuerpo de `POST /common/identifiers`. */
 export class CreateIdentifierDto {
-  @ApiProperty({ enum: OwnerType, description: 'Tipo de propietario polimórfico.' })
+  @ApiProperty({
+    enum: OwnerType,
+    description: 'Tipo de propietario polimórfico.',
+  })
   @IsEnum(OwnerType)
   ownerType!: OwnerType;
 

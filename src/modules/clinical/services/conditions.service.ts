@@ -18,9 +18,15 @@ export class ConditionsService {
   }
 
   /** UC-08-08: registra una condición evitando duplicados activos por código. */
-  async create(dto: CreateConditionDto, actor: AuthenticatedUser): Promise<ConditionResponseDto> {
+  async create(
+    dto: CreateConditionDto,
+    actor: AuthenticatedUser,
+  ): Promise<ConditionResponseDto> {
     this.logger.info(
-      { operation: 'clinical.condition.create', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.condition.create',
+        patientProfileId: dto.patientProfileId,
+      },
       'Recording condition',
     );
     return this.em.transactional(async (tx) => {
@@ -32,10 +38,13 @@ export class ConditionsService {
         CLIN.CONDITION_ACTIVE,
       );
       if (existing) {
-        throw new ConflictException('El paciente ya tiene esa condición activa', {
-          patientProfileId: dto.patientProfileId,
-          codeConceptId: dto.codeConceptId,
-        });
+        throw new ConflictException(
+          'El paciente ya tiene esa condición activa',
+          {
+            patientProfileId: dto.patientProfileId,
+            codeConceptId: dto.codeConceptId,
+          },
+        );
       }
 
       const condition = this.conditionsRepo.create(tx, {

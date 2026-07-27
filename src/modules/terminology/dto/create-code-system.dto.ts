@@ -7,13 +7,19 @@ import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
  * reutiliza.
  */
 export class CreateCodeSystemDto {
-  @ApiProperty({ description: 'Código interno único del sistema de códigos', maxLength: 255 })
+  @ApiProperty({
+    description: 'Código interno único del sistema de códigos',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
   internalCode!: string;
 
-  @ApiProperty({ description: 'Nombre legible del sistema de códigos', maxLength: 255 })
+  @ApiProperty({
+    description: 'Nombre legible del sistema de códigos',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
@@ -24,13 +30,19 @@ export class CreateCodeSystemDto {
   @IsNotEmpty()
   canonicalUrl!: string;
 
-  @ApiProperty({ description: 'Código de negocio de la fuente que publica el sistema', maxLength: 255 })
+  @ApiProperty({
+    description: 'Código de negocio de la fuente que publica el sistema',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
   sourceCode!: string;
 
-  @ApiProperty({ description: 'Nombre de la fuente que publica el sistema', maxLength: 255 })
+  @ApiProperty({
+    description: 'Nombre de la fuente que publica el sistema',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)

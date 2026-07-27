@@ -15,15 +15,19 @@ export class UpdateOrgUserAssignmentDto {
 
   @ApiPropertyOptional({ description: 'Nuevo alcance de acceso', enum: SCOPES })
   @IsOptional()
-  @IsIn(SCOPES as unknown as string[])
+  @IsIn(SCOPES)
   accessScope?: (typeof SCOPES)[number];
 
-  @ApiPropertyOptional({ description: 'Suspender la asignación (cascada a delegaciones)' })
+  @ApiPropertyOptional({
+    description: 'Suspender la asignación (cascada a delegaciones)',
+  })
   @IsOptional()
   @IsBoolean()
   suspend?: boolean;
 
-  @ApiPropertyOptional({ description: 'row_version esperado (concurrencia optimista)' })
+  @ApiPropertyOptional({
+    description: 'row_version esperado (concurrencia optimista)',
+  })
   @IsOptional()
   @IsInt()
   expectedRowVersion?: number;

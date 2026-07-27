@@ -2,7 +2,10 @@ import { jest } from '@jest/globals';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { MedicationsService } from './medications.service';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -15,7 +18,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new MedicationsService(
     em as any,
-    requestsRepo as any,
+    requestsRepo,
     recordsRepo as any,
     logger as any,
   );
@@ -33,7 +36,11 @@ describe('MedicationsService', () => {
         createdAt: new Date(),
       });
       const res = await d.service.prescribe(
-        { custodianTenantId: 't1', patientProfileId: 'p1', medicationConceptId: 'm1' } as any,
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          medicationConceptId: 'm1',
+        },
         actor,
       );
       expect(res.status).toBe(CLIN.MEDICATION_REQUEST_ACTIVE);
@@ -64,7 +71,7 @@ describe('MedicationsService', () => {
           medicationConceptId: 'm1',
           requestId: 'mr1',
           isFinalDose: true,
-        } as any,
+        },
         actor,
       );
 

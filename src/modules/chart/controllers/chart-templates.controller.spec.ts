@@ -10,7 +10,11 @@ describe('ChartTemplatesController', () => {
     const templatesService = { assignTemplate: mockFn() };
     const controller = new ChartTemplatesController(templatesService as any);
     const dto = { practiceId: 'pr1', isDefault: true };
-    await controller.assignTemplate('t1', dto as any, actor);
-    expect(templatesService.assignTemplate).toHaveBeenCalledWith('t1', dto, actor);
+    await controller.assignTemplate('t1', dto, actor);
+    expect(templatesService.assignTemplate).toHaveBeenCalledWith(
+      't1',
+      dto,
+      actor,
+    );
   });
 });

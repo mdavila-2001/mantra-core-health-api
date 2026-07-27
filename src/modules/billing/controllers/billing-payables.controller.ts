@@ -26,7 +26,9 @@ export class BillingPayablesController {
   @Post('bills')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar factura de proveedor con three-way match' })
+  @ApiOperation({
+    summary: 'Registrar factura de proveedor con three-way match',
+  })
   registerBill(
     @Body() dto: RegisterBillDto,
     @CurrentUser() actor: AuthenticatedUser,

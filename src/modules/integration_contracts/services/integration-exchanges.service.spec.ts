@@ -17,7 +17,11 @@ function build() {
   const contractsRepo = { findById: mockFn() };
   const versionsRepo = { findActiveByContract: mockFn(), findById: mockFn() };
   const recordsRepo = { findById: mockFn(), create: mockFn() };
-  const attemptsRepo = { maxAttemptNumber: mockFn().mockResolvedValue(0), lastAttempt: mockFn(), create: mockFn() };
+  const attemptsRepo = {
+    maxAttemptNumber: mockFn().mockResolvedValue(0),
+    lastAttempt: mockFn(),
+    create: mockFn(),
+  };
   const idempotencyRepo = { findByKey: mockFn(), create: mockFn() };
   const cursorsRepo = { findByScope: mockFn(), create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -25,34 +29,54 @@ function build() {
     em as any,
     contractsRepo as any,
     versionsRepo as any,
-    recordsRepo as any,
-    attemptsRepo as any,
-    idempotencyRepo as any,
-    cursorsRepo as any,
+    recordsRepo,
+    attemptsRepo,
+    idempotencyRepo,
+    cursorsRepo,
     logger as any,
   );
-  return { service, tx, contractsRepo, versionsRepo, recordsRepo, attemptsRepo, idempotencyRepo, cursorsRepo };
+  return {
+    service,
+    tx,
+    contractsRepo,
+    versionsRepo,
+    recordsRepo,
+    attemptsRepo,
+    idempotencyRepo,
+    cursorsRepo,
+  };
 }
 
 describe('IntegrationExchangesService', () => {
   describe('executeExchange (UC-31-05)', () => {
     it('rejects a missing idempotency key (422)', async () => {
       const d = build();
-      await expect(d.service.executeExchange('c1', undefined, {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.executeExchange('c1', undefined, {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('creates idempotency, record and first attempt for a fresh key', async () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue({ id: 'c1' });
-      d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v1', integrationContractId: 'c1' });
+      d.versionsRepo.findActiveByContract.mockResolvedValue({
+        id: 'v1',
+        integrationContractId: 'c1',
+      });
       d.idempotencyRepo.findByKey.mockResolvedValue(null);
       const idem: any = {};
       d.idempotencyRepo.create.mockReturnValue(idem);
-      d.recordsRepo.create.mockReturnValue({ id: 'r1', outcomeConceptId: ICON.OUTCOME_PENDING });
+      d.recordsRepo.create.mockReturnValue({
+        id: 'r1',
+        outcomeConceptId: ICON.OUTCOME_PENDING,
+      });
 
-      const res = await d.service.executeExchange('c1', 'idem-1', { requestHash: 'h' } as any, actor);
+      const res = await d.service.executeExchange(
+        'c1',
+        'idem-1',
+        { requestHash: 'h' },
+        actor,
+      );
 
       expect(res).toEqual({
         id: 'r1',
@@ -63,14 +87,20 @@ describe('IntegrationExchangesService', () => {
       expect(idem.firstExchangeRecordId).toBe('r1');
       expect(d.attemptsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ attemptNumber: 1, outcomeConceptId: ICON.ATTEMPT_IN_PROGRESS }),
+        expect.objectContaining({
+          attemptNumber: 1,
+          outcomeConceptId: ICON.ATTEMPT_IN_PROGRESS,
+        }),
       );
     });
 
     it('replays an existing key without re-executing', async () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue({ id: 'c1' });
-      d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v1', integrationContractId: 'c1' });
+      d.versionsRepo.findActiveByContract.mockResolvedValue({
+        id: 'v1',
+        integrationContractId: 'c1',
+      });
       d.idempotencyRepo.findByKey.mockResolvedValue({
         id: 'idem1',
         firstExchangeRecordId: 'r1',
@@ -79,7 +109,12 @@ describe('IntegrationExchangesService', () => {
         requestHash: 'h',
       });
 
-      const res = await d.service.executeExchange('c1', 'idem-1', { requestHash: 'h' } as any, actor);
+      const res = await d.service.executeExchange(
+        'c1',
+        'idem-1',
+        { requestHash: 'h' },
+        actor,
+      );
 
       expect(res.replayed).toBe(true);
       expect(res.id).toBe('r1');
@@ -90,10 +125,21 @@ describe('IntegrationExchangesService', () => {
     it('rejects a payload mismatch under the same key (409)', async () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue({ id: 'c1' });
-      d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v1', integrationContractId: 'c1' });
-      d.idempotencyRepo.findByKey.mockResolvedValue({ id: 'idem1', requestHash: 'OTHER' });
+      d.versionsRepo.findActiveByContract.mockResolvedValue({
+        id: 'v1',
+        integrationContractId: 'c1',
+      });
+      d.idempotencyRepo.findByKey.mockResolvedValue({
+        id: 'idem1',
+        requestHash: 'OTHER',
+      });
       await expect(
-        d.service.executeExchange('c1', 'idem-1', { requestHash: 'h' } as any, actor),
+        d.service.executeExchange(
+          'c1',
+          'idem-1',
+          { requestHash: 'h' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -118,14 +164,29 @@ describe('IntegrationExchangesService', () => {
       };
       d.recordsRepo.findById.mockResolvedValue(record);
       d.attemptsRepo.maxAttemptNumber.mockResolvedValue(1);
-      d.attemptsRepo.create.mockReturnValue({ id: 'a2', outcomeConceptId: ICON.ATTEMPT_SUCCESS });
-      d.versionsRepo.findById.mockResolvedValue({ id: 'v1', integrationContractId: 'c1' });
+      d.attemptsRepo.create.mockReturnValue({
+        id: 'a2',
+        outcomeConceptId: ICON.ATTEMPT_SUCCESS,
+      });
+      d.versionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        integrationContractId: 'c1',
+      });
       const idem: any = { statusConceptId: ICON.IDEMPOTENCY_PENDING };
       d.idempotencyRepo.findByKey.mockResolvedValue(idem);
 
-      const res = await d.service.recordAttempt('c1', 'r1', { outcome: 'SUCCESS' } as any, actor);
+      const res = await d.service.recordAttempt(
+        'c1',
+        'r1',
+        { outcome: 'SUCCESS' } as any,
+        actor,
+      );
 
-      expect(res).toMatchObject({ attemptNumber: 2, outcome: ICON.ATTEMPT_SUCCESS, recordOutcome: ICON.OUTCOME_SUCCESS });
+      expect(res).toMatchObject({
+        attemptNumber: 2,
+        outcome: ICON.ATTEMPT_SUCCESS,
+        recordOutcome: ICON.OUTCOME_SUCCESS,
+      });
       expect(record.outcomeConceptId).toBe(ICON.OUTCOME_SUCCESS);
       expect(idem.statusConceptId).toBe(ICON.IDEMPOTENCY_COMPLETED);
       expect(idem.responseReference).toBe('r1');
@@ -135,9 +196,17 @@ describe('IntegrationExchangesService', () => {
       const d = build();
       const record: any = { id: 'r1', outcomeConceptId: ICON.OUTCOME_PENDING };
       d.recordsRepo.findById.mockResolvedValue(record);
-      d.attemptsRepo.create.mockReturnValue({ id: 'a1', outcomeConceptId: ICON.ATTEMPT_FAILED });
+      d.attemptsRepo.create.mockReturnValue({
+        id: 'a1',
+        outcomeConceptId: ICON.ATTEMPT_FAILED,
+      });
 
-      const res = await d.service.recordAttempt('c1', 'r1', { outcome: 'FAILED', retryDecision: 'RETRYABLE' } as any, actor);
+      const res = await d.service.recordAttempt(
+        'c1',
+        'r1',
+        { outcome: 'FAILED', retryDecision: 'RETRYABLE' } as any,
+        actor,
+      );
 
       expect(res.recordOutcome).toBe(ICON.OUTCOME_FAILED);
       expect(record.outcomeConceptId).toBe(ICON.OUTCOME_FAILED);
@@ -147,7 +216,12 @@ describe('IntegrationExchangesService', () => {
       const d = build();
       d.recordsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.recordAttempt('c1', 'r1', { outcome: 'SUCCESS' } as any, actor),
+        d.service.recordAttempt(
+          'c1',
+          'r1',
+          { outcome: 'SUCCESS' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -162,21 +236,30 @@ describe('IntegrationExchangesService', () => {
         outcomeConceptId: ICON.ATTEMPT_FAILED,
         retryDecisionConceptId: ICON.RETRY_RETRYABLE,
       });
-      d.attemptsRepo.create.mockReturnValue({ id: 'a2', outcomeConceptId: ICON.ATTEMPT_SUCCESS });
+      d.attemptsRepo.create.mockReturnValue({
+        id: 'a2',
+        outcomeConceptId: ICON.ATTEMPT_SUCCESS,
+      });
 
-      const res = await d.service.retry('r1', {} as any, actor);
+      const res = await d.service.retry('r1', {}, actor);
 
-      expect(res).toMatchObject({ attemptNumber: 2, outcome: ICON.ATTEMPT_SUCCESS });
+      expect(res).toMatchObject({
+        attemptNumber: 2,
+        outcome: ICON.ATTEMPT_SUCCESS,
+      });
       expect(record.outcomeConceptId).toBe(ICON.OUTCOME_SUCCESS);
     });
 
     it('rejects retry when the last attempt was not FAILED (422)', async () => {
       const d = build();
       d.recordsRepo.findById.mockResolvedValue({ id: 'r1' });
-      d.attemptsRepo.lastAttempt.mockResolvedValue({ attemptNumber: 1, outcomeConceptId: ICON.ATTEMPT_SUCCESS });
-      await expect(d.service.retry('r1', {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      d.attemptsRepo.lastAttempt.mockResolvedValue({
+        attemptNumber: 1,
+        outcomeConceptId: ICON.ATTEMPT_SUCCESS,
+      });
+      await expect(
+        d.service.retry('r1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 
@@ -187,29 +270,61 @@ describe('IntegrationExchangesService', () => {
       d.cursorsRepo.findByScope.mockResolvedValue(null);
       d.cursorsRepo.create.mockReturnValue({ id: 'cur1', cursorValue: '100' });
 
-      const res = await d.service.advanceCursor('c1', 'orders', { cursorValue: '100' } as any, actor);
+      const res = await d.service.advanceCursor(
+        'c1',
+        'orders',
+        { cursorValue: '100' },
+        actor,
+      );
 
-      expect(res).toEqual({ id: 'cur1', cursorScope: 'orders', cursorValue: '100', created: true });
+      expect(res).toEqual({
+        id: 'cur1',
+        cursorScope: 'orders',
+        cursorValue: '100',
+        created: true,
+      });
     });
 
     it('advances a cursor forward', async () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue({ id: 'c1' });
-      const cursor: any = { id: 'cur1', cursorValue: '100', updatedAt: new Date() };
+      const cursor: any = {
+        id: 'cur1',
+        cursorValue: '100',
+        updatedAt: new Date(),
+      };
       d.cursorsRepo.findByScope.mockResolvedValue(cursor);
 
-      const res = await d.service.advanceCursor('c1', 'orders', { cursorValue: '200' } as any, actor);
+      const res = await d.service.advanceCursor(
+        'c1',
+        'orders',
+        { cursorValue: '200' },
+        actor,
+      );
 
-      expect(res).toEqual({ id: 'cur1', cursorScope: 'orders', cursorValue: '200', created: false });
+      expect(res).toEqual({
+        id: 'cur1',
+        cursorScope: 'orders',
+        cursorValue: '200',
+        created: false,
+      });
       expect(cursor.cursorValue).toBe('200');
     });
 
     it('rejects a regressive cursor (422)', async () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue({ id: 'c1' });
-      d.cursorsRepo.findByScope.mockResolvedValue({ id: 'cur1', cursorValue: '200' });
+      d.cursorsRepo.findByScope.mockResolvedValue({
+        id: 'cur1',
+        cursorValue: '200',
+      });
       await expect(
-        d.service.advanceCursor('c1', 'orders', { cursorValue: '100' } as any, actor),
+        d.service.advanceCursor(
+          'c1',
+          'orders',
+          { cursorValue: '100' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -217,7 +332,12 @@ describe('IntegrationExchangesService', () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.advanceCursor('c1', 'orders', { cursorValue: '1' } as any, actor),
+        d.service.advanceCursor(
+          'c1',
+          'orders',
+          { cursorValue: '1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

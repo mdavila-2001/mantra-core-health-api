@@ -12,7 +12,9 @@ import { CreateDataBoundaryDto, DataBoundaryResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('orgext/data-boundaries')
 export class OrgextDataBoundariesController {
-  constructor(private readonly boundariesService: OrgextDataBoundariesService) {}
+  constructor(
+    private readonly boundariesService: OrgextDataBoundariesService,
+  ) {}
 
   /** UC-22-08. */
   @Post()

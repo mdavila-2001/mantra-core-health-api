@@ -69,12 +69,21 @@ export class ProfilesPatientsService {
     dto: CreatePatientDto,
     actor: AuthenticatedUser,
   ): Promise<PatientProfileResponseDto> {
-    this.logger.info({ operation: 'profiles.patient.create', actorId: actor.id }, 'Registering patient');
+    this.logger.info(
+      { operation: 'profiles.patient.create', actorId: actor.id },
+      'Registering patient',
+    );
     return this.em.transactional(async (tx) => {
-      const clash = await this.patientProfilesRepo.findByPatientCode(tx, dto.patientCode);
+      const clash = await this.patientProfilesRepo.findByPatientCode(
+        tx,
+        dto.patientCode,
+      );
       if (clash) {
         this.logger.warn(
-          { operation: 'profiles.patient.create', reason: 'patient-code-in-use' },
+          {
+            operation: 'profiles.patient.create',
+            reason: 'patient-code-in-use',
+          },
           'Rejected patient creation: patient_code already exists',
         );
         throw new ConflictException('El patient_code ya está en uso', {
@@ -133,12 +142,20 @@ export class ProfilesPatientsService {
     dto: LinkAccountDto,
     actor: AuthenticatedUser,
   ): Promise<AccountLinkResponseDto> {
-    this.logger.info({ operation: 'profiles.account.link', personId }, 'Linking portal account');
+    this.logger.info(
+      { operation: 'profiles.account.link', personId },
+      'Linking portal account',
+    );
     return this.em.transactional(async (tx) => {
       const person = await this.personsRepo.findById(tx, personId);
-      if (!person) throw new ResourceNotFoundException('Persona no encontrada', { personId });
+      if (!person)
+        throw new ResourceNotFoundException('Persona no encontrada', {
+          personId,
+        });
       if (person.personStatusConceptId !== PROF.PERSON_ACTIVE) {
-        throw new PreconditionFailedException('La persona no está activa', { personId });
+        throw new PreconditionFailedException('La persona no está activa', {
+          personId,
+        });
       }
 
       const now = new Date();
@@ -172,12 +189,20 @@ export class ProfilesPatientsService {
     dto: AddIdentityLinkDto,
     actor: AuthenticatedUser,
   ): Promise<IdentityLinkResponseDto> {
-    this.logger.info({ operation: 'profiles.identity.link', profileId }, 'Adding patient identity link');
+    this.logger.info(
+      { operation: 'profiles.identity.link', profileId },
+      'Adding patient identity link',
+    );
     return this.em.transactional(async (tx) => {
       const patient = await this.patientProfilesRepo.findById(tx, profileId);
-      if (!patient) throw new ResourceNotFoundException('Paciente no encontrado', { profileId });
+      if (!patient)
+        throw new ResourceNotFoundException('Paciente no encontrado', {
+          profileId,
+        });
 
-      const verificationStatus = dto.verified ? PROF.IDENTITY_VERIFIED : PROF.IDENTITY_UNVERIFIED;
+      const verificationStatus = dto.verified
+        ? PROF.IDENTITY_VERIFIED
+        : PROF.IDENTITY_UNVERIFIED;
       const existing = await this.identityLinksRepo.findBySource(
         tx,
         dto.sourceTenantId,
@@ -218,7 +243,12 @@ export class ProfilesPatientsService {
       touch(patient, actor.id);
       await tx.flush();
 
-      return { id: linkId, patientProfileId: profileId, verificationStatus, created };
+      return {
+        id: linkId,
+        patientProfileId: profileId,
+        verificationStatus,
+        created,
+      };
     });
   }
 
@@ -237,21 +267,36 @@ export class ProfilesPatientsService {
     );
     return this.em.transactional(async (tx) => {
       if (dto.survivingPatientProfileId === dto.mergedPatientProfileId) {
-        throw new PreconditionFailedException('No se puede fusionar un paciente consigo mismo', {
-          profileId: dto.survivingPatientProfileId,
-        });
+        throw new PreconditionFailedException(
+          'No se puede fusionar un paciente consigo mismo',
+          {
+            profileId: dto.survivingPatientProfileId,
+          },
+        );
       }
-      const surviving = await this.patientProfilesRepo.findById(tx, dto.survivingPatientProfileId);
+      const surviving = await this.patientProfilesRepo.findById(
+        tx,
+        dto.survivingPatientProfileId,
+      );
       if (!surviving) {
-        throw new ResourceNotFoundException('Paciente sobreviviente no encontrado', {
-          profileId: dto.survivingPatientProfileId,
-        });
+        throw new ResourceNotFoundException(
+          'Paciente sobreviviente no encontrado',
+          {
+            profileId: dto.survivingPatientProfileId,
+          },
+        );
       }
-      const merged = await this.patientProfilesRepo.findById(tx, dto.mergedPatientProfileId);
+      const merged = await this.patientProfilesRepo.findById(
+        tx,
+        dto.mergedPatientProfileId,
+      );
       if (!merged) {
-        throw new ResourceNotFoundException('Paciente a fusionar no encontrado', {
-          profileId: dto.mergedPatientProfileId,
-        });
+        throw new ResourceNotFoundException(
+          'Paciente a fusionar no encontrado',
+          {
+            profileId: dto.mergedPatientProfileId,
+          },
+        );
       }
       if (merged.recordLinkageStatusConceptId === PROF.LINKAGE_MERGED) {
         throw new ConflictException('El paciente ya fue fusionado', {
@@ -277,7 +322,10 @@ export class ProfilesPatientsService {
 
       // patient_profiles.profile_id ES persons.id (FK a profiles.persons), así que
       // el id de perfil del perdedor identifica directamente a su persona.
-      const mergedPerson = await this.personsRepo.findById(tx, merged.profileId);
+      const mergedPerson = await this.personsRepo.findById(
+        tx,
+        merged.profileId,
+      );
       if (mergedPerson) {
         mergedPerson.mergeSurvivorPersonId = surviving.profileId;
         mergedPerson.personStatusConceptId = PROF.PERSON_MERGED;
@@ -315,16 +363,28 @@ export class ProfilesPatientsService {
     dto: ReverseMergeDto,
     actor: AuthenticatedUser,
   ): Promise<MergeEventResponseDto> {
-    this.logger.info({ operation: 'profiles.patient.merge.reverse', eventId }, 'Reversing patient merge');
+    this.logger.info(
+      { operation: 'profiles.patient.merge.reverse', eventId },
+      'Reversing patient merge',
+    );
     return this.em.transactional(async (tx) => {
       const original = await this.mergeEventsRepo.findById(tx, eventId);
-      if (!original) throw new ResourceNotFoundException('Evento de fusión no encontrado', { eventId });
-      if (original.decisionStatusConceptId !== PROF.MERGE_APPROVED) {
-        throw new PreconditionFailedException('Solo se puede revertir una fusión aprobada', {
+      if (!original)
+        throw new ResourceNotFoundException('Evento de fusión no encontrado', {
           eventId,
         });
+      if (original.decisionStatusConceptId !== PROF.MERGE_APPROVED) {
+        throw new PreconditionFailedException(
+          'Solo se puede revertir una fusión aprobada',
+          {
+            eventId,
+          },
+        );
       }
-      const alreadyReversed = await this.mergeEventsRepo.findByReversalOf(tx, eventId);
+      const alreadyReversed = await this.mergeEventsRepo.findByReversalOf(
+        tx,
+        eventId,
+      );
       if (alreadyReversed) {
         throw new ConflictException('La fusión ya fue revertida', { eventId });
       }
@@ -343,11 +403,17 @@ export class ProfilesPatientsService {
       await tx.flush();
 
       // Restaura el estado del paciente y la persona del perdedor.
-      const merged = await this.patientProfilesRepo.findById(tx, original.mergedPatientProfileId);
+      const merged = await this.patientProfilesRepo.findById(
+        tx,
+        original.mergedPatientProfileId,
+      );
       if (merged) {
         merged.recordLinkageStatusConceptId = PROF.LINKAGE_LINKED;
         touch(merged, actor.id);
-        const mergedPerson = await this.personsRepo.findById(tx, merged.profileId);
+        const mergedPerson = await this.personsRepo.findById(
+          tx,
+          merged.profileId,
+        );
         if (mergedPerson) {
           mergedPerson.mergeSurvivorPersonId = undefined;
           mergedPerson.personStatusConceptId = PROF.PERSON_ACTIVE;
@@ -366,15 +432,27 @@ export class ProfilesPatientsService {
     dto: AddRelatedPersonDto,
     actor: AuthenticatedUser,
   ): Promise<RelatedPersonResponseDto> {
-    this.logger.info({ operation: 'profiles.related.add', profileId }, 'Adding related person');
+    this.logger.info(
+      { operation: 'profiles.related.add', profileId },
+      'Adding related person',
+    );
     return this.em.transactional(async (tx) => {
       const patient = await this.patientProfilesRepo.findById(tx, profileId);
-      if (!patient) throw new ResourceNotFoundException('Paciente no encontrado', { profileId });
+      if (!patient)
+        throw new ResourceNotFoundException('Paciente no encontrado', {
+          profileId,
+        });
 
       if (dto.isLegalGuardian) {
-        const guardian = await this.relatedPersonsRepo.findActiveGuardian(tx, profileId);
+        const guardian = await this.relatedPersonsRepo.findActiveGuardian(
+          tx,
+          profileId,
+        );
         if (guardian) {
-          throw new ConflictException('El paciente ya tiene un tutor legal activo', { profileId });
+          throw new ConflictException(
+            'El paciente ya tiene un tutor legal activo',
+            { profileId },
+          );
         }
       }
 
@@ -382,7 +460,10 @@ export class ProfilesPatientsService {
       if (personId) {
         const existing = await this.personsRepo.findById(tx, personId);
         if (!existing) {
-          throw new ResourceNotFoundException('Persona relacionada no encontrada', { personId });
+          throw new ResourceNotFoundException(
+            'Persona relacionada no encontrada',
+            { personId },
+          );
         }
       } else {
         const person = this.personsRepo.create(tx, {
@@ -399,7 +480,8 @@ export class ProfilesPatientsService {
       const related = this.relatedPersonsRepo.create(tx, {
         patientProfileId: profileId,
         personId,
-        relationshipConceptId: dto.relationshipConceptId ?? PROF.RELATIONSHIP_GUARDIAN,
+        relationshipConceptId:
+          dto.relationshipConceptId ?? PROF.RELATIONSHIP_GUARDIAN,
         isEmergencyContact: dto.isEmergencyContact ?? false,
         isLegalGuardian: dto.isLegalGuardian ?? false,
         statusConceptId: PROF.RELATED_ACTIVE,
@@ -423,13 +505,22 @@ export class ProfilesPatientsService {
     dto: GrantPortalProxyDto,
     actor: AuthenticatedUser,
   ): Promise<PortalProxyResponseDto> {
-    this.logger.info({ operation: 'profiles.proxy.grant', profileId }, 'Granting portal proxy');
+    this.logger.info(
+      { operation: 'profiles.proxy.grant', profileId },
+      'Granting portal proxy',
+    );
     return this.em.transactional(async (tx) => {
       const patient = await this.patientProfilesRepo.findById(tx, profileId);
-      if (!patient) throw new ResourceNotFoundException('Paciente no encontrado', { profileId });
+      if (!patient)
+        throw new ResourceNotFoundException('Paciente no encontrado', {
+          profileId,
+        });
 
       if (dto.relatedPersonId) {
-        const related = await this.relatedPersonsRepo.findById(tx, dto.relatedPersonId);
+        const related = await this.relatedPersonsRepo.findById(
+          tx,
+          dto.relatedPersonId,
+        );
         if (!related || related.patientProfileId !== profileId) {
           throw new PreconditionFailedException(
             'La persona relacionada no pertenece al paciente',
@@ -439,7 +530,12 @@ export class ProfilesPatientsService {
       }
 
       const now = new Date();
-      await this.portalProxiesRepo.revokeActiveForProxyUser(tx, profileId, dto.proxyUserId, now);
+      await this.portalProxiesRepo.revokeActiveForProxyUser(
+        tx,
+        profileId,
+        dto.proxyUserId,
+        now,
+      );
 
       const proxy = this.portalProxiesRepo.create(tx, {
         patientProfileId: profileId,
@@ -470,12 +566,21 @@ export class ProfilesPatientsService {
     dto: DeceasePersonDto,
     actor: AuthenticatedUser,
   ): Promise<DeceaseResponseDto> {
-    this.logger.info({ operation: 'profiles.person.decease', personId }, 'Recording decease');
+    this.logger.info(
+      { operation: 'profiles.person.decease', personId },
+      'Recording decease',
+    );
     return this.em.transactional(async (tx) => {
       const person = await this.personsRepo.findById(tx, personId);
-      if (!person) throw new ResourceNotFoundException('Persona no encontrada', { personId });
+      if (!person)
+        throw new ResourceNotFoundException('Persona no encontrada', {
+          personId,
+        });
       if (person.vitalStatusConceptId === PROF.VITAL_DECEASED) {
-        throw new ConflictException('La persona ya está registrada como fallecida', { personId });
+        throw new ConflictException(
+          'La persona ya está registrada como fallecida',
+          { personId },
+        );
       }
 
       const now = new Date();
@@ -488,11 +593,13 @@ export class ProfilesPatientsService {
       }
       touch(person, actor.id);
 
-      const revokedAccountLinks = await this.accountLinksRepo.revokeActiveForPerson(tx, personId, now);
+      const revokedAccountLinks =
+        await this.accountLinksRepo.revokeActiveForPerson(tx, personId, now);
 
       // patient_profiles.profile_id ES persons.id: los proxies del posible perfil
       // de paciente de esta persona se revocan usando su propio id (0 si no es paciente).
-      const revokedProxies = await this.portalProxiesRepo.revokeActiveForPatient(tx, personId, now);
+      const revokedProxies =
+        await this.portalProxiesRepo.revokeActiveForPatient(tx, personId, now);
       await tx.flush();
 
       return {

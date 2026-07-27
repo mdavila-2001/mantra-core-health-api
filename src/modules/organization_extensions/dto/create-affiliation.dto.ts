@@ -17,28 +17,43 @@ export class CreateAffiliationDto {
   @IsUUID()
   participatingTenantId!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de afiliación (concepto)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de afiliación (concepto)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   affiliationTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Sitio de práctica anfitrión', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sitio de práctica anfitrión',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   hostPracticeSiteId?: string;
 
-  @ApiPropertyOptional({ description: 'Servicio de salud implicado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Servicio de salud implicado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   healthcareServiceId?: string;
 
-  @ApiPropertyOptional({ description: 'Referencia de contrato', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Referencia de contrato',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   contractReference?: string;
 
-  @ApiPropertyOptional({ description: 'Acuerdo de uso de datos (DUA) firmado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Acuerdo de uso de datos (DUA) firmado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dataUseAgreementId?: string;

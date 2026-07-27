@@ -31,43 +31,67 @@ function build() {
 describe('ClinicalRecordsController', () => {
   it('delegates createCondition (UC-08-08)', async () => {
     const d = build();
-    const dto = { custodianTenantId: 't1', patientProfileId: 'p1', codeConceptId: 'c1' };
-    await d.controller.createCondition(dto as any, actor);
+    const dto = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      codeConceptId: 'c1',
+    };
+    await d.controller.createCondition(dto, actor);
     expect(d.conditionsService.create).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates createAllergy (UC-08-09)', async () => {
     const d = build();
-    const dto = { custodianTenantId: 't1', patientProfileId: 'p1', substanceConceptId: 's1' };
-    await d.controller.createAllergy(dto as any, actor);
+    const dto = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      substanceConceptId: 's1',
+    };
+    await d.controller.createAllergy(dto, actor);
     expect(d.allergyService.create).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates prescribeMedication (UC-08-10)', async () => {
     const d = build();
-    const dto = { custodianTenantId: 't1', patientProfileId: 'p1', medicationConceptId: 'm1' };
-    await d.controller.prescribeMedication(dto as any, actor);
+    const dto = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      medicationConceptId: 'm1',
+    };
+    await d.controller.prescribeMedication(dto, actor);
     expect(d.medicationsService.prescribe).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates administerMedication (UC-08-11)', async () => {
     const d = build();
-    const dto = { custodianTenantId: 't1', patientProfileId: 'p1', medicationConceptId: 'm1' };
-    await d.controller.administerMedication(dto as any, actor);
+    const dto = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      medicationConceptId: 'm1',
+    };
+    await d.controller.administerMedication(dto, actor);
     expect(d.medicationsService.administer).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates createProcedure (UC-08-12)', async () => {
     const d = build();
-    const dto = { custodianTenantId: 't1', patientProfileId: 'p1', codeConceptId: 'c1' };
-    await d.controller.createProcedure(dto as any, actor);
+    const dto = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      codeConceptId: 'c1',
+    };
+    await d.controller.createProcedure(dto, actor);
     expect(d.proceduresService.create).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates createImmunization (UC-08-13)', async () => {
     const d = build();
-    const dto = { custodianTenantId: 't1', patientProfileId: 'p1', vaccineConceptId: 'v1' };
-    await d.controller.createImmunization(dto as any, actor);
+    const dto = {
+      custodianTenantId: 't1',
+      patientProfileId: 'p1',
+      vaccineConceptId: 'v1',
+    };
+    await d.controller.createImmunization(dto, actor);
     expect(d.immunizationsService.create).toHaveBeenCalledWith(dto, actor);
   });
 });

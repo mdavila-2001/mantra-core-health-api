@@ -38,12 +38,20 @@ export class IdentityManualReviewService {
     actor: AuthenticatedUser,
   ): Promise<ReviewDecisionResponseDto> {
     this.logger.info(
-      { operation: 'ida.review.decide', actorId: actor.id, reviewId, decision: dto.decision },
+      {
+        operation: 'ida.review.decide',
+        actorId: actor.id,
+        reviewId,
+        decision: dto.decision,
+      },
       'Deciding manual review',
     );
     return this.em.transactional(async (tx) => {
       const review = await this.reviewRepo.findById(tx, reviewId);
-      if (!review) throw new ResourceNotFoundException('Revisión manual no encontrada', { reviewId });
+      if (!review)
+        throw new ResourceNotFoundException('Revisión manual no encontrada', {
+          reviewId,
+        });
       if (review.statusConceptId !== IDA.REVIEW_OPEN) {
         throw new PreconditionFailedException('La revisión ya fue decidida', {
           reviewId,
@@ -51,21 +59,32 @@ export class IdentityManualReviewService {
         });
       }
       if (review.assignedToUserId && review.assignedToUserId !== actor.id) {
-        throw new PreconditionFailedException('La revisión está asignada a otro revisor', { reviewId });
+        throw new PreconditionFailedException(
+          'La revisión está asignada a otro revisor',
+          { reviewId },
+        );
       }
 
-      const kase = await this.casesRepo.findById(tx, review.identityVerificationCaseId);
+      const kase = await this.casesRepo.findById(
+        tx,
+        review.identityVerificationCaseId,
+      );
       if (!kase) {
-        throw new ResourceNotFoundException('Caso de verificación no encontrado', {
-          caseId: review.identityVerificationCaseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso de verificación no encontrado',
+          {
+            caseId: review.identityVerificationCaseId,
+          },
+        );
       }
 
       const approved = dto.decision === 'APPROVED';
       const now = new Date();
       review.statusConceptId = IDA.REVIEW_DECIDED;
       review.decidedAt = now;
-      review.decisionConceptId = approved ? IDA.DECISION_APPROVED : IDA.DECISION_REJECTED;
+      review.decisionConceptId = approved
+        ? IDA.DECISION_APPROVED
+        : IDA.DECISION_REJECTED;
       review.decisionReason = dto.decisionReason;
       touch(review, actor.id);
 
@@ -73,10 +92,19 @@ export class IdentityManualReviewService {
       kase.completedAt = now;
       touch(kase, actor.id);
 
-      await this.fraudRepo.resolveOpenForCase(tx, kase.id, IDA.FRAUD_OPEN, IDA.FRAUD_RESOLVED);
+      await this.fraudRepo.resolveOpenForCase(
+        tx,
+        kase.id,
+        IDA.FRAUD_OPEN,
+        IDA.FRAUD_RESOLVED,
+      );
 
       await tx.flush();
-      return { id: review.id, status: review.statusConceptId, caseStatus: kase.statusConceptId };
+      return {
+        id: review.id,
+        status: review.statusConceptId,
+        caseStatus: kase.statusConceptId,
+      };
     });
   }
 }

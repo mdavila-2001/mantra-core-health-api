@@ -13,11 +13,17 @@ import {
 
 /** Cuerpo de `POST /profiles/patients/{profileId}/identity-links` (UC-05-07). */
 export class AddIdentityLinkDto {
-  @ApiProperty({ description: 'Tenant origen de la identidad externa', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant origen de la identidad externa',
+    format: 'uuid',
+  })
   @IsUUID()
   sourceTenantId!: string;
 
-  @ApiProperty({ description: 'Identificador del paciente en el sistema origen', maxLength: 200 })
+  @ApiProperty({
+    description: 'Identificador del paciente en el sistema origen',
+    maxLength: 200,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
@@ -29,12 +35,19 @@ export class AddIdentityLinkDto {
   @MaxLength(2000)
   sourceSystemUri?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del tipo de vínculo', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del tipo de vínculo',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   linkTypeConceptId?: string;
 
-  @ApiProperty({ description: 'Puntuación de confianza [0..1]', minimum: 0, maximum: 1 })
+  @ApiProperty({
+    description: 'Puntuación de confianza [0..1]',
+    minimum: 0,
+    maximum: 1,
+  })
   @IsNumber()
   @Min(0)
   @Max(1)
@@ -54,9 +67,14 @@ export class IdentityLinkResponseDto {
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 
-  @ApiProperty({ description: 'true si el registro se creó, false si se actualizó (upsert)' })
+  @ApiProperty({
+    description: 'true si el registro se creó, false si se actualizó (upsert)',
+  })
   created!: boolean;
 }

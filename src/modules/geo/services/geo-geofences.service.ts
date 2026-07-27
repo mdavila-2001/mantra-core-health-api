@@ -18,7 +18,11 @@ import {
   RecordGeofenceEventDto,
   GeofenceEventResponseDto,
 } from '../dto';
-import { GEO, SHAPE_TYPE_CONCEPT_BY_CODE, EVENT_TYPE_CONCEPT_BY_CODE } from '../geo.concepts';
+import {
+  GEO,
+  SHAPE_TYPE_CONCEPT_BY_CODE,
+  EVENT_TYPE_CONCEPT_BY_CODE,
+} from '../geo.concepts';
 
 /**
  * Casos de uso sobre geofences: definir/activar geofence (UC-13-04) y registrar
@@ -37,28 +41,51 @@ export class GeoGeofencesService {
   }
 
   /** UC-13-04: define y activa un geofence (circle o polygon). */
-  async define(dto: CreateGeofenceDto, actor: AuthenticatedUser): Promise<GeofenceResponseDto> {
-    this.logger.info({ operation: 'geo.geofence.define', tenantId: dto.tenantId }, 'Defining geofence');
+  async define(
+    dto: CreateGeofenceDto,
+    actor: AuthenticatedUser,
+  ): Promise<GeofenceResponseDto> {
+    this.logger.info(
+      { operation: 'geo.geofence.define', tenantId: dto.tenantId },
+      'Defining geofence',
+    );
 
     // Coherencia forma/geometría (422 si falta) — antes de abrir transacción.
     if (dto.shapeType === 'CIRCLE') {
-      if (dto.radiusM === undefined || dto.centerLat === undefined || dto.centerLng === undefined) {
-        throw new PreconditionFailedException('Un geofence circular requiere radiusM, centerLat y centerLng', {
-          shapeType: dto.shapeType,
-        });
+      if (
+        dto.radiusM === undefined ||
+        dto.centerLat === undefined ||
+        dto.centerLng === undefined
+      ) {
+        throw new PreconditionFailedException(
+          'Un geofence circular requiere radiusM, centerLat y centerLng',
+          {
+            shapeType: dto.shapeType,
+          },
+        );
       }
     } else if (!dto.geometryJson) {
-      throw new PreconditionFailedException('Un geofence poligonal requiere geometryJson', {
-        shapeType: dto.shapeType,
-      });
+      throw new PreconditionFailedException(
+        'Un geofence poligonal requiere geometryJson',
+        {
+          shapeType: dto.shapeType,
+        },
+      );
     }
 
     return this.em.transactional(async (tx) => {
-      const clash = await this.geofencesRepo.findByTenantAndName(tx, dto.tenantId, dto.name);
+      const clash = await this.geofencesRepo.findByTenantAndName(
+        tx,
+        dto.tenantId,
+        dto.name,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe un geofence con ese nombre en el tenant', {
-          name: dto.name,
-        });
+        throw new ConflictException(
+          'Ya existe un geofence con ese nombre en el tenant',
+          {
+            name: dto.name,
+          },
+        );
       }
 
       const geofence = this.geofencesRepo.create(tx, {
@@ -67,14 +94,19 @@ export class GeoGeofencesService {
         shapeTypeConceptId: SHAPE_TYPE_CONCEPT_BY_CODE[dto.shapeType],
         geometryJson: dto.geometryJson,
         radiusM: dto.radiusM === undefined ? undefined : String(dto.radiusM),
-        centerLat: dto.centerLat === undefined ? undefined : String(dto.centerLat),
-        centerLng: dto.centerLng === undefined ? undefined : String(dto.centerLng),
+        centerLat:
+          dto.centerLat === undefined ? undefined : String(dto.centerLat),
+        centerLng:
+          dto.centerLng === undefined ? undefined : String(dto.centerLng),
         stateConceptId: GEO.GEOFENCE_ACTIVE,
         actorUserId: actor.id,
       });
       await tx.flush();
 
-      this.logger.info({ operation: 'geo.geofence.define', geofenceId: geofence.id }, 'Geofence defined');
+      this.logger.info(
+        { operation: 'geo.geofence.define', geofenceId: geofence.id },
+        'Geofence defined',
+      );
       return {
         id: geofence.id,
         tenantId: geofence.tenantId,
@@ -92,17 +124,29 @@ export class GeoGeofencesService {
     actor: AuthenticatedUser,
   ): Promise<GeofenceEventResponseDto> {
     this.logger.info(
-      { operation: 'geo.geofence.event', geofenceId: dto.geofenceId, eventType: dto.eventType },
+      {
+        operation: 'geo.geofence.event',
+        geofenceId: dto.geofenceId,
+        eventType: dto.eventType,
+      },
       'Recording geofence event',
     );
     return this.em.transactional(async (tx) => {
       const geofence = await this.geofencesRepo.findById(tx, dto.geofenceId);
-      if (!geofence) throw new ResourceNotFoundException('Geofence no encontrado', { geofenceId: dto.geofenceId });
+      if (!geofence)
+        throw new ResourceNotFoundException('Geofence no encontrado', {
+          geofenceId: dto.geofenceId,
+        });
       if (geofence.stateConceptId !== GEO.GEOFENCE_ACTIVE) {
-        throw new PreconditionFailedException('El geofence no está activo', { geofenceId: dto.geofenceId });
+        throw new PreconditionFailedException('El geofence no está activo', {
+          geofenceId: dto.geofenceId,
+        });
       }
 
-      const subject = await this.subjectsRepo.findById(tx, dto.trackedSubjectId);
+      const subject = await this.subjectsRepo.findById(
+        tx,
+        dto.trackedSubjectId,
+      );
       if (!subject) {
         throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
           trackedSubjectId: dto.trackedSubjectId,
@@ -112,11 +156,18 @@ export class GeoGeofencesService {
       const eventTypeConceptId = EVENT_TYPE_CONCEPT_BY_CODE[dto.eventType];
 
       // Transición idempotente: rechaza el mismo tipo consecutivo (ya dentro/fuera).
-      const last = await this.eventsRepo.findLast(tx, dto.geofenceId, dto.trackedSubjectId);
+      const last = await this.eventsRepo.findLast(
+        tx,
+        dto.geofenceId,
+        dto.trackedSubjectId,
+      );
       if (last && last.eventTypeConceptId === eventTypeConceptId) {
-        throw new ConflictException('El sujeto ya está en ese estado respecto al geofence', {
-          eventType: dto.eventType,
-        });
+        throw new ConflictException(
+          'El sujeto ya está en ese estado respecto al geofence',
+          {
+            eventType: dto.eventType,
+          },
+        );
       }
 
       const event = this.eventsRepo.record(tx, {

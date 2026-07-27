@@ -18,7 +18,10 @@ export type FactorType = 'TOTP' | 'WEBAUTHN';
  * uno existente (`verify: true` + `factorId`). El servicio valida la combinación.
  */
 export class MfaFactorDto {
-  @ApiPropertyOptional({ description: 'Tipo de factor a enrolar', enum: ['TOTP', 'WEBAUTHN'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de factor a enrolar',
+    enum: ['TOTP', 'WEBAUTHN'],
+  })
   @IsOptional()
   @IsIn(['TOTP', 'WEBAUTHN'])
   factorType?: FactorType;
@@ -29,7 +32,9 @@ export class MfaFactorDto {
   @MaxLength(200)
   label?: string;
 
-  @ApiPropertyOptional({ description: 'Si es true, verifica el factor indicado' })
+  @ApiPropertyOptional({
+    description: 'Si es true, verifica el factor indicado',
+  })
   @IsOptional()
   @IsBoolean()
   verify?: boolean;

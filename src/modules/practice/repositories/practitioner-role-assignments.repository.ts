@@ -24,15 +24,24 @@ export interface CreateRoleAssignmentData {
 /** Acceso a datos de `practice.practitioner_role_assignments` (stateless). */
 @Injectable()
 export class PractitionerRoleAssignmentsRepository {
-  findById(em: EntityManager, id: string): Promise<PractitionerRoleAssignments | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PractitionerRoleAssignments | null> {
     return em.findOne(PractitionerRoleAssignments, { id });
   }
 
-  findBySite(em: EntityManager, practiceSiteId: string): Promise<PractitionerRoleAssignments[]> {
+  findBySite(
+    em: EntityManager,
+    practiceSiteId: string,
+  ): Promise<PractitionerRoleAssignments[]> {
     return em.find(PractitionerRoleAssignments, { practiceSiteId });
   }
 
-  create(em: EntityManager, data: CreateRoleAssignmentData): PractitionerRoleAssignments {
+  create(
+    em: EntityManager,
+    data: CreateRoleAssignmentData,
+  ): PractitionerRoleAssignments {
     return em.create(
       PractitionerRoleAssignments,
       {

@@ -2,7 +2,11 @@ import { jest } from '@jest/globals';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { FormsFieldsService } from './forms-fields.service';
-import { ConflictException, PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  ConflictException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'steward-1', roles: ['USER'] } as any;
 
@@ -21,7 +25,7 @@ function build() {
     createAccessRule: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new FormsFieldsService(em as any, fieldsRepo as any, logger as any);
+  const service = new FormsFieldsService(em as any, fieldsRepo, logger as any);
   return { service, tx, fieldsRepo };
 }
 
@@ -49,7 +53,10 @@ describe('FormsFieldsService', () => {
       const d = build();
       d.fieldsRepo.findFieldByCode.mockResolvedValue({ id: 'f0' });
       await expect(
-        d.service.createFieldDefinition({ code: 'C', name: 'N', dataType: 'string' } as any, actor),
+        d.service.createFieldDefinition(
+          { code: 'C', name: 'N', dataType: 'string' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -71,7 +78,11 @@ describe('FormsFieldsService', () => {
     it('rejects a self dependency', async () => {
       const d = build();
       await expect(
-        d.service.addDependency('same', { sourceFieldId: 'same', operator: 'EQ', behavior: 'SHOW' } as any, actor),
+        d.service.addDependency(
+          'same',
+          { sourceFieldId: 'same', operator: 'EQ', behavior: 'SHOW' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -80,7 +91,11 @@ describe('FormsFieldsService', () => {
       d.fieldsRepo.findFieldById.mockResolvedValue({ id: 'x' });
       d.fieldsRepo.findDependency.mockResolvedValue({ id: 'dep0' });
       await expect(
-        d.service.addDependency('t', { sourceFieldId: 's', operator: 'EQ', behavior: 'SHOW' } as any, actor),
+        d.service.addDependency(
+          't',
+          { sourceFieldId: 's', operator: 'EQ', behavior: 'SHOW' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -91,7 +106,12 @@ describe('FormsFieldsService', () => {
       d.fieldsRepo.findFieldById.mockResolvedValue({ id: 'f1' });
       d.fieldsRepo.findLocalization.mockResolvedValue(null);
       d.fieldsRepo.createLocalization.mockReturnValue({ id: 'loc1' });
-      const res = await d.service.upsertLocalization('f1', 'es', { label: 'Nombre' } as any, actor);
+      const res = await d.service.upsertLocalization(
+        'f1',
+        'es',
+        { label: 'Nombre' },
+        actor,
+      );
       expect(res).toEqual({ id: 'loc1' });
     });
 
@@ -128,7 +148,11 @@ describe('FormsFieldsService', () => {
       const d = build();
       d.fieldsRepo.findFieldById.mockResolvedValue(null);
       await expect(
-        d.service.createAccessRule('f1', { purposeOfUseValueSetId: 'vs-1' } as any, actor),
+        d.service.createAccessRule(
+          'f1',
+          { purposeOfUseValueSetId: 'vs-1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

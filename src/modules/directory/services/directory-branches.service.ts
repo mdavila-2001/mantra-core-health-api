@@ -36,34 +36,51 @@ export class DirectoryBranchesService {
     );
     return this.em.transactional(async (tx) => {
       const tenant = await this.tenantsRepo.findById(tx, tenantId);
-      if (!tenant) throw new ResourceNotFoundException('Tenant no encontrado', { tenantId });
+      if (!tenant)
+        throw new ResourceNotFoundException('Tenant no encontrado', {
+          tenantId,
+        });
 
       if (tenant.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
-        throw new PreconditionFailedException('El tenant no está activo', { tenantId });
+        throw new PreconditionFailedException('El tenant no está activo', {
+          tenantId,
+        });
       }
 
-      const clash = await this.branchesRepo.findByTenantAndCode(tx, tenantId, dto.code);
+      const clash = await this.branchesRepo.findByTenantAndCode(
+        tx,
+        tenantId,
+        dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe una branch con ese código en el tenant', {
-          tenantId,
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe una branch con ese código en el tenant',
+          {
+            tenantId,
+            code: dto.code,
+          },
+        );
       }
 
       const branch = this.branchesRepo.create(tx, {
         tenantId,
         code: dto.code,
         name: dto.name,
-        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE[dto.branchType ?? 'CLINIC'],
+        branchTypeConceptId:
+          BRANCH_TYPE_CONCEPT_BY_CODE[dto.branchType ?? 'CLINIC'],
         statusConceptId: DIR.BRANCH_ACTIVE,
         timeZone: dto.timeZone,
         latitude: dto.latitude !== undefined ? String(dto.latitude) : undefined,
-        longitude: dto.longitude !== undefined ? String(dto.longitude) : undefined,
+        longitude:
+          dto.longitude !== undefined ? String(dto.longitude) : undefined,
         actorUserId: actor.id,
       });
       await tx.flush();
 
-      this.logger.info({ operation: 'directory.branch.create', branchId: branch.id }, 'Branch created');
+      this.logger.info(
+        { operation: 'directory.branch.create', branchId: branch.id },
+        'Branch created',
+      );
       return {
         id: branch.id,
         tenantId: branch.tenantId,

@@ -19,8 +19,12 @@ export class ConsentSweepController {
   @Post('expiration-sweep')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Expirar consentimientos y autorizaciones vencidas (barrido)' })
-  sweep(@CurrentUser() actor: AuthenticatedUser): Promise<ExpirationSweepResultDto> {
+  @ApiOperation({
+    summary: 'Expirar consentimientos y autorizaciones vencidas (barrido)',
+  })
+  sweep(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ExpirationSweepResultDto> {
     return this.sweepService.sweep(actor);
   }
 }

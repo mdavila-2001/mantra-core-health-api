@@ -3,7 +3,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { FormsValuesService } from './forms-values.service';
 import { FORMS } from '../forms.concepts';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'clin-1', roles: ['USER'] } as any;
 
@@ -18,7 +21,12 @@ function build() {
   };
   const instancesRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new FormsValuesService(em as any, valuesRepo as any, instancesRepo as any, logger as any);
+  const service = new FormsValuesService(
+    em as any,
+    valuesRepo as any,
+    instancesRepo as any,
+    logger as any,
+  );
   return { service, tx, valuesRepo, instancesRepo };
 }
 
@@ -34,7 +42,11 @@ describe('FormsValuesService', () => {
     it('captures values and writes an audit row per value', async () => {
       const d = build();
       d.instancesRepo.findById.mockResolvedValue(openInstance);
-      d.valuesRepo.create.mockReturnValue({ id: 'v1', fieldId: 'f1', ordinal: 0 });
+      d.valuesRepo.create.mockReturnValue({
+        id: 'v1',
+        fieldId: 'f1',
+        ordinal: 0,
+      });
       const res = await d.service.captureValues(
         'i1',
         { values: [{ fieldId: 'f1', dataType: 'string', value: 'hi' }] } as any,
@@ -49,9 +61,18 @@ describe('FormsValuesService', () => {
 
     it('rejects capturing on an instance that is not open', async () => {
       const d = build();
-      d.instancesRepo.findById.mockResolvedValue({ ...openInstance, stateConceptId: FORMS.INSTANCE_CLOSED });
+      d.instancesRepo.findById.mockResolvedValue({
+        ...openInstance,
+        stateConceptId: FORMS.INSTANCE_CLOSED,
+      });
       await expect(
-        d.service.captureValues('i1', { values: [{ fieldId: 'f1', dataType: 'string', value: 'x' }] } as any, actor),
+        d.service.captureValues(
+          'i1',
+          {
+            values: [{ fieldId: 'f1', dataType: 'string', value: 'x' }],
+          } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
@@ -72,7 +93,11 @@ describe('FormsValuesService', () => {
       };
       d.valuesRepo.findById.mockResolvedValue(previous);
       d.valuesRepo.create.mockReturnValue({ id: 'v2' });
-      const res = await d.service.correctValue('v1', { dataType: 'string', value: 'fixed' } as any, actor);
+      const res = await d.service.correctValue(
+        'v1',
+        { dataType: 'string', value: 'fixed' } as any,
+        actor,
+      );
       expect(res).toEqual({ id: 'v2' });
       expect(previous.valueStatusConceptId).toBe(FORMS.VALUE_SUPERSEDED);
       expect(d.valuesRepo.createAudit).toHaveBeenCalledWith(
@@ -83,9 +108,16 @@ describe('FormsValuesService', () => {
 
     it('rejects correcting an already superseded value', async () => {
       const d = build();
-      d.valuesRepo.findById.mockResolvedValue({ id: 'v1', valueStatusConceptId: FORMS.VALUE_SUPERSEDED });
+      d.valuesRepo.findById.mockResolvedValue({
+        id: 'v1',
+        valueStatusConceptId: FORMS.VALUE_SUPERSEDED,
+      });
       await expect(
-        d.service.correctValue('v1', { dataType: 'string', value: 'x' } as any, actor),
+        d.service.correctValue(
+          'v1',
+          { dataType: 'string', value: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -93,7 +125,11 @@ describe('FormsValuesService', () => {
       const d = build();
       d.valuesRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.correctValue('v1', { dataType: 'string', value: 'x' } as any, actor),
+        d.service.correctValue(
+          'v1',
+          { dataType: 'string', value: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -102,11 +138,22 @@ describe('FormsValuesService', () => {
     it('imports external values with provenance and audit', async () => {
       const d = build();
       d.instancesRepo.findById.mockResolvedValue(openInstance);
-      d.valuesRepo.create.mockReturnValue({ id: 'v1', fieldId: 'f1', ordinal: 0 });
+      d.valuesRepo.create.mockReturnValue({
+        id: 'v1',
+        fieldId: 'f1',
+        ordinal: 0,
+      });
       const res = await d.service.importValues(
         {
           importBatchId: 'batch-1',
-          items: [{ formInstanceId: 'i1', fieldId: 'f1', dataType: 'string', value: 'ext' }],
+          items: [
+            {
+              formInstanceId: 'i1',
+              fieldId: 'f1',
+              dataType: 'string',
+              value: 'ext',
+            },
+          ],
         } as any,
         actor,
       );
@@ -123,7 +170,17 @@ describe('FormsValuesService', () => {
       d.instancesRepo.findById.mockResolvedValue(null);
       await expect(
         d.service.importValues(
-          { importBatchId: 'b', items: [{ formInstanceId: 'i9', fieldId: 'f1', dataType: 'string', value: 'x' }] } as any,
+          {
+            importBatchId: 'b',
+            items: [
+              {
+                formInstanceId: 'i9',
+                fieldId: 'f1',
+                dataType: 'string',
+                value: 'x',
+              },
+            ],
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);

@@ -46,17 +46,26 @@ describe('AssessmentService', () => {
       const d = build();
       d.repo.findFrameworkByCodeVersion.mockResolvedValue({ id: 'f1' });
       await expect(
-        d.service.publishFramework({ code: 'C', version: '1', controls: [] } as any, actor),
+        d.service.publishFramework(
+          { code: 'C', version: '1', controls: [] } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('creates framework and links control hierarchy', async () => {
       const d = build();
       d.repo.findFrameworkByCodeVersion.mockResolvedValue(null);
-      d.repo.createFramework.mockReturnValue({ id: 'f1', code: 'C', version: '1' });
+      d.repo.createFramework.mockReturnValue({
+        id: 'f1',
+        code: 'C',
+        version: '1',
+      });
       const parent: any = { id: 'ctrl-parent' };
       const child: any = { id: 'ctrl-child' };
-      d.repo.createControl.mockReturnValueOnce(parent).mockReturnValueOnce(child);
+      d.repo.createControl
+        .mockReturnValueOnce(parent)
+        .mockReturnValueOnce(child);
 
       const res = await d.service.publishFramework(
         {
@@ -68,7 +77,7 @@ describe('AssessmentService', () => {
             { controlCode: 'A', title: 'A' },
             { controlCode: 'B', title: 'B', parentControlCode: 'A' },
           ],
-        } as any,
+        },
         actor,
       );
 
@@ -82,24 +91,42 @@ describe('AssessmentService', () => {
       const d = build();
       d.repo.findFrameworkById.mockResolvedValue(null);
       await expect(
-        d.service.createAssessment({ operationalFrameworkId: 'f1' } as any, actor),
+        d.service.createAssessment(
+          { operationalFrameworkId: 'f1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects an unpublished framework', async () => {
       const d = build();
-      d.repo.findFrameworkById.mockResolvedValue({ id: 'f1', stateConceptId: 'draft' });
+      d.repo.findFrameworkById.mockResolvedValue({
+        id: 'f1',
+        stateConceptId: 'draft',
+      });
       await expect(
-        d.service.createAssessment({ operationalFrameworkId: 'f1' } as any, actor),
+        d.service.createAssessment(
+          { operationalFrameworkId: 'f1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('creates the assessment IN_PROGRESS', async () => {
       const d = build();
-      d.repo.findFrameworkById.mockResolvedValue({ id: 'f1', stateConceptId: CONCEPTS.STATE_ACTIVE });
+      d.repo.findFrameworkById.mockResolvedValue({
+        id: 'f1',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
       d.repo.createAssessment.mockReturnValue({ id: 'a1' });
       const res = await d.service.createAssessment(
-        { operationalFrameworkId: 'f1', tenantId: 't', workloadCode: 'w', workloadName: 'W', assessmentTypeConceptId: 'ty' } as any,
+        {
+          operationalFrameworkId: 'f1',
+          tenantId: 't',
+          workloadCode: 'w',
+          workloadName: 'W',
+          assessmentTypeConceptId: 'ty',
+        },
         actor,
       );
       expect(res).toEqual({ id: 'a1' });
@@ -112,7 +139,11 @@ describe('AssessmentService', () => {
       d.repo.findAssessmentById.mockResolvedValue({ id: 'a1' });
       d.repo.findFindingByCode.mockResolvedValue({ id: 'x' });
       await expect(
-        d.service.createFinding('a1', { findingCode: 'F1', title: 't', severityConceptId: 's' } as any, actor),
+        d.service.createFinding(
+          'a1',
+          { findingCode: 'F1', title: 't', severityConceptId: 's' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -126,7 +157,11 @@ describe('AssessmentService', () => {
         assignedUserId: actor.id,
       });
       await expect(
-        d.service.verifyAction('ra1', { verificationEvidenceJson: {} } as any, actor),
+        d.service.verifyAction(
+          'ra1',
+          { verificationEvidenceJson: {} } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -139,13 +174,25 @@ describe('AssessmentService', () => {
         remediationPlanId: 'pl1',
         updatedAt: new Date(),
       };
-      const finding: any = { id: 'fnd1', statusConceptId: SYSOPS.FINDING_OPEN, updatedAt: new Date() };
-      const plan: any = { id: 'pl1', statusConceptId: SYSOPS.PLAN_OPEN, updatedAt: new Date() };
+      const finding: any = {
+        id: 'fnd1',
+        statusConceptId: SYSOPS.FINDING_OPEN,
+        updatedAt: new Date(),
+      };
+      const plan: any = {
+        id: 'pl1',
+        statusConceptId: SYSOPS.PLAN_OPEN,
+        updatedAt: new Date(),
+      };
       d.repo.findActionById.mockResolvedValue(action);
       d.repo.findFindingById.mockResolvedValue(finding);
       d.repo.findPlanById.mockResolvedValue(plan);
 
-      const res = await d.service.verifyAction('ra1', { verificationEvidenceJson: { ok: true } } as any, actor);
+      const res = await d.service.verifyAction(
+        'ra1',
+        { verificationEvidenceJson: { ok: true } },
+        actor,
+      );
       expect(res).toEqual({ ok: true });
       expect(action.statusConceptId).toBe(SYSOPS.ACTION_VERIFIED);
       expect(finding.statusConceptId).toBe(SYSOPS.FINDING_CLOSED);

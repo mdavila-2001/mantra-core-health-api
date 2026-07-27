@@ -12,7 +12,11 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const conditionsRepo = { findActiveByCode: mockFn(), create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new ConditionsService(em as any, conditionsRepo as any, logger as any);
+  const service = new ConditionsService(
+    em as any,
+    conditionsRepo as any,
+    logger as any,
+  );
   return { service, conditionsRepo };
 }
 
@@ -28,7 +32,11 @@ describe('ConditionsService (UC-08-08)', () => {
       createdAt: new Date(),
     });
     const res = await d.service.create(
-      { custodianTenantId: 't1', patientProfileId: 'p1', codeConceptId: 'code1' } as any,
+      {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        codeConceptId: 'code1',
+      },
       actor,
     );
     expect(res.clinicalStatus).toBe(CLIN.CONDITION_ACTIVE);
@@ -40,7 +48,11 @@ describe('ConditionsService (UC-08-08)', () => {
     d.conditionsRepo.findActiveByCode.mockResolvedValue({ id: 'existing' });
     await expect(
       d.service.create(
-        { custodianTenantId: 't1', patientProfileId: 'p1', codeConceptId: 'code1' } as any,
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          codeConceptId: 'code1',
+        } as any,
         actor,
       ),
     ).rejects.toBeInstanceOf(ConflictException);

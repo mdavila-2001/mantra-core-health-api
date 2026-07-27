@@ -23,11 +23,17 @@ export interface CreateDelegateData {
 /** Acceso a datos de `delegated_access.practitioner_delegate_assignments`. */
 @Injectable()
 export class PractitionerDelegateAssignmentsRepository {
-  findById(em: EntityManager, id: string): Promise<PractitionerDelegateAssignments | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PractitionerDelegateAssignments | null> {
     return em.findOne(PractitionerDelegateAssignments, { id });
   }
 
-  create(em: EntityManager, data: CreateDelegateData): PractitionerDelegateAssignments {
+  create(
+    em: EntityManager,
+    data: CreateDelegateData,
+  ): PractitionerDelegateAssignments {
     return em.create(
       PractitionerDelegateAssignments,
       {
@@ -61,7 +67,11 @@ export class PractitionerDelegateAssignmentsRepository {
     return em.nativeUpdate(
       PractitionerDelegateAssignments,
       { delegateUserAssignmentId, statusConceptId: activeStatusConceptId },
-      { statusConceptId: suspendedStatusConceptId, updatedAt: now, updatedByUserId: actorUserId },
+      {
+        statusConceptId: suspendedStatusConceptId,
+        updatedAt: now,
+        updatedByUserId: actorUserId,
+      },
     );
   }
 

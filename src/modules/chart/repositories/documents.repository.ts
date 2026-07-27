@@ -35,7 +35,10 @@ export interface CreateDocumentFileData {
  */
 @Injectable()
 export class DocumentsRepository {
-  createRecord(em: EntityManager, data: CreateDocumentRecordData): DocumentRecords {
+  createRecord(
+    em: EntityManager,
+    data: CreateDocumentRecordData,
+  ): DocumentRecords {
     return em.create(
       DocumentRecords,
       {
@@ -57,7 +60,10 @@ export class DocumentsRepository {
     );
   }
 
-  createFile(em: EntityManager, data: CreateDocumentFileData): DocumentRecordFiles {
+  createFile(
+    em: EntityManager,
+    data: CreateDocumentFileData,
+  ): DocumentRecordFiles {
     return em.create(
       DocumentRecordFiles,
       {

@@ -10,7 +10,11 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { HipaaAuthorizationsService } from '../services';
-import { CreateHipaaAuthorizationDto, HipaaAuthorizationResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateHipaaAuthorizationDto,
+  HipaaAuthorizationResponseDto,
+  StatusResultDto,
+} from '../dto';
 
 /** Endpoints sobre `/consent/hipaa-authorizations`. */
 @ApiTags('consent-hipaa-authorizations')

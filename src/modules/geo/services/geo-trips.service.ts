@@ -29,25 +29,45 @@ export class GeoTripsService {
   }
 
   /** UC-13-06: inicia un viaje IN_PROGRESS sobre una sesión OPEN sin viaje activo. */
-  async start(dto: StartTripDto, actor: AuthenticatedUser): Promise<TripResponseDto> {
+  async start(
+    dto: StartTripDto,
+    actor: AuthenticatedUser,
+  ): Promise<TripResponseDto> {
     this.logger.info(
-      { operation: 'geo.trip.start', trackingSessionId: dto.trackingSessionId, actorId: actor.id },
+      {
+        operation: 'geo.trip.start',
+        trackingSessionId: dto.trackingSessionId,
+        actorId: actor.id,
+      },
       'Starting trip',
     );
     return this.em.transactional(async (tx) => {
-      const session = await this.sessionsRepo.findById(tx, dto.trackingSessionId);
+      const session = await this.sessionsRepo.findById(
+        tx,
+        dto.trackingSessionId,
+      );
       if (!session) {
-        throw new ResourceNotFoundException('Sesión de tracking no encontrada', {
-          trackingSessionId: dto.trackingSessionId,
-        });
+        throw new ResourceNotFoundException(
+          'Sesión de tracking no encontrada',
+          {
+            trackingSessionId: dto.trackingSessionId,
+          },
+        );
       }
       if (session.statusConceptId !== GEO.SESSION_OPEN) {
-        throw new PreconditionFailedException('La sesión de tracking no está abierta', {
-          trackingSessionId: dto.trackingSessionId,
-        });
+        throw new PreconditionFailedException(
+          'La sesión de tracking no está abierta',
+          {
+            trackingSessionId: dto.trackingSessionId,
+          },
+        );
       }
 
-      const active = await this.tripsRepo.findInProgressBySession(tx, dto.trackingSessionId, GEO.TRIP_IN_PROGRESS);
+      const active = await this.tripsRepo.findInProgressBySession(
+        tx,
+        dto.trackingSessionId,
+        GEO.TRIP_IN_PROGRESS,
+      );
       if (active) {
         throw new ConflictException('La sesión ya tiene un viaje en progreso', {
           trackingSessionId: dto.trackingSessionId,
@@ -67,20 +87,33 @@ export class GeoTripsService {
 
       touch(session, actor.id, now);
 
-      this.logger.info({ operation: 'geo.trip.start', tripId: trip.id }, 'Trip started');
+      this.logger.info(
+        { operation: 'geo.trip.start', tripId: trip.id },
+        'Trip started',
+      );
       return this.toResponse(trip);
     });
   }
 
   /** UC-13-07: cierra un viaje IN_PROGRESS -> COMPLETED con distancia/duración. */
-  async close(tripId: string, dto: CloseTripDto, actor: AuthenticatedUser): Promise<TripResponseDto> {
-    this.logger.info({ operation: 'geo.trip.close', tripId, actorId: actor.id }, 'Closing trip');
+  async close(
+    tripId: string,
+    dto: CloseTripDto,
+    actor: AuthenticatedUser,
+  ): Promise<TripResponseDto> {
+    this.logger.info(
+      { operation: 'geo.trip.close', tripId, actorId: actor.id },
+      'Closing trip',
+    );
     return this.em.transactional(async (tx) => {
       const trip = await this.tripsRepo.findById(tx, tripId);
-      if (!trip) throw new ResourceNotFoundException('Viaje no encontrado', { tripId });
+      if (!trip)
+        throw new ResourceNotFoundException('Viaje no encontrado', { tripId });
 
       if (trip.statusConceptId !== GEO.TRIP_IN_PROGRESS) {
-        throw new PreconditionFailedException('El viaje no está en progreso', { tripId });
+        throw new PreconditionFailedException('El viaje no está en progreso', {
+          tripId,
+        });
       }
 
       const now = new Date();
@@ -90,11 +123,17 @@ export class GeoTripsService {
       if (dto.durationS !== undefined) {
         trip.durationS = dto.durationS;
       } else if (trip.startedAt) {
-        trip.durationS = Math.max(0, Math.round((now.getTime() - trip.startedAt.getTime()) / 1000));
+        trip.durationS = Math.max(
+          0,
+          Math.round((now.getTime() - trip.startedAt.getTime()) / 1000),
+        );
       }
       touch(trip, actor.id, now);
 
-      this.logger.info({ operation: 'geo.trip.close', tripId }, 'Trip completed');
+      this.logger.info(
+        { operation: 'geo.trip.close', tripId },
+        'Trip completed',
+      );
       return this.toResponse(trip);
     });
   }

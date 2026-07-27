@@ -6,7 +6,10 @@ export type SubjectTypeCode = 'PERSON' | 'VEHICLE';
 
 /** Cuerpo de `POST /geo/tracked-subjects` (UC-13-01). */
 export class CreateTrackedSubjectDto {
-  @ApiProperty({ description: 'Id del recurso rastreado (ambulancia/persona)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Id del recurso rastreado (ambulancia/persona)',
+    format: 'uuid',
+  })
   @IsUUID()
   subjectId!: string;
 
@@ -19,12 +22,18 @@ export class CreateTrackedSubjectDto {
   @IsIn(['PERSON', 'VEHICLE'])
   subjectType?: SubjectTypeCode;
 
-  @ApiPropertyOptional({ description: 'Dispositivo GPS asociado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Dispositivo GPS asociado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   deviceId?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant propietario (RLS)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant propietario (RLS)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;

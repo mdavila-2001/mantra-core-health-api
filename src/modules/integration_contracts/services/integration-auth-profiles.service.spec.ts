@@ -16,7 +16,7 @@ function build() {
   const service = new IntegrationAuthProfilesService(
     em as any,
     contractsRepo as any,
-    authProfilesRepo as any,
+    authProfilesRepo,
     logger as any,
   );
   return { service, tx, contractsRepo, authProfilesRepo };
@@ -27,15 +27,25 @@ describe('IntegrationAuthProfilesService', () => {
     it('creates an ACTIVE auth profile without leaking secrets', async () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue({ id: 'c1' });
-      d.authProfilesRepo.create.mockReturnValue({ id: 'ap1', statusConceptId: ICON.AUTH_PROFILE_ACTIVE });
+      d.authProfilesRepo.create.mockReturnValue({
+        id: 'ap1',
+        statusConceptId: ICON.AUTH_PROFILE_ACTIVE,
+      });
 
       const res = await d.service.configure(
         'c1',
-        { credentialSecretReference: 'secret://ref', clientIdentifier: 'cid' } as any,
+        {
+          credentialSecretReference: 'secret://ref',
+          clientIdentifier: 'cid',
+        },
         actor,
       );
 
-      expect(res).toEqual({ id: 'ap1', integrationContractId: 'c1', status: ICON.AUTH_PROFILE_ACTIVE });
+      expect(res).toEqual({
+        id: 'ap1',
+        integrationContractId: 'c1',
+        status: ICON.AUTH_PROFILE_ACTIVE,
+      });
       expect(d.authProfilesRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -49,7 +59,11 @@ describe('IntegrationAuthProfilesService', () => {
       const d = build();
       d.contractsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.configure('c1', { credentialSecretReference: 'x' } as any, actor),
+        d.service.configure(
+          'c1',
+          { credentialSecretReference: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -66,7 +80,12 @@ describe('IntegrationAuthProfilesService', () => {
       };
       d.authProfilesRepo.findById.mockResolvedValue(profile);
 
-      const res = await d.service.rotate('c1', 'ap1', { credentialSecretReference: 'new' } as any, actor);
+      const res = await d.service.rotate(
+        'c1',
+        'ap1',
+        { credentialSecretReference: 'new' },
+        actor,
+      );
 
       expect(res).toEqual({ ok: true });
       expect(profile.credentialSecretReference).toBe('new');
@@ -82,15 +101,28 @@ describe('IntegrationAuthProfilesService', () => {
         updatedAt: new Date(),
       };
       d.authProfilesRepo.findById.mockResolvedValue(profile);
-      await d.service.rotate('c1', 'ap1', { credentialSecretReference: 'n', targetStatus: 'REVOKED' } as any, actor);
+      await d.service.rotate(
+        'c1',
+        'ap1',
+        { credentialSecretReference: 'n', targetStatus: 'REVOKED' } as any,
+        actor,
+      );
       expect(profile.statusConceptId).toBe(ICON.AUTH_PROFILE_REVOKED);
     });
 
     it('throws not found when the profile does not belong to the contract (404)', async () => {
       const d = build();
-      d.authProfilesRepo.findById.mockResolvedValue({ id: 'ap1', integrationContractId: 'other' });
+      d.authProfilesRepo.findById.mockResolvedValue({
+        id: 'ap1',
+        integrationContractId: 'other',
+      });
       await expect(
-        d.service.rotate('c1', 'ap1', { credentialSecretReference: 'n' } as any, actor),
+        d.service.rotate(
+          'c1',
+          'ap1',
+          { credentialSecretReference: 'n' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

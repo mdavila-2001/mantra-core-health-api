@@ -35,6 +35,10 @@ export class FrontendRoutesRepository {
 
   create(em: EntityManager, data: CreateFrontendRouteData): FrontendRoutes {
     const { actorUserId, ...rest } = data;
-    return em.create(FrontendRoutes, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FrontendRoutes,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

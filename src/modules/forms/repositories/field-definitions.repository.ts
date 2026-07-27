@@ -82,15 +82,24 @@ export interface CreateAccessRuleData {
  */
 @Injectable()
 export class FieldDefinitionsRepository {
-  findFieldById(em: EntityManager, id: string): Promise<DynamicFieldDefinitions | null> {
+  findFieldById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DynamicFieldDefinitions | null> {
     return em.findOne(DynamicFieldDefinitions, { id });
   }
 
-  findFieldByCode(em: EntityManager, code: string): Promise<DynamicFieldDefinitions | null> {
+  findFieldByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<DynamicFieldDefinitions | null> {
     return em.findOne(DynamicFieldDefinitions, { code });
   }
 
-  createField(em: EntityManager, data: CreateFieldData): DynamicFieldDefinitions {
+  createField(
+    em: EntityManager,
+    data: CreateFieldData,
+  ): DynamicFieldDefinitions {
     const { actorUserId, ...rest } = data;
     return em.create(
       DynamicFieldDefinitions,
@@ -99,7 +108,10 @@ export class FieldDefinitionsRepository {
     );
   }
 
-  createValidationRule(em: EntityManager, data: CreateValidationRuleData): FieldValidationRules {
+  createValidationRule(
+    em: EntityManager,
+    data: CreateValidationRuleData,
+  ): FieldValidationRules {
     const { actorUserId, ...rest } = data;
     return em.create(
       FieldValidationRules,
@@ -121,9 +133,16 @@ export class FieldDefinitionsRepository {
     });
   }
 
-  createDependency(em: EntityManager, data: CreateDependencyData): FieldDependencies {
+  createDependency(
+    em: EntityManager,
+    data: CreateDependencyData,
+  ): FieldDependencies {
     const { actorUserId, ...rest } = data;
-    return em.create(FieldDependencies, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FieldDependencies,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   findLocalization(
@@ -131,10 +150,16 @@ export class FieldDefinitionsRepository {
     fieldId: string,
     languageConceptId: string,
   ): Promise<FieldDefinitionLocalizations | null> {
-    return em.findOne(FieldDefinitionLocalizations, { fieldId, languageConceptId });
+    return em.findOne(FieldDefinitionLocalizations, {
+      fieldId,
+      languageConceptId,
+    });
   }
 
-  createLocalization(em: EntityManager, data: UpsertLocalizationData): FieldDefinitionLocalizations {
+  createLocalization(
+    em: EntityManager,
+    data: UpsertLocalizationData,
+  ): FieldDefinitionLocalizations {
     const { actorUserId, ...rest } = data;
     return em.create(
       FieldDefinitionLocalizations,
@@ -143,8 +168,15 @@ export class FieldDefinitionsRepository {
     );
   }
 
-  createAccessRule(em: EntityManager, data: CreateAccessRuleData): FieldValueAccessRules {
+  createAccessRule(
+    em: EntityManager,
+    data: CreateAccessRuleData,
+  ): FieldValueAccessRules {
     const { actorUserId, ...rest } = data;
-    return em.create(FieldValueAccessRules, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FieldValueAccessRules,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

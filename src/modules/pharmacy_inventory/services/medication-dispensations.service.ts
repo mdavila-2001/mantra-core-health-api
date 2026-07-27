@@ -13,12 +13,21 @@ import {
   StockPositionsRepository,
   LedgerRepository,
 } from '../repositories';
-import { CreateDispensationDto, ReverseDispensationDto, MovementResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateDispensationDto,
+  ReverseDispensationDto,
+  MovementResponseDto,
+  StatusResultDto,
+} from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
-const num = (v: string | null | undefined): number => (v == null ? 0 : Number(v));
-const recompute = (onHand: string, reserved: string, quarantine: string): string =>
-  String(num(onHand) - num(reserved) - num(quarantine));
+const num = (v: string | null | undefined): number =>
+  v == null ? 0 : Number(v);
+const recompute = (
+  onHand: string,
+  reserved: string,
+  quarantine: string,
+): string => String(num(onHand) - num(reserved) - num(quarantine));
 
 /** Dispensación de prescripciones (UC-25-03) y su reversión/devolución (UC-25-11). */
 @Injectable()
@@ -41,12 +50,19 @@ export class MedicationDispensationsService {
     actor: AuthenticatedUser,
   ): Promise<MovementResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.dispensation.create', pharmacyId, patient: dto.patientProfileId },
+      {
+        operation: 'pharmacy_inventory.dispensation.create',
+        pharmacyId,
+        patient: dto.patientProfileId,
+      },
       'Dispensing medication',
     );
     return this.em.transactional(async (tx) => {
       if (dto.inventoryReservationId) {
-        const reservation = await this.reservationsRepo.findById(tx, dto.inventoryReservationId);
+        const reservation = await this.reservationsRepo.findById(
+          tx,
+          dto.inventoryReservationId,
+        );
         if (!reservation) {
           throw new ResourceNotFoundException('Reserva no encontrada', {
             reservationId: dto.inventoryReservationId,
@@ -76,12 +92,18 @@ export class MedicationDispensationsService {
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
         });
-        if (!position || num(position.onHandQuantity) < line.dispensedQuantity) {
-          throw new PreconditionFailedException('Stock insuficiente para dispensar', {
-            productId: line.pharmacyProductId,
-            onHand: position ? num(position.onHandQuantity) : 0,
-            requested: line.dispensedQuantity,
-          });
+        if (
+          !position ||
+          num(position.onHandQuantity) < line.dispensedQuantity
+        ) {
+          throw new PreconditionFailedException(
+            'Stock insuficiente para dispensar',
+            {
+              productId: line.pharmacyProductId,
+              onHand: position ? num(position.onHandQuantity) : 0,
+              requested: line.dispensedQuantity,
+            },
+          );
         }
 
         const created = this.dispensationsRepo.createLine(tx, {
@@ -89,8 +111,10 @@ export class MedicationDispensationsService {
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
           dispensedQuantity: String(line.dispensedQuantity),
-          patientAmount: line.patientAmount != null ? String(line.patientAmount) : undefined,
-          insurerAmount: line.insurerAmount != null ? String(line.insurerAmount) : undefined,
+          patientAmount:
+            line.patientAmount != null ? String(line.patientAmount) : undefined,
+          insurerAmount:
+            line.insurerAmount != null ? String(line.insurerAmount) : undefined,
           actorUserId: actor.id,
         });
         lineIds.push(created.id);
@@ -110,10 +134,17 @@ export class MedicationDispensationsService {
         });
         ledgerEntryIds.push(entry.id);
 
-        position.onHandQuantity = String(num(position.onHandQuantity) - line.dispensedQuantity);
+        position.onHandQuantity = String(
+          num(position.onHandQuantity) - line.dispensedQuantity,
+        );
         // Si la reserva cubría este lote, se libera al dispensar.
-        if (dto.inventoryReservationId && num(position.reservedQuantity) >= line.dispensedQuantity) {
-          position.reservedQuantity = String(num(position.reservedQuantity) - line.dispensedQuantity);
+        if (
+          dto.inventoryReservationId &&
+          num(position.reservedQuantity) >= line.dispensedQuantity
+        ) {
+          position.reservedQuantity = String(
+            num(position.reservedQuantity) - line.dispensedQuantity,
+          );
         }
         position.availableQuantity = recompute(
           position.onHandQuantity,
@@ -125,11 +156,17 @@ export class MedicationDispensationsService {
       }
 
       if (dto.inventoryReservationId) {
-        const reservation = await this.reservationsRepo.findById(tx, dto.inventoryReservationId);
+        const reservation = await this.reservationsRepo.findById(
+          tx,
+          dto.inventoryReservationId,
+        );
         if (reservation) {
           reservation.reservationStatusConceptId = PINV.RESERVATION_FULFILLED;
           touch(reservation, actor.id);
-          const rlines = await this.reservationsRepo.findLinesByReservation(tx, reservation.id);
+          const rlines = await this.reservationsRepo.findLinesByReservation(
+            tx,
+            reservation.id,
+          );
           for (const rl of rlines) {
             rl.fulfilledQuantity = rl.reservedQuantity;
             rl.statusConceptId = PINV.RES_LINE_FULFILLED;
@@ -149,16 +186,29 @@ export class MedicationDispensationsService {
     dto: ReverseDispensationDto,
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'pharmacy_inventory.dispensation.reverse', dispensationId: id }, 'Reversing dispensation');
+    this.logger.info(
+      {
+        operation: 'pharmacy_inventory.dispensation.reverse',
+        dispensationId: id,
+      },
+      'Reversing dispensation',
+    );
     return this.em.transactional(async (tx) => {
       const dispensation = await this.dispensationsRepo.findById(tx, id);
       if (!dispensation) {
-        throw new ResourceNotFoundException('Dispensación no encontrada', { dispensationId: id });
-      }
-      if (dispensation.dispensationStatusConceptId !== PINV.DISPENSE_DISPENSED) {
-        throw new PreconditionFailedException('La dispensación no está en estado reversible', {
+        throw new ResourceNotFoundException('Dispensación no encontrada', {
           dispensationId: id,
         });
+      }
+      if (
+        dispensation.dispensationStatusConceptId !== PINV.DISPENSE_DISPENSED
+      ) {
+        throw new PreconditionFailedException(
+          'La dispensación no está en estado reversible',
+          {
+            dispensationId: id,
+          },
+        );
       }
 
       dispensation.dispensationStatusConceptId = PINV.DISPENSE_REVERSED;
@@ -167,7 +217,10 @@ export class MedicationDispensationsService {
       const lines = await this.dispensationsRepo.findLines(tx, id);
       for (const dl of lines) {
         const locationId = dto.inventoryLocationId;
-        const sequence = await this.ledgerRepo.nextSequence(tx, dispensation.pharmacyId);
+        const sequence = await this.ledgerRepo.nextSequence(
+          tx,
+          dispensation.pharmacyId,
+        );
         if (locationId) {
           this.ledgerRepo.append(tx, {
             pharmacyId: dispensation.pharmacyId,
@@ -187,7 +240,9 @@ export class MedicationDispensationsService {
             inventoryLotId: dl.inventoryLotId,
           });
           if (position) {
-            position.onHandQuantity = String(num(position.onHandQuantity) + num(dl.dispensedQuantity));
+            position.onHandQuantity = String(
+              num(position.onHandQuantity) + num(dl.dispensedQuantity),
+            );
             position.availableQuantity = recompute(
               position.onHandQuantity,
               position.reservedQuantity,

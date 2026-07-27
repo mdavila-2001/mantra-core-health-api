@@ -33,11 +33,17 @@ export interface CreateGoodsReceiptLineData {
 /** Acceso a datos de las recepciones de mercancía y sus líneas. */
 @Injectable()
 export class GoodsReceiptsRepository {
-  findById(em: EntityManager, id: string): Promise<PharmacyGoodsReceipts | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PharmacyGoodsReceipts | null> {
     return em.findOne(PharmacyGoodsReceipts, { id });
   }
 
-  create(em: EntityManager, data: CreateGoodsReceiptData): PharmacyGoodsReceipts {
+  create(
+    em: EntityManager,
+    data: CreateGoodsReceiptData,
+  ): PharmacyGoodsReceipts {
     return em.create(
       PharmacyGoodsReceipts,
       {
@@ -54,7 +60,10 @@ export class GoodsReceiptsRepository {
     );
   }
 
-  createLine(em: EntityManager, data: CreateGoodsReceiptLineData): PharmacyGoodsReceiptLines {
+  createLine(
+    em: EntityManager,
+    data: CreateGoodsReceiptLineData,
+  ): PharmacyGoodsReceiptLines {
     return em.create(
       PharmacyGoodsReceiptLines,
       {

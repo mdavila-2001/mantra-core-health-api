@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { IntegrationsProvidersService, IntegrationsConnectionsService } from '../services';
+import {
+  IntegrationsProvidersService,
+  IntegrationsConnectionsService,
+} from '../services';
 import {
   RegisterProviderDto,
   ProvisionConnectionDto,
@@ -51,7 +54,9 @@ export class IntegrationsProvidersController {
   @Post('providers/:id/connections')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Aprovisionar una conexión de tenant y su credencial' })
+  @ApiOperation({
+    summary: 'Aprovisionar una conexión de tenant y su credencial',
+  })
   provisionConnection(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ProvisionConnectionDto,
@@ -64,7 +69,9 @@ export class IntegrationsProvidersController {
   @Post('providers/:id/endpoints')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Publicar un endpoint versionado y su mapeo de campos' })
+  @ApiOperation({
+    summary: 'Publicar un endpoint versionado y su mapeo de campos',
+  })
   publishEndpoint(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: PublishEndpointDto,
@@ -77,7 +84,9 @@ export class IntegrationsProvidersController {
   @Post('providers/:id/webhook-subscriptions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Gestionar (crear/actualizar) una suscripción de webhook' })
+  @ApiOperation({
+    summary: 'Gestionar (crear/actualizar) una suscripción de webhook',
+  })
   createWebhookSubscription(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateWebhookSubscriptionDto,

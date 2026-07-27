@@ -28,7 +28,11 @@ export class CreateClinicalAccessGrantDto {
   @IsIn(ACCESS_LEVELS)
   accessLevel!: AccessLevel;
 
-  @ApiProperty({ description: 'Fin de vigencia', type: String, format: 'date-time' })
+  @ApiProperty({
+    description: 'Fin de vigencia',
+    type: String,
+    format: 'date-time',
+  })
   @Type(() => Date)
   @IsDate()
   validTo!: Date;
@@ -38,20 +42,28 @@ export class CreateClinicalAccessGrantDto {
   @IsUUID()
   branchId?: string;
 
-  @ApiPropertyOptional({ description: 'Encuentro clínico asociado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Encuentro clínico asociado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   encounterId?: string;
 
   @ApiPropertyOptional({
-    description: 'Consentimiento que respalda el acceso (obligatorio salvo tratamiento directo)',
+    description:
+      'Consentimiento que respalda el acceso (obligatorio salvo tratamiento directo)',
     format: 'uuid',
   })
   @IsOptional()
   @IsUUID()
   consentId?: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia (por defecto ahora)', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia (por defecto ahora)',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()

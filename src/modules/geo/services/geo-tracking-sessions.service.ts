@@ -39,27 +39,44 @@ export class GeoTrackingSessionsService {
     actor: AuthenticatedUser,
   ): Promise<TrackingSessionResponseDto> {
     this.logger.info(
-      { operation: 'geo.session.start', trackedSubjectId: dto.trackedSubjectId, actorId: actor.id },
+      {
+        operation: 'geo.session.start',
+        trackedSubjectId: dto.trackedSubjectId,
+        actorId: actor.id,
+      },
       'Starting tracking session',
     );
     return this.em.transactional(async (tx) => {
-      const subject = await this.subjectsRepo.findById(tx, dto.trackedSubjectId);
+      const subject = await this.subjectsRepo.findById(
+        tx,
+        dto.trackedSubjectId,
+      );
       if (!subject) {
         throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
           trackedSubjectId: dto.trackedSubjectId,
         });
       }
       if (subject.stateConceptId !== GEO.SUBJECT_ACTIVE) {
-        throw new PreconditionFailedException('El sujeto no está activo para rastreo', {
-          trackedSubjectId: dto.trackedSubjectId,
-        });
+        throw new PreconditionFailedException(
+          'El sujeto no está activo para rastreo',
+          {
+            trackedSubjectId: dto.trackedSubjectId,
+          },
+        );
       }
 
-      const open = await this.sessionsRepo.findOpenBySubject(tx, dto.trackedSubjectId, GEO.SESSION_OPEN);
+      const open = await this.sessionsRepo.findOpenBySubject(
+        tx,
+        dto.trackedSubjectId,
+        GEO.SESSION_OPEN,
+      );
       if (open) {
-        throw new ConflictException('El sujeto ya tiene una sesión de tracking abierta', {
-          trackedSubjectId: dto.trackedSubjectId,
-        });
+        throw new ConflictException(
+          'El sujeto ya tiene una sesión de tracking abierta',
+          {
+            trackedSubjectId: dto.trackedSubjectId,
+          },
+        );
       }
 
       const now = new Date();
@@ -77,7 +94,10 @@ export class GeoTrackingSessionsService {
       // Marca el sujeto en-seguimiento.
       touch(subject, actor.id, now);
 
-      this.logger.info({ operation: 'geo.session.start', sessionId: session.id }, 'Tracking session started');
+      this.logger.info(
+        { operation: 'geo.session.start', sessionId: session.id },
+        'Tracking session started',
+      );
       return {
         id: session.id,
         trackedSubjectId: session.trackedSubjectId,
@@ -89,19 +109,38 @@ export class GeoTrackingSessionsService {
   }
 
   /** UC-13-08: cierra una sesión OPEN, siempre que no tenga viajes IN_PROGRESS. */
-  async close(sessionId: string, actor: AuthenticatedUser): Promise<TrackingSessionResponseDto> {
-    this.logger.info({ operation: 'geo.session.close', sessionId, actorId: actor.id }, 'Closing tracking session');
+  async close(
+    sessionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<TrackingSessionResponseDto> {
+    this.logger.info(
+      { operation: 'geo.session.close', sessionId, actorId: actor.id },
+      'Closing tracking session',
+    );
     return this.em.transactional(async (tx) => {
       const session = await this.sessionsRepo.findById(tx, sessionId);
-      if (!session) throw new ResourceNotFoundException('Sesión de tracking no encontrada', { sessionId });
+      if (!session)
+        throw new ResourceNotFoundException(
+          'Sesión de tracking no encontrada',
+          { sessionId },
+        );
 
       if (session.statusConceptId !== GEO.SESSION_OPEN) {
-        throw new PreconditionFailedException('La sesión no está abierta', { sessionId });
+        throw new PreconditionFailedException('La sesión no está abierta', {
+          sessionId,
+        });
       }
 
-      const inProgress = await this.tripsRepo.countBySessionAndStatus(tx, sessionId, GEO.TRIP_IN_PROGRESS);
+      const inProgress = await this.tripsRepo.countBySessionAndStatus(
+        tx,
+        sessionId,
+        GEO.TRIP_IN_PROGRESS,
+      );
       if (inProgress > 0) {
-        throw new PreconditionFailedException('La sesión tiene viajes en progreso', { sessionId });
+        throw new PreconditionFailedException(
+          'La sesión tiene viajes en progreso',
+          { sessionId },
+        );
       }
 
       const now = new Date();
@@ -110,10 +149,16 @@ export class GeoTrackingSessionsService {
       touch(session, actor.id, now);
 
       // Libera el estado en-seguimiento del sujeto.
-      const subject = await this.subjectsRepo.findById(tx, session.trackedSubjectId);
+      const subject = await this.subjectsRepo.findById(
+        tx,
+        session.trackedSubjectId,
+      );
       if (subject) touch(subject, actor.id, now);
 
-      this.logger.info({ operation: 'geo.session.close', sessionId }, 'Tracking session closed');
+      this.logger.info(
+        { operation: 'geo.session.close', sessionId },
+        'Tracking session closed',
+      );
       return {
         id: session.id,
         trackedSubjectId: session.trackedSubjectId,

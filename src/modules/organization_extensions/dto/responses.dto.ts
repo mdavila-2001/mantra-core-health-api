@@ -5,7 +5,8 @@ export class HospitalResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) tenantId!: string;
   @ApiProperty({ format: 'uuid' }) practiceId!: string;
-  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' }) status!: string;
+  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' })
+  status!: string;
   @ApiProperty() createdAt!: Date;
 }
 
@@ -13,7 +14,8 @@ export class HospitalResponseDto {
 export class ServiceLineResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) hospitalId!: string;
-  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' }) status!: string;
+  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' })
+  status!: string;
   @ApiProperty() createdAt!: Date;
 }
 
@@ -22,7 +24,10 @@ export class FacilityLicenseResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) tenantId!: string;
   @ApiProperty() licenseNumber!: string;
-  @ApiProperty({ format: 'uuid', description: 'Estado de verificación (concepto)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado de verificación (concepto)',
+  })
   verificationStatus!: string;
   @ApiProperty() createdAt!: Date;
 }
@@ -32,7 +37,8 @@ export class AffiliationResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) primaryTenantId!: string;
   @ApiProperty({ format: 'uuid' }) participatingTenantId!: string;
-  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' }) status!: string;
+  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' })
+  status!: string;
   @ApiProperty() createdAt!: Date;
 }
 
@@ -40,7 +46,8 @@ export class AffiliationResponseDto {
 export class DataBoundaryResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string;
   @ApiProperty({ format: 'uuid' }) tenantId!: string;
-  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' }) status!: string;
+  @ApiProperty({ format: 'uuid', description: 'Estado (concepto)' })
+  status!: string;
   @ApiProperty() effectiveFrom!: Date;
   @ApiProperty() createdAt!: Date;
 }
@@ -48,6 +55,10 @@ export class DataBoundaryResponseDto {
 /** Resultado escueto de una operación de estado (activate/verify/retire/terminate). */
 export class StatusResultDto {
   @ApiProperty({ description: 'Operación completada' }) ok!: boolean;
-  @ApiProperty({ format: 'uuid', description: 'Nuevo estado (concepto)', required: false })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Nuevo estado (concepto)',
+    required: false,
+  })
   status?: string;
 }

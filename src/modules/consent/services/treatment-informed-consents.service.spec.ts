@@ -13,7 +13,12 @@ function build() {
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new TreatmentInformedConsentsService(em as any, treatmentRepo as any, eventsRepo as any, logger as any);
+  const service = new TreatmentInformedConsentsService(
+    em as any,
+    treatmentRepo as any,
+    eventsRepo,
+    logger as any,
+  );
   return { service, tx, treatmentRepo, eventsRepo };
 }
 
@@ -30,7 +35,11 @@ describe('TreatmentInformedConsentsService', () => {
     d.treatmentRepo.create.mockReturnValue(created);
 
     const res = await d.service.sign(
-      { patientProfileId: 'p1', encounterId: 'e1', decision: 'ACCEPTED' } as any,
+      {
+        patientProfileId: 'p1',
+        encounterId: 'e1',
+        decision: 'ACCEPTED',
+      } as any,
       actor,
     );
 

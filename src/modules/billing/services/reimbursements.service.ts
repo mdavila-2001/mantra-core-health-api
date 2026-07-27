@@ -34,19 +34,36 @@ export class ReimbursementsService {
     this.logger.setContext(ReimbursementsService.name);
   }
 
-  async link(dto: LinkReimbursementDto, actor: AuthenticatedUser): Promise<ReimbursementResponseDto> {
+  async link(
+    dto: LinkReimbursementDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReimbursementResponseDto> {
     this.logger.info(
-      { operation: 'billing.reimbursement.link', claimId: dto.claimId, invoiceId: dto.invoiceId, actorId: actor.id },
+      {
+        operation: 'billing.reimbursement.link',
+        claimId: dto.claimId,
+        invoiceId: dto.invoiceId,
+        actorId: actor.id,
+      },
       'Linking claim reimbursement',
     );
     return this.em.transactional(async (tx) => {
-      const existing = await this.reimbursementsRepo.findByClaim(tx, dto.claimId);
+      const existing = await this.reimbursementsRepo.findByClaim(
+        tx,
+        dto.claimId,
+      );
       if (existing) {
-        throw new ConflictException('El reclamo ya tiene un reembolso registrado', { claimId: dto.claimId });
+        throw new ConflictException(
+          'El reclamo ya tiene un reembolso registrado',
+          { claimId: dto.claimId },
+        );
       }
 
       const invoice = await this.invoicesRepo.findById(tx, dto.invoiceId);
-      if (!invoice) throw new ResourceNotFoundException('Factura no encontrada', { invoiceId: dto.invoiceId });
+      if (!invoice)
+        throw new ResourceNotFoundException('Factura no encontrada', {
+          invoiceId: dto.invoiceId,
+        });
 
       const reimbursement = this.reimbursementsRepo.create(tx, {
         claimId: dto.claimId,
@@ -63,7 +80,8 @@ export class ReimbursementsService {
       const newBalanceCents = Math.max(0, balanceCents - amountCents);
       invoice.paidTotal = fromCents(newPaidCents);
       invoice.balance = fromCents(newBalanceCents);
-      invoice.statusConceptId = newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_PARTIALLY_PAID;
+      invoice.statusConceptId =
+        newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_PARTIALLY_PAID;
       touch(invoice, actor.id);
 
       if (dto.tenantId) {
@@ -77,7 +95,11 @@ export class ReimbursementsService {
       }
 
       this.logger.info(
-        { operation: 'billing.reimbursement.link', reimbursementId: reimbursement.id, invoiceId: invoice.id },
+        {
+          operation: 'billing.reimbursement.link',
+          reimbursementId: reimbursement.id,
+          invoiceId: invoice.id,
+        },
         'Claim reimbursement linked',
       );
       return {

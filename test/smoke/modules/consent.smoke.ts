@@ -19,8 +19,10 @@ import { CONS } from '../../../src/modules/consent/consent.concepts';
  * Los ids creados (consentId, hipaaAuthId, objectionId) se capturan en `ctx.vars`
  * para encadenar los casos dependientes (withdraw, provisions, revoke, resolve).
  */
-const patient = (c: { vars: Record<string, string>; adminUserId: string }): string =>
-  c.vars.patientProfileId ?? c.adminUserId;
+const patient = (c: {
+  vars: Record<string, string>;
+  adminUserId: string;
+}): string => c.vars.patientProfileId ?? c.adminUserId;
 const purpose = (): string => SEED.processingPurposeId;
 
 export const CONSENT_SMOKE: SmokeCase[] = [
@@ -31,7 +33,11 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     name: 'happy: registra evidencia inmutable',
     method: 'post',
     path: () => '/consent/consent-evidence',
-    body: (c) => ({ subjectType: 'CONSENT', subjectId: c.adminUserId, evidenceHash: `h-${c.u}` }),
+    body: (c) => ({
+      subjectType: 'CONSENT',
+      subjectId: c.adminUserId,
+      evidenceHash: `h-${c.u}`,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       if (b.id) c.vars.consentEvidenceId = String(b.id);
@@ -83,7 +89,11 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     name: 'happy: versiona base legal',
     method: 'post',
     path: () => '/consent/processing-legal-bases',
-    body: (c) => ({ processingPurposeId: purpose(), tenantId: c.tenantId, policyVersion: `v-${c.u}` }),
+    body: (c) => ({
+      processingPurposeId: purpose(),
+      tenantId: c.tenantId,
+      policyVersion: `v-${c.u}`,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       if (b.id) c.vars.legalBasisId = String(b.id);
@@ -125,7 +135,10 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/consent/consents',
     auth: false,
-    body: (c) => ({ patientProfileId: patient(c), processingPurposeId: purpose() }),
+    body: (c) => ({
+      patientProfileId: patient(c),
+      processingPurposeId: purpose(),
+    }),
     expectedStatus: 401,
   },
   {
@@ -144,7 +157,8 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     endpoint: 'PATCH /consent/consents/{id}/provisions',
     name: 'happy: actualiza provisiones (si hay consentId)',
     method: 'patch',
-    path: (c) => `/consent/consents/${c.vars.consentId ?? UUID_ABSENT}/provisions`,
+    path: (c) =>
+      `/consent/consents/${c.vars.consentId ?? UUID_ABSENT}/provisions`,
     body: () => ({ provisions: [{ action: 'DENY' }] }),
     expectedStatus: 200,
   },
@@ -164,7 +178,8 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     endpoint: 'POST /consent/consents/{id}/withdraw',
     name: 'happy: retira consentimiento (si hay consentId)',
     method: 'post',
-    path: (c) => `/consent/consents/${c.vars.consentId ?? UUID_ABSENT}/withdraw`,
+    path: (c) =>
+      `/consent/consents/${c.vars.consentId ?? UUID_ABSENT}/withdraw`,
     body: () => ({}),
     expectedStatus: 200,
   },
@@ -221,7 +236,8 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     endpoint: 'POST /consent/hipaa-authorizations/{id}/revoke',
     name: 'happy: revoca HIPAA (si hay hipaaAuthId)',
     method: 'post',
-    path: (c) => `/consent/hipaa-authorizations/${c.vars.hipaaAuthId ?? UUID_ABSENT}/revoke`,
+    path: (c) =>
+      `/consent/hipaa-authorizations/${c.vars.hipaaAuthId ?? UUID_ABSENT}/revoke`,
     expectedStatus: 200,
   },
   {
@@ -260,7 +276,10 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/consent/patient-objections',
     auth: false,
-    body: (c) => ({ patientProfileId: patient(c), processingPurposeId: purpose() }),
+    body: (c) => ({
+      patientProfileId: patient(c),
+      processingPurposeId: purpose(),
+    }),
     expectedStatus: 401,
   },
 
@@ -270,7 +289,8 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     endpoint: 'POST /consent/patient-objections/{id}/resolve',
     name: 'happy: resuelve objeción (si hay objectionId)',
     method: 'post',
-    path: (c) => `/consent/patient-objections/${c.vars.objectionId ?? UUID_ABSENT}/resolve`,
+    path: (c) =>
+      `/consent/patient-objections/${c.vars.objectionId ?? UUID_ABSENT}/resolve`,
     body: () => ({ resolution: 'UPHELD' }),
     expectedStatus: 200,
   },
@@ -331,7 +351,11 @@ export const CONSENT_SMOKE: SmokeCase[] = [
     name: 'límite: decision inválida -> 400',
     method: 'post',
     path: () => '/consent/treatment-informed-consents',
-    body: (c) => ({ patientProfileId: patient(c), encounterId: c.adminUserId, decision: 'MAYBE' }),
+    body: (c) => ({
+      patientProfileId: patient(c),
+      encounterId: c.adminUserId,
+      decision: 'MAYBE',
+    }),
     expectedStatus: 400,
   },
 ];

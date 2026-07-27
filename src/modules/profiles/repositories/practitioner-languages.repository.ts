@@ -15,14 +15,18 @@ export interface CreatePractitionerLanguageData {
 /** Acceso a datos de `profiles.practitioner_languages`. */
 @Injectable()
 export class PractitionerLanguagesRepository {
-  create(em: EntityManager, data: CreatePractitionerLanguageData): PractitionerLanguages {
+  create(
+    em: EntityManager,
+    data: CreatePractitionerLanguageData,
+  ): PractitionerLanguages {
     return em.create(
       PractitionerLanguages,
       {
         practitionerProfileId: data.practitionerProfileId,
         languageConceptId: data.languageConceptId,
         proficiencyConceptId: data.proficiencyConceptId,
-        clinicalInterpretationAllowed: data.clinicalInterpretationAllowed ?? false,
+        clinicalInterpretationAllowed:
+          data.clinicalInterpretationAllowed ?? false,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

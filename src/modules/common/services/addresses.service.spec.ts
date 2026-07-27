@@ -19,7 +19,7 @@ describe('AddressesService', () => {
   function build() {
     const { em, tx } = createEmMock();
     const repo = { create: fn() };
-    const service = new AddressesService(em as never, repo as never, logger as never);
+    const service = new AddressesService(em as never, repo, logger as never);
     return { service, tx, repo };
   }
 
@@ -32,14 +32,16 @@ describe('AddressesService', () => {
 
   it('creates an address, joining lines and defaulting country to PE', async () => {
     const { service, tx, repo } = build();
-    repo.create.mockImplementation((_tx: unknown, data: { lines?: string }) => ({
-      id: 'addr-1',
-      ownerId: dto.ownerId,
-      lines: data.lines,
-      city: dto.city,
-      postalCode: undefined,
-      createdAt: new Date(),
-    }));
+    repo.create.mockImplementation(
+      (_tx: unknown, data: { lines?: string }) => ({
+        id: 'addr-1',
+        ownerId: dto.ownerId,
+        lines: data.lines,
+        city: dto.city,
+        postalCode: undefined,
+        createdAt: new Date(),
+      }),
+    );
 
     const result = await service.create(dto, actor);
 
@@ -49,7 +51,11 @@ describe('AddressesService', () => {
       tx,
       expect.objectContaining({ lines: 'Av. Siempre Viva 742\nDpto 3' }),
     );
-    expect(result).toMatchObject({ id: 'addr-1', country: 'PE', ownerType: OwnerType.PATIENT });
+    expect(result).toMatchObject({
+      id: 'addr-1',
+      country: 'PE',
+      ownerType: OwnerType.PATIENT,
+    });
     expect(result.lines).toEqual(dto.lines);
   });
 });

@@ -17,28 +17,42 @@ export type ValueSetOperator = 'IN' | 'IS_A';
 
 /** Una regla de composición de un conjunto de valores. */
 export class ValueSetRuleInputDto {
-  @ApiProperty({ description: 'Id del sistema de códigos referido por la regla' })
+  @ApiProperty({
+    description: 'Id del sistema de códigos referido por la regla',
+  })
   @IsUUID()
   codeSystemId!: string;
 
-  @ApiPropertyOptional({ description: 'Operador de la regla', enum: ['IN', 'IS_A'] })
+  @ApiPropertyOptional({
+    description: 'Operador de la regla',
+    enum: ['IN', 'IS_A'],
+  })
   @IsOptional()
   @IsIn(['IN', 'IS_A'])
   operator?: ValueSetOperator;
 
-  @ApiPropertyOptional({ description: 'Propiedad sobre la que aplica la regla', maxLength: 255 })
+  @ApiPropertyOptional({
+    description: 'Propiedad sobre la que aplica la regla',
+    maxLength: 255,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   property?: string;
 
-  @ApiPropertyOptional({ description: 'Valor comparado por la regla', maxLength: 255 })
+  @ApiPropertyOptional({
+    description: 'Valor comparado por la regla',
+    maxLength: 255,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   value?: string;
 
-  @ApiPropertyOptional({ description: 'Si la regla incluye (true) o excluye (false); por defecto true' })
+  @ApiPropertyOptional({
+    description:
+      'Si la regla incluye (true) o excluye (false); por defecto true',
+  })
   @IsOptional()
   @IsBoolean()
   included?: boolean;
@@ -46,13 +60,19 @@ export class ValueSetRuleInputDto {
 
 /** Alta de un conjunto de valores con su versión inicial y reglas (UC-03-07). */
 export class CreateValueSetDto {
-  @ApiProperty({ description: 'Código interno único del conjunto de valores', maxLength: 255 })
+  @ApiProperty({
+    description: 'Código interno único del conjunto de valores',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
   internalCode!: string;
 
-  @ApiProperty({ description: 'Nombre legible del conjunto de valores', maxLength: 255 })
+  @ApiProperty({
+    description: 'Nombre legible del conjunto de valores',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
@@ -63,7 +83,10 @@ export class CreateValueSetDto {
   @IsNotEmpty()
   canonicalUrl!: string;
 
-  @ApiPropertyOptional({ type: [ValueSetRuleInputDto], description: 'Reglas de composición' })
+  @ApiPropertyOptional({
+    type: [ValueSetRuleInputDto],
+    description: 'Reglas de composición',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

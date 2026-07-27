@@ -30,7 +30,10 @@ export class IdempotencyRecordsRepository {
   }
 
   /** Crea la entidad de idempotencia en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateIdempotencyData): IntegrationIdempotencyRecords {
+  create(
+    em: EntityManager,
+    data: CreateIdempotencyData,
+  ): IntegrationIdempotencyRecords {
     return em.create(
       IntegrationIdempotencyRecords,
       {

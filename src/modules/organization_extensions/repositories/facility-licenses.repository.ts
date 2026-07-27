@@ -38,7 +38,11 @@ export class FacilityLicensesRepository {
     licenseTypeConceptId: string,
     licenseNumber: string,
   ): Promise<FacilityLicenses | null> {
-    return em.findOne(FacilityLicenses, { tenantId, licenseTypeConceptId, licenseNumber });
+    return em.findOne(FacilityLicenses, {
+      tenantId,
+      licenseTypeConceptId,
+      licenseNumber,
+    });
   }
 
   /** Cuenta licencias verificadas de un tenant (guard de activación de hospital). */

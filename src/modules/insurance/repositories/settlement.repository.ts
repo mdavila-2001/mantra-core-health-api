@@ -13,14 +13,31 @@ import {
  */
 @Injectable()
 export class SettlementRepository {
-  findBatch(em: EntityManager, id: string): Promise<InsuranceReconciliationBatches | null> {
+  findBatch(
+    em: EntityManager,
+    id: string,
+  ): Promise<InsuranceReconciliationBatches | null> {
     return em.findOne(InsuranceReconciliationBatches, { id });
   }
-  createBatch(em: EntityManager, data: Record<string, unknown>): InsuranceReconciliationBatches {
-    return em.create(InsuranceReconciliationBatches, { ...data, ...createdBy(data.actorUserId as string) }, { partial: true });
+  createBatch(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): InsuranceReconciliationBatches {
+    return em.create(
+      InsuranceReconciliationBatches,
+      { ...data, ...createdBy(data.actorUserId as string) },
+      { partial: true },
+    );
   }
-  createItem(em: EntityManager, data: Record<string, unknown>): InsuranceReconciliationItems {
-    return em.create(InsuranceReconciliationItems, { ...data, ...createdBy(data.actorUserId as string) }, { partial: true });
+  createItem(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): InsuranceReconciliationItems {
+    return em.create(
+      InsuranceReconciliationItems,
+      { ...data, ...createdBy(data.actorUserId as string) },
+      { partial: true },
+    );
   }
 
   findStatementByUnique(
@@ -37,7 +54,14 @@ export class SettlementRepository {
       periodEnd,
     });
   }
-  createStatement(em: EntityManager, data: Record<string, unknown>): BrokerCommissionStatements {
-    return em.create(BrokerCommissionStatements, { ...data, ...createdBy(data.actorUserId as string) }, { partial: true });
+  createStatement(
+    em: EntityManager,
+    data: Record<string, unknown>,
+  ): BrokerCommissionStatements {
+    return em.create(
+      BrokerCommissionStatements,
+      { ...data, ...createdBy(data.actorUserId as string) },
+      { partial: true },
+    );
   }
 }

@@ -170,7 +170,9 @@ export class FileVersionResponseDto {
   @ApiProperty()
   mimeType!: string;
 
-  @ApiProperty({ description: 'Tamaño en bytes (bigint serializado como string).' })
+  @ApiProperty({
+    description: 'Tamaño en bytes (bigint serializado como string).',
+  })
   sizeBytes!: string;
 
   @ApiProperty()

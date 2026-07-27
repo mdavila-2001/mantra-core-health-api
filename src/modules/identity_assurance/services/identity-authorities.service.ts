@@ -41,7 +41,11 @@ export class IdentityAuthoritiesService {
     actor: AuthenticatedUser,
   ): Promise<AuthorityResponseDto> {
     this.logger.info(
-      { operation: 'ida.authority.register', actorId: actor.id, code: dto.authorityCode },
+      {
+        operation: 'ida.authority.register',
+        actorId: actor.id,
+        code: dto.authorityCode,
+      },
       'Registering identity authority',
     );
     return this.em.transactional(async (tx) => {
@@ -79,7 +83,10 @@ export class IdentityAuthoritiesService {
     return this.em.transactional(async (tx) => {
       const authority = await this.authoritiesRepo.findById(tx, authorityId);
       if (!authority) {
-        throw new ResourceNotFoundException('Autoridad de identidad no encontrada', { authorityId });
+        throw new ResourceNotFoundException(
+          'Autoridad de identidad no encontrada',
+          { authorityId },
+        );
       }
 
       const endpoint = this.endpointsRepo.create(tx, {

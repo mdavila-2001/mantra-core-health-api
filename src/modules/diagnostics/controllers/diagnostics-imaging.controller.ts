@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
-import { DiagnosticsImagingService, DiagnosticsMediaQualityService } from '../services';
+import {
+  DiagnosticsImagingService,
+  DiagnosticsMediaQualityService,
+} from '../services';
 import {
   CreateImagingEndpointDto,
   StoreImagingStudyDto,
@@ -38,7 +41,9 @@ export class DiagnosticsImagingController {
   /** Soporte: alta de endpoint DICOM. */
   @Post('diagnostics/imaging-endpoints')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar un endpoint DICOM (soporte para STOW-RS)' })
+  @ApiOperation({
+    summary: 'Registrar un endpoint DICOM (soporte para STOW-RS)',
+  })
   createEndpoint(
     @Body() dto: CreateImagingEndpointDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -49,7 +54,9 @@ export class DiagnosticsImagingController {
   /** UC-20-11. */
   @Post('dicomweb/studies')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto' })
+  @ApiOperation({
+    summary: 'Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto',
+  })
   storeStudy(
     @Body() dto: StoreImagingStudyDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -83,7 +90,9 @@ export class DiagnosticsImagingController {
   /** UC-20-14. */
   @Post('diagnostics/data-quality-events')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar evento de calidad de datos + enlazar provenance' })
+  @ApiOperation({
+    summary: 'Registrar evento de calidad de datos + enlazar provenance',
+  })
   recordDataQuality(
     @Body() dto: CreateDataQualityEventDto,
     @CurrentUser() actor: AuthenticatedUser,

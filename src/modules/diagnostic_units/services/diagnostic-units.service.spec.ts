@@ -18,8 +18,16 @@ function build() {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => em),
   };
-  const unitsRepo = { findById: mockFn(), findByCode: mockFn(), create: mockFn() };
-  const sitesRepo = { findById: mockFn(), countActiveForUnit: mockFn(), create: mockFn() };
+  const unitsRepo = {
+    findById: mockFn(),
+    findByCode: mockFn(),
+    create: mockFn(),
+  };
+  const sitesRepo = {
+    findById: mockFn(),
+    countActiveForUnit: mockFn(),
+    create: mockFn(),
+  };
   const specialtiesRepo = {
     findOpenForUnit: mockFn().mockResolvedValue([]),
     findOpenByConcept: mockFn().mockResolvedValue(null),
@@ -31,19 +39,31 @@ function build() {
     create: mockFn(),
     verifyOpenForUnit: mockFn().mockResolvedValue(0),
   };
-  const assignmentsRepo = { findActiveOverlap: mockFn().mockResolvedValue(null), create: mockFn() };
+  const assignmentsRepo = {
+    findActiveOverlap: mockFn().mockResolvedValue(null),
+    create: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DiagnosticUnitsService(
     em as any,
-    unitsRepo as any,
-    sitesRepo as any,
-    specialtiesRepo as any,
-    accreditationsRepo as any,
+    unitsRepo,
+    sitesRepo,
+    specialtiesRepo,
+    accreditationsRepo,
     assignmentsRepo as any,
     logger as any,
   );
-  return { service, tx, em, unitsRepo, sitesRepo, specialtiesRepo, accreditationsRepo, assignmentsRepo };
+  return {
+    service,
+    tx,
+    em,
+    unitsRepo,
+    sitesRepo,
+    specialtiesRepo,
+    accreditationsRepo,
+    assignmentsRepo,
+  };
 }
 
 const activeUnit = () => ({
@@ -71,7 +91,7 @@ describe('DiagnosticUnitsService', () => {
           name: 'Lab',
           sites: [{ practiceSiteId: 'ps1' }],
           accreditations: [{ accreditationConceptId: 'acc1' }],
-        } as any,
+        },
         actor,
       );
 
@@ -87,7 +107,10 @@ describe('DiagnosticUnitsService', () => {
       const d = build();
       d.unitsRepo.findByCode.mockResolvedValue({ id: 'existing' });
       await expect(
-        d.service.create({ tenantId: 't1', code: 'DU-1', name: 'Lab' } as any, actor),
+        d.service.create(
+          { tenantId: 't1', code: 'DU-1', name: 'Lab' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.unitsRepo.create).not.toHaveBeenCalled();
     });
@@ -105,9 +128,20 @@ describe('DiagnosticUnitsService', () => {
     it('creates a site for an active unit', async () => {
       const d = build();
       d.unitsRepo.findById.mockResolvedValue(activeUnit());
-      d.sitesRepo.create.mockReturnValue({ id: 's1', statusConceptId: DUNIT.SITE_ACTIVE });
-      const res = await d.service.addSite('u1', { practiceSiteId: 'ps1' } as any, actor);
-      expect(res).toEqual({ id: 's1', diagnosticUnitId: 'u1', status: DUNIT.SITE_ACTIVE });
+      d.sitesRepo.create.mockReturnValue({
+        id: 's1',
+        statusConceptId: DUNIT.SITE_ACTIVE,
+      });
+      const res = await d.service.addSite(
+        'u1',
+        { practiceSiteId: 'ps1' },
+        actor,
+      );
+      expect(res).toEqual({
+        id: 's1',
+        diagnosticUnitId: 'u1',
+        status: DUNIT.SITE_ACTIVE,
+      });
     });
   });
 
@@ -116,9 +150,9 @@ describe('DiagnosticUnitsService', () => {
       const d = build();
       d.unitsRepo.findById.mockResolvedValue(activeUnit());
       d.sitesRepo.countActiveForUnit.mockResolvedValue(0);
-      await expect(d.service.verifyAndPublish('u1', actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.verifyAndPublish('u1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('verifies and assigns a public profile id', async () => {
@@ -127,7 +161,9 @@ describe('DiagnosticUnitsService', () => {
       d.unitsRepo.findById.mockResolvedValue(unit);
       d.sitesRepo.countActiveForUnit.mockResolvedValue(2);
       const res = await d.service.verifyAndPublish('u1', actor);
-      expect(unit.verificationStatusConceptId).toBe(DUNIT.VERIFICATION_VERIFIED);
+      expect(unit.verificationStatusConceptId).toBe(
+        DUNIT.VERIFICATION_VERIFIED,
+      );
       expect(res.publicProfileId).toBeDefined();
       expect(d.specialtiesRepo.verifyOpenForUnit).toHaveBeenCalled();
       expect(d.accreditationsRepo.verifyOpenForUnit).toHaveBeenCalled();
@@ -140,7 +176,12 @@ describe('DiagnosticUnitsService', () => {
       await expect(
         d.service.setSpecialties(
           'u1',
-          { specialties: [{ specialtyConceptId: 'a', isPrimary: true }, { specialtyConceptId: 'b', isPrimary: true }] } as any,
+          {
+            specialties: [
+              { specialtyConceptId: 'a', isPrimary: true },
+              { specialtyConceptId: 'b', isPrimary: true },
+            ],
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -156,7 +197,9 @@ describe('DiagnosticUnitsService', () => {
 
       const res = await d.service.setSpecialties(
         'u1',
-        { specialties: [{ specialtyConceptId: 'new', isPrimary: true }] } as any,
+        {
+          specialties: [{ specialtyConceptId: 'new', isPrimary: true }],
+        },
         actor,
       );
       expect(res).toEqual({ active: 1, closed: 1 });
@@ -170,18 +213,28 @@ describe('DiagnosticUnitsService', () => {
       d.unitsRepo.findById.mockResolvedValue(activeUnit());
       d.assignmentsRepo.findActiveOverlap.mockResolvedValue({ id: 'a1' });
       await expect(
-        d.service.assignPractitioner('u1', { practitionerRoleAssignmentId: 'pra1' } as any, actor),
+        d.service.assignPractitioner(
+          'u1',
+          { practitionerRoleAssignmentId: 'pra1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('creates the assignment and registers a new specialty', async () => {
       const d = build();
       d.unitsRepo.findById.mockResolvedValue(activeUnit());
-      d.assignmentsRepo.create.mockReturnValue({ id: 'a1', statusConceptId: DUNIT.ASSIGNMENT_ACTIVE });
+      d.assignmentsRepo.create.mockReturnValue({
+        id: 'a1',
+        statusConceptId: DUNIT.ASSIGNMENT_ACTIVE,
+      });
       d.specialtiesRepo.findOpenByConcept.mockResolvedValue(null);
       const res = await d.service.assignPractitioner(
         'u1',
-        { practitionerRoleAssignmentId: 'pra1', specialtyConceptId: 'spec1' } as any,
+        {
+          practitionerRoleAssignmentId: 'pra1',
+          specialtyConceptId: 'spec1',
+        },
         actor,
       );
       expect(res).toEqual({ id: 'a1', status: DUNIT.ASSIGNMENT_ACTIVE });
@@ -207,8 +260,11 @@ describe('DiagnosticUnitsService', () => {
         updatedAt: new Date(),
       };
       d.accreditationsRepo.findById.mockResolvedValue(prev);
-      d.accreditationsRepo.create.mockReturnValue({ id: 'acc2', verificationStatusConceptId: '' });
-      const res = await d.service.renewAccreditation('acc1', {} as any, actor);
+      d.accreditationsRepo.create.mockReturnValue({
+        id: 'acc2',
+        verificationStatusConceptId: '',
+      });
+      const res = await d.service.renewAccreditation('acc1', {}, actor);
       expect(prev.validTo).toBeDefined();
       expect(res.verificationStatus).toBe(DUNIT.VERIFICATION_VERIFIED);
     });
@@ -229,9 +285,9 @@ describe('DiagnosticUnitsService', () => {
     it('throws when the unit does not exist', async () => {
       const d = build();
       d.unitsRepo.findById.mockResolvedValue(null);
-      await expect(d.service.reproject('missing', actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.reproject('missing', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

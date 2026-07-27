@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { FieldValues, FieldValueAudit, FieldValueProvenance } from '../entities';
+import {
+  FieldValues,
+  FieldValueAudit,
+  FieldValueProvenance,
+} from '../entities';
 import { createdBy } from '../../../common';
 
 /** Columnas `value_*` derivadas del data_type (value[x] exclusivo). */
@@ -81,7 +85,11 @@ export class FieldValuesRepository {
 
   create(em: EntityManager, data: CreateValueData): FieldValues {
     const { actorUserId, ...rest } = data;
-    return em.create(FieldValues, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FieldValues,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createAudit(em: EntityManager, data: CreateAuditData): FieldValueAudit {
@@ -92,7 +100,10 @@ export class FieldValuesRepository {
     );
   }
 
-  createProvenance(em: EntityManager, data: CreateProvenanceData): FieldValueProvenance {
+  createProvenance(
+    em: EntityManager,
+    data: CreateProvenanceData,
+  ): FieldValueProvenance {
     const { actorUserId, ...rest } = data;
     return em.create(
       FieldValueProvenance,

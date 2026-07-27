@@ -38,13 +38,23 @@ export class FiscalService {
     actor: AuthenticatedUser,
   ): Promise<FiscalYearResponseDto> {
     this.logger.info(
-      { operation: 'accounting.fiscalYear.open', code: dto.code, periods: dto.periods.length },
+      {
+        operation: 'accounting.fiscalYear.open',
+        code: dto.code,
+        periods: dto.periods.length,
+      },
       'Opening fiscal year',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.fiscalRepo.findYearByCode(tx, dto.practiceId, dto.code);
+      const clash = await this.fiscalRepo.findYearByCode(
+        tx,
+        dto.practiceId,
+        dto.code,
+      );
       if (clash) {
-        throw new ConflictException('El ejercicio ya existe en la práctica', { code: dto.code });
+        throw new ConflictException('El ejercicio ya existe en la práctica', {
+          code: dto.code,
+        });
       }
 
       const year = this.fiscalRepo.createYear(tx, {
@@ -72,7 +82,12 @@ export class FiscalService {
       }
       await tx.flush();
 
-      return { id: year.id, code: year.code, status: year.statusConceptId, periodIds };
+      return {
+        id: year.id,
+        code: year.code,
+        status: year.statusConceptId,
+        periodIds,
+      };
     });
   }
 
@@ -83,13 +98,19 @@ export class FiscalService {
     actor: AuthenticatedUser,
   ): Promise<AccountingStatusDto> {
     this.logger.info(
-      { operation: 'accounting.fiscalPeriod.lock', periodId, actorId: actor.id },
+      {
+        operation: 'accounting.fiscalPeriod.lock',
+        periodId,
+        actorId: actor.id,
+      },
       'Locking fiscal period',
     );
     return this.em.transactional(async (tx) => {
       const period = await this.fiscalRepo.findPeriodById(tx, periodId);
       if (!period) {
-        throw new ResourceNotFoundException('Periodo fiscal no encontrado', { periodId });
+        throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
+          periodId,
+        });
       }
       if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
         throw new PreconditionFailedException('El periodo no está ABIERTO', {

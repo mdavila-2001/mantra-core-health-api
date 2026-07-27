@@ -22,11 +22,17 @@ export class LedgerLineDto {
   @IsUUID()
   accountId!: string;
 
-  @ApiProperty({ description: 'Dirección de la partida', enum: ['DEBIT', 'CREDIT'] })
+  @ApiProperty({
+    description: 'Dirección de la partida',
+    enum: ['DEBIT', 'CREDIT'],
+  })
   @IsIn(['DEBIT', 'CREDIT'])
   direction!: LedgerDirection;
 
-  @ApiProperty({ description: 'Importe positivo de la línea', example: '100.00' })
+  @ApiProperty({
+    description: 'Importe positivo de la línea',
+    example: '100.00',
+  })
   @IsNumberString()
   amount!: string;
 
@@ -45,12 +51,18 @@ export class LedgerLineDto {
   @IsUUID()
   currencyConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de cambio a moneda base', example: '3.75' })
+  @ApiPropertyOptional({
+    description: 'Tipo de cambio a moneda base',
+    example: '3.75',
+  })
   @IsOptional()
   @IsNumberString()
   fxRate?: string;
 
-  @ApiPropertyOptional({ description: 'Importe convertido a moneda base', example: '375.00' })
+  @ApiPropertyOptional({
+    description: 'Importe convertido a moneda base',
+    example: '375.00',
+  })
   @IsOptional()
   @IsNumberString()
   amountBase?: string;
@@ -64,21 +76,34 @@ export class LedgerLineDto {
 
 /** Cuerpo de `POST /accounting/journal-transactions` (UC-16-01). */
 export class PostJournalDto {
-  @ApiProperty({ description: 'Práctica propietaria del asiento', format: 'uuid' })
+  @ApiProperty({
+    description: 'Práctica propietaria del asiento',
+    format: 'uuid',
+  })
   @IsUUID()
   practiceId!: string;
 
-  @ApiPropertyOptional({ description: 'Número de asiento (único por práctica); autogenerado si se omite' })
+  @ApiPropertyOptional({
+    description:
+      'Número de asiento (único por práctica); autogenerado si se omite',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(60)
   transactionNumber?: string;
 
-  @ApiProperty({ description: 'Fecha contable', format: 'date', example: '2026-01-31' })
+  @ApiProperty({
+    description: 'Fecha contable',
+    format: 'date',
+    example: '2026-01-31',
+  })
   @IsDateString()
   transactionDate!: string;
 
-  @ApiPropertyOptional({ description: 'Periodo fiscal ABIERTO', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Periodo fiscal ABIERTO',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   fiscalPeriodId?: string;
@@ -100,7 +125,10 @@ export class PostJournalDto {
   @MaxLength(120)
   reference?: string;
 
-  @ApiProperty({ type: [LedgerLineDto], description: 'Líneas balanceadas (>=2)' })
+  @ApiProperty({
+    type: [LedgerLineDto],
+    description: 'Líneas balanceadas (>=2)',
+  })
   @IsArray()
   @ArrayMinSize(2)
   @ValidateNested({ each: true })
@@ -110,7 +138,10 @@ export class PostJournalDto {
 
 /** Cuerpo de `POST /accounting/journal-transactions/:id/reverse` (UC-16-03). */
 export class ReverseJournalDto {
-  @ApiPropertyOptional({ description: 'Periodo fiscal ABIERTO de la reversa', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Periodo fiscal ABIERTO de la reversa',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   fiscalPeriodId?: string;
@@ -140,7 +171,10 @@ export class DetermineAccountsDto {
 
 /** Cuerpo de `POST /accounting/journal-transactions/:id/files` (UC-16-13). */
 export class AttachFileDto {
-  @ApiProperty({ description: 'Archivo ya cargado en object storage', format: 'uuid' })
+  @ApiProperty({
+    description: 'Archivo ya cargado en object storage',
+    format: 'uuid',
+  })
   @IsUUID()
   fileId!: string;
 

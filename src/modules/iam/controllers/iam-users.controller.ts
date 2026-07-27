@@ -7,11 +7,7 @@ import {
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
   IamUsersService,
@@ -52,7 +48,9 @@ export class IamUsersController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear un usuario con credencial de contraseña y rol inicial' })
+  @ApiOperation({
+    summary: 'Crear un usuario con credencial de contraseña y rol inicial',
+  })
   createUser(
     @Body() dto: CreateUserDto,
     @CurrentUser() actor: AuthenticatedUser,

@@ -18,7 +18,10 @@ export class RetentionExecutionController {
   @Post('retention-executions/run')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Ejecutar un barrido de retención (excluye objetivos bajo legal hold)' })
+  @ApiOperation({
+    summary:
+      'Ejecutar un barrido de retención (excluye objetivos bajo legal hold)',
+  })
   run(
     @Body() dto: RunRetentionDto,
     @CurrentUser() actor: AuthenticatedUser,

@@ -29,13 +29,17 @@ import {
 @ApiBearerAuth()
 @Controller('profiles')
 export class ProfilesPractitionersController {
-  constructor(private readonly practitionersService: ProfilesPractitionersService) {}
+  constructor(
+    private readonly practitionersService: ProfilesPractitionersService,
+  ) {}
 
   /** UC-05-03. */
   @Post('practitioners')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Alta de profesional de salud (workforce generalista)' })
+  @ApiOperation({
+    summary: 'Alta de profesional de salud (workforce generalista)',
+  })
   onboardPractitioner(
     @Body() dto: CreatePractitionerDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -47,13 +51,19 @@ export class ProfilesPractitionersController {
   @Post('practitioners/:profileId/jurisdiction-authorizations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar/renovar autorización jurisdiccional (licencia)' })
+  @ApiOperation({
+    summary: 'Registrar/renovar autorización jurisdiccional (licencia)',
+  })
   addJurisdictionAuthorization(
     @Param('profileId', ParseUUIDPipe) profileId: string,
     @Body() dto: CreateJurisdictionAuthorizationDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<JurisdictionAuthorizationResponseDto> {
-    return this.practitionersService.addJurisdictionAuthorization(profileId, dto, actor);
+    return this.practitionersService.addJurisdictionAuthorization(
+      profileId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-05-06. */

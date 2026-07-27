@@ -47,7 +47,11 @@ export class ChartCarePlansService {
     actor: AuthenticatedUser,
   ): Promise<CarePlanResponseDto> {
     this.logger.info(
-      { operation: 'chart.carePlan.create', actorId: actor.id, activities: dto.activities?.length ?? 0 },
+      {
+        operation: 'chart.carePlan.create',
+        actorId: actor.id,
+        activities: dto.activities?.length ?? 0,
+      },
       'Creating care plan',
     );
     return this.em.transactional(async (tx) => {
@@ -78,7 +82,10 @@ export class ChartCarePlansService {
         });
       }
 
-      this.logger.info({ operation: 'chart.carePlan.create', planId: plan.id }, 'Care plan created');
+      this.logger.info(
+        { operation: 'chart.carePlan.create', planId: plan.id },
+        'Care plan created',
+      );
       return {
         id: plan.id,
         statusConceptId: plan.statusConceptId,
@@ -101,23 +108,40 @@ export class ChartCarePlansService {
     );
     return this.em.transactional(async (tx) => {
       const plan = await this.carePlansRepo.findPlanById(tx, planId);
-      if (!plan) throw new ResourceNotFoundException('Plan de cuidado no encontrado', { planId });
+      if (!plan)
+        throw new ResourceNotFoundException('Plan de cuidado no encontrado', {
+          planId,
+        });
       if (plan.statusConceptId !== CHART.CAREPLAN_ACTIVE) {
-        throw new PreconditionFailedException('El plan de cuidado no está activo', { planId });
+        throw new PreconditionFailedException(
+          'El plan de cuidado no está activo',
+          { planId },
+        );
       }
 
-      const activity = await this.carePlansRepo.findActivityById(tx, activityId);
+      const activity = await this.carePlansRepo.findActivityById(
+        tx,
+        activityId,
+      );
       if (!activity || activity.carePlanId !== planId) {
-        throw new ResourceNotFoundException('Actividad no encontrada', { planId, activityId });
+        throw new ResourceNotFoundException('Actividad no encontrada', {
+          planId,
+          activityId,
+        });
       }
 
-      if (dto.status) activity.statusConceptId = ACTIVITY_STATUS_CONCEPT[dto.status];
-      if (dto.scheduledAt !== undefined) activity.scheduledAt = new Date(dto.scheduledAt);
+      if (dto.status)
+        activity.statusConceptId = ACTIVITY_STATUS_CONCEPT[dto.status];
+      if (dto.scheduledAt !== undefined)
+        activity.scheduledAt = new Date(dto.scheduledAt);
       if (dto.detailText !== undefined) activity.detailText = dto.detailText;
       touch(activity, actor.id);
 
       // Completa el plan si todas sus actividades quedaron completadas.
-      const siblings = await this.carePlansRepo.findActivitiesForPlan(tx, planId);
+      const siblings = await this.carePlansRepo.findActivitiesForPlan(
+        tx,
+        planId,
+      );
       const allCompleted =
         siblings.length > 0 &&
         siblings.every((s) => s.statusConceptId === CHART.ACTIVITY_COMPLETED);

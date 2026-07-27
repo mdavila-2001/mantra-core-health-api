@@ -11,7 +11,10 @@ export class RunMigrationDto {
   @IsUUID()
   toVersionId!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de migración (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de migración (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   migrationTypeConceptId?: string;

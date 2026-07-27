@@ -41,7 +41,12 @@ export class LedgerService {
     actor: AuthenticatedUser,
   ): Promise<PostingResultDto> {
     this.logger.info(
-      { operation: 'billing.ledger.post', documentId, documentType: dto.documentType, actorId: actor.id },
+      {
+        operation: 'billing.ledger.post',
+        documentId,
+        documentType: dto.documentType,
+        actorId: actor.id,
+      },
       'Posting document to ledger',
     );
     return this.em.transactional(async (tx) => {
@@ -64,7 +69,11 @@ export class LedgerService {
       touch(doc, actor.id);
 
       this.logger.info(
-        { operation: 'billing.ledger.post', documentId, transactionId: dto.transactionId },
+        {
+          operation: 'billing.ledger.post',
+          documentId,
+          transactionId: dto.transactionId,
+        },
         'Document posted to ledger',
       );
       return {
@@ -80,7 +89,11 @@ export class LedgerService {
     tx: EntityManager,
     id: string,
     type: PostToLedgerDto['documentType'],
-  ): Promise<{ transactionId?: string; updatedAt: Date; updatedByUserId?: string } | null> {
+  ): Promise<{
+    transactionId?: string;
+    updatedAt: Date;
+    updatedByUserId?: string;
+  } | null> {
     switch (type) {
       case 'INVOICE':
         return this.invoicesRepo.findById(tx, id);

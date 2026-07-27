@@ -65,7 +65,11 @@ export class DiagnosticUnitsService {
     actor: AuthenticatedUser,
   ): Promise<DiagnosticUnitResponseDto> {
     this.logger.info(
-      { operation: 'diagnostic_units.unit.create', tenantId: dto.tenantId, code: dto.code },
+      {
+        operation: 'diagnostic_units.unit.create',
+        tenantId: dto.tenantId,
+        code: dto.code,
+      },
       'Creating diagnostic unit',
     );
     return this.em.transactional(async (tx) => {
@@ -75,7 +79,9 @@ export class DiagnosticUnitsService {
           { operation: 'diagnostic_units.unit.create', reason: 'code-in-use' },
           'Rejected: code already used in tenant',
         );
-        throw new ConflictException('El código ya existe en el tenant', { code: dto.code });
+        throw new ConflictException('El código ya existe en el tenant', {
+          code: dto.code,
+        });
       }
 
       const unit = this.unitsRepo.create(tx, {
@@ -84,7 +90,8 @@ export class DiagnosticUnitsService {
         name: dto.name,
         diagnosticUnitTypeConceptId:
           dto.diagnosticUnitTypeConceptId ?? DUNIT.UNIT_TYPE_LABORATORY,
-        ownershipTypeConceptId: dto.ownershipTypeConceptId ?? DUNIT.OWNERSHIP_PRIVATE,
+        ownershipTypeConceptId:
+          dto.ownershipTypeConceptId ?? DUNIT.OWNERSHIP_PRIVATE,
         practiceId: dto.practiceId,
         primaryPracticeSiteId: dto.primaryPracticeSiteId,
         acceptsExternalOrders: dto.acceptsExternalOrders,
@@ -132,7 +139,10 @@ export class DiagnosticUnitsService {
     dto: AddSiteDto,
     actor: AuthenticatedUser,
   ): Promise<SiteResponseDto> {
-    this.logger.info({ operation: 'diagnostic_units.site.add', unitId }, 'Adding site');
+    this.logger.info(
+      { operation: 'diagnostic_units.site.add', unitId },
+      'Adding site',
+    );
     return this.em.transactional(async (tx) => {
       const unit = await this.loadActiveUnit(tx, unitId);
 
@@ -147,7 +157,11 @@ export class DiagnosticUnitsService {
       });
 
       touch(unit, actor.id);
-      return { id: site.id, diagnosticUnitId: unit.id, status: site.statusConceptId };
+      return {
+        id: site.id,
+        diagnosticUnitId: unit.id,
+        status: site.statusConceptId,
+      };
     });
   }
 
@@ -157,20 +171,31 @@ export class DiagnosticUnitsService {
     dto: UpdateSiteDto,
     actor: AuthenticatedUser,
   ): Promise<SiteResponseDto> {
-    this.logger.info({ operation: 'diagnostic_units.site.update', siteId }, 'Updating site');
+    this.logger.info(
+      { operation: 'diagnostic_units.site.update', siteId },
+      'Updating site',
+    );
     return this.em.transactional(async (tx) => {
       const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site) throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      if (!site)
+        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
 
-      if (dto.siteRoleConceptId !== undefined) site.siteRoleConceptId = dto.siteRoleConceptId;
-      if (dto.accessionPrefix !== undefined) site.accessionPrefix = dto.accessionPrefix;
+      if (dto.siteRoleConceptId !== undefined)
+        site.siteRoleConceptId = dto.siteRoleConceptId;
+      if (dto.accessionPrefix !== undefined)
+        site.accessionPrefix = dto.accessionPrefix;
       if (dto.sampleCollectionAvailable !== undefined) {
         site.sampleCollectionAvailable = dto.sampleCollectionAvailable;
       }
-      if (dto.imagingAvailable !== undefined) site.imagingAvailable = dto.imagingAvailable;
+      if (dto.imagingAvailable !== undefined)
+        site.imagingAvailable = dto.imagingAvailable;
       touch(site, actor.id);
 
-      return { id: site.id, diagnosticUnitId: site.diagnosticUnitId, status: site.statusConceptId };
+      return {
+        id: site.id,
+        diagnosticUnitId: site.diagnosticUnitId,
+        status: site.statusConceptId,
+      };
     });
   }
 
@@ -179,14 +204,20 @@ export class DiagnosticUnitsService {
     unitId: string,
     actor: AuthenticatedUser,
   ): Promise<DiagnosticUnitResponseDto> {
-    this.logger.info({ operation: 'diagnostic_units.unit.verify', unitId }, 'Verifying unit');
+    this.logger.info(
+      { operation: 'diagnostic_units.unit.verify', unitId },
+      'Verifying unit',
+    );
     return this.em.transactional(async (tx) => {
       const unit = await this.loadActiveUnit(tx, unitId);
 
       const activeSites = await this.sitesRepo.countActiveForUnit(tx, unit.id);
       if (activeSites < 1) {
         this.logger.warn(
-          { operation: 'diagnostic_units.unit.verify', reason: 'no-active-site' },
+          {
+            operation: 'diagnostic_units.unit.verify',
+            reason: 'no-active-site',
+          },
           'Rejected: unit has no active site',
         );
         throw new PreconditionFailedException(
@@ -223,9 +254,12 @@ export class DiagnosticUnitsService {
 
     const primaries = dto.specialties.filter((s) => s.isPrimary).length;
     if (primaries > 1) {
-      throw new PreconditionFailedException('A lo sumo una especialidad puede ser primaria', {
-        unitId,
-      });
+      throw new PreconditionFailedException(
+        'A lo sumo una especialidad puede ser primaria',
+        {
+          unitId,
+        },
+      );
     }
 
     return this.em.transactional(async (tx) => {
@@ -353,7 +387,10 @@ export class DiagnosticUnitsService {
         actorUserId: actor.id,
       });
 
-      return { id: acc.id, verificationStatus: acc.verificationStatusConceptId };
+      return {
+        id: acc.id,
+        verificationStatus: acc.verificationStatusConceptId,
+      };
     });
   }
 
@@ -368,9 +405,14 @@ export class DiagnosticUnitsService {
       'Renewing accreditation',
     );
     return this.em.transactional(async (tx) => {
-      const previous = await this.accreditationsRepo.findById(tx, accreditationId);
+      const previous = await this.accreditationsRepo.findById(
+        tx,
+        accreditationId,
+      );
       if (!previous) {
-        throw new ResourceNotFoundException('Acreditación no encontrada', { accreditationId });
+        throw new ResourceNotFoundException('Acreditación no encontrada', {
+          accreditationId,
+        });
       }
 
       previous.validTo = dto.validFrom ?? new Date();
@@ -380,7 +422,8 @@ export class DiagnosticUnitsService {
         diagnosticUnitId: previous.diagnosticUnitId,
         accreditationConceptId: previous.accreditationConceptId,
         diagnosticUnitSiteId: previous.diagnosticUnitSiteId,
-        accreditationNumber: dto.accreditationNumber ?? previous.accreditationNumber,
+        accreditationNumber:
+          dto.accreditationNumber ?? previous.accreditationNumber,
         issuerTenantId: previous.issuerTenantId,
         evidenceFileId: dto.evidenceFileId ?? previous.evidenceFileId,
         validFrom: dto.validFrom ?? new Date(),
@@ -389,19 +432,30 @@ export class DiagnosticUnitsService {
       });
       renewed.verificationStatusConceptId = DUNIT.VERIFICATION_VERIFIED;
 
-      return { id: renewed.id, verificationStatus: renewed.verificationStatusConceptId };
+      return {
+        id: renewed.id,
+        verificationStatus: renewed.verificationStatusConceptId,
+      };
     });
   }
 
   /** UC-23-12: reproyectar el perfil público (idempotente; solo si VERIFIED). */
-  async reproject(unitId: string, actor: AuthenticatedUser): Promise<ReprojectResultDto> {
+  async reproject(
+    unitId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ReprojectResultDto> {
     this.logger.info(
-      { operation: 'diagnostic_units.unit.reproject', unitId, actorId: actor.id },
+      {
+        operation: 'diagnostic_units.unit.reproject',
+        unitId,
+        actorId: actor.id,
+      },
       'Reprojecting public profile',
     );
     const em = this.em.fork();
     const unit = await this.unitsRepo.findById(em, unitId);
-    if (!unit) throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+    if (!unit)
+      throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
 
     const projected =
       unit.verificationStatusConceptId === DUNIT.VERIFICATION_VERIFIED &&
@@ -411,11 +465,17 @@ export class DiagnosticUnitsService {
   }
 
   /** Carga una unidad y valida que exista y esté ACTIVA (precondición común). */
-  private async loadActiveUnit(tx: EntityManager, unitId: string): Promise<DiagnosticUnits> {
+  private async loadActiveUnit(
+    tx: EntityManager,
+    unitId: string,
+  ): Promise<DiagnosticUnits> {
     const unit = await this.unitsRepo.findById(tx, unitId);
-    if (!unit) throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+    if (!unit)
+      throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
     if (unit.statusConceptId !== DUNIT.UNIT_ACTIVE) {
-      throw new PreconditionFailedException('La unidad no está activa', { unitId });
+      throw new PreconditionFailedException('La unidad no está activa', {
+        unitId,
+      });
     }
     return unit;
   }

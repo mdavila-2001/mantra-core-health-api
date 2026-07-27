@@ -49,7 +49,10 @@ export class FrontendViewsController {
 
   /** UC-30-05. */
   @Get('portals/:portalCode/routes/:routeCode/views/:viewCode/data')
-  @ApiOperation({ summary: 'Servir el read model al frontend (consent-aware, masking heredado)' })
+  @ApiOperation({
+    summary:
+      'Servir el read model al frontend (consent-aware, masking heredado)',
+  })
   serveData(
     @Param('portalCode') portalCode: string,
     @Param('routeCode') routeCode: string,
@@ -61,7 +64,9 @@ export class FrontendViewsController {
 
   /** UC-30-11. */
   @Get('portals/:portalCode/routes/:routeCode/views/:viewCode/actions')
-  @ApiOperation({ summary: 'Derivar available_actions_json (estado + permiso + purpose)' })
+  @ApiOperation({
+    summary: 'Derivar available_actions_json (estado + permiso + purpose)',
+  })
   deriveActions(
     @Param('portalCode') portalCode: string,
     @Param('routeCode') routeCode: string,
@@ -69,7 +74,13 @@ export class FrontendViewsController {
     @Query('state') state: string | undefined,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<AvailableActionDto[]> {
-    return this.service.deriveAvailableActions(portalCode, routeCode, viewCode, state, user);
+    return this.service.deriveAvailableActions(
+      portalCode,
+      routeCode,
+      viewCode,
+      state,
+      user,
+    );
   }
 
   /** UC-30-09. */

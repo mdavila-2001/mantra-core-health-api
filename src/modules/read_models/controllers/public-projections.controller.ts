@@ -16,7 +16,9 @@ export class PublicProjectionsController {
   /** UC-30-10: catálogo público de directorio (city/specialty). */
   @Public()
   @Get('directory')
-  @ApiOperation({ summary: 'Servir el directorio público (solo campos aprobados)' })
+  @ApiOperation({
+    summary: 'Servir el directorio público (solo campos aprobados)',
+  })
   searchDirectory(
     @Query('city') city: string | undefined,
     @Query('specialty') specialty: string | undefined,

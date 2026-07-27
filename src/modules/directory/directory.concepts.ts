@@ -12,54 +12,104 @@ import { defineModuleConcepts } from '../../common/seed/concept-seed';
  * `DIRECTORY_CONCEPT_SEEDS` lo consume el agregador central del seed; `DIR` es el
  * mapa `nombre -> UUID` determinista que consumen servicios y repositorios.
  */
-export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } = defineModuleConcepts('directory', {
-  // --- Ciclo de vida de tenant (los que faltan en el catálogo transversal) ---
-  TENANT_PENDING: { code: 'DIR_TENANT_PENDING', display: 'Tenant pending verification' },
-  TENANT_SUSPENDED: { code: 'DIR_TENANT_SUSPENDED', display: 'Tenant suspended' },
-  TENANT_UNVERIFIED: { code: 'DIR_TENANT_UNVERIFIED', display: 'Tenant unverified' },
+export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
+  defineModuleConcepts('directory', {
+    // --- Ciclo de vida de tenant (los que faltan en el catálogo transversal) ---
+    TENANT_PENDING: {
+      code: 'DIR_TENANT_PENDING',
+      display: 'Tenant pending verification',
+    },
+    TENANT_SUSPENDED: {
+      code: 'DIR_TENANT_SUSPENDED',
+      display: 'Tenant suspended',
+    },
+    TENANT_UNVERIFIED: {
+      code: 'DIR_TENANT_UNVERIFIED',
+      display: 'Tenant unverified',
+    },
 
-  // --- Estados de tenant_memberships.status_concept_id ---
-  MEMBERSHIP_INVITED: { code: 'DIR_MEMBERSHIP_INVITED', display: 'Membership invited' },
-  MEMBERSHIP_ACTIVE: { code: 'DIR_MEMBERSHIP_ACTIVE', display: 'Membership active' },
-  MEMBERSHIP_ENDED: { code: 'DIR_MEMBERSHIP_ENDED', display: 'Membership ended' },
-  MEMBERSHIP_SUSPENDED: { code: 'DIR_MEMBERSHIP_SUSPENDED', display: 'Membership suspended' },
+    // --- Estados de tenant_memberships.status_concept_id ---
+    MEMBERSHIP_INVITED: {
+      code: 'DIR_MEMBERSHIP_INVITED',
+      display: 'Membership invited',
+    },
+    MEMBERSHIP_ACTIVE: {
+      code: 'DIR_MEMBERSHIP_ACTIVE',
+      display: 'Membership active',
+    },
+    MEMBERSHIP_ENDED: {
+      code: 'DIR_MEMBERSHIP_ENDED',
+      display: 'Membership ended',
+    },
+    MEMBERSHIP_SUSPENDED: {
+      code: 'DIR_MEMBERSHIP_SUSPENDED',
+      display: 'Membership suspended',
+    },
 
-  // --- Roles de tenant (tenant_memberships.tenant_role_concept_id) ---
-  ROLE_OWNER: { code: 'DIR_ROLE_OWNER', display: 'Tenant owner' },
-  ROLE_ADMIN: { code: 'DIR_ROLE_ADMIN', display: 'Tenant admin' },
-  ROLE_STAFF: { code: 'DIR_ROLE_STAFF', display: 'Tenant staff' },
+    // --- Roles de tenant (tenant_memberships.tenant_role_concept_id) ---
+    ROLE_OWNER: { code: 'DIR_ROLE_OWNER', display: 'Tenant owner' },
+    ROLE_ADMIN: { code: 'DIR_ROLE_ADMIN', display: 'Tenant admin' },
+    ROLE_STAFF: { code: 'DIR_ROLE_STAFF', display: 'Tenant staff' },
 
-  // --- Scopes de acceso (tenant_memberships.access_scope_concept_id) ---
-  SCOPE_ALL_TENANT: { code: 'DIR_SCOPE_ALL_TENANT', display: 'All-tenant access scope' },
-  SCOPE_BRANCH: { code: 'DIR_SCOPE_BRANCH', display: 'Branch access scope' },
+    // --- Scopes de acceso (tenant_memberships.access_scope_concept_id) ---
+    SCOPE_ALL_TENANT: {
+      code: 'DIR_SCOPE_ALL_TENANT',
+      display: 'All-tenant access scope',
+    },
+    SCOPE_BRANCH: { code: 'DIR_SCOPE_BRANCH', display: 'Branch access scope' },
 
-  // --- Tipos y estados de branch ---
-  BRANCH_TYPE_CLINIC: { code: 'DIR_BRANCH_TYPE_CLINIC', display: 'Clinic branch' },
-  BRANCH_TYPE_OFFICE: { code: 'DIR_BRANCH_TYPE_OFFICE', display: 'Administrative office' },
-  BRANCH_ACTIVE: { code: 'DIR_BRANCH_ACTIVE', display: 'Branch active' },
-  BRANCH_SUSPENDED: { code: 'DIR_BRANCH_SUSPENDED', display: 'Branch suspended' },
+    // --- Tipos y estados de branch ---
+    BRANCH_TYPE_CLINIC: {
+      code: 'DIR_BRANCH_TYPE_CLINIC',
+      display: 'Clinic branch',
+    },
+    BRANCH_TYPE_OFFICE: {
+      code: 'DIR_BRANCH_TYPE_OFFICE',
+      display: 'Administrative office',
+    },
+    BRANCH_ACTIVE: { code: 'DIR_BRANCH_ACTIVE', display: 'Branch active' },
+    BRANCH_SUSPENDED: {
+      code: 'DIR_BRANCH_SUSPENDED',
+      display: 'Branch suspended',
+    },
 
-  // --- Estados y rol local de branch_memberships ---
-  BRANCH_MEMBERSHIP_ACTIVE: { code: 'DIR_BRANCH_MEMBERSHIP_ACTIVE', display: 'Branch membership active' },
-  BRANCH_MEMBERSHIP_ENDED: { code: 'DIR_BRANCH_MEMBERSHIP_ENDED', display: 'Branch membership ended' },
-  LOCAL_ROLE_STAFF: { code: 'DIR_LOCAL_ROLE_STAFF', display: 'Local staff role' },
-});
+    // --- Estados y rol local de branch_memberships ---
+    BRANCH_MEMBERSHIP_ACTIVE: {
+      code: 'DIR_BRANCH_MEMBERSHIP_ACTIVE',
+      display: 'Branch membership active',
+    },
+    BRANCH_MEMBERSHIP_ENDED: {
+      code: 'DIR_BRANCH_MEMBERSHIP_ENDED',
+      display: 'Branch membership ended',
+    },
+    LOCAL_ROLE_STAFF: {
+      code: 'DIR_LOCAL_ROLE_STAFF',
+      display: 'Local staff role',
+    },
+  });
 
 /** Mapea el código de rol de tenant (DTO) a su concept id. */
-export const TENANT_ROLE_CONCEPT_BY_CODE: Record<'OWNER' | 'ADMIN' | 'STAFF', string> = {
+export const TENANT_ROLE_CONCEPT_BY_CODE: Record<
+  'OWNER' | 'ADMIN' | 'STAFF',
+  string
+> = {
   OWNER: DIR.ROLE_OWNER,
   ADMIN: DIR.ROLE_ADMIN,
   STAFF: DIR.ROLE_STAFF,
 };
 
 /** Mapea el código de scope de acceso (DTO) a su concept id. */
-export const ACCESS_SCOPE_CONCEPT_BY_CODE: Record<'ALL_TENANT' | 'BRANCH', string> = {
+export const ACCESS_SCOPE_CONCEPT_BY_CODE: Record<
+  'ALL_TENANT' | 'BRANCH',
+  string
+> = {
   ALL_TENANT: DIR.SCOPE_ALL_TENANT,
   BRANCH: DIR.SCOPE_BRANCH,
 };
 
 /** Mapea el código de tipo de branch (DTO) a su concept id. */
-export const BRANCH_TYPE_CONCEPT_BY_CODE: Record<'CLINIC' | 'OFFICE', string> = {
-  CLINIC: DIR.BRANCH_TYPE_CLINIC,
-  OFFICE: DIR.BRANCH_TYPE_OFFICE,
-};
+export const BRANCH_TYPE_CONCEPT_BY_CODE: Record<'CLINIC' | 'OFFICE', string> =
+  {
+    CLINIC: DIR.BRANCH_TYPE_CLINIC,
+    OFFICE: DIR.BRANCH_TYPE_OFFICE,
+  };

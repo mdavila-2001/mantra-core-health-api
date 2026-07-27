@@ -11,13 +11,22 @@ export class TenantResponseDto {
   @ApiProperty()
   legalName!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del tenant', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del tenant',
+    format: 'uuid',
+  })
   status!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 
-  @ApiPropertyOptional({ description: 'Tenant padre si es sub-tenant', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant padre si es sub-tenant',
+    format: 'uuid',
+  })
   parentTenantId?: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

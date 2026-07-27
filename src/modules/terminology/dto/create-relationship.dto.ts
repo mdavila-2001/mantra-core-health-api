@@ -14,7 +14,9 @@ export class CreateRelationshipDto {
   @IsIn(['IS_A', 'PART_OF'])
   relationshipType!: RelationshipType;
 
-  @ApiPropertyOptional({ description: 'Orden dentro de las relaciones del mismo tipo' })
+  @ApiPropertyOptional({
+    description: 'Orden dentro de las relaciones del mismo tipo',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -35,6 +37,8 @@ export class RelationshipResponseDto {
   @ApiProperty({ description: 'Tipo de relación (concepto)' })
   relationshipTypeConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Orden dentro de las relaciones del mismo tipo' })
+  @ApiPropertyOptional({
+    description: 'Orden dentro de las relaciones del mismo tipo',
+  })
   ordinal?: number;
 }

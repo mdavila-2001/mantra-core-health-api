@@ -16,7 +16,10 @@ import {
 
 /** Puntuación de una dimensión de la review. */
 export class ReviewDimensionInputDto {
-  @ApiProperty({ description: 'Dimensión', enum: ['COMMUNICATION', 'PUNCTUALITY', 'CLEANLINESS', 'OUTCOME'] })
+  @ApiProperty({
+    description: 'Dimensión',
+    enum: ['COMMUNICATION', 'PUNCTUALITY', 'CLEANLINESS', 'OUTCOME'],
+  })
   @IsIn(['COMMUNICATION', 'PUNCTUALITY', 'CLEANLINESS', 'OUTCOME'])
   dimension!: 'COMMUNICATION' | 'PUNCTUALITY' | 'CLEANLINESS' | 'OUTCOME';
 
@@ -33,12 +36,19 @@ export class CreateReviewDto {
   @IsUUID()
   reviewerPatientProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Encuentro verificado (nunca se expone públicamente)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Encuentro verificado (nunca se expone públicamente)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   verifiedEncounterId?: string;
 
-  @ApiProperty({ description: 'Calificación global 1..5', minimum: 1, maximum: 5 })
+  @ApiProperty({
+    description: 'Calificación global 1..5',
+    minimum: 1,
+    maximum: 5,
+  })
   @IsInt()
   @Min(1)
   @Max(5)
@@ -50,7 +60,10 @@ export class CreateReviewDto {
   @MaxLength(4000)
   reviewText?: string;
 
-  @ApiPropertyOptional({ description: 'Modo de visualización del reviewer', enum: ['REAL_NAME', 'ANONYMOUS'] })
+  @ApiPropertyOptional({
+    description: 'Modo de visualización del reviewer',
+    enum: ['REAL_NAME', 'ANONYMOUS'],
+  })
   @IsOptional()
   @IsIn(['REAL_NAME', 'ANONYMOUS'])
   displayMode?: 'REAL_NAME' | 'ANONYMOUS';

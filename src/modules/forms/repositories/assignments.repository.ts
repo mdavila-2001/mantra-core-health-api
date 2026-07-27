@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { FieldAssignments, ExtensionTargetPolicies, DynamicFieldSections } from '../entities';
+import {
+  FieldAssignments,
+  ExtensionTargetPolicies,
+  DynamicFieldSections,
+} from '../entities';
 import { createdBy } from '../../../common';
 
 /** Alta de una sección por defecto para alojar asignaciones. */
@@ -40,7 +44,10 @@ export class AssignmentsRepository {
     targetResourceConceptId: string,
     statusConceptId: string,
   ): Promise<ExtensionTargetPolicies | null> {
-    return em.findOne(ExtensionTargetPolicies, { targetResourceConceptId, statusConceptId });
+    return em.findOne(ExtensionTargetPolicies, {
+      targetResourceConceptId,
+      statusConceptId,
+    });
   }
 
   /** Cuenta asignaciones activas para un target (presupuesto de campos). */
@@ -49,16 +56,33 @@ export class AssignmentsRepository {
     targetResourceConceptId: string,
     stateConceptId: string,
   ): Promise<number> {
-    return em.count(FieldAssignments, { targetResourceConceptId, stateConceptId });
+    return em.count(FieldAssignments, {
+      targetResourceConceptId,
+      stateConceptId,
+    });
   }
 
-  createSection(em: EntityManager, data: CreateSectionData): DynamicFieldSections {
+  createSection(
+    em: EntityManager,
+    data: CreateSectionData,
+  ): DynamicFieldSections {
     const { actorUserId, ...rest } = data;
-    return em.create(DynamicFieldSections, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      DynamicFieldSections,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
-  createAssignment(em: EntityManager, data: CreateAssignmentData): FieldAssignments {
+  createAssignment(
+    em: EntityManager,
+    data: CreateAssignmentData,
+  ): FieldAssignments {
     const { actorUserId, ...rest } = data;
-    return em.create(FieldAssignments, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FieldAssignments,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

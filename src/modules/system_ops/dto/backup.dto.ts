@@ -17,7 +17,10 @@ export class CreateBackupPolicyDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Alcance del recurso (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Alcance del recurso (concept id)',
+    format: 'uuid',
+  })
   @IsUUID()
   resourceScopeConceptId!: string;
 
@@ -51,7 +54,9 @@ export class CreateBackupPolicyDto {
   @IsBoolean()
   encryptionRequired?: boolean;
 
-  @ApiPropertyOptional({ description: 'Frecuencia de prueba de restauración (días)' })
+  @ApiPropertyOptional({
+    description: 'Frecuencia de prueba de restauración (días)',
+  })
   @IsOptional()
   @IsInt()
   @Min(1)
@@ -64,7 +69,10 @@ export class CreateRestoreTestRunDto {
   @IsUUID()
   backupPolicyId!: string;
 
-  @ApiPropertyOptional({ description: 'Referencia del backup restaurado', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Referencia del backup restaurado',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -91,7 +99,10 @@ export class CreateRestoreTestRunDto {
   @IsBoolean()
   integrityCheckPassed?: boolean;
 
-  @ApiPropertyOptional({ description: 'Archivo de evidencia (common.files.id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Archivo de evidencia (common.files.id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   evidenceFileId?: string;

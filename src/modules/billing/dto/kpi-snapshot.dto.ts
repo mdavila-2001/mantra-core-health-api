@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNumberString, IsObject, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsDateString,
+  IsNumberString,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /billing/kpi-snapshots:compute` (UC-17-12). */
 export class ComputeKpiSnapshotDto {
@@ -7,12 +15,17 @@ export class ComputeKpiSnapshotDto {
   @IsUUID()
   practiceId!: string;
 
-  @ApiPropertyOptional({ description: 'Periodo fiscal (accounting.fiscal_periods)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Periodo fiscal (accounting.fiscal_periods)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   fiscalPeriodId?: string;
 
-  @ApiProperty({ description: 'Código de KPI (p. ej. DSO, AR_AGING, CASH_POSITION)' })
+  @ApiProperty({
+    description: 'Código de KPI (p. ej. DSO, AR_AGING, CASH_POSITION)',
+  })
   @IsString()
   @MaxLength(60)
   kpiCode!: string;
@@ -26,7 +39,9 @@ export class ComputeKpiSnapshotDto {
   @IsObject()
   dimensionJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Marca del cálculo (ISO); por defecto ahora' })
+  @ApiPropertyOptional({
+    description: 'Marca del cálculo (ISO); por defecto ahora',
+  })
   @IsOptional()
   @IsDateString()
   computedAt?: string;

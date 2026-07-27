@@ -42,7 +42,10 @@ export class PharmacyExternalProductMappingsRepository {
   }
 
   /** Crea el mapeo en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateMappingData): PharmacyExternalProductMappings {
+  create(
+    em: EntityManager,
+    data: CreateMappingData,
+  ): PharmacyExternalProductMappings {
     return em.create(
       PharmacyExternalProductMappings,
       {

@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsNumber, IsUUID, Min, ValidateNested } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsNumber,
+  IsUUID,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 /** Conteo capturado para una línea de la sesión. */
 export class CountResultDto {

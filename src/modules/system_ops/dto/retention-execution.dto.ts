@@ -3,11 +3,17 @@ import { IsInt, IsOptional, IsUUID, Min } from 'class-validator';
 
 /** Cuerpo de `POST /internal/governance/retention-executions/run` (UC-11-05). */
 export class RunRetentionDto {
-  @ApiProperty({ description: 'Política de retención ACTIVE a ejecutar', format: 'uuid' })
+  @ApiProperty({
+    description: 'Política de retención ACTIVE a ejecutar',
+    format: 'uuid',
+  })
   @IsUUID()
   retentionPolicyId!: string;
 
-  @ApiProperty({ description: 'Entidad objetivo del registro (entity_registry.id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Entidad objetivo del registro (entity_registry.id)',
+    format: 'uuid',
+  })
   @IsUUID()
   entityRegistryId!: string;
 
@@ -38,6 +44,8 @@ export class RetentionExecutionResponseDto {
   @ApiProperty()
   totalArchived!: number;
 
-  @ApiPropertyOptional({ description: 'true si se detuvo por legal hold activo' })
+  @ApiPropertyOptional({
+    description: 'true si se detuvo por legal hold activo',
+  })
   blockedByLegalHold?: boolean;
 }

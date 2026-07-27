@@ -51,7 +51,10 @@ function build() {
   };
   const rolesRepo = { findActiveForUser: mockFn().mockResolvedValue([]) };
   const lockoutsRepo = { create: mockFn(), findActiveForUser: mockFn() };
-  const eventsRepo = { record: mockFn(), countFailedLoginsSince: mockFn().mockResolvedValue(0) };
+  const eventsRepo = {
+    record: mockFn(),
+    countFailedLoginsSince: mockFn().mockResolvedValue(0),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new IamAuthService(
@@ -59,11 +62,11 @@ function build() {
     tokenService as any,
     usersRepo as any,
     credentialsRepo as any,
-    sessionsRepo as any,
-    refreshRepo as any,
+    sessionsRepo,
+    refreshRepo,
     rolesRepo as any,
-    lockoutsRepo as any,
-    eventsRepo as any,
+    lockoutsRepo,
+    eventsRepo,
     logger as any,
   );
   return {
@@ -95,9 +98,16 @@ describe('IamAuthService', () => {
       });
       d.sessionsRepo.create.mockReturnValue({ id: 's1' });
 
-      const res = await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
+      const res = await d.service.login(
+        { email: 'a@x.io', password: PASSWORD },
+        '1.2.3.4',
+      );
 
-      expect(res).toEqual({ accessToken: 'at', refreshToken: 'rt', expiresAt: new Date('2030-01-01') });
+      expect(res).toEqual({
+        accessToken: 'at',
+        refreshToken: 'rt',
+        expiresAt: new Date('2030-01-01'),
+      });
       expect(d.tx.flush).toHaveBeenCalled();
       expect(d.refreshRepo.create).toHaveBeenCalled();
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
@@ -115,13 +125,19 @@ describe('IamAuthService', () => {
       ).rejects.toBeInstanceOf(UnauthorizedException);
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED }),
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,
+        }),
       );
     });
 
     it('locks the account when failed attempts reach the threshold (UC-01-07 auto)', async () => {
       const d = build();
-      const user = { id: 'u1', statusConceptId: CONCEPTS.USER_ACTIVE, updatedAt: new Date() };
+      const user = {
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
@@ -139,7 +155,9 @@ describe('IamAuthService', () => {
       expect(d.lockoutsRepo.create).toHaveBeenCalled();
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_ACCOUNT_LOCK }),
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_ACCOUNT_LOCK,
+        }),
       );
     });
   });
@@ -164,7 +182,10 @@ describe('IamAuthService', () => {
 
       const res = await d.service.refresh({ refreshToken: 'raw' });
 
-      expect(res).toMatchObject({ accessToken: 'new-access', refreshToken: 'new-refresh' });
+      expect(res).toMatchObject({
+        accessToken: 'new-access',
+        refreshToken: 'new-refresh',
+      });
       expect(active.stateConceptId).toBe(CONCEPTS.STATE_ROTATED);
       expect(d.refreshRepo.create).toHaveBeenCalled();
     });
@@ -178,23 +199,25 @@ describe('IamAuthService', () => {
         expiresAt: new Date('2030-01-01'),
       });
 
-      await expect(d.service.refresh({ refreshToken: 'raw' })).rejects.toBeInstanceOf(
-        UnauthorizedException,
-      );
+      await expect(
+        d.service.refresh({ refreshToken: 'raw' }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
       expect(d.refreshRepo.revokeBySessionId).toHaveBeenCalledWith(d.tx, 's1');
       expect(d.sessionsRepo.revokeById).toHaveBeenCalledWith(d.tx, 's1');
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_TOKEN_REUSE }),
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_TOKEN_REUSE,
+        }),
       );
     });
 
     it('rejects an unknown refresh token', async () => {
       const d = build();
       d.refreshRepo.findByHash.mockResolvedValue(null);
-      await expect(d.service.refresh({ refreshToken: 'raw' })).rejects.toBeInstanceOf(
-        UnauthorizedException,
-      );
+      await expect(
+        d.service.refresh({ refreshToken: 'raw' }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
     });
   });
 
@@ -204,10 +227,13 @@ describe('IamAuthService', () => {
       d.sessionsRepo.activeSessionIdsForUser.mockResolvedValue(['s1', 's2']);
       d.sessionsRepo.revokeAllActiveForUser.mockResolvedValue(2);
 
-      const res = await d.service.logoutAll({ id: 'u1', roles: [] } as any);
+      const res = await d.service.logoutAll({ id: 'u1', roles: [] });
 
       expect(res).toEqual({ revokedSessions: 2 });
-      expect(d.refreshRepo.revokeActiveBySessionIds).toHaveBeenCalledWith(d.tx, ['s1', 's2']);
+      expect(d.refreshRepo.revokeActiveBySessionIds).toHaveBeenCalledWith(
+        d.tx,
+        ['s1', 's2'],
+      );
     });
   });
 
@@ -217,12 +243,17 @@ describe('IamAuthService', () => {
       d.sessionsRepo.purgeExpired.mockResolvedValue(3);
       d.refreshRepo.purgeExpired.mockResolvedValue(4);
 
-      const res = await d.service.purgeSessions({ id: 'admin', roles: ['SECURITY_ADMIN'] } as any);
+      const res = await d.service.purgeSessions({
+        id: 'admin',
+        roles: ['SECURITY_ADMIN'],
+      });
 
       expect(res).toEqual({ expiredSessions: 3, expiredTokens: 4 });
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_SESSION_PURGE }),
+        expect.objectContaining({
+          eventTypeConceptId: CONCEPTS.SEC_SESSION_PURGE,
+        }),
       );
     });
   });

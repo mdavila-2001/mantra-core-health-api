@@ -11,7 +11,10 @@ export class ContractResponseDto {
   @ApiProperty({ format: 'uuid' })
   externalProviderId!: string;
 
-  @ApiProperty({ description: 'Concepto de estado del contrato', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto de estado del contrato',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiProperty()
@@ -29,7 +32,10 @@ export class ContractVersionResponseDto {
   @ApiProperty()
   versionNumber!: number;
 
-  @ApiProperty({ description: 'Concepto de estado de la versión', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto de estado de la versión',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiPropertyOptional()
@@ -56,7 +62,10 @@ export class WebhookSubscriptionResponseDto {
   @ApiProperty({ format: 'uuid' })
   integrationContractId!: string;
 
-  @ApiProperty({ description: 'Concepto de estado de la suscripción', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto de estado de la suscripción',
+    format: 'uuid',
+  })
   status!: string;
 }
 
@@ -71,10 +80,14 @@ export class ExchangeRecordResponseDto {
   @ApiProperty({ description: 'Concepto de resultado', format: 'uuid' })
   outcome!: string;
 
-  @ApiProperty({ description: 'true si la respuesta se devuelve por replay idempotente' })
+  @ApiProperty({
+    description: 'true si la respuesta se devuelve por replay idempotente',
+  })
   replayed!: boolean;
 
-  @ApiPropertyOptional({ description: 'Referencia de respuesta previa (replay)' })
+  @ApiPropertyOptional({
+    description: 'Referencia de respuesta previa (replay)',
+  })
   responseReference?: string;
 }
 
@@ -89,10 +102,16 @@ export class ExchangeAttemptResponseDto {
   @ApiProperty()
   attemptNumber!: number;
 
-  @ApiProperty({ description: 'Concepto de resultado del intento', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto de resultado del intento',
+    format: 'uuid',
+  })
   outcome!: string;
 
-  @ApiProperty({ description: 'Concepto de resultado del registro tras el intento', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto de resultado del registro tras el intento',
+    format: 'uuid',
+  })
   recordOutcome!: string;
 }
 
@@ -119,7 +138,10 @@ export class DeliveryEvidenceResponseDto {
   @ApiProperty({ format: 'uuid' })
   integrationExchangeRecordId!: string;
 
-  @ApiProperty({ description: 'Concepto de resultado de la entrega', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto de resultado de la entrega',
+    format: 'uuid',
+  })
   outcome!: string;
 }
 

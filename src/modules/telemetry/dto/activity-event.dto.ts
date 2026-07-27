@@ -22,7 +22,10 @@ export class ActivityEventPropertyDto {
   @MaxLength(200)
   propertyName!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de valor', enum: ['STRING', 'NUMBER', 'BOOLEAN'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de valor',
+    enum: ['STRING', 'NUMBER', 'BOOLEAN'],
+  })
   @IsOptional()
   @IsIn(['STRING', 'NUMBER', 'BOOLEAN'])
   valueType?: 'STRING' | 'NUMBER' | 'BOOLEAN';
@@ -43,7 +46,10 @@ export class ActivityEventPropertyDto {
   @IsBoolean()
   valueBoolean?: boolean;
 
-  @ApiPropertyOptional({ description: 'Clasificación de dato (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Clasificación de dato (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dataClassificationConceptId?: string;
@@ -55,24 +61,36 @@ export class ActivityEventItemDto {
   @IsUUID()
   eventSchemaDefinitionId!: string;
 
-  @ApiPropertyOptional({ description: 'Nombre del evento (override del esquema)', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Nombre del evento (override del esquema)',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   eventName?: string;
 
-  @ApiPropertyOptional({ description: 'Clave de idempotencia del evento', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Clave de idempotencia del evento',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   eventIdempotencyKey?: string;
 
-  @ApiPropertyOptional({ description: 'Sujeto de analítica pseudónimo', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sujeto de analítica pseudónimo',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   analyticsSubjectId?: string;
 
-  @ApiPropertyOptional({ description: 'Usuario (para gate de consentimiento)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Usuario (para gate de consentimiento)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   userId?: string;
@@ -82,7 +100,10 @@ export class ActivityEventItemDto {
   @IsUUID()
   sessionId?: string;
 
-  @ApiPropertyOptional({ description: 'Journey de sesión existente a enlazar', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Journey de sesión existente a enlazar',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   sessionJourneyId?: string;
@@ -92,12 +113,18 @@ export class ActivityEventItemDto {
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de portal (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de portal (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   portalTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Plantilla de ruta (sin ids en claro)', maxLength: 300 })
+  @ApiPropertyOptional({
+    description: 'Plantilla de ruta (sin ids en claro)',
+    maxLength: 300,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(300)
@@ -113,7 +140,10 @@ export class ActivityEventItemDto {
   @IsUUID()
   correlationId?: string;
 
-  @ApiPropertyOptional({ type: [ActivityEventPropertyDto], description: 'Propiedades permitidas y minimizadas' })
+  @ApiPropertyOptional({
+    type: [ActivityEventPropertyDto],
+    description: 'Propiedades permitidas y minimizadas',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -123,7 +153,10 @@ export class ActivityEventItemDto {
 
 /** Cuerpo de `POST /telemetry/activity-events` (UC-28-07, batch). */
 export class CaptureActivityEventsDto {
-  @ApiProperty({ type: [ActivityEventItemDto], description: 'Lote de eventos de actividad' })
+  @ApiProperty({
+    type: [ActivityEventItemDto],
+    description: 'Lote de eventos de actividad',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(500)
@@ -137,12 +170,17 @@ export class ActivityEventsResponseDto {
   @ApiProperty({ description: 'Eventos insertados (consent-aware)' })
   inserted!: number;
 
-  @ApiProperty({ description: 'Eventos descartados por falta de consentimiento o reenvío' })
+  @ApiProperty({
+    description: 'Eventos descartados por falta de consentimiento o reenvío',
+  })
   skipped!: number;
 
   @ApiProperty({ type: [String], description: 'Ids de los eventos insertados' })
   eventIds!: string[];
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Journey de sesión afectado' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Journey de sesión afectado',
+  })
   sessionJourneyId?: string;
 }

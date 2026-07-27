@@ -18,7 +18,10 @@ export interface CreateRolePermissionData {
 @Injectable()
 export class RolePermissionsRepository {
   /** Bindings activos de un conjunto de roles (para el PDP). */
-  findActiveForRoles(em: EntityManager, roleIds: string[]): Promise<RolePermissions[]> {
+  findActiveForRoles(
+    em: EntityManager,
+    roleIds: string[],
+  ): Promise<RolePermissions[]> {
     if (roleIds.length === 0) return Promise.resolve([]);
     return em.find(RolePermissions, {
       roleId: { $in: roleIds },

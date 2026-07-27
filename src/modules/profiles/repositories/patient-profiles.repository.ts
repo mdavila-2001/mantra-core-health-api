@@ -15,12 +15,18 @@ export interface CreatePatientProfileData {
 /** Acceso a datos de `profiles.patient_profiles`. */
 @Injectable()
 export class PatientProfilesRepository {
-  findById(em: EntityManager, profileId: string): Promise<PatientProfiles | null> {
+  findById(
+    em: EntityManager,
+    profileId: string,
+  ): Promise<PatientProfiles | null> {
     return em.findOne(PatientProfiles, { profileId });
   }
 
   /** Verifica unicidad de patient_code (uq_patient_profiles_patient_code). */
-  findByPatientCode(em: EntityManager, patientCode: string): Promise<PatientProfiles | null> {
+  findByPatientCode(
+    em: EntityManager,
+    patientCode: string,
+  ): Promise<PatientProfiles | null> {
     return em.findOne(PatientProfiles, { patientCode });
   }
 

@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { TelemetryConsentService } from '../services';
@@ -24,7 +32,9 @@ export class TelemetryConsentController {
   /** UC-28-04. */
   @Post('disclosure-acceptances')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar aceptación de disclosure por usuario/sesión' })
+  @ApiOperation({
+    summary: 'Registrar aceptación de disclosure por usuario/sesión',
+  })
   acceptDisclosure(
     @Body() dto: CreateDisclosureAcceptanceDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -57,7 +67,9 @@ export class TelemetryConsentController {
   /** UC-28-12. */
   @Post('tracking-consents/:id/withdraw')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Retirar consentimiento y desactivar sujeto (cascada)' })
+  @ApiOperation({
+    summary: 'Retirar consentimiento y desactivar sujeto (cascada)',
+  })
   withdrawConsent(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() actor: AuthenticatedUser,

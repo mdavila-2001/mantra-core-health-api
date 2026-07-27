@@ -16,15 +16,27 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 describe('Consent controllers (thin delegation)', () => {
   it('ConsentsController delegates capture/withdraw/amendProvisions', async () => {
-    const service = { capture: mockFn(), withdraw: mockFn(), amendProvisions: mockFn() };
+    const service = {
+      capture: mockFn(),
+      withdraw: mockFn(),
+      amendProvisions: mockFn(),
+    };
     const c = new ConsentsController(service as any);
     const dto = { patientProfileId: 'p1', processingPurposeId: 'pp1' };
-    await c.capture(dto as any, actor);
+    await c.capture(dto, actor);
     expect(service.capture).toHaveBeenCalledWith(dto, actor);
-    await c.withdraw('c1', { withdrawalReasonConceptId: 'r1' } as any, actor);
-    expect(service.withdraw).toHaveBeenCalledWith('c1', { withdrawalReasonConceptId: 'r1' }, actor);
-    await c.amendProvisions('c1', { provisions: [] } as any, actor);
-    expect(service.amendProvisions).toHaveBeenCalledWith('c1', { provisions: [] }, actor);
+    await c.withdraw('c1', { withdrawalReasonConceptId: 'r1' }, actor);
+    expect(service.withdraw).toHaveBeenCalledWith(
+      'c1',
+      { withdrawalReasonConceptId: 'r1' },
+      actor,
+    );
+    await c.amendProvisions('c1', { provisions: [] }, actor);
+    expect(service.amendProvisions).toHaveBeenCalledWith(
+      'c1',
+      { provisions: [] },
+      actor,
+    );
   });
 
   it('HipaaAuthorizationsController delegates grant/revoke', async () => {
@@ -41,17 +53,21 @@ describe('Consent controllers (thin delegation)', () => {
     const service = { raise: mockFn(), resolve: mockFn() };
     const c = new PatientObjectionsController(service as any);
     const dto = { patientProfileId: 'p1', processingPurposeId: 'pp1' };
-    await c.raise(dto as any, actor);
+    await c.raise(dto, actor);
     expect(service.raise).toHaveBeenCalledWith(dto, actor);
     await c.resolve('o1', { resolution: 'UPHELD' } as any, actor);
-    expect(service.resolve).toHaveBeenCalledWith('o1', { resolution: 'UPHELD' }, actor);
+    expect(service.resolve).toHaveBeenCalledWith(
+      'o1',
+      { resolution: 'UPHELD' },
+      actor,
+    );
   });
 
   it('PrivacyRestrictionsController delegates apply', async () => {
     const service = { apply: mockFn() };
     const c = new PrivacyRestrictionsController(service as any);
     const dto = { patientProfileId: 'p1', dataClassConceptId: 'dc1' };
-    await c.apply(dto as any, actor);
+    await c.apply(dto, actor);
     expect(service.apply).toHaveBeenCalledWith(dto, actor);
   });
 
@@ -59,14 +75,18 @@ describe('Consent controllers (thin delegation)', () => {
     const service = { version: mockFn() };
     const c = new ProcessingLegalBasesController(service as any);
     const dto = { processingPurposeId: 'pp1' };
-    await c.version(dto as any, actor);
+    await c.version(dto, actor);
     expect(service.version).toHaveBeenCalledWith(dto, actor);
   });
 
   it('TreatmentInformedConsentsController delegates sign', async () => {
     const service = { sign: mockFn() };
     const c = new TreatmentInformedConsentsController(service as any);
-    const dto = { patientProfileId: 'p1', encounterId: 'e1', decision: 'ACCEPTED' };
+    const dto = {
+      patientProfileId: 'p1',
+      encounterId: 'e1',
+      decision: 'ACCEPTED',
+    };
     await c.sign(dto as any, actor);
     expect(service.sign).toHaveBeenCalledWith(dto, actor);
   });

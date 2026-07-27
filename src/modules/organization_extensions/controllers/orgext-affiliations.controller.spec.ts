@@ -7,7 +7,9 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
   const affiliationsService = { declare: mockFn(), terminate: mockFn() };
-  const controller = new OrgextAffiliationsController(affiliationsService as any);
+  const controller = new OrgextAffiliationsController(
+    affiliationsService as any,
+  );
   return { controller, affiliationsService };
 }
 
@@ -16,7 +18,9 @@ describe('OrgextAffiliationsController', () => {
     const d = build();
     const dto = { primaryTenantId: 't1', participatingTenantId: 't2' };
     d.affiliationsService.declare.mockResolvedValue({ id: 'a1' });
-    await expect(d.controller.declare(dto as any, actor)).resolves.toEqual({ id: 'a1' });
+    await expect(d.controller.declare(dto as any, actor)).resolves.toEqual({
+      id: 'a1',
+    });
     expect(d.affiliationsService.declare).toHaveBeenCalledWith(dto, actor);
   });
 

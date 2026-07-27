@@ -26,11 +26,17 @@ export class CapitalizeAssetDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ description: 'Cuenta de adquisición (débito del alta)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta de adquisición (débito del alta)',
+    format: 'uuid',
+  })
   @IsUUID()
   acquisitionAccountId!: string;
 
-  @ApiProperty({ description: 'Cuenta banco/proveedor (crédito del alta)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta banco/proveedor (crédito del alta)',
+    format: 'uuid',
+  })
   @IsUUID()
   offsetAccountId!: string;
 
@@ -84,11 +90,17 @@ export class RunDepreciationDto {
   @IsUUID()
   fiscalPeriodId!: string;
 
-  @ApiProperty({ description: 'Cuenta de gasto por depreciación (débito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta de gasto por depreciación (débito)',
+    format: 'uuid',
+  })
   @IsUUID()
   depreciationExpenseAccountId!: string;
 
-  @ApiProperty({ description: 'Cuenta de depreciación acumulada (crédito)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Cuenta de depreciación acumulada (crédito)',
+    format: 'uuid',
+  })
   @IsUUID()
   accumulatedDepreciationAccountId!: string;
 
@@ -96,7 +108,10 @@ export class RunDepreciationDto {
   @IsDateString()
   postingDate!: string;
 
-  @ApiPropertyOptional({ description: 'Limitar a un activo concreto', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Limitar a un activo concreto',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   assetId?: string;

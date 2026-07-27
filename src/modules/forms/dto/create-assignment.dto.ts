@@ -19,12 +19,18 @@ export class CreateAssignmentDto {
   @IsUUID()
   sectionId?: string;
 
-  @ApiPropertyOptional({ description: 'Perfil objetivo (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Perfil objetivo (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   profileTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant que crea la asignación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant que crea la asignación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;

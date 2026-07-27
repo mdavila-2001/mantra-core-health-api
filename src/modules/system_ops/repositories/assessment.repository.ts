@@ -27,7 +27,10 @@ export class AssessmentRepository {
     return em.findOne(OperationalFrameworks, { code, version });
   }
 
-  findFrameworkById(em: EntityManager, id: string): Promise<OperationalFrameworks | null> {
+  findFrameworkById(
+    em: EntityManager,
+    id: string,
+  ): Promise<OperationalFrameworks | null> {
     return em.findOne(OperationalFrameworks, { id });
   }
 
@@ -45,7 +48,11 @@ export class AssessmentRepository {
     },
   ): OperationalFrameworks {
     const { actorUserId, ...rest } = data;
-    return em.create(OperationalFrameworks, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      OperationalFrameworks,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createControl(
@@ -64,15 +71,25 @@ export class AssessmentRepository {
     },
   ): OperationalFrameworkControls {
     const { actorUserId, ...rest } = data;
-    return em.create(OperationalFrameworkControls, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      OperationalFrameworkControls,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
-  findControlById(em: EntityManager, id: string): Promise<OperationalFrameworkControls | null> {
+  findControlById(
+    em: EntityManager,
+    id: string,
+  ): Promise<OperationalFrameworkControls | null> {
     return em.findOne(OperationalFrameworkControls, { id });
   }
 
   // --- Evaluaciones y resultados ---
-  findAssessmentById(em: EntityManager, id: string): Promise<WorkloadAssessments | null> {
+  findAssessmentById(
+    em: EntityManager,
+    id: string,
+  ): Promise<WorkloadAssessments | null> {
     return em.findOne(WorkloadAssessments, { id });
   }
 
@@ -92,7 +109,11 @@ export class AssessmentRepository {
     },
   ): WorkloadAssessments {
     const { actorUserId, ...rest } = data;
-    return em.create(WorkloadAssessments, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      WorkloadAssessments,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   findControlResult(
@@ -100,7 +121,10 @@ export class AssessmentRepository {
     workloadAssessmentId: string,
     operationalFrameworkControlId: string,
   ): Promise<AssessmentControlResults | null> {
-    return em.findOne(AssessmentControlResults, { workloadAssessmentId, operationalFrameworkControlId });
+    return em.findOne(AssessmentControlResults, {
+      workloadAssessmentId,
+      operationalFrameworkControlId,
+    });
   }
 
   createControlResult(
@@ -125,7 +149,10 @@ export class AssessmentRepository {
   }
 
   // --- Hallazgos, planes y acciones ---
-  findFindingById(em: EntityManager, id: string): Promise<AssessmentFindings | null> {
+  findFindingById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AssessmentFindings | null> {
     return em.findOne(AssessmentFindings, { id });
   }
 
@@ -134,7 +161,10 @@ export class AssessmentRepository {
     workloadAssessmentId: string,
     findingCode: string,
   ): Promise<AssessmentFindings | null> {
-    return em.findOne(AssessmentFindings, { workloadAssessmentId, findingCode });
+    return em.findOne(AssessmentFindings, {
+      workloadAssessmentId,
+      findingCode,
+    });
   }
 
   createFinding(
@@ -153,10 +183,18 @@ export class AssessmentRepository {
     },
   ): AssessmentFindings {
     const { actorUserId, ...rest } = data;
-    return em.create(AssessmentFindings, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      AssessmentFindings,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
-  findPlanByCode(em: EntityManager, tenantId: string, code: string): Promise<RemediationPlans | null> {
+  findPlanByCode(
+    em: EntityManager,
+    tenantId: string,
+    code: string,
+  ): Promise<RemediationPlans | null> {
     return em.findOne(RemediationPlans, { tenantId, code });
   }
 
@@ -174,7 +212,11 @@ export class AssessmentRepository {
     },
   ): RemediationPlans {
     const { actorUserId, ...rest } = data;
-    return em.create(RemediationPlans, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      RemediationPlans,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createAction(
@@ -192,20 +234,37 @@ export class AssessmentRepository {
     },
   ): RemediationActions {
     const { actorUserId, ...rest } = data;
-    return em.create(RemediationActions, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      RemediationActions,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
-  findActionById(em: EntityManager, id: string): Promise<RemediationActions | null> {
+  findActionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<RemediationActions | null> {
     return em.findOne(RemediationActions, { id });
   }
 
-  findPlanById(em: EntityManager, id: string): Promise<RemediationPlans | null> {
+  findPlanById(
+    em: EntityManager,
+    id: string,
+  ): Promise<RemediationPlans | null> {
     return em.findOne(RemediationPlans, { id });
   }
 
   /** Cuenta acciones del plan cuyo estado NO está en la lista dada (p. ej. no verificadas). */
-  countActionsNotIn(em: EntityManager, remediationPlanId: string, statusConceptIds: string[]): Promise<number> {
-    return em.count(RemediationActions, { remediationPlanId, statusConceptId: { $nin: statusConceptIds } });
+  countActionsNotIn(
+    em: EntityManager,
+    remediationPlanId: string,
+    statusConceptIds: string[],
+  ): Promise<number> {
+    return em.count(RemediationActions, {
+      remediationPlanId,
+      statusConceptId: { $nin: statusConceptIds },
+    });
   }
 
   /** Cuenta acciones de un hallazgo cuyo estado NO está en la lista dada. */

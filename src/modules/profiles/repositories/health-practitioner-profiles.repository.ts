@@ -18,7 +18,10 @@ export interface CreatePractitionerProfileData {
 /** Acceso a datos de `profiles.health_practitioner_profiles`. */
 @Injectable()
 export class HealthPractitionerProfilesRepository {
-  findById(em: EntityManager, profileId: string): Promise<HealthPractitionerProfiles | null> {
+  findById(
+    em: EntityManager,
+    profileId: string,
+  ): Promise<HealthPractitionerProfiles | null> {
     return em.findOne(HealthPractitionerProfiles, { profileId });
   }
 
@@ -30,7 +33,10 @@ export class HealthPractitionerProfilesRepository {
     return em.findOne(HealthPractitionerProfiles, { practitionerCode });
   }
 
-  create(em: EntityManager, data: CreatePractitionerProfileData): HealthPractitionerProfiles {
+  create(
+    em: EntityManager,
+    data: CreatePractitionerProfileData,
+  ): HealthPractitionerProfiles {
     return em.create(
       HealthPractitionerProfiles,
       {

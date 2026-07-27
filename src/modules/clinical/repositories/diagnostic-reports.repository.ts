@@ -23,7 +23,10 @@ export class DiagnosticReportsRepository {
     return em.findOne(DiagnosticReports, { id });
   }
 
-  create(em: EntityManager, data: CreateDiagnosticReportData): DiagnosticReports {
+  create(
+    em: EntityManager,
+    data: CreateDiagnosticReportData,
+  ): DiagnosticReports {
     return em.create(
       DiagnosticReports,
       {

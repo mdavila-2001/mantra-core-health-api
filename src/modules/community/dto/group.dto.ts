@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /**
  * Cuerpo de `POST /community/groups`. Bootstrap: crea un grupo/comunidad (padre de
@@ -24,12 +31,18 @@ export class CreateGroupDto {
   @MaxLength(2000)
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Visibilidad', enum: ['PUBLIC', 'PRIVATE', 'SECRET'] })
+  @ApiPropertyOptional({
+    description: 'Visibilidad',
+    enum: ['PUBLIC', 'PRIVATE', 'SECRET'],
+  })
   @IsOptional()
   @IsIn(['PUBLIC', 'PRIVATE', 'SECRET'])
   visibility?: 'PUBLIC' | 'PRIVATE' | 'SECRET';
 
-  @ApiPropertyOptional({ description: 'Tipo de grupo', enum: ['GENERAL', 'SUPPORT'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de grupo',
+    enum: ['GENERAL', 'SUPPORT'],
+  })
   @IsOptional()
   @IsIn(['GENERAL', 'SUPPORT'])
   groupType?: 'GENERAL' | 'SUPPORT';
@@ -46,7 +59,10 @@ export class JoinGroupDto {
   @IsUUID()
   memberProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Perfil que invitó (grupos privados)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Perfil que invitó (grupos privados)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   invitedByProfileId?: string;

@@ -10,7 +10,9 @@ import * as Joi from 'joi';
  * evita fricción en pruebas y en el arranque local sin `.env` completo.
  */
 export const authEnvSchema = Joi.object({
-  JWT_SECRET: Joi.string().min(16).default('dev-only-insecure-secret-change-me'),
+  JWT_SECRET: Joi.string()
+    .min(16)
+    .default('dev-only-insecure-secret-change-me'),
   JWT_ACCESS_TTL: Joi.string().default('15m'),
   JWT_REFRESH_TTL_DAYS: Joi.number().integer().min(1).default(30),
   ACCOUNT_LOCK_THRESHOLD: Joi.number().integer().min(1).default(5),

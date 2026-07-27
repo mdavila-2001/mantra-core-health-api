@@ -3,11 +3,17 @@ import { IsInt, IsOptional, IsUUID, Min } from 'class-validator';
 
 /** Cuerpo de `POST /forms/instances` (UC-09-07). */
 export class OpenInstanceDto {
-  @ApiProperty({ description: 'Recurso al que se adjunta el formulario', format: 'uuid' })
+  @ApiProperty({
+    description: 'Recurso al que se adjunta el formulario',
+    format: 'uuid',
+  })
   @IsUUID()
   resourceId!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de recurso (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de recurso (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   resourceTypeConceptId?: string;
@@ -25,7 +31,10 @@ export class OpenInstanceDto {
   @IsUUID()
   definitionSetVersionId?: string;
 
-  @ApiPropertyOptional({ description: 'Versión de schema explícita', default: 1 })
+  @ApiPropertyOptional({
+    description: 'Versión de schema explícita',
+    default: 1,
+  })
   @IsOptional()
   @IsInt()
   @Min(1)

@@ -46,28 +46,46 @@ export class OrgextHospitalsService {
   }
 
   /** UC-22-01: especializa un practice/tenant como hospital en estado borrador. */
-  async specialize(dto: CreateHospitalDto, actor: AuthenticatedUser): Promise<HospitalResponseDto> {
+  async specialize(
+    dto: CreateHospitalDto,
+    actor: AuthenticatedUser,
+  ): Promise<HospitalResponseDto> {
     this.logger.info(
-      { operation: 'orgext.hospital.specialize', tenantId: dto.tenantId, practiceId: dto.practiceId },
+      {
+        operation: 'orgext.hospital.specialize',
+        tenantId: dto.tenantId,
+        practiceId: dto.practiceId,
+      },
       'Specializing practice as hospital',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.hospitalsRepo.findByTenantOrPractice(tx, dto.tenantId, dto.practiceId);
+      const clash = await this.hospitalsRepo.findByTenantOrPractice(
+        tx,
+        dto.tenantId,
+        dto.practiceId,
+      );
       if (clash) {
         this.logger.warn(
-          { operation: 'orgext.hospital.specialize', reason: 'already-specialized' },
+          {
+            operation: 'orgext.hospital.specialize',
+            reason: 'already-specialized',
+          },
           'Rejected hospital specialization: tenant or practice already specialized',
         );
-        throw new ConflictException('El tenant o el practice ya está especializado como hospital', {
-          tenantId: dto.tenantId,
-          practiceId: dto.practiceId,
-        });
+        throw new ConflictException(
+          'El tenant o el practice ya está especializado como hospital',
+          {
+            tenantId: dto.tenantId,
+            practiceId: dto.practiceId,
+          },
+        );
       }
 
       const hospital = this.hospitalsRepo.create(tx, {
         tenantId: dto.tenantId,
         practiceId: dto.practiceId,
-        hospitalTypeConceptId: dto.hospitalTypeConceptId ?? ORGEXT.HOSPITAL_TYPE_GENERAL,
+        hospitalTypeConceptId:
+          dto.hospitalTypeConceptId ?? ORGEXT.HOSPITAL_TYPE_GENERAL,
         careLevelConceptId: dto.careLevelConceptId,
         ownershipTypeConceptId: dto.ownershipTypeConceptId,
         teachingStatusConceptId: dto.teachingStatusConceptId,
@@ -93,15 +111,24 @@ export class OrgextHospitalsService {
     dto: ActivateHospitalDto,
     actor: AuthenticatedUser,
   ): Promise<HospitalResponseDto> {
-    this.logger.info({ operation: 'orgext.hospital.activate', hospitalId }, 'Activating hospital');
+    this.logger.info(
+      { operation: 'orgext.hospital.activate', hospitalId },
+      'Activating hospital',
+    );
     return this.em.transactional(async (tx) => {
       const hospital = await this.hospitalsRepo.findById(tx, hospitalId);
-      if (!hospital) throw new ResourceNotFoundException('Hospital no encontrado', { hospitalId });
-
-      if (hospital.statusConceptId !== ORGEXT.HOSPITAL_DRAFT) {
-        throw new PreconditionFailedException('El hospital no está en estado borrador/inactivo', {
+      if (!hospital)
+        throw new ResourceNotFoundException('Hospital no encontrado', {
           hospitalId,
         });
+
+      if (hospital.statusConceptId !== ORGEXT.HOSPITAL_DRAFT) {
+        throw new PreconditionFailedException(
+          'El hospital no está en estado borrador/inactivo',
+          {
+            hospitalId,
+          },
+        );
       }
 
       const verifiedCount = await this.licensesRepo.countVerifiedForTenant(
@@ -111,7 +138,11 @@ export class OrgextHospitalsService {
       );
       if (verifiedCount === 0) {
         this.logger.warn(
-          { operation: 'orgext.hospital.activate', reason: 'no-verified-license', hospitalId },
+          {
+            operation: 'orgext.hospital.activate',
+            reason: 'no-verified-license',
+            hospitalId,
+          },
           'Rejected hospital activation: no verified facility license',
         );
         throw new PreconditionFailedException(
@@ -121,11 +152,15 @@ export class OrgextHospitalsService {
       }
 
       hospital.statusConceptId = ORGEXT.HOSPITAL_ACTIVE;
-      if (dto.primaryPracticeSiteId) hospital.primaryPracticeSiteId = dto.primaryPracticeSiteId;
+      if (dto.primaryPracticeSiteId)
+        hospital.primaryPracticeSiteId = dto.primaryPracticeSiteId;
       if (dto.publicProfileId) hospital.publicProfileId = dto.publicProfileId;
       touch(hospital, actor.id);
 
-      this.logger.info({ operation: 'orgext.hospital.activate', hospitalId }, 'Hospital activated');
+      this.logger.info(
+        { operation: 'orgext.hospital.activate', hospitalId },
+        'Hospital activated',
+      );
       return this.toResponse(hospital);
     });
   }
@@ -142,17 +177,23 @@ export class OrgextHospitalsService {
     );
     return this.em.transactional(async (tx) => {
       const hospital = await this.hospitalsRepo.findById(tx, hospitalId);
-      if (!hospital) throw new ResourceNotFoundException('Hospital no encontrado', { hospitalId });
+      if (!hospital)
+        throw new ResourceNotFoundException('Hospital no encontrado', {
+          hospitalId,
+        });
 
       if (hospital.statusConceptId !== ORGEXT.HOSPITAL_ACTIVE) {
-        throw new PreconditionFailedException('El hospital no está activo', { hospitalId });
+        throw new PreconditionFailedException('El hospital no está activo', {
+          hospitalId,
+        });
       }
 
       const line = this.serviceLinesRepo.create(tx, {
         hospitalId,
         clinicalUnitId: dto.clinicalUnitId,
         healthcareServiceId: dto.healthcareServiceId,
-        serviceLineConceptId: dto.serviceLineConceptId ?? ORGEXT.SERVICE_LINE_GENERAL,
+        serviceLineConceptId:
+          dto.serviceLineConceptId ?? ORGEXT.SERVICE_LINE_GENERAL,
         specialtyConceptId: dto.specialtyConceptId,
         acuityLevelConceptId: dto.acuityLevelConceptId,
         referralRequired: dto.referralRequired,
@@ -162,7 +203,11 @@ export class OrgextHospitalsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'orgext.service-line.create', hospitalId, lineId: line.id },
+        {
+          operation: 'orgext.service-line.create',
+          hospitalId,
+          lineId: line.id,
+        },
         'Service line defined',
       );
       return {
@@ -185,11 +230,21 @@ export class OrgextHospitalsService {
       'Retiring service line',
     );
     return this.em.transactional(async (tx) => {
-      const line = await this.serviceLinesRepo.findByIdForHospital(tx, lineId, hospitalId);
-      if (!line) throw new ResourceNotFoundException('Línea de servicio no encontrada', { lineId });
+      const line = await this.serviceLinesRepo.findByIdForHospital(
+        tx,
+        lineId,
+        hospitalId,
+      );
+      if (!line)
+        throw new ResourceNotFoundException('Línea de servicio no encontrada', {
+          lineId,
+        });
 
       if (line.statusConceptId !== ORGEXT.SERVICE_LINE_ACTIVE) {
-        throw new PreconditionFailedException('La línea de servicio no está activa', { lineId });
+        throw new PreconditionFailedException(
+          'La línea de servicio no está activa',
+          { lineId },
+        );
       }
 
       line.statusConceptId = ORGEXT.SERVICE_LINE_RETIRED;

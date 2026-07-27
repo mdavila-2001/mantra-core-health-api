@@ -13,27 +13,36 @@ import {
  * credencial de soporte (verificable vía UC-05-05).
  */
 export class CreatePractitionerDto {
-  @ApiProperty({ description: 'Código único de profesional (practitioner_code, UK)', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único de profesional (practitioner_code, UK)',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   practitionerCode!: string;
 
   @ApiPropertyOptional({
-    description: 'Persona existente a reutilizar; si se omite se crea una nueva',
+    description:
+      'Persona existente a reutilizar; si se omite se crea una nueva',
     format: 'uuid',
   })
   @IsOptional()
   @IsUUID()
   personId?: string;
 
-  @ApiPropertyOptional({ description: 'Nombre visible (si se crea la persona)' })
+  @ApiPropertyOptional({
+    description: 'Nombre visible (si se crea la persona)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(300)
   displayName?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de categoría profesional', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de categoría profesional',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   practitionerCategoryConceptId?: string;
@@ -44,35 +53,53 @@ export class CreatePractitionerDto {
   @MaxLength(200)
   professionalTitle?: string;
 
-  @ApiProperty({ description: 'Nº de licencia de la autorización jurisdiccional inicial', maxLength: 100 })
+  @ApiProperty({
+    description: 'Nº de licencia de la autorización jurisdiccional inicial',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   licenseNumber!: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de jurisdicción de la licencia', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de jurisdicción de la licencia',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Autoridad regulatoria emisora', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Autoridad regulatoria emisora',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   regulatoryAuthority?: string;
 
-  @ApiProperty({ description: 'Nº de la credencial de soporte', maxLength: 100 })
+  @ApiProperty({
+    description: 'Nº de la credencial de soporte',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   credentialNumber!: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del tipo de credencial', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del tipo de credencial',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   credentialTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del idioma clínico', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del idioma clínico',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   languageConceptId?: string;
@@ -89,10 +116,16 @@ export class PractitionerResponseDto {
   @ApiProperty()
   practitionerCode!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de práctica', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de práctica',
+    format: 'uuid',
+  })
   practiceStatus!: string;
 
   @ApiProperty({ format: 'uuid' })

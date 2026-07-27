@@ -20,7 +20,11 @@ describe('ContactPointsService', () => {
   function build() {
     const { em, tx } = createEmMock();
     const repo = { findById: fn(), create: fn() };
-    const service = new ContactPointsService(em as never, repo as never, logger as never);
+    const service = new ContactPointsService(
+      em as never,
+      repo,
+      logger as never,
+    );
     return { service, tx, repo };
   }
 
@@ -47,7 +51,11 @@ describe('ContactPointsService', () => {
 
     expect(repo.create).toHaveBeenCalledTimes(1);
     expect(tx.flush).toHaveBeenCalledTimes(1);
-    expect(result).toMatchObject({ id: 'cp-1', verified: false, system: ContactSystem.EMAIL });
+    expect(result).toMatchObject({
+      id: 'cp-1',
+      verified: false,
+      system: ContactSystem.EMAIL,
+    });
   });
 
   it('verifies an existing contact point', async () => {

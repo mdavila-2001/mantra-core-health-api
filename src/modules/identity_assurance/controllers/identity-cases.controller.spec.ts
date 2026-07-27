@@ -15,7 +15,10 @@ function build() {
     issueAssertion: mockFn(),
     expireSweep: mockFn(),
   };
-  return { controller: new IdentityCasesController(casesService as any), casesService };
+  return {
+    controller: new IdentityCasesController(casesService as any),
+    casesService,
+  };
 }
 
 describe('IdentityCasesController', () => {
@@ -28,32 +31,60 @@ describe('IdentityCasesController', () => {
 
   it('delegates submitEvidence (UC-27-03)', async () => {
     const d = build();
-    await d.controller.submitEvidence('k1', { evidenceTypeConceptId: 'e' } as any, actor);
-    expect(d.casesService.submitEvidence).toHaveBeenCalledWith('k1', { evidenceTypeConceptId: 'e' }, actor);
+    await d.controller.submitEvidence(
+      'k1',
+      { evidenceTypeConceptId: 'e' },
+      actor,
+    );
+    expect(d.casesService.submitEvidence).toHaveBeenCalledWith(
+      'k1',
+      { evidenceTypeConceptId: 'e' },
+      actor,
+    );
   });
 
   it('delegates planChecks (UC-27-04)', async () => {
     const d = build();
-    await d.controller.planChecks('k1', { checks: [] } as any, actor);
-    expect(d.casesService.planChecks).toHaveBeenCalledWith('k1', { checks: [] }, actor);
+    await d.controller.planChecks('k1', { checks: [] }, actor);
+    expect(d.casesService.planChecks).toHaveBeenCalledWith(
+      'k1',
+      { checks: [] },
+      actor,
+    );
   });
 
   it('delegates raiseFraudSignal (UC-27-07)', async () => {
     const d = build();
     await d.controller.raiseFraudSignal('k1', {} as any, actor);
-    expect(d.casesService.raiseFraudSignal).toHaveBeenCalledWith('k1', {}, actor);
+    expect(d.casesService.raiseFraudSignal).toHaveBeenCalledWith(
+      'k1',
+      {},
+      actor,
+    );
   });
 
   it('delegates openManualReview (UC-27-08)', async () => {
     const d = build();
     await d.controller.openManualReview('k1', {} as any, actor);
-    expect(d.casesService.openManualReview).toHaveBeenCalledWith('k1', {}, actor);
+    expect(d.casesService.openManualReview).toHaveBeenCalledWith(
+      'k1',
+      {},
+      actor,
+    );
   });
 
   it('delegates issueAssertion (UC-27-10)', async () => {
     const d = build();
-    await d.controller.issueAssertion('k1', { issuerIdentityAuthorityId: 'a' } as any, actor);
-    expect(d.casesService.issueAssertion).toHaveBeenCalledWith('k1', { issuerIdentityAuthorityId: 'a' }, actor);
+    await d.controller.issueAssertion(
+      'k1',
+      { issuerIdentityAuthorityId: 'a' },
+      actor,
+    );
+    expect(d.casesService.issueAssertion).toHaveBeenCalledWith(
+      'k1',
+      { issuerIdentityAuthorityId: 'a' },
+      actor,
+    );
   });
 
   it('delegates expireSweep (UC-27-12)', async () => {

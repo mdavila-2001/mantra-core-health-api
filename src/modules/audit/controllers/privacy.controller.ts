@@ -36,7 +36,9 @@ export class PrivacyController {
   @Patch('dsar/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Avanzar la máquina de estados de una solicitud DSAR' })
+  @ApiOperation({
+    summary: 'Avanzar la máquina de estados de una solicitud DSAR',
+  })
   updateDsar(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateDsarDto,

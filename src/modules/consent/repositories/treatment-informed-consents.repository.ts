@@ -21,11 +21,17 @@ export interface CreateTreatmentInformedConsentData {
 /** Acceso a datos de `consent.treatment_informed_consents` (entidad versionada). */
 @Injectable()
 export class TreatmentInformedConsentsRepository {
-  findById(em: EntityManager, id: string): Promise<TreatmentInformedConsents | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<TreatmentInformedConsents | null> {
     return em.findOne(TreatmentInformedConsents, { id });
   }
 
-  create(em: EntityManager, data: CreateTreatmentInformedConsentData): TreatmentInformedConsents {
+  create(
+    em: EntityManager,
+    data: CreateTreatmentInformedConsentData,
+  ): TreatmentInformedConsents {
     return em.create(
       TreatmentInformedConsents,
       {

@@ -29,15 +29,19 @@ export class FilesRepository {
 
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateFileData): Files {
-    return em.create(Files, {
-      tenantId: data.tenantId,
-      categoryConceptId: data.categoryConceptId,
-      originalName: data.originalName,
-      sensitivityConceptId: data.sensitivityConceptId,
-      lifecycleStatusConceptId: data.lifecycleStatusConceptId,
-      ...createdBy(data.actorUserId),
-      // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
-      // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.
-    }, { partial: true });
+    return em.create(
+      Files,
+      {
+        tenantId: data.tenantId,
+        categoryConceptId: data.categoryConceptId,
+        originalName: data.originalName,
+        sensitivityConceptId: data.sensitivityConceptId,
+        lifecycleStatusConceptId: data.lifecycleStatusConceptId,
+        ...createdBy(data.actorUserId),
+        // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
+        // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.
+      },
+      { partial: true },
+    );
   }
 }

@@ -20,7 +20,10 @@ export interface CreateCaseData {
 /** Acceso a datos de `identity_assurance.identity_verification_cases`. */
 @Injectable()
 export class IdentityVerificationCasesRepository {
-  findById(em: EntityManager, id: string): Promise<IdentityVerificationCases | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IdentityVerificationCases | null> {
     return em.findOne(IdentityVerificationCases, { id });
   }
 

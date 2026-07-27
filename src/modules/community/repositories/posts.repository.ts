@@ -51,7 +51,8 @@ export class PostsRepository {
         bodyText: data.bodyText,
         visibilityConceptId: data.visibilityConceptId,
         commentsEnabled: data.commentsEnabled ?? true,
-        healthDataScreeningStatusConceptId: data.healthDataScreeningStatusConceptId,
+        healthDataScreeningStatusConceptId:
+          data.healthDataScreeningStatusConceptId,
         moderationStatusConceptId: data.moderationStatusConceptId,
         publicationStatusConceptId: data.publicationStatusConceptId,
         publishedAt: data.publishedAt,
@@ -78,7 +79,11 @@ export class PostsRepository {
   }
 
   /** UPSERT de hashtag por tag normalizado; incrementa `usage_count`. */
-  async upsertHashtag(em: EntityManager, tag: string, actorUserId?: string): Promise<Hashtags> {
+  async upsertHashtag(
+    em: EntityManager,
+    tag: string,
+    actorUserId?: string,
+  ): Promise<Hashtags> {
     const normalized = tag.trim().toLowerCase().replace(/^#/, '');
     let hashtag = await em.findOne(Hashtags, { normalizedTag: normalized });
     if (hashtag) {

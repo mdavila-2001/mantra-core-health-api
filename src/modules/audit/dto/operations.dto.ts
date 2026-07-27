@@ -1,21 +1,34 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsISO8601, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsISO8601,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /audit/retention/apply` (UC-10-09). */
 export class RetentionApplyDto {
-  @ApiPropertyOptional({ description: 'Partición de tenant afectada', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Partición de tenant afectada',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Log/partición lógica objetivo', maxLength: 100 })
+  @ApiPropertyOptional({
+    description: 'Log/partición lógica objetivo',
+    maxLength: 100,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   scope?: string;
 
   @ApiPropertyOptional({
-    description: 'Archiva/desprende particiones anteriores a esta fecha ISO-8601',
+    description:
+      'Archiva/desprende particiones anteriores a esta fecha ISO-8601',
   })
   @IsOptional()
   @IsISO8601()
@@ -30,13 +43,20 @@ export class RetentionResultDto {
   @ApiProperty({ description: 'true si la operación quedó registrada' })
   applied!: boolean;
 
-  @ApiProperty({ description: 'Momento del registro', type: String, format: 'date-time' })
+  @ApiProperty({
+    description: 'Momento del registro',
+    type: String,
+    format: 'date-time',
+  })
   recordedAt!: Date;
 }
 
 /** Cuerpo de `POST /audit/anomaly/scan` (UC-10-10). */
 export class AnomalyScanDto {
-  @ApiPropertyOptional({ description: 'Usuario a evaluar; por defecto el actor', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Usuario a evaluar; por defecto el actor',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   userId?: string;
@@ -46,7 +66,9 @@ export class AnomalyScanDto {
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Ventana: accesos desde esta fecha ISO-8601' })
+  @ApiPropertyOptional({
+    description: 'Ventana: accesos desde esta fecha ISO-8601',
+  })
   @IsOptional()
   @IsISO8601()
   since?: string;

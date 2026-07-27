@@ -35,20 +35,36 @@ export class PersonAccountLinksRepository {
   }
 
   /** Marca SUPERSEDED el vínculo activo previo del mismo usuario (uq active_user). */
-  supersedeActiveForUser(em: EntityManager, userId: string, now: Date): Promise<number> {
+  supersedeActiveForUser(
+    em: EntityManager,
+    userId: string,
+    now: Date,
+  ): Promise<number> {
     return em.nativeUpdate(
       PersonAccountLinks,
       { userId, statusConceptId: PROF.ACCOUNT_LINK_ACTIVE },
-      { statusConceptId: PROF.ACCOUNT_LINK_SUPERSEDED, validTo: now, updatedAt: now },
+      {
+        statusConceptId: PROF.ACCOUNT_LINK_SUPERSEDED,
+        validTo: now,
+        updatedAt: now,
+      },
     );
   }
 
   /** Revoca los vínculos activos de una persona (p. ej. al registrar defunción). */
-  revokeActiveForPerson(em: EntityManager, personId: string, now: Date): Promise<number> {
+  revokeActiveForPerson(
+    em: EntityManager,
+    personId: string,
+    now: Date,
+  ): Promise<number> {
     return em.nativeUpdate(
       PersonAccountLinks,
       { personId, statusConceptId: PROF.ACCOUNT_LINK_ACTIVE },
-      { statusConceptId: PROF.ACCOUNT_LINK_REVOKED, validTo: now, updatedAt: now },
+      {
+        statusConceptId: PROF.ACCOUNT_LINK_REVOKED,
+        validTo: now,
+        updatedAt: now,
+      },
     );
   }
 }

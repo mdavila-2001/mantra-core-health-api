@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { IntegrationExchangesService, IntegrationWebhooksService } from '../services';
+import {
+  IntegrationExchangesService,
+  IntegrationWebhooksService,
+} from '../services';
 import {
   DeliverWebhookDto,
   DeliveryEvidenceResponseDto,

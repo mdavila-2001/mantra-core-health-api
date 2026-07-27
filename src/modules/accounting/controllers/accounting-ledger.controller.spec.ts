@@ -36,19 +36,27 @@ describe('AccountingLedgerController', () => {
   it('delega determineAccounts (UC-16-02)', async () => {
     const d = build();
     const dto = { tenantId: 't', postingScenarioConceptId: 's' };
-    await d.controller.determineAccounts(dto as any);
+    await d.controller.determineAccounts(dto);
     expect(d.ledgerService.determineAccounts).toHaveBeenCalledWith(dto);
   });
 
   it('delega reverse (UC-16-03)', async () => {
     const d = build();
-    await d.controller.reverse('t1', { reason: 'x' } as any, actor);
-    expect(d.ledgerService.reverseJournal).toHaveBeenCalledWith('t1', { reason: 'x' }, actor);
+    await d.controller.reverse('t1', { reason: 'x' }, actor);
+    expect(d.ledgerService.reverseJournal).toHaveBeenCalledWith(
+      't1',
+      { reason: 'x' },
+      actor,
+    );
   });
 
   it('delega attachFile (UC-16-13)', async () => {
     const d = build();
-    await d.controller.attachFile('t1', { fileId: 'f' } as any, actor);
-    expect(d.ledgerService.attachFile).toHaveBeenCalledWith('t1', { fileId: 'f' }, actor);
+    await d.controller.attachFile('t1', { fileId: 'f' }, actor);
+    expect(d.ledgerService.attachFile).toHaveBeenCalledWith(
+      't1',
+      { fileId: 'f' },
+      actor,
+    );
   });
 });

@@ -5,9 +5,15 @@ export class TokenResponseDto {
   @ApiProperty({ description: 'JWT de acceso' })
   accessToken!: string;
 
-  @ApiProperty({ description: 'Refresh token en crudo; solo se entrega una vez' })
+  @ApiProperty({
+    description: 'Refresh token en crudo; solo se entrega una vez',
+  })
   refreshToken!: string;
 
-  @ApiProperty({ type: String, format: 'date-time', description: 'Expiración de la sesión' })
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+    description: 'Expiración de la sesión',
+  })
   expiresAt!: Date;
 }

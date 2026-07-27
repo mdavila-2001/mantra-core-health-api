@@ -16,7 +16,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new IdentityAuthoritiesService(
     em as any,
-    authoritiesRepo as any,
+    authoritiesRepo,
     endpointsRepo as any,
     logger as any,
   );
@@ -33,14 +33,21 @@ describe('IdentityAuthoritiesService', () => {
       createdAt: new Date('2026-01-01'),
     });
     const res = await d.service.registerAuthority(
-      { tenantId: 't1', authorityCode: 'REG', name: 'Registro', authorityTypeConceptId: 'c1' } as any,
+      {
+        tenantId: 't1',
+        authorityCode: 'REG',
+        name: 'Registro',
+        authorityTypeConceptId: 'c1',
+      },
       actor,
     );
     expect(res.id).toBe('a1');
     expect(res.status).toBe(CONCEPTS.STATE_ACTIVE);
     expect(d.authoritiesRepo.create).toHaveBeenCalledWith(
       d.tx,
-      expect.objectContaining({ verificationStatusConceptId: IDA.AUTHORITY_VERIFIED }),
+      expect.objectContaining({
+        verificationStatusConceptId: IDA.AUTHORITY_VERIFIED,
+      }),
     );
     expect(d.tx.flush).toHaveBeenCalled();
   });
@@ -49,7 +56,11 @@ describe('IdentityAuthoritiesService', () => {
     const d = build();
     d.authoritiesRepo.findById.mockResolvedValue(null);
     await expect(
-      d.service.addEndpoint('missing', { integrationEndpointId: 'e1', capabilityConceptId: 'c1' } as any, actor),
+      d.service.addEndpoint(
+        'missing',
+        { integrationEndpointId: 'e1', capabilityConceptId: 'c1' } as any,
+        actor,
+      ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
     expect(d.endpointsRepo.create).not.toHaveBeenCalled();
   });

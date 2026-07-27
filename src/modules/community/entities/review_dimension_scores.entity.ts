@@ -6,10 +6,10 @@ export class ReviewDimensionScores {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'review_id', type: 'uuid' })  // FK → community.service_reviews
+  @Property({ fieldName: 'review_id', type: 'uuid' }) // FK → community.service_reviews
   reviewId!: string;
 
-  @Property({ fieldName: 'dimension_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'dimension_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   dimensionConceptId!: string;
 
   @Property({ columnType: 'smallint' })
@@ -17,5 +17,4 @@ export class ReviewDimensionScores {
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
-
 }

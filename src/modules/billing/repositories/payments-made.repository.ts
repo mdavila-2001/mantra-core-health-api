@@ -53,7 +53,10 @@ export class PaymentsMadeRepository {
     );
   }
 
-  createAllocation(em: EntityManager, data: CreatePayableAllocationData): PayablePaymentAllocations {
+  createAllocation(
+    em: EntityManager,
+    data: CreatePayableAllocationData,
+  ): PayablePaymentAllocations {
     return em.create(
       PayablePaymentAllocations,
       {

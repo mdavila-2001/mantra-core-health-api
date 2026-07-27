@@ -70,20 +70,35 @@ export class AuthzGrantsService {
     );
     return this.em.transactional(async (tx) => {
       const role = await this.rolesRepo.findById(tx, dto.roleId);
-      if (!role) throw new ResourceNotFoundException('Rol no encontrado', { roleId: dto.roleId });
-      if (!role.isAssignable) {
-        throw new PreconditionFailedException('El rol no es asignable', { roleId: dto.roleId });
-      }
-      if (dto.validFrom && dto.validTo && dto.validFrom >= dto.validTo) {
-        throw new PreconditionFailedException('validFrom debe ser anterior a validTo', {});
-      }
-
-      const existing = await this.assignmentsRepo.findActive(tx, userId, dto.roleId);
-      if (existing) {
-        throw new ConflictException('El usuario ya tiene ese rol asignado y activo', {
-          userId,
+      if (!role)
+        throw new ResourceNotFoundException('Rol no encontrado', {
           roleId: dto.roleId,
         });
+      if (!role.isAssignable) {
+        throw new PreconditionFailedException('El rol no es asignable', {
+          roleId: dto.roleId,
+        });
+      }
+      if (dto.validFrom && dto.validTo && dto.validFrom >= dto.validTo) {
+        throw new PreconditionFailedException(
+          'validFrom debe ser anterior a validTo',
+          {},
+        );
+      }
+
+      const existing = await this.assignmentsRepo.findActive(
+        tx,
+        userId,
+        dto.roleId,
+      );
+      if (existing) {
+        throw new ConflictException(
+          'El usuario ya tiene ese rol asignado y activo',
+          {
+            userId,
+            roleId: dto.roleId,
+          },
+        );
       }
 
       const assignment = this.assignmentsRepo.create(tx, {
@@ -98,7 +113,11 @@ export class AuthzGrantsService {
         actorUserId: actor.id,
       });
       await tx.flush();
-      return { id: assignment.id, status: 'ACTIVE', createdAt: assignment.createdAt };
+      return {
+        id: assignment.id,
+        status: 'ACTIVE',
+        createdAt: assignment.createdAt,
+      };
     });
   }
 
@@ -109,22 +128,37 @@ export class AuthzGrantsService {
     actor: AuthenticatedUser,
   ): Promise<AuthzIdResponseDto> {
     this.logger.info(
-      { operation: 'authz.permission-grant.create', userId, permissionId: dto.permissionId, effect: dto.effect },
+      {
+        operation: 'authz.permission-grant.create',
+        userId,
+        permissionId: dto.permissionId,
+        effect: dto.effect,
+      },
       'Granting user permission exception',
     );
     return this.em.transactional(async (tx) => {
-      const permission = await this.permissionsRepo.findById(tx, dto.permissionId);
+      const permission = await this.permissionsRepo.findById(
+        tx,
+        dto.permissionId,
+      );
       if (!permission) {
         throw new ResourceNotFoundException('Permiso no encontrado', {
           permissionId: dto.permissionId,
         });
       }
-      const existing = await this.permGrantsRepo.findActive(tx, userId, dto.permissionId);
+      const existing = await this.permGrantsRepo.findActive(
+        tx,
+        userId,
+        dto.permissionId,
+      );
       if (existing) {
-        throw new ConflictException('El usuario ya tiene una excepción activa para ese permiso', {
-          userId,
-          permissionId: dto.permissionId,
-        });
+        throw new ConflictException(
+          'El usuario ya tiene una excepción activa para ese permiso',
+          {
+            userId,
+            permissionId: dto.permissionId,
+          },
+        );
       }
 
       const grant = this.permGrantsRepo.create(tx, {
@@ -158,7 +192,10 @@ export class AuthzGrantsService {
       'Granting resource scope',
     );
     return this.em.transactional(async (tx) => {
-      const permission = await this.permissionsRepo.findById(tx, dto.permissionId);
+      const permission = await this.permissionsRepo.findById(
+        tx,
+        dto.permissionId,
+      );
       if (!permission) {
         throw new ResourceNotFoundException('Permiso no encontrado', {
           permissionId: dto.permissionId,
@@ -171,11 +208,14 @@ export class AuthzGrantsService {
         dto.resourceId,
       );
       if (existing) {
-        throw new ConflictException('Ya existe un grant para ese (sujeto, permiso, recurso)', {
-          subjectId: dto.subjectId,
-          permissionId: dto.permissionId,
-          resourceId: dto.resourceId,
-        });
+        throw new ConflictException(
+          'Ya existe un grant para ese (sujeto, permiso, recurso)',
+          {
+            subjectId: dto.subjectId,
+            permissionId: dto.permissionId,
+            resourceId: dto.resourceId,
+          },
+        );
       }
 
       const grant = this.resourceGrantsRepo.create(tx, {

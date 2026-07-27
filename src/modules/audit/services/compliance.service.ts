@@ -67,7 +67,11 @@ export class ComplianceService {
     actor: AuthenticatedUser,
   ): Promise<AuditExportResultDto> {
     this.logger.info(
-      { operation: 'audit.export.create', actorId: actor.id, entity: dto.entity },
+      {
+        operation: 'audit.export.create',
+        actorId: actor.id,
+        entity: dto.entity,
+      },
       'Exporting audit evidence',
     );
     return this.em.transactional(async (tx) => {
@@ -75,10 +79,14 @@ export class ComplianceService {
       if (dto.queryHash) {
         const dup = await this.governanceRepo.existsByQueryHash(tx, queryHash);
         if (dup > 0) {
-          throw new ConflictException('Ya existe una exportación con ese query_hash', { queryHash });
+          throw new ConflictException(
+            'Ya existe una exportación con ese query_hash',
+            { queryHash },
+          );
         }
       }
-      const exportReference = dto.exportReference ?? `export-${queryHash.slice(0, 16)}`;
+      const exportReference =
+        dto.exportReference ?? `export-${queryHash.slice(0, 16)}`;
 
       const gov = this.governanceRepo.record(tx, {
         actorUserId: actor.id,
@@ -99,12 +107,20 @@ export class ComplianceService {
         recordedByUserId: actor.id,
       });
 
-      return { id: gov.id, exportReference, auditLogId: audit.id, occurredAt: gov.occurredAt };
+      return {
+        id: gov.id,
+        exportReference,
+        auditLogId: audit.id,
+        occurredAt: gov.occurredAt,
+      };
     });
   }
 
   /** UC-10-08: da de alta una solicitud DSAR (estado inicial "recibida"). */
-  async createDsar(dto: CreateDsarDto, actor: AuthenticatedUser): Promise<DsarResponseDto> {
+  async createDsar(
+    dto: CreateDsarDto,
+    actor: AuthenticatedUser,
+  ): Promise<DsarResponseDto> {
     this.logger.info(
       { operation: 'audit.dsar.create', actorId: actor.id, type: dto.type },
       'Intake DSAR request',
@@ -114,7 +130,9 @@ export class ComplianceService {
         userId: dto.userId ?? actor.id,
         typeConceptId: DSAR_TYPE[dto.type],
         statusConceptId: AUD.DSAR_RECEIVED,
-        jurisdictionConceptId: dto.jurisdiction ? JURISDICTION[dto.jurisdiction] : undefined,
+        jurisdictionConceptId: dto.jurisdiction
+          ? JURISDICTION[dto.jurisdiction]
+          : undefined,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -145,16 +163,27 @@ export class ComplianceService {
     actor: AuthenticatedUser,
   ): Promise<DsarResponseDto> {
     this.logger.info(
-      { operation: 'audit.dsar.update', actorId: actor.id, id, status: dto.status },
+      {
+        operation: 'audit.dsar.update',
+        actorId: actor.id,
+        id,
+        status: dto.status,
+      },
       'Transitioning DSAR request',
     );
     return this.em.transactional(async (tx) => {
       const dsar = await this.dsarRepo.findById(tx, id);
-      if (!dsar) throw new ResourceNotFoundException('Solicitud DSAR no encontrada', { id });
-      if (TERMINAL.has(dsar.statusConceptId)) {
-        throw new PreconditionFailedException('La solicitud DSAR ya está en estado terminal', {
+      if (!dsar)
+        throw new ResourceNotFoundException('Solicitud DSAR no encontrada', {
           id,
         });
+      if (TERMINAL.has(dsar.statusConceptId)) {
+        throw new PreconditionFailedException(
+          'La solicitud DSAR ya está en estado terminal',
+          {
+            id,
+          },
+        );
       }
 
       dsar.statusConceptId = DSAR_STATUS[dto.status];
@@ -180,7 +209,13 @@ export class ComplianceService {
   private toResponse(
     id: string,
     userId: string,
-    dsar: { statusConceptId: string; typeConceptId: string; rowVersion: number; requestedAt: Date; completedAt?: Date },
+    dsar: {
+      statusConceptId: string;
+      typeConceptId: string;
+      rowVersion: number;
+      requestedAt: Date;
+      completedAt?: Date;
+    },
   ): DsarResponseDto {
     return {
       id,

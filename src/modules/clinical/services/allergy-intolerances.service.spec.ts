@@ -16,7 +16,11 @@ function build() {
     createReaction: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new AllergyIntolerancesService(em as any, allergyRepo as any, logger as any);
+  const service = new AllergyIntolerancesService(
+    em as any,
+    allergyRepo as any,
+    logger as any,
+  );
   return { service, tx, allergyRepo };
 }
 
@@ -38,7 +42,7 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
         patientProfileId: 'p1',
         substanceConceptId: 's1',
         reactions: [{ manifestationConceptId: 'm1' }],
-      } as any,
+      },
       actor,
     );
 
@@ -51,7 +55,11 @@ describe('AllergyIntolerancesService (UC-08-09)', () => {
     d.allergyRepo.findActiveBySubstance.mockResolvedValue({ id: 'existing' });
     await expect(
       d.service.create(
-        { custodianTenantId: 't1', patientProfileId: 'p1', substanceConceptId: 's1' } as any,
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          substanceConceptId: 's1',
+        } as any,
         actor,
       ),
     ).rejects.toBeInstanceOf(ConflictException);

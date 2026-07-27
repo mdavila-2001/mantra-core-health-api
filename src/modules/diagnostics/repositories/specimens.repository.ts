@@ -67,11 +67,17 @@ export class SpecimensRepository {
     return em.findOne(Specimens, { id });
   }
 
-  findAccession(em: EntityManager, id: string): Promise<LaboratoryAccessions | null> {
+  findAccession(
+    em: EntityManager,
+    id: string,
+  ): Promise<LaboratoryAccessions | null> {
     return em.findOne(LaboratoryAccessions, { id });
   }
 
-  findContainer(em: EntityManager, id: string): Promise<SpecimenContainers | null> {
+  findContainer(
+    em: EntityManager,
+    id: string,
+  ): Promise<SpecimenContainers | null> {
     return em.findOne(SpecimenContainers, { id });
   }
 
@@ -96,7 +102,10 @@ export class SpecimensRepository {
     );
   }
 
-  createAccession(em: EntityManager, data: CreateAccessionData): LaboratoryAccessions {
+  createAccession(
+    em: EntityManager,
+    data: CreateAccessionData,
+  ): LaboratoryAccessions {
     return em.create(
       LaboratoryAccessions,
       {
@@ -116,7 +125,12 @@ export class SpecimensRepository {
 
   addAccessionSpecimen(
     em: EntityManager,
-    data: { laboratoryAccessionId: string; specimenId: string; sequenceNumber: number; statusConceptId: string },
+    data: {
+      laboratoryAccessionId: string;
+      specimenId: string;
+      sequenceNumber: number;
+      statusConceptId: string;
+    },
   ): AccessionSpecimens {
     return em.create(
       AccessionSpecimens,
@@ -193,7 +207,10 @@ export class SpecimensRepository {
     );
   }
 
-  createContainer(em: EntityManager, data: CreateContainerData): SpecimenContainers {
+  createContainer(
+    em: EntityManager,
+    data: CreateContainerData,
+  ): SpecimenContainers {
     return em.create(
       SpecimenContainers,
       {

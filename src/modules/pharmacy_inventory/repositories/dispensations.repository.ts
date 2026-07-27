@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { MedicationDispensations, MedicationDispensationLines } from '../entities';
+import {
+  MedicationDispensations,
+  MedicationDispensationLines,
+} from '../entities';
 import { createdBy } from '../../../common';
 
 /** Datos de cabecera de una dispensación de medicamentos. */
@@ -33,15 +36,26 @@ export interface CreateDispensationLineData {
 /** Acceso a datos de las dispensaciones y sus líneas. */
 @Injectable()
 export class DispensationsRepository {
-  findById(em: EntityManager, id: string): Promise<MedicationDispensations | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<MedicationDispensations | null> {
     return em.findOne(MedicationDispensations, { id });
   }
 
-  findLines(em: EntityManager, dispensationId: string): Promise<MedicationDispensationLines[]> {
-    return em.find(MedicationDispensationLines, { medicationDispensationId: dispensationId });
+  findLines(
+    em: EntityManager,
+    dispensationId: string,
+  ): Promise<MedicationDispensationLines[]> {
+    return em.find(MedicationDispensationLines, {
+      medicationDispensationId: dispensationId,
+    });
   }
 
-  create(em: EntityManager, data: CreateDispensationData): MedicationDispensations {
+  create(
+    em: EntityManager,
+    data: CreateDispensationData,
+  ): MedicationDispensations {
     return em.create(
       MedicationDispensations,
       {
@@ -60,7 +74,10 @@ export class DispensationsRepository {
     );
   }
 
-  createLine(em: EntityManager, data: CreateDispensationLineData): MedicationDispensationLines {
+  createLine(
+    em: EntityManager,
+    data: CreateDispensationLineData,
+  ): MedicationDispensationLines {
     return em.create(
       MedicationDispensationLines,
       {

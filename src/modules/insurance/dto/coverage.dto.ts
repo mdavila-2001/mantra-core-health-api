@@ -36,7 +36,10 @@ export class CreateCoverageDto {
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiProperty({ maxLength: 80, description: 'Identificador de afiliado (member id)' })
+  @ApiProperty({
+    maxLength: 80,
+    description: 'Identificador de afiliado (member id)',
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(80)
@@ -54,7 +57,10 @@ export class CreateCoverageDto {
   @Min(1)
   coverageOrder?: number;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Broker que intermedia (vincula broker_clients)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Broker que intermedia (vincula broker_clients)',
+  })
   @IsOptional()
   @IsUUID()
   insuranceBrokerId?: string;
@@ -85,7 +91,9 @@ export class CreateEligibilityRequestDto {
   @MaxLength(120)
   idempotencyKey?: string;
 
-  @ApiPropertyOptional({ description: 'Resumen de beneficios recibido del pagador' })
+  @ApiPropertyOptional({
+    description: 'Resumen de beneficios recibido del pagador',
+  })
   @IsOptional()
   benefitSummary?: unknown;
 }

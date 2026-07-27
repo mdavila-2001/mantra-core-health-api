@@ -27,19 +27,43 @@ function build() {
 describe('IdentityManualReviewService', () => {
   it('approves the review, verifies the case and closes fraud signals (UC-27-09)', async () => {
     const d = build();
-    const review: any = { id: 'rv1', identityVerificationCaseId: 'k1', statusConceptId: IDA.REVIEW_OPEN, assignedToUserId: 'admin-1', updatedAt: new Date() };
-    const kase: any = { id: 'k1', statusConceptId: IDA.CASE_MANUAL_REVIEW, updatedAt: new Date() };
+    const review: any = {
+      id: 'rv1',
+      identityVerificationCaseId: 'k1',
+      statusConceptId: IDA.REVIEW_OPEN,
+      assignedToUserId: 'admin-1',
+      updatedAt: new Date(),
+    };
+    const kase: any = {
+      id: 'k1',
+      statusConceptId: IDA.CASE_MANUAL_REVIEW,
+      updatedAt: new Date(),
+    };
     d.reviewRepo.findById.mockResolvedValue(review);
     d.casesRepo.findById.mockResolvedValue(kase);
-    const res = await d.service.decide('rv1', { decision: 'APPROVED' } as any, actor);
+    const res = await d.service.decide(
+      'rv1',
+      { decision: 'APPROVED' } as any,
+      actor,
+    );
     expect(res.caseStatus).toBe(IDA.CASE_VERIFIED);
     expect(review.statusConceptId).toBe(IDA.REVIEW_DECIDED);
-    expect(d.fraudRepo.resolveOpenForCase).toHaveBeenCalledWith(d.tx, 'k1', IDA.FRAUD_OPEN, IDA.FRAUD_RESOLVED);
+    expect(d.fraudRepo.resolveOpenForCase).toHaveBeenCalledWith(
+      d.tx,
+      'k1',
+      IDA.FRAUD_OPEN,
+      IDA.FRAUD_RESOLVED,
+    );
   });
 
   it('rejects deciding a review assigned to another reviewer', async () => {
     const d = build();
-    d.reviewRepo.findById.mockResolvedValue({ id: 'rv1', identityVerificationCaseId: 'k1', statusConceptId: IDA.REVIEW_OPEN, assignedToUserId: 'someone-else' });
+    d.reviewRepo.findById.mockResolvedValue({
+      id: 'rv1',
+      identityVerificationCaseId: 'k1',
+      statusConceptId: IDA.REVIEW_OPEN,
+      assignedToUserId: 'someone-else',
+    });
     await expect(
       d.service.decide('rv1', { decision: 'APPROVED' } as any, actor),
     ).rejects.toBeInstanceOf(PreconditionFailedException);

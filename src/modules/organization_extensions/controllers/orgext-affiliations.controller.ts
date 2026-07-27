@@ -10,7 +10,11 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { OrgextAffiliationsService } from '../services';
-import { CreateAffiliationDto, AffiliationResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateAffiliationDto,
+  AffiliationResponseDto,
+  StatusResultDto,
+} from '../dto';
 
 /**
  * Endpoints de afiliaciones entre organizaciones (UC-22-07, 09). Capa fina:
@@ -20,7 +24,9 @@ import { CreateAffiliationDto, AffiliationResponseDto, StatusResultDto } from '.
 @ApiBearerAuth()
 @Controller('orgext/affiliations')
 export class OrgextAffiliationsController {
-  constructor(private readonly affiliationsService: OrgextAffiliationsService) {}
+  constructor(
+    private readonly affiliationsService: OrgextAffiliationsService,
+  ) {}
 
   /** UC-22-07. */
   @Post()

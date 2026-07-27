@@ -10,7 +10,7 @@ describe('CommunityReviewsController', () => {
     const service = { publishReview: mockFn() };
     const controller = new CommunityReviewsController(service as any);
     const dto = { reviewerPatientProfileId: 'pp1', overallRating: 5 };
-    await controller.publishReview('p1', dto as any, actor);
+    await controller.publishReview('p1', dto, actor);
     expect(service.publishReview).toHaveBeenCalledWith('p1', dto, actor);
   });
 });

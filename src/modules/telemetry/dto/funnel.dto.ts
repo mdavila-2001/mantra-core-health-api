@@ -15,13 +15,19 @@ import {
 
 /** Un paso de funnel. */
 export class FunnelStepDto {
-  @ApiPropertyOptional({ description: 'Número de paso (contiguo desde 1). Si se omite se asigna por orden.' })
+  @ApiPropertyOptional({
+    description:
+      'Número de paso (contiguo desde 1). Si se omite se asigna por orden.',
+  })
   @IsOptional()
   @IsInt()
   @Min(1)
   stepNumber?: number;
 
-  @ApiProperty({ description: 'Esquema de evento que cualifica el paso', format: 'uuid' })
+  @ApiProperty({
+    description: 'Esquema de evento que cualifica el paso',
+    format: 'uuid',
+  })
   @IsUUID()
   eventSchemaDefinitionId!: string;
 
@@ -47,7 +53,10 @@ export class CreateFunnelDto {
   @IsUUID()
   purposeDefinitionId!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de portal (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de portal (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   portalTypeConceptId?: string;
@@ -58,7 +67,10 @@ export class CreateFunnelDto {
   @Min(1)
   versionNumber?: number;
 
-  @ApiProperty({ type: [FunnelStepDto], description: 'Pasos del funnel (>= 1)' })
+  @ApiProperty({
+    type: [FunnelStepDto],
+    description: 'Pasos del funnel (>= 1)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

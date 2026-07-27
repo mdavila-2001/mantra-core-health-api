@@ -5,7 +5,10 @@ export class PublishVersionResponseDto {
   @ApiProperty({ description: 'Id de la versión publicada' })
   id!: string;
 
-  @ApiProperty({ description: 'Estado del ciclo de vida tras la publicación (código de concepto)' })
+  @ApiProperty({
+    description:
+      'Estado del ciclo de vida tras la publicación (código de concepto)',
+  })
   state!: string;
 
   @ApiProperty({ description: 'Instante de publicación' })

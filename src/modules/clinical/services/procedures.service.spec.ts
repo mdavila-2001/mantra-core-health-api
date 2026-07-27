@@ -15,7 +15,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ProceduresService(
     em as any,
-    proceduresRepo as any,
+    proceduresRepo,
     serviceRequestsRepo as any,
     logger as any,
   );
@@ -25,7 +25,11 @@ function build() {
 describe('ProceduresService (UC-08-12)', () => {
   it('records a completed procedure and closes the source order', async () => {
     const d = build();
-    const sr = { id: 'sr1', statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE, updatedAt: new Date() };
+    const sr = {
+      id: 'sr1',
+      statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+      updatedAt: new Date(),
+    };
     d.serviceRequestsRepo.findById.mockResolvedValue(sr);
     d.proceduresRepo.create.mockReturnValue({
       id: 'proc1',
@@ -40,7 +44,7 @@ describe('ProceduresService (UC-08-12)', () => {
         patientProfileId: 'p1',
         codeConceptId: 'code1',
         serviceRequestId: 'sr1',
-      } as any,
+      },
       actor,
     );
     expect(sr.statusConceptId).toBe(CLIN.SERVICE_REQUEST_COMPLETED);

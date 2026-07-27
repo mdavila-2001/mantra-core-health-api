@@ -12,7 +12,10 @@ import {
 
 /** Asignación de un pago emitido a una factura de proveedor (UC-17-05). */
 export class PayableAllocationInputDto {
-  @ApiProperty({ description: 'Factura de proveedor destino (billing.bills)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Factura de proveedor destino (billing.bills)',
+    format: 'uuid',
+  })
   @IsUUID()
   billId!: string;
 
@@ -25,12 +28,18 @@ export class PayableAllocationInputDto {
   @IsNumberString()
   discountAmount?: string;
 
-  @ApiPropertyOptional({ description: 'Retención (withholding)', example: '0.00' })
+  @ApiPropertyOptional({
+    description: 'Retención (withholding)',
+    example: '0.00',
+  })
   @IsOptional()
   @IsNumberString()
   withholdingAmount?: string;
 
-  @ApiPropertyOptional({ description: 'Partida abierta del subledger (accounting.open_items)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Partida abierta del subledger (accounting.open_items)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   openItemId?: string;
@@ -42,7 +51,10 @@ export class ExecutePaymentMadeDto {
   @IsUUID()
   practiceId!: string;
 
-  @ApiPropertyOptional({ description: 'Proveedor (billing.vendors)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Proveedor (billing.vendors)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   vendorId?: string;
@@ -51,7 +63,10 @@ export class ExecutePaymentMadeDto {
   @IsNumberString()
   amount!: string;
 
-  @ApiPropertyOptional({ description: 'Método de pago (concepto); por defecto transferencia', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Método de pago (concepto); por defecto transferencia',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   methodConceptId?: string;
@@ -61,12 +76,18 @@ export class ExecutePaymentMadeDto {
   @IsDateString()
   paidAt?: string;
 
-  @ApiPropertyOptional({ description: 'Cuenta bancaria origen (accounting.company_bank_accounts)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Cuenta bancaria origen (accounting.company_bank_accounts)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   companyBankAccountId?: string;
 
-  @ApiProperty({ type: [PayableAllocationInputDto], description: 'Asignaciones por factura (al menos una)' })
+  @ApiProperty({
+    type: [PayableAllocationInputDto],
+    description: 'Asignaciones por factura (al menos una)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

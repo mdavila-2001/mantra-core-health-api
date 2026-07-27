@@ -9,11 +9,17 @@ import {
 
 /** Cuerpo de `POST /diagnostic-units/{id}/sites` (UC-23-02). */
 export class AddSiteDto {
-  @ApiProperty({ description: 'Sitio del practice donde opera la unidad', format: 'uuid' })
+  @ApiProperty({
+    description: 'Sitio del practice donde opera la unidad',
+    format: 'uuid',
+  })
   @IsUUID()
   practiceSiteId!: string;
 
-  @ApiPropertyOptional({ description: 'Rol del sitio (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Rol del sitio (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   siteRoleConceptId?: string;
@@ -37,7 +43,10 @@ export class AddSiteDto {
 
 /** Cuerpo de `PATCH /diagnostic-unit-sites/{siteId}` (UC-23-02). */
 export class UpdateSiteDto {
-  @ApiPropertyOptional({ description: 'Rol del sitio (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Rol del sitio (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   siteRoleConceptId?: string;

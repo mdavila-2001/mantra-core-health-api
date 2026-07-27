@@ -40,14 +40,26 @@ export class IamMfaService {
   ): Promise<MfaFactorResponseDto> {
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
-      if (!user) throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      if (!user)
+        throw new ResourceNotFoundException('Usuario no encontrado', {
+          userId,
+        });
 
       if (dto.verify) {
-        this.logger.info({ operation: 'iam.mfa.verify', userId, factorId: dto.factorId }, 'Verifying MFA factor');
+        this.logger.info(
+          { operation: 'iam.mfa.verify', userId, factorId: dto.factorId },
+          'Verifying MFA factor',
+        );
         if (!dto.factorId) {
-          throw new PreconditionFailedException('factorId es obligatorio para verificar');
+          throw new PreconditionFailedException(
+            'factorId es obligatorio para verificar',
+          );
         }
-        const factor = await this.mfaRepo.findByIdAndUser(tx, dto.factorId, userId);
+        const factor = await this.mfaRepo.findByIdAndUser(
+          tx,
+          dto.factorId,
+          userId,
+        );
         if (!factor) {
           throw new ResourceNotFoundException('Factor MFA no encontrado', {
             userId,
@@ -78,9 +90,14 @@ export class IamMfaService {
         };
       }
 
-      this.logger.info({ operation: 'iam.mfa.enroll', userId, factorType: dto.factorType }, 'Enrolling MFA factor');
+      this.logger.info(
+        { operation: 'iam.mfa.enroll', userId, factorType: dto.factorType },
+        'Enrolling MFA factor',
+      );
       if (!dto.factorType) {
-        throw new PreconditionFailedException('factorType es obligatorio para enrolar');
+        throw new PreconditionFailedException(
+          'factorType es obligatorio para enrolar',
+        );
       }
       const factorTypeConceptId =
         dto.factorType === 'TOTP' ? CONCEPTS.MFA_TOTP : CONCEPTS.MFA_WEBAUTHN;
@@ -100,7 +117,12 @@ export class IamMfaService {
         detailJson: { action: 'enroll', factorType: dto.factorType },
       });
 
-      return { id: factor.id, userId, state: factor.stateConceptId, verifiedAt: undefined };
+      return {
+        id: factor.id,
+        userId,
+        state: factor.stateConceptId,
+        verifiedAt: undefined,
+      };
     });
   }
 }

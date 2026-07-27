@@ -23,7 +23,10 @@ export class DiagnosticUnitSitesRepository {
   }
 
   /** Cuenta sitios ACTIVOS de la unidad (precondición de verify-and-publish). */
-  countActiveForUnit(em: EntityManager, diagnosticUnitId: string): Promise<number> {
+  countActiveForUnit(
+    em: EntityManager,
+    diagnosticUnitId: string,
+  ): Promise<number> {
     return em.count(DiagnosticUnitSites, {
       diagnosticUnitId,
       statusConceptId: DUNIT.SITE_ACTIVE,

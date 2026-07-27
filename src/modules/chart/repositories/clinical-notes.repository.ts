@@ -79,30 +79,51 @@ export interface CreateExamFindingData {
  */
 @Injectable()
 export class ClinicalNotesRepository {
-  findHeaderById(em: EntityManager, id: string): Promise<ClinicalNoteHeaders | null> {
+  findHeaderById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ClinicalNoteHeaders | null> {
     return em.findOne(ClinicalNoteHeaders, { id });
   }
 
-  findVersionById(em: EntityManager, id: string): Promise<ClinicalNoteVersions | null> {
+  findVersionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ClinicalNoteVersions | null> {
     return em.findOne(ClinicalNoteVersions, { id });
   }
 
   /** Mayor `version_number` existente para una nota (0 si no hay versiones). */
-  async maxVersionNumber(em: EntityManager, clinicalNoteId: string): Promise<number> {
+  async maxVersionNumber(
+    em: EntityManager,
+    clinicalNoteId: string,
+  ): Promise<number> {
     const rows = await em.find(
       ClinicalNoteVersions,
       { clinicalNoteId },
-      { fields: ['versionNumber'], orderBy: { versionNumber: 'desc' }, limit: 1 },
+      {
+        fields: ['versionNumber'],
+        orderBy: { versionNumber: 'desc' },
+        limit: 1,
+      },
     );
     return rows.length ? rows[0].versionNumber : 0;
   }
 
   /** Firmas existentes de una versión (para validar cofirma sobre firma primaria). */
-  findSignatures(em: EntityManager, versionId: string): Promise<ClinicalNoteSignatures[]> {
-    return em.find(ClinicalNoteSignatures, { clinicalNoteVersionId: versionId });
+  findSignatures(
+    em: EntityManager,
+    versionId: string,
+  ): Promise<ClinicalNoteSignatures[]> {
+    return em.find(ClinicalNoteSignatures, {
+      clinicalNoteVersionId: versionId,
+    });
   }
 
-  createHeader(em: EntityManager, data: CreateNoteHeaderData): ClinicalNoteHeaders {
+  createHeader(
+    em: EntityManager,
+    data: CreateNoteHeaderData,
+  ): ClinicalNoteHeaders {
     return em.create(
       ClinicalNoteHeaders,
       {
@@ -118,7 +139,10 @@ export class ClinicalNotesRepository {
     );
   }
 
-  createVersion(em: EntityManager, data: CreateNoteVersionData): ClinicalNoteVersions {
+  createVersion(
+    em: EntityManager,
+    data: CreateNoteVersionData,
+  ): ClinicalNoteVersions {
     return em.create(
       ClinicalNoteVersions,
       {
@@ -142,7 +166,10 @@ export class ClinicalNotesRepository {
     );
   }
 
-  createSignature(em: EntityManager, data: CreateSignatureData): ClinicalNoteSignatures {
+  createSignature(
+    em: EntityManager,
+    data: CreateSignatureData,
+  ): ClinicalNoteSignatures {
     return em.create(
       ClinicalNoteSignatures,
       {
@@ -158,7 +185,10 @@ export class ClinicalNotesRepository {
     );
   }
 
-  createReleaseEvent(em: EntityManager, data: CreateReleaseEventData): NoteReleaseEvents {
+  createReleaseEvent(
+    em: EntityManager,
+    data: CreateReleaseEventData,
+  ): NoteReleaseEvents {
     return em.create(
       NoteReleaseEvents,
       {
@@ -175,7 +205,10 @@ export class ClinicalNotesRepository {
     );
   }
 
-  createExamFinding(em: EntityManager, data: CreateExamFindingData): PhysicalExamFindings {
+  createExamFinding(
+    em: EntityManager,
+    data: CreateExamFindingData,
+  ): PhysicalExamFindings {
     return em.create(
       PhysicalExamFindings,
       {

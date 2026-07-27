@@ -11,7 +11,10 @@ import {
 
 /** Cuerpo de `POST /cds-rules` (crea la regla en borrador; precondición de UC-18-13). */
 export class CreateCdsRuleDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant propietario (null = global)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant propietario (null = global)',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
@@ -26,12 +29,18 @@ export class CreateCdsRuleDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tipo de regla (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tipo de regla (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   ruleTypeConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Severidad de la alerta que genera (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Severidad de la alerta que genera (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   severityConceptId?: string;
@@ -59,7 +68,10 @@ export class PublishRuleVersionDto {
   @IsString()
   messageTemplate?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Nueva severidad (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Nueva severidad (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   severityConceptId?: string;
@@ -76,18 +88,26 @@ export class EvaluateCdsDto {
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant de las reglas a evaluar' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant de las reglas a evaluar',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo del recurso disparador (p.ej. allergy_intolerance)' })
+  @ApiPropertyOptional({
+    description: 'Tipo del recurso disparador (p.ej. allergy_intolerance)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   sourceResourceType?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Id del recurso disparador' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Id del recurso disparador',
+  })
   @IsOptional()
   @IsUUID()
   sourceResourceId?: string;
@@ -104,14 +124,18 @@ export class CheckInteractionsDto {
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Prescripción en borrador que se evalúa' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Prescripción en borrador que se evalúa',
+  })
   @IsOptional()
   @IsUUID()
   medicationRequestId?: string;
 
   @ApiProperty({
     type: [String],
-    description: 'Concept ids de las sustancias activas + la nueva a prescribir',
+    description:
+      'Concept ids de las sustancias activas + la nueva a prescribir',
   })
   @IsArray()
   @ArrayMinSize(2)
@@ -129,7 +153,10 @@ export class CreateDrugInteractionDto {
   @IsUUID()
   substanceBConceptId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Severidad (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Severidad (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   severityConceptId?: string;

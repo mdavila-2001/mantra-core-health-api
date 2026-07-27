@@ -19,16 +19,25 @@ export type DocumentFileRole = 'PRIMARY' | 'ATTACHMENT';
 
 /** Un archivo gobernado adjunto al documento (UC-15-09). */
 export class DocumentFileInputDto {
-  @ApiProperty({ format: 'uuid', description: 'Archivo ya subido a object_storage (common.files)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Archivo ya subido a object_storage (common.files)',
+  })
   @IsUUID()
   fileId!: string;
 
-  @ApiPropertyOptional({ enum: ['PRIMARY', 'ATTACHMENT'], description: 'Rol de contenido' })
+  @ApiPropertyOptional({
+    enum: ['PRIMARY', 'ATTACHMENT'],
+    description: 'Rol de contenido',
+  })
   @IsOptional()
   @IsIn(['PRIMARY', 'ATTACHMENT'])
   contentRole?: DocumentFileRole;
 
-  @ApiPropertyOptional({ minimum: 0, description: 'Orden del archivo dentro del documento' })
+  @ApiPropertyOptional({
+    minimum: 0,
+    description: 'Orden del archivo dentro del documento',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -37,11 +46,17 @@ export class DocumentFileInputDto {
 
 /** Cuerpo de `POST /charts/documents` (UC-15-09). */
 export class CreateDocumentDto {
-  @ApiProperty({ format: 'uuid', description: 'Perfil de paciente (profiles.patient_profiles)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Perfil de paciente (profiles.patient_profiles)',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Tenant propietario (directory.tenants)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Tenant propietario (directory.tenants)',
+  })
   @IsUUID()
   tenantId!: string;
 
@@ -51,27 +66,42 @@ export class CreateDocumentDto {
   @MaxLength(500)
   title!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Encuentro clínico asociado' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Encuentro clínico asociado',
+  })
   @IsOptional()
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id de la categoría documental' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id de la categoría documental',
+  })
   @IsOptional()
   @IsUUID()
   categoryConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id de la fuente del documento' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id de la fuente del documento',
+  })
   @IsOptional()
   @IsUUID()
   sourceConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id de confidencialidad' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id de confidencialidad',
+  })
   @IsOptional()
   @IsUUID()
   confidentialityConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id de visibilidad para el paciente' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id de visibilidad para el paciente',
+  })
   @IsOptional()
   @IsUUID()
   patientVisibilityConceptId?: string;
@@ -82,12 +112,17 @@ export class CreateDocumentDto {
   @MaxLength(255)
   authorText?: string;
 
-  @ApiPropertyOptional({ description: 'true si el documento proviene de una fuente externa' })
+  @ApiPropertyOptional({
+    description: 'true si el documento proviene de una fuente externa',
+  })
   @IsOptional()
   @IsBoolean()
   isExternal?: boolean;
 
-  @ApiPropertyOptional({ type: [DocumentFileInputDto], description: 'Archivos gobernados (0..n)' })
+  @ApiPropertyOptional({
+    type: [DocumentFileInputDto],
+    description: 'Archivos gobernados (0..n)',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -100,7 +135,10 @@ export class DocumentResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del documento', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del documento',
+    format: 'uuid',
+  })
   statusConceptId!: string;
 
   @ApiProperty({ description: 'Nº de archivos adjuntados' })

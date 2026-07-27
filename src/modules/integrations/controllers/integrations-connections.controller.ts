@@ -26,7 +26,9 @@ import {
 @ApiBearerAuth()
 @Controller('integrations')
 export class IntegrationsConnectionsController {
-  constructor(private readonly connectionsService: IntegrationsConnectionsService) {}
+  constructor(
+    private readonly connectionsService: IntegrationsConnectionsService,
+  ) {}
 
   /** UC-12-03. */
   @Post('connections/:id/credentials\\:rotate')

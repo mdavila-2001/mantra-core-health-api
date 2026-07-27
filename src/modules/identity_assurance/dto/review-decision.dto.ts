@@ -6,7 +6,10 @@ export type ReviewDecision = 'APPROVED' | 'REJECTED';
 
 /** Cuerpo de `POST /identity/manual-review/{id}/decision` (UC-27-09). */
 export class ReviewDecisionDto {
-  @ApiProperty({ description: 'Decisión del revisor', enum: ['APPROVED', 'REJECTED'] })
+  @ApiProperty({
+    description: 'Decisión del revisor',
+    enum: ['APPROVED', 'REJECTED'],
+  })
   @IsIn(['APPROVED', 'REJECTED'])
   decision!: ReviewDecision;
 

@@ -3,7 +3,10 @@ import { IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /consent/consents/{id}/withdraw` (UC-07-02). */
 export class WithdrawConsentDto {
-  @ApiPropertyOptional({ description: 'Motivo de retiro (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Motivo de retiro (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   withdrawalReasonConceptId?: string;

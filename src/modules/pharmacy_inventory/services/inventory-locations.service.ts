@@ -24,7 +24,11 @@ export class InventoryLocationsService {
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.location.create', pharmacySiteId, code: dto.code },
+      {
+        operation: 'pharmacy_inventory.location.create',
+        pharmacySiteId,
+        code: dto.code,
+      },
       'Creating inventory location',
     );
     return this.em.transactional(async (tx) => {

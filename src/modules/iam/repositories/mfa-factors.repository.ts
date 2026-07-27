@@ -16,17 +16,25 @@ export interface CreateMfaFactorData {
 export class MfaFactorsRepository {
   /** Crea un factor MFA PENDING (sin flush). */
   create(em: EntityManager, data: CreateMfaFactorData): MfaFactors {
-    return em.create(MfaFactors, {
-      userId: data.userId,
-      factorTypeConceptId: data.factorTypeConceptId,
-      label: data.label,
-      stateConceptId: CONCEPTS.STATE_PENDING,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+    return em.create(
+      MfaFactors,
+      {
+        userId: data.userId,
+        factorTypeConceptId: data.factorTypeConceptId,
+        label: data.label,
+        stateConceptId: CONCEPTS.STATE_PENDING,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Factor por id que pertenece al usuario indicado. */
-  findByIdAndUser(em: EntityManager, id: string, userId: string): Promise<MfaFactors | null> {
+  findByIdAndUser(
+    em: EntityManager,
+    id: string,
+    userId: string,
+  ): Promise<MfaFactors | null> {
     return em.findOne(MfaFactors, { id, userId });
   }
 }

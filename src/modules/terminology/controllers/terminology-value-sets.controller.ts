@@ -17,7 +17,9 @@ export class TerminologyValueSetsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'UC-03-07: crea un conjunto de valores con versión y reglas' })
+  @ApiOperation({
+    summary: 'UC-03-07: crea un conjunto de valores con versión y reglas',
+  })
   createValueSet(
     @Body() dto: CreateValueSetDto,
     @CurrentUser() user: AuthenticatedUser,

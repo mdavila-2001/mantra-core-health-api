@@ -8,7 +8,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { DiagnosticReportsRepository, ServiceRequestsRepository } from '../repositories';
+import {
+  DiagnosticReportsRepository,
+  ServiceRequestsRepository,
+} from '../repositories';
 import {
   CreateDiagnosticReportDto,
   DiagnosticReportResponseDto,
@@ -38,16 +41,25 @@ export class DiagnosticReportsService {
     actor: AuthenticatedUser,
   ): Promise<DiagnosticReportResponseDto> {
     this.logger.info(
-      { operation: 'clinical.diagnostic-report.create', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.diagnostic-report.create',
+        patientProfileId: dto.patientProfileId,
+      },
       'Creating diagnostic report',
     );
     return this.em.transactional(async (tx) => {
       if (dto.serviceRequestId) {
-        const sr = await this.serviceRequestsRepo.findById(tx, dto.serviceRequestId);
+        const sr = await this.serviceRequestsRepo.findById(
+          tx,
+          dto.serviceRequestId,
+        );
         if (!sr) {
-          throw new ResourceNotFoundException('Orden de servicio no encontrada', {
-            serviceRequestId: dto.serviceRequestId,
-          });
+          throw new ResourceNotFoundException(
+            'Orden de servicio no encontrada',
+            {
+              serviceRequestId: dto.serviceRequestId,
+            },
+          );
         }
         sr.statusConceptId = CLIN.SERVICE_REQUEST_COMPLETED;
         touch(sr, actor.id);
@@ -88,20 +100,32 @@ export class DiagnosticReportsService {
     return this.em.transactional(async (tx) => {
       const report = await this.reportsRepo.findById(tx, reportId);
       if (!report) {
-        throw new ResourceNotFoundException('Reporte diagnóstico no encontrado', { reportId });
+        throw new ResourceNotFoundException(
+          'Reporte diagnóstico no encontrado',
+          { reportId },
+        );
       }
       const releasable = [CLIN.REPORT_PARTIAL, CLIN.REPORT_PRELIMINARY];
       if (!releasable.includes(report.lifecycleStatusConceptId)) {
-        throw new PreconditionFailedException('El reporte no está en estado liberable', {
-          reportId,
-          status: report.lifecycleStatusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El reporte no está en estado liberable',
+          {
+            reportId,
+            status: report.lifecycleStatusConceptId,
+          },
+        );
       }
-      if (dto.expectedRowVersion !== undefined && dto.expectedRowVersion !== report.rowVersion) {
-        throw new ConcurrencyConflictException('Versión del reporte desactualizada', {
-          expected: dto.expectedRowVersion,
-          actual: report.rowVersion,
-        });
+      if (
+        dto.expectedRowVersion !== undefined &&
+        dto.expectedRowVersion !== report.rowVersion
+      ) {
+        throw new ConcurrencyConflictException(
+          'Versión del reporte desactualizada',
+          {
+            expected: dto.expectedRowVersion,
+            actual: report.rowVersion,
+          },
+        );
       }
 
       report.lifecycleStatusConceptId = CLIN.REPORT_FINAL;

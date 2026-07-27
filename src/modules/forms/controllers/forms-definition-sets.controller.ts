@@ -34,7 +34,9 @@ export class FormsDefinitionSetsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Definir un set de campos dinámicos y su versión inicial' })
+  @ApiOperation({
+    summary: 'Definir un set de campos dinámicos y su versión inicial',
+  })
   createDefinitionSet(
     @Body() dto: CreateDefinitionSetDto,
     @CurrentUser() actor: AuthenticatedUser,

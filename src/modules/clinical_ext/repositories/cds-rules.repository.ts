@@ -30,7 +30,11 @@ export class CdsRulesRepository {
   }
 
   /** Reglas activas de un tenant (o globales) para una pasada de evaluación. */
-  findActive(em: EntityManager, statusConceptId: string, tenantId?: string): Promise<CdsRules[]> {
+  findActive(
+    em: EntityManager,
+    statusConceptId: string,
+    tenantId?: string,
+  ): Promise<CdsRules[]> {
     return em.find(CdsRules, {
       isActive: true,
       statusConceptId,

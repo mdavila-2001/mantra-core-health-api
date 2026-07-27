@@ -60,11 +60,20 @@ export class AuthzRolesService {
   }
 
   /** UC-06-03: crea un rol validando unicidad de código y ausencia de ciclos. */
-  async createRole(dto: CreateRoleDto, actor: AuthenticatedUser): Promise<RoleResponseDto> {
-    this.logger.info({ operation: 'authz.role.create', code: dto.code }, 'Creating role');
+  async createRole(
+    dto: CreateRoleDto,
+    actor: AuthenticatedUser,
+  ): Promise<RoleResponseDto> {
+    this.logger.info(
+      { operation: 'authz.role.create', code: dto.code },
+      'Creating role',
+    );
     return this.em.transactional(async (tx) => {
       const clash = await this.rolesRepo.findByCode(tx, dto.code);
-      if (clash) throw new ConflictException('Ya existe un rol con ese código', { code: dto.code });
+      if (clash)
+        throw new ConflictException('Ya existe un rol con ese código', {
+          code: dto.code,
+        });
 
       if (dto.parentRoleId) {
         const parent = await this.rolesRepo.findById(tx, dto.parentRoleId);
@@ -80,7 +89,9 @@ export class AuthzRolesService {
         code: dto.code,
         name: dto.name,
         parentRoleId: dto.parentRoleId,
-        baseRoleConceptId: dto.baseRole ? BASE_ROLE_CONCEPT[dto.baseRole] : undefined,
+        baseRoleConceptId: dto.baseRole
+          ? BASE_ROLE_CONCEPT[dto.baseRole]
+          : undefined,
         scopeConceptId: dto.scope ? ROLE_SCOPE_CONCEPT[dto.scope] : undefined,
         isSystem: dto.isSystem,
         isAssignable: dto.isAssignable,
@@ -106,16 +117,24 @@ export class AuthzRolesService {
     actor: AuthenticatedUser,
   ): Promise<RoleResponseDto> {
     this.logger.info(
-      { operation: 'authz.role.set-permissions', roleId, count: dto.permissions.length },
+      {
+        operation: 'authz.role.set-permissions',
+        roleId,
+        count: dto.permissions.length,
+      },
       'Setting role permissions',
     );
     return this.em.transactional(async (tx) => {
       const role = await this.rolesRepo.findById(tx, roleId);
-      if (!role) throw new ResourceNotFoundException('Rol no encontrado', { roleId });
+      if (!role)
+        throw new ResourceNotFoundException('Rol no encontrado', { roleId });
 
       // Valida que cada permiso exista antes de aplicar.
       for (const item of dto.permissions) {
-        const permission = await this.permissionsRepo.findById(tx, item.permissionId);
+        const permission = await this.permissionsRepo.findById(
+          tx,
+          item.permissionId,
+        );
         if (!permission) {
           throw new ResourceNotFoundException('Permiso no encontrado', {
             permissionId: item.permissionId,
@@ -157,12 +176,17 @@ export class AuthzRolesService {
     actor: AuthenticatedUser,
   ): Promise<AuthzStatusResultDto> {
     this.logger.info(
-      { operation: 'authz.role.field-permissions', roleId, count: dto.fields.length },
+      {
+        operation: 'authz.role.field-permissions',
+        roleId,
+        count: dto.fields.length,
+      },
       'Setting field permissions',
     );
     return this.em.transactional(async (tx) => {
       const role = await this.rolesRepo.findById(tx, roleId);
-      if (!role) throw new ResourceNotFoundException('Rol no encontrado', { roleId });
+      if (!role)
+        throw new ResourceNotFoundException('Rol no encontrado', { roleId });
 
       for (const field of dto.fields) {
         // Regla de negocio (check DB): can_write=true exige can_read=true.
@@ -176,7 +200,9 @@ export class AuthzRolesService {
 
       let affected = 0;
       for (const field of dto.fields) {
-        const maskId = field.maskStrategy ? MASK_CONCEPT[field.maskStrategy] : undefined;
+        const maskId = field.maskStrategy
+          ? MASK_CONCEPT[field.maskStrategy]
+          : undefined;
         const existing = await this.fieldPermsRepo.findOneByKey(
           tx,
           roleId,

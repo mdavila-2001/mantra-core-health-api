@@ -26,7 +26,10 @@ export interface CreateContractData {
 @Injectable()
 export class ContractsRepository {
   /** Busca un contrato por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<IntegrationContracts | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IntegrationContracts | null> {
     return em.findOne(IntegrationContracts, { id });
   }
 
@@ -36,7 +39,10 @@ export class ContractsRepository {
     contractCode: string,
     externalProviderId: string,
   ): Promise<IntegrationContracts | null> {
-    return em.findOne(IntegrationContracts, { contractCode, externalProviderId });
+    return em.findOne(IntegrationContracts, {
+      contractCode,
+      externalProviderId,
+    });
   }
 
   /** Crea la entidad de contrato en la unidad de trabajo (sin flush). */

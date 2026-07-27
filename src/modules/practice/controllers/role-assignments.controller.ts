@@ -10,7 +10,10 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { PracticeWorkforceService } from '../services';
-import { CreateSupportAssignmentDto, SupportAssignmentResponseDto } from '../dto';
+import {
+  CreateSupportAssignmentDto,
+  SupportAssignmentResponseDto,
+} from '../dto';
 
 /** Endpoints con raíz en `/role-assignments`: personal de apoyo a un rol. */
 @ApiTags('practice')
@@ -23,7 +26,9 @@ export class RoleAssignmentsController {
   @Post(':roleId/support-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Adjuntar personal de apoyo a un rol de profesional' })
+  @ApiOperation({
+    summary: 'Adjuntar personal de apoyo a un rol de profesional',
+  })
   attachSupport(
     @Param('roleId', ParseUUIDPipe) roleId: string,
     @Body() dto: CreateSupportAssignmentDto,

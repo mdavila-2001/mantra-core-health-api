@@ -10,7 +10,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { DiagnosticPricingService, DiagnosticStudiesService } from '../services';
+import {
+  DiagnosticPricingService,
+  DiagnosticStudiesService,
+} from '../services';
 import {
   CreateStudyPriceDto,
   StatusResultDto,
@@ -36,7 +39,9 @@ export class DiagnosticPricingController {
   @Post('price-schedules/:scheduleId/study-prices')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Fijar/versionar el precio de un estudio (append-only)' })
+  @ApiOperation({
+    summary: 'Fijar/versionar el precio de un estudio (append-only)',
+  })
   addStudyPrice(
     @Param('scheduleId', ParseUUIDPipe) scheduleId: string,
     @Body() dto: CreateStudyPriceDto,

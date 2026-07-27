@@ -2,7 +2,11 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { DelegatedAccessEvaluationService } from '../services';
-import { EvaluateActorDto, EvaluationResultDto, ExpirySweepResultDto } from '../dto';
+import {
+  EvaluateActorDto,
+  EvaluationResultDto,
+  ExpirySweepResultDto,
+} from '../dto';
 
 /**
  * Operaciones de authz/sistema del módulo: barrido de expiración (UC-29-08) y
@@ -19,7 +23,9 @@ export class DelegatedAccessAuthzController {
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Expirar delegaciones y grants vencidos (barrido)' })
-  expirySweep(@CurrentUser() actor: AuthenticatedUser): Promise<ExpirySweepResultDto> {
+  expirySweep(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ExpirySweepResultDto> {
     return this.service.expirySweep(actor);
   }
 

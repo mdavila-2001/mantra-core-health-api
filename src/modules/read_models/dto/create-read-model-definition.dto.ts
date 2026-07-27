@@ -17,13 +17,19 @@ import {
 
 /** Una dependencia upstream declarada por la definición. */
 export class ReadModelDependencyInputDto {
-  @ApiProperty({ description: 'Esquema de la fuente upstream', example: 'billing' })
+  @ApiProperty({
+    description: 'Esquema de la fuente upstream',
+    example: 'billing',
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(128)
   sourceSchemaName!: string;
 
-  @ApiProperty({ description: 'Objeto (tabla/vista) de la fuente upstream', example: 'bills' })
+  @ApiProperty({
+    description: 'Objeto (tabla/vista) de la fuente upstream',
+    example: 'bills',
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(128)
@@ -54,14 +60,20 @@ export class CreateReadModelDefinitionDto {
   @MaxLength(128)
   schemaName!: string;
 
-  @ApiProperty({ description: 'Nombre del objeto', example: 'crm_account_360_v' })
+  @ApiProperty({
+    description: 'Nombre del objeto',
+    example: 'crm_account_360_v',
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(128)
   @Matches(/^[a-z0-9_]+$/, { message: 'objectName debe ser snake_case' })
   objectName!: string;
 
-  @ApiProperty({ description: 'Tipo de objeto físico', enum: ['VIEW', 'MATERIALIZED_VIEW'] })
+  @ApiProperty({
+    description: 'Tipo de objeto físico',
+    enum: ['VIEW', 'MATERIALIZED_VIEW'],
+  })
   @IsIn(['VIEW', 'MATERIALIZED_VIEW'])
   objectType!: 'VIEW' | 'MATERIALIZED_VIEW';
 
@@ -77,12 +89,17 @@ export class CreateReadModelDefinitionDto {
   @MaxLength(2000)
   purposeText?: string;
 
-  @ApiPropertyOptional({ description: 'Modo de refresh', enum: ['CONCURRENT', 'SCHEDULED'] })
+  @ApiPropertyOptional({
+    description: 'Modo de refresh',
+    enum: ['CONCURRENT', 'SCHEDULED'],
+  })
   @IsOptional()
   @IsIn(['CONCURRENT', 'SCHEDULED'])
   refreshMode?: 'CONCURRENT' | 'SCHEDULED';
 
-  @ApiPropertyOptional({ description: 'Máxima antigüedad tolerada en segundos' })
+  @ApiPropertyOptional({
+    description: 'Máxima antigüedad tolerada en segundos',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -100,7 +117,9 @@ export class CreateReadModelDefinitionDto {
   @Min(1)
   maximumPageSize?: number;
 
-  @ApiPropertyOptional({ description: 'Columnas de cursor estable (tie-breaker determinista)' })
+  @ApiPropertyOptional({
+    description: 'Columnas de cursor estable (tie-breaker determinista)',
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -126,13 +145,18 @@ export class CreateReadModelDefinitionDto {
   @IsBoolean()
   rowLevelSecurityRequired?: boolean;
 
-  @ApiPropertyOptional({ description: 'Número de versión inicial (por defecto 1)' })
+  @ApiPropertyOptional({
+    description: 'Número de versión inicial (por defecto 1)',
+  })
   @IsOptional()
   @IsInt()
   @Min(1)
   versionNumber?: number;
 
-  @ApiProperty({ description: 'Dependencias upstream', type: [ReadModelDependencyInputDto] })
+  @ApiProperty({
+    description: 'Dependencias upstream',
+    type: [ReadModelDependencyInputDto],
+  })
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })

@@ -16,14 +16,16 @@ describe('GeoTripsController', () => {
     const d = build();
     const dto = { trackingSessionId: 'sess-1' };
     d.service.start.mockResolvedValue({ id: 't1' });
-    await expect(d.controller.start(dto as any, actor)).resolves.toEqual({ id: 't1' });
+    await expect(d.controller.start(dto as any, actor)).resolves.toEqual({
+      id: 't1',
+    });
     expect(d.service.start).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates close (UC-13-07)', async () => {
     const d = build();
     const dto = { distanceM: 100 };
-    await d.controller.close('t1', dto as any, actor);
+    await d.controller.close('t1', dto, actor);
     expect(d.service.close).toHaveBeenCalledWith('t1', dto, actor);
   });
 });

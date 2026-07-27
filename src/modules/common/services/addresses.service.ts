@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  AuthenticatedUser,
-  CONCEPTS,
-  ConceptName,
-} from '../../../common';
+import { AuthenticatedUser, CONCEPTS, ConceptName } from '../../../common';
 import { AddressesRepository } from '../repositories';
 import { Addresses } from '../entities';
 import { AddressResponseDto, CreateAddressDto, OwnerType } from '../dto';
@@ -44,7 +40,7 @@ export class AddressesService {
 
     return this.em.transactional(async (tx) => {
       const address = this.addressesRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}` as ConceptName],
+        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}`],
         ownerId: dto.ownerId,
         lines: dto.lines.join(LINE_SEPARATOR),
         city: dto.city,
@@ -64,11 +60,14 @@ export class AddressesService {
     });
   }
 
-  private toResponse(entity: Addresses, dto: CreateAddressDto): AddressResponseDto {
+  private toResponse(
+    entity: Addresses,
+    dto: CreateAddressDto,
+  ): AddressResponseDto {
     return {
       id: entity.id,
       ownerId: entity.ownerId,
-      ownerType: dto.ownerType as OwnerType,
+      ownerType: dto.ownerType,
       lines: entity.lines ? entity.lines.split(LINE_SEPARATOR) : [],
       city: entity.city,
       postalCode: entity.postalCode,

@@ -42,6 +42,10 @@ export class LegalHoldRepository {
     },
   ): LegalHolds {
     const { actorUserId, ...rest } = data;
-    return em.create(LegalHolds, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      LegalHolds,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

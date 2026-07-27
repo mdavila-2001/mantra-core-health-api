@@ -16,7 +16,9 @@ describe('GeoTrackingSessionsController', () => {
     const d = build();
     const dto = { trackedSubjectId: 's1' };
     d.service.start.mockResolvedValue({ id: 'sess-1' });
-    await expect(d.controller.start(dto as any, actor)).resolves.toEqual({ id: 'sess-1' });
+    await expect(d.controller.start(dto as any, actor)).resolves.toEqual({
+      id: 'sess-1',
+    });
     expect(d.service.start).toHaveBeenCalledWith(dto, actor);
   });
 

@@ -38,7 +38,9 @@ export class GovernanceCatalogController {
   @Post('entity-registry')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar dominio, clasificación y catalogar entidad + campos' })
+  @ApiOperation({
+    summary: 'Registrar dominio, clasificación y catalogar entidad + campos',
+  })
   catalogEntity(
     @Body() dto: CatalogEntityDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -112,7 +114,9 @@ export class GovernanceCatalogController {
   @Patch('field-registry/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Asignar regla de anonimización / masking a un campo' })
+  @ApiOperation({
+    summary: 'Asignar regla de anonimización / masking a un campo',
+  })
   updateField(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateFieldRegistryDto,

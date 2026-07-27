@@ -46,13 +46,21 @@ describe('FilesService', () => {
     const fileLinksRepo = { create: fn() };
     const service = new FilesService(
       em as never,
-      filesRepo as never,
-      fileVersionsRepo as never,
-      fileDerivativesRepo as never,
-      fileLinksRepo as never,
+      filesRepo,
+      fileVersionsRepo,
+      fileDerivativesRepo,
+      fileLinksRepo,
       logger as never,
     );
-    return { service, em, tx, filesRepo, fileVersionsRepo, fileDerivativesRepo, fileLinksRepo };
+    return {
+      service,
+      em,
+      tx,
+      filesRepo,
+      fileVersionsRepo,
+      fileDerivativesRepo,
+      fileLinksRepo,
+    };
   }
 
   const createFileDto: CreateFileDto = {
@@ -99,9 +107,9 @@ describe('FilesService', () => {
     it('throws ResourceNotFoundException when file is missing', async () => {
       const { service, filesRepo } = build();
       filesRepo.findById.mockResolvedValue(null);
-      await expect(service.createVersion('missing', dto, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        service.createVersion('missing', dto, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('adds the next version and promotes it', async () => {
@@ -166,13 +174,24 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const result = await service.createDerivative('file-1', 'ver-1', dto, actor);
+      const result = await service.createDerivative(
+        'file-1',
+        'ver-1',
+        dto,
+        actor,
+      );
 
       expect(fileDerivativesRepo.create).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ sourceFileVersionId: 'ver-1', derivativeFileVersionId: 'ver-2' }),
+        expect.objectContaining({
+          sourceFileVersionId: 'ver-1',
+          derivativeFileVersionId: 'ver-2',
+        }),
       );
-      expect(result).toMatchObject({ id: 'der-1', derivativeType: DerivativeType.THUMBNAIL });
+      expect(result).toMatchObject({
+        id: 'der-1',
+        derivativeType: DerivativeType.THUMBNAIL,
+      });
     });
 
     it('throws ResourceNotFoundException when the source version is missing', async () => {
@@ -187,10 +206,15 @@ describe('FilesService', () => {
   describe('recordScanResult', () => {
     it('marks a version as infected', async () => {
       const { service, fileVersionsRepo } = build();
-      const version = { id: 'ver-1', malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING };
+      const version = {
+        id: 'ver-1',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      };
       fileVersionsRepo.findById.mockResolvedValue(version);
 
-      const result = await service.recordScanResult('ver-1', { result: ScanResult.INFECTED });
+      const result = await service.recordScanResult('ver-1', {
+        result: ScanResult.INFECTED,
+      });
 
       expect(version.malwareScanStatusConceptId).toBe(CONCEPTS.SCAN_INFECTED);
       expect(result.malwareScanStatusConceptId).toBe(CONCEPTS.SCAN_INFECTED);
@@ -219,7 +243,10 @@ describe('FilesService', () => {
 
     it('soft-deletes a file and returns its deletedAt', async () => {
       const { service, filesRepo } = build();
-      const file: Record<string, unknown> = { id: 'file-1', legalHoldUntil: undefined };
+      const file: Record<string, unknown> = {
+        id: 'file-1',
+        legalHoldUntil: undefined,
+      };
       filesRepo.findById.mockResolvedValue(file);
 
       const result = await service.softDelete('file-1', actor);
@@ -267,17 +294,17 @@ describe('FilesService', () => {
         malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
       });
 
-      await expect(service.generateDownloadUrl('file-1')).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        service.generateDownloadUrl('file-1'),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('throws ResourceNotFoundException when the file is missing', async () => {
       const { service, filesRepo } = build();
       filesRepo.findById.mockResolvedValue(null);
-      await expect(service.generateDownloadUrl('missing')).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        service.generateDownloadUrl('missing'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

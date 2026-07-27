@@ -15,7 +15,11 @@ function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const pharmaciesRepo = { findById: mockFn() };
-  const priceListsRepo = { findByPharmacyAndCode: mockFn(), findById: mockFn(), create: mockFn() };
+  const priceListsRepo = {
+    findByPharmacyAndCode: mockFn(),
+    findById: mockFn(),
+    create: mockFn(),
+  };
   const productsRepo = { findById: mockFn() };
   const pricesRepo = {
     findActiveByListAndProduct: mockFn().mockResolvedValue([]),
@@ -27,36 +31,62 @@ function build() {
   const service = new PharmacyPricingService(
     em as any,
     pharmaciesRepo as any,
-    priceListsRepo as any,
+    priceListsRepo,
     productsRepo as any,
     pricesRepo as any,
     logger as any,
   );
-  return { service, tx, pharmaciesRepo, priceListsRepo, productsRepo, pricesRepo };
+  return {
+    service,
+    tx,
+    pharmaciesRepo,
+    priceListsRepo,
+    productsRepo,
+    pricesRepo,
+  };
 }
 
 describe('PharmacyPricingService', () => {
   describe('createPriceList (UC-24-05)', () => {
     it('requires insurerTenantId for INSURER lists', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_ACTIVE });
+      d.pharmaciesRepo.findById.mockResolvedValue({
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+      });
       await expect(
-        d.service.createPriceList('ph1', { code: 'PL', priceListType: 'INSURER' } as any, actor),
+        d.service.createPriceList(
+          'ph1',
+          { code: 'PL', priceListType: 'INSURER' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('rejects duplicated list code', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_ACTIVE });
-      d.priceListsRepo.findByPharmacyAndCode.mockResolvedValue({ id: 'existing' });
+      d.pharmaciesRepo.findById.mockResolvedValue({
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+      });
+      d.priceListsRepo.findByPharmacyAndCode.mockResolvedValue({
+        id: 'existing',
+      });
       await expect(
-        d.service.createPriceList('ph1', { code: 'PL', priceListType: 'PUBLIC' } as any, actor),
+        d.service.createPriceList(
+          'ph1',
+          { code: 'PL', priceListType: 'PUBLIC' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('creates a public price list', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({ id: 'ph1', statusConceptId: PHARM.PHARMACY_ACTIVE });
+      d.pharmaciesRepo.findById.mockResolvedValue({
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+      });
       d.priceListsRepo.findByPharmacyAndCode.mockResolvedValue(null);
       d.priceListsRepo.create.mockReturnValue({
         id: 'pl1',
@@ -66,7 +96,11 @@ describe('PharmacyPricingService', () => {
         statusConceptId: PHARM.PRICE_LIST_ACTIVE,
         createdAt: new Date(),
       });
-      const res = await d.service.createPriceList('ph1', { code: 'PL', priceListType: 'PUBLIC' } as any, actor);
+      const res = await d.service.createPriceList(
+        'ph1',
+        { code: 'PL', priceListType: 'PUBLIC' } as any,
+        actor,
+      );
       expect(res).toMatchObject({ id: 'pl1', status: PHARM.PRICE_LIST_ACTIVE });
     });
   });
@@ -76,7 +110,12 @@ describe('PharmacyPricingService', () => {
       const d = build();
       d.priceListsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.versionPrice('ph1', 'pl1', { pharmacyProductId: 'pr1', unitAmount: 10 } as any, actor),
+        d.service.versionPrice(
+          'ph1',
+          'pl1',
+          { pharmacyProductId: 'pr1', unitAmount: 10 } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -88,7 +127,12 @@ describe('PharmacyPricingService', () => {
         statusConceptId: PHARM.PRICE_LIST_CLOSED,
       });
       await expect(
-        d.service.versionPrice('ph1', 'pl1', { pharmacyProductId: 'pr1', unitAmount: 10 } as any, actor),
+        d.service.versionPrice(
+          'ph1',
+          'pl1',
+          { pharmacyProductId: 'pr1', unitAmount: 10 } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -105,7 +149,10 @@ describe('PharmacyPricingService', () => {
         pharmacyId: 'ph1',
         statusConceptId: PHARM.PRODUCT_ACTIVE,
       });
-      const prev = { statusConceptId: PHARM.PRICE_ACTIVE, effectiveTo: undefined };
+      const prev = {
+        statusConceptId: PHARM.PRICE_ACTIVE,
+        effectiveTo: undefined,
+      };
       d.pricesRepo.findActiveByListAndProduct.mockResolvedValue([prev]);
       d.pricesRepo.maxVersionNumber.mockResolvedValue(2);
       d.pricesRepo.create.mockReturnValue({
@@ -121,7 +168,7 @@ describe('PharmacyPricingService', () => {
       const res = await d.service.versionPrice(
         'ph1',
         'pl1',
-        { pharmacyProductId: 'pr1', unitAmount: 10 } as any,
+        { pharmacyProductId: 'pr1', unitAmount: 10 },
         actor,
       );
 
@@ -142,9 +189,9 @@ describe('PharmacyPricingService', () => {
         pharmacyId: 'ph1',
         statusConceptId: PHARM.PRICE_LIST_CLOSED,
       });
-      await expect(d.service.closePriceList('ph1', 'pl1', actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.closePriceList('ph1', 'pl1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('closes the list and supersedes its active prices', async () => {
@@ -156,7 +203,10 @@ describe('PharmacyPricingService', () => {
         validTo: undefined,
         updatedAt: new Date(),
       };
-      const price = { statusConceptId: PHARM.PRICE_ACTIVE, effectiveTo: undefined };
+      const price = {
+        statusConceptId: PHARM.PRICE_ACTIVE,
+        effectiveTo: undefined,
+      };
       d.priceListsRepo.findById.mockResolvedValue(list);
       d.pricesRepo.findActiveByList.mockResolvedValue([price]);
 

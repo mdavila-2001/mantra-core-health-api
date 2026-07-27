@@ -11,7 +11,12 @@ import {
 } from '../../../common';
 import { GovernanceRepository, LegalHoldRepository } from '../repositories';
 import { SYSOPS } from '../system_ops.concepts';
-import { CreateLegalHoldDto, IdResultDto, ReleaseLegalHoldDto, StatusResultDto } from '../dto';
+import {
+  CreateLegalHoldDto,
+  IdResultDto,
+  ReleaseLegalHoldDto,
+  StatusResultDto,
+} from '../dto';
 
 /**
  * UC-11-08: coloca / levanta un legal hold sobre un objetivo.
@@ -33,13 +38,24 @@ export class LegalHoldService {
   }
 
   /** UC-11-08: coloca un legal hold (ACTIVE) sobre un objetivo. */
-  async place(dto: CreateLegalHoldDto, actor: AuthenticatedUser): Promise<IdResultDto> {
+  async place(
+    dto: CreateLegalHoldDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
-      const active = await this.repo.findActive(tx, dto.tenantId, dto.targetTypeConceptId, dto.targetId);
+      const active = await this.repo.findActive(
+        tx,
+        dto.tenantId,
+        dto.targetTypeConceptId,
+        dto.targetId,
+      );
       if (active) {
-        throw new ConflictException('Ya existe un legal hold ACTIVE para ese objetivo', {
-          targetId: dto.targetId,
-        });
+        throw new ConflictException(
+          'Ya existe un legal hold ACTIVE para ese objetivo',
+          {
+            targetId: dto.targetId,
+          },
+        );
       }
       const hold = this.repo.create(tx, {
         tenantId: dto.tenantId,
@@ -59,18 +75,28 @@ export class LegalHoldService {
         changedByUserId: actor.id,
         newSnapshotJson: { targetId: dto.targetId, status: 'ACTIVE' },
       });
-      this.logger.info({ operation: 'sysops.legalhold.place', holdId: hold.id }, 'Legal hold placed');
+      this.logger.info(
+        { operation: 'sysops.legalhold.place', holdId: hold.id },
+        'Legal hold placed',
+      );
       return { id: hold.id };
     });
   }
 
   /** UC-11-08: levanta un legal hold ACTIVE (-> RELEASED). */
-  async release(id: string, dto: ReleaseLegalHoldDto, actor: AuthenticatedUser): Promise<StatusResultDto> {
+  async release(
+    id: string,
+    dto: ReleaseLegalHoldDto,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
       const hold = await this.repo.findById(tx, id);
-      if (!hold) throw new ResourceNotFoundException('Legal hold no encontrado', { id });
+      if (!hold)
+        throw new ResourceNotFoundException('Legal hold no encontrado', { id });
       if (hold.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El legal hold no está ACTIVE', { id });
+        throw new PreconditionFailedException('El legal hold no está ACTIVE', {
+          id,
+        });
       }
       hold.statusConceptId = CONCEPTS.STATE_REVOKED;
       hold.endsAt = new Date();
@@ -84,7 +110,10 @@ export class LegalHoldService {
         newSnapshotJson: { status: 'RELEASED' },
         reason: dto.reason,
       });
-      this.logger.info({ operation: 'sysops.legalhold.release', holdId: hold.id }, 'Legal hold released');
+      this.logger.info(
+        { operation: 'sysops.legalhold.release', holdId: hold.id },
+        'Legal hold released',
+      );
       return { ok: true };
     });
   }

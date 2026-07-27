@@ -14,7 +14,10 @@ export class BranchResponseDto {
   @ApiProperty()
   name!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la branch', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la branch',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

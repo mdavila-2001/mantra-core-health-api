@@ -61,7 +61,11 @@ export class AuditEventsService {
     actor: AuthenticatedUser,
   ): Promise<DataAccessResultDto> {
     this.logger.info(
-      { operation: 'audit.dataAccess.record', actorId: actor.id, resourceType: dto.resourceType },
+      {
+        operation: 'audit.dataAccess.record',
+        actorId: actor.id,
+        resourceType: dto.resourceType,
+      },
       'Recording clinical data access',
     );
     return this.em.transactional(async (tx) => {
@@ -71,7 +75,9 @@ export class AuditEventsService {
         patientProfileId: dto.patientProfileId,
         tenantId: dto.tenantId,
         purpose: dto.purpose,
-        legalBasisConceptId: dto.legalBasis ? LEGAL_BASIS[dto.legalBasis] : undefined,
+        legalBasisConceptId: dto.legalBasis
+          ? LEGAL_BASIS[dto.legalBasis]
+          : undefined,
         resourceType: dto.resourceType,
         resourceId: dto.resourceId,
         recordedByUserId: actor.id,
@@ -85,7 +91,8 @@ export class AuditEventsService {
           resourceId: dto.resourceId,
           resourceVersionId: dto.resourceVersionId,
           actionConceptId: AUD.ACTION_READ,
-          purposeOfUseConceptId: PURPOSE_OF_USE[dto.purposeOfUse ?? 'TREATMENT'],
+          purposeOfUseConceptId:
+            PURPOSE_OF_USE[dto.purposeOfUse ?? 'TREATMENT'],
           decisionConceptId: AUD.DECISION_PERMIT,
           policyVersion: dto.policyVersion,
           requestId: dto.requestId,
@@ -119,7 +126,12 @@ export class AuditEventsService {
     actor: AuthenticatedUser,
   ): Promise<AuditEventResultDto> {
     this.logger.info(
-      { operation: 'audit.event.record', actorId: actor.id, action: dto.action, entity: dto.entity },
+      {
+        operation: 'audit.event.record',
+        actorId: actor.id,
+        action: dto.action,
+        entity: dto.entity,
+      },
       'Sealing audit event into hash chain',
     );
     return this.em.transactional(async (tx) => {
@@ -150,11 +162,19 @@ export class AuditEventsService {
     actor: AuthenticatedUser,
   ): Promise<IntegrityReportDto> {
     this.logger.info(
-      { operation: 'audit.integrity.verify', actorId: actor.id, tenantId: dto.tenantId },
+      {
+        operation: 'audit.integrity.verify',
+        actorId: actor.id,
+        tenantId: dto.tenantId,
+      },
       'Verifying hash-chain integrity',
     );
     return this.em.transactional(async (tx) => {
-      const chain = await this.auditLogRepo.findChain(tx, dto.tenantId, dto.limit ?? 1000);
+      const chain = await this.auditLogRepo.findChain(
+        tx,
+        dto.tenantId,
+        dto.limit ?? 1000,
+      );
       let prev: string | undefined;
       let brokenAt: string | null = null;
       let checkedCount = 0;
@@ -164,7 +184,9 @@ export class AuditEventsService {
           AuditLogRepository.content(link),
           link.recordedAt,
         );
-        const linkOk = (link.previousHash ?? undefined) === prev && expected === link.recordHash;
+        const linkOk =
+          (link.previousHash ?? undefined) === prev &&
+          expected === link.recordHash;
         if (!linkOk) {
           brokenAt = link.id;
           break;
@@ -179,7 +201,9 @@ export class AuditEventsService {
         action: 'INTEGRITY_ATTESTATION',
         entity: 'audit_log',
         entityId: brokenAt ?? undefined,
-        outcomeConceptId: verified ? CONCEPTS.OUTCOME_SUCCESS : CONCEPTS.OUTCOME_FAILURE,
+        outcomeConceptId: verified
+          ? CONCEPTS.OUTCOME_SUCCESS
+          : CONCEPTS.OUTCOME_FAILURE,
         tenantId: dto.tenantId,
         recordedByUserId: actor.id,
       });
@@ -190,7 +214,12 @@ export class AuditEventsService {
           'Hash chain integrity broken',
         );
       }
-      return { verified, checkedCount, brokenAt, attestationId: attestation.id };
+      return {
+        verified,
+        checkedCount,
+        brokenAt,
+        attestationId: attestation.id,
+      };
     });
   }
 
@@ -200,7 +229,11 @@ export class AuditEventsService {
     actor: AuthenticatedUser,
   ): Promise<RetentionResultDto> {
     this.logger.info(
-      { operation: 'audit.retention.apply', actorId: actor.id, scope: dto.scope },
+      {
+        operation: 'audit.retention.apply',
+        actorId: actor.id,
+        scope: dto.scope,
+      },
       'Recording retention/archival application',
     );
     return this.em.transactional(async (tx) => {
@@ -222,20 +255,28 @@ export class AuditEventsService {
     actor: AuthenticatedUser,
   ): Promise<AnomalyScanResultDto> {
     const targetUser = dto.userId ?? actor.id;
-    const since = dto.since ? new Date(dto.since) : new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const since = dto.since
+      ? new Date(dto.since)
+      : new Date(Date.now() - 24 * 60 * 60 * 1000);
     this.logger.info(
       { operation: 'audit.anomaly.scan', actorId: actor.id, targetUser },
       'Scanning access baseline for anomalies',
     );
     return this.em.transactional(async (tx) => {
-      const accessCount = await this.dataAccessRepo.countByUserSince(tx, targetUser, since);
+      const accessCount = await this.dataAccessRepo.countByUserSince(
+        tx,
+        targetUser,
+        since,
+      );
       const anomalous = accessCount > ANOMALY_THRESHOLD;
       const row = await this.auditLogRepo.append(tx, {
         userId: actor.id,
         action: 'ANOMALY_FINDING',
         entity: 'data_access_log',
         entityId: targetUser,
-        outcomeConceptId: anomalous ? CONCEPTS.OUTCOME_FAILURE : CONCEPTS.OUTCOME_SUCCESS,
+        outcomeConceptId: anomalous
+          ? CONCEPTS.OUTCOME_FAILURE
+          : CONCEPTS.OUTCOME_SUCCESS,
         tenantId: dto.tenantId,
         recordedByUserId: actor.id,
       });

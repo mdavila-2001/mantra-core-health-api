@@ -10,7 +10,11 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { PermissionSetsService } from '../services';
-import { CreatePermissionSetDto, PublishSetVersionDto, PermissionSetVersionDto } from '../dto';
+import {
+  CreatePermissionSetDto,
+  PublishSetVersionDto,
+  PermissionSetVersionDto,
+} from '../dto';
 
 /** Sets de permisos delegados y su versionado (UC-29-02). */
 @ApiTags('delegated-access-permission-sets')

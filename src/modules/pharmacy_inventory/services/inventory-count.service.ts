@@ -14,12 +14,20 @@ import {
   StockPositionsRepository,
   LedgerRepository,
 } from '../repositories';
-import { CreateCountSessionDto, ApproveCountSessionDto, CountSessionResponseDto } from '../dto';
+import {
+  CreateCountSessionDto,
+  ApproveCountSessionDto,
+  CountSessionResponseDto,
+} from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
-const num = (v: string | null | undefined): number => (v == null ? 0 : Number(v));
-const recompute = (onHand: string, reserved: string, quarantine: string): string =>
-  String(num(onHand) - num(reserved) - num(quarantine));
+const num = (v: string | null | undefined): number =>
+  v == null ? 0 : Number(v);
+const recompute = (
+  onHand: string,
+  reserved: string,
+  quarantine: string,
+): string => String(num(onHand) - num(reserved) - num(quarantine));
 
 /** Conteo cíclico: abrir/congelar sesión (UC-25-06) y aprobar/ajustar (UC-25-07). */
 @Injectable()
@@ -42,25 +50,35 @@ export class InventoryCountService {
     actor: AuthenticatedUser,
   ): Promise<CountSessionResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.count.open', pharmacySiteId, location: dto.inventoryLocationId },
+      {
+        operation: 'pharmacy_inventory.count.open',
+        pharmacySiteId,
+        location: dto.inventoryLocationId,
+      },
       'Opening count session',
     );
     return this.em.transactional(async (tx) => {
-      const location = await this.locationsRepo.findById(tx, dto.inventoryLocationId);
+      const location = await this.locationsRepo.findById(
+        tx,
+        dto.inventoryLocationId,
+      );
       if (!location) {
         throw new ResourceNotFoundException('Ubicación no encontrada', {
           locationId: dto.inventoryLocationId,
         });
       }
-      const openCount = await this.countRepo.countOpenAtLocation(tx, dto.inventoryLocationId, [
-        PINV.COUNT_OPEN,
-        PINV.COUNT_FROZEN,
-        PINV.COUNT_COUNTED,
-      ]);
+      const openCount = await this.countRepo.countOpenAtLocation(
+        tx,
+        dto.inventoryLocationId,
+        [PINV.COUNT_OPEN, PINV.COUNT_FROZEN, PINV.COUNT_COUNTED],
+      );
       if (openCount > 0) {
-        throw new ConflictException('Ya existe una sesión de conteo abierta en la ubicación', {
-          locationId: dto.inventoryLocationId,
-        });
+        throw new ConflictException(
+          'Ya existe una sesión de conteo abierta en la ubicación',
+          {
+            locationId: dto.inventoryLocationId,
+          },
+        );
       }
 
       const session = this.countRepo.create(tx, {
@@ -105,25 +123,41 @@ export class InventoryCountService {
     dto: ApproveCountSessionDto,
     actor: AuthenticatedUser,
   ): Promise<CountSessionResponseDto> {
-    this.logger.info({ operation: 'pharmacy_inventory.count.approve', sessionId: id }, 'Approving count session');
+    this.logger.info(
+      { operation: 'pharmacy_inventory.count.approve', sessionId: id },
+      'Approving count session',
+    );
     return this.em.transactional(async (tx) => {
       const session = await this.countRepo.findById(tx, id);
       if (!session) {
-        throw new ResourceNotFoundException('Sesión de conteo no encontrada', { sessionId: id });
+        throw new ResourceNotFoundException('Sesión de conteo no encontrada', {
+          sessionId: id,
+        });
       }
-      const approvable = [PINV.COUNT_OPEN, PINV.COUNT_FROZEN, PINV.COUNT_COUNTED];
+      const approvable = [
+        PINV.COUNT_OPEN,
+        PINV.COUNT_FROZEN,
+        PINV.COUNT_COUNTED,
+      ];
       if (!approvable.includes(session.statusConceptId)) {
-        throw new PreconditionFailedException('La sesión no está en estado aprobable', { sessionId: id });
+        throw new PreconditionFailedException(
+          'La sesión no está en estado aprobable',
+          { sessionId: id },
+        );
       }
 
-      const countByLine = new Map(dto.counts.map((c) => [c.lineId, c.countedQuantity]));
+      const countByLine = new Map(
+        dto.counts.map((c) => [c.lineId, c.countedQuantity]),
+      );
       const lineIds: string[] = [];
       let adjustments = 0;
 
       for (const [lineId, counted] of countByLine) {
         const line = await this.countRepo.findLineById(tx, lineId);
         if (!line || line.inventoryCountSessionId !== session.id) {
-          throw new ResourceNotFoundException('Línea de conteo no encontrada', { lineId });
+          throw new ResourceNotFoundException('Línea de conteo no encontrada', {
+            lineId,
+          });
         }
         lineIds.push(line.id);
         const variance = counted - num(line.expectedQuantity);
@@ -132,7 +166,10 @@ export class InventoryCountService {
 
         if (variance !== 0) {
           line.varianceReasonConceptId = PINV.VARIANCE_REASON_ADJUSTMENT;
-          const sequence = await this.ledgerRepo.nextSequence(tx, session.pharmacySiteId);
+          const sequence = await this.ledgerRepo.nextSequence(
+            tx,
+            session.pharmacySiteId,
+          );
           this.ledgerRepo.append(tx, {
             pharmacyId: session.pharmacySiteId,
             pharmacySiteId: session.pharmacySiteId,

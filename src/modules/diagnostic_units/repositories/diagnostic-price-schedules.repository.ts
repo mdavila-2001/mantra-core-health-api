@@ -22,7 +22,10 @@ export interface CreatePriceScheduleData {
 /** Acceso a datos de `diagnostic_units.diagnostic_price_schedules`. */
 @Injectable()
 export class DiagnosticPriceSchedulesRepository {
-  findById(em: EntityManager, id: string): Promise<DiagnosticPriceSchedules | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DiagnosticPriceSchedules | null> {
     return em.findOne(DiagnosticPriceSchedules, { id });
   }
 
@@ -35,7 +38,10 @@ export class DiagnosticPriceSchedulesRepository {
     return em.findOne(DiagnosticPriceSchedules, { diagnosticUnitId, code });
   }
 
-  create(em: EntityManager, data: CreatePriceScheduleData): DiagnosticPriceSchedules {
+  create(
+    em: EntityManager,
+    data: CreatePriceScheduleData,
+  ): DiagnosticPriceSchedules {
     return em.create(
       DiagnosticPriceSchedules,
       {

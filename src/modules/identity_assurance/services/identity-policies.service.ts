@@ -20,9 +20,16 @@ export class IdentityPoliciesService {
   }
 
   /** Crea una política vigente (effective_from = ahora, sin fin) en estado activo. */
-  async createPolicy(dto: CreatePolicyDto, actor: AuthenticatedUser): Promise<PolicyResponseDto> {
+  async createPolicy(
+    dto: CreatePolicyDto,
+    actor: AuthenticatedUser,
+  ): Promise<PolicyResponseDto> {
     this.logger.info(
-      { operation: 'ida.policy.create', actorId: actor.id, code: dto.policyCode },
+      {
+        operation: 'ida.policy.create',
+        actorId: actor.id,
+        code: dto.policyCode,
+      },
       'Creating identity verification policy',
     );
     return this.em.transactional(async (tx) => {
@@ -30,10 +37,12 @@ export class IdentityPoliciesService {
         policyCode: dto.policyCode,
         subjectTypeConceptId: dto.subjectTypeConceptId,
         transactionRiskConceptId: dto.transactionRiskConceptId,
-        requiredIdentityAssuranceLevelConceptId: dto.requiredIdentityAssuranceLevelConceptId,
+        requiredIdentityAssuranceLevelConceptId:
+          dto.requiredIdentityAssuranceLevelConceptId,
         requiredAuthenticatorAssuranceLevelConceptId:
           dto.requiredAuthenticatorAssuranceLevelConceptId,
-        requiredFederationAssuranceLevelConceptId: dto.requiredFederationAssuranceLevelConceptId,
+        requiredFederationAssuranceLevelConceptId:
+          dto.requiredFederationAssuranceLevelConceptId,
         evidenceRequirementsJson: dto.evidenceRequirementsJson,
         fraudControlsJson: dto.fraudControlsJson,
         versionNumber: dto.versionNumber ?? 1,

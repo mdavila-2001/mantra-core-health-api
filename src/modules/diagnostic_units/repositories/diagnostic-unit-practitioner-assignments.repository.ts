@@ -44,7 +44,10 @@ export class DiagnosticUnitPractitionerAssignmentsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateAssignmentData): DiagnosticUnitPractitionerAssignments {
+  create(
+    em: EntityManager,
+    data: CreateAssignmentData,
+  ): DiagnosticUnitPractitionerAssignments {
     return em.create(
       DiagnosticUnitPractitionerAssignments,
       {
@@ -52,7 +55,8 @@ export class DiagnosticUnitPractitionerAssignmentsRepository {
         practitionerRoleAssignmentId: data.practitionerRoleAssignmentId,
         diagnosticUnitSiteId: data.diagnosticUnitSiteId,
         specialtyConceptId: data.specialtyConceptId,
-        assignmentRoleConceptId: data.assignmentRoleConceptId ?? DUNIT.ASSIGNMENT_ROLE_SPECIALIST,
+        assignmentRoleConceptId:
+          data.assignmentRoleConceptId ?? DUNIT.ASSIGNMENT_ROLE_SPECIALIST,
         mayValidateResults: data.mayValidateResults,
         maySignReports: data.maySignReports,
         validFrom: data.validFrom,

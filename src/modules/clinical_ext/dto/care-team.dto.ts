@@ -19,7 +19,10 @@ export class CareTeamMemberInputDto {
   @IsUUID()
   practitionerProfileId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Persona relacionada (cuidador)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Persona relacionada (cuidador)',
+  })
   @IsOptional()
   @IsUUID()
   relatedPersonId?: string;
@@ -28,7 +31,9 @@ export class CareTeamMemberInputDto {
   @IsUUID()
   memberRoleConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Marca al miembro como responsable del equipo' })
+  @ApiPropertyOptional({
+    description: 'Marca al miembro como responsable del equipo',
+  })
   @IsOptional()
   @IsBoolean()
   isResponsible?: boolean;
@@ -55,7 +60,10 @@ export class CreateCareTeamDto {
   @MaxLength(200)
   name?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Categoría del equipo (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Categoría del equipo (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   categoryConceptId?: string;
@@ -65,7 +73,10 @@ export class CreateCareTeamDto {
   @IsISO8601()
   periodStart?: string;
 
-  @ApiProperty({ type: [CareTeamMemberInputDto], description: 'Miembros iniciales del equipo' })
+  @ApiProperty({
+    type: [CareTeamMemberInputDto],
+    description: 'Miembros iniciales del equipo',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
@@ -93,7 +104,10 @@ export class CareTeamResponseDto {
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Estado del equipo (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado del equipo (concept id)',
+  })
   statusConceptId!: string;
 
   @ApiProperty({ type: [CareTeamMemberResponseDto] })

@@ -23,7 +23,9 @@ export class InventoryItemsController {
   @Post(':itemId/movements')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar un movimiento de inventario (ajuste de stock)' })
+  @ApiOperation({
+    summary: 'Registrar un movimiento de inventario (ajuste de stock)',
+  })
   recordMovement(
     @Param('itemId', ParseUUIDPipe) itemId: string,
     @Body() dto: CreateMovementDto,

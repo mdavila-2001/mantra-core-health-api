@@ -17,19 +17,26 @@ export interface CreateLockoutData {
 export class AccountLockoutsRepository {
   /** Crea un bloqueo ACTIVO (sin flush). */
   create(em: EntityManager, data: CreateLockoutData): AccountLockouts {
-    return em.create(AccountLockouts, {
-      userId: data.userId,
-      reasonConceptId: data.reasonConceptId,
-      statusConceptId: CONCEPTS.LOCKOUT_ACTIVE,
-      failedAttempts: data.failedAttempts,
-      lockedAt: new Date(),
-      sourceIp: data.sourceIp,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+    return em.create(
+      AccountLockouts,
+      {
+        userId: data.userId,
+        reasonConceptId: data.reasonConceptId,
+        statusConceptId: CONCEPTS.LOCKOUT_ACTIVE,
+        failedAttempts: data.failedAttempts,
+        lockedAt: new Date(),
+        sourceIp: data.sourceIp,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Bloqueo ACTIVO del usuario, si existe. */
-  findActiveForUser(em: EntityManager, userId: string): Promise<AccountLockouts | null> {
+  findActiveForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<AccountLockouts | null> {
     return em.findOne(AccountLockouts, {
       userId,
       statusConceptId: CONCEPTS.LOCKOUT_ACTIVE,

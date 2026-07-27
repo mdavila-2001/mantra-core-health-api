@@ -29,7 +29,11 @@ export class PharmaciesRepository {
   }
 
   /** Busca una farmacia por (tenant, code) para validar unicidad. */
-  findByTenantAndCode(em: EntityManager, tenantId: string, code: string): Promise<Pharmacies | null> {
+  findByTenantAndCode(
+    em: EntityManager,
+    tenantId: string,
+    code: string,
+  ): Promise<Pharmacies | null> {
     return em.findOne(Pharmacies, { tenantId, code });
   }
 

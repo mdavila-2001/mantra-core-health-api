@@ -28,7 +28,9 @@ export class IdentityChecksController {
   @Post(':id/attempts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Ejecutar un intento contra la autoridad externa (idempotente)' })
+  @ApiOperation({
+    summary: 'Ejecutar un intento contra la autoridad externa (idempotente)',
+  })
   recordAttempt(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RecordAttemptDto,
@@ -41,7 +43,9 @@ export class IdentityChecksController {
   @Post(':id/results')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar el resultado inmutable del check (con supersede)' })
+  @ApiOperation({
+    summary: 'Registrar el resultado inmutable del check (con supersede)',
+  })
   recordResult(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RecordResultDto,

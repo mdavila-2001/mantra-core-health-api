@@ -35,7 +35,9 @@ export class FormsInstancesController {
   /** UC-09-07. */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Abrir una instancia de formulario para un recurso' })
+  @ApiOperation({
+    summary: 'Abrir una instancia de formulario para un recurso',
+  })
   openInstance(
     @Body() dto: OpenInstanceDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -46,7 +48,9 @@ export class FormsInstancesController {
   /** UC-09-08. */
   @Post(':id/values')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Capturar valores de formulario (value[x] exclusivo)' })
+  @ApiOperation({
+    summary: 'Capturar valores de formulario (value[x] exclusivo)',
+  })
   captureValues(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CaptureValuesDto,

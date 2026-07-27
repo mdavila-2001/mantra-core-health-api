@@ -49,7 +49,9 @@ export class CatalogClassificationDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Rango de sensibilidad (mayor = más sensible)' })
+  @ApiPropertyOptional({
+    description: 'Rango de sensibilidad (mayor = más sensible)',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -89,7 +91,10 @@ export class CatalogFieldDto {
   @IsBoolean()
   isPhi?: boolean;
 
-  @ApiPropertyOptional({ description: 'Estrategia de enmascaramiento (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Estrategia de enmascaramiento (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   maskingStrategyConceptId?: string;
@@ -189,12 +194,18 @@ export class EntityRegistryResponseDto {
 
 /** Cuerpo de `PATCH /admin/governance/field-registry/{id}` (UC-11-04). */
 export class UpdateFieldRegistryDto {
-  @ApiPropertyOptional({ description: 'Regla de anonimización a asignar', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Regla de anonimización a asignar',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   anonymizationRuleId?: string;
 
-  @ApiPropertyOptional({ description: 'Estrategia de enmascaramiento (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Estrategia de enmascaramiento (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   maskingStrategyConceptId?: string;

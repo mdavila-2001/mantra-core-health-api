@@ -33,7 +33,13 @@ describe('Common (integración)', () => {
     const res = await http()
       .post('/common/identifiers')
       .set(bearer(ctx.adminToken))
-      .send({ ...owner(), type: 'NATIONAL_ID', system: `urn:pe:dni:${uniq}`, value: '12345678', use: 'OFFICIAL' })
+      .send({
+        ...owner(),
+        type: 'NATIONAL_ID',
+        system: `urn:pe:dni:${uniq}`,
+        value: '12345678',
+        use: 'OFFICIAL',
+      })
       .expect(201);
     const em = orm.em.fork();
     const persisted = await em.findOne(Identifiers, { id: res.body.id });
@@ -44,7 +50,12 @@ describe('Common (integración)', () => {
     await http()
       .post('/common/identifiers')
       .set(bearer(ctx.adminToken))
-      .send({ ...owner(), type: 'NATIONAL_ID', system: `urn:pe:dni:${uniq}`, value: '12345678' })
+      .send({
+        ...owner(),
+        type: 'NATIONAL_ID',
+        system: `urn:pe:dni:${uniq}`,
+        value: '12345678',
+      })
       .expect(409);
   });
 
@@ -52,7 +63,12 @@ describe('Common (integración)', () => {
     const created = await http()
       .post('/common/contact-points')
       .set(bearer(ctx.adminToken))
-      .send({ ...owner(), system: 'EMAIL', value: `c-${uniq}@example.com`, use: 'HOME' })
+      .send({
+        ...owner(),
+        system: 'EMAIL',
+        value: `c-${uniq}@example.com`,
+        use: 'HOME',
+      })
       .expect(201);
     contactPointId = created.body.id;
     const verified = await http()
@@ -67,7 +83,13 @@ describe('Common (integración)', () => {
     await http()
       .post('/common/addresses')
       .set(bearer(ctx.adminToken))
-      .send({ ...owner(), lines: ['Av. Siempre Viva 742'], city: 'Lima', postalCode: '15001', country: 'PE' })
+      .send({
+        ...owner(),
+        lines: ['Av. Siempre Viva 742'],
+        city: 'Lima',
+        postalCode: '15001',
+        country: 'PE',
+      })
       .expect(201);
   });
 
@@ -107,7 +129,13 @@ describe('Common (integración)', () => {
     await http()
       .post(`/common/files/${fileId}/versions/${versionId}/derivatives`)
       .set(bearer(ctx.adminToken))
-      .send({ derivativeType: 'THUMBNAIL', storageUri: `s3://bucket/thumb-${uniq}.png`, mimeType: 'image/png', sizeBytes: 2048, contentHash: 'c'.repeat(64) })
+      .send({
+        derivativeType: 'THUMBNAIL',
+        storageUri: `s3://bucket/thumb-${uniq}.png`,
+        mimeType: 'image/png',
+        sizeBytes: 2048,
+        contentHash: 'c'.repeat(64),
+      })
       .expect(201);
   });
 
@@ -115,7 +143,12 @@ describe('Common (integración)', () => {
     await http()
       .post(`/common/files/${fileId}/links`)
       .set(bearer(ctx.adminToken))
-      .send({ ownerType: 'PATIENT', ownerId: ctx.adminUserId, linkRole: 'ATTACHMENT', visibility: 'INTERNAL' })
+      .send({
+        ownerType: 'PATIENT',
+        ownerId: ctx.adminUserId,
+        linkRole: 'ATTACHMENT',
+        visibility: 'INTERNAL',
+      })
       .expect(201);
   });
 
@@ -132,7 +165,12 @@ describe('Common (integración)', () => {
     await http()
       .post(`/common/files/${fileId}/versions`)
       .set(bearer(ctx.adminToken))
-      .send({ mimeType: 'application/pdf', sizeBytes: 20500, contentHash: 'b'.repeat(64), storageUri: `s3://bucket/report-v2-${uniq}.pdf` })
+      .send({
+        mimeType: 'application/pdf',
+        sizeBytes: 20500,
+        contentHash: 'b'.repeat(64),
+        storageUri: `s3://bucket/report-v2-${uniq}.pdf`,
+      })
       .expect(201);
   });
 
@@ -148,6 +186,9 @@ describe('Common (integración)', () => {
   });
 
   it('rechaza sin autenticación (401)', async () => {
-    await http().post('/common/identifiers').send({ ...owner(), type: 'MRN', value: 'x' }).expect(401);
+    await http()
+      .post('/common/identifiers')
+      .send({ ...owner(), type: 'MRN', value: 'x' })
+      .expect(401);
   });
 });

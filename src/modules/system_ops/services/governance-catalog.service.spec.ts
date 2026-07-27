@@ -29,7 +29,7 @@ function build() {
     recordChange: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new GovernanceCatalogService(em as any, repo as any, logger as any);
+  const service = new GovernanceCatalogService(em as any, repo, logger as any);
   return { service, tx, repo };
 }
 
@@ -41,8 +41,14 @@ describe('GovernanceCatalogService', () => {
       d.repo.createDomain.mockReturnValue({ id: 'dom-1' });
       d.repo.findClassificationByCode.mockResolvedValue(null);
       d.repo.createClassification.mockReturnValue({ id: 'cls-1' });
-      d.repo.createEntity.mockReturnValue({ id: 'ent-1', schemaName: 'clinical', tableName: 'encounters' });
-      d.repo.createField.mockReturnValueOnce({ id: 'fld-1' }).mockReturnValueOnce({ id: 'fld-2' });
+      d.repo.createEntity.mockReturnValue({
+        id: 'ent-1',
+        schemaName: 'clinical',
+        tableName: 'encounters',
+      });
+      d.repo.createField
+        .mockReturnValueOnce({ id: 'fld-1' })
+        .mockReturnValueOnce({ id: 'fld-2' });
 
       const res = await d.service.catalogEntity(
         {
@@ -54,7 +60,7 @@ describe('GovernanceCatalogService', () => {
           isSoftDelete: true,
           hasHistory: true,
           fields: [{ columnName: 'a' }, { columnName: 'b' }],
-        } as any,
+        },
         actor,
       );
 
@@ -73,7 +79,11 @@ describe('GovernanceCatalogService', () => {
       const d = build();
       d.repo.findDomainByCode.mockResolvedValue({ id: 'dom-x' });
       d.repo.findClassificationByCode.mockResolvedValue({ id: 'cls-x' });
-      d.repo.createEntity.mockReturnValue({ id: 'ent-2', schemaName: 's', tableName: 't' });
+      d.repo.createEntity.mockReturnValue({
+        id: 'ent-2',
+        schemaName: 's',
+        tableName: 't',
+      });
 
       const res = await d.service.catalogEntity(
         {
@@ -85,7 +95,7 @@ describe('GovernanceCatalogService', () => {
           isSoftDelete: false,
           hasHistory: false,
           fields: [],
-        } as any,
+        },
         actor,
       );
 
@@ -109,7 +119,10 @@ describe('GovernanceCatalogService', () => {
       const d = build();
       d.repo.findWritePolicyByCode.mockResolvedValue(null);
       d.repo.createWritePolicy.mockReturnValue({ id: 'w2' });
-      const res = await d.service.createWritePolicy({ code: 'WP', name: 'x' } as any, actor);
+      const res = await d.service.createWritePolicy(
+        { code: 'WP', name: 'x' } as any,
+        actor,
+      );
       expect(res).toEqual({ id: 'w2' });
       expect(d.repo.recordChange).toHaveBeenCalled();
     });
@@ -129,7 +142,11 @@ describe('GovernanceCatalogService', () => {
       const entity: any = { id: 'e1', updatedAt: new Date() };
       d.repo.findEntityById.mockResolvedValue(entity);
       d.repo.findWritePolicyById.mockResolvedValue({ id: 'w1' });
-      const res = await d.service.applyWritePolicy('e1', { writePolicyId: 'w1' } as any, actor);
+      const res = await d.service.applyWritePolicy(
+        'e1',
+        { writePolicyId: 'w1' },
+        actor,
+      );
       expect(res).toEqual({ ok: true });
       expect(entity.writePolicyId).toBe('w1');
     });
@@ -138,10 +155,17 @@ describe('GovernanceCatalogService', () => {
   describe('applyRetention (UC-11-03)', () => {
     it('throws when the retention policy does not exist', async () => {
       const d = build();
-      d.repo.findEntityById.mockResolvedValue({ id: 'e1', updatedAt: new Date() });
+      d.repo.findEntityById.mockResolvedValue({
+        id: 'e1',
+        updatedAt: new Date(),
+      });
       d.repo.findRetentionPolicyById.mockResolvedValue(null);
       await expect(
-        d.service.applyRetention('e1', { retentionPolicyId: 'r1', reason: 'x' } as any, actor),
+        d.service.applyRetention(
+          'e1',
+          { retentionPolicyId: 'r1', reason: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -150,16 +174,20 @@ describe('GovernanceCatalogService', () => {
     it('throws when the field does not exist', async () => {
       const d = build();
       d.repo.findFieldById.mockResolvedValue(null);
-      await expect(d.service.updateField('f1', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.updateField('f1', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('assigns the anonymization rule to the field', async () => {
       const d = build();
       const field: any = { id: 'f1', updatedAt: new Date() };
       d.repo.findFieldById.mockResolvedValue(field);
-      const res = await d.service.updateField('f1', { anonymizationRuleId: 'ar1' } as any, actor);
+      const res = await d.service.updateField(
+        'f1',
+        { anonymizationRuleId: 'ar1' },
+        actor,
+      );
       expect(res).toEqual({ ok: true });
       expect(field.anonymizationRuleId).toBe('ar1');
     });

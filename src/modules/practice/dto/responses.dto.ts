@@ -58,7 +58,8 @@ export class SettingResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() practiceId!: string;
   @ApiProperty() settingKey!: string;
-  @ApiProperty({ description: 'true si se creó, false si se actualizó' }) created!: boolean;
+  @ApiProperty({ description: 'true si se creó, false si se actualizó' })
+  created!: boolean;
 }
 
 /** Respuesta de asignación de rol (UC-14-08). */

@@ -6,14 +6,23 @@ const user: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 
 describe('TerminologyCodeSystemsController', () => {
   function build() {
-    const service = { createCodeSystem: jest.fn(), createVersion: jest.fn() } as any;
+    const service = {
+      createCodeSystem: jest.fn(),
+      createVersion: jest.fn(),
+    } as any;
     const controller = new TerminologyCodeSystemsController(service);
     return { controller, service };
   }
 
   it('createCodeSystem delega en el servicio', async () => {
     const { controller, service } = build();
-    const dto = { internalCode: 'a', name: 'b', canonicalUrl: 'c', sourceCode: 'd', sourceName: 'e' };
+    const dto = {
+      internalCode: 'a',
+      name: 'b',
+      canonicalUrl: 'c',
+      sourceCode: 'd',
+      sourceName: 'e',
+    };
     const expected = { id: 'cs-1', internalCode: 'a', sourceId: 's-1' };
     service.createCodeSystem.mockResolvedValue(expected);
 

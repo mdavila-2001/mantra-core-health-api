@@ -25,20 +25,32 @@ export class CreatePolicyDto {
   @IsUUID()
   subjectTypeConceptId!: string;
 
-  @ApiProperty({ description: 'Concepto: riesgo de la transacción', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto: riesgo de la transacción',
+    format: 'uuid',
+  })
   @IsUUID()
   transactionRiskConceptId!: string;
 
-  @ApiProperty({ description: 'Concepto: IAL requerido (NIST 800-63)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concepto: IAL requerido (NIST 800-63)',
+    format: 'uuid',
+  })
   @IsUUID()
   requiredIdentityAssuranceLevelConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Concepto: AAL requerido', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto: AAL requerido',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   requiredAuthenticatorAssuranceLevelConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto: FAL requerido', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto: FAL requerido',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   requiredFederationAssuranceLevelConceptId?: string;
@@ -53,7 +65,10 @@ export class CreatePolicyDto {
   @IsObject()
   fraudControlsJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Número de versión de la política', default: 1 })
+  @ApiPropertyOptional({
+    description: 'Número de versión de la política',
+    default: 1,
+  })
   @IsOptional()
   @IsInt()
   @Min(1)

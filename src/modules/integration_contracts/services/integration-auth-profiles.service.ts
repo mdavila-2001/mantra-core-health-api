@@ -38,18 +38,25 @@ export class IntegrationAuthProfilesService {
     actor: AuthenticatedUser,
   ): Promise<AuthProfileResponseDto> {
     this.logger.info(
-      { operation: 'integration.auth-profile.configure', contractId, actorId: actor.id },
+      {
+        operation: 'integration.auth-profile.configure',
+        contractId,
+        actorId: actor.id,
+      },
       'Configuring auth profile',
     );
     return this.em.transactional(async (tx) => {
       const contract = await this.contractsRepo.findById(tx, contractId);
       if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', { contractId });
+        throw new ResourceNotFoundException('Contrato no encontrado', {
+          contractId,
+        });
       }
 
       const profile = this.authProfilesRepo.create(tx, {
         integrationContractId: contractId,
-        authProfileConceptId: dto.authProfileConceptId ?? ICON.AUTH_OAUTH2_CONFIDENTIAL,
+        authProfileConceptId:
+          dto.authProfileConceptId ?? ICON.AUTH_OAUTH2_CONFIDENTIAL,
         oauthIssuerUri: dto.oauthIssuerUri,
         clientIdentifier: dto.clientIdentifier,
         credentialSecretReference: dto.credentialSecretReference,
@@ -64,10 +71,18 @@ export class IntegrationAuthProfilesService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.auth-profile.configure', contractId, profileId: profile.id },
+        {
+          operation: 'integration.auth-profile.configure',
+          contractId,
+          profileId: profile.id,
+        },
         'Auth profile configured',
       );
-      return { id: profile.id, integrationContractId: contractId, status: profile.statusConceptId };
+      return {
+        id: profile.id,
+        integrationContractId: contractId,
+        status: profile.statusConceptId,
+      };
     });
   }
 
@@ -79,16 +94,24 @@ export class IntegrationAuthProfilesService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'integration.auth-profile.rotate', contractId, profileId, actorId: actor.id },
+      {
+        operation: 'integration.auth-profile.rotate',
+        contractId,
+        profileId,
+        actorId: actor.id,
+      },
       'Rotating auth profile credentials',
     );
     return this.em.transactional(async (tx) => {
       const profile = await this.authProfilesRepo.findById(tx, profileId);
       if (!profile || profile.integrationContractId !== contractId) {
-        throw new ResourceNotFoundException('Perfil de autenticación no encontrado', {
-          contractId,
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Perfil de autenticación no encontrado',
+          {
+            contractId,
+            profileId,
+          },
+        );
       }
 
       profile.credentialSecretReference = dto.credentialSecretReference;
@@ -96,7 +119,9 @@ export class IntegrationAuthProfilesService {
         profile.dpopKeyReference = dto.dpopKeyReference;
       }
       profile.statusConceptId =
-        dto.targetStatus === 'REVOKED' ? ICON.AUTH_PROFILE_REVOKED : ICON.AUTH_PROFILE_ROTATED;
+        dto.targetStatus === 'REVOKED'
+          ? ICON.AUTH_PROFILE_REVOKED
+          : ICON.AUTH_PROFILE_ROTATED;
       touch(profile, actor.id);
       await tx.flush();
 

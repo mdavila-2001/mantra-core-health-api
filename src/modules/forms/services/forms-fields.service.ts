@@ -59,14 +59,17 @@ export class FormsFieldsService {
     return this.em.transactional(async (tx) => {
       const clash = await this.fieldsRepo.findFieldByCode(tx, dto.code);
       if (clash) {
-        throw new ConflictException('El código de campo ya existe', { code: dto.code });
+        throw new ConflictException('El código de campo ya existe', {
+          code: dto.code,
+        });
       }
 
       const field = this.fieldsRepo.createField(tx, {
         code: dto.code,
         name: dto.name,
         dataType: dto.dataType,
-        sensitivityConceptId: dto.sensitivityConceptId ?? CONCEPTS.SENSITIVITY_NORMAL,
+        sensitivityConceptId:
+          dto.sensitivityConceptId ?? CONCEPTS.SENSITIVITY_NORMAL,
         semanticConceptId: dto.semanticConceptId,
         valueSetId: dto.valueSetId,
         unitValueSetId: dto.unitValueSetId,
@@ -84,10 +87,14 @@ export class FormsFieldsService {
         this.fieldsRepo.createValidationRule(tx, {
           fieldId: field.id,
           ruleTypeConceptId: RULE_TYPE_BY_CODE[rule.ruleType],
-          operatorConceptId: rule.operator ? OPERATOR_BY_CODE[rule.operator] : undefined,
+          operatorConceptId: rule.operator
+            ? OPERATOR_BY_CODE[rule.operator]
+            : undefined,
           parametersJson: rule.parameters,
           severityConceptId:
-            rule.severity === 'WARNING' ? FORMS.SEVERITY_WARNING : FORMS.SEVERITY_ERROR,
+            rule.severity === 'WARNING'
+              ? FORMS.SEVERITY_WARNING
+              : FORMS.SEVERITY_ERROR,
           errorMessage: rule.errorMessage,
           ordinal: i,
           active: true,
@@ -95,7 +102,10 @@ export class FormsFieldsService {
         });
       }
 
-      this.logger.info({ operation: 'forms.field.create', fieldId: field.id }, 'Field created');
+      this.logger.info(
+        { operation: 'forms.field.create', fieldId: field.id },
+        'Field created',
+      );
       return { id: field.id };
     });
   }
@@ -107,18 +117,28 @@ export class FormsFieldsService {
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     this.logger.info(
-      { operation: 'forms.field.dependency', targetFieldId, sourceFieldId: dto.sourceFieldId },
+      {
+        operation: 'forms.field.dependency',
+        targetFieldId,
+        sourceFieldId: dto.sourceFieldId,
+      },
       'Defining field dependency',
     );
     return this.em.transactional(async (tx) => {
       if (targetFieldId === dto.sourceFieldId) {
-        throw new PreconditionFailedException('Un campo no puede depender de sí mismo', {
-          targetFieldId,
-        });
+        throw new PreconditionFailedException(
+          'Un campo no puede depender de sí mismo',
+          {
+            targetFieldId,
+          },
+        );
       }
 
       const target = await this.fieldsRepo.findFieldById(tx, targetFieldId);
-      if (!target) throw new ResourceNotFoundException('Campo destino no encontrado', { targetFieldId });
+      if (!target)
+        throw new ResourceNotFoundException('Campo destino no encontrado', {
+          targetFieldId,
+        });
       const source = await this.fieldsRepo.findFieldById(tx, dto.sourceFieldId);
       if (!source) {
         throw new ResourceNotFoundException('Campo fuente no encontrado', {
@@ -133,10 +153,13 @@ export class FormsFieldsService {
         dto.logicalGroup,
       );
       if (dup) {
-        throw new ConflictException('La dependencia ya existe en ese grupo lógico', {
-          targetFieldId,
-          sourceFieldId: dto.sourceFieldId,
-        });
+        throw new ConflictException(
+          'La dependencia ya existe en ese grupo lógico',
+          {
+            targetFieldId,
+            sourceFieldId: dto.sourceFieldId,
+          },
+        );
       }
 
       const dep = this.fieldsRepo.createDependency(tx, {
@@ -167,18 +190,26 @@ export class FormsFieldsService {
     );
     const languageConceptId = LANGUAGE_CONCEPT_BY_CODE[langCode.toLowerCase()];
     if (!languageConceptId) {
-      throw new PreconditionFailedException('Idioma no soportado', { lang: langCode });
+      throw new PreconditionFailedException('Idioma no soportado', {
+        lang: langCode,
+      });
     }
     return this.em.transactional(async (tx) => {
       const field = await this.fieldsRepo.findFieldById(tx, fieldId);
-      if (!field) throw new ResourceNotFoundException('Campo no encontrado', { fieldId });
+      if (!field)
+        throw new ResourceNotFoundException('Campo no encontrado', { fieldId });
 
-      const existing = await this.fieldsRepo.findLocalization(tx, fieldId, languageConceptId);
+      const existing = await this.fieldsRepo.findLocalization(
+        tx,
+        fieldId,
+        languageConceptId,
+      );
       if (existing) {
         existing.label = dto.label ?? existing.label;
         existing.helpText = dto.helpText ?? existing.helpText;
         existing.placeholder = dto.placeholder ?? existing.placeholder;
-        existing.validationMessage = dto.validationMessage ?? existing.validationMessage;
+        existing.validationMessage =
+          dto.validationMessage ?? existing.validationMessage;
         touch(existing, actor.id);
         return { id: existing.id };
       }
@@ -208,7 +239,8 @@ export class FormsFieldsService {
     );
     return this.em.transactional(async (tx) => {
       const field = await this.fieldsRepo.findFieldById(tx, fieldId);
-      if (!field) throw new ResourceNotFoundException('Campo no encontrado', { fieldId });
+      if (!field)
+        throw new ResourceNotFoundException('Campo no encontrado', { fieldId });
 
       const rule = this.fieldsRepo.createAccessRule(tx, {
         fieldId,

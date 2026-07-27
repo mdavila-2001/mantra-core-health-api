@@ -9,7 +9,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ICON } from '../integration_contracts.concepts';
-import { ContractsRepository, ContractVersionsRepository } from '../repositories';
+import {
+  ContractsRepository,
+  ContractVersionsRepository,
+} from '../repositories';
 import {
   ActivateVersionDto,
   ContractResponseDto,
@@ -46,7 +49,11 @@ export class IntegrationContractsService {
     actor: AuthenticatedUser,
   ): Promise<ContractResponseDto> {
     this.logger.info(
-      { operation: 'integration.contract.create', actorId: actor.id, contractCode: dto.contractCode },
+      {
+        operation: 'integration.contract.create',
+        actorId: actor.id,
+        contractCode: dto.contractCode,
+      },
       'Defining integration contract',
     );
     return this.em.transactional(async (tx) => {
@@ -57,12 +64,18 @@ export class IntegrationContractsService {
       );
       if (clash) {
         this.logger.warn(
-          { operation: 'integration.contract.create', reason: 'duplicate-code' },
+          {
+            operation: 'integration.contract.create',
+            reason: 'duplicate-code',
+          },
           'Rejected contract: code already used for provider',
         );
-        throw new ConflictException('El código de contrato ya existe para el proveedor', {
-          contractCode: dto.contractCode,
-        });
+        throw new ConflictException(
+          'El código de contrato ya existe para el proveedor',
+          {
+            contractCode: dto.contractCode,
+          },
+        );
       }
 
       const contract = this.contractsRepo.create(tx, {
@@ -93,13 +106,19 @@ export class IntegrationContractsService {
     actor: AuthenticatedUser,
   ): Promise<ContractVersionResponseDto> {
     this.logger.info(
-      { operation: 'integration.version.publish', contractId, actorId: actor.id },
+      {
+        operation: 'integration.version.publish',
+        contractId,
+        actorId: actor.id,
+      },
       'Publishing contract version',
     );
     return this.em.transactional(async (tx) => {
       const contract = await this.contractsRepo.findById(tx, contractId);
       if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', { contractId });
+        throw new ResourceNotFoundException('Contrato no encontrado', {
+          contractId,
+        });
       }
       if (
         contract.statusConceptId !== ICON.CONTRACT_DRAFT &&
@@ -111,7 +130,8 @@ export class IntegrationContractsService {
         );
       }
 
-      const next = (await this.versionsRepo.maxVersionNumber(tx, contractId)) + 1;
+      const next =
+        (await this.versionsRepo.maxVersionNumber(tx, contractId)) + 1;
       const version = this.versionsRepo.create(tx, {
         integrationContractId: contractId,
         versionNumber: next,
@@ -120,7 +140,9 @@ export class IntegrationContractsService {
         openapiFileId: dto.openapiFileId,
         mappingProfileId: dto.mappingProfileId,
         contractHash: dto.contractHash,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : undefined,
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : undefined,
         statusConceptId: ICON.VERSION_DRAFT,
         actorUserId: actor.id,
       });
@@ -129,7 +151,12 @@ export class IntegrationContractsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.version.publish', contractId, versionId: version.id, versionNumber: next },
+        {
+          operation: 'integration.version.publish',
+          contractId,
+          versionId: version.id,
+          versionNumber: next,
+        },
         'Contract version published',
       );
       return this.toVersionResponse(version);
@@ -144,32 +171,49 @@ export class IntegrationContractsService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'integration.version.activate', contractId, versionId, actorId: actor.id },
+      {
+        operation: 'integration.version.activate',
+        contractId,
+        versionId,
+        actorId: actor.id,
+      },
       'Activating contract version',
     );
     return this.em.transactional(async (tx) => {
       const contract = await this.contractsRepo.findById(tx, contractId);
       if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', { contractId });
+        throw new ResourceNotFoundException('Contrato no encontrado', {
+          contractId,
+        });
       }
       const version = await this.versionsRepo.findById(tx, versionId);
       if (!version || version.integrationContractId !== contractId) {
-        throw new ResourceNotFoundException('Versión no encontrada para el contrato', {
-          contractId,
-          versionId,
-        });
+        throw new ResourceNotFoundException(
+          'Versión no encontrada para el contrato',
+          {
+            contractId,
+            versionId,
+          },
+        );
       }
       if (version.statusConceptId !== ICON.VERSION_DRAFT) {
-        throw new PreconditionFailedException('Solo se puede activar una versión DRAFT', {
-          versionId,
-          status: version.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'Solo se puede activar una versión DRAFT',
+          {
+            versionId,
+            status: version.statusConceptId,
+          },
+        );
       }
 
       const now = dto.effectiveFrom ? new Date(dto.effectiveFrom) : new Date();
 
       // Supersede la versión ACTIVE vigente (si existe) para mantener una sola activa.
-      const current = await this.versionsRepo.findActiveByContract(tx, contractId, ICON.VERSION_ACTIVE);
+      const current = await this.versionsRepo.findActiveByContract(
+        tx,
+        contractId,
+        ICON.VERSION_ACTIVE,
+      );
       if (current && current.id !== version.id) {
         current.statusConceptId = ICON.VERSION_SUPERSEDED;
         current.effectiveTo = now;
@@ -200,20 +244,32 @@ export class IntegrationContractsService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'integration.contract.retire', contractId, actorId: actor.id },
+      {
+        operation: 'integration.contract.retire',
+        contractId,
+        actorId: actor.id,
+      },
       'Retiring integration contract',
     );
     return this.em.transactional(async (tx) => {
       const contract = await this.contractsRepo.findById(tx, contractId);
       if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', { contractId });
+        throw new ResourceNotFoundException('Contrato no encontrado', {
+          contractId,
+        });
       }
       if (contract.statusConceptId === ICON.CONTRACT_RETIRED) {
-        throw new PreconditionFailedException('El contrato ya está retirado', { contractId });
+        throw new PreconditionFailedException('El contrato ya está retirado', {
+          contractId,
+        });
       }
 
       const now = new Date();
-      const activeVersions = await this.versionsRepo.findActiveVersions(tx, contractId, ICON.VERSION_ACTIVE);
+      const activeVersions = await this.versionsRepo.findActiveVersions(
+        tx,
+        contractId,
+        ICON.VERSION_ACTIVE,
+      );
       for (const v of activeVersions) {
         v.statusConceptId = ICON.VERSION_SUPERSEDED;
         v.effectiveTo = now;
@@ -224,7 +280,11 @@ export class IntegrationContractsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.contract.retire', contractId, reason: dto.reason },
+        {
+          operation: 'integration.contract.retire',
+          contractId,
+          reason: dto.reason,
+        },
         'Integration contract retired',
       );
       return { ok: true };

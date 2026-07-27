@@ -22,9 +22,15 @@ export class CareEpisodesService {
   }
 
   /** UC-08-01: abre un episodio de cuidado activo. */
-  async open(dto: CreateCareEpisodeDto, actor: AuthenticatedUser): Promise<CareEpisodeResponseDto> {
+  async open(
+    dto: CreateCareEpisodeDto,
+    actor: AuthenticatedUser,
+  ): Promise<CareEpisodeResponseDto> {
     this.logger.info(
-      { operation: 'clinical.care-episode.open', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.care-episode.open',
+        patientProfileId: dto.patientProfileId,
+      },
       'Opening care episode',
     );
     return this.em.transactional(async (tx) => {

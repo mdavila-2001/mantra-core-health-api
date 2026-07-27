@@ -14,12 +14,18 @@ import {
 
 /** Un ítem de la plantilla de órdenes. */
 export class OrderSetItemInputDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tipo de ítem (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tipo de ítem (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   itemTypeConceptId?: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Código de la orden (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Código de la orden (concept id)',
+  })
   @IsUUID()
   codeConceptId!: string;
 
@@ -93,7 +99,8 @@ export class ApplyOrderSetDto {
 
   @ApiPropertyOptional({
     type: [String],
-    description: 'Ítems seleccionados explícitamente; si se omite, se usan los default',
+    description:
+      'Ítems seleccionados explícitamente; si se omite, se usan los default',
   })
   @IsOptional()
   @IsArray()

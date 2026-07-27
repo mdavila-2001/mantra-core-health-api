@@ -55,13 +55,21 @@ export class IntegrationsMessagingService {
     actor: AuthenticatedUser,
   ): Promise<OutboundMessageResponseDto> {
     this.logger.info(
-      { operation: 'integrations.message.enqueue', connectionId: dto.connectionId },
+      {
+        operation: 'integrations.message.enqueue',
+        connectionId: dto.connectionId,
+      },
       'Enqueuing outbound message',
     );
     return this.em.transactional(async (tx) => {
-      const connection = await this.connectionsRepo.findById(tx, dto.connectionId);
+      const connection = await this.connectionsRepo.findById(
+        tx,
+        dto.connectionId,
+      );
       if (!connection) {
-        throw new ResourceNotFoundException('Conexión no encontrada', { connectionId: dto.connectionId });
+        throw new ResourceNotFoundException('Conexión no encontrada', {
+          connectionId: dto.connectionId,
+        });
       }
       if (connection.stateConceptId !== INTEG.CONN_ACTIVE) {
         throw new PreconditionFailedException('La conexión no está activa', {
@@ -70,10 +78,17 @@ export class IntegrationsMessagingService {
       }
 
       // Idempotencia del productor: la misma clave devuelve la fila existente.
-      const existing = await this.outboundRepo.findByIdempotencyKey(tx, dto.idempotencyKey);
+      const existing = await this.outboundRepo.findByIdempotencyKey(
+        tx,
+        dto.idempotencyKey,
+      );
       if (existing) {
         this.logger.info(
-          { operation: 'integrations.message.enqueue', messageId: existing.id, idempotent: true },
+          {
+            operation: 'integrations.message.enqueue',
+            messageId: existing.id,
+            idempotent: true,
+          },
           'Returning existing outbound message (idempotent)',
         );
         return {
@@ -101,7 +116,12 @@ export class IntegrationsMessagingService {
       });
       await tx.flush();
 
-      return { id: message.id, status: message.statusConceptId, correlationId, idempotent: false };
+      return {
+        id: message.id,
+        status: message.statusConceptId,
+        correlationId,
+        idempotent: false,
+      };
     });
   }
 
@@ -111,12 +131,20 @@ export class IntegrationsMessagingService {
     dto: DispatchMessageDto,
     actor: AuthenticatedUser,
   ): Promise<DispatchResultDto> {
-    this.logger.info({ operation: 'integrations.message.dispatch', messageId }, 'Dispatching message');
+    this.logger.info(
+      { operation: 'integrations.message.dispatch', messageId },
+      'Dispatching message',
+    );
     return this.em.transactional(async (tx) => {
       const message = await this.outboundRepo.findById(tx, messageId);
-      if (!message) throw new ResourceNotFoundException('Mensaje no encontrado', { messageId });
+      if (!message)
+        throw new ResourceNotFoundException('Mensaje no encontrado', {
+          messageId,
+        });
       if (message.statusConceptId !== INTEG.MSG_QUEUED) {
-        throw new PreconditionFailedException('El mensaje no está en cola', { messageId });
+        throw new PreconditionFailedException('El mensaje no está en cola', {
+          messageId,
+        });
       }
 
       const isSuccess = !dto.simulateFailure;
@@ -127,7 +155,9 @@ export class IntegrationsMessagingService {
 
       const response = this.responsesRepo.create(tx, {
         outboundMessageId: message.id,
-        responsePayloadJson: isSuccess ? { ok: true } : { error: dto.errorText ?? 'dispatch failed' },
+        responsePayloadJson: isSuccess
+          ? { ok: true }
+          : { error: dto.errorText ?? 'dispatch failed' },
         httpStatus: dto.httpStatus ?? (isSuccess ? 200 : 502),
         latencyMs: 0,
         isSuccess,
@@ -140,26 +170,47 @@ export class IntegrationsMessagingService {
         { operation: 'integrations.message.dispatch', messageId, isSuccess },
         isSuccess ? 'Message sent' : 'Message failed',
       );
-      return { id: message.id, status: message.statusConceptId, isSuccess, responseId: response.id };
+      return {
+        id: message.id,
+        status: message.statusConceptId,
+        isSuccess,
+        responseId: response.id,
+      };
     });
   }
 
   /** UC-12-07: programa un reintento con backoff exponencial. */
-  async retry(messageId: string, actor: AuthenticatedUser): Promise<RetryResultDto> {
-    this.logger.info({ operation: 'integrations.message.retry', messageId }, 'Scheduling retry');
+  async retry(
+    messageId: string,
+    actor: AuthenticatedUser,
+  ): Promise<RetryResultDto> {
+    this.logger.info(
+      { operation: 'integrations.message.retry', messageId },
+      'Scheduling retry',
+    );
     return this.em.transactional(async (tx) => {
       const message = await this.outboundRepo.findById(tx, messageId);
-      if (!message) throw new ResourceNotFoundException('Mensaje no encontrado', { messageId });
+      if (!message)
+        throw new ResourceNotFoundException('Mensaje no encontrado', {
+          messageId,
+        });
       if (message.statusConceptId !== INTEG.MSG_FAILED) {
-        throw new PreconditionFailedException('El mensaje no está en estado fallido', { messageId });
+        throw new PreconditionFailedException(
+          'El mensaje no está en estado fallido',
+          { messageId },
+        );
       }
 
-      const attemptNumber = (await this.retriesRepo.maxAttempt(tx, messageId)) + 1;
+      const attemptNumber =
+        (await this.retriesRepo.maxAttempt(tx, messageId)) + 1;
       if (attemptNumber > MAX_ATTEMPTS) {
-        throw new PreconditionFailedException('Se agotaron los reintentos (usar dead-letter)', {
-          messageId,
-          attemptNumber,
-        });
+        throw new PreconditionFailedException(
+          'Se agotaron los reintentos (usar dead-letter)',
+          {
+            messageId,
+            attemptNumber,
+          },
+        );
       }
 
       const now = new Date();
@@ -182,26 +233,48 @@ export class IntegrationsMessagingService {
       touch(message, actor.id);
       await tx.flush();
 
-      return { messageId, attemptNumber, status: message.statusConceptId, nextRetryAt };
+      return {
+        messageId,
+        attemptNumber,
+        status: message.statusConceptId,
+        nextRetryAt,
+      };
     });
   }
 
   /** UC-12-08: envía a dead-letter tras agotar reintentos (idempotente). */
-  async deadLetter(messageId: string, actor: AuthenticatedUser): Promise<DeadLetterResultDto> {
-    this.logger.info({ operation: 'integrations.message.deadLetter', messageId }, 'Dead-lettering message');
+  async deadLetter(
+    messageId: string,
+    actor: AuthenticatedUser,
+  ): Promise<DeadLetterResultDto> {
+    this.logger.info(
+      { operation: 'integrations.message.deadLetter', messageId },
+      'Dead-lettering message',
+    );
     return this.em.transactional(async (tx) => {
       const message = await this.outboundRepo.findById(tx, messageId);
-      if (!message) throw new ResourceNotFoundException('Mensaje no encontrado', { messageId });
+      if (!message)
+        throw new ResourceNotFoundException('Mensaje no encontrado', {
+          messageId,
+        });
 
       // Transición terminal idempotente.
       if (message.statusConceptId === INTEG.MSG_DEAD_LETTER) {
-        return { messageId, status: message.statusConceptId, alreadyDeadLettered: true };
+        return {
+          messageId,
+          status: message.statusConceptId,
+          alreadyDeadLettered: true,
+        };
       }
       if (message.statusConceptId !== INTEG.MSG_FAILED) {
-        throw new PreconditionFailedException('El mensaje no está en estado fallido', { messageId });
+        throw new PreconditionFailedException(
+          'El mensaje no está en estado fallido',
+          { messageId },
+        );
       }
 
-      const attemptNumber = (await this.retriesRepo.maxAttempt(tx, messageId)) + 1;
+      const attemptNumber =
+        (await this.retriesRepo.maxAttempt(tx, messageId)) + 1;
       message.statusConceptId = INTEG.MSG_DEAD_LETTER;
       touch(message, actor.id);
 
@@ -218,13 +291,23 @@ export class IntegrationsMessagingService {
       });
       await tx.flush();
 
-      this.logger.warn({ operation: 'integrations.message.deadLetter', messageId }, 'Message dead-lettered');
-      return { messageId, status: message.statusConceptId, alreadyDeadLettered: false };
+      this.logger.warn(
+        { operation: 'integrations.message.deadLetter', messageId },
+        'Message dead-lettered',
+      );
+      return {
+        messageId,
+        status: message.statusConceptId,
+        alreadyDeadLettered: false,
+      };
     });
   }
 
   /** UC-12-10: correlaciona un mensaje entrante RECEIVED con su saliente. */
-  async correlate(inboundMessageId: string, actor: AuthenticatedUser): Promise<CorrelateResultDto> {
+  async correlate(
+    inboundMessageId: string,
+    actor: AuthenticatedUser,
+  ): Promise<CorrelateResultDto> {
     this.logger.info(
       { operation: 'integrations.message.correlate', inboundMessageId },
       'Correlating inbound callback',
@@ -232,24 +315,38 @@ export class IntegrationsMessagingService {
     return this.em.transactional(async (tx) => {
       const inbound = await this.inboundRepo.findById(tx, inboundMessageId);
       if (!inbound) {
-        throw new ResourceNotFoundException('Mensaje entrante no encontrado', { inboundMessageId });
+        throw new ResourceNotFoundException('Mensaje entrante no encontrado', {
+          inboundMessageId,
+        });
       }
       if (inbound.statusConceptId !== INTEG.INBOUND_RECEIVED) {
-        throw new PreconditionFailedException('El mensaje entrante no está en estado recibido', {
-          inboundMessageId,
-        });
+        throw new PreconditionFailedException(
+          'El mensaje entrante no está en estado recibido',
+          {
+            inboundMessageId,
+          },
+        );
       }
       if (!inbound.correlationId) {
-        throw new PreconditionFailedException('El mensaje entrante no tiene correlación', {
-          inboundMessageId,
-        });
+        throw new PreconditionFailedException(
+          'El mensaje entrante no tiene correlación',
+          {
+            inboundMessageId,
+          },
+        );
       }
 
-      const outbound = await this.outboundRepo.findByCorrelationId(tx, inbound.correlationId);
+      const outbound = await this.outboundRepo.findByCorrelationId(
+        tx,
+        inbound.correlationId,
+      );
       if (!outbound) {
-        throw new ResourceNotFoundException('No hay mensaje saliente correlacionado', {
-          correlationId: inbound.correlationId,
-        });
+        throw new ResourceNotFoundException(
+          'No hay mensaje saliente correlacionado',
+          {
+            correlationId: inbound.correlationId,
+          },
+        );
       }
 
       outbound.statusConceptId = INTEG.MSG_ACKNOWLEDGED;

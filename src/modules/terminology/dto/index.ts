@@ -5,3 +5,7 @@ export * from './publish-version.dto';
 export * from './create-designation.dto';
 export * from './create-relationship.dto';
 export * from './create-value-set.dto';
+export * from './concept-properties.dto';
+export * from './expand-value-set.dto';
+export * from './translate-concept.dto';
+export * from './tenant-catalog-policy.dto';

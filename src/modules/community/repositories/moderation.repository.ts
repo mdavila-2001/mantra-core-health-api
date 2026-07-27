@@ -87,7 +87,10 @@ export class ModerationRepository {
   }
 
   // --- Queue ---
-  findQueueById(em: EntityManager, id: string): Promise<ModerationQueue | null> {
+  findQueueById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ModerationQueue | null> {
     return em.findOne(ModerationQueue, { id });
   }
 
@@ -123,11 +126,17 @@ export class ModerationRepository {
   }
 
   // --- Decisions ---
-  findDecisionById(em: EntityManager, id: string): Promise<ModerationDecisions | null> {
+  findDecisionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ModerationDecisions | null> {
     return em.findOne(ModerationDecisions, { id });
   }
 
-  createDecision(em: EntityManager, data: CreateDecisionData): ModerationDecisions {
+  createDecision(
+    em: EntityManager,
+    data: CreateDecisionData,
+  ): ModerationDecisions {
     return em.create(
       ModerationDecisions,
       {

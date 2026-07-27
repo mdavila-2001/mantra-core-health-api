@@ -13,22 +13,31 @@ export interface CreateSetItemData {
 /** Acceso a datos de `delegated_access.delegated_permission_set_items`. */
 @Injectable()
 export class DelegatedPermissionSetItemsRepository {
-  create(em: EntityManager, data: CreateSetItemData): DelegatedPermissionSetItems {
+  create(
+    em: EntityManager,
+    data: CreateSetItemData,
+  ): DelegatedPermissionSetItems {
     return em.create(
       DelegatedPermissionSetItems,
       {
         delegatedPermissionSetId: data.delegatedPermissionSetId,
         permissionId: data.permissionId,
         constraintJson: data.constraintJson,
-        requiresStepUpAuthentication: data.requiresStepUpAuthentication ?? false,
+        requiresStepUpAuthentication:
+          data.requiresStepUpAuthentication ?? false,
         createdAt: new Date(),
       },
       { partial: true },
     );
   }
 
-  findBySet(em: EntityManager, setId: string): Promise<DelegatedPermissionSetItems[]> {
-    return em.find(DelegatedPermissionSetItems, { delegatedPermissionSetId: setId });
+  findBySet(
+    em: EntityManager,
+    setId: string,
+  ): Promise<DelegatedPermissionSetItems[]> {
+    return em.find(DelegatedPermissionSetItems, {
+      delegatedPermissionSetId: setId,
+    });
   }
 
   /** Ítem concreto de un set para un permiso (evaluación de step-up). */
@@ -45,6 +54,8 @@ export class DelegatedPermissionSetItemsRepository {
 
   /** Reemplazo all-or-nothing: borra los ítems de la versión previa. */
   deleteBySet(em: EntityManager, setId: string): Promise<number> {
-    return em.nativeDelete(DelegatedPermissionSetItems, { delegatedPermissionSetId: setId });
+    return em.nativeDelete(DelegatedPermissionSetItems, {
+      delegatedPermissionSetId: setId,
+    });
   }
 }

@@ -31,17 +31,29 @@ export class DiagnosticsMediaQualityService {
   }
 
   /** UC-20-12: adjunta media clínica y sus anotaciones. */
-  async attachMedia(dto: AttachClinicalMediaDto, actor: AuthenticatedUser): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.media.attach', fileId: dto.fileId }, 'Attaching clinical media');
+  async attachMedia(
+    dto: AttachClinicalMediaDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceCreatedDto> {
+    this.logger.info(
+      { operation: 'diagnostics.media.attach', fileId: dto.fileId },
+      'Attaching clinical media',
+    );
     return this.em.transactional(async (tx) => {
       const tenantId = dto.custodianTenantId;
       if (!tenantId) {
-        throw new PreconditionFailedException('Falta el tenant custodio de la media', {});
+        throw new PreconditionFailedException(
+          'Falta el tenant custodio de la media',
+          {},
+        );
       }
       // Un mismo archivo no genera dos medias.
       const dup = await this.repo.findMediaByFile(tx, dto.fileId);
       if (dup) {
-        throw new ConflictException('El archivo ya está adjunto como media clínica', { fileId: dto.fileId });
+        throw new ConflictException(
+          'El archivo ya está adjunto como media clínica',
+          { fileId: dto.fileId },
+        );
       }
 
       const media = this.repo.createMedia(tx, {
@@ -64,7 +76,8 @@ export class DiagnosticsMediaQualityService {
       for (const a of dto.annotations ?? []) {
         this.repo.addAnnotation(tx, {
           clinicalMediaId: media.id,
-          annotationTypeConceptId: a.annotationTypeConceptId ?? DIAG.ANNOTATION_TYPE_MANUAL,
+          annotationTypeConceptId:
+            a.annotationTypeConceptId ?? DIAG.ANNOTATION_TYPE_MANUAL,
           statusConceptId: DIAG.ANNOTATION_STATUS_ACTIVE,
           labelText: a.labelText,
           confidenceScore: a.confidenceScore,
@@ -84,11 +97,17 @@ export class DiagnosticsMediaQualityService {
     dto: CreateDataQualityEventDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.dataQuality.record', ruleCode: dto.ruleCode }, 'Recording data-quality event');
+    this.logger.info(
+      { operation: 'diagnostics.dataQuality.record', ruleCode: dto.ruleCode },
+      'Recording data-quality event',
+    );
     return this.em.transactional(async (tx) => {
       const tenantId = dto.custodianTenantId;
       if (!tenantId) {
-        throw new PreconditionFailedException('Falta el tenant custodio del evento de calidad', {});
+        throw new PreconditionFailedException(
+          'Falta el tenant custodio del evento de calidad',
+          {},
+        );
       }
 
       const now = new Date();
@@ -111,9 +130,11 @@ export class DiagnosticsMediaQualityService {
           .digest('hex');
         this.repo.addProvenanceLink(tx, {
           custodianTenantId: tenantId,
-          targetTypeConceptId: dto.targetTypeConceptId ?? DIAG.PROVENANCE_TARGET,
+          targetTypeConceptId:
+            dto.targetTypeConceptId ?? DIAG.PROVENANCE_TARGET,
           targetId: dto.targetId,
-          sourceTypeConceptId: dto.provenanceSourceTypeConceptId ?? DIAG.PROVENANCE_SOURCE,
+          sourceTypeConceptId:
+            dto.provenanceSourceTypeConceptId ?? DIAG.PROVENANCE_SOURCE,
           sourceId: dto.provenanceSourceId,
           activityConceptId: DIAG.PROVENANCE_DERIVATION,
           contentHash,

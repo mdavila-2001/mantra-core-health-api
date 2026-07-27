@@ -7,7 +7,10 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { AssignmentsRepository, FieldDefinitionsRepository } from '../repositories';
+import {
+  AssignmentsRepository,
+  FieldDefinitionsRepository,
+} from '../repositories';
 import { CreateAssignmentDto, IdResponseDto } from '../dto';
 import { FORMS } from '../forms.concepts';
 
@@ -40,7 +43,10 @@ export class FormsAssignmentsService {
     );
     return this.em.transactional(async (tx) => {
       const field = await this.fieldsRepo.findFieldById(tx, dto.fieldId);
-      if (!field) throw new ResourceNotFoundException('Campo no encontrado', { fieldId: dto.fieldId });
+      if (!field)
+        throw new ResourceNotFoundException('Campo no encontrado', {
+          fieldId: dto.fieldId,
+        });
 
       // Enforcement de gobernanza: si hay política activa, respetar el presupuesto.
       const policy = await this.assignmentsRepo.findActivePolicy(
@@ -55,10 +61,13 @@ export class FormsAssignmentsService {
           FORMS.ASSIGNMENT_ACTIVE,
         );
         if (active >= policy.maximumFields) {
-          throw new PreconditionFailedException('Se excedió el presupuesto de campos del target', {
-            targetResourceConceptId: dto.targetResourceConceptId,
-            maximumFields: policy.maximumFields,
-          });
+          throw new PreconditionFailedException(
+            'Se excedió el presupuesto de campos del target',
+            {
+              targetResourceConceptId: dto.targetResourceConceptId,
+              maximumFields: policy.maximumFields,
+            },
+          );
         }
       }
 

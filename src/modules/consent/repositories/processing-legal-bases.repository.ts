@@ -20,7 +20,10 @@ export interface CreateProcessingLegalBasisData {
 /** Acceso a datos de `consent.processing_legal_bases` (entidad versionada). */
 @Injectable()
 export class ProcessingLegalBasesRepository {
-  findById(em: EntityManager, id: string): Promise<ProcessingLegalBases | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ProcessingLegalBases | null> {
     return em.findOne(ProcessingLegalBases, { id });
   }
 
@@ -44,7 +47,10 @@ export class ProcessingLegalBasesRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateProcessingLegalBasisData): ProcessingLegalBases {
+  create(
+    em: EntityManager,
+    data: CreateProcessingLegalBasisData,
+  ): ProcessingLegalBases {
     return em.create(
       ProcessingLegalBases,
       {
@@ -52,7 +58,8 @@ export class ProcessingLegalBasesRepository {
         processingPurposeId: data.processingPurposeId,
         jurisdictionConceptId: data.jurisdictionConceptId,
         generalLegalBasisConceptId: data.generalLegalBasisConceptId,
-        specialCategoryConditionConceptId: data.specialCategoryConditionConceptId,
+        specialCategoryConditionConceptId:
+          data.specialCategoryConditionConceptId,
         policyVersion: data.policyVersion,
         legalReferenceUri: data.legalReferenceUri,
         validFrom: data.validFrom,

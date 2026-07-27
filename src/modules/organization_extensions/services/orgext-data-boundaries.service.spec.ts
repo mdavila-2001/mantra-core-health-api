@@ -11,10 +11,17 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const boundariesRepo = { findActiveByTenantAndType: mockFn(), create: mockFn() };
+  const boundariesRepo = {
+    findActiveByTenantAndType: mockFn(),
+    create: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new OrgextDataBoundariesService(em as any, boundariesRepo as any, logger as any);
+  const service = new OrgextDataBoundariesService(
+    em as any,
+    boundariesRepo as any,
+    logger as any,
+  );
   return { service, tx, boundariesRepo };
 }
 
@@ -34,7 +41,7 @@ describe('OrgextDataBoundariesService', () => {
       };
       d.boundariesRepo.create.mockReturnValue(boundary);
 
-      const res = await d.service.define(baseDto as any, actor);
+      const res = await d.service.define(baseDto, actor);
 
       expect(res.status).toBe(ORGEXT.BOUNDARY_ACTIVE);
       expect(d.tx.flush).toHaveBeenCalled();
@@ -42,10 +49,12 @@ describe('OrgextDataBoundariesService', () => {
 
     it('rejects when an active boundary of the same type already exists (conflict)', async () => {
       const d = build();
-      d.boundariesRepo.findActiveByTenantAndType.mockResolvedValue({ id: 'b0' });
-      await expect(d.service.define(baseDto as any, actor)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      d.boundariesRepo.findActiveByTenantAndType.mockResolvedValue({
+        id: 'b0',
+      });
+      await expect(
+        d.service.define(baseDto as any, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
       expect(d.boundariesRepo.create).not.toHaveBeenCalled();
     });
   });

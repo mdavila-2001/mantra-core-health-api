@@ -22,15 +22,19 @@ export interface CreateSessionData {
 export class SessionsRepository {
   /** Crea una sesión ACTIVA (sin flush). */
   create(em: EntityManager, data: CreateSessionData): Sessions {
-    return em.create(Sessions, {
-      userId: data.userId,
-      tokenId: data.tokenId,
-      stateConceptId: CONCEPTS.STATE_ACTIVE,
-      expiresAt: data.expiresAt,
-      deviceId: data.deviceId,
-      ip: data.ip,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+    return em.create(
+      Sessions,
+      {
+        userId: data.userId,
+        tokenId: data.tokenId,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        expiresAt: data.expiresAt,
+        deviceId: data.deviceId,
+        ip: data.ip,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Busca una sesión por id; `null` si no existe. */
@@ -48,7 +52,10 @@ export class SessionsRepository {
   }
 
   /** Ids de las sesiones ACTIVAS del usuario (para cascada a refresh tokens). */
-  async activeSessionIdsForUser(em: EntityManager, userId: string): Promise<string[]> {
+  async activeSessionIdsForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string[]> {
     const rows = await em.find(
       Sessions,
       { userId, stateConceptId: CONCEPTS.STATE_ACTIVE },

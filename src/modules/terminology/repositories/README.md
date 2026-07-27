@@ -22,13 +22,25 @@ negocio; solo construcción de consultas y de entidades.
 | Archivo | Entidades | Métodos clave |
 | --- | --- | --- |
 | `terminology-sources.repository.ts` | `TerminologySources` | `findByCode`, `create` |
-| `code-systems.repository.ts` | `CodeSystems` | `findById`, `findByInternalCode`, `create` |
-| `code-system-versions.repository.ts` | `CodeSystemVersions` | `findById`, `findByCodeSystemAndVersion`, `create` |
-| `catalog-concepts.repository.ts` | `CatalogConcepts` | `findById`, `findExistingCodes`, `create` |
-| `concept-designations.repository.ts` | `ConceptDesignations`, `ConceptProperties` | `createDesignation`, `createProperty` |
-| `concept-relationships.repository.ts` | `ConceptRelationships` | `findEquivalent`, `create` |
-| `value-sets.repository.ts` | `ValueSets`, `ValueSetVersions`, `ValueSetRules` | `findByInternalCode`, `createValueSet`, `createVersion`, `createRule` |
+| `code-systems.repository.ts` | `CodeSystems` | `findById`, `findByInternalCode`, `findByCanonicalUrl`, `create` |
+| `code-system-versions.repository.ts` | `CodeSystemVersions` | `findById`, `findByCodeSystemAndVersion`, `findDefaultActiveVersion`, `create` |
+| `catalog-concepts.repository.ts` | `CatalogConcepts` | `findById`, `findByIdForUpdate`, `findExistingCodes`, `findByVersionAndCode`, `findByVersion`, `create` |
+| `concept-designations.repository.ts` | `ConceptDesignations`, `ConceptProperties` | `createDesignation`, `createProperty`, `findByLanguageForUpdate`, `findByConcept`, `findProperty`, `findPropertiesByConcept`, `findPropertyForConcepts` |
+| `concept-relationships.repository.ts` | `ConceptRelationships` | `findEquivalent`, `findByTypeForSources`, `create` |
+| `value-sets.repository.ts` | `ValueSets`, `ValueSetVersions`, `ValueSetRules`, `ValueSetMembers` | `findById`, `findByInternalCode`, `createValueSet`, `createVersion`, `createRule`, `findVersionForUpdate`, `findDefaultVersionsForUpdate`, `findRulesByVersion`, `deleteMembersByVersion`, `createMember`, `findMembersByConceptForUpdate` |
+| `concept-maps.repository.ts` | `ConceptMaps` | `findEquivalent`, `findByIdForUpdate`, `findTranslations`, `create` |
+| `tenant-catalog.repository.ts` | `TenantCatalogPolicies`, `TenantConceptConfig` | `findPolicyForUpdate`, `createPolicy`, `findConfig`, `findDefaultsForUpdate`, `createConfig` |
 
 Las tablas hijas se agrupan con su raíz (`concept_properties` con designaciones;
-versiones y reglas con `value_sets`) porque se materializan en la misma operación
-de negocio.
+versiones, reglas y miembros con `value_sets`; la configuración por concepto con
+la política del tenant) porque se materializan en la misma operación de negocio.
+
+## Bloqueos y consultas en bloque
+
+- Los métodos `…ForUpdate` aplican `LockMode.PESSIMISTIC_WRITE` (`SELECT … FOR
+  UPDATE`). Existen donde el caso de uso declara una invariante de "sólo uno"
+  (designación preferida por idioma, versión por defecto, `is_default` del tenant)
+  o una competencia por la misma fila (retirada de concepto, recurado de un mapeo).
+- `findByTypeForSources`, `findPropertyForConcepts` y `findExistingCodes` reciben
+  listas y resuelven en una sola query: la expansión de un conjunto de valores
+  recorre el catálogo entero y hacerlo concepto a concepto sería un N+1.

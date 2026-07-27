@@ -44,7 +44,9 @@ export class DiagnosticsLabController {
   /** Soporte: abrir corrida de analizador. */
   @Post('analyzer-runs')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Abrir una corrida de analizador (soporte para ingesta)' })
+  @ApiOperation({
+    summary: 'Abrir una corrida de analizador (soporte para ingesta)',
+  })
   createAnalyzerRun(
     @Body() dto: CreateAnalyzerRunDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -55,7 +57,9 @@ export class DiagnosticsLabController {
   /** UC-20-05. */
   @Post('analyzer-runs/:id/messages')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Ingerir mensaje de resultado de analizador (LIS/HL7/ASTM)' })
+  @ApiOperation({
+    summary: 'Ingerir mensaje de resultado de analizador (LIS/HL7/ASTM)',
+  })
   ingestMessage(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: IngestAnalyzerMessageDto,

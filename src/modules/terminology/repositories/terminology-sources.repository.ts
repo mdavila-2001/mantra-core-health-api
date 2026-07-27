@@ -22,18 +22,28 @@ export interface CreateTerminologySourceData {
 @Injectable()
 export class TerminologySourcesRepository {
   /** Busca una fuente por su código de negocio; `null` si no existe. */
-  findByCode(em: EntityManager, code: string): Promise<TerminologySources | null> {
+  findByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<TerminologySources | null> {
     return em.findOne(TerminologySources, { code });
   }
 
   /** Crea la fuente en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateTerminologySourceData): TerminologySources {
-    return em.create(TerminologySources, {
-      code: data.code,
-      name: data.name,
-      sourceTypeConceptId: data.sourceTypeConceptId,
-      stateConceptId: data.stateConceptId,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+  create(
+    em: EntityManager,
+    data: CreateTerminologySourceData,
+  ): TerminologySources {
+    return em.create(
+      TerminologySources,
+      {
+        code: data.code,
+        name: data.name,
+        sourceTypeConceptId: data.sourceTypeConceptId,
+        stateConceptId: data.stateConceptId,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 }

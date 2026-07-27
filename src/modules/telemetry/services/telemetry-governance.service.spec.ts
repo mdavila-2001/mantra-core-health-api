@@ -15,8 +15,16 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const purposesRepo = { findByCode: mockFn(), findById: mockFn(), create: mockFn() };
-  const schemasRepo = { findByNameVersion: mockFn(), findById: mockFn(), create: mockFn() };
+  const purposesRepo = {
+    findByCode: mockFn(),
+    findById: mockFn(),
+    create: mockFn(),
+  };
+  const schemasRepo = {
+    findByNameVersion: mockFn(),
+    findById: mockFn(),
+    create: mockFn(),
+  };
   const disclosuresRepo = {
     findByDocumentVersion: mockFn(),
     findOpenByDocument: mockFn().mockResolvedValue([]),
@@ -28,14 +36,23 @@ function build() {
 
   const service = new TelemetryGovernanceService(
     em as any,
-    purposesRepo as any,
-    schemasRepo as any,
+    purposesRepo,
+    schemasRepo,
     disclosuresRepo as any,
     funnelsRepo as any,
-    funnelStepsRepo as any,
+    funnelStepsRepo,
     logger as any,
   );
-  return { service, tx, em, purposesRepo, schemasRepo, disclosuresRepo, funnelsRepo, funnelStepsRepo };
+  return {
+    service,
+    tx,
+    em,
+    purposesRepo,
+    schemasRepo,
+    disclosuresRepo,
+    funnelsRepo,
+    funnelStepsRepo,
+  };
 }
 
 describe('TelemetryGovernanceService', () => {
@@ -53,7 +70,7 @@ describe('TelemetryGovernanceService', () => {
       });
 
       const res = await d.service.definePurpose(
-        { purposeCode: 'ANALYTICS', name: 'Analytics' } as any,
+        { purposeCode: 'ANALYTICS', name: 'Analytics' },
         actor,
       );
 
@@ -65,7 +82,10 @@ describe('TelemetryGovernanceService', () => {
       const d = build();
       d.purposesRepo.findByCode.mockResolvedValue({ id: 'exists' });
       await expect(
-        d.service.definePurpose({ purposeCode: 'ANALYTICS', name: 'x' } as any, actor),
+        d.service.definePurpose(
+          { purposeCode: 'ANALYTICS', name: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -73,7 +93,10 @@ describe('TelemetryGovernanceService', () => {
   describe('registerEventSchema (UC-28-02)', () => {
     it('registers a schema for an active purpose', async () => {
       const d = build();
-      d.purposesRepo.findById.mockResolvedValue({ id: 'p1', statusConceptId: CONCEPTS.STATE_ACTIVE });
+      d.purposesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      });
       d.schemasRepo.findByNameVersion.mockResolvedValue(null);
       d.schemasRepo.create.mockReturnValue({
         id: 's1',
@@ -85,7 +108,7 @@ describe('TelemetryGovernanceService', () => {
       });
 
       const res = await d.service.registerEventSchema(
-        { eventName: 'page_view', purposeDefinitionId: 'p1' } as any,
+        { eventName: 'page_view', purposeDefinitionId: 'p1' },
         actor,
       );
       expect(res.id).toBe('s1');
@@ -95,24 +118,39 @@ describe('TelemetryGovernanceService', () => {
       const d = build();
       d.purposesRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.registerEventSchema({ eventName: 'x', purposeDefinitionId: 'p9' } as any, actor),
+        d.service.registerEventSchema(
+          { eventName: 'x', purposeDefinitionId: 'p9' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('422 when the purpose is not active', async () => {
       const d = build();
-      d.purposesRepo.findById.mockResolvedValue({ id: 'p1', statusConceptId: 'other' });
+      d.purposesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        statusConceptId: 'other',
+      });
       await expect(
-        d.service.registerEventSchema({ eventName: 'x', purposeDefinitionId: 'p1' } as any, actor),
+        d.service.registerEventSchema(
+          { eventName: 'x', purposeDefinitionId: 'p1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('409 on duplicate (eventName, schemaVersion)', async () => {
       const d = build();
-      d.purposesRepo.findById.mockResolvedValue({ id: 'p1', statusConceptId: CONCEPTS.STATE_ACTIVE });
+      d.purposesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      });
       d.schemasRepo.findByNameVersion.mockResolvedValue({ id: 'dup' });
       await expect(
-        d.service.registerEventSchema({ eventName: 'x', purposeDefinitionId: 'p1' } as any, actor),
+        d.service.registerEventSchema(
+          { eventName: 'x', purposeDefinitionId: 'p1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -131,7 +169,10 @@ describe('TelemetryGovernanceService', () => {
         createdAt: new Date(),
       });
 
-      const res = await d.service.publishDisclosure({ documentCode: 'PRIV' } as any, actor);
+      const res = await d.service.publishDisclosure(
+        { documentCode: 'PRIV' },
+        actor,
+      );
       expect(res.id).toBe('v1');
       expect(prev.effectiveTo).toBeInstanceOf(Date);
     });
@@ -164,8 +205,11 @@ describe('TelemetryGovernanceService', () => {
           funnelCode: 'signup',
           name: 'Signup',
           purposeDefinitionId: 'p1',
-          steps: [{ eventSchemaDefinitionId: 's1' }, { eventSchemaDefinitionId: 's1' }],
-        } as any,
+          steps: [
+            { eventSchemaDefinitionId: 's1' },
+            { eventSchemaDefinitionId: 's1' },
+          ],
+        },
         actor,
       );
       expect(res.stepCount).toBe(2);
@@ -180,7 +224,12 @@ describe('TelemetryGovernanceService', () => {
       d.schemasRepo.findById.mockResolvedValue(null);
       await expect(
         d.service.defineFunnel(
-          { funnelCode: 'x', name: 'x', purposeDefinitionId: 'p1', steps: [{ eventSchemaDefinitionId: 'nope' }] } as any,
+          {
+            funnelCode: 'x',
+            name: 'x',
+            purposeDefinitionId: 'p1',
+            steps: [{ eventSchemaDefinitionId: 'nope' }],
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);

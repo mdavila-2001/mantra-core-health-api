@@ -19,7 +19,10 @@ export class CreateDeviceDto {
   @MaxLength(512)
   deviceFingerprint!: string;
 
-  @ApiPropertyOptional({ description: 'Plataforma', enum: ['IOS', 'ANDROID', 'WEB'] })
+  @ApiPropertyOptional({
+    description: 'Plataforma',
+    enum: ['IOS', 'ANDROID', 'WEB'],
+  })
   @IsOptional()
   @IsIn(['IOS', 'ANDROID', 'WEB'])
   platform?: DevicePlatform;
@@ -30,7 +33,9 @@ export class CreateDeviceDto {
   @MaxLength(200)
   name?: string;
 
-  @ApiPropertyOptional({ description: 'Marcar el dispositivo como de confianza' })
+  @ApiPropertyOptional({
+    description: 'Marcar el dispositivo como de confianza',
+  })
   @IsOptional()
   @IsBoolean()
   trust?: boolean;

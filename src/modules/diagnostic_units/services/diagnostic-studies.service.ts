@@ -43,21 +43,35 @@ export class DiagnosticStudiesService {
     actor: AuthenticatedUser,
   ): Promise<StudyOfferingResponseDto> {
     this.logger.info(
-      { operation: 'diagnostic_units.offering.create', unitId, studyCode: dto.studyCode },
+      {
+        operation: 'diagnostic_units.offering.create',
+        unitId,
+        studyCode: dto.studyCode,
+      },
       'Publishing study offering',
     );
     return this.em.transactional(async (tx) => {
       const unit = await this.unitsRepo.findById(tx, unitId);
-      if (!unit) throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+      if (!unit)
+        throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
       if (unit.statusConceptId !== DUNIT.UNIT_ACTIVE) {
-        throw new PreconditionFailedException('La unidad no está activa', { unitId });
+        throw new PreconditionFailedException('La unidad no está activa', {
+          unitId,
+        });
       }
 
-      const clash = await this.offeringsRepo.findByStudyCode(tx, unit.id, dto.studyCode);
+      const clash = await this.offeringsRepo.findByStudyCode(
+        tx,
+        unit.id,
+        dto.studyCode,
+      );
       if (clash) {
-        throw new ConflictException('El código de estudio ya existe en la unidad', {
-          studyCode: dto.studyCode,
-        });
+        throw new ConflictException(
+          'El código de estudio ya existe en la unidad',
+          {
+            studyCode: dto.studyCode,
+          },
+        );
       }
 
       const offering = this.offeringsRepo.create(tx, {
@@ -101,7 +115,10 @@ export class DiagnosticStudiesService {
       }
 
       this.logger.info(
-        { operation: 'diagnostic_units.offering.create', offeringId: offering.id },
+        {
+          operation: 'diagnostic_units.offering.create',
+          offeringId: offering.id,
+        },
         'Study offering published',
       );
       return {
@@ -114,17 +131,25 @@ export class DiagnosticStudiesService {
   }
 
   /** UC-23-08: retirar (soft-delete) una oferta de estudio. */
-  async retireOffering(offeringId: string, actor: AuthenticatedUser): Promise<StatusResultDto> {
+  async retireOffering(
+    offeringId: string,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
     this.logger.info(
       { operation: 'diagnostic_units.offering.retire', offeringId },
       'Retiring study offering',
     );
     return this.em.transactional(async (tx) => {
       const offering = await this.offeringsRepo.findById(tx, offeringId);
-      if (!offering) throw new ResourceNotFoundException('Oferta no encontrada', { offeringId });
+      if (!offering)
+        throw new ResourceNotFoundException('Oferta no encontrada', {
+          offeringId,
+        });
 
       if (offering.statusConceptId === DUNIT.OFFERING_RETIRED) {
-        throw new ConflictException('La oferta ya está retirada', { offeringId });
+        throw new ConflictException('La oferta ya está retirada', {
+          offeringId,
+        });
       }
 
       offering.statusConceptId = DUNIT.OFFERING_RETIRED;

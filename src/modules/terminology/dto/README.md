@@ -14,7 +14,17 @@ estados) y nunca filtran columnas internas.
 | `create-designation.dto.ts` | `CreateDesignationDto` (+ `ConceptPropertyInputDto`) | `DesignationResponseDto` |
 | `create-relationship.dto.ts` | `CreateRelationshipDto` | `RelationshipResponseDto` |
 | `create-value-set.dto.ts` | `CreateValueSetDto` (+ `ValueSetRuleInputDto`) | `ValueSetResponseDto` |
+| `concept-properties.dto.ts` | `UpsertConceptPropertiesDto`, `DeprecateConceptDto` | `ConceptPropertiesResponseDto`, `DeprecateConceptResponseDto`, `LookupResponseDto` (+ `LookupDesignationDto`, `LookupPropertyDto`) |
+| `expand-value-set.dto.ts` | `ExpandValueSetDto` | `ExpandValueSetResponseDto` |
+| `translate-concept.dto.ts` | `TranslateConceptDto` | `TranslateResponseDto` (+ `TranslationMatchDto`) |
+| `tenant-catalog-policy.dto.ts` | `UpsertTenantCatalogPolicyDto` (+ `TenantConceptConfigInputDto`) | `TenantCatalogPolicyResponseDto` |
 
 Los enums del contrato (`language`, `designationType`, `relationshipType`,
-`operator`) son códigos legibles (`ES`/`EN`, `IS_A`/`PART_OF`, …). El servicio los
-traduce a `*_concept_id` vía `CONCEPTS`; el cliente nunca maneja UUID de concepto.
+`operator`, `equivalence`, `mode`) son códigos legibles (`ES`/`EN`,
+`IS_A`/`PART_OF`, `EQUIVALENT`/`WIDER`/…, `INHERIT`/`SUBSET`/`EXTEND`). El
+servicio los traduce a `*_concept_id` vía `CONCEPTS`; el cliente nunca maneja UUID
+de concepto.
+
+`TranslateConceptDto` cubre los dos caminos del mismo endpoint: con
+`targetConceptId` la llamada cura el mapeo (y entonces `equivalence` es
+obligatoria, validado en el servicio); sin él, sólo consulta.

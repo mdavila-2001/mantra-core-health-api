@@ -21,7 +21,10 @@ export class CreatePermissionSetDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Código único del set por tenant', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único del set por tenant',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -33,9 +36,12 @@ export class CreatePermissionSetDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de delegado', enum: DELEGATE_TYPES })
+  @ApiPropertyOptional({
+    description: 'Tipo de delegado',
+    enum: DELEGATE_TYPES,
+  })
   @IsOptional()
-  @IsIn(DELEGATE_TYPES as unknown as string[])
+  @IsIn(DELEGATE_TYPES)
   delegateType?: (typeof DELEGATE_TYPES)[number];
 
   @ApiPropertyOptional({ description: 'Descripción del set' })
@@ -44,7 +50,10 @@ export class CreatePermissionSetDto {
   @MaxLength(1000)
   description?: string;
 
-  @ApiProperty({ description: 'Ítems de permiso de la versión 1', type: [PermissionSetItemDto] })
+  @ApiProperty({
+    description: 'Ítems de permiso de la versión 1',
+    type: [PermissionSetItemDto],
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

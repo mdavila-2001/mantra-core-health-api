@@ -32,7 +32,10 @@ export interface CreateFieldMappingData {
 /** Acceso a datos de endpoints de integración y sus mapeos de campos. */
 @Injectable()
 export class IntegrationEndpointsRepository {
-  findById(em: EntityManager, id: string): Promise<IntegrationEndpoints | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IntegrationEndpoints | null> {
     return em.findOne(IntegrationEndpoints, { id });
   }
 
@@ -45,7 +48,10 @@ export class IntegrationEndpointsRepository {
     return em.findOne(IntegrationEndpoints, { providerId, version });
   }
 
-  createEndpoint(em: EntityManager, data: CreateEndpointData): IntegrationEndpoints {
+  createEndpoint(
+    em: EntityManager,
+    data: CreateEndpointData,
+  ): IntegrationEndpoints {
     return em.create(
       IntegrationEndpoints,
       {
@@ -65,7 +71,10 @@ export class IntegrationEndpointsRepository {
     );
   }
 
-  createFieldMapping(em: EntityManager, data: CreateFieldMappingData): IntegrationFieldMappings {
+  createFieldMapping(
+    em: EntityManager,
+    data: CreateFieldMappingData,
+  ): IntegrationFieldMappings {
     return em.create(
       IntegrationFieldMappings,
       {

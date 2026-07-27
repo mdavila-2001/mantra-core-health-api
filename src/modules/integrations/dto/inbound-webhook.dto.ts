@@ -1,18 +1,33 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsObject, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /integrations/webhooks/inbound` (UC-12-09). */
 export class InboundWebhookDto {
-  @ApiProperty({ description: 'Conexión que identifica al tenant/proveedor', format: 'uuid' })
+  @ApiProperty({
+    description: 'Conexión que identifica al tenant/proveedor',
+    format: 'uuid',
+  })
   @IsUUID()
   connectionId!: string;
 
-  @ApiPropertyOptional({ description: 'Endpoint de integración asociado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Endpoint de integración asociado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   endpointId?: string;
 
-  @ApiPropertyOptional({ description: 'Correlación para casar con un mensaje saliente', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Correlación para casar con un mensaje saliente',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -22,7 +37,10 @@ export class InboundWebhookDto {
   @IsObject()
   payloadJson!: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Firma HMAC de la entrega (idempotencia)', maxLength: 512 })
+  @ApiPropertyOptional({
+    description: 'Firma HMAC de la entrega (idempotencia)',
+    maxLength: 512,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(512)

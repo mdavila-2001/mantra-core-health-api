@@ -16,7 +16,10 @@ export class DispensationLineDto {
   @IsUUID()
   pharmacyProductId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Ubicación desde donde se dispensa' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Ubicación desde donde se dispensa',
+  })
   @IsUUID()
   inventoryLocationId!: string;
 
@@ -53,7 +56,10 @@ export class CreateDispensationDto {
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Solicitud de medicación' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Solicitud de medicación',
+  })
   @IsOptional()
   @IsUUID()
   medicationRequestId?: string;

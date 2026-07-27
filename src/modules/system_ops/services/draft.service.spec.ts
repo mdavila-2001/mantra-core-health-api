@@ -2,7 +2,10 @@ import { jest } from '@jest/globals';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DraftService } from './draft.service';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 import { SYSOPS } from '../system_ops.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -10,9 +13,13 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const repo = { create: mockFn(), findById: mockFn(), createRevision: mockFn() };
+  const repo = {
+    create: mockFn(),
+    findById: mockFn(),
+    createRevision: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DraftService(em as any, repo as any, logger as any);
+  const service = new DraftService(em as any, repo, logger as any);
   return { service, repo };
 }
 
@@ -20,9 +27,12 @@ describe('DraftService (UC-11-15)', () => {
   describe('createDraft', () => {
     it('creates a DRAFT owned by the actor', async () => {
       const d = build();
-      d.repo.create.mockReturnValue({ id: 'dr1', statusConceptId: SYSOPS.DRAFT });
+      d.repo.create.mockReturnValue({
+        id: 'dr1',
+        statusConceptId: SYSOPS.DRAFT,
+      });
       const res = await d.service.createDraft(
-        { schemaName: 's', tableName: 't', payloadJson: {} } as any,
+        { schemaName: 's', tableName: 't', payloadJson: {} },
         actor,
       );
       expect(res.id).toBe('dr1');
@@ -41,7 +51,11 @@ describe('DraftService (UC-11-15)', () => {
 
     it('rejects publishing when the actor is not the owner', async () => {
       const d = build();
-      d.repo.findById.mockResolvedValue({ id: 'dr1', ownerUserId: 'someone-else', statusConceptId: SYSOPS.DRAFT });
+      d.repo.findById.mockResolvedValue({
+        id: 'dr1',
+        ownerUserId: 'someone-else',
+        statusConceptId: SYSOPS.DRAFT,
+      });
       await expect(
         d.service.publishDraft('dr1', { publishReference: 'r' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -59,7 +73,11 @@ describe('DraftService (UC-11-15)', () => {
         updatedAt: new Date(),
       };
       d.repo.findById.mockResolvedValue(draft);
-      const res = await d.service.publishDraft('dr1', { publishReference: 'r' } as any, actor);
+      const res = await d.service.publishDraft(
+        'dr1',
+        { publishReference: 'r' },
+        actor,
+      );
       expect(draft.statusConceptId).toBe(SYSOPS.PUBLISHED);
       expect(res.publishedRecordId).toBeDefined();
       expect(d.repo.createRevision).toHaveBeenCalled();

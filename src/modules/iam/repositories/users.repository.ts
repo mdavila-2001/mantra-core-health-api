@@ -29,15 +29,19 @@ export class UsersRepository {
 
   /** Crea la entidad de usuario en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateUserData): Users {
-    return em.create(Users, {
-      statusConceptId: data.statusConceptId,
-      displayName: data.displayName,
-      mfaStatusConceptId: data.mfaStatusConceptId,
-      timeZone: data.timeZone,
-      emailVerified: false,
-      phoneVerified: false,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+    return em.create(
+      Users,
+      {
+        statusConceptId: data.statusConceptId,
+        displayName: data.displayName,
+        mfaStatusConceptId: data.mfaStatusConceptId,
+        timeZone: data.timeZone,
+        emailVerified: false,
+        phoneVerified: false,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Cuenta usuarios activos; utilidad para métricas/pruebas. */

@@ -19,14 +19,18 @@ export interface CreateComponentData {
  */
 @Injectable()
 export class DiagnosticStudyComponentsRepository {
-  create(em: EntityManager, data: CreateComponentData): DiagnosticStudyComponents {
+  create(
+    em: EntityManager,
+    data: CreateComponentData,
+  ): DiagnosticStudyComponents {
     const now = new Date();
     return em.create(
       DiagnosticStudyComponents,
       {
         parentOfferingId: data.parentOfferingId,
         componentOfferingId: data.componentOfferingId,
-        componentRoleConceptId: data.componentRoleConceptId ?? DUNIT.COMPONENT_ROLE_PANEL,
+        componentRoleConceptId:
+          data.componentRoleConceptId ?? DUNIT.COMPONENT_ROLE_PANEL,
         quantity: data.quantity,
         ordinal: data.ordinal,
         createdAt: now,

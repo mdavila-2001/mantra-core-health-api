@@ -23,7 +23,10 @@ export class DefinitionSetResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Versión inicial (draft) creada' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Versión inicial (draft) creada',
+  })
   versionId!: string;
 
   @ApiProperty({ description: 'Estado del set (concept id)', format: 'uuid' })
@@ -38,7 +41,10 @@ export class FormInstanceResponseDto {
   @ApiProperty({ description: 'Versión de schema congelada' })
   schemaVersion!: number;
 
-  @ApiProperty({ description: 'Estado de la instancia (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Estado de la instancia (concept id)',
+    format: 'uuid',
+  })
   state!: string;
 }
 

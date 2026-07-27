@@ -30,7 +30,7 @@ function build() {
   const service = new DirectoryMembershipsService(
     em as any,
     membershipsRepo as any,
-    branchMembershipsRepo as any,
+    branchMembershipsRepo,
     branchesRepo as any,
     logger as any,
   );
@@ -64,7 +64,7 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
       d.membershipsRepo.create.mockReturnValue(activeMembership());
 
-      const res = await d.service.invite('t1', { userId: 'u1' } as any, actor);
+      const res = await d.service.invite('t1', { userId: 'u1' }, actor);
 
       expect(res.id).toBe('m1');
       expect(d.membershipsRepo.create).toHaveBeenCalledWith(
@@ -90,7 +90,10 @@ describe('DirectoryMembershipsService', () => {
     it('rejects a branch of another tenant (precondition)', async () => {
       const d = build();
       d.membershipsRepo.findByIdInTenant.mockResolvedValue(activeMembership());
-      d.branchesRepo.findById.mockResolvedValue({ id: 'b1', tenantId: 'OTHER' });
+      d.branchesRepo.findById.mockResolvedValue({
+        id: 'b1',
+        tenantId: 'OTHER',
+      });
       await expect(
         d.service.assignBranch('t1', 'm1', { branchId: 'b1' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -101,7 +104,9 @@ describe('DirectoryMembershipsService', () => {
       const membership = activeMembership({ primaryBranchId: undefined });
       d.membershipsRepo.findByIdInTenant.mockResolvedValue(membership);
       d.branchesRepo.findById.mockResolvedValue({ id: 'b1', tenantId: 't1' });
-      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue(null);
+      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue(
+        null,
+      );
       d.branchMembershipsRepo.create.mockReturnValue({
         id: 'bm1',
         tenantMembershipId: 'm1',
@@ -110,7 +115,12 @@ describe('DirectoryMembershipsService', () => {
         statusConceptId: DIR.BRANCH_MEMBERSHIP_ACTIVE,
       });
 
-      const res = await d.service.assignBranch('t1', 'm1', { branchId: 'b1' } as any, actor);
+      const res = await d.service.assignBranch(
+        't1',
+        'm1',
+        { branchId: 'b1' },
+        actor,
+      );
 
       expect(res.id).toBe('bm1');
       expect(membership.primaryBranchId).toBe('b1');
@@ -121,7 +131,9 @@ describe('DirectoryMembershipsService', () => {
       const d = build();
       d.membershipsRepo.findByIdInTenant.mockResolvedValue(activeMembership());
       d.branchesRepo.findById.mockResolvedValue({ id: 'b1', tenantId: 't1' });
-      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue({ id: 'bm0' });
+      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue({
+        id: 'bm0',
+      });
       await expect(
         d.service.assignBranch('t1', 'm1', { branchId: 'b1' } as any, actor),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -134,13 +146,19 @@ describe('DirectoryMembershipsService', () => {
       const membership = activeMembership({ primaryBranchId: 'b1' });
       d.membershipsRepo.findByIdInTenant.mockResolvedValue(membership);
       d.branchesRepo.findById.mockResolvedValue({ id: 'b1', tenantId: 't1' });
-      const source = { statusConceptId: DIR.BRANCH_MEMBERSHIP_ACTIVE, localRoleConceptId: 'lr', updatedAt: new Date() };
-      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue(source);
+      const source = {
+        statusConceptId: DIR.BRANCH_MEMBERSHIP_ACTIVE,
+        localRoleConceptId: 'lr',
+        updatedAt: new Date(),
+      };
+      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue(
+        source,
+      );
 
       const res = await d.service.transfer(
         't1',
         'm1',
-        { fromBranchId: 'b1', toBranchId: 'b2' } as any,
+        { fromBranchId: 'b1', toBranchId: 'b2' },
         actor,
       );
 
@@ -154,9 +172,16 @@ describe('DirectoryMembershipsService', () => {
       const d = build();
       d.membershipsRepo.findByIdInTenant.mockResolvedValue(activeMembership());
       d.branchesRepo.findById.mockResolvedValue({ id: 'b', tenantId: 't1' });
-      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue(null);
+      d.branchMembershipsRepo.findByMembershipBranchStatus.mockResolvedValue(
+        null,
+      );
       await expect(
-        d.service.transfer('t1', 'm1', { fromBranchId: 'b1', toBranchId: 'b2' } as any, actor),
+        d.service.transfer(
+          't1',
+          'm1',
+          { fromBranchId: 'b1', toBranchId: 'b2' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -192,8 +217,13 @@ describe('DirectoryMembershipsService', () => {
       const d = build();
       const membership = activeMembership();
       d.membershipsRepo.findByIdInTenant.mockResolvedValue(membership);
-      const assignment = { statusConceptId: DIR.BRANCH_MEMBERSHIP_ACTIVE, updatedAt: new Date() };
-      d.branchMembershipsRepo.findByMembershipAndStatus.mockResolvedValue([assignment]);
+      const assignment = {
+        statusConceptId: DIR.BRANCH_MEMBERSHIP_ACTIVE,
+        updatedAt: new Date(),
+      };
+      d.branchMembershipsRepo.findByMembershipAndStatus.mockResolvedValue([
+        assignment,
+      ]);
 
       const res = await d.service.offboard('t1', 'm1', actor);
 
@@ -208,9 +238,9 @@ describe('DirectoryMembershipsService', () => {
       d.membershipsRepo.findByIdInTenant.mockResolvedValue(
         activeMembership({ statusConceptId: DIR.MEMBERSHIP_ENDED }),
       );
-      await expect(d.service.offboard('t1', 'm1', actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.offboard('t1', 'm1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 });

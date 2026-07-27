@@ -7,7 +7,10 @@ const actor = { id: 'mod-1', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
   const service = { report: mockFn(), decide: mockFn(), appeal: mockFn() };
-  return { controller: new CommunityModerationController(service as any), service };
+  return {
+    controller: new CommunityModerationController(service as any),
+    service,
+  };
 }
 
 describe('CommunityModerationController', () => {
@@ -28,7 +31,7 @@ describe('CommunityModerationController', () => {
   it('delegates appeal (UC-19-10)', async () => {
     const d = build();
     const dto = { appellantProfileId: 'p1', reasonText: 'x' };
-    await d.controller.appeal('dec1', dto as any, actor);
+    await d.controller.appeal('dec1', dto, actor);
     expect(d.service.appeal).toHaveBeenCalledWith('dec1', dto, actor);
   });
 });

@@ -5,7 +5,10 @@ export class ResourceCreatedDto {
   @ApiProperty({ format: 'uuid', description: 'Id del recurso creado' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Concept id del estado del recurso' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Concept id del estado del recurso',
+  })
   status!: string;
 }
 
@@ -23,7 +26,11 @@ export class AccessionCreatedDto {
   @ApiProperty({ format: 'uuid' })
   status!: string;
 
-  @ApiProperty({ type: [String], format: 'uuid', description: 'Ids de accession_specimens' })
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Ids de accession_specimens',
+  })
   accessionSpecimenIds!: string[];
 }
 
@@ -35,7 +42,11 @@ export class WorkOrderCreatedDto {
   @ApiProperty({ format: 'uuid' })
   status!: string;
 
-  @ApiProperty({ type: [String], format: 'uuid', description: 'Ids de las pruebas creadas' })
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Ids de las pruebas creadas',
+  })
   testIds!: string[];
 }
 

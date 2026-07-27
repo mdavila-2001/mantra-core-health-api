@@ -60,7 +60,9 @@ export class TenantsController {
   @Post(':tenantId/branches')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear una branch / sede física con geolocalización' })
+  @ApiOperation({
+    summary: 'Crear una branch / sede física con geolocalización',
+  })
   createBranch(
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @Body() dto: CreateBranchDto,
@@ -93,7 +95,12 @@ export class TenantsController {
     @Body() dto: BranchAssignmentDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<BranchMembershipResponseDto> {
-    return this.membershipsService.assignBranch(tenantId, membershipId, dto, actor);
+    return this.membershipsService.assignBranch(
+      tenantId,
+      membershipId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-04-07. */
@@ -121,7 +128,12 @@ export class TenantsController {
     @Body() dto: ChangeMembershipRoleDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MembershipResponseDto> {
-    return this.membershipsService.changeRole(tenantId, membershipId, dto, actor);
+    return this.membershipsService.changeRole(
+      tenantId,
+      membershipId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-04-09. */

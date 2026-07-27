@@ -9,7 +9,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { InvoicesRepository, BillingDocumentLinksRepository } from '../repositories';
+import {
+  InvoicesRepository,
+  BillingDocumentLinksRepository,
+} from '../repositories';
 import {
   IssueInvoiceFromEncounterDto,
   CreditNoteDto,
@@ -45,16 +48,27 @@ export class InvoicesService {
     actor: AuthenticatedUser,
   ): Promise<InvoiceResponseDto> {
     this.logger.info(
-      { operation: 'billing.invoice.issue', practiceId: dto.practiceId, actorId: actor.id },
+      {
+        operation: 'billing.invoice.issue',
+        practiceId: dto.practiceId,
+        actorId: actor.id,
+      },
       'Issuing invoice from encounter',
     );
     return this.em.transactional(async (tx) => {
       const invoiceNumber = dto.invoiceNumber ?? this.generateNumber('INV');
-      const clash = await this.invoicesRepo.findByNumber(tx, dto.practiceId, invoiceNumber);
+      const clash = await this.invoicesRepo.findByNumber(
+        tx,
+        dto.practiceId,
+        invoiceNumber,
+      );
       if (clash) {
-        throw new ConflictException('El número de factura ya existe en la práctica', {
-          invoiceNumber,
-        });
+        throw new ConflictException(
+          'El número de factura ya existe en la práctica',
+          {
+            invoiceNumber,
+          },
+        );
       }
 
       // Totales derivados de las líneas (base = cantidad*precio - descuento).
@@ -123,7 +137,11 @@ export class InvoicesService {
       }
 
       this.logger.info(
-        { operation: 'billing.invoice.issue', invoiceId: invoice.id, lines: dto.lines.length },
+        {
+          operation: 'billing.invoice.issue',
+          invoiceId: invoice.id,
+          lines: dto.lines.length,
+        },
         'Invoice issued',
       );
       return this.toResponse(invoice, dto.lines.length);
@@ -137,12 +155,19 @@ export class InvoicesService {
     actor: AuthenticatedUser,
   ): Promise<InvoiceResponseDto> {
     this.logger.info(
-      { operation: 'billing.invoice.credit-note', invoiceId, actorId: actor.id },
+      {
+        operation: 'billing.invoice.credit-note',
+        invoiceId,
+        actorId: actor.id,
+      },
       'Issuing credit note',
     );
     return this.em.transactional(async (tx) => {
       const original = await this.invoicesRepo.findById(tx, invoiceId);
-      if (!original) throw new ResourceNotFoundException('Factura no encontrada', { invoiceId });
+      if (!original)
+        throw new ResourceNotFoundException('Factura no encontrada', {
+          invoiceId,
+        });
 
       // Total del reverso (positivo); se registra en la NC con signo negativo.
       const reverseCents = dto.lines.reduce((acc, l) => {
@@ -155,7 +180,11 @@ export class InvoicesService {
       if (reverseCents > originalBalanceCents && !dto.writeOff) {
         throw new PreconditionFailedException(
           'El monto de la nota de crédito excede el saldo de la factura',
-          { invoiceId, reverse: fromCents(reverseCents), balance: original.balance },
+          {
+            invoiceId,
+            reverse: fromCents(reverseCents),
+            balance: original.balance,
+          },
         );
       }
 
@@ -193,7 +222,8 @@ export class InvoicesService {
       // Ajusta la factura original: baja el saldo y marca ADJUSTED (o IN_COLLECTION si castigo total).
       const newBalanceCents = Math.max(0, originalBalanceCents - reverseCents);
       original.balance = fromCents(newBalanceCents);
-      original.statusConceptId = newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_ADJUSTED;
+      original.statusConceptId =
+        newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_ADJUSTED;
       touch(original, actor.id);
 
       if (dto.tenantId) {
@@ -206,7 +236,11 @@ export class InvoicesService {
       }
 
       this.logger.info(
-        { operation: 'billing.invoice.credit-note', creditId: credit.id, originalId: original.id },
+        {
+          operation: 'billing.invoice.credit-note',
+          creditId: credit.id,
+          originalId: original.id,
+        },
         'Credit note issued',
       );
       return this.toResponse(credit, dto.lines.length);
@@ -219,7 +253,11 @@ export class InvoicesService {
     actor: AuthenticatedUser,
   ): Promise<PaymentPlanResponseDto> {
     this.logger.info(
-      { operation: 'billing.payment-plan.create', sourceInvoiceId: dto.sourceInvoiceId, actorId: actor.id },
+      {
+        operation: 'billing.payment-plan.create',
+        sourceInvoiceId: dto.sourceInvoiceId,
+        actorId: actor.id,
+      },
       'Creating payment plan',
     );
     return this.em.transactional(async (tx) => {
@@ -232,17 +270,26 @@ export class InvoicesService {
 
       const balanceCents = toCents(source.balance ?? '0');
       if (balanceCents <= 0) {
-        throw new PreconditionFailedException('La factura origen no tiene saldo', {
-          invoiceId: source.id,
-        });
+        throw new PreconditionFailedException(
+          'La factura origen no tiene saldo',
+          {
+            invoiceId: source.id,
+          },
+        );
       }
 
-      const installmentsCents = dto.installments.reduce((acc, i) => acc + toCents(i.amount), 0);
+      const installmentsCents = dto.installments.reduce(
+        (acc, i) => acc + toCents(i.amount),
+        0,
+      );
       if (installmentsCents !== balanceCents) {
-        throw new PreconditionFailedException('La suma de cuotas debe igualar el saldo de la factura', {
-          balance: source.balance,
-          installments: fromCents(installmentsCents),
-        });
+        throw new PreconditionFailedException(
+          'La suma de cuotas debe igualar el saldo de la factura',
+          {
+            balance: source.balance,
+            installments: fromCents(installmentsCents),
+          },
+        );
       }
 
       const created: Invoices[] = [];
@@ -280,7 +327,11 @@ export class InvoicesService {
       touch(source, actor.id);
 
       this.logger.info(
-        { operation: 'billing.payment-plan.create', sourceInvoiceId: source.id, installments: created.length },
+        {
+          operation: 'billing.payment-plan.create',
+          sourceInvoiceId: source.id,
+          installments: created.length,
+        },
         'Payment plan created',
       );
       return {

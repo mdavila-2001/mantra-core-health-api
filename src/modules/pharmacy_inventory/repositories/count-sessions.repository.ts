@@ -29,7 +29,10 @@ export interface CreateCountLineData {
 /** Acceso a datos de las sesiones de conteo y sus líneas. */
 @Injectable()
 export class CountSessionsRepository {
-  findById(em: EntityManager, id: string): Promise<InventoryCountSessions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<InventoryCountSessions | null> {
     return em.findOne(InventoryCountSessions, { id });
   }
 
@@ -45,15 +48,24 @@ export class CountSessionsRepository {
     });
   }
 
-  findLines(em: EntityManager, sessionId: string): Promise<InventoryCountLines[]> {
+  findLines(
+    em: EntityManager,
+    sessionId: string,
+  ): Promise<InventoryCountLines[]> {
     return em.find(InventoryCountLines, { inventoryCountSessionId: sessionId });
   }
 
-  findLineById(em: EntityManager, id: string): Promise<InventoryCountLines | null> {
+  findLineById(
+    em: EntityManager,
+    id: string,
+  ): Promise<InventoryCountLines | null> {
     return em.findOne(InventoryCountLines, { id });
   }
 
-  create(em: EntityManager, data: CreateCountSessionData): InventoryCountSessions {
+  create(
+    em: EntityManager,
+    data: CreateCountSessionData,
+  ): InventoryCountSessions {
     return em.create(
       InventoryCountSessions,
       {
@@ -69,7 +81,10 @@ export class CountSessionsRepository {
     );
   }
 
-  createLine(em: EntityManager, data: CreateCountLineData): InventoryCountLines {
+  createLine(
+    em: EntityManager,
+    data: CreateCountLineData,
+  ): InventoryCountLines {
     return em.create(
       InventoryCountLines,
       {

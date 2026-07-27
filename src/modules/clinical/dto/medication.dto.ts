@@ -10,11 +10,17 @@ import {
 
 /** Cuerpo de `POST /clinical/medication-requests` (UC-08-10). */
 export class CreateMedicationRequestDto {
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
@@ -27,12 +33,18 @@ export class CreateMedicationRequestDto {
   @IsUUID()
   medicationConceptId!: string;
 
-  @ApiPropertyOptional({ description: 'Sustancia ATC (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sustancia ATC (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   substanceAtcConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Profesional prescriptor', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Profesional prescriptor',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   prescriberProfileId?: string;
@@ -42,7 +54,10 @@ export class CreateMedicationRequestDto {
   @IsString()
   doseText?: string;
 
-  @ApiPropertyOptional({ description: 'Vía de administración (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Vía de administración (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   routeConceptId?: string;
@@ -62,7 +77,10 @@ export class CreateMedicationRequestDto {
   @IsUUID()
   unitConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   validFrom?: string;
@@ -75,15 +93,24 @@ export class CreateMedicationRequestDto {
 
 /** Cuerpo de `POST /clinical/medication-records` (UC-08-11). */
 export class CreateMedicationRecordDto {
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Prescripción que se administra', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Prescripción que se administra',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   requestId?: string;
@@ -102,12 +129,17 @@ export class CreateMedicationRecordDto {
   @IsUUID()
   unitConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Momento de administración', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Momento de administración',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   administeredAt?: string;
 
-  @ApiPropertyOptional({ description: 'Marca la dosis final: cierra la prescripción' })
+  @ApiPropertyOptional({
+    description: 'Marca la dosis final: cierra la prescripción',
+  })
   @IsOptional()
   @IsBoolean()
   isFinalDose?: boolean;

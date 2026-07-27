@@ -48,7 +48,9 @@ export class AccountingLedgerController {
   @Post('journal-transactions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar y postear un asiento balanceado (partida doble)' })
+  @ApiOperation({
+    summary: 'Registrar y postear un asiento balanceado (partida doble)',
+  })
   postJournal(
     @Body() dto: PostJournalDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -60,8 +62,12 @@ export class AccountingLedgerController {
   @Post('postings/determine-accounts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Determinar la cuenta objetivo por reglas vigentes' })
-  determineAccounts(@Body() dto: DetermineAccountsDto): Promise<DeterminedAccountResponseDto> {
+  @ApiOperation({
+    summary: 'Determinar la cuenta objetivo por reglas vigentes',
+  })
+  determineAccounts(
+    @Body() dto: DetermineAccountsDto,
+  ): Promise<DeterminedAccountResponseDto> {
     return this.ledgerService.determineAccounts(dto);
   }
 

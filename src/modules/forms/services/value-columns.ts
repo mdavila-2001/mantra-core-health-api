@@ -7,9 +7,14 @@ import type { ValueColumns } from '../repositories';
  * captura (UC-09-08), corrección (UC-09-09), importación (UC-09-10) y migración
  * (UC-09-13) construyan valores de forma consistente.
  */
-export function buildValueColumns(dataType: string, value: unknown): ValueColumns {
+export function buildValueColumns(
+  dataType: string,
+  value: unknown,
+): ValueColumns {
   if (value === undefined || value === null) {
-    throw new PreconditionFailedException('El valor no puede ser nulo', { dataType });
+    throw new PreconditionFailedException('El valor no puede ser nulo', {
+      dataType,
+    });
   }
   switch (dataType) {
     case 'string':
@@ -39,6 +44,8 @@ export function buildValueColumns(dataType: string, value: unknown): ValueColumn
     case 'json':
       return { valueJson: value };
     default:
-      throw new PreconditionFailedException('Tipo de dato no soportado', { dataType });
+      throw new PreconditionFailedException('Tipo de dato no soportado', {
+        dataType,
+      });
   }
 }

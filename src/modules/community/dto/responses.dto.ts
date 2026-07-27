@@ -59,7 +59,9 @@ export class ReactionResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ description: 'true si se creó, false si se actualizó una existente' })
+  @ApiProperty({
+    description: 'true si se creó, false si se actualizó una existente',
+  })
   created!: boolean;
 
   @ApiProperty()
@@ -92,7 +94,10 @@ export class ReportResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Entrada de cola de moderación asociada' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Entrada de cola de moderación asociada',
+  })
   moderationQueueId!: string;
 }
 
@@ -101,7 +106,11 @@ export class ModerationDecisionResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid', nullable: true, description: 'Strike emitido, si aplica' })
+  @ApiProperty({
+    format: 'uuid',
+    nullable: true,
+    description: 'Strike emitido, si aplica',
+  })
   strikeId!: string | null;
 
   @ApiProperty()

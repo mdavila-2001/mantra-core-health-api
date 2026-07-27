@@ -20,7 +20,9 @@ describe('IntegrationExchangesController', () => {
     const d = build();
     const dto = { outcome: 'SUCCESS' };
     d.exchangesService.retry.mockResolvedValue({ id: 'a1' });
-    await expect(d.controller.retry('r1', dto as any, actor)).resolves.toEqual({ id: 'a1' });
+    await expect(d.controller.retry('r1', dto as any, actor)).resolves.toEqual({
+      id: 'a1',
+    });
     expect(d.exchangesService.retry).toHaveBeenCalledWith('r1', dto, actor);
   });
 

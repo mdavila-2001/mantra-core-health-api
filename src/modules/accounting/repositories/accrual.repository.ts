@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { AccrualObjects, AccrualScheduleLines, AccrualPostings } from '../entities';
+import {
+  AccrualObjects,
+  AccrualScheduleLines,
+  AccrualPostings,
+} from '../entities';
 import { createdBy } from '../../../common';
 
 /** Acceso a objetos de devengo y su cronograma (UC-16-06 / UC-16-07). */
 @Injectable()
 export class AccrualRepository {
-  findObjectById(em: EntityManager, id: string): Promise<AccrualObjects | null> {
+  findObjectById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AccrualObjects | null> {
     return em.findOne(AccrualObjects, { id });
   }
 

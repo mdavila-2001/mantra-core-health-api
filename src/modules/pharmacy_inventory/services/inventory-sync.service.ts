@@ -8,7 +8,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SyncRepository } from '../repositories';
-import { CreateSyncBatchDto, SyncBatchResponseDto, ReconcileResponseDto } from '../dto';
+import {
+  CreateSyncBatchDto,
+  SyncBatchResponseDto,
+  ReconcileResponseDto,
+} from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
 /**
@@ -27,9 +31,15 @@ export class InventorySyncService {
   }
 
   /** Bootstrap: ingresa un lote de sincronización en estado RECEIVED con items. */
-  async createBatch(dto: CreateSyncBatchDto, actor: AuthenticatedUser): Promise<SyncBatchResponseDto> {
+  async createBatch(
+    dto: CreateSyncBatchDto,
+    actor: AuthenticatedUser,
+  ): Promise<SyncBatchResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy_inventory.sync.create_batch', items: dto.items.length },
+      {
+        operation: 'pharmacy_inventory.sync.create_batch',
+        items: dto.items.length,
+      },
       'Ingesting sync batch',
     );
     return this.em.transactional(async (tx) => {
@@ -51,7 +61,10 @@ export class InventorySyncService {
           externalProductCode: item.externalProductCode,
           externalLocationCode: item.externalLocationCode,
           externalLotNumber: item.externalLotNumber,
-          externalQuantity: item.externalQuantity != null ? String(item.externalQuantity) : undefined,
+          externalQuantity:
+            item.externalQuantity != null
+              ? String(item.externalQuantity)
+              : undefined,
           reconciliationStatusConceptId: PINV.SYNC_ITEM_PENDING,
           idempotencyKey: item.idempotencyKey,
         });
@@ -64,15 +77,27 @@ export class InventorySyncService {
   }
 
   /** UC-25-12: reconcilia un lote RECEIVED; clasifica items y cierra el lote. */
-  async reconcile(batchId: string, actor: AuthenticatedUser): Promise<ReconcileResponseDto> {
-    this.logger.info({ operation: 'pharmacy_inventory.sync.reconcile', batchId }, 'Reconciling sync batch');
+  async reconcile(
+    batchId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ReconcileResponseDto> {
+    this.logger.info(
+      { operation: 'pharmacy_inventory.sync.reconcile', batchId },
+      'Reconciling sync batch',
+    );
     return this.em.transactional(async (tx) => {
       const batch = await this.syncRepo.findBatchById(tx, batchId);
       if (!batch) {
-        throw new ResourceNotFoundException('Lote de sincronización no encontrado', { batchId });
+        throw new ResourceNotFoundException(
+          'Lote de sincronización no encontrado',
+          { batchId },
+        );
       }
       if (batch.statusConceptId !== PINV.BATCH_RECEIVED) {
-        throw new PreconditionFailedException('El lote no está en estado reconciliable', { batchId });
+        throw new PreconditionFailedException(
+          'El lote no está en estado reconciliable',
+          { batchId },
+        );
       }
 
       const items = await this.syncRepo.findItems(tx, batchId);
@@ -85,7 +110,8 @@ export class InventorySyncService {
         } else {
           item.reconciliationStatusConceptId = PINV.SYNC_ITEM_DISCREPANCY;
           item.errorCode = 'UNMAPPED_PRODUCT';
-          item.errorDetail = 'No se encontró un producto para el código externo';
+          item.errorDetail =
+            'No se encontró un producto para el código externo';
           discrepancies += 1;
         }
       }

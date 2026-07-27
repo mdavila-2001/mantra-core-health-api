@@ -12,7 +12,10 @@ import {
 
 /** Cuerpo de `POST /telemetry/tracking-purposes` (UC-28-01). */
 export class CreateTrackingPurposeDto {
-  @ApiProperty({ description: 'Código único del propósito de tracking', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único del propósito de tracking',
+    maxLength: 100,
+  })
   @IsString()
   @MaxLength(100)
   purposeCode!: string;
@@ -22,17 +25,26 @@ export class CreateTrackingPurposeDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Categoría del propósito (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Categoría del propósito (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   purposeCategoryConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Base legal (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Base legal (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   legalBasisConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Requiere consentimiento explícito', default: true })
+  @ApiPropertyOptional({
+    description: 'Requiere consentimiento explícito',
+    default: true,
+  })
   @IsOptional()
   @IsBoolean()
   requiresConsent?: boolean;

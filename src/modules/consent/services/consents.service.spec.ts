@@ -17,15 +17,18 @@ function build() {
     create: mockFn(),
     findExpirable: mockFn().mockResolvedValue([]),
   };
-  const provisionsRepo = { findOpenByConsent: mockFn().mockResolvedValue([]), create: mockFn() };
+  const provisionsRepo = {
+    findOpenByConsent: mockFn().mockResolvedValue([]),
+    create: mockFn(),
+  };
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ConsentsService(
     em as any,
-    consentsRepo as any,
-    provisionsRepo as any,
-    eventsRepo as any,
+    consentsRepo,
+    provisionsRepo,
+    eventsRepo,
     logger as any,
   );
   return { service, tx, consentsRepo, provisionsRepo, eventsRepo };
@@ -46,7 +49,11 @@ describe('ConsentsService', () => {
       d.consentsRepo.create.mockReturnValue(created);
 
       const res = await d.service.capture(
-        { patientProfileId: 'p1', processingPurposeId: 'pp1', provisions: [{ action: 'PERMIT' }] } as any,
+        {
+          patientProfileId: 'p1',
+          processingPurposeId: 'pp1',
+          provisions: [{ action: 'PERMIT' }],
+        } as any,
         actor,
       );
 
@@ -70,7 +77,10 @@ describe('ConsentsService', () => {
       d.consentsRepo.findActiveByPurpose.mockResolvedValue({ id: 'existing' });
 
       await expect(
-        d.service.capture({ patientProfileId: 'p1', processingPurposeId: 'pp1' } as any, actor),
+        d.service.capture(
+          { patientProfileId: 'p1', processingPurposeId: 'pp1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.consentsRepo.create).not.toHaveBeenCalled();
     });
@@ -80,23 +90,36 @@ describe('ConsentsService', () => {
     it('throws when the consent does not exist', async () => {
       const d = build();
       d.consentsRepo.findById.mockResolvedValue(null);
-      await expect(d.service.withdraw('missing', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.withdraw('missing', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects withdrawing a consent that is not active', async () => {
       const d = build();
-      d.consentsRepo.findById.mockResolvedValue({ id: 'c1', statusConceptId: CONS.CONSENT_WITHDRAWN });
-      await expect(d.service.withdraw('c1', {} as any, actor)).rejects.toBeInstanceOf(ConflictException);
+      d.consentsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        statusConceptId: CONS.CONSENT_WITHDRAWN,
+      });
+      await expect(
+        d.service.withdraw('c1', {} as any, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('withdraws an active consent and records the withdrawn event', async () => {
       const d = build();
-      const consent = { id: 'c1', statusConceptId: CONS.CONSENT_ACTIVE, updatedAt: new Date() };
+      const consent = {
+        id: 'c1',
+        statusConceptId: CONS.CONSENT_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.consentsRepo.findById.mockResolvedValue(consent);
 
-      const res = await d.service.withdraw('c1', { withdrawalReasonConceptId: 'r1' } as any, actor);
+      const res = await d.service.withdraw(
+        'c1',
+        { withdrawalReasonConceptId: 'r1' },
+        actor,
+      );
 
       expect(res).toEqual({ ok: true });
       expect(consent.statusConceptId).toBe(CONS.CONSENT_WITHDRAWN);
@@ -129,7 +152,9 @@ describe('ConsentsService', () => {
       expect(d.provisionsRepo.create).toHaveBeenCalledTimes(2);
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ eventTypeConceptId: CONS.EVENT_PROVISIONS_AMENDED }),
+        expect.objectContaining({
+          eventTypeConceptId: CONS.EVENT_PROVISIONS_AMENDED,
+        }),
       );
     });
   });

@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNumberString, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsNumberString,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 
 /** Cuerpo de `POST /billing/patient-statements:generate` (UC-17-09). */
 export class GeneratePatientStatementDto {
@@ -7,7 +12,10 @@ export class GeneratePatientStatementDto {
   @IsUUID()
   practiceId!: string;
 
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
@@ -19,12 +27,19 @@ export class GeneratePatientStatementDto {
   @IsDateString()
   periodEnd!: string;
 
-  @ApiPropertyOptional({ description: 'Saldo de apertura; por defecto 0.00', example: '0.00' })
+  @ApiPropertyOptional({
+    description: 'Saldo de apertura; por defecto 0.00',
+    example: '0.00',
+  })
   @IsOptional()
   @IsNumberString()
   openingBalance?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant (directory.tenants); requerido para vincular las facturas incluidas', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Tenant (directory.tenants); requerido para vincular las facturas incluidas',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;

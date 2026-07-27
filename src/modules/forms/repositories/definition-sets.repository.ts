@@ -45,24 +45,40 @@ export interface CreateMemberData {
  */
 @Injectable()
 export class DefinitionSetsRepository {
-  findSetById(em: EntityManager, id: string): Promise<FieldDefinitionSets | null> {
+  findSetById(
+    em: EntityManager,
+    id: string,
+  ): Promise<FieldDefinitionSets | null> {
     return em.findOne(FieldDefinitionSets, { id });
   }
 
-  findSetByNamespace(em: EntityManager, namespaceUri: string): Promise<FieldDefinitionSets | null> {
+  findSetByNamespace(
+    em: EntityManager,
+    namespaceUri: string,
+  ): Promise<FieldDefinitionSets | null> {
     return em.findOne(FieldDefinitionSets, { namespaceUri });
   }
 
   createSet(em: EntityManager, data: CreateSetData): FieldDefinitionSets {
     const { actorUserId, ...rest } = data;
-    return em.create(FieldDefinitionSets, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FieldDefinitionSets,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
-  findVersionById(em: EntityManager, id: string): Promise<FieldDefinitionSetVersions | null> {
+  findVersionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<FieldDefinitionSetVersions | null> {
     return em.findOne(FieldDefinitionSetVersions, { id });
   }
 
-  createVersion(em: EntityManager, data: CreateVersionData): FieldDefinitionSetVersions {
+  createVersion(
+    em: EntityManager,
+    data: CreateVersionData,
+  ): FieldDefinitionSetVersions {
     const { actorUserId, ...rest } = data;
     return em.create(
       FieldDefinitionSetVersions,

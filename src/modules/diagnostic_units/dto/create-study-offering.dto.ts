@@ -15,11 +15,17 @@ import {
 
 /** Componente de un panel compuesto (UC-23-05). */
 export class StudyComponentDto {
-  @ApiProperty({ description: 'Oferta que actúa como componente', format: 'uuid' })
+  @ApiProperty({
+    description: 'Oferta que actúa como componente',
+    format: 'uuid',
+  })
   @IsUUID()
   componentOfferingId!: string;
 
-  @ApiPropertyOptional({ description: 'Rol del componente (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Rol del componente (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   componentRoleConceptId?: string;
@@ -38,7 +44,10 @@ export class StudyComponentDto {
 
 /** Cuerpo de `POST /diagnostic-units/{id}/study-offerings` (UC-23-05). */
 export class CreateStudyOfferingDto {
-  @ApiProperty({ description: 'Código del estudio en la unidad', maxLength: 60 })
+  @ApiProperty({
+    description: 'Código del estudio en la unidad',
+    maxLength: 60,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(60)
@@ -54,22 +63,34 @@ export class CreateStudyOfferingDto {
   @MaxLength(200)
   displayName!: string;
 
-  @ApiPropertyOptional({ description: 'Sitio de la unidad donde se ofrece', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sitio de la unidad donde se ofrece',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   diagnosticUnitSiteId?: string;
 
-  @ApiPropertyOptional({ description: 'Modalidad (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Modalidad (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   modalityConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Zona anatómica (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Zona anatómica (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   bodySiteConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de muestra (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo de muestra (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   specimenTypeConceptId?: string;
@@ -111,7 +132,10 @@ export class CreateStudyOfferingDto {
   @IsBoolean()
   homeCollectionEligible?: boolean;
 
-  @ApiPropertyOptional({ type: [StudyComponentDto], description: 'Componentes del panel (0..N)' })
+  @ApiPropertyOptional({
+    type: [StudyComponentDto],
+    description: 'Componentes del panel (0..N)',
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

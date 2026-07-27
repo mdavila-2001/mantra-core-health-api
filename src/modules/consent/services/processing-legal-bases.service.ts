@@ -4,7 +4,10 @@ import { PinoLogger } from 'nestjs-pino';
 import { SEED, touch, type AuthenticatedUser } from '../../../common';
 import { ProcessingLegalBasesRepository } from '../repositories';
 import { CONS } from '../consent.concepts';
-import { CreateProcessingLegalBasisDto, ProcessingLegalBasisResponseDto } from '../dto';
+import {
+  CreateProcessingLegalBasisDto,
+  ProcessingLegalBasisResponseDto,
+} from '../dto';
 
 /**
  * UC-07-06: establece/versiona la base legal de procesamiento. Inserta la versión
@@ -27,13 +30,17 @@ export class ProcessingLegalBasesService {
     actor: AuthenticatedUser,
   ): Promise<ProcessingLegalBasisResponseDto> {
     this.logger.info(
-      { operation: 'consent.legal-basis.version', processingPurposeId: dto.processingPurposeId },
+      {
+        operation: 'consent.legal-basis.version',
+        processingPurposeId: dto.processingPurposeId,
+      },
       'Versioning processing legal basis',
     );
     return this.em.transactional(async (tx) => {
       const now = new Date();
       const tenantId = dto.tenantId ?? SEED.tenantId;
-      const jurisdictionConceptId = dto.jurisdictionConceptId ?? CONS.JURISDICTION_PE;
+      const jurisdictionConceptId =
+        dto.jurisdictionConceptId ?? CONS.JURISDICTION_PE;
 
       const current = await this.legalBasesRepo.findCurrentVersion(
         tx,
@@ -54,8 +61,10 @@ export class ProcessingLegalBasesService {
         tenantId,
         processingPurposeId: dto.processingPurposeId,
         jurisdictionConceptId,
-        generalLegalBasisConceptId: dto.generalLegalBasisConceptId ?? CONS.LEGAL_BASIS_CONSENT,
-        specialCategoryConditionConceptId: dto.specialCategoryConditionConceptId,
+        generalLegalBasisConceptId:
+          dto.generalLegalBasisConceptId ?? CONS.LEGAL_BASIS_CONSENT,
+        specialCategoryConditionConceptId:
+          dto.specialCategoryConditionConceptId,
         policyVersion: dto.policyVersion,
         legalReferenceUri: dto.legalReferenceUri,
         validFrom: now,
@@ -65,7 +74,11 @@ export class ProcessingLegalBasesService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'consent.legal-basis.version', basisId: basis.id, supersededId },
+        {
+          operation: 'consent.legal-basis.version',
+          basisId: basis.id,
+          supersededId,
+        },
         'Processing legal basis versioned',
       );
       return {

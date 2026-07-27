@@ -18,7 +18,11 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     name: 'happy: aprovisiona tenant raíz',
     method: 'post',
     path: () => '/admin/tenants',
-    body: (c) => ({ code: `DIR-T-${c.u}`, legalName: 'Acme Health SA', ownerUserId: c.adminUserId }),
+    body: (c) => ({
+      code: `DIR-T-${c.u}`,
+      legalName: 'Acme Health SA',
+      ownerUserId: c.adminUserId,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.dirTenantId = String(b.id);
@@ -31,7 +35,11 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/admin/tenants',
     auth: false,
-    body: (c) => ({ code: `DIR-X-${c.u}`, legalName: 'X', ownerUserId: c.adminUserId }),
+    body: (c) => ({
+      code: `DIR-X-${c.u}`,
+      legalName: 'X',
+      ownerUserId: c.adminUserId,
+    }),
     expectedStatus: 401,
   },
   {
@@ -71,7 +79,11 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     name: 'happy: crea sub-tenant',
     method: 'post',
     path: (c) => `/tenants/${c.vars.dirTenantId}/child-tenants`,
-    body: (c) => ({ code: `DIR-C-${c.u}`, legalName: 'Acme Child', adminUserId: c.adminUserId }),
+    body: (c) => ({
+      code: `DIR-C-${c.u}`,
+      legalName: 'Acme Child',
+      adminUserId: c.adminUserId,
+    }),
     expectedStatus: 201,
   },
   {
@@ -80,7 +92,11 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     name: 'límite: padre inexistente -> 404',
     method: 'post',
     path: () => `/tenants/${UUID_ABSENT}/child-tenants`,
-    body: (c) => ({ code: `DIR-C2-${c.u}`, legalName: 'X', adminUserId: c.adminUserId }),
+    body: (c) => ({
+      code: `DIR-C2-${c.u}`,
+      legalName: 'X',
+      adminUserId: c.adminUserId,
+    }),
     expectedStatus: 404,
   },
 
@@ -91,7 +107,12 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     name: 'happy: crea branch origen',
     method: 'post',
     path: (c) => `/tenants/${c.tenantId}/branches`,
-    body: (c) => ({ code: `DIR-B1-${c.u}`, name: 'Sede Centro', latitude: -12.0464, longitude: -77.0428 }),
+    body: (c) => ({
+      code: `DIR-B1-${c.u}`,
+      name: 'Sede Centro',
+      latitude: -12.0464,
+      longitude: -77.0428,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.dirBranch1 = String(b.id);
@@ -145,19 +166,23 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
   // --- UC-04-06: asignar a branch ---
   {
     module: 'Directory',
-    endpoint: 'POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
+    endpoint:
+      'POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
     name: 'happy: asigna a branch',
     method: 'post',
-    path: (c) => `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/branch-assignments`,
+    path: (c) =>
+      `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/branch-assignments`,
     body: (c) => ({ branchId: c.vars.dirBranch1 }),
     expectedStatus: 201,
   },
   {
     module: 'Directory',
-    endpoint: 'POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
+    endpoint:
+      'POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
     name: 'límite: asignación duplicada -> 409',
     method: 'post',
-    path: (c) => `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/branch-assignments`,
+    path: (c) =>
+      `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/branch-assignments`,
     body: (c) => ({ branchId: c.vars.dirBranch1 }),
     expectedStatus: 409,
   },
@@ -168,8 +193,12 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /tenants/{tenantId}/memberships/{membershipId}/transfer',
     name: 'happy: transfiere de origen a destino',
     method: 'post',
-    path: (c) => `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/transfer`,
-    body: (c) => ({ fromBranchId: c.vars.dirBranch1, toBranchId: c.vars.dirBranch2 }),
+    path: (c) =>
+      `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/transfer`,
+    body: (c) => ({
+      fromBranchId: c.vars.dirBranch1,
+      toBranchId: c.vars.dirBranch2,
+    }),
     expectedStatus: 200,
   },
 
@@ -179,7 +208,8 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     endpoint: 'PATCH /tenants/{tenantId}/memberships/{membershipId}/role',
     name: 'happy: cambia rol y scope',
     method: 'patch',
-    path: (c) => `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/role`,
+    path: (c) =>
+      `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/role`,
     body: () => ({ role: 'ADMIN', accessScope: 'BRANCH' }),
     expectedStatus: 200,
   },
@@ -188,7 +218,8 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     endpoint: 'PATCH /tenants/{tenantId}/memberships/{membershipId}/role',
     name: 'límite: sin rol ni scope -> 422',
     method: 'patch',
-    path: (c) => `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/role`,
+    path: (c) =>
+      `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/role`,
     body: () => ({}),
     expectedStatus: 422,
   },
@@ -199,7 +230,8 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /tenants/{tenantId}/memberships/{membershipId}/offboard',
     name: 'happy: da de baja al miembro',
     method: 'post',
-    path: (c) => `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/offboard`,
+    path: (c) =>
+      `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/offboard`,
     body: () => ({}),
     expectedStatus: 200,
   },
@@ -208,7 +240,8 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     endpoint: 'POST /tenants/{tenantId}/memberships/{membershipId}/offboard',
     name: 'límite: membresía ya cerrada -> 422',
     method: 'post',
-    path: (c) => `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/offboard`,
+    path: (c) =>
+      `/tenants/${c.tenantId}/memberships/${c.vars.dirMembershipId}/offboard`,
     body: () => ({}),
     expectedStatus: 422,
   },

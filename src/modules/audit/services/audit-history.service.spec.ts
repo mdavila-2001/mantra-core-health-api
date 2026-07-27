@@ -12,7 +12,11 @@ function build() {
   const historyRepo = {
     isSupported: mockFn().mockReturnValue(true),
     timeline: mockFn().mockResolvedValue([
-      { operationConceptId: 'op', recordedAt: new Date('2026-01-01'), dataSnapshot: {} },
+      {
+        operationConceptId: 'op',
+        recordedAt: new Date('2026-01-01'),
+        dataSnapshot: {},
+      },
     ]),
   };
   const dataAccessRepo = { record: mockFn() };
@@ -20,7 +24,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuditHistoryService(
     em as any,
-    historyRepo as any,
+    historyRepo,
     dataAccessRepo as any,
     auditLogRepo as any,
     logger as any,
@@ -31,7 +35,7 @@ function build() {
 describe('AuditHistoryService (UC-10-05)', () => {
   it('devuelve la línea de tiempo y audita la propia lectura', async () => {
     const d = build();
-    const res = await d.service.getTimeline('users', 'u1', {} as any, actor);
+    const res = await d.service.getTimeline('users', 'u1', {}, actor);
     expect(res).toMatchObject({ entity: 'users', entityId: 'u1', count: 1 });
     expect(d.dataAccessRepo.record).toHaveBeenCalled();
     expect(d.auditLogRepo.append).toHaveBeenCalled();

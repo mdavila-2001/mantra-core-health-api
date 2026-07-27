@@ -19,12 +19,18 @@ export class InitialLicenseDto {
   @MaxLength(200)
   licenseNumber!: string;
 
-  @ApiPropertyOptional({ description: 'Tenant de la autoridad emisora', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant de la autoridad emisora',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   issuingAuthorityTenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de la jurisdicción', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de la jurisdicción',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
@@ -39,7 +45,10 @@ export class InitialLicenseDto {
   @IsDateString()
   validTo?: string;
 
-  @ApiPropertyOptional({ description: 'Archivo de evidencia de la licencia', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Archivo de evidencia de la licencia',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   evidenceFileId?: string;
@@ -47,11 +56,17 @@ export class InitialLicenseDto {
 
 /** Cuerpo de `POST /pharmacies` (UC-24-01). */
 export class CreatePharmacyDto {
-  @ApiProperty({ description: 'Tenant propietario de la farmacia', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant propietario de la farmacia',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Código único de la farmacia por tenant', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único de la farmacia por tenant',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -69,12 +84,18 @@ export class CreatePharmacyDto {
   @MaxLength(300)
   tradeName?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant no público / farmacia interna', example: false })
+  @ApiPropertyOptional({
+    description: 'Tenant no público / farmacia interna',
+    example: false,
+  })
   @IsOptional()
   @IsBoolean()
   isRetail?: boolean;
 
-  @ApiProperty({ description: 'Licencia inicial de la farmacia', type: InitialLicenseDto })
+  @ApiProperty({
+    description: 'Licencia inicial de la farmacia',
+    type: InitialLicenseDto,
+  })
   @ValidateNested()
   @Type(() => InitialLicenseDto)
   license!: InitialLicenseDto;

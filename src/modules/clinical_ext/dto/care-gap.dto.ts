@@ -18,7 +18,10 @@ export class CareGapInputDto {
   @IsUUID()
   gapTypeConceptId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Medida de calidad / vacuna (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Medida de calidad / vacuna (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   measureConceptId?: string;
@@ -51,7 +54,10 @@ export class CloseCareGapDto {
   @MaxLength(100)
   closedByResourceType?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Id del recurso que cierra la brecha' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Id del recurso que cierra la brecha',
+  })
   @IsOptional()
   @IsUUID()
   closedByResourceId?: string;
@@ -59,11 +65,18 @@ export class CloseCareGapDto {
 
 /** Cuerpo de `POST /patients/{id}/immunization-plan/project` (UC-18-11). */
 export class ProjectImmunizationPlanDto {
-  @ApiProperty({ type: String, format: 'date', description: 'Fecha de nacimiento del paciente' })
+  @ApiProperty({
+    type: String,
+    format: 'date',
+    description: 'Fecha de nacimiento del paciente',
+  })
   @IsISO8601()
   birthDate!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Jurisdicción del calendario (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Jurisdicción del calendario (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
@@ -90,7 +103,9 @@ export class CreateImmunizationScheduleDto {
   @MaxLength(200)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Edad recomendada en días desde el nacimiento' })
+  @ApiPropertyOptional({
+    description: 'Edad recomendada en días desde el nacimiento',
+  })
   @IsOptional()
   @IsInt()
   recommendedAgeDays?: number;
@@ -119,7 +134,10 @@ export class CareGapResponseDto {
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Estado de la brecha (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado de la brecha (concept id)',
+  })
   statusConceptId!: string;
 }
 
@@ -128,10 +146,15 @@ export class RecomputeCareGapsResponseDto {
   @ApiProperty({ description: 'Nº de brechas abiertas nuevas' })
   opened!: number;
 
-  @ApiProperty({ description: 'Nº de brechas ya abiertas que se dejaron intactas' })
+  @ApiProperty({
+    description: 'Nº de brechas ya abiertas que se dejaron intactas',
+  })
   skipped!: number;
 
-  @ApiProperty({ type: [String], description: 'Ids de las brechas abiertas en esta corrida' })
+  @ApiProperty({
+    type: [String],
+    description: 'Ids de las brechas abiertas en esta corrida',
+  })
   openedIds!: string[];
 }
 

@@ -42,18 +42,22 @@ export class IdentifiersRepository {
 
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateIdentifierData): Identifiers {
-    return em.create(Identifiers, {
-      ownerTypeConceptId: data.ownerTypeConceptId,
-      ownerId: data.ownerId,
-      typeConceptId: data.typeConceptId,
-      system: data.system,
-      value: data.value,
-      useConceptId: data.useConceptId,
-      stateConceptId: data.stateConceptId,
-      ...createdBy(data.actorUserId),
-      // `partial: true` relaja el tipado estricto de `em.create`: la columna
-      // `row_version` (version: true) tiene DEFAULT en BD y MikroORM la gestiona,
-      // pero su tipo la marcaría como requerida. No altera el comportamiento.
-    }, { partial: true });
+    return em.create(
+      Identifiers,
+      {
+        ownerTypeConceptId: data.ownerTypeConceptId,
+        ownerId: data.ownerId,
+        typeConceptId: data.typeConceptId,
+        system: data.system,
+        value: data.value,
+        useConceptId: data.useConceptId,
+        stateConceptId: data.stateConceptId,
+        ...createdBy(data.actorUserId),
+        // `partial: true` relaja el tipado estricto de `em.create`: la columna
+        // `row_version` (version: true) tiene DEFAULT en BD y MikroORM la gestiona,
+        // pero su tipo la marcaría como requerida. No altera el comportamiento.
+      },
+      { partial: true },
+    );
   }
 }

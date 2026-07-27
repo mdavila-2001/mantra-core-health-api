@@ -26,7 +26,10 @@ export class AnalyticsGovernanceLogRepository {
   }
 
   /** Encola una fila de gobernanza; sin flush. */
-  record(em: EntityManager, data: RecordGovernanceData): AnalyticsGovernanceLog {
+  record(
+    em: EntityManager,
+    data: RecordGovernanceData,
+  ): AnalyticsGovernanceLog {
     return em.create(
       AnalyticsGovernanceLog,
       {
@@ -35,7 +38,9 @@ export class AnalyticsGovernanceLogRepository {
         purposeDefinitionId: data.purposeDefinitionId,
         exportReference: data.exportReference,
         affectedSubjectCount:
-          data.affectedSubjectCount === undefined ? undefined : String(data.affectedSubjectCount),
+          data.affectedSubjectCount === undefined
+            ? undefined
+            : String(data.affectedSubjectCount),
         queryHash: data.queryHash,
         approvalStatusConceptId: data.approvalStatusConceptId,
         occurredAt: new Date(),

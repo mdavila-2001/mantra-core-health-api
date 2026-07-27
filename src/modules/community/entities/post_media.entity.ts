@@ -6,13 +6,13 @@ export class PostMedia {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'post_id', type: 'uuid' })  // FK → community.social_posts
+  @Property({ fieldName: 'post_id', type: 'uuid' }) // FK → community.social_posts
   postId!: string;
 
-  @Property({ fieldName: 'file_id', type: 'uuid' })  // FK → common.files
+  @Property({ fieldName: 'file_id', type: 'uuid' }) // FK → common.files
   fileId!: string;
 
-  @Property({ fieldName: 'media_role_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'media_role_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   mediaRoleConceptId!: string;
 
   @Property({ fieldName: 'alt_text', columnType: 'varchar', nullable: true })
@@ -24,7 +24,6 @@ export class PostMedia {
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
-
 }

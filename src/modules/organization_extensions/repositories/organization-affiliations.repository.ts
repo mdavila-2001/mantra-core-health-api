@@ -25,7 +25,10 @@ export interface CreateAffiliationData {
 @Injectable()
 export class OrganizationAffiliationsRepository {
   /** Busca una afiliación por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<OrganizationAffiliations | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<OrganizationAffiliations | null> {
     return em.findOne(OrganizationAffiliations, { id });
   }
 
@@ -46,7 +49,10 @@ export class OrganizationAffiliationsRepository {
   }
 
   /** Crea la afiliación en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateAffiliationData): OrganizationAffiliations {
+  create(
+    em: EntityManager,
+    data: CreateAffiliationData,
+  ): OrganizationAffiliations {
     return em.create(
       OrganizationAffiliations,
       {

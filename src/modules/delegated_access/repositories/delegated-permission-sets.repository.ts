@@ -17,16 +17,26 @@ export interface CreatePermissionSetData {
 /** Acceso a datos de `delegated_access.delegated_permission_sets`. */
 @Injectable()
 export class DelegatedPermissionSetsRepository {
-  findById(em: EntityManager, id: string): Promise<DelegatedPermissionSets | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DelegatedPermissionSets | null> {
     return em.findOne(DelegatedPermissionSets, { id });
   }
 
   /** Set por (tenant, code): la unicidad es por tenant. */
-  findByCode(em: EntityManager, tenantId: string, code: string): Promise<DelegatedPermissionSets | null> {
+  findByCode(
+    em: EntityManager,
+    tenantId: string,
+    code: string,
+  ): Promise<DelegatedPermissionSets | null> {
     return em.findOne(DelegatedPermissionSets, { tenantId, code });
   }
 
-  create(em: EntityManager, data: CreatePermissionSetData): DelegatedPermissionSets {
+  create(
+    em: EntityManager,
+    data: CreatePermissionSetData,
+  ): DelegatedPermissionSets {
     return em.create(
       DelegatedPermissionSets,
       {

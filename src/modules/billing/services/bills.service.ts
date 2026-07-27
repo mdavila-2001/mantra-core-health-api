@@ -8,7 +8,10 @@ import {
   CONCEPTS,
   type AuthenticatedUser,
 } from '../../../common';
-import { BillsRepository, BillingDocumentLinksRepository } from '../repositories';
+import {
+  BillsRepository,
+  BillingDocumentLinksRepository,
+} from '../repositories';
 import { RegisterBillDto, BillResponseDto } from '../dto';
 import { BILL } from '../billing.concepts';
 import { fromCents, toCents } from '../money.util';
@@ -30,24 +33,47 @@ export class BillsService {
     this.logger.setContext(BillsService.name);
   }
 
-  async register(dto: RegisterBillDto, actor: AuthenticatedUser): Promise<BillResponseDto> {
+  async register(
+    dto: RegisterBillDto,
+    actor: AuthenticatedUser,
+  ): Promise<BillResponseDto> {
     this.logger.info(
-      { operation: 'billing.bill.register', vendorId: dto.vendorId, actorId: actor.id },
+      {
+        operation: 'billing.bill.register',
+        vendorId: dto.vendorId,
+        actorId: actor.id,
+      },
       'Registering vendor bill',
     );
     return this.em.transactional(async (tx) => {
       const vendor = await this.billsRepo.findVendor(tx, dto.vendorId);
-      if (!vendor) throw new ResourceNotFoundException('Proveedor no encontrado', { vendorId: dto.vendorId });
-      if (vendor.statusConceptId !== CONCEPTS.STATE_ACTIVE && vendor.statusConceptId !== CONCEPTS.TENANT_ACTIVE) {
+      if (!vendor)
+        throw new ResourceNotFoundException('Proveedor no encontrado', {
+          vendorId: dto.vendorId,
+        });
+      if (
+        vendor.statusConceptId !== CONCEPTS.STATE_ACTIVE &&
+        vendor.statusConceptId !== CONCEPTS.TENANT_ACTIVE
+      ) {
         // El vendor debe estar activo para poder capturar su factura.
-        throw new PreconditionFailedException('El proveedor no está activo', { vendorId: dto.vendorId });
+        throw new PreconditionFailedException('El proveedor no está activo', {
+          vendorId: dto.vendorId,
+        });
       }
 
-      const clash = await this.billsRepo.findByNumber(tx, dto.practiceId, dto.vendorId, dto.billNumber);
+      const clash = await this.billsRepo.findByNumber(
+        tx,
+        dto.practiceId,
+        dto.vendorId,
+        dto.billNumber,
+      );
       if (clash) {
-        throw new ConflictException('La factura del proveedor ya fue capturada', {
-          billNumber: dto.billNumber,
-        });
+        throw new ConflictException(
+          'La factura del proveedor ya fue capturada',
+          {
+            billNumber: dto.billNumber,
+          },
+        );
       }
 
       // Three-way match: una línea con orden de compra debe traer su recepción de bienes.
@@ -120,7 +146,11 @@ export class BillsService {
       }
 
       this.logger.info(
-        { operation: 'billing.bill.register', billId: bill.id, lines: dto.lines.length },
+        {
+          operation: 'billing.bill.register',
+          billId: bill.id,
+          lines: dto.lines.length,
+        },
         'Vendor bill registered',
       );
       return {

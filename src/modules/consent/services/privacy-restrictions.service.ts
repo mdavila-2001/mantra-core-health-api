@@ -2,9 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { SEED, type AuthenticatedUser } from '../../../common';
-import { PrivacyRestrictionsRepository, ConsentEventsRepository } from '../repositories';
+import {
+  PrivacyRestrictionsRepository,
+  ConsentEventsRepository,
+} from '../repositories';
 import { CONS } from '../consent.concepts';
-import { CreatePrivacyRestrictionDto, PrivacyRestrictionResponseDto } from '../dto';
+import {
+  CreatePrivacyRestrictionDto,
+  PrivacyRestrictionResponseDto,
+} from '../dto';
 
 /**
  * UC-07-07: aplica una restricción de privacidad que afecta el RLS clínico. Se
@@ -28,7 +34,10 @@ export class PrivacyRestrictionsService {
     actor: AuthenticatedUser,
   ): Promise<PrivacyRestrictionResponseDto> {
     this.logger.info(
-      { operation: 'consent.restriction.apply', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'consent.restriction.apply',
+        patientProfileId: dto.patientProfileId,
+      },
       'Applying privacy restriction',
     );
     return this.em.transactional(async (tx) => {
@@ -36,7 +45,8 @@ export class PrivacyRestrictionsService {
       const restriction = this.restrictionsRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
         tenantId: dto.tenantId ?? SEED.tenantId,
-        restrictionTypeConceptId: dto.restrictionTypeConceptId ?? CONS.RESTRICTION_TYPE_BLOCK,
+        restrictionTypeConceptId:
+          dto.restrictionTypeConceptId ?? CONS.RESTRICTION_TYPE_BLOCK,
         dataClassConceptId: dto.dataClassConceptId,
         targetActorTypeConceptId: dto.targetActorTypeConceptId,
         targetActorId: dto.targetActorId,
@@ -58,7 +68,10 @@ export class PrivacyRestrictionsService {
       });
 
       this.logger.info(
-        { operation: 'consent.restriction.apply', restrictionId: restriction.id },
+        {
+          operation: 'consent.restriction.apply',
+          restrictionId: restriction.id,
+        },
         'Privacy restriction applied',
       );
       return {

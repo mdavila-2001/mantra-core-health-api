@@ -23,7 +23,10 @@ export interface CreateProvisionData {
 @Injectable()
 export class ConsentProvisionsRepository {
   /** Provisiones vigentes (sin `valid_to`) de un consentimiento. */
-  findOpenByConsent(em: EntityManager, consentId: string): Promise<ConsentProvisions[]> {
+  findOpenByConsent(
+    em: EntityManager,
+    consentId: string,
+  ): Promise<ConsentProvisions[]> {
     return em.find(ConsentProvisions, { consentId, validTo: null });
   }
 

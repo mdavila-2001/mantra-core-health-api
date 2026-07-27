@@ -52,15 +52,24 @@ export class TelemetryConsentService {
   ): Promise<DisclosureAcceptanceResponseDto> {
     const userId = dto.userId ?? actor.id;
     this.logger.info(
-      { operation: 'telemetry.disclosure.accept', versionId: dto.trackingDisclosureVersionId },
+      {
+        operation: 'telemetry.disclosure.accept',
+        versionId: dto.trackingDisclosureVersionId,
+      },
       'Recording disclosure acceptance',
     );
     return this.em.transactional(async (tx) => {
-      const version = await this.disclosuresRepo.findById(tx, dto.trackingDisclosureVersionId);
+      const version = await this.disclosuresRepo.findById(
+        tx,
+        dto.trackingDisclosureVersionId,
+      );
       if (!version) {
-        throw new ResourceNotFoundException('Versión de disclosure no encontrada', {
-          trackingDisclosureVersionId: dto.trackingDisclosureVersionId,
-        });
+        throw new ResourceNotFoundException(
+          'Versión de disclosure no encontrada',
+          {
+            trackingDisclosureVersionId: dto.trackingDisclosureVersionId,
+          },
+        );
       }
 
       // Idempotencia lógica por (user, version, session): reusa la existente.
@@ -107,20 +116,32 @@ export class TelemetryConsentService {
   ): Promise<TrackingConsentResponseDto> {
     const userId = dto.userId ?? actor.id;
     this.logger.info(
-      { operation: 'telemetry.consent.grant', purposeDefinitionId: dto.purposeDefinitionId },
+      {
+        operation: 'telemetry.consent.grant',
+        purposeDefinitionId: dto.purposeDefinitionId,
+      },
       'Granting tracking consent',
     );
     return this.em.transactional(async (tx) => {
-      const purpose = await this.purposesRepo.findById(tx, dto.purposeDefinitionId);
+      const purpose = await this.purposesRepo.findById(
+        tx,
+        dto.purposeDefinitionId,
+      );
       if (!purpose) {
-        throw new ResourceNotFoundException('Propósito de tracking no encontrado', {
-          purposeDefinitionId: dto.purposeDefinitionId,
-        });
+        throw new ResourceNotFoundException(
+          'Propósito de tracking no encontrado',
+          {
+            purposeDefinitionId: dto.purposeDefinitionId,
+          },
+        );
       }
       if (purpose.requiresConsent === false) {
-        throw new PreconditionFailedException('El propósito no requiere consentimiento', {
-          purposeDefinitionId: dto.purposeDefinitionId,
-        });
+        throw new PreconditionFailedException(
+          'El propósito no requiere consentimiento',
+          {
+            purposeDefinitionId: dto.purposeDefinitionId,
+          },
+        );
       }
 
       const now = new Date();
@@ -151,7 +172,10 @@ export class TelemetryConsentService {
     dto: ProvisionAnalyticsSubjectDto,
   ): Promise<AnalyticsSubjectResponseDto> {
     const key = dto.pseudonymousSubjectKey ?? this.deriveSubjectKey(dto);
-    this.logger.info({ operation: 'telemetry.subject.provision' }, 'Provisioning analytics subject');
+    this.logger.info(
+      { operation: 'telemetry.subject.provision' },
+      'Provisioning analytics subject',
+    );
     return this.em.transactional(async (tx) => {
       // unique(pseudonymous_subject_key): si ya existe, se reutiliza (idempotente).
       const existing = await this.subjectsRepo.findByKey(tx, key);
@@ -189,19 +213,31 @@ export class TelemetryConsentService {
     consentId: string,
     actor: AuthenticatedUser,
   ): Promise<TrackingConsentResponseDto> {
-    this.logger.info({ operation: 'telemetry.consent.withdraw', consentId }, 'Withdrawing tracking consent');
+    this.logger.info(
+      { operation: 'telemetry.consent.withdraw', consentId },
+      'Withdrawing tracking consent',
+    );
     return this.em.transactional(async (tx) => {
       const consent = await this.consentsRepo.findById(tx, consentId);
       if (!consent) {
-        throw new ResourceNotFoundException('Consentimiento no encontrado', { consentId });
+        throw new ResourceNotFoundException('Consentimiento no encontrado', {
+          consentId,
+        });
       }
 
       // El estado efectivo lo define la última decisión de (user, purpose).
-      const latest = await this.consentsRepo.findLatest(tx, consent.userId, consent.purposeDefinitionId);
+      const latest = await this.consentsRepo.findLatest(
+        tx,
+        consent.userId,
+        consent.purposeDefinitionId,
+      );
       if (!latest || latest.decisionConceptId !== TELE.DECISION_GRANTED) {
-        throw new PreconditionFailedException('No hay un consentimiento vigente que retirar', {
-          consentId,
-        });
+        throw new PreconditionFailedException(
+          'No hay un consentimiento vigente que retirar',
+          {
+            consentId,
+          },
+        );
       }
 
       const now = new Date();
@@ -218,7 +254,10 @@ export class TelemetryConsentService {
       await tx.flush();
 
       // Corta la recolección futura: desactiva sujetos originados por este consentimiento.
-      const subjects = await this.subjectsRepo.findActiveByConsent(tx, consent.id);
+      const subjects = await this.subjectsRepo.findActiveByConsent(
+        tx,
+        consent.id,
+      );
       for (const subject of subjects) {
         subject.deactivatedAt = now;
       }
@@ -236,7 +275,11 @@ export class TelemetryConsentService {
 
   /** Deriva una clave pseudónima estable (HMAC-like) sin exponer PII. */
   private deriveSubjectKey(dto: ProvisionAnalyticsSubjectDto): string {
-    const material = [dto.userId, dto.patientProfileId, dto.createdFromConsentId].filter(Boolean);
+    const material = [
+      dto.userId,
+      dto.patientProfileId,
+      dto.createdFromConsentId,
+    ].filter(Boolean);
     if (material.length === 0) return `anon:${randomUUID()}`;
     return createHash('sha256').update(material.join('|')).digest('hex');
   }

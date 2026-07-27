@@ -13,11 +13,17 @@ import { createdBy } from '../../../common';
  */
 @Injectable()
 export class ResidencyRepository {
-  findPolicyByCode(em: EntityManager, code: string): Promise<DataResidencyPolicies | null> {
+  findPolicyByCode(
+    em: EntityManager,
+    code: string,
+  ): Promise<DataResidencyPolicies | null> {
     return em.findOne(DataResidencyPolicies, { code });
   }
 
-  findPolicyById(em: EntityManager, id: string): Promise<DataResidencyPolicies | null> {
+  findPolicyById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DataResidencyPolicies | null> {
     return em.findOne(DataResidencyPolicies, { id });
   }
 
@@ -39,7 +45,11 @@ export class ResidencyRepository {
     },
   ): DataResidencyPolicies {
     const { actorUserId, ...rest } = data;
-    return em.create(DataResidencyPolicies, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      DataResidencyPolicies,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createBinding(
@@ -55,10 +65,17 @@ export class ResidencyRepository {
     },
   ): TenantResidencyBindings {
     const { actorUserId, ...rest } = data;
-    return em.create(TenantResidencyBindings, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      TenantResidencyBindings,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
-  findTransferByReference(em: EntityManager, transferReference: string): Promise<CrossBorderTransferEvents | null> {
+  findTransferByReference(
+    em: EntityManager,
+    transferReference: string,
+  ): Promise<CrossBorderTransferEvents | null> {
     return em.findOne(CrossBorderTransferEvents, { transferReference });
   }
 

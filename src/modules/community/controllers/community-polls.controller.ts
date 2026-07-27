@@ -10,7 +10,12 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { CommunityPollsService } from '../services';
-import { CreatePollDto, CreateVoteDto, PollResponseDto, VoteResponseDto } from '../dto';
+import {
+  CreatePollDto,
+  CreateVoteDto,
+  PollResponseDto,
+  VoteResponseDto,
+} from '../dto';
 
 /** Endpoints de encuestas: creación sobre un post y voto. */
 @ApiTags('community-polls')

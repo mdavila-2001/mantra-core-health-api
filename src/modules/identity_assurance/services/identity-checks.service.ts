@@ -52,20 +52,28 @@ export class IdentityChecksService {
     dto: RecordAttemptDto,
     actor: AuthenticatedUser,
   ): Promise<AttemptResponseDto> {
-    this.logger.info({ operation: 'ida.check.attempt', actorId: actor.id, checkId }, 'Recording attempt');
+    this.logger.info(
+      { operation: 'ida.check.attempt', actorId: actor.id, checkId },
+      'Recording attempt',
+    );
     return this.em.transactional(async (tx) => {
       const check = await this.loadCheck(tx, checkId);
 
       const outcome: AttemptOutcome = dto.outcome ?? 'SUCCESS';
       const now = new Date();
-      const attemptNumber = (await this.attemptsRepo.countByCase(tx, check.identityVerificationCaseId)) + 1;
+      const attemptNumber =
+        (await this.attemptsRepo.countByCase(
+          tx,
+          check.identityVerificationCaseId,
+        )) + 1;
       const attempt = this.attemptsRepo.create(tx, {
         identityVerificationCaseId: check.identityVerificationCaseId,
         identityAuthorityEndpointId: dto.identityAuthorityEndpointId,
         attemptNumber,
         requestMessageId: dto.requestMessageId,
         responseMessageId: dto.responseMessageId,
-        idempotencyKey: dto.idempotencyKey ?? `ida-attempt-${check.id}-${attemptNumber}`,
+        idempotencyKey:
+          dto.idempotencyKey ?? `ida-attempt-${check.id}-${attemptNumber}`,
         startedAt: now,
         completedAt: outcome === 'PENDING' ? undefined : now,
         outcomeConceptId: ATTEMPT_OUTCOME_CONCEPT[outcome],
@@ -73,7 +81,8 @@ export class IdentityChecksService {
         retryEligible: dto.retryEligible,
       });
 
-      check.statusConceptId = outcome === 'FAILED' ? IDA.CHECK_FAILED : IDA.CHECK_IN_PROGRESS;
+      check.statusConceptId =
+        outcome === 'FAILED' ? IDA.CHECK_FAILED : IDA.CHECK_IN_PROGRESS;
       touch(check, actor.id);
       await tx.flush();
       return {
@@ -91,7 +100,10 @@ export class IdentityChecksService {
     dto: RecordResultDto,
     actor: AuthenticatedUser,
   ): Promise<CheckResultResponseDto> {
-    this.logger.info({ operation: 'ida.check.result', actorId: actor.id, checkId }, 'Recording result');
+    this.logger.info(
+      { operation: 'ida.check.result', actorId: actor.id, checkId },
+      'Recording result',
+    );
     return this.em.transactional(async (tx) => {
       const check = await this.loadCheck(tx, checkId);
       const hasCompleted = await this.attemptsRepo.existsCompletedForCase(
@@ -99,14 +111,19 @@ export class IdentityChecksService {
         check.identityVerificationCaseId,
       );
       if (!hasCompleted) {
-        throw new PreconditionFailedException('No existe un intento completado para registrar resultado', {
-          checkId,
-        });
+        throw new PreconditionFailedException(
+          'No existe un intento completado para registrar resultado',
+          {
+            checkId,
+          },
+        );
       }
 
       const previous = await this.resultsRepo.findLatestByCheck(tx, check.id);
-      const resultVersion = (await this.resultsRepo.countByCheck(tx, check.id)) + 1;
-      const resultConceptId = dto.result === 'MATCH' ? IDA.RESULT_MATCH : IDA.RESULT_NO_MATCH;
+      const resultVersion =
+        (await this.resultsRepo.countByCheck(tx, check.id)) + 1;
+      const resultConceptId =
+        dto.result === 'MATCH' ? IDA.RESULT_MATCH : IDA.RESULT_NO_MATCH;
       const result = this.resultsRepo.create(tx, {
         identityCheckId: check.id,
         resultVersion,
@@ -119,7 +136,8 @@ export class IdentityChecksService {
         checkedByActorId: actor.id,
       });
 
-      check.statusConceptId = dto.result === 'MATCH' ? IDA.CHECK_COMPLETED : IDA.CHECK_FAILED;
+      check.statusConceptId =
+        dto.result === 'MATCH' ? IDA.CHECK_COMPLETED : IDA.CHECK_FAILED;
       touch(check, actor.id);
       await tx.flush();
       return {
@@ -131,9 +149,15 @@ export class IdentityChecksService {
     });
   }
 
-  private async loadCheck(tx: EntityManager, checkId: string): Promise<IdentityChecks> {
+  private async loadCheck(
+    tx: EntityManager,
+    checkId: string,
+  ): Promise<IdentityChecks> {
     const check = await this.checksRepo.findById(tx, checkId);
-    if (!check) throw new ResourceNotFoundException('Check de identidad no encontrado', { checkId });
+    if (!check)
+      throw new ResourceNotFoundException('Check de identidad no encontrado', {
+        checkId,
+      });
     return check;
   }
 }

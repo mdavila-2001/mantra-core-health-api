@@ -4,7 +4,10 @@ import { IsDate, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /authz/users/{userId}/role-assignments` (UC-06-04). */
 export class CreateRoleAssignmentDto {
-  @ApiProperty({ description: 'Rol a asignar (debe ser asignable)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Rol a asignar (debe ser asignable)',
+    format: 'uuid',
+  })
   @IsUUID()
   roleId!: string;
 
@@ -13,23 +16,37 @@ export class CreateRoleAssignmentDto {
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Sede/branch del ámbito', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sede/branch del ámbito',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   branchId?: string;
 
-  @ApiPropertyOptional({ description: 'Consultorio/practice del ámbito', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Consultorio/practice del ámbito',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   practiceId?: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
   validFrom?: Date;
 
-  @ApiPropertyOptional({ description: 'Fin de vigencia', type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Fin de vigencia',
+    type: String,
+    format: 'date-time',
+  })
   @IsOptional()
   @Type(() => Date)
   @IsDate()

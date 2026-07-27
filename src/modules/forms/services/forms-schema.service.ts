@@ -10,7 +10,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { DefinitionSetsRepository, MigrationsRepository } from '../repositories';
+import {
+  DefinitionSetsRepository,
+  MigrationsRepository,
+} from '../repositories';
 import {
   CreateDefinitionSetDto,
   PublishVersionDto,
@@ -51,10 +54,16 @@ export class FormsSchemaService {
       'Creating definition set',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.setsRepo.findSetByNamespace(tx, dto.namespaceUri);
+      const clash = await this.setsRepo.findSetByNamespace(
+        tx,
+        dto.namespaceUri,
+      );
       if (clash) {
         this.logger.warn(
-          { operation: 'forms.definitionSet.create', reason: 'namespace-in-use' },
+          {
+            operation: 'forms.definitionSet.create',
+            reason: 'namespace-in-use',
+          },
           'Rejected: namespace already in use',
         );
         throw new ConflictException('El namespace ya está en uso', {
@@ -67,7 +76,8 @@ export class FormsSchemaService {
         code: dto.code,
         name: dto.name,
         ownerTenantId: dto.ownerTenantId,
-        targetDomainConceptId: dto.targetDomainConceptId ?? FORMS.TARGET_DOMAIN_GENERIC,
+        targetDomainConceptId:
+          dto.targetDomainConceptId ?? FORMS.TARGET_DOMAIN_GENERIC,
         statusConceptId: FORMS.SET_STATUS_DRAFT,
         actorUserId: actor.id,
       });
@@ -86,7 +96,11 @@ export class FormsSchemaService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'forms.definitionSet.create', setId: set.id, versionId: version.id },
+        {
+          operation: 'forms.definitionSet.create',
+          setId: set.id,
+          versionId: version.id,
+        },
         'Definition set created',
       );
       return { id: set.id, versionId: version.id, status: set.statusConceptId };
@@ -106,16 +120,26 @@ export class FormsSchemaService {
     );
     return this.em.transactional(async (tx) => {
       const set = await this.setsRepo.findSetById(tx, setId);
-      if (!set) throw new ResourceNotFoundException('Set de definiciones no encontrado', { setId });
+      if (!set)
+        throw new ResourceNotFoundException(
+          'Set de definiciones no encontrado',
+          { setId },
+        );
 
       const version = await this.setsRepo.findVersionById(tx, versionId);
       if (!version || version.definitionSetId !== setId) {
-        throw new ResourceNotFoundException('Versión no encontrada para el set', { versionId });
+        throw new ResourceNotFoundException(
+          'Versión no encontrada para el set',
+          { versionId },
+        );
       }
       if (version.publicationStatusConceptId !== FORMS.PUB_DRAFT) {
-        throw new PreconditionFailedException('La versión no está en borrador', {
-          versionId,
-        });
+        throw new PreconditionFailedException(
+          'La versión no está en borrador',
+          {
+            versionId,
+          },
+        );
       }
 
       for (const [i, m] of dto.members.entries()) {
@@ -132,13 +156,21 @@ export class FormsSchemaService {
 
       version.publicationStatusConceptId = FORMS.PUB_PUBLISHED;
       version.effectiveFrom = new Date();
-      version.schemaHash = this.finalHash(version.id, dto.members.map((m) => m.fieldId));
+      version.schemaHash = this.finalHash(
+        version.id,
+        dto.members.map((m) => m.fieldId),
+      );
 
       set.statusConceptId = FORMS.SET_STATUS_ACTIVE;
       touch(set, actor.id);
 
       this.logger.info(
-        { operation: 'forms.definitionSet.publish', setId, versionId, members: dto.members.length },
+        {
+          operation: 'forms.definitionSet.publish',
+          setId,
+          versionId,
+          members: dto.members.length,
+        },
         'Definition set version published',
       );
       return { ok: true };
@@ -158,15 +190,27 @@ export class FormsSchemaService {
     );
     return this.em.transactional(async (tx) => {
       const set = await this.setsRepo.findSetById(tx, setId);
-      if (!set) throw new ResourceNotFoundException('Set de definiciones no encontrado', { setId });
+      if (!set)
+        throw new ResourceNotFoundException(
+          'Set de definiciones no encontrado',
+          { setId },
+        );
 
       const existing = await this.migrationsRepo.findById(tx, migrationId);
       if (existing) {
-        throw new ConflictException('La migración ya fue registrada', { migrationId });
+        throw new ConflictException('La migración ya fue registrada', {
+          migrationId,
+        });
       }
 
-      const fromVersion = await this.setsRepo.findVersionById(tx, dto.fromVersionId);
-      const toVersion = await this.setsRepo.findVersionById(tx, dto.toVersionId);
+      const fromVersion = await this.setsRepo.findVersionById(
+        tx,
+        dto.fromVersionId,
+      );
+      const toVersion = await this.setsRepo.findVersionById(
+        tx,
+        dto.toVersionId,
+      );
       if (!fromVersion || fromVersion.definitionSetId !== setId) {
         throw new ResourceNotFoundException('Versión origen no válida', {
           fromVersionId: dto.fromVersionId,
@@ -184,7 +228,8 @@ export class FormsSchemaService {
         definitionSetId: setId,
         fromVersionId: dto.fromVersionId,
         toVersionId: dto.toVersionId,
-        migrationTypeConceptId: dto.migrationTypeConceptId ?? FORMS.MIGRATION_TYPE_TRANSFORM,
+        migrationTypeConceptId:
+          dto.migrationTypeConceptId ?? FORMS.MIGRATION_TYPE_TRANSFORM,
         transformationExpression: dto.transformationExpression,
         validationExpression: dto.validationExpression,
         rollbackExpression: dto.rollbackExpression,
@@ -194,15 +239,25 @@ export class FormsSchemaService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'forms.schema.migrate', migrationId: migration.id, migratedValues: 0 },
+        {
+          operation: 'forms.schema.migrate',
+          migrationId: migration.id,
+          migratedValues: 0,
+        },
         'Schema migration completed',
       );
-      return { id: migration.id, status: migration.statusConceptId, migratedValues: 0 };
+      return {
+        id: migration.id,
+        status: migration.statusConceptId,
+        migratedValues: 0,
+      };
     });
   }
 
   private provisionalHash(setId: string, semanticVersion: string): string {
-    return createHash('sha256').update(`${setId}:${semanticVersion}:draft`).digest('hex');
+    return createHash('sha256')
+      .update(`${setId}:${semanticVersion}:draft`)
+      .digest('hex');
   }
 
   private finalHash(versionId: string, fieldIds: string[]): string {

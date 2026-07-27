@@ -41,7 +41,9 @@ export class SitesController {
   @Post(':siteId/care-spaces')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear un espacio de atención bajo una unidad/sitio' })
+  @ApiOperation({
+    summary: 'Crear un espacio de atención bajo una unidad/sitio',
+  })
   createCareSpace(
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @Body() dto: CreateCareSpaceDto,

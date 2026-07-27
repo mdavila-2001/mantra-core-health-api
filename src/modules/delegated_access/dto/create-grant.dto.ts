@@ -2,7 +2,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDateString, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 const PURPOSES = ['TREATMENT', 'BILLING', 'OPERATIONS'] as const;
-const RESOURCE_TYPES = ['CLINICAL_NOTE', 'APPOINTMENT', 'PRESCRIPTION'] as const;
+const RESOURCE_TYPES = [
+  'CLINICAL_NOTE',
+  'APPOINTMENT',
+  'PRESCRIPTION',
+] as const;
 
 /**
  * Cuerpo de `POST /practitioner-delegates/{id}/grants` (UC-29-06). `validTo` es
@@ -10,14 +14,20 @@ const RESOURCE_TYPES = ['CLINICAL_NOTE', 'APPOINTMENT', 'PRESCRIPTION'] as const
  */
 export class CreateGrantDto {
   @ApiProperty({ description: 'Propósito de uso', enum: PURPOSES })
-  @IsIn(PURPOSES as unknown as string[])
+  @IsIn(PURPOSES)
   purpose!: (typeof PURPOSES)[number];
 
-  @ApiProperty({ description: 'Fin de vigencia del grant (ISO, obligatorio)', format: 'date-time' })
+  @ApiProperty({
+    description: 'Fin de vigencia del grant (ISO, obligatorio)',
+    format: 'date-time',
+  })
   @IsDateString()
   validTo!: string;
 
-  @ApiPropertyOptional({ description: 'Inicio de vigencia (ISO)', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Inicio de vigencia (ISO)',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   validFrom?: string;
@@ -34,6 +44,6 @@ export class CreateGrantDto {
 
   @ApiPropertyOptional({ description: 'Tipo de recurso', enum: RESOURCE_TYPES })
   @IsOptional()
-  @IsIn(RESOURCE_TYPES as unknown as string[])
+  @IsIn(RESOURCE_TYPES)
   resourceType?: (typeof RESOURCE_TYPES)[number];
 }

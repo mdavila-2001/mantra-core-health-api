@@ -3,7 +3,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PracticeAccreditationsService } from './practice-accreditations.service';
 import { PRAC } from '../practice.concepts';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -18,7 +21,7 @@ function build() {
     em as any,
     practicesRepo as any,
     sitesRepo as any,
-    accreditationsRepo as any,
+    accreditationsRepo,
     logger as any,
   );
   return { service, tx, practicesRepo, sitesRepo, accreditationsRepo };
@@ -29,9 +32,9 @@ describe('PracticeAccreditationsService', () => {
     it('throws when the practice is missing', async () => {
       const d = build();
       d.practicesRepo.findById.mockResolvedValue(null);
-      await expect(d.service.create('p1', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.create('p1', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects a site that does not belong to the practice', async () => {
@@ -53,7 +56,7 @@ describe('PracticeAccreditationsService', () => {
         createdAt: new Date(),
       };
       d.accreditationsRepo.create.mockReturnValue(created);
-      const res = await d.service.create('p1', {} as any, actor);
+      const res = await d.service.create('p1', {}, actor);
       expect(res.verificationStatus).toBe(PRAC.ACCRED_PENDING);
       expect(d.tx.flush).toHaveBeenCalled();
     });
@@ -63,9 +66,9 @@ describe('PracticeAccreditationsService', () => {
     it('throws when the accreditation is missing', async () => {
       const d = build();
       d.accreditationsRepo.findById.mockResolvedValue(null);
-      await expect(d.service.verify('a1', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.verify('a1', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects verifying an accreditation that is not pending', async () => {
@@ -90,7 +93,11 @@ describe('PracticeAccreditationsService', () => {
         updatedAt: new Date(),
       };
       d.accreditationsRepo.findById.mockResolvedValue(acc);
-      const res = await d.service.verify('a1', { decision: 'VERIFIED' } as any, actor);
+      const res = await d.service.verify(
+        'a1',
+        { decision: 'VERIFIED' } as any,
+        actor,
+      );
       expect(res.verificationStatus).toBe(PRAC.ACCRED_VERIFIED);
       expect(acc.verificationStatusConceptId).toBe(PRAC.ACCRED_VERIFIED);
     });
@@ -105,7 +112,11 @@ describe('PracticeAccreditationsService', () => {
         updatedAt: new Date(),
       };
       d.accreditationsRepo.findById.mockResolvedValue(acc);
-      const res = await d.service.verify('a1', { decision: 'EXPIRED' } as any, actor);
+      const res = await d.service.verify(
+        'a1',
+        { decision: 'EXPIRED' } as any,
+        actor,
+      );
       expect(res.verificationStatus).toBe(PRAC.ACCRED_EXPIRED);
     });
   });

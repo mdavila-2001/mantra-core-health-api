@@ -8,7 +8,10 @@ export class TrackingSessionResponseDto {
   @ApiProperty({ format: 'uuid' })
   trackedSubjectId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la sesión', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la sesión',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiPropertyOptional({ type: String, format: 'date-time' })

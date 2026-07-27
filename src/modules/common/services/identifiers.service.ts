@@ -49,7 +49,11 @@ export class IdentifiersService {
     actor: AuthenticatedUser,
   ): Promise<IdentifierResponseDto> {
     this.logger.info(
-      { operation: 'common.identifier.create', ownerId: dto.ownerId, type: dto.type },
+      {
+        operation: 'common.identifier.create',
+        ownerId: dto.ownerId,
+        type: dto.type,
+      },
       'Creating identifier',
     );
 
@@ -66,16 +70,18 @@ export class IdentifiersService {
           { operation: 'common.identifier.create', type: dto.type },
           'Rejected duplicate active identifier',
         );
-        throw new ConflictException('Ya existe un identificador activo con ese tipo, sistema y valor');
+        throw new ConflictException(
+          'Ya existe un identificador activo con ese tipo, sistema y valor',
+        );
       }
 
       const identifier = this.identifiersRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}` as ConceptName],
+        ownerTypeConceptId: CONCEPTS[`OWNER_${dto.ownerType}`],
         ownerId: dto.ownerId,
         typeConceptId,
         system: dto.system,
         value: dto.value,
-        useConceptId: dto.use ? CONCEPTS[`USE_${dto.use}` as ConceptName] : undefined,
+        useConceptId: dto.use ? CONCEPTS[`USE_${dto.use}`] : undefined,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: actor.id,
       });
@@ -89,7 +95,10 @@ export class IdentifiersService {
     });
   }
 
-  private toResponse(entity: Identifiers, dto: CreateIdentifierDto): IdentifierResponseDto {
+  private toResponse(
+    entity: Identifiers,
+    dto: CreateIdentifierDto,
+  ): IdentifierResponseDto {
     return {
       id: entity.id,
       ownerId: entity.ownerId,

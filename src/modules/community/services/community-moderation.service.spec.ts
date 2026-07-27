@@ -23,7 +23,11 @@ function build() {
     findOpenAppealForDecision: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new CommunityModerationService(em as any, moderationRepo as any, logger as any);
+  const service = new CommunityModerationService(
+    em as any,
+    moderationRepo,
+    logger as any,
+  );
   return { service, tx, moderationRepo };
 }
 
@@ -44,8 +48,13 @@ describe('CommunityModerationService', () => {
     it('reuses an existing open queue entry (dedup)', async () => {
       const d = build();
       d.moderationRepo.createReport.mockReturnValue({ id: 'rep2' });
-      d.moderationRepo.findOpenQueueForContent.mockResolvedValue({ id: 'qExisting' });
-      const res = await d.service.report({ targetType: 'POST', targetId: 'post1', reason: 'ABUSE' } as any, actor);
+      d.moderationRepo.findOpenQueueForContent.mockResolvedValue({
+        id: 'qExisting',
+      });
+      const res = await d.service.report(
+        { targetType: 'POST', targetId: 'post1', reason: 'ABUSE' } as any,
+        actor,
+      );
       expect(res.moderationQueueId).toBe('qExisting');
       expect(d.moderationRepo.createQueue).not.toHaveBeenCalled();
     });
@@ -55,31 +64,47 @@ describe('CommunityModerationService', () => {
     it('throws when the queue entry does not exist', async () => {
       const d = build();
       d.moderationRepo.findQueueById.mockResolvedValue(null);
-      await expect(d.service.decide('missing', { decision: 'REMOVED' } as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.decide('missing', { decision: 'REMOVED' } as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects deciding an already resolved queue', async () => {
       const d = build();
-      d.moderationRepo.findQueueById.mockResolvedValue({ id: 'q1', statusConceptId: COMM.QUEUE_RESOLVED });
-      await expect(d.service.decide('q1', { decision: 'REMOVED' } as any, actor)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      d.moderationRepo.findQueueById.mockResolvedValue({
+        id: 'q1',
+        statusConceptId: COMM.QUEUE_RESOLVED,
+      });
+      await expect(
+        d.service.decide('q1', { decision: 'REMOVED' } as any, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('records the decision, resolves the queue and issues a strike', async () => {
       const d = build();
-      const queue = { id: 'q1', statusConceptId: COMM.QUEUE_QUEUED, contentRefId: 'post1', updatedAt: new Date() };
+      const queue = {
+        id: 'q1',
+        statusConceptId: COMM.QUEUE_QUEUED,
+        contentRefId: 'post1',
+        updatedAt: new Date(),
+      };
       d.moderationRepo.findQueueById.mockResolvedValue(queue);
       d.moderationRepo.createDecision.mockReturnValue({ id: 'dec1' });
       d.moderationRepo.createStrike.mockReturnValue({ id: 'str1' });
       const res = await d.service.decide(
         'q1',
-        { decision: 'REMOVED', subjectProfileId: 'p9', strikeSeverity: 'HIGH' } as any,
+        {
+          decision: 'REMOVED',
+          subjectProfileId: 'p9',
+          strikeSeverity: 'HIGH',
+        } as any,
         actor,
       );
-      expect(res).toEqual({ id: 'dec1', strikeId: 'str1', decision: 'REMOVED' });
+      expect(res).toEqual({
+        id: 'dec1',
+        strikeId: 'str1',
+        decision: 'REMOVED',
+      });
       expect(queue.statusConceptId).toBe(COMM.QUEUE_RESOLVED);
     });
   });
@@ -89,26 +114,50 @@ describe('CommunityModerationService', () => {
       const d = build();
       d.moderationRepo.findDecisionById.mockResolvedValue(null);
       await expect(
-        d.service.appeal('missing', { appellantProfileId: 'p1', reasonText: 'x' } as any, actor),
+        d.service.appeal(
+          'missing',
+          { appellantProfileId: 'p1', reasonText: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects a second open appeal for the same decision', async () => {
       const d = build();
-      d.moderationRepo.findDecisionById.mockResolvedValue({ id: 'dec1', moderationQueueId: 'q1' });
-      d.moderationRepo.findOpenAppealForDecision.mockResolvedValue({ id: 'ap0' });
+      d.moderationRepo.findDecisionById.mockResolvedValue({
+        id: 'dec1',
+        moderationQueueId: 'q1',
+      });
+      d.moderationRepo.findOpenAppealForDecision.mockResolvedValue({
+        id: 'ap0',
+      });
       await expect(
-        d.service.appeal('dec1', { appellantProfileId: 'p1', reasonText: 'x' } as any, actor),
+        d.service.appeal(
+          'dec1',
+          { appellantProfileId: 'p1', reasonText: 'x' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('creates the appeal and re-queues the content', async () => {
       const d = build();
-      d.moderationRepo.findDecisionById.mockResolvedValue({ id: 'dec1', moderationQueueId: 'q1' });
+      d.moderationRepo.findDecisionById.mockResolvedValue({
+        id: 'dec1',
+        moderationQueueId: 'q1',
+      });
       d.moderationRepo.findOpenAppealForDecision.mockResolvedValue(null);
       d.moderationRepo.createAppeal.mockReturnValue({ id: 'ap1' });
-      d.moderationRepo.findQueueById.mockResolvedValue({ id: 'q1', contentTypeConceptId: 'ct', contentRefId: 'post1' });
-      const res = await d.service.appeal('dec1', { appellantProfileId: 'p1', reasonText: 'unfair' } as any, actor);
+      d.moderationRepo.findQueueById.mockResolvedValue({
+        id: 'q1',
+        contentTypeConceptId: 'ct',
+        contentRefId: 'post1',
+      });
+      const res = await d.service.appeal(
+        'dec1',
+        { appellantProfileId: 'p1', reasonText: 'unfair' },
+        actor,
+      );
       expect(res).toEqual({ id: 'ap1' });
       expect(d.moderationRepo.createQueue).toHaveBeenCalled();
     });

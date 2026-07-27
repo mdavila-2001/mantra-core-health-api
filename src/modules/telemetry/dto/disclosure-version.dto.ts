@@ -1,9 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 /** Cuerpo de `POST /telemetry/disclosure-versions` (UC-28-03). */
 export class CreateDisclosureVersionDto {
-  @ApiProperty({ description: 'Código del documento de disclosure', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código del documento de disclosure',
+    maxLength: 100,
+  })
   @IsString()
   @MaxLength(100)
   documentCode!: string;
@@ -14,17 +24,26 @@ export class CreateDisclosureVersionDto {
   @Min(1)
   versionNumber?: number;
 
-  @ApiPropertyOptional({ description: 'Jurisdicción (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Jurisdicción (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Documento en object storage (file id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Documento en object storage (file id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   fileId?: string;
 
-  @ApiPropertyOptional({ description: 'Hash del contenido del documento', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Hash del contenido del documento',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)

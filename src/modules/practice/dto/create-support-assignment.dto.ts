@@ -3,16 +3,25 @@ import { IsDateString, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /role-assignments/{roleId}/support-assignments` (UC-14-09). */
 export class CreateSupportAssignmentDto {
-  @ApiProperty({ description: 'Perfil de apoyo (profiles.secretary_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Perfil de apoyo (profiles.secretary_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   supportProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de rol de apoyo', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de rol de apoyo',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   supportRoleConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de alcance del apoyo', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de alcance del apoyo',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   scopeConceptId?: string;

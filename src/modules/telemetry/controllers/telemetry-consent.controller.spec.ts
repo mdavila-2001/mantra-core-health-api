@@ -20,21 +20,21 @@ describe('TelemetryConsentController', () => {
   it('delegates acceptDisclosure (UC-28-04)', async () => {
     const d = build();
     const dto = { trackingDisclosureVersionId: 'v1' };
-    await d.controller.acceptDisclosure(dto as any, actor);
+    await d.controller.acceptDisclosure(dto, actor);
     expect(d.consent.acceptDisclosure).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates grantConsent (UC-28-05)', async () => {
     const d = build();
     const dto = { purposeDefinitionId: 'p1' };
-    await d.controller.grantConsent(dto as any, actor);
+    await d.controller.grantConsent(dto, actor);
     expect(d.consent.grantConsent).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates provisionSubject (UC-28-06)', async () => {
     const d = build();
     const dto = { pseudonymousSubjectKey: 'k' };
-    await d.controller.provisionSubject(dto as any);
+    await d.controller.provisionSubject(dto);
     expect(d.consent.provisionSubject).toHaveBeenCalledWith(dto);
   });
 

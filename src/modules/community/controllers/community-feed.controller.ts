@@ -19,7 +19,10 @@ export class CommunityFeedController {
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Generar feed (fan-out y ranking)' })
-  rebuild(@Body() dto: RebuildFeedDto, @CurrentUser() actor: AuthenticatedUser): Promise<FeedRebuildResponseDto> {
+  rebuild(
+    @Body() dto: RebuildFeedDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<FeedRebuildResponseDto> {
     return this.service.rebuild(dto, actor);
   }
 }

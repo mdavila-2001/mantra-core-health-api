@@ -23,28 +23,50 @@ export class DomainException extends HttpException {
 
 /** Recurso relacionado o principal inexistente. */
 export class ResourceNotFoundException extends DomainException {
-  constructor(message = 'Recurso no encontrado', details?: Record<string, unknown>) {
+  constructor(
+    message = 'Recurso no encontrado',
+    details?: Record<string, unknown>,
+  ) {
     super(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, message, details);
   }
 }
 
 /** Violación de unicidad o estado incompatible con la operación (duplicado). */
 export class ConflictException extends DomainException {
-  constructor(message = 'Conflicto de estado', details?: Record<string, unknown>) {
+  constructor(
+    message = 'Conflicto de estado',
+    details?: Record<string, unknown>,
+  ) {
     super(HttpStatus.CONFLICT, ErrorCode.CONFLICT, message, details);
   }
 }
 
 /** Precondición de negocio no satisfecha (estado del agregado, consentimiento). */
 export class PreconditionFailedException extends DomainException {
-  constructor(message = 'Precondición no satisfecha', details?: Record<string, unknown>) {
-    super(HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.PRECONDITION_FAILED, message, details);
+  constructor(
+    message = 'Precondición no satisfecha',
+    details?: Record<string, unknown>,
+  ) {
+    super(
+      HttpStatus.UNPROCESSABLE_ENTITY,
+      ErrorCode.PRECONDITION_FAILED,
+      message,
+      details,
+    );
   }
 }
 
 /** Colisión de concurrencia optimista (`row_version`). */
 export class ConcurrencyConflictException extends DomainException {
-  constructor(message = 'Conflicto de concurrencia', details?: Record<string, unknown>) {
-    super(HttpStatus.CONFLICT, ErrorCode.CONCURRENCY_CONFLICT, message, details);
+  constructor(
+    message = 'Conflicto de concurrencia',
+    details?: Record<string, unknown>,
+  ) {
+    super(
+      HttpStatus.CONFLICT,
+      ErrorCode.CONCURRENCY_CONFLICT,
+      message,
+      details,
+    );
   }
 }

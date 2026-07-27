@@ -22,7 +22,13 @@ function build() {
     paymentsMadeRepo as any,
     logger as any,
   );
-  return { service, invoicesRepo, billsRepo, paymentsReceivedRepo, paymentsMadeRepo };
+  return {
+    service,
+    invoicesRepo,
+    billsRepo,
+    paymentsReceivedRepo,
+    paymentsMadeRepo,
+  };
 }
 
 describe('LedgerService (UC-17-06)', () => {
@@ -31,7 +37,11 @@ describe('LedgerService (UC-17-06)', () => {
     const invoice = { transactionId: undefined, updatedAt: new Date() };
     d.invoicesRepo.findById.mockResolvedValue(invoice);
 
-    const res = await d.service.postToLedger('inv1', { documentType: 'INVOICE', transactionId: 'txn1' } as any, actor);
+    const res = await d.service.postToLedger(
+      'inv1',
+      { documentType: 'INVOICE', transactionId: 'txn1' } as any,
+      actor,
+    );
 
     expect(res.posted).toBe(true);
     expect(res.transactionId).toBe('txn1');
@@ -42,15 +52,26 @@ describe('LedgerService (UC-17-06)', () => {
     const d = build();
     d.billsRepo.findById.mockResolvedValue(null);
     await expect(
-      d.service.postToLedger('b1', { documentType: 'BILL', transactionId: 'txn1' } as any, actor),
+      d.service.postToLedger(
+        'b1',
+        { documentType: 'BILL', transactionId: 'txn1' } as any,
+        actor,
+      ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
   it('rejects re-posting an already posted document (conflict / idempotency)', async () => {
     const d = build();
-    d.paymentsReceivedRepo.findById.mockResolvedValue({ transactionId: 'existing', updatedAt: new Date() });
+    d.paymentsReceivedRepo.findById.mockResolvedValue({
+      transactionId: 'existing',
+      updatedAt: new Date(),
+    });
     await expect(
-      d.service.postToLedger('p1', { documentType: 'PAYMENT_RECEIVED', transactionId: 'txn1' } as any, actor),
+      d.service.postToLedger(
+        'p1',
+        { documentType: 'PAYMENT_RECEIVED', transactionId: 'txn1' } as any,
+        actor,
+      ),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });

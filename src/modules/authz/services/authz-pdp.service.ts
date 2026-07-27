@@ -68,7 +68,10 @@ export class AuthzPdpService {
   }
 
   /** UC-06-11: invalida las entradas de decisión afectadas por un cambio de authz. */
-  invalidateCache(dto: InvalidateCacheDto, actor: AuthenticatedUser): CacheInvalidationResultDto {
+  invalidateCache(
+    dto: InvalidateCacheDto,
+    actor: AuthenticatedUser,
+  ): CacheInvalidationResultDto {
     const subject = dto.userId ?? dto.roleId ?? '*';
     const cacheKey = `pdp:${dto.tenantId ?? '*'}:${subject}`;
     this.logger.info(
@@ -78,12 +81,16 @@ export class AuthzPdpService {
     // La invalidación efectiva la realiza el consumidor de outbox sobre Redis;
     // aquí se registra la orden idempotente por clave. `invalidatedEntries` es el
     // nº de dimensiones invalidadas (tenant/user/role) presentes en la clave.
-    const invalidatedEntries = [dto.tenantId, dto.userId, dto.roleId].filter(Boolean).length || 1;
+    const invalidatedEntries =
+      [dto.tenantId, dto.userId, dto.roleId].filter(Boolean).length || 1;
     return { ok: true, cacheKey, invalidatedEntries };
   }
 
   /** UC-06-12: evalúa la decisión efectiva. Solo lectura (`em.fork`). */
-  async evaluate(dto: EvaluateDecisionDto, actor: AuthenticatedUser): Promise<DecisionResponseDto> {
+  async evaluate(
+    dto: EvaluateDecisionDto,
+    actor: AuthenticatedUser,
+  ): Promise<DecisionResponseDto> {
     const em = this.em.fork();
     this.logger.info(
       {
@@ -107,12 +114,18 @@ export class AuthzPdpService {
     );
 
     // 2. Roles efectivos del usuario (asignaciones activas + herencia de padres).
-    const assignments = await this.assignmentsRepo.findActiveForUser(em, dto.userId);
+    const assignments = await this.assignmentsRepo.findActiveForUser(
+      em,
+      dto.userId,
+    );
     const now = Date.now();
     const directRoleIds = assignments
       .filter((a) => this.isWithinWindow(a.validFrom, a.validTo, now))
       .map((a) => a.roleId);
-    const effectiveRoleIds = await this.resolveRoleInheritance(em, directRoleIds);
+    const effectiveRoleIds = await this.resolveRoleInheritance(
+      em,
+      directRoleIds,
+    );
 
     let hasAllow = false;
     let hasDeny = false;
@@ -123,7 +136,10 @@ export class AuthzPdpService {
       reasons.push(`permiso inexistente para ${dto.resource}:${dto.action}`);
     } else {
       // 3. role_permissions de los roles efectivos para ese permiso.
-      const rolePerms = await this.rolePermsRepo.findActiveForRoles(em, effectiveRoleIds);
+      const rolePerms = await this.rolePermsRepo.findActiveForRoles(
+        em,
+        effectiveRoleIds,
+      );
       for (const rp of rolePerms) {
         if (rp.permissionId !== permission.id) continue;
         if (rp.effectConceptId === AUTHZ.EFFECT_DENY) {
@@ -136,7 +152,10 @@ export class AuthzPdpService {
       }
 
       // 4. Excepciones de usuario (deny individual prevalece sobre allow de rol).
-      const grants = await this.permGrantsRepo.findActiveForUser(em, dto.userId);
+      const grants = await this.permGrantsRepo.findActiveForUser(
+        em,
+        dto.userId,
+      );
       for (const g of grants) {
         if (g.permissionId !== permission.id) continue;
         if (!this.isWithinWindow(g.validFrom, g.validTo, now)) continue;
@@ -171,7 +190,11 @@ export class AuthzPdpService {
     }
 
     // 5. Políticas ABAC del tenant sobre el recurso (deny gana; orden por prioridad).
-    const policies = await this.policiesRepo.findActiveForTarget(em, dto.tenantId, dto.resource);
+    const policies = await this.policiesRepo.findActiveForTarget(
+      em,
+      dto.tenantId,
+      dto.resource,
+    );
     for (const p of policies) {
       if (p.effectConceptId === AUTHZ.EFFECT_DENY) {
         hasDeny = true;
@@ -189,7 +212,9 @@ export class AuthzPdpService {
         dto.userId,
         dto.patientProfileId,
       );
-      const active = clinical.filter((c) => this.isWithinWindow(c.validFrom, c.validTo, now));
+      const active = clinical.filter((c) =>
+        this.isWithinWindow(c.validFrom, c.validTo, now),
+      );
       if (active.length > 0) {
         hasAllow = true;
         reasons.push('allow por acceso clínico vigente');
@@ -204,7 +229,10 @@ export class AuthzPdpService {
     // Resolución final: deny-overrides.
     const permit = hasDeny ? false : hasAllow;
     const decision: 'PERMIT' | 'DENY' = permit ? 'PERMIT' : 'DENY';
-    const reason = reasons.length > 0 ? reasons.join('; ') : 'sin señales aplicables (deny por defecto)';
+    const reason =
+      reasons.length > 0
+        ? reasons.join('; ')
+        : 'sin señales aplicables (deny por defecto)';
 
     this.logger.info(
       { operation: 'authz.pdp.evaluate.result', decision, cacheKey },
@@ -223,7 +251,10 @@ export class AuthzPdpService {
   }
 
   /** Expande un conjunto de roles con sus ancestros (herencia parent_role_id). */
-  private async resolveRoleInheritance(em: EntityManager, roleIds: string[]): Promise<string[]> {
+  private async resolveRoleInheritance(
+    em: EntityManager,
+    roleIds: string[],
+  ): Promise<string[]> {
     const visited = new Set<string>();
     const queue = [...roleIds];
     while (queue.length > 0) {
@@ -247,7 +278,11 @@ export class AuthzPdpService {
     const masked: MaskedFieldDto[] = [];
     for (const r of rules) {
       if (!r.canRead) {
-        masked.push({ entity: r.entity, columnName: r.columnName, strategy: 'NO_READ' });
+        masked.push({
+          entity: r.entity,
+          columnName: r.columnName,
+          strategy: 'NO_READ',
+        });
       } else if (r.maskStrategyConceptId) {
         masked.push({
           entity: r.entity,
@@ -260,7 +295,11 @@ export class AuthzPdpService {
   }
 
   /** Vigencia por tstzrange abierto: null en un extremo = sin límite. */
-  private isWithinWindow(from: Date | undefined, to: Date | undefined, now: number): boolean {
+  private isWithinWindow(
+    from: Date | undefined,
+    to: Date | undefined,
+    now: number,
+  ): boolean {
     if (from && from.getTime() > now) return false;
     if (to && to.getTime() <= now) return false;
     return true;

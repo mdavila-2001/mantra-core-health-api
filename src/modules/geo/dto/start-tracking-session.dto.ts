@@ -7,18 +7,26 @@ export class StartTrackingSessionDto {
   @IsUUID()
   trackedSubjectId!: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del propósito de la sesión', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del propósito de la sesión',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   purposeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de recurso relacionado (p. ej. encounter/dispatch)' })
+  @ApiPropertyOptional({
+    description: 'Tipo de recurso relacionado (p. ej. encounter/dispatch)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   relatedResourceType?: string;
 
-  @ApiPropertyOptional({ description: 'Id del recurso relacionado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Id del recurso relacionado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   relatedResourceId?: string;

@@ -48,22 +48,32 @@ export class IntegrationWebhooksService {
     actor: AuthenticatedUser,
   ): Promise<WebhookSubscriptionResponseDto> {
     this.logger.info(
-      { operation: 'integration.webhook.subscribe', contractId, actorId: actor.id },
+      {
+        operation: 'integration.webhook.subscribe',
+        contractId,
+        actorId: actor.id,
+      },
       'Subscribing webhook',
     );
     return this.em.transactional(async (tx) => {
       const contract = await this.contractsRepo.findById(tx, contractId);
       if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', { contractId });
-      }
-      if (contract.statusConceptId !== ICON.CONTRACT_ACTIVE) {
-        throw new PreconditionFailedException('El contrato debe estar ACTIVE para suscribir webhooks', {
+        throw new ResourceNotFoundException('Contrato no encontrado', {
           contractId,
-          status: contract.statusConceptId,
         });
       }
+      if (contract.statusConceptId !== ICON.CONTRACT_ACTIVE) {
+        throw new PreconditionFailedException(
+          'El contrato debe estar ACTIVE para suscribir webhooks',
+          {
+            contractId,
+            status: contract.statusConceptId,
+          },
+        );
+      }
 
-      const eventTypeConceptId = dto.eventTypeConceptId ?? ICON.WEBHOOK_EVENT_GENERIC;
+      const eventTypeConceptId =
+        dto.eventTypeConceptId ?? ICON.WEBHOOK_EVENT_GENERIC;
       const dup = await this.subscriptionsRepo.findDuplicate(
         tx,
         contractId,
@@ -71,10 +81,13 @@ export class IntegrationWebhooksService {
         dto.callbackUri,
       );
       if (dup) {
-        throw new ConflictException('Ya existe una suscripción para ese evento y callback', {
-          contractId,
-          eventTypeConceptId,
-        });
+        throw new ConflictException(
+          'Ya existe una suscripción para ese evento y callback',
+          {
+            contractId,
+            eventTypeConceptId,
+          },
+        );
       }
 
       const sub = this.subscriptionsRepo.create(tx, {
@@ -91,10 +104,18 @@ export class IntegrationWebhooksService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.webhook.subscribe', contractId, subscriptionId: sub.id },
+        {
+          operation: 'integration.webhook.subscribe',
+          contractId,
+          subscriptionId: sub.id,
+        },
         'Webhook subscribed',
       );
-      return { id: sub.id, integrationContractId: contractId, status: sub.statusConceptId };
+      return {
+        id: sub.id,
+        integrationContractId: contractId,
+        status: sub.statusConceptId,
+      };
     });
   }
 
@@ -105,13 +126,20 @@ export class IntegrationWebhooksService {
     actor: AuthenticatedUser,
   ): Promise<DeliveryEvidenceResponseDto> {
     this.logger.info(
-      { operation: 'integration.webhook.deliver', subscriptionId, actorId: actor.id },
+      {
+        operation: 'integration.webhook.deliver',
+        subscriptionId,
+        actorId: actor.id,
+      },
       'Delivering signed webhook',
     );
     return this.em.transactional(async (tx) => {
       const sub = await this.subscriptionsRepo.findById(tx, subscriptionId);
       if (!sub) {
-        throw new ResourceNotFoundException('Suscripción de webhook no encontrada', { subscriptionId });
+        throw new ResourceNotFoundException(
+          'Suscripción de webhook no encontrada',
+          { subscriptionId },
+        );
       }
       if (sub.statusConceptId !== ICON.SUBSCRIPTION_ACTIVE) {
         throw new PreconditionFailedException('La suscripción no está ACTIVE', {
@@ -121,10 +149,15 @@ export class IntegrationWebhooksService {
       }
       const now = new Date();
       if (sub.validFrom && sub.validFrom > now) {
-        throw new PreconditionFailedException('La suscripción aún no es válida', { subscriptionId });
+        throw new PreconditionFailedException(
+          'La suscripción aún no es válida',
+          { subscriptionId },
+        );
       }
       if (sub.validTo && sub.validTo < now) {
-        throw new PreconditionFailedException('La suscripción ya expiró', { subscriptionId });
+        throw new PreconditionFailedException('La suscripción ya expiró', {
+          subscriptionId,
+        });
       }
 
       const version = await this.versionsRepo.findActiveByContract(
@@ -133,9 +166,12 @@ export class IntegrationWebhooksService {
         ICON.VERSION_ACTIVE,
       );
       if (!version) {
-        throw new PreconditionFailedException('No hay versión ACTIVE del contrato para entregar', {
-          contractId: sub.integrationContractId,
-        });
+        throw new PreconditionFailedException(
+          'No hay versión ACTIVE del contrato para entregar',
+          {
+            contractId: sub.integrationContractId,
+          },
+        );
       }
 
       const delivered = (dto.outcome ?? 'DELIVERED') === 'DELIVERED';
@@ -146,7 +182,9 @@ export class IntegrationWebhooksService {
         correlationId: dto.correlationId,
         requestHash: dto.requestHash,
         receivedAt: now,
-        outcomeConceptId: delivered ? ICON.OUTCOME_SUCCESS : ICON.OUTCOME_PENDING,
+        outcomeConceptId: delivered
+          ? ICON.OUTCOME_SUCCESS
+          : ICON.OUTCOME_PENDING,
       });
       // FK integration_exchange_record_id → hay que persistir el record antes de la evidencia.
       await tx.flush();
@@ -156,15 +194,24 @@ export class IntegrationWebhooksService {
         integrationExchangeRecordId: record.id,
         signatureAlgorithm: dto.signatureAlgorithm,
         signatureVerificationConceptId:
-          dto.signatureVerified === false ? ICON.SIGNATURE_FAILED : ICON.SIGNATURE_VERIFIED,
+          dto.signatureVerified === false
+            ? ICON.SIGNATURE_FAILED
+            : ICON.SIGNATURE_VERIFIED,
         deliveredAt: delivered ? now : undefined,
         acknowledgedAt: dto.acknowledged ? now : undefined,
-        outcomeConceptId: delivered ? ICON.DELIVERY_DELIVERED : ICON.DELIVERY_FAILED,
+        outcomeConceptId: delivered
+          ? ICON.DELIVERY_DELIVERED
+          : ICON.DELIVERY_FAILED,
       });
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integration.webhook.deliver', subscriptionId, evidenceId: evidence.id, delivered },
+        {
+          operation: 'integration.webhook.deliver',
+          subscriptionId,
+          evidenceId: evidence.id,
+          delivered,
+        },
         'Webhook delivery recorded',
       );
       return {

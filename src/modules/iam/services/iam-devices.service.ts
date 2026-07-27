@@ -6,8 +6,16 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { UsersRepository, DevicesRepository, SecurityEventsRepository } from '../repositories';
-import { CreateDeviceDto, DeviceResponseDto, type DevicePlatform } from '../dto';
+import {
+  UsersRepository,
+  DevicesRepository,
+  SecurityEventsRepository,
+} from '../repositories';
+import {
+  CreateDeviceDto,
+  DeviceResponseDto,
+  type DevicePlatform,
+} from '../dto';
 
 const PLATFORM_CONCEPT: Readonly<Record<DevicePlatform, string>> = {
   IOS: CONCEPTS.PLATFORM_IOS,
@@ -40,13 +48,18 @@ export class IamDevicesService {
     );
     return this.em.transactional(async (tx) => {
       const user = await this.usersRepo.findById(tx, userId);
-      if (!user) throw new ResourceNotFoundException('Usuario no encontrado', { userId });
+      if (!user)
+        throw new ResourceNotFoundException('Usuario no encontrado', {
+          userId,
+        });
 
       const trusted = dto.trust === true;
       const device = this.devicesRepo.create(tx, {
         userId,
         deviceFingerprint: dto.deviceFingerprint,
-        platformConceptId: dto.platform ? PLATFORM_CONCEPT[dto.platform] : undefined,
+        platformConceptId: dto.platform
+          ? PLATFORM_CONCEPT[dto.platform]
+          : undefined,
         name: dto.name,
         trusted,
         actorUserId: actor.id,

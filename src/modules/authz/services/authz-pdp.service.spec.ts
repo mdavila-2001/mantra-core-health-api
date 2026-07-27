@@ -11,12 +11,18 @@ function build() {
   const em = { fork: mockFn(() => forkEm) };
   const rolesRepo = { findById: mockFn().mockResolvedValue(null) };
   const rolePermsRepo = { findActiveForRoles: mockFn().mockResolvedValue([]) };
-  const permissionsRepo = { findByResourceAction: mockFn().mockResolvedValue(null) };
+  const permissionsRepo = {
+    findByResourceAction: mockFn().mockResolvedValue(null),
+  };
   const assignmentsRepo = { findActiveForUser: mockFn().mockResolvedValue([]) };
   const permGrantsRepo = { findActiveForUser: mockFn().mockResolvedValue([]) };
   const policiesRepo = { findActiveForTarget: mockFn().mockResolvedValue([]) };
-  const clinicalRepo = { findActiveForUserPatient: mockFn().mockResolvedValue([]) };
-  const resourceGrantsRepo = { findForSubjectResource: mockFn().mockResolvedValue([]) };
+  const clinicalRepo = {
+    findActiveForUserPatient: mockFn().mockResolvedValue([]),
+  };
+  const resourceGrantsRepo = {
+    findForSubjectResource: mockFn().mockResolvedValue([]),
+  };
   const fieldPermsRepo = { findForRoles: mockFn().mockResolvedValue([]) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuthzPdpService(
@@ -46,13 +52,21 @@ function build() {
   };
 }
 
-const baseDto = { userId: 'u1', tenantId: 't1', resource: 'patient', action: 'READ' } as any;
+const baseDto = {
+  userId: 'u1',
+  tenantId: 't1',
+  resource: 'patient',
+  action: 'READ',
+} as any;
 
 describe('AuthzPdpService', () => {
   describe('invalidateCache (UC-06-11)', () => {
     it('builds a logical cache key and counts dimensions', () => {
       const d = build();
-      const res = d.service.invalidateCache({ tenantId: 't1', userId: 'u1' } as any, actor);
+      const res = d.service.invalidateCache(
+        { tenantId: 't1', userId: 'u1' },
+        actor,
+      );
       expect(res.ok).toBe(true);
       expect(res.cacheKey).toBe('pdp:t1:u1');
       expect(res.invalidatedEntries).toBe(2);
@@ -60,7 +74,7 @@ describe('AuthzPdpService', () => {
 
     it('falls back to a wildcard key with no fields', () => {
       const d = build();
-      const res = d.service.invalidateCache({} as any, actor);
+      const res = d.service.invalidateCache({}, actor);
       expect(res.cacheKey).toBe('pdp:*:*');
       expect(res.invalidatedEntries).toBe(1);
     });
@@ -76,8 +90,12 @@ describe('AuthzPdpService', () => {
 
     it('PERMIT via an allow role permission on an effective role', async () => {
       const d = build();
-      d.permissionsRepo.findByResourceAction.mockResolvedValue({ id: 'perm-1' });
-      d.assignmentsRepo.findActiveForUser.mockResolvedValue([{ roleId: 'role-1', validFrom: null, validTo: null }]);
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'role-1', validFrom: null, validTo: null },
+      ]);
       d.rolePermsRepo.findActiveForRoles.mockResolvedValue([
         { permissionId: 'perm-1', effectConceptId: AUTHZ.EFFECT_ALLOW },
       ]);
@@ -88,8 +106,12 @@ describe('AuthzPdpService', () => {
 
     it('deny-overrides: a deny policy beats an allow role', async () => {
       const d = build();
-      d.permissionsRepo.findByResourceAction.mockResolvedValue({ id: 'perm-1' });
-      d.assignmentsRepo.findActiveForUser.mockResolvedValue([{ roleId: 'role-1', validFrom: null, validTo: null }]);
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'role-1', validFrom: null, validTo: null },
+      ]);
       d.rolePermsRepo.findActiveForRoles.mockResolvedValue([
         { permissionId: 'perm-1', effectConceptId: AUTHZ.EFFECT_ALLOW },
       ]);
@@ -102,16 +124,26 @@ describe('AuthzPdpService', () => {
 
     it('resolves role inheritance through parent_role_id', async () => {
       const d = build();
-      d.permissionsRepo.findByResourceAction.mockResolvedValue({ id: 'perm-1' });
-      d.assignmentsRepo.findActiveForUser.mockResolvedValue([{ roleId: 'child', validFrom: null, validTo: null }]);
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'child', validFrom: null, validTo: null },
+      ]);
       d.rolesRepo.findById.mockImplementation((_em: any, id: string) =>
-        Promise.resolve(id === 'child' ? { id: 'child', parentRoleId: 'parent' } : { id: 'parent' }),
+        Promise.resolve(
+          id === 'child'
+            ? { id: 'child', parentRoleId: 'parent' }
+            : { id: 'parent' },
+        ),
       );
       d.rolePermsRepo.findActiveForRoles.mockResolvedValue([
         { permissionId: 'perm-1', effectConceptId: AUTHZ.EFFECT_ALLOW },
       ]);
       const res = await d.service.evaluate(baseDto, actor);
-      expect(res.effectiveRoleIds).toEqual(expect.arrayContaining(['child', 'parent']));
+      expect(res.effectiveRoleIds).toEqual(
+        expect.arrayContaining(['child', 'parent']),
+      );
       expect(d.rolePermsRepo.findActiveForRoles).toHaveBeenCalledWith(
         {},
         expect.arrayContaining(['child', 'parent']),
@@ -120,7 +152,9 @@ describe('AuthzPdpService', () => {
 
     it('PERMIT via an active clinical access grant by purpose of use', async () => {
       const d = build();
-      d.permissionsRepo.findByResourceAction.mockResolvedValue({ id: 'perm-1' });
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
       d.clinicalRepo.findActiveForUserPatient.mockResolvedValue([
         { validFrom: null, validTo: new Date(Date.now() + 3_600_000) },
       ]);
@@ -134,14 +168,28 @@ describe('AuthzPdpService', () => {
 
     it('reports masked fields from field permissions', async () => {
       const d = build();
-      d.permissionsRepo.findByResourceAction.mockResolvedValue({ id: 'perm-1' });
-      d.assignmentsRepo.findActiveForUser.mockResolvedValue([{ roleId: 'role-1', validFrom: null, validTo: null }]);
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'role-1', validFrom: null, validTo: null },
+      ]);
       d.rolePermsRepo.findActiveForRoles.mockResolvedValue([
         { permissionId: 'perm-1', effectConceptId: AUTHZ.EFFECT_ALLOW },
       ]);
       d.fieldPermsRepo.findForRoles.mockResolvedValue([
-        { entity: 'patient', columnName: 'ssn', canRead: true, maskStrategyConceptId: AUTHZ.MASK_REDACT },
-        { entity: 'patient', columnName: 'notes', canRead: false, maskStrategyConceptId: null },
+        {
+          entity: 'patient',
+          columnName: 'ssn',
+          canRead: true,
+          maskStrategyConceptId: AUTHZ.MASK_REDACT,
+        },
+        {
+          entity: 'patient',
+          columnName: 'notes',
+          canRead: false,
+          maskStrategyConceptId: null,
+        },
       ]);
       const res = await d.service.evaluate(baseDto, actor);
       expect(res.maskedFields).toEqual(

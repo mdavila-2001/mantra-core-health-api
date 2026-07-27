@@ -22,7 +22,7 @@ function build() {
   const service = new IamMfaService(
     em as any,
     usersRepo as any,
-    mfaRepo as any,
+    mfaRepo,
     eventsRepo as any,
     logger as any,
   );
@@ -33,11 +33,22 @@ describe('IamMfaService (UC-01-03)', () => {
   it('enrolls a new factor in PENDING state', async () => {
     const d = build();
     d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
-    d.mfaRepo.create.mockReturnValue({ id: 'f1', stateConceptId: CONCEPTS.STATE_PENDING });
+    d.mfaRepo.create.mockReturnValue({
+      id: 'f1',
+      stateConceptId: CONCEPTS.STATE_PENDING,
+    });
 
-    const res = await d.service.enrollOrVerify('u1', { factorType: 'TOTP' }, actor as any);
+    const res = await d.service.enrollOrVerify(
+      'u1',
+      { factorType: 'TOTP' },
+      actor,
+    );
 
-    expect(res).toMatchObject({ id: 'f1', userId: 'u1', state: CONCEPTS.STATE_PENDING });
+    expect(res).toMatchObject({
+      id: 'f1',
+      userId: 'u1',
+      state: CONCEPTS.STATE_PENDING,
+    });
     expect(d.mfaRepo.create).toHaveBeenCalled();
     expect(d.eventsRepo.record).toHaveBeenCalledWith(
       d.tx,
@@ -47,12 +58,24 @@ describe('IamMfaService (UC-01-03)', () => {
 
   it('verifies a factor and enables MFA on the user', async () => {
     const d = build();
-    const user = { id: 'u1', mfaStatusConceptId: CONCEPTS.MFA_DISABLED, updatedAt: new Date() };
-    const factor = { id: 'f1', stateConceptId: CONCEPTS.STATE_PENDING, updatedAt: new Date() };
+    const user = {
+      id: 'u1',
+      mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
+      updatedAt: new Date(),
+    };
+    const factor = {
+      id: 'f1',
+      stateConceptId: CONCEPTS.STATE_PENDING,
+      updatedAt: new Date(),
+    };
     d.usersRepo.findById.mockResolvedValue(user);
     d.mfaRepo.findByIdAndUser.mockResolvedValue(factor);
 
-    const res = await d.service.enrollOrVerify('u1', { verify: true, factorId: 'f1' }, actor as any);
+    const res = await d.service.enrollOrVerify(
+      'u1',
+      { verify: true, factorId: 'f1' },
+      actor,
+    );
 
     expect(res.state).toBe(CONCEPTS.STATE_VERIFIED);
     expect(factor.stateConceptId).toBe(CONCEPTS.STATE_VERIFIED);
@@ -72,15 +95,19 @@ describe('IamMfaService (UC-01-03)', () => {
     d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
     d.mfaRepo.findByIdAndUser.mockResolvedValue(null);
     await expect(
-      d.service.enrollOrVerify('u1', { verify: true, factorId: 'f1' }, actor as any),
+      d.service.enrollOrVerify(
+        'u1',
+        { verify: true, factorId: 'f1' },
+        actor as any,
+      ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
   it('requires factorType when enrolling (business rule)', async () => {
     const d = build();
     d.usersRepo.findById.mockResolvedValue({ id: 'u1' });
-    await expect(d.service.enrollOrVerify('u1', {}, actor as any)).rejects.toBeInstanceOf(
-      PreconditionFailedException,
-    );
+    await expect(
+      d.service.enrollOrVerify('u1', {}, actor as any),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 });

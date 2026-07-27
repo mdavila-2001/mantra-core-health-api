@@ -32,7 +32,10 @@ export class KpiSnapshotsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateKpiSnapshotData): FinancialKpiSnapshots {
+  create(
+    em: EntityManager,
+    data: CreateKpiSnapshotData,
+  ): FinancialKpiSnapshots {
     const now = new Date();
     return em.create(
       FinancialKpiSnapshots,

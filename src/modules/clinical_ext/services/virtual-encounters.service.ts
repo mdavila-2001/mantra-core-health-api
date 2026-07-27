@@ -37,15 +37,24 @@ export class VirtualEncountersService {
     actor: AuthenticatedUser,
   ): Promise<VirtualEncounterResponseDto> {
     this.logger.info(
-      { operation: 'clinical_ext.virtual_encounter.create', encounterId: dto.encounterId },
+      {
+        operation: 'clinical_ext.virtual_encounter.create',
+        encounterId: dto.encounterId,
+      },
       'Creating virtual encounter',
     );
     return this.em.transactional(async (tx) => {
-      const existing = await this.encountersRepo.findByEncounter(tx, dto.encounterId);
+      const existing = await this.encountersRepo.findByEncounter(
+        tx,
+        dto.encounterId,
+      );
       if (existing) {
-        throw new ConflictException('El encuentro ya tiene una sesión virtual', {
-          encounterId: dto.encounterId,
-        });
+        throw new ConflictException(
+          'El encuentro ya tiene una sesión virtual',
+          {
+            encounterId: dto.encounterId,
+          },
+        );
       }
 
       const venc = this.encountersRepo.create(tx, {
@@ -58,25 +67,44 @@ export class VirtualEncountersService {
       });
       await tx.flush();
 
-      return { id: venc.id, encounterId: venc.encounterId, statusConceptId: venc.statusConceptId };
+      return {
+        id: venc.id,
+        encounterId: venc.encounterId,
+        statusConceptId: venc.statusConceptId,
+      };
     });
   }
 
   /** UC-18-12: el participante se une (scheduled -> in-progress). */
-  async join(id: string, actor: AuthenticatedUser): Promise<VirtualEncounterResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.virtual_encounter.join', id }, 'Joining virtual encounter');
+  async join(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<VirtualEncounterResponseDto> {
+    this.logger.info(
+      { operation: 'clinical_ext.virtual_encounter.join', id },
+      'Joining virtual encounter',
+    );
     return this.em.transactional(async (tx) => {
       const venc = await this.encountersRepo.findById(tx, id);
-      if (!venc) throw new ResourceNotFoundException('Sesión virtual no encontrada', { id });
+      if (!venc)
+        throw new ResourceNotFoundException('Sesión virtual no encontrada', {
+          id,
+        });
       if (venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_SCHEDULED) {
-        throw new PreconditionFailedException('La sesión no está agendada', { id });
+        throw new PreconditionFailedException('La sesión no está agendada', {
+          id,
+        });
       }
 
       venc.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS;
       venc.joinedAt = new Date();
       touch(venc, actor.id);
 
-      return { id: venc.id, encounterId: venc.encounterId, statusConceptId: venc.statusConceptId };
+      return {
+        id: venc.id,
+        encounterId: venc.encounterId,
+        statusConceptId: venc.statusConceptId,
+      };
     });
   }
 
@@ -86,12 +114,20 @@ export class VirtualEncountersService {
     dto: EndVirtualEncounterDto,
     actor: AuthenticatedUser,
   ): Promise<VirtualEncounterResponseDto> {
-    this.logger.info({ operation: 'clinical_ext.virtual_encounter.end', id }, 'Ending virtual encounter');
+    this.logger.info(
+      { operation: 'clinical_ext.virtual_encounter.end', id },
+      'Ending virtual encounter',
+    );
     return this.em.transactional(async (tx) => {
       const venc = await this.encountersRepo.findById(tx, id);
-      if (!venc) throw new ResourceNotFoundException('Sesión virtual no encontrada', { id });
+      if (!venc)
+        throw new ResourceNotFoundException('Sesión virtual no encontrada', {
+          id,
+        });
       if (venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS) {
-        throw new PreconditionFailedException('La sesión no está en progreso', { id });
+        throw new PreconditionFailedException('La sesión no está en progreso', {
+          id,
+        });
       }
 
       venc.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_COMPLETED;
@@ -99,7 +135,11 @@ export class VirtualEncountersService {
       venc.recordingFileId = dto.recordingFileId;
       touch(venc, actor.id);
 
-      return { id: venc.id, encounterId: venc.encounterId, statusConceptId: venc.statusConceptId };
+      return {
+        id: venc.id,
+        encounterId: venc.encounterId,
+        statusConceptId: venc.statusConceptId,
+      };
     });
   }
 }

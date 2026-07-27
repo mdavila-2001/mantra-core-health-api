@@ -1,9 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsBoolean, IsOptional, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsBoolean,
+  IsOptional,
+  MaxLength,
+} from 'class-validator';
 
 /** Alta de una versión de sistema de códigos (UC-03-02). */
 export class CreateCodeSystemVersionDto {
-  @ApiProperty({ description: 'Etiqueta de versión (p. ej. 1.0.0)', maxLength: 255 })
+  @ApiProperty({
+    description: 'Etiqueta de versión (p. ej. 1.0.0)',
+    maxLength: 255,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)

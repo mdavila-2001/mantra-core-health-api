@@ -10,7 +10,10 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { EFFECTS, type Effect } from './create-access-policy.dto';
-import { PERMISSION_SCOPES, type PermissionScope } from './create-permission.dto';
+import {
+  PERMISSION_SCOPES,
+  type PermissionScope,
+} from './create-permission.dto';
 
 /** Un binding permiso→efecto dentro del rol. */
 export class RolePermissionItemDto {
@@ -32,7 +35,10 @@ export class RolePermissionItemDto {
   @IsObject()
   constraintJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Value set de campos permitidos', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Value set de campos permitidos',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   fieldValueSetId?: string;
@@ -40,7 +46,10 @@ export class RolePermissionItemDto {
 
 /** Cuerpo de `PUT /authz/roles/{roleId}/permissions` (UC-06-03). */
 export class SetRolePermissionsDto {
-  @ApiProperty({ description: 'Bindings permiso→efecto a aplicar (reemplaza los activos)', type: [RolePermissionItemDto] })
+  @ApiProperty({
+    description: 'Bindings permiso→efecto a aplicar (reemplaza los activos)',
+    type: [RolePermissionItemDto],
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

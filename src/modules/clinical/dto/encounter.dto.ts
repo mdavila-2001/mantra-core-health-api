@@ -17,12 +17,17 @@ export class EncounterParticipantInput {
   @IsUUID()
   practitionerProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Rol del participante (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Rol del participante (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   roleConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Marca al participante como responsable' })
+  @ApiPropertyOptional({
+    description: 'Marca al participante como responsable',
+  })
   @IsOptional()
   @IsBoolean()
   isResponsible?: boolean;
@@ -30,7 +35,10 @@ export class EncounterParticipantInput {
 
 /** Ubicación física del encuentro. */
 export class EncounterLocationInput {
-  @ApiProperty({ description: 'Sede de práctica (practice.practice_sites)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Sede de práctica (practice.practice_sites)',
+    format: 'uuid',
+  })
   @IsUUID()
   practiceSiteId!: string;
 
@@ -39,7 +47,10 @@ export class EncounterLocationInput {
   @IsUUID()
   clinicalUnitId?: string;
 
-  @ApiPropertyOptional({ description: 'Espacio de atención (cama/consultorio)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Espacio de atención (cama/consultorio)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   careSpaceId?: string;
@@ -47,20 +58,32 @@ export class EncounterLocationInput {
 
 /** Cuerpo de `POST /clinical/encounters/check-in` (UC-08-02). */
 export class CheckInEncounterDto {
-  @ApiProperty({ description: 'Paciente (profiles.patient_profiles)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Paciente (profiles.patient_profiles)',
+    format: 'uuid',
+  })
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiProperty({ description: 'Tenant custodio (directory.tenants)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Tenant custodio (directory.tenants)',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 
-  @ApiPropertyOptional({ description: 'Episodio de cuidado asociado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Episodio de cuidado asociado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   episodeId?: string;
 
-  @ApiPropertyOptional({ description: 'Sucursal (directory.branches)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sucursal (directory.branches)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   branchId?: string;
@@ -70,17 +93,26 @@ export class CheckInEncounterDto {
   @IsUUID()
   primaryPractitionerId?: string;
 
-  @ApiPropertyOptional({ description: 'Cita que origina el check-in', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Cita que origina el check-in',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   appointmentId?: string;
 
-  @ApiPropertyOptional({ description: 'Clase del encuentro (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Clase del encuentro (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   classConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo del encuentro (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tipo del encuentro (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   typeConceptId?: string;
@@ -106,7 +138,9 @@ export class CheckInEncounterDto {
 
 /** Cuerpo de `POST /clinical/encounters/{id}/close` (UC-08-14). */
 export class CloseEncounterDto {
-  @ApiPropertyOptional({ description: 'row_version esperado (bloqueo optimista)' })
+  @ApiPropertyOptional({
+    description: 'row_version esperado (bloqueo optimista)',
+  })
   @IsOptional()
   @IsInt()
   @Min(1)
@@ -124,7 +158,10 @@ export class EncounterResponseDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   episodeId!: string | null;
 
-  @ApiProperty({ description: 'Estado del encuentro (concept id)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Estado del encuentro (concept id)',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiProperty({ type: [String], description: 'Ids de participantes creados' })

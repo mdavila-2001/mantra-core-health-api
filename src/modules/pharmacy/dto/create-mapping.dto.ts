@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /**
  * Cuerpo de
@@ -11,13 +17,19 @@ export class CreateMappingDto {
   @IsUUID()
   pharmacyProductId!: string;
 
-  @ApiProperty({ description: 'Código de producto en el sistema externo', maxLength: 200 })
+  @ApiProperty({
+    description: 'Código de producto en el sistema externo',
+    maxLength: 200,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
   externalProductCode!: string;
 
-  @ApiPropertyOptional({ description: 'Código de unidad en el sistema externo', maxLength: 100 })
+  @ApiPropertyOptional({
+    description: 'Código de unidad en el sistema externo',
+    maxLength: 100,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)

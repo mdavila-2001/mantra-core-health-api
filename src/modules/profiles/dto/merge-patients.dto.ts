@@ -3,15 +3,24 @@ import { IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /profiles/patients/merge` (UC-05-08). */
 export class MergePatientsDto {
-  @ApiProperty({ description: 'Perfil de paciente que sobrevive', format: 'uuid' })
+  @ApiProperty({
+    description: 'Perfil de paciente que sobrevive',
+    format: 'uuid',
+  })
   @IsUUID()
   survivingPatientProfileId!: string;
 
-  @ApiProperty({ description: 'Perfil de paciente que se fusiona (perdedor)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Perfil de paciente que se fusiona (perdedor)',
+    format: 'uuid',
+  })
   @IsUUID()
   mergedPatientProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de la razón de fusión', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de la razón de fusión',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   reasonConceptId?: string;
@@ -19,7 +28,10 @@ export class MergePatientsDto {
 
 /** Cuerpo de `POST /profiles/patients/merge/{eventId}/reverse` (UC-05-09). */
 export class ReverseMergeDto {
-  @ApiPropertyOptional({ description: 'Concept id de la razón de reversión', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de la razón de reversión',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   reasonConceptId?: string;
@@ -36,10 +48,16 @@ export class MergeEventResponseDto {
   @ApiProperty({ format: 'uuid' })
   mergedPatientProfileId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la decisión', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la decisión',
+    format: 'uuid',
+  })
   decisionStatus!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Evento original revertido (si aplica)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Evento original revertido (si aplica)',
+  })
   reversalOfEventId?: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

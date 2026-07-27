@@ -51,7 +51,9 @@ export class IamAuthController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar todas las sesiones del usuario actual' })
-  logoutAll(@CurrentUser() actor: AuthenticatedUser): Promise<LogoutAllResultDto> {
+  logoutAll(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LogoutAllResultDto> {
     return this.authService.logoutAll(actor);
   }
 

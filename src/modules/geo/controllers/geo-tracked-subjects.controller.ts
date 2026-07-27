@@ -34,7 +34,9 @@ export class GeoTrackedSubjectsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Alta de sujeto rastreado con consentimiento de ubicación' })
+  @ApiOperation({
+    summary: 'Alta de sujeto rastreado con consentimiento de ubicación',
+  })
   enroll(
     @Body() dto: CreateTrackedSubjectDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -46,7 +48,9 @@ export class GeoTrackedSubjectsController {
   @Post(':id/pings')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Ingerir un batch de pings de ubicación de alta frecuencia' })
+  @ApiOperation({
+    summary: 'Ingerir un batch de pings de ubicación de alta frecuencia',
+  })
   ingestPings(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: IngestPingsDto,
@@ -59,7 +63,9 @@ export class GeoTrackedSubjectsController {
   @Get(':id/last-position')
   @Roles('SECURITY_ADMIN')
   @ApiOperation({ summary: 'Consultar la última posición conocida del sujeto' })
-  lastPosition(@Param('id', ParseUUIDPipe) id: string): Promise<LastPositionResponseDto> {
+  lastPosition(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<LastPositionResponseDto> {
     return this.service.lastPosition(id);
   }
 
@@ -67,7 +73,9 @@ export class GeoTrackedSubjectsController {
   @Post(':id/revoke-consent')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Revocar consentimiento de ubicación y pausar el rastreo' })
+  @ApiOperation({
+    summary: 'Revocar consentimiento de ubicación y pausar el rastreo',
+  })
   revokeConsent(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() actor: AuthenticatedUser,

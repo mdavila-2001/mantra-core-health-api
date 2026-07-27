@@ -19,7 +19,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new DiagnosticReportsService(
     em as any,
-    reportsRepo as any,
+    reportsRepo,
     serviceRequestsRepo as any,
     logger as any,
   );
@@ -42,7 +42,11 @@ describe('DiagnosticReportsService', () => {
   describe('create (UC-08-06)', () => {
     it('creates a held report and completes the source service request', async () => {
       const d = build();
-      const sr = { id: 'sr1', statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE, updatedAt: new Date() };
+      const sr = {
+        id: 'sr1',
+        statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+        updatedAt: new Date(),
+      };
       d.serviceRequestsRepo.findById.mockResolvedValue(sr);
       d.reportsRepo.create.mockReturnValue(report());
 
@@ -52,7 +56,7 @@ describe('DiagnosticReportsService', () => {
           patientProfileId: 'p1',
           codeConceptId: 'code1',
           serviceRequestId: 'sr1',
-        } as any,
+        },
         actor,
       );
 
@@ -93,9 +97,9 @@ describe('DiagnosticReportsService', () => {
     it('throws when the report does not exist', async () => {
       const d = build();
       d.reportsRepo.findById.mockResolvedValue(null);
-      await expect(d.service.release('missing', {}, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.release('missing', {}, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects releasing a report in a non-releasable status', async () => {

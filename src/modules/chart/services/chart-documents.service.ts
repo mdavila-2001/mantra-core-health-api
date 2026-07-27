@@ -28,7 +28,11 @@ export class ChartDocumentsService {
     actor: AuthenticatedUser,
   ): Promise<DocumentResponseDto> {
     this.logger.info(
-      { operation: 'chart.document.create', actorId: actor.id, files: dto.files?.length ?? 0 },
+      {
+        operation: 'chart.document.create',
+        actorId: actor.id,
+        files: dto.files?.length ?? 0,
+      },
       'Attaching patient document',
     );
     return this.em.transactional(async (tx) => {
@@ -42,7 +46,8 @@ export class ChartDocumentsService {
         authorText: dto.authorText,
         isExternal: dto.isExternal,
         statusConceptId: CHART.DOC_STATUS_ACTIVE,
-        confidentialityConceptId: dto.confidentialityConceptId ?? CHART.DOC_CONFIDENTIALITY_NORMAL,
+        confidentialityConceptId:
+          dto.confidentialityConceptId ?? CHART.DOC_CONFIDENTIALITY_NORMAL,
         patientVisibilityConceptId:
           dto.patientVisibilityConceptId ?? CHART.VISIBILITY_PROVIDER_ONLY,
         actorUserId: actor.id,

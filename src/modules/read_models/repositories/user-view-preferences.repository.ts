@@ -29,8 +29,15 @@ export class UserViewPreferencesRepository {
     return em.findOne(UserViewPreferences, { userId, frontendPageViewId });
   }
 
-  create(em: EntityManager, data: CreateUserViewPreferenceData): UserViewPreferences {
+  create(
+    em: EntityManager,
+    data: CreateUserViewPreferenceData,
+  ): UserViewPreferences {
     const { actorUserId, ...rest } = data;
-    return em.create(UserViewPreferences, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      UserViewPreferences,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

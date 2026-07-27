@@ -21,7 +21,10 @@ export class UpsertLocalizationDto {
   @MaxLength(200)
   placeholder?: string;
 
-  @ApiPropertyOptional({ description: 'Mensaje de validación traducido', maxLength: 500 })
+  @ApiPropertyOptional({
+    description: 'Mensaje de validación traducido',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)

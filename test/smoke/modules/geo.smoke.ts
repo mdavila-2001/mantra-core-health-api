@@ -21,7 +21,11 @@ export const GEO_SMOKE: SmokeCase[] = [
     name: 'happy: da de alta sujeto rastreado',
     method: 'post',
     path: () => '/geo/tracked-subjects',
-    body: (c) => ({ subjectId: c.adminUserId, subjectType: 'PERSON', tenantId: c.tenantId }),
+    body: (c) => ({
+      subjectId: c.adminUserId,
+      subjectType: 'PERSON',
+      tenantId: c.tenantId,
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.geoSubjectId = String(b.id);
@@ -43,7 +47,11 @@ export const GEO_SMOKE: SmokeCase[] = [
     name: 'límite: alta duplicada del mismo sujeto activo -> 409',
     method: 'post',
     path: () => '/geo/tracked-subjects',
-    body: (c) => ({ subjectId: c.adminUserId, subjectType: 'PERSON', tenantId: c.tenantId }),
+    body: (c) => ({
+      subjectId: c.adminUserId,
+      subjectType: 'PERSON',
+      tenantId: c.tenantId,
+    }),
     expectedStatus: 409,
   },
 
@@ -54,7 +62,10 @@ export const GEO_SMOKE: SmokeCase[] = [
     name: 'happy: abre sesión de tracking',
     method: 'post',
     path: () => '/geo/tracking-sessions',
-    body: (c) => ({ trackedSubjectId: c.vars.geoSubjectId, relatedResourceType: 'dispatch' }),
+    body: (c) => ({
+      trackedSubjectId: c.vars.geoSubjectId,
+      relatedResourceType: 'dispatch',
+    }),
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.geoSessionId = String(b.id);
@@ -88,7 +99,14 @@ export const GEO_SMOKE: SmokeCase[] = [
     path: (c) => `/geo/tracked-subjects/${c.vars.geoSubjectId}/pings`,
     body: () => ({
       pings: [
-        { latitude: -12.0464, longitude: -77.0428, accuracyM: 5, speedMps: 8, batteryPct: 90, network: 'CELLULAR' },
+        {
+          latitude: -12.0464,
+          longitude: -77.0428,
+          accuracyM: 5,
+          speedMps: 8,
+          batteryPct: 90,
+          network: 'CELLULAR',
+        },
         { latitude: -12.05, longitude: -77.05, accuracyM: 4 },
       ],
     }),
@@ -130,7 +148,11 @@ export const GEO_SMOKE: SmokeCase[] = [
     name: 'límite: círculo sin centro/radio -> 422',
     method: 'post',
     path: (c) => '/geo/geofences',
-    body: (c) => ({ tenantId: c.tenantId, name: `GEO-BAD-${c.u}`, shapeType: 'CIRCLE' }),
+    body: (c) => ({
+      tenantId: c.tenantId,
+      name: `GEO-BAD-${c.u}`,
+      shapeType: 'CIRCLE',
+    }),
     expectedStatus: 422,
   },
 
@@ -184,7 +206,11 @@ export const GEO_SMOKE: SmokeCase[] = [
     name: 'happy: registra cruce ENTER',
     method: 'post',
     path: () => '/geo/geofence-events',
-    body: (c) => ({ geofenceId: c.vars.geoFenceId, trackedSubjectId: c.vars.geoSubjectId, eventType: 'ENTER' }),
+    body: (c) => ({
+      geofenceId: c.vars.geoFenceId,
+      trackedSubjectId: c.vars.geoSubjectId,
+      eventType: 'ENTER',
+    }),
     expectedStatus: 201,
   },
   {
@@ -193,7 +219,11 @@ export const GEO_SMOKE: SmokeCase[] = [
     name: 'límite: transición ENTER repetida -> 409',
     method: 'post',
     path: (c) => `/geo/geofence-events`,
-    body: (c) => ({ geofenceId: c.vars.geoFenceId, trackedSubjectId: c.vars.geoSubjectId, eventType: 'ENTER' }),
+    body: (c) => ({
+      geofenceId: c.vars.geoFenceId,
+      trackedSubjectId: c.vars.geoSubjectId,
+      eventType: 'ENTER',
+    }),
     expectedStatus: 409,
   },
 

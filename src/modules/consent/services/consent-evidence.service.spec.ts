@@ -12,7 +12,11 @@ function build() {
   const evidenceRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new ConsentEvidenceService(em as any, evidenceRepo as any, logger as any);
+  const service = new ConsentEvidenceService(
+    em as any,
+    evidenceRepo,
+    logger as any,
+  );
   return { service, tx, evidenceRepo };
 }
 
@@ -22,9 +26,16 @@ describe('ConsentEvidenceService', () => {
     const created = { id: 'ev1', subjectId: 's1', recordedAt: new Date() };
     d.evidenceRepo.create.mockReturnValue(created);
 
-    const res = await d.service.record({ subjectType: 'CONSENT', subjectId: 's1' } as any, actor);
+    const res = await d.service.record(
+      { subjectType: 'CONSENT', subjectId: 's1' } as any,
+      actor,
+    );
 
-    expect(res).toEqual({ id: 'ev1', subjectId: 's1', recordedAt: created.recordedAt });
+    expect(res).toEqual({
+      id: 'ev1',
+      subjectId: 's1',
+      recordedAt: created.recordedAt,
+    });
     expect(d.tx.flush).toHaveBeenCalled();
     expect(d.evidenceRepo.create).toHaveBeenCalledWith(
       d.tx,

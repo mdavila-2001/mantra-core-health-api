@@ -48,13 +48,21 @@ export class AssessmentService {
   }
 
   /** UC-11-11: publica un framework operativo con sus controles. */
-  async publishFramework(dto: CreateFrameworkDto, actor: AuthenticatedUser): Promise<FrameworkResponseDto> {
+  async publishFramework(
+    dto: CreateFrameworkDto,
+    actor: AuthenticatedUser,
+  ): Promise<FrameworkResponseDto> {
     return this.em.transactional(async (tx) => {
-      if (await this.repo.findFrameworkByCodeVersion(tx, dto.code, dto.version)) {
-        throw new ConflictException('Ya existe un framework con ese code+version', {
-          code: dto.code,
-          version: dto.version,
-        });
+      if (
+        await this.repo.findFrameworkByCodeVersion(tx, dto.code, dto.version)
+      ) {
+        throw new ConflictException(
+          'Ya existe un framework con ese code+version',
+          {
+            code: dto.code,
+            version: dto.version,
+          },
+        );
       }
       const framework = this.repo.createFramework(tx, {
         code: dto.code,
@@ -82,7 +90,10 @@ export class AssessmentService {
           stateConceptId: CONCEPTS.STATE_ACTIVE,
           actorUserId: actor.id,
         });
-        byCode.set(c.controlCode, { id: control.id, parentCode: c.parentControlCode });
+        byCode.set(c.controlCode, {
+          id: control.id,
+          parentCode: c.parentControlCode,
+        });
         return { entity: control, def: c };
       });
       await tx.flush();
@@ -92,16 +103,22 @@ export class AssessmentService {
         if (def.parentControlCode) {
           const parent = byCode.get(def.parentControlCode);
           if (!parent) {
-            throw new PreconditionFailedException('parentControlCode no existe en el framework', {
-              parentControlCode: def.parentControlCode,
-            });
+            throw new PreconditionFailedException(
+              'parentControlCode no existe en el framework',
+              {
+                parentControlCode: def.parentControlCode,
+              },
+            );
           }
           entity.parentControlId = parent.id;
         }
       }
       await tx.flush();
 
-      this.logger.info({ operation: 'sysops.framework.publish', frameworkId: framework.id }, 'Framework published');
+      this.logger.info(
+        { operation: 'sysops.framework.publish', frameworkId: framework.id },
+        'Framework published',
+      );
       return {
         id: framework.id,
         code: framework.code,
@@ -117,16 +134,22 @@ export class AssessmentService {
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
-      const framework = await this.repo.findFrameworkById(tx, dto.operationalFrameworkId);
+      const framework = await this.repo.findFrameworkById(
+        tx,
+        dto.operationalFrameworkId,
+      );
       if (!framework) {
         throw new ResourceNotFoundException('Framework no encontrado', {
           operationalFrameworkId: dto.operationalFrameworkId,
         });
       }
       if (framework.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El framework no está publicado (ACTIVE)', {
-          operationalFrameworkId: dto.operationalFrameworkId,
-        });
+        throw new PreconditionFailedException(
+          'El framework no está publicado (ACTIVE)',
+          {
+            operationalFrameworkId: dto.operationalFrameworkId,
+          },
+        );
       }
       const assessment = this.repo.createAssessment(tx, {
         tenantId: dto.tenantId,
@@ -135,8 +158,12 @@ export class AssessmentService {
         workloadName: dto.workloadName,
         assessmentTypeConceptId: dto.assessmentTypeConceptId,
         statusConceptId: SYSOPS.ASSESS_IN_PROGRESS,
-        assessmentPeriodStart: dto.assessmentPeriodStart ? new Date(dto.assessmentPeriodStart) : undefined,
-        assessmentPeriodEnd: dto.assessmentPeriodEnd ? new Date(dto.assessmentPeriodEnd) : undefined,
+        assessmentPeriodStart: dto.assessmentPeriodStart
+          ? new Date(dto.assessmentPeriodStart)
+          : undefined,
+        assessmentPeriodEnd: dto.assessmentPeriodEnd
+          ? new Date(dto.assessmentPeriodEnd)
+          : undefined,
         facilitatorUserId: dto.facilitatorUserId,
         actorUserId: actor.id,
       });
@@ -153,10 +180,17 @@ export class AssessmentService {
   ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
       const assessment = await this.repo.findAssessmentById(tx, assessmentId);
-      if (!assessment) throw new ResourceNotFoundException('Evaluación no encontrada', { assessmentId });
+      if (!assessment)
+        throw new ResourceNotFoundException('Evaluación no encontrada', {
+          assessmentId,
+        });
 
       for (const item of dto.results) {
-        const existing = await this.repo.findControlResult(tx, assessmentId, item.operationalFrameworkControlId);
+        const existing = await this.repo.findControlResult(
+          tx,
+          assessmentId,
+          item.operationalFrameworkControlId,
+        );
         if (existing) {
           existing.resultConceptId = item.resultConceptId;
           existing.maturityLevelConceptId = item.maturityLevelConceptId;
@@ -191,11 +225,19 @@ export class AssessmentService {
   ): Promise<FindingResponseDto> {
     return this.em.transactional(async (tx) => {
       const assessment = await this.repo.findAssessmentById(tx, assessmentId);
-      if (!assessment) throw new ResourceNotFoundException('Evaluación no encontrada', { assessmentId });
-      if (await this.repo.findFindingByCode(tx, assessmentId, dto.findingCode)) {
-        throw new ConflictException('Ya existe un hallazgo con ese finding_code', {
-          findingCode: dto.findingCode,
+      if (!assessment)
+        throw new ResourceNotFoundException('Evaluación no encontrada', {
+          assessmentId,
         });
+      if (
+        await this.repo.findFindingByCode(tx, assessmentId, dto.findingCode)
+      ) {
+        throw new ConflictException(
+          'Ya existe un hallazgo con ese finding_code',
+          {
+            findingCode: dto.findingCode,
+          },
+        );
       }
       const finding = this.repo.createFinding(tx, {
         workloadAssessmentId: assessmentId,
@@ -222,15 +264,24 @@ export class AssessmentService {
   ): Promise<RemediationPlanResponseDto> {
     return this.em.transactional(async (tx) => {
       const assessment = await this.repo.findAssessmentById(tx, assessmentId);
-      if (!assessment) throw new ResourceNotFoundException('Evaluación no encontrada', { assessmentId });
-      const finding = await this.repo.findFindingById(tx, dto.assessmentFindingId);
+      if (!assessment)
+        throw new ResourceNotFoundException('Evaluación no encontrada', {
+          assessmentId,
+        });
+      const finding = await this.repo.findFindingById(
+        tx,
+        dto.assessmentFindingId,
+      );
       if (!finding) {
         throw new ResourceNotFoundException('Hallazgo no encontrado', {
           assessmentFindingId: dto.assessmentFindingId,
         });
       }
       if (await this.repo.findPlanByCode(tx, assessment.tenantId, dto.code)) {
-        throw new ConflictException('Ya existe un plan con ese code para el tenant', { code: dto.code });
+        throw new ConflictException(
+          'Ya existe un plan con ese code para el tenant',
+          { code: dto.code },
+        );
       }
       const plan = this.repo.createPlan(tx, {
         tenantId: assessment.tenantId,
@@ -239,7 +290,9 @@ export class AssessmentService {
         name: dto.name,
         statusConceptId: SYSOPS.PLAN_OPEN,
         ownerUserId: dto.ownerUserId,
-        targetCompletionAt: dto.targetCompletionAt ? new Date(dto.targetCompletionAt) : undefined,
+        targetCompletionAt: dto.targetCompletionAt
+          ? new Date(dto.targetCompletionAt)
+          : undefined,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -259,7 +312,10 @@ export class AssessmentService {
         actionIds.push(action.id);
       }
       await tx.flush();
-      this.logger.info({ operation: 'sysops.remediation.plan', planId: plan.id }, 'Remediation plan created');
+      this.logger.info(
+        { operation: 'sysops.remediation.plan', planId: plan.id },
+        'Remediation plan created',
+      );
       return { id: plan.id, actionIds };
     });
   }
@@ -272,13 +328,22 @@ export class AssessmentService {
   ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
       const action = await this.repo.findActionById(tx, actionId);
-      if (!action) throw new ResourceNotFoundException('Acción de remediación no encontrada', { actionId });
+      if (!action)
+        throw new ResourceNotFoundException(
+          'Acción de remediación no encontrada',
+          { actionId },
+        );
       if (action.statusConceptId === SYSOPS.ACTION_VERIFIED) {
-        throw new PreconditionFailedException('La acción ya está verificada', { actionId });
+        throw new PreconditionFailedException('La acción ya está verificada', {
+          actionId,
+        });
       }
       // Segregación de funciones: el verificador no puede ser el asignado.
       if (action.assignedUserId && action.assignedUserId === actor.id) {
-        throw new PreconditionFailedException('El verificador no puede ser el asignado', { actionId });
+        throw new PreconditionFailedException(
+          'El verificador no puede ser el asignado',
+          { actionId },
+        );
       }
 
       action.statusConceptId = SYSOPS.ACTION_VERIFIED;
@@ -289,11 +354,16 @@ export class AssessmentService {
       touch(action, actor.id);
 
       // Cerrar el hallazgo si todas sus acciones están verificadas.
-      const openFindingActions = await this.repo.countFindingActionsNotIn(tx, action.assessmentFindingId, [
-        SYSOPS.ACTION_VERIFIED,
-      ]);
+      const openFindingActions = await this.repo.countFindingActionsNotIn(
+        tx,
+        action.assessmentFindingId,
+        [SYSOPS.ACTION_VERIFIED],
+      );
       if (openFindingActions === 0) {
-        const finding = await this.repo.findFindingById(tx, action.assessmentFindingId);
+        const finding = await this.repo.findFindingById(
+          tx,
+          action.assessmentFindingId,
+        );
         if (finding && finding.statusConceptId !== SYSOPS.FINDING_CLOSED) {
           finding.statusConceptId = SYSOPS.FINDING_CLOSED;
           finding.closedAt = new Date();
@@ -302,9 +372,11 @@ export class AssessmentService {
       }
 
       // Completar el plan si no quedan acciones abiertas.
-      const openPlanActions = await this.repo.countActionsNotIn(tx, action.remediationPlanId, [
-        SYSOPS.ACTION_VERIFIED,
-      ]);
+      const openPlanActions = await this.repo.countActionsNotIn(
+        tx,
+        action.remediationPlanId,
+        [SYSOPS.ACTION_VERIFIED],
+      );
       if (openPlanActions === 0) {
         const plan = await this.repo.findPlanById(tx, action.remediationPlanId);
         if (plan && plan.statusConceptId !== SYSOPS.PLAN_COMPLETED) {
@@ -314,7 +386,10 @@ export class AssessmentService {
           touch(plan, actor.id);
         }
       }
-      this.logger.info({ operation: 'sysops.remediation.verify', actionId }, 'Remediation action verified');
+      this.logger.info(
+        { operation: 'sysops.remediation.verify', actionId },
+        'Remediation action verified',
+      );
       return { ok: true };
     });
   }
@@ -327,10 +402,14 @@ export class AssessmentService {
   ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
       const finding = await this.repo.findFindingById(tx, findingId);
-      if (!finding) throw new ResourceNotFoundException('Hallazgo no encontrado', { findingId });
+      if (!finding)
+        throw new ResourceNotFoundException('Hallazgo no encontrado', {
+          findingId,
+        });
       if (dto.statusConceptId !== undefined) {
         finding.statusConceptId = dto.statusConceptId;
-        if (dto.statusConceptId === SYSOPS.FINDING_CLOSED) finding.closedAt = new Date();
+        if (dto.statusConceptId === SYSOPS.FINDING_CLOSED)
+          finding.closedAt = new Date();
       }
       if (dto.ownerTeam !== undefined) finding.ownerTeam = dto.ownerTeam;
       touch(finding, actor.id);

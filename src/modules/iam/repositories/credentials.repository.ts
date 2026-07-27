@@ -63,16 +63,23 @@ export class CredentialsRepository {
   }
 
   /** Crea una credencial de contraseña ACTIVA (sin flush). */
-  createPassword(em: EntityManager, data: CreatePasswordCredentialData): AuthenticationCredentials {
-    return em.create(AuthenticationCredentials, {
-      userId: data.userId,
-      methodConceptId: CONCEPTS.CRED_PASSWORD,
-      stateConceptId: CONCEPTS.STATE_ACTIVE,
-      externalSubject: data.externalSubject,
-      secretHash: data.secretHash,
-      hashAlgorithmConceptId: CONCEPTS.HASH_ARGON2ID,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+  createPassword(
+    em: EntityManager,
+    data: CreatePasswordCredentialData,
+  ): AuthenticationCredentials {
+    return em.create(
+      AuthenticationCredentials,
+      {
+        userId: data.userId,
+        methodConceptId: CONCEPTS.CRED_PASSWORD,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        externalSubject: data.externalSubject,
+        secretHash: data.secretHash,
+        hashAlgorithmConceptId: CONCEPTS.HASH_ARGON2ID,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Crea una credencial federada ACTIVA (sin flush). */
@@ -80,14 +87,18 @@ export class CredentialsRepository {
     em: EntityManager,
     data: CreateFederatedCredentialData,
   ): AuthenticationCredentials {
-    return em.create(AuthenticationCredentials, {
-      userId: data.userId,
-      methodConceptId: CONCEPTS.CRED_FEDERATED,
-      stateConceptId: CONCEPTS.STATE_ACTIVE,
-      identityProvider: data.identityProvider,
-      externalSubject: data.externalSubject,
-      ...createdBy(data.actorUserId),
-    }, { partial: true });
+    return em.create(
+      AuthenticationCredentials,
+      {
+        userId: data.userId,
+        methodConceptId: CONCEPTS.CRED_FEDERATED,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        identityProvider: data.identityProvider,
+        externalSubject: data.externalSubject,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Revoca en bloque todas las credenciales del usuario (anonimización). */

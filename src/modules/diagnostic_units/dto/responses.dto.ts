@@ -11,13 +11,19 @@ export class DiagnosticUnitResponseDto {
   @ApiProperty()
   name!: string;
 
-  @ApiProperty({ description: 'Concept id de estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id de estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 
   @ApiProperty({ description: 'Concept id de estado', format: 'uuid' })
   status!: string;
 
-  @ApiPropertyOptional({ description: 'Perfil público asignado', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Perfil público asignado',
+    format: 'uuid',
+  })
   publicProfileId?: string;
 
   @ApiProperty({ description: 'Nº de sitios creados en el alta' })
@@ -89,7 +95,10 @@ export class EquipmentResponseDto {
   @ApiProperty({ format: 'uuid' })
   diagnosticUnitSiteId!: string;
 
-  @ApiProperty({ description: 'Concept id de estado operativo', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id de estado operativo',
+    format: 'uuid',
+  })
   operationalStatus!: string;
 }
 
@@ -98,7 +107,10 @@ export class AccreditationResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ description: 'Concept id de estado de verificación', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id de estado de verificación',
+    format: 'uuid',
+  })
   verificationStatus!: string;
 }
 

@@ -81,7 +81,11 @@ export class DataAccessLogRepository {
   }
 
   /** Cuenta accesos de un usuario desde una fecha (heurística de anomalías, UC-10-10). */
-  countByUserSince(em: EntityManager, userId: string, since: Date): Promise<number> {
+  countByUserSince(
+    em: EntityManager,
+    userId: string,
+    since: Date,
+  ): Promise<number> {
     return em.count(DataAccessLog, { userId, recordedAt: { $gte: since } });
   }
 }

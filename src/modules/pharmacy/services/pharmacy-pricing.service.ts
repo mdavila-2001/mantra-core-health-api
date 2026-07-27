@@ -55,28 +55,44 @@ export class PharmacyPricingService {
     );
     return this.em.transactional(async (tx) => {
       const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy) throw new ResourceNotFoundException('Farmacia no encontrada', { pharmacyId });
+      if (!pharmacy)
+        throw new ResourceNotFoundException('Farmacia no encontrada', {
+          pharmacyId,
+        });
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
-        throw new PreconditionFailedException('La farmacia no está activa', { pharmacyId });
+        throw new PreconditionFailedException('La farmacia no está activa', {
+          pharmacyId,
+        });
       }
       if (dto.priceListType === 'INSURER' && !dto.insurerTenantId) {
-        throw new PreconditionFailedException('Una lista por aseguradora requiere insurerTenantId', {
-          code: dto.code,
-        });
+        throw new PreconditionFailedException(
+          'Una lista por aseguradora requiere insurerTenantId',
+          {
+            code: dto.code,
+          },
+        );
       }
 
-      const clash = await this.priceListsRepo.findByPharmacyAndCode(tx, pharmacyId, dto.code);
+      const clash = await this.priceListsRepo.findByPharmacyAndCode(
+        tx,
+        pharmacyId,
+        dto.code,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe una lista con ese código en la farmacia', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe una lista con ese código en la farmacia',
+          {
+            code: dto.code,
+          },
+        );
       }
 
       const priceList = this.priceListsRepo.create(tx, {
         pharmacyId,
         pharmacySiteId: dto.pharmacySiteId,
         code: dto.code,
-        priceListTypeConceptId: PRICE_LIST_TYPE_CONCEPT_BY_CODE[dto.priceListType],
+        priceListTypeConceptId:
+          PRICE_LIST_TYPE_CONCEPT_BY_CODE[dto.priceListType],
         insurerTenantId: dto.insurerTenantId,
         currencyConceptId: dto.currencyConceptId ?? PHARM.CURRENCY_USD,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
@@ -88,7 +104,11 @@ export class PharmacyPricingService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'pharmacy.price-list.create', pharmacyId, priceListId: priceList.id },
+        {
+          operation: 'pharmacy.price-list.create',
+          pharmacyId,
+          priceListId: priceList.id,
+        },
         'Price list created',
       );
       return {
@@ -110,19 +130,32 @@ export class PharmacyPricingService {
     actor: AuthenticatedUser,
   ): Promise<PriceResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy.price.version', pharmacyId, priceListId, productId: dto.pharmacyProductId },
+      {
+        operation: 'pharmacy.price.version',
+        pharmacyId,
+        priceListId,
+        productId: dto.pharmacyProductId,
+      },
       'Versioning product price',
     );
     return this.em.transactional(async (tx) => {
       const priceList = await this.priceListsRepo.findById(tx, priceListId);
       if (!priceList || priceList.pharmacyId !== pharmacyId) {
-        throw new ResourceNotFoundException('Lista de precios no encontrada', { priceListId });
+        throw new ResourceNotFoundException('Lista de precios no encontrada', {
+          priceListId,
+        });
       }
       if (priceList.statusConceptId !== PHARM.PRICE_LIST_ACTIVE) {
-        throw new PreconditionFailedException('La lista de precios no está activa', { priceListId });
+        throw new PreconditionFailedException(
+          'La lista de precios no está activa',
+          { priceListId },
+        );
       }
 
-      const product = await this.productsRepo.findById(tx, dto.pharmacyProductId);
+      const product = await this.productsRepo.findById(
+        tx,
+        dto.pharmacyProductId,
+      );
       if (!product || product.pharmacyId !== pharmacyId) {
         throw new ResourceNotFoundException('Producto no encontrado', {
           productId: dto.pharmacyProductId,
@@ -146,16 +179,30 @@ export class PharmacyPricingService {
         prev.effectiveTo = now;
       }
 
-      const maxVersion = await this.pricesRepo.maxVersionNumber(tx, priceListId, dto.pharmacyProductId);
+      const maxVersion = await this.pricesRepo.maxVersionNumber(
+        tx,
+        priceListId,
+        dto.pharmacyProductId,
+      );
       const price = this.pricesRepo.create(tx, {
         pharmacyPriceListId: priceListId,
         pharmacyProductId: dto.pharmacyProductId,
         versionNumber: maxVersion + 1,
         unitAmount: String(dto.unitAmount),
-        taxAmount: dto.taxAmount !== undefined ? String(dto.taxAmount) : undefined,
-        patientAmount: dto.patientAmount !== undefined ? String(dto.patientAmount) : undefined,
-        insurerAmount: dto.insurerAmount !== undefined ? String(dto.insurerAmount) : undefined,
-        minimumQuantity: dto.minimumQuantity !== undefined ? String(dto.minimumQuantity) : undefined,
+        taxAmount:
+          dto.taxAmount !== undefined ? String(dto.taxAmount) : undefined,
+        patientAmount:
+          dto.patientAmount !== undefined
+            ? String(dto.patientAmount)
+            : undefined,
+        insurerAmount:
+          dto.insurerAmount !== undefined
+            ? String(dto.insurerAmount)
+            : undefined,
+        minimumQuantity:
+          dto.minimumQuantity !== undefined
+            ? String(dto.minimumQuantity)
+            : undefined,
         effectiveFrom: now,
         statusConceptId: PHARM.PRICE_ACTIVE,
         recordedAt: now,
@@ -166,7 +213,11 @@ export class PharmacyPricingService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'pharmacy.price.version', priceId: price.id, versionNumber: price.versionNumber },
+        {
+          operation: 'pharmacy.price.version',
+          priceId: price.id,
+          versionNumber: price.versionNumber,
+        },
         'Product price versioned',
       );
       return {
@@ -194,10 +245,15 @@ export class PharmacyPricingService {
     return this.em.transactional(async (tx) => {
       const priceList = await this.priceListsRepo.findById(tx, priceListId);
       if (!priceList || priceList.pharmacyId !== pharmacyId) {
-        throw new ResourceNotFoundException('Lista de precios no encontrada', { priceListId });
+        throw new ResourceNotFoundException('Lista de precios no encontrada', {
+          priceListId,
+        });
       }
       if (priceList.statusConceptId !== PHARM.PRICE_LIST_ACTIVE) {
-        throw new PreconditionFailedException('La lista de precios no está activa', { priceListId });
+        throw new PreconditionFailedException(
+          'La lista de precios no está activa',
+          { priceListId },
+        );
       }
 
       const now = new Date();
@@ -205,14 +261,22 @@ export class PharmacyPricingService {
       priceList.validTo = now;
       touch(priceList, actor.id);
 
-      const prices = await this.pricesRepo.findActiveByList(tx, priceListId, PHARM.PRICE_ACTIVE);
+      const prices = await this.pricesRepo.findActiveByList(
+        tx,
+        priceListId,
+        PHARM.PRICE_ACTIVE,
+      );
       for (const price of prices) {
         price.statusConceptId = PHARM.PRICE_SUPERSEDED;
         price.effectiveTo = now;
       }
 
       this.logger.info(
-        { operation: 'pharmacy.price-list.close', priceListId, supersededPrices: prices.length },
+        {
+          operation: 'pharmacy.price-list.close',
+          priceListId,
+          supersededPrices: prices.length,
+        },
         'Price list closed',
       );
       return { ok: true };

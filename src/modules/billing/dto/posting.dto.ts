@@ -2,7 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsUUID } from 'class-validator';
 
 /** Tipos de documento que pueden contabilizarse (UC-17-06). */
-export type PostableDocumentType = 'INVOICE' | 'BILL' | 'PAYMENT_RECEIVED' | 'PAYMENT_MADE';
+export type PostableDocumentType =
+  'INVOICE' | 'BILL' | 'PAYMENT_RECEIVED' | 'PAYMENT_MADE';
 
 /** Cuerpo de `POST /billing/documents/{id}:post-to-ledger` (UC-17-06). */
 export class PostToLedgerDto {
@@ -13,7 +14,10 @@ export class PostToLedgerDto {
   @IsIn(['INVOICE', 'BILL', 'PAYMENT_RECEIVED', 'PAYMENT_MADE'])
   documentType!: PostableDocumentType;
 
-  @ApiProperty({ description: 'Asiento contable resuelto (accounting.journal_transactions)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Asiento contable resuelto (accounting.journal_transactions)',
+    format: 'uuid',
+  })
   @IsUUID()
   transactionId!: string;
 }
@@ -23,7 +27,9 @@ export class PostingResultDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ enum: ['INVOICE', 'BILL', 'PAYMENT_RECEIVED', 'PAYMENT_MADE'] })
+  @ApiProperty({
+    enum: ['INVOICE', 'BILL', 'PAYMENT_RECEIVED', 'PAYMENT_MADE'],
+  })
   documentType!: PostableDocumentType;
 
   @ApiProperty({ format: 'uuid' })

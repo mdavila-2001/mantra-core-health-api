@@ -33,12 +33,20 @@ export class CommunityReviewsService {
     dto: CreateReviewDto,
     actor: AuthenticatedUser,
   ): Promise<ReviewResponseDto> {
-    this.logger.info({ operation: 'community.review.publish', profileId }, 'Publishing service review');
+    this.logger.info(
+      { operation: 'community.review.publish', profileId },
+      'Publishing service review',
+    );
     return this.em.transactional(async (tx) => {
       const target = await this.profilesRepo.findById(tx, profileId);
-      if (!target) throw new ResourceNotFoundException('Perfil objetivo no encontrado', { profileId });
+      if (!target)
+        throw new ResourceNotFoundException('Perfil objetivo no encontrado', {
+          profileId,
+        });
       if (target.acceptsReviews === false) {
-        throw new PreconditionFailedException('El perfil no acepta reviews', { profileId });
+        throw new PreconditionFailedException('El perfil no acepta reviews', {
+          profileId,
+        });
       }
 
       if (dto.verifiedEncounterId) {
@@ -49,9 +57,12 @@ export class CommunityReviewsService {
           dto.verifiedEncounterId,
         );
         if (existing) {
-          throw new ConflictException('Ya existe una review verificada para este encuentro', {
-            profileId,
-          });
+          throw new ConflictException(
+            'Ya existe una review verificada para este encuentro',
+            {
+              profileId,
+            },
+          );
         }
       }
 
@@ -63,8 +74,12 @@ export class CommunityReviewsService {
         overallRating: dto.overallRating,
         reviewText: dto.reviewText,
         reviewerDisplayModeConceptId:
-          dto.displayMode === 'ANONYMOUS' ? COMM.REVIEW_DISPLAY_ANONYMOUS : COMM.REVIEW_DISPLAY_REAL_NAME,
-        verificationStatusConceptId: verified ? COMM.REVIEW_VERIFIED : COMM.REVIEW_UNVERIFIED,
+          dto.displayMode === 'ANONYMOUS'
+            ? COMM.REVIEW_DISPLAY_ANONYMOUS
+            : COMM.REVIEW_DISPLAY_REAL_NAME,
+        verificationStatusConceptId: verified
+          ? COMM.REVIEW_VERIFIED
+          : COMM.REVIEW_UNVERIFIED,
         moderationStatusConceptId: COMM.MODERATION_PENDING,
         publicationStatusConceptId: COMM.PUBLICATION_PUBLISHED,
         publishedAt: new Date(),
@@ -74,11 +89,21 @@ export class CommunityReviewsService {
 
       let dimensionCount = 0;
       for (const d of dto.dimensions ?? []) {
-        this.reviewsRepo.createDimensionScore(tx, review.id, REVIEW_DIMENSION_BY_CODE[d.dimension], d.score);
+        this.reviewsRepo.createDimensionScore(
+          tx,
+          review.id,
+          REVIEW_DIMENSION_BY_CODE[d.dimension],
+          d.score,
+        );
         dimensionCount++;
       }
 
-      return { id: review.id, overallRating: review.overallRating, verified, dimensionCount };
+      return {
+        id: review.id,
+        overallRating: review.overallRating,
+        verified,
+        dimensionCount,
+      };
     });
   }
 }

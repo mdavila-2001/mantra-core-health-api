@@ -7,7 +7,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { InvoicesRepository, PaymentsReceivedRepository } from '../repositories';
+import {
+  InvoicesRepository,
+  PaymentsReceivedRepository,
+} from '../repositories';
 import {
   ApplyPaymentReceivedDto,
   PaymentReceivedResponseDto,
@@ -37,18 +40,28 @@ export class PaymentsReceivedService {
     actor: AuthenticatedUser,
   ): Promise<PaymentReceivedResponseDto> {
     this.logger.info(
-      { operation: 'billing.payment-received.apply', practiceId: dto.practiceId, actorId: actor.id },
+      {
+        operation: 'billing.payment-received.apply',
+        practiceId: dto.practiceId,
+        actorId: actor.id,
+      },
       'Applying received payment',
     );
     return this.em.transactional(async (tx) => {
       const amountCents = toCents(dto.amount);
       if (amountCents <= 0) {
-        throw new PreconditionFailedException('El monto del pago debe ser positivo', {
-          amount: dto.amount,
-        });
+        throw new PreconditionFailedException(
+          'El monto del pago debe ser positivo',
+          {
+            amount: dto.amount,
+          },
+        );
       }
 
-      const allocatedCents = dto.allocations.reduce((acc, a) => acc + toCents(a.allocatedAmount), 0);
+      const allocatedCents = dto.allocations.reduce(
+        (acc, a) => acc + toCents(a.allocatedAmount),
+        0,
+      );
       if (allocatedCents > amountCents) {
         throw new PreconditionFailedException(
           'La suma asignada excede el monto del pago',
@@ -74,21 +87,29 @@ export class PaymentsReceivedService {
       for (const alloc of dto.allocations) {
         const invoice = await this.invoicesRepo.findById(tx, alloc.invoiceId);
         if (!invoice) {
-          throw new ResourceNotFoundException('Factura no encontrada', { invoiceId: alloc.invoiceId });
+          throw new ResourceNotFoundException('Factura no encontrada', {
+            invoiceId: alloc.invoiceId,
+          });
         }
         const balanceCents = toCents(invoice.balance ?? '0');
         const allocCents = toCents(alloc.allocatedAmount);
         if (balanceCents <= 0) {
-          throw new PreconditionFailedException('La factura no tiene saldo pendiente', {
-            invoiceId: invoice.id,
-          });
+          throw new PreconditionFailedException(
+            'La factura no tiene saldo pendiente',
+            {
+              invoiceId: invoice.id,
+            },
+          );
         }
         if (allocCents > balanceCents) {
-          throw new PreconditionFailedException('La asignación excede el saldo de la factura', {
-            invoiceId: invoice.id,
-            balance: invoice.balance,
-            allocated: alloc.allocatedAmount,
-          });
+          throw new PreconditionFailedException(
+            'La asignación excede el saldo de la factura',
+            {
+              invoiceId: invoice.id,
+              balance: invoice.balance,
+              allocated: alloc.allocatedAmount,
+            },
+          );
         }
 
         this.paymentsRepo.createAllocation(tx, {
@@ -101,13 +122,20 @@ export class PaymentsReceivedService {
           actorUserId: actor.id,
         });
 
-        const discountCents = alloc.discountAmount ? toCents(alloc.discountAmount) : 0;
+        const discountCents = alloc.discountAmount
+          ? toCents(alloc.discountAmount)
+          : 0;
         const newPaidCents = toCents(invoice.paidTotal ?? '0') + allocCents;
-        const newBalanceCents = Math.max(0, balanceCents - allocCents - discountCents);
+        const newBalanceCents = Math.max(
+          0,
+          balanceCents - allocCents - discountCents,
+        );
         invoice.paidTotal = fromCents(newPaidCents);
         invoice.balance = fromCents(newBalanceCents);
         invoice.statusConceptId =
-          newBalanceCents === 0 ? BILL.INVOICE_PAID : BILL.INVOICE_PARTIALLY_PAID;
+          newBalanceCents === 0
+            ? BILL.INVOICE_PAID
+            : BILL.INVOICE_PARTIALLY_PAID;
         touch(invoice, actor.id);
 
         affected.push({
@@ -119,7 +147,11 @@ export class PaymentsReceivedService {
       }
 
       this.logger.info(
-        { operation: 'billing.payment-received.apply', paymentId: payment.id, allocations: affected.length },
+        {
+          operation: 'billing.payment-received.apply',
+          paymentId: payment.id,
+          allocations: affected.length,
+        },
         'Received payment applied',
       );
       return {

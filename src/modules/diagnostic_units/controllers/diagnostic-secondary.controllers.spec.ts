@@ -12,14 +12,25 @@ describe('DiagnosticUnitSitesController', () => {
   it('delegates updateSite (UC-23-02) and addEquipment (UC-23-09)', async () => {
     const unitsService = { updateSite: mockFn() };
     const equipmentService = { addEquipment: mockFn() };
-    const controller = new DiagnosticUnitSitesController(unitsService as any, equipmentService as any);
+    const controller = new DiagnosticUnitSitesController(
+      unitsService as any,
+      equipmentService as any,
+    );
 
-    await controller.updateSite('s1', { accessionPrefix: 'AX' } as any, actor);
-    expect(unitsService.updateSite).toHaveBeenCalledWith('s1', { accessionPrefix: 'AX' }, actor);
+    await controller.updateSite('s1', { accessionPrefix: 'AX' }, actor);
+    expect(unitsService.updateSite).toHaveBeenCalledWith(
+      's1',
+      { accessionPrefix: 'AX' },
+      actor,
+    );
 
     const eqDto = { equipmentTypeConceptId: 'et1' };
-    await controller.addEquipment('s1', eqDto as any, actor);
-    expect(equipmentService.addEquipment).toHaveBeenCalledWith('s1', eqDto, actor);
+    await controller.addEquipment('s1', eqDto, actor);
+    expect(equipmentService.addEquipment).toHaveBeenCalledWith(
+      's1',
+      eqDto,
+      actor,
+    );
   });
 });
 
@@ -27,11 +38,18 @@ describe('DiagnosticPricingController', () => {
   it('delegates addStudyPrice (UC-23-07), closePrice and retireOffering (UC-23-08)', async () => {
     const pricingService = { addStudyPrice: mockFn(), closePrice: mockFn() };
     const studiesService = { retireOffering: mockFn() };
-    const controller = new DiagnosticPricingController(pricingService as any, studiesService as any);
+    const controller = new DiagnosticPricingController(
+      pricingService as any,
+      studiesService as any,
+    );
 
     const priceDto = { diagnosticStudyOfferingId: 'o1', baseAmount: '10' };
-    await controller.addStudyPrice('ps1', priceDto as any, actor);
-    expect(pricingService.addStudyPrice).toHaveBeenCalledWith('ps1', priceDto, actor);
+    await controller.addStudyPrice('ps1', priceDto, actor);
+    expect(pricingService.addStudyPrice).toHaveBeenCalledWith(
+      'ps1',
+      priceDto,
+      actor,
+    );
 
     await controller.closePrice('pr1', actor);
     expect(pricingService.closePrice).toHaveBeenCalledWith('pr1', actor);
@@ -44,19 +62,31 @@ describe('DiagnosticPricingController', () => {
 describe('DiagnosticEquipmentController', () => {
   it('delegates updateEquipment (UC-23-09)', async () => {
     const equipmentService = { updateEquipment: mockFn() };
-    const controller = new DiagnosticEquipmentController(equipmentService as any);
+    const controller = new DiagnosticEquipmentController(
+      equipmentService as any,
+    );
     const dto = { operationalStatusConceptId: 'os1' };
-    await controller.updateEquipment('e1', dto as any, actor);
-    expect(equipmentService.updateEquipment).toHaveBeenCalledWith('e1', dto, actor);
+    await controller.updateEquipment('e1', dto, actor);
+    expect(equipmentService.updateEquipment).toHaveBeenCalledWith(
+      'e1',
+      dto,
+      actor,
+    );
   });
 });
 
 describe('DiagnosticUnitAccreditationsController', () => {
   it('delegates renew (UC-23-11)', async () => {
     const unitsService = { renewAccreditation: mockFn() };
-    const controller = new DiagnosticUnitAccreditationsController(unitsService as any);
+    const controller = new DiagnosticUnitAccreditationsController(
+      unitsService as any,
+    );
     const dto = { accreditationNumber: 'A-2' };
-    await controller.renew('acc1', dto as any, actor);
-    expect(unitsService.renewAccreditation).toHaveBeenCalledWith('acc1', dto, actor);
+    await controller.renew('acc1', dto, actor);
+    expect(unitsService.renewAccreditation).toHaveBeenCalledWith(
+      'acc1',
+      dto,
+      actor,
+    );
   });
 });

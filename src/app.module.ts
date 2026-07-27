@@ -73,7 +73,9 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
     // esquemas Joi (persistencia + logging) en la única validación global.
     ConfigModule.forRoot({
       isGlobal: true,
-      validationSchema: ormEnvSchema.concat(loggingEnvSchema).concat(authEnvSchema),
+      validationSchema: ormEnvSchema
+        .concat(loggingEnvSchema)
+        .concat(authEnvSchema),
     }),
     // Logging estructurado con pino para todas las capas. Va primero para que el
     // logger de peticiones y el `PinoLogger` estén disponibles desde el arranque.

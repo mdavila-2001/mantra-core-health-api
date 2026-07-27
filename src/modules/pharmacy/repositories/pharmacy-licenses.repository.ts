@@ -27,7 +27,11 @@ export class PharmacyLicensesRepository {
   }
 
   /** Cuenta las licencias de una farmacia que aún no están verificadas. */
-  countUnverified(em: EntityManager, pharmacyId: string, verifiedConceptId: string): Promise<number> {
+  countUnverified(
+    em: EntityManager,
+    pharmacyId: string,
+    verifiedConceptId: string,
+  ): Promise<number> {
     return em.count(PharmacyLicenses, {
       pharmacyId,
       verificationStatusConceptId: { $ne: verifiedConceptId },

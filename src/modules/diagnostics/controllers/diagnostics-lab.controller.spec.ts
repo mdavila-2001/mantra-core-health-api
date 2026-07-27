@@ -19,26 +19,34 @@ describe('DiagnosticsLabController', () => {
   it('delegates createWorkOrder (UC-20-04)', async () => {
     const d = build();
     const dto = { laboratoryAccessionId: 'a1', tests: [] };
-    await d.controller.createWorkOrder(dto as any, actor);
+    await d.controller.createWorkOrder(dto, actor);
     expect(d.service.createWorkOrder).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates createAnalyzerRun (soporte)', async () => {
     const d = build();
     const dto = { analyzerDeviceId: 'dev1', runIdentifier: 'r1' };
-    await d.controller.createAnalyzerRun(dto as any, actor);
+    await d.controller.createAnalyzerRun(dto, actor);
     expect(d.service.createAnalyzerRun).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates ingestMessage (UC-20-05)', async () => {
     const d = build();
-    await d.controller.ingestMessage('run1', { payloadHash: 'h' } as any, actor);
-    expect(d.service.ingestMessage).toHaveBeenCalledWith('run1', { payloadHash: 'h' }, actor);
+    await d.controller.ingestMessage('run1', { payloadHash: 'h' }, actor);
+    expect(d.service.ingestMessage).toHaveBeenCalledWith(
+      'run1',
+      { payloadHash: 'h' },
+      actor,
+    );
   });
 
   it('delegates verifyResult (UC-20-06)', async () => {
     const d = build();
-    await d.controller.verifyResult('o1', { level: 'TECHNICAL', verifiedByProfileId: 'p1' } as any, actor);
+    await d.controller.verifyResult(
+      'o1',
+      { level: 'TECHNICAL', verifiedByProfileId: 'p1' } as any,
+      actor,
+    );
     expect(d.service.verifyResult).toHaveBeenCalledWith(
       'o1',
       { level: 'TECHNICAL', verifiedByProfileId: 'p1' },

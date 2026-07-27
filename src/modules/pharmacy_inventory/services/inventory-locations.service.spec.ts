@@ -10,7 +10,11 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const locationsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new InventoryLocationsService(em as any, locationsRepo as any, logger as any);
+  const service = new InventoryLocationsService(
+    em as any,
+    locationsRepo as any,
+    logger as any,
+  );
   return { service, tx, locationsRepo };
 }
 
@@ -18,7 +22,11 @@ describe('InventoryLocationsService', () => {
   it('creates an active inventory location (bootstrap)', async () => {
     const d = build();
     d.locationsRepo.create.mockReturnValue({ id: 'loc1' });
-    const res = await d.service.create('site1', { code: 'A1', name: 'Shelf A1' } as any, actor);
+    const res = await d.service.create(
+      'site1',
+      { code: 'A1', name: 'Shelf A1' },
+      actor,
+    );
     expect(res).toEqual({ id: 'loc1' });
     expect(d.locationsRepo.create).toHaveBeenCalledWith(
       d.tx,

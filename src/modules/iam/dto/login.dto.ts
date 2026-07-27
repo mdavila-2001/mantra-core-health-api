@@ -13,7 +13,9 @@ export class LoginDto {
   @MaxLength(200)
   password!: string;
 
-  @ApiPropertyOptional({ description: 'Código MFA de un solo uso, si el usuario lo tiene activo' })
+  @ApiPropertyOptional({
+    description: 'Código MFA de un solo uso, si el usuario lo tiene activo',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(20)

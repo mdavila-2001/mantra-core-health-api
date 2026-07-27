@@ -45,21 +45,37 @@ export class PharmacyProductsService {
     actor: AuthenticatedUser,
   ): Promise<ProductResponseDto> {
     this.logger.info(
-      { operation: 'pharmacy.product.publish', pharmacyId, productCode: dto.productCode },
+      {
+        operation: 'pharmacy.product.publish',
+        pharmacyId,
+        productCode: dto.productCode,
+      },
       'Publishing pharmacy product',
     );
     return this.em.transactional(async (tx) => {
       const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy) throw new ResourceNotFoundException('Farmacia no encontrada', { pharmacyId });
+      if (!pharmacy)
+        throw new ResourceNotFoundException('Farmacia no encontrada', {
+          pharmacyId,
+        });
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
-        throw new PreconditionFailedException('La farmacia no está activa', { pharmacyId });
+        throw new PreconditionFailedException('La farmacia no está activa', {
+          pharmacyId,
+        });
       }
 
-      const clash = await this.productsRepo.findByPharmacyAndCode(tx, pharmacyId, dto.productCode);
+      const clash = await this.productsRepo.findByPharmacyAndCode(
+        tx,
+        pharmacyId,
+        dto.productCode,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe un producto con ese código en la farmacia', {
-          productCode: dto.productCode,
-        });
+        throw new ConflictException(
+          'Ya existe un producto con ese código en la farmacia',
+          {
+            productCode: dto.productCode,
+          },
+        );
       }
 
       const product = this.productsRepo.create(tx, {
@@ -84,7 +100,8 @@ export class PharmacyProductsService {
       for (const idf of identifiers) {
         this.identifiersRepo.create(tx, {
           pharmacyProductId: product.id,
-          identifierTypeConceptId: IDENTIFIER_TYPE_CONCEPT_BY_CODE[idf.identifierType],
+          identifierTypeConceptId:
+            IDENTIFIER_TYPE_CONCEPT_BY_CODE[idf.identifierType],
           identifierValue: idf.identifierValue,
           assigningAuthorityTenantId: idf.assigningAuthorityTenantId,
           validFrom: idf.validFrom ? new Date(idf.validFrom) : undefined,
@@ -95,7 +112,11 @@ export class PharmacyProductsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'pharmacy.product.publish', pharmacyId, productId: product.id },
+        {
+          operation: 'pharmacy.product.publish',
+          pharmacyId,
+          productId: product.id,
+        },
         'Pharmacy product published',
       );
       return {
@@ -122,23 +143,35 @@ export class PharmacyProductsService {
     return this.em.transactional(async (tx) => {
       const product = await this.productsRepo.findById(tx, productId);
       if (!product || product.pharmacyId !== pharmacyId) {
-        throw new ResourceNotFoundException('Producto no encontrado', { productId });
+        throw new ResourceNotFoundException('Producto no encontrado', {
+          productId,
+        });
       }
       if (product.statusConceptId !== PHARM.PRODUCT_ACTIVE) {
-        throw new PreconditionFailedException('El producto no está activo', { productId });
+        throw new PreconditionFailedException('El producto no está activo', {
+          productId,
+        });
       }
 
       product.statusConceptId = PHARM.PRODUCT_RETIRED;
       touch(product, actor.id);
 
       const now = new Date();
-      const prices = await this.pricesRepo.findActiveByProduct(tx, productId, PHARM.PRICE_ACTIVE);
+      const prices = await this.pricesRepo.findActiveByProduct(
+        tx,
+        productId,
+        PHARM.PRICE_ACTIVE,
+      );
       for (const price of prices) {
         price.statusConceptId = PHARM.PRICE_SUPERSEDED;
         price.effectiveTo = now;
       }
 
-      const mappings = await this.mappingsRepo.findActiveByProduct(tx, productId, PHARM.MAPPING_INACTIVE);
+      const mappings = await this.mappingsRepo.findActiveByProduct(
+        tx,
+        productId,
+        PHARM.MAPPING_INACTIVE,
+      );
       for (const mapping of mappings) {
         mapping.verificationStatusConceptId = PHARM.MAPPING_INACTIVE;
         touch(mapping, actor.id);

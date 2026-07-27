@@ -21,14 +21,16 @@ describe('GeoTrackedSubjectsController', () => {
     const d = build();
     const dto = { subjectId: 'subj-1' };
     d.service.enroll.mockResolvedValue({ id: 's1' });
-    await expect(d.controller.enroll(dto as any, actor)).resolves.toEqual({ id: 's1' });
+    await expect(d.controller.enroll(dto as any, actor)).resolves.toEqual({
+      id: 's1',
+    });
     expect(d.service.enroll).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates ingestPings (UC-13-03)', async () => {
     const d = build();
     const dto = { pings: [{ latitude: 0, longitude: 0 }] };
-    await d.controller.ingestPings('s1', dto as any, actor);
+    await d.controller.ingestPings('s1', dto, actor);
     expect(d.service.ingestPings).toHaveBeenCalledWith('s1', dto, actor);
   });
 

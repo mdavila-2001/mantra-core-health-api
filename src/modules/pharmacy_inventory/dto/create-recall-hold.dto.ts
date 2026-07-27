@@ -7,7 +7,10 @@ export class CreateRecallHoldDto {
   @IsUUID()
   pharmacyId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Sede de farmacia (para el ledger)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Sede de farmacia (para el ledger)',
+  })
   @IsUUID()
   pharmacySiteId!: string;
 
@@ -19,7 +22,10 @@ export class CreateRecallHoldDto {
   @IsUUID()
   inventoryLotId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Ubicación del lote (para el ledger)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Ubicación del lote (para el ledger)',
+  })
   @IsUUID()
   inventoryLocationId!: string;
 
@@ -28,7 +34,10 @@ export class CreateRecallHoldDto {
   @MaxLength(128)
   recallReference!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant de la autoridad emisora' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant de la autoridad emisora',
+  })
   @IsOptional()
   @IsUUID()
   sourceAuthorityTenantId?: string;

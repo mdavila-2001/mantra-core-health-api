@@ -10,7 +10,12 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { CommunityGroupsService } from '../services';
-import { CreateGroupDto, JoinGroupDto, IdResponseDto, GroupMembershipResponseDto } from '../dto';
+import {
+  CreateGroupDto,
+  JoinGroupDto,
+  IdResponseDto,
+  GroupMembershipResponseDto,
+} from '../dto';
 
 /** Endpoints de grupos/comunidades. */
 @ApiTags('community-groups')
@@ -23,7 +28,10 @@ export class CommunityGroupsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un grupo/comunidad' })
-  createGroup(@Body() dto: CreateGroupDto, @CurrentUser() actor: AuthenticatedUser): Promise<IdResponseDto> {
+  createGroup(
+    @Body() dto: CreateGroupDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.service.createGroup(dto, actor);
   }
 

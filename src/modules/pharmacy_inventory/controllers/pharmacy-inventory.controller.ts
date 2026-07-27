@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
@@ -83,7 +91,9 @@ export class PharmacyInventoryController {
   @Post(':siteId/count-sessions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Iniciar y congelar una sesión de conteo (UC-25-06)' })
+  @ApiOperation({
+    summary: 'Iniciar y congelar una sesión de conteo (UC-25-06)',
+  })
   openCountSession(
     @Param('siteId', ParseUUIDPipe) siteId: string,
     @Body() dto: CreateCountSessionDto,
@@ -96,7 +106,9 @@ export class PharmacyInventoryController {
   @Post('count-sessions/:id/approve')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Aprobar conteo y ajustar ledger por varianza (UC-25-07)' })
+  @ApiOperation({
+    summary: 'Aprobar conteo y ajustar ledger por varianza (UC-25-07)',
+  })
   approveCountSession(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ApproveCountSessionDto,

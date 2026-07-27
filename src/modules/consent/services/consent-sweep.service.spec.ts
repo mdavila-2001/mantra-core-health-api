@@ -20,7 +20,7 @@ function build() {
     consentsRepo as any,
     authRepo as any,
     restrictionsRepo as any,
-    eventsRepo as any,
+    eventsRepo,
     logger as any,
   );
   return { service, tx, consentsRepo, authRepo, restrictionsRepo, eventsRepo };
@@ -30,21 +30,41 @@ describe('ConsentSweepService', () => {
   it('sweep (UC-07-11) returns zero counts when nothing is expirable', async () => {
     const d = build();
     const res = await d.service.sweep(actor);
-    expect(res).toEqual({ expiredConsents: 0, expiredAuthorizations: 0, expiredRestrictions: 0 });
+    expect(res).toEqual({
+      expiredConsents: 0,
+      expiredAuthorizations: 0,
+      expiredRestrictions: 0,
+    });
   });
 
   it('sweep (UC-07-11) expires directives and records an expired event per row', async () => {
     const d = build();
-    const consent = { id: 'c1', statusConceptId: CONS.CONSENT_ACTIVE, updatedAt: new Date() };
-    const auth = { id: 'h1', statusConceptId: CONS.HIPAA_ACTIVE, updatedAt: new Date() };
-    const restriction = { id: 'r1', statusConceptId: CONS.RESTRICTION_ACTIVE, updatedAt: new Date() };
+    const consent = {
+      id: 'c1',
+      statusConceptId: CONS.CONSENT_ACTIVE,
+      updatedAt: new Date(),
+    };
+    const auth = {
+      id: 'h1',
+      statusConceptId: CONS.HIPAA_ACTIVE,
+      updatedAt: new Date(),
+    };
+    const restriction = {
+      id: 'r1',
+      statusConceptId: CONS.RESTRICTION_ACTIVE,
+      updatedAt: new Date(),
+    };
     d.consentsRepo.findExpirable.mockResolvedValue([consent]);
     d.authRepo.findExpirable.mockResolvedValue([auth]);
     d.restrictionsRepo.findExpirable.mockResolvedValue([restriction]);
 
     const res = await d.service.sweep(actor);
 
-    expect(res).toEqual({ expiredConsents: 1, expiredAuthorizations: 1, expiredRestrictions: 1 });
+    expect(res).toEqual({
+      expiredConsents: 1,
+      expiredAuthorizations: 1,
+      expiredRestrictions: 1,
+    });
     expect(consent.statusConceptId).toBe(CONS.CONSENT_EXPIRED);
     expect(auth.statusConceptId).toBe(CONS.HIPAA_EXPIRED);
     expect(restriction.statusConceptId).toBe(CONS.RESTRICTION_EXPIRED);

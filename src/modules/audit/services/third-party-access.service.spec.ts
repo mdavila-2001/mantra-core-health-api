@@ -19,7 +19,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ThirdPartyAccessService(
     em as any,
-    tpaRepo as any,
+    tpaRepo,
     auditLogRepo as any,
     logger as any,
   );
@@ -30,24 +30,35 @@ describe('ThirdPartyAccessService (UC-10-12)', () => {
   it('canal DELEGATED registra el log delegado + provenance', async () => {
     const d = build();
     const res = await d.service.record(
-      { channel: 'DELEGATED', outcome: 'SUCCESS', delegatingPractitionerProfileId: 'pr1' } as any,
+      {
+        channel: 'DELEGATED',
+        outcome: 'SUCCESS',
+        delegatingPractitionerProfileId: 'pr1',
+      },
       actor,
     );
-    expect(res).toMatchObject({ id: 'del1', channel: 'DELEGATED', auditLogId: 'a1' });
+    expect(res).toMatchObject({
+      id: 'del1',
+      channel: 'DELEGATED',
+      auditLogId: 'a1',
+    });
     expect(d.tpaRepo.recordDelegated).toHaveBeenCalled();
   });
 
   it('canal INSURANCE requiere aseguradora y paciente', async () => {
     const d = build();
     await expect(
-      d.service.record({ channel: 'INSURANCE', outcome: 'SUCCESS' } as any, actor),
+      d.service.record(
+        { channel: 'INSURANCE', outcome: 'SUCCESS' } as any,
+        actor,
+      ),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
   it('canal PHARMACY registra el log de farmacia', async () => {
     const d = build();
     const res = await d.service.record(
-      { channel: 'PHARMACY', outcome: 'SUCCESS', pharmacyId: 'ph-x' } as any,
+      { channel: 'PHARMACY', outcome: 'SUCCESS', pharmacyId: 'ph-x' },
       actor,
     );
     expect(res.id).toBe('ph1');

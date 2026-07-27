@@ -15,7 +15,10 @@ export class LiabilityRepository {
     return em.findOne(Liabilities, { id });
   }
 
-  findScheduleById(em: EntityManager, id: string): Promise<LiabilitySchedules | null> {
+  findScheduleById(
+    em: EntityManager,
+    id: string,
+  ): Promise<LiabilitySchedules | null> {
     return em.findOne(LiabilitySchedules, { id });
   }
 

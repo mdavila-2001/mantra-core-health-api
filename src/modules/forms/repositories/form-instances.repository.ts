@@ -26,11 +26,19 @@ export class FormInstancesRepository {
     resourceId: string,
     schemaVersion: number,
   ): Promise<FormInstances | null> {
-    return em.findOne(FormInstances, { resourceTypeConceptId, resourceId, schemaVersion });
+    return em.findOne(FormInstances, {
+      resourceTypeConceptId,
+      resourceId,
+      schemaVersion,
+    });
   }
 
   create(em: EntityManager, data: CreateInstanceData): FormInstances {
     const { actorUserId, ...rest } = data;
-    return em.create(FormInstances, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FormInstances,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

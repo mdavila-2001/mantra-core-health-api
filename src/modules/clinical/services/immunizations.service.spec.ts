@@ -10,9 +10,16 @@ const actor = { id: 'user-1', roles: [] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const immunizationsRepo = { findByPatientVaccineDose: mockFn(), create: mockFn() };
+  const immunizationsRepo = {
+    findByPatientVaccineDose: mockFn(),
+    create: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new ImmunizationsService(em as any, immunizationsRepo as any, logger as any);
+  const service = new ImmunizationsService(
+    em as any,
+    immunizationsRepo as any,
+    logger as any,
+  );
   return { service, immunizationsRepo };
 }
 
@@ -33,7 +40,7 @@ describe('ImmunizationsService (UC-08-13)', () => {
         patientProfileId: 'p1',
         vaccineConceptId: 'v1',
         doseNumber: 1,
-      } as any,
+      },
       actor,
     );
     expect(res.status).toBe(CLIN.IMMUNIZATION_COMPLETED);
@@ -42,7 +49,9 @@ describe('ImmunizationsService (UC-08-13)', () => {
 
   it('rejects a duplicate dose', async () => {
     const d = build();
-    d.immunizationsRepo.findByPatientVaccineDose.mockResolvedValue({ id: 'existing' });
+    d.immunizationsRepo.findByPatientVaccineDose.mockResolvedValue({
+      id: 'existing',
+    });
     await expect(
       d.service.create(
         {

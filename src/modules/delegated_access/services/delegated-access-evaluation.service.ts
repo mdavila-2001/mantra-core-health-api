@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException, touch, type AuthenticatedUser } from '../../../common';
+import {
+  ResourceNotFoundException,
+  touch,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DelegatedAccessGrantsRepository,
   PractitionerDelegateAssignmentsRepository,
@@ -9,9 +13,17 @@ import {
   DelegatedPermissionSetItemsRepository,
   DelegationEventsRepository,
 } from '../repositories';
-import { EvaluateActorDto, EvaluationResultDto, ExpirySweepResultDto } from '../dto';
+import {
+  EvaluateActorDto,
+  EvaluationResultDto,
+  ExpirySweepResultDto,
+} from '../dto';
 import { DELEG } from '../delegated_access.concepts';
-import { PURPOSE_OF_USE_CONCEPT, RESOURCE_TYPE_CONCEPT, STATUS } from './concept-maps';
+import {
+  PURPOSE_OF_USE_CONCEPT,
+  RESOURCE_TYPE_CONCEPT,
+  STATUS,
+} from './concept-maps';
 
 /**
  * UC-29-08 (barrido de expiración de delegaciones y grants vencidos) y UC-29-09
@@ -41,19 +53,28 @@ export class DelegatedAccessEvaluationService {
     return this.em.transactional(async (tx) => {
       const now = new Date();
 
-      const grants = await this.grantsRepo.findOverdueActive(tx, now, STATUS.ACTIVE);
+      const grants = await this.grantsRepo.findOverdueActive(
+        tx,
+        now,
+        STATUS.ACTIVE,
+      );
       for (const grant of grants) {
         grant.statusConceptId = STATUS.EXPIRED;
         touch(grant, actor.id, now);
         this.eventsRepo.record(tx, {
-          practitionerDelegateAssignmentId: grant.practitionerDelegateAssignmentId,
+          practitionerDelegateAssignmentId:
+            grant.practitionerDelegateAssignmentId,
           eventTypeConceptId: DELEG.EVENT_DELEGATION_EXPIRED,
           actorUserId: actor.id,
           reasonConceptId: DELEG.REASON_EXPIRED,
         });
       }
 
-      const delegates = await this.delegatesRepo.findOverdueActive(tx, now, STATUS.ACTIVE);
+      const delegates = await this.delegatesRepo.findOverdueActive(
+        tx,
+        now,
+        STATUS.ACTIVE,
+      );
       for (const delegate of delegates) {
         delegate.statusConceptId = STATUS.EXPIRED;
         touch(delegate, actor.id, now);
@@ -65,7 +86,11 @@ export class DelegatedAccessEvaluationService {
         });
       }
 
-      const orgAssignments = await this.orgAssignmentsRepo.findOverdueActive(tx, now, STATUS.ACTIVE);
+      const orgAssignments = await this.orgAssignmentsRepo.findOverdueActive(
+        tx,
+        now,
+        STATUS.ACTIVE,
+      );
       for (const assignment of orgAssignments) {
         assignment.statusConceptId = STATUS.EXPIRED;
         touch(assignment, actor.id, now);
@@ -89,7 +114,10 @@ export class DelegatedAccessEvaluationService {
   }
 
   /** UC-29-09: evalúa el actor efectivo por propósito; puede exigir step-up. */
-  async evaluate(dto: EvaluateActorDto, actor: AuthenticatedUser): Promise<EvaluationResultDto> {
+  async evaluate(
+    dto: EvaluateActorDto,
+    actor: AuthenticatedUser,
+  ): Promise<EvaluationResultDto> {
     this.logger.info(
       {
         operation: 'delegated_access.evaluate',
@@ -100,7 +128,10 @@ export class DelegatedAccessEvaluationService {
       'Evaluating effective actor',
     );
     return this.em.transactional(async (tx) => {
-      const delegate = await this.delegatesRepo.findById(tx, dto.practitionerDelegateAssignmentId);
+      const delegate = await this.delegatesRepo.findById(
+        tx,
+        dto.practitionerDelegateAssignmentId,
+      );
       if (!delegate) {
         throw new ResourceNotFoundException('Delegación no encontrada', {
           delegateId: dto.practitionerDelegateAssignmentId,
@@ -119,7 +150,11 @@ export class DelegatedAccessEvaluationService {
           eventTypeConceptId: DELEG.EVENT_ACCESS_EVALUATED,
           actorUserId: actor.id,
         });
-        return { allowed: false, requiresStepUp: false, reason: 'NO_ACTIVE_DELEGATION' };
+        return {
+          allowed: false,
+          requiresStepUp: false,
+          reason: 'NO_ACTIVE_DELEGATION',
+        };
       }
 
       const grant = await this.grantsRepo.findActiveMatch(
@@ -137,7 +172,11 @@ export class DelegatedAccessEvaluationService {
           eventTypeConceptId: DELEG.EVENT_ACCESS_EVALUATED,
           actorUserId: actor.id,
         });
-        return { allowed: false, requiresStepUp: false, reason: 'NO_MATCHING_GRANT' };
+        return {
+          allowed: false,
+          requiresStepUp: false,
+          reason: 'NO_MATCHING_GRANT',
+        };
       }
 
       // Step-up: si el ítem del permiso lo exige, se bloquea hasta verificación reforzada.
@@ -157,7 +196,11 @@ export class DelegatedAccessEvaluationService {
           eventTypeConceptId: DELEG.EVENT_STEP_UP_REQUIRED,
           actorUserId: actor.id,
         });
-        return { allowed: false, requiresStepUp: true, reason: 'STEP_UP_REQUIRED' };
+        return {
+          allowed: false,
+          requiresStepUp: true,
+          reason: 'STEP_UP_REQUIRED',
+        };
       }
 
       this.eventsRepo.record(tx, {

@@ -21,22 +21,30 @@ export interface RecordSecurityEventData {
 export class SecurityEventsRepository {
   /** Registra un evento de seguridad (sin flush). */
   record(em: EntityManager, data: RecordSecurityEventData): SecurityEvents {
-    return em.create(SecurityEvents, {
-      eventTypeConceptId: data.eventTypeConceptId,
-      outcomeConceptId: data.outcomeConceptId,
-      userId: data.userId,
-      ip: data.ip,
-      detailJson: data.detailJson,
-      recordedByUserId: data.recordedByUserId,
-      recordedAt: new Date(),
-    }, { partial: true });
+    return em.create(
+      SecurityEvents,
+      {
+        eventTypeConceptId: data.eventTypeConceptId,
+        outcomeConceptId: data.outcomeConceptId,
+        userId: data.userId,
+        ip: data.ip,
+        detailJson: data.detailJson,
+        recordedByUserId: data.recordedByUserId,
+        recordedAt: new Date(),
+      },
+      { partial: true },
+    );
   }
 
   /**
    * Nº de logins fallidos del usuario desde un instante dado (o desde siempre).
    * Sustenta el umbral de bloqueo automático de cuenta.
    */
-  countFailedLoginsSince(em: EntityManager, userId: string, since?: Date): Promise<number> {
+  countFailedLoginsSince(
+    em: EntityManager,
+    userId: string,
+    since?: Date,
+  ): Promise<number> {
     return em.count(SecurityEvents, {
       userId,
       eventTypeConceptId: CONCEPTS.SEC_LOGIN_FAILED,

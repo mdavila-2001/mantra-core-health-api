@@ -44,13 +44,17 @@ export class CommunityGroupsService {
   }
 
   /** Bootstrap: crea un grupo. */
-  async createGroup(dto: CreateGroupDto, actor: AuthenticatedUser): Promise<IdResponseDto> {
+  async createGroup(
+    dto: CreateGroupDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
       const group = this.groupsRepo.create(tx, {
         slug: dto.slug,
         name: dto.name,
         description: dto.description,
-        visibilityConceptId: GROUP_VISIBILITY_BY_CODE[dto.visibility ?? 'PUBLIC'],
+        visibilityConceptId:
+          GROUP_VISIBILITY_BY_CODE[dto.visibility ?? 'PUBLIC'],
         groupTypeConceptId: GROUP_TYPE_BY_CODE[dto.groupType ?? 'GENERAL'],
         ownerProfileId: dto.ownerProfileId,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
@@ -67,16 +71,31 @@ export class CommunityGroupsService {
     dto: JoinGroupDto,
     actor: AuthenticatedUser,
   ): Promise<GroupMembershipResponseDto> {
-    this.logger.info({ operation: 'community.group.join', groupId }, 'Joining group');
+    this.logger.info(
+      { operation: 'community.group.join', groupId },
+      'Joining group',
+    );
     return this.em.transactional(async (tx) => {
       const group = await this.groupsRepo.findById(tx, groupId);
-      if (!group) throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+      if (!group)
+        throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
 
-      const dup = await this.groupsRepo.findMember(tx, groupId, dto.memberProfileId);
-      if (dup) throw new ConflictException('El perfil ya es miembro del grupo', { groupId, memberProfileId: dto.memberProfileId });
+      const dup = await this.groupsRepo.findMember(
+        tx,
+        groupId,
+        dto.memberProfileId,
+      );
+      if (dup)
+        throw new ConflictException('El perfil ya es miembro del grupo', {
+          groupId,
+          memberProfileId: dto.memberProfileId,
+        });
 
-      const isPublic = group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC;
-      const joinStatus = isPublic ? COMM.GROUP_JOIN_ACTIVE : COMM.GROUP_JOIN_PENDING;
+      const isPublic =
+        group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC;
+      const joinStatus = isPublic
+        ? COMM.GROUP_JOIN_ACTIVE
+        : COMM.GROUP_JOIN_PENDING;
 
       const member = this.groupsRepo.createMember(tx, {
         groupId,

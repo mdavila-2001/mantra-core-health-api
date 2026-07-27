@@ -50,7 +50,13 @@ export class RetentionExecutionRepository {
   }
 
   /** Cuenta holds ACTIVE sobre un objetivo (para excluirlo del barrido). */
-  countActiveHoldsForTarget(em: EntityManager, targetId: string): Promise<number> {
-    return em.count(LegalHolds, { targetId, statusConceptId: CONCEPTS.STATE_ACTIVE });
+  countActiveHoldsForTarget(
+    em: EntityManager,
+    targetId: string,
+  ): Promise<number> {
+    return em.count(LegalHolds, {
+      targetId,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
   }
 }

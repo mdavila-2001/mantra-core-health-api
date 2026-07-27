@@ -48,8 +48,14 @@ export class CommunityModerationService {
   }
 
   /** UC-19-08: reporta contenido y lo encola (dedup por contenido en cola abierta). */
-  async report(dto: CreateReportDto, actor: AuthenticatedUser): Promise<ReportResponseDto> {
-    this.logger.info({ operation: 'community.report.create', targetId: dto.targetId }, 'Reporting content');
+  async report(
+    dto: CreateReportDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReportResponseDto> {
+    this.logger.info(
+      { operation: 'community.report.create', targetId: dto.targetId },
+      'Reporting content',
+    );
     return this.em.transactional(async (tx) => {
       const report = this.moderationRepo.createReport(tx, {
         reporterUserId: actor.id,
@@ -62,7 +68,11 @@ export class CommunityModerationService {
       await tx.flush();
 
       // Dedup: reutiliza la entrada de cola abierta del mismo contenido si existe.
-      let queue = await this.moderationRepo.findOpenQueueForContent(tx, dto.targetId, COMM.QUEUE_RESOLVED);
+      let queue = await this.moderationRepo.findOpenQueueForContent(
+        tx,
+        dto.targetId,
+        COMM.QUEUE_RESOLVED,
+      );
       if (!queue) {
         queue = this.moderationRepo.createQueue(tx, {
           contentTypeConceptId: CONTENT_TYPE_BY_TARGET[dto.targetType],
@@ -86,12 +96,24 @@ export class CommunityModerationService {
     dto: ModerationDecisionDto,
     actor: AuthenticatedUser,
   ): Promise<ModerationDecisionResponseDto> {
-    this.logger.info({ operation: 'community.moderation.decide', queueId, decision: dto.decision }, 'Resolving moderation');
+    this.logger.info(
+      {
+        operation: 'community.moderation.decide',
+        queueId,
+        decision: dto.decision,
+      },
+      'Resolving moderation',
+    );
     return this.em.transactional(async (tx) => {
       const queue = await this.moderationRepo.findQueueById(tx, queueId);
-      if (!queue) throw new ResourceNotFoundException('Entrada de cola no encontrada', { queueId });
+      if (!queue)
+        throw new ResourceNotFoundException('Entrada de cola no encontrada', {
+          queueId,
+        });
       if (queue.statusConceptId === COMM.QUEUE_RESOLVED) {
-        throw new ConflictException('La entrada de cola ya está resuelta', { queueId });
+        throw new ConflictException('La entrada de cola ya está resuelta', {
+          queueId,
+        });
       }
 
       const map = MODERATION_DECISION_BY_CODE[dto.decision];
@@ -109,7 +131,10 @@ export class CommunityModerationService {
       // Cierra la cola y todos los reportes ligados al contenido.
       queue.statusConceptId = COMM.QUEUE_RESOLVED;
       touch(queue, actor.id);
-      const reports = await this.moderationRepo.findReportsByTarget(tx, queue.contentRefId);
+      const reports = await this.moderationRepo.findReportsByTarget(
+        tx,
+        queue.contentRefId,
+      );
       const now = new Date();
       for (const r of reports) {
         r.statusConceptId = COMM.REPORT_RESOLVED;
@@ -119,7 +144,11 @@ export class CommunityModerationService {
 
       // Emite strike si la decisión sanciona y se indicó sujeto + severidad.
       let strikeId: string | null = null;
-      if (dto.subjectProfileId && dto.strikeSeverity && dto.decision !== 'DISMISSED') {
+      if (
+        dto.subjectProfileId &&
+        dto.strikeSeverity &&
+        dto.decision !== 'DISMISSED'
+      ) {
         const severity = STRIKE_SEVERITY_BY_CODE[dto.strikeSeverity];
         const strike = this.moderationRepo.createStrike(tx, {
           subjectProfileId: dto.subjectProfileId,
@@ -138,13 +167,31 @@ export class CommunityModerationService {
   }
 
   /** UC-19-10: apela una decisión de moderación (una apelación abierta por decisión). */
-  async appeal(decisionId: string, dto: CreateAppealDto, actor: AuthenticatedUser): Promise<IdResponseDto> {
+  async appeal(
+    decisionId: string,
+    dto: CreateAppealDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
-      const decision = await this.moderationRepo.findDecisionById(tx, decisionId);
-      if (!decision) throw new ResourceNotFoundException('Decisión no encontrada', { decisionId });
+      const decision = await this.moderationRepo.findDecisionById(
+        tx,
+        decisionId,
+      );
+      if (!decision)
+        throw new ResourceNotFoundException('Decisión no encontrada', {
+          decisionId,
+        });
 
-      const open = await this.moderationRepo.findOpenAppealForDecision(tx, decisionId, COMM.APPEAL_OPEN);
-      if (open) throw new ConflictException('Ya existe una apelación abierta para esta decisión', { decisionId });
+      const open = await this.moderationRepo.findOpenAppealForDecision(
+        tx,
+        decisionId,
+        COMM.APPEAL_OPEN,
+      );
+      if (open)
+        throw new ConflictException(
+          'Ya existe una apelación abierta para esta decisión',
+          { decisionId },
+        );
 
       const appeal = this.moderationRepo.createAppeal(tx, {
         moderationDecisionId: decisionId,
@@ -156,7 +203,10 @@ export class CommunityModerationService {
       await tx.flush();
 
       // Re-encola el contenido para re-revisión (source=appeal).
-      const queue = await this.moderationRepo.findQueueById(tx, decision.moderationQueueId);
+      const queue = await this.moderationRepo.findQueueById(
+        tx,
+        decision.moderationQueueId,
+      );
       if (queue) {
         this.moderationRepo.createQueue(tx, {
           contentTypeConceptId: queue.contentTypeConceptId,

@@ -16,7 +16,10 @@ import { Type } from 'class-transformer';
 
 /** Línea de un reclamo (UC-26-06). */
 export class ClaimLineDto {
-  @ApiProperty({ description: 'Secuencia única dentro del reclamo', example: 1 })
+  @ApiProperty({
+    description: 'Secuencia única dentro del reclamo',
+    example: 1,
+  })
   @IsInt()
   @Min(1)
   lineSequence!: number;
@@ -35,7 +38,10 @@ export class ClaimLineDto {
   @IsNumberString()
   billedAmount!: string;
 
-  @ApiPropertyOptional({ description: 'Responsabilidad del paciente', example: '20.00' })
+  @ApiPropertyOptional({
+    description: 'Responsabilidad del paciente',
+    example: '20.00',
+  })
   @IsOptional()
   @IsNumberString()
   patientResponsibilityAmount?: string;
@@ -60,7 +66,10 @@ export class CreateClaimDto {
   @MaxLength(80)
   claimIdentifier!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Autorización previa vinculada' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Autorización previa vinculada',
+  })
   @IsOptional()
   @IsUUID()
   priorAuthorizationRequestId?: string;
@@ -126,7 +135,10 @@ export class CreateAdjudicationDto {
   @IsNumberString()
   totalDeniedAmount?: string;
 
-  @ApiProperty({ type: [LineAdjudicationDto], description: 'Una por línea del reclamo' })
+  @ApiProperty({
+    type: [LineAdjudicationDto],
+    description: 'Una por línea del reclamo',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
@@ -136,7 +148,10 @@ export class CreateAdjudicationDto {
 
 /** UC-26-08: publicar EOB para el paciente. */
 export class PublishEobDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Documento generado (object storage)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Documento generado (object storage)',
+  })
   @IsOptional()
   @IsUUID()
   documentRecordId?: string;
@@ -144,7 +159,10 @@ export class PublishEobDto {
 
 /** UC-26-10: registrar reversión de reclamo. */
 export class CreateReversalDto {
-  @ApiProperty({ format: 'uuid', description: 'Versión de adjudicación a revertir' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Versión de adjudicación a revertir',
+  })
   @IsUUID()
   reversedAdjudicationVersionId!: string;
 
@@ -162,12 +180,18 @@ export class CreateReversalDto {
 
 /** UC-26-11: abrir disputa sobre adjudicación. */
 export class CreateDisputeDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Versión de adjudicación disputada' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Versión de adjudicación disputada',
+  })
   @IsOptional()
   @IsUUID()
   claimAdjudicationVersionId?: string;
 
-  @ApiProperty({ enum: ['PROVIDER', 'PATIENT'], description: 'Parte que inicia' })
+  @ApiProperty({
+    enum: ['PROVIDER', 'PATIENT'],
+    description: 'Parte que inicia',
+  })
   @IsIn(['PROVIDER', 'PATIENT'])
   initiatedBy!: 'PROVIDER' | 'PATIENT';
 
@@ -176,7 +200,11 @@ export class CreateDisputeDto {
   @IsUUID()
   initiatedByEntityId?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date', description: 'Fecha límite de presentación' })
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date',
+    description: 'Fecha límite de presentación',
+  })
   @IsOptional()
   @IsString()
   filingDeadline?: string;

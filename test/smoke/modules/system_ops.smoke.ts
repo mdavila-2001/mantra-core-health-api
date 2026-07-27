@@ -32,8 +32,18 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/admin/governance/entity-registry',
     body: (c) => ({
-      domain: { code: `SO-DOM-${c.u}`, name: 'Clinical', ownerTeam: 'data-eng' },
-      classification: { code: `SO-CLS-${c.u}`, name: 'PHI', isPii: true, isPhi: true, handlingRulesJson: { mask: true } },
+      domain: {
+        code: `SO-DOM-${c.u}`,
+        name: 'Clinical',
+        ownerTeam: 'data-eng',
+      },
+      classification: {
+        code: `SO-CLS-${c.u}`,
+        name: 'PHI',
+        isPii: true,
+        isPhi: true,
+        handlingRulesJson: { mask: true },
+      },
       schemaName: 'clinical',
       tableName: `encounters_${c.u}`,
       isAppendOnly: false,
@@ -62,7 +72,11 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     auth: false,
     body: (c) => ({
       domain: { code: `SO-DOM-X-${c.u}`, name: 'X' },
-      classification: { code: `SO-CLS-X-${c.u}`, name: 'X', handlingRulesJson: {} },
+      classification: {
+        code: `SO-CLS-X-${c.u}`,
+        name: 'X',
+        handlingRulesJson: {},
+      },
       schemaName: 's',
       tableName: 't',
       isAppendOnly: false,
@@ -80,7 +94,11 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     path: () => '/admin/governance/entity-registry',
     body: (c) => ({
       domain: { code: `SO-DOM-Y-${c.u}`, name: 'X' },
-      classification: { code: `SO-CLS-Y-${c.u}`, name: 'X', handlingRulesJson: {} },
+      classification: {
+        code: `SO-CLS-Y-${c.u}`,
+        name: 'X',
+        handlingRulesJson: {},
+      },
       tableName: 't',
       isAppendOnly: false,
       isSoftDelete: false,
@@ -115,8 +133,12 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'PATCH /admin/governance/entity-registry/{id}/write-policy',
     name: 'happy: aplica política de escritura',
     method: 'patch',
-    path: (c) => `/admin/governance/entity-registry/${c.vars.soEntityId}/write-policy`,
-    body: (c) => ({ writePolicyId: c.vars.soWritePolicyId, reason: 'PHI hardening' }),
+    path: (c) =>
+      `/admin/governance/entity-registry/${c.vars.soEntityId}/write-policy`,
+    body: (c) => ({
+      writePolicyId: c.vars.soWritePolicyId,
+      reason: 'PHI hardening',
+    }),
     expectedStatus: 200,
   },
   {
@@ -124,7 +146,8 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'PATCH /admin/governance/entity-registry/{id}/write-policy',
     name: 'límite: entidad inexistente -> 404',
     method: 'patch',
-    path: (c) => `/admin/governance/entity-registry/${UUID_ABSENT}/write-policy`,
+    path: (c) =>
+      `/admin/governance/entity-registry/${UUID_ABSENT}/write-policy`,
     body: (c) => ({ writePolicyId: c.vars.soWritePolicyId }),
     expectedStatus: 404,
   },
@@ -154,8 +177,12 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'PATCH /admin/governance/entity-registry/{id}/retention',
     name: 'happy: aplica retención a la entidad',
     method: 'patch',
-    path: (c) => `/admin/governance/entity-registry/${c.vars.soEntityId}/retention`,
-    body: (c) => ({ retentionPolicyId: c.vars.soRetentionPolicyId, reason: 'Cumplimiento normativo' }),
+    path: (c) =>
+      `/admin/governance/entity-registry/${c.vars.soEntityId}/retention`,
+    body: (c) => ({
+      retentionPolicyId: c.vars.soRetentionPolicyId,
+      reason: 'Cumplimiento normativo',
+    }),
     expectedStatus: 200,
   },
   {
@@ -163,7 +190,8 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'PATCH /admin/governance/entity-registry/{id}/retention',
     name: 'límite: falta reason -> 400',
     method: 'patch',
-    path: (c) => `/admin/governance/entity-registry/${c.vars.soEntityId}/retention`,
+    path: (c) =>
+      `/admin/governance/entity-registry/${c.vars.soEntityId}/retention`,
     body: (c) => ({ retentionPolicyId: c.vars.soRetentionPolicyId }),
     expectedStatus: 400,
   },
@@ -192,7 +220,11 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     name: 'happy: asigna regla al campo',
     method: 'patch',
     path: (c) => `/admin/governance/field-registry/${c.vars.soFieldId}`,
-    body: (c) => ({ anonymizationRuleId: c.vars.soAnonRuleId, maskingStrategyConceptId: SYSOPS.MASK_FULL, isPii: true }),
+    body: (c) => ({
+      anonymizationRuleId: c.vars.soAnonRuleId,
+      maskingStrategyConceptId: SYSOPS.MASK_FULL,
+      isPii: true,
+    }),
     expectedStatus: 200,
   },
   {
@@ -246,7 +278,10 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     name: 'happy: barrido excluido por legal hold activo',
     method: 'post',
     path: () => '/internal/governance/retention-executions/run',
-    body: (c) => ({ retentionPolicyId: c.vars.soRetentionPolicyId, entityRegistryId: c.vars.soEntityId }),
+    body: (c) => ({
+      retentionPolicyId: c.vars.soRetentionPolicyId,
+      entityRegistryId: c.vars.soEntityId,
+    }),
     expectedStatus: 200,
   },
   {
@@ -255,7 +290,10 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     name: 'límite: política inexistente -> 404',
     method: 'post',
     path: (c) => '/internal/governance/retention-executions/run',
-    body: (c) => ({ retentionPolicyId: UUID_ABSENT, entityRegistryId: c.vars.soEntityId }),
+    body: (c) => ({
+      retentionPolicyId: UUID_ABSENT,
+      entityRegistryId: c.vars.soEntityId,
+    }),
     expectedStatus: 404,
   },
 
@@ -302,7 +340,11 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/admin/governance/tenant-residency-bindings',
     auth: false,
-    body: (c) => ({ tenantId: c.tenantId, residencyPolicyId: UUID_ABSENT, primaryRegionConceptId: SYSOPS.REGION_SA_EAST }),
+    body: (c) => ({
+      tenantId: c.tenantId,
+      residencyPolicyId: UUID_ABSENT,
+      primaryRegionConceptId: SYSOPS.REGION_SA_EAST,
+    }),
     expectedStatus: 401,
   },
 
@@ -401,7 +443,10 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     name: 'límite: política inexistente -> 404',
     method: 'post',
     path: () => '/internal/ops/restore-test-runs',
-    body: () => ({ backupPolicyId: UUID_ABSENT, outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS }),
+    body: () => ({
+      backupPolicyId: UUID_ABSENT,
+      outcomeConceptId: SYSOPS.RESTORE_OUTCOME_PASS,
+    }),
     expectedStatus: 404,
   },
 
@@ -418,8 +463,17 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
       providerConceptId: SYSOPS.FRAMEWORK_PROVIDER_INTERNAL,
       version: '1.0',
       controls: [
-        { controlCode: 'SEC', title: 'Security', pillarConceptId: SYSOPS.PILLAR_SECURITY },
-        { controlCode: 'SEC-1', title: 'Encryption at rest', parentControlCode: 'SEC', pillarConceptId: SYSOPS.PILLAR_SECURITY },
+        {
+          controlCode: 'SEC',
+          title: 'Security',
+          pillarConceptId: SYSOPS.PILLAR_SECURITY,
+        },
+        {
+          controlCode: 'SEC-1',
+          title: 'Encryption at rest',
+          parentControlCode: 'SEC',
+          pillarConceptId: SYSOPS.PILLAR_SECURITY,
+        },
       ],
     }),
     expectedStatus: 201,
@@ -435,7 +489,13 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/admin/governance/operational-frameworks',
     auth: false,
-    body: (c) => ({ code: `SO-FW-X-${c.u}`, name: 'x', providerConceptId: SYSOPS.FRAMEWORK_PROVIDER_INTERNAL, version: '1', controls: [] }),
+    body: (c) => ({
+      code: `SO-FW-X-${c.u}`,
+      name: 'x',
+      providerConceptId: SYSOPS.FRAMEWORK_PROVIDER_INTERNAL,
+      version: '1',
+      controls: [],
+    }),
     expectedStatus: 401,
   },
 
@@ -478,7 +538,8 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'PUT /admin/governance/workload-assessments/{id}/control-results',
     name: 'happy: registra resultados de control',
     method: 'put',
-    path: (c) => `/admin/governance/workload-assessments/${c.vars.soAssessmentId}/control-results`,
+    path: (c) =>
+      `/admin/governance/workload-assessments/${c.vars.soAssessmentId}/control-results`,
     body: (c) => ({
       results: [
         {
@@ -496,8 +557,16 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'PUT /admin/governance/workload-assessments/{id}/control-results',
     name: 'límite: evaluación inexistente -> 404',
     method: 'put',
-    path: (c) => `/admin/governance/workload-assessments/${UUID_ABSENT}/control-results`,
-    body: (c) => ({ results: [{ operationalFrameworkControlId: c.vars.soControlId, resultConceptId: SYSOPS.RESULT_PASS }] }),
+    path: (c) =>
+      `/admin/governance/workload-assessments/${UUID_ABSENT}/control-results`,
+    body: (c) => ({
+      results: [
+        {
+          operationalFrameworkControlId: c.vars.soControlId,
+          resultConceptId: SYSOPS.RESULT_PASS,
+        },
+      ],
+    }),
     expectedStatus: 404,
   },
 
@@ -507,7 +576,8 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /admin/governance/assessments/{id}/findings',
     name: 'happy: abre hallazgo',
     method: 'post',
-    path: (c) => `/admin/governance/assessments/${c.vars.soAssessmentId}/findings`,
+    path: (c) =>
+      `/admin/governance/assessments/${c.vars.soAssessmentId}/findings`,
     body: (c) => ({
       findingCode: `FND-${c.u}`,
       title: 'Cifrado incompleto',
@@ -524,8 +594,13 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /admin/governance/assessments/{id}/findings',
     name: 'límite: finding_code duplicado -> 409',
     method: 'post',
-    path: (c) => `/admin/governance/assessments/${c.vars.soAssessmentId}/findings`,
-    body: (c) => ({ findingCode: `FND-${c.u}`, title: 'dup', severityConceptId: SYSOPS.SEVERITY_LOW }),
+    path: (c) =>
+      `/admin/governance/assessments/${c.vars.soAssessmentId}/findings`,
+    body: (c) => ({
+      findingCode: `FND-${c.u}`,
+      title: 'dup',
+      severityConceptId: SYSOPS.SEVERITY_LOW,
+    }),
     expectedStatus: 409,
   },
   {
@@ -533,12 +608,19 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /admin/governance/assessments/{id}/remediation-plans',
     name: 'happy: crea plan con acciones',
     method: 'post',
-    path: (c) => `/admin/governance/assessments/${c.vars.soAssessmentId}/remediation-plans`,
+    path: (c) =>
+      `/admin/governance/assessments/${c.vars.soAssessmentId}/remediation-plans`,
     body: (c) => ({
       code: `PLAN-${c.u}`,
       name: 'Remediar cifrado',
       assessmentFindingId: c.vars.soFindingId,
-      actions: [{ actionCode: 'A1', description: 'Habilitar cifrado at-rest', assignedTeam: 'platform' }],
+      actions: [
+        {
+          actionCode: 'A1',
+          description: 'Habilitar cifrado at-rest',
+          assignedTeam: 'platform',
+        },
+      ],
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -551,8 +633,14 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /admin/governance/assessments/{id}/remediation-plans',
     name: 'límite: hallazgo inexistente -> 404',
     method: 'post',
-    path: (c) => `/admin/governance/assessments/${c.vars.soAssessmentId}/remediation-plans`,
-    body: (c) => ({ code: `PLAN-X-${c.u}`, name: 'x', assessmentFindingId: UUID_ABSENT, actions: [] }),
+    path: (c) =>
+      `/admin/governance/assessments/${c.vars.soAssessmentId}/remediation-plans`,
+    body: (c) => ({
+      code: `PLAN-X-${c.u}`,
+      name: 'x',
+      assessmentFindingId: UUID_ABSENT,
+      actions: [],
+    }),
     expectedStatus: 404,
   },
 
@@ -562,7 +650,8 @@ export const SYSTEM_OPS_SMOKE: SmokeCase[] = [
     endpoint: 'POST /admin/governance/remediation-actions/{id}/verify',
     name: 'happy: verifica acción (cierra hallazgo y completa plan)',
     method: 'post',
-    path: (c) => `/admin/governance/remediation-actions/${c.vars.soActionId}/verify`,
+    path: (c) =>
+      `/admin/governance/remediation-actions/${c.vars.soActionId}/verify`,
     body: () => ({ verificationEvidenceJson: { evidence: 'PR #123 merged' } }),
     expectedStatus: 200,
   },

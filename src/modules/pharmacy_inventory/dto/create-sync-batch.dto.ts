@@ -13,7 +13,10 @@ import {
 
 /** Un item de un lote de sincronización ERP. */
 export class SyncItemDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Producto mapeado (si se conoce)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Producto mapeado (si se conoce)',
+  })
   @IsOptional()
   @IsUUID()
   pharmacyProductId?: string;
@@ -50,7 +53,10 @@ export class SyncItemDto {
 
 /** Cuerpo de `POST /internal/inventory-sync-batches` (bootstrap de lote ERP). */
 export class CreateSyncBatchDto {
-  @ApiProperty({ format: 'uuid', description: 'Conexión de integración de farmacia' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Conexión de integración de farmacia',
+  })
   @IsUUID()
   pharmacyIntegrationConnectionId!: string;
 

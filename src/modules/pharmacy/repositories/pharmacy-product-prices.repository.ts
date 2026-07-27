@@ -35,7 +35,11 @@ export class PharmacyProductPricesRepository {
     const rows = await em.find(
       PharmacyProductPrices,
       { pharmacyPriceListId: priceListId, pharmacyProductId: productId },
-      { fields: ['versionNumber'], orderBy: { versionNumber: 'desc' }, limit: 1 },
+      {
+        fields: ['versionNumber'],
+        orderBy: { versionNumber: 'desc' },
+        limit: 1,
+      },
     );
     return rows.length ? rows[0].versionNumber : 0;
   }

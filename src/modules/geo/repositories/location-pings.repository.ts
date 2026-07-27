@@ -51,7 +51,10 @@ export class LocationPingsRepository {
    * Última posición conocida del sujeto: el ping más reciente por `recorded_at`.
    * `null` si el sujeto no tiene pings.
    */
-  findLastBySubject(em: EntityManager, trackedSubjectId: string): Promise<LocationPings | null> {
+  findLastBySubject(
+    em: EntityManager,
+    trackedSubjectId: string,
+  ): Promise<LocationPings | null> {
     return em.findOne(
       LocationPings,
       { trackedSubjectId },

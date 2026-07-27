@@ -30,16 +30,27 @@ export class CommunityFeedService {
   }
 
   /** UC-19-15: fan-out de un post a los feeds de sus seguidores. */
-  async rebuild(dto: RebuildFeedDto, actor: AuthenticatedUser): Promise<FeedRebuildResponseDto> {
+  async rebuild(
+    dto: RebuildFeedDto,
+    actor: AuthenticatedUser,
+  ): Promise<FeedRebuildResponseDto> {
     this.logger.info(
-      { operation: 'community.feed.rebuild', sourceRefId: dto.sourceRefId, fanout: dto.followerProfileIds.length },
+      {
+        operation: 'community.feed.rebuild',
+        sourceRefId: dto.sourceRefId,
+        fanout: dto.followerProfileIds.length,
+      },
       'Rebuilding feed fan-out',
     );
     return this.em.transactional(async (tx) => {
       const origin = ORIGIN_BY_CODE[dto.origin ?? 'FOLLOWING'];
       let itemsCreated = 0;
       for (const ownerProfileId of dto.followerProfileIds) {
-        const existing = await this.feedRepo.findByOwnerSource(tx, ownerProfileId, dto.sourceRefId);
+        const existing = await this.feedRepo.findByOwnerSource(
+          tx,
+          ownerProfileId,
+          dto.sourceRefId,
+        );
         if (existing) continue;
         this.feedRepo.create(tx, {
           ownerProfileId,

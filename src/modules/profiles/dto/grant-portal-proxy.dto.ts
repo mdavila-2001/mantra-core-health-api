@@ -3,7 +3,10 @@ import { IsDateString, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /profiles/patients/{profileId}/portal-proxies` (UC-05-11). */
 export class GrantPortalProxyDto {
-  @ApiProperty({ description: 'Usuario representante al que se delega el acceso', format: 'uuid' })
+  @ApiProperty({
+    description: 'Usuario representante al que se delega el acceso',
+    format: 'uuid',
+  })
   @IsUUID()
   proxyUserId!: string;
 
@@ -15,20 +18,32 @@ export class GrantPortalProxyDto {
   @IsUUID()
   relatedPersonId?: string;
 
-  @ApiProperty({ description: 'Value set que gobierna el alcance delegado', format: 'uuid' })
+  @ApiProperty({
+    description: 'Value set que gobierna el alcance delegado',
+    format: 'uuid',
+  })
   @IsUUID()
   scopeValueSetId!: string;
 
-  @ApiProperty({ description: 'Registro de base legal que respalda el acceso', format: 'uuid' })
+  @ApiProperty({
+    description: 'Registro de base legal que respalda el acceso',
+    format: 'uuid',
+  })
   @IsUUID()
   legalBasisRecordId!: string;
 
-  @ApiPropertyOptional({ description: 'Vigente desde (ISO date-time)', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Vigente desde (ISO date-time)',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   validFrom?: string;
 
-  @ApiPropertyOptional({ description: 'Vigente hasta (ISO date-time)', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Vigente hasta (ISO date-time)',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   validTo?: string;
@@ -45,7 +60,10 @@ export class PortalProxyResponseDto {
   @ApiProperty({ format: 'uuid' })
   proxyUserId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del proxy', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del proxy',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

@@ -12,7 +12,9 @@ import {
 
 /** Cuerpo de `PUT /views/{frontend_page_view_id}/preferences` (UC-30-09). */
 export class UpsertViewPreferencesDto {
-  @ApiPropertyOptional({ description: 'Campos visibles (subconjunto del allow-list del contrato)' })
+  @ApiPropertyOptional({
+    description: 'Campos visibles (subconjunto del allow-list del contrato)',
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -24,7 +26,9 @@ export class UpsertViewPreferencesDto {
   @IsString({ each: true })
   fieldOrder?: string[];
 
-  @ApiPropertyOptional({ description: 'Filtros activos (mapa código -> valor)' })
+  @ApiPropertyOptional({
+    description: 'Filtros activos (mapa código -> valor)',
+  })
   @IsOptional()
   activeFilter?: Record<string, unknown>;
 
@@ -34,7 +38,10 @@ export class UpsertViewPreferencesDto {
   @MaxLength(128)
   sortCode?: string;
 
-  @ApiPropertyOptional({ description: 'Densidad', enum: ['COMPACT', 'COMFORTABLE'] })
+  @ApiPropertyOptional({
+    description: 'Densidad',
+    enum: ['COMPACT', 'COMFORTABLE'],
+  })
   @IsOptional()
   @IsIn(['COMPACT', 'COMFORTABLE'])
   density?: 'COMPACT' | 'COMFORTABLE';
@@ -46,7 +53,10 @@ export class UpsertViewPreferencesDto {
   @Max(500)
   pageSize?: number;
 
-  @ApiPropertyOptional({ description: 'Tenant al que se asocia la preferencia', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant al que se asocia la preferencia',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsString()
   tenantId?: string;

@@ -114,25 +114,50 @@ export interface CreateStateData {
  */
 @Injectable()
 export class FrontendViewChildrenRepository {
-  listFields(em: EntityManager, frontendPageViewId: string): Promise<FrontendViewFields[]> {
-    return em.find(FrontendViewFields, { frontendPageViewId }, { orderBy: { ordinal: 'asc' } });
+  listFields(
+    em: EntityManager,
+    frontendPageViewId: string,
+  ): Promise<FrontendViewFields[]> {
+    return em.find(
+      FrontendViewFields,
+      { frontendPageViewId },
+      { orderBy: { ordinal: 'asc' } },
+    );
   }
 
-  listActions(em: EntityManager, frontendPageViewId: string): Promise<FrontendViewActions[]> {
-    return em.find(FrontendViewActions, { frontendPageViewId }, { orderBy: { ordinal: 'asc' } });
+  listActions(
+    em: EntityManager,
+    frontendPageViewId: string,
+  ): Promise<FrontendViewActions[]> {
+    return em.find(
+      FrontendViewActions,
+      { frontendPageViewId },
+      { orderBy: { ordinal: 'asc' } },
+    );
   }
 
   createField(em: EntityManager, data: CreateFieldData): FrontendViewFields {
     const { actorUserId, ...rest } = data;
-    return em.create(FrontendViewFields, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FrontendViewFields,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createFilter(em: EntityManager, data: CreateFilterData): FrontendViewFilters {
     const { actorUserId, ...rest } = data;
-    return em.create(FrontendViewFilters, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FrontendViewFilters,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
-  createSortOption(em: EntityManager, data: CreateSortOptionData): FrontendViewSortOptions {
+  createSortOption(
+    em: EntityManager,
+    data: CreateSortOptionData,
+  ): FrontendViewSortOptions {
     const { actorUserId, ...rest } = data;
     return em.create(
       FrontendViewSortOptions,
@@ -143,16 +168,28 @@ export class FrontendViewChildrenRepository {
 
   createAction(em: EntityManager, data: CreateActionData): FrontendViewActions {
     const { actorUserId, ...rest } = data;
-    return em.create(FrontendViewActions, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FrontendViewActions,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createKpi(em: EntityManager, data: CreateKpiData): FrontendViewKpis {
     const { actorUserId, ...rest } = data;
-    return em.create(FrontendViewKpis, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FrontendViewKpis,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createState(em: EntityManager, data: CreateStateData): FrontendViewStates {
     const { actorUserId, ...rest } = data;
-    return em.create(FrontendViewStates, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      FrontendViewStates,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 }

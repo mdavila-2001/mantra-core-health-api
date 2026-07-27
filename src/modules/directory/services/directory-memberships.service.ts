@@ -64,10 +64,13 @@ export class DirectoryMembershipsService {
         DIR.MEMBERSHIP_ACTIVE,
       );
       if (existing) {
-        throw new ConflictException('El usuario ya tiene una membresía activa en el tenant', {
-          tenantId,
-          userId: dto.userId,
-        });
+        throw new ConflictException(
+          'El usuario ya tiene una membresía activa en el tenant',
+          {
+            tenantId,
+            userId: dto.userId,
+          },
+        );
       }
 
       const membership = this.membershipsRepo.create(tx, {
@@ -75,7 +78,8 @@ export class DirectoryMembershipsService {
         tenantId,
         tenantRoleConceptId: TENANT_ROLE_CONCEPT_BY_CODE[dto.role ?? 'STAFF'],
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
-        accessScopeConceptId: ACCESS_SCOPE_CONCEPT_BY_CODE[dto.accessScope ?? 'ALL_TENANT'],
+        accessScopeConceptId:
+          ACCESS_SCOPE_CONCEPT_BY_CODE[dto.accessScope ?? 'ALL_TENANT'],
         primaryBranchId: dto.primaryBranchId,
         startDate: new Date(),
         invitedByUserId: actor.id,
@@ -84,7 +88,10 @@ export class DirectoryMembershipsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'directory.membership.invite', membershipId: membership.id },
+        {
+          operation: 'directory.membership.invite',
+          membershipId: membership.id,
+        },
         'Member invited',
       );
       return this.toResponse(membership);
@@ -99,24 +106,37 @@ export class DirectoryMembershipsService {
     actor: AuthenticatedUser,
   ): Promise<BranchMembershipResponseDto> {
     this.logger.info(
-      { operation: 'directory.branch-assignment.create', tenantId, membershipId, actorId: actor.id },
+      {
+        operation: 'directory.branch-assignment.create',
+        tenantId,
+        membershipId,
+        actorId: actor.id,
+      },
       'Assigning membership to branch',
     );
     return this.em.transactional(async (tx) => {
-      const membership = await this.requireActiveMembership(tx, tenantId, membershipId);
+      const membership = await this.requireActiveMembership(
+        tx,
+        tenantId,
+        membershipId,
+      );
       await this.requireBranchInTenant(tx, tenantId, dto.branchId);
 
-      const already = await this.branchMembershipsRepo.findByMembershipBranchStatus(
-        tx,
-        membershipId,
-        dto.branchId,
-        DIR.BRANCH_MEMBERSHIP_ACTIVE,
-      );
-      if (already) {
-        throw new ConflictException('La membresía ya está asignada a esa branch', {
+      const already =
+        await this.branchMembershipsRepo.findByMembershipBranchStatus(
+          tx,
           membershipId,
-          branchId: dto.branchId,
-        });
+          dto.branchId,
+          DIR.BRANCH_MEMBERSHIP_ACTIVE,
+        );
+      if (already) {
+        throw new ConflictException(
+          'La membresía ya está asignada a esa branch',
+          {
+            membershipId,
+            branchId: dto.branchId,
+          },
+        );
       }
 
       const assignment = this.branchMembershipsRepo.create(tx, {
@@ -135,7 +155,10 @@ export class DirectoryMembershipsService {
       }
 
       this.logger.info(
-        { operation: 'directory.branch-assignment.create', assignmentId: assignment.id },
+        {
+          operation: 'directory.branch-assignment.create',
+          assignmentId: assignment.id,
+        },
         'Branch assignment created',
       );
       return {
@@ -156,25 +179,38 @@ export class DirectoryMembershipsService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'directory.membership.transfer', tenantId, membershipId, actorId: actor.id },
+      {
+        operation: 'directory.membership.transfer',
+        tenantId,
+        membershipId,
+        actorId: actor.id,
+      },
       'Transferring membership between branches',
     );
     return this.em.transactional(async (tx) => {
-      const membership = await this.requireActiveMembership(tx, tenantId, membershipId);
+      const membership = await this.requireActiveMembership(
+        tx,
+        tenantId,
+        membershipId,
+      );
       await this.requireBranchInTenant(tx, tenantId, dto.fromBranchId);
       await this.requireBranchInTenant(tx, tenantId, dto.toBranchId);
 
-      const source = await this.branchMembershipsRepo.findByMembershipBranchStatus(
-        tx,
-        membershipId,
-        dto.fromBranchId,
-        DIR.BRANCH_MEMBERSHIP_ACTIVE,
-      );
-      if (!source) {
-        throw new ResourceNotFoundException('No hay asignación activa en la branch de origen', {
+      const source =
+        await this.branchMembershipsRepo.findByMembershipBranchStatus(
+          tx,
           membershipId,
-          branchId: dto.fromBranchId,
-        });
+          dto.fromBranchId,
+          DIR.BRANCH_MEMBERSHIP_ACTIVE,
+        );
+      if (!source) {
+        throw new ResourceNotFoundException(
+          'No hay asignación activa en la branch de origen',
+          {
+            membershipId,
+            branchId: dto.fromBranchId,
+          },
+        );
       }
 
       source.statusConceptId = DIR.BRANCH_MEMBERSHIP_ENDED;
@@ -208,18 +244,32 @@ export class DirectoryMembershipsService {
     actor: AuthenticatedUser,
   ): Promise<MembershipResponseDto> {
     this.logger.info(
-      { operation: 'directory.membership.role', tenantId, membershipId, actorId: actor.id },
+      {
+        operation: 'directory.membership.role',
+        tenantId,
+        membershipId,
+        actorId: actor.id,
+      },
       'Changing membership role/scope',
     );
     if (!dto.role && !dto.accessScope) {
-      throw new PreconditionFailedException('Debe indicar un nuevo rol o scope', { membershipId });
+      throw new PreconditionFailedException(
+        'Debe indicar un nuevo rol o scope',
+        { membershipId },
+      );
     }
     return this.em.transactional(async (tx) => {
-      const membership = await this.requireActiveMembership(tx, tenantId, membershipId);
+      const membership = await this.requireActiveMembership(
+        tx,
+        tenantId,
+        membershipId,
+      );
 
-      if (dto.role) membership.tenantRoleConceptId = TENANT_ROLE_CONCEPT_BY_CODE[dto.role];
+      if (dto.role)
+        membership.tenantRoleConceptId = TENANT_ROLE_CONCEPT_BY_CODE[dto.role];
       if (dto.accessScope) {
-        membership.accessScopeConceptId = ACCESS_SCOPE_CONCEPT_BY_CODE[dto.accessScope];
+        membership.accessScopeConceptId =
+          ACCESS_SCOPE_CONCEPT_BY_CODE[dto.accessScope];
       }
       touch(membership, actor.id);
 
@@ -238,21 +288,31 @@ export class DirectoryMembershipsService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'directory.membership.offboard', tenantId, membershipId, actorId: actor.id },
+      {
+        operation: 'directory.membership.offboard',
+        tenantId,
+        membershipId,
+        actorId: actor.id,
+      },
       'Offboarding member',
     );
     return this.em.transactional(async (tx) => {
-      const membership = await this.requireActiveMembership(tx, tenantId, membershipId);
+      const membership = await this.requireActiveMembership(
+        tx,
+        tenantId,
+        membershipId,
+      );
 
       membership.statusConceptId = DIR.MEMBERSHIP_ENDED;
       membership.endDate = new Date();
       touch(membership, actor.id);
 
-      const assignments = await this.branchMembershipsRepo.findByMembershipAndStatus(
-        tx,
-        membershipId,
-        DIR.BRANCH_MEMBERSHIP_ACTIVE,
-      );
+      const assignments =
+        await this.branchMembershipsRepo.findByMembershipAndStatus(
+          tx,
+          membershipId,
+          DIR.BRANCH_MEMBERSHIP_ACTIVE,
+        );
       for (const assignment of assignments) {
         assignment.statusConceptId = DIR.BRANCH_MEMBERSHIP_ENDED;
         touch(assignment, actor.id);
@@ -276,12 +336,21 @@ export class DirectoryMembershipsService {
     tenantId: string,
     membershipId: string,
   ): Promise<TenantMemberships> {
-    const membership = await this.membershipsRepo.findByIdInTenant(em, membershipId, tenantId);
+    const membership = await this.membershipsRepo.findByIdInTenant(
+      em,
+      membershipId,
+      tenantId,
+    );
     if (!membership) {
-      throw new ResourceNotFoundException('Membresía no encontrada', { tenantId, membershipId });
+      throw new ResourceNotFoundException('Membresía no encontrada', {
+        tenantId,
+        membershipId,
+      });
     }
     if (membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE) {
-      throw new PreconditionFailedException('La membresía no está activa', { membershipId });
+      throw new PreconditionFailedException('La membresía no está activa', {
+        membershipId,
+      });
     }
     return membership;
   }
@@ -293,12 +362,16 @@ export class DirectoryMembershipsService {
     branchId: string,
   ): Promise<void> {
     const branch = await this.branchesRepo.findById(em, branchId);
-    if (!branch) throw new ResourceNotFoundException('Branch no encontrada', { branchId });
+    if (!branch)
+      throw new ResourceNotFoundException('Branch no encontrada', { branchId });
     if (branch.tenantId !== tenantId) {
-      throw new PreconditionFailedException('La branch no pertenece al tenant', {
-        tenantId,
-        branchId,
-      });
+      throw new PreconditionFailedException(
+        'La branch no pertenece al tenant',
+        {
+          tenantId,
+          branchId,
+        },
+      );
     }
   }
 

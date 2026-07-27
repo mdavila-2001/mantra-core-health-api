@@ -24,7 +24,11 @@ export class ReactionsRepository {
     reactableTypeConceptId: string,
     reactableRefId: string,
   ): Promise<Reactions | null> {
-    return em.findOne(Reactions, { actorProfileId, reactableTypeConceptId, reactableRefId });
+    return em.findOne(Reactions, {
+      actorProfileId,
+      reactableTypeConceptId,
+      reactableRefId,
+    });
   }
 
   create(em: EntityManager, data: UpsertReactionData): Reactions {

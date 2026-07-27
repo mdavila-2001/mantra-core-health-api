@@ -1,7 +1,18 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { InventoryReservationsService, InventorySyncService } from '../services';
+import {
+  InventoryReservationsService,
+  InventorySyncService,
+} from '../services';
 import {
   CreateSyncBatchDto,
   SyncBatchResponseDto,
@@ -28,7 +39,9 @@ export class PharmacyInventoryInternalController {
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Liberar reservas vencidas (UC-25-05)' })
-  expireReservations(@CurrentUser() actor: AuthenticatedUser): Promise<ExpireReservationsResponseDto> {
+  expireReservations(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ExpireReservationsResponseDto> {
     return this.reservations.expire(actor);
   }
 
@@ -48,7 +61,9 @@ export class PharmacyInventoryInternalController {
   @Post('inventory-sync/:batchId/reconcile')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Conciliar lote de sincronización externa (UC-25-12)' })
+  @ApiOperation({
+    summary: 'Conciliar lote de sincronización externa (UC-25-12)',
+  })
   reconcile(
     @Param('batchId', ParseUUIDPipe) batchId: string,
     @CurrentUser() actor: AuthenticatedUser,

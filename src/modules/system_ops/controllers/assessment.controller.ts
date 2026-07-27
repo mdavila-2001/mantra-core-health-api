@@ -42,7 +42,9 @@ export class AssessmentController {
   @Post('operational-frameworks')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Publicar un framework operativo con sus controles' })
+  @ApiOperation({
+    summary: 'Publicar un framework operativo con sus controles',
+  })
   publishFramework(
     @Body() dto: CreateFrameworkDto,
     @CurrentUser() actor: AuthenticatedUser,
@@ -66,7 +68,9 @@ export class AssessmentController {
   @Put('workload-assessments/:id/control-results')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Registrar (UPSERT) resultados de control de una evaluación' })
+  @ApiOperation({
+    summary: 'Registrar (UPSERT) resultados de control de una evaluación',
+  })
   putControlResults(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: PutControlResultsDto,

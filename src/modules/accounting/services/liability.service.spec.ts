@@ -4,7 +4,10 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { LiabilityService } from './liability.service';
 import { ACCT } from '../accounting.concepts';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -18,11 +21,19 @@ function build() {
     createPosting: mockFn(),
   };
   const posting = {
-    post: mockFn().mockResolvedValue({ transactionId: 'tx1', entryIds: ['e-principal', 'e-interest', 'e-bank'] }),
+    post: mockFn().mockResolvedValue({
+      transactionId: 'tx1',
+      entryIds: ['e-principal', 'e-interest', 'e-bank'],
+    }),
     generateNumber: mockFn(() => 'LIABP-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new LiabilityService(em as any, liabilityRepo as any, posting as any, logger as any);
+  const service = new LiabilityService(
+    em as any,
+    liabilityRepo,
+    posting as any,
+    logger as any,
+  );
   return { service, tx, liabilityRepo, posting };
 }
 
@@ -40,25 +51,29 @@ describe('LiabilityService', () => {
     it('rechaza (422) si principal + interés no iguala el importe', async () => {
       const d = build();
       const bad = { ...payDto, interestComponent: '999.00' };
-      await expect(d.service.payLiability('l1', bad as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.payLiability('l1', bad as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('lanza 404 si el pasivo no existe', async () => {
       const d = build();
       d.liabilityRepo.findById.mockResolvedValue(null);
-      await expect(d.service.payLiability('l1', payDto as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.payLiability('l1', payDto as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rechaza si el pasivo no está ACTIVO', async () => {
       const d = build();
-      d.liabilityRepo.findById.mockResolvedValue({ id: 'l1', statusConceptId: ACCT.LIABILITY_SETTLED, accountId: 'liab-acc' });
-      await expect(d.service.payLiability('l1', payDto as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      d.liabilityRepo.findById.mockResolvedValue({
+        id: 'l1',
+        statusConceptId: ACCT.LIABILITY_SETTLED,
+        accountId: 'liab-acc',
+      });
+      await expect(
+        d.service.payLiability('l1', payDto as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('registra el pago, saldando el pasivo y posteando el asiento', async () => {
@@ -72,7 +87,7 @@ describe('LiabilityService', () => {
         updatedAt: new Date(),
       };
       d.liabilityRepo.findById.mockResolvedValue(liability);
-      const res = await d.service.payLiability('l1', payDto as any, actor);
+      const res = await d.service.payLiability('l1', payDto, actor);
       expect(res.transactionId).toBe('tx1');
       expect(res.liabilityStatus).toBe(ACCT.LIABILITY_SETTLED);
       expect(res.outstandingAmount).toBe('0.00');

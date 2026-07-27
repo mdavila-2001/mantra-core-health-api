@@ -23,7 +23,10 @@ export interface CreateIdentifierData {
 @Injectable()
 export class PharmacyProductIdentifiersRepository {
   /** Crea el identificador en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateIdentifierData): PharmacyProductIdentifiers {
+  create(
+    em: EntityManager,
+    data: CreateIdentifierData,
+  ): PharmacyProductIdentifiers {
     return em.create(
       PharmacyProductIdentifiers,
       {

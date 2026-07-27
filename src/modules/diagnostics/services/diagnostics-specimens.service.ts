@@ -41,8 +41,14 @@ export class DiagnosticsSpecimensService {
   }
 
   /** Soporte: da de alta un espécimen en estado recolectado. */
-  async createSpecimen(dto: CreateSpecimenDto, actor: AuthenticatedUser): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.specimen.create', actorId: actor.id }, 'Creating specimen');
+  async createSpecimen(
+    dto: CreateSpecimenDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceCreatedDto> {
+    this.logger.info(
+      { operation: 'diagnostics.specimen.create', actorId: actor.id },
+      'Creating specimen',
+    );
     return this.em.transactional(async (tx) => {
       const specimen = this.repo.createSpecimen(tx, {
         patientProfileId: dto.patientProfileId,
@@ -63,25 +69,38 @@ export class DiagnosticsSpecimensService {
   }
 
   /** UC-20-01: acesiona uno o más especímenes recibidos en el laboratorio. */
-  async accession(dto: CreateAccessionDto, actor: AuthenticatedUser): Promise<AccessionCreatedDto> {
+  async accession(
+    dto: CreateAccessionDto,
+    actor: AuthenticatedUser,
+  ): Promise<AccessionCreatedDto> {
     this.logger.info(
-      { operation: 'diagnostics.accession.create', count: dto.specimenIds.length },
+      {
+        operation: 'diagnostics.accession.create',
+        count: dto.specimenIds.length,
+      },
       'Accessioning specimens',
     );
     return this.em.transactional(async (tx) => {
-      const tenantId = dto.custodianTenantId ?? (await this.tenantOfSpecimen(tx, dto.specimenIds[0]));
+      const tenantId =
+        dto.custodianTenantId ??
+        (await this.tenantOfSpecimen(tx, dto.specimenIds[0]));
 
       // Precondición: todos los especímenes existen y están en un estado acesionable.
       const specimens = [];
       for (const specimenId of dto.specimenIds) {
         const specimen = await this.repo.findSpecimen(tx, specimenId);
         if (!specimen) {
-          throw new ResourceNotFoundException('Espécimen no encontrado', { specimenId });
-        }
-        if (specimen.statusConceptId === DIAG.SPECIMEN_REJECTED) {
-          throw new PreconditionFailedException('El espécimen está rechazado y no puede acesionarse', {
+          throw new ResourceNotFoundException('Espécimen no encontrado', {
             specimenId,
           });
+        }
+        if (specimen.statusConceptId === DIAG.SPECIMEN_REJECTED) {
+          throw new PreconditionFailedException(
+            'El espécimen está rechazado y no puede acesionarse',
+            {
+              specimenId,
+            },
+          );
         }
         specimens.push(specimen);
       }
@@ -121,7 +140,11 @@ export class DiagnosticsSpecimensService {
         accessionSpecimenIds.push(item.id);
       }
 
-      return { id: accession.id, status: accession.statusConceptId, accessionSpecimenIds };
+      return {
+        id: accession.id,
+        status: accession.statusConceptId,
+        accessionSpecimenIds,
+      };
     });
   }
 
@@ -131,18 +154,28 @@ export class DiagnosticsSpecimensService {
     dto: RejectSpecimenDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.specimen.reject', specimenId }, 'Rejecting specimen');
+    this.logger.info(
+      { operation: 'diagnostics.specimen.reject', specimenId },
+      'Rejecting specimen',
+    );
     return this.em.transactional(async (tx) => {
       const specimen = await this.repo.findSpecimen(tx, specimenId);
-      if (!specimen) throw new ResourceNotFoundException('Espécimen no encontrado', { specimenId });
+      if (!specimen)
+        throw new ResourceNotFoundException('Espécimen no encontrado', {
+          specimenId,
+        });
       if (specimen.statusConceptId === DIAG.SPECIMEN_REJECTED) {
-        throw new PreconditionFailedException('El espécimen ya está rechazado', { specimenId });
+        throw new PreconditionFailedException(
+          'El espécimen ya está rechazado',
+          { specimenId },
+        );
       }
 
       const rejection = this.repo.recordRejection(tx, {
         specimenId,
         rejectedAt: new Date(),
-        rejectionReasonConceptId: dto.rejectionReasonConceptId ?? DIAG.REJECTION_REASON_QUALITY,
+        rejectionReasonConceptId:
+          dto.rejectionReasonConceptId ?? DIAG.REJECTION_REASON_QUALITY,
         rejectedByProfileId: dto.rejectedByProfileId,
         notes: dto.notes,
         recollectionRequired: dto.recollectionRequired,
@@ -152,7 +185,11 @@ export class DiagnosticsSpecimensService {
       specimen.statusConceptId = DIAG.SPECIMEN_REJECTED;
       touch(specimen, actor.id);
       // Cancela las pruebas de orden dependientes del espécimen.
-      await this.repo.cancelTestsForSpecimen(tx, specimenId, DIAG.TEST_CANCELLED);
+      await this.repo.cancelTestsForSpecimen(
+        tx,
+        specimenId,
+        DIAG.TEST_CANCELLED,
+      );
       await tx.flush();
 
       return { id: rejection.id, status: specimen.statusConceptId };
@@ -165,10 +202,16 @@ export class DiagnosticsSpecimensService {
     dto: CreateContainerDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
-    this.logger.info({ operation: 'diagnostics.container.create', specimenId }, 'Creating container');
+    this.logger.info(
+      { operation: 'diagnostics.container.create', specimenId },
+      'Creating container',
+    );
     return this.em.transactional(async (tx) => {
       const specimen = await this.repo.findSpecimen(tx, specimenId);
-      if (!specimen) throw new ResourceNotFoundException('Espécimen no encontrado', { specimenId });
+      if (!specimen)
+        throw new ResourceNotFoundException('Espécimen no encontrado', {
+          specimenId,
+        });
 
       const container = this.repo.createContainer(tx, {
         specimenId,
@@ -196,11 +239,15 @@ export class DiagnosticsSpecimensService {
     );
     return this.em.transactional(async (tx) => {
       const container = await this.repo.findContainer(tx, containerId);
-      if (!container) throw new ResourceNotFoundException('Contenedor no encontrado', { containerId });
+      if (!container)
+        throw new ResourceNotFoundException('Contenedor no encontrado', {
+          containerId,
+        });
 
       this.repo.recordContainerEvent(tx, {
         specimenContainerId: containerId,
-        eventTypeConceptId: dto.eventTypeConceptId ?? DIAG.CONTAINER_EVENT_TRANSFER,
+        eventTypeConceptId:
+          dto.eventTypeConceptId ?? DIAG.CONTAINER_EVENT_TRANSFER,
         occurredAt: new Date(),
         temperatureCelsius: dto.temperatureCelsius,
         notes: dto.notes,
@@ -217,7 +264,8 @@ export class DiagnosticsSpecimensService {
         signedByUserId: actor.id,
       });
 
-      container.statusConceptId = dto.destinationStatusConceptId ?? DIAG.CONTAINER_STORED;
+      container.statusConceptId =
+        dto.destinationStatusConceptId ?? DIAG.CONTAINER_STORED;
       touch(container, actor.id);
       await tx.flush();
 
@@ -226,9 +274,15 @@ export class DiagnosticsSpecimensService {
   }
 
   /** Resuelve el tenant custodio del espécimen para acesiones sin tenant explícito. */
-  private async tenantOfSpecimen(em: EntityManager, specimenId: string): Promise<string> {
+  private async tenantOfSpecimen(
+    em: EntityManager,
+    specimenId: string,
+  ): Promise<string> {
     const specimen = await this.repo.findSpecimen(em, specimenId);
-    if (!specimen) throw new ResourceNotFoundException('Espécimen no encontrado', { specimenId });
+    if (!specimen)
+      throw new ResourceNotFoundException('Espécimen no encontrado', {
+        specimenId,
+      });
     return specimen.custodianTenantId;
   }
 }

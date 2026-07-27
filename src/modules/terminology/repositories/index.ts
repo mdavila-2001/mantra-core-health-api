@@ -5,3 +5,5 @@ export * from './catalog-concepts.repository';
 export * from './concept-designations.repository';
 export * from './concept-relationships.repository';
 export * from './value-sets.repository';
+export * from './concept-maps.repository';
+export * from './tenant-catalog.repository';

@@ -26,7 +26,10 @@ export interface CreateStockPositionData extends StockPositionKey {
  */
 @Injectable()
 export class StockPositionsRepository {
-  findByKey(em: EntityManager, key: StockPositionKey): Promise<InventoryStockPositions | null> {
+  findByKey(
+    em: EntityManager,
+    key: StockPositionKey,
+  ): Promise<InventoryStockPositions | null> {
     return em.findOne(InventoryStockPositions, {
       inventoryLocationId: key.inventoryLocationId,
       pharmacyProductId: key.pharmacyProductId,
@@ -35,11 +38,17 @@ export class StockPositionsRepository {
   }
 
   /** Todas las posiciones de un lote (para recall/liberación en cualquier ubicación). */
-  findByLot(em: EntityManager, inventoryLotId: string): Promise<InventoryStockPositions[]> {
+  findByLot(
+    em: EntityManager,
+    inventoryLotId: string,
+  ): Promise<InventoryStockPositions[]> {
     return em.find(InventoryStockPositions, { inventoryLotId });
   }
 
-  create(em: EntityManager, data: CreateStockPositionData): InventoryStockPositions {
+  create(
+    em: EntityManager,
+    data: CreateStockPositionData,
+  ): InventoryStockPositions {
     return em.create(
       InventoryStockPositions,
       {

@@ -30,7 +30,11 @@ export class DiagnosticUnitsRepository {
   }
 
   /** Busca una unidad por (tenant, code): la UK que evita duplicados. */
-  findByCode(em: EntityManager, tenantId: string, code: string): Promise<DiagnosticUnits | null> {
+  findByCode(
+    em: EntityManager,
+    tenantId: string,
+    code: string,
+  ): Promise<DiagnosticUnits | null> {
     return em.findOne(DiagnosticUnits, { tenantId, code });
   }
 

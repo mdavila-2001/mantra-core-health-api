@@ -28,7 +28,10 @@ export class ProductIdentifierDto {
   @MaxLength(100)
   identifierValue!: string;
 
-  @ApiPropertyOptional({ description: 'Tenant de la autoridad que asigna el identificador', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant de la autoridad que asigna el identificador',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   assigningAuthorityTenantId?: string;
@@ -46,13 +49,19 @@ export class ProductIdentifierDto {
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/products` (UC-24-04). */
 export class CreateProductDto {
-  @ApiProperty({ description: 'Código único de producto por farmacia', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único de producto por farmacia',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   productCode!: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del medicamento', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del medicamento',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   medicationConceptId?: string;
@@ -74,18 +83,27 @@ export class CreateProductDto {
   @MaxLength(300)
   genericName?: string;
 
-  @ApiPropertyOptional({ description: 'Concentración (texto libre)', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Concentración (texto libre)',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   strengthText?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de la forma farmacéutica', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de la forma farmacéutica',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dosageFormConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Tamaño de empaque (texto libre)', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Tamaño de empaque (texto libre)',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
@@ -101,7 +119,10 @@ export class CreateProductDto {
   @IsBoolean()
   coldChainRequired?: boolean;
 
-  @ApiPropertyOptional({ description: 'Identificadores (GTIN/NDC)', type: [ProductIdentifierDto] })
+  @ApiPropertyOptional({
+    description: 'Identificadores (GTIN/NDC)',
+    type: [ProductIdentifierDto],
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

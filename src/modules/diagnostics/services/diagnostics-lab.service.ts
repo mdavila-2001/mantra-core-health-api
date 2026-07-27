@@ -37,13 +37,22 @@ export class DiagnosticsLabService {
   }
 
   /** UC-20-04: abre una orden de trabajo y desglosa sus pruebas. */
-  async createWorkOrder(dto: CreateWorkOrderDto, actor: AuthenticatedUser): Promise<WorkOrderCreatedDto> {
+  async createWorkOrder(
+    dto: CreateWorkOrderDto,
+    actor: AuthenticatedUser,
+  ): Promise<WorkOrderCreatedDto> {
     this.logger.info(
-      { operation: 'diagnostics.workOrder.create', accessionId: dto.laboratoryAccessionId },
+      {
+        operation: 'diagnostics.workOrder.create',
+        accessionId: dto.laboratoryAccessionId,
+      },
       'Opening work order',
     );
     return this.em.transactional(async (tx) => {
-      const accession = await this.specimensRepo.findAccession(tx, dto.laboratoryAccessionId);
+      const accession = await this.specimensRepo.findAccession(
+        tx,
+        dto.laboratoryAccessionId,
+      );
       if (!accession) {
         throw new ResourceNotFoundException('Acesión no encontrada', {
           laboratoryAccessionId: dto.laboratoryAccessionId,
@@ -85,15 +94,24 @@ export class DiagnosticsLabService {
   }
 
   /** Soporte: abre una corrida de analizador. */
-  async createAnalyzerRun(dto: CreateAnalyzerRunDto, actor: AuthenticatedUser): Promise<ResourceCreatedDto> {
+  async createAnalyzerRun(
+    dto: CreateAnalyzerRunDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceCreatedDto> {
     this.logger.info(
-      { operation: 'diagnostics.analyzerRun.create', device: dto.analyzerDeviceId },
+      {
+        operation: 'diagnostics.analyzerRun.create',
+        device: dto.analyzerDeviceId,
+      },
       'Opening analyzer run',
     );
     return this.em.transactional(async (tx) => {
       const tenantId = dto.custodianTenantId;
       if (!tenantId) {
-        throw new PreconditionFailedException('Falta el tenant custodio de la corrida', {});
+        throw new PreconditionFailedException(
+          'Falta el tenant custodio de la corrida',
+          {},
+        );
       }
       const run = this.repo.createAnalyzerRun(tx, {
         custodianTenantId: tenantId,
@@ -121,22 +139,34 @@ export class DiagnosticsLabService {
     );
     return this.em.transactional(async (tx) => {
       const run = await this.repo.findAnalyzerRun(tx, analyzerRunId);
-      if (!run) throw new ResourceNotFoundException('Corrida de analizador no encontrada', { analyzerRunId });
+      if (!run)
+        throw new ResourceNotFoundException(
+          'Corrida de analizador no encontrada',
+          { analyzerRunId },
+        );
 
       // Idempotencia por (run, message_control_id).
       if (dto.messageControlId) {
-        const dup = await this.repo.findMessageByControlId(tx, analyzerRunId, dto.messageControlId);
+        const dup = await this.repo.findMessageByControlId(
+          tx,
+          analyzerRunId,
+          dto.messageControlId,
+        );
         if (dup) {
-          throw new ConflictException('El mensaje ya fue ingerido para esta corrida', {
-            messageControlId: dto.messageControlId,
-          });
+          throw new ConflictException(
+            'El mensaje ya fue ingerido para esta corrida',
+            {
+              messageControlId: dto.messageControlId,
+            },
+          );
         }
       }
 
       const message = this.repo.recordMessage(tx, {
         analyzerRunId,
         receivedAt: new Date(),
-        messageFormatConceptId: dto.messageFormatConceptId ?? DIAG.MESSAGE_FORMAT_HL7,
+        messageFormatConceptId:
+          dto.messageFormatConceptId ?? DIAG.MESSAGE_FORMAT_HL7,
         payloadHash: dto.payloadHash,
         validationStatusConceptId: DIAG.MESSAGE_VALIDATED,
         messageControlId: dto.messageControlId,
@@ -148,7 +178,10 @@ export class DiagnosticsLabService {
 
       // Si el mensaje mapea a una prueba, la marca con resultado preliminar.
       if (dto.laboratoryWorkOrderTestId) {
-        const test = await this.repo.findWorkOrderTest(tx, dto.laboratoryWorkOrderTestId);
+        const test = await this.repo.findWorkOrderTest(
+          tx,
+          dto.laboratoryWorkOrderTestId,
+        );
         if (test) {
           test.statusConceptId = DIAG.TEST_PRELIMINARY;
           test.observationId = dto.mappedObservationId ?? test.observationId;
@@ -169,16 +202,25 @@ export class DiagnosticsLabService {
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
-      { operation: 'diagnostics.result.verify', observationId, level: dto.level },
+      {
+        operation: 'diagnostics.result.verify',
+        observationId,
+        level: dto.level,
+      },
       'Verifying result',
     );
     return this.em.transactional(async (tx) => {
       const tenantId = dto.custodianTenantId;
       if (!tenantId) {
-        throw new PreconditionFailedException('Falta el tenant custodio de la verificación', {});
+        throw new PreconditionFailedException(
+          'Falta el tenant custodio de la verificación',
+          {},
+        );
       }
       const levelConceptId =
-        dto.level === 'MEDICAL' ? DIAG.VERIFICATION_MEDICAL : DIAG.VERIFICATION_TECHNICAL;
+        dto.level === 'MEDICAL'
+          ? DIAG.VERIFICATION_MEDICAL
+          : DIAG.VERIFICATION_TECHNICAL;
 
       const verification = this.repo.recordVerification(tx, {
         custodianTenantId: tenantId,
@@ -194,7 +236,11 @@ export class DiagnosticsLabService {
       await tx.flush();
 
       // Marca como verificadas las pruebas ligadas a esa observación (si existen).
-      await this.repo.markTestsVerifiedForObservation(tx, observationId, DIAG.TEST_VERIFIED);
+      await this.repo.markTestsVerifiedForObservation(
+        tx,
+        observationId,
+        DIAG.TEST_VERIFIED,
+      );
 
       return { id: verification.id, status: verification.resultConceptId };
     });

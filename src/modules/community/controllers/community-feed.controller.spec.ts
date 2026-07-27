@@ -10,7 +10,7 @@ describe('CommunityFeedController', () => {
     const service = { rebuild: mockFn() };
     const controller = new CommunityFeedController(service as any);
     const dto = { sourceRefId: 'post1', followerProfileIds: ['a', 'b'] };
-    await controller.rebuild(dto as any, actor);
+    await controller.rebuild(dto, actor);
     expect(service.rebuild).toHaveBeenCalledWith(dto, actor);
   });
 });

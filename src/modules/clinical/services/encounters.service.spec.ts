@@ -26,7 +26,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new EncountersService(
     em as any,
-    encountersRepo as any,
+    encountersRepo,
     episodesRepo as any,
     logger as any,
   );
@@ -50,7 +50,7 @@ describe('EncountersService', () => {
       const d = build();
       d.encountersRepo.create.mockReturnValue(encounter());
       const res = await d.service.checkIn(
-        { patientProfileId: 'p1', tenantId: 't1' } as any,
+        { patientProfileId: 'p1', tenantId: 't1' },
         actor,
       );
       expect(res.id).toBe('enc1');
@@ -70,7 +70,7 @@ describe('EncountersService', () => {
           tenantId: 't1',
           participants: [{ practitionerProfileId: 'hp1' }],
           location: { practiceSiteId: 'site1' },
-        } as any,
+        },
         actor,
       );
       expect(res.participantIds).toEqual(['part1']);
@@ -82,7 +82,11 @@ describe('EncountersService', () => {
       d.episodesRepo.findById.mockResolvedValue(null);
       await expect(
         d.service.checkIn(
-          { patientProfileId: 'p1', tenantId: 't1', episodeId: 'missing' } as any,
+          {
+            patientProfileId: 'p1',
+            tenantId: 't1',
+            episodeId: 'missing',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
@@ -104,16 +108,18 @@ describe('EncountersService', () => {
       expect(enc.statusConceptId).toBe(CLIN.ENCOUNTER_FINISHED);
       expect(enc.endAt).toBeInstanceOf(Date);
       expect((part as any).statusConceptId).toBe(CLIN.PARTICIPANT_COMPLETED);
-      expect((loc as any).locationStatusConceptId).toBe(CLIN.LOCATION_COMPLETED);
+      expect((loc as any).locationStatusConceptId).toBe(
+        CLIN.LOCATION_COMPLETED,
+      );
       expect(res.status).toBe(CLIN.ENCOUNTER_FINISHED);
     });
 
     it('throws when the encounter does not exist', async () => {
       const d = build();
       d.encountersRepo.findById.mockResolvedValue(null);
-      await expect(d.service.close('missing', {}, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.close('missing', {}, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects closing an encounter that is not in progress', async () => {
@@ -129,7 +135,10 @@ describe('EncountersService', () => {
 
     it('rejects on optimistic version mismatch', async () => {
       const d = build();
-      d.encountersRepo.findById.mockResolvedValue({ ...encounter(), rowVersion: 3 });
+      d.encountersRepo.findById.mockResolvedValue({
+        ...encounter(),
+        rowVersion: 3,
+      });
       await expect(
         d.service.close('enc1', { expectedRowVersion: 1 }, actor),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);

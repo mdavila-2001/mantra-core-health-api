@@ -30,7 +30,10 @@ export class TrackingDisclosureAcceptancesRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateDisclosureAcceptanceData): TrackingDisclosureAcceptances {
+  create(
+    em: EntityManager,
+    data: CreateDisclosureAcceptanceData,
+  ): TrackingDisclosureAcceptances {
     return em.create(
       TrackingDisclosureAcceptances,
       {

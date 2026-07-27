@@ -11,7 +11,12 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { ReferralsService } from '../services';
-import { CreateReferralDto, RespondReferralDto, ReferralResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateReferralDto,
+  RespondReferralDto,
+  ReferralResponseDto,
+  StatusResultDto,
+} from '../dto';
 
 /**
  * Endpoints de referencias clínicas (`/referrals`): emisión (UC-18-07) y respuesta

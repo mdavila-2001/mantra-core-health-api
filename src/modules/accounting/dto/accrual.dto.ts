@@ -18,7 +18,10 @@ export class AccrualScheduleInputDto {
   @IsUUID()
   fiscalPeriodId!: string;
 
-  @ApiProperty({ description: 'Importe planificado del periodo', example: '100.00' })
+  @ApiProperty({
+    description: 'Importe planificado del periodo',
+    example: '100.00',
+  })
   @IsNumberString()
   plannedAmount!: string;
 }
@@ -29,7 +32,10 @@ export class CreateAccrualObjectDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Número de objeto (único por tenant)', maxLength: 60 })
+  @ApiProperty({
+    description: 'Número de objeto (único por tenant)',
+    maxLength: 60,
+  })
   @IsString()
   @MaxLength(60)
   objectNumber!: string;
@@ -62,7 +68,10 @@ export class CreateAccrualObjectDto {
   @IsDateString()
   endDate?: string;
 
-  @ApiProperty({ description: 'Importe total (= suma de planned)', example: '300.00' })
+  @ApiProperty({
+    description: 'Importe total (= suma de planned)',
+    example: '300.00',
+  })
   @IsNumberString()
   totalAmount!: string;
 
@@ -71,7 +80,10 @@ export class CreateAccrualObjectDto {
   @IsUUID()
   currencyConceptId?: string;
 
-  @ApiProperty({ type: [AccrualScheduleInputDto], description: 'Cronograma (>=1 línea)' })
+  @ApiProperty({
+    type: [AccrualScheduleInputDto],
+    description: 'Cronograma (>=1 línea)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
@@ -85,7 +97,10 @@ export class RunAccrualsDto {
   @IsUUID()
   accrualObjectId!: string;
 
-  @ApiProperty({ description: 'Periodo fiscal ABIERTO a devengar', format: 'uuid' })
+  @ApiProperty({
+    description: 'Periodo fiscal ABIERTO a devengar',
+    format: 'uuid',
+  })
   @IsUUID()
   fiscalPeriodId!: string;
 
@@ -109,6 +124,9 @@ export class AccrualObjectResponseDto {
 /** Respuesta del batch de devengo. */
 export class AccrualRunResponseDto {
   @ApiProperty({ type: Number }) postedLines!: number;
-  @ApiProperty({ type: [String], description: 'Transacciones de devengo generadas' })
+  @ApiProperty({
+    type: [String],
+    description: 'Transacciones de devengo generadas',
+  })
   transactionIds!: string[];
 }

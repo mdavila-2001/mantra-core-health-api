@@ -1,25 +1,43 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsDateString,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /practices/{practiceId}/accreditations` (UC-14-02). */
 export class CreateAccreditationDto {
-  @ApiPropertyOptional({ description: 'Sitio acreditado (opcional)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sitio acreditado (opcional)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   practiceSiteId?: string;
 
-  @ApiPropertyOptional({ description: 'Concepto de tipo de acreditación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto de tipo de acreditación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   accreditationTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Número de acreditación', maxLength: 100 })
+  @ApiPropertyOptional({
+    description: 'Número de acreditación',
+    maxLength: 100,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   accreditationNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant emisor (directory.tenants)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant emisor (directory.tenants)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   issuerTenantId?: string;
@@ -40,7 +58,10 @@ export class CreateAccreditationDto {
   @IsDateString()
   validTo?: string;
 
-  @ApiPropertyOptional({ description: 'Archivo de evidencia (common.files)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Archivo de evidencia (common.files)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   evidenceFileId?: string;

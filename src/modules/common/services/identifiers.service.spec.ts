@@ -29,7 +29,7 @@ describe('IdentifiersService', () => {
   function build() {
     const { em, tx } = createEmMock();
     const repo = { findActiveDuplicate: fn(), create: fn() };
-    const service = new IdentifiersService(em as never, repo as never, logger as never);
+    const service = new IdentifiersService(em as never, repo, logger as never);
     return { service, em, tx, repo };
   }
 
@@ -46,17 +46,26 @@ describe('IdentifiersService', () => {
 
     const result = await service.create(dto, actor);
 
-    expect(repo.findActiveDuplicate).toHaveBeenCalledWith(tx, expect.objectContaining({ value: dto.value }));
+    expect(repo.findActiveDuplicate).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({ value: dto.value }),
+    );
     expect(repo.create).toHaveBeenCalledTimes(1);
     expect(tx.flush).toHaveBeenCalledTimes(1);
-    expect(result).toMatchObject({ id: 'id-1', state: 'ACTIVE', value: dto.value });
+    expect(result).toMatchObject({
+      id: 'id-1',
+      state: 'ACTIVE',
+      value: dto.value,
+    });
   });
 
   it('rejects a duplicate active identifier with ConflictException', async () => {
     const { service, repo } = build();
     repo.findActiveDuplicate.mockResolvedValue({ id: 'existing' });
 
-    await expect(service.create(dto, actor)).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.create(dto, actor)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
     expect(repo.create).not.toHaveBeenCalled();
   });
 });

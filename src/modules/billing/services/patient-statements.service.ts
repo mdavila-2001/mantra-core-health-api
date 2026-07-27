@@ -7,7 +7,10 @@ import {
   InvoicesRepository,
   BillingDocumentLinksRepository,
 } from '../repositories';
-import { GeneratePatientStatementDto, PatientStatementResponseDto } from '../dto';
+import {
+  GeneratePatientStatementDto,
+  PatientStatementResponseDto,
+} from '../dto';
 import { BILL } from '../billing.concepts';
 import { fromCents, sumAmounts, toCents } from '../money.util';
 
@@ -35,7 +38,11 @@ export class PatientStatementsService {
     actor: AuthenticatedUser,
   ): Promise<PatientStatementResponseDto> {
     this.logger.info(
-      { operation: 'billing.statement.generate', patientProfileId: dto.patientProfileId, actorId: actor.id },
+      {
+        operation: 'billing.statement.generate',
+        patientProfileId: dto.patientProfileId,
+        actorId: actor.id,
+      },
       'Generating patient statement',
     );
     const periodStart = new Date(dto.periodStart);
@@ -50,11 +57,14 @@ export class PatientStatementsService {
         periodEnd,
       );
       if (existing) {
-        throw new ConflictException('Ya existe un estado de cuenta para el periodo', {
-          patientProfileId: dto.patientProfileId,
-          periodStart: dto.periodStart,
-          periodEnd: dto.periodEnd,
-        });
+        throw new ConflictException(
+          'Ya existe un estado de cuenta para el periodo',
+          {
+            patientProfileId: dto.patientProfileId,
+            periodStart: dto.periodStart,
+            periodEnd: dto.periodEnd,
+          },
+        );
       }
 
       const invoices = await this.invoicesRepo.findByPatientInRange(
@@ -95,7 +105,11 @@ export class PatientStatementsService {
       }
 
       this.logger.info(
-        { operation: 'billing.statement.generate', statementId: statement.id, invoices: invoices.length },
+        {
+          operation: 'billing.statement.generate',
+          statementId: statement.id,
+          invoices: invoices.length,
+        },
         'Patient statement generated',
       );
       return {

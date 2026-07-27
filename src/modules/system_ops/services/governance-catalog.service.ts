@@ -46,9 +46,15 @@ export class GovernanceCatalogService {
   }
 
   /** UC-11-01: registra dominio, clasificación y cataloga la entidad con sus campos. */
-  async catalogEntity(dto: CatalogEntityDto, actor: AuthenticatedUser): Promise<EntityRegistryResponseDto> {
+  async catalogEntity(
+    dto: CatalogEntityDto,
+    actor: AuthenticatedUser,
+  ): Promise<EntityRegistryResponseDto> {
     this.logger.info(
-      { operation: 'sysops.governance.catalog', table: `${dto.schemaName}.${dto.tableName}` },
+      {
+        operation: 'sysops.governance.catalog',
+        table: `${dto.schemaName}.${dto.tableName}`,
+      },
       'Cataloging entity',
     );
     return this.em.transactional(async (tx) => {
@@ -65,7 +71,10 @@ export class GovernanceCatalogService {
       }
 
       // Clasificación: UPSERT por code.
-      let classification = await this.repo.findClassificationByCode(tx, dto.classification.code);
+      let classification = await this.repo.findClassificationByCode(
+        tx,
+        dto.classification.code,
+      );
       if (!classification) {
         classification = this.repo.createClassification(tx, {
           code: dto.classification.code,
@@ -107,7 +116,8 @@ export class GovernanceCatalogService {
           classificationId: classification.id,
           isPii: f.isPii,
           isPhi: f.isPhi,
-          maskingStrategyConceptId: f.maskingStrategyConceptId ?? SYSOPS.MASK_NONE,
+          maskingStrategyConceptId:
+            f.maskingStrategyConceptId ?? SYSOPS.MASK_NONE,
           notes: f.notes,
           actorUserId: actor.id,
         });
@@ -120,10 +130,17 @@ export class GovernanceCatalogService {
         targetId: entity.id,
         actionConceptId: SYSOPS.ACTION_CREATE,
         changedByUserId: actor.id,
-        newSnapshotJson: { schemaName: dto.schemaName, tableName: dto.tableName, fields: dto.fields.length },
+        newSnapshotJson: {
+          schemaName: dto.schemaName,
+          tableName: dto.tableName,
+          fields: dto.fields.length,
+        },
       });
 
-      this.logger.info({ operation: 'sysops.governance.catalog', entityId: entity.id }, 'Entity catalogued');
+      this.logger.info(
+        { operation: 'sysops.governance.catalog', entityId: entity.id },
+        'Entity catalogued',
+      );
       return {
         id: entity.id,
         domainId: domain.id,
@@ -136,10 +153,16 @@ export class GovernanceCatalogService {
   }
 
   /** UC-11-02: define una política de escritura (code único). */
-  async createWritePolicy(dto: CreateWritePolicyDto, actor: AuthenticatedUser): Promise<IdResultDto> {
+  async createWritePolicy(
+    dto: CreateWritePolicyDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
       if (await this.repo.findWritePolicyByCode(tx, dto.code)) {
-        throw new ConflictException('Ya existe una política de escritura con ese code', { code: dto.code });
+        throw new ConflictException(
+          'Ya existe una política de escritura con ese code',
+          { code: dto.code },
+        );
       }
       const policy = this.repo.createWritePolicy(tx, {
         code: dto.code,
@@ -174,12 +197,18 @@ export class GovernanceCatalogService {
   ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
       const entity = await this.repo.findEntityById(tx, entityId);
-      if (!entity) throw new ResourceNotFoundException('Entidad no encontrada', { entityId });
+      if (!entity)
+        throw new ResourceNotFoundException('Entidad no encontrada', {
+          entityId,
+        });
       const policy = await this.repo.findWritePolicyById(tx, dto.writePolicyId);
       if (!policy) {
-        throw new ResourceNotFoundException('Política de escritura no encontrada', {
-          writePolicyId: dto.writePolicyId,
-        });
+        throw new ResourceNotFoundException(
+          'Política de escritura no encontrada',
+          {
+            writePolicyId: dto.writePolicyId,
+          },
+        );
       }
       const previous = entity.writePolicyId;
       entity.writePolicyId = policy.id;
@@ -204,7 +233,10 @@ export class GovernanceCatalogService {
   ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
       if (await this.repo.findRetentionPolicyByCode(tx, dto.code)) {
-        throw new ConflictException('Ya existe una política de retención con ese code', { code: dto.code });
+        throw new ConflictException(
+          'Ya existe una política de retención con ese code',
+          { code: dto.code },
+        );
       }
       const policy = this.repo.createRetentionPolicy(tx, {
         code: dto.code,
@@ -222,7 +254,10 @@ export class GovernanceCatalogService {
         targetId: policy.id,
         actionConceptId: SYSOPS.ACTION_CREATE,
         changedByUserId: actor.id,
-        newSnapshotJson: { code: dto.code, retentionPeriodDays: dto.retentionPeriodDays },
+        newSnapshotJson: {
+          code: dto.code,
+          retentionPeriodDays: dto.retentionPeriodDays,
+        },
       });
       return { id: policy.id };
     });
@@ -236,12 +271,21 @@ export class GovernanceCatalogService {
   ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
       const entity = await this.repo.findEntityById(tx, entityId);
-      if (!entity) throw new ResourceNotFoundException('Entidad no encontrada', { entityId });
-      const policy = await this.repo.findRetentionPolicyById(tx, dto.retentionPolicyId);
-      if (!policy) {
-        throw new ResourceNotFoundException('Política de retención no encontrada', {
-          retentionPolicyId: dto.retentionPolicyId,
+      if (!entity)
+        throw new ResourceNotFoundException('Entidad no encontrada', {
+          entityId,
         });
+      const policy = await this.repo.findRetentionPolicyById(
+        tx,
+        dto.retentionPolicyId,
+      );
+      if (!policy) {
+        throw new ResourceNotFoundException(
+          'Política de retención no encontrada',
+          {
+            retentionPolicyId: dto.retentionPolicyId,
+          },
+        );
       }
       const previous = entity.retentionPolicyId;
       entity.retentionPolicyId = policy.id;
@@ -266,7 +310,10 @@ export class GovernanceCatalogService {
   ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
       if (await this.repo.findAnonymizationRuleByCode(tx, dto.code)) {
-        throw new ConflictException('Ya existe una regla de anonimización con ese code', { code: dto.code });
+        throw new ConflictException(
+          'Ya existe una regla de anonimización con ese code',
+          { code: dto.code },
+        );
       }
       const rule = this.repo.createAnonymizationRule(tx, {
         code: dto.code,
@@ -295,9 +342,12 @@ export class GovernanceCatalogService {
   ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
       const field = await this.repo.findFieldById(tx, fieldId);
-      if (!field) throw new ResourceNotFoundException('Campo no encontrado', { fieldId });
-      if (dto.anonymizationRuleId !== undefined) field.anonymizationRuleId = dto.anonymizationRuleId;
-      if (dto.maskingStrategyConceptId !== undefined) field.maskingStrategyConceptId = dto.maskingStrategyConceptId;
+      if (!field)
+        throw new ResourceNotFoundException('Campo no encontrado', { fieldId });
+      if (dto.anonymizationRuleId !== undefined)
+        field.anonymizationRuleId = dto.anonymizationRuleId;
+      if (dto.maskingStrategyConceptId !== undefined)
+        field.maskingStrategyConceptId = dto.maskingStrategyConceptId;
       if (dto.isPii !== undefined) field.isPii = dto.isPii;
       if (dto.isPhi !== undefined) field.isPhi = dto.isPhi;
       touch(field, actor.id);

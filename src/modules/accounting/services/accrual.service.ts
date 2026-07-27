@@ -42,23 +42,36 @@ export class AccrualService {
     actor: AuthenticatedUser,
   ): Promise<AccrualObjectResponseDto> {
     this.logger.info(
-      { operation: 'accounting.accrual.create', objectNumber: dto.objectNumber },
+      {
+        operation: 'accounting.accrual.create',
+        objectNumber: dto.objectNumber,
+      },
       'Creating accrual object',
     );
     const plannedTotal = sumCents(dto.schedule.map((s) => s.plannedAmount));
     if (plannedTotal !== toCents(dto.totalAmount)) {
-      throw new PreconditionFailedException('La suma del cronograma no iguala el total', {
-        total: dto.totalAmount,
-        planned: fromCents(plannedTotal),
-      });
+      throw new PreconditionFailedException(
+        'La suma del cronograma no iguala el total',
+        {
+          total: dto.totalAmount,
+          planned: fromCents(plannedTotal),
+        },
+      );
     }
 
     return this.em.transactional(async (tx) => {
-      const clash = await this.accrualRepo.findObjectByNumber(tx, dto.tenantId, dto.objectNumber);
+      const clash = await this.accrualRepo.findObjectByNumber(
+        tx,
+        dto.tenantId,
+        dto.objectNumber,
+      );
       if (clash) {
-        throw new ConflictException('El número de objeto ya existe en el tenant', {
-          objectNumber: dto.objectNumber,
-        });
+        throw new ConflictException(
+          'El número de objeto ya existe en el tenant',
+          {
+            objectNumber: dto.objectNumber,
+          },
+        );
       }
 
       const object = this.accrualRepo.createObject(tx, {
@@ -104,22 +117,35 @@ export class AccrualService {
   }
 
   /** UC-16-07: postea las líneas PENDIENTES del periodo (idempotente por línea). */
-  async runAccruals(dto: RunAccrualsDto, actor: AuthenticatedUser): Promise<AccrualRunResponseDto> {
+  async runAccruals(
+    dto: RunAccrualsDto,
+    actor: AuthenticatedUser,
+  ): Promise<AccrualRunResponseDto> {
     this.logger.info(
-      { operation: 'accounting.accrual.run', accrualObjectId: dto.accrualObjectId, periodId: dto.fiscalPeriodId },
+      {
+        operation: 'accounting.accrual.run',
+        accrualObjectId: dto.accrualObjectId,
+        periodId: dto.fiscalPeriodId,
+      },
       'Running accrual batch',
     );
     return this.em.transactional(async (tx) => {
-      const object = await this.accrualRepo.findObjectById(tx, dto.accrualObjectId);
+      const object = await this.accrualRepo.findObjectById(
+        tx,
+        dto.accrualObjectId,
+      );
       if (!object) {
         throw new ResourceNotFoundException('Objeto de devengo no encontrado', {
           accrualObjectId: dto.accrualObjectId,
         });
       }
       if (!object.expenseAccountId || !object.accrualAccountId) {
-        throw new PreconditionFailedException('El objeto de devengo no define cuentas', {
-          accrualObjectId: dto.accrualObjectId,
-        });
+        throw new PreconditionFailedException(
+          'El objeto de devengo no define cuentas',
+          {
+            accrualObjectId: dto.accrualObjectId,
+          },
+        );
       }
 
       const pending = await this.accrualRepo.pendingLinesForPeriod(
@@ -129,10 +155,13 @@ export class AccrualService {
         ACCT.SCHEDULE_PENDING,
       );
       if (pending.length === 0) {
-        throw new PreconditionFailedException('No hay líneas de devengo pendientes en el periodo', {
-          accrualObjectId: dto.accrualObjectId,
-          fiscalPeriodId: dto.fiscalPeriodId,
-        });
+        throw new PreconditionFailedException(
+          'No hay líneas de devengo pendientes en el periodo',
+          {
+            accrualObjectId: dto.accrualObjectId,
+            fiscalPeriodId: dto.fiscalPeriodId,
+          },
+        );
       }
 
       const transactionIds: string[] = [];

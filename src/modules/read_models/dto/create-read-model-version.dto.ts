@@ -21,16 +21,24 @@ import { ReadModelDependencyInputDto } from './create-read-model-definition.dto'
  * ACTIVE para rollback hasta el corte.
  */
 export class CreateReadModelVersionDto {
-  @ApiProperty({ description: 'Tipo de objeto físico', enum: ['VIEW', 'MATERIALIZED_VIEW'] })
+  @ApiProperty({
+    description: 'Tipo de objeto físico',
+    enum: ['VIEW', 'MATERIALIZED_VIEW'],
+  })
   @IsIn(['VIEW', 'MATERIALIZED_VIEW'])
   objectType!: 'VIEW' | 'MATERIALIZED_VIEW';
 
-  @ApiPropertyOptional({ description: 'Modo de refresh', enum: ['CONCURRENT', 'SCHEDULED'] })
+  @ApiPropertyOptional({
+    description: 'Modo de refresh',
+    enum: ['CONCURRENT', 'SCHEDULED'],
+  })
   @IsOptional()
   @IsIn(['CONCURRENT', 'SCHEDULED'])
   refreshMode?: 'CONCURRENT' | 'SCHEDULED';
 
-  @ApiPropertyOptional({ description: 'Máxima antigüedad tolerada en segundos' })
+  @ApiPropertyOptional({
+    description: 'Máxima antigüedad tolerada en segundos',
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
@@ -52,7 +60,10 @@ export class CreateReadModelVersionDto {
   @IsBoolean()
   containsPhi?: boolean;
 
-  @ApiProperty({ description: 'Dependencias upstream de la nueva versión', type: [ReadModelDependencyInputDto] })
+  @ApiProperty({
+    description: 'Dependencias upstream de la nueva versión',
+    type: [ReadModelDependencyInputDto],
+  })
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })

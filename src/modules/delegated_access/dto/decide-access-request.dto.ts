@@ -3,7 +3,11 @@ import { IsDateString, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 const DECISIONS = ['APPROVED', 'DENIED'] as const;
 const PURPOSES = ['TREATMENT', 'BILLING', 'OPERATIONS'] as const;
-const RESOURCE_TYPES = ['CLINICAL_NOTE', 'APPOINTMENT', 'PRESCRIPTION'] as const;
+const RESOURCE_TYPES = [
+  'CLINICAL_NOTE',
+  'APPOINTMENT',
+  'PRESCRIPTION',
+] as const;
 
 /**
  * Cuerpo de `POST /access-requests/{id}/decision` (UC-29-05). Si `APPROVED` se
@@ -11,20 +15,29 @@ const RESOURCE_TYPES = ['CLINICAL_NOTE', 'APPOINTMENT', 'PRESCRIPTION'] as const
  */
 export class DecideAccessRequestDto {
   @ApiProperty({ description: 'Decisión del aprobador', enum: DECISIONS })
-  @IsIn(DECISIONS as unknown as string[])
+  @IsIn(DECISIONS)
   decision!: (typeof DECISIONS)[number];
 
-  @ApiPropertyOptional({ description: 'Propósito de uso del grant emitido', enum: PURPOSES })
+  @ApiPropertyOptional({
+    description: 'Propósito de uso del grant emitido',
+    enum: PURPOSES,
+  })
   @IsOptional()
-  @IsIn(PURPOSES as unknown as string[])
+  @IsIn(PURPOSES)
   purpose?: (typeof PURPOSES)[number];
 
-  @ApiPropertyOptional({ description: 'Tipo de recurso del grant', enum: RESOURCE_TYPES })
+  @ApiPropertyOptional({
+    description: 'Tipo de recurso del grant',
+    enum: RESOURCE_TYPES,
+  })
   @IsOptional()
-  @IsIn(RESOURCE_TYPES as unknown as string[])
+  @IsIn(RESOURCE_TYPES)
   resourceType?: (typeof RESOURCE_TYPES)[number];
 
-  @ApiPropertyOptional({ description: 'Fin de vigencia del grant (ISO)', format: 'date-time' })
+  @ApiPropertyOptional({
+    description: 'Fin de vigencia del grant (ISO)',
+    format: 'date-time',
+  })
   @IsOptional()
   @IsDateString()
   validTo?: string;

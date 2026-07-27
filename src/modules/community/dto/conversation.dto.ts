@@ -21,12 +21,18 @@ export class CreateConversationDto {
   @IsUUID('4', { each: true })
   participantProfileIds!: string[];
 
-  @ApiPropertyOptional({ description: 'Tipo de conversación', enum: ['DIRECT', 'GROUP'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de conversación',
+    enum: ['DIRECT', 'GROUP'],
+  })
   @IsOptional()
   @IsIn(['DIRECT', 'GROUP'])
   conversationType?: 'DIRECT' | 'GROUP';
 
-  @ApiPropertyOptional({ description: 'Grupo asociado (conversaciones de grupo)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Grupo asociado (conversaciones de grupo)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   groupId?: string;
@@ -34,7 +40,10 @@ export class CreateConversationDto {
 
 /** Cuerpo de `POST /community/conversations/{conversationId}/messages` (UC-19-06). */
 export class SendMessageDto {
-  @ApiProperty({ description: 'Perfil remitente (participante activo)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Perfil remitente (participante activo)',
+    format: 'uuid',
+  })
   @IsUUID()
   senderProfileId!: string;
 
@@ -45,17 +54,26 @@ export class SendMessageDto {
   @MaxLength(4000)
   bodyText?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de contenido', enum: ['TEXT', 'MEDIA'] })
+  @ApiPropertyOptional({
+    description: 'Tipo de contenido',
+    enum: ['TEXT', 'MEDIA'],
+  })
   @IsOptional()
   @IsIn(['TEXT', 'MEDIA'])
   contentType?: 'TEXT' | 'MEDIA';
 
-  @ApiPropertyOptional({ description: 'Mensaje al que responde', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Mensaje al que responde',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   replyToMessageId?: string;
 
-  @ApiPropertyOptional({ description: 'Archivo adjunto (common.files)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Archivo adjunto (common.files)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   attachmentFileId?: string;
@@ -67,7 +85,10 @@ export class MarkReadDto {
   @IsUUID()
   recipientProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Último mensaje leído (por defecto el más reciente)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Último mensaje leído (por defecto el más reciente)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   upToMessageId?: string;

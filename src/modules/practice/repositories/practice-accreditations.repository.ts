@@ -21,11 +21,17 @@ export interface CreateAccreditationData {
 /** Acceso a datos de `practice.practice_accreditations` (stateless). */
 @Injectable()
 export class PracticeAccreditationsRepository {
-  findById(em: EntityManager, id: string): Promise<PracticeAccreditations | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PracticeAccreditations | null> {
     return em.findOne(PracticeAccreditations, { id });
   }
 
-  create(em: EntityManager, data: CreateAccreditationData): PracticeAccreditations {
+  create(
+    em: EntityManager,
+    data: CreateAccreditationData,
+  ): PracticeAccreditations {
     return em.create(
       PracticeAccreditations,
       {

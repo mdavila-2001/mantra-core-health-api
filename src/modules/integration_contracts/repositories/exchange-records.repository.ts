@@ -22,12 +22,18 @@ export interface CreateExchangeRecordData {
 @Injectable()
 export class ExchangeRecordsRepository {
   /** Busca un registro de intercambio por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<IntegrationExchangeRecords | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IntegrationExchangeRecords | null> {
     return em.findOne(IntegrationExchangeRecords, { id });
   }
 
   /** Crea la entidad de registro en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateExchangeRecordData): IntegrationExchangeRecords {
+  create(
+    em: EntityManager,
+    data: CreateExchangeRecordData,
+  ): IntegrationExchangeRecords {
     return em.create(
       IntegrationExchangeRecords,
       {

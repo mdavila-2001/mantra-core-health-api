@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ConflictException, touch, type AuthenticatedUser } from '../../../common';
+import {
+  ConflictException,
+  touch,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DunningRepository, InvoicesRepository } from '../repositories';
 import { ExecuteDunningRunDto, DunningRunResponseDto } from '../dto';
 import { BILL } from '../billing.concepts';
@@ -23,24 +27,40 @@ export class DunningService {
     this.logger.setContext(DunningService.name);
   }
 
-  async execute(dto: ExecuteDunningRunDto, actor: AuthenticatedUser): Promise<DunningRunResponseDto> {
+  async execute(
+    dto: ExecuteDunningRunDto,
+    actor: AuthenticatedUser,
+  ): Promise<DunningRunResponseDto> {
     this.logger.info(
-      { operation: 'billing.dunning.execute', tenantId: dto.tenantId, runNumber: dto.runNumber, actorId: actor.id },
+      {
+        operation: 'billing.dunning.execute',
+        tenantId: dto.tenantId,
+        runNumber: dto.runNumber,
+        actorId: actor.id,
+      },
       'Executing dunning run',
     );
     return this.em.transactional(async (tx) => {
-      const clash = await this.dunningRepo.findRunByNumber(tx, dto.tenantId, dto.runNumber);
+      const clash = await this.dunningRepo.findRunByNumber(
+        tx,
+        dto.tenantId,
+        dto.runNumber,
+      );
       if (clash) {
-        throw new ConflictException('El número de corrida ya existe para el tenant', {
-          runNumber: dto.runNumber,
-        });
+        throw new ConflictException(
+          'El número de corrida ya existe para el tenant',
+          {
+            runNumber: dto.runNumber,
+          },
+        );
       }
 
       const run = this.dunningRepo.createRun(tx, {
         tenantId: dto.tenantId,
         runNumber: dto.runNumber,
         runDate: dto.runDate ? new Date(dto.runDate) : new Date(),
-        dunningLevelConceptId: dto.dunningLevelConceptId ?? BILL.DUNNING_LEVEL_1,
+        dunningLevelConceptId:
+          dto.dunningLevelConceptId ?? BILL.DUNNING_LEVEL_1,
         statusConceptId: BILL.DUNNING_RUN_RUNNING,
         actorUserId: actor.id,
       });
@@ -70,7 +90,11 @@ export class DunningService {
       run.statusConceptId = BILL.DUNNING_RUN_COMPLETED;
 
       this.logger.info(
-        { operation: 'billing.dunning.execute', runId: run.id, items: dto.items.length },
+        {
+          operation: 'billing.dunning.execute',
+          runId: run.id,
+          items: dto.items.length,
+        },
         'Dunning run completed',
       );
       return {

@@ -28,7 +28,9 @@ export class InternalFilesController {
   @Post('versions/:vid/scan-result')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Registrar resultado de escaneo antimalware (UC-02-09)' })
+  @ApiOperation({
+    summary: 'Registrar resultado de escaneo antimalware (UC-02-09)',
+  })
   scanResult(
     @Param('vid', ParseUUIDPipe) vid: string,
     @Body() dto: ScanResultDto,

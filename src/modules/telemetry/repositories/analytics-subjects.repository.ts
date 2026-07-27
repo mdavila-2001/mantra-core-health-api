@@ -18,15 +18,27 @@ export class AnalyticsSubjectsRepository {
     return em.findOne(AnalyticsSubjects, { id });
   }
 
-  findByKey(em: EntityManager, pseudonymousSubjectKey: string): Promise<AnalyticsSubjects | null> {
+  findByKey(
+    em: EntityManager,
+    pseudonymousSubjectKey: string,
+  ): Promise<AnalyticsSubjects | null> {
     return em.findOne(AnalyticsSubjects, { pseudonymousSubjectKey });
   }
 
-  findActiveByConsent(em: EntityManager, createdFromConsentId: string): Promise<AnalyticsSubjects[]> {
-    return em.find(AnalyticsSubjects, { createdFromConsentId, deactivatedAt: null });
+  findActiveByConsent(
+    em: EntityManager,
+    createdFromConsentId: string,
+  ): Promise<AnalyticsSubjects[]> {
+    return em.find(AnalyticsSubjects, {
+      createdFromConsentId,
+      deactivatedAt: null,
+    });
   }
 
-  create(em: EntityManager, data: CreateAnalyticsSubjectData): AnalyticsSubjects {
+  create(
+    em: EntityManager,
+    data: CreateAnalyticsSubjectData,
+  ): AnalyticsSubjects {
     return em.create(
       AnalyticsSubjects,
       {

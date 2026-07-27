@@ -9,16 +9,20 @@ export class Hashtags {
   @Property({ columnType: 'varchar' })
   tag!: string;
 
-  @Property({ fieldName: 'normalized_tag', columnType: 'varchar', nullable: true })
+  @Property({
+    fieldName: 'normalized_tag',
+    columnType: 'varchar',
+    nullable: true,
+  })
   normalizedTag?: string;
 
   @Property({ fieldName: 'usage_count', type: 'bigint', nullable: true })
   usageCount?: string;
 
-  @Property({ fieldName: 'topic_id', type: 'uuid', nullable: true })  // FK → community.topics
+  @Property({ fieldName: 'topic_id', type: 'uuid', nullable: true }) // FK → community.topics
   topicId?: string;
 
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' })  // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -27,13 +31,12 @@ export class Hashtags {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })  // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
-
 }

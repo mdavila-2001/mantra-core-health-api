@@ -15,7 +15,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ServiceRequestsService(
     em as any,
-    serviceRequestsRepo as any,
+    serviceRequestsRepo,
     encountersRepo as any,
     logger as any,
   );
@@ -33,7 +33,11 @@ describe('ServiceRequestsService (UC-08-05)', () => {
       createdAt: new Date(),
     });
     const res = await d.service.create(
-      { custodianTenantId: 't1', patientProfileId: 'p1', codeConceptId: 'code1' } as any,
+      {
+        custodianTenantId: 't1',
+        patientProfileId: 'p1',
+        codeConceptId: 'code1',
+      },
       actor,
     );
     expect(res.status).toBe(CLIN.SERVICE_REQUEST_ACTIVE);

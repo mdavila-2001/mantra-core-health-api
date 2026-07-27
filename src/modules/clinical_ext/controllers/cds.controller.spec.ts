@@ -22,14 +22,14 @@ describe('CdsController', () => {
   it('delegates createRule', async () => {
     const d = build();
     const dto = { code: 'C1', name: 'R' };
-    await d.controller.createRule(dto as any, actor);
+    await d.controller.createRule(dto, actor);
     expect(d.cdsService.createRule).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates publish (UC-18-13)', async () => {
     const d = build();
     const dto = { messageTemplate: 'm' };
-    await d.controller.publish('r1', dto as any, actor);
+    await d.controller.publish('r1', dto, actor);
     expect(d.cdsService.publishVersion).toHaveBeenCalledWith('r1', dto, actor);
   });
 
@@ -42,21 +42,21 @@ describe('CdsController', () => {
   it('delegates evaluate (UC-18-03)', async () => {
     const d = build();
     const dto = { patientProfileId: 'p1' };
-    await d.controller.evaluate(dto as any, actor);
+    await d.controller.evaluate(dto, actor);
     expect(d.cdsService.evaluate).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates checkInteractions (UC-18-04)', async () => {
     const d = build();
     const dto = { patientProfileId: 'p1', substanceConceptIds: ['a', 'b'] };
-    await d.controller.checkInteractions(dto as any, actor);
+    await d.controller.checkInteractions(dto, actor);
     expect(d.cdsService.checkInteractions).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates createDrugInteraction', async () => {
     const d = build();
     const dto = { substanceAConceptId: 'a', substanceBConceptId: 'b' };
-    await d.controller.createDrugInteraction(dto as any, actor);
+    await d.controller.createDrugInteraction(dto, actor);
     expect(d.cdsService.createDrugInteraction).toHaveBeenCalledWith(dto, actor);
   });
 });

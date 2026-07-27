@@ -27,7 +27,11 @@ export class GeofencesRepository {
   }
 
   /** Busca un geofence por (tenant, nombre); sustenta la unicidad del nombre. */
-  findByTenantAndName(em: EntityManager, tenantId: string, name: string): Promise<Geofences | null> {
+  findByTenantAndName(
+    em: EntityManager,
+    tenantId: string,
+    name: string,
+  ): Promise<Geofences | null> {
     return em.findOne(Geofences, { tenantId, name });
   }
 

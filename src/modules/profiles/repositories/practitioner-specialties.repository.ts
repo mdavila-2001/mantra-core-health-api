@@ -19,7 +19,10 @@ export interface CreateSpecialtyData {
 /** Acceso a datos de `profiles.practitioner_specialties`. */
 @Injectable()
 export class PractitionerSpecialtiesRepository {
-  create(em: EntityManager, data: CreateSpecialtyData): PractitionerSpecialties {
+  create(
+    em: EntityManager,
+    data: CreateSpecialtyData,
+  ): PractitionerSpecialties {
     return em.create(
       PractitionerSpecialties,
       {

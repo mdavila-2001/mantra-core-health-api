@@ -60,15 +60,23 @@ export class IntegrationsProvidersService {
     dto: RegisterProviderDto,
     actor: AuthenticatedUser,
   ): Promise<ProviderResponseDto> {
-    this.logger.info({ operation: 'integrations.provider.register', actorId: actor.id }, 'Registering provider');
+    this.logger.info(
+      { operation: 'integrations.provider.register', actorId: actor.id },
+      'Registering provider',
+    );
     return this.em.transactional(async (tx) => {
       const clash = await this.providersRepo.findByCode(tx, dto.code);
       if (clash) {
         this.logger.warn(
-          { operation: 'integrations.provider.register', reason: 'code-in-use' },
+          {
+            operation: 'integrations.provider.register',
+            reason: 'code-in-use',
+          },
           'Rejected provider registration: code already exists',
         );
-        throw new ConflictException('Ya existe un proveedor con ese código', { code: dto.code });
+        throw new ConflictException('Ya existe un proveedor con ese código', {
+          code: dto.code,
+        });
       }
 
       const provider = this.providersRepo.create(tx, {
@@ -77,13 +85,21 @@ export class IntegrationsProvidersService {
         providerTypeConceptId: PROVIDER_TYPE_CONCEPT_BY_CODE[dto.providerType],
         stateConceptId: INTEG.PROVIDER_ACTIVE,
         baseUrl: dto.baseUrl,
-        authTypeConceptId: dto.authType ? AUTH_TYPE_CONCEPT_BY_CODE[dto.authType] : undefined,
+        authTypeConceptId: dto.authType
+          ? AUTH_TYPE_CONCEPT_BY_CODE[dto.authType]
+          : undefined,
         docUrl: dto.docUrl,
         actorUserId: actor.id,
       });
       await tx.flush();
 
-      this.logger.info({ operation: 'integrations.provider.register', providerId: provider.id }, 'Provider registered');
+      this.logger.info(
+        {
+          operation: 'integrations.provider.register',
+          providerId: provider.id,
+        },
+        'Provider registered',
+      );
       return {
         id: provider.id,
         code: provider.code,
@@ -101,22 +117,38 @@ export class IntegrationsProvidersService {
     actor: AuthenticatedUser,
   ): Promise<EndpointResponseDto> {
     this.logger.info(
-      { operation: 'integrations.endpoint.publish', providerId, version: dto.version },
+      {
+        operation: 'integrations.endpoint.publish',
+        providerId,
+        version: dto.version,
+      },
       'Publishing endpoint',
     );
     return this.em.transactional(async (tx) => {
       const provider = await this.providersRepo.findById(tx, providerId);
-      if (!provider) throw new ResourceNotFoundException('Proveedor no encontrado', { providerId });
+      if (!provider)
+        throw new ResourceNotFoundException('Proveedor no encontrado', {
+          providerId,
+        });
       if (provider.stateConceptId !== INTEG.PROVIDER_ACTIVE) {
-        throw new PreconditionFailedException('El proveedor no está activo', { providerId });
+        throw new PreconditionFailedException('El proveedor no está activo', {
+          providerId,
+        });
       }
 
-      const existing = await this.endpointsRepo.findByProviderAndVersion(tx, providerId, dto.version);
+      const existing = await this.endpointsRepo.findByProviderAndVersion(
+        tx,
+        providerId,
+        dto.version,
+      );
       if (existing) {
-        throw new ConflictException('Ya existe un endpoint con esa versión para el proveedor', {
-          providerId,
-          version: dto.version,
-        });
+        throw new ConflictException(
+          'Ya existe un endpoint con esa versión para el proveedor',
+          {
+            providerId,
+            version: dto.version,
+          },
+        );
       }
 
       const endpoint = this.endpointsRepo.createEndpoint(tx, {
@@ -125,7 +157,9 @@ export class IntegrationsProvidersService {
         operation: dto.operation,
         version: dto.version,
         stateConceptId: INTEG.ENDPOINT_PUBLISHED,
-        httpMethodConceptId: dto.httpMethod ? HTTP_METHOD_CONCEPT_BY_CODE[dto.httpMethod] : undefined,
+        httpMethodConceptId: dto.httpMethod
+          ? HTTP_METHOD_CONCEPT_BY_CODE[dto.httpMethod]
+          : undefined,
         path: dto.path,
         requestSchemaJson: dto.requestSchemaJson,
         responseSchemaJson: dto.responseSchemaJson,
@@ -143,7 +177,9 @@ export class IntegrationsProvidersService {
           targetField: m.targetField,
           conceptMapId: m.conceptMapId,
           transformJson: m.transformJson,
-          directionConceptId: m.direction ? DIRECTION_CONCEPT_BY_CODE[m.direction] : undefined,
+          directionConceptId: m.direction
+            ? DIRECTION_CONCEPT_BY_CODE[m.direction]
+            : undefined,
           actorUserId: actor.id,
         });
       }
@@ -166,17 +202,31 @@ export class IntegrationsProvidersService {
     actor: AuthenticatedUser,
   ): Promise<WebhookSubscriptionResponseDto> {
     this.logger.info(
-      { operation: 'integrations.webhook.subscribe', providerId, eventType: dto.eventType },
+      {
+        operation: 'integrations.webhook.subscribe',
+        providerId,
+        eventType: dto.eventType,
+      },
       'Managing webhook subscription',
     );
     return this.em.transactional(async (tx) => {
       const provider = await this.providersRepo.findById(tx, providerId);
-      if (!provider) throw new ResourceNotFoundException('Proveedor no encontrado', { providerId });
+      if (!provider)
+        throw new ResourceNotFoundException('Proveedor no encontrado', {
+          providerId,
+        });
       if (provider.stateConceptId !== INTEG.PROVIDER_ACTIVE) {
-        throw new PreconditionFailedException('El proveedor no está activo', { providerId });
+        throw new PreconditionFailedException('El proveedor no está activo', {
+          providerId,
+        });
       }
 
-      const existing = await this.webhooksRepo.findByLogicalKey(tx, providerId, dto.eventType, dto.tenantId);
+      const existing = await this.webhooksRepo.findByLogicalKey(
+        tx,
+        providerId,
+        dto.eventType,
+        dto.tenantId,
+      );
       if (existing) {
         existing.callbackUrl = dto.callbackUrl;
         existing.secretRef = dto.secretRef;

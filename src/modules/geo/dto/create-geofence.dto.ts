@@ -26,33 +26,48 @@ export class CreateGeofenceDto {
   @IsUUID()
   tenantId!: string;
 
-  @ApiProperty({ description: 'Nombre único del geofence dentro del tenant', maxLength: 200 })
+  @ApiProperty({
+    description: 'Nombre único del geofence dentro del tenant',
+    maxLength: 200,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
   name!: string;
 
-  @ApiProperty({ description: 'Forma del geofence', enum: ['CIRCLE', 'POLYGON'] })
+  @ApiProperty({
+    description: 'Forma del geofence',
+    enum: ['CIRCLE', 'POLYGON'],
+  })
   @IsIn(['CIRCLE', 'POLYGON'])
   shapeType!: ShapeTypeCode;
 
-  @ApiPropertyOptional({ description: 'Radio en metros (obligatorio si CIRCLE)' })
+  @ApiPropertyOptional({
+    description: 'Radio en metros (obligatorio si CIRCLE)',
+  })
   @IsOptional()
   @IsNumber()
   @IsPositive()
   radiusM?: number;
 
-  @ApiPropertyOptional({ description: 'Latitud del centro (obligatorio si CIRCLE)' })
+  @ApiPropertyOptional({
+    description: 'Latitud del centro (obligatorio si CIRCLE)',
+  })
   @IsOptional()
   @IsLatitude()
   centerLat?: number;
 
-  @ApiPropertyOptional({ description: 'Longitud del centro (obligatorio si CIRCLE)' })
+  @ApiPropertyOptional({
+    description: 'Longitud del centro (obligatorio si CIRCLE)',
+  })
   @IsOptional()
   @IsLongitude()
   centerLng?: number;
 
-  @ApiPropertyOptional({ description: 'GeoJSON del polígono (obligatorio si POLYGON)', type: Object })
+  @ApiPropertyOptional({
+    description: 'GeoJSON del polígono (obligatorio si POLYGON)',
+    type: Object,
+  })
   @IsOptional()
   @IsObject()
   geometryJson?: Record<string, unknown>;

@@ -63,35 +63,51 @@ export class PractitionerDelegatesService {
       'Creating practitioner delegate assignment',
     );
     return this.em.transactional(async (tx) => {
-      const orgAssignment = await this.orgAssignmentsRepo.findById(tx, dto.delegateUserAssignmentId);
+      const orgAssignment = await this.orgAssignmentsRepo.findById(
+        tx,
+        dto.delegateUserAssignmentId,
+      );
       if (!orgAssignment) {
-        throw new ResourceNotFoundException('Asignación de usuario de organización no encontrada', {
-          delegateUserAssignmentId: dto.delegateUserAssignmentId,
-        });
+        throw new ResourceNotFoundException(
+          'Asignación de usuario de organización no encontrada',
+          {
+            delegateUserAssignmentId: dto.delegateUserAssignmentId,
+          },
+        );
       }
       if (orgAssignment.statusConceptId !== STATUS.ACTIVE) {
-        throw new PreconditionFailedException('El usuario de organización no está activo', {
-          delegateUserAssignmentId: dto.delegateUserAssignmentId,
-        });
+        throw new PreconditionFailedException(
+          'El usuario de organización no está activo',
+          {
+            delegateUserAssignmentId: dto.delegateUserAssignmentId,
+          },
+        );
       }
 
-      const set = await this.setsRepo.findById(tx, dto.delegatedPermissionSetId);
+      const set = await this.setsRepo.findById(
+        tx,
+        dto.delegatedPermissionSetId,
+      );
       if (!set) {
         throw new ResourceNotFoundException('Set de permisos no encontrado', {
           delegatedPermissionSetId: dto.delegatedPermissionSetId,
         });
       }
       if (set.statusConceptId !== STATUS.ACTIVE) {
-        throw new PreconditionFailedException('El set de permisos no está activo', {
-          delegatedPermissionSetId: dto.delegatedPermissionSetId,
-        });
+        throw new PreconditionFailedException(
+          'El set de permisos no está activo',
+          {
+            delegatedPermissionSetId: dto.delegatedPermissionSetId,
+          },
+        );
       }
 
       const delegate = this.delegatesRepo.create(tx, {
         practitionerRoleAssignmentId: dto.practitionerRoleAssignmentId,
         delegateUserAssignmentId: dto.delegateUserAssignmentId,
         delegatedPermissionSetId: dto.delegatedPermissionSetId,
-        delegateRoleConceptId: DELEGATE_ROLE_CONCEPT[dto.delegateRole ?? 'ASSISTANT'],
+        delegateRoleConceptId:
+          DELEGATE_ROLE_CONCEPT[dto.delegateRole ?? 'ASSISTANT'],
         patientScopeConceptId: dto.patientScope
           ? PATIENT_SCOPE_CONCEPT[dto.patientScope]
           : undefined,
@@ -116,10 +132,17 @@ export class PractitionerDelegatesService {
       });
 
       this.logger.info(
-        { operation: 'delegated_access.delegate.create', delegateId: delegate.id },
+        {
+          operation: 'delegated_access.delegate.create',
+          delegateId: delegate.id,
+        },
         'Practitioner delegate assignment created',
       );
-      return { id: delegate.id, status: delegate.statusConceptId, createdAt: delegate.createdAt };
+      return {
+        id: delegate.id,
+        status: delegate.statusConceptId,
+        createdAt: delegate.createdAt,
+      };
     });
   }
 
@@ -130,16 +153,24 @@ export class PractitionerDelegatesService {
     actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
-      { operation: 'delegated_access.grant.issue', delegateId, actorId: actor.id },
+      {
+        operation: 'delegated_access.grant.issue',
+        delegateId,
+        actorId: actor.id,
+      },
       'Issuing delegated grant',
     );
     return this.em.transactional(async (tx) => {
       const delegate = await this.delegatesRepo.findById(tx, delegateId);
       if (!delegate) {
-        throw new ResourceNotFoundException('Delegación no encontrada', { delegateId });
+        throw new ResourceNotFoundException('Delegación no encontrada', {
+          delegateId,
+        });
       }
       if (delegate.statusConceptId !== STATUS.ACTIVE) {
-        throw new PreconditionFailedException('La delegación no está activa', { delegateId });
+        throw new PreconditionFailedException('La delegación no está activa', {
+          delegateId,
+        });
       }
 
       const grant = this.grantsRepo.create(tx, {
@@ -169,7 +200,11 @@ export class PractitionerDelegatesService {
         { operation: 'delegated_access.grant.issue', grantId: grant.id },
         'Delegated grant issued',
       );
-      return { id: grant.id, status: grant.statusConceptId, createdAt: grant.createdAt };
+      return {
+        id: grant.id,
+        status: grant.statusConceptId,
+        createdAt: grant.createdAt,
+      };
     });
   }
 
@@ -180,13 +215,19 @@ export class PractitionerDelegatesService {
     actor: AuthenticatedUser,
   ): Promise<OperationResultDto> {
     this.logger.info(
-      { operation: 'delegated_access.delegate.revoke', delegateId, actorId: actor.id },
+      {
+        operation: 'delegated_access.delegate.revoke',
+        delegateId,
+        actorId: actor.id,
+      },
       'Revoking delegation',
     );
     return this.em.transactional(async (tx) => {
       const delegate = await this.delegatesRepo.findById(tx, delegateId);
       if (!delegate) {
-        throw new ResourceNotFoundException('Delegación no encontrada', { delegateId });
+        throw new ResourceNotFoundException('Delegación no encontrada', {
+          delegateId,
+        });
       }
       // Idempotente: si ya está revocada no se hace nada.
       if (delegate.statusConceptId === STATUS.REVOKED) {
@@ -221,7 +262,11 @@ export class PractitionerDelegatesService {
       });
 
       this.logger.info(
-        { operation: 'delegated_access.delegate.revoke', delegateId, reason: dto.reason },
+        {
+          operation: 'delegated_access.delegate.revoke',
+          delegateId,
+          reason: dto.reason,
+        },
         'Delegation revoked',
       );
       return { ok: true };

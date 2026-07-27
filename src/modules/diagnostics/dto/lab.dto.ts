@@ -13,7 +13,10 @@ import {
 
 /** Una prueba a desglosar dentro de la orden de trabajo. */
 export class WorkOrderTestItemDto {
-  @ApiProperty({ format: 'uuid', description: 'Orden clínica que solicita la prueba' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Orden clínica que solicita la prueba',
+  })
   @IsUUID()
   serviceRequestId!: string;
 
@@ -21,7 +24,10 @@ export class WorkOrderTestItemDto {
   @IsUUID()
   testCodeConceptId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Espécimen sobre el que se corre' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Espécimen sobre el que se corre',
+  })
   @IsOptional()
   @IsUUID()
   specimenId?: string;
@@ -31,7 +37,10 @@ export class WorkOrderTestItemDto {
   @IsUUID()
   methodConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Analizador asignado (device id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Analizador asignado (device id)',
+  })
   @IsOptional()
   @IsUUID()
   analyzerDeviceId?: string;
@@ -39,11 +48,17 @@ export class WorkOrderTestItemDto {
 
 /** Cuerpo de `POST /diagnostics/work-orders` (UC-20-04). */
 export class CreateWorkOrderDto {
-  @ApiProperty({ format: 'uuid', description: 'Acesión de laboratorio en estado recibido' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Acesión de laboratorio en estado recibido',
+  })
   @IsUUID()
   laboratoryAccessionId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant custodio (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant custodio (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;
@@ -54,17 +69,26 @@ export class CreateWorkOrderDto {
   @MaxLength(120)
   workOrderNumber?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Prioridad (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Prioridad (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   priorityConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Unidad de laboratorio asignada' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Unidad de laboratorio asignada',
+  })
   @IsOptional()
   @IsUUID()
   assignedLaboratoryUnitId?: string;
 
-  @ApiProperty({ type: [WorkOrderTestItemDto], description: 'Pruebas a desglosar' })
+  @ApiProperty({
+    type: [WorkOrderTestItemDto],
+    description: 'Pruebas a desglosar',
+  })
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
@@ -83,7 +107,10 @@ export class CreateAnalyzerRunDto {
   @MaxLength(120)
   runIdentifier!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant custodio (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant custodio (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;
@@ -107,28 +134,42 @@ export class IngestAnalyzerMessageDto {
   @MaxLength(200)
   payloadHash!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Formato del mensaje (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Formato del mensaje (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   messageFormatConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Message control id (idempotencia por corrida)' })
+  @ApiPropertyOptional({
+    description: 'Message control id (idempotencia por corrida)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   messageControlId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Prueba de la orden a completar' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Prueba de la orden a completar',
+  })
   @IsOptional()
   @IsUUID()
   laboratoryWorkOrderTestId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Observación mapeada (clinical.observations)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Observación mapeada (clinical.observations)',
+  })
   @IsOptional()
   @IsUUID()
   mappedObservationId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Archivo del mensaje crudo (common.files)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Archivo del mensaje crudo (common.files)',
+  })
   @IsOptional()
   @IsUUID()
   rawMessageFileId?: string;
@@ -136,7 +177,10 @@ export class IngestAnalyzerMessageDto {
 
 /** Cuerpo de `POST /diagnostics/results/{observationId}/verifications` (UC-20-06). */
 export class VerifyResultDto {
-  @ApiProperty({ enum: ['TECHNICAL', 'MEDICAL'], description: 'Nivel de verificación' })
+  @ApiProperty({
+    enum: ['TECHNICAL', 'MEDICAL'],
+    description: 'Nivel de verificación',
+  })
   @IsIn(['TECHNICAL', 'MEDICAL'])
   level!: 'TECHNICAL' | 'MEDICAL';
 
@@ -144,17 +188,26 @@ export class VerifyResultDto {
   @IsUUID()
   verifiedByProfileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant custodio (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant custodio (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Resultado de la verificación (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Resultado de la verificación (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   resultConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Verificación previa que se encadena' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Verificación previa que se encadena',
+  })
   @IsOptional()
   @IsUUID()
   previousVerificationId?: string;

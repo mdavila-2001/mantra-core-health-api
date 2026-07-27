@@ -9,7 +9,10 @@ import { createdBy } from '../../../common';
  */
 @Injectable()
 export class BackupRepository {
-  findPolicyById(em: EntityManager, id: string): Promise<BackupPolicies | null> {
+  findPolicyById(
+    em: EntityManager,
+    id: string,
+  ): Promise<BackupPolicies | null> {
     return em.findOne(BackupPolicies, { id });
   }
 
@@ -19,7 +22,11 @@ export class BackupRepository {
     resourceScopeConceptId: string,
     statusConceptId: string,
   ): Promise<BackupPolicies | null> {
-    return em.findOne(BackupPolicies, { tenantId, resourceScopeConceptId, statusConceptId });
+    return em.findOne(BackupPolicies, {
+      tenantId,
+      resourceScopeConceptId,
+      statusConceptId,
+    });
   }
 
   createPolicy(
@@ -39,7 +46,11 @@ export class BackupRepository {
     },
   ): BackupPolicies {
     const { actorUserId, ...rest } = data;
-    return em.create(BackupPolicies, { ...rest, ...createdBy(actorUserId) }, { partial: true });
+    return em.create(
+      BackupPolicies,
+      { ...rest, ...createdBy(actorUserId) },
+      { partial: true },
+    );
   }
 
   createTestRun(

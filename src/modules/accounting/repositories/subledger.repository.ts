@@ -11,7 +11,10 @@ import { createdBy } from '../../../common';
 /** Acceso a subledgers, partidas abiertas y documentos de compensación. */
 @Injectable()
 export class SubledgerRepository {
-  findSubledgerById(em: EntityManager, id: string): Promise<SubledgerAccounts | null> {
+  findSubledgerById(
+    em: EntityManager,
+    id: string,
+  ): Promise<SubledgerAccounts | null> {
     return em.findOne(SubledgerAccounts, { id });
   }
 

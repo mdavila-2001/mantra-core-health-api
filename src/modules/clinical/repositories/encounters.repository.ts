@@ -70,7 +70,10 @@ export class EncountersRepository {
     );
   }
 
-  createParticipant(em: EntityManager, data: CreateParticipantData): EncounterParticipants {
+  createParticipant(
+    em: EntityManager,
+    data: CreateParticipantData,
+  ): EncounterParticipants {
     return em.create(
       EncounterParticipants,
       {
@@ -86,7 +89,10 @@ export class EncountersRepository {
     );
   }
 
-  createLocation(em: EntityManager, data: CreateLocationData): EncounterLocations {
+  createLocation(
+    em: EntityManager,
+    data: CreateLocationData,
+  ): EncounterLocations {
     return em.create(
       EncounterLocations,
       {

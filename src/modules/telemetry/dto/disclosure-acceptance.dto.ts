@@ -3,11 +3,17 @@ import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 /** Cuerpo de `POST /telemetry/disclosure-acceptances` (UC-28-04). */
 export class CreateDisclosureAcceptanceDto {
-  @ApiProperty({ description: 'Versión de disclosure aceptada', format: 'uuid' })
+  @ApiProperty({
+    description: 'Versión de disclosure aceptada',
+    format: 'uuid',
+  })
   @IsUUID()
   trackingDisclosureVersionId!: string;
 
-  @ApiPropertyOptional({ description: 'Usuario que acepta (por defecto el autenticado)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Usuario que acepta (por defecto el autenticado)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   userId?: string;
@@ -17,13 +23,19 @@ export class CreateDisclosureAcceptanceDto {
   @IsUUID()
   sessionId?: string;
 
-  @ApiPropertyOptional({ description: 'Hash del prefijo de IP (sin PII en claro)', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Hash del prefijo de IP (sin PII en claro)',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   ipPrefixHash?: string;
 
-  @ApiPropertyOptional({ description: 'Hash del user agent (sin PII en claro)', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Hash del user agent (sin PII en claro)',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)

@@ -9,7 +9,10 @@ import {
 
 /** Cuerpo de `POST /admin/tenants` (UC-04-01: aprovisionar tenant raíz). */
 export class CreateTenantDto {
-  @ApiProperty({ description: 'Código único global del tenant', maxLength: 100 })
+  @ApiProperty({
+    description: 'Código único global del tenant',
+    maxLength: 100,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -21,7 +24,10 @@ export class CreateTenantDto {
   @MaxLength(300)
   legalName!: string;
 
-  @ApiProperty({ description: 'Usuario que será owner inicial del tenant', format: 'uuid' })
+  @ApiProperty({
+    description: 'Usuario que será owner inicial del tenant',
+    format: 'uuid',
+  })
   @IsUUID()
   ownerUserId!: string;
 
@@ -31,17 +37,26 @@ export class CreateTenantDto {
   @MaxLength(300)
   tradeName?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del tipo de tenant', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del tipo de tenant',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id del tipo de entidad legal', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id del tipo de entidad legal',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   legalEntityTypeConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Concept id de la región de residencia de datos', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concept id de la región de residencia de datos',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   dataResidencyRegionConceptId?: string;

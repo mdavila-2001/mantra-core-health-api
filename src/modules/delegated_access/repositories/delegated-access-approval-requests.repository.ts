@@ -16,7 +16,10 @@ export interface CreateApprovalRequestData {
 /** Acceso a datos de `delegated_access.delegated_access_approval_requests`. */
 @Injectable()
 export class DelegatedAccessApprovalRequestsRepository {
-  findById(em: EntityManager, id: string): Promise<DelegatedAccessApprovalRequests | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DelegatedAccessApprovalRequests | null> {
     return em.findOne(DelegatedAccessApprovalRequests, { id });
   }
 
@@ -38,7 +41,10 @@ export class DelegatedAccessApprovalRequestsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateApprovalRequestData): DelegatedAccessApprovalRequests {
+  create(
+    em: EntityManager,
+    data: CreateApprovalRequestData,
+  ): DelegatedAccessApprovalRequests {
     return em.create(
       DelegatedAccessApprovalRequests,
       {
@@ -65,7 +71,10 @@ export class DelegatedAccessApprovalRequestsRepository {
   ): Promise<number> {
     return em.nativeUpdate(
       DelegatedAccessApprovalRequests,
-      { practitionerDelegateAssignmentId, statusConceptId: openStatusConceptId },
+      {
+        practitionerDelegateAssignmentId,
+        statusConceptId: openStatusConceptId,
+      },
       { statusConceptId: cancelledStatusConceptId },
     );
   }

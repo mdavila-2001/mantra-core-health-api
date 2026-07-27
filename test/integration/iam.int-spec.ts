@@ -1,7 +1,10 @@
 import request from 'supertest';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { bootstrapTestApp, bearer, type TestContext } from './harness';
-import { AuthenticationCredentials, Users } from '../../src/modules/iam/entities';
+import {
+  AuthenticationCredentials,
+  Users,
+} from '../../src/modules/iam/entities';
 import { CONCEPTS } from '../../src/common';
 
 /**
@@ -43,7 +46,10 @@ describe('IAM (integración)', () => {
     const persisted = await em.findOne(Users, { id: userId });
     expect(persisted).not.toBeNull();
     expect(persisted!.statusConceptId).toBe(CONCEPTS.USER_ACTIVE);
-    const cred = await em.findOne(AuthenticationCredentials, { userId, externalSubject: email });
+    const cred = await em.findOne(AuthenticationCredentials, {
+      userId,
+      externalSubject: email,
+    });
     expect(cred).not.toBeNull();
     // El hash de contraseña nunca es la contraseña en claro.
     expect(cred!.secretHash).not.toBe(password);
@@ -76,7 +82,10 @@ describe('IAM (integración)', () => {
   });
 
   it('UC-01-04 login con contraseña incorrecta (401)', async () => {
-    await http().post('/iam/auth/login').send({ email, password: 'wrong' }).expect(401);
+    await http()
+      .post('/iam/auth/login')
+      .send({ email, password: 'wrong' })
+      .expect(401);
   });
 
   it('UC-01-06 refresh rota el token y detecta reuso', async () => {
@@ -87,7 +96,10 @@ describe('IAM (integración)', () => {
     expect(first.body.refreshToken).not.toBe(refreshToken);
 
     // Reusar el refresh token ya rotado dispara la detección de reuso (401).
-    await http().post('/iam/auth/token/refresh').send({ refreshToken }).expect(401);
+    await http()
+      .post('/iam/auth/token/refresh')
+      .send({ refreshToken })
+      .expect(401);
   });
 
   it('UC-01-03 inscribe un factor MFA', async () => {
@@ -102,7 +114,11 @@ describe('IAM (integración)', () => {
     const res = await http()
       .post(`/iam/users/${userId}/devices`)
       .set(bearer(ctx.adminToken))
-      .send({ deviceFingerprint: `fp-${Date.now()}`, platform: 'WEB', trust: true })
+      .send({
+        deviceFingerprint: `fp-${Date.now()}`,
+        platform: 'WEB',
+        trust: true,
+      })
       .expect(201);
     expect(res.body.trusted).toBe(true);
   });

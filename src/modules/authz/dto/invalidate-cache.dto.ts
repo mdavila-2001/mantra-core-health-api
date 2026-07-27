@@ -13,12 +13,18 @@ export class InvalidateCacheDto {
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Usuario cuya decisión se invalida', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Usuario cuya decisión se invalida',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   userId?: string;
 
-  @ApiPropertyOptional({ description: 'Rol cuya decisión se invalida', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Rol cuya decisión se invalida',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   roleId?: string;

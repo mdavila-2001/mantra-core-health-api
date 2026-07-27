@@ -66,7 +66,10 @@ export class AllergyIntolerancesRepository {
     );
   }
 
-  createReaction(em: EntityManager, data: CreateReactionData): AllergyReactions {
+  createReaction(
+    em: EntityManager,
+    data: CreateReactionData,
+  ): AllergyReactions {
     return em.create(
       AllergyReactions,
       {

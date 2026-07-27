@@ -18,11 +18,17 @@ export interface CreateSupportAssignmentData {
 /** Acceso a datos de `practice.practitioner_support_assignments` (stateless). */
 @Injectable()
 export class PractitionerSupportAssignmentsRepository {
-  findById(em: EntityManager, id: string): Promise<PractitionerSupportAssignments | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<PractitionerSupportAssignments | null> {
     return em.findOne(PractitionerSupportAssignments, { id });
   }
 
-  create(em: EntityManager, data: CreateSupportAssignmentData): PractitionerSupportAssignments {
+  create(
+    em: EntityManager,
+    data: CreateSupportAssignmentData,
+  ): PractitionerSupportAssignments {
     return em.create(
       PractitionerSupportAssignments,
       {

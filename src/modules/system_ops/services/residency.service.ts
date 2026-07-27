@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { CONCEPTS, ConflictException, type AuthenticatedUser } from '../../../common';
+import {
+  CONCEPTS,
+  ConflictException,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GovernanceRepository, ResidencyRepository } from '../repositories';
 import { SYSOPS } from '../system_ops.concepts';
 import {
@@ -36,15 +40,20 @@ export class ResidencyService {
   ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
       if (await this.repo.findPolicyByCode(tx, dto.code)) {
-        throw new ConflictException('Ya existe una política de residencia con ese code', { code: dto.code });
+        throw new ConflictException(
+          'Ya existe una política de residencia con ese code',
+          { code: dto.code },
+        );
       }
       const policy = this.repo.createPolicy(tx, {
         code: dto.code,
         jurisdictionConceptId: dto.jurisdictionConceptId,
         dataClassificationId: dto.dataClassificationId,
         allowedStorageRegionValueSetId: dto.allowedStorageRegionValueSetId,
-        allowedProcessingRegionValueSetId: dto.allowedProcessingRegionValueSetId,
-        crossBorderTransferBasisConceptId: dto.crossBorderTransferBasisConceptId,
+        allowedProcessingRegionValueSetId:
+          dto.allowedProcessingRegionValueSetId,
+        crossBorderTransferBasisConceptId:
+          dto.crossBorderTransferBasisConceptId,
         transferImpactAssessmentRequired: dto.transferImpactAssessmentRequired,
         encryptionKeyRegionLocked: dto.encryptionKeyRegionLocked,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
@@ -75,7 +84,9 @@ export class ResidencyService {
         residencyPolicyId: dto.residencyPolicyId,
         primaryRegionConceptId: dto.primaryRegionConceptId,
         disasterRecoveryRegionConceptId: dto.disasterRecoveryRegionConceptId,
-        effectiveFrom: dto.effectiveFrom ? new Date(dto.effectiveFrom) : new Date(),
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : new Date(),
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: actor.id,
       });
@@ -90,11 +101,17 @@ export class ResidencyService {
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
-      const existing = await this.repo.findTransferByReference(tx, dto.transferReference);
+      const existing = await this.repo.findTransferByReference(
+        tx,
+        dto.transferReference,
+      );
       if (existing) {
-        throw new ConflictException('La referencia de transferencia ya fue registrada', {
-          transferReference: dto.transferReference,
-        });
+        throw new ConflictException(
+          'La referencia de transferencia ya fue registrada',
+          {
+            transferReference: dto.transferReference,
+          },
+        );
       }
       const event = this.repo.createTransfer(tx, {
         tenantId: dto.tenantId,

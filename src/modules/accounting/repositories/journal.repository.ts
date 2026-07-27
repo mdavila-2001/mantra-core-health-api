@@ -72,7 +72,10 @@ export interface CreateAssignmentData {
  */
 @Injectable()
 export class JournalRepository {
-  findTransactionById(em: EntityManager, id: string): Promise<JournalTransactions | null> {
+  findTransactionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<JournalTransactions | null> {
     return em.findOne(JournalTransactions, { id });
   }
 
@@ -84,7 +87,10 @@ export class JournalRepository {
     return em.findOne(JournalTransactions, { practiceId, transactionNumber });
   }
 
-  createTransaction(em: EntityManager, data: CreateTransactionData): JournalTransactions {
+  createTransaction(
+    em: EntityManager,
+    data: CreateTransactionData,
+  ): JournalTransactions {
     return em.create(
       JournalTransactions,
       {
@@ -108,7 +114,10 @@ export class JournalRepository {
     );
   }
 
-  createLedgerEntry(em: EntityManager, data: CreateLedgerEntryData): LedgerEntries {
+  createLedgerEntry(
+    em: EntityManager,
+    data: CreateLedgerEntryData,
+  ): LedgerEntries {
     return em.create(
       LedgerEntries,
       {
@@ -128,7 +137,10 @@ export class JournalRepository {
     );
   }
 
-  createAssignment(em: EntityManager, data: CreateAssignmentData): JournalEntryAssignments {
+  createAssignment(
+    em: EntityManager,
+    data: CreateAssignmentData,
+  ): JournalEntryAssignments {
     return em.create(
       JournalEntryAssignments,
       {
@@ -160,7 +172,10 @@ export class JournalRepository {
     sourceTransactionId: string,
     relationTypeConceptId: string,
   ): Promise<AccountingDocumentLinks | null> {
-    return em.findOne(AccountingDocumentLinks, { sourceTransactionId, relationTypeConceptId });
+    return em.findOne(AccountingDocumentLinks, {
+      sourceTransactionId,
+      relationTypeConceptId,
+    });
   }
 
   createLink(
@@ -188,8 +203,15 @@ export class JournalRepository {
     );
   }
 
-  ledgerEntriesForTransaction(em: EntityManager, transactionId: string): Promise<LedgerEntries[]> {
-    return em.find(LedgerEntries, { transactionId }, { orderBy: { lineNo: 'asc' } });
+  ledgerEntriesForTransaction(
+    em: EntityManager,
+    transactionId: string,
+  ): Promise<LedgerEntries[]> {
+    return em.find(
+      LedgerEntries,
+      { transactionId },
+      { orderBy: { lineNo: 'asc' } },
+    );
   }
 
   assignmentForEntry(

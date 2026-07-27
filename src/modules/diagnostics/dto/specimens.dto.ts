@@ -20,11 +20,17 @@ export class CreateSpecimenDto {
   @IsUUID()
   custodianTenantId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Tipo de espécimen (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Tipo de espécimen (concept id)',
+  })
   @IsUUID()
   specimenTypeConceptId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Orden clínica de origen' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Orden clínica de origen',
+  })
   @IsOptional()
   @IsUUID()
   serviceRequestId?: string;
@@ -34,17 +40,26 @@ export class CreateSpecimenDto {
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Sitio anatómico (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Sitio anatómico (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   bodySiteConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Método de recolección (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Método de recolección (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   collectionMethodConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Profesional que recolecta' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Profesional que recolecta',
+  })
   @IsOptional()
   @IsUUID()
   collectorProfileId?: string;
@@ -56,12 +71,19 @@ export class CreateAccessionDto {
   @IsUUID()
   patientProfileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant custodio (por defecto el del token)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tenant custodio (por defecto el del token)',
+  })
   @IsOptional()
   @IsUUID()
   custodianTenantId?: string;
 
-  @ApiProperty({ type: [String], format: 'uuid', description: 'Especímenes a acesionar' })
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Especímenes a acesionar',
+  })
   @IsArray()
   @ArrayNotEmpty()
   @IsUUID('4', { each: true })
@@ -73,7 +95,10 @@ export class CreateAccessionDto {
   @MaxLength(120)
   accessionNumber?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Prioridad (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Prioridad (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   priorityConceptId?: string;
@@ -86,7 +111,10 @@ export class CreateAccessionDto {
 
 /** Cuerpo de `POST /diagnostics/specimens/{id}/rejection` (UC-20-02). */
 export class RejectSpecimenDto {
-  @ApiProperty({ format: 'uuid', description: 'Motivo de rechazo (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Motivo de rechazo (concept id)',
+  })
   @IsUUID()
   rejectionReasonConceptId!: string;
 
@@ -101,12 +129,18 @@ export class RejectSpecimenDto {
   @IsBoolean()
   recollectionRequired?: boolean;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Nueva orden de recolección' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Nueva orden de recolección',
+  })
   @IsOptional()
   @IsUUID()
   recollectionServiceRequestId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Profesional que rechaza' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Profesional que rechaza',
+  })
   @IsOptional()
   @IsUUID()
   rejectedByProfileId?: string;
@@ -120,7 +154,10 @@ export class CreateContainerDto {
   @MaxLength(120)
   containerIdentifier!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Tipo de contenedor (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Tipo de contenedor (concept id)',
+  })
   @IsUUID()
   containerTypeConceptId!: string;
 
@@ -137,16 +174,25 @@ export class CreateContainerDto {
 
 /** Cuerpo de `POST /diagnostics/containers/{id}/custody-events` (UC-20-03). */
 export class ContainerCustodyEventDto {
-  @ApiProperty({ format: 'uuid', description: 'Espécimen asociado al contenedor' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Espécimen asociado al contenedor',
+  })
   @IsUUID()
   specimenId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tipo de evento de contenedor (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tipo de evento de contenedor (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   eventTypeConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tipo de parte destino (concept id)' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Tipo de parte destino (concept id)',
+  })
   @IsOptional()
   @IsUUID()
   toPartyTypeConceptId?: string;
@@ -174,7 +220,10 @@ export class ContainerCustodyEventDto {
   @MaxLength(200)
   evidenceHash?: string;
 
-  @ApiPropertyOptional({ description: 'Estado destino del contenedor (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Estado destino del contenedor (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   destinationStatusConceptId?: string;

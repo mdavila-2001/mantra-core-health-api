@@ -3,7 +3,10 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ConflictException, type AuthenticatedUser } from '../../../common';
 import { AllergyIntolerancesRepository } from '../repositories';
-import { CreateAllergyIntoleranceDto, AllergyIntoleranceResponseDto } from '../dto';
+import {
+  CreateAllergyIntoleranceDto,
+  AllergyIntoleranceResponseDto,
+} from '../dto';
 import { CLIN } from '../clinical.concepts';
 
 /** UC-08-09: registro de alergias/intolerancias con reacciones (CDS). */
@@ -23,7 +26,10 @@ export class AllergyIntolerancesService {
     actor: AuthenticatedUser,
   ): Promise<AllergyIntoleranceResponseDto> {
     this.logger.info(
-      { operation: 'clinical.allergy.create', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.allergy.create',
+        patientProfileId: dto.patientProfileId,
+      },
       'Recording allergy',
     );
     return this.em.transactional(async (tx) => {
@@ -35,10 +41,13 @@ export class AllergyIntolerancesService {
         CLIN.ALLERGY_ACTIVE,
       );
       if (existing) {
-        throw new ConflictException('El paciente ya tiene una alergia activa a esa sustancia', {
-          patientProfileId: dto.patientProfileId,
-          substanceConceptId: dto.substanceConceptId,
-        });
+        throw new ConflictException(
+          'El paciente ya tiene una alergia activa a esa sustancia',
+          {
+            patientProfileId: dto.patientProfileId,
+            substanceConceptId: dto.substanceConceptId,
+          },
+        );
       }
 
       const allergy = this.allergyRepo.create(tx, {

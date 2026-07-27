@@ -7,12 +7,16 @@ export class PermissionSetItemDto {
   @IsUUID()
   permissionId!: string;
 
-  @ApiPropertyOptional({ description: 'Restricción declarativa (constraint) del permiso' })
+  @ApiPropertyOptional({
+    description: 'Restricción declarativa (constraint) del permiso',
+  })
   @IsOptional()
   @IsObject()
   constraintJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Requiere step-up (autenticación reforzada)' })
+  @ApiPropertyOptional({
+    description: 'Requiere step-up (autenticación reforzada)',
+  })
   @IsOptional()
   @IsBoolean()
   requiresStepUpAuthentication?: boolean;

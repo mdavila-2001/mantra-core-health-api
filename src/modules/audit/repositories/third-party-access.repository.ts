@@ -61,7 +61,10 @@ export interface RecordPharmacyAccessData {
  */
 @Injectable()
 export class ThirdPartyAccessRepository {
-  recordDelegated(em: EntityManager, data: RecordDelegatedAccessData): DelegatedAccessAuditLog {
+  recordDelegated(
+    em: EntityManager,
+    data: RecordDelegatedAccessData,
+  ): DelegatedAccessAuditLog {
     return em.create(
       DelegatedAccessAuditLog,
       {
@@ -79,7 +82,10 @@ export class ThirdPartyAccessRepository {
     );
   }
 
-  recordInsurance(em: EntityManager, data: RecordInsuranceAccessData): InsuranceDecisionAccessLog {
+  recordInsurance(
+    em: EntityManager,
+    data: RecordInsuranceAccessData,
+  ): InsuranceDecisionAccessLog {
     return em.create(
       InsuranceDecisionAccessLog,
       {
@@ -117,7 +123,10 @@ export class ThirdPartyAccessRepository {
     );
   }
 
-  recordPharmacy(em: EntityManager, data: RecordPharmacyAccessData): PharmacyInventoryAccessLog {
+  recordPharmacy(
+    em: EntityManager,
+    data: RecordPharmacyAccessData,
+  ): PharmacyInventoryAccessLog {
     return em.create(
       PharmacyInventoryAccessLog,
       {

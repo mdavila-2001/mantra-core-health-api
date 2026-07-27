@@ -3,7 +3,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PracticeInventoryService } from './practice-inventory.service';
 import { PRAC } from '../practice.concepts';
-import { PreconditionFailedException, ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -13,7 +16,12 @@ function build() {
   const itemsRepo = { findById: mockFn(), create: mockFn() };
   const movementsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PracticeInventoryService(em as any, itemsRepo as any, movementsRepo as any, logger as any);
+  const service = new PracticeInventoryService(
+    em as any,
+    itemsRepo,
+    movementsRepo,
+    logger as any,
+  );
   return { service, tx, itemsRepo, movementsRepo };
 }
 
@@ -30,11 +38,14 @@ describe('PracticeInventoryService', () => {
         createdAt: new Date(),
       };
       d.itemsRepo.create.mockReturnValue(created);
-      const res = await d.service.createItem('p1', { name: 'Gauze' } as any, actor);
+      const res = await d.service.createItem('p1', { name: 'Gauze' }, actor);
       expect(res.quantityOnHand).toBe('0');
       expect(d.itemsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ quantityOnHand: '0', statusConceptId: PRAC.INVENTORY_ACTIVE }),
+        expect.objectContaining({
+          quantityOnHand: '0',
+          statusConceptId: PRAC.INVENTORY_ACTIVE,
+        }),
       );
     });
   });
@@ -44,7 +55,11 @@ describe('PracticeInventoryService', () => {
       const d = build();
       d.itemsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.recordMovement('it1', { direction: 'IN', quantity: 5 } as any, actor),
+        d.service.recordMovement(
+          'it1',
+          { direction: 'IN', quantity: 5 } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -57,7 +72,11 @@ describe('PracticeInventoryService', () => {
         updatedAt: new Date(),
       });
       await expect(
-        d.service.recordMovement('it1', { direction: 'OUT', quantity: 5 } as any, actor),
+        d.service.recordMovement(
+          'it1',
+          { direction: 'OUT', quantity: 5 } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -71,13 +90,24 @@ describe('PracticeInventoryService', () => {
         updatedAt: new Date(),
       };
       d.itemsRepo.findById.mockResolvedValue(item);
-      d.movementsRepo.create.mockReturnValue({ id: 'mv1', inventoryItemId: 'it1', recordedAt: new Date() });
-      const res = await d.service.recordMovement('it1', { direction: 'IN', quantity: 3 } as any, actor);
+      d.movementsRepo.create.mockReturnValue({
+        id: 'mv1',
+        inventoryItemId: 'it1',
+        recordedAt: new Date(),
+      });
+      const res = await d.service.recordMovement(
+        'it1',
+        { direction: 'IN', quantity: 3 } as any,
+        actor,
+      );
       expect(item.quantityOnHand).toBe('5');
       expect(res.quantityOnHand).toBe('5');
       expect(d.movementsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ movementTypeConceptId: PRAC.MOVEMENT_IN, quantity: '3' }),
+        expect.objectContaining({
+          movementTypeConceptId: PRAC.MOVEMENT_IN,
+          quantity: '3',
+        }),
       );
     });
 
@@ -91,8 +121,16 @@ describe('PracticeInventoryService', () => {
         updatedAt: new Date(),
       };
       d.itemsRepo.findById.mockResolvedValue(item);
-      d.movementsRepo.create.mockReturnValue({ id: 'mv1', inventoryItemId: 'it1', recordedAt: new Date() });
-      await d.service.recordMovement('it1', { direction: 'OUT', quantity: 4 } as any, actor);
+      d.movementsRepo.create.mockReturnValue({
+        id: 'mv1',
+        inventoryItemId: 'it1',
+        recordedAt: new Date(),
+      });
+      await d.service.recordMovement(
+        'it1',
+        { direction: 'OUT', quantity: 4 } as any,
+        actor,
+      );
       expect(item.quantityOnHand).toBe('6');
     });
   });

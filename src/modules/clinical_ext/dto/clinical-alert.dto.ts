@@ -4,7 +4,8 @@ import { IsOptional, IsString, MaxLength } from 'class-validator';
 /** Cuerpo de `PATCH /clinical-alerts/{id}/override` (UC-18-05). */
 export class OverrideAlertDto {
   @ApiPropertyOptional({
-    description: 'Motivo del override (obligatorio para alertas de alta severidad)',
+    description:
+      'Motivo del override (obligatorio para alertas de alta severidad)',
   })
   @IsOptional()
   @IsString()
@@ -17,7 +18,10 @@ export class ClinicalAlertResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Estado de la alerta (concept id)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado de la alerta (concept id)',
+  })
   statusConceptId!: string;
 
   @ApiPropertyOptional({ type: String, format: 'date-time' })

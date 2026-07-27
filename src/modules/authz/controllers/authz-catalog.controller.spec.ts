@@ -6,7 +6,10 @@ import { AuthzCatalogController } from './authz-catalog.controller';
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
-  const catalogService = { createCategory: mockFn(), createPermission: mockFn() };
+  const catalogService = {
+    createCategory: mockFn(),
+    createPermission: mockFn(),
+  };
   const controller = new AuthzCatalogController(catalogService as any);
   return { controller, catalogService };
 }
@@ -16,7 +19,9 @@ describe('AuthzCatalogController', () => {
     const d = build();
     const dto = { code: 'C', name: 'C' };
     d.catalogService.createCategory.mockResolvedValue({ id: 'c1' });
-    await expect(d.controller.createCategory(dto as any, actor)).resolves.toEqual({ id: 'c1' });
+    await expect(
+      d.controller.createCategory(dto as any, actor),
+    ).resolves.toEqual({ id: 'c1' });
     expect(d.catalogService.createCategory).toHaveBeenCalledWith(dto, actor);
   });
 

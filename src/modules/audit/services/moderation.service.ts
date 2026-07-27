@@ -8,7 +8,10 @@ import {
   AuditLogRepository,
 } from '../repositories';
 import { AUD } from '../audit.concepts';
-import { CreateModerationDecisionDto, ModerationDecisionResultDto } from '../dto';
+import {
+  CreateModerationDecisionDto,
+  ModerationDecisionResultDto,
+} from '../dto';
 
 const TARGET_TYPE: Record<string, string> = {
   CONTENT: AUD.MOD_TARGET_CONTENT,
@@ -54,7 +57,11 @@ export class ModerationService {
     actor: AuthenticatedUser,
   ): Promise<ModerationDecisionResultDto> {
     this.logger.info(
-      { operation: 'audit.moderation.record', actorId: actor.id, action: dto.action },
+      {
+        operation: 'audit.moderation.record',
+        actorId: actor.id,
+        action: dto.action,
+      },
       'Recording moderation decision',
     );
     return this.em.transactional(async (tx) => {

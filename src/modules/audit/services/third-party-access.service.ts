@@ -6,7 +6,10 @@ import {
   PreconditionFailedException,
   type AuthenticatedUser,
 } from '../../../common';
-import { ThirdPartyAccessRepository, AuditLogRepository } from '../repositories';
+import {
+  ThirdPartyAccessRepository,
+  AuditLogRepository,
+} from '../repositories';
 import { AUD } from '../audit.concepts';
 import { RecordThirdPartyAccessDto, ThirdPartyAccessResultDto } from '../dto';
 
@@ -40,10 +43,17 @@ export class ThirdPartyAccessService {
     actor: AuthenticatedUser,
   ): Promise<ThirdPartyAccessResultDto> {
     this.logger.info(
-      { operation: 'audit.thirdParty.record', actorId: actor.id, channel: dto.channel },
+      {
+        operation: 'audit.thirdParty.record',
+        actorId: actor.id,
+        channel: dto.channel,
+      },
       'Recording governed third-party access',
     );
-    const outcome = dto.outcome === 'FAILURE' ? CONCEPTS.OUTCOME_FAILURE : CONCEPTS.OUTCOME_SUCCESS;
+    const outcome =
+      dto.outcome === 'FAILURE'
+        ? CONCEPTS.OUTCOME_FAILURE
+        : CONCEPTS.OUTCOME_SUCCESS;
     const purpose = PURPOSE_OF_USE[dto.purposeOfUse ?? 'TREATMENT'];
 
     return this.em.transactional(async (tx) => {
@@ -51,10 +61,14 @@ export class ThirdPartyAccessService {
 
       switch (dto.channel) {
         case 'DELEGATED': {
-          this.require(dto.delegatingPractitionerProfileId, 'delegatingPractitionerProfileId');
+          this.require(
+            dto.delegatingPractitionerProfileId,
+            'delegatingPractitionerProfileId',
+          );
           const row = this.tpaRepo.recordDelegated(tx, {
             delegateUserId: actor.id,
-            delegatingPractitionerProfileId: dto.delegatingPractitionerProfileId!,
+            delegatingPractitionerProfileId:
+              dto.delegatingPractitionerProfileId!,
             delegatedAssignmentId: dto.delegatedAssignmentId,
             patientProfileId: dto.patientProfileId,
             resourceTypeConceptId: AUD.RESOURCE_TYPE_CLINICAL,
@@ -75,7 +89,8 @@ export class ThirdPartyAccessService {
             claimId: dto.claimId,
             authorizationRequestId: dto.authorizationRequestId,
             actionConceptId: AUD.ACTION_READ,
-            purposeOfUseConceptId: PURPOSE_OF_USE[dto.purposeOfUse ?? 'COVERAGE'],
+            purposeOfUseConceptId:
+              PURPOSE_OF_USE[dto.purposeOfUse ?? 'COVERAGE'],
             outcomeConceptId: outcome,
           });
           rowId = row.id;
@@ -87,7 +102,8 @@ export class ThirdPartyAccessService {
             verificationCaseId: dto.verificationCaseId!,
             actorUserId: actor.id,
             actionConceptId: AUD.ACTION_READ,
-            purposeOfUseConceptId: PURPOSE_OF_USE[dto.purposeOfUse ?? 'VERIFICATION'],
+            purposeOfUseConceptId:
+              PURPOSE_OF_USE[dto.purposeOfUse ?? 'VERIFICATION'],
             outcomeConceptId: outcome,
           });
           rowId = row.id;
@@ -125,9 +141,12 @@ export class ThirdPartyAccessService {
 
   private require(value: string | undefined, field: string): void {
     if (!value) {
-      throw new PreconditionFailedException(`Falta el campo requerido para el canal: ${field}`, {
-        field,
-      });
+      throw new PreconditionFailedException(
+        `Falta el campo requerido para el canal: ${field}`,
+        {
+          field,
+        },
+      );
     }
   }
 }

@@ -25,7 +25,11 @@ export class ExchangeAttemptsRepository {
     const rows = await em.find(
       IntegrationExchangeAttempts,
       { integrationExchangeRecordId: recordId },
-      { fields: ['attemptNumber'], orderBy: { attemptNumber: 'desc' }, limit: 1 },
+      {
+        fields: ['attemptNumber'],
+        orderBy: { attemptNumber: 'desc' },
+        limit: 1,
+      },
     );
     return rows.length ? rows[0].attemptNumber : 0;
   }
@@ -44,7 +48,10 @@ export class ExchangeAttemptsRepository {
   }
 
   /** Crea la entidad de intento en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateAttemptData): IntegrationExchangeAttempts {
+  create(
+    em: EntityManager,
+    data: CreateAttemptData,
+  ): IntegrationExchangeAttempts {
     return em.create(
       IntegrationExchangeAttempts,
       {

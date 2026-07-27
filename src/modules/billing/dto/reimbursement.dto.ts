@@ -1,26 +1,46 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNumberString, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsNumberString,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 
 /** Cuerpo de `POST /billing/reimbursements:link` (UC-17-08). */
 export class LinkReimbursementDto {
-  @ApiProperty({ description: 'Reclamo de seguro (insurance.insurance_claims)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Reclamo de seguro (insurance.insurance_claims)',
+    format: 'uuid',
+  })
   @IsUUID()
   claimId!: string;
 
-  @ApiProperty({ description: 'Factura del paciente a acreditar (billing.invoices)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Factura del paciente a acreditar (billing.invoices)',
+    format: 'uuid',
+  })
   @IsUUID()
   invoiceId!: string;
 
-  @ApiProperty({ description: 'Monto reembolsado por la aseguradora', example: '30.00' })
+  @ApiProperty({
+    description: 'Monto reembolsado por la aseguradora',
+    example: '30.00',
+  })
   @IsNumberString()
   amount!: string;
 
-  @ApiPropertyOptional({ description: 'Fecha de recepción del reembolso (ISO)' })
+  @ApiPropertyOptional({
+    description: 'Fecha de recepción del reembolso (ISO)',
+  })
   @IsOptional()
   @IsDateString()
   receivedAt?: string;
 
-  @ApiPropertyOptional({ description: 'Tenant (directory.tenants); requerido para registrar el vínculo REIMBURSEMENT_OF', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Tenant (directory.tenants); requerido para registrar el vínculo REIMBURSEMENT_OF',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;

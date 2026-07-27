@@ -14,7 +14,10 @@ import {
 
 /** Cuerpo de `POST /charts/notes` (UC-15-01): crea una nota y su versión 1 borrador. */
 export class CreateNoteDto {
-  @ApiProperty({ format: 'uuid', description: 'Perfil de paciente (profiles.patient_profiles)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Perfil de paciente (profiles.patient_profiles)',
+  })
   @IsUUID()
   patientProfileId!: string;
 
@@ -22,17 +25,26 @@ export class CreateNoteDto {
   @IsUUID()
   authorProfileId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Encuentro clínico asociado' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Encuentro clínico asociado',
+  })
   @IsOptional()
   @IsUUID()
   encounterId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id del tipo de nota' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del tipo de nota',
+  })
   @IsOptional()
   @IsUUID()
   noteTypeConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id de confidencialidad' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id de confidencialidad',
+  })
   @IsOptional()
   @IsUUID()
   confidentialityConceptId?: string;
@@ -99,17 +111,24 @@ export class AddVersionDto {
 
 /** Cuerpo de `POST .../versions/{versionId}/sign` (UC-15-03). */
 export class SignVersionDto {
-  @ApiProperty({ format: 'uuid', description: 'Perfil del firmante (autor o delegado)' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Perfil del firmante (autor o delegado)',
+  })
   @IsUUID()
   signerProfileId!: string;
 
-  @ApiPropertyOptional({ description: 'Huella del certificado usado en la firma' })
+  @ApiPropertyOptional({
+    description: 'Huella del certificado usado en la firma',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   certificateThumbprint?: string;
 
-  @ApiPropertyOptional({ description: 'Valor de firma cifrado (opaco al backend)' })
+  @ApiPropertyOptional({
+    description: 'Valor de firma cifrado (opaco al backend)',
+  })
   @IsOptional()
   @IsString()
   signatureValueEncrypted?: string;
@@ -117,7 +136,10 @@ export class SignVersionDto {
 
 /** Cuerpo de `POST .../versions/{versionId}/cosign` (UC-15-04). */
 export class CosignVersionDto {
-  @ApiProperty({ format: 'uuid', description: 'Perfil del cofirmante / supervisor' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Perfil del cofirmante / supervisor',
+  })
   @IsUUID()
   signerProfileId!: string;
 
@@ -135,7 +157,10 @@ export class CosignVersionDto {
 
 /** Cuerpo de `POST /charts/notes/{noteId}/amendments` (UC-15-05). */
 export class AmendNoteDto {
-  @ApiProperty({ format: 'uuid', description: 'Perfil del clínico que enmienda' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Perfil del clínico que enmienda',
+  })
   @IsUUID()
   authorProfileId!: string;
 
@@ -145,7 +170,10 @@ export class AmendNoteDto {
   @MaxLength(2000)
   amendmentReasonText!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id del motivo de enmienda' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del motivo de enmienda',
+  })
   @IsOptional()
   @IsUUID()
   amendmentReasonConceptId?: string;
@@ -173,7 +201,9 @@ export class AmendNoteDto {
 
 /** Cuerpo de `POST /charts/notes/versions/{versionId}/release` (UC-15-06). */
 export class ReleaseVersionDto {
-  @ApiPropertyOptional({ description: 'Versión de la política de liberación aplicada' })
+  @ApiPropertyOptional({
+    description: 'Versión de la política de liberación aplicada',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -182,12 +212,17 @@ export class ReleaseVersionDto {
 
 /** Cuerpo de `POST /charts/notes/versions/{versionId}/withhold` (UC-15-07). */
 export class WithholdVersionDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id del motivo de retención' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del motivo de retención',
+  })
   @IsOptional()
   @IsUUID()
   reasonConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Versión de la política de retención aplicada' })
+  @ApiPropertyOptional({
+    description: 'Versión de la política de retención aplicada',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -196,12 +231,18 @@ export class WithholdVersionDto {
 
 /** Un hallazgo de examen físico dentro del batch de UC-15-08. */
 export class ExamFindingInputDto {
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id del sistema corporal' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del sistema corporal',
+  })
   @IsOptional()
   @IsUUID()
   bodySystemConceptId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Concept id del hallazgo codificado' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Concept id del hallazgo codificado',
+  })
   @IsOptional()
   @IsUUID()
   findingConceptId?: string;
@@ -219,14 +260,20 @@ export class ExamFindingInputDto {
 
 /** Cuerpo de `POST /charts/notes/versions/{versionId}/exam-findings` (UC-15-08). */
 export class ExamFindingsDto {
-  @ApiProperty({ type: [ExamFindingInputDto], description: 'Batch de hallazgos' })
+  @ApiProperty({
+    type: [ExamFindingInputDto],
+    description: 'Batch de hallazgos',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => ExamFindingInputDto)
   findings!: ExamFindingInputDto[];
 
-  @ApiPropertyOptional({ description: 'Texto objetivo sintetizado (solo si la versión sigue en DRAFT)' })
+  @ApiPropertyOptional({
+    description:
+      'Texto objetivo sintetizado (solo si la versión sigue en DRAFT)',
+  })
   @IsOptional()
   @IsString()
   objectiveText?: string;
@@ -243,10 +290,16 @@ export class NoteVersionResponseDto {
   @ApiProperty()
   versionNumber!: number;
 
-  @ApiProperty({ description: 'Concept id del ciclo de vida de la cabecera', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del ciclo de vida de la cabecera',
+    format: 'uuid',
+  })
   lifecycleStatusConceptId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de la versión', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de la versión',
+    format: 'uuid',
+  })
   versionStatusConceptId!: string;
 }
 
@@ -267,6 +320,9 @@ export class ReleaseResultDto {
   @ApiProperty({ format: 'uuid' })
   releaseEventId!: string;
 
-  @ApiProperty({ description: 'Concept id del estado de liberación de la cabecera', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado de liberación de la cabecera',
+    format: 'uuid',
+  })
   patientReleaseStatusConceptId!: string;
 }

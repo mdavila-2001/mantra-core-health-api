@@ -10,7 +10,7 @@ describe('ChartDocumentsController', () => {
     const documentsService = { createDocument: mockFn() };
     const controller = new ChartDocumentsController(documentsService as any);
     const dto = { patientProfileId: 'p1', tenantId: 't1', title: 'Doc' };
-    await controller.createDocument(dto as any, actor);
+    await controller.createDocument(dto, actor);
     expect(documentsService.createDocument).toHaveBeenCalledWith(dto, actor);
   });
 });

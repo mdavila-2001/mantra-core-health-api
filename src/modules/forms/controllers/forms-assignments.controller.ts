@@ -19,7 +19,9 @@ export class FormsAssignmentsController {
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Asignar campos a un target con política de extensión' })
+  @ApiOperation({
+    summary: 'Asignar campos a un target con política de extensión',
+  })
   createAssignment(
     @Body() dto: CreateAssignmentDto,
     @CurrentUser() actor: AuthenticatedUser,

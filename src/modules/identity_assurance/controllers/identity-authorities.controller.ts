@@ -22,7 +22,9 @@ import {
 @ApiBearerAuth()
 @Controller('identity/authorities')
 export class IdentityAuthoritiesController {
-  constructor(private readonly authoritiesService: IdentityAuthoritiesService) {}
+  constructor(
+    private readonly authoritiesService: IdentityAuthoritiesService,
+  ) {}
 
   /** UC-27-01. */
   @Post()
@@ -40,7 +42,9 @@ export class IdentityAuthoritiesController {
   @Post(':id/endpoints')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Publicar un endpoint de verificación de la autoridad' })
+  @ApiOperation({
+    summary: 'Publicar un endpoint de verificación de la autoridad',
+  })
   addEndpoint(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateAuthorityEndpointDto,

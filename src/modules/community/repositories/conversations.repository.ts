@@ -42,11 +42,17 @@ export interface CreateMessageData {
  */
 @Injectable()
 export class ConversationsRepository {
-  findConversationById(em: EntityManager, id: string): Promise<Conversations | null> {
+  findConversationById(
+    em: EntityManager,
+    id: string,
+  ): Promise<Conversations | null> {
     return em.findOne(Conversations, { id });
   }
 
-  createConversation(em: EntityManager, data: CreateConversationData): Conversations {
+  createConversation(
+    em: EntityManager,
+    data: CreateConversationData,
+  ): Conversations {
     return em.create(
       Conversations,
       {
@@ -61,7 +67,10 @@ export class ConversationsRepository {
     );
   }
 
-  createParticipant(em: EntityManager, data: CreateParticipantData): ConversationParticipants {
+  createParticipant(
+    em: EntityManager,
+    data: CreateParticipantData,
+  ): ConversationParticipants {
     return em.create(
       ConversationParticipants,
       {
@@ -115,8 +124,15 @@ export class ConversationsRepository {
     );
   }
 
-  findLastMessage(em: EntityManager, conversationId: string): Promise<DirectMessages | null> {
-    return em.findOne(DirectMessages, { conversationId }, { orderBy: { sentAt: 'desc' } });
+  findLastMessage(
+    em: EntityManager,
+    conversationId: string,
+  ): Promise<DirectMessages | null> {
+    return em.findOne(
+      DirectMessages,
+      { conversationId },
+      { orderBy: { sentAt: 'desc' } },
+    );
   }
 
   createReceipt(

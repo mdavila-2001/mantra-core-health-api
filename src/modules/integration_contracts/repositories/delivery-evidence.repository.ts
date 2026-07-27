@@ -17,7 +17,10 @@ export interface CreateDeliveryEvidenceData {
 @Injectable()
 export class DeliveryEvidenceRepository {
   /** Crea la entidad de evidencia en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateDeliveryEvidenceData): WebhookDeliveryEvidence {
+  create(
+    em: EntityManager,
+    data: CreateDeliveryEvidenceData,
+  ): WebhookDeliveryEvidence {
     return em.create(
       WebhookDeliveryEvidence,
       {

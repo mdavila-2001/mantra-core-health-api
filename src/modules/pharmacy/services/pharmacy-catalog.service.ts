@@ -1,8 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException, type AuthenticatedUser } from '../../../common';
-import { PharmaciesRepository, PharmacyProductsRepository, PharmacyProductPricesRepository } from '../repositories';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
+import {
+  PharmaciesRepository,
+  PharmacyProductsRepository,
+  PharmacyProductPricesRepository,
+} from '../repositories';
 import { PHARM } from '../pharmacy.concepts';
 import { CatalogEntryDto, CatalogProjectionDto } from '../dto';
 
@@ -29,7 +36,10 @@ export class PharmacyCatalogService {
   }
 
   /** Proyecta el catálogo activo y sus precios vigentes de una farmacia. */
-  async projectCatalog(pharmacyId: string, actor: AuthenticatedUser): Promise<CatalogProjectionDto> {
+  async projectCatalog(
+    pharmacyId: string,
+    actor: AuthenticatedUser,
+  ): Promise<CatalogProjectionDto> {
     this.logger.info(
       { operation: 'pharmacy.catalog.project', pharmacyId, actorId: actor.id },
       'Projecting pharmacy catalog',
@@ -37,7 +47,10 @@ export class PharmacyCatalogService {
     const em = this.em.fork();
 
     const pharmacy = await this.pharmaciesRepo.findById(em, pharmacyId);
-    if (!pharmacy) throw new ResourceNotFoundException('Farmacia no encontrada', { pharmacyId });
+    if (!pharmacy)
+      throw new ResourceNotFoundException('Farmacia no encontrada', {
+        pharmacyId,
+      });
 
     const products = await this.productsRepo.findByPharmacyAndStatus(
       em,
@@ -47,7 +60,11 @@ export class PharmacyCatalogService {
 
     const entries: CatalogEntryDto[] = [];
     for (const product of products) {
-      const prices = await this.pricesRepo.findActiveByProduct(em, product.id, PHARM.PRICE_ACTIVE);
+      const prices = await this.pricesRepo.findActiveByProduct(
+        em,
+        product.id,
+        PHARM.PRICE_ACTIVE,
+      );
       entries.push({
         productId: product.id,
         productCode: product.productCode,
@@ -61,7 +78,11 @@ export class PharmacyCatalogService {
     }
 
     this.logger.info(
-      { operation: 'pharmacy.catalog.project', pharmacyId, productCount: entries.length },
+      {
+        operation: 'pharmacy.catalog.project',
+        pharmacyId,
+        productCount: entries.length,
+      },
       'Pharmacy catalog projected',
     );
     return {

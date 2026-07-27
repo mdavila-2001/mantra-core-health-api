@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify` (UC-24-03). */
 export class VerifyLicenseDto {
@@ -11,12 +17,18 @@ export class VerifyLicenseDto {
   @IsBoolean()
   approve?: boolean;
 
-  @ApiPropertyOptional({ description: 'Archivo de evidencia usado en la verificación', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Archivo de evidencia usado en la verificación',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   evidenceFileId?: string;
 
-  @ApiPropertyOptional({ description: 'Motivo del rechazo (si aplica)', maxLength: 500 })
+  @ApiPropertyOptional({
+    description: 'Motivo del rechazo (si aplica)',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)

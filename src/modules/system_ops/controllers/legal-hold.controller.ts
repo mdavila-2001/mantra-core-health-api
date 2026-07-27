@@ -10,7 +10,12 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { LegalHoldService } from '../services';
-import { CreateLegalHoldDto, IdResultDto, ReleaseLegalHoldDto, StatusResultDto } from '../dto';
+import {
+  CreateLegalHoldDto,
+  IdResultDto,
+  ReleaseLegalHoldDto,
+  StatusResultDto,
+} from '../dto';
 
 /** Endpoints de legal hold (UC-11-08). */
 @ApiTags('system-ops-legal-holds')

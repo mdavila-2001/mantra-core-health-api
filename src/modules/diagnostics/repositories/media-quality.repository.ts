@@ -47,7 +47,10 @@ export class MediaQualityRepository {
     return em.findOne(ClinicalMedia, { id });
   }
 
-  findMediaByFile(em: EntityManager, fileId: string): Promise<ClinicalMedia | null> {
+  findMediaByFile(
+    em: EntityManager,
+    fileId: string,
+  ): Promise<ClinicalMedia | null> {
     return em.findOne(ClinicalMedia, { fileId });
   }
 

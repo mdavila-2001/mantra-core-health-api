@@ -1,9 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /integrations/providers/{id}/webhook-subscriptions` (UC-12-11). */
 export class CreateWebhookSubscriptionDto {
-  @ApiPropertyOptional({ description: 'Tenant al que aplica la suscripción', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Tenant al que aplica la suscripción',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
@@ -19,7 +29,10 @@ export class CreateWebhookSubscriptionDto {
   @MaxLength(2048)
   callbackUrl!: string;
 
-  @ApiPropertyOptional({ description: 'Referencia al secreto de verificación de firma', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Referencia al secreto de verificación de firma',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)

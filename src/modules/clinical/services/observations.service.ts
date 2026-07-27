@@ -55,36 +55,52 @@ export class ObservationsService {
    * NOT NULL `value_type_concept_id`.
    */
   private resolveValue(input: ValueLike): ObservationValue {
-    const value: ObservationValue = { valueTypeConceptId: input.valueTypeConceptId ?? '' };
+    const value: ObservationValue = {
+      valueTypeConceptId: input.valueTypeConceptId ?? '',
+    };
     if (input.quantityValue !== undefined) {
       value.quantityValue = String(input.quantityValue);
       value.quantityUnitConceptId = input.quantityUnitConceptId;
-      value.valueTypeConceptId = input.valueTypeConceptId ?? CLIN.VALUE_TYPE_QUANTITY;
+      value.valueTypeConceptId =
+        input.valueTypeConceptId ?? CLIN.VALUE_TYPE_QUANTITY;
     } else if (input.valueDecimal !== undefined) {
       value.valueDecimal = String(input.valueDecimal);
-      value.valueTypeConceptId = input.valueTypeConceptId ?? CLIN.VALUE_TYPE_DECIMAL;
+      value.valueTypeConceptId =
+        input.valueTypeConceptId ?? CLIN.VALUE_TYPE_DECIMAL;
     } else if (input.valueBoolean !== undefined) {
       value.valueBoolean = input.valueBoolean;
-      value.valueTypeConceptId = input.valueTypeConceptId ?? CLIN.VALUE_TYPE_BOOLEAN;
+      value.valueTypeConceptId =
+        input.valueTypeConceptId ?? CLIN.VALUE_TYPE_BOOLEAN;
     } else if (input.valueConceptId !== undefined) {
       value.valueConceptId = input.valueConceptId;
-      value.valueTypeConceptId = input.valueTypeConceptId ?? CLIN.VALUE_TYPE_CODEABLE;
+      value.valueTypeConceptId =
+        input.valueTypeConceptId ?? CLIN.VALUE_TYPE_CODEABLE;
     } else if (input.valueText !== undefined) {
       value.valueText = input.valueText;
-      value.valueTypeConceptId = input.valueTypeConceptId ?? CLIN.VALUE_TYPE_STRING;
+      value.valueTypeConceptId =
+        input.valueTypeConceptId ?? CLIN.VALUE_TYPE_STRING;
     }
     return value;
   }
 
   /** UC-08-03: registra una observación con componentes, rangos y ejecutantes. */
-  async record(dto: CreateObservationDto, actor: AuthenticatedUser): Promise<ObservationResponseDto> {
+  async record(
+    dto: CreateObservationDto,
+    actor: AuthenticatedUser,
+  ): Promise<ObservationResponseDto> {
     this.logger.info(
-      { operation: 'clinical.observation.record', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.observation.record',
+        patientProfileId: dto.patientProfileId,
+      },
       'Recording observation',
     );
     return this.em.transactional(async (tx) => {
       if (dto.encounterId) {
-        const encounter = await this.encountersRepo.findById(tx, dto.encounterId);
+        const encounter = await this.encountersRepo.findById(
+          tx,
+          dto.encounterId,
+        );
         if (!encounter) {
           throw new ResourceNotFoundException('Encuentro no encontrado', {
             encounterId: dto.encounterId,
@@ -92,11 +108,17 @@ export class ObservationsService {
         }
       }
       if (dto.basedOnServiceRequestId) {
-        const sr = await this.serviceRequestsRepo.findById(tx, dto.basedOnServiceRequestId);
+        const sr = await this.serviceRequestsRepo.findById(
+          tx,
+          dto.basedOnServiceRequestId,
+        );
         if (!sr) {
-          throw new ResourceNotFoundException('Orden de servicio no encontrada', {
-            serviceRequestId: dto.basedOnServiceRequestId,
-          });
+          throw new ResourceNotFoundException(
+            'Orden de servicio no encontrada',
+            {
+              serviceRequestId: dto.basedOnServiceRequestId,
+            },
+          );
         }
       }
 
@@ -119,7 +141,9 @@ export class ObservationsService {
         methodConceptId: dto.methodConceptId,
         bodySiteConceptId: dto.bodySiteConceptId,
         sourceDeviceId: dto.sourceDeviceId,
-        effectiveStartAt: dto.effectiveStartAt ? new Date(dto.effectiveStartAt) : undefined,
+        effectiveStartAt: dto.effectiveStartAt
+          ? new Date(dto.effectiveStartAt)
+          : undefined,
         issuedAt: dto.issuedAt ? new Date(dto.issuedAt) : new Date(),
         recordedByUserId: actor.id,
         actorUserId: actor.id,
@@ -158,7 +182,8 @@ export class ObservationsService {
         this.observationsRepo.createReferenceRange(tx, {
           observationId: observation.id,
           lowValue: r.lowValue !== undefined ? String(r.lowValue) : undefined,
-          highValue: r.highValue !== undefined ? String(r.highValue) : undefined,
+          highValue:
+            r.highValue !== undefined ? String(r.highValue) : undefined,
           unitConceptId: r.unitConceptId,
           text: r.text,
           actorUserId: actor.id,
@@ -175,7 +200,10 @@ export class ObservationsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'clinical.observation.record', observationId: observation.id },
+        {
+          operation: 'clinical.observation.record',
+          observationId: observation.id,
+        },
         'Observation recorded',
       );
       return {
@@ -200,25 +228,36 @@ export class ObservationsService {
       'Amending observation',
     );
     return this.em.transactional(async (tx) => {
-      const observation = await this.observationsRepo.findById(tx, observationId);
+      const observation = await this.observationsRepo.findById(
+        tx,
+        observationId,
+      );
       if (!observation) {
-        throw new ResourceNotFoundException('Observación no encontrada', { observationId });
+        throw new ResourceNotFoundException('Observación no encontrada', {
+          observationId,
+        });
       }
       const amendable = [CLIN.OBSERVATION_FINAL, CLIN.OBSERVATION_PRELIMINARY];
       if (!amendable.includes(observation.statusConceptId)) {
-        throw new PreconditionFailedException('La observación no admite enmienda en su estado', {
-          observationId,
-          status: observation.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'La observación no admite enmienda en su estado',
+          {
+            observationId,
+            status: observation.statusConceptId,
+          },
+        );
       }
       if (
         dto.expectedRowVersion !== undefined &&
         dto.expectedRowVersion !== observation.rowVersion
       ) {
-        throw new ConcurrencyConflictException('Versión de la observación desactualizada', {
-          expected: dto.expectedRowVersion,
-          actual: observation.rowVersion,
-        });
+        throw new ConcurrencyConflictException(
+          'Versión de la observación desactualizada',
+          {
+            expected: dto.expectedRowVersion,
+            actual: observation.rowVersion,
+          },
+        );
       }
 
       const value = this.resolveValue(dto);
@@ -244,7 +283,10 @@ export class ObservationsService {
       });
       await tx.flush();
 
-      const components = await this.observationsRepo.findComponents(tx, observation.id);
+      const components = await this.observationsRepo.findComponents(
+        tx,
+        observation.id,
+      );
       this.logger.info(
         { operation: 'clinical.observation.amend', observationId },
         'Observation amended',

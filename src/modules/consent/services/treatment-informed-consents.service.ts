@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { SEED, type AuthenticatedUser } from '../../../common';
-import { TreatmentInformedConsentsRepository, ConsentEventsRepository } from '../repositories';
+import {
+  TreatmentInformedConsentsRepository,
+  ConsentEventsRepository,
+} from '../repositories';
 import { CONS } from '../consent.concepts';
 import {
   CreateTreatmentInformedConsentDto,
@@ -45,7 +48,9 @@ export class TreatmentInformedConsentsService {
         interpreterUserId: dto.interpreterUserId,
         witnessUserId: dto.witnessUserId,
         decisionConceptId:
-          dto.decision === 'DECLINED' ? CONS.DECISION_DECLINED : CONS.DECISION_ACCEPTED,
+          dto.decision === 'DECLINED'
+            ? CONS.DECISION_DECLINED
+            : CONS.DECISION_ACCEPTED,
         statusConceptId: CONS.TREATMENT_SIGNED,
         signedAt: now,
         actorUserId: actor.id,

@@ -2,7 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 /** Respuesta genérica de creación: id del recurso recién materializado. */
 export class CreatedResourceDto {
-  @ApiProperty({ format: 'uuid', description: 'Identificador del recurso creado' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Identificador del recurso creado',
+  })
   id!: string;
 }
 
@@ -11,7 +14,10 @@ export class ResourceStatusDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Concepto de estado del recurso' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Concepto de estado del recurso',
+  })
   status!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })

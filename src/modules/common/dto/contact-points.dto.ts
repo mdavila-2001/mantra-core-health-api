@@ -44,7 +44,8 @@ export class CreateContactPointDto {
 /** Cuerpo de `POST /common/contact-points/:id/verify`. */
 export class VerifyContactPointDto {
   @ApiPropertyOptional({
-    description: 'Código de verificación (OTP). En esta implementación se acepta cualquiera.',
+    description:
+      'Código de verificación (OTP). En esta implementación se acepta cualquiera.',
   })
   @IsOptional()
   @IsString()

@@ -34,7 +34,11 @@ export class ReferralsRepository {
     targetProfileId: string,
     specialtyConceptId: string,
   ): Promise<Referrals | null> {
-    return em.findOne(Referrals, { sourceEncounterId, targetProfileId, specialtyConceptId });
+    return em.findOne(Referrals, {
+      sourceEncounterId,
+      targetProfileId,
+      specialtyConceptId,
+    });
   }
 
   create(em: EntityManager, data: CreateReferralData): Referrals {

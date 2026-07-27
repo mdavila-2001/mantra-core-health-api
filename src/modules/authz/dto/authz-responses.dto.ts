@@ -5,7 +5,10 @@ export class AuthzIdResponseDto {
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
-  @ApiProperty({ description: 'Concept id del estado del recurso', format: 'uuid' })
+  @ApiProperty({
+    description: 'Concept id del estado del recurso',
+    format: 'uuid',
+  })
   status!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })
@@ -59,7 +62,9 @@ export class MaskedFieldDto {
   @ApiProperty()
   columnName!: string;
 
-  @ApiProperty({ description: 'Estrategia (REDACT/HASH/PARTIAL/NULLIFY) o NO_READ' })
+  @ApiProperty({
+    description: 'Estrategia (REDACT/HASH/PARTIAL/NULLIFY) o NO_READ',
+  })
   strategy!: string;
 }
 
@@ -71,10 +76,16 @@ export class DecisionResponseDto {
   @ApiProperty({ description: 'Motivo legible de la decisión' })
   reason!: string;
 
-  @ApiProperty({ description: 'Ids de roles efectivos considerados', type: [String] })
+  @ApiProperty({
+    description: 'Ids de roles efectivos considerados',
+    type: [String],
+  })
   effectiveRoleIds!: string[];
 
-  @ApiProperty({ description: 'Campos a enmascarar en la respuesta', type: [MaskedFieldDto] })
+  @ApiProperty({
+    description: 'Campos a enmascarar en la respuesta',
+    type: [MaskedFieldDto],
+  })
   maskedFields!: MaskedFieldDto[];
 
   @ApiPropertyOptional({ description: 'Propósito de uso registrado' })
@@ -83,6 +94,8 @@ export class DecisionResponseDto {
   @ApiProperty({ description: 'Clave de cache de la decisión (idempotente)' })
   cacheKey!: string;
 
-  @ApiProperty({ description: 'TTL sugerido en segundos para la entrada de cache' })
+  @ApiProperty({
+    description: 'TTL sugerido en segundos para la entrada de cache',
+  })
   ttlSeconds!: number;
 }

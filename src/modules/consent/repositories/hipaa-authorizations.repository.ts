@@ -37,7 +37,10 @@ export class HipaaAuthorizationsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateHipaaAuthorizationData): HipaaAuthorizations {
+  create(
+    em: EntityManager,
+    data: CreateHipaaAuthorizationData,
+  ): HipaaAuthorizations {
     return em.create(
       HipaaAuthorizations,
       {

@@ -18,7 +18,9 @@ export class RestoreTestController {
   @Post('restore-test-runs')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar una prueba de restauración con evidencia' })
+  @ApiOperation({
+    summary: 'Registrar una prueba de restauración con evidencia',
+  })
   recordRestoreTest(
     @Body() dto: CreateRestoreTestRunDto,
     @CurrentUser() actor: AuthenticatedUser,

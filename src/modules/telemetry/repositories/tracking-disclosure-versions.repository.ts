@@ -17,7 +17,10 @@ export interface CreateDisclosureVersionData {
 /** Acceso a `telemetry.tracking_disclosure_versions`. */
 @Injectable()
 export class TrackingDisclosureVersionsRepository {
-  findById(em: EntityManager, id: string): Promise<TrackingDisclosureVersions | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<TrackingDisclosureVersions | null> {
     return em.findOne(TrackingDisclosureVersions, { id });
   }
 
@@ -26,15 +29,27 @@ export class TrackingDisclosureVersionsRepository {
     documentCode: string,
     versionNumber: number,
   ): Promise<TrackingDisclosureVersions | null> {
-    return em.findOne(TrackingDisclosureVersions, { documentCode, versionNumber });
+    return em.findOne(TrackingDisclosureVersions, {
+      documentCode,
+      versionNumber,
+    });
   }
 
   /** Versiones abiertas (sin effective_to) del mismo documento, para superseder. */
-  findOpenByDocument(em: EntityManager, documentCode: string): Promise<TrackingDisclosureVersions[]> {
-    return em.find(TrackingDisclosureVersions, { documentCode, effectiveTo: null });
+  findOpenByDocument(
+    em: EntityManager,
+    documentCode: string,
+  ): Promise<TrackingDisclosureVersions[]> {
+    return em.find(TrackingDisclosureVersions, {
+      documentCode,
+      effectiveTo: null,
+    });
   }
 
-  create(em: EntityManager, data: CreateDisclosureVersionData): TrackingDisclosureVersions {
+  create(
+    em: EntityManager,
+    data: CreateDisclosureVersionData,
+  ): TrackingDisclosureVersions {
     return em.create(
       TrackingDisclosureVersions,
       {

@@ -21,8 +21,15 @@ export class SessionJourneysRepository {
   }
 
   /** Journey no cerrado (sin ended_at) para una sesión. */
-  findOpenBySession(em: EntityManager, sessionId: string): Promise<SessionJourneys | null> {
-    return em.findOne(SessionJourneys, { sessionId, endedAt: null }, { orderBy: { createdAt: 'DESC' } });
+  findOpenBySession(
+    em: EntityManager,
+    sessionId: string,
+  ): Promise<SessionJourneys | null> {
+    return em.findOne(
+      SessionJourneys,
+      { sessionId, endedAt: null },
+      { orderBy: { createdAt: 'DESC' } },
+    );
   }
 
   create(em: EntityManager, data: CreateSessionJourneyData): SessionJourneys {

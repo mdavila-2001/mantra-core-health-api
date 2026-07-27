@@ -3,7 +3,10 @@ import { IsIn, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 /** Cuerpo de `POST /community/reports` (UC-19-08). */
 export class CreateReportDto {
-  @ApiProperty({ description: 'Tipo de contenido reportado', enum: ['POST', 'COMMENT', 'PROFILE', 'MESSAGE', 'REVIEW'] })
+  @ApiProperty({
+    description: 'Tipo de contenido reportado',
+    enum: ['POST', 'COMMENT', 'PROFILE', 'MESSAGE', 'REVIEW'],
+  })
   @IsIn(['POST', 'COMMENT', 'PROFILE', 'MESSAGE', 'REVIEW'])
   targetType!: 'POST' | 'COMMENT' | 'PROFILE' | 'MESSAGE' | 'REVIEW';
 
@@ -11,7 +14,10 @@ export class CreateReportDto {
   @IsUUID()
   targetId!: string;
 
-  @ApiProperty({ description: 'Motivo', enum: ['SPAM', 'ABUSE', 'MISINFORMATION', 'PHI', 'OTHER'] })
+  @ApiProperty({
+    description: 'Motivo',
+    enum: ['SPAM', 'ABUSE', 'MISINFORMATION', 'PHI', 'OTHER'],
+  })
   @IsIn(['SPAM', 'ABUSE', 'MISINFORMATION', 'PHI', 'OTHER'])
   reason!: 'SPAM' | 'ABUSE' | 'MISINFORMATION' | 'PHI' | 'OTHER';
 

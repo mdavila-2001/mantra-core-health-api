@@ -27,10 +27,18 @@ export class PatientStatementsRepository {
     periodStart: Date,
     periodEnd: Date,
   ): Promise<PatientStatements | null> {
-    return em.findOne(PatientStatements, { practiceId, patientProfileId, periodStart, periodEnd });
+    return em.findOne(PatientStatements, {
+      practiceId,
+      patientProfileId,
+      periodStart,
+      periodEnd,
+    });
   }
 
-  create(em: EntityManager, data: CreatePatientStatementData): PatientStatements {
+  create(
+    em: EntityManager,
+    data: CreatePatientStatementData,
+  ): PatientStatements {
     return em.create(
       PatientStatements,
       {

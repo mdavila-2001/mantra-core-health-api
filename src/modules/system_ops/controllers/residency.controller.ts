@@ -47,7 +47,9 @@ export class ResidencyController {
   @Post('cross-border-transfers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registrar una transferencia transfronteriza (append-only)' })
+  @ApiOperation({
+    summary: 'Registrar una transferencia transfronteriza (append-only)',
+  })
   recordTransfer(
     @Body() dto: CreateCrossBorderTransferDto,
     @CurrentUser() actor: AuthenticatedUser,

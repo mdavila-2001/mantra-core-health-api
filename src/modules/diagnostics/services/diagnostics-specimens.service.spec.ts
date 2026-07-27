@@ -4,7 +4,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsSpecimensService } from './diagnostics-specimens.service';
 import { DIAG } from '../diagnostics.concepts';
-import { ResourceNotFoundException, PreconditionFailedException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  PreconditionFailedException,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -25,7 +28,11 @@ function build() {
     cancelTestsForSpecimen: mockFn().mockResolvedValue(0),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DiagnosticsSpecimensService(em as any, repo as any, logger as any);
+  const service = new DiagnosticsSpecimensService(
+    em as any,
+    repo,
+    logger as any,
+  );
   return { service, tx, em, repo };
 }
 
@@ -33,9 +40,16 @@ describe('DiagnosticsSpecimensService', () => {
   describe('createSpecimen (soporte)', () => {
     it('creates a collected specimen and flushes', async () => {
       const d = build();
-      d.repo.createSpecimen.mockReturnValue({ id: 's1', statusConceptId: DIAG.SPECIMEN_COLLECTED });
+      d.repo.createSpecimen.mockReturnValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+      });
       const res = await d.service.createSpecimen(
-        { patientProfileId: 'p1', custodianTenantId: 't1', specimenTypeConceptId: 'c1' } as any,
+        {
+          patientProfileId: 'p1',
+          custodianTenantId: 't1',
+          specimenTypeConceptId: 'c1',
+        },
         actor,
       );
       expect(res).toEqual({ id: 's1', status: DIAG.SPECIMEN_COLLECTED });
@@ -48,32 +62,64 @@ describe('DiagnosticsSpecimensService', () => {
       const d = build();
       d.repo.findSpecimen.mockResolvedValue(null);
       await expect(
-        d.service.accession({ patientProfileId: 'p1', custodianTenantId: 't1', specimenIds: ['x'] } as any, actor),
+        d.service.accession(
+          {
+            patientProfileId: 'p1',
+            custodianTenantId: 't1',
+            specimenIds: ['x'],
+          } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('accessions, marks specimen received and records custody', async () => {
       const d = build();
-      const specimen = { id: 's1', statusConceptId: DIAG.SPECIMEN_COLLECTED, custodianTenantId: 't1' };
+      const specimen = {
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_COLLECTED,
+        custodianTenantId: 't1',
+      };
       d.repo.findSpecimen.mockResolvedValue(specimen);
-      d.repo.createAccession.mockReturnValue({ id: 'a1', statusConceptId: DIAG.ACCESSION_RECEIVED });
+      d.repo.createAccession.mockReturnValue({
+        id: 'a1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      });
       d.repo.addAccessionSpecimen.mockReturnValue({ id: 'as1' });
 
       const res = await d.service.accession(
-        { patientProfileId: 'p1', custodianTenantId: 't1', specimenIds: ['s1'] } as any,
+        {
+          patientProfileId: 'p1',
+          custodianTenantId: 't1',
+          specimenIds: ['s1'],
+        },
         actor,
       );
 
-      expect(res).toEqual({ id: 'a1', status: DIAG.ACCESSION_RECEIVED, accessionSpecimenIds: ['as1'] });
+      expect(res).toEqual({
+        id: 'a1',
+        status: DIAG.ACCESSION_RECEIVED,
+        accessionSpecimenIds: ['as1'],
+      });
       expect(specimen.statusConceptId).toBe(DIAG.SPECIMEN_RECEIVED);
       expect(d.repo.recordCustodyEvent).toHaveBeenCalled();
     });
 
     it('refuses to accession a rejected specimen (precondition)', async () => {
       const d = build();
-      d.repo.findSpecimen.mockResolvedValue({ id: 's1', statusConceptId: DIAG.SPECIMEN_REJECTED });
+      d.repo.findSpecimen.mockResolvedValue({
+        id: 's1',
+        statusConceptId: DIAG.SPECIMEN_REJECTED,
+      });
       await expect(
-        d.service.accession({ patientProfileId: 'p1', custodianTenantId: 't1', specimenIds: ['s1'] } as any, actor),
+        d.service.accession(
+          {
+            patientProfileId: 'p1',
+            custodianTenantId: 't1',
+            specimenIds: ['s1'],
+          } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
@@ -82,9 +128,9 @@ describe('DiagnosticsSpecimensService', () => {
     it('throws when specimen missing', async () => {
       const d = build();
       d.repo.findSpecimen.mockResolvedValue(null);
-      await expect(d.service.reject('missing', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.reject('missing', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects specimen and cancels dependent tests', async () => {
@@ -93,11 +139,19 @@ describe('DiagnosticsSpecimensService', () => {
       d.repo.findSpecimen.mockResolvedValue(specimen);
       d.repo.recordRejection.mockReturnValue({ id: 'rej1' });
 
-      const res = await d.service.reject('s1', { rejectionReasonConceptId: 'r1' } as any, actor);
+      const res = await d.service.reject(
+        's1',
+        { rejectionReasonConceptId: 'r1' },
+        actor,
+      );
 
       expect(res).toEqual({ id: 'rej1', status: DIAG.SPECIMEN_REJECTED });
       expect(specimen.statusConceptId).toBe(DIAG.SPECIMEN_REJECTED);
-      expect(d.repo.cancelTestsForSpecimen).toHaveBeenCalledWith(d.tx, 's1', DIAG.TEST_CANCELLED);
+      expect(d.repo.cancelTestsForSpecimen).toHaveBeenCalledWith(
+        d.tx,
+        's1',
+        DIAG.TEST_CANCELLED,
+      );
     });
   });
 
@@ -106,7 +160,11 @@ describe('DiagnosticsSpecimensService', () => {
       const d = build();
       d.repo.findContainer.mockResolvedValue(null);
       await expect(
-        d.service.recordCustodyEvent('missing', { specimenId: 's1' } as any, actor),
+        d.service.recordCustodyEvent(
+          'missing',
+          { specimenId: 's1' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -116,7 +174,11 @@ describe('DiagnosticsSpecimensService', () => {
       d.repo.findContainer.mockResolvedValue(container);
       d.repo.recordCustodyEvent.mockReturnValue({ id: 'cust1' });
 
-      const res = await d.service.recordCustodyEvent('c1', { specimenId: 's1' } as any, actor);
+      const res = await d.service.recordCustodyEvent(
+        'c1',
+        { specimenId: 's1' },
+        actor,
+      );
 
       expect(res.id).toBe('cust1');
       expect(container.statusConceptId).toBe(DIAG.CONTAINER_STORED);

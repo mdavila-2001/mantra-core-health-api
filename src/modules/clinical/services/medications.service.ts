@@ -7,7 +7,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { MedicationRecordsRepository, MedicationRequestsRepository } from '../repositories';
+import {
+  MedicationRecordsRepository,
+  MedicationRequestsRepository,
+} from '../repositories';
 import {
   CreateMedicationRecordDto,
   CreateMedicationRequestDto,
@@ -38,7 +41,10 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<MedicationRequestResponseDto> {
     this.logger.info(
-      { operation: 'clinical.medication.prescribe', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.medication.prescribe',
+        patientProfileId: dto.patientProfileId,
+      },
       'Prescribing medication',
     );
     return this.em.transactional(async (tx) => {
@@ -54,7 +60,10 @@ export class MedicationsService {
         doseText: dto.doseText,
         routeConceptId: dto.routeConceptId,
         frequencyText: dto.frequencyText,
-        quantityDecimal: dto.quantityDecimal !== undefined ? String(dto.quantityDecimal) : undefined,
+        quantityDecimal:
+          dto.quantityDecimal !== undefined
+            ? String(dto.quantityDecimal)
+            : undefined,
         unitConceptId: dto.unitConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
@@ -81,7 +90,10 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<MedicationRecordResponseDto> {
     this.logger.info(
-      { operation: 'clinical.medication.administer', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical.medication.administer',
+        patientProfileId: dto.patientProfileId,
+      },
       'Recording medication administration',
     );
     return this.em.transactional(async (tx) => {
@@ -93,10 +105,13 @@ export class MedicationsService {
           });
         }
         if (request.statusConceptId !== CLIN.MEDICATION_REQUEST_ACTIVE) {
-          throw new PreconditionFailedException('La prescripción no está activa', {
-            requestId: dto.requestId,
-            status: request.statusConceptId,
-          });
+          throw new PreconditionFailedException(
+            'La prescripción no está activa',
+            {
+              requestId: dto.requestId,
+              status: request.statusConceptId,
+            },
+          );
         }
         if (dto.isFinalDose) {
           request.statusConceptId = CLIN.MEDICATION_REQUEST_COMPLETED;
@@ -111,9 +126,12 @@ export class MedicationsService {
         medicationConceptId: dto.medicationConceptId,
         statusConceptId: CLIN.MEDICATION_RECORD_COMPLETED,
         recordTypeConceptId: CLIN.MEDICATION_RECORD_TYPE_ADMINISTRATION,
-        doseDecimal: dto.doseDecimal !== undefined ? String(dto.doseDecimal) : undefined,
+        doseDecimal:
+          dto.doseDecimal !== undefined ? String(dto.doseDecimal) : undefined,
         unitConceptId: dto.unitConceptId,
-        administeredAt: dto.administeredAt ? new Date(dto.administeredAt) : new Date(),
+        administeredAt: dto.administeredAt
+          ? new Date(dto.administeredAt)
+          : new Date(),
         recordedByUserId: actor.id,
         actorUserId: actor.id,
       });

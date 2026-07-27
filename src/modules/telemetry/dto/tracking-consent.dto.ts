@@ -3,27 +3,42 @@ import { IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 /** Cuerpo de `POST /telemetry/tracking-consents` (UC-28-05). */
 export class CreateTrackingConsentDto {
-  @ApiProperty({ description: 'Propósito de tracking (requiere consentimiento)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Propósito de tracking (requiere consentimiento)',
+    format: 'uuid',
+  })
   @IsUUID()
   purposeDefinitionId!: string;
 
-  @ApiPropertyOptional({ description: 'Usuario que consiente (por defecto el autenticado)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Usuario que consiente (por defecto el autenticado)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   userId?: string;
 
-  @ApiPropertyOptional({ description: 'Jurisdicción (concept id)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Jurisdicción (concept id)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   jurisdictionConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Versión del consentimiento', maxLength: 50 })
+  @ApiPropertyOptional({
+    description: 'Versión del consentimiento',
+    maxLength: 50,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(50)
   consentVersion?: string;
 
-  @ApiPropertyOptional({ description: 'Hash de la evidencia de consentimiento', maxLength: 200 })
+  @ApiPropertyOptional({
+    description: 'Hash de la evidencia de consentimiento',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(200)

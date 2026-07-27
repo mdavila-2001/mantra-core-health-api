@@ -23,7 +23,10 @@ export interface CreateActivityEventData {
 /** Acceso a `telemetry.user_activity_events`. */
 @Injectable()
 export class UserActivityEventsRepository {
-  findByIdempotencyKey(em: EntityManager, key: string): Promise<UserActivityEvents | null> {
+  findByIdempotencyKey(
+    em: EntityManager,
+    key: string,
+  ): Promise<UserActivityEvents | null> {
     return em.findOne(UserActivityEvents, { eventIdempotencyKey: key });
   }
 

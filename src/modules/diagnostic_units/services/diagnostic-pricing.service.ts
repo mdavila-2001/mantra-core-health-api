@@ -53,16 +53,22 @@ export class DiagnosticPricingService {
     );
     return this.em.transactional(async (tx) => {
       const unit = await this.unitsRepo.findById(tx, unitId);
-      if (!unit) throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+      if (!unit)
+        throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
       if (unit.statusConceptId !== DUNIT.UNIT_ACTIVE) {
-        throw new PreconditionFailedException('La unidad no está activa', { unitId });
+        throw new PreconditionFailedException('La unidad no está activa', {
+          unitId,
+        });
       }
 
       const clash = await this.schedulesRepo.findByCode(tx, unit.id, dto.code);
       if (clash) {
-        throw new ConflictException('El código de cronograma ya existe en la unidad', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'El código de cronograma ya existe en la unidad',
+          {
+            code: dto.code,
+          },
+        );
       }
 
       const schedule = this.schedulesRepo.create(tx, {
@@ -79,7 +85,11 @@ export class DiagnosticPricingService {
         actorUserId: actor.id,
       });
 
-      return { id: schedule.id, code: schedule.code, status: schedule.statusConceptId };
+      return {
+        id: schedule.id,
+        code: schedule.code,
+        status: schedule.statusConceptId,
+      };
     });
   }
 
@@ -96,13 +106,20 @@ export class DiagnosticPricingService {
     return this.em.transactional(async (tx) => {
       const schedule = await this.schedulesRepo.findById(tx, scheduleId);
       if (!schedule) {
-        throw new ResourceNotFoundException('Cronograma no encontrado', { scheduleId });
+        throw new ResourceNotFoundException('Cronograma no encontrado', {
+          scheduleId,
+        });
       }
       if (schedule.statusConceptId !== DUNIT.SCHEDULE_ACTIVE) {
-        throw new PreconditionFailedException('El cronograma no está activo', { scheduleId });
+        throw new PreconditionFailedException('El cronograma no está activo', {
+          scheduleId,
+        });
       }
 
-      const offering = await this.offeringsRepo.findById(tx, dto.diagnosticStudyOfferingId);
+      const offering = await this.offeringsRepo.findById(
+        tx,
+        dto.diagnosticStudyOfferingId,
+      );
       if (!offering) {
         throw new ResourceNotFoundException('Oferta de estudio no encontrada', {
           offeringId: dto.diagnosticStudyOfferingId,
@@ -118,13 +135,21 @@ export class DiagnosticPricingService {
       const effectiveFrom = dto.effectiveFrom ?? new Date();
 
       // Cierra la versión vigente del par (schedule, offering), si existe.
-      const current = await this.pricesRepo.findActive(tx, schedule.id, offering.id);
+      const current = await this.pricesRepo.findActive(
+        tx,
+        schedule.id,
+        offering.id,
+      );
       if (current) {
         current.effectiveTo = effectiveFrom;
         current.statusConceptId = DUNIT.PRICE_SUPERSEDED;
       }
 
-      const maxVersion = await this.pricesRepo.maxVersion(tx, schedule.id, offering.id);
+      const maxVersion = await this.pricesRepo.maxVersion(
+        tx,
+        schedule.id,
+        offering.id,
+      );
       const price = this.pricesRepo.create(tx, {
         priceScheduleId: schedule.id,
         diagnosticStudyOfferingId: offering.id,
@@ -140,7 +165,11 @@ export class DiagnosticPricingService {
       });
 
       this.logger.info(
-        { operation: 'diagnostic_units.price.version', priceId: price.id, version: price.versionNumber },
+        {
+          operation: 'diagnostic_units.price.version',
+          priceId: price.id,
+          version: price.versionNumber,
+        },
         'Study price versioned',
       );
       return {
@@ -153,11 +182,20 @@ export class DiagnosticPricingService {
   }
 
   /** UC-23-08: cerrar una versión de precio vigente (retirar oferta de precio). */
-  async closePrice(priceId: string, actor: AuthenticatedUser): Promise<StatusResultDto> {
-    this.logger.info({ operation: 'diagnostic_units.price.close', priceId }, 'Closing price');
+  async closePrice(
+    priceId: string,
+    actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    this.logger.info(
+      { operation: 'diagnostic_units.price.close', priceId },
+      'Closing price',
+    );
     return this.em.transactional(async (tx) => {
       const price = await this.pricesRepo.findById(tx, priceId);
-      if (!price) throw new ResourceNotFoundException('Precio no encontrado', { priceId });
+      if (!price)
+        throw new ResourceNotFoundException('Precio no encontrado', {
+          priceId,
+        });
 
       if (price.statusConceptId !== DUNIT.PRICE_ACTIVE || price.effectiveTo) {
         throw new PreconditionFailedException(

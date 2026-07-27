@@ -26,7 +26,10 @@ export class CreateReconciliationItemDto {
   @IsUUID()
   insuranceClaimId!: string;
 
-  @ApiProperty({ format: 'uuid', description: 'Versión exacta de adjudicación liquidada' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Versión exacta de adjudicación liquidada',
+  })
   @IsUUID()
   claimAdjudicationVersionId!: string;
 

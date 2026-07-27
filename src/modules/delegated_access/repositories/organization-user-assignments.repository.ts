@@ -28,7 +28,10 @@ export interface CreateOrgAssignmentData {
  */
 @Injectable()
 export class OrganizationUserAssignmentsRepository {
-  findById(em: EntityManager, id: string): Promise<OrganizationUserAssignments | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<OrganizationUserAssignments | null> {
     return em.findOne(OrganizationUserAssignments, { id });
   }
 
@@ -48,7 +51,10 @@ export class OrganizationUserAssignmentsRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateOrgAssignmentData): OrganizationUserAssignments {
+  create(
+    em: EntityManager,
+    data: CreateOrgAssignmentData,
+  ): OrganizationUserAssignments {
     return em.create(
       OrganizationUserAssignments,
       {

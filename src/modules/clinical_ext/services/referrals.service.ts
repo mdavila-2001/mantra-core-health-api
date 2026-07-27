@@ -9,7 +9,12 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ReferralsRepository } from '../repositories';
-import { CreateReferralDto, RespondReferralDto, ReferralResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateReferralDto,
+  RespondReferralDto,
+  ReferralResponseDto,
+  StatusResultDto,
+} from '../dto';
 import { CEXT } from '../clinical_ext.concepts';
 
 /**
@@ -28,13 +33,23 @@ export class ReferralsService {
   }
 
   /** UC-18-07: emite una referencia en estado solicitado. */
-  async create(dto: CreateReferralDto, actor: AuthenticatedUser): Promise<ReferralResponseDto> {
+  async create(
+    dto: CreateReferralDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReferralResponseDto> {
     this.logger.info(
-      { operation: 'clinical_ext.referral.create', patientProfileId: dto.patientProfileId },
+      {
+        operation: 'clinical_ext.referral.create',
+        patientProfileId: dto.patientProfileId,
+      },
       'Creating referral',
     );
     return this.em.transactional(async (tx) => {
-      if (dto.sourceEncounterId && dto.targetProfileId && dto.specialtyConceptId) {
+      if (
+        dto.sourceEncounterId &&
+        dto.targetProfileId &&
+        dto.specialtyConceptId
+      ) {
         const dup = await this.referralsRepo.findDuplicate(
           tx,
           dto.sourceEncounterId,
@@ -57,7 +72,8 @@ export class ReferralsService {
         specialtyConceptId: dto.specialtyConceptId,
         reasonConceptId: dto.reasonConceptId,
         reasonText: dto.reasonText,
-        priorityConceptId: dto.priorityConceptId ?? CEXT.REFERRAL_PRIORITY_ROUTINE,
+        priorityConceptId:
+          dto.priorityConceptId ?? CEXT.REFERRAL_PRIORITY_ROUTINE,
         statusConceptId: CEXT.REFERRAL_REQUESTED,
         validUntil: dto.validUntil ? new Date(dto.validUntil) : undefined,
         actorUserId: actor.id,
@@ -80,20 +96,32 @@ export class ReferralsService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'clinical_ext.referral.respond', referralId, decision: dto.decision },
+      {
+        operation: 'clinical_ext.referral.respond',
+        referralId,
+        decision: dto.decision,
+      },
       'Responding referral',
     );
     return this.em.transactional(async (tx) => {
       const referral = await this.referralsRepo.findById(tx, referralId);
-      if (!referral) throw new ResourceNotFoundException('Referencia no encontrada', { referralId });
-      if (referral.statusConceptId !== CEXT.REFERRAL_REQUESTED) {
-        throw new PreconditionFailedException('La referencia no está en estado solicitado', {
+      if (!referral)
+        throw new ResourceNotFoundException('Referencia no encontrada', {
           referralId,
         });
+      if (referral.statusConceptId !== CEXT.REFERRAL_REQUESTED) {
+        throw new PreconditionFailedException(
+          'La referencia no está en estado solicitado',
+          {
+            referralId,
+          },
+        );
       }
 
       referral.statusConceptId =
-        dto.decision === 'ACCEPT' ? CEXT.REFERRAL_ACCEPTED : CEXT.REFERRAL_REJECTED;
+        dto.decision === 'ACCEPT'
+          ? CEXT.REFERRAL_ACCEPTED
+          : CEXT.REFERRAL_REJECTED;
       referral.respondedAt = new Date();
       touch(referral, actor.id);
 

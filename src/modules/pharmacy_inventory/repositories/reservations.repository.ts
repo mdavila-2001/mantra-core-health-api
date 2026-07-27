@@ -32,23 +32,38 @@ export interface CreateReservationLineData {
 /** Acceso a datos de las reservas de inventario y sus líneas. */
 @Injectable()
 export class ReservationsRepository {
-  findById(em: EntityManager, id: string): Promise<InventoryReservations | null> {
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<InventoryReservations | null> {
     return em.findOne(InventoryReservations, { id });
   }
 
   /** Reservas confirmadas cuyo `expires_at` ya venció (cola del worker). */
-  findExpired(em: EntityManager, statusConceptId: string, now: Date): Promise<InventoryReservations[]> {
+  findExpired(
+    em: EntityManager,
+    statusConceptId: string,
+    now: Date,
+  ): Promise<InventoryReservations[]> {
     return em.find(InventoryReservations, {
       reservationStatusConceptId: statusConceptId,
       expiresAt: { $lt: now },
     });
   }
 
-  findLinesByReservation(em: EntityManager, reservationId: string): Promise<InventoryReservationLines[]> {
-    return em.find(InventoryReservationLines, { inventoryReservationId: reservationId });
+  findLinesByReservation(
+    em: EntityManager,
+    reservationId: string,
+  ): Promise<InventoryReservationLines[]> {
+    return em.find(InventoryReservationLines, {
+      inventoryReservationId: reservationId,
+    });
   }
 
-  create(em: EntityManager, data: CreateReservationData): InventoryReservations {
+  create(
+    em: EntityManager,
+    data: CreateReservationData,
+  ): InventoryReservations {
     return em.create(
       InventoryReservations,
       {
@@ -67,7 +82,10 @@ export class ReservationsRepository {
     );
   }
 
-  createLine(em: EntityManager, data: CreateReservationLineData): InventoryReservationLines {
+  createLine(
+    em: EntityManager,
+    data: CreateReservationLineData,
+  ): InventoryReservationLines {
     return em.create(
       InventoryReservationLines,
       {

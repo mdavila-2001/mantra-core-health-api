@@ -33,7 +33,10 @@ interface HistoryBinding {
  */
 const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   users: { entity: UsersHistory, sourceField: 'userId' },
-  patient_profiles: { entity: PatientProfilesHistory, sourceField: 'patientProfileId' },
+  patient_profiles: {
+    entity: PatientProfilesHistory,
+    sourceField: 'patientProfileId',
+  },
   consents: { entity: ConsentsHistory, sourceField: 'consentId' },
   moderation_decisions: {
     entity: ModerationDecisionsHistory,

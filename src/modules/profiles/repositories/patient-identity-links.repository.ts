@@ -34,7 +34,10 @@ export class PatientIdentityLinksRepository {
     });
   }
 
-  create(em: EntityManager, data: CreateIdentityLinkData): PatientIdentityLinks {
+  create(
+    em: EntityManager,
+    data: CreateIdentityLinkData,
+  ): PatientIdentityLinks {
     return em.create(
       PatientIdentityLinks,
       {

@@ -16,7 +16,11 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const contractsRepo = { findById: mockFn() };
   const versionsRepo = { findActiveByContract: mockFn() };
-  const subscriptionsRepo = { findById: mockFn(), findDuplicate: mockFn(), create: mockFn() };
+  const subscriptionsRepo = {
+    findById: mockFn(),
+    findDuplicate: mockFn(),
+    create: mockFn(),
+  };
   const exchangeRecordsRepo = { create: mockFn() };
   const evidenceRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -26,39 +30,75 @@ function build() {
     versionsRepo as any,
     subscriptionsRepo as any,
     exchangeRecordsRepo as any,
-    evidenceRepo as any,
+    evidenceRepo,
     logger as any,
   );
-  return { service, tx, contractsRepo, versionsRepo, subscriptionsRepo, exchangeRecordsRepo, evidenceRepo };
+  return {
+    service,
+    tx,
+    contractsRepo,
+    versionsRepo,
+    subscriptionsRepo,
+    exchangeRecordsRepo,
+    evidenceRepo,
+  };
 }
 
 describe('IntegrationWebhooksService', () => {
   describe('subscribe (UC-31-04)', () => {
     it('subscribes a webhook on an ACTIVE contract', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({ id: 'c1', statusConceptId: ICON.CONTRACT_ACTIVE });
+      d.contractsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_ACTIVE,
+      });
       d.subscriptionsRepo.findDuplicate.mockResolvedValue(null);
-      d.subscriptionsRepo.create.mockReturnValue({ id: 's1', statusConceptId: ICON.SUBSCRIPTION_ACTIVE });
+      d.subscriptionsRepo.create.mockReturnValue({
+        id: 's1',
+        statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
+      });
 
-      const res = await d.service.subscribe('c1', { callbackUri: 'https://x/cb' } as any, actor);
+      const res = await d.service.subscribe(
+        'c1',
+        { callbackUri: 'https://x/cb' },
+        actor,
+      );
 
-      expect(res).toEqual({ id: 's1', integrationContractId: 'c1', status: ICON.SUBSCRIPTION_ACTIVE });
+      expect(res).toEqual({
+        id: 's1',
+        integrationContractId: 'c1',
+        status: ICON.SUBSCRIPTION_ACTIVE,
+      });
     });
 
     it('rejects subscribing when the contract is not ACTIVE (422)', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({ id: 'c1', statusConceptId: ICON.CONTRACT_DRAFT });
+      d.contractsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_DRAFT,
+      });
       await expect(
-        d.service.subscribe('c1', { callbackUri: 'https://x/cb' } as any, actor),
+        d.service.subscribe(
+          'c1',
+          { callbackUri: 'https://x/cb' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('rejects a duplicate subscription (409)', async () => {
       const d = build();
-      d.contractsRepo.findById.mockResolvedValue({ id: 'c1', statusConceptId: ICON.CONTRACT_ACTIVE });
+      d.contractsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        statusConceptId: ICON.CONTRACT_ACTIVE,
+      });
       d.subscriptionsRepo.findDuplicate.mockResolvedValue({ id: 'dup' });
       await expect(
-        d.service.subscribe('c1', { callbackUri: 'https://x/cb' } as any, actor),
+        d.service.subscribe(
+          'c1',
+          { callbackUri: 'https://x/cb' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -72,10 +112,20 @@ describe('IntegrationWebhooksService', () => {
         statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
       });
       d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v1' });
-      d.exchangeRecordsRepo.create.mockReturnValue({ id: 'r1', outcomeConceptId: ICON.OUTCOME_SUCCESS });
-      d.evidenceRepo.create.mockReturnValue({ id: 'e1', outcomeConceptId: ICON.DELIVERY_DELIVERED });
+      d.exchangeRecordsRepo.create.mockReturnValue({
+        id: 'r1',
+        outcomeConceptId: ICON.OUTCOME_SUCCESS,
+      });
+      d.evidenceRepo.create.mockReturnValue({
+        id: 'e1',
+        outcomeConceptId: ICON.DELIVERY_DELIVERED,
+      });
 
-      const res = await d.service.deliver('s1', { outcome: 'DELIVERED' } as any, actor);
+      const res = await d.service.deliver(
+        's1',
+        { outcome: 'DELIVERED' } as any,
+        actor,
+      );
 
       expect(res).toEqual({
         id: 'e1',
@@ -92,7 +142,10 @@ describe('IntegrationWebhooksService', () => {
       );
       expect(d.evidenceRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ integrationExchangeRecordId: 'r1', webhookSubscriptionId: 's1' }),
+        expect.objectContaining({
+          integrationExchangeRecordId: 'r1',
+          webhookSubscriptionId: 's1',
+        }),
       );
       expect(d.tx.flush).toHaveBeenCalledTimes(2);
     });
@@ -100,9 +153,9 @@ describe('IntegrationWebhooksService', () => {
     it('throws not found when the subscription is absent (404)', async () => {
       const d = build();
       d.subscriptionsRepo.findById.mockResolvedValue(null);
-      await expect(d.service.deliver('s1', {} as any, actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.deliver('s1', {} as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('rejects delivery when there is no ACTIVE contract version (422)', async () => {
@@ -113,9 +166,9 @@ describe('IntegrationWebhooksService', () => {
         statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
       });
       d.versionsRepo.findActiveByContract.mockResolvedValue(null);
-      await expect(d.service.deliver('s1', {} as any, actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        d.service.deliver('s1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 });

@@ -17,7 +17,11 @@ export class AssetRepository {
     return em.findOne(Assets, { id });
   }
 
-  findByCode(em: EntityManager, practiceId: string, code: string): Promise<Assets | null> {
+  findByCode(
+    em: EntityManager,
+    practiceId: string,
+    code: string,
+  ): Promise<Assets | null> {
     return em.findOne(Assets, { practiceId, code });
   }
 

@@ -39,7 +39,10 @@ export class FieldMappingDto {
   @IsObject()
   transformJson?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Dirección del mapeo', enum: ['INBOUND', 'OUTBOUND'] })
+  @ApiPropertyOptional({
+    description: 'Dirección del mapeo',
+    enum: ['INBOUND', 'OUTBOUND'],
+  })
   @IsOptional()
   @IsIn(['INBOUND', 'OUTBOUND'])
   direction?: DirectionCode;
@@ -59,13 +62,19 @@ export class PublishEndpointDto {
   @MaxLength(100)
   operation!: string;
 
-  @ApiProperty({ description: 'Versión del endpoint (única por proveedor)', maxLength: 50 })
+  @ApiProperty({
+    description: 'Versión del endpoint (única por proveedor)',
+    maxLength: 50,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(50)
   version!: string;
 
-  @ApiPropertyOptional({ description: 'Método HTTP', enum: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] })
+  @ApiPropertyOptional({
+    description: 'Método HTTP',
+    enum: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  })
   @IsOptional()
   @IsIn(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
   httpMethod?: HttpMethodCode;
@@ -92,7 +101,10 @@ export class PublishEndpointDto {
   @Min(1)
   timeoutMs?: number;
 
-  @ApiPropertyOptional({ description: 'Mapeos de campos publicados en la misma transacción', type: [FieldMappingDto] })
+  @ApiPropertyOptional({
+    description: 'Mapeos de campos publicados en la misma transacción',
+    type: [FieldMappingDto],
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

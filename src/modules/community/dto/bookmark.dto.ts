@@ -7,7 +7,10 @@ export class CreateBookmarkDto {
   @IsUUID()
   profileId!: string;
 
-  @ApiProperty({ description: 'Tipo de objeto', enum: ['POST', 'COMMENT', 'REVIEW'] })
+  @ApiProperty({
+    description: 'Tipo de objeto',
+    enum: ['POST', 'COMMENT', 'REVIEW'],
+  })
   @IsIn(['POST', 'COMMENT', 'REVIEW'])
   bookmarkableType!: 'POST' | 'COMMENT' | 'REVIEW';
 
@@ -15,7 +18,10 @@ export class CreateBookmarkDto {
   @IsUUID()
   bookmarkableRefId!: string;
 
-  @ApiPropertyOptional({ description: 'Colección a la que se añade', maxLength: 120 })
+  @ApiPropertyOptional({
+    description: 'Colección a la que se añade',
+    maxLength: 120,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(120)

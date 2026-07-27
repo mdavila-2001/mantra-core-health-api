@@ -3,7 +3,10 @@ import { IsInt, IsOptional, IsUUID, Min } from 'class-validator';
 
 /** Cuerpo de `POST /identity/verification-cases` (UC-27-02). */
 export class OpenCaseDto {
-  @ApiProperty({ description: 'Política de verificación vigente', format: 'uuid' })
+  @ApiProperty({
+    description: 'Política de verificación vigente',
+    format: 'uuid',
+  })
   @IsUUID()
   identityVerificationPolicyId!: string;
 
@@ -11,21 +14,33 @@ export class OpenCaseDto {
   @IsUUID()
   subjectTypeConceptId!: string;
 
-  @ApiProperty({ description: 'Id de la entidad sujeto (paciente/profesional/representante)', format: 'uuid' })
+  @ApiProperty({
+    description: 'Id de la entidad sujeto (paciente/profesional/representante)',
+    format: 'uuid',
+  })
   @IsUUID()
   subjectEntityId!: string;
 
-  @ApiPropertyOptional({ description: 'Concepto: IAL/AAL solicitado (por defecto el de la política)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Concepto: IAL/AAL solicitado (por defecto el de la política)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   requestedAssuranceLevelConceptId?: string;
 
-  @ApiPropertyOptional({ description: 'Correlation id para idempotencia de apertura', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Correlation id para idempotencia de apertura',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   correlationId?: string;
 
-  @ApiPropertyOptional({ description: 'TTL del caso en horas (por defecto 72)', default: 72 })
+  @ApiPropertyOptional({
+    description: 'TTL del caso en horas (por defecto 72)',
+    default: 72,
+  })
   @IsOptional()
   @IsInt()
   @Min(1)

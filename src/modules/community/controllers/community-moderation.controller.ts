@@ -30,7 +30,10 @@ export class CommunityModerationController {
   @Post('reports')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Reportar contenido y encolar moderación' })
-  report(@Body() dto: CreateReportDto, @CurrentUser() actor: AuthenticatedUser): Promise<ReportResponseDto> {
+  report(
+    @Body() dto: CreateReportDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReportResponseDto> {
     return this.service.report(dto, actor);
   }
 

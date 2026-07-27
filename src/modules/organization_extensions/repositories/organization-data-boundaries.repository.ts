@@ -45,11 +45,17 @@ export class OrganizationDataBoundariesRepository {
     tenantId: string,
     activeConceptId: string,
   ): Promise<number> {
-    return em.count(OrganizationDataBoundaries, { tenantId, statusConceptId: activeConceptId });
+    return em.count(OrganizationDataBoundaries, {
+      tenantId,
+      statusConceptId: activeConceptId,
+    });
   }
 
   /** Crea la frontera de datos en la unidad de trabajo (sin flush). */
-  create(em: EntityManager, data: CreateDataBoundaryData): OrganizationDataBoundaries {
+  create(
+    em: EntityManager,
+    data: CreateDataBoundaryData,
+  ): OrganizationDataBoundaries {
     return em.create(
       OrganizationDataBoundaries,
       {

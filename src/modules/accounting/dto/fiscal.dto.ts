@@ -13,7 +13,10 @@ import {
 
 /** Un periodo hijo del ejercicio fiscal. */
 export class FiscalPeriodInputDto {
-  @ApiProperty({ description: 'Código del periodo (p. ej. 2026-01)', maxLength: 40 })
+  @ApiProperty({
+    description: 'Código del periodo (p. ej. 2026-01)',
+    maxLength: 40,
+  })
   @IsString()
   @MaxLength(40)
   code!: string;
@@ -33,7 +36,10 @@ export class CreateFiscalYearDto {
   @IsUUID()
   practiceId!: string;
 
-  @ApiProperty({ description: 'Código del ejercicio (único por práctica)', maxLength: 40 })
+  @ApiProperty({
+    description: 'Código del ejercicio (único por práctica)',
+    maxLength: 40,
+  })
   @IsString()
   @MaxLength(40)
   code!: string;
@@ -46,7 +52,10 @@ export class CreateFiscalYearDto {
   @IsDateString()
   endDate!: string;
 
-  @ApiProperty({ type: [FiscalPeriodInputDto], description: 'Periodos hijos (>=1)' })
+  @ApiProperty({
+    type: [FiscalPeriodInputDto],
+    description: 'Periodos hijos (>=1)',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

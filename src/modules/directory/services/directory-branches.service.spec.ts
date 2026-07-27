@@ -40,7 +40,9 @@ describe('DirectoryBranchesService', () => {
 
     it('rejects when the tenant is not active (precondition)', async () => {
       const d = build();
-      d.tenantsRepo.findById.mockResolvedValue({ statusConceptId: DIR.TENANT_PENDING });
+      d.tenantsRepo.findById.mockResolvedValue({
+        statusConceptId: DIR.TENANT_PENDING,
+      });
       await expect(
         d.service.create('t1', { code: 'B', name: 'Main' } as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -48,7 +50,9 @@ describe('DirectoryBranchesService', () => {
 
     it('rejects a duplicated code within the tenant (conflict)', async () => {
       const d = build();
-      d.tenantsRepo.findById.mockResolvedValue({ statusConceptId: CONCEPTS.TENANT_ACTIVE });
+      d.tenantsRepo.findById.mockResolvedValue({
+        statusConceptId: CONCEPTS.TENANT_ACTIVE,
+      });
       d.branchesRepo.findByTenantAndCode.mockResolvedValue({ id: 'b0' });
       await expect(
         d.service.create('t1', { code: 'B', name: 'Main' } as any, actor),
@@ -57,7 +61,9 @@ describe('DirectoryBranchesService', () => {
 
     it('creates an active branch and converts lat/long to strings', async () => {
       const d = build();
-      d.tenantsRepo.findById.mockResolvedValue({ statusConceptId: CONCEPTS.TENANT_ACTIVE });
+      d.tenantsRepo.findById.mockResolvedValue({
+        statusConceptId: CONCEPTS.TENANT_ACTIVE,
+      });
       d.branchesRepo.findByTenantAndCode.mockResolvedValue(null);
       const branch = {
         id: 'b1',
@@ -71,14 +77,18 @@ describe('DirectoryBranchesService', () => {
 
       const res = await d.service.create(
         't1',
-        { code: 'B', name: 'Main', latitude: -12.05, longitude: -77.04 } as any,
+        { code: 'B', name: 'Main', latitude: -12.05, longitude: -77.04 },
         actor,
       );
 
       expect(res.id).toBe('b1');
       expect(d.branchesRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ latitude: '-12.05', longitude: '-77.04', statusConceptId: DIR.BRANCH_ACTIVE }),
+        expect.objectContaining({
+          latitude: '-12.05',
+          longitude: '-77.04',
+          statusConceptId: DIR.BRANCH_ACTIVE,
+        }),
       );
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
     });

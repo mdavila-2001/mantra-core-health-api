@@ -72,15 +72,26 @@ export class FrontendViewsService {
     actor: AuthenticatedUser,
   ): Promise<ViewContractResponseDto> {
     this.logger.info(
-      { operation: 'read_models.view.publish', portalCode, routeCode, viewCode: dto.viewCode },
+      {
+        operation: 'read_models.view.publish',
+        portalCode,
+        routeCode,
+        viewCode: dto.viewCode,
+      },
       'Publishing frontend view contract',
     );
     return this.em.transactional(async (tx) => {
-      const definition = await this.definitionsRepo.findById(tx, dto.readModelDefinitionId);
+      const definition = await this.definitionsRepo.findById(
+        tx,
+        dto.readModelDefinitionId,
+      );
       if (!definition) {
-        throw new ResourceNotFoundException('Definición de read model no encontrada', {
-          readModelDefinitionId: dto.readModelDefinitionId,
-        });
+        throw new ResourceNotFoundException(
+          'Definición de read model no encontrada',
+          {
+            readModelDefinitionId: dto.readModelDefinitionId,
+          },
+        );
       }
       if (definition.statusConceptId !== RM.DEF_ACTIVE) {
         throw new PreconditionFailedException(
@@ -103,7 +114,11 @@ export class FrontendViewsService {
       }
 
       // --- Ruta (upsert por surface + route_code) ---
-      let route = await this.routesRepo.findBySurfaceAndCode(tx, surface.id, routeCode);
+      let route = await this.routesRepo.findBySurfaceAndCode(
+        tx,
+        surface.id,
+        routeCode,
+      );
       if (!route) {
         route = this.routesRepo.create(tx, {
           portalSurfaceId: surface.id,
@@ -119,7 +134,11 @@ export class FrontendViewsService {
       }
 
       // --- Vista (unique route + view_code) ---
-      const clash = await this.pageViewsRepo.findByRouteAndCode(tx, route.id, dto.viewCode);
+      const clash = await this.pageViewsRepo.findByRouteAndCode(
+        tx,
+        route.id,
+        dto.viewCode,
+      );
       if (clash) {
         throw new ConflictException('La vista ya existe en esa ruta', {
           routeCode,
@@ -245,7 +264,10 @@ export class FrontendViewsService {
       masked: this.isFieldMasked(f, privileged),
     }));
 
-    const lastRun = await this.runsRepo.findLatestByDefinition(em, view.readModelDefinitionId);
+    const lastRun = await this.runsRepo.findLatestByDefinition(
+      em,
+      view.readModelDefinitionId,
+    );
     const refreshedAt = lastRun?.completedAt ?? lastRun?.createdAt ?? null;
     const now = new Date();
     const stalenessSeconds = refreshedAt
@@ -290,21 +312,32 @@ export class FrontendViewsService {
     user: AuthenticatedUser,
   ): Promise<ViewPreferencesResponseDto> {
     this.logger.info(
-      { operation: 'read_models.view.preferences', frontendPageViewId, userId: user.id },
+      {
+        operation: 'read_models.view.preferences',
+        frontendPageViewId,
+        userId: user.id,
+      },
       'Saving user view preferences',
     );
     return this.em.transactional(async (tx) => {
       const view = await this.pageViewsRepo.findById(tx, frontendPageViewId);
       if (!view) {
-        throw new ResourceNotFoundException('Vista no encontrada', { frontendPageViewId });
+        throw new ResourceNotFoundException('Vista no encontrada', {
+          frontendPageViewId,
+        });
       }
       if (view.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('La vista no está ACTIVE', { frontendPageViewId });
+        throw new PreconditionFailedException('La vista no está ACTIVE', {
+          frontendPageViewId,
+        });
       }
 
       // Validar que los campos visibles estén dentro del allow-list del contrato.
       if (dto.visibleFields?.length) {
-        const fields = await this.childrenRepo.listFields(tx, frontendPageViewId);
+        const fields = await this.childrenRepo.listFields(
+          tx,
+          frontendPageViewId,
+        );
         const allowed = new Set(fields.map((f) => f.fieldCode));
         const invalid = dto.visibleFields.filter((code) => !allowed.has(code));
         if (invalid.length > 0) {
@@ -315,14 +348,23 @@ export class FrontendViewsService {
         }
       }
 
-      const densityConceptId = dto.density ? DENSITY_CONCEPT_BY_CODE[dto.density] : undefined;
-      const existing = await this.prefsRepo.findByUserAndView(tx, user.id, frontendPageViewId);
+      const densityConceptId = dto.density
+        ? DENSITY_CONCEPT_BY_CODE[dto.density]
+        : undefined;
+      const existing = await this.prefsRepo.findByUserAndView(
+        tx,
+        user.id,
+        frontendPageViewId,
+      );
       if (existing) {
-        existing.visibleFieldsJson = dto.visibleFields ?? existing.visibleFieldsJson;
+        existing.visibleFieldsJson =
+          dto.visibleFields ?? existing.visibleFieldsJson;
         existing.fieldOrderJson = dto.fieldOrder ?? existing.fieldOrderJson;
-        existing.activeFilterJson = dto.activeFilter ?? existing.activeFilterJson;
+        existing.activeFilterJson =
+          dto.activeFilter ?? existing.activeFilterJson;
         existing.sortCode = dto.sortCode ?? existing.sortCode;
-        existing.densityConceptId = densityConceptId ?? existing.densityConceptId;
+        existing.densityConceptId =
+          densityConceptId ?? existing.densityConceptId;
         existing.pageSize = dto.pageSize ?? existing.pageSize;
         existing.tenantId = dto.tenantId ?? existing.tenantId;
         touch(existing, user.id);
@@ -365,15 +407,31 @@ export class FrontendViewsService {
   ) {
     const surface = await this.surfacesRepo.findByCode(em, portalCode);
     if (!surface) {
-      throw new ResourceNotFoundException('Portal no encontrado', { portalCode });
+      throw new ResourceNotFoundException('Portal no encontrado', {
+        portalCode,
+      });
     }
-    const route = await this.routesRepo.findBySurfaceAndCode(em, surface.id, routeCode);
+    const route = await this.routesRepo.findBySurfaceAndCode(
+      em,
+      surface.id,
+      routeCode,
+    );
     if (!route) {
-      throw new ResourceNotFoundException('Ruta no encontrada', { portalCode, routeCode });
+      throw new ResourceNotFoundException('Ruta no encontrada', {
+        portalCode,
+        routeCode,
+      });
     }
-    const view = await this.pageViewsRepo.findByRouteAndCode(em, route.id, viewCode);
+    const view = await this.pageViewsRepo.findByRouteAndCode(
+      em,
+      route.id,
+      viewCode,
+    );
     if (!view) {
-      throw new ResourceNotFoundException('Vista no encontrada', { routeCode, viewCode });
+      throw new ResourceNotFoundException('Vista no encontrada', {
+        routeCode,
+        viewCode,
+      });
     }
     return view;
   }
@@ -393,7 +451,8 @@ export class FrontendViewsService {
       const permissionOk = privileged || !a.requiredPermissionId;
       // Sin catálogo de value sets cargado aquí, el estado no restringe salvo
       // que exista un allowed_state_value_set_id (en cuyo caso requiere privilegio).
-      const stateOk = !a.allowedStateValueSetId || privileged || stateValue == null;
+      const stateOk =
+        !a.allowedStateValueSetId || privileged || stateValue == null;
       return {
         actionCode: a.actionCode,
         label: a.label,
@@ -403,7 +462,10 @@ export class FrontendViewsService {
     });
   }
 
-  private isFieldMasked(field: FrontendViewFields, privileged: boolean): boolean {
+  private isFieldMasked(
+    field: FrontendViewFields,
+    privileged: boolean,
+  ): boolean {
     if (!field.sensitive) return false;
     // Campo sensible con permiso explícito: solo se revela a roles privilegiados.
     return !privileged;

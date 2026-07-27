@@ -19,7 +19,10 @@ export class CreateCommentDto {
   @IsUUID()
   authorProfileId!: string;
 
-  @ApiProperty({ description: 'Tipo de contenido comentado', enum: ['POST', 'COMMENT', 'REVIEW'] })
+  @ApiProperty({
+    description: 'Tipo de contenido comentado',
+    enum: ['POST', 'COMMENT', 'REVIEW'],
+  })
   @IsIn(['POST', 'COMMENT', 'REVIEW'])
   commentableType!: 'POST' | 'COMMENT' | 'REVIEW';
 
@@ -27,7 +30,10 @@ export class CreateCommentDto {
   @IsUUID()
   commentableRefId!: string;
 
-  @ApiPropertyOptional({ description: 'Comentario padre (para respuesta anidada)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Comentario padre (para respuesta anidada)',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   parentCommentId?: string;

@@ -14,7 +14,12 @@ import {
 } from 'class-validator';
 
 /** Estrategia de enmascaramiento de un campo. */
-export const MASK_STRATEGIES = ['REDACT', 'HASH', 'PARTIAL', 'NULLIFY'] as const;
+export const MASK_STRATEGIES = [
+  'REDACT',
+  'HASH',
+  'PARTIAL',
+  'NULLIFY',
+] as const;
 export type MaskStrategy = (typeof MASK_STRATEGIES)[number];
 
 /** Una regla de enmascaramiento por (entity, column). */
@@ -39,7 +44,10 @@ export class FieldPermissionItemDto {
   @IsBoolean()
   canWrite!: boolean;
 
-  @ApiPropertyOptional({ description: 'Estrategia de enmascaramiento', enum: MASK_STRATEGIES })
+  @ApiPropertyOptional({
+    description: 'Estrategia de enmascaramiento',
+    enum: MASK_STRATEGIES,
+  })
   @IsOptional()
   @IsIn(MASK_STRATEGIES)
   maskStrategy?: MaskStrategy;
@@ -52,7 +60,10 @@ export class FieldPermissionItemDto {
 
 /** Cuerpo de `PUT /authz/roles/{roleId}/field-permissions` (UC-06-08). */
 export class SetFieldPermissionsDto {
-  @ApiProperty({ description: 'Reglas de enmascaramiento a aplicar (upsert)', type: [FieldPermissionItemDto] })
+  @ApiProperty({
+    description: 'Reglas de enmascaramiento a aplicar (upsert)',
+    type: [FieldPermissionItemDto],
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

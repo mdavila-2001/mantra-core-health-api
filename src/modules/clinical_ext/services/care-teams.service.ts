@@ -8,8 +8,15 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { CareTeamsRepository, CareTeamMembersRepository } from '../repositories';
-import { CreateCareTeamDto, CareTeamResponseDto, StatusResultDto } from '../dto';
+import {
+  CareTeamsRepository,
+  CareTeamMembersRepository,
+} from '../repositories';
+import {
+  CreateCareTeamDto,
+  CareTeamResponseDto,
+  StatusResultDto,
+} from '../dto';
 import { CEXT } from '../clinical_ext.concepts';
 
 /**
@@ -33,7 +40,10 @@ export class CareTeamsService {
   }
 
   /** UC-18-01: crea el equipo y sus miembros iniciales (a lo sumo uno responsable). */
-  async create(dto: CreateCareTeamDto, actor: AuthenticatedUser): Promise<CareTeamResponseDto> {
+  async create(
+    dto: CreateCareTeamDto,
+    actor: AuthenticatedUser,
+  ): Promise<CareTeamResponseDto> {
     this.logger.info(
       { operation: 'clinical_ext.care_team.create', actorId: actor.id },
       'Creating care team',
@@ -41,9 +51,12 @@ export class CareTeamsService {
 
     const responsibleCount = dto.members.filter((m) => m.isResponsible).length;
     if (responsibleCount > 1) {
-      throw new ConflictException('A lo sumo un miembro puede ser responsable', {
-        responsibleCount,
-      });
+      throw new ConflictException(
+        'A lo sumo un miembro puede ser responsable',
+        {
+          responsibleCount,
+        },
+      );
     }
 
     return this.em.transactional(async (tx) => {
@@ -52,7 +65,8 @@ export class CareTeamsService {
         tenantId: dto.tenantId,
         episodeId: dto.episodeId,
         name: dto.name,
-        categoryConceptId: dto.categoryConceptId ?? CEXT.CARE_TEAM_CATEGORY_LONGITUDINAL,
+        categoryConceptId:
+          dto.categoryConceptId ?? CEXT.CARE_TEAM_CATEGORY_LONGITUDINAL,
         statusConceptId: CEXT.CARE_TEAM_ACTIVE,
         periodStart: dto.periodStart ? new Date(dto.periodStart) : new Date(),
         actorUserId: actor.id,
@@ -75,7 +89,11 @@ export class CareTeamsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'clinical_ext.care_team.create', careTeamId: team.id, members: members.length },
+        {
+          operation: 'clinical_ext.care_team.create',
+          careTeamId: team.id,
+          members: members.length,
+        },
         'Care team created',
       );
       return {
@@ -99,26 +117,41 @@ export class CareTeamsService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     this.logger.info(
-      { operation: 'clinical_ext.care_team.set_responsible', careTeamId, memberId },
+      {
+        operation: 'clinical_ext.care_team.set_responsible',
+        careTeamId,
+        memberId,
+      },
       'Transferring care team leadership',
     );
 
     return this.em.transactional(async (tx) => {
       const team = await this.teamsRepo.findById(tx, careTeamId);
-      if (!team) throw new ResourceNotFoundException('Equipo de cuidado no encontrado', { careTeamId });
+      if (!team)
+        throw new ResourceNotFoundException('Equipo de cuidado no encontrado', {
+          careTeamId,
+        });
       if (team.statusConceptId !== CEXT.CARE_TEAM_ACTIVE) {
-        throw new PreconditionFailedException('El equipo no está activo', { careTeamId });
+        throw new PreconditionFailedException('El equipo no está activo', {
+          careTeamId,
+        });
       }
 
       const target = await this.membersRepo.findById(tx, memberId);
       if (!target || target.careTeamId !== careTeamId) {
-        throw new ResourceNotFoundException('Miembro no encontrado en el equipo', {
-          careTeamId,
-          memberId,
-        });
+        throw new ResourceNotFoundException(
+          'Miembro no encontrado en el equipo',
+          {
+            careTeamId,
+            memberId,
+          },
+        );
       }
       if (target.statusConceptId !== CEXT.MEMBER_ACTIVE) {
-        throw new PreconditionFailedException('El miembro destino no está activo', { memberId });
+        throw new PreconditionFailedException(
+          'El miembro destino no está activo',
+          { memberId },
+        );
       }
 
       const current = await this.membersRepo.findResponsible(tx, careTeamId);

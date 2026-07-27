@@ -11,7 +11,11 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { CareTeamsService } from '../services';
-import { CreateCareTeamDto, CareTeamResponseDto, StatusResultDto } from '../dto';
+import {
+  CreateCareTeamDto,
+  CareTeamResponseDto,
+  StatusResultDto,
+} from '../dto';
 
 /**
  * Endpoints de equipos de cuidado (`/care-teams`). Capa fina: valida parámetros y
@@ -37,7 +41,9 @@ export class CareTeamsController {
   /** UC-18-02. */
   @Patch(':id/members/:memberId/set-responsible')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Designar miembro responsable (transferir liderazgo)' })
+  @ApiOperation({
+    summary: 'Designar miembro responsable (transferir liderazgo)',
+  })
   setResponsible(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('memberId', ParseUUIDPipe) memberId: string,

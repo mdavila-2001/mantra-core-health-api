@@ -70,11 +70,14 @@ export class TelemetryGovernanceService {
       const purpose = this.purposesRepo.create(tx, {
         purposeCode: dto.purposeCode,
         name: dto.name,
-        purposeCategoryConceptId: dto.purposeCategoryConceptId ?? TELE.PURPOSE_CATEGORY_ANALYTICS,
-        legalBasisConceptId: dto.legalBasisConceptId ?? TELE.LEGAL_BASIS_CONSENT,
+        purposeCategoryConceptId:
+          dto.purposeCategoryConceptId ?? TELE.PURPOSE_CATEGORY_ANALYTICS,
+        legalBasisConceptId:
+          dto.legalBasisConceptId ?? TELE.LEGAL_BASIS_CONSENT,
         requiresConsent: dto.requiresConsent ?? true,
         permitsMarketingUse: dto.permitsMarketingUse ?? false,
-        permitsCrossTenantAggregation: dto.permitsCrossTenantAggregation ?? false,
+        permitsCrossTenantAggregation:
+          dto.permitsCrossTenantAggregation ?? false,
         defaultRetentionDays: dto.defaultRetentionDays,
         versionNumber: 1,
         effectiveFrom: new Date(),
@@ -101,28 +104,48 @@ export class TelemetryGovernanceService {
   ): Promise<EventSchemaResponseDto> {
     const schemaVersion = dto.schemaVersion ?? 1;
     this.logger.info(
-      { operation: 'telemetry.schema.register', eventName: dto.eventName, schemaVersion },
+      {
+        operation: 'telemetry.schema.register',
+        eventName: dto.eventName,
+        schemaVersion,
+      },
       'Registering event schema',
     );
     return this.em.transactional(async (tx) => {
-      const purpose = await this.purposesRepo.findById(tx, dto.purposeDefinitionId);
+      const purpose = await this.purposesRepo.findById(
+        tx,
+        dto.purposeDefinitionId,
+      );
       if (!purpose) {
-        throw new ResourceNotFoundException('Propósito de tracking no encontrado', {
-          purposeDefinitionId: dto.purposeDefinitionId,
-        });
+        throw new ResourceNotFoundException(
+          'Propósito de tracking no encontrado',
+          {
+            purposeDefinitionId: dto.purposeDefinitionId,
+          },
+        );
       }
       if (purpose.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El propósito de tracking no está activo', {
-          purposeDefinitionId: dto.purposeDefinitionId,
-        });
+        throw new PreconditionFailedException(
+          'El propósito de tracking no está activo',
+          {
+            purposeDefinitionId: dto.purposeDefinitionId,
+          },
+        );
       }
 
-      const clash = await this.schemasRepo.findByNameVersion(tx, dto.eventName, schemaVersion);
+      const clash = await this.schemasRepo.findByNameVersion(
+        tx,
+        dto.eventName,
+        schemaVersion,
+      );
       if (clash) {
-        throw new ConflictException('Ya existe un esquema con ese nombre y versión', {
-          eventName: dto.eventName,
-          schemaVersion,
-        });
+        throw new ConflictException(
+          'Ya existe un esquema con ese nombre y versión',
+          {
+            eventName: dto.eventName,
+            schemaVersion,
+          },
+        );
       }
 
       const schema = this.schemasRepo.create(tx, {
@@ -132,7 +155,8 @@ export class TelemetryGovernanceService {
         portalTypeConceptId: dto.portalTypeConceptId ?? TELE.PORTAL_WEB,
         propertySchemaJson: dto.propertySchemaJson,
         prohibitedPropertyPatternsJson: dto.prohibitedPropertyPatternsJson,
-        piiClassificationConceptId: dto.piiClassificationConceptId ?? TELE.PII_NONE,
+        piiClassificationConceptId:
+          dto.piiClassificationConceptId ?? TELE.PII_NONE,
         phiAllowed: dto.phiAllowed ?? false,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         effectiveFrom: new Date(),
@@ -158,7 +182,11 @@ export class TelemetryGovernanceService {
   ): Promise<DisclosureVersionResponseDto> {
     const versionNumber = dto.versionNumber ?? 1;
     this.logger.info(
-      { operation: 'telemetry.disclosure.publish', documentCode: dto.documentCode, versionNumber },
+      {
+        operation: 'telemetry.disclosure.publish',
+        documentCode: dto.documentCode,
+        versionNumber,
+      },
       'Publishing disclosure version',
     );
     return this.em.transactional(async (tx) => {
@@ -175,7 +203,10 @@ export class TelemetryGovernanceService {
       }
 
       // Cierra la vigencia de las versiones abiertas del mismo documento.
-      const open = await this.disclosuresRepo.findOpenByDocument(tx, dto.documentCode);
+      const open = await this.disclosuresRepo.findOpenByDocument(
+        tx,
+        dto.documentCode,
+      );
       const now = new Date();
       for (const prev of open) {
         prev.effectiveTo = now;
@@ -184,7 +215,8 @@ export class TelemetryGovernanceService {
       const version = this.disclosuresRepo.create(tx, {
         documentCode: dto.documentCode,
         versionNumber,
-        jurisdictionConceptId: dto.jurisdictionConceptId ?? TELE.JURISDICTION_DEFAULT,
+        jurisdictionConceptId:
+          dto.jurisdictionConceptId ?? TELE.JURISDICTION_DEFAULT,
         fileId: dto.fileId,
         contentHash: dto.contentHash,
         effectiveFrom: now,
@@ -204,31 +236,52 @@ export class TelemetryGovernanceService {
   }
 
   /** UC-28-10: define un funnel y sus pasos (contiguos) en una sola transacción. */
-  async defineFunnel(dto: CreateFunnelDto, actor: AuthenticatedUser): Promise<FunnelResponseDto> {
+  async defineFunnel(
+    dto: CreateFunnelDto,
+    actor: AuthenticatedUser,
+  ): Promise<FunnelResponseDto> {
     this.logger.info(
-      { operation: 'telemetry.funnel.define', funnelCode: dto.funnelCode, steps: dto.steps.length },
+      {
+        operation: 'telemetry.funnel.define',
+        funnelCode: dto.funnelCode,
+        steps: dto.steps.length,
+      },
       'Defining funnel',
     );
     return this.em.transactional(async (tx) => {
-      const purpose = await this.purposesRepo.findById(tx, dto.purposeDefinitionId);
+      const purpose = await this.purposesRepo.findById(
+        tx,
+        dto.purposeDefinitionId,
+      );
       if (!purpose) {
-        throw new ResourceNotFoundException('Propósito de tracking no encontrado', {
-          purposeDefinitionId: dto.purposeDefinitionId,
-        });
+        throw new ResourceNotFoundException(
+          'Propósito de tracking no encontrado',
+          {
+            purposeDefinitionId: dto.purposeDefinitionId,
+          },
+        );
       }
 
       const clash = await this.funnelsRepo.findByCode(tx, dto.funnelCode);
       if (clash) {
-        throw new ConflictException('El código de funnel ya existe', { funnelCode: dto.funnelCode });
+        throw new ConflictException('El código de funnel ya existe', {
+          funnelCode: dto.funnelCode,
+        });
       }
 
       // Cada paso debe referenciar un esquema de evento existente.
       for (const step of dto.steps) {
-        const schema = await this.schemasRepo.findById(tx, step.eventSchemaDefinitionId);
+        const schema = await this.schemasRepo.findById(
+          tx,
+          step.eventSchemaDefinitionId,
+        );
         if (!schema) {
-          throw new PreconditionFailedException('Esquema de evento de un paso no existe', {
-            eventSchemaDefinitionId: step.eventSchemaDefinitionId,
-          });
+          throw new PreconditionFailedException(
+            'Esquema de evento de un paso no existe',
+            {
+              eventSchemaDefinitionId: step.eventSchemaDefinitionId,
+            },
+          );
         }
       }
 

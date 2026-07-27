@@ -46,8 +46,14 @@ describe('PharmacyCatalogService (UC-24-11)', () => {
     const res = await d.service.projectCatalog('ph1', actor);
 
     expect(res.productCount).toBe(1);
-    expect(res.entries[0]).toMatchObject({ productId: 'pr1', productCode: 'P-1' });
-    expect(res.entries[0].prices[0]).toMatchObject({ priceListId: 'pl1', unitAmount: '10' });
+    expect(res.entries[0]).toMatchObject({
+      productId: 'pr1',
+      productCode: 'P-1',
+    });
+    expect(res.entries[0].prices[0]).toMatchObject({
+      priceListId: 'pl1',
+      unitAmount: '10',
+    });
     expect(d.em.fork).toHaveBeenCalled();
     expect(d.productsRepo.findByPharmacyAndStatus).toHaveBeenCalledWith(
       expect.anything(),
