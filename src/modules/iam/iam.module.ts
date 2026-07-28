@@ -8,6 +8,7 @@ import {
   IamMfaService,
   IamDevicesService,
   IamAuthService,
+  IamAssistedRegistrationService,
 } from './services';
 import {
   UsersRepository,
@@ -19,6 +20,7 @@ import {
   UserGlobalRolesRepository,
   AccountLockoutsRepository,
   SecurityEventsRepository,
+  AccountActivationsRepository,
 } from './repositories';
 
 /**
@@ -39,12 +41,14 @@ import {
     UserGlobalRolesRepository,
     AccountLockoutsRepository,
     SecurityEventsRepository,
+    AccountActivationsRepository,
     // Servicios
     IamUsersService,
     IamCredentialsService,
     IamMfaService,
     IamDevicesService,
     IamAuthService,
+    IamAssistedRegistrationService,
   ],
 })
 export class IamModule {}

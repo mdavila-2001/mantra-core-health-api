@@ -5,6 +5,7 @@ import {
   ClinicalEncountersController,
   ClinicalObservationsController,
   ClinicalOrdersController,
+  ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
 } from './controllers';
 import {
@@ -16,6 +17,7 @@ import {
   ConditionsService,
   AllergyIntolerancesService,
   MedicationsService,
+  PrescriptionSignaturePoliciesService,
   ProceduresService,
   ImmunizationsService,
 } from './services';
@@ -29,6 +31,7 @@ import {
   AllergyIntolerancesRepository,
   MedicationRequestsRepository,
   MedicationRecordsRepository,
+  PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
   ImmunizationsRepository,
 } from './repositories';
@@ -45,6 +48,7 @@ import {
     ClinicalEncountersController,
     ClinicalObservationsController,
     ClinicalOrdersController,
+    ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
   ],
   providers: [
@@ -58,6 +62,7 @@ import {
     AllergyIntolerancesRepository,
     MedicationRequestsRepository,
     MedicationRecordsRepository,
+    PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
     // Servicios
@@ -69,6 +74,7 @@ import {
     ConditionsService,
     AllergyIntolerancesService,
     MedicationsService,
+    PrescriptionSignaturePoliciesService,
     ProceduresService,
     ImmunizationsService,
   ],

@@ -7,5 +7,6 @@ export * from './conditions.repository';
 export * from './allergy-intolerances.repository';
 export * from './medication-requests.repository';
 export * from './medication-records.repository';
+export * from './prescription-signature-policies.repository';
 export * from './procedures.repository';
 export * from './immunizations.repository';

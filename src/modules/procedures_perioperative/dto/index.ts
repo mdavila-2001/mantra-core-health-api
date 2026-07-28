@@ -1,6 +1,9 @@
 export {
   ScheduleCaseDto,
   CaseResponseDto,
+  UpdateCaseDto,
+  UpdateCaseResponseDto,
+  ConfirmCaseResponseDto,
   CaseDiagnosisDto,
   AddDiagnosesDto,
   DiagnosesResponseDto,

@@ -11,8 +11,12 @@ function build() {
     logoutAll: mockFn(),
     purgeSessions: mockFn(),
   };
-  const controller = new IamAuthController(authService as any);
-  return { controller, authService };
+  const assistedRegistrationService = { activateAccount: mockFn() };
+  const controller = new IamAuthController(
+    authService as any,
+    assistedRegistrationService as any,
+  );
+  return { controller, authService, assistedRegistrationService };
 }
 
 describe('IamAuthController', () => {

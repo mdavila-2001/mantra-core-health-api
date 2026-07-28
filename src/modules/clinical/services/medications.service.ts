@@ -23,6 +23,7 @@ import {
 } from '../dto';
 import { MedicationRequests } from '../entities';
 import { CLIN } from '../clinical.concepts';
+import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
 
 /**
  * UC-08-10 (prescribir) y UC-08-11 (administrar/registrar) de medicación, más la
@@ -47,6 +48,7 @@ export class MedicationsService {
     private readonly em: EntityManager,
     private readonly requestsRepo: MedicationRequestsRepository,
     private readonly recordsRepo: MedicationRecordsRepository,
+    private readonly signaturePolicies: PrescriptionSignaturePoliciesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MedicationsService.name);
@@ -63,6 +65,7 @@ export class MedicationsService {
       replacesRequestId: request.replacesRequestId ?? null,
       replacedByRequestId: request.replacedByRequestId ?? null,
       renewedFromRequestId: request.renewedFromRequestId ?? null,
+      signedAt: request.signedAt ?? null,
       createdAt: request.createdAt,
     };
   }
@@ -183,8 +186,43 @@ export class MedicationsService {
   }
 
   /**
+   * REDESA D-05 / CAN-RX: firma una receta en borrador (DRAFT). Aditivo: registra
+   * quién firma y cuándo, sin alterar la máquina de estados. Firmar es idempotente
+   * (no re-firma si ya está firmada) y solo se permite antes de emitir.
+   */
+  async sign(
+    requestId: string,
+    actor: AuthenticatedUser,
+  ): Promise<MedicationRequestResponseDto> {
+    this.logger.info(
+      { operation: 'clinical.medication.sign', requestId },
+      'Signing medication request',
+    );
+    return this.em.transactional(async (tx) => {
+      const request = await this.loadRequestOrThrow(tx, requestId);
+      if (request.statusConceptId !== CLIN.MEDICATION_REQUEST_DRAFT) {
+        throw new PreconditionFailedException(
+          'Solo un borrador (DRAFT) puede firmarse antes de emitirse',
+          { requestId, status: request.statusConceptId },
+        );
+      }
+      if (!request.signedAt) {
+        request.signedAt = new Date();
+        request.signedByUserId = actor.id;
+        touch(request, actor.id);
+        await tx.flush();
+      }
+      return this.toRequestResponse(request);
+    });
+  }
+
+  /**
    * CAN-RX: emite la receta (DRAFT → ISSUED) y SELLA su contenido. A partir de
    * aquí es inmutable; toda corrección pasa por invalidate/replace.
+   *
+   * REDESA D-05: si la política PARAMETRIZABLE de firma vigente exige firma para
+   * esta receta y aún no está firmada, se rechaza. FAIL-SAFE: sin política
+   * aplicable, `isSignatureRequired` es `false` y la emisión no cambia.
    */
   async issue(
     requestId: string,
@@ -202,6 +240,21 @@ export class MedicationsService {
           { requestId, status: request.statusConceptId },
         );
       }
+
+      if (!request.signedAt) {
+        const signatureRequired =
+          await this.signaturePolicies.isSignatureRequired(
+            request.custodianTenantId,
+            { medicationType: request.medicationConceptId },
+          );
+        if (signatureRequired) {
+          throw new PreconditionFailedException(
+            'La política vigente exige firmar la receta antes de emitirla',
+            { requestId },
+          );
+        }
+      }
+
       request.statusConceptId = CLIN.MEDICATION_REQUEST_ISSUED;
       request.issuedAt = new Date();
       touch(request, actor.id);

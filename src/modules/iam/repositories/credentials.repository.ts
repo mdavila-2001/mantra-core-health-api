@@ -39,6 +39,36 @@ export class CredentialsRepository {
     });
   }
 
+  /**
+   * Credencial de contraseña VIVA (ACTIVA o PENDIENTE de activación) para el
+   * identificador dado. Sustenta la detección de duplicados del registro asistido
+   * (C-18): si ya existe una cuenta con el identificador verificado no se crea otra.
+   */
+  findLivePasswordBySubject(
+    em: EntityManager,
+    externalSubject: string,
+  ): Promise<AuthenticationCredentials | null> {
+    return em.findOne(AuthenticationCredentials, {
+      methodConceptId: CONCEPTS.CRED_PASSWORD,
+      externalSubject,
+      stateConceptId: {
+        $in: [CONCEPTS.STATE_ACTIVE, CONCEPTS.STATE_PENDING],
+      },
+    });
+  }
+
+  /** Credencial de contraseña PENDIENTE (sin secreto) de un usuario; para su activación. */
+  findPendingPasswordByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<AuthenticationCredentials | null> {
+    return em.findOne(AuthenticationCredentials, {
+      userId,
+      methodConceptId: CONCEPTS.CRED_PASSWORD,
+      stateConceptId: CONCEPTS.STATE_PENDING,
+    });
+  }
+
   /** Credencial federada existente para (usuario, proveedor, sujeto). */
   findFederated(
     em: EntityManager,
@@ -60,6 +90,29 @@ export class CredentialsRepository {
     userId: string,
   ): Promise<AuthenticationCredentials | null> {
     return em.findOne(AuthenticationCredentials, { id, userId });
+  }
+
+  /**
+   * Crea una credencial de contraseña PENDIENTE, sin secreto (registro asistido,
+   * C-18). Reserva la identidad de login (`external_subject`) y bloquea duplicados,
+   * pero no puede autenticar hasta que el titular fije su contraseña en la
+   * activación (pasa a ACTIVA con `secret_hash`). Sin flush.
+   */
+  createPendingPassword(
+    em: EntityManager,
+    data: { userId: string; externalSubject: string; actorUserId?: string },
+  ): AuthenticationCredentials {
+    return em.create(
+      AuthenticationCredentials,
+      {
+        userId: data.userId,
+        methodConceptId: CONCEPTS.CRED_PASSWORD,
+        stateConceptId: CONCEPTS.STATE_PENDING,
+        externalSubject: data.externalSubject,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
   }
 
   /** Crea una credencial de contraseña ACTIVA (sin flush). */

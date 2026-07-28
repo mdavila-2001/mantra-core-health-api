@@ -84,6 +84,19 @@ export class MedicationRequests {
   @Property({ fieldName: 'issued_at', columnType: 'timestamptz', nullable: true })
   issuedAt?: Date;
 
+  // --- Firma de receta (REDESA D-05 / CAN-RX, aditivo, fail-safe) -------------
+  // La receta no traía columnas de firma; se añaden nullable. Una receta sin
+  // firmar tiene ambas en NULL. La emisión solo las exige cuando una política
+  // parametrizable vigente (clinical.prescription_signature_policies) lo requiere.
+
+  /** Instante de la firma de la receta (nulo = sin firmar). */
+  @Property({ fieldName: 'signed_at', columnType: 'timestamptz', nullable: true })
+  signedAt?: Date;
+
+  /** Usuario que firmó la receta. FK → iam.users */
+  @Property({ fieldName: 'signed_by_user_id', type: 'uuid', nullable: true })
+  signedByUserId?: string;
+
   /** Motivo de INVALIDATED/REPLACED (obligatorio al invalidar/reemplazar). */
   @Property({
     fieldName: 'status_reason_text',

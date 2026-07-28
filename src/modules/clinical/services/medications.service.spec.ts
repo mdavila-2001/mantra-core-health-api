@@ -15,14 +15,19 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const requestsRepo = { findById: mockFn(), create: mockFn() };
   const recordsRepo = { create: mockFn() };
+  // Por defecto FAIL-SAFE: sin política, la firma no se exige.
+  const signaturePolicies = {
+    isSignatureRequired: mockFn().mockResolvedValue(false),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
     recordsRepo as any,
+    signaturePolicies as any,
     logger as any,
   );
-  return { service, requestsRepo, recordsRepo };
+  return { service, requestsRepo, recordsRepo, signaturePolicies };
 }
 
 describe('MedicationsService', () => {
@@ -110,6 +115,97 @@ describe('MedicationsService', () => {
         statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
       });
       await expect(d.service.issue('mr1', actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+    });
+
+    it('issues without signature when no policy applies (fail-safe, flow intact)', async () => {
+      const d = build();
+      // isSignatureRequired ya devuelve false por defecto.
+      const request = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        custodianTenantId: 't1',
+        medicationConceptId: 'm1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      const res = await d.service.issue('mr1', actor);
+      expect(res.status).toBe(CLIN.MEDICATION_REQUEST_ISSUED);
+      expect(d.signaturePolicies.isSignatureRequired).toHaveBeenCalledWith(
+        't1',
+        { medicationType: 'm1' },
+      );
+    });
+
+    it('rejects issuing an unsigned request when the policy requires a signature', async () => {
+      const d = build();
+      d.signaturePolicies.isSignatureRequired.mockResolvedValue(true);
+      const request = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        custodianTenantId: 't1',
+        medicationConceptId: 'm1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      await expect(d.service.issue('mr1', actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      // No debe emitirse.
+      expect(request.statusConceptId).toBe(CLIN.MEDICATION_REQUEST_DRAFT);
+    });
+
+    it('issues a signed request even when the policy requires a signature', async () => {
+      const d = build();
+      d.signaturePolicies.isSignatureRequired.mockResolvedValue(true);
+      const request = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        custodianTenantId: 't1',
+        medicationConceptId: 'm1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        signedAt: new Date(),
+        signedByUserId: 'user-1',
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      const res = await d.service.issue('mr1', actor);
+      expect(res.status).toBe(CLIN.MEDICATION_REQUEST_ISSUED);
+      // Ya estaba firmada: ni siquiera se consulta la política.
+      expect(d.signaturePolicies.isSignatureRequired).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sign (REDESA D-05, additive)', () => {
+    it('stamps signedAt/signedByUserId on a draft', async () => {
+      const d = build();
+      const request = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      const res = await d.service.sign('mr1', actor);
+      expect((request as any).signedAt).toBeInstanceOf(Date);
+      expect((request as any).signedByUserId).toBe('user-1');
+      expect(res.signedAt).toBeInstanceOf(Date);
+    });
+
+    it('rejects signing a non-draft request', async () => {
+      const d = build();
+      d.requestsRepo.findById.mockResolvedValue({
+        id: 'mr1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
+      });
+      await expect(d.service.sign('mr1', actor)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
     });

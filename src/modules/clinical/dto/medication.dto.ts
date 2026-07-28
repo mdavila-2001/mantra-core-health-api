@@ -334,6 +334,14 @@ export class MedicationRequestResponseDto {
   })
   renewedFromRequestId?: string | null;
 
+  @ApiPropertyOptional({
+    description: 'Instante de firma de la receta (nulo = sin firmar)',
+    type: String,
+    format: 'date-time',
+    nullable: true,
+  })
+  signedAt?: Date | null;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 }

@@ -131,6 +131,72 @@ export class CaseResponseDto {
   milestoneId!: string;
 }
 
+/**
+ * Cuerpo de `PATCH /procedure-cases/{id}` (C-13 · CAN-INT-001).
+ * Corregir datos del caso todavía en borrador; el cambio de paciente está
+ * restringido por estado y por dependencias (véase el servicio).
+ */
+export class UpdateCaseDto {
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Paciente de la intervención. Sólo corregible con el caso en borrador y sin dependencias (CAN-INT-001).',
+  })
+  @IsOptional()
+  @IsUUID()
+  patientProfileId?: string;
+
+  @ApiPropertyOptional({ enum: CASE_PRIORITIES })
+  @IsOptional()
+  @IsIn(CASE_PRIORITIES)
+  priority?: CasePriority;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  scheduledStartAt?: string;
+
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsISO8601()
+  scheduledEndAt?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  urgencyReasonText?: string;
+}
+
+export class UpdateCaseResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  @ApiProperty({ format: 'uuid', description: 'Paciente vigente del caso' })
+  patientProfileId!: string;
+
+  @ApiProperty({ description: 'true si se corrigió el paciente del caso' })
+  patientChanged!: boolean;
+}
+
+/**
+ * Respuesta de `POST /procedure-cases/{id}/confirm` (C-14 · CAN-INT-002).
+ */
+export class ConfirmCaseResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid', description: 'Estado tras confirmar' })
+  statusConceptId!: string;
+
+  @ApiProperty({
+    description: 'Miembros del equipo con credencial verificada al confirmar',
+  })
+  teamVerified!: number;
+}
+
 // ---------------------------------------------------------------------------
 // UC-53-02 · Diagnósticos y equipo
 // ---------------------------------------------------------------------------

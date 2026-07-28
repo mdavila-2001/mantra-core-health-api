@@ -9,6 +9,8 @@ export interface CreateUserData {
   statusConceptId: string;
   mfaStatusConceptId: string;
   timeZone?: string;
+  /** Exige cambio de credencial en el primer ingreso (registro asistido, C-18). */
+  mustChangePassword?: boolean;
   actorUserId?: string;
 }
 
@@ -36,6 +38,7 @@ export class UsersRepository {
         displayName: data.displayName,
         mfaStatusConceptId: data.mfaStatusConceptId,
         timeZone: data.timeZone,
+        mustChangePassword: data.mustChangePassword,
         emailVerified: false,
         phoneVerified: false,
         ...createdBy(data.actorUserId),

@@ -6,4 +6,5 @@ export * from './mfa-factors.repository';
 export * from './devices.repository';
 export * from './user-global-roles.repository';
 export * from './account-lockouts.repository';
+export * from './account-activations.repository';
 export * from './security-events.repository';

@@ -13,6 +13,9 @@ import { PeriopCasesRepository } from '../repositories';
 import {
   ScheduleCaseDto,
   CaseResponseDto,
+  UpdateCaseDto,
+  UpdateCaseResponseDto,
+  ConfirmCaseResponseDto,
   AddDiagnosesDto,
   DiagnosesResponseDto,
   AssignTeamMemberDto,
@@ -82,6 +85,50 @@ const CANCELLABLE_CASE_STATES: readonly string[] = [
   CONCEPTS.CASE_SCHEDULED,
   CONCEPTS.CASE_READY_FOR_SURGERY,
   CONCEPTS.SURGICAL_CASE_IN_PROGRESS,
+];
+
+/**
+ * C-13 (CAN-INT-001): estado "borrador" del caso. Es el único en el que el
+ * modelo REDESA todavía permite corregir el paciente de la intervención. El
+ * sistema no tiene un estado DRAFT propio: el caso nace ya `CASE_SCHEDULED`, que
+ * es su estado editable inicial (antes de que verificación de órdenes /
+ * confirmación lo fijen). `CASE_READY_FOR_SURGERY` equivale a
+ * "pendiente de confirmación" en adelante, y `SURGICAL_CASE_IN_PROGRESS` /
+ * `CASE_COMPLETED` a "confirmado/iniciado", donde el cambio queda prohibido.
+ */
+const CASE_DRAFT_STATE: string = CONCEPTS.CASE_SCHEDULED;
+
+/**
+ * C-14 (CAN-INT-002): roles del equipo que exigen credencial profesional
+ * vigente antes de confirmar o iniciar la intervención. Todos los roles
+ * perioperatorios son clínicos y por tanto la exigen.
+ */
+const CREDENTIAL_REQUIRED_TEAM_ROLES: readonly string[] = [
+  CONCEPTS.TEAM_ROLE_SURGEON,
+  CONCEPTS.TEAM_ROLE_ASSISTANT,
+  CONCEPTS.TEAM_ROLE_ANESTHESIOLOGIST,
+  CONCEPTS.TEAM_ROLE_SCRUB_NURSE,
+  CONCEPTS.TEAM_ROLE_CIRCULATING_NURSE,
+];
+
+/**
+ * C-14 (CAN-INT-002): estados del miembro que acreditan una credencial
+ * profesional VIGENTE/verificada. Fuente documentada: la vigencia autoritativa
+ * de la credencial vive en `iam.authentication_credentials` / el perfil
+ * profesional (`profiles`), fuera del alcance de este módulo. Aquí se usa el
+ * estado de verificación del propio miembro del equipo
+ * (`procedure_case_team_members.status_concept_id`) como fuente local: sólo
+ * `TEAM_ACCEPTED` cuenta como vigente. Cualquier otro estado (asignado sin
+ * aceptar/verificar) se trata como NO vigente (fail-closed).
+ */
+const CREDENTIAL_CURRENT_MEMBER_STATES: readonly string[] = [
+  CONCEPTS.TEAM_ACCEPTED,
+];
+
+/** Estados del caso desde los que tiene sentido confirmarlo (C-14). */
+const CONFIRMABLE_CASE_STATES: readonly string[] = [
+  CONCEPTS.CASE_SCHEDULED,
+  CONCEPTS.CASE_READY_FOR_SURGERY,
 ];
 
 /**
@@ -217,6 +264,217 @@ export class PeriopCasesService {
         milestoneId: milestone.id,
       };
     });
+  }
+
+  /**
+   * C-13 (CAN-INT-001): modificar los datos del caso. El paciente de la
+   * intervención sólo puede corregirse mientras el caso está en borrador
+   * (`CASE_SCHEDULED`) y no arrastra dependencias (asignaciones de equipo más
+   * allá del cirujano principal sembrado, ni diagnósticos/evidencias). Desde
+   * "pendiente de confirmación" (`CASE_READY_FOR_SURGERY`) en adelante, cambiar
+   * el paciente no se permite en la modificación general: el caso debe
+   * cancelarse y crearse uno nuevo. Desde "confirmado/iniciado"
+   * (`SURGICAL_CASE_IN_PROGRESS` / `CASE_COMPLETED`) está prohibido.
+   */
+  async updateCase(
+    caseId: string,
+    dto: UpdateCaseDto,
+    actor: AuthenticatedUser,
+  ): Promise<UpdateCaseResponseDto> {
+    this.logger.info(
+      { operation: 'periop.case.update', caseId },
+      'Updating surgical case',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
+      if (!surgicalCase) {
+        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
+          caseId,
+        });
+      }
+      if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
+        throw new PreconditionFailedException('El caso está cancelado', {
+          caseId,
+        });
+      }
+
+      let patientChanged = false;
+      if (
+        dto.patientProfileId &&
+        dto.patientProfileId !== surgicalCase.patientProfileId
+      ) {
+        // C-13: el cambio de paciente sólo cabe con el caso en borrador.
+        if (surgicalCase.statusConceptId !== CASE_DRAFT_STATE) {
+          throw new PreconditionFailedException(
+            'CAN-INT-001: el paciente de la intervención no puede cambiarse una vez confirmada; cancele el caso y cree uno nuevo',
+            {
+              code: 'CAN-INT-001',
+              caseId,
+              statusConceptId: surgicalCase.statusConceptId,
+            },
+          );
+        }
+        // C-13: aun en borrador, con consentimientos/asignaciones/evidencias ya
+        // ligados al paciente actual, corregirlo dejaría esos datos huérfanos.
+        if (await this.caseHasBlockingDependencies(tx, surgicalCase)) {
+          throw new PreconditionFailedException(
+            'CAN-INT-001: el paciente no puede cambiarse: el caso ya tiene asignaciones o evidencias asociadas',
+            { code: 'CAN-INT-001', caseId },
+          );
+        }
+        surgicalCase.patientProfileId = dto.patientProfileId;
+        patientChanged = true;
+      }
+
+      if (dto.priority) {
+        surgicalCase.priorityConceptId = PRIORITY_CONCEPT[dto.priority];
+      }
+      if (dto.urgencyReasonText !== undefined) {
+        surgicalCase.urgencyReasonText = dto.urgencyReasonText;
+      }
+      if (dto.scheduledStartAt) {
+        surgicalCase.scheduledStartAt = new Date(dto.scheduledStartAt);
+      }
+      if (dto.scheduledEndAt) {
+        surgicalCase.scheduledEndAt = new Date(dto.scheduledEndAt);
+      }
+      if (
+        surgicalCase.scheduledStartAt &&
+        surgicalCase.scheduledEndAt &&
+        surgicalCase.scheduledEndAt <= surgicalCase.scheduledStartAt
+      ) {
+        throw new PreconditionFailedException(
+          'El caso debe terminar después de empezar',
+          { caseId },
+        );
+      }
+
+      touch(surgicalCase, actor.id);
+
+      return {
+        id: caseId,
+        statusConceptId: surgicalCase.statusConceptId,
+        patientProfileId: surgicalCase.patientProfileId,
+        patientChanged,
+      };
+    });
+  }
+
+  /**
+   * C-14 (CAN-INT-002): confirmar la intervención. Antes de fijar el equipo y
+   * dejar el caso listo para operar, cada integrante que requiere credencial
+   * profesional debe tenerla VIGENTE (verificada). Si alguno no la tiene, se
+   * bloquea la transición (fail-closed) y se deja el gancho de notificación al
+   * médico responsable y a la organización. Confirmar precede a INICIAR (la
+   * inducción anestésica), por lo que este mismo control cubre ambos momentos.
+   */
+  async confirmCase(
+    caseId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ConfirmCaseResponseDto> {
+    this.logger.info(
+      { operation: 'periop.case.confirm', caseId },
+      'Confirming surgical case',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
+      if (!surgicalCase) {
+        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
+          caseId,
+        });
+      }
+      if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
+        throw new PreconditionFailedException('El caso está cancelado', {
+          caseId,
+        });
+      }
+      if (!CONFIRMABLE_CASE_STATES.includes(surgicalCase.statusConceptId)) {
+        throw new PreconditionFailedException(
+          'El caso no admite confirmación en su estado actual',
+          { caseId, statusConceptId: surgicalCase.statusConceptId },
+        );
+      }
+
+      const team = await this.casesRepo.findTeamByCase(tx, caseId);
+      // C-14: cada integrante con rol que exige credencial debe estar vigente.
+      const withoutCurrentCredential = team.filter(
+        (member) =>
+          CREDENTIAL_REQUIRED_TEAM_ROLES.includes(member.teamRoleConceptId) &&
+          !CREDENTIAL_CURRENT_MEMBER_STATES.includes(member.statusConceptId),
+      );
+      if (withoutCurrentCredential.length > 0) {
+        // Gancho de notificación: avisar al médico responsable del caso
+        // (cirujano principal) y a la organización custodia de que la
+        // confirmación se bloqueó por credenciales no vigentes. El envío real
+        // (correo/evento) lo resolverá el módulo de notificaciones; aquí se deja
+        // registrada la intención con los datos necesarios.
+        this.logger.warn(
+          {
+            operation: 'periop.case.confirm.blocked',
+            code: 'CAN-INT-002',
+            caseId,
+            custodianTenantId: surgicalCase.custodianTenantId,
+            responsibleProfileId: surgicalCase.primarySurgeonProfileId,
+            memberIds: withoutCurrentCredential.map((m) => m.id),
+          },
+          'Blocked case confirmation: team members without current professional credential',
+        );
+        throw new PreconditionFailedException(
+          'CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesional vigente',
+          {
+            code: 'CAN-INT-002',
+            caseId,
+            membersWithoutCurrentCredential: withoutCurrentCredential.map(
+              (m) => m.id,
+            ),
+          },
+        );
+      }
+
+      let statusConceptId = surgicalCase.statusConceptId;
+      if (statusConceptId === CONCEPTS.CASE_SCHEDULED) {
+        statusConceptId = CONCEPTS.CASE_READY_FOR_SURGERY;
+        this.casesRepo.createStatusHistory(tx, {
+          procedureCaseId: caseId,
+          fromStatusConceptId: surgicalCase.statusConceptId,
+          toStatusConceptId: statusConceptId,
+          changedByUserId: actor.id,
+          reasonText: 'Confirmación: credenciales del equipo verificadas',
+        });
+        surgicalCase.statusConceptId = statusConceptId;
+      }
+      touch(surgicalCase, actor.id);
+
+      return { id: caseId, statusConceptId, teamVerified: team.length };
+    });
+  }
+
+  /**
+   * C-13: ¿arrastra el caso dependencias que impiden reasignar el paciente?
+   * Como los consentimientos y buena parte de la evidencia clínica viven en
+   * otros módulos, aquí se comprueban las señales locales: asignaciones de
+   * equipo más allá del cirujano principal sembrado al programar, y diagnósticos
+   * ya registrados. Fail-closed: ante cualquiera de ellas, no se permite el
+   * cambio.
+   */
+  private async caseHasBlockingDependencies(
+    tx: EntityManager,
+    surgicalCase: { id: string; primarySurgeonProfileId?: string },
+  ): Promise<boolean> {
+    const team = await this.casesRepo.findTeamByCase(tx, surgicalCase.id);
+    const extraAssignments = team.some(
+      (member) =>
+        member.practitionerProfileId !== surgicalCase.primarySurgeonProfileId,
+    );
+    if (extraAssignments) return true;
+
+    const diagnoses = await this.casesRepo.findDiagnosesByCase(
+      tx,
+      surgicalCase.id,
+    );
+    return diagnoses.length > 0;
   }
 
   /**

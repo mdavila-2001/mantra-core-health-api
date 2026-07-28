@@ -334,6 +334,194 @@ describe('PeriopCasesService', () => {
     });
   });
 
+  describe('updateCase (C-13 · CAN-INT-001)', () => {
+    const NEW_PATIENT = '99999999-9999-9999-9999-999999999999';
+
+    function draftCase(overrides: Record<string, unknown> = {}): any {
+      return {
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        patientProfileId: PATIENT,
+        primarySurgeonProfileId: SURGEON,
+        ...overrides,
+      };
+    }
+
+    it('corrects the patient on a draft case without dependencies', async () => {
+      const d = build();
+      const surgicalCase = draftCase();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+      // Only the auto-seeded primary surgeon, no diagnoses: no dependencies.
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          practitionerProfileId: SURGEON,
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        },
+      ]);
+      d.casesRepo.findDiagnosesByCase.mockResolvedValue([]);
+
+      const res = await d.service.updateCase(
+        CASE,
+        { patientProfileId: NEW_PATIENT },
+        actor,
+      );
+
+      expect(res).toMatchObject({
+        patientProfileId: NEW_PATIENT,
+        patientChanged: true,
+      });
+      expect(surgicalCase.patientProfileId).toBe(NEW_PATIENT);
+    });
+
+    it('rejects changing the patient once past DRAFT (ready for surgery)', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(
+        draftCase({ statusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY }),
+      );
+
+      await expect(
+        d.service.updateCase(
+          CASE,
+          { patientProfileId: NEW_PATIENT },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects changing the patient on a confirmed/in-progress case', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(
+        draftCase({ statusConceptId: CONCEPTS.SURGICAL_CASE_IN_PROGRESS }),
+      );
+
+      await expect(
+        d.service.updateCase(
+          CASE,
+          { patientProfileId: NEW_PATIENT },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects changing the patient in DRAFT when the case has dependencies', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(draftCase());
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          practitionerProfileId: SURGEON,
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        },
+      ]);
+      // A diagnosis already tied to the current patient is a blocking dependency.
+      d.casesRepo.findDiagnosesByCase.mockResolvedValue([{ id: 'dx-1' }]);
+
+      await expect(
+        d.service.updateCase(
+          CASE,
+          { patientProfileId: NEW_PATIENT },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('allows editing other fields without touching the patient', async () => {
+      const d = build();
+      const surgicalCase = draftCase({
+        statusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
+      });
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+
+      const res = await d.service.updateCase(
+        CASE,
+        { urgencyReasonText: 'Actualización de la nota' },
+        actor,
+      );
+
+      expect(res.patientChanged).toBe(false);
+      expect(surgicalCase.urgencyReasonText).toBe('Actualización de la nota');
+    });
+  });
+
+  describe('confirmCase (C-14 · CAN-INT-002)', () => {
+    it('confirms when every credentialed member is verified', async () => {
+      const d = build();
+      const surgicalCase: any = {
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        primarySurgeonProfileId: SURGEON,
+      };
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          id: 'm-1',
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+          statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        },
+        {
+          id: 'm-2',
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_ANESTHESIOLOGIST,
+          statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        },
+      ]);
+
+      const res = await d.service.confirmCase(CASE, actor);
+
+      expect(res).toMatchObject({
+        statusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
+        teamVerified: 2,
+      });
+      expect(surgicalCase.statusConceptId).toBe(
+        CONCEPTS.CASE_READY_FOR_SURGERY,
+      );
+      expect(d.casesRepo.createStatusHistory).toHaveBeenCalled();
+    });
+
+    it('blocks confirmation when a member has no current credential (fail-closed)', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        primarySurgeonProfileId: SURGEON,
+      });
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          id: 'm-1',
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+          // Assigned but not accepted/verified: credential not current.
+          statusConceptId: CONCEPTS.TEAM_ASSIGNED,
+        },
+      ]);
+
+      await expect(
+        d.service.confirmCase(CASE, actor as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
+      expect(d.logger.warn).toHaveBeenCalled();
+    });
+
+    it('refuses to confirm a case that is not in a confirmable state', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_COMPLETED,
+        primarySurgeonProfileId: SURGEON,
+      });
+
+      await expect(
+        d.service.confirmCase(CASE, actor as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('fails when the case does not exist', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(null);
+
+      await expect(
+        d.service.confirmCase(CASE, actor as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('cancelCase (UC-53-13)', () => {
     const dto = {
       cancellationReasonConceptId: REASON,

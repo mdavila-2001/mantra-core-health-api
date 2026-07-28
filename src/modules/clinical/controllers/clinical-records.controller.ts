@@ -108,6 +108,17 @@ export class ClinicalRecordsController {
     return this.medicationsService.editDraft(id, dto, actor);
   }
 
+  /** REDESA D-05: firma la receta en borrador (aditivo; habilita emitir bajo política). */
+  @Post('medication-requests/:id/sign')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Firmar una receta en borrador (DRAFT)' })
+  signMedicationRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicationRequestResponseDto> {
+    return this.medicationsService.sign(id, actor);
+  }
+
   /** CAN-RX: emite la receta (DRAFT → ISSUED) y sella su contenido. */
   @Post('medication-requests/:id/issue')
   @HttpCode(HttpStatus.OK)

@@ -19,12 +19,14 @@ function build() {
   };
   const mfaService = { enrollOrVerify: mockFn() };
   const devicesService = { register: mockFn() };
+  const assistedRegistrationService = { assistedRegistration: mockFn() };
 
   const controller = new IamUsersController(
     usersService as any,
     credentialsService as any,
     mfaService as any,
     devicesService as any,
+    assistedRegistrationService as any,
   );
   return {
     controller,
@@ -32,6 +34,7 @@ function build() {
     credentialsService,
     mfaService,
     devicesService,
+    assistedRegistrationService,
   };
 }
 

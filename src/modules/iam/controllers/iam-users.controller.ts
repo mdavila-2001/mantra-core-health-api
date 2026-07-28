@@ -14,6 +14,7 @@ import {
   IamCredentialsService,
   IamMfaService,
   IamDevicesService,
+  IamAssistedRegistrationService,
 } from '../services';
 import {
   CreateUserDto,
@@ -27,6 +28,8 @@ import {
   LockUserDto,
   GlobalRoleDto,
   StatusResultDto,
+  AssistedRegistrationDto,
+  AssistedRegistrationResponseDto,
 } from '../dto';
 
 /**
@@ -42,7 +45,26 @@ export class IamUsersController {
     private readonly credentialsService: IamCredentialsService,
     private readonly mfaService: IamMfaService,
     private readonly devicesService: IamDevicesService,
+    private readonly assistedRegistrationService: IamAssistedRegistrationService,
   ) {}
+
+  /**
+   * C-18 / CAN-IDENT: registro asistido de un paciente. Devuelve el token de
+   * activación de un solo uso para entregar al titular por canal seguro — NUNCA
+   * una contraseña.
+   */
+  @Post('assisted-registration')
+  @Roles('CLINICIAN', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registro asistido de un paciente (devuelve token de activación)',
+  })
+  assistedRegistration(
+    @Body() dto: AssistedRegistrationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AssistedRegistrationResponseDto> {
+    return this.assistedRegistrationService.assistedRegistration(dto, actor);
+  }
 
   /** UC-01-01. */
   @Post()

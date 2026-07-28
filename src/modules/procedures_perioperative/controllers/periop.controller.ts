@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -17,6 +18,9 @@ import {
 import {
   ScheduleCaseDto,
   CaseResponseDto,
+  UpdateCaseDto,
+  UpdateCaseResponseDto,
+  ConfirmCaseResponseDto,
   AddDiagnosesDto,
   DiagnosesResponseDto,
   AssignTeamMemberDto,
@@ -82,6 +86,39 @@ export class PeriopController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CaseResponseDto> {
     return this.casesService.scheduleCase(dto, actor);
+  }
+
+  /** C-13 (CAN-INT-001). */
+  @Patch('procedure-cases/:id')
+  @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Modificar el caso quirúrgico',
+    description:
+      'El paciente sólo puede corregirse con el caso en borrador y sin dependencias (CAN-INT-001).',
+  })
+  updateCase(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateCaseDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<UpdateCaseResponseDto> {
+    return this.casesService.updateCase(id, dto, actor);
+  }
+
+  /** C-14 (CAN-INT-002). */
+  @Post('procedure-cases/:id/confirm')
+  @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Confirmar la intervención verificando las credenciales del equipo',
+    description:
+      'Bloquea la confirmación si algún integrante no tiene credencial profesional vigente (CAN-INT-002).',
+  })
+  confirmCase(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ConfirmCaseResponseDto> {
+    return this.casesService.confirmCase(id, actor);
   }
 
   /** UC-53-02. */

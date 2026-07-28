@@ -6,5 +6,6 @@ export * from './diagnostic-reports.service';
 export * from './conditions.service';
 export * from './allergy-intolerances.service';
 export * from './medications.service';
+export * from './prescription-signature-policies.service';
 export * from './procedures.service';
 export * from './immunizations.service';

@@ -84,6 +84,13 @@ export class Users {
   })
   lastLoginAt?: Date;
 
+  @Property({
+    fieldName: 'must_change_password',
+    type: 'boolean',
+    nullable: true,
+  })
+  mustChangePassword?: boolean;
+
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 

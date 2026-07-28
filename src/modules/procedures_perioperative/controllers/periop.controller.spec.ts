@@ -11,6 +11,8 @@ const SECOND = '22222222-2222-2222-2222-222222222222';
 function build() {
   const casesService = {
     scheduleCase: mockFn(),
+    updateCase: mockFn(),
+    confirmCase: mockFn(),
     addDiagnoses: mockFn(),
     assignTeamMember: mockFn(),
     cancelCase: mockFn(),
@@ -57,6 +59,23 @@ describe('PeriopController', () => {
     await d.controller.scheduleCase(dto, actor);
 
     expect(d.casesService.scheduleCase).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates case update and confirmation (C-13, C-14)', async () => {
+    const d = build();
+    const updateDto = { patientProfileId: SECOND } as any;
+    d.casesService.updateCase.mockResolvedValue({ id: ID });
+    d.casesService.confirmCase.mockResolvedValue({ id: ID });
+
+    await d.controller.updateCase(ID, updateDto, actor);
+    await d.controller.confirmCase(ID, actor);
+
+    expect(d.casesService.updateCase).toHaveBeenCalledWith(
+      ID,
+      updateDto,
+      actor,
+    );
+    expect(d.casesService.confirmCase).toHaveBeenCalledWith(ID, actor);
   });
 
   it('delegates diagnoses and team assignment (UC-53-02)', async () => {
