@@ -28,7 +28,8 @@
     "orm:entities:missing": "node tools/catalog/generate-missing-entities.mjs",
     "orm:audit": "node tools/catalog/audit-fidelity.mjs graphify-out/fidelity-audit.json",
     "orm:schema:dump": "ORM_SCHEMA_SYNC=dry-run node dist/main",
-    "redesa:guardrails": "node tools/redesa/guardrails.mjs"
+    "redesa:guardrails": "node tools/redesa/guardrails.mjs",
+    "redesa:coverage": "node tools/redesa/coverage-report.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",

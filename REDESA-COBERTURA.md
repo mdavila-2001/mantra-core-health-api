@@ -1,0 +1,97 @@
+# Informe de cobertura REDESA (estático)
+
+- Entidades (tablas mapeadas): **1179**
+- Endpoints declarados: **814** en 187 controllers
+- Módulos: **57**
+
+## ORPHAN_TABLE — entidades sin consumidor fuera de `entities/` (304)
+> Heurística estática: la entidad puede consumirse por catálogo ORM/migración; revisar antes de eliminar.
+- `accounting` · AccountGroups (src/modules/accounting/entities/account_groups.entity.ts)
+- `accounting` · AssetClasses (src/modules/accounting/entities/asset_classes.entity.ts)
+- `accounting` · CompanyBankAccounts (src/modules/accounting/entities/company_bank_accounts.entity.ts)
+- `accounting` · ControllingAreas (src/modules/accounting/entities/controlling_areas.entity.ts)
+- `accounting` · CostCenterMaps (src/modules/accounting/entities/cost_center_maps.entity.ts)
+- `accounting` · CostCenters (src/modules/accounting/entities/cost_centers.entity.ts)
+- `accounting` · DepreciationAreas (src/modules/accounting/entities/depreciation_areas.entity.ts)
+- `accounting` · EmployeePayments (src/modules/accounting/entities/employee_payments.entity.ts)
+- `accounting` · FunctionalAreas (src/modules/accounting/entities/functional_areas.entity.ts)
+- `accounting` · InfrastructureItems (src/modules/accounting/entities/infrastructure_items.entity.ts)
+- `accounting` · InternalOrders (src/modules/accounting/entities/internal_orders.entity.ts)
+- `accounting` · ProfitCenters (src/modules/accounting/entities/profit_centers.entity.ts)
+- `accounting` · Purchases (src/modules/accounting/entities/purchases.entity.ts)
+- `accounting` · Sales (src/modules/accounting/entities/sales.entity.ts)
+- `accounting` · AccountingSegments (src/modules/accounting/entities/segments.entity.ts)
+- `ads` · BrandLiftStudies (src/modules/ads/entities/brand_lift_studies.entity.ts)
+- `ads` · CollectionAds (src/modules/ads/entities/collection_ads.entity.ts)
+- `ads` · ConversionAttributions (src/modules/ads/entities/conversion_attributions.entity.ts)
+- `ads` · CustomConversions (src/modules/ads/entities/custom_conversions.entity.ts)
+- `ads` · DatasetConnections (src/modules/ads/entities/dataset_connections.entity.ts)
+- `ads` · DatasetQualitySnapshots (src/modules/ads/entities/dataset_quality_snapshots.entity.ts)
+- `ads` · DynamicAdTemplates (src/modules/ads/entities/dynamic_ad_templates.entity.ts)
+- `ads` · ExternalAdObjectSnapshots (src/modules/ads/entities/external_ad_object_snapshots.entity.ts)
+- `ads` · FrequencyCaps (src/modules/ads/entities/frequency_caps.entity.ts)
+- `ads` · InsightBreakdownDefinitions (src/modules/ads/entities/insight_breakdown_definitions.entity.ts)
+- `ads` · InsightMetricDefinitions (src/modules/ads/entities/insight_metric_definitions.entity.ts)
+- `ads` · PixelEvents (src/modules/ads/entities/pixel_events.entity.ts)
+- `ads` · ProductLocalizations (src/modules/ads/entities/product_localizations.entity.ts)
+- `ads` · TrackingPixels (src/modules/ads/entities/tracking_pixels.entity.ts)
+- `audit` · AccountsHistory (src/modules/audit/entities/accounts_history.entity.ts)
+- `audit` · AdAccountsHistory (src/modules/audit/entities/ad_accounts_history.entity.ts)
+- `audit` · AdCreativesHistory (src/modules/audit/entities/ad_creatives_history.entity.ts)
+- `audit` · AdExperimentsHistory (src/modules/audit/entities/ad_experiments_history.entity.ts)
+- `audit` · AdSetsHistory (src/modules/audit/entities/ad_sets_history.entity.ts)
+- `audit` · AdsHistory (src/modules/audit/entities/ads_history.entity.ts)
+- `audit` · AgentVersionsHistory (src/modules/audit/entities/agent_versions_history.entity.ts)
+- `audit` · AgentsHistory (src/modules/audit/entities/agents_history.entity.ts)
+- `audit` · AllergyIntolerancesHistory (src/modules/audit/entities/allergy_intolerances_history.entity.ts)
+- `audit` · AppointmentBookingsHistory (src/modules/audit/entities/appointment_bookings_history.entity.ts)
+- `audit` · AssetsHistory (src/modules/audit/entities/assets_history.entity.ts)
+- `audit` · AutomatedRulesHistory (src/modules/audit/entities/automated_rules_history.entity.ts)
+- `audit` · BillsHistory (src/modules/audit/entities/bills_history.entity.ts)
+- `audit` · BookingPoliciesHistory (src/modules/audit/entities/booking_policies_history.entity.ts)
+- `audit` · CampaignsHistory (src/modules/audit/entities/campaigns_history.entity.ts)
+- `audit` · CarePlansHistory (src/modules/audit/entities/care_plans_history.entity.ts)
+- `audit` · CareSpacesHistory (src/modules/audit/entities/care_spaces_history.entity.ts)
+- `audit` · CareTeamsHistory (src/modules/audit/entities/care_teams_history.entity.ts)
+- `audit` · CatalogProductsHistory (src/modules/audit/entities/catalog_products_history.entity.ts)
+- `audit` · CdsRulesHistory (src/modules/audit/entities/cds_rules_history.entity.ts)
+- `audit` · CertificatesHistory (src/modules/audit/entities/certificates_history.entity.ts)
+- `audit` · ClinicalAlertsHistory (src/modules/audit/entities/clinical_alerts_history.entity.ts)
+- `audit` · ClinicalNoteHeadersHistory (src/modules/audit/entities/clinical_note_headers_history.entity.ts)
+- `audit` · ClinicalUnitsHistory (src/modules/audit/entities/clinical_units_history.entity.ts)
+- `audit` · CommentsHistory (src/modules/audit/entities/comments_history.entity.ts)
+- `audit` · ConditionsHistory (src/modules/audit/entities/conditions_history.entity.ts)
+- `audit` · ConnectedAccountsHistory (src/modules/audit/entities/connected_accounts_history.entity.ts)
+- `audit` · ContactsHistory (src/modules/audit/entities/contacts_history.entity.ts)
+- `audit` · ContractsHistory (src/modules/audit/entities/contracts_history.entity.ts)
+- `audit` · ConversationsHistory (src/modules/audit/entities/conversations_history.entity.ts)
+- `audit` · CouponsHistory (src/modules/audit/entities/coupons_history.entity.ts)
+- … +244 más
+
+## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (23)
+- src/modules/common/controllers/common-addresses.controller.ts:16 — @Post 
+- src/modules/common/controllers/common-contact-points.controller.ts:28 — @Post 
+- src/modules/common/controllers/common-contact-points.controller.ts:39 — @Post ':id/verify'
+- src/modules/common/controllers/common-files.controller.ts:36 — @Post 
+- src/modules/common/controllers/common-files.controller.ts:49 — @Post ':id/versions'
+- src/modules/common/controllers/common-files.controller.ts:61 — @Post ':id/versions/:vid/derivatives'
+- src/modules/common/controllers/common-files.controller.ts:74 — @Post ':id/links'
+- src/modules/common/controllers/common-files.controller.ts:86 — @Delete ':id'
+- src/modules/common/controllers/common-files.controller.ts:97 — @Post ':id/download-url'
+- src/modules/common/controllers/common-identifiers.controller.ts:16 — @Post 
+- src/modules/community/controllers/community-groups.controller.ts:28 — @Post 
+- src/modules/community/controllers/community-groups.controller.ts:39 — @Post ':groupId/members'
+- src/modules/community/controllers/community-messaging.controller.ts:30 — @Post 
+- src/modules/community/controllers/community-messaging.controller.ts:41 — @Post ':conversationId/messages'
+- src/modules/community/controllers/community-messaging.controller.ts:53 — @Post ':conversationId/read'
+- src/modules/community/controllers/community-polls.controller.ts:28 — @Post 'posts/:postId/polls'
+- src/modules/community/controllers/community-polls.controller.ts:40 — @Post 'polls/:pollId/votes'
+- src/modules/community/controllers/community-reviews.controller.ts:23 — @Post ':profileId/reviews'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:36 — @Post 'activity-events'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:48 — @Post 'client-contexts'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:60 — @Post 'web-vitals'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:72 — @Post 'conversion-events'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:82 — @Post 'session-journeys/:id/close'
+
+## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (1)
+- src/modules/promotions/repositories/promotions-loyalty.repository.ts → `payments`
