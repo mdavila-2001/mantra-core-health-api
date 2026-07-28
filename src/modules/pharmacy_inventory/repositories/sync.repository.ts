@@ -48,6 +48,14 @@ export class SyncRepository {
     });
   }
 
+  /** Item de sync previo con la misma clave de idempotencia (dedupe en retry). */
+  findItemByIdempotencyKey(
+    em: EntityManager,
+    idempotencyKey: string,
+  ): Promise<PharmacyInventorySyncItems | null> {
+    return em.findOne(PharmacyInventorySyncItems, { idempotencyKey });
+  }
+
   createBatch(
     em: EntityManager,
     data: CreateSyncBatchData,

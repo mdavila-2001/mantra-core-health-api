@@ -21,6 +21,21 @@ export class DomainException extends HttpException {
   }
 }
 
+/** Credencial/firma ausente o inválida (autenticación fallida). */
+export class UnauthorizedException extends DomainException {
+  constructor(
+    message = 'No autenticado',
+    details?: Record<string, unknown>,
+  ) {
+    super(
+      HttpStatus.UNAUTHORIZED,
+      ErrorCode.UNAUTHENTICATED,
+      message,
+      details,
+    );
+  }
+}
+
 /** Recurso relacionado o principal inexistente. */
 export class ResourceNotFoundException extends DomainException {
   constructor(

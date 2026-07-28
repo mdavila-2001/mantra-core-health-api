@@ -1,12 +1,13 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ChartDocumentsService } from '../services';
 import { CreateDocumentDto, DocumentResponseDto } from '../dto';
 
 /** Endpoints de documentos gobernados del chart (`/charts/documents`). */
 @ApiTags('chart-documents')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('charts/documents')
 export class ChartDocumentsController {
   constructor(private readonly documentsService: ChartDocumentsService) {}

@@ -8,7 +8,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ClinicalAlertsService } from '../services';
 import { OverrideAlertDto, ClinicalAlertResponseDto } from '../dto';
 
@@ -18,6 +18,7 @@ import { OverrideAlertDto, ClinicalAlertResponseDto } from '../dto';
  */
 @ApiTags('clinical-ext-alerts')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical-alerts')
 export class ClinicalAlertsController {
   constructor(private readonly alertsService: ClinicalAlertsService) {}

@@ -3,8 +3,10 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
+  HttpDispatcherService,
   PreconditionFailedException,
   ResourceNotFoundException,
+  deriveWebhookSecret,
   type AuthenticatedUser,
 } from '../../../common';
 import { ICON } from '../integration_contracts.concepts';
@@ -36,6 +38,7 @@ export class IntegrationWebhooksService {
     private readonly subscriptionsRepo: WebhookSubscriptionsRepository,
     private readonly exchangeRecordsRepo: ExchangeRecordsRepository,
     private readonly evidenceRepo: DeliveryEvidenceRepository,
+    private readonly http: HttpDispatcherService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IntegrationWebhooksService.name);
@@ -174,7 +177,28 @@ export class IntegrationWebhooksService {
         );
       }
 
-      const delivered = (dto.outcome ?? 'DELIVERED') === 'DELIVERED';
+      // Entrega real: POST firmado al callbackUri de la suscripción. El resultado
+      // (delivered) proviene del código HTTP real, no de un valor del cliente.
+      if (!sub.callbackUri) {
+        throw new PreconditionFailedException(
+          'La suscripción no tiene callbackUri para entregar',
+          { subscriptionId },
+        );
+      }
+      const secret = sub.secretReference ?? deriveWebhookSecret('subscription', sub.id); // TODO secreto por conexión
+      const body = {
+        contractVersionId: version.id,
+        eventTypeConceptId: sub.eventTypeConceptId,
+        correlationId: dto.correlationId,
+        requestHash: dto.requestHash,
+      };
+      const dispatch = await this.http.post({
+        url: sub.callbackUri,
+        body,
+        secret,
+      });
+      const delivered = dispatch.ok;
+
       const record = this.exchangeRecordsRepo.create(tx, {
         integrationContractVersionId: version.id,
         directionConceptId: ICON.DIRECTION_OUTBOUND,
@@ -192,13 +216,12 @@ export class IntegrationWebhooksService {
       const evidence = this.evidenceRepo.create(tx, {
         webhookSubscriptionId: subscriptionId,
         integrationExchangeRecordId: record.id,
-        signatureAlgorithm: dto.signatureAlgorithm,
-        signatureVerificationConceptId:
-          dto.signatureVerified === false
-            ? ICON.SIGNATURE_FAILED
-            : ICON.SIGNATURE_VERIFIED,
+        signatureAlgorithm: dto.signatureAlgorithm ?? 'HMAC-SHA256',
+        // Nosotros firmamos el cuerpo con el secreto de la suscripción: la firma
+        // sale verificada por construcción, no según un valor del cliente.
+        signatureVerificationConceptId: ICON.SIGNATURE_VERIFIED,
         deliveredAt: delivered ? now : undefined,
-        acknowledgedAt: dto.acknowledged ? now : undefined,
+        acknowledgedAt: delivered ? now : undefined,
         outcomeConceptId: delivered
           ? ICON.DELIVERY_DELIVERED
           : ICON.DELIVERY_FAILED,
@@ -211,6 +234,8 @@ export class IntegrationWebhooksService {
           subscriptionId,
           evidenceId: evidence.id,
           delivered,
+          httpStatus: dispatch.httpStatus,
+          latencyMs: dispatch.latencyMs,
         },
         'Webhook delivery recorded',
       );

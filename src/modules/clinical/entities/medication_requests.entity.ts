@@ -75,6 +75,39 @@ export class MedicationRequests {
   })
   validTo?: Date;
 
+  // --- Inmutabilidad / máquina de estados de receta (REDESA CAN-RX-001..004) ---
+  // El modelo no traía columnas de relación entre recetas; se añaden aquí (self-FK
+  // lógicas → clinical.medication_requests.id, mismo patrón que
+  // procedures.parent_procedure_id) para encadenar corrección/renovación.
+
+  /** Instante en que la receta se selló (DRAFT → ISSUED); a partir de aquí es inmutable. */
+  @Property({ fieldName: 'issued_at', columnType: 'timestamptz', nullable: true })
+  issuedAt?: Date;
+
+  /** Motivo de INVALIDATED/REPLACED (obligatorio al invalidar/reemplazar). */
+  @Property({
+    fieldName: 'status_reason_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  statusReasonText?: string;
+
+  /** Receta a la que ESTA sustituye (esta es la corrección). FK → medication_requests.id */
+  @Property({ fieldName: 'replaces_request_id', type: 'uuid', nullable: true })
+  replacesRequestId?: string;
+
+  /** Receta que sustituye a ESTA (esta quedó REPLACED). FK → medication_requests.id */
+  @Property({ fieldName: 'replaced_by_request_id', type: 'uuid', nullable: true })
+  replacedByRequestId?: string;
+
+  /** Receta de la que ESTA es renovación (copia). FK → medication_requests.id */
+  @Property({
+    fieldName: 'renewed_from_request_id',
+    type: 'uuid',
+    nullable: true,
+  })
+  renewedFromRequestId?: string;
+
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 

@@ -9,7 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ChartNotesService } from '../services';
 import {
   AddVersionDto,
@@ -32,6 +32,7 @@ import {
  */
 @ApiTags('chart-notes')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('charts/notes')
 export class ChartNotesController {
   constructor(private readonly notesService: ChartNotesService) {}

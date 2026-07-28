@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Length,
   MaxLength,
 } from 'class-validator';
 
@@ -43,4 +44,14 @@ export class MfaFactorDto {
   @IsOptional()
   @IsUUID()
   factorId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Código TOTP de la app autenticadora. Obligatorio cuando verify=true.',
+    example: '123456',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(6, 8)
+  code?: string;
 }

@@ -64,6 +64,25 @@ export class AuditLogRepository {
   }
 
   /**
+   * Serializa el append por partición de tenant dentro de la transacción actual.
+   *
+   * El cerrojo es un `pg_advisory_xact_lock`: se toma sobre la MISMA transacción
+   * que hará el insert y se libera solo al COMMIT/ROLLBACK. Así, entre leer el
+   * tip de la cadena (`previous_hash`) e insertar el nuevo eslabón, ningún otro
+   * append del mismo tenant puede colarse; sin él, dos escrituras concurrentes
+   * leerían el mismo `previous_hash` y bifurcarían la cadena WORM.
+   *
+   * La clave se compone en JS (`audit:<tenant>`) y se hashea con `hashtext(?)`:
+   * así la partición global (`tenant_id IS NULL`) obtiene una clave estable en
+   * vez del NULL que devolvería `'audit:'||NULL`, que no bloquearía nada.
+   */
+  private lockChainPartition(em: EntityManager, tenantId?: string): Promise<unknown> {
+    return em.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [
+      `audit:${tenantId ?? ''}`,
+    ]);
+  }
+
+  /**
    * Última fila de la cadena de la partición para leer `previous_hash`. La
    * partición es el tenant (o la partición global `tenant_id IS NULL`): así cada
    * cadena es autoconsistente y no se entrelaza con la de otros tenants.
@@ -83,6 +102,9 @@ export class AuditLogRepository {
    */
   async append(em: EntityManager, data: AppendAuditData): Promise<AuditLog> {
     const recordedAt = new Date();
+    // Serializa el append por tenant ANTES de leer el tip: leer el último eslabón
+    // e insertar el nuevo pasa a ser atómico frente a otros appends del tenant.
+    await this.lockChainPartition(em, data.tenantId);
     const tip = await this.findChainTip(em, data.tenantId);
     const previousHash = tip?.recordHash;
     const content = AuditLogRepository.content(data);

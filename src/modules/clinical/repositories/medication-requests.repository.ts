@@ -19,6 +19,11 @@ export interface CreateMedicationRequestData {
   unitConceptId?: string;
   validFrom?: Date;
   validTo?: Date;
+  issuedAt?: Date;
+  statusReasonText?: string;
+  replacesRequestId?: string;
+  replacedByRequestId?: string;
+  renewedFromRequestId?: string;
   actorUserId?: string;
 }
 
@@ -51,6 +56,11 @@ export class MedicationRequestsRepository {
         unitConceptId: data.unitConceptId,
         validFrom: data.validFrom,
         validTo: data.validTo,
+        issuedAt: data.issuedAt,
+        statusReasonText: data.statusReasonText,
+        replacesRequestId: data.replacesRequestId,
+        replacedByRequestId: data.replacedByRequestId,
+        renewedFromRequestId: data.renewedFromRequestId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

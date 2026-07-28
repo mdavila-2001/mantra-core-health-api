@@ -14,6 +14,8 @@ function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const connectionsRepo = { findById: mockFn() };
+  const providersRepo = { findById: mockFn() };
+  const endpointsRepo = { findById: mockFn() };
   const outboundRepo = {
     findById: mockFn(),
     findByIdempotencyKey: mockFn(),
@@ -26,24 +28,40 @@ function build() {
     create: mockFn(),
   };
   const inboundRepo = { findById: mockFn() };
+  // Despacho HTTP real mockeado: por defecto responde 2xx.
+  const http = {
+    post: mockFn().mockResolvedValue({
+      ok: true,
+      httpStatus: 200,
+      latencyMs: 12,
+      signature: 'sig',
+      responseBody: { ok: true },
+    }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new IntegrationsMessagingService(
     em as any,
     connectionsRepo as any,
+    providersRepo as any,
+    endpointsRepo as any,
     outboundRepo as any,
     responsesRepo,
     retriesRepo,
     inboundRepo as any,
+    http as any,
     logger as any,
   );
   return {
     service,
     tx,
     connectionsRepo,
+    providersRepo,
+    endpointsRepo,
     outboundRepo,
     responsesRepo,
     retriesRepo,
     inboundRepo,
+    http,
   };
 }
 
@@ -128,36 +146,84 @@ describe('IntegrationsMessagingService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
-    it('marks SENT and records a successful response', async () => {
+    function wireDispatch(d: ReturnType<typeof build>, msg: any) {
+      d.outboundRepo.findById.mockResolvedValue(msg);
+      d.connectionsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        providerId: 'p1',
+      });
+      d.providersRepo.findById.mockResolvedValue({
+        id: 'p1',
+        baseUrl: 'https://provider.example/api',
+      });
+      d.responsesRepo.create.mockReturnValue({ id: 'r1' });
+    }
+
+    it('marks SENT and records the real successful response', async () => {
       const d = build();
       const msg: any = {
         id: 'm1',
+        connectionId: 'c1',
         statusConceptId: INTEG.MSG_QUEUED,
+        requestPayloadJson: { a: 1 },
         updatedAt: new Date(),
       };
-      d.outboundRepo.findById.mockResolvedValue(msg);
-      d.responsesRepo.create.mockReturnValue({ id: 'r1' });
+      wireDispatch(d, msg);
+
       const res = await d.service.dispatch('m1', {}, actor);
+
+      expect(d.http.post).toHaveBeenCalledTimes(1);
       expect(res.isSuccess).toBe(true);
       expect(msg.statusConceptId).toBe(INTEG.MSG_SENT);
+      expect(d.responsesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ httpStatus: 200, latencyMs: 12 }),
+      );
     });
 
-    it('marks FAILED when simulateFailure is set', async () => {
+    it('marks FAILED when the provider responds with an error', async () => {
       const d = build();
       const msg: any = {
         id: 'm1',
+        connectionId: 'c1',
         statusConceptId: INTEG.MSG_QUEUED,
+        requestPayloadJson: {},
         updatedAt: new Date(),
       };
-      d.outboundRepo.findById.mockResolvedValue(msg);
-      d.responsesRepo.create.mockReturnValue({ id: 'r1' });
-      const res = await d.service.dispatch(
-        'm1',
-        { simulateFailure: true },
-        actor,
-      );
+      wireDispatch(d, msg);
+      d.http.post.mockResolvedValue({
+        ok: false,
+        httpStatus: 502,
+        latencyMs: 30,
+        signature: 'sig',
+        responseBody: undefined,
+        errorText: 'HTTP 502',
+      });
+
+      const res = await d.service.dispatch('m1', {}, actor);
+
       expect(res.isSuccess).toBe(false);
       expect(msg.statusConceptId).toBe(INTEG.MSG_FAILED);
+    });
+
+    it('rejects when the provider has no base_url configured (precondition)', async () => {
+      const d = build();
+      const msg: any = {
+        id: 'm1',
+        connectionId: 'c1',
+        statusConceptId: INTEG.MSG_QUEUED,
+        requestPayloadJson: {},
+      };
+      d.outboundRepo.findById.mockResolvedValue(msg);
+      d.connectionsRepo.findById.mockResolvedValue({
+        id: 'c1',
+        providerId: 'p1',
+      });
+      d.providersRepo.findById.mockResolvedValue({ id: 'p1' });
+
+      await expect(
+        d.service.dispatch('m1', {}, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 

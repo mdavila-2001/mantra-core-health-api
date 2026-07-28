@@ -27,6 +27,9 @@ import {
   PurgeResultDto,
 } from '../dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
+// Lectura cross-dominio acotada al límite de autenticación: al emitir el token
+// se resuelven las membresías de tenant del sujeto para embeberlas como claim.
+import { TenantMemberships } from '../../directory/entities';
 
 /**
  * Flujos de autenticación de sesión: login (UC-01-04), rotación de tokens con
@@ -54,6 +57,22 @@ export class IamAuthService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamAuthService.name);
+  }
+
+  /**
+   * Tenants de los que el usuario es miembro ACTIVO. Se embeben en el token para
+   * que el `X-Tenant-Id` del request pueda validarse sin un lookup por petición.
+   */
+  private async loadActiveTenantIds(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string[]> {
+    const memberships =
+      (await em.find(TenantMemberships, {
+        userId,
+        statusConceptId: CONCEPTS.MEMBERSHIP_ACTIVE,
+      })) ?? [];
+    return [...new Set(memberships.map((m) => m.tenantId))];
   }
 
   /** UC-01-04: autentica por email+contraseña y abre una sesión. */
@@ -92,7 +111,12 @@ export class IamAuthService {
       const roles = conceptIdsToRoleCodes(
         activeRoles.map((r) => r.roleConceptId),
       );
-      const issued = this.tokenService.issueSessionTokens(user.id, roles);
+      const tenants = await this.loadActiveTenantIds(tx, user.id);
+      const issued = this.tokenService.issueSessionTokens(
+        user.id,
+        roles,
+        tenants,
+      );
 
       const session = this.sessionsRepo.create(tx, {
         userId: user.id,
@@ -181,10 +205,12 @@ export class IamAuthService {
       const roles = conceptIdsToRoleCodes(
         activeRoles.map((r) => r.roleConceptId),
       );
+      const tenants = await this.loadActiveTenantIds(tx, session.userId);
       const accessToken = this.tokenService.signAccessToken(
         session.userId,
         session.tokenId,
         roles,
+        tenants,
       );
       const { raw, hash } = this.tokenService.issueRefreshToken();
       const expiresAt = new Date(

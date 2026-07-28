@@ -15,7 +15,7 @@ beforeAll(async () => {
 });
 
 function build() {
-  const tx = { flush: mockFn() };
+  const tx = { flush: mockFn(), find: mockFn(() => []) };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => ({})),

@@ -150,13 +150,18 @@ describe('AuthzPdpService', () => {
       );
     });
 
-    it('PERMIT via an active clinical access grant by purpose of use', async () => {
+    it('PERMIT via an active clinical access grant when level and purpose match', async () => {
       const d = build();
       d.permissionsRepo.findByResourceAction.mockResolvedValue({
         id: 'perm-1',
       });
       d.clinicalRepo.findActiveForUserPatient.mockResolvedValue([
-        { validFrom: null, validTo: new Date(Date.now() + 3_600_000) },
+        {
+          validFrom: null,
+          validTo: new Date(Date.now() + 3_600_000),
+          reasonConceptId: AUTHZ.PURPOSE_TREATMENT,
+          accessLevelConceptId: AUTHZ.ACCESS_LEVEL_READ,
+        },
       ]);
       const res = await d.service.evaluate(
         { ...baseDto, patientProfileId: 'pat-1', purposeOfUse: 'TREATMENT' },
@@ -164,6 +169,71 @@ describe('AuthzPdpService', () => {
       );
       expect(res.decision).toBe('PERMIT');
       expect(res.purposeOfUse).toBe('TREATMENT');
+    });
+
+    it('DENY: a READ clinical grant does not authorize DELETE (CAN-AUTH-001)', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.clinicalRepo.findActiveForUserPatient.mockResolvedValue([
+        {
+          validFrom: null,
+          validTo: new Date(Date.now() + 3_600_000),
+          reasonConceptId: AUTHZ.PURPOSE_TREATMENT,
+          accessLevelConceptId: AUTHZ.ACCESS_LEVEL_READ,
+        },
+      ]);
+      const res = await d.service.evaluate(
+        {
+          ...baseDto,
+          action: 'DELETE',
+          patientProfileId: 'pat-1',
+          purposeOfUse: 'TREATMENT',
+        },
+        actor,
+      );
+      expect(res.decision).toBe('DENY');
+    });
+
+    it('DENY: a clinical grant with a different purpose of use does not authorize', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.clinicalRepo.findActiveForUserPatient.mockResolvedValue([
+        {
+          validFrom: null,
+          validTo: new Date(Date.now() + 3_600_000),
+          reasonConceptId: AUTHZ.PURPOSE_TREATMENT,
+          accessLevelConceptId: AUTHZ.ACCESS_LEVEL_FULL,
+        },
+      ]);
+      const res = await d.service.evaluate(
+        { ...baseDto, patientProfileId: 'pat-1', purposeOfUse: 'PAYMENT' },
+        actor,
+      );
+      expect(res.decision).toBe('DENY');
+    });
+
+    it('DENY: a clinical grant requires an explicit purpose of use to authorize', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.clinicalRepo.findActiveForUserPatient.mockResolvedValue([
+        {
+          validFrom: null,
+          validTo: new Date(Date.now() + 3_600_000),
+          reasonConceptId: AUTHZ.PURPOSE_TREATMENT,
+          accessLevelConceptId: AUTHZ.ACCESS_LEVEL_READ,
+        },
+      ]);
+      const res = await d.service.evaluate(
+        { ...baseDto, patientProfileId: 'pat-1' },
+        actor,
+      );
+      expect(res.decision).toBe('DENY');
     });
 
     it('reports masked fields from field permissions', async () => {

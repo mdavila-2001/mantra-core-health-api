@@ -44,6 +44,10 @@ function build() {
     findReferralByCode: mockFn(),
     findReferralForUpdate: mockFn(),
     findReferralsByReferrer: mockFn(),
+    findWalletForUpdate: mockFn(),
+    createWallet: mockFn(),
+    findWalletLedgerEntryByKey: mockFn(),
+    createWalletLedgerEntry: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PromotionsLoyaltyService(
@@ -657,6 +661,8 @@ describe('PromotionsLoyaltyService', () => {
     function rewardingProgram(): any {
       return {
         id: PROGRAM,
+        tenantId: TENANT,
+        currencyConceptId: 'currency-usd',
         referrerAwardTypeConceptId: CONCEPTS.AWARD_POINTS,
         referrerAwardAmount: '100',
         refereeAwardTypeConceptId: CONCEPTS.AWARD_POINTS,
@@ -739,7 +745,7 @@ describe('PromotionsLoyaltyService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('skips the ledger for a wallet-credit award, which payments settles', async () => {
+    it('credits the wallet for a wallet-credit award, locking and creating it if absent', async () => {
       const d = build();
       d.loyaltyRepo.findReferralForUpdate.mockResolvedValue(pendingReferral());
       d.loyaltyRepo.findReferralProgramById.mockResolvedValue({
@@ -747,12 +753,57 @@ describe('PromotionsLoyaltyService', () => {
         referrerAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
         refereeAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
       });
+      d.loyaltyRepo.findWalletLedgerEntryByKey.mockResolvedValue(null);
+      d.loyaltyRepo.findMembershipForUpdate.mockResolvedValue(membership());
+      // La billetera del referidor no existe; la del referido sí (saldo 20).
+      d.loyaltyRepo.findWalletForUpdate
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 'wallet-referee', availableBalance: '20' });
+      d.loyaltyRepo.createWallet.mockReturnValue({
+        id: 'wallet-referrer',
+        availableBalance: '0',
+      });
+      let n = 0;
+      d.loyaltyRepo.createWalletLedgerEntry.mockImplementation(() => ({
+        id: `wled-${++n}`,
+      }));
 
       const res = await d.service.qualifyReferral(REFERRAL, dto, actor);
 
-      expect(res.referrerLedgerEntryId).toBeUndefined();
-      expect(res.refereeLedgerEntryId).toBeUndefined();
       expect(res.statusConceptId).toBe(CONCEPTS.REFERRAL_QUALIFIED);
+      expect(res.referrerLedgerEntryId).toBe('wled-1');
+      expect(res.refereeLedgerEntryId).toBe('wled-2');
+      // Se creó la billetera ausente y no se tocó el ledger de puntos.
+      expect(d.loyaltyRepo.createWallet).toHaveBeenCalledTimes(1);
+      expect(d.loyaltyRepo.createLedgerEntry).not.toHaveBeenCalled();
+      // El abono suma sobre el saldo existente del referido: 20 + 50 = 70.00.
+      const refereeEntry =
+        d.loyaltyRepo.createWalletLedgerEntry.mock.calls[1][1];
+      expect(refereeEntry).toMatchObject({
+        walletId: 'wallet-referee',
+        amount: '50',
+        balanceAfter: '70.00',
+        idempotencyKey: `referral:${REFERRAL}:referee`,
+      });
+    });
+
+    it('is idempotent on wallet credit: an existing entry is not re-credited', async () => {
+      const d = build();
+      d.loyaltyRepo.findReferralForUpdate.mockResolvedValue(pendingReferral());
+      d.loyaltyRepo.findReferralProgramById.mockResolvedValue({
+        ...rewardingProgram(),
+        referrerAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
+        refereeAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
+      });
+      d.loyaltyRepo.findWalletLedgerEntryByKey.mockResolvedValue({
+        id: 'wled-existing',
+      });
+
+      const res = await d.service.qualifyReferral(REFERRAL, dto, actor);
+
+      expect(res.referrerLedgerEntryId).toBe('wled-existing');
+      expect(d.loyaltyRepo.createWalletLedgerEntry).not.toHaveBeenCalled();
+      expect(d.loyaltyRepo.findWalletForUpdate).not.toHaveBeenCalled();
     });
   });
 });

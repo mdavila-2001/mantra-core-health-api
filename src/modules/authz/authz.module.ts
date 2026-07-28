@@ -30,6 +30,7 @@ import {
   FieldPermissionsRepository,
   ResourceScopeGrantsRepository,
 } from './repositories';
+import { DataAccessLogRepository } from '../audit/repositories';
 
 /**
  * Módulo 06 — Authorization, Purpose of Use and Field Masking.
@@ -62,6 +63,8 @@ import {
     BreakGlassSessionsRepository,
     FieldPermissionsRepository,
     ResourceScopeGrantsRepository,
+    // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
+    DataAccessLogRepository,
     // Servicios
     AuthzCatalogService,
     AuthzPoliciesService,

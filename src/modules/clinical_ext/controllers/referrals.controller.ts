@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ReferralsService } from '../services';
 import {
   CreateReferralDto,
@@ -24,6 +24,7 @@ import {
  */
 @ApiTags('clinical-ext-referrals')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('referrals')
 export class ReferralsController {
   constructor(private readonly referralsService: ReferralsService) {}

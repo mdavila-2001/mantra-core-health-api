@@ -20,14 +20,16 @@ function build() {
     create: mockFn(),
   };
   const btgRepo = { create: mockFn() };
+  const dataAccessLogRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuthzClinicalService(
     em as any,
     grantsRepo as any,
     btgRepo,
+    dataAccessLogRepo as any,
     logger as any,
   );
-  return { service, tx, grantsRepo, btgRepo };
+  return { service, tx, grantsRepo, btgRepo, dataAccessLogRepo };
 }
 
 const future = new Date(Date.now() + 3_600_000);
@@ -122,6 +124,16 @@ describe('AuthzClinicalService', () => {
       );
       expect(res.id).toBe('cag-e');
       expect(d.btgRepo.create).toHaveBeenCalled();
+      // Registra el evento de acceso de emergencia (datos consultados) en audit.
+      expect(d.dataAccessLogRepo.record).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          userId: actor.id,
+          patientProfileId: 'pat-1',
+          purpose: 'EMERGENCY',
+          resourceId: 'pat-1',
+        }),
+      );
       expect(d.tx.flush).toHaveBeenCalledTimes(2);
     });
   });

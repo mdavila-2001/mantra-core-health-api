@@ -17,6 +17,12 @@ export { Public } from './auth/public.decorator';
 export { Roles } from './auth/roles.decorator';
 export { authEnvSchema, loadAuthEnv } from './auth/auth.env';
 export type { AuthEnv } from './auth/auth.env';
+export {
+  runWithTenant,
+  getCurrentTenantId,
+} from './tenant/tenant-context';
+export type { TenantContext } from './tenant/tenant-context';
+export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
 export type { AuthenticatedUser } from './auth/authenticated-user.interface';
 export type { JwtPayload } from './auth/jwt-payload.interface';
 
@@ -24,6 +30,7 @@ export type { JwtPayload } from './auth/jwt-payload.interface';
 export { ErrorCode } from './errors/error-codes';
 export {
   DomainException,
+  UnauthorizedException,
   ResourceNotFoundException,
   ConflictException,
   PreconditionFailedException,
@@ -38,6 +45,27 @@ export { PageResponseDto, PageMetaDto } from './dto/page-response.dto';
 // Persistencia
 export { createdBy, touch } from './persistence/audit-fields';
 export type { AuditableCreate } from './persistence/audit-fields';
+
+// Criptografía
+export { encryptSecret, decryptSecret } from './crypto/secret-cipher';
+export {
+  signPayload,
+  verifySignature,
+  canonicalJson,
+  deriveWebhookSecret,
+} from './crypto/webhook-signature';
+
+// HTTP saliente (despacho firmado + guarda anti-SSRF)
+export {
+  HttpDispatcherService,
+  joinUrl,
+  DEFAULT_DISPATCH_TIMEOUT_MS,
+} from './http/http-dispatcher.service';
+export type {
+  OutboundDispatchInput,
+  OutboundDispatchResult,
+} from './http/http-dispatcher.service';
+export { assertOutboundUrlAllowed } from './http/ssrf-guard';
 
 // Conceptos de dominio
 export {

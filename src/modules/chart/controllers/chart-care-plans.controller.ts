@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ChartCarePlansService } from '../services';
 import {
   ActivityResponseDto,
@@ -21,6 +21,7 @@ import {
 /** Endpoints de planes de cuidado del chart (`/charts/care-plans`). */
 @ApiTags('chart-care-plans')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('charts/care-plans')
 export class ChartCarePlansController {
   constructor(private readonly carePlansService: ChartCarePlansService) {}

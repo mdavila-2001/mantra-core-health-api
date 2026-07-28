@@ -8,7 +8,31 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UnauthorizedException,
+  canonicalJson,
+  deriveWebhookSecret,
+  signPayload,
 } from '../../../common';
+
+/** Firma un callback de gateway como lo haría el proveedor (mismo secreto derivado). */
+function signCallback(
+  gatewayId: string,
+  body: {
+    gatewayTransactionRef: string;
+    outcome: 'CAPTURED' | 'FAILED' | 'AUTHORIZED';
+    authorizationCode?: string;
+  },
+): string {
+  const secret = deriveWebhookSecret('payments-gateway', gatewayId);
+  return signPayload(
+    secret,
+    canonicalJson({
+      gatewayTransactionRef: body.gatewayTransactionRef,
+      outcome: body.outcome,
+      authorizationCode: body.authorizationCode,
+    }),
+  );
+}
 
 const actor = { id: 'user-1', roles: ['PAYMENTS_ADMIN'] };
 
@@ -154,6 +178,7 @@ describe('PaymentsTransactionsService', () => {
       const d = build();
       const transaction = {
         id: 'txn-1',
+        gatewayId: 'gw-1',
         paymentIntentId: 'intent-1',
         statusConceptId: CONCEPTS.TXN_PROCESSING,
       };
@@ -164,9 +189,10 @@ describe('PaymentsTransactionsService', () => {
       d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
       d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
 
+      const body = { gatewayTransactionRef: 'ref-1', outcome: 'CAPTURED' as const };
       const res = await d.service.applyCallback('libelula', {
-        gatewayTransactionRef: 'ref-1',
-        outcome: 'CAPTURED',
+        ...body,
+        signature: signCallback('gw-1', body),
       });
 
       expect(res.duplicate).toBe(false);
@@ -174,17 +200,37 @@ describe('PaymentsTransactionsService', () => {
       expect(intent.statusConceptId).toBe(CONCEPTS.PI_SUCCEEDED);
     });
 
+    it('rejects a callback with an invalid or missing signature (fail-closed)', async () => {
+      const d = build();
+      d.transactionsRepo.findByGatewayRef.mockResolvedValue({
+        id: 'txn-1',
+        gatewayId: 'gw-1',
+        paymentIntentId: 'intent-1',
+        statusConceptId: CONCEPTS.TXN_PROCESSING,
+      });
+
+      await expect(
+        d.service.applyCallback('libelula', {
+          gatewayTransactionRef: 'ref-1',
+          outcome: 'CAPTURED',
+          signature: 'deadbeef',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
     it('is idempotent when the provider retries an already-applied callback', async () => {
       const d = build();
       d.transactionsRepo.findByGatewayRef.mockResolvedValue({
         id: 'txn-1',
+        gatewayId: 'gw-1',
         paymentIntentId: 'intent-1',
         statusConceptId: CONCEPTS.TXN_CAPTURED,
       });
 
+      const body = { gatewayTransactionRef: 'ref-1', outcome: 'CAPTURED' as const };
       const res = await d.service.applyCallback('libelula', {
-        gatewayTransactionRef: 'ref-1',
-        outcome: 'CAPTURED',
+        ...body,
+        signature: signCallback('gw-1', body),
       });
 
       expect(res.duplicate).toBe(true);

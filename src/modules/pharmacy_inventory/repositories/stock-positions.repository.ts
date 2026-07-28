@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { InventoryStockPositions } from '../entities';
 
@@ -35,6 +36,27 @@ export class StockPositionsRepository {
       pharmacyProductId: key.pharmacyProductId,
       inventoryLotId: key.inventoryLotId ?? null,
     });
+  }
+
+  /**
+   * `SELECT ... FOR UPDATE` sobre la posición de stock por su clave lógica.
+   * Serializa el read-modify-write de `on_hand`/`reserved`/`available` entre
+   * transacciones concurrentes (anti-oversell). Debe invocarse ANTES de leer las
+   * cantidades que luego se van a mutar dentro de la misma transacción.
+   */
+  findByKeyForUpdate(
+    em: EntityManager,
+    key: StockPositionKey,
+  ): Promise<InventoryStockPositions | null> {
+    return em.findOne(
+      InventoryStockPositions,
+      {
+        inventoryLocationId: key.inventoryLocationId,
+        pharmacyProductId: key.pharmacyProductId,
+        inventoryLotId: key.inventoryLotId ?? null,
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
   }
 
   /** Todas las posiciones de un lote (para recall/liberación en cualquier ubicación). */

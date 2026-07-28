@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { DiagnosticsReportsService } from '../services';
 import {
   CreateReportVersionDto,
@@ -25,6 +25,7 @@ import {
  */
 @ApiTags('diagnostics-reports')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('diagnostics')
 export class DiagnosticsReportsController {
   constructor(private readonly service: DiagnosticsReportsService) {}

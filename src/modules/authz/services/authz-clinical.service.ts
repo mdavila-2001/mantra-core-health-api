@@ -13,6 +13,8 @@ import {
   ClinicalAccessGrantsRepository,
   BreakGlassSessionsRepository,
 } from '../repositories';
+import { DataAccessLogRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
 import {
   CreateClinicalAccessGrantDto,
   BreakTheGlassDto,
@@ -48,6 +50,7 @@ export class AuthzClinicalService {
     private readonly em: EntityManager,
     private readonly grantsRepo: ClinicalAccessGrantsRepository,
     private readonly btgRepo: BreakGlassSessionsRepository,
+    private readonly dataAccessLogRepo: DataAccessLogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AuthzClinicalService.name);
@@ -154,6 +157,9 @@ export class AuthzClinicalService {
       });
       await tx.flush();
 
+      // La sesión break-the-glass deja constancia del MOTIVO (justification) y
+      // queda para REVISIÓN posterior (campos reviewed_*/review_outcome en
+      // authz.break_glass_sessions, que resuelve el Oficial de Privacidad).
       this.btgRepo.create(tx, {
         tenantId: dto.tenantId,
         userId: actor.id,
@@ -165,7 +171,31 @@ export class AuthzClinicalService {
         expiresAt,
         actorUserId: actor.id,
       });
+
+      // Evento de acceso de emergencia (CAN-EMERG-001): registra los DATOS
+      // CONSULTADOS bajo la anulación en la tabla WORM audit.data_access_log,
+      // enlazado al mismo paciente/propósito, para la trazabilidad y la revisión.
+      // Se persiste en la MISMA transacción que el grant y la sesión BTG.
+      this.dataAccessLogRepo.record(tx, {
+        userId: actor.id,
+        tenantId: dto.tenantId,
+        patientProfileId,
+        purpose: 'EMERGENCY',
+        legalBasisConceptId: AUD.LEGAL_BASIS_LEGAL_OBLIGATION,
+        resourceType: 'PATIENT_PROFILE',
+        resourceId: patientProfileId,
+        actionConceptId: AUD.ACTION_READ,
+        recordedByUserId: actor.id,
+      });
+
       await tx.flush();
+
+      // NOTIFICACIÓN AL PACIENTE (break-the-glass): aquí se dispararía la
+      // notificación posterior obligatoria al paciente informando del acceso de
+      // emergencia a su historia (p. ej. emitir un evento de dominio/outbox
+      // `authz.break_glass.activated` que el módulo de mensajería consume). No se
+      // envía de forma síncrona para no acoplar el acceso clínico al canal de
+      // notificación; el evento se drena tras el COMMIT de esta transacción.
 
       return { id: grant.id, status: 'ACTIVE', createdAt: grant.createdAt };
     });

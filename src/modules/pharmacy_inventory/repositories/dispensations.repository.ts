@@ -43,6 +43,15 @@ export class DispensationsRepository {
     return em.findOne(MedicationDispensations, { id });
   }
 
+  /** Dispensación previa con la misma clave de idempotencia (retry seguro). */
+  findByIdempotencyKey(
+    em: EntityManager,
+    pharmacyId: string,
+    idempotencyKey: string,
+  ): Promise<MedicationDispensations | null> {
+    return em.findOne(MedicationDispensations, { pharmacyId, idempotencyKey });
+  }
+
   findLines(
     em: EntityManager,
     dispensationId: string,

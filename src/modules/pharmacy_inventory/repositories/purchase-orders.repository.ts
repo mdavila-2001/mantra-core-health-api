@@ -40,6 +40,15 @@ export class PurchaseOrdersRepository {
     return em.findOne(PharmacyPurchaseOrders, { id });
   }
 
+  /** Orden previa con la misma clave de idempotencia (retry seguro). */
+  findByIdempotencyKey(
+    em: EntityManager,
+    pharmacyId: string,
+    idempotencyKey: string,
+  ): Promise<PharmacyPurchaseOrders | null> {
+    return em.findOne(PharmacyPurchaseOrders, { pharmacyId, idempotencyKey });
+  }
+
   findLinesByOrder(
     em: EntityManager,
     orderId: string,

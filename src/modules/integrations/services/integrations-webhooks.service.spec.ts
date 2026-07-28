@@ -3,7 +3,21 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { IntegrationsWebhooksService } from './integrations-webhooks.service';
 import { INTEG } from '../integrations.concepts';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  UnauthorizedException,
+  canonicalJson,
+  deriveWebhookSecret,
+  signPayload,
+} from '../../../common';
+
+/** Firma válida del payload para la conexión dada (mismo secreto que el servicio). */
+function sign(connectionId: string, payload: unknown): string {
+  return signPayload(
+    deriveWebhookSecret('connection', connectionId),
+    canonicalJson(payload),
+  );
+}
 
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
@@ -36,8 +50,23 @@ describe('IntegrationsWebhooksService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
+    it('rejects a webhook with an invalid/missing signature (fail-closed)', async () => {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue({ id: 'c1' });
+      await expect(
+        d.service.receiveInbound({
+          connectionId: 'c1',
+          payloadJson: { a: 1 },
+          signature: 'not-a-valid-signature',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      // No se persiste nada si la firma no valida.
+      expect(d.inboundRepo.create).not.toHaveBeenCalled();
+    });
+
     it('de-duplicates a redelivery by signature', async () => {
       const d = build();
+      const payload = {};
       d.connectionsRepo.findById.mockResolvedValue({ id: 'c1' });
       d.inboundRepo.findByConnectionAndSignature.mockResolvedValue({
         id: 'i0',
@@ -45,8 +74,8 @@ describe('IntegrationsWebhooksService', () => {
       });
       const res = await d.service.receiveInbound({
         connectionId: 'c1',
-        payloadJson: {},
-        signature: 'sig',
+        payloadJson: payload,
+        signature: sign('c1', payload),
       });
       expect(res.duplicate).toBe(true);
       expect(res.id).toBe('i0');
@@ -55,6 +84,7 @@ describe('IntegrationsWebhooksService', () => {
 
     it('stores a new inbound message as RECEIVED', async () => {
       const d = build();
+      const payload = { a: 1 };
       d.connectionsRepo.findById.mockResolvedValue({ id: 'c1' });
       d.inboundRepo.findByConnectionAndSignature.mockResolvedValue(null);
       d.inboundRepo.create.mockReturnValue({
@@ -63,8 +93,8 @@ describe('IntegrationsWebhooksService', () => {
       });
       const res = await d.service.receiveInbound({
         connectionId: 'c1',
-        payloadJson: { a: 1 },
-        signature: 'sig',
+        payloadJson: payload,
+        signature: sign('c1', payload),
       });
       expect(res.duplicate).toBe(false);
       expect(res.status).toBe(INTEG.INBOUND_RECEIVED);

@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
   DiagnosticsImagingService,
   DiagnosticsMediaQualityService,
@@ -31,6 +31,7 @@ import {
  */
 @ApiTags('diagnostics-imaging')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller()
 export class DiagnosticsImagingController {
   constructor(

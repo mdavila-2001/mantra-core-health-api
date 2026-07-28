@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { CareEpisodesService, EncountersService } from '../services';
 import {
   CreateCareEpisodeDto,
@@ -24,6 +24,7 @@ import {
  */
 @ApiTags('clinical-encounters')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical')
 export class ClinicalEncountersController {
   constructor(

@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { CareTeamsService } from '../services';
 import {
   CreateCareTeamDto,
@@ -23,6 +23,7 @@ import {
  */
 @ApiTags('clinical-ext-care-teams')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('care-teams')
 export class CareTeamsController {
   constructor(private readonly careTeamsService: CareTeamsService) {}

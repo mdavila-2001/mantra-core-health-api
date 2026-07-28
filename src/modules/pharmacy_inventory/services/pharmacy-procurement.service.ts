@@ -91,6 +91,26 @@ export class PharmacyProcurementService {
       'Placing purchase order',
     );
     return this.em.transactional(async (tx) => {
+      // Idempotencia: un retry con la misma clave devuelve la orden ya creada.
+      if (dto.idempotencyKey) {
+        const existing = await this.ordersRepo.findByIdempotencyKey(
+          tx,
+          pharmacyId,
+          dto.idempotencyKey,
+        );
+        if (existing) {
+          const existingLines = await this.ordersRepo.findLinesByOrder(
+            tx,
+            existing.id,
+          );
+          return {
+            id: existing.id,
+            purchaseOrderNumber: existing.purchaseOrderNumber,
+            lineIds: existingLines.map((l) => l.id),
+          };
+        }
+      }
+
       const supplier = await this.suppliersRepo.findById(
         tx,
         dto.pharmacySupplierId,
@@ -156,6 +176,38 @@ export class PharmacyProcurementService {
       'Posting goods receipt',
     );
     return this.em.transactional(async (tx) => {
+      // Idempotencia: un retry con la misma clave devuelve la recepción ya
+      // posteada SIN repetir el ingreso de stock ni los asientos del ledger.
+      if (dto.idempotencyKey) {
+        const existing = await this.receiptsRepo.findByIdempotencyKey(
+          tx,
+          dto.idempotencyKey,
+        );
+        if (existing) {
+          const existingLines = await this.receiptsRepo.findLines(
+            tx,
+            existing.id,
+          );
+          const existingLotIds = [
+            ...new Set(
+              existingLines
+                .map((l) => l.inventoryLotId)
+                .filter((v): v is string => v != null),
+            ),
+          ];
+          const existingLedgerIds = await this.ledgerRepo.findEntryIdsBySource(
+            tx,
+            existing.id,
+          );
+          return {
+            id: existing.id,
+            receiptNumber: existing.receiptNumber,
+            lotIds: existingLotIds,
+            ledgerEntryIds: existingLedgerIds,
+          };
+        }
+      }
+
       const order = await this.ordersRepo.findById(
         tx,
         dto.pharmacyPurchaseOrderId,
@@ -252,7 +304,7 @@ export class PharmacyProcurementService {
         ledgerEntryIds.push(entry.id);
 
         // UPSERT de la posición de stock del lote.
-        let position = await this.stockRepo.findByKey(tx, {
+        let position = await this.stockRepo.findByKeyForUpdate(tx, {
           inventoryLocationId: dto.inventoryLocationId,
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: lot.id,

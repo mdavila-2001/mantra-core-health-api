@@ -55,6 +55,19 @@ export class InventorySyncService {
 
       const itemIds: string[] = [];
       for (const item of dto.items) {
+        // Idempotencia por item: un retry con la misma clave reutiliza el item
+        // ya ingresado en lugar de duplicarlo.
+        if (item.idempotencyKey) {
+          const existing = await this.syncRepo.findItemByIdempotencyKey(
+            tx,
+            item.idempotencyKey,
+          );
+          if (existing) {
+            itemIds.push(existing.id);
+            continue;
+          }
+        }
+
         const created = this.syncRepo.createItem(tx, {
           pharmacyInventorySyncBatchId: batch.id,
           pharmacyProductId: item.pharmacyProductId,

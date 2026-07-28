@@ -1,6 +1,14 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
   AllergyIntolerancesService,
   ConditionsService,
@@ -17,10 +25,14 @@ import {
   CreateMedicationRecordDto,
   CreateMedicationRequestDto,
   CreateProcedureDto,
+  EditMedicationRequestDraftDto,
   ImmunizationResponseDto,
+  InvalidateMedicationRequestDto,
   MedicationRecordResponseDto,
   MedicationRequestResponseDto,
   ProcedureResponseDto,
+  RenewMedicationRequestDto,
+  ReplaceMedicationRequestDto,
 } from '../dto';
 
 /**
@@ -29,6 +41,7 @@ import {
  */
 @ApiTags('clinical-records')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical')
 export class ClinicalRecordsController {
   constructor(
@@ -81,6 +94,65 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MedicationRecordResponseDto> {
     return this.medicationsService.administer(dto, actor);
+  }
+
+  /** CAN-RX: edita ítems clínicos de un borrador (solo DRAFT; comando, no PATCH genérico). */
+  @Post('medication-requests/:id/edit')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Editar ítems de una receta en borrador (DRAFT)' })
+  editMedicationDraft(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: EditMedicationRequestDraftDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicationRequestResponseDto> {
+    return this.medicationsService.editDraft(id, dto, actor);
+  }
+
+  /** CAN-RX: emite la receta (DRAFT → ISSUED) y sella su contenido. */
+  @Post('medication-requests/:id/issue')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Emitir una receta (la vuelve inmutable)' })
+  issueMedicationRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicationRequestResponseDto> {
+    return this.medicationsService.issue(id, actor);
+  }
+
+  /** CAN-RX: invalida una receta emitida (motivo obligatorio; se conserva). */
+  @Post('medication-requests/:id/invalidate')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Invalidar una receta emitida' })
+  invalidateMedicationRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: InvalidateMedicationRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicationRequestResponseDto> {
+    return this.medicationsService.invalidate(id, dto, actor);
+  }
+
+  /** CAN-RX: reemplaza una receta emitida y devuelve la nueva (DRAFT). */
+  @Post('medication-requests/:id/replace')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Reemplazar una receta emitida (crea la corrección)' })
+  replaceMedicationRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReplaceMedicationRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicationRequestResponseDto> {
+    return this.medicationsService.replace(id, dto, actor);
+  }
+
+  /** CAN-RX: renueva una receta copiando datos y devuelve la nueva (DRAFT). */
+  @Post('medication-requests/:id/renew')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Renovar una receta (crea una nueva copiando datos)' })
+  renewMedicationRequest(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RenewMedicationRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicationRequestResponseDto> {
+    return this.medicationsService.renew(id, dto, actor);
   }
 
   /** UC-08-12. */

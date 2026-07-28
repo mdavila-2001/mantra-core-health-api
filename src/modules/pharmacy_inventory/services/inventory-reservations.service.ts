@@ -74,7 +74,7 @@ export class InventoryReservationsService {
       const ledgerEntryIds: string[] = [];
 
       for (const line of dto.lines) {
-        const position = await this.stockRepo.findByKey(tx, {
+        const position = await this.stockRepo.findByKeyForUpdate(tx, {
           inventoryLocationId: line.inventoryLocationId,
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
@@ -166,7 +166,7 @@ export class InventoryReservationsService {
           touch(rl, actor.id);
 
           if (rl.inventoryLocationId) {
-            const position = await this.stockRepo.findByKey(tx, {
+            const position = await this.stockRepo.findByKeyForUpdate(tx, {
               inventoryLocationId: rl.inventoryLocationId,
               pharmacyProductId: rl.pharmacyProductId,
               inventoryLotId: rl.inventoryLotId,

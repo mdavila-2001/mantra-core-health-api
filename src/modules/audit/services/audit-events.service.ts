@@ -223,29 +223,58 @@ export class AuditEventsService {
     });
   }
 
-  /** UC-10-09: registra la aplicación de retención/archivado de una partición. */
+  /**
+   * UC-10-09: aplica la política de retención sobre el log de accesos y sella el
+   * evento de retención en la cadena de auditoría.
+   *
+   * Política y fail-closed:
+   * - Sólo se purga el `data_access_log` (contabilidad de accesos, dato con
+   *   ventana de retención). La cadena WORM `audit_log` es tamper-evidence: es
+   *   inmutable y jamás se borra, así que un `scope` distinto de `data_access_log`
+   *   no purga nada (0 filas) y sólo deja constancia.
+   * - Sólo se borra con una ventana explícita (`olderThan`): sin fecha de corte no
+   *   se elimina nada, para no borrar más de lo que la ventana indica.
+   *
+   * Reporta el conteo REAL de filas purgadas por la base.
+   */
   async applyRetention(
     dto: RetentionApplyDto,
     actor: AuthenticatedUser,
   ): Promise<RetentionResultDto> {
+    const scope = dto.scope ?? 'data_access_log';
     this.logger.info(
       {
         operation: 'audit.retention.apply',
         actorId: actor.id,
-        scope: dto.scope,
+        scope,
+        olderThan: dto.olderThan,
       },
-      'Recording retention/archival application',
+      'Applying retention policy',
     );
     return this.em.transactional(async (tx) => {
+      let purgedCount = 0;
+      if (dto.olderThan && scope === 'data_access_log') {
+        purgedCount = await this.dataAccessRepo.purgeOlderThan(
+          tx,
+          new Date(dto.olderThan),
+          dto.tenantId,
+        );
+      }
+
       const row = await this.auditLogRepo.append(tx, {
         userId: actor.id,
         action: 'RETENTION_APPLIED',
-        entity: dto.scope ?? 'audit_partition',
+        entity: scope,
         outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
         tenantId: dto.tenantId,
         recordedByUserId: actor.id,
       });
-      return { auditLogId: row.id, applied: true, recordedAt: row.recordedAt };
+      return {
+        auditLogId: row.id,
+        applied: true,
+        purgedCount,
+        recordedAt: row.recordedAt,
+      };
     });
   }
 

@@ -7,6 +7,10 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UnauthorizedException,
+  canonicalJson,
+  deriveWebhookSecret,
+  signPayload,
 } from '../../../common';
 
 const actor = { id: 'user-1', roles: ['SYSTEM'] };
@@ -325,7 +329,19 @@ describe('NotificationsService', () => {
   });
 
   describe('recordProviderReceipt (UC-35-12)', () => {
-    const dto: any = { providerMessageRef: 'prov-1', receiptType: 'DELIVERED' };
+    // Cuerpo original del webhook y su firma HMAC válida bajo el secreto del
+    // proveedor (el mismo que deriva el servicio a partir de provider.id).
+    const RAW = { event: 'delivered' };
+    const SIGNATURE = signPayload(
+      deriveWebhookSecret('provider', PROVIDER),
+      canonicalJson(RAW),
+    );
+    const dto: any = {
+      providerMessageRef: 'prov-1',
+      receiptType: 'DELIVERED',
+      rawPayloadJson: RAW,
+      signature: SIGNATURE,
+    };
 
     function wire(d: ReturnType<typeof build>) {
       d.notificationsRepo.findProviderByCode.mockResolvedValue({
@@ -414,6 +430,19 @@ describe('NotificationsService', () => {
       await expect(
         d.service.recordProviderReceipt('nope', dto),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('rejects an acknowledgement with an invalid signature (fail-closed)', async () => {
+      const d = build();
+      wire(d);
+
+      await expect(
+        d.service.recordProviderReceipt('sendgrid', {
+          ...dto,
+          signature: 'tampered',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(d.notificationsRepo.createReceipt).not.toHaveBeenCalled();
     });
   });
 

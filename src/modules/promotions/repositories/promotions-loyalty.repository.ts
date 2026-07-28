@@ -10,6 +10,10 @@ import {
   ReferralPrograms,
   MemberReferrals,
 } from '../entities';
+// La billetera vive en el módulo de pagos; el crédito de un referido con premio
+// `wallet_credit` la acredita reutilizando esas entidades (MikroORM las descubre
+// globalmente, así que el `em` opera sobre ellas sin acoplarse al servicio 42B).
+import { Wallets, WalletLedgerEntries } from '../../payments/entities';
 import { createdBy } from '../../../common';
 
 export interface CreateLoyaltyProgramData {
@@ -76,6 +80,29 @@ export interface CreateLedgerEntryData {
   expiresAt?: Date;
   idempotencyKey: string;
   occurredAt?: Date;
+  recordedByUserId?: string;
+}
+
+export interface CreateWalletData {
+  tenantId: string;
+  ownerTypeConceptId: string;
+  ownerRefId: string;
+  walletTypeConceptId: string;
+  currencyConceptId: string;
+  statusConceptId: string;
+  actorUserId?: string;
+}
+
+export interface CreateWalletLedgerEntryData {
+  walletId: string;
+  directionConceptId: string;
+  amount: string;
+  currencyConceptId: string;
+  entryTypeConceptId: string;
+  balanceAfter: string;
+  idempotencyKey: string;
+  sourceType?: string;
+  sourceRefId?: string;
   recordedByUserId?: string;
 }
 
@@ -339,6 +366,85 @@ export class PromotionsLoyaltyRepository {
         expiresAt: { $ne: null, $lte: now },
       },
       { orderBy: { recordedAt: 'ASC' } },
+    );
+  }
+
+  // --- Billetera del referido (UC-51-13, premio wallet_credit) ---
+
+  /**
+   * Billetera del propietario en la moneda del premio, tomada con `FOR UPDATE`:
+   * el saldo es un contador compartido, mismo patrón de bloqueo que la membresía
+   * en earn/redeem.
+   */
+  findWalletForUpdate(
+    em: EntityManager,
+    data: {
+      tenantId: string;
+      ownerTypeConceptId: string;
+      ownerRefId: string;
+      currencyConceptId: string;
+    },
+  ): Promise<Wallets | null> {
+    return em.findOne(
+      Wallets,
+      {
+        tenantId: data.tenantId,
+        ownerTypeConceptId: data.ownerTypeConceptId,
+        ownerRefId: data.ownerRefId,
+        currencyConceptId: data.currencyConceptId,
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  createWallet(em: EntityManager, data: CreateWalletData): Wallets {
+    return em.create(
+      Wallets,
+      {
+        tenantId: data.tenantId,
+        ownerTypeConceptId: data.ownerTypeConceptId,
+        ownerRefId: data.ownerRefId,
+        walletTypeConceptId: data.walletTypeConceptId,
+        currencyConceptId: data.currencyConceptId,
+        availableBalance: '0',
+        pendingBalance: '0',
+        reservedBalance: '0',
+        statusConceptId: data.statusConceptId,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
+  }
+
+  /** La clave de idempotencia (UNIQUE) convierte un reintento del referido en lectura. */
+  findWalletLedgerEntryByKey(
+    em: EntityManager,
+    idempotencyKey: string,
+  ): Promise<WalletLedgerEntries | null> {
+    return em.findOne(WalletLedgerEntries, { idempotencyKey });
+  }
+
+  createWalletLedgerEntry(
+    em: EntityManager,
+    data: CreateWalletLedgerEntryData,
+  ): WalletLedgerEntries {
+    return em.create(
+      WalletLedgerEntries,
+      {
+        walletId: data.walletId,
+        directionConceptId: data.directionConceptId,
+        amount: data.amount,
+        currencyConceptId: data.currencyConceptId,
+        entryTypeConceptId: data.entryTypeConceptId,
+        balanceAfter: data.balanceAfter,
+        sourceType: data.sourceType,
+        sourceRefId: data.sourceRefId,
+        idempotencyKey: data.idempotencyKey,
+        occurredAt: new Date(),
+        recordedAt: new Date(),
+        recordedByUserId: data.recordedByUserId,
+      },
+      { partial: true },
     );
   }
 

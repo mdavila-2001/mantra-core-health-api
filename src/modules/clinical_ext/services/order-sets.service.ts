@@ -8,6 +8,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { OrderSetsRepository } from '../repositories';
+import { ServiceRequestsRepository } from '../../clinical/repositories';
 import {
   CreateOrderSetDto,
   ApplyOrderSetDto,
@@ -15,18 +16,20 @@ import {
   ApplyOrderSetResponseDto,
 } from '../dto';
 import { CEXT } from '../clinical_ext.concepts';
+import { CLIN } from '../../clinical/clinical.concepts';
 
 /**
  * Plantillas de órdenes (order sets): creación de la plantilla con sus ítems y
  * aplicación con fan-out (UC-18-06). La aplicación deriva una orden por ítem
- * seleccionado; el alta de las `clinical.service_requests` resultantes pertenece
- * al módulo clínico, por lo que aquí se devuelve el plan derivado de forma atómica.
+ * seleccionado y persiste, en la misma transacción, una `clinical.service_requests`
+ * por ítem, enlazada al paciente/encuentro del DTO. Devuelve los ids creados.
  */
 @Injectable()
 export class OrderSetsService {
   constructor(
     private readonly em: EntityManager,
     private readonly orderSetsRepo: OrderSetsRepository,
+    private readonly serviceRequestsRepo: ServiceRequestsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrderSetsService.name);
@@ -126,15 +129,52 @@ export class OrderSetsService {
         );
       }
 
+      // El service_request exige tenant custodio (NOT NULL): del DTO o, en su
+      // defecto, el del propio order set. Sin ninguno no se puede materializar la
+      // orden, así que se corta con una precondición clara.
+      const custodianTenantId = dto.custodianTenantId ?? orderSet.tenantId;
+      if (!custodianTenantId) {
+        throw new PreconditionFailedException(
+          'Se requiere tenant custodio para materializar las órdenes del order set',
+          { orderSetId },
+        );
+      }
+
+      // Fan-out real: una service_request por ítem seleccionado, dentro de la
+      // misma transacción, enlazada al paciente/encuentro del DTO.
+      const appliedOrders = selected.map((item) => {
+        const serviceRequest = this.serviceRequestsRepo.create(tx, {
+          custodianTenantId,
+          patientProfileId: dto.patientProfileId,
+          encounterId: dto.encounterId,
+          codeConceptId: item.codeConceptId,
+          intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          actorUserId: actor.id,
+        });
+        return {
+          serviceRequestId: serviceRequest.id,
+          orderSetItemId: item.id,
+          codeConceptId: item.codeConceptId,
+          doseText: item.defaultDoseText,
+          frequencyText: item.defaultFrequencyText,
+        };
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'clinical_ext.order_set.apply',
+          orderSetId,
+          created: appliedOrders.length,
+        },
+        'Order set applied',
+      );
+
       return {
         orderSetId,
-        appliedOrders: selected.map((i) => ({
-          orderSetItemId: i.id,
-          codeConceptId: i.codeConceptId,
-          doseText: i.defaultDoseText,
-          frequencyText: i.defaultFrequencyText,
-        })),
-        count: selected.length,
+        appliedOrders,
+        count: appliedOrders.length,
       };
     });
   }

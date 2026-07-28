@@ -31,6 +31,14 @@ import {
 import type { ReadModelDefinitions } from '../entities';
 
 /**
+ * Lista blanca de identificador SQL para el nombre físico de la vista. Un
+ * identificador no admite *bind*, así que validar contra esta expresión (y citar
+ * cada parte) es lo que sustituye al parámetro y cierra la inyección. Admite un
+ * único par `esquema.objeto`.
+ */
+const VIEW_IDENTIFIER = /^[a-z_][a-z0-9_]*(\.[a-z_][a-z0-9_]*)?$/i;
+
+/**
  * Casos de uso del contrato de read model versionado y su materialización:
  * publicación (UC-30-01), versionado (UC-30-08), refresh manual (UC-30-03),
  * backfill (UC-30-04), invalidación/recomputo (UC-30-06), reconciliación
@@ -381,11 +389,21 @@ export class ReadModelDefinitionsService {
     return { generatedAt: new Date(), items };
   }
 
-  /** Núcleo compartido de las corridas de refresh (03/04/06/07). */
-  private runRefresh(
+  /**
+   * Núcleo compartido de las corridas de refresh (03/04/06/07). Materializa de
+   * verdad: si la definición es una materialized view ejecuta el
+   * `REFRESH MATERIALIZED VIEW [CONCURRENTLY] <vista>` real y cuenta las filas
+   * resultantes; si la vista física no existe (o el REFRESH falla) el error se
+   * captura, la corrida queda como FAILURE con su mensaje y NO se oculta.
+   *
+   * El REFRESH corre en una conexión sin contexto de transacción (autocommit):
+   * si lanzara dentro de la transacción del `refresh_run`, Postgres abortaría esa
+   * transacción y no podríamos ni siquiera registrar el fallo.
+   */
+  private async runRefresh(
     definitionId: string,
     refreshTypeConceptId: string,
-    resultConceptId: string,
+    successResultConceptId: string,
     actor: AuthenticatedUser,
     opts: { requireMaterialized: boolean; operation: string },
   ): Promise<RefreshRunResponseDto> {
@@ -393,52 +411,125 @@ export class ReadModelDefinitionsService {
       { operation: opts.operation, definitionId, actorId: actor.id },
       'Refresh run',
     );
-    return this.em.transactional(async (tx) => {
-      const definition = await this.definitionsRepo.findById(tx, definitionId);
-      if (!definition) {
-        throw new ResourceNotFoundException('Read model no encontrado', {
-          definitionId,
-        });
-      }
-      if (
-        opts.requireMaterialized &&
-        definition.objectTypeConceptId !== RM.OBJECT_TYPE_MATERIALIZED_VIEW
-      ) {
-        throw new PreconditionFailedException(
-          'La operación requiere una materialized view',
-          { definitionId },
+
+    const readEm = this.em.fork();
+    const definition = await this.definitionsRepo.findById(readEm, definitionId);
+    if (!definition) {
+      throw new ResourceNotFoundException('Read model no encontrado', {
+        definitionId,
+      });
+    }
+    const isMaterialized =
+      definition.objectTypeConceptId === RM.OBJECT_TYPE_MATERIALIZED_VIEW;
+    if (opts.requireMaterialized && !isMaterialized) {
+      throw new PreconditionFailedException(
+        'La operación requiere una materialized view',
+        { definitionId },
+      );
+    }
+    if (definition.statusConceptId === RM.DEF_RETIRED) {
+      throw new PreconditionFailedException('La versión está retirada', {
+        definitionId,
+      });
+    }
+
+    const startedAt = new Date();
+    const correlationId = randomUUID();
+    // Watermark de la corrida: sirve de checkpoint para la invalidación de una
+    // VIEW (que siempre está viva) y de marca temporal para las MV.
+    const sourceWatermark = String(startedAt.getTime());
+
+    let resultConceptId = successResultConceptId;
+    let rowsAffected = '0';
+    let errorCode: string | undefined;
+
+    // refresh/backfill/reconcile e invalidate sobre una MV recomputan físicamente;
+    // invalidate sobre una VIEW plana solo marca el checkpoint (no hay que refrescar).
+    if (isMaterialized) {
+      const viewName = this.resolveViewName(definition);
+      // Solo el refresh concurrente manual usa CONCURRENTLY, y únicamente si la
+      // definición lo declara: el backfill inicial y el recomputo de reconcile
+      // deben ser no concurrentes.
+      const concurrently =
+        refreshTypeConceptId === RM.REFRESH_TYPE_CONCURRENT &&
+        definition.refreshModeConceptId === RM.REFRESH_MODE_CONCURRENT;
+      const connection = this.em.getConnection();
+      try {
+        await connection.execute(
+          `REFRESH MATERIALIZED VIEW ${concurrently ? 'CONCURRENTLY ' : ''}${viewName}`,
+          [],
+          'run',
+        );
+        // REFRESH no reporta un rowcount fiable: se cuentan las filas materializadas.
+        const counted = await connection.execute<{ affected: string }[]>(
+          `SELECT count(*)::text AS affected FROM ${viewName}`,
+          [],
+          'all',
+        );
+        rowsAffected = counted?.[0]?.affected ?? '0';
+      } catch (err) {
+        // La MV puede no existir físicamente aún: es un FAILURE legítimo.
+        resultConceptId = RM.RESULT_FAILED;
+        errorCode = this.describeError(err);
+        this.logger.warn(
+          { operation: opts.operation, definitionId, error: errorCode },
+          'Materialized view refresh failed',
         );
       }
-      if (definition.statusConceptId === RM.DEF_RETIRED) {
-        throw new PreconditionFailedException('La versión está retirada', {
-          definitionId,
-        });
-      }
+    }
 
-      const startedAt = new Date();
-      const correlationId = randomUUID();
-      const run = this.runsRepo.create(tx, {
+    const completedAt = new Date();
+    const run = await this.em.transactional(async (tx) =>
+      this.runsRepo.create(tx, {
         readModelDefinitionId: definitionId,
         refreshTypeConceptId,
         startedAt,
-        completedAt: new Date(),
-        rowsAffected: '0',
-        sourceWatermark: String(startedAt.getTime()),
+        completedAt,
+        rowsAffected,
+        sourceWatermark,
         resultConceptId,
+        errorCode,
         correlationId,
-      });
+      }),
+    );
 
-      return {
-        id: run.id,
-        readModelDefinitionId: definitionId,
-        refreshType: refreshTypeConceptId,
-        result: resultConceptId,
-        rowsAffected: run.rowsAffected,
-        startedAt: run.startedAt,
-        completedAt: run.completedAt,
-        correlationId,
-      };
-    });
+    return {
+      id: run.id,
+      readModelDefinitionId: definitionId,
+      refreshType: refreshTypeConceptId,
+      result: resultConceptId,
+      rowsAffected: run.rowsAffected ?? rowsAffected,
+      startedAt: run.startedAt ?? startedAt,
+      completedAt: run.completedAt ?? completedAt,
+      correlationId,
+    };
+  }
+
+  /**
+   * Resuelve y valida el nombre físico de la vista (`esquema.objeto`) contra la
+   * lista blanca de identificador antes de interpolarlo, y cita cada parte. Nunca
+   * se interpola sin validar.
+   */
+  private resolveViewName(definition: ReadModelDefinitions): string {
+    const schema = definition.schemaName;
+    const object = definition.objectName;
+    if (
+      !VIEW_IDENTIFIER.test(schema) ||
+      !VIEW_IDENTIFIER.test(object) ||
+      !VIEW_IDENTIFIER.test(`${schema}.${object}`)
+    ) {
+      throw new PreconditionFailedException(
+        'El nombre físico de la vista no es un identificador SQL válido',
+        { definitionId: definition.id },
+      );
+    }
+    return `"${schema}"."${object}"`;
+  }
+
+  /** Mensaje de error acotado para la bitácora de la corrida. */
+  private describeError(err: unknown): string {
+    const message = err instanceof Error ? err.message : String(err);
+    return message.slice(0, 500);
   }
 
   private computeHash(

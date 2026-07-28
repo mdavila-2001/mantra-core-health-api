@@ -15,9 +15,14 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = {
+  // Conexión SQL simulada: `execute` resuelve vacío por defecto (REFRESH ok,
+  // count sin filas). Los tests que necesitan otra cosa la reconfiguran.
+  const execute = mockFn().mockResolvedValue([]);
+  const connection = { execute };
+  const em: any = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => em),
+    getConnection: mockFn(() => connection),
   };
   const definitionsRepo = {
     findById: mockFn(),
@@ -43,6 +48,7 @@ function build() {
     service,
     tx,
     em,
+    execute,
     definitionsRepo,
     dependenciesRepo,
     runsRepo,
@@ -182,41 +188,86 @@ describe('ReadModelDefinitionsService', () => {
       expect(d.runsRepo.create).not.toHaveBeenCalled();
     });
 
-    it('records a successful concurrent refresh run for a materialized view', async () => {
+    it('runs REFRESH MATERIALIZED VIEW CONCURRENTLY and records a successful run', async () => {
       const d = build();
       d.definitionsRepo.findById.mockResolvedValue({
         id: 'def-1',
+        schemaName: 'read_models',
+        objectName: 'crm_account_360_v',
         objectTypeConceptId: RM.OBJECT_TYPE_MATERIALIZED_VIEW,
+        refreshModeConceptId: RM.REFRESH_MODE_CONCURRENT,
         statusConceptId: RM.DEF_ACTIVE,
       });
-      d.runsRepo.create.mockReturnValue({
+      // 1ª llamada: REFRESH (sin filas); 2ª: count con 42 filas reales.
+      d.execute
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ affected: '42' }]);
+      d.runsRepo.create.mockImplementation((_tx: any, data: any) => ({
         id: 'run-1',
-        rowsAffected: '0',
-        startedAt: new Date(),
-        completedAt: new Date(),
-      });
+        ...data,
+      }));
 
       const res = await d.service.refresh('def-1', actor);
 
       expect(res.id).toBe('run-1');
       expect(res.refreshType).toBe(RM.REFRESH_TYPE_CONCURRENT);
       expect(res.result).toBe(RM.RESULT_SUCCESS);
+      expect(res.rowsAffected).toBe('42');
+      // El primer execute es el REFRESH CONCURRENTLY sobre la vista citada.
+      const refreshSql = d.execute.mock.calls[0][0] as string;
+      expect(refreshSql).toContain('REFRESH MATERIALIZED VIEW CONCURRENTLY');
+      expect(refreshSql).toContain('"read_models"."crm_account_360_v"');
       expect(d.runsRepo.create).toHaveBeenCalledTimes(1);
+      const runArg = d.runsRepo.create.mock.calls[0][1];
+      expect(runArg.resultConceptId).toBe(RM.RESULT_SUCCESS);
+      expect(runArg.rowsAffected).toBe('42');
+    });
+
+    it('records a FAILURE run when the REFRESH throws (missing MV) without hiding it', async () => {
+      const d = build();
+      d.definitionsRepo.findById.mockResolvedValue({
+        id: 'def-1',
+        schemaName: 'read_models',
+        objectName: 'crm_account_360_v',
+        objectTypeConceptId: RM.OBJECT_TYPE_MATERIALIZED_VIEW,
+        statusConceptId: RM.DEF_ACTIVE,
+      });
+      d.execute.mockRejectedValueOnce(
+        new Error('relation "read_models.crm_account_360_v" does not exist'),
+      );
+      d.runsRepo.create.mockImplementation((_tx: any, data: any) => ({
+        id: 'run-err',
+        ...data,
+      }));
+
+      const res = await d.service.refresh('def-1', actor);
+
+      expect(res.result).toBe(RM.RESULT_FAILED);
+      const runArg = d.runsRepo.create.mock.calls[0][1];
+      expect(runArg.resultConceptId).toBe(RM.RESULT_FAILED);
+      expect(runArg.errorCode).toContain('does not exist');
     });
   });
 
   describe('backfill (UC-30-04)', () => {
-    it('records a FULL_BACKFILL run', async () => {
+    it('records a FULL_BACKFILL run with a non-concurrent REFRESH', async () => {
       const d = build();
       d.definitionsRepo.findById.mockResolvedValue({
         id: 'def-1',
+        schemaName: 'read_models',
+        objectName: 'crm_account_360_v',
         objectTypeConceptId: RM.OBJECT_TYPE_MATERIALIZED_VIEW,
+        refreshModeConceptId: RM.REFRESH_MODE_CONCURRENT,
         statusConceptId: RM.DEF_ACTIVE,
       });
       d.runsRepo.create.mockReturnValue({ id: 'run-2' });
 
       const res = await d.service.backfill('def-1', actor);
       expect(res.refreshType).toBe(RM.REFRESH_TYPE_FULL_BACKFILL);
+      // El backfill inicial nunca usa CONCURRENTLY (la MV aún no está poblada).
+      const refreshSql = d.execute.mock.calls[0][0] as string;
+      expect(refreshSql).toContain('REFRESH MATERIALIZED VIEW ');
+      expect(refreshSql).not.toContain('CONCURRENTLY');
     });
   });
 
@@ -225,6 +276,8 @@ describe('ReadModelDefinitionsService', () => {
       const d = build();
       d.definitionsRepo.findById.mockResolvedValue({
         id: 'def-1',
+        schemaName: 'read_models',
+        objectName: 'crm_account_360_v',
         objectTypeConceptId: RM.OBJECT_TYPE_MATERIALIZED_VIEW,
         statusConceptId: RM.DEF_ACTIVE,
       });

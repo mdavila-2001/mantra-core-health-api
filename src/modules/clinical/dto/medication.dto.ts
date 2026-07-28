@@ -145,6 +145,163 @@ export class CreateMedicationRecordDto {
   isFinalDose?: boolean;
 }
 
+/**
+ * Cuerpo de `POST /clinical/medication-requests/:id/edit`. Editar ítems clínicos
+ * solo se permite mientras la receta está en DRAFT; todos los campos son opcionales
+ * (parcial). Una receta emitida (≥ ISSUED) es inmutable y este comando la rechaza.
+ */
+export class EditMedicationRequestDraftDto {
+  @ApiPropertyOptional({ description: 'Encuentro en curso', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  encounterId?: string;
+
+  @ApiPropertyOptional({ description: 'Medicamento (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  medicationConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Sustancia ATC (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  substanceAtcConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Profesional prescriptor', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  prescriberProfileId?: string;
+
+  @ApiPropertyOptional({ description: 'Dosis en texto libre' })
+  @IsOptional()
+  @IsString()
+  doseText?: string;
+
+  @ApiPropertyOptional({ description: 'Vía de administración (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  routeConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Frecuencia en texto libre' })
+  @IsOptional()
+  @IsString()
+  frequencyText?: string;
+
+  @ApiPropertyOptional({ description: 'Cantidad prescrita' })
+  @IsOptional()
+  @IsNumber()
+  quantityDecimal?: number;
+
+  @ApiPropertyOptional({ description: 'Unidad (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  unitConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Inicio de vigencia', format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  validFrom?: string;
+
+  @ApiPropertyOptional({ description: 'Fin de vigencia', format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  validTo?: string;
+}
+
+/** Cuerpo de `POST /clinical/medication-requests/:id/invalidate`. */
+export class InvalidateMedicationRequestDto {
+  @ApiProperty({ description: 'Motivo de la invalidación (obligatorio)' })
+  @IsString()
+  reasonText!: string;
+}
+
+/**
+ * Cuerpo de `POST /clinical/medication-requests/:id/replace`. Invalida la receta
+ * emitida (queda REPLACED) y crea una NUEVA receta en DRAFT que la corrige. Los
+ * campos opcionales sobrescriben lo copiado del original.
+ */
+export class ReplaceMedicationRequestDto {
+  @ApiProperty({ description: 'Motivo de la corrección/reemplazo (obligatorio)' })
+  @IsString()
+  reasonText!: string;
+
+  @ApiPropertyOptional({ description: 'Medicamento (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  medicationConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Sustancia ATC (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  substanceAtcConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Dosis en texto libre' })
+  @IsOptional()
+  @IsString()
+  doseText?: string;
+
+  @ApiPropertyOptional({ description: 'Vía de administración (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  routeConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Frecuencia en texto libre' })
+  @IsOptional()
+  @IsString()
+  frequencyText?: string;
+
+  @ApiPropertyOptional({ description: 'Cantidad prescrita' })
+  @IsOptional()
+  @IsNumber()
+  quantityDecimal?: number;
+
+  @ApiPropertyOptional({ description: 'Unidad (concept id)', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  unitConceptId?: string;
+
+  @ApiPropertyOptional({ description: 'Inicio de vigencia', format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  validFrom?: string;
+
+  @ApiPropertyOptional({ description: 'Fin de vigencia', format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  validTo?: string;
+}
+
+/**
+ * Cuerpo de `POST /clinical/medication-requests/:id/renew`. Crea una NUEVA receta
+ * en DRAFT copiando los datos clínicos de la original (que no se modifica). Los
+ * campos opcionales sobrescriben lo copiado (típicamente nueva vigencia/cantidad).
+ */
+export class RenewMedicationRequestDto {
+  @ApiPropertyOptional({ description: 'Dosis en texto libre' })
+  @IsOptional()
+  @IsString()
+  doseText?: string;
+
+  @ApiPropertyOptional({ description: 'Frecuencia en texto libre' })
+  @IsOptional()
+  @IsString()
+  frequencyText?: string;
+
+  @ApiPropertyOptional({ description: 'Cantidad prescrita' })
+  @IsOptional()
+  @IsNumber()
+  quantityDecimal?: number;
+
+  @ApiPropertyOptional({ description: 'Inicio de vigencia', format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  validFrom?: string;
+
+  @ApiPropertyOptional({ description: 'Fin de vigencia', format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  validTo?: string;
+}
+
 /** Respuesta de una prescripción de medicación. */
 export class MedicationRequestResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -155,6 +312,27 @@ export class MedicationRequestResponseDto {
 
   @ApiProperty({ description: 'Estado (concept id)', format: 'uuid' })
   status!: string;
+
+  @ApiPropertyOptional({
+    description: 'Receta a la que esta sustituye',
+    format: 'uuid',
+    nullable: true,
+  })
+  replacesRequestId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Receta que sustituye a esta',
+    format: 'uuid',
+    nullable: true,
+  })
+  replacedByRequestId?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Receta de la que esta es renovación',
+    format: 'uuid',
+    nullable: true,
+  })
+  renewedFromRequestId?: string | null;
 
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;

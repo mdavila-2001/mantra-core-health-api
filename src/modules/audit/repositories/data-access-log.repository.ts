@@ -88,4 +88,21 @@ export class DataAccessLogRepository {
   ): Promise<number> {
     return em.count(DataAccessLog, { userId, recordedAt: { $gte: since } });
   }
+
+  /**
+   * Purga de retención (UC-10-09): borra los accesos con `recorded_at` ANTERIOR
+   * al corte (nunca los de dentro de la ventana) y devuelve el nº REAL de filas
+   * afectadas. Se acota por tenant cuando se indica, para no cruzar particiones.
+   * `nativeDelete` ejecuta el DELETE dentro de la tx activa y reporta el conteo
+   * exacto que hizo la base.
+   */
+  purgeOlderThan(
+    em: EntityManager,
+    olderThan: Date,
+    tenantId?: string,
+  ): Promise<number> {
+    const where: Record<string, unknown> = { recordedAt: { $lt: olderThan } };
+    if (tenantId) where.tenantId = tenantId;
+    return em.nativeDelete(DataAccessLog, where);
+  }
 }

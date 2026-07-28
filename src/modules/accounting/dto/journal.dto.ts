@@ -9,9 +9,17 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+
+/**
+ * Importe positivo (sin signo). El motor de partida doble solo compara sumas de
+ * DEBIT contra CREDIT (`assertBalanced`); sin esta guarda una línea negativa
+ * "balancea" igual (DEBIT 100 / DEBIT -50 / CREDIT 50) y viola la invariante.
+ */
+const POSITIVE_AMOUNT_REGEX = /^\d+(\.\d+)?$/;
 
 /** Dirección contable de una línea del mayor. */
 export type LedgerDirection = 'DEBIT' | 'CREDIT';
@@ -34,6 +42,9 @@ export class LedgerLineDto {
     example: '100.00',
   })
   @IsNumberString()
+  @Matches(POSITIVE_AMOUNT_REGEX, {
+    message: 'El importe de la línea debe ser positivo (sin signo)',
+  })
   amount!: string;
 
   @ApiPropertyOptional({ format: 'uuid' })

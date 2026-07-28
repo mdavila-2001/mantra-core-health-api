@@ -184,7 +184,7 @@ export class InventoryCountService {
           });
           adjustments += 1;
 
-          const position = await this.stockRepo.findByKey(tx, {
+          const position = await this.stockRepo.findByKeyForUpdate(tx, {
             inventoryLocationId: session.inventoryLocationId,
             pharmacyProductId: line.pharmacyProductId,
             inventoryLotId: line.inventoryLotId,

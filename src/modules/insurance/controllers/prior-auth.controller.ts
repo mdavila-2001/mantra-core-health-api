@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { PriorAuthService } from '../services';
 import {
   CreatePriorAuthRequestDto,
@@ -23,6 +23,7 @@ import {
  */
 @ApiTags('insurance-prior-auth')
 @ApiBearerAuth()
+@Roles('BILLING', 'FINANCE')
 @Controller()
 export class PriorAuthController {
   constructor(private readonly service: PriorAuthService) {}

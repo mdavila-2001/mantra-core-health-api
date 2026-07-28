@@ -628,6 +628,16 @@ export class ProviderReceiptDto {
   rawPayloadJson?: Record<string, unknown>;
 
   @ApiPropertyOptional({
+    description:
+      'Firma HMAC-SHA256 (hex) del cuerpo original bajo el secreto del proveedor',
+    maxLength: 512,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(512)
+  signature?: string;
+
+  @ApiPropertyOptional({
     format: 'date-time',
     description: 'Cuándo ocurrió según el proveedor',
   })

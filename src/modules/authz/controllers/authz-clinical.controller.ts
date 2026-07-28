@@ -21,6 +21,7 @@ import {
 /** UC-06-06 (acceso clínico), UC-06-07 (break-the-glass), UC-06-10 (revocar). */
 @ApiTags('authz-clinical')
 @ApiBearerAuth()
+@Roles('CLINICAL_APPROVER', 'SECURITY_ADMIN')
 @Controller('authz')
 export class AuthzClinicalController {
   constructor(private readonly clinicalService: AuthzClinicalService) {}

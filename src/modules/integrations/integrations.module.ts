@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { HttpDispatcherService } from '../../common';
 import * as entities from './entities';
 import {
   IntegrationsProvidersController,
@@ -51,6 +52,8 @@ import {
     MessageRetriesRepository,
     InboundMessagesRepository,
     WebhookSubscriptionsRepository,
+    // Infraestructura HTTP saliente
+    HttpDispatcherService,
     // Servicios
     IntegrationsProvidersService,
     IntegrationsConnectionsService,

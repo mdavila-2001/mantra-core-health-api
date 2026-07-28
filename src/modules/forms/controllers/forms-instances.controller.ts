@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { FormsInstancesService, FormsValuesService } from '../services';
 import {
   OpenInstanceDto,
@@ -25,6 +25,7 @@ import {
  */
 @ApiTags('forms-instances')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('forms/instances')
 export class FormsInstancesController {
   constructor(

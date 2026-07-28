@@ -118,27 +118,98 @@ describe('CdsService', () => {
   });
 
   describe('evaluate (UC-18-03)', () => {
-    it('generates one alert per active rule, atomically', async () => {
+    it('emits alerts only for rules whose logic matches the context', async () => {
       const d = build();
       d.rulesRepo.findActive.mockResolvedValue([
         {
-          id: 'r1',
-          name: 'R1',
+          id: 'r-med',
+          name: 'On drug X',
           severityConceptId: CEXT.SEVERITY_HIGH,
           messageTemplate: 'msg',
+          logicJson: { field: 'medications', op: 'contains', value: 'drug-x' },
         },
-        { id: 'r2', name: 'R2', severityConceptId: CEXT.SEVERITY_LOW },
+        {
+          id: 'r-hi-glucose',
+          name: 'Hyperglycemia',
+          severityConceptId: CEXT.SEVERITY_MODERATE,
+          logicJson: { field: 'observations.gluc', op: 'gt', value: 200 },
+        },
+        {
+          id: 'r-no-match',
+          name: 'On drug Y',
+          severityConceptId: CEXT.SEVERITY_LOW,
+          logicJson: { field: 'medications', op: 'contains', value: 'drug-y' },
+        },
       ]);
       d.alertsRepo.create.mockImplementation((_tx: any, data: any) => ({
         id: `a-${data.ruleId}`,
         ...data,
       }));
 
-      const res = await d.service.evaluate({ patientProfileId: 'p1' }, actor);
+      const res = await d.service.evaluate(
+        {
+          patientProfileId: 'p1',
+          medicationConceptIds: ['drug-x'],
+          observations: [{ codeConceptId: 'gluc', valueNumber: 250 }],
+        },
+        actor,
+      );
 
       expect(res.count).toBe(2);
-      expect(d.alertsRepo.create).toHaveBeenCalledTimes(2);
+      const firedRules = res.alerts.map((a) => a.ruleId).sort();
+      expect(firedRules).toEqual(['r-hi-glucose', 'r-med']);
+      // La severidad emitida es la declarada por cada regla, no una fija.
+      const bySeverity = Object.fromEntries(
+        res.alerts.map((a) => [a.ruleId, a.severityConceptId]),
+      );
+      expect(bySeverity['r-med']).toBe(CEXT.SEVERITY_HIGH);
+      expect(bySeverity['r-hi-glucose']).toBe(CEXT.SEVERITY_MODERATE);
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
+    });
+
+    it('supports boolean composition (all/any/not)', async () => {
+      const d = build();
+      d.rulesRepo.findActive.mockResolvedValue([
+        {
+          id: 'r-all',
+          name: 'both',
+          severityConceptId: CEXT.SEVERITY_HIGH,
+          logicJson: {
+            all: [
+              { field: 'medications', op: 'contains', value: 'm1' },
+              { field: 'observations.k', op: 'gte', value: 5 },
+            ],
+          },
+        },
+      ]);
+      d.alertsRepo.create.mockImplementation((_tx: any, data: any) => ({
+        id: `a-${data.ruleId}`,
+        ...data,
+      }));
+
+      const res = await d.service.evaluate(
+        {
+          patientProfileId: 'p1',
+          medicationConceptIds: ['m1'],
+          observations: [{ codeConceptId: 'k', valueNumber: 5 }],
+        },
+        actor,
+      );
+      expect(res.count).toBe(1);
+    });
+
+    it('fails closed: an unparseable rule does not fire and is logged (warn)', async () => {
+      const d = build();
+      d.rulesRepo.findActive.mockResolvedValue([
+        { id: 'r-bad', name: 'bad', severityConceptId: CEXT.SEVERITY_HIGH, logicJson: { weird: true } },
+        { id: 'r-nologic', name: 'none', severityConceptId: CEXT.SEVERITY_LOW },
+      ]);
+      const res = await d.service.evaluate(
+        { patientProfileId: 'p1', medicationConceptIds: ['x'] },
+        actor,
+      );
+      expect(res.count).toBe(0);
+      expect(d.alertsRepo.create).not.toHaveBeenCalled();
     });
   });
 

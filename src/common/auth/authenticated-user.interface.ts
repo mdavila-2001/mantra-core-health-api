@@ -13,4 +13,10 @@ export interface AuthenticatedUser {
    * usan por `RolesGuard`; su fuente es `iam.user_global_roles` al emitir el token.
    */
   readonly roles: string[];
+  /**
+   * Tenants de los que el sujeto es miembro activo (de `directory.tenant_memberships`
+   * al emitir el token). El `TenantContextGuard` exige que el `X-Tenant-Id` del
+   * request pertenezca a esta lista (salvo `SUPERADMIN`).
+   */
+  readonly tenantIds?: string[];
 }

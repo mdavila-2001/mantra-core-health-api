@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { VirtualEncountersService } from '../services';
 import {
   CreateVirtualEncounterDto,
@@ -23,6 +23,7 @@ import {
  */
 @ApiTags('clinical-ext-virtual-encounters')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('virtual-encounters')
 export class VirtualEncountersController {
   constructor(

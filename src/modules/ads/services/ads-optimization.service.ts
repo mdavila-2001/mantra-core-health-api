@@ -612,6 +612,26 @@ export class AdsOptimizationService {
         });
       }
 
+      // Intento de cobro REAL de la factura: se asienta el cargo por el total en
+      // `ad_billing_events` (la tabla de cobros del módulo), dentro de la misma
+      // transacción que la factura, referenciando el número de factura.
+      //
+      // La pasarela de pago es frontera de `payments` (stub deliberado): crear el
+      // PaymentIntent y el asiento contable NO pertenecen a este módulo. Cuando
+      // ese gateway confirme el cobro, poblará `ad_invoices.payment_intent_id` y
+      // transicionará la factura a AD_INVOICE_PAID. Aquí no se inventa pasarela:
+      // se deja registrado el cargo y la factura permanece AD_INVOICE_ISSUED.
+      this.dataRepo.createBillingEvent(tx, {
+        adAccountId,
+        billingEventTypeConceptId: CONCEPTS.AD_BILLING_CHARGE,
+        amount: this.round(total),
+        currencyConceptId: dto.currencyConceptId ?? account.currencyConceptId,
+        periodStart,
+        periodEnd,
+        externalBillingRef: dto.invoiceNumber,
+        recordedByUserId: actor.id,
+      });
+
       return {
         id: invoice.id,
         invoiceNumber: dto.invoiceNumber,

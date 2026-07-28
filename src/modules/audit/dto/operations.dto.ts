@@ -44,6 +44,11 @@ export class RetentionResultDto {
   applied!: boolean;
 
   @ApiProperty({
+    description: 'Nº real de filas purgadas por la política de retención',
+  })
+  purgedCount!: number;
+
+  @ApiProperty({
     description: 'Momento del registro',
     type: String,
     format: 'date-time',

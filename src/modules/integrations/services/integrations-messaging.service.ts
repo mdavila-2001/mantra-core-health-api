@@ -2,13 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  HttpDispatcherService,
   PreconditionFailedException,
   ResourceNotFoundException,
+  deriveWebhookSecret,
+  joinUrl,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import {
   ProviderConnectionsRepository,
+  ExternalProvidersRepository,
+  IntegrationEndpointsRepository,
   OutboundMessagesRepository,
   MessageResponsesRepository,
   MessageRetriesRepository,
@@ -40,10 +45,13 @@ export class IntegrationsMessagingService {
   constructor(
     private readonly em: EntityManager,
     private readonly connectionsRepo: ProviderConnectionsRepository,
+    private readonly providersRepo: ExternalProvidersRepository,
+    private readonly endpointsRepo: IntegrationEndpointsRepository,
     private readonly outboundRepo: OutboundMessagesRepository,
     private readonly responsesRepo: MessageResponsesRepository,
     private readonly retriesRepo: MessageRetriesRepository,
     private readonly inboundRepo: InboundMessagesRepository,
+    private readonly http: HttpDispatcherService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IntegrationsMessagingService.name);
@@ -147,7 +155,49 @@ export class IntegrationsMessagingService {
         });
       }
 
-      const isSuccess = !dto.simulateFailure;
+      // Resuelve el destino real: base_url del proveedor + path del endpoint.
+      const connection = await this.connectionsRepo.findById(
+        tx,
+        message.connectionId,
+      );
+      if (!connection) {
+        throw new ResourceNotFoundException('Conexión no encontrada', {
+          connectionId: message.connectionId,
+        });
+      }
+      const provider = await this.providersRepo.findById(
+        tx,
+        connection.providerId,
+      );
+      if (!provider?.baseUrl) {
+        throw new PreconditionFailedException(
+          'El proveedor no tiene base_url configurada para el despacho',
+          { connectionId: connection.id, providerId: connection.providerId },
+        );
+      }
+      let path: string | undefined;
+      let endpointTimeoutMs: number | undefined;
+      if (message.endpointId) {
+        const endpoint = await this.endpointsRepo.findById(
+          tx,
+          message.endpointId,
+        );
+        path = endpoint?.path;
+        endpointTimeoutMs = endpoint?.timeoutMs;
+      }
+      const url = joinUrl(provider.baseUrl, path);
+
+      // Firma el cuerpo con el secreto de la conexión (guarda anti-SSRF dentro).
+      const secret = deriveWebhookSecret('connection', connection.id); // TODO secreto por conexión
+      const outcome = await this.http.post({
+        url,
+        body: message.requestPayloadJson,
+        secret,
+        headers: message.headersJson as Record<string, string> | undefined,
+        timeoutMs: endpointTimeoutMs ?? undefined,
+      });
+
+      const isSuccess = outcome.ok;
       const now = new Date();
       message.statusConceptId = isSuccess ? INTEG.MSG_SENT : INTEG.MSG_FAILED;
       message.sentAt = now;
@@ -155,11 +205,11 @@ export class IntegrationsMessagingService {
 
       const response = this.responsesRepo.create(tx, {
         outboundMessageId: message.id,
-        responsePayloadJson: isSuccess
-          ? { ok: true }
-          : { error: dto.errorText ?? 'dispatch failed' },
-        httpStatus: dto.httpStatus ?? (isSuccess ? 200 : 502),
-        latencyMs: 0,
+        responsePayloadJson:
+          outcome.responseBody ??
+          (isSuccess ? { ok: true } : { error: outcome.errorText }),
+        httpStatus: outcome.httpStatus,
+        latencyMs: outcome.latencyMs,
         isSuccess,
         receivedAt: now,
         actorUserId: actor.id,
@@ -167,7 +217,13 @@ export class IntegrationsMessagingService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'integrations.message.dispatch', messageId, isSuccess },
+        {
+          operation: 'integrations.message.dispatch',
+          messageId,
+          isSuccess,
+          httpStatus: outcome.httpStatus,
+          latencyMs: outcome.latencyMs,
+        },
         isSuccess ? 'Message sent' : 'Message failed',
       );
       return {

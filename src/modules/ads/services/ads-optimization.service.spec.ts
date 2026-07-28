@@ -65,6 +65,7 @@ function build() {
   const dataRepo = {
     findInsightsInPeriod: mockFn(),
     createDeliverySnapshot: mockFn(),
+    createBillingEvent: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AdsOptimizationService(
@@ -559,6 +560,15 @@ describe('AdsOptimizationService', () => {
         campaignRefId: CAMPAIGN,
         impressions: '3000',
         amount: '65.00',
+      });
+      // Se asienta el cobro real de la factura por el total.
+      expect(d.dataRepo.createBillingEvent).toHaveBeenCalledTimes(1);
+      const charge = d.dataRepo.createBillingEvent.mock.calls[0][1];
+      expect(charge).toMatchObject({
+        adAccountId: ACCOUNT,
+        billingEventTypeConceptId: CONCEPTS.AD_BILLING_CHARGE,
+        amount: '75.00',
+        externalBillingRef: dto.invoiceNumber,
       });
     });
 

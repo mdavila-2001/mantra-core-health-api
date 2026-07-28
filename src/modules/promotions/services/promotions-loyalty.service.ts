@@ -90,6 +90,27 @@ const DEFAULT_SWEEP_BATCH = 100;
 const REFERRAL_CODE_BYTES = 6;
 
 /**
+ * Propietario polimórfico de la billetera según el tipo de miembro de lealtad:
+ * el premio `wallet_credit` de un referido se acredita a la billetera del usuario
+ * (o paciente) recompensado.
+ */
+const WALLET_OWNER_CONCEPT: Readonly<Record<string, string>> = {
+  [CONCEPTS.REWARD_MEMBER_USER]: CONCEPTS.OWNER_USER,
+  [CONCEPTS.REWARD_MEMBER_PATIENT]: CONCEPTS.OWNER_PATIENT,
+};
+
+// Conceptos de la billetera de crédito promocional. No existe un catálogo de
+// tipos/estados de billetera propio, así que se reutilizan conceptos vigentes:
+// - tipo/entrada: `AWARD_WALLET_CREDIT` ("Wallet credit award") clasifica tanto la
+//   billetera de crédito promocional como el asiento que la abona.
+// - estado: `STATE_ACTIVE` (activa).
+// - dirección: `PAYMENT_DIRECTION_IN` (fondos entrantes = abono/crédito).
+const WALLET_TYPE_CONCEPT = CONCEPTS.AWARD_WALLET_CREDIT;
+const WALLET_STATUS_ACTIVE = CONCEPTS.STATE_ACTIVE;
+const WALLET_CREDIT_DIRECTION = CONCEPTS.PAYMENT_DIRECTION_IN;
+const WALLET_CREDIT_ENTRY_TYPE = CONCEPTS.AWARD_WALLET_CREDIT;
+
+/**
  * Programas de lealtad, membresías, ledger de puntos y referidos
  * (UC-51-01 … 06, UC-51-12, UC-51-13).
  */
@@ -819,6 +840,8 @@ export class PromotionsLoyaltyService {
         `referral:${referralId}:referrer`,
         referralId,
         actor,
+        program.tenantId,
+        program.currencyConceptId,
       );
       const refereeLedgerEntryId = await this.awardReferral(
         tx,
@@ -828,6 +851,8 @@ export class PromotionsLoyaltyService {
         `referral:${referralId}:referee`,
         referralId,
         actor,
+        program.tenantId,
+        program.currencyConceptId,
       );
 
       referral.statusConceptId = CONCEPTS.REFERRAL_QUALIFIED;
@@ -846,7 +871,12 @@ export class PromotionsLoyaltyService {
 
   // --- Apoyo ---
 
-  /** Acredita el premio de un referido en la membresía indicada. */
+  /**
+   * Acredita el premio de un referido en la membresía indicada. Según el tipo de
+   * premio del programa, deriva a puntos (ledger de lealtad) o a crédito de
+   * billetera (ledger de pagos). Ambos caminos son idempotentes por la clave del
+   * referido: reentregar el evento no vuelve a pagar.
+   */
   private async awardReferral(
     tx: EntityManager,
     membershipId: string,
@@ -855,12 +885,45 @@ export class PromotionsLoyaltyService {
     idempotencyKey: string,
     referralId: string,
     actor: AuthenticatedUser,
+    tenantId: string,
+    currencyConceptId: string | undefined,
   ): Promise<string | undefined> {
-    // Un premio en crédito de billetera lo liquida payments; aquí sólo se
-    // acreditan puntos (ver README, sección Pendiente).
-    if (awardTypeConceptId !== CONCEPTS.AWARD_POINTS) return undefined;
     if (!awardAmount || Number(awardAmount) <= 0) return undefined;
 
+    if (awardTypeConceptId === CONCEPTS.AWARD_POINTS) {
+      return this.awardReferralPoints(
+        tx,
+        membershipId,
+        awardAmount,
+        idempotencyKey,
+        referralId,
+        actor,
+      );
+    }
+    if (awardTypeConceptId === CONCEPTS.AWARD_WALLET_CREDIT) {
+      return this.awardReferralWalletCredit(
+        tx,
+        membershipId,
+        awardAmount,
+        idempotencyKey,
+        referralId,
+        actor,
+        tenantId,
+        currencyConceptId,
+      );
+    }
+    return undefined;
+  }
+
+  /** Acredita puntos de lealtad y recalcula el nivel de la membresía. */
+  private async awardReferralPoints(
+    tx: EntityManager,
+    membershipId: string,
+    awardAmount: string,
+    idempotencyKey: string,
+    referralId: string,
+    actor: AuthenticatedUser,
+  ): Promise<string | undefined> {
     const existing = await this.loyaltyRepo.findLedgerEntryByKey(
       tx,
       idempotencyKey,
@@ -908,6 +971,94 @@ export class PromotionsLoyaltyService {
     membership.currentTierId =
       this.tierFor(tiers, lifetimePoints)?.id ?? membership.currentTierId;
     touch(membership, actor.id);
+
+    return entry.id;
+  }
+
+  /**
+   * Acredita crédito de billetera: localiza (o crea) la billetera del miembro
+   * recompensado en la moneda del programa, la bloquea (FOR UPDATE) y suma el
+   * abono en su ledger, todo dentro de la misma transacción. Mismo patrón de
+   * bloqueo read-modify-write que earn/redeem sobre la membresía.
+   */
+  private async awardReferralWalletCredit(
+    tx: EntityManager,
+    membershipId: string,
+    awardAmount: string,
+    idempotencyKey: string,
+    referralId: string,
+    actor: AuthenticatedUser,
+    tenantId: string,
+    currencyConceptId: string | undefined,
+  ): Promise<string | undefined> {
+    // Idempotencia: la clave del referido (UNIQUE en el ledger) convierte un
+    // reintento del evento en una lectura, sin volver a abonar.
+    const existing = await this.loyaltyRepo.findWalletLedgerEntryByKey(
+      tx,
+      idempotencyKey,
+    );
+    if (existing) return existing.id;
+
+    // Sin moneda no se puede liquidar el crédito: fail-closed.
+    if (!currencyConceptId) {
+      throw new PreconditionFailedException(
+        'El programa de referidos no define moneda para el crédito de billetera',
+        { referralId },
+      );
+    }
+
+    const membership = await this.loyaltyRepo.findMembershipForUpdate(
+      tx,
+      membershipId,
+    );
+    if (!membership) {
+      throw new ResourceNotFoundException(
+        'Membresía de la recompensa no encontrada',
+        {
+          membershipId,
+        },
+      );
+    }
+
+    const ownerTypeConceptId =
+      WALLET_OWNER_CONCEPT[membership.memberTypeConceptId] ??
+      CONCEPTS.OWNER_USER;
+
+    let wallet = await this.loyaltyRepo.findWalletForUpdate(tx, {
+      tenantId,
+      ownerTypeConceptId,
+      ownerRefId: membership.memberRefId,
+      currencyConceptId,
+    });
+    if (!wallet) {
+      wallet = this.loyaltyRepo.createWallet(tx, {
+        tenantId,
+        ownerTypeConceptId,
+        ownerRefId: membership.memberRefId,
+        walletTypeConceptId: WALLET_TYPE_CONCEPT,
+        currencyConceptId,
+        statusConceptId: WALLET_STATUS_ACTIVE,
+        actorUserId: actor.id,
+      });
+    }
+
+    const balanceAfter = this.round(
+      Number(wallet.availableBalance ?? '0') + Number(awardAmount),
+    );
+    const entry = this.loyaltyRepo.createWalletLedgerEntry(tx, {
+      walletId: wallet.id,
+      directionConceptId: WALLET_CREDIT_DIRECTION,
+      amount: awardAmount,
+      currencyConceptId,
+      entryTypeConceptId: WALLET_CREDIT_ENTRY_TYPE,
+      balanceAfter,
+      idempotencyKey,
+      sourceType: 'member_referral',
+      sourceRefId: referralId,
+      recordedByUserId: actor.id,
+    });
+    wallet.availableBalance = balanceAfter;
+    touch(wallet, actor.id);
 
     return entry.id;
   }

@@ -14,6 +14,7 @@ import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
 } from '../repositories';
+import type { CancellationPolicySnapshot } from '../entities';
 import {
   CreateHoldDto,
   HoldResponseDto,
@@ -42,6 +43,12 @@ const ACTIVE_BOOKING_STATES: readonly string[] = [
 
 const DEFAULT_HOLD_TTL_SECONDS = 300;
 const DEFAULT_WORKER_BATCH = 100;
+
+/**
+ * CAN-APT-001: ventana de cancelación por defecto (24h) cuando la reserva no tiene
+ * snapshot (citas antiguas) o la política no definía una ventana específica.
+ */
+const DEFAULT_CANCELLATION_WINDOW_MINUTES = 24 * 60;
 
 /**
  * Flujo de reserva: holds anti-double-booking, confirmación, reprogramación,
@@ -194,6 +201,29 @@ export class SchedulingBookingsService {
         });
       }
 
+      // CAN-APT-001: se congela la política de cancelación vigente en el momento de
+      // confirmar. La referencia `booking_policy_id` puede mutar de versión después,
+      // pero el snapshot preserva las condiciones que el paciente aceptó.
+      const policy = slot.scheduleTemplateId
+        ? await this.resolvePolicy(tx, slot.scheduleTemplateId)
+        : null;
+      // CAN-TIME-001: la tz vive en el recurso; se congela para auditoría aunque el
+      // plazo se evalúe sobre instantes UTC (`start_at` es timestamptz).
+      const resource = slot.resourceId
+        ? await this.catalogRepo.findResourceById(tx, slot.resourceId)
+        : null;
+      const cancellationPolicySnapshot: CancellationPolicySnapshot = {
+        policyId: policy?.id,
+        policyRowVersion: policy?.rowVersion,
+        cancellationWindowMinutes:
+          policy?.cancellationWindowMinutes ??
+          DEFAULT_CANCELLATION_WINDOW_MINUTES,
+        noShowFeeAmount: policy?.noShowFeeAmount ?? undefined,
+        currencyConceptId: policy?.currencyConceptId ?? undefined,
+        timeZone: resource?.timeZone ?? undefined,
+        capturedAt: new Date().toISOString(),
+      };
+
       const booking = this.bookingsRepo.createBooking(tx, {
         tenantId: dto.tenantId,
         patientProfileId: dto.patientProfileId,
@@ -204,6 +234,8 @@ export class SchedulingBookingsService {
         bookedByUserId: actor.id,
         statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
         confirmedAt: new Date(),
+        bookingPolicyId: policy?.id,
+        cancellationPolicySnapshot,
         reasonText: dto.reasonText,
         actorUserId: actor.id,
       });
@@ -409,12 +441,43 @@ export class SchedulingBookingsService {
       }
 
       const isNoShow = dto.isNoShow ?? false;
-      const policy = booking.bookingPolicyId
-        ? await this.catalogRepo.findPolicyById(tx, booking.bookingPolicyId)
-        : null;
-      const feeAmount = isNoShow
-        ? (policy?.noShowFeeAmount ?? undefined)
-        : undefined;
+
+      // CAN-APT-001: la ventana y el cargo salen del snapshot congelado de la
+      // reserva, NUNCA de la política actual (que pudo cambiar tras la aceptación).
+      const snapshot = booking.cancellationPolicySnapshot;
+      const windowMinutes =
+        snapshot?.cancellationWindowMinutes ??
+        DEFAULT_CANCELLATION_WINDOW_MINUTES;
+
+      // El cargo también se congela en el snapshot. Solo para reservas antiguas sin
+      // snapshot se consulta la política actual como último recurso (compatibilidad).
+      let feeSource = snapshot?.noShowFeeAmount;
+      let currencyConceptId = snapshot?.currencyConceptId;
+      if (feeSource === undefined && !snapshot && booking.bookingPolicyId) {
+        const policy = await this.catalogRepo.findPolicyById(
+          tx,
+          booking.bookingPolicyId,
+        );
+        feeSource = policy?.noShowFeeAmount ?? undefined;
+        currencyConceptId = policy?.currencyConceptId ?? undefined;
+      }
+
+      const slot = await this.bookingsRepo.findSlotForUpdate(
+        tx,
+        booking.bookableSlotId,
+      );
+
+      // CAN-TIME-001: el plazo se mide sobre instantes absolutos (`start_at` es
+      // timestamptz en UTC), por lo que es independiente de la zona horaria; la tz
+      // congelada del snapshot queda solo como dato de auditoría.
+      const withinWindow =
+        slot != null &&
+        Date.now() >= slot.startAt.getTime() - windowMinutes * 60_000;
+
+      // Se cobra si es inasistencia o si la cancelación cae dentro de la ventana
+      // (tardía). Una cancelación avisada a tiempo no genera cargo.
+      const chargeable = isNoShow || withinWindow;
+      const feeAmount = chargeable ? (feeSource ?? undefined) : undefined;
 
       this.bookingsRepo.createCancellation(tx, {
         bookingId,
@@ -426,7 +489,9 @@ export class SchedulingBookingsService {
         cancelledByUserId: actor.id,
         isNoShow,
         feeAmount,
-        currencyConceptId: feeAmount ? CONCEPTS.CURRENCY_BOB : undefined,
+        currencyConceptId: feeAmount
+          ? (currencyConceptId ?? CONCEPTS.CURRENCY_BOB)
+          : undefined,
         cancelledAt: new Date(),
         statusConceptId: CONCEPTS.STATE_ACTIVE,
         actorUserId: actor.id,
@@ -435,10 +500,6 @@ export class SchedulingBookingsService {
       booking.statusConceptId = CONCEPTS.BOOKING_CANCELLED;
       touch(booking, actor.id);
 
-      const slot = await this.bookingsRepo.findSlotForUpdate(
-        tx,
-        booking.bookableSlotId,
-      );
       let capacityReleased = false;
       if (slot) {
         slot.remainingCapacity += 1;

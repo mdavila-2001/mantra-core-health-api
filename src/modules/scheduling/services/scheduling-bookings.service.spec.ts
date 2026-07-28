@@ -30,7 +30,11 @@ function build() {
     createCancellation: mockFn(),
     createReminder: mockFn(),
   };
-  const catalogRepo = { findTemplateById: mockFn(), findPolicyById: mockFn() };
+  const catalogRepo = {
+    findTemplateById: mockFn(),
+    findPolicyById: mockFn(),
+    findResourceById: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new SchedulingBookingsService(
@@ -200,6 +204,58 @@ describe('SchedulingBookingsService', () => {
       expect(d.bookingsRepo.createReminder).toHaveBeenCalledTimes(2);
     });
 
+    it('freezes the cancellation policy snapshot on the booking (CAN-APT-001)', async () => {
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ scheduleTemplateId: 'tpl-1', resourceId: 'res-1' }),
+      );
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        bookingPolicyId: 'pol-1',
+      });
+      d.catalogRepo.findPolicyById.mockResolvedValue({
+        id: 'pol-1',
+        rowVersion: 3,
+        cancellationWindowMinutes: 120,
+        noShowFeeAmount: '50.00',
+        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+      });
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        timeZone: 'America/La_Paz',
+      });
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+
+      await d.service.confirmBooking('token', dto, actor);
+
+      const arg = d.bookingsRepo.createBooking.mock.calls[0][1];
+      expect(arg.bookingPolicyId).toBe('pol-1');
+      expect(arg.cancellationPolicySnapshot).toMatchObject({
+        policyId: 'pol-1',
+        policyRowVersion: 3,
+        cancellationWindowMinutes: 120,
+        noShowFeeAmount: '50.00',
+        timeZone: 'America/La_Paz',
+      });
+      expect(arg.cancellationPolicySnapshot.capturedAt).toEqual(
+        expect.any(String),
+      );
+    });
+
+    it('snapshots the default 24h window when there is no policy', async () => {
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+
+      await d.service.confirmBooking('token', dto, actor);
+
+      const arg = d.bookingsRepo.createBooking.mock.calls[0][1];
+      expect(arg.bookingPolicyId).toBeUndefined();
+      expect(arg.cancellationPolicySnapshot.cancellationWindowMinutes).toBe(
+        24 * 60,
+      );
+    });
+
     it('refuses an expired hold even before the worker recycles it', async () => {
       const d = build();
       d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(
@@ -306,20 +362,154 @@ describe('SchedulingBookingsService', () => {
     });
   });
 
-  describe('cancel (UC-41-09)', () => {
-    it('charges the no-show fee only when the policy defines one', async () => {
-      const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+  describe('cancel (UC-41-09) — snapshot-based window (CAN-APT-001)', () => {
+    const MIN = 60_000;
+
+    function bookingWithSnapshot(snapshot: Record<string, unknown> | undefined) {
+      return {
         id: 'booking-1',
         bookableSlotId: SLOT_ID,
         bookingPolicyId: 'pol-1',
         statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        cancellationPolicySnapshot: snapshot,
+      };
+    }
+
+    it('charges the frozen fee for a late cancellation, using the snapshot window', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingWithSnapshot({
+          cancellationWindowMinutes: 120,
+          noShowFeeAmount: '50.00',
+          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+        }),
+      );
+      // Inicio dentro de la ventana de 120 min → cancelación tardía.
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ remainingCapacity: 0, startAt: new Date(Date.now() + 60 * MIN) }),
+      );
+
+      const res = await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PATIENT' },
+        actor,
+      );
+
+      expect(res.feeAmount).toBe('50.00');
+      expect(res.capacityReleased).toBe(true);
+      // Nunca se consulta la política actual: se usa el snapshot congelado.
+      expect(d.catalogRepo.findPolicyById).not.toHaveBeenCalled();
+    });
+
+    it('does not charge for a timely cancellation outside the snapshot window', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingWithSnapshot({
+          cancellationWindowMinutes: 120,
+          noShowFeeAmount: '50.00',
+        }),
+      );
+      // Inicio a 5h → fuera de la ventana de 120 min → a tiempo.
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ startAt: new Date(Date.now() + 300 * MIN) }),
+      );
+
+      const res = await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PATIENT' },
+        actor,
+      );
+
+      expect(res.feeAmount).toBeUndefined();
+      expect(d.catalogRepo.findPolicyById).not.toHaveBeenCalled();
+    });
+
+    it('ignores a widened current policy: only the snapshot window counts', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingWithSnapshot({
+          cancellationWindowMinutes: 120,
+          noShowFeeAmount: '50.00',
+        }),
+      );
+      // La política actual se amplió a 48h, pero no debe usarse.
+      d.catalogRepo.findPolicyById.mockResolvedValue({
+        cancellationWindowMinutes: 48 * 60,
+        noShowFeeAmount: '999.00',
       });
+      // Inicio a 5h: dentro de 48h (política nueva) pero fuera de 120 min (snapshot).
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ startAt: new Date(Date.now() + 300 * MIN) }),
+      );
+
+      const res = await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PATIENT' },
+        actor,
+      );
+
+      expect(res.feeAmount).toBeUndefined();
+      expect(d.catalogRepo.findPolicyById).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the default 24h window when the booking has no snapshot', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingWithSnapshot(undefined),
+      );
+      d.catalogRepo.findPolicyById.mockResolvedValue({
+        noShowFeeAmount: '50.00',
+        currencyConceptId: CONCEPTS.CURRENCY_BOB,
+      });
+      // Inicio a 1h → dentro de las 24h por defecto → tardía.
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ startAt: new Date(Date.now() + 60 * MIN) }),
+      );
+
+      const res = await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PATIENT' },
+        actor,
+      );
+
+      expect(res.feeAmount).toBe('50.00');
+      // Sin snapshot sí se consulta la política actual (compatibilidad).
+      expect(d.catalogRepo.findPolicyById).toHaveBeenCalled();
+    });
+
+    it('does not charge a no-snapshot cancellation outside the default 24h window', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingWithSnapshot(undefined),
+      );
       d.catalogRepo.findPolicyById.mockResolvedValue({
         noShowFeeAmount: '50.00',
       });
+      // Inicio a 2 días → fuera de las 24h por defecto.
       d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
-        openSlot({ remainingCapacity: 0 }),
+        openSlot({ startAt: new Date(Date.now() + 2 * 24 * 60 * MIN) }),
+      );
+
+      const res = await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PATIENT' },
+        actor,
+      );
+
+      expect(res.feeAmount).toBeUndefined();
+    });
+
+    it('charges a no-show regardless of the window', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        bookingWithSnapshot({
+          cancellationWindowMinutes: 120,
+          noShowFeeAmount: '50.00',
+        }),
+      );
+      // Inicio lejano: no sería tardía, pero el no-show siempre cobra.
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ startAt: new Date(Date.now() + 300 * MIN) }),
       );
 
       const res = await d.service.cancel(
@@ -329,29 +519,6 @@ describe('SchedulingBookingsService', () => {
       );
 
       expect(res.feeAmount).toBe('50.00');
-      expect(res.capacityReleased).toBe(true);
-    });
-
-    it('does not charge a fee for a timely cancellation', async () => {
-      const d = build();
-      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
-        id: 'booking-1',
-        bookableSlotId: SLOT_ID,
-        bookingPolicyId: 'pol-1',
-        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
-      });
-      d.catalogRepo.findPolicyById.mockResolvedValue({
-        noShowFeeAmount: '50.00',
-      });
-      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
-
-      const res = await d.service.cancel(
-        'booking-1',
-        { cancelledBy: 'PATIENT' },
-        actor,
-      );
-
-      expect(res.feeAmount).toBeUndefined();
     });
 
     it('rejects cancelling an already cancelled booking', async () => {

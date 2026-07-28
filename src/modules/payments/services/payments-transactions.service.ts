@@ -6,7 +6,11 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UnauthorizedException,
+  canonicalJson,
+  deriveWebhookSecret,
   touch,
+  verifySignature,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -180,6 +184,35 @@ export class PaymentsTransactionsService {
             gatewayTransactionRef: dto.gatewayTransactionRef,
           },
         );
+      }
+
+      // Verificación de origen del webhook (fail-closed). Sin esto, cualquiera que
+      // conozca una `gatewayTransactionRef` podía forzar `PI_SUCCEEDED` (pago
+      // fraudulento). Se valida el HMAC de la firma contra el secreto del gateway.
+      // TODO: resolver el secreto real desde `gateway_connections.webhook_secret_ref`
+      // (bóveda de credenciales) en lugar del secreto derivado por gateway.
+      const webhookSecret = deriveWebhookSecret(
+        'payments-gateway',
+        transaction.gatewayId,
+      );
+      const signedBody = canonicalJson({
+        gatewayTransactionRef: dto.gatewayTransactionRef,
+        outcome: dto.outcome,
+        authorizationCode: dto.authorizationCode,
+      });
+      if (
+        !dto.signature ||
+        !verifySignature(webhookSecret, signedBody, dto.signature)
+      ) {
+        this.logger.warn(
+          {
+            operation: 'payments.callback.apply',
+            gatewayTransactionRef: dto.gatewayTransactionRef,
+            reason: 'invalid-signature',
+          },
+          'Rejected gateway callback with invalid signature',
+        );
+        throw new UnauthorizedException('Firma del webhook inválida');
       }
 
       const targetStatus = this.callbackStatus(dto.outcome);

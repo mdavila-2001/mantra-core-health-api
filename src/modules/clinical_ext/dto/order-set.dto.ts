@@ -98,6 +98,15 @@ export class ApplyOrderSetDto {
   patientProfileId!: string;
 
   @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Tenant custodio de las órdenes derivadas; si se omite, se usa el del order set',
+  })
+  @IsOptional()
+  @IsUUID()
+  custodianTenantId?: string;
+
+  @ApiPropertyOptional({
     type: [String],
     description:
       'Ítems seleccionados explícitamente; si se omite, se usan los default',
@@ -128,6 +137,12 @@ export class OrderSetResponseDto {
 
 /** Una orden derivada del fan-out del order set. */
 export class AppliedOrderDto {
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Service request persistido para este ítem',
+  })
+  serviceRequestId!: string;
+
   @ApiProperty({ format: 'uuid' })
   orderSetItemId!: string;
 

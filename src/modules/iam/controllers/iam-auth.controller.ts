@@ -7,6 +7,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import {
   CurrentUser,
   Public,
@@ -31,6 +32,10 @@ export class IamAuthController {
   /** UC-01-04. */
   @Post('login')
   @Public()
+  // Límite estricto contra fuerza bruta / credential stuffing sobre el login,
+  // por encima del backstop global. El lockout por cuenta complementa este límite
+  // por IP.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Iniciar sesión con email y contraseña' })
   login(@Body() dto: LoginDto, @Ip() ip: string): Promise<TokenResponseDto> {
@@ -40,6 +45,7 @@ export class IamAuthController {
   /** UC-01-06. */
   @Post('token/refresh')
   @Public()
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rotar el refresh token' })
   refresh(@Body() dto: RefreshTokenDto): Promise<TokenResponseDto> {

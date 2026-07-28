@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ObservationsService } from '../services';
 import {
   AmendObservationDto,
@@ -20,6 +20,7 @@ import {
 /** Endpoints de observaciones clínicas (registro y enmienda). */
 @ApiTags('clinical-observations')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical/observations')
 export class ClinicalObservationsController {
   constructor(private readonly observationsService: ObservationsService) {}

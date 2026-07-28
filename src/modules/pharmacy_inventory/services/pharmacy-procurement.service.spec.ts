@@ -16,18 +16,30 @@ function build() {
   const suppliersRepo = { findById: mockFn(), create: mockFn() };
   const ordersRepo = {
     findById: mockFn(),
+    findByIdempotencyKey: mockFn(),
+    findLinesByOrder: mockFn(),
     create: mockFn(),
     createLine: mockFn(),
     findLineById: mockFn(),
   };
-  const receiptsRepo = { create: mockFn(), createLine: mockFn() };
+  const receiptsRepo = {
+    create: mockFn(),
+    createLine: mockFn(),
+    findByIdempotencyKey: mockFn(),
+    findLines: mockFn(),
+  };
   const locationsRepo = { findById: mockFn() };
   const lotsRepo = { findByProductAndNumber: mockFn(), create: mockFn() };
   const ledgerRepo = {
     nextSequence: mockFn(async () => '1'),
     append: mockFn(() => ({ id: 'led1' })),
+    findEntryIdsBySource: mockFn(async () => []),
   };
-  const stockRepo = { findByKey: mockFn(), create: mockFn() };
+  const stockRepo = {
+    findByKey: mockFn(),
+    findByKeyForUpdate: mockFn(),
+    create: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new PharmacyProcurementService(
     em as any,
@@ -49,6 +61,7 @@ function build() {
     locationsRepo,
     lotsRepo,
     stockRepo,
+    ledgerRepo,
   };
 }
 
@@ -123,7 +136,7 @@ describe('PharmacyProcurementService', () => {
     });
     d.lotsRepo.findByProductAndNumber.mockResolvedValue(null);
     d.lotsRepo.create.mockReturnValue({ id: 'lot1' });
-    d.stockRepo.findByKey.mockResolvedValue(null);
+    d.stockRepo.findByKeyForUpdate.mockResolvedValue(null);
     d.stockRepo.create.mockReturnValue({ id: 'sp1' });
     const dto = {
       pharmacyPurchaseOrderId: 'po1',
@@ -142,6 +155,66 @@ describe('PharmacyProcurementService', () => {
     expect(res.id).toBe('gr1');
     expect(res.lotIds).toEqual(['lot1']);
     expect(res.ledgerEntryIds).toEqual(['led1']);
+    // El upsert de la posición de stock toma el lock (FOR UPDATE), no un read suelto.
+    expect(d.stockRepo.findByKeyForUpdate).toHaveBeenCalled();
+    expect(d.stockRepo.findByKey).not.toHaveBeenCalled();
+  });
+
+  it('createPurchaseOrder: idempotent retry returns the existing order without re-creating', async () => {
+    const d = build();
+    d.ordersRepo.findByIdempotencyKey.mockResolvedValue({
+      id: 'po-existing',
+      purchaseOrderNumber: 'PO-existing',
+    });
+    d.ordersRepo.findLinesByOrder.mockResolvedValue([{ id: 'pol-existing' }]);
+    const dto = {
+      pharmacySiteId: 's1',
+      pharmacySupplierId: 'sup1',
+      idempotencyKey: 'idem-po',
+      lines: [{ pharmacyProductId: 'p1', orderedQuantity: 5 }],
+    };
+    const res = await d.service.createPurchaseOrder('ph1', dto as any, actor);
+    expect(res).toEqual({
+      id: 'po-existing',
+      purchaseOrderNumber: 'PO-existing',
+      lineIds: ['pol-existing'],
+    });
+    expect(d.ordersRepo.findByIdempotencyKey).toHaveBeenCalledWith(
+      d.tx,
+      'ph1',
+      'idem-po',
+    );
+    // No repite el efecto: no vuelve a crear la orden.
+    expect(d.ordersRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('receiveGoods: idempotent retry returns the existing receipt without re-posting stock', async () => {
+    const d = build();
+    d.receiptsRepo.findByIdempotencyKey.mockResolvedValue({
+      id: 'gr-existing',
+      receiptNumber: 'GR-existing',
+    });
+    d.receiptsRepo.findLines.mockResolvedValue([
+      { id: 'grl1', inventoryLotId: 'lot-existing' },
+    ]);
+    d.ledgerRepo.findEntryIdsBySource.mockResolvedValue(['led-existing']);
+    const dto = {
+      pharmacyPurchaseOrderId: 'po1',
+      pharmacySiteId: 's1',
+      inventoryLocationId: 'loc1',
+      idempotencyKey: 'idem-gr',
+      lines: [],
+    };
+    const res = await d.service.receiveGoods('ph1', dto as any, actor);
+    expect(res).toEqual({
+      id: 'gr-existing',
+      receiptNumber: 'GR-existing',
+      lotIds: ['lot-existing'],
+      ledgerEntryIds: ['led-existing'],
+    });
+    // No repite el efecto: ni ledger nuevo ni mutación de stock.
+    expect(d.receiptsRepo.create).not.toHaveBeenCalled();
+    expect(d.stockRepo.findByKeyForUpdate).not.toHaveBeenCalled();
   });
 
   it('receiveGoods: throws when order missing', async () => {

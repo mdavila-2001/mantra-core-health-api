@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { generateSecret, generateURI, verify as verifyTotp } from 'otplib';
 import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  decryptSecret,
+  encryptSecret,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -67,6 +70,39 @@ export class IamMfaService {
           });
         }
 
+        // El código es obligatorio para verificar un factor TOTP.
+        if (!dto.code) {
+          throw new PreconditionFailedException(
+            'code es obligatorio para verificar',
+          );
+        }
+
+        // El secreto se guardó cifrado al enrolar; sin él no se puede validar.
+        if (!factor.secretEncrypted) {
+          throw new PreconditionFailedException(
+            'El factor no tiene un secreto TOTP asociado',
+          );
+        }
+
+        const secret = decryptSecret(factor.secretEncrypted);
+        const result = await verifyTotp({ token: dto.code, secret });
+        if (!result.valid) {
+          // Registrar el intento fallido como evento de seguridad ANTES de abortar.
+          // Se usa un EntityManager independiente (fork + flush) porque al lanzar
+          // la excepción la transacción principal hace rollback: si el evento se
+          // registrara sobre `tx` se perdería, y el log de auditoría es append-only.
+          const auditEm = this.em.fork();
+          this.eventsRepo.record(auditEm, {
+            eventTypeConceptId: CONCEPTS.SEC_MFA_ENROLL,
+            outcomeConceptId: CONCEPTS.OUTCOME_FAILURE,
+            userId,
+            recordedByUserId: actor.id,
+            detailJson: { factorId: factor.id, action: 'verify' },
+          });
+          await auditEm.flush();
+          throw new PreconditionFailedException('Código MFA inválido');
+        }
+
         factor.stateConceptId = CONCEPTS.STATE_VERIFIED;
         factor.verifiedAt = new Date();
         touch(factor, actor.id);
@@ -109,6 +145,21 @@ export class IamMfaService {
         actorUserId: actor.id,
       });
 
+      // Para TOTP se genera un secreto, se guarda cifrado y se devuelve una sola
+      // vez (junto con el URI otpauth://) para que el usuario lo cargue en su app
+      // autenticadora. Para WEBAUTHN se mantiene el comportamiento actual.
+      let secret: string | undefined;
+      let otpauthUri: string | undefined;
+      if (dto.factorType === 'TOTP') {
+        secret = generateSecret();
+        factor.secretEncrypted = encryptSecret(secret);
+        otpauthUri = generateURI({
+          issuer: 'REDESA Health',
+          label: user.displayName ?? userId,
+          secret,
+        });
+      }
+
       this.eventsRepo.record(tx, {
         eventTypeConceptId: CONCEPTS.SEC_MFA_ENROLL,
         outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
@@ -122,6 +173,8 @@ export class IamMfaService {
         userId,
         state: factor.stateConceptId,
         verifiedAt: undefined,
+        secret,
+        otpauthUri,
       };
     });
   }

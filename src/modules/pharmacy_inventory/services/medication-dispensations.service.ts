@@ -58,6 +58,29 @@ export class MedicationDispensationsService {
       'Dispensing medication',
     );
     return this.em.transactional(async (tx) => {
+      // Idempotencia: un retry con la misma clave devuelve la dispensación ya
+      // creada SIN repetir el descuento de stock ni los asientos del ledger.
+      if (dto.idempotencyKey) {
+        const existing = await this.dispensationsRepo.findByIdempotencyKey(
+          tx,
+          pharmacyId,
+          dto.idempotencyKey,
+        );
+        if (existing) {
+          const existingLines = await this.dispensationsRepo.findLines(
+            tx,
+            existing.id,
+          );
+          const existingLedgerIds =
+            await this.ledgerRepo.findEntryIdsBySource(tx, existing.id);
+          return {
+            id: existing.id,
+            lineIds: existingLines.map((l) => l.id),
+            ledgerEntryIds: existingLedgerIds,
+          };
+        }
+      }
+
       if (dto.inventoryReservationId) {
         const reservation = await this.reservationsRepo.findById(
           tx,
@@ -87,7 +110,7 @@ export class MedicationDispensationsService {
       const ledgerEntryIds: string[] = [];
 
       for (const line of dto.lines) {
-        const position = await this.stockRepo.findByKey(tx, {
+        const position = await this.stockRepo.findByKeyForUpdate(tx, {
           inventoryLocationId: line.inventoryLocationId,
           pharmacyProductId: line.pharmacyProductId,
           inventoryLotId: line.inventoryLotId,
@@ -234,7 +257,7 @@ export class MedicationDispensationsService {
             sourceId: dispensation.id,
             recordedByUserId: actor.id,
           });
-          const position = await this.stockRepo.findByKey(tx, {
+          const position = await this.stockRepo.findByKeyForUpdate(tx, {
             inventoryLocationId: locationId,
             pharmacyProductId: dl.pharmacyProductId,
             inventoryLotId: dl.inventoryLotId,

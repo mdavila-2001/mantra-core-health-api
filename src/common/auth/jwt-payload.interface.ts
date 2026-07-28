@@ -7,6 +7,12 @@ export interface JwtPayload {
   sub: string;
   sid?: string;
   roles: string[];
+  /**
+   * Tenants (organizaciones) de los que el usuario es miembro activo. El request
+   * elige uno vía cabecera `X-Tenant-Id`, que debe pertenecer a esta lista; así
+   * el scoping por tenant (RLS) no requiere un lookup por request.
+   */
+  tenants?: string[];
   /** Marca de tipo para distinguir access de otros usos futuros del secreto. */
   typ: 'access';
 }

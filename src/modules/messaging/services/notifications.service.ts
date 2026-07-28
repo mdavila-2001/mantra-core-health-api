@@ -5,7 +5,11 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UnauthorizedException,
+  canonicalJson,
+  deriveWebhookSecret,
   touch,
+  verifySignature,
   type AuthenticatedUser,
 } from '../../../common';
 import { NotificationsRepository } from '../repositories';
@@ -372,6 +376,18 @@ export class NotificationsService {
         throw new ResourceNotFoundException('Proveedor no encontrado', {
           providerCode,
         });
+      }
+
+      // Verificación de firma HMAC del proveedor ANTES de conciliar nada
+      // (fail-closed): sin firma válida contra el secreto del proveedor se
+      // rechaza el acuse. Esta es la única superficie pública del módulo.
+      const secret = deriveWebhookSecret('provider', provider.id); // TODO secreto por proveedor
+      const rawBody = canonicalJson(dto.rawPayloadJson);
+      if (!verifySignature(secret, rawBody, dto.signature)) {
+        throw new UnauthorizedException(
+          'Firma del acuse del proveedor inválida',
+          { providerCode },
+        );
       }
 
       const delivery =

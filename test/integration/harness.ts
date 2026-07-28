@@ -66,6 +66,9 @@ export async function bootstrapTestApp(
   opts: { reset?: boolean } = {},
 ): Promise<TestContext> {
   process.env.ORM_SCHEMA_SYNC = process.env.ORM_SCHEMA_SYNC ?? 'off';
+  // Las pruebas disparan muchas peticiones desde el mismo IP; sin esto el
+  // ThrottlerGuard global las cortaría con 429.
+  process.env.RATE_LIMIT_DISABLED = 'true';
 
   // Reset opcional (lo usa el smoke) para una corrida reproducible desde cero.
   if (opts.reset) {

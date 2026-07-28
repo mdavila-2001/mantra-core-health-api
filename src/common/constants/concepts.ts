@@ -3371,7 +3371,11 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'RISK_APFEL',
     'Apfel PONV score',
   ),
-  RISK_CATEGORY_LOW: def('periop:risk-category:low', 'RISK_LOW', 'Low risk'),
+  RISK_CATEGORY_LOW: def(
+    'periop:risk-category:low',
+    'PERIOP_RISK_LOW',
+    'Low risk',
+  ),
   RISK_CATEGORY_MODERATE: def(
     'periop:risk-category:moderate',
     'RISK_MODERATE',
@@ -3379,7 +3383,7 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   RISK_CATEGORY_HIGH: def(
     'periop:risk-category:high',
-    'RISK_HIGH',
+    'PERIOP_RISK_HIGH',
     'High risk',
   ),
   ASSESSMENT_COMPLETED: def(
@@ -3726,7 +3730,7 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   CANCEL_CATEGORY_PATIENT: def(
     'periop:cancel-category:patient',
-    'CANCEL_PATIENT',
+    'PERIOP_CANCEL_PATIENT',
     'Patient-related cancellation',
   ),
   CANCEL_CATEGORY_FACILITY: def(

@@ -40,6 +40,24 @@ export class GoodsReceiptsRepository {
     return em.findOne(PharmacyGoodsReceipts, { id });
   }
 
+  /** Recepción previa con la misma clave de idempotencia (retry seguro). */
+  findByIdempotencyKey(
+    em: EntityManager,
+    idempotencyKey: string,
+  ): Promise<PharmacyGoodsReceipts | null> {
+    return em.findOne(PharmacyGoodsReceipts, { idempotencyKey });
+  }
+
+  /** Líneas de una recepción (para reconstruir lotes en respuestas idempotentes). */
+  findLines(
+    em: EntityManager,
+    receiptId: string,
+  ): Promise<PharmacyGoodsReceiptLines[]> {
+    return em.find(PharmacyGoodsReceiptLines, {
+      pharmacyGoodsReceiptId: receiptId,
+    });
+  }
+
   create(
     em: EntityManager,
     data: CreateGoodsReceiptData,

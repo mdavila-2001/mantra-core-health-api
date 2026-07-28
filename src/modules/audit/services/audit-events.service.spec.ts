@@ -26,6 +26,7 @@ function build() {
     }),
     recordPatientContent: mockFn(),
     countByUserSince: mockFn().mockResolvedValue(0),
+    purgeOlderThan: mockFn().mockResolvedValue(0),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuditEventsService(
@@ -121,10 +122,44 @@ describe('AuditEventsService', () => {
   });
 
   describe('applyRetention (UC-10-09)', () => {
-    it('registra el evento de retención', async () => {
+    it('purga el log de accesos fuera de la ventana y reporta el conteo real', async () => {
       const d = build();
-      const res = await d.service.applyRetention({ scope: 'audit_log' }, actor);
-      expect(res).toMatchObject({ auditLogId: 'a1', applied: true });
+      d.dataAccessRepo.purgeOlderThan.mockResolvedValue(7);
+      const res = await d.service.applyRetention(
+        { scope: 'data_access_log', olderThan: '2025-01-01', tenantId: 't1' },
+        actor,
+      );
+      expect(d.dataAccessRepo.purgeOlderThan).toHaveBeenCalledWith(
+        d.tx,
+        new Date('2025-01-01'),
+        't1',
+      );
+      expect(res).toMatchObject({
+        auditLogId: 'a1',
+        applied: true,
+        purgedCount: 7,
+      });
+    });
+
+    it('fail-closed: sin ventana explícita no borra nada', async () => {
+      const d = build();
+      const res = await d.service.applyRetention(
+        { scope: 'data_access_log' },
+        actor,
+      );
+      expect(d.dataAccessRepo.purgeOlderThan).not.toHaveBeenCalled();
+      expect(res.purgedCount).toBe(0);
+      expect(res.applied).toBe(true);
+    });
+
+    it('nunca borra la cadena WORM audit_log, sólo deja constancia', async () => {
+      const d = build();
+      const res = await d.service.applyRetention(
+        { scope: 'audit_log', olderThan: '2025-01-01' },
+        actor,
+      );
+      expect(d.dataAccessRepo.purgeOlderThan).not.toHaveBeenCalled();
+      expect(res).toMatchObject({ auditLogId: 'a1', applied: true, purgedCount: 0 });
     });
   });
 

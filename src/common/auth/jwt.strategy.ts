@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { loadAuthEnv } from './auth.env';
+import { JWT_ALGORITHM, loadAuthEnv } from './auth.env';
 import type { JwtPayload } from './jwt-payload.interface';
 import type { AuthenticatedUser } from './authenticated-user.interface';
 
@@ -18,6 +18,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: loadAuthEnv().secret,
+      // Se fija el algoritmo de verificación: passport-jwt aceptaría cualquiera
+      // compatible con la clave; pinnearlo cierra la confusión de algoritmo.
+      algorithms: [JWT_ALGORITHM],
     });
   }
 
@@ -36,6 +39,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: payload.sub,
       sessionId: payload.sid,
       roles: payload.roles ?? [],
+      tenantIds: payload.tenants ?? [],
     };
   }
 }

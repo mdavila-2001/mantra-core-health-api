@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { loadAuthEnv } from './auth.env';
+import { JWT_ALGORITHM, loadAuthEnv } from './auth.env';
 import type { JwtPayload } from './jwt-payload.interface';
 
 /** Par de tokens emitido al abrir o rotar una sesión. */
@@ -32,11 +32,13 @@ export class TokenService {
     userId: string,
     sessionTokenId: string,
     roles: string[],
+    tenants: string[] = [],
   ): string {
     const payload: JwtPayload = {
       sub: userId,
       sid: sessionTokenId,
       roles,
+      tenants,
       typ: 'access',
     };
     // `expiresIn` acepta un string tipo `15m`; el tipo de la librería exige un
@@ -44,6 +46,7 @@ export class TokenService {
     const options = {
       secret: this.env.secret,
       expiresIn: this.env.accessTtl,
+      algorithm: JWT_ALGORITHM,
     } as JwtSignOptions;
     return this.jwt.sign(payload, options);
   }
@@ -68,14 +71,18 @@ export class TokenService {
    * access token firmado, refresh token y su hash, y la fecha de expiración del
    * refresh derivada de `JWT_REFRESH_TTL_DAYS`.
    */
-  issueSessionTokens(userId: string, roles: string[]): IssuedTokens {
+  issueSessionTokens(
+    userId: string,
+    roles: string[],
+    tenants: string[] = [],
+  ): IssuedTokens {
     const sessionTokenId = randomUUID();
     const { raw, hash } = this.issueRefreshToken();
     const expiresAt = new Date(
       Date.now() + this.env.refreshTtlDays * 24 * 60 * 60 * 1000,
     );
     return {
-      accessToken: this.signAccessToken(userId, sessionTokenId, roles),
+      accessToken: this.signAccessToken(userId, sessionTokenId, roles, tenants),
       refreshToken: raw,
       refreshTokenHash: hash,
       sessionTokenId,

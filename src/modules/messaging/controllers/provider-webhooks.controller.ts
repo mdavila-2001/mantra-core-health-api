@@ -15,8 +15,9 @@ import { ProviderReceiptDto, ProviderReceiptResponseDto } from '../dto';
  * Webhooks de los proveedores de mensajería.
  *
  * Es la única superficie **pública** del módulo: quien llama es un tercero sin
- * sesión en el sistema. La verificación de firma la hace el conector de
- * integraciones, que es quien guarda el secreto (ver "Pendiente" en el README).
+ * sesión en el sistema. La autenticidad se establece verificando la firma HMAC
+ * del acuse (`signature`) contra el secreto del proveedor dentro del servicio
+ * (fail-closed) antes de conciliar la entrega.
  */
 @ApiTags('messaging-webhooks')
 @Controller('webhooks/providers')

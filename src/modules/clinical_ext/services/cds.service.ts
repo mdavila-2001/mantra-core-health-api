@@ -24,6 +24,21 @@ import {
 } from '../dto';
 import { CEXT } from '../clinical_ext.concepts';
 
+/** Contexto contra el que se evalúa una regla CDS (armado desde el DTO). */
+interface CdsEvalContext {
+  /** Concept ids de los medicamentos activos del paciente. */
+  medications: string[];
+  /** Observaciones indexadas por concept id → valor numérico. */
+  observations: Record<string, number | undefined>;
+}
+
+/**
+ * Se lanza cuando la lógica de una regla no encaja en la gramática soportada.
+ * El evaluador la captura para **fallar cerrado**: la regla no dispara y se
+ * loguea. Es un detalle interno; nunca sale del servicio.
+ */
+class UnparseableCdsRuleError extends Error {}
+
 /**
  * Motor de decisión clínica (CDS): gobernanza de reglas (crear/publicar/rollback,
  * UC-18-13), evaluación de reglas activas para generar alertas (UC-18-03) y chequeo
@@ -141,7 +156,17 @@ export class CdsService {
     });
   }
 
-  /** UC-18-03: evalúa todas las reglas activas y genera una alerta por match. */
+  /**
+   * UC-18-03: evalúa las reglas activas contra el contexto del paciente
+   * (medicamentos + observaciones del DTO) y genera una alerta **solo** por cada
+   * regla que realmente matchea, con su severidad declarada.
+   *
+   * La lógica de la regla vive en `logic_json` y se interpreta con una gramática
+   * mínima ({@link evaluateLogic}). El evaluador **falla cerrado**: una regla cuya
+   * lógica no se entiende NO dispara y se loguea `warn`. Una regla de decisión
+   * clínica que se disparara "por si acaso" cuando no se sabe leerla generaría
+   * alertas falsas y erosionaría la confianza en el sistema.
+   */
   async evaluate(
     dto: EvaluateCdsDto,
     actor: AuthenticatedUser,
@@ -159,8 +184,11 @@ export class CdsService {
         CEXT.CDS_RULE_ACTIVE,
         dto.tenantId,
       );
+      const context = this.buildContext(dto);
+      const matched = rules.filter((rule) => this.ruleMatches(rule, context));
+
       const now = new Date();
-      const alerts = rules.map((rule) =>
+      const alerts = matched.map((rule) =>
         this.alertsRepo.create(tx, {
           patientProfileId: dto.patientProfileId,
           encounterId: dto.encounterId,
@@ -179,7 +207,11 @@ export class CdsService {
       await tx.flush();
 
       this.logger.info(
-        { operation: 'clinical_ext.cds.evaluate', generated: alerts.length },
+        {
+          operation: 'clinical_ext.cds.evaluate',
+          evaluated: rules.length,
+          generated: alerts.length,
+        },
         'CDS evaluation completed',
       );
       return {
@@ -268,6 +300,147 @@ export class CdsService {
       await tx.flush();
       return { id: interaction.id };
     });
+  }
+
+  // --- Evaluación de reglas (UC-18-03) ------------------------------------
+
+  /**
+   * Arma el contexto de evaluación desde el DTO: la lista de medicamentos y un
+   * mapa `codeConceptId → valor` de las observaciones, que es lo que la gramática
+   * de `logic_json` sabe consultar por ruta con puntos (`observations.<id>`).
+   */
+  private buildContext(dto: EvaluateCdsDto): CdsEvalContext {
+    const observations: Record<string, number | undefined> = {};
+    for (const obs of dto.observations ?? []) {
+      observations[obs.codeConceptId] = obs.valueNumber;
+    }
+    return {
+      medications: dto.medicationConceptIds ?? [],
+      observations,
+    };
+  }
+
+  /**
+   * ¿Matchea la regla el contexto? Envuelve al evaluador y **falla cerrado**: si
+   * la lógica no se entiende (o la regla no trae lógica), no dispara y se loguea.
+   */
+  private ruleMatches(
+    rule: { id: string; logicJson?: unknown },
+    context: CdsEvalContext,
+  ): boolean {
+    try {
+      return this.evaluateLogic(rule.logicJson, context);
+    } catch (err) {
+      this.logger.warn(
+        {
+          operation: 'clinical_ext.cds.evaluate',
+          ruleId: rule.id,
+          reason: err instanceof Error ? err.message : String(err),
+        },
+        'Regla CDS ignorada: lógica no interpretable (fail-closed)',
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Evaluador de `logic_json`. Gramática mínima, inspirada en el evaluador de
+   * guardas de workflow, con composición booleana:
+   *
+   * - Hoja: `{ field, op, value? }`, donde `field` es una ruta con puntos dentro
+   *   del contexto (`medications`, `observations.<conceptId>`).
+   *   Operadores: `exists`, `eq`, `ne`, `in`, `contains`, `gt`, `lt`, `gte`, `lte`.
+   * - Compuestos: `{ all: [...] }` (Y), `{ any: [...] }` (O), `{ not: {...} }`.
+   *
+   * Cualquier nodo que no encaje en esta gramática lanza
+   * {@link UnparseableCdsRuleError} para que la regla falle cerrado.
+   */
+  private evaluateLogic(logic: unknown, context: CdsEvalContext): boolean {
+    if (logic === null || typeof logic !== 'object') {
+      throw new UnparseableCdsRuleError('logic_json no es un objeto');
+    }
+    const node = logic as Record<string, unknown>;
+
+    if (Array.isArray(node.all)) {
+      return node.all.every((child) => this.evaluateLogic(child, context));
+    }
+    if (Array.isArray(node.any)) {
+      return node.any.some((child) => this.evaluateLogic(child, context));
+    }
+    if ('not' in node) {
+      return !this.evaluateLogic(node.not, context);
+    }
+    if (typeof node.field === 'string' && typeof node.op === 'string') {
+      return this.evaluateLeaf(node.field, node.op, node.value, context);
+    }
+
+    throw new UnparseableCdsRuleError('nodo de lógica no reconocido');
+  }
+
+  /**
+   * Evalúa una hoja `{ field, op, value }`.
+   *
+   * Se distingue entre lógica malformada (la regla declara mal el operador o el
+   * `value` requerido → `UnparseableCdsRuleError`, falla cerrado) y datos ausentes
+   * en tiempo de ejecución (la observación no está o no es numérica → simplemente
+   * no matchea, `false`). No entender la regla no es lo mismo que la regla no se
+   * cumpla.
+   */
+  private evaluateLeaf(
+    field: string,
+    op: string,
+    value: unknown,
+    context: CdsEvalContext,
+  ): boolean {
+    const actual = this.readPath(
+      context as unknown as Record<string, unknown>,
+      field,
+    );
+
+    switch (op) {
+      case 'exists':
+        return actual !== undefined && actual !== null;
+      case 'eq':
+        return actual === value;
+      case 'ne':
+        return actual !== value;
+      case 'in':
+        if (!Array.isArray(value)) {
+          throw new UnparseableCdsRuleError("op 'in' exige un array en value");
+        }
+        return value.includes(actual);
+      case 'contains':
+        // `field` apunta a un array del contexto (p.ej. medications) y `value`
+        // es el elemento buscado.
+        return Array.isArray(actual) && actual.includes(value);
+      case 'gt':
+      case 'lt':
+      case 'gte':
+      case 'lte': {
+        if (typeof value !== 'number') {
+          throw new UnparseableCdsRuleError(
+            `op '${op}' exige un número en value`,
+          );
+        }
+        if (typeof actual !== 'number') return false;
+        if (op === 'gt') return actual > value;
+        if (op === 'lt') return actual < value;
+        if (op === 'gte') return actual >= value;
+        return actual <= value;
+      }
+      default:
+        throw new UnparseableCdsRuleError(`operador no soportado: ${op}`);
+    }
+  }
+
+  /** Lee una ruta con puntos dentro del contexto; ausente ⇒ `undefined`. */
+  private readPath(source: Record<string, unknown>, path: string): unknown {
+    let current: unknown = source;
+    for (const segment of path.split('.')) {
+      if (current === null || typeof current !== 'object') return undefined;
+      current = (current as Record<string, unknown>)[segment];
+    }
+    return current;
   }
 
   private toRuleResponse(rule: {

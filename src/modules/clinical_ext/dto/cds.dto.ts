@@ -1,12 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
+  ValidateNested,
 } from 'class-validator';
 
 /** Cuerpo de `POST /cds-rules` (crea la regla en borrador; precondición de UC-18-13). */
@@ -77,6 +80,23 @@ export class PublishRuleVersionDto {
   severityConceptId?: string;
 }
 
+/** Una observación del contexto de evaluación (código + valor numérico opcional). */
+export class CdsObservationInputDto {
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Código de la observación (concept id)',
+  })
+  @IsUUID()
+  codeConceptId!: string;
+
+  @ApiPropertyOptional({
+    description: 'Valor numérico observado (p.ej. glucemia)',
+  })
+  @IsOptional()
+  @IsNumber()
+  valueNumber?: number;
+}
+
 /** Cuerpo de `POST /cds/evaluate` (UC-18-03). */
 export class EvaluateCdsDto {
   @ApiProperty({ format: 'uuid' })
@@ -111,6 +131,26 @@ export class EvaluateCdsDto {
   @IsOptional()
   @IsUUID()
   sourceResourceId?: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Concept ids de los medicamentos activos del paciente (contexto de evaluación)',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  medicationConceptIds?: string[];
+
+  @ApiPropertyOptional({
+    type: [CdsObservationInputDto],
+    description: 'Observaciones del paciente (contexto de evaluación)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CdsObservationInputDto)
+  observations?: CdsObservationInputDto[];
 }
 
 /** Cuerpo de `POST /cds/check-interactions` (UC-18-04). */

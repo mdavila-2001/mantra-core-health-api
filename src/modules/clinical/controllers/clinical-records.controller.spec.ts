@@ -8,7 +8,15 @@ const actor = { id: 'user-1', roles: [] } as any;
 function build() {
   const conditionsService = { create: mockFn() };
   const allergyService = { create: mockFn() };
-  const medicationsService = { prescribe: mockFn(), administer: mockFn() };
+  const medicationsService = {
+    prescribe: mockFn(),
+    administer: mockFn(),
+    editDraft: mockFn(),
+    issue: mockFn(),
+    invalidate: mockFn(),
+    replace: mockFn(),
+    renew: mockFn(),
+  };
   const proceduresService = { create: mockFn() };
   const immunizationsService = { create: mockFn() };
   const controller = new ClinicalRecordsController(
@@ -71,6 +79,52 @@ describe('ClinicalRecordsController', () => {
     };
     await d.controller.administerMedication(dto, actor);
     expect(d.medicationsService.administer).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates editMedicationDraft (CAN-RX)', async () => {
+    const d = build();
+    const dto = { doseText: '500mg' };
+    await d.controller.editMedicationDraft('mr1', dto, actor);
+    expect(d.medicationsService.editDraft).toHaveBeenCalledWith(
+      'mr1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates issueMedicationRequest (CAN-RX)', async () => {
+    const d = build();
+    await d.controller.issueMedicationRequest('mr1', actor);
+    expect(d.medicationsService.issue).toHaveBeenCalledWith('mr1', actor);
+  });
+
+  it('delegates invalidateMedicationRequest (CAN-RX)', async () => {
+    const d = build();
+    const dto = { reasonText: 'error' };
+    await d.controller.invalidateMedicationRequest('mr1', dto, actor);
+    expect(d.medicationsService.invalidate).toHaveBeenCalledWith(
+      'mr1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates replaceMedicationRequest (CAN-RX)', async () => {
+    const d = build();
+    const dto = { reasonText: 'corrección' };
+    await d.controller.replaceMedicationRequest('mr1', dto, actor);
+    expect(d.medicationsService.replace).toHaveBeenCalledWith(
+      'mr1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates renewMedicationRequest (CAN-RX)', async () => {
+    const d = build();
+    const dto = {};
+    await d.controller.renewMedicationRequest('mr1', dto, actor);
+    expect(d.medicationsService.renew).toHaveBeenCalledWith('mr1', dto, actor);
   });
 
   it('delegates createProcedure (UC-08-12)', async () => {

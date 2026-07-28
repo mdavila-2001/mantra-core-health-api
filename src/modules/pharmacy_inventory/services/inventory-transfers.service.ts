@@ -65,7 +65,7 @@ export class InventoryTransfersService {
         });
       }
 
-      const fromPosition = await this.stockRepo.findByKey(tx, {
+      const fromPosition = await this.stockRepo.findByKeyForUpdate(tx, {
         inventoryLocationId: dto.fromLocationId,
         pharmacyProductId: dto.pharmacyProductId,
         inventoryLotId: dto.inventoryLotId,
@@ -122,7 +122,7 @@ export class InventoryTransfersService {
       fromPosition.lastLedgerSequence = outSeq;
       fromPosition.updatedAt = new Date();
 
-      let toPosition = await this.stockRepo.findByKey(tx, {
+      let toPosition = await this.stockRepo.findByKeyForUpdate(tx, {
         inventoryLocationId: dto.toLocationId,
         pharmacyProductId: dto.pharmacyProductId,
         inventoryLotId: dto.inventoryLotId,

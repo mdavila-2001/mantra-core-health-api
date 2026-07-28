@@ -31,6 +31,7 @@ import {
   ImmunizationSchedulesRepository,
   VirtualEncountersRepository,
 } from './repositories';
+import { ServiceRequestsRepository } from '../clinical/repositories';
 
 /**
  * Módulo Clinical-Ext (18): coordinación de cuidado (equipos), decisión clínica
@@ -60,6 +61,8 @@ import {
     CareGapsRepository,
     ImmunizationSchedulesRepository,
     VirtualEncountersRepository,
+    // Repositorio de otro módulo (clinical) reutilizado por el fan-out de order sets
+    ServiceRequestsRepository,
     // Servicios
     CareTeamsService,
     CdsService,

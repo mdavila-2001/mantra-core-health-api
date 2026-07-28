@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { AppealsService } from '../services';
 import { CreateAppealDecisionDto, CreatedResourceDto } from '../dto';
 
@@ -18,6 +18,7 @@ import { CreateAppealDecisionDto, CreatedResourceDto } from '../dto';
  */
 @ApiTags('insurance-appeals')
 @ApiBearerAuth()
+@Roles('BILLING', 'FINANCE')
 @Controller('claim-disputes')
 export class AppealsController {
   constructor(private readonly service: AppealsService) {}

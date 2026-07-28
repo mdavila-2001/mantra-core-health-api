@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ClaimsService } from '../services';
 import {
   CreateClaimDto,
@@ -26,6 +26,7 @@ import {
  */
 @ApiTags('insurance-claims')
 @ApiBearerAuth()
+@Roles('BILLING', 'FINANCE')
 @Controller('insurance-claims')
 export class ClaimsController {
   constructor(private readonly service: ClaimsService) {}

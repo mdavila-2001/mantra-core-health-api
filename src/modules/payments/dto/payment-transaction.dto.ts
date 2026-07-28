@@ -5,8 +5,18 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
 } from 'class-validator';
+
+/**
+ * Importe monetario positivo con hasta 2 decimales, como cadena. Rechaza
+ * negativos y notación con signo: `@IsNumberString()` los aceptaba, lo que
+ * permitía reembolsos/capturas negativos que corrompen los totales.
+ */
+export const POSITIVE_MONEY_REGEX = /^\d+(\.\d{1,2})?$/;
+const POSITIVE_MONEY_MESSAGE =
+  'El importe debe ser un número positivo con hasta 2 decimales';
 
 /** Operación solicitada al gateway. */
 export type TransactionOperation = 'AUTHORIZE' | 'CAPTURE' | 'SALE';
@@ -31,6 +41,7 @@ export class ProcessTransactionDto {
   })
   @IsOptional()
   @IsNumberString()
+  @Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })
   amount?: string;
 
   @ApiPropertyOptional({ description: 'Referencia devuelta por el gateway' })
@@ -112,6 +123,7 @@ export class CreateRefundDto {
     example: '50.00',
   })
   @IsNumberString()
+  @Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })
   amount!: string;
 
   @ApiPropertyOptional({

@@ -23,6 +23,16 @@ function build() {
   };
   const exchangeRecordsRepo = { create: mockFn() };
   const evidenceRepo = { create: mockFn() };
+  // Entrega HTTP real mockeada: por defecto 2xx.
+  const http = {
+    post: mockFn().mockResolvedValue({
+      ok: true,
+      httpStatus: 200,
+      latencyMs: 10,
+      signature: 'sig',
+      responseBody: { ok: true },
+    }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new IntegrationWebhooksService(
     em as any,
@@ -31,6 +41,7 @@ function build() {
     subscriptionsRepo as any,
     exchangeRecordsRepo as any,
     evidenceRepo,
+    http as any,
     logger as any,
   );
   return {
@@ -41,6 +52,7 @@ function build() {
     subscriptionsRepo,
     exchangeRecordsRepo,
     evidenceRepo,
+    http,
   };
 }
 
@@ -109,6 +121,7 @@ describe('IntegrationWebhooksService', () => {
       d.subscriptionsRepo.findById.mockResolvedValue({
         id: 's1',
         integrationContractId: 'c1',
+        callbackUri: 'https://consumer.example/cb',
         statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
       });
       d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v1' });
@@ -127,6 +140,7 @@ describe('IntegrationWebhooksService', () => {
         actor,
       );
 
+      expect(d.http.post).toHaveBeenCalledTimes(1);
       expect(res).toEqual({
         id: 'e1',
         integrationExchangeRecordId: 'r1',
@@ -169,6 +183,51 @@ describe('IntegrationWebhooksService', () => {
       await expect(
         d.service.deliver('s1', {} as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects delivery when the subscription has no callbackUri (422)', async () => {
+      const d = build();
+      d.subscriptionsRepo.findById.mockResolvedValue({
+        id: 's1',
+        integrationContractId: 'c1',
+        statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
+      });
+      d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v1' });
+      await expect(
+        d.service.deliver('s1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('records a FAILED delivery when the consumer responds with an error', async () => {
+      const d = build();
+      d.subscriptionsRepo.findById.mockResolvedValue({
+        id: 's1',
+        integrationContractId: 'c1',
+        callbackUri: 'https://consumer.example/cb',
+        statusConceptId: ICON.SUBSCRIPTION_ACTIVE,
+      });
+      d.versionsRepo.findActiveByContract.mockResolvedValue({ id: 'v1' });
+      d.exchangeRecordsRepo.create.mockReturnValue({ id: 'r1' });
+      d.evidenceRepo.create.mockReturnValue({
+        id: 'e1',
+        outcomeConceptId: ICON.DELIVERY_FAILED,
+      });
+      d.http.post.mockResolvedValue({
+        ok: false,
+        httpStatus: 500,
+        latencyMs: 40,
+        signature: 'sig',
+        responseBody: undefined,
+        errorText: 'HTTP 500',
+      });
+
+      const res = await d.service.deliver('s1', {} as any, actor);
+
+      expect(res.outcome).toBe(ICON.DELIVERY_FAILED);
+      expect(d.evidenceRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ outcomeConceptId: ICON.DELIVERY_FAILED }),
+      );
     });
   });
 });

@@ -9,6 +9,7 @@ import {
   BookingCancellations,
   WaitlistEntries,
   AppointmentReminders,
+  type CancellationPolicySnapshot,
 } from '../entities';
 import { createdBy } from '../../../common';
 
@@ -33,6 +34,7 @@ export interface CreateBookingData {
   statusConceptId: string;
   confirmedAt?: Date;
   bookingPolicyId?: string;
+  cancellationPolicySnapshot?: CancellationPolicySnapshot;
   reasonText?: string;
   actorUserId?: string;
 }
@@ -142,6 +144,7 @@ export class SchedulingBookingsRepository {
         statusConceptId: data.statusConceptId,
         confirmedAt: data.confirmedAt,
         bookingPolicyId: data.bookingPolicyId,
+        cancellationPolicySnapshot: data.cancellationPolicySnapshot,
         reasonText: data.reasonText,
         ...createdBy(data.actorUserId),
       },

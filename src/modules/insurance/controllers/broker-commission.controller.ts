@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { BrokerCommissionService } from '../services';
 import { CreateCommissionStatementDto, CreatedResourceDto } from '../dto';
 
@@ -10,6 +10,7 @@ import { CreateCommissionStatementDto, CreatedResourceDto } from '../dto';
  */
 @ApiTags('insurance-broker-commission')
 @ApiBearerAuth()
+@Roles('BILLING', 'FINANCE')
 @Controller('broker-commission-statements')
 export class BrokerCommissionController {
   constructor(private readonly service: BrokerCommissionService) {}

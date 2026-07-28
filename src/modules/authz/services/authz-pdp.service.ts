@@ -31,6 +31,42 @@ const ACTION_CONCEPT: Record<string, string> = {
   APPROVE: AUTHZ.ACTION_APPROVE,
 };
 
+/**
+ * Rango de privilegio exigido por cada acción para un acceso clínico.
+ * Orden creciente READ < WRITE < FULL: una acción solo la cubre un grant cuyo
+ * nivel alcance su rango. Acciones destructivas/administrativas exigen nivel FULL.
+ */
+const CLINICAL_ACTION_RANK: Record<string, number> = {
+  READ: 1,
+  WRITE: 2,
+  CREATE: 2,
+  DELETE: 3,
+  EXECUTE: 3,
+  APPROVE: 3,
+};
+
+/**
+ * Rango que otorga cada nivel de un `clinical_access_grant`. El nivel ELEVATED
+ * (break-the-glass) se equipara a FULL para la duración de la emergencia.
+ */
+const CLINICAL_LEVEL_RANK: Record<string, number> = {
+  [AUTHZ.ACCESS_LEVEL_READ]: 1,
+  [AUTHZ.ACCESS_LEVEL_WRITE]: 2,
+  [AUTHZ.ACCESS_LEVEL_FULL]: 3,
+  [AUTHZ.ACCESS_LEVEL_ELEVATED]: 3,
+};
+
+/**
+ * Propósito de uso solicitado → concepto autorizado que debe portar el grant
+ * (`clinical_access_grants.reason_concept_id`). Debe coincidir exactamente.
+ */
+const CLINICAL_PURPOSE_CONCEPT: Record<string, string> = {
+  TREATMENT: AUTHZ.PURPOSE_TREATMENT,
+  PAYMENT: AUTHZ.PURPOSE_PAYMENT,
+  OPERATIONS: AUTHZ.PURPOSE_OPERATIONS,
+  EMERGENCY: AUTHZ.PURPOSE_EMERGENCY,
+};
+
 /** Concept id de estrategia de enmascaramiento → código legible. */
 const MASK_NAME: Record<string, string> = {
   [AUTHZ.MASK_REDACT]: 'REDACT',
@@ -206,20 +242,47 @@ export class AuthzPdpService {
     }
 
     // 6b. Acceso clínico por propósito de uso (si el recurso es clínico).
+    // Fail-closed: un grant solo concede si (a) su nivel cubre la ACCIÓN pedida,
+    // (b) su propósito autorizado coincide con el propósito solicitado y (c) está
+    // vigente. Un grant READ NO habilita DELETE, y un propósito distinto (o
+    // ausente) no concede. Antes se concedía por la mera existencia de un grant
+    // vigente, ignorando acción y propósito (CAN-AUTH-001).
     if (dto.patientProfileId) {
       const clinical = await this.clinicalRepo.findActiveForUserPatient(
         em,
         dto.userId,
         dto.patientProfileId,
       );
-      const active = clinical.filter((c) =>
-        this.isWithinWindow(c.validFrom, c.validTo, now),
-      );
-      if (active.length > 0) {
+      const requiredRank =
+        CLINICAL_ACTION_RANK[dto.action] ?? Number.MAX_SAFE_INTEGER;
+      const requestedPurposeConcept = dto.purposeOfUse
+        ? CLINICAL_PURPOSE_CONCEPT[dto.purposeOfUse]
+        : undefined;
+
+      const matching = clinical.filter((c) => {
+        // (c) vigencia por ventana temporal del grant.
+        if (!this.isWithinWindow(c.validFrom, c.validTo, now)) return false;
+        // (b) el propósito solicitado debe existir y coincidir con el autorizado.
+        if (
+          !requestedPurposeConcept ||
+          c.reasonConceptId !== requestedPurposeConcept
+        ) {
+          return false;
+        }
+        // (a) el nivel del grant debe alcanzar el rango que exige la acción.
+        const grantedRank = CLINICAL_LEVEL_RANK[c.accessLevelConceptId] ?? 0;
+        return grantedRank >= requiredRank;
+      });
+
+      if (matching.length > 0) {
         hasAllow = true;
-        reasons.push('allow por acceso clínico vigente');
+        reasons.push(
+          'allow por acceso clínico vigente (nivel y propósito verificados)',
+        );
       } else {
-        reasons.push('sin acceso clínico vigente para el paciente');
+        reasons.push(
+          'sin acceso clínico que habilite la acción/propósito solicitados',
+        );
       }
     }
 

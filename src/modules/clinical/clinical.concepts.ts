@@ -132,6 +132,31 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     ALLERGY_CRITICALITY_HIGH: { code: 'ALG_HIGH', display: 'High criticality' },
 
     // --- medication_requests / records -----------------------------------------
+    // Máquina de estados canónica (REDESA CAN-RX-001..004):
+    // DRAFT (editable/eliminable por el autor) → ISSUED (inmutable, sellada) →
+    // dispensación (administer → COMPLETED). Una receta emitida NUNCA se edita:
+    // corrección = REPLACED (+ nueva receta relacionada) o INVALIDATED; renovar =
+    // nueva receta (RENEWED reservado para trazar la relación de renovación).
+    MEDICATION_REQUEST_DRAFT: {
+      code: 'MR_DRAFT',
+      display: 'Medication request draft',
+    },
+    MEDICATION_REQUEST_ISSUED: {
+      code: 'MR_ISSUED',
+      display: 'Medication request issued',
+    },
+    MEDICATION_REQUEST_INVALIDATED: {
+      code: 'MR_INVALIDATED',
+      display: 'Medication request invalidated',
+    },
+    MEDICATION_REQUEST_REPLACED: {
+      code: 'MR_REPLACED',
+      display: 'Medication request replaced',
+    },
+    MEDICATION_REQUEST_RENEWED: {
+      code: 'MR_RENEWED',
+      display: 'Medication request renewed',
+    },
     MEDICATION_REQUEST_ACTIVE: {
       code: 'MR_ACTIVE',
       display: 'Medication request active',

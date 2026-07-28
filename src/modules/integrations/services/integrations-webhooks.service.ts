@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  UnauthorizedException,
+  canonicalJson,
+  deriveWebhookSecret,
+  verifySignature,
+} from '../../../common';
 import {
   ProviderConnectionsRepository,
   InboundMessagesRepository,
@@ -13,8 +19,8 @@ import { INTEG } from '../integrations.concepts';
  * Caso de uso de recepción de webhooks entrantes (UC-12-09).
  *
  * Endpoint público (el gateway externo no porta token de usuario): el tenant se
- * identifica por la conexión y la autenticidad por la firma HMAC (aquí se acepta
- * la referencia de firma; la verificación criptográfica vive en el gateway). La
+ * identifica por la conexión y la autenticidad por la firma HMAC, que se verifica
+ * aquí (fail-closed) contra el secreto de la conexión antes de persistir nada. La
  * idempotencia por (connection_id, signature) de-duplica reentregas del proveedor.
  */
 @Injectable()
@@ -46,6 +52,16 @@ export class IntegrationsWebhooksService {
       );
       if (!connection) {
         throw new ResourceNotFoundException('Conexión no encontrada', {
+          connectionId: dto.connectionId,
+        });
+      }
+
+      // Verificación de firma HMAC ANTES de persistir (fail-closed): sin firma
+      // válida contra el secreto de la conexión no se admite el webhook.
+      const secret = deriveWebhookSecret('connection', connection.id); // TODO secreto por conexión
+      const rawBody = canonicalJson(dto.payloadJson);
+      if (!verifySignature(secret, rawBody, dto.signature)) {
+        throw new UnauthorizedException('Firma del webhook inválida', {
           connectionId: dto.connectionId,
         });
       }

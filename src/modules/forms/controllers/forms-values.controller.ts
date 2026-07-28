@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { FormsValuesService } from '../services';
 import {
   CorrectValueDto,
@@ -25,6 +25,7 @@ import {
  */
 @ApiTags('forms-values')
 @ApiBearerAuth()
+@Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('forms/values')
 export class FormsValuesController {
   constructor(private readonly valuesService: FormsValuesService) {}

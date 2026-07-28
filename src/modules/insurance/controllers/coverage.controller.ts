@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { CoverageService } from '../services';
 import {
   CreateCoverageDto,
@@ -16,6 +16,7 @@ import {
  */
 @ApiTags('insurance-coverage')
 @ApiBearerAuth()
+@Roles('BILLING', 'FINANCE')
 @Controller()
 export class CoverageController {
   constructor(private readonly service: CoverageService) {}
