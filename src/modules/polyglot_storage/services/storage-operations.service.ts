@@ -44,6 +44,16 @@ const LIVE_PLACEMENT_STATES: string[] = [
  */
 @Injectable()
 export class StorageOperationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param backendsRepo - Valor de backends repo requerido por la operación.
+   * @param placementsRepo - Valor de placements repo requerido por la operación.
+   * @param policiesRepo - Valor de policies repo requerido por la operación.
+   * @param datasetsRepo - Valor de datasets repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly backendsRepo: StorageBackendsRepository,

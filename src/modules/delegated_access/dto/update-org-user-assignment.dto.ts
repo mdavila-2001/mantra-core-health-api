@@ -8,16 +8,25 @@ const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT'] as const;
  * `supervisorUserId`, `accessScope` o `suspend` debe venir (validado en servicio).
  */
 export class UpdateOrgUserAssignmentDto {
+  /**
+   * Identificador asociado a supervisor user.
+   */
   @ApiPropertyOptional({ description: 'Nuevo supervisor', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   supervisorUserId?: string;
 
+  /**
+   * Valor de access scope mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Nuevo alcance de acceso', enum: SCOPES })
   @IsOptional()
   @IsIn(SCOPES)
   accessScope?: (typeof SCOPES)[number];
 
+  /**
+   * Valor de suspend mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Suspender la asignación (cascada a delegaciones)',
   })
@@ -25,6 +34,9 @@ export class UpdateOrgUserAssignmentDto {
   @IsBoolean()
   suspend?: boolean;
 
+  /**
+   * Valor de expected row version mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'row_version esperado (concurrencia optimista)',
   })

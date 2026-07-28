@@ -13,6 +13,9 @@ import {
  * casos de uso presuponen; se expone para poder crearla y encadenar recursos.
  */
 export class CreatePracticeDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({
     description: 'Tenant gestor (directory.tenants)',
     format: 'uuid',
@@ -20,18 +23,27 @@ export class CreatePracticeDto {
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Código único de la práctica', maxLength: 100 })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   code!: string;
 
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Nombre de la práctica', maxLength: 200 })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
   name!: string;
 
+  /**
+   * Identificador asociado a type concept.
+   */
   @ApiPropertyOptional({
     description: 'Concepto de tipo de práctica',
     format: 'uuid',
@@ -40,6 +52,9 @@ export class CreatePracticeDto {
   @IsUUID()
   typeConceptId?: string;
 
+  /**
+   * Identificador asociado a admin user.
+   */
   @ApiPropertyOptional({
     description: 'Usuario administrador (por defecto el actor)',
     format: 'uuid',
@@ -48,11 +63,17 @@ export class CreatePracticeDto {
   @IsUUID()
   adminUserId?: string;
 
+  /**
+   * Identificador asociado a currency concept.
+   */
   @ApiPropertyOptional({ description: 'Concepto de moneda', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   currencyConceptId?: string;
 
+  /**
+   * Valor de time zone mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Zona horaria IANA' })
   @IsOptional()
   @IsString()

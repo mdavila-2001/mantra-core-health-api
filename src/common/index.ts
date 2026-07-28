@@ -17,10 +17,7 @@ export { Public } from './auth/public.decorator';
 export { Roles } from './auth/roles.decorator';
 export { authEnvSchema, loadAuthEnv } from './auth/auth.env';
 export type { AuthEnv } from './auth/auth.env';
-export {
-  runWithTenant,
-  getCurrentTenantId,
-} from './tenant/tenant-context';
+export { runWithTenant, getCurrentTenantId } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
 export type { AuthenticatedUser } from './auth/authenticated-user.interface';

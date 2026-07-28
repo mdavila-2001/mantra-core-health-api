@@ -35,6 +35,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('charts/notes')
 export class ChartNotesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param notesService - Valor de notes service requerido por la operación.
+   */
   constructor(private readonly notesService: ChartNotesService) {}
 
   /** UC-15-01. */

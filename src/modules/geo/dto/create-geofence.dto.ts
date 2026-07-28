@@ -22,10 +22,16 @@ export type ShapeTypeCode = 'CIRCLE' | 'POLYGON';
  * responde 422 si falta.
  */
 export class CreateGeofenceDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({ description: 'Tenant propietario (RLS)', format: 'uuid' })
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Nombre único del geofence dentro del tenant',
     maxLength: 200,
@@ -35,6 +41,9 @@ export class CreateGeofenceDto {
   @MaxLength(200)
   name!: string;
 
+  /**
+   * Valor de shape type mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Forma del geofence',
     enum: ['CIRCLE', 'POLYGON'],
@@ -42,6 +51,9 @@ export class CreateGeofenceDto {
   @IsIn(['CIRCLE', 'POLYGON'])
   shapeType!: ShapeTypeCode;
 
+  /**
+   * Valor de radius m mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Radio en metros (obligatorio si CIRCLE)',
   })
@@ -50,6 +62,9 @@ export class CreateGeofenceDto {
   @IsPositive()
   radiusM?: number;
 
+  /**
+   * Valor de center lat mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Latitud del centro (obligatorio si CIRCLE)',
   })
@@ -57,6 +72,9 @@ export class CreateGeofenceDto {
   @IsLatitude()
   centerLat?: number;
 
+  /**
+   * Valor de center lng mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Longitud del centro (obligatorio si CIRCLE)',
   })
@@ -64,6 +82,9 @@ export class CreateGeofenceDto {
   @IsLongitude()
   centerLng?: number;
 
+  /**
+   * Valor de geometry json mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'GeoJSON del polígono (obligatorio si POLYGON)',
     type: Object,

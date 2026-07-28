@@ -24,6 +24,13 @@ const DEFAULT_PRIORITY = 0;
  */
 @Injectable()
 export class SchedulingWaitlistService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param bookingsRepo - Valor de bookings repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly bookingsRepo: SchedulingBookingsRepository,

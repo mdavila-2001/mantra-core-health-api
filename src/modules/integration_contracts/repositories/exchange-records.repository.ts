@@ -4,17 +4,53 @@ import { IntegrationExchangeRecords } from '../entities';
 
 /** Datos para registrar un intercambio (UC-31-05 / UC-31-09). */
 export interface CreateExchangeRecordData {
+  /**
+   * Identificador asociado a integration contract version.
+   */
   integrationContractVersionId: string;
+  /**
+   * Identificador asociado a direction concept.
+   */
   directionConceptId: string;
+  /**
+   * Identificador asociado a message type concept.
+   */
   messageTypeConceptId: string;
+  /**
+   * Identificador asociado a outcome concept.
+   */
   outcomeConceptId: string;
+  /**
+   * Valor de business identifier mantenido por la instancia.
+   */
   businessIdentifier?: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey?: string;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId?: string;
+  /**
+   * Identificador asociado a subject type concept.
+   */
   subjectTypeConceptId?: string;
+  /**
+   * Identificador asociado a subject entity.
+   */
   subjectEntityId?: string;
+  /**
+   * Valor de request hash mantenido por la instancia.
+   */
   requestHash?: string;
+  /**
+   * Identificador asociado a payload file.
+   */
   payloadFileId?: string;
+  /**
+   * Valor de received at mantenido por la instancia.
+   */
   receivedAt?: Date;
 }
 

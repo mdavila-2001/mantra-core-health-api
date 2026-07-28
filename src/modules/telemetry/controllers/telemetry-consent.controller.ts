@@ -27,6 +27,11 @@ import {
 @ApiBearerAuth()
 @Controller('telemetry')
 export class TelemetryConsentController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param consent - Valor de consent requerido por la operación.
+   */
   constructor(private readonly consent: TelemetryConsentService) {}
 
   /** UC-28-04. */

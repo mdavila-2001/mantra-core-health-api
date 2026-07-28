@@ -37,6 +37,14 @@ const DEFAULT_SOURCE_VERSION = '1';
  */
 @Injectable()
 export class SeriesIngestService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ingestRepo - Valor de ingest repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly ingestRepo: SeriesIngestRepository,
@@ -555,14 +563,41 @@ export class SeriesIngestService {
   private recordPipelineMetric(
     tx: EntityManager,
     input: {
+      /**
+       * Valor de time mantenido por la instancia.
+       */
       time: Date;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a series.
+       */
       seriesId: string;
+      /**
+       * Identificador asociado a ingestion.
+       */
       ingestionId: string;
+      /**
+       * Identificador asociado a batch.
+       */
       batchId: string;
+      /**
+       * Valor de stage code mantenido por la instancia.
+       */
       stageCode: string;
+      /**
+       * Valor de metric code mantenido por la instancia.
+       */
       metricCode: string;
+      /**
+       * Valor de metric value mantenido por la instancia.
+       */
       metricValue: number;
+      /**
+       * Valor de dimensions mantenido por la instancia.
+       */
       dimensions?: unknown;
     },
   ): void {

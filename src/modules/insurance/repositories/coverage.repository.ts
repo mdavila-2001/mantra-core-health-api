@@ -18,6 +18,13 @@ import {
  */
 @Injectable()
 export class CoverageRepository {
+  /**
+   * Obtiene find coverage.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find coverage conforme al contrato `Promise<PatientCoverages | null>`.
+   */
   findCoverage(
     em: EntityManager,
     id: string,
@@ -25,6 +32,14 @@ export class CoverageRepository {
     return em.findOne(PatientCoverages, { id });
   }
 
+  /**
+   * Obtiene find by member and plan.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param memberIdentifier - Valor de member identifier requerido por la operación.
+   * @param insurancePlanId - Identificador de insurance plan.
+   * @returns Resultado de find by member and plan conforme al contrato `Promise<PatientCoverages | null>`.
+   */
   findByMemberAndPlan(
     em: EntityManager,
     memberIdentifier: string,
@@ -33,6 +48,14 @@ export class CoverageRepository {
     return em.findOne(PatientCoverages, { memberIdentifier, insurancePlanId });
   }
 
+  /**
+   * Ejecuta la operación count active by patient.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Identificador de patient profile.
+   * @param statusConceptId - Identificador de status concept.
+   * @returns Resultado de count active by patient conforme al contrato `Promise<number>`.
+   */
   countActiveByPatient(
     em: EntityManager,
     patientProfileId: string,
@@ -41,6 +64,13 @@ export class CoverageRepository {
     return em.count(PatientCoverages, { patientProfileId, statusConceptId });
   }
 
+  /**
+   * Crea create coverage.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create coverage conforme al contrato `PatientCoverages`.
+   */
   createCoverage(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -52,6 +82,13 @@ export class CoverageRepository {
     );
   }
 
+  /**
+   * Crea create dependent.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create dependent conforme al contrato `CoverageDependents`.
+   */
   createDependent(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -63,6 +100,13 @@ export class CoverageRepository {
     );
   }
 
+  /**
+   * Crea create broker client.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create broker client conforme al contrato `BrokerClients`.
+   */
   createBrokerClient(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -86,6 +130,13 @@ export class CoverageRepository {
     );
   }
 
+  /**
+   * Crea create cob.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create cob conforme al contrato `CoordinationOfBenefits`.
+   */
   createCob(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -102,6 +153,13 @@ export class CoverageRepository {
   }
 
   // --- Elegibilidad (UC-26-03) ---
+  /**
+   * Obtiene find request by idempotency.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param idempotencyKey - Valor de idempotency key requerido por la operación.
+   * @returns Resultado de find request by idempotency conforme al contrato `Promise<CoverageEligibilityRequests | null>`.
+   */
   findRequestByIdempotency(
     em: EntityManager,
     idempotencyKey: string,
@@ -109,6 +167,13 @@ export class CoverageRepository {
     return em.findOne(CoverageEligibilityRequests, { idempotencyKey });
   }
 
+  /**
+   * Crea create eligibility request.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create eligibility request conforme al contrato `CoverageEligibilityRequests`.
+   */
   createEligibilityRequest(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -124,6 +189,13 @@ export class CoverageRepository {
     );
   }
 
+  /**
+   * Crea create eligibility response.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create eligibility response conforme al contrato `CoverageEligibilityResponses`.
+   */
   createEligibilityResponse(
     em: EntityManager,
     data: Record<string, unknown>,

@@ -4,15 +4,34 @@ import { DelegatedPermissionSetItems } from '../entities';
 
 /** Un ítem de permiso dentro de un set delegado. */
 export interface CreateSetItemData {
+  /**
+   * Identificador asociado a delegated permission set.
+   */
   delegatedPermissionSetId: string;
+  /**
+   * Identificador asociado a permission.
+   */
   permissionId: string;
+  /**
+   * Valor de constraint json mantenido por la instancia.
+   */
   constraintJson?: unknown;
+  /**
+   * Valor de requires step up authentication mantenido por la instancia.
+   */
   requiresStepUpAuthentication?: boolean;
 }
 
 /** Acceso a datos de `delegated_access.delegated_permission_set_items`. */
 @Injectable()
 export class DelegatedPermissionSetItemsRepository {
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `DelegatedPermissionSetItems`.
+   */
   create(
     em: EntityManager,
     data: CreateSetItemData,
@@ -31,6 +50,13 @@ export class DelegatedPermissionSetItemsRepository {
     );
   }
 
+  /**
+   * Obtiene find by set.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param setId - Identificador de set.
+   * @returns Resultado de find by set conforme al contrato `Promise<DelegatedPermissionSetItems[]>`.
+   */
   findBySet(
     em: EntityManager,
     setId: string,

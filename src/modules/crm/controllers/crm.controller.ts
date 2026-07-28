@@ -44,6 +44,12 @@ import {
 @ApiBearerAuth()
 @Controller('crm')
 export class CrmController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param salesService - Valor de sales service requerido por la operación.
+   * @param serviceService - Valor de service service requerido por la operación.
+   */
   constructor(
     private readonly salesService: CrmSalesService,
     private readonly serviceService: CrmServiceService,
@@ -213,7 +219,15 @@ export class CrmController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddCaseCommentDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<{ id: string; caseId: string }> {
+  ): Promise<{
+    /**
+     * Identificador único de la instancia.
+     */
+    id: string; /**
+     * Identificador asociado a case.
+     */
+    caseId: string;
+  }> {
     return this.serviceService.addCaseComment(id, dto, actor);
   }
 

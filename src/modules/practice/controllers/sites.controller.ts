@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('sites')
 export class SitesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param structureService - Valor de structure service requerido por la operación.
+   */
   constructor(private readonly structureService: ClinicalStructureService) {}
 
   /** UC-14-04. */

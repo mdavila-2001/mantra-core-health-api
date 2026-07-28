@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 import { ObjectId } from 'mongodb';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DocumentStoreService } from './document-store.service';
@@ -13,6 +19,12 @@ import {
 const actor = { id: 'admin-1', roles: ['STORAGE_ADMIN'] } as any;
 const TENANT = '11111111-1111-1111-1111-111111111111';
 
+/**
+ * Ejecuta la operación stored doc.
+ *
+ * @param over - Valor de over requerido por la operación.
+ * @returns Resultado de stored doc conforme al contrato `any`.
+ */
 function storedDoc(over: Partial<any> = {}): any {
   const now = new Date('2026-01-01T00:00:00Z');
   return {
@@ -28,6 +40,10 @@ function storedDoc(over: Partial<any> = {}): any {
   };
 }
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const repo = {
     insert: mockFn(),
@@ -81,7 +97,11 @@ describe('DocumentStoreService', () => {
     it('devuelve el documento vivo', async () => {
       const d = build();
       d.repo.findById.mockResolvedValue(storedDoc());
-      const res = await d.service.findOne('c', '507f1f77bcf86cd799439011', TENANT);
+      const res = await d.service.findOne(
+        'c',
+        '507f1f77bcf86cd799439011',
+        TENANT,
+      );
       expect(res.tenantId).toBe(TENANT);
     });
   });

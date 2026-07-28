@@ -4,17 +4,53 @@ import { LocationPings } from '../entities';
 
 /** Datos de un ping de ubicación append-only. */
 export interface RecordPingData {
+  /**
+   * Identificador asociado a tracked subject.
+   */
   trackedSubjectId: string;
+  /**
+   * Identificador asociado a device.
+   */
   deviceId?: string;
+  /**
+   * Valor de latitude mantenido por la instancia.
+   */
   latitude: string;
+  /**
+   * Valor de longitude mantenido por la instancia.
+   */
   longitude: string;
+  /**
+   * Valor de accuracy m mantenido por la instancia.
+   */
   accuracyM?: string;
+  /**
+   * Valor de altitude m mantenido por la instancia.
+   */
   altitudeM?: string;
+  /**
+   * Valor de speed mps mantenido por la instancia.
+   */
   speedMps?: string;
+  /**
+   * Valor de heading deg mantenido por la instancia.
+   */
   headingDeg?: string;
+  /**
+   * Valor de battery pct mantenido por la instancia.
+   */
   batteryPct?: number;
+  /**
+   * Identificador asociado a network concept.
+   */
   networkConceptId?: string;
+  /**
+   * Valor de captured at mantenido por la instancia.
+   */
   capturedAt?: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 

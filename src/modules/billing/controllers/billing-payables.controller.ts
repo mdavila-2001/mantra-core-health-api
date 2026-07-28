@@ -17,6 +17,12 @@ import {
 @ApiBearerAuth()
 @Controller('billing')
 export class BillingPayablesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param billsService - Valor de bills service requerido por la operación.
+   * @param paymentsMadeService - Valor de payments made service requerido por la operación.
+   */
   constructor(
     private readonly billsService: BillsService,
     private readonly paymentsMadeService: PaymentsMadeService,

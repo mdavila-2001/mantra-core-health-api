@@ -5,12 +5,33 @@ import { createdBy } from '../../../common';
 
 /** Datos para crear/actualizar una suscripción de webhook (UC-12-11). */
 export interface CreateWebhookData {
+  /**
+   * Identificador asociado a provider.
+   */
   providerId: string;
+  /**
+   * Valor de event type mantenido por la instancia.
+   */
   eventType: string;
+  /**
+   * Valor de callback url mantenido por la instancia.
+   */
   callbackUrl: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de secret ref mantenido por la instancia.
+   */
   secretRef?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -34,6 +55,13 @@ export class WebhookSubscriptionsRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `WebhookSubscriptions`.
+   */
   create(em: EntityManager, data: CreateWebhookData): WebhookSubscriptions {
     return em.create(
       WebhookSubscriptions,

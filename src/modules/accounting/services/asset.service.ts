@@ -26,6 +26,14 @@ import {
  */
 @Injectable()
 export class AssetService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param assetRepo - Valor de asset repo requerido por la operación.
+   * @param posting - Valor de posting requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly assetRepo: AssetRepository,

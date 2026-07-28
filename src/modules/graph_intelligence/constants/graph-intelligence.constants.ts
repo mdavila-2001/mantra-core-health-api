@@ -8,6 +8,9 @@
 
 // --- Ciclo de vida de nodos y aristas ---
 export const NODE_STATES = ['active', 'deleted'] as const;
+/**
+ * Define el tipo de dominio node state.
+ */
 export type NodeState = (typeof NODE_STATES)[number];
 
 /**
@@ -16,17 +19,29 @@ export type NodeState = (typeof NODE_STATES)[number];
  * dos salen del traversal, pero la distinción es lo que permite explicar por qué.
  */
 export const EDGE_STATES = ['active', 'expired', 'retired', 'deleted'] as const;
+/**
+ * Define el tipo de dominio edge state.
+ */
 export type EdgeState = (typeof EDGE_STATES)[number];
 
 // --- Definiciones y alcances ---
 export const DEFINITION_STATES = ['draft', 'active', 'suspended'] as const;
+/**
+ * Define el tipo de dominio definition state.
+ */
 export type DefinitionState = (typeof DEFINITION_STATES)[number];
 
 export const SCOPE_STATES = ['active', 'suspended'] as const;
+/**
+ * Define el tipo de dominio scope state.
+ */
 export type ScopeState = (typeof SCOPE_STATES)[number];
 
 // --- Corridas de proyección ---
 export const RUN_STATUSES = ['running', 'completed', 'failed'] as const;
+/**
+ * Define el tipo de dominio run status.
+ */
 export type RunStatus = (typeof RUN_STATUSES)[number];
 
 // --- Hallazgos de regla ---
@@ -36,6 +51,9 @@ export const HIT_STATUSES = [
   'resolved',
   'dismissed',
 ] as const;
+/**
+ * Define el tipo de dominio hit status.
+ */
 export type HitStatus = (typeof HIT_STATUSES)[number];
 
 /**
@@ -55,6 +73,9 @@ export const LIVE_HIT_STATUSES = ['open', 'in_review'] as const;
 
 // --- Borrado ---
 export const DELETION_STATUSES = ['requested', 'running', 'verified'] as const;
+/**
+ * Define el tipo de dominio deletion status.
+ */
 export type DeletionStatus = (typeof DELETION_STATUSES)[number];
 
 /** Estados en los que un job de borrado ya está en marcha y no se duplica. */
@@ -62,6 +83,9 @@ export const ACTIVE_DELETION_STATUSES = ['requested', 'running'] as const;
 
 // --- Direccionalidad de la arista ---
 export const DIRECTIONALITIES = ['directed', 'undirected'] as const;
+/**
+ * Define el tipo de dominio directionality.
+ */
 export type Directionality = (typeof DIRECTIONALITIES)[number];
 
 // --- Tipos de evidencia ---
@@ -71,10 +95,16 @@ export const EVIDENCE_TYPES = [
   'inference',
   'termination',
 ] as const;
+/**
+ * Define el tipo de dominio evidence type.
+ */
 export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
 
 // --- Severidad de la regla ---
 export const SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+/**
+ * Define el tipo de dominio severity.
+ */
 export type Severity = (typeof SEVERITIES)[number];
 
 /**

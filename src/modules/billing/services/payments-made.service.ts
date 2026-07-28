@@ -24,6 +24,14 @@ import { fromCents, toCents } from '../money.util';
  */
 @Injectable()
 export class PaymentsMadeService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param paymentsRepo - Valor de payments repo requerido por la operación.
+   * @param billsRepo - Valor de bills repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly paymentsRepo: PaymentsMadeRepository,
@@ -33,6 +41,14 @@ export class PaymentsMadeService {
     this.logger.setContext(PaymentsMadeService.name);
   }
 
+  /**
+   * Ejecuta la operación execute.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de execute conforme al contrato `Promise<PaymentMadeResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async execute(
     dto: ExecutePaymentMadeDto,
     actor: AuthenticatedUser,

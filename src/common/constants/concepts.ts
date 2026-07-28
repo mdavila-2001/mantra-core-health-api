@@ -88,11 +88,28 @@ export const SEED = {
  * El seed itera sobre este mapa; el resto del código referencia `CONCEPTS.<X>`.
  */
 interface ConceptDef {
+  /**
+   * Valor de key mantenido por la instancia.
+   */
   readonly key: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   readonly code: string;
+  /**
+   * Valor de display mantenido por la instancia.
+   */
   readonly display: string;
 }
 
+/**
+ * Ejecuta la operación def.
+ *
+ * @param key - Valor de key requerido por la operación.
+ * @param code - Valor de code requerido por la operación.
+ * @param display - Valor de display requerido por la operación.
+ * @returns Resultado de def conforme al contrato `ConceptDef`.
+ */
 function def(key: string, code: string, display: string): ConceptDef {
   return { key, code, display };
 }
@@ -6119,6 +6136,9 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
 } as const;
 
+/**
+ * Define el tipo de dominio concept name.
+ */
 export type ConceptName = keyof typeof CONCEPT_DEFS;
 
 /**

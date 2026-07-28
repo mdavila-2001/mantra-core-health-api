@@ -1,9 +1,21 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { TimescaleRepository } from './timescale.repository';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ *
+ * @param rows - Valor de rows requerido por la operación.
+ * @returns Resultado de build.
+ */
 function build(rows: any = []) {
   const execute = mockFn(async () => rows);
   const em = {

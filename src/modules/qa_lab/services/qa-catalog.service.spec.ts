@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { QaCatalogService } from './qa-catalog.service';
@@ -14,6 +20,10 @@ const actor = { id: 'user-1', roles: ['QA_ADMIN'] };
 const SUITE = '11111111-1111-1111-1111-111111111111';
 const ENVIRONMENT = '22222222-2222-2222-2222-222222222222';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -101,6 +111,12 @@ describe('QaCatalogService', () => {
   });
 
   describe('createTestCase (UC-36-02)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         code: 'CASE-01',
@@ -112,6 +128,13 @@ describe('QaCatalogService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param existingCases - Valor de existing cases requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, existingCases: any[] = []) {
       d.catalogRepo.findSuiteForUpdate.mockResolvedValue({ id: SUITE });
       d.catalogRepo.findCaseByCode.mockResolvedValue(null);
@@ -278,6 +301,12 @@ describe('QaCatalogService', () => {
       firstRunAt: '2026-08-01T02:00:00Z',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.catalogRepo.findSuiteById.mockResolvedValue({
         id: SUITE,

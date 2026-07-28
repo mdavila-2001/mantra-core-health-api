@@ -30,6 +30,14 @@ import { CEXT } from '../clinical_ext.concepts';
  */
 @Injectable()
 export class CareGapsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param gapsRepo - Valor de gaps repo requerido por la operación.
+   * @param schedulesRepo - Valor de schedules repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly gapsRepo: CareGapsRepository,
@@ -174,7 +182,12 @@ export class CareGapsService {
   async createSchedule(
     dto: CreateImmunizationScheduleDto,
     actor: AuthenticatedUser,
-  ): Promise<{ id: string }> {
+  ): Promise<{
+    /**
+     * Identificador único de la instancia.
+     */
+    id: string;
+  }> {
     return this.em.transactional(async (tx) => {
       const schedule = this.schedulesRepo.create(tx, {
         tenantId: dto.tenantId,

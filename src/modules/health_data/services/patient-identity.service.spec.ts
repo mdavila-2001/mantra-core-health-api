@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PatientIdentityService } from './patient-identity.service';
@@ -18,6 +24,10 @@ const CLUSTER = '44444444-4444-4444-4444-444444444444';
 const TYPE = '55555555-5555-5555-5555-555555555555';
 const SOURCE_ENTITY = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -45,6 +55,12 @@ function build() {
   return { service, tx, identityRepo, logger };
 }
 
+/**
+ * Ejecuta la operación pending candidate.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de pending candidate conforme al contrato `any`.
+ */
 function pendingCandidate(overrides: Record<string, unknown> = {}): any {
   return {
     id: CANDIDATE,

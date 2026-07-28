@@ -31,6 +31,12 @@ import {
 @Roles('SECURITY_ADMIN')
 @Controller('integration')
 export class IntegrationExchangesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param exchangesService - Valor de exchanges service requerido por la operación.
+   * @param webhooksService - Valor de webhooks service requerido por la operación.
+   */
   constructor(
     private readonly exchangesService: IntegrationExchangesService,
     private readonly webhooksService: IntegrationWebhooksService,

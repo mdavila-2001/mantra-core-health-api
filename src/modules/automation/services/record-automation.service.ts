@@ -27,8 +27,17 @@ import {
  * literal. `required` hace que falte el dato sea un error en vez de un `null`.
  */
 interface FieldMapping {
+  /**
+   * Valor de from mantenido por la instancia.
+   */
   from?: string;
+  /**
+   * Valor de value mantenido por la instancia.
+   */
   value?: unknown;
+  /**
+   * Valor de required mantenido por la instancia.
+   */
   required?: boolean;
 }
 
@@ -43,6 +52,17 @@ interface FieldMapping {
  */
 @Injectable()
 export class RecordAutomationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runsRepo - Valor de runs repo requerido por la operación.
+   * @param agentsRepo - Valor de agents repo requerido por la operación.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param targetRepo - Valor de target repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly runsRepo: AutomationRunsRepository,
@@ -293,7 +313,14 @@ export class RecordAutomationService {
   ): void {
     if (!validationJson || typeof validationJson !== 'object') return;
 
-    const required = (validationJson as { required?: unknown }).required;
+    const required = (
+      validationJson as {
+        /**
+         * Valor de required mantenido por la instancia.
+         */
+        required?: unknown;
+      }
+    ).required;
     if (!Array.isArray(required)) return;
 
     for (const column of required) {
@@ -321,6 +348,13 @@ export class RecordAutomationService {
       .filter((part) => part.length > 0);
   }
 
+  /**
+   * Obtiene read path.
+   *
+   * @param source - Valor de source requerido por la operación.
+   * @param path - Valor de path requerido por la operación.
+   * @returns Resultado de read path conforme al contrato `unknown`.
+   */
   private readPath(source: Record<string, unknown>, path: string): unknown {
     let current: unknown = source;
     for (const segment of path.split('.')) {

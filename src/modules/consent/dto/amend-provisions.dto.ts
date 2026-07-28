@@ -10,6 +10,9 @@ import { ConsentProvisionInputDto } from './consent-provision.dto';
 
 /** Cuerpo de `PATCH /consent/consents/{id}/provisions` (UC-07-09). */
 export class AmendProvisionsDto {
+  /**
+   * Valor de provisions mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Provisiones nuevas que reemplazan a las vigentes',
     type: [ConsentProvisionInputDto],

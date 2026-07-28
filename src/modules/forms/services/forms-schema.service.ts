@@ -35,6 +35,14 @@ import { FORMS } from '../forms.concepts';
  */
 @Injectable()
 export class FormsSchemaService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param setsRepo - Valor de sets repo requerido por la operación.
+   * @param migrationsRepo - Valor de migrations repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly setsRepo: DefinitionSetsRepository,
@@ -254,12 +262,26 @@ export class FormsSchemaService {
     });
   }
 
+  /**
+   * Crea provisional hash.
+   *
+   * @param setId - Identificador de set.
+   * @param semanticVersion - Valor de semantic version requerido por la operación.
+   * @returns Resultado de provisional hash conforme al contrato `string`.
+   */
   private provisionalHash(setId: string, semanticVersion: string): string {
     return createHash('sha256')
       .update(`${setId}:${semanticVersion}:draft`)
       .digest('hex');
   }
 
+  /**
+   * Ejecuta la operación final hash.
+   *
+   * @param versionId - Identificador de version.
+   * @param fieldIds - Valor de field ids requerido por la operación.
+   * @returns Resultado de final hash conforme al contrato `string`.
+   */
   private finalHash(versionId: string, fieldIds: string[]): string {
     return createHash('sha256')
       .update(`${versionId}:${[...fieldIds].sort().join(',')}`)

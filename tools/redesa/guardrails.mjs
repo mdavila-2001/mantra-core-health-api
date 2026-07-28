@@ -28,7 +28,8 @@ const RESTRICTED_DOMAINS = [
 ];
 
 /** Recursos inmutables: no admiten edición/borrado directo (solo comandos de negocio). */
-const IMMUTABLE_RESOURCE = /(medication|prescription|clinical-?note|chart-note|journal|ledger|audit)/i;
+const IMMUTABLE_RESOURCE =
+  /(medication|prescription|clinical-?note|chart-note|journal|ledger|audit)/i;
 
 /** Verbos de negocio permitidos sobre recursos inmutables (no son CRUD genérico). */
 const ALLOWED_COMMANDS =
@@ -73,14 +74,22 @@ for (const file of controllers) {
     const verb = mhttp[1];
     const path = mhttp[2] || '';
     const near = lines.slice(i, i + 6).join(' ');
-    const hasPublic = pendingDecorators.some((d) => /@Public\(/.test(d.text)) || /@Public\(/.test(near);
+    const hasPublic =
+      pendingDecorators.some((d) => /@Public\(/.test(d.text)) ||
+      /@Public\(/.test(near);
     const hasRolesHere =
-      classHasRoles || pendingDecorators.some((d) => /@Roles\(/.test(d.text)) || /@Roles\(/.test(near);
+      classHasRoles ||
+      pendingDecorators.some((d) => /@Roles\(/.test(d.text)) ||
+      /@Roles\(/.test(near);
 
     // HARD_DELETE sobre dominio protegido.
     if (verb === 'Delete' && RESTRICTED_DOMAINS.includes(domain)) {
-      add('HARD_DELETE_RESTRICTED_DATA', file, i + 1,
-        `@Delete en dominio protegido '${domain}': ${path}`);
+      add(
+        'HARD_DELETE_RESTRICTED_DATA',
+        file,
+        i + 1,
+        `@Delete en dominio protegido '${domain}': ${path}`,
+      );
     }
     // CRUD genérico sobre recurso inmutable (Patch/Put/Delete sin verbo de negocio).
     if (
@@ -88,13 +97,25 @@ for (const file of controllers) {
       ['Put', 'Patch', 'Delete'].includes(verb) &&
       !ALLOWED_COMMANDS.test(path)
     ) {
-      add('GENERIC_CRUD_ON_IMMUTABLE', file, i + 1,
-        `@${verb} sobre recurso inmutable sin comando de negocio: ${path}`);
+      add(
+        'GENERIC_CRUD_ON_IMMUTABLE',
+        file,
+        i + 1,
+        `@${verb} sobre recurso inmutable sin comando de negocio: ${path}`,
+      );
     }
     // Endpoint mutante sin autorización por rol y sin ser público.
-    if (['Post', 'Put', 'Patch', 'Delete'].includes(verb) && !hasRolesHere && !hasPublic) {
-      add('UNSCOPED_MUTATION', file, i + 1,
-        `@${verb} mutante sin @Roles ni @Public: ${path}`);
+    if (
+      ['Post', 'Put', 'Patch', 'Delete'].includes(verb) &&
+      !hasRolesHere &&
+      !hasPublic
+    ) {
+      add(
+        'UNSCOPED_MUTATION',
+        file,
+        i + 1,
+        `@${verb} mutante sin @Roles ni @Public: ${path}`,
+      );
     }
     pendingDecorators = [];
   });
@@ -105,9 +126,15 @@ const fkDir = join(SRC, 'orm', 'catalog', 'foreign-keys');
 try {
   for (const file of walk(fkDir)) {
     const text = readFileSync(file, 'utf8');
-    if (/CASCADE/.test(text) && RESTRICTED_DOMAINS.some((d) => text.includes(`${d}.`))) {
+    if (
+      /CASCADE/.test(text) &&
+      RESTRICTED_DOMAINS.some((d) => text.includes(`${d}.`))
+    ) {
       text.split(/\r?\n/).forEach((l, i) => {
-        if (/CASCADE/i.test(l) && RESTRICTED_DOMAINS.some((d) => l.includes(`${d}.`)))
+        if (
+          /CASCADE/i.test(l) &&
+          RESTRICTED_DOMAINS.some((d) => l.includes(`${d}.`))
+        )
           add('CASCADE_ON_RESTRICTED', file, i + 1, l.trim().slice(0, 100));
       });
     }
@@ -125,7 +152,8 @@ for (const code of Object.keys(byCode)) {
   console.log(`\n[${code}] ${byCode[code].length} hallazgo(s):`);
   for (const v of byCode[code].slice(0, 40))
     console.log(`  ${v.file}:${v.line} — ${v.msg}`);
-  if (byCode[code].length > 40) console.log(`  … +${byCode[code].length - 40} más`);
+  if (byCode[code].length > 40)
+    console.log(`  … +${byCode[code].length - 40} más`);
 }
 if (violations.length === 0) console.log('Sin violaciones. ✓');
 

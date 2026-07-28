@@ -9,6 +9,9 @@ export const EQUIVALENCES = [
   'INEXACT',
   'UNMATCHED',
 ] as const;
+/**
+ * Define el tipo de dominio equivalence.
+ */
 export type Equivalence = (typeof EQUIVALENCES)[number];
 
 /**
@@ -19,10 +22,16 @@ export type Equivalence = (typeof EQUIVALENCES)[number];
  * de origen.
  */
 export class TranslateConceptDto {
+  /**
+   * Identificador asociado a source concept.
+   */
   @ApiProperty({ description: 'Concepto de origen', format: 'uuid' })
   @IsUUID()
   sourceConceptId!: string;
 
+  /**
+   * Identificador asociado a target concept.
+   */
   @ApiPropertyOptional({
     description: 'Concepto de destino. Si se envía, la llamada cura el mapeo.',
     format: 'uuid',
@@ -31,6 +40,9 @@ export class TranslateConceptDto {
   @IsUUID()
   targetConceptId?: string;
 
+  /**
+   * Valor de equivalence mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     enum: EQUIVALENCES,
     description: 'Equivalencia del mapeo; obligatoria al curar',
@@ -39,12 +51,18 @@ export class TranslateConceptDto {
   @IsIn(EQUIVALENCES)
   equivalence?: Equivalence;
 
+  /**
+   * Valor de context mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Contexto del mapeo', maxLength: 255 })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   context?: string;
 
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Versión del mapeo', maxLength: 50 })
   @IsOptional()
   @IsString()
@@ -54,33 +72,57 @@ export class TranslateConceptDto {
 
 /** Una traducción del concepto de origen. */
 export class TranslationMatchDto {
+  /**
+   * Identificador asociado a concept map.
+   */
   @ApiProperty({ description: 'Id del mapeo' })
   conceptMapId!: string;
 
+  /**
+   * Identificador asociado a target concept.
+   */
   @ApiProperty({ description: 'Concepto de destino' })
   targetConceptId!: string;
 
+  /**
+   * Identificador asociado a equivalence concept.
+   */
   @ApiPropertyOptional({ description: 'Equivalencia (concepto)' })
   equivalenceConceptId?: string;
 
+  /**
+   * Valor de context mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Contexto del mapeo' })
   context?: string;
 }
 
 /** Resultado de `$translate`. */
 export class TranslateResponseDto {
+  /**
+   * Identificador asociado a source concept.
+   */
   @ApiProperty({ description: 'Concepto de origen' })
   sourceConceptId!: string;
 
+  /**
+   * Valor de matched mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Verdadero si hay al menos una traducción' })
   matched!: boolean;
 
+  /**
+   * Valor de matches mantenido por la instancia.
+   */
   @ApiProperty({
     type: [TranslationMatchDto],
     description: 'Traducciones encontradas',
   })
   matches!: TranslationMatchDto[];
 
+  /**
+   * Valor de curated mantenido por la instancia.
+   */
   @ApiProperty({
     description:
       'Verdadero si la llamada curó un mapeo en vez de sólo consultar',

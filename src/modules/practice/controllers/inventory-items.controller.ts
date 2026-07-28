@@ -17,6 +17,11 @@ import { CreateMovementDto, MovementResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('inventory-items')
 export class InventoryItemsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param inventoryService - Valor de inventory service requerido por la operación.
+   */
   constructor(private readonly inventoryService: PracticeInventoryService) {}
 
   /** UC-14-11. */

@@ -30,6 +30,11 @@ import {
 @ApiBearerAuth()
 @Controller('common/files')
 export class CommonFilesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param filesService - Valor de files service requerido por la operación.
+   */
   constructor(private readonly filesService: FilesService) {}
 
   /** UC-02-05: crea un archivo y su primera versión. */

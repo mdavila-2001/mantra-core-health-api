@@ -6,6 +6,10 @@ import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import { ContactSystem, CreateContactPointDto, OwnerType } from '../dto';
 import type { AuthenticatedUser } from '../../../common';
 
+/**
+ * Crea create em mock.
+ * @returns Resultado de create em mock.
+ */
 function createEmMock() {
   const tx = { flush: fn().mockResolvedValue(undefined) };
   const em = { transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)) };
@@ -17,6 +21,10 @@ const actor: AuthenticatedUser = { id: 'user-1', roles: [] };
 describe('ContactPointsService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
 
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const { em, tx } = createEmMock();
     const repo = { findById: fn(), create: fn() };

@@ -5,19 +5,50 @@ import { createdBy } from '../../../common';
 
 /** Datos para dar de alta una política de firma de receta. */
 export interface CreatePrescriptionSignaturePolicyData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de jurisdiction code mantenido por la instancia.
+   */
   jurisdictionCode?: string;
+  /**
+   * Identificador asociado a medication type concept.
+   */
   medicationTypeConceptId?: string;
+  /**
+   * Identificador asociado a channel concept.
+   */
   channelConceptId?: string;
+  /**
+   * Valor de signature required mantenido por la instancia.
+   */
   signatureRequired: boolean;
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   effectiveFrom: Date;
+  /**
+   * Valor de effective to mantenido por la instancia.
+   */
   effectiveTo?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `clinical.prescription_signature_policies` (stateless). */
 @Injectable()
 export class PrescriptionSignaturePoliciesRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<PrescriptionSignaturePolicies | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -58,6 +89,13 @@ export class PrescriptionSignaturePoliciesRepository {
     );
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PrescriptionSignaturePolicies`.
+   */
   create(
     em: EntityManager,
     data: CreatePrescriptionSignaturePolicyData,

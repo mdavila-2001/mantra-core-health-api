@@ -5,22 +5,62 @@ import { createdBy } from '../../../common';
 
 /** Datos para emitir un grant de acceso delegado. */
 export interface CreateGrantData {
+  /**
+   * Identificador asociado a practitioner delegate assignment.
+   */
   practitionerDelegateAssignmentId: string;
+  /**
+   * Identificador asociado a grant type concept.
+   */
   grantTypeConceptId: string;
+  /**
+   * Identificador asociado a purpose of use concept.
+   */
   purposeOfUseConceptId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId?: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Identificador asociado a resource type concept.
+   */
   resourceTypeConceptId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a approved by user.
+   */
   approvedByUserId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `delegated_access.delegated_access_grants`. */
 @Injectable()
 export class DelegatedAccessGrantsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<DelegatedAccessGrants | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -28,6 +68,13 @@ export class DelegatedAccessGrantsRepository {
     return em.findOne(DelegatedAccessGrants, { id });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `DelegatedAccessGrants`.
+   */
   create(em: EntityManager, data: CreateGrantData): DelegatedAccessGrants {
     return em.create(
       DelegatedAccessGrants,

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -18,6 +24,12 @@ const PI_ID = '88888888-8888-8888-8888-888888888888';
 const FUTURE = new Date(Date.now() + 365 * 86_400_000);
 const PAST = new Date(Date.now() - 86_400_000);
 
+/**
+ * Ejecuta la operación project.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de project.
+ */
 function project(overrides: any = {}) {
   return {
     id: PROJECT_ID,
@@ -31,6 +43,10 @@ function project(overrides: any = {}) {
   };
 }
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -262,6 +278,13 @@ describe('ResearchReleaseService', () => {
       contentHash: 'ch-1',
     } as any;
 
+    /**
+     * Ejecuta la operación with request.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with request.
+     */
     function withRequest(d: ReturnType<typeof build>, overrides: any = {}) {
       const request = {
         id: REQUEST_ID,
@@ -385,6 +408,13 @@ describe('ResearchReleaseService', () => {
   });
 
   describe('revokeRelease (UC-63-12)', () => {
+    /**
+     * Ejecuta la operación with released.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param status - Valor de status requerido por la operación.
+     * @returns Resultado de with released.
+     */
     function withReleased(d: ReturnType<typeof build>, status = 'released') {
       const request = { id: REQUEST_ID, tenantId: TENANT_ID, status };
       d.researchRepo.findReleaseRequestForUpdate.mockResolvedValue(request);

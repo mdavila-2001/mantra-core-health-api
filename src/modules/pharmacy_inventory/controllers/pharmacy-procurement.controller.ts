@@ -27,6 +27,11 @@ import {
 @ApiBearerAuth()
 @Controller('pharmacy')
 export class PharmacyProcurementController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param procurement - Valor de procurement requerido por la operación.
+   */
   constructor(private readonly procurement: PharmacyProcurementService) {}
 
   /** Bootstrap: alta de proveedor. */

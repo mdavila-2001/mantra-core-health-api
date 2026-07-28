@@ -8,6 +8,13 @@ import { ClaimDisputes, ClaimAppealDecisions } from '../entities';
  */
 @Injectable()
 export class DisputeRepository {
+  /**
+   * Obtiene find dispute.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find dispute conforme al contrato `Promise<ClaimDisputes | null>`.
+   */
   findDispute(em: EntityManager, id: string): Promise<ClaimDisputes | null> {
     return em.findOne(ClaimDisputes, { id });
   }
@@ -24,6 +31,13 @@ export class DisputeRepository {
     );
   }
 
+  /**
+   * Crea create appeal decision.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create appeal decision conforme al contrato `ClaimAppealDecisions`.
+   */
   createAppealDecision(
     em: EntityManager,
     data: Record<string, unknown>,

@@ -6,7 +6,13 @@ import { createdBy } from '../../../common';
 
 /** Datos para establecer una conexión de integración (UC-24-07). */
 export interface CreateConnectionData {
+  /**
+   * Identificador asociado a pharmacy.
+   */
   pharmacyId: string;
+  /**
+   * Identificador asociado a pharmacy site.
+   */
   pharmacySiteId?: string;
   /**
    * Id de la conexión de integración externa. `connection_id` es una FK NOT NULL
@@ -14,14 +20,41 @@ export interface CreateConnectionData {
    * existente, la fila se auto-referencia usando su propio id.
    */
   connectionId?: string;
+  /**
+   * Identificador asociado a integration mode concept.
+   */
   integrationModeConceptId: string;
+  /**
+   * Identificador asociado a inventory authority concept.
+   */
   inventoryAuthorityConceptId?: string;
+  /**
+   * Valor de supports stock query mantenido por la instancia.
+   */
   supportsStockQuery?: boolean;
+  /**
+   * Valor de supports price query mantenido por la instancia.
+   */
   supportsPriceQuery?: boolean;
+  /**
+   * Valor de supports reservation mantenido por la instancia.
+   */
   supportsReservation?: boolean;
+  /**
+   * Valor de supports dispense confirmation mantenido por la instancia.
+   */
   supportsDispenseConfirmation?: boolean;
+  /**
+   * Valor de manual fallback allowed mantenido por la instancia.
+   */
   manualFallbackAllowed?: boolean;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -42,6 +42,13 @@ const VALIDATION_MODE_CONCEPT: Readonly<Record<ValidationMode, string>> = {
  */
 @Injectable()
 export class DynamicEnumsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contextRepo - Valor de context repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contextRepo: SystemContextRepository,
@@ -537,6 +544,14 @@ export class DynamicEnumsService {
 
   // --- Apoyo ---
 
+  /**
+   * Ejecuta la operación rejected.
+   *
+   * @param validationModeConceptId - Identificador de validation mode concept.
+   * @param cacheToken - Valor de cache token requerido por la operación.
+   * @param reason - Valor de reason requerido por la operación.
+   * @returns Resultado de rejected conforme al contrato `ResolveEnumValueResponseDto`.
+   */
   private rejected(
     validationModeConceptId: string,
     cacheToken: string,

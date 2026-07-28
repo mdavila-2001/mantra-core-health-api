@@ -16,6 +16,14 @@ import { CLIN } from '../clinical.concepts';
 /** UC-08-12: registro de procedimientos completados; cierra la orden si aplica. */
 @Injectable()
 export class ProceduresService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param proceduresRepo - Valor de procedures repo requerido por la operación.
+   * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly proceduresRepo: ProceduresRepository,

@@ -10,6 +10,11 @@ import { CreateDocumentDto, DocumentResponseDto } from '../dto';
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('charts/documents')
 export class ChartDocumentsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param documentsService - Valor de documents service requerido por la operación.
+   */
   constructor(private readonly documentsService: ChartDocumentsService) {}
 
   /** UC-15-09. */

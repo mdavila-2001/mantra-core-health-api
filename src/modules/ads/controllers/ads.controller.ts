@@ -59,6 +59,14 @@ import {
 @ApiBearerAuth()
 @Controller('ads')
 export class AdsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param accountsService - Valor de accounts service requerido por la operación.
+   * @param campaignsService - Valor de campaigns service requerido por la operación.
+   * @param dataService - Valor de data service requerido por la operación.
+   * @param optimizationService - Valor de optimization service requerido por la operación.
+   */
   constructor(
     private readonly accountsService: AdsAccountsService,
     private readonly campaignsService: AdsCampaignsService,

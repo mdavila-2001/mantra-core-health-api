@@ -6,11 +6,29 @@ import { DUNIT } from '../diagnostic_units.concepts';
 
 /** Datos de una especialidad declarada por la unidad (UC-23-04/10). */
 export interface UpsertSpecialtyData {
+  /**
+   * Identificador asociado a diagnostic unit.
+   */
   diagnosticUnitId: string;
+  /**
+   * Identificador asociado a specialty concept.
+   */
   specialtyConceptId: string;
+  /**
+   * Valor de is primary mantenido por la instancia.
+   */
   isPrimary?: boolean;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -41,6 +59,13 @@ export class DiagnosticUnitSpecialtiesRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `DiagnosticUnitSpecialties`.
+   */
   create(
     em: EntityManager,
     data: UpsertSpecialtyData,

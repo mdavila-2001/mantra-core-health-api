@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { FederatedLoginService } from './federated-login.service';
@@ -19,6 +25,10 @@ const ATTEMPT = '55555555-5555-5555-5555-555555555555';
 const REQUEST = '66666666-6666-6666-6666-666666666666';
 const SUBJECT = 'ext-subject-1';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -49,6 +59,12 @@ function build() {
   return { service, tx, providersRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active provider.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active provider conforme al contrato `any`.
+ */
 function activeProvider(overrides: Record<string, unknown> = {}): any {
   return {
     id: PROVIDER,
@@ -59,6 +75,12 @@ function activeProvider(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación active config.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active config conforme al contrato `any`.
+ */
 function activeConfig(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'config-1',
@@ -73,6 +95,12 @@ function activeConfig(overrides: Record<string, unknown> = {}): any {
 
 describe('FederatedLoginService', () => {
   describe('startLogin (UC-40-07)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.providersRepo.findProviderByCode.mockResolvedValue(activeProvider());
       d.providersRepo.findProtocolConfig.mockResolvedValue(activeConfig());
@@ -229,6 +257,12 @@ describe('FederatedLoginService', () => {
       tenantId: TENANT,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.providersRepo.findProviderByCode.mockResolvedValue(activeProvider());
       d.providersRepo.findAttemptByRequestId.mockResolvedValue({
@@ -569,6 +603,12 @@ describe('FederatedLoginService', () => {
   describe('requestAccountLink (UC-40-09)', () => {
     const dto: any = { providerId: PROVIDER, externalSubject: SUBJECT };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.providersRepo.findProviderById.mockResolvedValue(activeProvider());
       d.providersRepo.findIdentityBySubject.mockResolvedValue(null);
@@ -664,6 +704,12 @@ describe('FederatedLoginService', () => {
   });
 
   describe('completeAccountLink (UC-40-10)', () => {
+    /**
+     * Ejecuta la operación pending request.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de pending request conforme al contrato `any`.
+     */
     function pendingRequest(overrides: Record<string, unknown> = {}): any {
       return {
         id: REQUEST,

@@ -25,6 +25,14 @@ import { INTEG } from '../integrations.concepts';
  */
 @Injectable()
 export class IntegrationsWebhooksService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param connectionsRepo - Valor de connections repo requerido por la operación.
+   * @param inboundRepo - Valor de inbound repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly connectionsRepo: ProviderConnectionsRepository,

@@ -34,7 +34,8 @@ export const redisClientProvider: Provider = {
       maxRetriesPerRequest: 2,
       enableReadyCheck: true,
       // Reintento acotado: baja latencia y fallo rápido ante caídas.
-      retryStrategy: (times) => (times > 5 ? null : Math.min(times * 100, 1000)),
+      retryStrategy: (times) =>
+        times > 5 ? null : Math.min(times * 100, 1000),
     });
 
     client.on('error', (err: Error) => {
@@ -43,7 +44,9 @@ export const redisClientProvider: Provider = {
 
     // Conexión perezosa: se dispara sin bloquear el arranque del módulo.
     void client.connect().catch((err: Error) => {
-      logger.error(`No se pudo conectar a Redis (${host}:${port}): ${err.message}`);
+      logger.error(
+        `No se pudo conectar a Redis (${host}:${port}): ${err.message}`,
+      );
     });
 
     return client;

@@ -4,22 +4,73 @@ import { InventoryLedgerEntries } from '../entities';
 
 /** Datos de un asiento inmutable del ledger de inventario. */
 export interface AppendLedgerData {
+  /**
+   * Identificador asociado a pharmacy.
+   */
   pharmacyId: string;
+  /**
+   * Identificador asociado a pharmacy site.
+   */
   pharmacySiteId: string;
+  /**
+   * Identificador asociado a inventory location.
+   */
   inventoryLocationId: string;
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   pharmacyProductId: string;
+  /**
+   * Identificador asociado a inventory lot.
+   */
   inventoryLotId?: string;
+  /**
+   * Identificador asociado a inventory serial.
+   */
   inventorySerialId?: string;
+  /**
+   * Valor de ledger sequence mantenido por la instancia.
+   */
   ledgerSequence: string;
+  /**
+   * Identificador asociado a movement type concept.
+   */
   movementTypeConceptId: string;
+  /**
+   * Valor de quantity delta mantenido por la instancia.
+   */
   quantityDelta: string;
+  /**
+   * Valor de reservation delta mantenido por la instancia.
+   */
   reservationDelta?: string;
+  /**
+   * Valor de quarantine delta mantenido por la instancia.
+   */
   quarantineDelta?: string;
+  /**
+   * Valor de unit cost amount mantenido por la instancia.
+   */
   unitCostAmount?: string;
+  /**
+   * Identificador asociado a source type concept.
+   */
   sourceTypeConceptId?: string;
+  /**
+   * Identificador asociado a source.
+   */
   sourceId?: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey?: string;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId?: string;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
@@ -47,7 +98,14 @@ export class LedgerRepository {
     await em.execute('select pg_advisory_xact_lock(hashtext(?))', [
       `pharmacy_inventory.ledger:${pharmacyId}`,
     ]);
-    const rows = await em.execute<{ max: string | null }[]>(
+    const rows = await em.execute<
+      {
+        /**
+         * Valor de max mantenido por la instancia.
+         */
+        max: string | null;
+      }[]
+    >(
       'select max(ledger_sequence) as max from pharmacy_inventory.inventory_ledger_entries where pharmacy_id = ?',
       [pharmacyId],
     );
@@ -68,6 +126,13 @@ export class LedgerRepository {
     return entries.map((e) => e.id);
   }
 
+  /**
+   * Ejecuta la operación append.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de append conforme al contrato `InventoryLedgerEntries`.
+   */
   append(em: EntityManager, data: AppendLedgerData): InventoryLedgerEntries {
     const now = new Date();
     return em.create(

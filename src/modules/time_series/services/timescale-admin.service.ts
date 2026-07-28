@@ -41,6 +41,15 @@ const DEFAULT_SPACE_PARTITIONS = 4;
  */
 @Injectable()
 export class TimescaleAdminService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param timescaleRepo - Valor de timescale repo requerido por la operación.
+   * @param ingestRepo - Valor de ingest repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly timescaleRepo: TimescaleRepository,

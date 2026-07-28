@@ -42,12 +42,27 @@ import {
 @ApiBearerAuth()
 @Controller('terminology')
 export class TerminologyFhirController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param valueSetsService - Valor de value sets service requerido por la operación.
+   * @param conceptMapsService - Valor de concept maps service requerido por la operación.
+   * @param conceptsService - Valor de concepts service requerido por la operación.
+   */
   constructor(
     private readonly valueSetsService: ValueSetsService,
     private readonly conceptMapsService: ConceptMapsService,
     private readonly conceptsService: ConceptsService,
   ) {}
 
+  /**
+   * Ejecuta la operación expand value set.
+   *
+   * @param id - Identificador de id.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de expand value set conforme al contrato `Promise<ExpandValueSetResponseDto>`.
+   */
   @Post('ValueSet/:id/$expand')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -62,6 +77,13 @@ export class TerminologyFhirController {
     return this.valueSetsService.expandValueSet(id, dto, user);
   }
 
+  /**
+   * Ejecuta la operación translate.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de translate conforme al contrato `Promise<TranslateResponseDto>`.
+   */
   @Post('ConceptMap/$translate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -74,6 +96,14 @@ export class TerminologyFhirController {
     return this.conceptMapsService.translate(dto, user);
   }
 
+  /**
+   * Ejecuta la operación lookup.
+   *
+   * @param system - Valor de system requerido por la operación.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de lookup conforme al contrato `Promise<LookupResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   @Get('CodeSystem/$lookup')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

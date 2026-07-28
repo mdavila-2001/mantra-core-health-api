@@ -5,23 +5,66 @@ import { createdBy } from '../../../common';
 
 /** Datos para encolar un mensaje saliente (UC-12-05). */
 export interface CreateOutboundData {
+  /**
+   * Identificador asociado a connection.
+   */
   connectionId: string;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId: string;
+  /**
+   * Valor de request payload json mantenido por la instancia.
+   */
   requestPayloadJson: unknown;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de payload version mantenido por la instancia.
+   */
   payloadVersion: number;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey?: string;
+  /**
+   * Identificador asociado a endpoint.
+   */
   endpointId?: string;
+  /**
+   * Valor de headers json mantenido por la instancia.
+   */
   headersJson?: unknown;
+  /**
+   * Valor de scheduled at mantenido por la instancia.
+   */
   scheduledAt?: Date;
+  /**
+   * Valor de source resource type mantenido por la instancia.
+   */
   sourceResourceType?: string;
+  /**
+   * Identificador asociado a source resource.
+   */
   sourceResourceId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `integrations.outbound_messages`. */
 @Injectable()
 export class OutboundMessagesRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<OutboundMessages | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<OutboundMessages | null> {
     return em.findOne(OutboundMessages, { id });
   }
@@ -42,6 +85,13 @@ export class OutboundMessagesRepository {
     return em.findOne(OutboundMessages, { correlationId });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `OutboundMessages`.
+   */
   create(em: EntityManager, data: CreateOutboundData): OutboundMessages {
     return em.create(
       OutboundMessages,

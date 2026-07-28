@@ -49,6 +49,14 @@ const IDENTITY_TYPE_CONCEPT: Readonly<Record<'PAGE' | 'INSTAGRAM', string>> = {
  */
 @Injectable()
 export class AdsAccountsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param accountsRepo - Valor de accounts repo requerido por la operación.
+   * @param campaignsRepo - Valor de campaigns repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly accountsRepo: AdsAccountsRepository,

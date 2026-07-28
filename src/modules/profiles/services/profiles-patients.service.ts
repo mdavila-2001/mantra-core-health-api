@@ -49,6 +49,20 @@ import {
  */
 @Injectable()
 export class ProfilesPatientsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personsRepo - Valor de persons repo requerido por la operación.
+   * @param personProfilesRepo - Valor de person profiles repo requerido por la operación.
+   * @param patientProfilesRepo - Valor de patient profiles repo requerido por la operación.
+   * @param accountLinksRepo - Valor de account links repo requerido por la operación.
+   * @param identityLinksRepo - Valor de identity links repo requerido por la operación.
+   * @param mergeEventsRepo - Valor de merge events repo requerido por la operación.
+   * @param relatedPersonsRepo - Valor de related persons repo requerido por la operación.
+   * @param portalProxiesRepo - Valor de portal proxies repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly personsRepo: PersonsRepository,
@@ -613,12 +627,36 @@ export class ProfilesPatientsService {
     });
   }
 
+  /**
+   * Transforma to event dto.
+   *
+   * @param event - Valor de event requerido por la operación.
+   * @returns Resultado de to event dto conforme al contrato `MergeEventResponseDto`.
+   */
   private toEventDto(event: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a surviving patient profile.
+     */
     survivingPatientProfileId: string;
+    /**
+     * Identificador asociado a merged patient profile.
+     */
     mergedPatientProfileId: string;
+    /**
+     * Identificador asociado a decision status concept.
+     */
     decisionStatusConceptId: string;
+    /**
+     * Identificador asociado a reversal of event.
+     */
     reversalOfEventId?: string;
+    /**
+     * Valor de recorded at mantenido por la instancia.
+     */
     recordedAt: Date;
   }): MergeEventResponseDto {
     return {

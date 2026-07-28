@@ -33,6 +33,17 @@ import {
  */
 @Injectable()
 export class TelemetryConsentService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param disclosuresRepo - Valor de disclosures repo requerido por la operación.
+   * @param acceptancesRepo - Valor de acceptances repo requerido por la operación.
+   * @param consentsRepo - Valor de consents repo requerido por la operación.
+   * @param purposesRepo - Valor de purposes repo requerido por la operación.
+   * @param subjectsRepo - Valor de subjects repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly disclosuresRepo: TrackingDisclosureVersionsRepository,

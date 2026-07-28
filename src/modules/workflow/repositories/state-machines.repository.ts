@@ -10,68 +10,233 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common/persistence/audit-fields';
 
+/**
+ * Describe el contrato estructural de create machine data.
+ */
 export interface CreateMachineData {
+  /**
+   * Valor de machine code mantenido por la instancia.
+   */
   machineCode: string;
+  /**
+   * Valor de aggregate schema name mantenido por la instancia.
+   */
   aggregateSchemaName: string;
+  /**
+   * Valor de aggregate entity name mantenido por la instancia.
+   */
   aggregateEntityName: string;
+  /**
+   * Valor de status field name mantenido por la instancia.
+   */
   statusFieldName: string;
+  /**
+   * Identificador asociado a state value set.
+   */
   stateValueSetId: string;
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
   versionNumber: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   effectiveFrom?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create state data.
+ */
 export interface CreateStateData {
+  /**
+   * Identificador asociado a state machine definition.
+   */
   stateMachineDefinitionId: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Valor de state code snapshot mantenido por la instancia.
+   */
   stateCodeSnapshot: string;
+  /**
+   * Valor de is initial mantenido por la instancia.
+   */
   isInitial: boolean;
+  /**
+   * Valor de is terminal mantenido por la instancia.
+   */
   isTerminal: boolean;
+  /**
+   * Valor de allows edit mantenido por la instancia.
+   */
   allowsEdit: boolean;
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   ordinal: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create transition data.
+ */
 export interface CreateTransitionData {
+  /**
+   * Identificador asociado a state machine definition.
+   */
   stateMachineDefinitionId: string;
+  /**
+   * Valor de transition code mantenido por la instancia.
+   */
   transitionCode: string;
+  /**
+   * Identificador asociado a from state concept.
+   */
   fromStateConceptId: string;
+  /**
+   * Identificador asociado a to state concept.
+   */
   toStateConceptId: string;
+  /**
+   * Valor de command code mantenido por la instancia.
+   */
   commandCode: string;
+  /**
+   * Identificador asociado a required permission.
+   */
   requiredPermissionId: string;
+  /**
+   * Identificador asociado a purpose of use concept.
+   */
   purposeOfUseConceptId: string;
+  /**
+   * Valor de idempotency required mantenido por la instancia.
+   */
   idempotencyRequired?: boolean;
+  /**
+   * Valor de optimistic lock required mantenido por la instancia.
+   */
   optimisticLockRequired?: boolean;
+  /**
+   * Valor de reason required mantenido por la instancia.
+   */
   reasonRequired?: boolean;
+  /**
+   * Valor de transition timeout seconds mantenido por la instancia.
+   */
   transitionTimeoutSeconds?: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create guard data.
+ */
 export interface CreateGuardData {
+  /**
+   * Identificador asociado a state transition definition.
+   */
   stateTransitionDefinitionId: string;
+  /**
+   * Valor de guard code mantenido por la instancia.
+   */
   guardCode: string;
+  /**
+   * Identificador asociado a guard type concept.
+   */
   guardTypeConceptId: string;
+  /**
+   * Valor de evaluation order mantenido por la instancia.
+   */
   evaluationOrder: number;
+  /**
+   * Valor de expression json mantenido por la instancia.
+   */
   expressionJson?: unknown;
+  /**
+   * Valor de failure code mantenido por la instancia.
+   */
   failureCode?: string;
+  /**
+   * Valor de failure message key mantenido por la instancia.
+   */
   failureMessageKey?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create side effect data.
+ */
 export interface CreateSideEffectData {
+  /**
+   * Identificador asociado a state transition definition.
+   */
   stateTransitionDefinitionId: string;
+  /**
+   * Valor de side effect code mantenido por la instancia.
+   */
   sideEffectCode: string;
+  /**
+   * Identificador asociado a side effect type concept.
+   */
   sideEffectTypeConceptId: string;
+  /**
+   * Identificador asociado a execution mode concept.
+   */
   executionModeConceptId: string;
+  /**
+   * Valor de execution order mantenido por la instancia.
+   */
   executionOrder: number;
+  /**
+   * Valor de outbox event type mantenido por la instancia.
+   */
   outboxEventType?: string;
+  /**
+   * Valor de action spec json mantenido por la instancia.
+   */
   actionSpecJson?: unknown;
+  /**
+   * Valor de compensation spec json mantenido por la instancia.
+   */
   compensationSpecJson?: unknown;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -85,6 +250,13 @@ export interface CreateSideEffectData {
 export class StateMachinesRepository {
   // --- Definiciones de máquina (UC-32-01, 04) ---
 
+  /**
+   * Crea create machine.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create machine conforme al contrato `StateMachineDefinitions`.
+   */
   createMachine(
     em: EntityManager,
     data: CreateMachineData,
@@ -106,6 +278,13 @@ export class StateMachinesRepository {
     );
   }
 
+  /**
+   * Obtiene find machine by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find machine by id conforme al contrato `Promise<StateMachineDefinitions | null>`.
+   */
   findMachineById(
     em: EntityManager,
     id: string,
@@ -125,6 +304,13 @@ export class StateMachinesRepository {
     );
   }
 
+  /**
+   * Obtiene find machine by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param machineCode - Valor de machine code requerido por la operación.
+   * @returns Resultado de find machine by code conforme al contrato `Promise<StateMachineDefinitions | null>`.
+   */
   findMachineByCode(
     em: EntityManager,
     machineCode: string,
@@ -179,6 +365,13 @@ export class StateMachinesRepository {
 
   // --- Estados (UC-32-02) ---
 
+  /**
+   * Crea create state.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create state conforme al contrato `StateDefinitions`.
+   */
   createState(em: EntityManager, data: CreateStateData): StateDefinitions {
     return em.create(
       StateDefinitions,
@@ -197,6 +390,13 @@ export class StateMachinesRepository {
     );
   }
 
+  /**
+   * Obtiene find states by machine.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param stateMachineDefinitionId - Identificador de state machine definition.
+   * @returns Resultado de find states by machine conforme al contrato `Promise<StateDefinitions[]>`.
+   */
   findStatesByMachine(
     em: EntityManager,
     stateMachineDefinitionId: string,
@@ -208,6 +408,14 @@ export class StateMachinesRepository {
     );
   }
 
+  /**
+   * Obtiene find state.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param stateMachineDefinitionId - Identificador de state machine definition.
+   * @param stateConceptId - Identificador de state concept.
+   * @returns Resultado de find state conforme al contrato `Promise<StateDefinitions | null>`.
+   */
   findState(
     em: EntityManager,
     stateMachineDefinitionId: string,
@@ -219,6 +427,13 @@ export class StateMachinesRepository {
     });
   }
 
+  /**
+   * Obtiene find initial state.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param stateMachineDefinitionId - Identificador de state machine definition.
+   * @returns Resultado de find initial state conforme al contrato `Promise<StateDefinitions | null>`.
+   */
   findInitialState(
     em: EntityManager,
     stateMachineDefinitionId: string,
@@ -231,6 +446,13 @@ export class StateMachinesRepository {
 
   // --- Transiciones (UC-32-03) ---
 
+  /**
+   * Crea create transition.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create transition conforme al contrato `StateTransitionDefinitions`.
+   */
   createTransition(
     em: EntityManager,
     data: CreateTransitionData,
@@ -256,6 +478,13 @@ export class StateMachinesRepository {
     );
   }
 
+  /**
+   * Obtiene find transition by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find transition by id conforme al contrato `Promise<StateTransitionDefinitions | null>`.
+   */
   findTransitionById(
     em: EntityManager,
     id: string,
@@ -263,6 +492,14 @@ export class StateMachinesRepository {
     return em.findOne(StateTransitionDefinitions, { id });
   }
 
+  /**
+   * Obtiene find transition by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param stateMachineDefinitionId - Identificador de state machine definition.
+   * @param transitionCode - Valor de transition code requerido por la operación.
+   * @returns Resultado de find transition by code conforme al contrato `Promise<StateTransitionDefinitions | null>`.
+   */
   findTransitionByCode(
     em: EntityManager,
     stateMachineDefinitionId: string,
@@ -292,6 +529,13 @@ export class StateMachinesRepository {
     });
   }
 
+  /**
+   * Obtiene find transitions by machine.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param stateMachineDefinitionId - Identificador de state machine definition.
+   * @returns Resultado de find transitions by machine conforme al contrato `Promise<StateTransitionDefinitions[]>`.
+   */
   findTransitionsByMachine(
     em: EntityManager,
     stateMachineDefinitionId: string,
@@ -301,6 +545,13 @@ export class StateMachinesRepository {
 
   // --- Guardas y efectos (UC-32-03, 05, 07, 08) ---
 
+  /**
+   * Crea create guard.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create guard conforme al contrato `TransitionGuards`.
+   */
   createGuard(em: EntityManager, data: CreateGuardData): TransitionGuards {
     return em.create(
       TransitionGuards,
@@ -331,6 +582,13 @@ export class StateMachinesRepository {
     );
   }
 
+  /**
+   * Crea create side effect.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create side effect conforme al contrato `TransitionSideEffects`.
+   */
   createSideEffect(
     em: EntityManager,
     data: CreateSideEffectData,
@@ -353,6 +611,13 @@ export class StateMachinesRepository {
     );
   }
 
+  /**
+   * Obtiene find side effects by transition.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param stateTransitionDefinitionId - Identificador de state transition definition.
+   * @returns Resultado de find side effects by transition conforme al contrato `Promise<TransitionSideEffects[]>`.
+   */
   findSideEffectsByTransition(
     em: EntityManager,
     stateTransitionDefinitionId: string,

@@ -12,16 +12,49 @@ import {
   LargePayloadManifests,
 } from '../entities';
 
+/**
+ * Describe el contrato estructural de create object version data.
+ */
 export interface CreateObjectVersionData {
+  /**
+   * Identificador asociado a object manifest.
+   */
   objectManifestId: string;
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
   versionNumber: number;
+  /**
+   * Identificador asociado a provider version.
+   */
   providerVersionId: string;
+  /**
+   * Valor de object key mantenido por la instancia.
+   */
   objectKey: string;
+  /**
+   * Valor de mime type mantenido por la instancia.
+   */
   mimeType: string;
+  /**
+   * Valor de size bytes mantenido por la instancia.
+   */
   sizeBytes: string;
+  /**
+   * Valor de sha256 mantenido por la instancia.
+   */
   sha256: string;
+  /**
+   * Valor de etag mantenido por la instancia.
+   */
   etag: string;
+  /**
+   * Valor de compression mantenido por la instancia.
+   */
   compression?: string;
+  /**
+   * Identificador asociado a supersedes version.
+   */
   supersedesVersionId?: string;
 }
 
@@ -34,6 +67,13 @@ export interface CreateObjectVersionData {
 export class ObjectStorageRepository {
   // --- Espacios de nombres (UC-60-01, 02, 03) ---
 
+  /**
+   * Obtiene find namespace by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find namespace by code conforme al contrato `Promise<ObjectNamespaces | null>`.
+   */
   findNamespaceByCode(
     em: EntityManager,
     code: string,
@@ -41,6 +81,13 @@ export class ObjectStorageRepository {
     return em.findOne(ObjectNamespaces, { code });
   }
 
+  /**
+   * Obtiene find namespace by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find namespace by id conforme al contrato `Promise<ObjectNamespaces | null>`.
+   */
   findNamespaceById(
     em: EntityManager,
     id: string,
@@ -50,15 +97,43 @@ export class ObjectStorageRepository {
 
   // --- Cargas multiparte (UC-60-01, 02) ---
 
+  /**
+   * Crea create upload.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create upload conforme al contrato `MultipartUploads`.
+   */
   createUpload(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Identificador asociado a namespace.
+       */
       namespaceId: string;
+      /**
+       * Identificador asociado a provider upload.
+       */
       providerUploadId: string;
+      /**
+       * Valor de target object key mantenido por la instancia.
+       */
       targetObjectKey: string;
+      /**
+       * Valor de expected size bytes mantenido por la instancia.
+       */
       expectedSizeBytes: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de expires at mantenido por la instancia.
+       */
       expiresAt?: Date;
     },
   ): MultipartUploads {
@@ -86,6 +161,13 @@ export class ObjectStorageRepository {
     return em.findOne(MultipartUploads, { namespaceId, providerUploadId });
   }
 
+  /**
+   * Obtiene find upload for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find upload for update conforme al contrato `Promise<MultipartUploads | null>`.
+   */
   findUploadForUpdate(
     em: EntityManager,
     id: string,
@@ -99,15 +181,43 @@ export class ObjectStorageRepository {
 
   // --- Manifiestos de objeto (UC-60-02 … 12) ---
 
+  /**
+   * Crea create manifest.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create manifest conforme al contrato `ObjectManifests`.
+   */
   createManifest(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Identificador asociado a namespace.
+       */
       namespaceId: string;
+      /**
+       * Identificador asociado a logical object.
+       */
       logicalObjectId: string;
+      /**
+       * Valor de object type mantenido por la instancia.
+       */
       objectType: string;
+      /**
+       * Identificador asociado a patient profile.
+       */
       patientProfileId?: string;
+      /**
+       * Valor de lifecycle state mantenido por la instancia.
+       */
       lifecycleState: string;
+      /**
+       * Valor de retention policy code mantenido por la instancia.
+       */
       retentionPolicyCode?: string;
     },
   ): ObjectManifests {
@@ -126,6 +236,13 @@ export class ObjectStorageRepository {
     );
   }
 
+  /**
+   * Obtiene find manifest by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find manifest by id conforme al contrato `Promise<ObjectManifests | null>`.
+   */
   findManifestById(
     em: EntityManager,
     id: string,
@@ -183,6 +300,13 @@ export class ObjectStorageRepository {
     );
   }
 
+  /**
+   * Obtiene find version by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find version by id conforme al contrato `Promise<ObjectVersions | null>`.
+   */
   findVersionById(
     em: EntityManager,
     id: string,
@@ -190,6 +314,13 @@ export class ObjectStorageRepository {
     return em.findOne(ObjectVersions, { id });
   }
 
+  /**
+   * Obtiene find latest version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param objectManifestId - Identificador de object manifest.
+   * @returns Resultado de find latest version conforme al contrato `Promise<ObjectVersions | null>`.
+   */
   findLatestVersion(
     em: EntityManager,
     objectManifestId: string,
@@ -212,14 +343,39 @@ export class ObjectStorageRepository {
 
   // --- Checksums, cifrado y ubicaciones ---
 
+  /**
+   * Crea create checksum.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create checksum conforme al contrato `ObjectChecksums`.
+   */
   createChecksum(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a object version.
+       */
       objectVersionId: string;
+      /**
+       * Valor de algorithm mantenido por la instancia.
+       */
       algorithm: string;
+      /**
+       * Valor de checksum mantenido por la instancia.
+       */
       checksum: string;
+      /**
+       * Valor de source mantenido por la instancia.
+       */
       source: string;
+      /**
+       * Valor de verification status mantenido por la instancia.
+       */
       verificationStatus: string;
+      /**
+       * Valor de verified at mantenido por la instancia.
+       */
       verifiedAt?: Date;
     },
   ): ObjectChecksums {
@@ -237,6 +393,14 @@ export class ObjectStorageRepository {
     );
   }
 
+  /**
+   * Obtiene find checksum for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param objectVersionId - Identificador de object version.
+   * @param algorithm - Valor de algorithm requerido por la operación.
+   * @returns Resultado de find checksum for update conforme al contrato `Promise<ObjectChecksums | null>`.
+   */
   findChecksumForUpdate(
     em: EntityManager,
     objectVersionId: string,
@@ -249,14 +413,39 @@ export class ObjectStorageRepository {
     );
   }
 
+  /**
+   * Crea create encryption envelope.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create encryption envelope conforme al contrato `ObjectEncryptionEnvelopes`.
+   */
   createEncryptionEnvelope(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a object version.
+       */
       objectVersionId: string;
+      /**
+       * Valor de algorithm mantenido por la instancia.
+       */
       algorithm: string;
+      /**
+       * Valor de key management provider mantenido por la instancia.
+       */
       keyManagementProvider: string;
+      /**
+       * Valor de encrypted data key mantenido por la instancia.
+       */
       encryptedDataKey: string;
+      /**
+       * Valor de key version mantenido por la instancia.
+       */
       keyVersion: string;
+      /**
+       * Valor de encryption context hash mantenido por la instancia.
+       */
       encryptionContextHash?: string;
     },
   ): ObjectEncryptionEnvelopes {
@@ -274,6 +463,13 @@ export class ObjectStorageRepository {
     );
   }
 
+  /**
+   * Obtiene find encryption envelope.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param objectVersionId - Identificador de object version.
+   * @returns Resultado de find encryption envelope conforme al contrato `Promise<ObjectEncryptionEnvelopes | null>`.
+   */
   findEncryptionEnvelope(
     em: EntityManager,
     objectVersionId: string,
@@ -281,14 +477,39 @@ export class ObjectStorageRepository {
     return em.findOne(ObjectEncryptionEnvelopes, { objectVersionId });
   }
 
+  /**
+   * Crea create location.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create location conforme al contrato `ObjectLocations`.
+   */
   createLocation(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a object version.
+       */
       objectVersionId: string;
+      /**
+       * Identificador asociado a namespace.
+       */
       namespaceId: string;
+      /**
+       * Valor de placement role mantenido por la instancia.
+       */
       placementRole: string;
+      /**
+       * Valor de provider uri mantenido por la instancia.
+       */
       providerUri: string;
+      /**
+       * Valor de storage class mantenido por la instancia.
+       */
       storageClass: string;
+      /**
+       * Valor de replication state mantenido por la instancia.
+       */
       replicationState: string;
     },
   ): ObjectLocations {
@@ -319,6 +540,14 @@ export class ObjectStorageRepository {
     );
   }
 
+  /**
+   * Obtiene find primary location.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param objectVersionId - Identificador de object version.
+   * @param primaryRole - Valor de primary role requerido por la operación.
+   * @returns Resultado de find primary location conforme al contrato `Promise<ObjectLocations | null>`.
+   */
   findPrimaryLocation(
     em: EntityManager,
     objectVersionId: string,
@@ -332,15 +561,43 @@ export class ObjectStorageRepository {
 
   // --- Payloads grandes (UC-60-06) ---
 
+  /**
+   * Crea create large payload.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create large payload conforme al contrato `LargePayloadManifests`.
+   */
   createLargePayload(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Valor de payload type mantenido por la instancia.
+       */
       payloadType: string;
+      /**
+       * Valor de source entity type mantenido por la instancia.
+       */
       sourceEntityType: string;
+      /**
+       * Identificador asociado a source entity.
+       */
       sourceEntityId: string;
+      /**
+       * Identificador asociado a object manifest.
+       */
       objectManifestId: string;
+      /**
+       * Valor de content hash mantenido por la instancia.
+       */
       contentHash: string;
+      /**
+       * Valor de contains phi mantenido por la instancia.
+       */
       containsPhi: boolean;
     },
   ): LargePayloadManifests {

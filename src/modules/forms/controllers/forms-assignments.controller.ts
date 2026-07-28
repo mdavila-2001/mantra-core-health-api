@@ -13,6 +13,11 @@ import { CreateAssignmentDto, IdResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('forms/assignments')
 export class FormsAssignmentsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param assignmentsService - Valor de assignments service requerido por la operación.
+   */
   constructor(private readonly assignmentsService: FormsAssignmentsService) {}
 
   /** UC-09-06. */

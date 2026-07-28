@@ -19,6 +19,9 @@ export type DocumentFileRole = 'PRIMARY' | 'ATTACHMENT';
 
 /** Un archivo gobernado adjunto al documento (UC-15-09). */
 export class DocumentFileInputDto {
+  /**
+   * Identificador asociado a file.
+   */
   @ApiProperty({
     format: 'uuid',
     description: 'Archivo ya subido a object_storage (common.files)',
@@ -26,6 +29,9 @@ export class DocumentFileInputDto {
   @IsUUID()
   fileId!: string;
 
+  /**
+   * Valor de content role mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     enum: ['PRIMARY', 'ATTACHMENT'],
     description: 'Rol de contenido',
@@ -34,6 +40,9 @@ export class DocumentFileInputDto {
   @IsIn(['PRIMARY', 'ATTACHMENT'])
   contentRole?: DocumentFileRole;
 
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     minimum: 0,
     description: 'Orden del archivo dentro del documento',
@@ -46,6 +55,9 @@ export class DocumentFileInputDto {
 
 /** Cuerpo de `POST /charts/documents` (UC-15-09). */
 export class CreateDocumentDto {
+  /**
+   * Identificador asociado a patient profile.
+   */
   @ApiProperty({
     format: 'uuid',
     description: 'Perfil de paciente (profiles.patient_profiles)',
@@ -53,6 +65,9 @@ export class CreateDocumentDto {
   @IsUUID()
   patientProfileId!: string;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({
     format: 'uuid',
     description: 'Tenant propietario (directory.tenants)',
@@ -60,12 +75,18 @@ export class CreateDocumentDto {
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de title mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Título del documento' })
   @IsString()
   @MinLength(1)
   @MaxLength(500)
   title!: string;
 
+  /**
+   * Identificador asociado a encounter.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Encuentro clínico asociado',
@@ -74,6 +95,9 @@ export class CreateDocumentDto {
   @IsUUID()
   encounterId?: string;
 
+  /**
+   * Identificador asociado a category concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Concept id de la categoría documental',
@@ -82,6 +106,9 @@ export class CreateDocumentDto {
   @IsUUID()
   categoryConceptId?: string;
 
+  /**
+   * Identificador asociado a source concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Concept id de la fuente del documento',
@@ -90,6 +117,9 @@ export class CreateDocumentDto {
   @IsUUID()
   sourceConceptId?: string;
 
+  /**
+   * Identificador asociado a confidentiality concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Concept id de confidencialidad',
@@ -98,6 +128,9 @@ export class CreateDocumentDto {
   @IsUUID()
   confidentialityConceptId?: string;
 
+  /**
+   * Identificador asociado a patient visibility concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Concept id de visibilidad para el paciente',
@@ -106,12 +139,18 @@ export class CreateDocumentDto {
   @IsUUID()
   patientVisibilityConceptId?: string;
 
+  /**
+   * Valor de author text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Autor libre (documentos externos)' })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   authorText?: string;
 
+  /**
+   * Valor de is external mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'true si el documento proviene de una fuente externa',
   })
@@ -119,6 +158,9 @@ export class CreateDocumentDto {
   @IsBoolean()
   isExternal?: boolean;
 
+  /**
+   * Valor de files mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     type: [DocumentFileInputDto],
     description: 'Archivos gobernados (0..n)',
@@ -132,18 +174,30 @@ export class CreateDocumentDto {
 
 /** Respuesta de `POST /charts/documents` (UC-15-09). */
 export class DocumentResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({
     description: 'Concept id del estado del documento',
     format: 'uuid',
   })
   statusConceptId!: string;
 
+  /**
+   * Valor de file count mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Nº de archivos adjuntados' })
   fileCount!: number;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 }

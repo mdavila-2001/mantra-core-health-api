@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ProjectionDeliveryService } from './projection-delivery.service';
@@ -13,6 +19,10 @@ const OUTBOX_EVENT_ID = '55555555-5555-5555-5555-555555555555';
 const ATTEMPT_ID = '66666666-6666-6666-6666-666666666666';
 const DEAD_LETTER_ID = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -316,6 +326,12 @@ describe('ProjectionDeliveryService', () => {
       reasonCode: 'MAX_ATTEMPTS',
     } as any;
 
+    /**
+     * Ejecuta la operación with attempt.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de with attempt.
+     */
     function withAttempt(d: ReturnType<typeof build>) {
       const attempt = {
         id: ATTEMPT_ID,
@@ -368,6 +384,13 @@ describe('ProjectionDeliveryService', () => {
   });
 
   describe('replayDeadLetter (UC-62-04)', () => {
+    /**
+     * Ejecuta la operación with dead letter.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param state - Valor de state requerido por la operación.
+     * @returns Resultado de with dead letter.
+     */
     function withDeadLetter(d: ReturnType<typeof build>, state = 'OPEN') {
       const deadLetter = {
         id: DEAD_LETTER_ID,

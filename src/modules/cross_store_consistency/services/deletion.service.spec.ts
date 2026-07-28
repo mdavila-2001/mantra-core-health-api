@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DeletionService } from './deletion.service';
@@ -11,6 +17,10 @@ const REQUEST_ID = '33333333-3333-3333-3333-333333333333';
 const TARGET_ID = '44444444-4444-4444-4444-444444444444';
 const DATASET_ID = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -111,6 +121,13 @@ describe('DeletionService', () => {
       ],
     } as any;
 
+    /**
+     * Ejecuta la operación with request.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param state - Valor de state requerido por la operación.
+     * @returns Resultado de with request.
+     */
     function withRequest(d: ReturnType<typeof build>, state = 'PENDING') {
       const request = { id: REQUEST_ID, tenantId: TENANT_ID, state };
       d.deletionRepo.findRequestForUpdate.mockResolvedValue(request);
@@ -169,6 +186,13 @@ describe('DeletionService', () => {
   });
 
   describe('executeDeletion (UC-62-10)', () => {
+    /**
+     * Ejecuta la operación with target.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with target.
+     */
     function withTarget(d: ReturnType<typeof build>, overrides: any = {}) {
       const target = {
         id: TARGET_ID,
@@ -245,6 +269,13 @@ describe('DeletionService', () => {
   });
 
   describe('verifyDeletion (UC-62-11)', () => {
+    /**
+     * Ejecuta la operación with target.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param state - Valor de state requerido por la operación.
+     * @returns Resultado de with target.
+     */
     function withTarget(d: ReturnType<typeof build>, state = 'EXECUTED') {
       const target = { id: TARGET_ID, state, blockedByLegalHold: false };
       d.deletionRepo.findTargetForUpdate.mockResolvedValue(target);
@@ -312,6 +343,14 @@ describe('DeletionService', () => {
   });
 
   describe('closeDeletionRequest (UC-62-11)', () => {
+    /**
+     * Ejecuta la operación with request.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param targets - Valor de targets requerido por la operación.
+     * @param state - Valor de state requerido por la operación.
+     * @returns Resultado de with request.
+     */
     function withRequest(
       d: ReturnType<typeof build>,
       targets: any[],

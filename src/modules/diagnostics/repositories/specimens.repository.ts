@@ -14,41 +14,125 @@ import { createdBy } from '../../../common';
 
 /** Datos para dar de alta un espécimen (endpoint de soporte). */
 export interface CreateSpecimenData {
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   custodianTenantId: string;
+  /**
+   * Identificador asociado a specimen type concept.
+   */
   specimenTypeConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a service request.
+   */
   serviceRequestId?: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Identificador asociado a body site concept.
+   */
   bodySiteConceptId?: string;
+  /**
+   * Identificador asociado a collection method concept.
+   */
   collectionMethodConceptId?: string;
+  /**
+   * Valor de collected at mantenido por la instancia.
+   */
   collectedAt?: Date;
+  /**
+   * Identificador asociado a collector profile.
+   */
   collectorProfileId?: string;
+  /**
+   * Valor de accession identifier mantenido por la instancia.
+   */
   accessionIdentifier?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos para dar de alta una acesión de laboratorio. */
 export interface CreateAccessionData {
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   custodianTenantId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Valor de accession number mantenido por la instancia.
+   */
   accessionNumber: string;
+  /**
+   * Valor de received at mantenido por la instancia.
+   */
   receivedAt: Date;
+  /**
+   * Identificador asociado a priority concept.
+   */
   priorityConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a service request.
+   */
   serviceRequestId?: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos para dar de alta un contenedor de espécimen. */
 export interface CreateContainerData {
+  /**
+   * Identificador asociado a specimen.
+   */
   specimenId: string;
+  /**
+   * Valor de container identifier mantenido por la instancia.
+   */
   containerIdentifier: string;
+  /**
+   * Identificador asociado a container type concept.
+   */
   containerTypeConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a additive concept.
+   */
   additiveConceptId?: string;
+  /**
+   * Identificador asociado a parent container.
+   */
   parentContainerId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -63,10 +147,24 @@ export interface CreateContainerData {
  */
 @Injectable()
 export class SpecimensRepository {
+  /**
+   * Obtiene find specimen.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find specimen conforme al contrato `Promise<Specimens | null>`.
+   */
   findSpecimen(em: EntityManager, id: string): Promise<Specimens | null> {
     return em.findOne(Specimens, { id });
   }
 
+  /**
+   * Obtiene find accession.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find accession conforme al contrato `Promise<LaboratoryAccessions | null>`.
+   */
   findAccession(
     em: EntityManager,
     id: string,
@@ -74,6 +172,13 @@ export class SpecimensRepository {
     return em.findOne(LaboratoryAccessions, { id });
   }
 
+  /**
+   * Obtiene find container.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find container conforme al contrato `Promise<SpecimenContainers | null>`.
+   */
   findContainer(
     em: EntityManager,
     id: string,
@@ -81,6 +186,13 @@ export class SpecimensRepository {
     return em.findOne(SpecimenContainers, { id });
   }
 
+  /**
+   * Crea create specimen.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create specimen conforme al contrato `Specimens`.
+   */
   createSpecimen(em: EntityManager, data: CreateSpecimenData): Specimens {
     return em.create(
       Specimens,
@@ -102,6 +214,13 @@ export class SpecimensRepository {
     );
   }
 
+  /**
+   * Crea create accession.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create accession conforme al contrato `LaboratoryAccessions`.
+   */
   createAccession(
     em: EntityManager,
     data: CreateAccessionData,
@@ -123,12 +242,31 @@ export class SpecimensRepository {
     );
   }
 
+  /**
+   * Crea add accession specimen.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de add accession specimen conforme al contrato `AccessionSpecimens`.
+   */
   addAccessionSpecimen(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a laboratory accession.
+       */
       laboratoryAccessionId: string;
+      /**
+       * Identificador asociado a specimen.
+       */
       specimenId: string;
+      /**
+       * Valor de sequence number mantenido por la instancia.
+       */
       sequenceNumber: number;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
     },
   ): AccessionSpecimens {
@@ -149,14 +287,41 @@ export class SpecimensRepository {
   recordCustodyEvent(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a specimen.
+       */
       specimenId: string;
+      /**
+       * Identificador asociado a specimen container.
+       */
       specimenContainerId?: string;
+      /**
+       * Identificador asociado a custody event type concept.
+       */
       custodyEventTypeConceptId: string;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt: Date;
+      /**
+       * Identificador asociado a to party type concept.
+       */
       toPartyTypeConceptId?: string;
+      /**
+       * Identificador asociado a to party.
+       */
       toPartyId?: string;
+      /**
+       * Valor de seal identifier mantenido por la instancia.
+       */
       sealIdentifier?: string;
+      /**
+       * Valor de evidence hash mantenido por la instancia.
+       */
       evidenceHash?: string;
+      /**
+       * Identificador asociado a signed by user.
+       */
       signedByUserId?: string;
     },
   ): SpecimenChainOfCustodyEvents {
@@ -182,12 +347,33 @@ export class SpecimensRepository {
   recordRejection(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a specimen.
+       */
       specimenId: string;
+      /**
+       * Valor de rejected at mantenido por la instancia.
+       */
       rejectedAt: Date;
+      /**
+       * Identificador asociado a rejection reason concept.
+       */
       rejectionReasonConceptId: string;
+      /**
+       * Identificador asociado a rejected by profile.
+       */
       rejectedByProfileId?: string;
+      /**
+       * Valor de notes mantenido por la instancia.
+       */
       notes?: string;
+      /**
+       * Valor de recollection required mantenido por la instancia.
+       */
       recollectionRequired?: boolean;
+      /**
+       * Identificador asociado a recollection service request.
+       */
       recollectionServiceRequestId?: string;
     },
   ): SpecimenRejectionEvents {
@@ -207,6 +393,13 @@ export class SpecimensRepository {
     );
   }
 
+  /**
+   * Crea create container.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create container conforme al contrato `SpecimenContainers`.
+   */
   createContainer(
     em: EntityManager,
     data: CreateContainerData,
@@ -230,11 +423,29 @@ export class SpecimensRepository {
   recordContainerEvent(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a specimen container.
+       */
       specimenContainerId: string;
+      /**
+       * Identificador asociado a event type concept.
+       */
       eventTypeConceptId: string;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt: Date;
+      /**
+       * Identificador asociado a actor profile.
+       */
       actorProfileId?: string;
+      /**
+       * Valor de temperature celsius mantenido por la instancia.
+       */
       temperatureCelsius?: string;
+      /**
+       * Valor de notes mantenido por la instancia.
+       */
       notes?: string;
     },
   ): SpecimenContainerEvents {

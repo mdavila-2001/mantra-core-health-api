@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { HealthValidationService } from './health-validation.service';
@@ -16,6 +22,10 @@ const PROFILE_VERSION = '33333333-3333-3333-3333-333333333333';
 const RULE_SET = '44444444-4444-4444-4444-444444444444';
 const RULE = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -52,6 +62,13 @@ describe('HealthValidationService', () => {
       startedAt: '2026-07-20T10:00:00.000Z',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param resourceOverrides - Valor de resource overrides requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       resourceOverrides: Record<string, unknown> = {},
@@ -196,6 +213,13 @@ describe('HealthValidationService', () => {
       healthIngestionBatchId: '66666666-6666-6666-6666-666666666666',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param severity - Valor de severity requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       severity = CONCEPTS.ISSUE_SEV_WARNING,

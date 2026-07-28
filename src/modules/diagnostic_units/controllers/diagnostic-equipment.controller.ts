@@ -17,6 +17,11 @@ import { EquipmentResponseDto, UpdateEquipmentDto } from '../dto';
 @ApiBearerAuth()
 @Controller('diagnostic-equipment')
 export class DiagnosticEquipmentController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param equipmentService - Valor de equipment service requerido por la operación.
+   */
   constructor(private readonly equipmentService: DiagnosticEquipmentService) {}
 
   /** UC-23-09. */

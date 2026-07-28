@@ -96,7 +96,18 @@ export const IMPROVEMENT_PRIORITY_CONCEPT: Readonly<
 const INCIDENT_TRANSITIONS: Readonly<
   Record<
     Exclude<IncidentTransition, 'UPDATE'>,
-    { from: readonly string[]; to: string; event: string }
+    {
+      /**
+       * Valor de from mantenido por la instancia.
+       */
+      from: readonly string[]; /**
+       * Valor de to mantenido por la instancia.
+       */
+      to: string; /**
+       * Valor de event mantenido por la instancia.
+       */
+      event: string;
+    }
   >
 > = {
   ACKNOWLEDGE: {
@@ -122,6 +133,14 @@ const INCIDENT_TRANSITIONS: Readonly<
  */
 @Injectable()
 export class OpsIncidentsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param incidentsRepo - Valor de incidents repo requerido por la operación.
+   * @param improvementsRepo - Valor de improvements repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly incidentsRepo: OpsIncidentsRepository,
@@ -510,6 +529,16 @@ export class OpsIncidentsService {
     return count;
   }
 
+  /**
+   * Ejecuta la operación apply transition.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param incident - Valor de incident requerido por la operación.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de apply transition conforme al contrato `string`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private applyTransition(
     tx: EntityManager,
     incident: HealthIncidents,
@@ -561,6 +590,13 @@ export class OpsIncidentsService {
     }).id;
   }
 
+  /**
+   * Valida assert unique action codes.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param incidentId - Identificador de incident.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private assertUniqueActionCodes(
     dto: OpenPostmortemDto,
     incidentId: string,
@@ -580,6 +616,13 @@ export class OpsIncidentsService {
     }
   }
 
+  /**
+   * Ejecuta la operación next incident number.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @returns Resultado de next incident number conforme al contrato `Promise<string>`.
+   */
   private async nextIncidentNumber(
     tx: EntityManager,
     tenantId?: string,

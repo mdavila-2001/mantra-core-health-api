@@ -35,6 +35,15 @@ import { ORGEXT } from '../organization_extensions.concepts';
  */
 @Injectable()
 export class OrgextHospitalsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param hospitalsRepo - Valor de hospitals repo requerido por la operación.
+   * @param serviceLinesRepo - Valor de service lines repo requerido por la operación.
+   * @param licensesRepo - Valor de licenses repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly hospitalsRepo: HospitalsRepository,
@@ -254,11 +263,32 @@ export class OrgextHospitalsService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param hospital - Valor de hospital requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `HospitalResponseDto`.
+   */
   private toResponse(hospital: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a tenant.
+     */
     tenantId: string;
+    /**
+     * Identificador asociado a practice.
+     */
     practiceId: string;
+    /**
+     * Identificador asociado a status concept.
+     */
     statusConceptId: string;
+    /**
+     * Fecha y hora en que se creó el registro.
+     */
     createdAt: Date;
   }): HospitalResponseDto {
     return {

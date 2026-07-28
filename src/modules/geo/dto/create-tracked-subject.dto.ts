@@ -6,6 +6,9 @@ export type SubjectTypeCode = 'PERSON' | 'VEHICLE';
 
 /** Cuerpo de `POST /geo/tracked-subjects` (UC-13-01). */
 export class CreateTrackedSubjectDto {
+  /**
+   * Identificador asociado a subject.
+   */
   @ApiProperty({
     description: 'Id del recurso rastreado (ambulancia/persona)',
     format: 'uuid',
@@ -13,6 +16,9 @@ export class CreateTrackedSubjectDto {
   @IsUUID()
   subjectId!: string;
 
+  /**
+   * Valor de subject type mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Tipo de sujeto (discriminador polimórfico)',
     enum: ['PERSON', 'VEHICLE'],
@@ -22,6 +28,9 @@ export class CreateTrackedSubjectDto {
   @IsIn(['PERSON', 'VEHICLE'])
   subjectType?: SubjectTypeCode;
 
+  /**
+   * Identificador asociado a device.
+   */
   @ApiPropertyOptional({
     description: 'Dispositivo GPS asociado',
     format: 'uuid',
@@ -30,6 +39,9 @@ export class CreateTrackedSubjectDto {
   @IsUUID()
   deviceId?: string;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiPropertyOptional({
     description: 'Tenant propietario (RLS)',
     format: 'uuid',

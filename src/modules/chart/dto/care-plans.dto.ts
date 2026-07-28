@@ -13,6 +13,9 @@ import {
 
 /** Una actividad inicial del plan de cuidado (UC-15-10). */
 export class CarePlanActivityInputDto {
+  /**
+   * Identificador asociado a activity concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Concept id del tipo de actividad',
@@ -21,6 +24,9 @@ export class CarePlanActivityInputDto {
   @IsUUID()
   activityConceptId?: string;
 
+  /**
+   * Valor de scheduled at mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     type: String,
     format: 'date-time',
@@ -30,6 +36,9 @@ export class CarePlanActivityInputDto {
   @IsDateString()
   scheduledAt?: string;
 
+  /**
+   * Valor de detail text mantenido por la instancia.
+   */
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -39,6 +48,9 @@ export class CarePlanActivityInputDto {
 
 /** Cuerpo de `POST /charts/care-plans` (UC-15-10). */
 export class CreateCarePlanDto {
+  /**
+   * Identificador asociado a patient profile.
+   */
   @ApiProperty({
     format: 'uuid',
     description: 'Perfil de paciente (profiles.patient_profiles)',
@@ -46,6 +58,9 @@ export class CreateCarePlanDto {
   @IsUUID()
   patientProfileId!: string;
 
+  /**
+   * Identificador asociado a condition.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Condición clínica asociada',
@@ -54,6 +69,9 @@ export class CreateCarePlanDto {
   @IsUUID()
   conditionId?: string;
 
+  /**
+   * Identificador asociado a encounter.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Encuentro clínico asociado',
@@ -62,6 +80,9 @@ export class CreateCarePlanDto {
   @IsUUID()
   encounterId?: string;
 
+  /**
+   * Identificador asociado a intent concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Concept id de la intención del plan',
@@ -70,6 +91,9 @@ export class CreateCarePlanDto {
   @IsUUID()
   intentConceptId?: string;
 
+  /**
+   * Identificador asociado a author profile.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Perfil del clínico autor',
@@ -78,12 +102,18 @@ export class CreateCarePlanDto {
   @IsUUID()
   authorProfileId?: string;
 
+  /**
+   * Valor de goal text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Meta clínica del plan' })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
   goalText?: string;
 
+  /**
+   * Valor de start date mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     type: String,
     format: 'date',
@@ -93,6 +123,9 @@ export class CreateCarePlanDto {
   @IsDateString()
   startDate?: string;
 
+  /**
+   * Valor de end date mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     type: String,
     format: 'date',
@@ -102,6 +135,9 @@ export class CreateCarePlanDto {
   @IsDateString()
   endDate?: string;
 
+  /**
+   * Valor de activities mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     type: [CarePlanActivityInputDto],
     description: 'Actividades iniciales (0..n)',
@@ -119,6 +155,9 @@ export type ActivityStatus =
 
 /** Cuerpo de `PATCH /charts/care-plans/{planId}/activities/{activityId}` (UC-15-11). */
 export class UpdateActivityDto {
+  /**
+   * Valor de status mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     enum: ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
     description: 'Nuevo estado de la actividad',
@@ -127,11 +166,17 @@ export class UpdateActivityDto {
   @IsIn(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
   status?: ActivityStatus;
 
+  /**
+   * Valor de scheduled at mantenido por la instancia.
+   */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   @IsOptional()
   @IsDateString()
   scheduledAt?: string;
 
+  /**
+   * Valor de detail text mantenido por la instancia.
+   */
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -141,33 +186,54 @@ export class UpdateActivityDto {
 
 /** Respuesta de `POST /charts/care-plans` (UC-15-10). */
 export class CarePlanResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({
     description: 'Concept id del estado del plan',
     format: 'uuid',
   })
   statusConceptId!: string;
 
+  /**
+   * Valor de activity count mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Nº de actividades creadas' })
   activityCount!: number;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 }
 
 /** Respuesta de `PATCH .../activities/{activityId}` (UC-15-11). */
 export class ActivityResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({
     description: 'Concept id del estado de la actividad',
     format: 'uuid',
   })
   statusConceptId!: string;
 
+  /**
+   * Identificador asociado a plan status concept.
+   */
   @ApiProperty({
     description: 'Concept id del estado del plan tras la actualización',
     format: 'uuid',

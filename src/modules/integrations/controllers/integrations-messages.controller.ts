@@ -29,6 +29,11 @@ import {
 @ApiBearerAuth()
 @Controller('integrations')
 export class IntegrationsMessagesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param messagingService - Valor de messaging service requerido por la operación.
+   */
   constructor(
     private readonly messagingService: IntegrationsMessagingService,
   ) {}

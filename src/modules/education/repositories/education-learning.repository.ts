@@ -10,28 +10,91 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create enrollment data.
+ */
 export interface CreateEnrollmentData {
+  /**
+   * Identificador asociado a course.
+   */
   courseId: string;
+  /**
+   * Identificador asociado a cohort.
+   */
   cohortId?: string;
+  /**
+   * Identificador asociado a learner type concept.
+   */
   learnerTypeConceptId: string;
+  /**
+   * Identificador asociado a learner ref.
+   */
   learnerRefId: string;
+  /**
+   * Identificador asociado a enrollment source concept.
+   */
   enrollmentSourceConceptId: string;
+  /**
+   * Identificador asociado a payment intent.
+   */
   paymentIntentId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create certificate data.
+ */
 export interface CreateCertificateData {
+  /**
+   * Identificador asociado a enrollment.
+   */
   enrollmentId: string;
+  /**
+   * Identificador asociado a course.
+   */
   courseId: string;
+  /**
+   * Valor de certificate number mantenido por la instancia.
+   */
   certificateNumber: string;
+  /**
+   * Identificador asociado a learner ref.
+   */
   learnerRefId?: string;
+  /**
+   * Valor de cme credits awarded mantenido por la instancia.
+   */
   cmeCreditsAwarded?: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt?: Date;
+  /**
+   * Valor de verification code mantenido por la instancia.
+   */
   verificationCode: string;
+  /**
+   * Identificador asociado a file.
+   */
   fileId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -43,6 +106,13 @@ export interface CreateCertificateData {
 export class EducationLearningRepository {
   // --- Inscripciones (UC-47-05, UC-47-10) ---
 
+  /**
+   * Crea create enrollment.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create enrollment conforme al contrato `Enrollments`.
+   */
   createEnrollment(em: EntityManager, data: CreateEnrollmentData): Enrollments {
     return em.create(
       Enrollments,
@@ -63,6 +133,13 @@ export class EducationLearningRepository {
     );
   }
 
+  /**
+   * Obtiene find enrollment by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find enrollment by id conforme al contrato `Promise<Enrollments | null>`.
+   */
   findEnrollmentById(
     em: EntityManager,
     id: string,
@@ -70,6 +147,13 @@ export class EducationLearningRepository {
     return em.findOne(Enrollments, { id });
   }
 
+  /**
+   * Obtiene find enrollment for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find enrollment for update conforme al contrato `Promise<Enrollments | null>`.
+   */
   findEnrollmentForUpdate(
     em: EntityManager,
     id: string,
@@ -106,13 +190,37 @@ export class EducationLearningRepository {
   createLessonProgress(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a enrollment.
+       */
       enrollmentId: string;
+      /**
+       * Identificador asociado a lesson.
+       */
       lessonId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de seconds watched mantenido por la instancia.
+       */
       secondsWatched?: number;
+      /**
+       * Valor de completion percent mantenido por la instancia.
+       */
       completionPercent?: string;
+      /**
+       * Valor de completed at mantenido por la instancia.
+       */
       completedAt?: Date;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt?: Date;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): LessonProgress {
@@ -150,13 +258,35 @@ export class EducationLearningRepository {
 
   // --- Intentos de evaluación (UC-47-08, UC-47-09) ---
 
+  /**
+   * Crea create attempt.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create attempt conforme al contrato `AssessmentAttempts`.
+   */
   createAttempt(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a assessment.
+       */
       assessmentId: string;
+      /**
+       * Identificador asociado a enrollment.
+       */
       enrollmentId: string;
+      /**
+       * Valor de attempt number mantenido por la instancia.
+       */
       attemptNumber: number;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): AssessmentAttempts {
@@ -174,6 +304,13 @@ export class EducationLearningRepository {
     );
   }
 
+  /**
+   * Obtiene find attempt for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find attempt for update conforme al contrato `Promise<AssessmentAttempts | null>`.
+   */
   findAttemptForUpdate(
     em: EntityManager,
     id: string,
@@ -214,6 +351,13 @@ export class EducationLearningRepository {
 
   // --- Certificados (UC-47-11, UC-47-14) ---
 
+  /**
+   * Crea create certificate.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create certificate conforme al contrato `Certificates`.
+   */
   createCertificate(
     em: EntityManager,
     data: CreateCertificateData,
@@ -237,6 +381,13 @@ export class EducationLearningRepository {
     );
   }
 
+  /**
+   * Obtiene find certificate by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find certificate by id conforme al contrato `Promise<Certificates | null>`.
+   */
   findCertificateById(
     em: EntityManager,
     id: string,
@@ -244,6 +395,13 @@ export class EducationLearningRepository {
     return em.findOne(Certificates, { id });
   }
 
+  /**
+   * Obtiene find certificate for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find certificate for update conforme al contrato `Promise<Certificates | null>`.
+   */
   findCertificateForUpdate(
     em: EntityManager,
     id: string,
@@ -263,6 +421,13 @@ export class EducationLearningRepository {
     return em.findOne(Certificates, { enrollmentId });
   }
 
+  /**
+   * Obtiene find certificate by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param certificateNumber - Valor de certificate number requerido por la operación.
+   * @returns Resultado de find certificate by number conforme al contrato `Promise<Certificates | null>`.
+   */
   findCertificateByNumber(
     em: EntityManager,
     certificateNumber: string,
@@ -270,6 +435,13 @@ export class EducationLearningRepository {
     return em.findOne(Certificates, { certificateNumber });
   }
 
+  /**
+   * Obtiene find certificate by verification code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param verificationCode - Valor de verification code requerido por la operación.
+   * @returns Resultado de find certificate by verification code conforme al contrato `Promise<Certificates | null>`.
+   */
   findCertificateByVerificationCode(
     em: EntityManager,
     verificationCode: string,
@@ -279,17 +451,51 @@ export class EducationLearningRepository {
 
   // --- Créditos CME (UC-47-12, UC-47-14) ---
 
+  /**
+   * Crea create cme record.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create cme record conforme al contrato `CmeCreditRecords`.
+   */
   createCmeRecord(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a practitioner profile.
+       */
       practitionerProfileId: string;
+      /**
+       * Identificador asociado a certificate.
+       */
       certificateId: string;
+      /**
+       * Valor de credit hours mantenido por la instancia.
+       */
       creditHours: string;
+      /**
+       * Identificador asociado a accrediting body concept.
+       */
       accreditingBodyConceptId: string;
+      /**
+       * Identificador asociado a specialty concept.
+       */
       specialtyConceptId?: string;
+      /**
+       * Identificador asociado a jurisdiction concept.
+       */
       jurisdictionConceptId?: string;
+      /**
+       * Valor de period year mantenido por la instancia.
+       */
       periodYear: number;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): CmeCreditRecords {

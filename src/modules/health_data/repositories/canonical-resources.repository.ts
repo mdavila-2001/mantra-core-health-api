@@ -9,17 +9,53 @@ import {
   CanonicalResourceBindings,
 } from '../entities';
 
+/**
+ * Describe el contrato estructural de create resource version data.
+ */
 export interface CreateResourceVersionData {
+  /**
+   * Identificador asociado a canonical health resource.
+   */
   canonicalHealthResourceId: string;
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
   versionNumber: number;
+  /**
+   * Identificador asociado a health ingestion record.
+   */
   healthIngestionRecordId?: string;
+  /**
+   * Valor de effective start at mantenido por la instancia.
+   */
   effectiveStartAt?: Date;
+  /**
+   * Identificador asociado a change type concept.
+   */
   changeTypeConceptId: string;
+  /**
+   * Identificador asociado a payload format concept.
+   */
   payloadFormatConceptId?: string;
+  /**
+   * Valor de normalized payload json mantenido por la instancia.
+   */
   normalizedPayloadJson: unknown;
+  /**
+   * Identificador asociado a original payload file.
+   */
   originalPayloadFileId?: string;
+  /**
+   * Valor de content hash mantenido por la instancia.
+   */
   contentHash: string;
+  /**
+   * Identificador asociado a provenance record.
+   */
   provenanceRecordId?: string;
+  /**
+   * Identificador asociado a supersedes version.
+   */
   supersedesVersionId?: string;
 }
 
@@ -31,17 +67,51 @@ export interface CreateResourceVersionData {
 export class CanonicalResourcesRepository {
   // --- Recursos (UC-52-03, 04, 05, 06, 07, 13, 14) ---
 
+  /**
+   * Crea create resource.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create resource conforme al contrato `CanonicalHealthResources`.
+   */
   createResource(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a custodian tenant.
+       */
       custodianTenantId?: string;
+      /**
+       * Identificador asociado a resource type concept.
+       */
       resourceTypeConceptId: string;
+      /**
+       * Valor de logical identifier mantenido por la instancia.
+       */
       logicalIdentifier: string;
+      /**
+       * Identificador asociado a patient profile.
+       */
       patientProfileId?: string;
+      /**
+       * Identificador asociado a encounter.
+       */
       encounterId?: string;
+      /**
+       * Identificador asociado a source system.
+       */
       sourceSystemId?: string;
+      /**
+       * Identificador asociado a lifecycle status concept.
+       */
       lifecycleStatusConceptId: string;
+      /**
+       * Valor de security labels json mantenido por la instancia.
+       */
       securityLabelsJson?: unknown;
+      /**
+       * Valor de purpose restrictions json mantenido por la instancia.
+       */
       purposeRestrictionsJson?: unknown;
     },
   ): CanonicalHealthResources {
@@ -62,6 +132,13 @@ export class CanonicalResourcesRepository {
     );
   }
 
+  /**
+   * Obtiene find resource by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find resource by id conforme al contrato `Promise<CanonicalHealthResources | null>`.
+   */
   findResourceById(
     em: EntityManager,
     id: string,
@@ -136,6 +213,13 @@ export class CanonicalResourcesRepository {
     );
   }
 
+  /**
+   * Obtiene find version by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find version by id conforme al contrato `Promise<CanonicalHealthResourceVersions | null>`.
+   */
   findVersionById(
     em: EntityManager,
     id: string,
@@ -143,6 +227,13 @@ export class CanonicalResourcesRepository {
     return em.findOne(CanonicalHealthResourceVersions, { id });
   }
 
+  /**
+   * Obtiene find latest version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param canonicalHealthResourceId - Identificador de canonical health resource.
+   * @returns Resultado de find latest version conforme al contrato `Promise<CanonicalHealthResourceVersions | null>`.
+   */
   findLatestVersion(
     em: EntityManager,
     canonicalHealthResourceId: string,
@@ -154,6 +245,13 @@ export class CanonicalResourcesRepository {
     );
   }
 
+  /**
+   * Obtiene find versions by ids.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Valor de ids requerido por la operación.
+   * @returns Resultado de find versions by ids conforme al contrato `Promise<CanonicalHealthResourceVersions[]>`.
+   */
   findVersionsByIds(
     em: EntityManager,
     ids: string[],
@@ -163,15 +261,43 @@ export class CanonicalResourcesRepository {
 
   // --- Identificadores (UC-52-04) ---
 
+  /**
+   * Crea create identifier.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create identifier conforme al contrato `CanonicalResourceIdentifiers`.
+   */
   createIdentifier(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a canonical health resource.
+       */
       canonicalHealthResourceId: string;
+      /**
+       * Valor de identifier system mantenido por la instancia.
+       */
       identifierSystem: string;
+      /**
+       * Valor de identifier value mantenido por la instancia.
+       */
       identifierValue: string;
+      /**
+       * Identificador asociado a identifier type concept.
+       */
       identifierTypeConceptId?: string;
+      /**
+       * Valor de assigning authority mantenido por la instancia.
+       */
       assigningAuthority?: string;
+      /**
+       * Valor de is primary mantenido por la instancia.
+       */
       isPrimary: boolean;
+      /**
+       * Valor de effective from mantenido por la instancia.
+       */
       effectiveFrom: Date;
     },
   ): CanonicalResourceIdentifiers {
@@ -190,6 +316,15 @@ export class CanonicalResourcesRepository {
     );
   }
 
+  /**
+   * Obtiene find identifier.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param canonicalHealthResourceId - Identificador de canonical health resource.
+   * @param identifierSystem - Valor de identifier system requerido por la operación.
+   * @param identifierValue - Valor de identifier value requerido por la operación.
+   * @returns Resultado de find identifier conforme al contrato `Promise<CanonicalResourceIdentifiers | null>`.
+   */
   findIdentifier(
     em: EntityManager,
     canonicalHealthResourceId: string,
@@ -226,14 +361,39 @@ export class CanonicalResourcesRepository {
 
   // --- Relaciones (UC-52-05, 13, 14) ---
 
+  /**
+   * Crea create relationship.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create relationship conforme al contrato `CanonicalResourceRelationships`.
+   */
   createRelationship(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a source resource.
+       */
       sourceResourceId: string;
+      /**
+       * Identificador asociado a target resource.
+       */
       targetResourceId: string;
+      /**
+       * Identificador asociado a relationship type concept.
+       */
       relationshipTypeConceptId: string;
+      /**
+       * Identificador asociado a relationship role concept.
+       */
       relationshipRoleConceptId?: string;
+      /**
+       * Valor de effective from mantenido por la instancia.
+       */
       effectiveFrom: Date;
+      /**
+       * Valor de confidence score mantenido por la instancia.
+       */
       confidenceScore?: string;
     },
   ): CanonicalResourceRelationships {
@@ -270,6 +430,13 @@ export class CanonicalResourcesRepository {
     );
   }
 
+  /**
+   * Obtiene find live relationships for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param sourceResourceId - Identificador de source resource.
+   * @returns Resultado de find live relationships for update conforme al contrato `Promise<CanonicalResourceRelationships[]>`.
+   */
   findLiveRelationshipsForUpdate(
     em: EntityManager,
     sourceResourceId: string,
@@ -281,6 +448,13 @@ export class CanonicalResourcesRepository {
     );
   }
 
+  /**
+   * Obtiene find live relationships by sources.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param sourceResourceIds - Valor de source resource ids requerido por la operación.
+   * @returns Resultado de find live relationships by sources conforme al contrato `Promise<CanonicalResourceRelationships[]>`.
+   */
   findLiveRelationshipsBySources(
     em: EntityManager,
     sourceResourceIds: string[],
@@ -293,14 +467,39 @@ export class CanonicalResourcesRepository {
 
   // --- Bindings al dominio (UC-52-06, 14) ---
 
+  /**
+   * Crea create binding.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create binding conforme al contrato `CanonicalResourceBindings`.
+   */
   createBinding(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a canonical health resource.
+       */
       canonicalHealthResourceId: string;
+      /**
+       * Identificador asociado a domain entity type concept.
+       */
       domainEntityTypeConceptId: string;
+      /**
+       * Identificador asociado a domain entity.
+       */
       domainEntityId: string;
+      /**
+       * Identificador asociado a binding role concept.
+       */
       bindingRoleConceptId?: string;
+      /**
+       * Identificador asociado a binding status concept.
+       */
       bindingStatusConceptId: string;
+      /**
+       * Identificador asociado a mapping version.
+       */
       mappingVersionId?: string;
     },
   ): CanonicalResourceBindings {
@@ -318,6 +517,16 @@ export class CanonicalResourcesRepository {
     );
   }
 
+  /**
+   * Obtiene find binding.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param canonicalHealthResourceId - Identificador de canonical health resource.
+   * @param domainEntityTypeConceptId - Identificador de domain entity type concept.
+   * @param domainEntityId - Identificador de domain entity.
+   * @param bindingRoleConceptId - Identificador de binding role concept.
+   * @returns Resultado de find binding conforme al contrato `Promise<CanonicalResourceBindings | null>`.
+   */
   findBinding(
     em: EntityManager,
     canonicalHealthResourceId: string,
@@ -333,6 +542,13 @@ export class CanonicalResourcesRepository {
     });
   }
 
+  /**
+   * Obtiene find live bindings for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param canonicalHealthResourceId - Identificador de canonical health resource.
+   * @returns Resultado de find live bindings for update conforme al contrato `Promise<CanonicalResourceBindings[]>`.
+   */
   findLiveBindingsForUpdate(
     em: EntityManager,
     canonicalHealthResourceId: string,

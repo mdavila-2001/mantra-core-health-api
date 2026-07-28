@@ -3,6 +3,9 @@ import { IsBoolean, IsIn, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /forms/fields/{id}/access-rules` (UC-09-12). */
 export class CreateAccessRuleDto {
+  /**
+   * Identificador asociado a purpose of use value set.
+   */
   @ApiProperty({
     description: 'Value set de propósitos de uso permitidos',
     format: 'uuid',
@@ -10,6 +13,9 @@ export class CreateAccessRuleDto {
   @IsUUID()
   purposeOfUseValueSetId!: string;
 
+  /**
+   * Identificador asociado a assignment.
+   */
   @ApiPropertyOptional({
     description: 'Asignación concreta afectada',
     format: 'uuid',
@@ -18,6 +24,9 @@ export class CreateAccessRuleDto {
   @IsUUID()
   assignmentId?: string;
 
+  /**
+   * Identificador asociado a read role value set.
+   */
   @ApiPropertyOptional({
     description: 'Value set de roles de lectura',
     format: 'uuid',
@@ -26,6 +35,9 @@ export class CreateAccessRuleDto {
   @IsUUID()
   readRoleValueSetId?: string;
 
+  /**
+   * Identificador asociado a write role value set.
+   */
   @ApiPropertyOptional({
     description: 'Value set de roles de escritura',
     format: 'uuid',
@@ -34,6 +46,9 @@ export class CreateAccessRuleDto {
   @IsUUID()
   writeRoleValueSetId?: string;
 
+  /**
+   * Identificador asociado a consent category concept.
+   */
   @ApiPropertyOptional({
     description: 'Categoría de consentimiento (concept id)',
     format: 'uuid',
@@ -42,6 +57,9 @@ export class CreateAccessRuleDto {
   @IsUUID()
   consentCategoryConceptId?: string;
 
+  /**
+   * Valor de mask strategy mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     enum: ['NONE', 'REDACT', 'HASH'],
     description: 'Estrategia de enmascarado',
@@ -50,6 +68,9 @@ export class CreateAccessRuleDto {
   @IsIn(['NONE', 'REDACT', 'HASH'])
   maskStrategy?: 'NONE' | 'REDACT' | 'HASH';
 
+  /**
+   * Valor de break glass allowed mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: '¿Permite acceso break-glass?' })
   @IsOptional()
   @IsBoolean()

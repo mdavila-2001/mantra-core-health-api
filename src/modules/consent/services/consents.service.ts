@@ -34,6 +34,15 @@ import {
  */
 @Injectable()
 export class ConsentsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param consentsRepo - Valor de consents repo requerido por la operación.
+   * @param provisionsRepo - Valor de provisions repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly consentsRepo: ConsentsRepository,
@@ -210,6 +219,15 @@ export class ConsentsService {
     });
   }
 
+  /**
+   * Crea create provision.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param consentId - Identificador de consent.
+   * @param provision - Valor de provision requerido por la operación.
+   * @param actorId - Identificador de actor.
+   * @param validFromDefault - Valor de valid from default requerido por la operación.
+   */
   private createProvision(
     tx: EntityManager,
     consentId: string,
@@ -236,11 +254,32 @@ export class ConsentsService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param consent - Valor de consent requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `ConsentResponseDto`.
+   */
   private toResponse(consent: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a patient profile.
+     */
     patientProfileId: string;
+    /**
+     * Identificador asociado a status concept.
+     */
     statusConceptId: string;
+    /**
+     * Identificador asociado a processing purpose.
+     */
     processingPurposeId: string;
+    /**
+     * Fecha y hora en que se creó el registro.
+     */
     createdAt: Date;
   }): ConsentResponseDto {
     return {

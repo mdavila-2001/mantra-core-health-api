@@ -36,6 +36,14 @@ const EQUIVALENCE_CONCEPTS: Record<Equivalence, string> = {
  */
 @Injectable()
 export class ConceptMapsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conceptMapsRepo - Valor de concept maps repo requerido por la operación.
+   * @param conceptsRepo - Valor de concepts repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly conceptMapsRepo: ConceptMapsRepository,

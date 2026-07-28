@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 
 // Loose-typed mock factory (evita los typings Mock<never> de @jest/globals bajo el tsconfig raíz).
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { LedgerService } from './ledger.service';
@@ -13,6 +19,10 @@ import {
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = {
@@ -272,9 +282,9 @@ describe('LedgerService', () => {
         id: 't1',
         statusConceptId: ACCT.TXN_PENDING_REVIEW,
       });
-      await expect(
-        d.service.post('t1', {}, actor),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(d.service.post('t1', {}, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
     });
 
     it('post rechaza (422) si las líneas persistidas no balancean', async () => {
@@ -287,9 +297,9 @@ describe('LedgerService', () => {
         { directionConceptId: ACCT.DIRECTION_DEBIT, amount: '100.00' },
         { directionConceptId: ACCT.DIRECTION_CREDIT, amount: '90.00' },
       ]);
-      await expect(
-        d.service.post('t1', {}, actor),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(d.service.post('t1', {}, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
     });
 
     it('post rechaza (422) en un periodo BLOQUEADO', async () => {
@@ -306,9 +316,9 @@ describe('LedgerService', () => {
         id: 'fp1',
         statusConceptId: ACCT.PERIOD_LOCKED,
       });
-      await expect(
-        d.service.post('t1', {}, actor),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(d.service.post('t1', {}, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
     });
 
     it('approve exige un rol con autoridad de aprobación', async () => {
@@ -318,9 +328,9 @@ describe('LedgerService', () => {
         statusConceptId: ACCT.TXN_PENDING_REVIEW,
       });
       const noRole = { id: 'u2', roles: [] } as any;
-      await expect(
-        d.service.approve('t1', {}, noRole),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(d.service.approve('t1', {}, noRole)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
     });
 
     it('lanza 404 al transicionar un asiento inexistente', async () => {

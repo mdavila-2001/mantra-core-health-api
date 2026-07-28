@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingConfirmationService } from './scheduling-confirmation.service';
@@ -13,13 +19,37 @@ let ruleSeq = 0;
 
 /** Fábrica de reglas ya "activas y vigentes" (el filtro real lo hace el repo). */
 function rule(overrides: {
+  /**
+   * Identificador único de la instancia.
+   */
   id?: string;
+  /**
+   * Identificador asociado a scope type concept.
+   */
   scopeTypeConceptId?: string;
+  /**
+   * Identificador asociado a scope.
+   */
   scopeId?: string;
+  /**
+   * Valor de priority mantenido por la instancia.
+   */
   priority?: number;
+  /**
+   * Identificador asociado a decision concept.
+   */
   decisionConceptId?: string;
+  /**
+   * Valor de condition mantenido por la instancia.
+   */
   condition?: RuleCondition | unknown;
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   version?: number;
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   createdAt?: Date;
 }) {
   ruleSeq += 1;
@@ -30,12 +60,22 @@ function rule(overrides: {
     priority: overrides.priority ?? 100,
     decisionConceptId:
       overrides.decisionConceptId ?? SCHED.DECISION_AUTO_CONFIRM,
-    conditionJson: overrides.condition ?? { field: 'ok', op: 'eq', value: true },
+    conditionJson: overrides.condition ?? {
+      field: 'ok',
+      op: 'eq',
+      value: true,
+    },
     version: overrides.version ?? 1,
     createdAt: overrides.createdAt ?? new Date('2026-01-01T00:00:00Z'),
   };
 }
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ *
+ * @param activeRules - Valor de active rules requerido por la operación.
+ * @returns Resultado de build.
+ */
 function build(activeRules: unknown[]) {
   const repo = {
     findActiveRules: mockFn(async () => activeRules),

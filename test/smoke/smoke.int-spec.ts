@@ -22,16 +22,49 @@ import type { SmokeCase, SmokeCtx } from './smoke-kit';
  */
 
 interface CaseResult {
+  /**
+   * Valor de module mantenido por la instancia.
+   */
   module: string;
+  /**
+   * Valor de endpoint mantenido por la instancia.
+   */
   endpoint: string;
+  /**
+   * Valor de test case mantenido por la instancia.
+   */
   testCase: string;
+  /**
+   * Valor de method mantenido por la instancia.
+   */
   method: string;
+  /**
+   * Valor de path mantenido por la instancia.
+   */
   path: string;
+  /**
+   * Valor de expected status mantenido por la instancia.
+   */
   expectedStatus: number;
+  /**
+   * Valor de actual status mantenido por la instancia.
+   */
   actualStatus: number;
+  /**
+   * Valor de pass mantenido por la instancia.
+   */
   pass: boolean;
+  /**
+   * Valor de error code mantenido por la instancia.
+   */
   errorCode: string | null;
+  /**
+   * Valor de duration ms mantenido por la instancia.
+   */
   durationMs: number;
+  /**
+   * Valor de note mantenido por la instancia.
+   */
   note: string;
 }
 
@@ -65,9 +98,21 @@ describe('Smoke test — 30 endpoints', () => {
     method: 'post' | 'delete' | 'get' | 'patch',
     path: string,
     opts: {
+      /**
+       * Valor de body mantenido por la instancia.
+       */
       body?: unknown;
+      /**
+       * Valor de token mantenido por la instancia.
+       */
       token?: string;
+      /**
+       * Valor de expected status mantenido por la instancia.
+       */
       expectedStatus: number;
+      /**
+       * Valor de expected code mantenido por la instancia.
+       */
       expectedCode?: string;
     },
   ): Promise<request.Response | null> {
@@ -168,6 +213,12 @@ describe('Smoke test — 30 endpoints', () => {
   it('ejercita los 30 endpoints con casos felices y límite', async () => {
     const u = Date.now();
     const admin = ctx.adminToken;
+    /**
+     * Ejecuta la operación b.
+     *
+     * @param t - Valor de t requerido por la operación.
+     * @returns Resultado de b.
+     */
     const B = (t?: string) => ({ token: t });
 
     // ------------------------------------------------------------------
@@ -1206,7 +1257,18 @@ function writeReports(): void {
   const passed = results.filter((r) => r.pass).length;
   const byModule: Record<
     string,
-    { total: number; passed: number; failed: number }
+    {
+      /**
+       * Valor de total mantenido por la instancia.
+       */
+      total: number; /**
+       * Valor de passed mantenido por la instancia.
+       */
+      passed: number; /**
+       * Valor de failed mantenido por la instancia.
+       */
+      failed: number;
+    }
   > = {};
   for (const r of results) {
     const m = (byModule[r.module] ??= { total: 0, passed: 0, failed: 0 });
@@ -1250,6 +1312,12 @@ function toCsv(rows: CaseResult[]): string {
     'durationMs',
     'note',
   ];
+  /**
+   * Ejecuta la operación escape.
+   *
+   * @param v - Valor de v requerido por la operación.
+   * @returns Resultado de escape conforme al contrato `string`.
+   */
   const escape = (v: unknown): string => {
     const s = v === null || v === undefined ? '' : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;

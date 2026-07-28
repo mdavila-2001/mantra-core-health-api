@@ -5,12 +5,33 @@ import { createdBy } from '../../../common';
 
 /** Datos para iniciar una sesión de tracking. */
 export interface CreateTrackingSessionData {
+  /**
+   * Identificador asociado a tracked subject.
+   */
   trackedSubjectId: string;
+  /**
+   * Identificador asociado a purpose concept.
+   */
   purposeConceptId?: string;
+  /**
+   * Valor de related resource type mantenido por la instancia.
+   */
   relatedResourceType?: string;
+  /**
+   * Identificador asociado a related resource.
+   */
   relatedResourceId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

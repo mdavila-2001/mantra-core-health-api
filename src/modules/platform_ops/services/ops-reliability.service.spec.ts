@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { OpsReliabilityService } from './ops-reliability.service';
@@ -14,6 +20,10 @@ const SLO = '11111111-1111-1111-1111-111111111111';
 const POLICY = '22222222-2222-2222-2222-222222222222';
 const PLAN = '33333333-3333-3333-3333-333333333333';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -42,6 +52,12 @@ function build() {
   return { service, tx, reliabilityRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active slo.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active slo conforme al contrato `any`.
+ */
 function activeSlo(overrides: Record<string, unknown> = {}): any {
   return {
     id: SLO,
@@ -241,6 +257,12 @@ describe('OpsReliabilityService', () => {
       remainingBudgetPercent: '20.00000',
     };
 
+    /**
+     * Ejecuta la operación active policy.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de active policy conforme al contrato `any`.
+     */
     function activePolicy(overrides: Record<string, unknown> = {}): any {
       return {
         id: POLICY,
@@ -361,6 +383,12 @@ describe('OpsReliabilityService', () => {
       measuredAt: '2026-07-15T00:00:00.000Z',
     };
 
+    /**
+     * Ejecuta la operación active plan.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de active plan conforme al contrato `any`.
+     */
     function activePlan(overrides: Record<string, unknown> = {}): any {
       return {
         id: PLAN,

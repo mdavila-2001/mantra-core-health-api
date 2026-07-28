@@ -10,10 +10,21 @@ import { IS_PUBLIC_KEY } from './public.decorator';
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param reflector - Valor de reflector requerido por la operación.
+   */
   constructor(private readonly reflector: Reflector) {
     super();
   }
 
+  /**
+   * Obtiene can activate.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de can activate.
+   */
   canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),

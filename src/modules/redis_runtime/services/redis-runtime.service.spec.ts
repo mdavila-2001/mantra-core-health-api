@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 import { RedisRuntimeService } from './redis-runtime.service';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 /**
@@ -19,7 +25,9 @@ function makeFakeRedis() {
       store.set(key, value);
       return 'OK';
     }),
-    get: mockFn(async (key: string) => (store.has(key) ? store.get(key)! : null)),
+    get: mockFn(async (key: string) =>
+      store.has(key) ? store.get(key)! : null,
+    ),
     del: mockFn(async (key: string) => (store.delete(key) ? 1 : 0)),
     incr: mockFn(async (key: string) => {
       const next = Number(store.get(key) ?? '0') + 1;
@@ -28,18 +36,24 @@ function makeFakeRedis() {
     }),
     expire: mockFn(async () => 1),
     ttl: mockFn(async () => 60),
-    eval: mockFn(async (_script: string, _numKeys: number, key: string, token: string) => {
-      if (store.get(key) === token) {
-        store.delete(key);
-        return 1;
-      }
-      return 0;
-    }),
+    eval: mockFn(
+      async (_script: string, _numKeys: number, key: string, token: string) => {
+        if (store.get(key) === token) {
+          store.delete(key);
+          return 1;
+        }
+        return 0;
+      },
+    ),
   };
 }
 
 const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
+/**
+ * Ejecuta la operación make service.
+ * @returns Resultado de make service.
+ */
 function makeService() {
   const redis = makeFakeRedis();
   const service = new RedisRuntimeService(redis as any, logger as any);
@@ -101,15 +115,23 @@ describe('RedisRuntimeService', () => {
     await service.putChallenge(TENANT, 'otp:user1', '123456', 300);
     expect(redis.store.get('tenant-a:challenge:otp:user1')).not.toBe('123456');
 
-    expect(await service.verifyChallenge(TENANT, 'otp:user1', '000000')).toBe(false);
+    expect(await service.verifyChallenge(TENANT, 'otp:user1', '000000')).toBe(
+      false,
+    );
     // El fallo no consume el challenge (sigue disponible).
-    expect(await service.verifyChallenge(TENANT, 'otp:user1', '123456')).toBe(true);
+    expect(await service.verifyChallenge(TENANT, 'otp:user1', '123456')).toBe(
+      true,
+    );
     // El acierto sí lo consume (single-use).
-    expect(await service.verifyChallenge(TENANT, 'otp:user1', '123456')).toBe(false);
+    expect(await service.verifyChallenge(TENANT, 'otp:user1', '123456')).toBe(
+      false,
+    );
   });
 
   it('verifyChallenge devuelve false si el challenge no existe/expiró', async () => {
     const { service } = makeService();
-    expect(await service.verifyChallenge(TENANT, 'inexistente', 'x')).toBe(false);
+    expect(await service.verifyChallenge(TENANT, 'inexistente', 'x')).toBe(
+      false,
+    );
   });
 });

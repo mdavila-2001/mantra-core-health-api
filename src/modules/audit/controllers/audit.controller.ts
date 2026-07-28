@@ -42,6 +42,13 @@ import {
 @ApiBearerAuth()
 @Controller('audit')
 export class AuditController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param eventsService - Valor de events service requerido por la operación.
+   * @param historyService - Valor de history service requerido por la operación.
+   * @param thirdPartyService - Valor de third party service requerido por la operación.
+   */
   constructor(
     private readonly eventsService: AuditEventsService,
     private readonly historyService: AuditHistoryService,

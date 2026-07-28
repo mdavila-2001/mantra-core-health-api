@@ -12,6 +12,13 @@ import { CLIN } from '../clinical.concepts';
 /** UC-08-09: registro de alergias/intolerancias con reacciones (CDS). */
 @Injectable()
 export class AllergyIntolerancesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param allergyRepo - Valor de allergy repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly allergyRepo: AllergyIntolerancesRepository,

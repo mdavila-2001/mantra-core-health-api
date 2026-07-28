@@ -19,42 +19,141 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create experiment data.
+ */
 export interface CreateExperimentData {
+  /**
+   * Identificador asociado a ad account.
+   */
   adAccountId: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a experiment type concept.
+   */
   experimentTypeConceptId: string;
+  /**
+   * Identificador asociado a objective metric concept.
+   */
   objectiveMetricConceptId: string;
+  /**
+   * Valor de hypothesis mantenido por la instancia.
+   */
   hypothesis?: string;
+  /**
+   * Valor de holdout percent mantenido por la instancia.
+   */
   holdoutPercent?: string;
+  /**
+   * Valor de start at mantenido por la instancia.
+   */
   startAt?: Date;
+  /**
+   * Valor de end at mantenido por la instancia.
+   */
   endAt?: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create invoice data.
+ */
 export interface CreateInvoiceData {
+  /**
+   * Identificador asociado a ad account.
+   */
   adAccountId: string;
+  /**
+   * Valor de invoice number mantenido por la instancia.
+   */
   invoiceNumber: string;
+  /**
+   * Valor de period start mantenido por la instancia.
+   */
   periodStart: Date;
+  /**
+   * Valor de period end mantenido por la instancia.
+   */
   periodEnd: Date;
+  /**
+   * Valor de subtotal mantenido por la instancia.
+   */
   subtotal: string;
+  /**
+   * Valor de tax total mantenido por la instancia.
+   */
   taxTotal: string;
+  /**
+   * Valor de total mantenido por la instancia.
+   */
   total: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create lead submission data.
+ */
 export interface CreateLeadSubmissionData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a lead form.
+   */
   leadFormId: string;
+  /**
+   * Identificador asociado a ad.
+   */
   adId?: string;
+  /**
+   * Identificador asociado a ad set.
+   */
   adSetId?: string;
+  /**
+   * Identificador asociado a campaign.
+   */
   campaignId?: string;
+  /**
+   * Identificador asociado a external lead.
+   */
   externalLeadId: string;
+  /**
+   * Identificador asociado a consent directive.
+   */
   consentDirectiveId?: string;
+  /**
+   * Identificador asociado a processing status concept.
+   */
   processingStatusConceptId: string;
+  /**
+   * Valor de raw payload hash mantenido por la instancia.
+   */
   rawPayloadHash?: string;
+  /**
+   * Valor de source ip hash mantenido por la instancia.
+   */
   sourceIpHash?: string;
 }
 
@@ -66,6 +165,13 @@ export interface CreateLeadSubmissionData {
 export class AdsOptimizationRepository {
   // --- Experimentos (UC-43-10) ---
 
+  /**
+   * Crea create experiment.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create experiment conforme al contrato `AdExperiments`.
+   */
   createExperiment(
     em: EntityManager,
     data: CreateExperimentData,
@@ -88,6 +194,13 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Obtiene find experiment for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find experiment for update conforme al contrato `Promise<AdExperiments | null>`.
+   */
   findExperimentForUpdate(
     em: EntityManager,
     id: string,
@@ -99,15 +212,43 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Crea create variant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create variant conforme al contrato `ExperimentVariants`.
+   */
   createVariant(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a ad experiment.
+       */
       adExperimentId: string;
+      /**
+       * Valor de name mantenido por la instancia.
+       */
       name: string;
+      /**
+       * Valor de variant ref type mantenido por la instancia.
+       */
       variantRefType: string;
+      /**
+       * Identificador asociado a variant ref.
+       */
       variantRefId: string;
+      /**
+       * Valor de traffic split percent mantenido por la instancia.
+       */
       trafficSplitPercent: string;
+      /**
+       * Valor de is control mantenido por la instancia.
+       */
       isControl: boolean;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): ExperimentVariants {
@@ -126,6 +267,13 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Obtiene find variants by experiment.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param adExperimentId - Identificador de ad experiment.
+   * @returns Resultado de find variants by experiment conforme al contrato `Promise<ExperimentVariants[]>`.
+   */
   findVariantsByExperiment(
     em: EntityManager,
     adExperimentId: string,
@@ -135,6 +283,13 @@ export class AdsOptimizationRepository {
 
   // --- Reglas automatizadas (UC-43-11) ---
 
+  /**
+   * Obtiene find rule for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find rule for update conforme al contrato `Promise<AutomatedRules | null>`.
+   */
   findRuleForUpdate(
     em: EntityManager,
     id: string,
@@ -150,12 +305,33 @@ export class AdsOptimizationRepository {
   createRuleExecution(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a automated rule.
+       */
       automatedRuleId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de entities evaluated mantenido por la instancia.
+       */
       entitiesEvaluated: number;
+      /**
+       * Valor de entities affected mantenido por la instancia.
+       */
       entitiesAffected: number;
+      /**
+       * Valor de actions json mantenido por la instancia.
+       */
       actionsJson?: unknown;
+      /**
+       * Valor de error text mantenido por la instancia.
+       */
       errorText?: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): RuleExecutions {
@@ -178,14 +354,39 @@ export class AdsOptimizationRepository {
 
   // --- Moderación (UC-43-12) ---
 
+  /**
+   * Crea create review event.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create review event conforme al contrato `AdReviewEvents`.
+   */
   createReviewEvent(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a ad.
+       */
       adId: string;
+      /**
+       * Identificador asociado a review event type concept.
+       */
       reviewEventTypeConceptId: string;
+      /**
+       * Identificador asociado a review status concept.
+       */
       reviewStatusConceptId: string;
+      /**
+       * Identificador asociado a external review.
+       */
       externalReviewId?: string;
+      /**
+       * Valor de reasons json mantenido por la instancia.
+       */
       reasonsJson?: unknown;
+      /**
+       * Valor de source payload hash mantenido por la instancia.
+       */
       sourcePayloadHash?: string;
     },
   ): AdReviewEvents {
@@ -213,16 +414,47 @@ export class AdsOptimizationRepository {
     return em.findOne(AdReviewEvents, { externalReviewId });
   }
 
+  /**
+   * Crea create violation.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create violation conforme al contrato `AdPolicyViolations`.
+   */
   createViolation(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a ad.
+       */
       adId: string;
+      /**
+       * Identificador asociado a ad review event.
+       */
       adReviewEventId?: string;
+      /**
+       * Valor de policy code mantenido por la instancia.
+       */
       policyCode: string;
+      /**
+       * Identificador asociado a policy category concept.
+       */
       policyCategoryConceptId: string;
+      /**
+       * Identificador asociado a severity concept.
+       */
       severityConceptId: string;
+      /**
+       * Valor de explanation mantenido por la instancia.
+       */
       explanation?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): AdPolicyViolations {
@@ -243,6 +475,13 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Obtiene find violation for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find violation for update conforme al contrato `Promise<AdPolicyViolations | null>`.
+   */
   findViolationForUpdate(
     em: EntityManager,
     id: string,
@@ -266,14 +505,39 @@ export class AdsOptimizationRepository {
     });
   }
 
+  /**
+   * Crea create appeal.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create appeal conforme al contrato `AdPolicyAppeals`.
+   */
   createAppeal(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a ad policy violation.
+       */
       adPolicyViolationId: string;
+      /**
+       * Identificador asociado a submitted by user.
+       */
       submittedByUserId?: string;
+      /**
+       * Valor de appeal reason mantenido por la instancia.
+       */
       appealReason: string;
+      /**
+       * Identificador asociado a evidence file.
+       */
       evidenceFileId?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): AdPolicyAppeals {
@@ -292,6 +556,13 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Obtiene find appeal by violation.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param adPolicyViolationId - Identificador de ad policy violation.
+   * @returns Resultado de find appeal by violation conforme al contrato `Promise<AdPolicyAppeals | null>`.
+   */
   findAppealByViolation(
     em: EntityManager,
     adPolicyViolationId: string,
@@ -301,6 +572,13 @@ export class AdsOptimizationRepository {
 
   // --- Facturación (UC-43-14) ---
 
+  /**
+   * Crea create invoice.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create invoice conforme al contrato `AdInvoices`.
+   */
   createInvoice(em: EntityManager, data: CreateInvoiceData): AdInvoices {
     return em.create(
       AdInvoices,
@@ -321,6 +599,13 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Obtiene find invoice by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param invoiceNumber - Valor de invoice number requerido por la operación.
+   * @returns Resultado de find invoice by number conforme al contrato `Promise<AdInvoices | null>`.
+   */
   findInvoiceByNumber(
     em: EntityManager,
     invoiceNumber: string,
@@ -338,15 +623,43 @@ export class AdsOptimizationRepository {
     return em.findOne(AdInvoices, { adAccountId, periodStart, periodEnd });
   }
 
+  /**
+   * Crea create invoice line.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create invoice line conforme al contrato `AdInvoiceLines`.
+   */
   createInvoiceLine(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a ad invoice.
+       */
       adInvoiceId: string;
+      /**
+       * Identificador asociado a campaign ref.
+       */
       campaignRefId: string;
+      /**
+       * Valor de description mantenido por la instancia.
+       */
       description?: string;
+      /**
+       * Valor de impressions mantenido por la instancia.
+       */
       impressions?: string;
+      /**
+       * Valor de clicks mantenido por la instancia.
+       */
       clicks?: string;
+      /**
+       * Valor de amount mantenido por la instancia.
+       */
       amount: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): AdInvoiceLines {
@@ -367,10 +680,24 @@ export class AdsOptimizationRepository {
 
   // --- Leads (UC-43-15) ---
 
+  /**
+   * Obtiene find lead form by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find lead form by id conforme al contrato `Promise<LeadForms | null>`.
+   */
   findLeadFormById(em: EntityManager, id: string): Promise<LeadForms | null> {
     return em.findOne(LeadForms, { id });
   }
 
+  /**
+   * Obtiene find questions by form.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param leadFormId - Identificador de lead form.
+   * @returns Resultado de find questions by form conforme al contrato `Promise<LeadFormQuestions[]>`.
+   */
   findQuestionsByForm(
     em: EntityManager,
     leadFormId: string,
@@ -382,6 +709,13 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Crea create submission.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create submission conforme al contrato `LeadSubmissions`.
+   */
   createSubmission(
     em: EntityManager,
     data: CreateLeadSubmissionData,
@@ -419,9 +753,21 @@ export class AdsOptimizationRepository {
   createAnswer(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a lead submission.
+       */
       leadSubmissionId: string;
+      /**
+       * Identificador asociado a lead form question.
+       */
       leadFormQuestionId: string;
+      /**
+       * Valor de answer text encrypted mantenido por la instancia.
+       */
       answerTextEncrypted?: string;
+      /**
+       * Valor de normalized value hash mantenido por la instancia.
+       */
       normalizedValueHash?: string;
     },
   ): LeadAnswers {
@@ -438,15 +784,43 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Crea create delivery event.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create delivery event conforme al contrato `LeadDeliveryEvents`.
+   */
   createDeliveryEvent(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a lead submission.
+       */
       leadSubmissionId: string;
+      /**
+       * Identificador asociado a destination type concept.
+       */
       destinationTypeConceptId: string;
+      /**
+       * Valor de destination reference mantenido por la instancia.
+       */
       destinationReference?: string;
+      /**
+       * Valor de attempt number mantenido por la instancia.
+       */
       attemptNumber: number;
+      /**
+       * Identificador asociado a result concept.
+       */
       resultConceptId: string;
+      /**
+       * Valor de response reference mantenido por la instancia.
+       */
       responseReference?: string;
+      /**
+       * Valor de retry at mantenido por la instancia.
+       */
       retryAt?: Date;
     },
   ): LeadDeliveryEvents {
@@ -467,6 +841,13 @@ export class AdsOptimizationRepository {
     );
   }
 
+  /**
+   * Ejecuta la operación count delivery attempts.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param leadSubmissionId - Identificador de lead submission.
+   * @returns Resultado de count delivery attempts conforme al contrato `Promise<number>`.
+   */
   countDeliveryAttempts(
     em: EntityManager,
     leadSubmissionId: string,

@@ -38,6 +38,12 @@ import {
 @ApiBearerAuth()
 @Controller('graph')
 export class GraphQueryController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param traversalService - Valor de traversal service requerido por la operación.
+   * @param analyticsService - Valor de analytics service requerido por la operación.
+   */
   constructor(
     private readonly traversalService: GraphTraversalService,
     private readonly analyticsService: GraphAnalyticsService,

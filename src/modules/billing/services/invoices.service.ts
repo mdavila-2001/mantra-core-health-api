@@ -33,6 +33,14 @@ import type { Invoices } from '../entities';
  */
 @Injectable()
 export class InvoicesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param invoicesRepo - Valor de invoices repo requerido por la operación.
+   * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly invoicesRepo: InvoicesRepository,
@@ -347,10 +355,23 @@ export class InvoicesService {
     });
   }
 
+  /**
+   * Crea generate number.
+   *
+   * @param prefix - Valor de prefix requerido por la operación.
+   * @returns Resultado de generate number conforme al contrato `string`.
+   */
   private generateNumber(prefix: string): string {
     return `${prefix}-${Date.now()}-${randomUUID().slice(0, 8)}`;
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param invoice - Valor de invoice requerido por la operación.
+   * @param lineCount - Valor de line count requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `InvoiceResponseDto`.
+   */
   private toResponse(invoice: Invoices, lineCount: number): InvoiceResponseDto {
     return {
       id: invoice.id,

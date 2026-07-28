@@ -18,6 +18,13 @@ import { CEXT } from '../clinical_ext.concepts';
  */
 @Injectable()
 export class ClinicalAlertsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param alertsRepo - Valor de alerts repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly alertsRepo: ClinicalAlertsRepository,
@@ -84,6 +91,14 @@ export class ClinicalAlertsService {
     });
   }
 
+  /**
+   * Obtiene load active.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param alertId - Identificador de alert.
+   * @returns Resultado de load active.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async loadActive(tx: EntityManager, alertId: string) {
     const alert = await this.alertsRepo.findById(tx, alertId);
     if (!alert)

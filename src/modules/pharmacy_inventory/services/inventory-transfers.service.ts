@@ -15,8 +15,22 @@ import {
 import { CreateTransferDto, TransferResponseDto } from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
+/**
+ * Ejecuta la operación num.
+ *
+ * @param v - Valor de v requerido por la operación.
+ * @returns Resultado de num conforme al contrato `number`.
+ */
 const num = (v: string | null | undefined): number =>
   v == null ? 0 : Number(v);
+/**
+ * Ejecuta la operación recompute.
+ *
+ * @param onHand - Valor de on hand requerido por la operación.
+ * @param reserved - Valor de reserved requerido por la operación.
+ * @param quarantine - Valor de quarantine requerido por la operación.
+ * @returns Resultado de recompute conforme al contrato `string`.
+ */
 const recompute = (
   onHand: string,
   reserved: string,
@@ -26,6 +40,15 @@ const recompute = (
 /** Transferencia de stock entre ubicaciones (UC-25-10): TRANSFER_OUT + TRANSFER_IN. */
 @Injectable()
 export class InventoryTransfersService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param locationsRepo - Valor de locations repo requerido por la operación.
+   * @param stockRepo - Valor de stock repo requerido por la operación.
+   * @param ledgerRepo - Valor de ledger repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly locationsRepo: LocationsRepository,

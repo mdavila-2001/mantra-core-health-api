@@ -31,6 +31,11 @@ import {
 @ApiBearerAuth()
 @Controller('accounting')
 export class AccountingLedgerController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param ledgerService - Valor de ledger service requerido por la operación.
+   */
   constructor(private readonly ledgerService: LedgerService) {}
 
   /** Soporte: alta de cuenta del plan contable. */
@@ -66,7 +71,9 @@ export class AccountingLedgerController {
   @Post('journal-transactions/drafts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crear un asiento en borrador (DRAFT, sin postear)' })
+  @ApiOperation({
+    summary: 'Crear un asiento en borrador (DRAFT, sin postear)',
+  })
   createDraft(
     @Body() dto: PostJournalDto,
     @CurrentUser() actor: AuthenticatedUser,

@@ -4,14 +4,41 @@ import { ReadModelRefreshRuns } from '../entities';
 
 /** Datos para registrar una corrida de refresh. */
 export interface CreateRefreshRunData {
+  /**
+   * Identificador asociado a read model definition.
+   */
   readModelDefinitionId: string;
+  /**
+   * Identificador asociado a refresh type concept.
+   */
   refreshTypeConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt?: Date;
+  /**
+   * Valor de completed at mantenido por la instancia.
+   */
   completedAt?: Date;
+  /**
+   * Valor de rows affected mantenido por la instancia.
+   */
   rowsAffected?: string;
+  /**
+   * Valor de source watermark mantenido por la instancia.
+   */
   sourceWatermark?: string;
+  /**
+   * Identificador asociado a result concept.
+   */
   resultConceptId?: string;
+  /**
+   * Valor de error code mantenido por la instancia.
+   */
   errorCode?: string;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId?: string;
 }
 
@@ -33,6 +60,13 @@ export class ReadModelRefreshRunsRepository {
     );
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `ReadModelRefreshRuns`.
+   */
   create(em: EntityManager, data: CreateRefreshRunData): ReadModelRefreshRuns {
     return em.create(
       ReadModelRefreshRuns,

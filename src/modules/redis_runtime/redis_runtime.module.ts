@@ -1,7 +1,11 @@
 import { Inject, Module, type OnModuleDestroy } from '@nestjs/common';
 import { RedisRuntimeController } from './controllers';
 import { RedisRuntimeService } from './services';
-import { REDIS_CLIENT, redisClientProvider, type RedisClient } from './redis.provider';
+import {
+  REDIS_CLIENT,
+  redisClientProvider,
+  type RedisClient,
+} from './redis.provider';
 
 /**
  * MÓDULO 56 `redis_runtime`: runtime de baja latencia sobre Redis real. Ofrece
@@ -19,6 +23,11 @@ import { REDIS_CLIENT, redisClientProvider, type RedisClient } from './redis.pro
   exports: [RedisRuntimeService],
 })
 export class RedisRuntimeModule implements OnModuleDestroy {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param redis - Valor de redis requerido por la operación.
+   */
   constructor(@Inject(REDIS_CLIENT) private readonly redis: RedisClient) {}
 
   /** Cierre ordenado de la conexión Redis al destruir el módulo. */

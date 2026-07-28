@@ -5,20 +5,54 @@ import { createdBy } from '../../../common';
 
 /** Datos de una especialidad de profesional. */
 export interface CreateSpecialtyData {
+  /**
+   * Identificador asociado a practitioner profile.
+   */
   practitionerProfileId: string;
+  /**
+   * Identificador asociado a specialty concept.
+   */
   specialtyConceptId: string;
+  /**
+   * Identificador asociado a supporting credential.
+   */
   supportingCredentialId?: string;
+  /**
+   * Identificador asociado a specialty role concept.
+   */
   specialtyRoleConceptId?: string;
+  /**
+   * Valor de is primary mantenido por la instancia.
+   */
   isPrimary?: boolean;
+  /**
+   * Valor de board certified mantenido por la instancia.
+   */
   boardCertified?: boolean;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `profiles.practitioner_specialties`. */
 @Injectable()
 export class PractitionerSpecialtiesRepository {
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PractitionerSpecialties`.
+   */
   create(
     em: EntityManager,
     data: CreateSpecialtyData,

@@ -50,6 +50,16 @@ const VIEW_IDENTIFIER = /^[a-z_][a-z0-9_]*(\.[a-z_][a-z0-9_]*)?$/i;
  */
 @Injectable()
 export class ReadModelDefinitionsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param definitionsRepo - Valor de definitions repo requerido por la operación.
+   * @param dependenciesRepo - Valor de dependencies repo requerido por la operación.
+   * @param runsRepo - Valor de runs repo requerido por la operación.
+   * @param pageViewsRepo - Valor de page views repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly definitionsRepo: ReadModelDefinitionsRepository,
@@ -405,7 +415,15 @@ export class ReadModelDefinitionsService {
     refreshTypeConceptId: string,
     successResultConceptId: string,
     actor: AuthenticatedUser,
-    opts: { requireMaterialized: boolean; operation: string },
+    opts: {
+      /**
+       * Valor de require materialized mantenido por la instancia.
+       */
+      requireMaterialized: boolean; /**
+       * Valor de operation mantenido por la instancia.
+       */
+      operation: string;
+    },
   ): Promise<RefreshRunResponseDto> {
     this.logger.info(
       { operation: opts.operation, definitionId, actorId: actor.id },
@@ -413,7 +431,10 @@ export class ReadModelDefinitionsService {
     );
 
     const readEm = this.em.fork();
-    const definition = await this.definitionsRepo.findById(readEm, definitionId);
+    const definition = await this.definitionsRepo.findById(
+      readEm,
+      definitionId,
+    );
     if (!definition) {
       throw new ResourceNotFoundException('Read model no encontrado', {
         definitionId,
@@ -461,11 +482,14 @@ export class ReadModelDefinitionsService {
           'run',
         );
         // REFRESH no reporta un rowcount fiable: se cuentan las filas materializadas.
-        const counted = await connection.execute<{ affected: string }[]>(
-          `SELECT count(*)::text AS affected FROM ${viewName}`,
-          [],
-          'all',
-        );
+        const counted = await connection.execute<
+          {
+            /**
+             * Valor de affected mantenido por la instancia.
+             */
+            affected: string;
+          }[]
+        >(`SELECT count(*)::text AS affected FROM ${viewName}`, [], 'all');
         rowsAffected = counted?.[0]?.affected ?? '0';
       } catch (err) {
         // La MV puede no existir físicamente aún: es un FAILURE legítimo.
@@ -532,11 +556,28 @@ export class ReadModelDefinitionsService {
     return message.slice(0, 500);
   }
 
+  /**
+   * Ejecuta la operación compute hash.
+   *
+   * @param schemaName - Valor de schema name requerido por la operación.
+   * @param objectName - Valor de object name requerido por la operación.
+   * @param versionNumber - Valor de version number requerido por la operación.
+   * @param dependencies - Valor de dependencies requerido por la operación.
+   * @returns Resultado de compute hash conforme al contrato `string`.
+   */
   private computeHash(
     schemaName: string,
     objectName: string,
     versionNumber: number,
-    dependencies: { sourceSchemaName: string; sourceObjectName: string }[],
+    dependencies: {
+      /**
+       * Valor de source schema name mantenido por la instancia.
+       */
+      sourceSchemaName: string; /**
+       * Valor de source object name mantenido por la instancia.
+       */
+      sourceObjectName: string;
+    }[],
   ): string {
     const material = [
       schemaName,
@@ -549,6 +590,13 @@ export class ReadModelDefinitionsService {
     return createHash('sha256').update(material).digest('hex');
   }
 
+  /**
+   * Transforma to definition response.
+   *
+   * @param definition - Valor de definition requerido por la operación.
+   * @param dependencyCount - Valor de dependency count requerido por la operación.
+   * @returns Resultado de to definition response conforme al contrato `ReadModelDefinitionResponseDto`.
+   */
   private toDefinitionResponse(
     definition: ReadModelDefinitions,
     dependencyCount: number,

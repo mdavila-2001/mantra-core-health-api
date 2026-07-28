@@ -30,6 +30,10 @@ describe('Terminology (integración)', () => {
     await ctx.app.close();
   });
 
+  /**
+   * Ejecuta la operación http.
+   * @returns Resultado de http.
+   */
   const http = () => request(ctx.app.getHttpServer());
 
   it('UC-03-01 crea un code system', async () => {

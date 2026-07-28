@@ -10,13 +10,35 @@ import { CONCEPTS } from '../../../common';
  */
 @Injectable()
 export class RetentionExecutionRepository {
+  /**
+   * Crea create execution.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create execution conforme al contrato `RetentionExecutions`.
+   */
   createExecution(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a retention policy.
+       */
       retentionPolicyId: string;
+      /**
+       * Identificador asociado a entity registry.
+       */
       entityRegistryId?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): RetentionExecutions {
@@ -27,14 +49,39 @@ export class RetentionExecutionRepository {
     );
   }
 
+  /**
+   * Crea create revision.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create revision conforme al contrato `RecordRevisions`.
+   */
   createRevision(
     em: EntityManager,
     data: {
+      /**
+       * Valor de schema name mantenido por la instancia.
+       */
       schemaName: string;
+      /**
+       * Valor de table name mantenido por la instancia.
+       */
       tableName: string;
+      /**
+       * Identificador asociado a record.
+       */
       recordId: string;
+      /**
+       * Identificador asociado a operation concept.
+       */
       operationConceptId: string;
+      /**
+       * Valor de data snapshot mantenido por la instancia.
+       */
       dataSnapshot: unknown;
+      /**
+       * Identificador asociado a changed by user.
+       */
       changedByUserId?: string;
     },
   ): RecordRevisions {

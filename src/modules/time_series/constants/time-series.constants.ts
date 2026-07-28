@@ -19,10 +19,16 @@ export const QUALITY_STATES = [
   'rejected',
   'backfill',
 ] as const;
+/**
+ * Define el tipo de dominio quality state.
+ */
 export type QualityState = (typeof QUALITY_STATES)[number];
 
 /** Estado de validación clínica de una constante vital normalizada. */
 export const VALIDATION_STATES = ['pending', 'validated', 'rejected'] as const;
+/**
+ * Define el tipo de dominio validation state.
+ */
 export type ValidationState = (typeof VALIDATION_STATES)[number];
 
 /** Etapa del pipeline que emite una métrica de ingesta. */
@@ -34,6 +40,9 @@ export const STAGE_CODES = [
   'rollup',
   'backfill',
 ] as const;
+/**
+ * Define el tipo de dominio stage code.
+ */
 export type StageCode = (typeof STAGE_CODES)[number];
 
 /** Códigos de métrica que emite este módulo, tal como los nombra el caso de uso. */
@@ -75,6 +84,9 @@ export const TIMESERIES_TABLES = [
   'service_sli_series',
   'telemetry_event_series',
 ] as const;
+/**
+ * Define el tipo de dominio timeseries table.
+ */
 export type TimeseriesTable = (typeof TIMESERIES_TABLES)[number];
 
 /** Series que admiten ingesta genérica por lote (UC-58-01). */
@@ -86,6 +98,9 @@ export const BATCH_INGEST_DATASETS = [
   'lab_analyzer_event_series',
   'payment_gateway_metric_series',
 ] as const;
+/**
+ * Define el tipo de dominio batch ingest dataset.
+ */
 export type BatchIngestDataset = (typeof BATCH_INGEST_DATASETS)[number];
 
 /** Datasets de métricas de runtime y observabilidad (UC-58-11). */
@@ -94,6 +109,9 @@ export const METRIC_DATASETS = [
   'ingestion_pipeline_metric_series',
   'service_sli_series',
 ] as const;
+/**
+ * Define el tipo de dominio metric dataset.
+ */
 export type MetricDataset = (typeof METRIC_DATASETS)[number];
 
 /** Series que admiten backfill gobernado (UC-58-12). */
@@ -101,6 +119,9 @@ export const BACKFILLABLE_DATASETS = [
   'device_raw_reading_series',
   'telemetry_event_series',
 ] as const;
+/**
+ * Define el tipo de dominio backfillable dataset.
+ */
 export type BackfillableDataset = (typeof BACKFILLABLE_DATASETS)[number];
 
 /**
@@ -157,6 +178,9 @@ export const ROLLUPS = {
        GROUP BY bucket, tenant_id, target_type, action_code`,
   },
 } as const;
+/**
+ * Define el tipo de dominio rollup name.
+ */
 export type RollupName = keyof typeof ROLLUPS;
 export const ROLLUP_NAMES = Object.keys(ROLLUPS) as RollupName[];
 
@@ -182,6 +206,9 @@ export const COMPRESSION_SEGMENTS: Partial<Record<TimeseriesTable, string>> = {
 
 /** Funciones de agregación admitidas al consultar con downsampling (UC-58-09). */
 export const AGGREGATIONS = ['avg', 'min', 'max', 'sum', 'count'] as const;
+/**
+ * Define el tipo de dominio aggregation.
+ */
 export type Aggregation = (typeof AGGREGATIONS)[number];
 
 /**

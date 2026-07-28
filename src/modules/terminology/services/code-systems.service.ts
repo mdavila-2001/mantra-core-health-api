@@ -30,6 +30,15 @@ import {
  */
 @Injectable()
 export class CodeSystemsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param sourcesRepo - Valor de sources repo requerido por la operación.
+   * @param codeSystemsRepo - Valor de code systems repo requerido por la operación.
+   * @param versionsRepo - Valor de versions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly sourcesRepo: TerminologySourcesRepository,

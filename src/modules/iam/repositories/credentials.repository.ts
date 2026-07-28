@@ -5,17 +5,41 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Alta de una credencial de contraseña (identidad de login del usuario). */
 export interface CreatePasswordCredentialData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Valor de external subject mantenido por la instancia.
+   */
   externalSubject: string;
+  /**
+   * Valor de secret hash mantenido por la instancia.
+   */
   secretHash: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Alta de una credencial federada (proveedor externo de identidad). */
 export interface CreateFederatedCredentialData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Valor de identity provider mantenido por la instancia.
+   */
   identityProvider: string;
+  /**
+   * Valor de external subject mantenido por la instancia.
+   */
   externalSubject: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -100,7 +124,18 @@ export class CredentialsRepository {
    */
   createPendingPassword(
     em: EntityManager,
-    data: { userId: string; externalSubject: string; actorUserId?: string },
+    data: {
+      /**
+       * Identificador asociado a user.
+       */
+      userId: string; /**
+       * Valor de external subject mantenido por la instancia.
+       */
+      externalSubject: string; /**
+       * Identificador asociado a actor user.
+       */
+      actorUserId?: string;
+    },
   ): AuthenticationCredentials {
     return em.create(
       AuthenticationCredentials,

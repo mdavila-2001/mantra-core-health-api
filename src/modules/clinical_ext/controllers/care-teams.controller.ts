@@ -26,6 +26,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('care-teams')
 export class CareTeamsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param careTeamsService - Valor de care teams service requerido por la operación.
+   */
   constructor(private readonly careTeamsService: CareTeamsService) {}
 
   /** UC-18-01. */

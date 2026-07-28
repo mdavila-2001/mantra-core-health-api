@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { AdsCampaignsService } from './ads-campaigns.service';
@@ -18,6 +24,10 @@ const IDENTITY = '44444444-4444-4444-4444-444444444444';
 const CURRENCY = '55555555-5555-5555-5555-555555555555';
 const TARGETING = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -63,6 +73,12 @@ function build() {
   return { service, tx, campaignsRepo, accountsRepo };
 }
 
+/**
+ * Ejecuta la operación active account.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active account conforme al contrato `any`.
+ */
 function activeAccount(overrides: Record<string, unknown> = {}): any {
   return {
     id: ACCOUNT,
@@ -73,6 +89,12 @@ function activeAccount(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación launch dto.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de launch dto conforme al contrato `any`.
+ */
 function launchDto(overrides: Record<string, unknown> = {}): any {
   return {
     name: 'Campaña chequeo',
@@ -94,6 +116,12 @@ function launchDto(overrides: Record<string, unknown> = {}): any {
 
 describe('AdsCampaignsService', () => {
   describe('launchCampaign (UC-43-04)', () => {
+    /**
+     * Ejecuta la operación wire happy path.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire happy path.
+     */
     function wireHappyPath(d: ReturnType<typeof build>) {
       d.accountsRepo.findAdAccountById.mockResolvedValue(activeAccount());
       d.campaignsRepo.createCampaign.mockReturnValue({ id: CAMPAIGN });
@@ -415,6 +443,13 @@ describe('AdsCampaignsService', () => {
       validFrom: '2026-08-01T00:00:00Z',
     };
 
+    /**
+     * Ejecuta la operación wire ad set.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de wire ad set.
+     */
     function wireAdSet(
       d: ReturnType<typeof build>,
       overrides: Record<string, unknown> = {},

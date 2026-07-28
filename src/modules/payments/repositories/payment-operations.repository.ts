@@ -13,88 +13,301 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create fee schedule data.
+ */
 export interface CreateFeeScheduleData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a fee type concept.
+   */
   feeTypeConceptId: string;
+  /**
+   * Identificador asociado a calculation method concept.
+   */
   calculationMethodConceptId: string;
+  /**
+   * Valor de percentage mantenido por la instancia.
+   */
   percentage?: string;
+  /**
+   * Valor de fixed amount mantenido por la instancia.
+   */
   fixedAmount?: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Valor de min amount mantenido por la instancia.
+   */
   minAmount?: string;
+  /**
+   * Valor de max amount mantenido por la instancia.
+   */
   maxAmount?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create settlement data.
+ */
 export interface CreateSettlementData {
+  /**
+   * Identificador asociado a gateway.
+   */
   gatewayId: string;
+  /**
+   * Valor de settlement ref mantenido por la instancia.
+   */
   settlementRef: string;
+  /**
+   * Valor de gross amount mantenido por la instancia.
+   */
   grossAmount: string;
+  /**
+   * Valor de fee amount mantenido por la instancia.
+   */
   feeAmount: string;
+  /**
+   * Valor de net amount mantenido por la instancia.
+   */
   netAmount: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId: string;
+  /**
+   * Valor de settled at mantenido por la instancia.
+   */
   settledAt?: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create settlement line data.
+ */
 export interface CreateSettlementLineData {
+  /**
+   * Identificador asociado a settlement.
+   */
   settlementId: string;
+  /**
+   * Identificador asociado a payment transaction.
+   */
   paymentTransactionId?: string;
+  /**
+   * Identificador asociado a refund.
+   */
   refundId?: string;
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Valor de fee amount mantenido por la instancia.
+   */
   feeAmount?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create payout data.
+ */
 export interface CreatePayoutData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a practice.
+   */
   practiceId?: string;
+  /**
+   * Identificador asociado a payee type concept.
+   */
   payeeTypeConceptId: string;
+  /**
+   * Identificador asociado a payee ref.
+   */
   payeeRefId: string;
+  /**
+   * Identificador asociado a gateway.
+   */
   gatewayId: string;
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId: string;
+  /**
+   * Valor de period start mantenido por la instancia.
+   */
   periodStart: Date;
+  /**
+   * Valor de period end mantenido por la instancia.
+   */
   periodEnd: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de scheduled at mantenido por la instancia.
+   */
   scheduledAt?: Date;
+  /**
+   * Valor de executed at mantenido por la instancia.
+   */
   executedAt?: Date;
+  /**
+   * Valor de gateway payout ref mantenido por la instancia.
+   */
   gatewayPayoutRef?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create payout item data.
+ */
 export interface CreatePayoutItemData {
+  /**
+   * Identificador asociado a payout.
+   */
   payoutId: string;
+  /**
+   * Identificador asociado a source type concept.
+   */
   sourceTypeConceptId: string;
+  /**
+   * Identificador asociado a source ref.
+   */
   sourceRefId: string;
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Valor de commission amount mantenido por la instancia.
+   */
   commissionAmount?: string;
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   description?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create reconciliation run data.
+ */
 export interface CreateReconciliationRunData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a gateway.
+   */
   gatewayId: string;
+  /**
+   * Valor de period start mantenido por la instancia.
+   */
   periodStart: Date;
+  /**
+   * Valor de period end mantenido por la instancia.
+   */
   periodEnd: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create reconciliation exception data.
+ */
 export interface CreateReconciliationExceptionData {
+  /**
+   * Identificador asociado a reconciliation run.
+   */
   reconciliationRunId: string;
+  /**
+   * Identificador asociado a exception type concept.
+   */
   exceptionTypeConceptId: string;
+  /**
+   * Identificador asociado a payment transaction.
+   */
   paymentTransactionId?: string;
+  /**
+   * Valor de external ref mantenido por la instancia.
+   */
   externalRef?: string;
+  /**
+   * Valor de amount difference mantenido por la instancia.
+   */
   amountDifference?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -105,6 +318,13 @@ export interface CreateReconciliationExceptionData {
  */
 @Injectable()
 export class PaymentOperationsRepository {
+  /**
+   * Crea create fee schedule.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create fee schedule conforme al contrato `FeeSchedules`.
+   */
   createFeeSchedule(
     em: EntityManager,
     data: CreateFeeScheduleData,
@@ -145,15 +365,43 @@ export class PaymentOperationsRepository {
     });
   }
 
+  /**
+   * Crea create transaction fee.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create transaction fee conforme al contrato `TransactionFees`.
+   */
   createTransactionFee(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a payment transaction.
+       */
       paymentTransactionId: string;
+      /**
+       * Identificador asociado a fee schedule.
+       */
       feeScheduleId?: string;
+      /**
+       * Identificador asociado a fee type concept.
+       */
       feeTypeConceptId: string;
+      /**
+       * Valor de amount mantenido por la instancia.
+       */
       amount: string;
+      /**
+       * Identificador asociado a currency concept.
+       */
       currencyConceptId: string;
+      /**
+       * Identificador asociado a bearer type concept.
+       */
       bearerTypeConceptId?: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): TransactionFees {
@@ -172,6 +420,13 @@ export class PaymentOperationsRepository {
     );
   }
 
+  /**
+   * Crea create settlement.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create settlement conforme al contrato `GatewaySettlements`.
+   */
   createSettlement(
     em: EntityManager,
     data: CreateSettlementData,
@@ -201,6 +456,13 @@ export class PaymentOperationsRepository {
     return em.findOne(GatewaySettlements, { settlementRef });
   }
 
+  /**
+   * Crea create settlement line.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create settlement line conforme al contrato `SettlementLines`.
+   */
   createSettlementLine(
     em: EntityManager,
     data: CreateSettlementLineData,
@@ -219,6 +481,13 @@ export class PaymentOperationsRepository {
     );
   }
 
+  /**
+   * Crea create payout.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create payout conforme al contrato `Payouts`.
+   */
   createPayout(em: EntityManager, data: CreatePayoutData): Payouts {
     return em.create(
       Payouts,
@@ -242,6 +511,13 @@ export class PaymentOperationsRepository {
     );
   }
 
+  /**
+   * Crea create payout item.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create payout item conforme al contrato `PayoutItems`.
+   */
   createPayoutItem(em: EntityManager, data: CreatePayoutItemData): PayoutItems {
     return em.create(
       PayoutItems,
@@ -258,6 +534,13 @@ export class PaymentOperationsRepository {
     );
   }
 
+  /**
+   * Crea create reconciliation run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create reconciliation run conforme al contrato `PaymentsReconciliationRuns`.
+   */
   createReconciliationRun(
     em: EntityManager,
     data: CreateReconciliationRunData,
@@ -277,18 +560,55 @@ export class PaymentOperationsRepository {
     );
   }
 
+  /**
+   * Crea create reconciliation record.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create reconciliation record conforme al contrato `ProviderReconciliationRecords`.
+   */
   createReconciliationRecord(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a gateway connection.
+       */
       gatewayConnectionId: string;
+      /**
+       * Identificador asociado a reconciliation run.
+       */
       reconciliationRunId: string;
+      /**
+       * Identificador asociado a payment transaction.
+       */
       paymentTransactionId?: string;
+      /**
+       * Identificador asociado a external transaction.
+       */
       externalTransactionId: string;
+      /**
+       * Valor de provider status code mantenido por la instancia.
+       */
       providerStatusCode: string;
+      /**
+       * Valor de provider amount mantenido por la instancia.
+       */
       providerAmount: string;
+      /**
+       * Valor de provider currency code mantenido por la instancia.
+       */
       providerCurrencyCode: string;
+      /**
+       * Valor de provider fee amount mantenido por la instancia.
+       */
       providerFeeAmount?: string;
+      /**
+       * Identificador asociado a match status concept.
+       */
       matchStatusConceptId: string;
+      /**
+       * Valor de recorded at mantenido por la instancia.
+       */
       recordedAt: Date;
     },
   ): ProviderReconciliationRecords {
@@ -311,6 +631,13 @@ export class PaymentOperationsRepository {
     );
   }
 
+  /**
+   * Crea create reconciliation exception.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create reconciliation exception conforme al contrato `ReconciliationExceptions`.
+   */
   createReconciliationException(
     em: EntityManager,
     data: CreateReconciliationExceptionData,

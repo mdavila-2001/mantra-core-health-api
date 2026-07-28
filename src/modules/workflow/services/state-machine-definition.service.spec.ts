@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -12,6 +18,10 @@ const STATE_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const STATE_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const STATE_C = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -198,6 +208,12 @@ describe('StateMachineDefinitionService', () => {
       ],
     } as any;
 
+    /**
+     * Ejecuta la operación with draft machine.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de with draft machine.
+     */
     function withDraftMachine(d: ReturnType<typeof build>) {
       d.machinesRepo.findMachineForUpdate.mockResolvedValue({
         id: MACHINE_ID,
@@ -291,6 +307,15 @@ describe('StateMachineDefinitionService', () => {
   });
 
   describe('publishStateMachine (UC-32-04)', () => {
+    /**
+     * Ejecuta la operación with graph.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param states - Valor de states requerido por la operación.
+     * @param transitions - Valor de transitions requerido por la operación.
+     * @param machine - Valor de machine requerido por la operación.
+     * @returns Resultado de with graph.
+     */
     function withGraph(
       d: ReturnType<typeof build>,
       states: any[],

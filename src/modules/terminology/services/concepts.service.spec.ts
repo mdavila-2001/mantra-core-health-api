@@ -10,6 +10,10 @@ import {
 
 const actor: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: jest.fn(() => Promise.resolve()) };
   const em = {

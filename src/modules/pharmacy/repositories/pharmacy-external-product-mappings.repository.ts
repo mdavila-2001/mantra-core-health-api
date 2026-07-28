@@ -5,12 +5,33 @@ import { createdBy } from '../../../common';
 
 /** Datos para mapear un producto a un código externo (UC-24-08). */
 export interface CreateMappingData {
+  /**
+   * Identificador asociado a pharmacy integration connection.
+   */
   pharmacyIntegrationConnectionId: string;
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   pharmacyProductId: string;
+  /**
+   * Valor de external product code mantenido por la instancia.
+   */
   externalProductCode: string;
+  /**
+   * Valor de external unit code mantenido por la instancia.
+   */
   externalUnitCode?: string;
+  /**
+   * Valor de mapping version mantenido por la instancia.
+   */
   mappingVersion?: string;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -21,6 +21,15 @@ import { ReviewDecisionDto, ReviewDecisionResponseDto } from '../dto';
  */
 @Injectable()
 export class IdentityManualReviewService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reviewRepo - Valor de review repo requerido por la operación.
+   * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param fraudRepo - Valor de fraud repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly reviewRepo: IdentityManualReviewCasesRepository,

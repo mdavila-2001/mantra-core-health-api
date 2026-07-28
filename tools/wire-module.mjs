@@ -26,7 +26,8 @@ function findExport(file, re) {
   return m ? m[1] : null;
 }
 
-const conceptExport = findExport(conceptFile, /export const \{\s*seeds:\s*(\w+)/) ??
+const conceptExport =
+  findExport(conceptFile, /export const \{\s*seeds:\s*(\w+)/) ??
   findExport(conceptFile, /export const (\w+_CONCEPT_SEEDS)/);
 const smokeExport = findExport(smokeFile, /export const (\w+_SMOKE)\b/);
 
@@ -39,7 +40,8 @@ function wire(registryPath, importLine, spreadLine, anchorSpread) {
   // Inserta el import tras el último import existente (o al inicio del bloque de comentarios de registro).
   const lines = src.split('\n');
   let lastImport = -1;
-  for (let i = 0; i < lines.length; i++) if (lines[i].startsWith('import ')) lastImport = i;
+  for (let i = 0; i < lines.length; i++)
+    if (lines[i].startsWith('import ')) lastImport = i;
   lines.splice(lastImport + 1, 0, importLine);
   src = lines.join('\n');
   // Inserta el spread antes del cierre `];` del arreglo agregador.
@@ -48,7 +50,9 @@ function wire(registryPath, importLine, spreadLine, anchorSpread) {
   console.log(`  cableado en ${registryPath}`);
 }
 
-console.log(`Cableando módulo '${mod}' (conceptos=${conceptExport}, smoke=${smokeExport})`);
+console.log(
+  `Cableando módulo '${mod}' (conceptos=${conceptExport}, smoke=${smokeExport})`,
+);
 
 if (conceptExport) {
   wire(
@@ -58,7 +62,9 @@ if (conceptExport) {
     '];',
   );
 } else {
-  console.warn(`  AVISO: no se encontró export *_CONCEPT_SEEDS en ${conceptFile}`);
+  console.warn(
+    `  AVISO: no se encontró export *_CONCEPT_SEEDS en ${conceptFile}`,
+  );
 }
 
 if (smokeExport) {

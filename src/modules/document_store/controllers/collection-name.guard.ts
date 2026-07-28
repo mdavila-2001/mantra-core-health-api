@@ -21,6 +21,13 @@ export const COLLECTION_NAME_RE = /^[a-z][a-z0-9_]{2,40}$/;
  */
 @Injectable()
 export class CollectionNameGuard implements CanActivate {
+  /**
+   * Obtiene can activate.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de can activate conforme al contrato `boolean`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const collection = request.params?.collection;

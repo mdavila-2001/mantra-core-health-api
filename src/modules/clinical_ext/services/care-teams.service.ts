@@ -30,6 +30,14 @@ import { CEXT } from '../clinical_ext.concepts';
  */
 @Injectable()
 export class CareTeamsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param teamsRepo - Valor de teams repo requerido por la operación.
+   * @param membersRepo - Valor de members repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly teamsRepo: CareTeamsRepository,

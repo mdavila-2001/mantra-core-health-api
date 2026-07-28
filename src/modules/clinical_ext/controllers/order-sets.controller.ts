@@ -25,6 +25,11 @@ import {
 @ApiBearerAuth()
 @Controller('order-sets')
 export class OrderSetsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param orderSetsService - Valor de order sets service requerido por la operación.
+   */
   constructor(private readonly orderSetsService: OrderSetsService) {}
 
   /** Crea una plantilla de órdenes (precondición de UC-18-06). */

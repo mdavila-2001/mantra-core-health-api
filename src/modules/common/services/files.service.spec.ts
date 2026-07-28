@@ -18,6 +18,10 @@ import {
 } from '../dto';
 import type { AuthenticatedUser } from '../../../common';
 
+/**
+ * Crea create em mock.
+ * @returns Resultado de create em mock.
+ */
 function createEmMock() {
   const tx = { flush: fn().mockResolvedValue(undefined) };
   const fork = {};
@@ -33,6 +37,10 @@ const actor: AuthenticatedUser = { id: 'user-1', roles: [] };
 describe('FilesService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
 
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const { em, tx } = createEmMock();
     const filesRepo = { findById: fn(), create: fn() };

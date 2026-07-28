@@ -14,6 +14,11 @@ import {
 @ApiBearerAuth()
 @Controller('accounting')
 export class AccountingAccrualController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param accrualService - Valor de accrual service requerido por la operación.
+   */
   constructor(private readonly accrualService: AccrualService) {}
 
   /** UC-16-06. */

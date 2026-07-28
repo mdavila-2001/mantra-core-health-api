@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { AdsDataService } from './ads-data.service';
@@ -21,6 +27,10 @@ const FEED = '77777777-7777-7777-7777-777777777777';
 const CURRENCY = '88888888-8888-8888-8888-888888888888';
 const CONSENT = '99999999-9999-9999-9999-999999999999';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -143,6 +153,12 @@ describe('AdsDataService', () => {
   });
 
   describe('ingestInsights (UC-43-07)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param rows - Valor de rows requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(rows: any[] = []): any {
       return {
         tenantId: TENANT,
@@ -166,6 +182,13 @@ describe('AdsDataService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param account - Valor de account requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       account: Record<string, unknown> = {},
@@ -282,6 +305,12 @@ describe('AdsDataService', () => {
   });
 
   describe('sendConversion (UC-43-08)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         tenantId: TENANT,
@@ -293,6 +322,12 @@ describe('AdsDataService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.dataRepo.findDatasetById.mockResolvedValue({
         id: DATASET,
@@ -456,6 +491,12 @@ describe('AdsDataService', () => {
   });
 
   describe('uploadOfflineConversions (UC-43-09)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param events - Valor de events requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(events: any[]): any {
       return {
         adAccountId: ACCOUNT,
@@ -529,10 +570,22 @@ describe('AdsDataService', () => {
   });
 
   describe('runFeed (UC-43-13)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param items - Valor de items requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(items: any[]): any {
       return { items };
     }
 
+    /**
+     * Ejecuta la operación item.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de item conforme al contrato `any`.
+     */
     function item(overrides: Record<string, unknown> = {}): any {
       return {
         retailerProductId: 'sku-1',
@@ -543,6 +596,12 @@ describe('AdsDataService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       const catalog: any = { id: CATALOG, defaultCurrencyConceptId: CURRENCY };
       d.dataRepo.findCatalogForUpdate.mockResolvedValue(catalog);

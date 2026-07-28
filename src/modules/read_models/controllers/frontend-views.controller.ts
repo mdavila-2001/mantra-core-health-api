@@ -31,6 +31,11 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class FrontendViewsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: FrontendViewsService) {}
 
   /** UC-30-02. */

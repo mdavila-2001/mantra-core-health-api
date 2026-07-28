@@ -5,10 +5,25 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Alta de un refresh token ligado a una sesión. */
 export interface CreateRefreshTokenData {
+  /**
+   * Identificador asociado a session.
+   */
   sessionId: string;
+  /**
+   * Valor de token hash mantenido por la instancia.
+   */
   tokenHash: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt: Date;
+  /**
+   * Identificador asociado a replaced by.
+   */
   replacedById?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

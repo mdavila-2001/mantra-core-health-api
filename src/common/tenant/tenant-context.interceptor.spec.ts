@@ -11,6 +11,12 @@ function httpContext(headers: Record<string, string>, user?: unknown): any {
   };
 }
 
+/**
+ * Ejecuta la operación handler.
+ *
+ * @param value - Valor de value requerido por la operación.
+ * @returns Resultado de handler.
+ */
 const handler = (value: unknown) => ({ handle: () => of(value) });
 
 describe('TenantContextInterceptor', () => {
@@ -19,7 +25,10 @@ describe('TenantContextInterceptor', () => {
   it('sin cabecera X-Tenant-Id deja pasar el request tal cual', async () => {
     const interceptor = new TenantContextInterceptor(em);
     const res = await lastValueFrom(
-      interceptor.intercept(httpContext({}, { id: 'u1', roles: [] }), handler('ok')) as any,
+      interceptor.intercept(
+        httpContext({}, { id: 'u1', roles: [] }),
+        handler('ok'),
+      ) as any,
     );
     expect(res).toBe('ok');
   });
@@ -41,7 +50,9 @@ describe('TenantContextInterceptor', () => {
       { 'x-tenant-id': 'tenant-A' },
       { id: 'u1', roles: [], tenantIds: ['tenant-A'] },
     );
-    const res = await lastValueFrom(interceptor.intercept(ctx, handler('ok')) as any);
+    const res = await lastValueFrom(
+      interceptor.intercept(ctx, handler('ok')) as any,
+    );
     expect(res).toBe('ok');
   });
 
@@ -51,7 +62,9 @@ describe('TenantContextInterceptor', () => {
       { 'x-tenant-id': 'tenant-X' },
       { id: 'admin', roles: ['SUPERADMIN'], tenantIds: [] },
     );
-    const res = await lastValueFrom(interceptor.intercept(ctx, handler('ok')) as any);
+    const res = await lastValueFrom(
+      interceptor.intercept(ctx, handler('ok')) as any,
+    );
     expect(res).toBe('ok');
   });
 });

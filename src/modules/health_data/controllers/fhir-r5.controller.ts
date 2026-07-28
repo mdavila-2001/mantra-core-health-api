@@ -35,6 +35,11 @@ import {
 @ApiBearerAuth()
 @Controller('fhir/r5')
 export class FhirR5Controller {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param releaseService - Valor de release service requerido por la operación.
+   */
   constructor(private readonly releaseService: DataReleaseService) {}
 
   /** UC-52-12. */

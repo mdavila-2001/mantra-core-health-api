@@ -30,6 +30,12 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class DiagnosticPricingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param pricingService - Valor de pricing service requerido por la operación.
+   * @param studiesService - Valor de studies service requerido por la operación.
+   */
   constructor(
     private readonly pricingService: DiagnosticPricingService,
     private readonly studiesService: DiagnosticStudiesService,

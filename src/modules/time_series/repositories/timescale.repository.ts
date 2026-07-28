@@ -23,6 +23,13 @@ function assertTable(table: string): TimeseriesTable {
   return table as TimeseriesTable;
 }
 
+/**
+ * Valida assert rollup.
+ *
+ * @param name - Valor de name requerido por la operación.
+ * @returns Resultado de assert rollup conforme al contrato `RollupName`.
+ * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+ */
 function assertRollup(name: string): RollupName {
   if (!Object.prototype.hasOwnProperty.call(ROLLUPS, name)) {
     throw new InternalServerErrorException(
@@ -35,7 +42,13 @@ function assertRollup(name: string): RollupName {
 /** Identificador de columna admisible para el particionado por espacio. */
 const SAFE_COLUMN = /^[a-z_][a-z0-9_]{0,62}$/;
 
+/**
+ * Describe el contrato estructural de chunk info.
+ */
 export interface ChunkInfo {
+  /**
+   * Valor de chunk mantenido por la instancia.
+   */
   chunk: string;
 }
 
@@ -118,18 +131,34 @@ export class TimescaleRepository {
   async describeHypertable(
     em: EntityManager,
     table: string,
-  ): Promise<{ num_chunks: number; compression_enabled: boolean } | null> {
+  ): Promise<{
+    /**
+     * Valor de num chunks mantenido por la instancia.
+     */
+    num_chunks: number; /**
+     * Valor de compression enabled mantenido por la instancia.
+     */
+    compression_enabled: boolean;
+  } | null> {
     const safe = assertTable(table);
-    const rows = await em
-      .getConnection()
-      .execute<{ num_chunks: number; compression_enabled: boolean }[]>(
-        `SELECT num_chunks, compression_enabled
+    const rows = await em.getConnection().execute<
+      {
+        /**
+         * Valor de num chunks mantenido por la instancia.
+         */
+        num_chunks: number; /**
+         * Valor de compression enabled mantenido por la instancia.
+         */
+        compression_enabled: boolean;
+      }[]
+    >(
+      `SELECT num_chunks, compression_enabled
            FROM timescaledb_information.hypertables
           WHERE hypertable_schema = ? AND hypertable_name = ?`,
-        [SCHEMA, safe],
-        'all',
-        em.getTransactionContext(),
-      );
+      [SCHEMA, safe],
+      'all',
+      em.getTransactionContext(),
+    );
     return rows?.[0] ?? null;
   }
 
@@ -278,14 +307,14 @@ export class TimescaleRepository {
     to: Date,
   ): Promise<number> {
     const safe = assertRollup(name);
-    const rows = await em
-      .getConnection()
-      .execute<{ total: string }[]>(
-        `SELECT count(*)::text AS total FROM ${SCHEMA}.${safe} WHERE bucket >= ? AND bucket < ?`,
-        [from, to],
-        'all',
-        em.getTransactionContext(),
-      );
+    const rows = await em.getConnection().execute<
+      {
+        /**
+         * Valor de total mantenido por la instancia.
+         */
+        total: string;
+      }[]
+    >(`SELECT count(*)::text AS total FROM ${SCHEMA}.${safe} WHERE bucket >= ? AND bucket < ?`, [from, to], 'all', em.getTransactionContext());
     return Number(rows?.[0]?.total ?? 0);
   }
 
@@ -307,14 +336,45 @@ export class TimescaleRepository {
     valueColumn: string | null,
     agg: string,
     params: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a series.
+       */
       seriesId: string;
+      /**
+       * Valor de from mantenido por la instancia.
+       */
       from: Date;
+      /**
+       * Valor de to mantenido por la instancia.
+       */
       to: Date;
+      /**
+       * Valor de bucket mantenido por la instancia.
+       */
       bucket: string;
+      /**
+       * Valor de limit mantenido por la instancia.
+       */
       limit: number;
     },
-  ): Promise<{ bucket: string; value: number | null; samples: string }[]> {
+  ): Promise<
+    {
+      /**
+       * Valor de bucket mantenido por la instancia.
+       */
+      bucket: string; /**
+       * Valor de value mantenido por la instancia.
+       */
+      value: number | null; /**
+       * Valor de samples mantenido por la instancia.
+       */
+      samples: string;
+    }[]
+  > {
     const safe = assertTable(table);
     if (!SAFE_COLUMN.test(agg)) {
       throw new InternalServerErrorException(
@@ -338,10 +398,21 @@ export class TimescaleRepository {
     const expression =
       valueColumn === null ? 'count(*)' : `${agg}("${valueColumn}")`;
 
-    const rows = await em
-      .getConnection()
-      .execute<{ bucket: string; value: number | null; samples: string }[]>(
-        `SELECT time_bucket(?::interval, time)::text AS bucket,
+    const rows = await em.getConnection().execute<
+      {
+        /**
+         * Valor de bucket mantenido por la instancia.
+         */
+        bucket: string; /**
+         * Valor de value mantenido por la instancia.
+         */
+        value: number | null; /**
+         * Valor de samples mantenido por la instancia.
+         */
+        samples: string;
+      }[]
+    >(
+      `SELECT time_bucket(?::interval, time)::text AS bucket,
               ${expression} AS value,
               count(*)::text AS samples
          FROM ${SCHEMA}.${safe}
@@ -349,17 +420,17 @@ export class TimescaleRepository {
         GROUP BY 1
         ORDER BY 1
         LIMIT ?`,
-        [
-          params.bucket,
-          params.tenantId,
-          params.seriesId,
-          params.from,
-          params.to,
-          params.limit,
-        ],
-        'all',
-        em.getTransactionContext(),
-      );
+      [
+        params.bucket,
+        params.tenantId,
+        params.seriesId,
+        params.from,
+        params.to,
+        params.limit,
+      ],
+      'all',
+      em.getTransactionContext(),
+    );
     return rows ?? [];
   }
 
@@ -370,23 +441,61 @@ export class TimescaleRepository {
   async queryRollupRange(
     em: EntityManager,
     name: string,
-    params: { tenantId: string; from: Date; to: Date; limit: number },
-  ): Promise<{ bucket: string; value: number | null; samples: string }[]> {
+    params: {
+      /**
+       * Identificador asociado a tenant.
+       */
+      tenantId: string; /**
+       * Valor de from mantenido por la instancia.
+       */
+      from: Date; /**
+       * Valor de to mantenido por la instancia.
+       */
+      to: Date; /**
+       * Valor de limit mantenido por la instancia.
+       */
+      limit: number;
+    },
+  ): Promise<
+    {
+      /**
+       * Valor de bucket mantenido por la instancia.
+       */
+      bucket: string; /**
+       * Valor de value mantenido por la instancia.
+       */
+      value: number | null; /**
+       * Valor de samples mantenido por la instancia.
+       */
+      samples: string;
+    }[]
+  > {
     const safe = assertRollup(name);
     const valueExpression =
       safe === 'continuous_audit_daily' ? 'event_count' : 'value';
-    const rows = await em
-      .getConnection()
-      .execute<{ bucket: string; value: number | null; samples: string }[]>(
-        `SELECT bucket::text AS bucket, ${valueExpression} AS value, '1' AS samples
+    const rows = await em.getConnection().execute<
+      {
+        /**
+         * Valor de bucket mantenido por la instancia.
+         */
+        bucket: string; /**
+         * Valor de value mantenido por la instancia.
+         */
+        value: number | null; /**
+         * Valor de samples mantenido por la instancia.
+         */
+        samples: string;
+      }[]
+    >(
+      `SELECT bucket::text AS bucket, ${valueExpression} AS value, '1' AS samples
          FROM ${SCHEMA}.${safe}
         WHERE tenant_id = ? AND bucket >= ? AND bucket < ?
         ORDER BY bucket
         LIMIT ?`,
-        [params.tenantId, params.from, params.to, params.limit],
-        'all',
-        em.getTransactionContext(),
-      );
+      [params.tenantId, params.from, params.to, params.limit],
+      'all',
+      em.getTransactionContext(),
+    );
     return rows ?? [];
   }
 }

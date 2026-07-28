@@ -9,6 +9,13 @@ import { CONCEPTS, createdBy } from '../../../common';
  */
 @Injectable()
 export class LegalHoldRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<LegalHolds | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<LegalHolds | null> {
     return em.findOne(LegalHolds, { id });
   }
@@ -28,16 +35,47 @@ export class LegalHoldRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `LegalHolds`.
+   */
   create(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a target type concept.
+       */
       targetTypeConceptId: string;
+      /**
+       * Identificador asociado a target.
+       */
       targetId: string;
+      /**
+       * Identificador asociado a reason concept.
+       */
       reasonConceptId: string;
+      /**
+       * Valor de authority reference mantenido por la instancia.
+       */
       authorityReference?: string;
+      /**
+       * Valor de starts at mantenido por la instancia.
+       */
       startsAt?: Date;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): LegalHolds {

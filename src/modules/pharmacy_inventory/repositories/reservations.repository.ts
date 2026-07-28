@@ -5,33 +5,94 @@ import { createdBy } from '../../../common';
 
 /** Datos de cabecera de una reserva de stock. */
 export interface CreateReservationData {
+  /**
+   * Identificador asociado a pharmacy.
+   */
   pharmacyId: string;
+  /**
+   * Identificador asociado a pharmacy site.
+   */
   pharmacySiteId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId?: string;
+  /**
+   * Identificador asociado a medication request.
+   */
   medicationRequestId?: string;
+  /**
+   * Identificador asociado a quotation.
+   */
   quotationId?: string;
+  /**
+   * Identificador asociado a reservation status concept.
+   */
   reservationStatusConceptId: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt: Date;
+  /**
+   * Valor de confirmed at mantenido por la instancia.
+   */
   confirmedAt?: Date;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos de una línea de reserva. */
 export interface CreateReservationLineData {
+  /**
+   * Identificador asociado a inventory reservation.
+   */
   inventoryReservationId: string;
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   pharmacyProductId: string;
+  /**
+   * Identificador asociado a inventory lot.
+   */
   inventoryLotId?: string;
+  /**
+   * Identificador asociado a inventory location.
+   */
   inventoryLocationId?: string;
+  /**
+   * Valor de requested quantity mantenido por la instancia.
+   */
   requestedQuantity: string;
+  /**
+   * Valor de reserved quantity mantenido por la instancia.
+   */
   reservedQuantity: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de las reservas de inventario y sus líneas. */
 @Injectable()
 export class ReservationsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<InventoryReservations | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -51,6 +112,13 @@ export class ReservationsRepository {
     });
   }
 
+  /**
+   * Obtiene find lines by reservation.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reservationId - Identificador de reservation.
+   * @returns Resultado de find lines by reservation conforme al contrato `Promise<InventoryReservationLines[]>`.
+   */
   findLinesByReservation(
     em: EntityManager,
     reservationId: string,
@@ -60,6 +128,13 @@ export class ReservationsRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `InventoryReservations`.
+   */
   create(
     em: EntityManager,
     data: CreateReservationData,
@@ -82,6 +157,13 @@ export class ReservationsRepository {
     );
   }
 
+  /**
+   * Crea create line.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create line conforme al contrato `InventoryReservationLines`.
+   */
   createLine(
     em: EntityManager,
     data: CreateReservationLineData,

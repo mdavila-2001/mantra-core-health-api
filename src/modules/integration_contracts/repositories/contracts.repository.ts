@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para definir un contrato de integración (UC-31-01). */
 export interface CreateContractData {
+  /**
+   * Identificador asociado a external provider.
+   */
   externalProviderId: string;
+  /**
+   * Valor de contract code mantenido por la instancia.
+   */
   contractCode: string;
+  /**
+   * Identificador asociado a capability concept.
+   */
   capabilityConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a data classification concept.
+   */
   dataClassificationConceptId?: string;
+  /**
+   * Identificador asociado a legal basis concept.
+   */
   legalBasisConceptId?: string;
+  /**
+   * Identificador asociado a allowed purpose value set.
+   */
   allowedPurposeValueSetId?: string;
+  /**
+   * Identificador asociado a data use agreement.
+   */
   dataUseAgreementId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

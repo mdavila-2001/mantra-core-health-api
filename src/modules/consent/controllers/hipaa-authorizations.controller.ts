@@ -21,6 +21,11 @@ import {
 @ApiBearerAuth()
 @Controller('consent/hipaa-authorizations')
 export class HipaaAuthorizationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param hipaaService - Valor de hipaa service requerido por la operación.
+   */
   constructor(private readonly hipaaService: HipaaAuthorizationsService) {}
 
   /** UC-07-04. */

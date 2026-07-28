@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -20,6 +26,10 @@ const MACHINE = {
   statusConceptId: CONCEPTS.WF_DEF_ACTIVE,
 };
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -252,6 +262,13 @@ describe('TransitionExecutionService', () => {
     });
 
     describe('guardas', () => {
+      /**
+       * Ejecuta la operación with guard.
+       *
+       * @param d - Valor de d requerido por la operación.
+       * @param guard - Valor de guard requerido por la operación.
+       * @returns Resultado de with guard.
+       */
       function withGuard(d: ReturnType<typeof build>, guard: any) {
         d.machinesRepo.findTransitionByCommand.mockResolvedValue(TRANSITION);
         d.machinesRepo.findGuardsByTransition.mockResolvedValue([guard]);

@@ -21,6 +21,13 @@ const ORIGIN_BY_CODE: Record<string, string> = {
  */
 @Injectable()
 export class CommunityFeedService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param feedRepo - Valor de feed repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly feedRepo: FeedRepository,

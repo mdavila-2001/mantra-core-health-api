@@ -45,6 +45,9 @@ export const COMPATIBILITY_MODE = {
   FULL: 'FULL',
 } as const;
 
+/**
+ * Define el tipo de dominio compatibility mode.
+ */
 export type CompatibilityMode =
   (typeof COMPATIBILITY_MODE)[keyof typeof COMPATIBILITY_MODE];
 
@@ -60,6 +63,9 @@ export const VALIDATION_MODE = {
   LENIENT: 'LENIENT',
 } as const;
 
+/**
+ * Define el tipo de dominio schema validation mode.
+ */
 export type SchemaValidationMode =
   (typeof VALIDATION_MODE)[keyof typeof VALIDATION_MODE];
 
@@ -109,6 +115,9 @@ export const HEALTH_STATUS = {
   UNHEALTHY: 'UNHEALTHY',
 } as const;
 
+/**
+ * Define el tipo de dominio health status.
+ */
 export type HealthStatus = (typeof HEALTH_STATUS)[keyof typeof HEALTH_STATUS];
 
 /** Cómo reacciona la política de replicación ante una región caída. */

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ReportingRunsService } from './reporting-runs.service';
@@ -18,6 +24,10 @@ const SCHEDULE = '44444444-4444-4444-4444-444444444444';
 const CHANNEL = '55555555-5555-5555-5555-555555555555';
 const RECIPIENT = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -54,6 +64,12 @@ function build() {
   return { service, tx, runsRepo, definitionsRepo };
 }
 
+/**
+ * Ejecuta la operación active definition.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active definition conforme al contrato `any`.
+ */
 function activeDefinition(overrides: Record<string, unknown> = {}): any {
   return {
     id: DEFINITION,
@@ -66,6 +82,13 @@ function activeDefinition(overrides: Record<string, unknown> = {}): any {
 
 describe('ReportingRunsService', () => {
   describe('createExecution (UC-39-04)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param parameters - Valor de parameters requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, parameters: any[] = []) {
       d.definitionsRepo.findDefinitionById.mockResolvedValue(
         activeDefinition(),
@@ -170,6 +193,13 @@ describe('ReportingRunsService', () => {
   describe('materializeSnapshot (UC-39-05)', () => {
     const dto = { storageUri: 's3://reports/x.csv', rowCount: 120 };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param execution - Valor de execution requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       execution: Record<string, unknown> = {},
@@ -308,6 +338,12 @@ describe('ReportingRunsService', () => {
   });
 
   describe('schedulerTick (UC-39-07)', () => {
+    /**
+     * Ejecuta la operación due schedule.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de due schedule conforme al contrato `any`.
+     */
     function dueSchedule(overrides: Record<string, unknown> = {}): any {
       return {
         id: SCHEDULE,
@@ -390,6 +426,12 @@ describe('ReportingRunsService', () => {
   });
 
   describe('dispatchDistributions (UC-39-08)', () => {
+    /**
+     * Ejecuta la operación succeeded execution.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de succeeded execution conforme al contrato `any`.
+     */
     function succeededExecution(overrides: Record<string, unknown> = {}): any {
       return {
         id: EXECUTION,
@@ -499,6 +541,12 @@ describe('ReportingRunsService', () => {
   describe('subscribe (UC-39-09)', () => {
     const dto = { channelId: CHANNEL };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.runsRepo.findScheduleById.mockResolvedValue({
         id: SCHEDULE,
@@ -565,6 +613,12 @@ describe('ReportingRunsService', () => {
   });
 
   describe('retryExecution (UC-39-11)', () => {
+    /**
+     * Ejecuta la operación failed execution.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de failed execution conforme al contrato `any`.
+     */
     function failedExecution(overrides: Record<string, unknown> = {}): any {
       return {
         id: EXECUTION,

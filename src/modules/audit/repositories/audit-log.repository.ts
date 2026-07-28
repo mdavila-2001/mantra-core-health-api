@@ -5,15 +5,45 @@ import { AuditLog } from '../entities';
 
 /** Datos de un evento de auditoría (provenance) a sellar en la cadena. */
 export interface AppendAuditData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Valor de action mantenido por la instancia.
+   */
   action: string;
+  /**
+   * Valor de entity mantenido por la instancia.
+   */
   entity: string;
+  /**
+   * Identificador asociado a outcome concept.
+   */
   outcomeConceptId: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a branch.
+   */
   branchId?: string;
+  /**
+   * Identificador asociado a entity.
+   */
   entityId?: string;
+  /**
+   * Valor de ip mantenido por la instancia.
+   */
   ip?: string;
+  /**
+   * Identificador asociado a device.
+   */
   deviceId?: string;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
@@ -29,14 +59,41 @@ export interface AppendAuditData {
 export class AuditLogRepository {
   /** Serialización canónica del contenido sellado (estable entre append y verify). */
   static content(row: {
+    /**
+     * Identificador asociado a user.
+     */
     userId: string;
+    /**
+     * Identificador asociado a tenant.
+     */
     tenantId?: string;
+    /**
+     * Identificador asociado a branch.
+     */
     branchId?: string;
+    /**
+     * Valor de action mantenido por la instancia.
+     */
     action: string;
+    /**
+     * Valor de entity mantenido por la instancia.
+     */
     entity: string;
+    /**
+     * Identificador asociado a entity.
+     */
     entityId?: string;
+    /**
+     * Identificador asociado a outcome concept.
+     */
     outcomeConceptId: string;
+    /**
+     * Valor de ip mantenido por la instancia.
+     */
     ip?: string;
+    /**
+     * Identificador asociado a device.
+     */
     deviceId?: string;
   }): string {
     return JSON.stringify([
@@ -76,7 +133,10 @@ export class AuditLogRepository {
    * así la partición global (`tenant_id IS NULL`) obtiene una clave estable en
    * vez del NULL que devolvería `'audit:'||NULL`, que no bloquearía nada.
    */
-  private lockChainPartition(em: EntityManager, tenantId?: string): Promise<unknown> {
+  private lockChainPartition(
+    em: EntityManager,
+    tenantId?: string,
+  ): Promise<unknown> {
     return em.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [
       `audit:${tenantId ?? ''}`,
     ]);

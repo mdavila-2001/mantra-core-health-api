@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CanonicalResourcesService } from './canonical-resources.service';
@@ -18,6 +24,10 @@ const TENANT = '44444444-4444-4444-4444-444444444444';
 const TYPE = '55555555-5555-5555-5555-555555555555';
 const DOMAIN_ENTITY = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -48,6 +58,12 @@ function build() {
   return { service, tx, resourcesRepo, provenanceRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active resource.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active resource conforme al contrato `any`.
+ */
 function activeResource(overrides: Record<string, unknown> = {}): any {
   return {
     id: RESOURCE,
@@ -138,6 +154,13 @@ describe('CanonicalResourcesService', () => {
       relationshipTypeConceptId: TYPE,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param target - Valor de target requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       target = activeResource({ id: TARGET }),

@@ -16,6 +16,14 @@ import { UpsertSettingDto, SettingResponseDto } from '../dto';
 /** UC-14-07: configura (upsert) un ajuste de práctica por (practice_id, setting_key). */
 @Injectable()
 export class PracticeSettingsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practicesRepo - Valor de practices repo requerido por la operación.
+   * @param settingsRepo - Valor de settings repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: PracticesRepository,

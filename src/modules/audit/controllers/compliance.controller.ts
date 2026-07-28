@@ -9,6 +9,11 @@ import { CreateAuditExportDto, AuditExportResultDto } from '../dto';
 @ApiBearerAuth()
 @Controller('compliance')
 export class ComplianceController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param complianceService - Valor de compliance service requerido por la operación.
+   */
   constructor(private readonly complianceService: ComplianceService) {}
 
   /** UC-10-07. */

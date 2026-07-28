@@ -17,6 +17,11 @@ import { VerifyAccreditationDto, AccreditationResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('accreditations')
 export class AccreditationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param accreditationsService - Valor de accreditations service requerido por la operación.
+   */
   constructor(
     private readonly accreditationsService: PracticeAccreditationsService,
   ) {}

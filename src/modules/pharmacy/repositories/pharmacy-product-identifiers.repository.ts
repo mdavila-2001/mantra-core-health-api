@@ -4,13 +4,37 @@ import { PharmacyProductIdentifiers } from '../entities';
 
 /** Datos para registrar un identificador de producto (UC-24-04). */
 export interface CreateIdentifierData {
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   pharmacyProductId: string;
+  /**
+   * Identificador asociado a identifier type concept.
+   */
   identifierTypeConceptId: string;
+  /**
+   * Valor de identifier value mantenido por la instancia.
+   */
   identifierValue: string;
+  /**
+   * Identificador asociado a assigning authority tenant.
+   */
   assigningAuthorityTenantId?: string;
+  /**
+   * Identificador asociado a jurisdiction concept.
+   */
   jurisdictionConceptId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

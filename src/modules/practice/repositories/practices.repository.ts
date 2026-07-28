@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta una práctica (organización raíz). */
 export interface CreatePracticeData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a type concept.
+   */
   typeConceptId: string;
+  /**
+   * Identificador asociado a admin user.
+   */
   adminUserId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Valor de time zone mantenido por la instancia.
+   */
   timeZone?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -22,10 +49,24 @@ export interface CreatePracticeData {
  */
 @Injectable()
 export class PracticesRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<Practices | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<Practices | null> {
     return em.findOne(Practices, { id });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `Practices`.
+   */
   create(em: EntityManager, data: CreatePracticeData): Practices {
     return em.create(
       Practices,

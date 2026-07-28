@@ -37,6 +37,13 @@ import {
 @ApiBearerAuth()
 @Controller('tenants')
 export class TenantsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param tenantsService - Valor de tenants service requerido por la operación.
+   * @param branchesService - Valor de branches service requerido por la operación.
+   * @param membershipsService - Valor de memberships service requerido por la operación.
+   */
   constructor(
     private readonly tenantsService: DirectoryTenantsService,
     private readonly branchesService: DirectoryBranchesService,

@@ -5,8 +5,17 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Alta de una concesión de rol global ACTIVA. */
 export interface CreateRoleData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a role concept.
+   */
   roleConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

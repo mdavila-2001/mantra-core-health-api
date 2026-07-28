@@ -13,6 +13,9 @@ export type HipaaExpirationType = 'DATE' | 'EVENT';
 
 /** Cuerpo de `POST /consent/hipaa-authorizations` (UC-07-04). */
 export class CreateHipaaAuthorizationDto {
+  /**
+   * Identificador asociado a patient profile.
+   */
   @ApiProperty({
     description: 'Paciente titular (patient profile id)',
     format: 'uuid',
@@ -20,6 +23,9 @@ export class CreateHipaaAuthorizationDto {
   @IsUUID()
   patientProfileId!: string;
 
+  /**
+   * Identificador asociado a processing purpose.
+   */
   @ApiProperty({
     description: 'Propósito de procesamiento activo',
     format: 'uuid',
@@ -27,6 +33,9 @@ export class CreateHipaaAuthorizationDto {
   @IsUUID()
   processingPurposeId!: string;
 
+  /**
+   * Valor de recipient description mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Descripción del destinatario de la divulgación',
   })
@@ -34,15 +43,24 @@ export class CreateHipaaAuthorizationDto {
   @MaxLength(500)
   recipientDescription!: string;
 
+  /**
+   * Valor de information description mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Descripción de la información a divulgar' })
   @IsString()
   @MaxLength(4000)
   informationDescription!: string;
 
+  /**
+   * Valor de expiration type mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Tipo de expiración', enum: ['DATE', 'EVENT'] })
   @IsIn(['DATE', 'EVENT'])
   expirationType!: HipaaExpirationType;
 
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Fecha de expiración (ISO-8601) si expirationType=DATE',
   })
@@ -50,6 +68,9 @@ export class CreateHipaaAuthorizationDto {
   @IsISO8601()
   expiresAt?: string;
 
+  /**
+   * Valor de expiration event text mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Evento de expiración si expirationType=EVENT',
   })
@@ -58,6 +79,9 @@ export class CreateHipaaAuthorizationDto {
   @MaxLength(1000)
   expirationEventText?: string;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiPropertyOptional({ description: 'Tenant propietario', format: 'uuid' })
   @IsOptional()
   @IsUUID()

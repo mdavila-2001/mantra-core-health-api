@@ -32,6 +32,16 @@ import {
  */
 @Injectable()
 export class PharmacyPricingService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param pharmaciesRepo - Valor de pharmacies repo requerido por la operación.
+   * @param priceListsRepo - Valor de price lists repo requerido por la operación.
+   * @param productsRepo - Valor de products repo requerido por la operación.
+   * @param pricesRepo - Valor de prices repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly pharmaciesRepo: PharmaciesRepository,

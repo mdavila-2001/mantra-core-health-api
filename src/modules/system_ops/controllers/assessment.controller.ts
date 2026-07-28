@@ -36,6 +36,11 @@ import {
 @ApiBearerAuth()
 @Controller('admin/governance')
 export class AssessmentController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: AssessmentService) {}
 
   /** UC-11-11. */

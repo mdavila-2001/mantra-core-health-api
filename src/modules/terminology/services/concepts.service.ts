@@ -39,6 +39,18 @@ const DEFAULT_PROPERTY_DATA_TYPE = 'string';
  */
 @Injectable()
 export class ConceptsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conceptsRepo - Valor de concepts repo requerido por la operación.
+   * @param designationsRepo - Valor de designations repo requerido por la operación.
+   * @param relationshipsRepo - Valor de relationships repo requerido por la operación.
+   * @param valueSetsRepo - Valor de value sets repo requerido por la operación.
+   * @param codeSystemsRepo - Valor de code systems repo requerido por la operación.
+   * @param versionsRepo - Valor de versions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly conceptsRepo: CatalogConceptsRepository,

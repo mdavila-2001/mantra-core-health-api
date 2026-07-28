@@ -47,6 +47,14 @@ const DEFAULT_MATCH_TOLERANCE = '0.00';
  */
 @Injectable()
 export class ErpOperationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param operationsRepo - Valor de operations repo requerido por la operación.
+   * @param contractsRepo - Valor de contracts repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly operationsRepo: ErpOperationsRepository,

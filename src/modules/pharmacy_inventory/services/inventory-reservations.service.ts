@@ -18,8 +18,22 @@ import {
 } from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
+/**
+ * Ejecuta la operación num.
+ *
+ * @param v - Valor de v requerido por la operación.
+ * @returns Resultado de num conforme al contrato `number`.
+ */
 const num = (v: string | null | undefined): number =>
   v == null ? 0 : Number(v);
+/**
+ * Ejecuta la operación recompute.
+ *
+ * @param onHand - Valor de on hand requerido por la operación.
+ * @param reserved - Valor de reserved requerido por la operación.
+ * @param quarantine - Valor de quarantine requerido por la operación.
+ * @returns Resultado de recompute conforme al contrato `string`.
+ */
 const recompute = (
   onHand: string,
   reserved: string,
@@ -29,6 +43,15 @@ const recompute = (
 /** Reservas de stock (UC-25-04) y liberación de reservas vencidas (UC-25-05). */
 @Injectable()
 export class InventoryReservationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reservationsRepo - Valor de reservations repo requerido por la operación.
+   * @param stockRepo - Valor de stock repo requerido por la operación.
+   * @param ledgerRepo - Valor de ledger repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly reservationsRepo: ReservationsRepository,

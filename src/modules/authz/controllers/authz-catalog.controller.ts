@@ -13,6 +13,11 @@ import {
 @ApiBearerAuth()
 @Controller('authz')
 export class AuthzCatalogController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param catalogService - Valor de catalog service requerido por la operación.
+   */
   constructor(private readonly catalogService: AuthzCatalogService) {}
 
   /** UC-06-01. */

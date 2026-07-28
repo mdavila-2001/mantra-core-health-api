@@ -21,6 +21,11 @@ import { CreateAppealDecisionDto, CreatedResourceDto } from '../dto';
 @Roles('BILLING', 'FINANCE')
 @Controller('claim-disputes')
 export class AppealsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: AppealsService) {}
 
   /** UC-26-12. */

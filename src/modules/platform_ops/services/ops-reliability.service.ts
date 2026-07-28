@@ -47,6 +47,13 @@ const GUARDRAIL_KEY = 'maxUtilizationPercent';
  */
 @Injectable()
 export class OpsReliabilityService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reliabilityRepo - Valor de reliability repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly reliabilityRepo: OpsReliabilityRepository,
@@ -416,6 +423,14 @@ export class OpsReliabilityService {
     return `${whole}.${fraction}`;
   }
 
+  /**
+   * Ejecuta la operación attainment status.
+   *
+   * @param attained - Valor de attained requerido por la operación.
+   * @param target - Valor de target requerido por la operación.
+   * @param warningThreshold - Valor de warning threshold requerido por la operación.
+   * @returns Resultado de attainment status conforme al contrato `string`.
+   */
   private attainmentStatus(
     attained: string,
     target: string,
@@ -431,6 +446,12 @@ export class OpsReliabilityService {
     return CONCEPTS.SLO_FAIL;
   }
 
+  /**
+   * Obtiene read guardrail.
+   *
+   * @param costGuardrailsJson - Valor de cost guardrails json requerido por la operación.
+   * @returns Resultado de read guardrail conforme al contrato `number | undefined`.
+   */
   private readGuardrail(costGuardrailsJson: unknown): number | undefined {
     if (!costGuardrailsJson || typeof costGuardrailsJson !== 'object')
       return undefined;

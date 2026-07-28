@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { StorageOperationsService } from './storage-operations.service';
@@ -20,10 +26,20 @@ const PLACEMENT = '22222222-2222-2222-2222-222222222222';
 const SECONDARY = '33333333-3333-3333-3333-333333333333';
 const DATASET = '44444444-4444-4444-4444-444444444444';
 
+/**
+ * Ejecuta la operación past.
+ *
+ * @param days - Valor de days requerido por la operación.
+ * @returns Resultado de past conforme al contrato `string`.
+ */
 function past(days: number): string {
   return new Date(Date.now() - days * 86_400_000).toISOString();
 }
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -361,6 +377,13 @@ describe('StorageOperationsService', () => {
       projectionHash: 'abc123',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param quarantineOnMismatch - Valor de quarantine on mismatch requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, quarantineOnMismatch = true) {
       d.placementsRepo.findIntegrityPolicy.mockResolvedValue({
         id: 'policy-1',

@@ -40,6 +40,15 @@ import {
 @ApiBearerAuth()
 @Controller('pharmacy')
 export class PharmacyInventoryController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param locations - Valor de locations requerido por la operación.
+   * @param reservations - Valor de reservations requerido por la operación.
+   * @param transfers - Valor de transfers requerido por la operación.
+   * @param counts - Valor de counts requerido por la operación.
+   * @param recalls - Valor de recalls requerido por la operación.
+   */
   constructor(
     private readonly locations: InventoryLocationsService,
     private readonly reservations: InventoryReservationsService,

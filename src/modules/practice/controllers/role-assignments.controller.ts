@@ -20,6 +20,11 @@ import {
 @ApiBearerAuth()
 @Controller('role-assignments')
 export class RoleAssignmentsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param workforceService - Valor de workforce service requerido por la operación.
+   */
   constructor(private readonly workforceService: PracticeWorkforceService) {}
 
   /** UC-14-09. */

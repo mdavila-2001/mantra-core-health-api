@@ -5,9 +5,21 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Alta de un factor MFA en estado PENDING. */
 export interface CreateMfaFactorData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a factor type concept.
+   */
   factorTypeConceptId: string;
+  /**
+   * Valor de label mantenido por la instancia.
+   */
   label?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

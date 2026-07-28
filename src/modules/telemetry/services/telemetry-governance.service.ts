@@ -38,6 +38,17 @@ import {
  */
 @Injectable()
 export class TelemetryGovernanceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param purposesRepo - Valor de purposes repo requerido por la operación.
+   * @param schemasRepo - Valor de schemas repo requerido por la operación.
+   * @param disclosuresRepo - Valor de disclosures repo requerido por la operación.
+   * @param funnelsRepo - Valor de funnels repo requerido por la operación.
+   * @param funnelStepsRepo - Valor de funnel steps repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly purposesRepo: TrackingPurposeDefinitionsRepository,

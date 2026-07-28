@@ -76,6 +76,14 @@ const ACCOUNT_360_LIMIT = 50;
  */
 @Injectable()
 export class CrmServiceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param serviceRepo - Valor de service repo requerido por la operación.
+   * @param salesRepo - Valor de sales repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly serviceRepo: CrmServiceRepository,
@@ -262,7 +270,15 @@ export class CrmServiceService {
     caseId: string,
     dto: AddCaseCommentDto,
     actor: AuthenticatedUser,
-  ): Promise<{ id: string; caseId: string }> {
+  ): Promise<{
+    /**
+     * Identificador único de la instancia.
+     */
+    id: string; /**
+     * Identificador asociado a case.
+     */
+    caseId: string;
+  }> {
     this.logger.info(
       { operation: 'crm.case.comment', caseId },
       'Adding case comment',

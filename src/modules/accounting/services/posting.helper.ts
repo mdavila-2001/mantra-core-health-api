@@ -7,34 +7,97 @@ import { sumCents, fromCents } from './money';
 
 /** Una línea de un asiento generado por un flujo automático (devengo, activo, ...). */
 export interface PostingLine {
+  /**
+   * Identificador asociado a account.
+   */
   accountId: string;
+  /**
+   * Valor de direction mantenido por la instancia.
+   */
   direction: 'DEBIT' | 'CREDIT';
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Identificador asociado a cost center.
+   */
   costCenterId?: string;
+  /**
+   * Identificador asociado a profit center.
+   */
   profitCenterId?: string;
+  /**
+   * Identificador asociado a asset.
+   */
   assetId?: string;
+  /**
+   * Identificador asociado a liability.
+   */
   liabilityId?: string;
+  /**
+   * Identificador asociado a subledger account.
+   */
   subledgerAccountId?: string;
+  /**
+   * Valor de memo mantenido por la instancia.
+   */
   memo?: string;
 }
 
 /** Parámetros de un asiento posteado por un flujo automático. */
 export interface PostingRequest {
+  /**
+   * Identificador asociado a practice.
+   */
   practiceId: string;
+  /**
+   * Identificador asociado a transaction type concept.
+   */
   transactionTypeConceptId: string;
+  /**
+   * Valor de transaction number mantenido por la instancia.
+   */
   transactionNumber: string;
+  /**
+   * Valor de transaction date mantenido por la instancia.
+   */
   transactionDate: Date;
+  /**
+   * Identificador asociado a fiscal period.
+   */
   fiscalPeriodId?: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   description?: string;
+  /**
+   * Valor de reference mantenido por la instancia.
+   */
   reference?: string;
+  /**
+   * Valor de lines mantenido por la instancia.
+   */
   lines: PostingLine[];
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId: string;
 }
 
 /** Resultado del posteo: id de la transacción y de sus líneas (en orden). */
 export interface PostingResult {
+  /**
+   * Identificador asociado a transaction.
+   */
   transactionId: string;
+  /**
+   * Valor de entry ids mantenido por la instancia.
+   */
   entryIds: string[];
 }
 
@@ -45,8 +108,21 @@ export interface PostingResult {
  */
 @Injectable()
 export class PostingHelper {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param journalRepo - Valor de journal repo requerido por la operación.
+   */
   constructor(private readonly journalRepo: JournalRepository) {}
 
+  /**
+   * Ejecuta la operación post.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param req - Valor de req requerido por la operación.
+   * @returns Resultado de post conforme al contrato `Promise<PostingResult>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async post(tx: EntityManager, req: PostingRequest): Promise<PostingResult> {
     const debit = sumCents(
       req.lines.filter((l) => l.direction === 'DEBIT').map((l) => l.amount),
@@ -115,6 +191,12 @@ export class PostingHelper {
     return { transactionId: transaction.id, entryIds };
   }
 
+  /**
+   * Crea generate number.
+   *
+   * @param prefix - Valor de prefix requerido por la operación.
+   * @returns Resultado de generate number conforme al contrato `string`.
+   */
   generateNumber(prefix: string): string {
     return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
   }

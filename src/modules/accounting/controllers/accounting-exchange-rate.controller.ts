@@ -9,6 +9,11 @@ import { RegisterExchangeRateDto, ExchangeRateResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('accounting')
 export class AccountingExchangeRateController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param exchangeRateService - Valor de exchange rate service requerido por la operación.
+   */
   constructor(private readonly exchangeRateService: ExchangeRateService) {}
 
   /** UC-16-14. */

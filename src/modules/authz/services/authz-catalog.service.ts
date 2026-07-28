@@ -39,6 +39,14 @@ export const SCOPE_CONCEPT: Record<PermissionScope, string> = {
  */
 @Injectable()
 export class AuthzCatalogService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param categoriesRepo - Valor de categories repo requerido por la operación.
+   * @param permissionsRepo - Valor de permissions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly categoriesRepo: PermissionCategoriesRepository,

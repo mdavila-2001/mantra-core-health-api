@@ -34,6 +34,14 @@ import {
 @ApiBearerAuth()
 @Controller('billing')
 export class BillingOperationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param ledgerService - Valor de ledger service requerido por la operación.
+   * @param reconciliationService - Valor de reconciliation service requerido por la operación.
+   * @param dunningService - Valor de dunning service requerido por la operación.
+   * @param kpiService - Valor de kpi service requerido por la operación.
+   */
   constructor(
     private readonly ledgerService: LedgerService,
     private readonly reconciliationService: ReconciliationService,

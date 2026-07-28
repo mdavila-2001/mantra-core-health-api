@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SeriesIngestService } from './series-ingest.service';
@@ -12,6 +18,10 @@ const BATCH_ID = '44444444-4444-4444-4444-444444444444';
 const ACCOUNT_ID = '55555555-5555-5555-5555-555555555555';
 const CAMPAIGN_ID = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };

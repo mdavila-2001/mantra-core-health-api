@@ -24,6 +24,15 @@ import { NormalizeReadingDto, NormalizeReadingResponseDto } from '../dto';
  */
 @Injectable()
 export class VitalNormalizationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ingestRepo - Valor de ingest repo requerido por la operación.
+   * @param observationsRepo - Valor de observations repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly ingestRepo: SeriesIngestRepository,

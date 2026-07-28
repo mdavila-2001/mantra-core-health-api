@@ -9,6 +9,13 @@ import { PINV } from '../pharmacy_inventory.concepts';
 /** Bootstrap de ubicaciones de inventario (parent de stock/ledger/conteo). */
 @Injectable()
 export class InventoryLocationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param locationsRepo - Valor de locations repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly locationsRepo: LocationsRepository,

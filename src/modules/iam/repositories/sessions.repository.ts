@@ -5,11 +5,29 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Alta de una sesión al abrir o rotar tokens. */
 export interface CreateSessionData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a token.
+   */
   tokenId: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt: Date;
+  /**
+   * Identificador asociado a device.
+   */
   deviceId?: string;
+  /**
+   * Valor de ip mantenido por la instancia.
+   */
   ip?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

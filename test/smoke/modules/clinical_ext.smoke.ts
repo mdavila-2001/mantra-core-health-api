@@ -54,7 +54,12 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
     expectedStatus: 201,
     capture: (b, c) => {
       c.vars.cextCareTeamId = String(b.id);
-      const members = (b.members ?? []) as Array<{ id: string }>;
+      const members = (b.members ?? []) as Array<{
+        /**
+         * Identificador único de la instancia.
+         */
+        id: string;
+      }>;
       c.vars.cextMember1 = String(members[0]?.id);
       c.vars.cextMember2 = String(members[1]?.id);
     },
@@ -172,7 +177,12 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
     }),
     expectedStatus: 201,
     capture: (b, c) => {
-      const alerts = (b.alerts ?? []) as Array<{ id: string }>;
+      const alerts = (b.alerts ?? []) as Array<{
+        /**
+         * Identificador único de la instancia.
+         */
+        id: string;
+      }>;
       c.vars.cextAlertId = String(alerts[0]?.id);
     },
   },
@@ -188,7 +198,12 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
     }),
     expectedStatus: 201,
     capture: (b, c) => {
-      const alerts = (b.alerts ?? []) as Array<{ id: string }>;
+      const alerts = (b.alerts ?? []) as Array<{
+        /**
+         * Identificador único de la instancia.
+         */
+        id: string;
+      }>;
       c.vars.cextAlertId2 = String(alerts[0]?.id);
     },
   },

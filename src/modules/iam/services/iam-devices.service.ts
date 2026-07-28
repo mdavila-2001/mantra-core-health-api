@@ -26,6 +26,15 @@ const PLATFORM_CONCEPT: Readonly<Record<DevicePlatform, string>> = {
 /** Registro de dispositivos de un usuario (UC-01-05). */
 @Injectable()
 export class IamDevicesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param usersRepo - Valor de users repo requerido por la operación.
+   * @param devicesRepo - Valor de devices repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly usersRepo: UsersRepository,

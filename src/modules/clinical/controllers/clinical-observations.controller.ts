@@ -23,6 +23,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical/observations')
 export class ClinicalObservationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param observationsService - Valor de observations service requerido por la operación.
+   */
   constructor(private readonly observationsService: ObservationsService) {}
 
   /** UC-08-03. */

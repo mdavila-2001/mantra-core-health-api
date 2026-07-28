@@ -40,6 +40,15 @@ import {
 @ApiBearerAuth()
 @Controller('iam/users')
 export class IamUsersController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param usersService - Valor de users service requerido por la operación.
+   * @param credentialsService - Valor de credentials service requerido por la operación.
+   * @param mfaService - Valor de mfa service requerido por la operación.
+   * @param devicesService - Valor de devices service requerido por la operación.
+   * @param assistedRegistrationService - Valor de assisted registration service requerido por la operación.
+   */
   constructor(
     private readonly usersService: IamUsersService,
     private readonly credentialsService: IamCredentialsService,

@@ -110,6 +110,14 @@ const ALDRETE_DISCHARGE_THRESHOLD = 9;
  */
 @Injectable()
 export class PeriopIntraopService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param intraopRepo - Valor de intraop repo requerido por la operación.
+   * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly intraopRepo: PeriopIntraopRepository,

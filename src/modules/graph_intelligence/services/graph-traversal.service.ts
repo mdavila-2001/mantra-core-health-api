@@ -27,12 +27,46 @@ import {
 
 /** Lo que un recorrido acumula mientras avanza. */
 interface TraversalResult {
-  visited: Map<string, { node: GraphNodes; depth: number }>;
+  /**
+   * Valor de visited mantenido por la instancia.
+   */
+  visited: Map<
+    string,
+    {
+      /**
+       * Valor de node mantenido por la instancia.
+       */
+      node: GraphNodes; /**
+       * Valor de depth mantenido por la instancia.
+       */
+      depth: number;
+    }
+  >;
+  /**
+   * Valor de edge count mantenido por la instancia.
+   */
   edgeCount: number;
+  /**
+   * Valor de depth reached mantenido por la instancia.
+   */
   depthReached: number;
+  /**
+   * Valor de truncated mantenido por la instancia.
+   */
   truncated: boolean;
   /** Nodo padre de cada visitado, para reconstruir el camino. */
-  parent: Map<string, { nodeId: string; edgeId: string }>;
+  parent: Map<
+    string,
+    {
+      /**
+       * Identificador asociado a node.
+       */
+      nodeId: string; /**
+       * Identificador asociado a edge.
+       */
+      edgeId: string;
+    }
+  >;
 }
 
 /**
@@ -45,6 +79,15 @@ interface TraversalResult {
  */
 @Injectable()
 export class GraphTraversalService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param analyticsRepo - Valor de analytics repo requerido por la operación.
+   * @param projectionRepo - Valor de projection repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly analyticsRepo: GraphAnalyticsRepository,
@@ -352,10 +395,30 @@ export class GraphTraversalService {
       scope,
     );
 
-    const visited = new Map<string, { node: GraphNodes; depth: number }>([
-      [start.nodeId, { node: start, depth: 0 }],
-    ]);
-    const parent = new Map<string, { nodeId: string; edgeId: string }>();
+    const visited = new Map<
+      string,
+      {
+        /**
+         * Valor de node mantenido por la instancia.
+         */
+        node: GraphNodes; /**
+         * Valor de depth mantenido por la instancia.
+         */
+        depth: number;
+      }
+    >([[start.nodeId, { node: start, depth: 0 }]]);
+    const parent = new Map<
+      string,
+      {
+        /**
+         * Identificador asociado a node.
+         */
+        nodeId: string; /**
+         * Identificador asociado a edge.
+         */
+        edgeId: string;
+      }
+    >();
 
     let frontier = [start.nodeId];
     let edgeCount = 0;
@@ -412,6 +475,14 @@ export class GraphTraversalService {
     return { visited, edgeCount, depthReached, truncated, parent };
   }
 
+  /**
+   * Ejecuta la operación require active scope.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param dto - Datos validados de la operación.
+   * @returns Resultado de require active scope conforme al contrato `Promise<GraphAccessScopes>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async requireActiveScope(
     tx: EntityManager,
     dto: TraverseDto,
@@ -450,6 +521,16 @@ export class GraphTraversalService {
     return scope;
   }
 
+  /**
+   * Ejecuta la operación require start node.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param startNodeId - Identificador de start node.
+   * @param tenantId - Identificador de tenant.
+   * @param scope - Valor de scope requerido por la operación.
+   * @returns Resultado de require start node conforme al contrato `Promise<GraphNodes>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async requireStartNode(
     tx: EntityManager,
     startNodeId: string,
@@ -471,6 +552,13 @@ export class GraphTraversalService {
     return node;
   }
 
+  /**
+   * Obtiene is visible.
+   *
+   * @param node - Valor de node requerido por la operación.
+   * @param scope - Valor de scope requerido por la operación.
+   * @returns Resultado de is visible conforme al contrato `boolean`.
+   */
   private isVisible(node: GraphNodes, scope: GraphAccessScopes): boolean {
     if (node.lifecycleState !== 'active') return false;
     return scope.allowedNodeTypes.includes(node.nodeType);

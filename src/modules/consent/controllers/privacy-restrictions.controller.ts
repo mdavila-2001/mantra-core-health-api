@@ -12,6 +12,11 @@ import {
 @ApiBearerAuth()
 @Controller('consent/privacy-restrictions')
 export class PrivacyRestrictionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param restrictionsService - Valor de restrictions service requerido por la operación.
+   */
   constructor(
     private readonly restrictionsService: PrivacyRestrictionsService,
   ) {}

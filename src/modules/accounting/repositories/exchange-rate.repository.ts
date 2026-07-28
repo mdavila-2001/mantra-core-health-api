@@ -20,14 +20,39 @@ export class ExchangeRateRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `ExchangeRates`.
+   */
   create(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a from currency concept.
+       */
       fromCurrencyConceptId: string;
+      /**
+       * Identificador asociado a to currency concept.
+       */
       toCurrencyConceptId: string;
+      /**
+       * Valor de rate mantenido por la instancia.
+       */
       rate: string;
+      /**
+       * Valor de valid on mantenido por la instancia.
+       */
       validOn: Date;
+      /**
+       * Valor de source mantenido por la instancia.
+       */
       source?: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): ExchangeRates {

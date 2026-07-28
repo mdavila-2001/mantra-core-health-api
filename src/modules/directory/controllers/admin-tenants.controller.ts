@@ -27,6 +27,11 @@ import {
 @ApiBearerAuth()
 @Controller('admin/tenants')
 export class AdminTenantsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param tenantsService - Valor de tenants service requerido por la operación.
+   */
   constructor(private readonly tenantsService: DirectoryTenantsService) {}
 
   /** UC-04-01. */

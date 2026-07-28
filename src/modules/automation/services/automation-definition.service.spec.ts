@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -10,6 +16,10 @@ const WORKFLOW_ID = '11111111-1111-1111-1111-111111111111';
 const AGENT_ID = '22222222-2222-2222-2222-222222222222';
 const TOOL_ID = '33333333-3333-3333-3333-333333333333';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -194,6 +204,13 @@ describe('AutomationDefinitionService', () => {
       workflowId: WORKFLOW_ID,
     } as any;
 
+    /**
+     * Ejecuta la operación with workflow.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param state - Valor de state requerido por la operación.
+     * @returns Resultado de with workflow.
+     */
     function withWorkflow(
       d: ReturnType<typeof build>,
       state = CONCEPTS.AUTO_WORKFLOW_ACTIVE,

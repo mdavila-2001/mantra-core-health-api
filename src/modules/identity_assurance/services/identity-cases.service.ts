@@ -57,6 +57,19 @@ const CANCELLABLE_CHECK_STATES = [IDA.CHECK_PENDING, IDA.CHECK_IN_PROGRESS];
  */
 @Injectable()
 export class IdentityCasesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param policiesRepo - Valor de policies repo requerido por la operación.
+   * @param evidenceRepo - Valor de evidence repo requerido por la operación.
+   * @param checksRepo - Valor de checks repo requerido por la operación.
+   * @param fraudRepo - Valor de fraud repo requerido por la operación.
+   * @param reviewRepo - Valor de review repo requerido por la operación.
+   * @param assertionsRepo - Valor de assertions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly casesRepo: IdentityVerificationCasesRepository,
@@ -419,6 +432,14 @@ export class IdentityCasesService {
     });
   }
 
+  /**
+   * Obtiene load case.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param caseId - Identificador de case.
+   * @returns Resultado de load case.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async loadCase(tx: EntityManager, caseId: string) {
     const kase = await this.casesRepo.findById(tx, caseId);
     if (!kase)

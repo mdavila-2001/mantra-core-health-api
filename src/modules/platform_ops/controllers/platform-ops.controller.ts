@@ -54,6 +54,14 @@ import {
 @ApiBearerAuth()
 @Controller('ops')
 export class PlatformOpsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param releasesService - Valor de releases service requerido por la operación.
+   * @param incidentsService - Valor de incidents service requerido por la operación.
+   * @param reliabilityService - Valor de reliability service requerido por la operación.
+   * @param practicesService - Valor de practices service requerido por la operación.
+   */
   constructor(
     private readonly releasesService: OpsReleasesService,
     private readonly incidentsService: OpsIncidentsService,

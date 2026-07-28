@@ -21,6 +21,15 @@ import { HistoryQueryDto, HistoryTimelineDto } from '../dto';
  */
 @Injectable()
 export class AuditHistoryService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param historyRepo - Valor de history repo requerido por la operación.
+   * @param dataAccessRepo - Valor de data access repo requerido por la operación.
+   * @param auditLogRepo - Valor de audit log repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly historyRepo: HistoryRepository,

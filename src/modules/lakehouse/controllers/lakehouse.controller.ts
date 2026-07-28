@@ -32,6 +32,12 @@ import {
 @ApiBearerAuth()
 @Controller('lakehouse')
 export class LakehouseController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param catalogService - Valor de catalog service requerido por la operación.
+   * @param transformationService - Valor de transformation service requerido por la operación.
+   */
   constructor(
     private readonly catalogService: LakehouseCatalogService,
     private readonly transformationService: TransformationService,

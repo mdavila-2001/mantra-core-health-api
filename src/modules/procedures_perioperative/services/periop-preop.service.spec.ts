@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopPreopService } from './periop-preop.service';
@@ -18,6 +24,10 @@ const PLAN = '44444444-4444-4444-4444-444444444444';
 const ORDER = '55555555-5555-5555-5555-555555555555';
 const ITEM = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -57,12 +67,24 @@ function build() {
   return { service, tx, preopRepo, casesRepo, logger };
 }
 
+/**
+ * Ejecuta la operación scheduled case.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de scheduled case conforme al contrato `any`.
+ */
 function scheduledCase(overrides: Record<string, unknown> = {}): any {
   return { id: CASE, statusConceptId: CONCEPTS.CASE_SCHEDULED, ...overrides };
 }
 
 describe('PeriopPreopService', () => {
   describe('createAssessment (UC-53-03)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         assessmentType: 'ANESTHESIA' as const,
@@ -74,6 +96,12 @@ describe('PeriopPreopService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.casesRepo.findCaseForUpdate.mockResolvedValue(scheduledCase());
       d.preopRepo.findAssessmentByCase.mockResolvedValue(null);
@@ -161,6 +189,12 @@ describe('PeriopPreopService', () => {
   describe('verifyOrders (UC-53-04)', () => {
     const dto = { orderIds: [ORDER], verifiedByProfileId: PROFILE };
 
+    /**
+     * Ejecuta la operación order.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de order conforme al contrato `any`.
+     */
     function order(overrides: Record<string, unknown> = {}): any {
       return {
         id: ORDER,
@@ -241,6 +275,12 @@ describe('PeriopPreopService', () => {
   });
 
   describe('submitChecklistPhase (UC-53-05)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         phase: 'TIME_OUT' as const,
@@ -252,6 +292,13 @@ describe('PeriopPreopService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param items - Valor de items requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       items: any[] = [{ id: ITEM, isMandatory: true }],
@@ -367,6 +414,12 @@ describe('PeriopPreopService', () => {
   });
 
   describe('createAnesthesiaPlan (UC-53-06)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         anesthesiologistProfileId: PROFILE,
@@ -381,6 +434,12 @@ describe('PeriopPreopService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.casesRepo.findCaseForUpdate.mockResolvedValue(scheduledCase());
       d.preopRepo.findAnesthesiaPlanByCase.mockResolvedValue(null);
@@ -502,6 +561,12 @@ describe('PeriopPreopService', () => {
   });
 
   describe('recordAnesthesiaEvent (UC-53-07)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         eventType: 'MEDICATION' as const,
@@ -510,6 +575,13 @@ describe('PeriopPreopService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param planStatus - Valor de plan status requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       planStatus = CONCEPTS.PLAN_APPROVED,

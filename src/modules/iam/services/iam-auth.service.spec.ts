@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { UnauthorizedException } from '@nestjs/common';
 import * as argon2 from 'argon2';
@@ -14,6 +20,10 @@ beforeAll(async () => {
   PASSWORD_HASH = await argon2.hash(PASSWORD);
 });
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn(), find: mockFn(() => []) };
   const em = {

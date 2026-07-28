@@ -5,10 +5,25 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Alta de un bloqueo de cuenta ACTIVO. */
 export interface CreateLockoutData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId: string;
+  /**
+   * Valor de failed attempts mantenido por la instancia.
+   */
   failedAttempts?: number;
+  /**
+   * Valor de source ip mantenido por la instancia.
+   */
   sourceIp?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

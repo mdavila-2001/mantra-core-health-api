@@ -21,6 +21,11 @@ import { TrackedLinkClickResponseDto } from '../dto';
 @ApiTags('marketing')
 @Controller('r')
 export class TrackedLinkRedirectController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param journeysService - Valor de journeys service requerido por la operación.
+   */
   constructor(private readonly journeysService: MarketingJourneysService) {}
 
   /**

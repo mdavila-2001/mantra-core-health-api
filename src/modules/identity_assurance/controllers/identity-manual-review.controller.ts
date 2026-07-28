@@ -17,6 +17,11 @@ import { ReviewDecisionDto, ReviewDecisionResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('identity/manual-review')
 export class IdentityManualReviewController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param reviewService - Valor de review service requerido por la operación.
+   */
   constructor(private readonly reviewService: IdentityManualReviewService) {}
 
   /** UC-27-09. */

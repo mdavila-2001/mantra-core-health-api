@@ -9,19 +9,52 @@ import {
 
 /** Una revisión de la línea de tiempo de un registro (proyección de lectura). */
 export interface HistoryRevision {
+  /**
+   * Valor de revision no mantenido por la instancia.
+   */
   revisionNo?: number;
+  /**
+   * Identificador asociado a operation concept.
+   */
   operationConceptId: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a changed by user.
+   */
   changedByUserId?: string;
+  /**
+   * Identificador asociado a change reason concept.
+   */
   changeReasonConceptId?: string;
+  /**
+   * Valor de recorded at mantenido por la instancia.
+   */
   recordedAt: Date;
+  /**
+   * Valor de data snapshot mantenido por la instancia.
+   */
   dataSnapshot: unknown;
 }
 
+/**
+ * Describe el contrato estructural de history binding.
+ */
 interface HistoryBinding {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /**
+   * Valor de entity mantenido por la instancia.
+   */
   entity: any;
+  /**
+   * Valor de source field mantenido por la instancia.
+   */
   sourceField: string;
 }
 

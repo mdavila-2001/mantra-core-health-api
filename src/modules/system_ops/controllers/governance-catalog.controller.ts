@@ -32,6 +32,11 @@ import {
 @ApiBearerAuth()
 @Controller('admin/governance')
 export class GovernanceCatalogController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: GovernanceCatalogService) {}
 
   /** UC-11-01. */

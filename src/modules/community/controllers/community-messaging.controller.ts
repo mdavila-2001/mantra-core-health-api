@@ -24,6 +24,11 @@ import {
 @ApiBearerAuth()
 @Controller('community/conversations')
 export class CommunityMessagingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CommunityMessagingService) {}
 
   /** Bootstrap: crea una conversación con participantes. */

@@ -50,6 +50,12 @@ import {
 @ApiBearerAuth()
 @Controller('auth-providers')
 export class AuthProvidersController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param configService - Valor de config service requerido por la operación.
+   * @param loginService - Valor de login service requerido por la operación.
+   */
   constructor(
     private readonly configService: AuthProvidersConfigService,
     private readonly loginService: FederatedLoginService,

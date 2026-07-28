@@ -6,11 +6,29 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar un concepto de catálogo. */
 export interface CreateCatalogConceptData {
+  /**
+   * Identificador asociado a code system version.
+   */
   codeSystemVersionId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de display mantenido por la instancia.
+   */
   display: string;
+  /**
+   * Valor de definition mantenido por la instancia.
+   */
   definition?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

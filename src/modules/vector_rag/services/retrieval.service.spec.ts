@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { RetrievalService } from './retrieval.service';
@@ -13,6 +19,10 @@ const CHUNK_ID = '55555555-5555-5555-5555-555555555555';
 const PATIENT_ID = '66666666-6666-6666-6666-666666666666';
 const CONSENT_ID = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -72,6 +82,12 @@ function build() {
   };
 }
 
+/**
+ * Ejecuta la operación policy.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de policy.
+ */
 function policy(overrides: any = {}) {
   return {
     id: POLICY_ID,
@@ -86,6 +102,12 @@ function policy(overrides: any = {}) {
   };
 }
 
+/**
+ * Ejecuta la operación session.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de session.
+ */
 function session(overrides: any = {}) {
   return {
     id: SESSION_ID,
@@ -97,6 +119,12 @@ function session(overrides: any = {}) {
   };
 }
 
+/**
+ * Ejecuta la operación document.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de document.
+ */
 function document(overrides: any = {}) {
   return {
     id: 'doc-1',

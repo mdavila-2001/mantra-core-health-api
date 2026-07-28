@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { VectorGovernanceService } from './vector-governance.service';
@@ -10,6 +16,10 @@ const MODEL_ID = '22222222-2222-2222-2222-222222222222';
 const COLLECTION_ID = '33333333-3333-3333-3333-333333333333';
 const POLICY_ID = '44444444-4444-4444-4444-444444444444';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -54,6 +64,12 @@ function build() {
   return { service, em, tx, catalogRepo, outbox, logger };
 }
 
+/**
+ * Ejecuta la operación model.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de model.
+ */
 function model(overrides: any = {}) {
   return {
     id: MODEL_ID,

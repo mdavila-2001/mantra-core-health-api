@@ -21,6 +21,11 @@ import {
 @ApiBearerAuth()
 @Controller('delegated-permission-sets')
 export class DelegatedPermissionSetsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: PermissionSetsService) {}
 
   /** UC-29-02: publica el set (versión 1). */

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { AuthProvidersConfigService } from './auth-providers-config.service';
@@ -17,6 +23,10 @@ const ROLE = '33333333-3333-3333-3333-333333333333';
 const CONFIG = '44444444-4444-4444-4444-444444444444';
 const KEY = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -52,6 +62,12 @@ function build() {
   return { service, tx, providersRepo, logger };
 }
 
+/**
+ * Ejecuta la operación oidc provider.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de oidc provider conforme al contrato `any`.
+ */
 function oidcProvider(overrides: Record<string, unknown> = {}): any {
   return {
     id: PROVIDER,
@@ -136,6 +152,13 @@ describe('AuthProvidersConfigService', () => {
       jwksUri: 'https://idp.example/jwks',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param provider - Valor de provider requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, provider = oidcProvider()) {
       d.providersRepo.findProviderForUpdate.mockResolvedValue(provider);
       d.providersRepo.findProtocolConfigForUpdate.mockResolvedValue(null);
@@ -359,6 +382,13 @@ describe('AuthProvidersConfigService', () => {
   describe('rotateSigningKey (UC-40-11)', () => {
     const dto: any = { keyId: 'kid-2', algorithm: 'RS256', publicKey: 'pem-2' };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param active - Valor de active requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, active: any[]) {
       d.providersRepo.findProviderForUpdate.mockResolvedValue(oidcProvider());
       d.providersRepo.findSigningKey.mockResolvedValue(null);
@@ -442,6 +472,13 @@ describe('AuthProvidersConfigService', () => {
       { sourceClaim: 'email', targetAttribute: 'email', required: true },
     ];
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param previous - Valor de previous requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, previous: any[] = []) {
       d.providersRepo.findProviderForUpdate.mockResolvedValue(oidcProvider());
       d.providersRepo.findMappingsForUpdate.mockResolvedValue(previous);

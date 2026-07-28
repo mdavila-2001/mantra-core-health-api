@@ -24,6 +24,11 @@ import {
 @ApiBearerAuth()
 @Controller('authz/roles')
 export class AuthzRolesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param rolesService - Valor de roles service requerido por la operación.
+   */
   constructor(private readonly rolesService: AuthzRolesService) {}
 
   /** UC-06-03. */

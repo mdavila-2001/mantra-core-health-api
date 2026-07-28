@@ -54,6 +54,13 @@ const DEFAULT_PRIORITY = 5;
  */
 @Injectable()
 export class NotificationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param notificationsRepo - Valor de notifications repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly notificationsRepo: NotificationsRepository,
@@ -570,9 +577,23 @@ export class NotificationsService {
   private inQuietHours(quietHoursJson: unknown, at: Date): boolean {
     if (!quietHoursJson || typeof quietHoursJson !== 'object') return false;
 
-    const { start, end } = quietHoursJson as { start?: unknown; end?: unknown };
+    const { start, end } = quietHoursJson as {
+      /**
+       * Valor de start mantenido por la instancia.
+       */
+      start?: unknown; /**
+       * Valor de end mantenido por la instancia.
+       */
+      end?: unknown;
+    };
     if (typeof start !== 'string' || typeof end !== 'string') return false;
 
+    /**
+     * Transforma to minutes.
+     *
+     * @param value - Valor de value requerido por la operación.
+     * @returns Resultado de to minutes conforme al contrato `number | undefined`.
+     */
     const toMinutes = (value: string): number | undefined => {
       const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
       if (!match) return undefined;

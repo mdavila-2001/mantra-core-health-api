@@ -5,6 +5,10 @@ import { type AuthenticatedUser } from '../../../common';
 const user: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 
 describe('TerminologyConceptsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const service = {
       addDesignation: jest.fn(),

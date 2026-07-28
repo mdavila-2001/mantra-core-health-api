@@ -74,6 +74,19 @@ const BLOCK_REASON_BY_CODE: Record<string, string> = {
  */
 @Injectable()
 export class CommunitySocialService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profilesRepo - Valor de profiles repo requerido por la operación.
+   * @param postsRepo - Valor de posts repo requerido por la operación.
+   * @param commentsRepo - Valor de comments repo requerido por la operación.
+   * @param reactionsRepo - Valor de reactions repo requerido por la operación.
+   * @param bookmarksRepo - Valor de bookmarks repo requerido por la operación.
+   * @param followsRepo - Valor de follows repo requerido por la operación.
+   * @param blocksRepo - Valor de blocks repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly profilesRepo: PublicProfilesRepository,

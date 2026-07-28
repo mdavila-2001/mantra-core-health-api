@@ -6,27 +6,51 @@ import type { StoredDocument } from '../repositories';
  * hexadecimal de cadena para no filtrar el tipo `ObjectId` del driver al cliente.
  */
 export class DocumentResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ description: 'Identificador del documento (ObjectId hex)' })
   id!: string;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({ format: 'uuid' })
   tenantId!: string;
 
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
   @ApiProperty()
   documentType!: string;
 
+  /**
+   * Valor de payload mantenido por la instancia.
+   */
   @ApiProperty({ type: 'object', additionalProperties: true })
   payload!: Record<string, unknown>;
 
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Versión vigente (concurrencia optimista)' })
   version!: number;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @ApiProperty({ type: String, format: 'date-time' })
   updatedAt!: Date;
 
+  /**
+   * Fecha y hora de la eliminación lógica, si corresponde.
+   */
   @ApiPropertyOptional({
     type: String,
     format: 'date-time',

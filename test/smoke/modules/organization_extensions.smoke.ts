@@ -24,11 +24,29 @@ const runUuid = (u: number, tag: string): string =>
   `00000000-0000-4000-8000-${tag}${String(u).padStart(11, '0').slice(-11)}`;
 
 // hospitals.tenant_id es FK a directory.tenants → usar el tenant sembrado.
+/**
+ * Ejecuta la operación hospital tenant.
+ *
+ * @param c - Valor de c requerido por la operación.
+ * @returns Resultado de hospital tenant.
+ */
 const hospitalTenant = (c: SmokeCtx) => c.tenantId;
+/**
+ * Ejecuta la operación hospital practice.
+ *
+ * @param c - Valor de c requerido por la operación.
+ * @returns Resultado de hospital practice.
+ */
 const hospitalPractice = (c: SmokeCtx) => c.vars.pracPracticeId;
 // data_boundaries.tenant_id también es FK a directory.tenants → tenant sembrado.
 // (Las afiliaciones exigen dos tenants distintos; con uno solo su happy-path queda
 // documentado como limitación por falta de un segundo tenant sembrado.)
+/**
+ * Ejecuta la operación participating tenant.
+ *
+ * @param c - Valor de c requerido por la operación.
+ * @returns Resultado de participating tenant.
+ */
 const participatingTenant = (c: SmokeCtx) => c.tenantId;
 
 export const ORGANIZATION_EXTENSIONS_SMOKE: SmokeCase[] = [

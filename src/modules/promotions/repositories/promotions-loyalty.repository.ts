@@ -16,102 +16,351 @@ import {
 import { Wallets, WalletLedgerEntries } from '../../payments/entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create loyalty program data.
+ */
 export interface CreateLoyaltyProgramData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a program type concept.
+   */
   programTypeConceptId: string;
+  /**
+   * Valor de points currency name mantenido por la instancia.
+   */
   pointsCurrencyName?: string;
+  /**
+   * Valor de point to currency rate mantenido por la instancia.
+   */
   pointToCurrencyRate?: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Identificador asociado a expiry policy concept.
+   */
   expiryPolicyConceptId?: string;
+  /**
+   * Valor de points expiry days mantenido por la instancia.
+   */
   pointsExpiryDays?: number;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create tier data.
+ */
 export interface CreateTierData {
+  /**
+   * Identificador asociado a loyalty program.
+   */
   loyaltyProgramId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Valor de min points mantenido por la instancia.
+   */
   minPoints: string;
+  /**
+   * Valor de multiplier mantenido por la instancia.
+   */
   multiplier?: string;
+  /**
+   * Valor de benefits json mantenido por la instancia.
+   */
   benefitsJson?: unknown;
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   ordinal: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create earning rule data.
+ */
 export interface CreateEarningRuleData {
+  /**
+   * Identificador asociado a loyalty program.
+   */
   loyaltyProgramId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a event type concept.
+   */
   eventTypeConceptId: string;
+  /**
+   * Identificador asociado a award type concept.
+   */
   awardTypeConceptId: string;
+  /**
+   * Valor de points amount mantenido por la instancia.
+   */
   pointsAmount?: string;
+  /**
+   * Valor de credit amount mantenido por la instancia.
+   */
   creditAmount?: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Valor de condition json mantenido por la instancia.
+   */
   conditionJson?: unknown;
+  /**
+   * Valor de cap per period mantenido por la instancia.
+   */
   capPerPeriod?: number;
+  /**
+   * Identificador asociado a period concept.
+   */
   periodConceptId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Valor de is active mantenido por la instancia.
+   */
   isActive: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create membership data.
+ */
 export interface CreateMembershipData {
+  /**
+   * Identificador asociado a loyalty program.
+   */
   loyaltyProgramId: string;
+  /**
+   * Identificador asociado a member type concept.
+   */
   memberTypeConceptId: string;
+  /**
+   * Identificador asociado a member ref.
+   */
   memberRefId: string;
+  /**
+   * Identificador asociado a current tier.
+   */
   currentTierId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create ledger entry data.
+ */
 export interface CreateLedgerEntryData {
+  /**
+   * Identificador asociado a loyalty membership.
+   */
   loyaltyMembershipId: string;
+  /**
+   * Identificador asociado a direction concept.
+   */
   directionConceptId: string;
+  /**
+   * Valor de points mantenido por la instancia.
+   */
   points: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId: string;
+  /**
+   * Valor de balance after mantenido por la instancia.
+   */
   balanceAfter: string;
+  /**
+   * Valor de source type mantenido por la instancia.
+   */
   sourceType?: string;
+  /**
+   * Identificador asociado a source ref.
+   */
   sourceRefId?: string;
+  /**
+   * Identificador asociado a earning rule.
+   */
   earningRuleId?: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt?: Date;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey: string;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt?: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create wallet data.
+ */
 export interface CreateWalletData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a owner type concept.
+   */
   ownerTypeConceptId: string;
+  /**
+   * Identificador asociado a owner ref.
+   */
   ownerRefId: string;
+  /**
+   * Identificador asociado a wallet type concept.
+   */
   walletTypeConceptId: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create wallet ledger entry data.
+ */
 export interface CreateWalletLedgerEntryData {
+  /**
+   * Identificador asociado a wallet.
+   */
   walletId: string;
+  /**
+   * Identificador asociado a direction concept.
+   */
   directionConceptId: string;
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId: string;
+  /**
+   * Identificador asociado a entry type concept.
+   */
   entryTypeConceptId: string;
+  /**
+   * Valor de balance after mantenido por la instancia.
+   */
   balanceAfter: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey: string;
+  /**
+   * Valor de source type mantenido por la instancia.
+   */
   sourceType?: string;
+  /**
+   * Identificador asociado a source ref.
+   */
   sourceRefId?: string;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create referral data.
+ */
 export interface CreateReferralData {
+  /**
+   * Identificador asociado a referral program.
+   */
   referralProgramId: string;
+  /**
+   * Identificador asociado a referrer user.
+   */
   referrerUserId: string;
+  /**
+   * Valor de referral code mantenido por la instancia.
+   */
   referralCode: string;
+  /**
+   * Valor de referee contact mantenido por la instancia.
+   */
   refereeContact?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -123,6 +372,13 @@ export interface CreateReferralData {
 export class PromotionsLoyaltyRepository {
   // --- Programas, niveles y reglas (UC-51-01) ---
 
+  /**
+   * Crea create program.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create program conforme al contrato `LoyaltyPrograms`.
+   */
   createProgram(
     em: EntityManager,
     data: CreateLoyaltyProgramData,
@@ -146,6 +402,13 @@ export class PromotionsLoyaltyRepository {
     );
   }
 
+  /**
+   * Obtiene find program by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find program by id conforme al contrato `Promise<LoyaltyPrograms | null>`.
+   */
   findProgramById(
     em: EntityManager,
     id: string,
@@ -153,6 +416,14 @@ export class PromotionsLoyaltyRepository {
     return em.findOne(LoyaltyPrograms, { id });
   }
 
+  /**
+   * Obtiene find program by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find program by code conforme al contrato `Promise<LoyaltyPrograms | null>`.
+   */
   findProgramByCode(
     em: EntityManager,
     tenantId: string,
@@ -161,6 +432,13 @@ export class PromotionsLoyaltyRepository {
     return em.findOne(LoyaltyPrograms, { tenantId, code });
   }
 
+  /**
+   * Crea create tier.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create tier conforme al contrato `LoyaltyTiers`.
+   */
   createTier(em: EntityManager, data: CreateTierData): LoyaltyTiers {
     return em.create(
       LoyaltyTiers,
@@ -190,6 +468,13 @@ export class PromotionsLoyaltyRepository {
     );
   }
 
+  /**
+   * Crea create earning rule.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create earning rule conforme al contrato `EarningRules`.
+   */
   createEarningRule(
     em: EntityManager,
     data: CreateEarningRuleData,
@@ -217,6 +502,13 @@ export class PromotionsLoyaltyRepository {
     );
   }
 
+  /**
+   * Obtiene find earning rule by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find earning rule by id conforme al contrato `Promise<EarningRules | null>`.
+   */
   findEarningRuleById(
     em: EntityManager,
     id: string,
@@ -226,6 +518,13 @@ export class PromotionsLoyaltyRepository {
 
   // --- Membresías (UC-51-02, UC-51-05) ---
 
+  /**
+   * Crea create membership.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create membership conforme al contrato `LoyaltyMemberships`.
+   */
   createMembership(
     em: EntityManager,
     data: CreateMembershipData,
@@ -292,6 +591,13 @@ export class PromotionsLoyaltyRepository {
 
   // --- Ledger de puntos (UC-51-03, 04, 06, 11, 13) ---
 
+  /**
+   * Crea create ledger entry.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create ledger entry conforme al contrato `PointsLedgerEntries`.
+   */
   createLedgerEntry(
     em: EntityManager,
     data: CreateLedgerEntryData,
@@ -379,9 +685,21 @@ export class PromotionsLoyaltyRepository {
   findWalletForUpdate(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a owner type concept.
+       */
       ownerTypeConceptId: string;
+      /**
+       * Identificador asociado a owner ref.
+       */
       ownerRefId: string;
+      /**
+       * Identificador asociado a currency concept.
+       */
       currencyConceptId: string;
     },
   ): Promise<Wallets | null> {
@@ -397,6 +715,13 @@ export class PromotionsLoyaltyRepository {
     );
   }
 
+  /**
+   * Crea create wallet.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create wallet conforme al contrato `Wallets`.
+   */
   createWallet(em: EntityManager, data: CreateWalletData): Wallets {
     return em.create(
       Wallets,
@@ -424,6 +749,13 @@ export class PromotionsLoyaltyRepository {
     return em.findOne(WalletLedgerEntries, { idempotencyKey });
   }
 
+  /**
+   * Crea create wallet ledger entry.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create wallet ledger entry conforme al contrato `WalletLedgerEntries`.
+   */
   createWalletLedgerEntry(
     em: EntityManager,
     data: CreateWalletLedgerEntryData,
@@ -450,6 +782,13 @@ export class PromotionsLoyaltyRepository {
 
   // --- Referidos (UC-51-12, UC-51-13) ---
 
+  /**
+   * Obtiene find referral program by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find referral program by id conforme al contrato `Promise<ReferralPrograms | null>`.
+   */
   findReferralProgramById(
     em: EntityManager,
     id: string,
@@ -457,6 +796,13 @@ export class PromotionsLoyaltyRepository {
     return em.findOne(ReferralPrograms, { id });
   }
 
+  /**
+   * Crea create referral.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create referral conforme al contrato `MemberReferrals`.
+   */
   createReferral(em: EntityManager, data: CreateReferralData): MemberReferrals {
     return em.create(
       MemberReferrals,
@@ -472,6 +818,13 @@ export class PromotionsLoyaltyRepository {
     );
   }
 
+  /**
+   * Obtiene find referral by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param referralCode - Valor de referral code requerido por la operación.
+   * @returns Resultado de find referral by code conforme al contrato `Promise<MemberReferrals | null>`.
+   */
   findReferralByCode(
     em: EntityManager,
     referralCode: string,
@@ -479,6 +832,13 @@ export class PromotionsLoyaltyRepository {
     return em.findOne(MemberReferrals, { referralCode });
   }
 
+  /**
+   * Obtiene find referral for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find referral for update conforme al contrato `Promise<MemberReferrals | null>`.
+   */
   findReferralForUpdate(
     em: EntityManager,
     id: string,

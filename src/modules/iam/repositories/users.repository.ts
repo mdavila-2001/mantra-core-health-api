@@ -5,12 +5,27 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta un usuario. */
 export interface CreateUserData {
+  /**
+   * Valor de display name mantenido por la instancia.
+   */
   displayName: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a mfa status concept.
+   */
   mfaStatusConceptId: string;
+  /**
+   * Valor de time zone mantenido por la instancia.
+   */
   timeZone?: string;
   /** Exige cambio de credencial en el primer ingreso (registro asistido, C-18). */
   mustChangePassword?: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

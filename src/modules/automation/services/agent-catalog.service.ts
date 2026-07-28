@@ -45,6 +45,15 @@ const ACTING_AUTONOMY_LEVELS = [
  */
 @Injectable()
 export class AgentCatalogService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param agentsRepo - Valor de agents repo requerido por la operación.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly agentsRepo: AgentsRepository,
@@ -678,6 +687,16 @@ export class AgentCatalogService {
     });
   }
 
+  /**
+   * Ejecuta la operación publish memory event.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @param memoryId - Identificador de memory.
+   * @param agentId - Identificador de agent.
+   * @param updated - Valor de updated requerido por la operación.
+   * @param actorUserId - Identificador de actor user.
+   */
   private async publishMemoryEvent(
     tx: EntityManager,
     tenantId: string | undefined,

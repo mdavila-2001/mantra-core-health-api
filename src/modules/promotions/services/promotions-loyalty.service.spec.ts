@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PromotionsLoyaltyService } from './promotions-loyalty.service';
@@ -19,6 +25,10 @@ const RULE = '55555555-5555-5555-5555-555555555555';
 const REFERRAL = '66666666-6666-6666-6666-666666666666';
 const REFEREE = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -67,6 +77,12 @@ function tiers(): any[] {
   ];
 }
 
+/**
+ * Ejecuta la operación membership.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de membership conforme al contrato `any`.
+ */
 function membership(overrides: Record<string, unknown> = {}): any {
   return {
     id: MEMBERSHIP,
@@ -82,6 +98,12 @@ function membership(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación earning rule.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de earning rule conforme al contrato `any`.
+ */
 function earningRule(overrides: Record<string, unknown> = {}): any {
   return {
     id: RULE,
@@ -589,6 +611,12 @@ describe('PromotionsLoyaltyService', () => {
   });
 
   describe('createReferral (UC-51-12)', () => {
+    /**
+     * Ejecuta la operación active program.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de active program conforme al contrato `any`.
+     */
     function activeProgram(overrides: Record<string, unknown> = {}): any {
       return {
         id: PROGRAM,
@@ -648,6 +676,12 @@ describe('PromotionsLoyaltyService', () => {
       refereeMembershipId: 'membership-referee',
     };
 
+    /**
+     * Ejecuta la operación pending referral.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de pending referral conforme al contrato `any`.
+     */
     function pendingReferral(overrides: Record<string, unknown> = {}): any {
       return {
         id: REFERRAL,
@@ -658,6 +692,10 @@ describe('PromotionsLoyaltyService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación rewarding program.
+     * @returns Resultado de rewarding program conforme al contrato `any`.
+     */
     function rewardingProgram(): any {
       return {
         id: PROGRAM,
@@ -758,7 +796,10 @@ describe('PromotionsLoyaltyService', () => {
       // La billetera del referidor no existe; la del referido sí (saldo 20).
       d.loyaltyRepo.findWalletForUpdate
         .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({ id: 'wallet-referee', availableBalance: '20' });
+        .mockResolvedValueOnce({
+          id: 'wallet-referee',
+          availableBalance: '20',
+        });
       d.loyaltyRepo.createWallet.mockReturnValue({
         id: 'wallet-referrer',
         availableBalance: '0',

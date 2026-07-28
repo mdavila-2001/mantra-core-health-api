@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DataReleaseService } from './data-release.service';
@@ -20,6 +26,10 @@ const TYPE = '77777777-7777-7777-7777-777777777777';
 const CLUSTER = '88888888-8888-8888-8888-888888888888';
 const MANIFEST_FILE = '99999999-9999-9999-9999-999999999999';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -65,6 +75,12 @@ function build() {
   };
 }
 
+/**
+ * Ejecuta la operación active profile.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active profile conforme al contrato `any`.
+ */
 function activeProfile(overrides: Record<string, unknown> = {}): any {
   return {
     id: PROFILE,
@@ -275,6 +291,12 @@ describe('DataReleaseService', () => {
   });
 
   describe('serveEverything (UC-52-13)', () => {
+    /**
+     * Ejecuta la operación live resource.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de live resource conforme al contrato `any`.
+     */
     function liveResource(overrides: Record<string, unknown> = {}): any {
       return {
         id: RESOURCE,

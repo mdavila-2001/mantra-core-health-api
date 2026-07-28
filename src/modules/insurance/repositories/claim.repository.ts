@@ -19,15 +19,36 @@ import {
  */
 @Injectable()
 export class ClaimRepository {
+  /**
+   * Obtiene find claim.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find claim conforme al contrato `Promise<InsuranceClaims | null>`.
+   */
   findClaim(em: EntityManager, id: string): Promise<InsuranceClaims | null> {
     return em.findOne(InsuranceClaims, { id });
   }
+  /**
+   * Obtiene find by idempotency.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param idempotencyKey - Valor de idempotency key requerido por la operación.
+   * @returns Resultado de find by idempotency conforme al contrato `Promise<InsuranceClaims | null>`.
+   */
   findByIdempotency(
     em: EntityManager,
     idempotencyKey: string,
   ): Promise<InsuranceClaims | null> {
     return em.findOne(InsuranceClaims, { idempotencyKey });
   }
+  /**
+   * Crea create claim.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create claim conforme al contrato `InsuranceClaims`.
+   */
   createClaim(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -39,9 +60,23 @@ export class ClaimRepository {
     );
   }
 
+  /**
+   * Obtiene find line.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find line conforme al contrato `Promise<InsuranceClaimLines | null>`.
+   */
   findLine(em: EntityManager, id: string): Promise<InsuranceClaimLines | null> {
     return em.findOne(InsuranceClaimLines, { id });
   }
+  /**
+   * Crea create line.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create line conforme al contrato `InsuranceClaimLines`.
+   */
   createLine(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -53,6 +88,13 @@ export class ClaimRepository {
     );
   }
 
+  /**
+   * Obtiene find version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find version conforme al contrato `Promise<ClaimAdjudicationVersions | null>`.
+   */
   findVersion(
     em: EntityManager,
     id: string,
@@ -70,6 +112,13 @@ export class ClaimRepository {
       { orderBy: { adjudicationVersion: 'DESC' } },
     );
   }
+  /**
+   * Crea create version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create version conforme al contrato `ClaimAdjudicationVersions`.
+   */
   createVersion(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -84,6 +133,13 @@ export class ClaimRepository {
       { partial: true },
     );
   }
+  /**
+   * Crea create line adjudication.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create line adjudication conforme al contrato `ClaimLineAdjudications`.
+   */
   createLineAdjudication(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -95,6 +151,14 @@ export class ClaimRepository {
     );
   }
 
+  /**
+   * Obtiene find eob.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param claimId - Identificador de claim.
+   * @param versionId - Identificador de version.
+   * @returns Resultado de find eob conforme al contrato `Promise<PatientExplanationsOfBenefit | null>`.
+   */
   findEob(
     em: EntityManager,
     claimId: string,
@@ -105,6 +169,13 @@ export class ClaimRepository {
       claimAdjudicationVersionId: versionId,
     });
   }
+  /**
+   * Crea create eob.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create eob conforme al contrato `PatientExplanationsOfBenefit`.
+   */
   createEob(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -120,6 +191,13 @@ export class ClaimRepository {
     );
   }
 
+  /**
+   * Crea create reversal.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create reversal conforme al contrato `ClaimReversals`.
+   */
   createReversal(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -136,6 +214,13 @@ export class ClaimRepository {
     );
   }
 
+  /**
+   * Crea create dispute.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create dispute conforme al contrato `ClaimDisputes`.
+   */
   createDispute(
     em: EntityManager,
     data: Record<string, unknown>,

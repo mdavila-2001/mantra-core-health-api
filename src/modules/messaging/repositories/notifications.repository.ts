@@ -14,23 +14,77 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create notification request data.
+ */
 export interface CreateNotificationRequestData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a recipient user.
+   */
   recipientUserId?: string;
+  /**
+   * Valor de recipient address mantenido por la instancia.
+   */
   recipientAddress?: string;
+  /**
+   * Identificador asociado a channel.
+   */
   channelId: string;
+  /**
+   * Identificador asociado a template.
+   */
   templateId?: string;
+  /**
+   * Identificador asociado a domain event.
+   */
   domainEventId?: string;
+  /**
+   * Valor de payload json mantenido por la instancia.
+   */
   payloadJson?: unknown;
+  /**
+   * Valor de debounce key mantenido por la instancia.
+   */
   debounceKey?: string;
+  /**
+   * Valor de priority mantenido por la instancia.
+   */
   priority: number;
+  /**
+   * Identificador asociado a category concept.
+   */
   categoryConceptId?: string;
+  /**
+   * Valor de related resource type mantenido por la instancia.
+   */
   relatedResourceType?: string;
+  /**
+   * Identificador asociado a related resource.
+   */
   relatedResourceId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de scheduled at mantenido por la instancia.
+   */
   scheduledAt?: Date;
+  /**
+   * Identificador asociado a consent.
+   */
   consentId?: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -43,6 +97,13 @@ export interface CreateNotificationRequestData {
 export class NotificationsRepository {
   // --- Catálogo (UC-35-10) ---
 
+  /**
+   * Obtiene find channel by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find channel by id conforme al contrato `Promise<MessageChannels | null>`.
+   */
   findChannelById(
     em: EntityManager,
     id: string,
@@ -50,6 +111,13 @@ export class NotificationsRepository {
     return em.findOne(MessageChannels, { id });
   }
 
+  /**
+   * Obtiene find template by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find template by id conforme al contrato `Promise<MessageTemplates | null>`.
+   */
   findTemplateById(
     em: EntityManager,
     id: string,
@@ -73,6 +141,13 @@ export class NotificationsRepository {
 
   // --- Solicitudes (UC-35-10, 11, 12) ---
 
+  /**
+   * Crea create notification request.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create notification request conforme al contrato `NotificationRequests`.
+   */
   createNotificationRequest(
     em: EntityManager,
     data: CreateNotificationRequestData,
@@ -102,6 +177,13 @@ export class NotificationsRepository {
     );
   }
 
+  /**
+   * Obtiene find request by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find request by id conforme al contrato `Promise<NotificationRequests | null>`.
+   */
   findRequestById(
     em: EntityManager,
     id: string,
@@ -109,6 +191,13 @@ export class NotificationsRepository {
     return em.findOne(NotificationRequests, { id });
   }
 
+  /**
+   * Obtiene find request for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find request for update conforme al contrato `Promise<NotificationRequests | null>`.
+   */
   findRequestForUpdate(
     em: EntityManager,
     id: string,
@@ -153,6 +242,13 @@ export class NotificationsRepository {
     );
   }
 
+  /**
+   * Obtiene find provider by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find provider by code conforme al contrato `Promise<MessagingProviders | null>`.
+   */
   findProviderByCode(
     em: EntityManager,
     code: string,
@@ -162,21 +258,67 @@ export class NotificationsRepository {
 
   // --- Entregas y acuses (UC-35-11, 12) ---
 
+  /**
+   * Crea create delivery.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create delivery conforme al contrato `NotificationDeliveries`.
+   */
   createDelivery(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a notification request.
+       */
       notificationRequestId: string;
+      /**
+       * Identificador asociado a provider.
+       */
       providerId: string;
+      /**
+       * Identificador asociado a channel.
+       */
       channelId: string;
+      /**
+       * Identificador asociado a provider channel config.
+       */
       providerChannelConfigId?: string;
+      /**
+       * Valor de attempt number mantenido por la instancia.
+       */
       attemptNumber: number;
+      /**
+       * Valor de provider message ref mantenido por la instancia.
+       */
       providerMessageRef?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de error code mantenido por la instancia.
+       */
       errorCode?: string;
+      /**
+       * Valor de error text mantenido por la instancia.
+       */
       errorText?: string;
+      /**
+       * Valor de cost amount mantenido por la instancia.
+       */
       costAmount?: string;
+      /**
+       * Identificador asociado a currency concept.
+       */
       currencyConceptId?: string;
+      /**
+       * Valor de sent at mantenido por la instancia.
+       */
       sentAt?: Date;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): NotificationDeliveries {
@@ -213,6 +355,13 @@ export class NotificationsRepository {
     });
   }
 
+  /**
+   * Ejecuta la operación count deliveries.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param notificationRequestId - Identificador de notification request.
+   * @returns Resultado de count deliveries conforme al contrato `Promise<number>`.
+   */
   countDeliveries(
     em: EntityManager,
     notificationRequestId: string,
@@ -237,11 +386,29 @@ export class NotificationsRepository {
   createReceipt(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a delivery.
+       */
       deliveryId: string;
+      /**
+       * Identificador asociado a receipt type concept.
+       */
       receiptTypeConceptId: string;
+      /**
+       * Valor de provider status mantenido por la instancia.
+       */
       providerStatus?: string;
+      /**
+       * Valor de raw payload json mantenido por la instancia.
+       */
       rawPayloadJson?: unknown;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt?: Date;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): DeliveryReceipts {
@@ -271,22 +438,71 @@ export class NotificationsRepository {
 
   // --- Bandeja in-app (UC-35-11, 13) ---
 
+  /**
+   * Crea create in app notification.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create in app notification conforme al contrato `InAppNotifications`.
+   */
   createInAppNotification(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a recipient user.
+       */
       recipientUserId: string;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Identificador asociado a channel concept.
+       */
       channelConceptId?: string;
+      /**
+       * Identificador asociado a category concept.
+       */
       categoryConceptId?: string;
+      /**
+       * Valor de template code mantenido por la instancia.
+       */
       templateCode?: string;
+      /**
+       * Valor de subject mantenido por la instancia.
+       */
       subject?: string;
+      /**
+       * Valor de body text mantenido por la instancia.
+       */
       bodyText?: string;
+      /**
+       * Valor de payload json mantenido por la instancia.
+       */
       payloadJson?: unknown;
+      /**
+       * Valor de related resource type mantenido por la instancia.
+       */
       relatedResourceType?: string;
+      /**
+       * Identificador asociado a related resource.
+       */
       relatedResourceId?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a notification request.
+       */
       notificationRequestId?: string;
+      /**
+       * Identificador asociado a notification delivery.
+       */
       notificationDeliveryId?: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): InAppNotifications {
@@ -314,6 +530,13 @@ export class NotificationsRepository {
     );
   }
 
+  /**
+   * Obtiene find in app for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find in app for update conforme al contrato `Promise<InAppNotifications | null>`.
+   */
   findInAppForUpdate(
     em: EntityManager,
     id: string,

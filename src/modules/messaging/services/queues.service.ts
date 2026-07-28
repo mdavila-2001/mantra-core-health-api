@@ -38,6 +38,13 @@ const DEFAULT_CLAIM_BATCH = 10;
  */
 @Injectable()
 export class QueuesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param queuesRepo - Valor de queues repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly queuesRepo: QueuesRepository,
@@ -387,6 +394,13 @@ export class QueuesService {
 
   // --- Apoyo ---
 
+  /**
+   * Ejecuta la operación dead letter queue id.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param queueId - Identificador de queue.
+   * @returns Resultado de dead letter queue id conforme al contrato `Promise<string>`.
+   */
   private async deadLetterQueueId(
     tx: EntityManager,
     queueId: string,

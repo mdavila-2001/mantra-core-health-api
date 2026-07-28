@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingBookingsService } from './scheduling-bookings.service';
@@ -14,6 +20,10 @@ const actor = { id: 'user-1', roles: ['SCHEDULING_AGENT'] };
 const SLOT_ID = '11111111-1111-1111-1111-111111111111';
 const PATIENT = '22222222-2222-2222-2222-222222222222';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -47,6 +57,12 @@ function build() {
   return { service, tx, bookingsRepo, catalogRepo };
 }
 
+/**
+ * Ejecuta la operación open slot.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de open slot.
+ */
 function openSlot(overrides: Record<string, unknown> = {}) {
   return {
     id: SLOT_ID,
@@ -164,6 +180,12 @@ describe('SchedulingBookingsService', () => {
       channel: 'PORTAL' as const,
     };
 
+    /**
+     * Ejecuta la operación active hold.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de active hold.
+     */
     function activeHold(overrides: Record<string, unknown> = {}) {
       return {
         id: 'hold-1',
@@ -366,7 +388,15 @@ describe('SchedulingBookingsService', () => {
   describe('cancel (UC-41-09) — snapshot-based window (CAN-APT-001)', () => {
     const MIN = 60_000;
 
-    function bookingWithSnapshot(snapshot: Record<string, unknown> | undefined) {
+    /**
+     * Ejecuta la operación booking with snapshot.
+     *
+     * @param snapshot - Valor de snapshot requerido por la operación.
+     * @returns Resultado de booking with snapshot.
+     */
+    function bookingWithSnapshot(
+      snapshot: Record<string, unknown> | undefined,
+    ) {
       return {
         id: 'booking-1',
         bookableSlotId: SLOT_ID,
@@ -387,7 +417,10 @@ describe('SchedulingBookingsService', () => {
       );
       // Inicio dentro de la ventana de 120 min → cancelación tardía.
       d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
-        openSlot({ remainingCapacity: 0, startAt: new Date(Date.now() + 60 * MIN) }),
+        openSlot({
+          remainingCapacity: 0,
+          startAt: new Date(Date.now() + 60 * MIN),
+        }),
       );
 
       const res = await d.service.cancel(

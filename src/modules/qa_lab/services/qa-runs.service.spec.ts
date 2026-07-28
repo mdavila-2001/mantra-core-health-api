@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { QaRunsService } from './qa-runs.service';
@@ -19,6 +25,10 @@ const RESULT = '55555555-5555-5555-5555-555555555555';
 const DEFECT = '66666666-6666-6666-6666-666666666666';
 const FILE = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -71,6 +81,12 @@ describe('QaRunsService', () => {
       trigger: 'MANUAL' as const,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
         id: SUITE,
@@ -170,6 +186,13 @@ describe('QaRunsService', () => {
       latencyMs: 42,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param isProductionSafe - Valor de is production safe requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, isProductionSafe = true) {
       const run: any = {
         id: RUN,
@@ -281,6 +304,13 @@ describe('QaRunsService', () => {
   });
 
   describe('evaluateResult (UC-36-06)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param assertions - Valor de assertions requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, assertions: any[]) {
       const result: any = { id: RESULT, testCaseId: CASE };
       d.runsRepo.findCaseResultForUpdate.mockResolvedValue(result);
@@ -373,6 +403,14 @@ describe('QaRunsService', () => {
   });
 
   describe('finalizeRun (UC-36-07)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param results - Valor de results requerido por la operación.
+     * @param totalCases - Valor de total cases requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, results: any[], totalCases = 3) {
       const run: any = {
         id: RUN,
@@ -564,6 +602,12 @@ describe('QaRunsService', () => {
   });
 
   describe('triageDefect (UC-36-10)', () => {
+    /**
+     * Ejecuta la operación open defect.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de open defect conforme al contrato `any`.
+     */
     function openDefect(overrides: Record<string, unknown> = {}): any {
       return {
         id: DEFECT,

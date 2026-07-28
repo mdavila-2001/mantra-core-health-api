@@ -35,6 +35,13 @@ const ID_TYPE_CONCEPT: Readonly<Record<IdentifierType, ConceptName>> = {
  */
 @Injectable()
 export class IdentifiersService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param identifiersRepo - Valor de identifiers repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly identifiersRepo: IdentifiersRepository,
@@ -95,6 +102,13 @@ export class IdentifiersService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param entity - Valor de entity requerido por la operación.
+   * @param dto - Datos validados de la operación.
+   * @returns Resultado de to response conforme al contrato `IdentifierResponseDto`.
+   */
   private toResponse(
     entity: Identifiers,
     dto: CreateIdentifierDto,

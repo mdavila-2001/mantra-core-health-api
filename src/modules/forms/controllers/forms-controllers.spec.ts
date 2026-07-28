@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { FormsDefinitionSetsController } from './forms-definition-sets.controller';
 import { FormsFieldsController } from './forms-fields.controller';
@@ -10,6 +16,10 @@ import { FormsValuesController } from './forms-values.controller';
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
 describe('FormsDefinitionSetsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const schemaService = {
       createDefinitionSet: mockFn(),
@@ -58,6 +68,10 @@ describe('FormsDefinitionSetsController', () => {
 });
 
 describe('FormsFieldsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const fieldsService = {
       createFieldDefinition: mockFn(),
@@ -128,6 +142,10 @@ describe('FormsAssignmentsController', () => {
 });
 
 describe('FormsInstancesController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const instancesService = {
       openInstance: mockFn(),
@@ -170,6 +188,10 @@ describe('FormsInstancesController', () => {
 });
 
 describe('FormsValuesController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const valuesService = { correctValue: mockFn(), importValues: mockFn() };
     return {

@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict typings.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticUnitsService } from './diagnostic-units.service';
 import {
@@ -12,6 +18,10 @@ import { DUNIT } from '../diagnostic_units.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = {
@@ -66,6 +76,10 @@ function build() {
   };
 }
 
+/**
+ * Ejecuta la operación active unit.
+ * @returns Resultado de active unit.
+ */
 const activeUnit = () => ({
   id: 'u1',
   code: 'DU-1',

@@ -19,6 +19,11 @@ import {
 @Roles('BILLING', 'FINANCE')
 @Controller()
 export class CoverageController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CoverageService) {}
 
   /** UC-26-02. */

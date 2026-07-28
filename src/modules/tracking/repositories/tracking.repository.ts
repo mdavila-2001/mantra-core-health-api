@@ -13,56 +13,191 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create subject data.
+ */
 export interface CreateSubjectData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a subject type concept.
+   */
   subjectTypeConceptId: string;
+  /**
+   * Valor de subject ref type mantenido por la instancia.
+   */
   subjectRefType: string;
+  /**
+   * Identificador asociado a subject ref.
+   */
   subjectRefId: string;
+  /**
+   * Valor de tracking number mantenido por la instancia.
+   */
   trackingNumber: string;
+  /**
+   * Identificador asociado a current status concept.
+   */
   currentStatusConceptId: string;
+  /**
+   * Identificador asociado a priority concept.
+   */
   priorityConceptId: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create shipment data.
+ */
 export interface CreateShipmentData {
+  /**
+   * Identificador asociado a trackable subject.
+   */
   trackableSubjectId: string;
+  /**
+   * Identificador asociado a carrier.
+   */
   carrierId?: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de shipment number mantenido por la instancia.
+   */
   shipmentNumber: string;
+  /**
+   * Identificador asociado a origin address.
+   */
   originAddressId?: string;
+  /**
+   * Identificador asociado a destination address.
+   */
   destinationAddressId?: string;
+  /**
+   * Identificador asociado a assigned courier user.
+   */
   assignedCourierUserId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de temperature controlled mantenido por la instancia.
+   */
   temperatureControlled: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create milestone definition data.
+ */
 export interface CreateMilestoneDefinitionData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a subject type concept.
+   */
   subjectTypeConceptId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a milestone status concept.
+   */
   milestoneStatusConceptId: string;
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   ordinal: number;
+  /**
+   * Valor de is terminal mantenido por la instancia.
+   */
   isTerminal: boolean;
+  /**
+   * Valor de sla minutes mantenido por la instancia.
+   */
   slaMinutes?: number;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create tracking event data.
+ */
 export interface CreateTrackingEventData {
+  /**
+   * Identificador asociado a trackable subject.
+   */
   trackableSubjectId: string;
+  /**
+   * Identificador asociado a milestone definition.
+   */
   milestoneDefinitionId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   description?: string;
+  /**
+   * Valor de location text mantenido por la instancia.
+   */
   locationText?: string;
+  /**
+   * Valor de latitude mantenido por la instancia.
+   */
   latitude?: string;
+  /**
+   * Valor de longitude mantenido por la instancia.
+   */
   longitude?: string;
+  /**
+   * Identificador asociado a location ping.
+   */
   locationPingId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
+  /**
+   * Identificador asociado a source concept.
+   */
   sourceConceptId: string;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt?: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
@@ -74,6 +209,13 @@ export interface CreateTrackingEventData {
 export class TrackingRepository {
   // --- Sujeto rastreable (UC-37-01, 10) ---
 
+  /**
+   * Crea create subject.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create subject conforme al contrato `TrackableSubjects`.
+   */
   createSubject(em: EntityManager, data: CreateSubjectData): TrackableSubjects {
     return em.create(
       TrackableSubjects,
@@ -93,6 +235,13 @@ export class TrackingRepository {
     );
   }
 
+  /**
+   * Obtiene find subject by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find subject by id conforme al contrato `Promise<TrackableSubjects | null>`.
+   */
   findSubjectById(
     em: EntityManager,
     id: string,
@@ -112,6 +261,13 @@ export class TrackingRepository {
     );
   }
 
+  /**
+   * Obtiene find subject by tracking number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param trackingNumber - Valor de tracking number requerido por la operación.
+   * @returns Resultado de find subject by tracking number conforme al contrato `Promise<TrackableSubjects | null>`.
+   */
   findSubjectByTrackingNumber(
     em: EntityManager,
     trackingNumber: string,
@@ -135,6 +291,13 @@ export class TrackingRepository {
 
   // --- Envío (UC-37-01, 03, 06, 07, 08, 09, 10) ---
 
+  /**
+   * Crea create shipment.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create shipment conforme al contrato `Shipments`.
+   */
   createShipment(em: EntityManager, data: CreateShipmentData): Shipments {
     return em.create(
       Shipments,
@@ -154,10 +317,24 @@ export class TrackingRepository {
     );
   }
 
+  /**
+   * Obtiene find shipment by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find shipment by id conforme al contrato `Promise<Shipments | null>`.
+   */
   findShipmentById(em: EntityManager, id: string): Promise<Shipments | null> {
     return em.findOne(Shipments, { id });
   }
 
+  /**
+   * Obtiene find shipment for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find shipment for update conforme al contrato `Promise<Shipments | null>`.
+   */
   findShipmentForUpdate(
     em: EntityManager,
     id: string,
@@ -169,6 +346,13 @@ export class TrackingRepository {
     );
   }
 
+  /**
+   * Obtiene find shipment by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param shipmentNumber - Valor de shipment number requerido por la operación.
+   * @returns Resultado de find shipment by number conforme al contrato `Promise<Shipments | null>`.
+   */
   findShipmentByNumber(
     em: EntityManager,
     shipmentNumber: string,
@@ -188,12 +372,25 @@ export class TrackingRepository {
     );
   }
 
+  /**
+   * Ejecuta la operación count shipments.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @returns Resultado de count shipments conforme al contrato `Promise<number>`.
+   */
   countShipments(em: EntityManager): Promise<number> {
     return em.count(Shipments, {});
   }
 
   // --- Catálogo de hitos (UC-37-02) ---
 
+  /**
+   * Crea create milestone definition.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create milestone definition conforme al contrato `MilestoneDefinitions`.
+   */
   createMilestoneDefinition(
     em: EntityManager,
     data: CreateMilestoneDefinitionData,
@@ -216,6 +413,13 @@ export class TrackingRepository {
     );
   }
 
+  /**
+   * Obtiene find milestone by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find milestone by id conforme al contrato `Promise<MilestoneDefinitions | null>`.
+   */
   findMilestoneById(
     em: EntityManager,
     id: string,
@@ -223,6 +427,14 @@ export class TrackingRepository {
     return em.findOne(MilestoneDefinitions, { id });
   }
 
+  /**
+   * Obtiene find milestone by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param subjectTypeConceptId - Identificador de subject type concept.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find milestone by code conforme al contrato `Promise<MilestoneDefinitions | null>`.
+   */
   findMilestoneByCode(
     em: EntityManager,
     subjectTypeConceptId: string,
@@ -298,17 +510,51 @@ export class TrackingRepository {
 
   // --- Handoff (UC-37-06) ---
 
+  /**
+   * Crea create handoff.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create handoff conforme al contrato `ShipmentHandoffs`.
+   */
   createHandoff(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a shipment.
+       */
       shipmentId: string;
+      /**
+       * Identificador asociado a handoff type concept.
+       */
       handoffTypeConceptId: string;
+      /**
+       * Valor de from party type mantenido por la instancia.
+       */
       fromPartyType?: string;
+      /**
+       * Identificador asociado a from party.
+       */
       fromPartyId?: string;
+      /**
+       * Valor de to party type mantenido por la instancia.
+       */
       toPartyType?: string;
+      /**
+       * Identificador asociado a to party.
+       */
       toPartyId?: string;
+      /**
+       * Valor de location text mantenido por la instancia.
+       */
       locationText?: string;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt?: Date;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): ShipmentHandoffs {
@@ -336,11 +582,29 @@ export class TrackingRepository {
   createEtaEstimate(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a trackable subject.
+       */
       trackableSubjectId: string;
+      /**
+       * Identificador asociado a shipment.
+       */
       shipmentId?: string;
+      /**
+       * Valor de estimated arrival at mantenido por la instancia.
+       */
       estimatedArrivalAt: Date;
+      /**
+       * Valor de confidence pct mantenido por la instancia.
+       */
       confidencePct?: number;
+      /**
+       * Identificador asociado a method concept.
+       */
       methodConceptId: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): EtaEstimates {
@@ -374,17 +638,51 @@ export class TrackingRepository {
 
   // --- Prueba de entrega (UC-37-08, 09) ---
 
+  /**
+   * Crea create delivery proof.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create delivery proof conforme al contrato `DeliveryProofs`.
+   */
   createDeliveryProof(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a shipment.
+       */
       shipmentId: string;
+      /**
+       * Identificador asociado a proof type concept.
+       */
       proofTypeConceptId: string;
+      /**
+       * Valor de recipient name mantenido por la instancia.
+       */
       recipientName?: string;
+      /**
+       * Identificador asociado a signature file.
+       */
       signatureFileId?: string;
+      /**
+       * Identificador asociado a photo file.
+       */
       photoFileId?: string;
+      /**
+       * Valor de latitude mantenido por la instancia.
+       */
       latitude?: string;
+      /**
+       * Valor de longitude mantenido por la instancia.
+       */
       longitude?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): DeliveryProofs {
@@ -420,6 +718,13 @@ export class TrackingRepository {
 
   // --- Transportistas (UC-37-05, 06) ---
 
+  /**
+   * Obtiene find carrier by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find carrier by id conforme al contrato `Promise<TrackingCarriers | null>`.
+   */
   findCarrierById(
     em: EntityManager,
     id: string,

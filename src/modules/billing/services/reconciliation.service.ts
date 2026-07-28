@@ -21,6 +21,14 @@ import { BILL } from '../billing.concepts';
  */
 @Injectable()
 export class ReconciliationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param paymentsReceivedRepo - Valor de payments received repo requerido por la operación.
+   * @param paymentsMadeRepo - Valor de payments made repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly paymentsReceivedRepo: PaymentsReceivedRepository,
@@ -30,6 +38,14 @@ export class ReconciliationService {
     this.logger.setContext(ReconciliationService.name);
   }
 
+  /**
+   * Ejecuta la operación clear.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de clear conforme al contrato `Promise<ReconciliationResultDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async clear(
     dto: ReconciliationClearDto,
     actor: AuthenticatedUser,

@@ -23,8 +23,21 @@ import {
 @ApiBearerAuth()
 @Controller('terminology/tenants')
 export class TerminologyTenantCatalogController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param tenantCatalogService - Valor de tenant catalog service requerido por la operación.
+   */
   constructor(private readonly tenantCatalogService: TenantCatalogService) {}
 
+  /**
+   * Ejecuta la operación upsert policy.
+   *
+   * @param tenantId - Identificador de tenant.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de upsert policy conforme al contrato `Promise<TenantCatalogPolicyResponseDto>`.
+   */
   @Put(':tenantId/catalog-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

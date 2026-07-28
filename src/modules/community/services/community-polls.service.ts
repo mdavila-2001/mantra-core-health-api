@@ -24,6 +24,14 @@ import {
  */
 @Injectable()
 export class CommunityPollsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param pollsRepo - Valor de polls repo requerido por la operación.
+   * @param postsRepo - Valor de posts repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly pollsRepo: PollsRepository,

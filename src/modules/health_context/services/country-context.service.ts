@@ -44,6 +44,13 @@ const USABLE_RUN_STATES: readonly string[] = [
  */
 @Injectable()
 export class CountryContextService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contextRepo - Valor de context repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contextRepo: HealthContextRepository,
@@ -616,6 +623,13 @@ export class CountryContextService {
 
   // --- Apoyo ---
 
+  /**
+   * Valida assert unique fact keys.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param contextId - Identificador de context.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private assertUniqueFactKeys(
     dto: DraftContextVersionDto,
     contextId: string,
@@ -642,6 +656,12 @@ export class CountryContextService {
       .digest('hex');
   }
 
+  /**
+   * Obtiene canonicalise.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de canonicalise conforme al contrato `string`.
+   */
   private canonicalise(value: unknown): string {
     if (value === null || typeof value !== 'object')
       return JSON.stringify(value) ?? 'null';

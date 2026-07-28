@@ -24,6 +24,11 @@ import {
 @Roles('CLINICAL_APPROVER', 'SECURITY_ADMIN')
 @Controller('authz')
 export class AuthzClinicalController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param clinicalService - Valor de clinical service requerido por la operación.
+   */
   constructor(private readonly clinicalService: AuthzClinicalService) {}
 
   /** UC-06-06 (clínico tratante o paciente que autoriza; autenticado). */

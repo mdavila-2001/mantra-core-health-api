@@ -29,6 +29,14 @@ const PURPOSE_OF_USE: Record<string, string> = {
  */
 @Injectable()
 export class ThirdPartyAccessService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tpaRepo - Valor de tpa repo requerido por la operación.
+   * @param auditLogRepo - Valor de audit log repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly tpaRepo: ThirdPartyAccessRepository,
@@ -38,6 +46,13 @@ export class ThirdPartyAccessService {
     this.logger.setContext(ThirdPartyAccessService.name);
   }
 
+  /**
+   * Ejecuta la operación record.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de record conforme al contrato `Promise<ThirdPartyAccessResultDto>`.
+   */
   async record(
     dto: RecordThirdPartyAccessDto,
     actor: AuthenticatedUser,
@@ -139,6 +154,13 @@ export class ThirdPartyAccessService {
     });
   }
 
+  /**
+   * Ejecuta la operación require.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @param field - Valor de field requerido por la operación.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private require(value: string | undefined, field: string): void {
     if (!value) {
       throw new PreconditionFailedException(

@@ -28,6 +28,11 @@ import {
 @ApiBearerAuth()
 @Controller('forms/definition-sets')
 export class FormsDefinitionSetsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param schemaService - Valor de schema service requerido por la operación.
+   */
   constructor(private readonly schemaService: FormsSchemaService) {}
 
   /** UC-09-01. */

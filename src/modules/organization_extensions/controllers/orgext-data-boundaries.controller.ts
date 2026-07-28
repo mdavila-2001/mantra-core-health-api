@@ -12,6 +12,11 @@ import { CreateDataBoundaryDto, DataBoundaryResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('orgext/data-boundaries')
 export class OrgextDataBoundariesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param boundariesService - Valor de boundaries service requerido por la operación.
+   */
   constructor(
     private readonly boundariesService: OrgextDataBoundariesService,
   ) {}

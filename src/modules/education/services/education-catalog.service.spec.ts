@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { EducationCatalogService } from './education-catalog.service';
@@ -15,6 +21,10 @@ const COURSE = '11111111-1111-1111-1111-111111111111';
 const MODULE = '22222222-2222-2222-2222-222222222222';
 const PROFILE = '33333333-3333-3333-3333-333333333333';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -54,6 +64,12 @@ function build() {
   return { service, tx, catalogRepo };
 }
 
+/**
+ * Ejecuta la operación course dto.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de course dto conforme al contrato `any`.
+ */
 function courseDto(overrides: Record<string, unknown> = {}): any {
   return {
     code: 'CUR-01',
@@ -82,6 +98,12 @@ function courseDto(overrides: Record<string, unknown> = {}): any {
 
 describe('EducationCatalogService', () => {
   describe('publishCourse (UC-47-01)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.catalogRepo.findCourseByCode.mockResolvedValue(null);
       d.catalogRepo.createCourse.mockReturnValue({ id: COURSE });
@@ -365,6 +387,12 @@ describe('EducationCatalogService', () => {
   });
 
   describe('createAssessment (UC-47-07)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         title: 'Examen final',

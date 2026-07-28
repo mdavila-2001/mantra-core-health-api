@@ -38,6 +38,14 @@ import {
 @ApiBearerAuth()
 @Controller('billing')
 export class BillingReceivablesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param invoicesService - Valor de invoices service requerido por la operación.
+   * @param paymentsReceivedService - Valor de payments received service requerido por la operación.
+   * @param reimbursementsService - Valor de reimbursements service requerido por la operación.
+   * @param statementsService - Valor de statements service requerido por la operación.
+   */
   constructor(
     private readonly invoicesService: InvoicesService,
     private readonly paymentsReceivedService: PaymentsReceivedService,

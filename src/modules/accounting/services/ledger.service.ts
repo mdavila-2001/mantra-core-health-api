@@ -66,7 +66,10 @@ const ALLOWED_TRANSITIONS: Record<string, readonly string[]> = {
  * exige que el actor porte al menos uno; el gate autoritativo es el `@Roles` del
  * controlador, esta comprobación es la defensa en profundidad a nivel de servicio.
  */
-const APPROVAL_ROLES: readonly string[] = ['ACCOUNTING_APPROVER', 'SECURITY_ADMIN'];
+const APPROVAL_ROLES: readonly string[] = [
+  'ACCOUNTING_APPROVER',
+  'SECURITY_ADMIN',
+];
 
 /**
  * Casos de uso del libro mayor: posteo de asientos por partida doble balanceada
@@ -80,6 +83,15 @@ const APPROVAL_ROLES: readonly string[] = ['ACCOUNTING_APPROVER', 'SECURITY_ADMI
  */
 @Injectable()
 export class LedgerService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param journalRepo - Valor de journal repo requerido por la operación.
+   * @param accountsRepo - Valor de accounts repo requerido por la operación.
+   * @param fiscalRepo - Valor de fiscal repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly journalRepo: JournalRepository,
@@ -287,12 +299,7 @@ export class LedgerService {
     _dto: JournalTransitionDto,
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
-    return this.transition(
-      id,
-      ACCT.TXN_PENDING_REVIEW,
-      actor,
-      'submit-review',
-    );
+    return this.transition(id, ACCT.TXN_PENDING_REVIEW, actor, 'submit-review');
   }
 
   /**
@@ -357,7 +364,10 @@ export class LedgerService {
         }
       }
 
-      const entries = await this.journalRepo.ledgerEntriesForTransaction(tx, id);
+      const entries = await this.journalRepo.ledgerEntriesForTransaction(
+        tx,
+        id,
+      );
       const debitCents = this.assertBalancedEntries(entries);
 
       const now = new Date();
@@ -671,8 +681,17 @@ export class LedgerService {
     actor: AuthenticatedUser,
     operation: string,
     mutate?: (txn: {
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de approved at mantenido por la instancia.
+       */
       approvedAt?: Date;
+      /**
+       * Identificador asociado a approved by user.
+       */
       approvedByUserId?: string;
     }) => void,
   ): Promise<JournalTransactionResponseDto> {
@@ -709,10 +728,25 @@ export class LedgerService {
   /** Serializa una transacción a la respuesta estándar del asiento. */
   private toResponse(
     txn: {
+      /**
+       * Identificador único de la instancia.
+       */
       id: string;
+      /**
+       * Valor de transaction number mantenido por la instancia.
+       */
       transactionNumber: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de total amount mantenido por la instancia.
+       */
       totalAmount?: string;
+      /**
+       * Valor de posted at mantenido por la instancia.
+       */
       postedAt?: Date;
     },
     lineCount = 0,
@@ -729,7 +763,15 @@ export class LedgerService {
 
   /** Recalcula la partida doble desde las líneas persistidas del mayor (usado por `post`). */
   private assertBalancedEntries(
-    entries: { directionConceptId: string; amount: string }[],
+    entries: {
+      /**
+       * Identificador asociado a direction concept.
+       */
+      directionConceptId: string; /**
+       * Valor de amount mantenido por la instancia.
+       */
+      amount: string;
+    }[],
   ): number {
     const debitCents = sumCents(
       entries
@@ -752,7 +794,13 @@ export class LedgerService {
 
   /** Valida partida doble: suma de débitos == suma de créditos. Lanza 422 si no. */
   private assertBalanced(lines: LedgerLineDto[]): {
+    /**
+     * Valor de debit cents mantenido por la instancia.
+     */
     debitCents: number;
+    /**
+     * Valor de credit cents mantenido por la instancia.
+     */
     creditCents: number;
   } {
     const debitCents = sumCents(
@@ -776,6 +824,12 @@ export class LedgerService {
     return { debitCents, creditCents };
   }
 
+  /**
+   * Crea generate number.
+   *
+   * @param prefix - Valor de prefix requerido por la operación.
+   * @returns Resultado de generate number conforme al contrato `string`.
+   */
   private generateNumber(prefix: string): string {
     return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
   }

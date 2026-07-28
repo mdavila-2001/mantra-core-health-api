@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('community/groups')
 export class CommunityGroupsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CommunityGroupsService) {}
 
   /** Bootstrap: crea un grupo. */

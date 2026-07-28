@@ -5,10 +5,25 @@ import { createdBy } from '../../../common';
 
 /** Datos para dar de alta una asignación a branch. */
 export interface CreateBranchMembershipData {
+  /**
+   * Identificador asociado a tenant membership.
+   */
   tenantMembershipId: string;
+  /**
+   * Identificador asociado a branch.
+   */
   branchId: string;
+  /**
+   * Identificador asociado a local role concept.
+   */
   localRoleConceptId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -30,6 +30,11 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class CareGapsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param careGapsService - Valor de care gaps service requerido por la operación.
+   */
   constructor(private readonly careGapsService: CareGapsService) {}
 
   /** UC-18-09. */
@@ -79,7 +84,12 @@ export class CareGapsController {
   createSchedule(
     @Body() dto: CreateImmunizationScheduleDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<{ id: string }> {
+  ): Promise<{
+    /**
+     * Identificador único de la instancia.
+     */
+    id: string;
+  }> {
     return this.careGapsService.createSchedule(dto, actor);
   }
 }

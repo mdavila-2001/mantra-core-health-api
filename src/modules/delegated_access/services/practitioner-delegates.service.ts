@@ -40,6 +40,18 @@ import {
  */
 @Injectable()
 export class PractitionerDelegatesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param delegatesRepo - Valor de delegates repo requerido por la operación.
+   * @param orgAssignmentsRepo - Valor de org assignments repo requerido por la operación.
+   * @param setsRepo - Valor de sets repo requerido por la operación.
+   * @param grantsRepo - Valor de grants repo requerido por la operación.
+   * @param requestsRepo - Valor de requests repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly delegatesRepo: PractitionerDelegateAssignmentsRepository,

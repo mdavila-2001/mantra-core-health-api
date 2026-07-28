@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { RetentionExecutionController } from './retention-execution.controller';
 import { ResidencyController } from './residency.controller';
@@ -27,6 +33,10 @@ describe('RetentionExecutionController (UC-11-05)', () => {
 });
 
 describe('ResidencyController (UC-11-06/07)', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const service = {
       createResidencyPolicy: mockFn(),
@@ -62,6 +72,10 @@ describe('ResidencyController (UC-11-06/07)', () => {
 });
 
 describe('LegalHoldController (UC-11-08)', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const service = { place: mockFn(), release: mockFn() };
     return { controller: new LegalHoldController(service as any), service };
@@ -104,6 +118,10 @@ describe('RestoreTestController (UC-11-10)', () => {
 });
 
 describe('AssessmentController (UC-11-11..14)', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const service = {
       publishFramework: mockFn(),
@@ -184,6 +202,10 @@ describe('AssessmentController (UC-11-11..14)', () => {
 });
 
 describe('DraftController (UC-11-15)', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const service = { createDraft: mockFn(), publishDraft: mockFn() };
     return { controller: new DraftController(service as any), service };

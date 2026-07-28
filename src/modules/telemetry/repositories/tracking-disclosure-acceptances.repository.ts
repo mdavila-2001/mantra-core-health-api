@@ -4,12 +4,33 @@ import { TrackingDisclosureAcceptances } from '../entities';
 
 /** Datos de una aceptación de disclosure (UC-28-04, append-only). */
 export interface CreateDisclosureAcceptanceData {
+  /**
+   * Identificador asociado a tracking disclosure version.
+   */
   trackingDisclosureVersionId: string;
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a session.
+   */
   sessionId?: string;
+  /**
+   * Valor de accepted at mantenido por la instancia.
+   */
   acceptedAt: Date;
+  /**
+   * Valor de ip prefix hash mantenido por la instancia.
+   */
   ipPrefixHash?: string;
+  /**
+   * Valor de user agent hash mantenido por la instancia.
+   */
   userAgentHash?: string;
+  /**
+   * Identificador asociado a acceptance status concept.
+   */
   acceptanceStatusConceptId: string;
 }
 
@@ -30,6 +51,13 @@ export class TrackingDisclosureAcceptancesRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `TrackingDisclosureAcceptances`.
+   */
   create(
     em: EntityManager,
     data: CreateDisclosureAcceptanceData,

@@ -5,16 +5,49 @@ import { createdBy } from '../../../common';
 
 /** Datos para declarar una afiliación entre organizaciones (UC-22-07). */
 export interface CreateAffiliationData {
+  /**
+   * Identificador asociado a primary tenant.
+   */
   primaryTenantId: string;
+  /**
+   * Identificador asociado a participating tenant.
+   */
   participatingTenantId: string;
+  /**
+   * Identificador asociado a affiliation type concept.
+   */
   affiliationTypeConceptId: string;
+  /**
+   * Identificador asociado a host practice site.
+   */
   hostPracticeSiteId?: string;
+  /**
+   * Identificador asociado a healthcare service.
+   */
   healthcareServiceId?: string;
+  /**
+   * Valor de contract reference mantenido por la instancia.
+   */
   contractReference?: string;
+  /**
+   * Identificador asociado a data use agreement.
+   */
   dataUseAgreementId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

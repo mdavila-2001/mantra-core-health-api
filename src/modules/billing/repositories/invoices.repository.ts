@@ -5,36 +5,117 @@ import { createdBy } from '../../../common';
 
 /** Cabecera de factura a crear (los totales se calculan en el servicio). */
 export interface CreateInvoiceData {
+  /**
+   * Identificador asociado a practice.
+   */
   practiceId: string;
+  /**
+   * Valor de invoice number mantenido por la instancia.
+   */
   invoiceNumber: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Valor de issue date mantenido por la instancia.
+   */
   issueDate: Date;
+  /**
+   * Valor de due date mantenido por la instancia.
+   */
   dueDate?: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de subtotal mantenido por la instancia.
+   */
   subtotal?: string;
+  /**
+   * Valor de tax total mantenido por la instancia.
+   */
   taxTotal?: string;
+  /**
+   * Valor de discount total mantenido por la instancia.
+   */
   discountTotal?: string;
+  /**
+   * Valor de total mantenido por la instancia.
+   */
   total?: string;
+  /**
+   * Valor de paid total mantenido por la instancia.
+   */
   paidTotal?: string;
+  /**
+   * Valor de balance mantenido por la instancia.
+   */
   balance?: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Línea de factura a crear. */
 export interface CreateInvoiceLineData {
+  /**
+   * Identificador asociado a invoice.
+   */
   invoiceId: string;
+  /**
+   * Identificador asociado a service.
+   */
   serviceId?: string;
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   description?: string;
+  /**
+   * Valor de quantity mantenido por la instancia.
+   */
   quantity: string;
+  /**
+   * Valor de unit price mantenido por la instancia.
+   */
   unitPrice: string;
+  /**
+   * Valor de discount mantenido por la instancia.
+   */
   discount?: string;
+  /**
+   * Identificador asociado a tax code.
+   */
   taxCodeId?: string;
+  /**
+   * Valor de tax amount mantenido por la instancia.
+   */
   taxAmount?: string;
+  /**
+   * Valor de line total mantenido por la instancia.
+   */
   lineTotal?: string;
+  /**
+   * Identificador asociado a income account.
+   */
   incomeAccountId?: string;
+  /**
+   * Identificador asociado a cost center.
+   */
   costCenterId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -45,10 +126,25 @@ export interface CreateInvoiceLineData {
  */
 @Injectable()
 export class InvoicesRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<Invoices | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<Invoices | null> {
     return em.findOne(Invoices, { id });
   }
 
+  /**
+   * Obtiene find by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Identificador de practice.
+   * @param invoiceNumber - Valor de invoice number requerido por la operación.
+   * @returns Resultado de find by number conforme al contrato `Promise<Invoices | null>`.
+   */
   findByNumber(
     em: EntityManager,
     practiceId: string,
@@ -72,6 +168,13 @@ export class InvoicesRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `Invoices`.
+   */
   create(em: EntityManager, data: CreateInvoiceData): Invoices {
     return em.create(
       Invoices,
@@ -96,6 +199,13 @@ export class InvoicesRepository {
     );
   }
 
+  /**
+   * Crea create line.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create line conforme al contrato `InvoiceLines`.
+   */
   createLine(em: EntityManager, data: CreateInvoiceLineData): InvoiceLines {
     return em.create(
       InvoiceLines,

@@ -30,8 +30,21 @@ import {
 @ApiBearerAuth()
 @Controller('terminology/concepts')
 export class TerminologyConceptsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param conceptsService - Valor de concepts service requerido por la operación.
+   */
   constructor(private readonly conceptsService: ConceptsService) {}
 
+  /**
+   * Crea add designation.
+   *
+   * @param conceptId - Identificador de concept.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de add designation conforme al contrato `Promise<DesignationResponseDto>`.
+   */
   @Post(':conceptId/designations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -46,6 +59,14 @@ export class TerminologyConceptsController {
     return this.conceptsService.addDesignation(conceptId, dto, user);
   }
 
+  /**
+   * Crea add relationship.
+   *
+   * @param conceptId - Identificador de concept.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de add relationship conforme al contrato `Promise<RelationshipResponseDto>`.
+   */
   @Post(':conceptId/relationships')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -60,6 +81,14 @@ export class TerminologyConceptsController {
     return this.conceptsService.addRelationship(conceptId, dto, user);
   }
 
+  /**
+   * Ejecuta la operación upsert properties.
+   *
+   * @param conceptId - Identificador de concept.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de upsert properties conforme al contrato `Promise<ConceptPropertiesResponseDto>`.
+   */
   @Post(':conceptId/properties')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -74,6 +103,14 @@ export class TerminologyConceptsController {
     return this.conceptsService.upsertProperties(conceptId, dto, user);
   }
 
+  /**
+   * Ejecuta la operación deprecate concept.
+   *
+   * @param conceptId - Identificador de concept.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de deprecate concept conforme al contrato `Promise<DeprecateConceptResponseDto>`.
+   */
   @Post(':conceptId/$deprecate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

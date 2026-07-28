@@ -35,6 +35,14 @@ const BLOCKING_SEVERITIES: readonly IssueSeverity[] = ['FATAL', 'ERROR'];
  */
 @Injectable()
 export class HealthValidationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param validationRepo - Valor de validation repo requerido por la operación.
+   * @param resourcesRepo - Valor de resources repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly validationRepo: HealthValidationRepository,

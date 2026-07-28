@@ -41,6 +41,12 @@ end`;
  */
 @Injectable()
 export class RedisRuntimeService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param redis - Valor de redis requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     @Inject(REDIS_CLIENT) private readonly redis: RedisClient,
     private readonly logger: PinoLogger,
@@ -73,7 +79,12 @@ export class RedisRuntimeService {
     value: string,
     ttlSec: number,
   ): Promise<void> {
-    await this.redis.set(this.keyFor(tenant, 'cache', key), value, 'EX', ttlSec);
+    await this.redis.set(
+      this.keyFor(tenant, 'cache', key),
+      value,
+      'EX',
+      ttlSec,
+    );
   }
 
   /** Lee el valor de `key`, o `null` si no existe / expiró. */
@@ -128,7 +139,11 @@ export class RedisRuntimeService {
    * Libera el lock sólo si el `token` coincide con el titular (CAS vía Lua).
    * Devuelve `true` si se borró.
    */
-  async releaseLock(tenant: string, key: string, token: string): Promise<boolean> {
+  async releaseLock(
+    tenant: string,
+    key: string,
+    token: string,
+  ): Promise<boolean> {
     const fullKey = this.keyFor(tenant, 'lock', key);
     const removed = (await this.redis.eval(
       RELEASE_LOCK_LUA,
@@ -189,10 +204,23 @@ export class RedisRuntimeService {
     return true;
   }
 
+  /**
+   * Obtiene hash secret.
+   *
+   * @param secret - Valor de secret requerido por la operación.
+   * @returns Resultado de hash secret conforme al contrato `string`.
+   */
   private hashSecret(secret: string): string {
     return createHash('sha256').update(secret, 'utf8').digest('hex');
   }
 
+  /**
+   * Ejecuta la operación constant time equals.
+   *
+   * @param a - Valor de a requerido por la operación.
+   * @param b - Valor de b requerido por la operación.
+   * @returns Resultado de constant time equals conforme al contrato `boolean`.
+   */
   private constantTimeEquals(a: string, b: string): boolean {
     const bufA = Buffer.from(a, 'utf8');
     const bufB = Buffer.from(b, 'utf8');

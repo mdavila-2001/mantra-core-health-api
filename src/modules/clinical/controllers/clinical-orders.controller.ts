@@ -24,6 +24,12 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical')
 export class ClinicalOrdersController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param serviceRequestsService - Valor de service requests service requerido por la operación.
+   * @param diagnosticReportsService - Valor de diagnostic reports service requerido por la operación.
+   */
   constructor(
     private readonly serviceRequestsService: ServiceRequestsService,
     private readonly diagnosticReportsService: DiagnosticReportsService,

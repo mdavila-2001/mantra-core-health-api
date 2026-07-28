@@ -5,30 +5,82 @@ import { createdBy } from '../../../common';
 
 /** Datos de cabecera de una sesión de conteo cíclico. */
 export interface CreateCountSessionData {
+  /**
+   * Identificador asociado a pharmacy site.
+   */
   pharmacySiteId: string;
+  /**
+   * Identificador asociado a inventory location.
+   */
   inventoryLocationId: string;
+  /**
+   * Identificador asociado a count type concept.
+   */
   countTypeConceptId: string;
+  /**
+   * Identificador asociado a freeze mode concept.
+   */
   freezeModeConceptId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos de una línea de conteo (snapshot). */
 export interface CreateCountLineData {
+  /**
+   * Identificador asociado a inventory count session.
+   */
   inventoryCountSessionId: string;
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   pharmacyProductId: string;
+  /**
+   * Identificador asociado a inventory lot.
+   */
   inventoryLotId?: string;
+  /**
+   * Valor de expected quantity mantenido por la instancia.
+   */
   expectedQuantity: string;
+  /**
+   * Valor de counted quantity mantenido por la instancia.
+   */
   countedQuantity: string;
+  /**
+   * Valor de variance quantity mantenido por la instancia.
+   */
   varianceQuantity: string;
+  /**
+   * Identificador asociado a variance reason concept.
+   */
   varianceReasonConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de las sesiones de conteo y sus líneas. */
 @Injectable()
 export class CountSessionsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<InventoryCountSessions | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -48,6 +100,13 @@ export class CountSessionsRepository {
     });
   }
 
+  /**
+   * Obtiene find lines.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param sessionId - Identificador de session.
+   * @returns Resultado de find lines conforme al contrato `Promise<InventoryCountLines[]>`.
+   */
   findLines(
     em: EntityManager,
     sessionId: string,
@@ -55,6 +114,13 @@ export class CountSessionsRepository {
     return em.find(InventoryCountLines, { inventoryCountSessionId: sessionId });
   }
 
+  /**
+   * Obtiene find line by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find line by id conforme al contrato `Promise<InventoryCountLines | null>`.
+   */
   findLineById(
     em: EntityManager,
     id: string,
@@ -62,6 +128,13 @@ export class CountSessionsRepository {
     return em.findOne(InventoryCountLines, { id });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `InventoryCountSessions`.
+   */
   create(
     em: EntityManager,
     data: CreateCountSessionData,
@@ -81,6 +154,13 @@ export class CountSessionsRepository {
     );
   }
 
+  /**
+   * Crea create line.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create line conforme al contrato `InventoryCountLines`.
+   */
   createLine(
     em: EntityManager,
     data: CreateCountLineData,

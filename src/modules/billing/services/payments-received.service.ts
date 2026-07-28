@@ -26,6 +26,14 @@ import { fromCents, toCents } from '../money.util';
  */
 @Injectable()
 export class PaymentsReceivedService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param paymentsRepo - Valor de payments repo requerido por la operación.
+   * @param invoicesRepo - Valor de invoices repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly paymentsRepo: PaymentsReceivedRepository,
@@ -35,6 +43,14 @@ export class PaymentsReceivedService {
     this.logger.setContext(PaymentsReceivedService.name);
   }
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de apply conforme al contrato `Promise<PaymentReceivedResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async apply(
     dto: ApplyPaymentReceivedDto,
     actor: AuthenticatedUser,

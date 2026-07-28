@@ -30,6 +30,11 @@ import {
 @ApiBearerAuth()
 @Controller('telemetry')
 export class TelemetryEventsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param events - Valor de events requerido por la operación.
+   */
   constructor(private readonly events: TelemetryEventsService) {}
 
   /** UC-28-07. */

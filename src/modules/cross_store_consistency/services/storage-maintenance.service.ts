@@ -26,6 +26,14 @@ import {
  */
 @Injectable()
 export class StorageMaintenanceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param deletionRepo - Valor de deletion repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly deletionRepo: DeletionRepository,

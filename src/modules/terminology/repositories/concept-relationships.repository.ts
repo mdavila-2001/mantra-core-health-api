@@ -5,10 +5,25 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar una relación entre conceptos. */
 export interface CreateConceptRelationshipData {
+  /**
+   * Identificador asociado a source concept.
+   */
   sourceConceptId: string;
+  /**
+   * Identificador asociado a target concept.
+   */
   targetConceptId: string;
+  /**
+   * Identificador asociado a relationship type concept.
+   */
   relationshipTypeConceptId: string;
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   ordinal?: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

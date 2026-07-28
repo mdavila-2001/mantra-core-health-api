@@ -50,6 +50,19 @@ const PRIVILEGED_ROLES = new Set(['SUPERADMIN', 'SECURITY_ADMIN']);
  */
 @Injectable()
 export class FrontendViewsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param definitionsRepo - Valor de definitions repo requerido por la operación.
+   * @param runsRepo - Valor de runs repo requerido por la operación.
+   * @param surfacesRepo - Valor de surfaces repo requerido por la operación.
+   * @param routesRepo - Valor de routes repo requerido por la operación.
+   * @param pageViewsRepo - Valor de page views repo requerido por la operación.
+   * @param childrenRepo - Valor de children repo requerido por la operación.
+   * @param prefsRepo - Valor de prefs repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly definitionsRepo: ReadModelDefinitionsRepository,
@@ -399,6 +412,16 @@ export class FrontendViewsService {
     });
   }
 
+  /**
+   * Obtiene resolve view.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param portalCode - Valor de portal code requerido por la operación.
+   * @param routeCode - Valor de route code requerido por la operación.
+   * @param viewCode - Valor de view code requerido por la operación.
+   * @returns Resultado de resolve view.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async resolveView(
     em: EntityManager,
     portalCode: string,
@@ -462,6 +485,13 @@ export class FrontendViewsService {
     });
   }
 
+  /**
+   * Obtiene is field masked.
+   *
+   * @param field - Valor de field requerido por la operación.
+   * @param privileged - Valor de privileged requerido por la operación.
+   * @returns Resultado de is field masked conforme al contrato `boolean`.
+   */
   private isFieldMasked(
     field: FrontendViewFields,
     privileged: boolean,
@@ -471,6 +501,12 @@ export class FrontendViewsService {
     return !privileged;
   }
 
+  /**
+   * Obtiene is privileged.
+   *
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de is privileged conforme al contrato `boolean`.
+   */
   private isPrivileged(user: AuthenticatedUser): boolean {
     return (user.roles ?? []).some((r) => PRIVILEGED_ROLES.has(r));
   }

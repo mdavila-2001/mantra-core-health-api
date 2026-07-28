@@ -116,6 +116,14 @@ const EVENT_MILESTONE: Readonly<Partial<Record<AnesthesiaEventType, string>>> =
  */
 @Injectable()
 export class PeriopPreopService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param preopRepo - Valor de preop repo requerido por la operación.
+   * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly preopRepo: PeriopPreopRepository,
@@ -741,10 +749,26 @@ export class PeriopPreopService {
     return CONCEPTS.RISK_CATEGORY_HIGH;
   }
 
+  /**
+   * Ejecuta la operación phase completed at.
+   *
+   * @param checklist - Valor de checklist requerido por la operación.
+   * @param phase - Valor de phase requerido por la operación.
+   * @returns Resultado de phase completed at conforme al contrato `Date | undefined`.
+   */
   private phaseCompletedAt(
     checklist: {
+      /**
+       * Valor de sign in completed at mantenido por la instancia.
+       */
       signInCompletedAt?: Date;
+      /**
+       * Valor de time out completed at mantenido por la instancia.
+       */
       timeOutCompletedAt?: Date;
+      /**
+       * Valor de sign out completed at mantenido por la instancia.
+       */
       signOutCompletedAt?: Date;
     },
     phase: ChecklistPhase,

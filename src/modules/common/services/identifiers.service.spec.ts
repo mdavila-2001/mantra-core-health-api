@@ -26,6 +26,10 @@ const dto: CreateIdentifierDto = {
 describe('IdentifiersService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
 
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const { em, tx } = createEmMock();
     const repo = { findActiveDuplicate: fn(), create: fn() };

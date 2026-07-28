@@ -10,29 +10,95 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create execution data.
+ */
 export interface CreateExecutionData {
+  /**
+   * Identificador asociado a report definition.
+   */
   reportDefinitionId: string;
+  /**
+   * Identificador asociado a report version.
+   */
   reportVersionId?: string;
+  /**
+   * Identificador asociado a schedule.
+   */
   scheduleId?: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a trigger concept.
+   */
   triggerConceptId: string;
+  /**
+   * Identificador asociado a requested by user.
+   */
   requestedByUserId?: string;
+  /**
+   * Valor de parameters json mantenido por la instancia.
+   */
   parametersJson?: unknown;
+  /**
+   * Identificador asociado a output format concept.
+   */
   outputFormatConceptId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create schedule data.
+ */
 export interface CreateScheduleData {
+  /**
+   * Identificador asociado a report definition.
+   */
   reportDefinitionId: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Valor de cron expression mantenido por la instancia.
+   */
   cronExpression: string;
+  /**
+   * Valor de time zone mantenido por la instancia.
+   */
   timeZone?: string;
+  /**
+   * Valor de parameters json mantenido por la instancia.
+   */
   parametersJson?: unknown;
+  /**
+   * Identificador asociado a output format concept.
+   */
   outputFormatConceptId: string;
+  /**
+   * Valor de next run at mantenido por la instancia.
+   */
   nextRunAt: Date;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -44,6 +110,13 @@ export interface CreateScheduleData {
 export class ReportingRunsRepository {
   // --- Ejecuciones (UC-39-04, UC-39-05, UC-39-11) ---
 
+  /**
+   * Crea create execution.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create execution conforme al contrato `ReportExecutions`.
+   */
   createExecution(
     em: EntityManager,
     data: CreateExecutionData,
@@ -66,6 +139,13 @@ export class ReportingRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find execution by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find execution by id conforme al contrato `Promise<ReportExecutions | null>`.
+   */
   findExecutionById(
     em: EntityManager,
     id: string,
@@ -73,6 +153,13 @@ export class ReportingRunsRepository {
     return em.findOne(ReportExecutions, { id });
   }
 
+  /**
+   * Obtiene find execution for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find execution for update conforme al contrato `Promise<ReportExecutions | null>`.
+   */
   findExecutionForUpdate(
     em: EntityManager,
     id: string,
@@ -86,15 +173,43 @@ export class ReportingRunsRepository {
 
   // --- Snapshots (UC-39-05) ---
 
+  /**
+   * Crea create snapshot.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create snapshot conforme al contrato `ReportSnapshots`.
+   */
   createSnapshot(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a report execution.
+       */
       reportExecutionId: string;
+      /**
+       * Valor de storage uri mantenido por la instancia.
+       */
       storageUri: string;
+      /**
+       * Valor de content hash mantenido por la instancia.
+       */
       contentHash?: string;
+      /**
+       * Valor de row count mantenido por la instancia.
+       */
       rowCount?: string;
+      /**
+       * Valor de size bytes mantenido por la instancia.
+       */
       sizeBytes?: string;
+      /**
+       * Valor de expires at mantenido por la instancia.
+       */
       expiresAt?: Date;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): ReportSnapshots {
@@ -113,6 +228,13 @@ export class ReportingRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find snapshot by execution.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reportExecutionId - Identificador de report execution.
+   * @returns Resultado de find snapshot by execution conforme al contrato `Promise<ReportSnapshots | null>`.
+   */
   findSnapshotByExecution(
     em: EntityManager,
     reportExecutionId: string,
@@ -130,6 +252,13 @@ export class ReportingRunsRepository {
 
   // --- Programaciones (UC-39-06, UC-39-07, UC-39-12) ---
 
+  /**
+   * Crea create schedule.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create schedule conforme al contrato `ReportSchedules`.
+   */
   createSchedule(em: EntityManager, data: CreateScheduleData): ReportSchedules {
     return em.create(
       ReportSchedules,
@@ -150,6 +279,13 @@ export class ReportingRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find schedule by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find schedule by id conforme al contrato `Promise<ReportSchedules | null>`.
+   */
   findScheduleById(
     em: EntityManager,
     id: string,
@@ -197,16 +333,47 @@ export class ReportingRunsRepository {
 
   // --- Distribuciones y suscripciones (UC-39-08, UC-39-09) ---
 
+  /**
+   * Crea create distribution.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create distribution conforme al contrato `ReportDistributions`.
+   */
   createDistribution(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a schedule.
+       */
       scheduleId?: string;
+      /**
+       * Identificador asociado a report execution.
+       */
       reportExecutionId: string;
+      /**
+       * Identificador asociado a recipient type concept.
+       */
       recipientTypeConceptId: string;
+      /**
+       * Identificador asociado a recipient user.
+       */
       recipientUserId?: string;
+      /**
+       * Valor de recipient address mantenido por la instancia.
+       */
       recipientAddress?: string;
+      /**
+       * Identificador asociado a channel.
+       */
       channelId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): ReportDistributions {
@@ -234,6 +401,13 @@ export class ReportingRunsRepository {
     return em.find(ReportDistributions, { reportExecutionId });
   }
 
+  /**
+   * Obtiene find distributions by execution for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reportExecutionId - Identificador de report execution.
+   * @returns Resultado de find distributions by execution for update conforme al contrato `Promise<ReportDistributions[]>`.
+   */
   findDistributionsByExecutionForUpdate(
     em: EntityManager,
     reportExecutionId: string,
@@ -245,12 +419,31 @@ export class ReportingRunsRepository {
     );
   }
 
+  /**
+   * Crea create subscription.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create subscription conforme al contrato `ReportSubscriptions`.
+   */
   createSubscription(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a report schedule.
+       */
       reportScheduleId: string;
+      /**
+       * Identificador asociado a subscriber user.
+       */
       subscriberUserId: string;
+      /**
+       * Identificador asociado a channel.
+       */
       channelId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): ReportSubscriptions {

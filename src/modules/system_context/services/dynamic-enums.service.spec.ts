@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DynamicEnumsService } from './dynamic-enums.service';
@@ -18,6 +24,10 @@ const CONCEPT_A = '44444444-4444-4444-4444-444444444444';
 const CONCEPT_B = '55555555-5555-5555-5555-555555555555';
 const FALLBACK = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -49,6 +59,12 @@ function build() {
   return { service, tx, contextRepo, logger };
 }
 
+/**
+ * Ejecuta la operación draft definition.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de draft definition conforme al contrato `any`.
+ */
 function draftDefinition(overrides: Record<string, unknown> = {}): any {
   return {
     id: DEFINITION,
@@ -96,6 +112,13 @@ describe('DynamicEnumsService', () => {
   });
 
   describe('draftVersion (UC-45-02)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param definition - Valor de definition requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, definition = draftDefinition()) {
       d.contextRepo.findEnumDefinitionForUpdate.mockResolvedValue(definition);
       return definition;
@@ -228,6 +251,12 @@ describe('DynamicEnumsService', () => {
   });
 
   describe('publishVersion (UC-45-03)', () => {
+    /**
+     * Ejecuta la operación draft version.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de draft version conforme al contrato `any`.
+     */
     function draftVersion(overrides: Record<string, unknown> = {}): any {
       return {
         id: VERSION,
@@ -237,6 +266,14 @@ describe('DynamicEnumsService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param definition - Valor de definition requerido por la operación.
+     * @param version - Valor de version requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       definition = draftDefinition(),
@@ -408,6 +445,14 @@ describe('DynamicEnumsService', () => {
       conceptId: CONCEPT_A,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param binding - Valor de binding requerido por la operación.
+     * @param options - Valor de options requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       binding: Record<string, unknown> = {},

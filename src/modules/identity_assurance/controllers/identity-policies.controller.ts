@@ -9,8 +9,20 @@ import { CreatePolicyDto, PolicyResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('identity/verification-policies')
 export class IdentityPoliciesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param policiesService - Valor de policies service requerido por la operación.
+   */
   constructor(private readonly policiesService: IdentityPoliciesService) {}
 
+  /**
+   * Crea create.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create conforme al contrato `Promise<PolicyResponseDto>`.
+   */
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

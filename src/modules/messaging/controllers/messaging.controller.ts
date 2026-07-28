@@ -25,6 +25,12 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class MessagingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param queuesService - Valor de queues service requerido por la operación.
+   * @param notificationsService - Valor de notifications service requerido por la operación.
+   */
   constructor(
     private readonly queuesService: QueuesService,
     private readonly notificationsService: NotificationsService,

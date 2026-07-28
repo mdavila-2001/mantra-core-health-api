@@ -5,16 +5,49 @@ import { DUNIT } from '../diagnostic_units.concepts';
 
 /** Datos de una nueva versión de precio (append-only, UC-23-07). */
 export interface CreatePriceData {
+  /**
+   * Identificador asociado a price schedule.
+   */
   priceScheduleId: string;
+  /**
+   * Identificador asociado a diagnostic study offering.
+   */
   diagnosticStudyOfferingId: string;
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
   versionNumber: number;
+  /**
+   * Valor de base amount mantenido por la instancia.
+   */
   baseAmount: string;
+  /**
+   * Valor de patient amount mantenido por la instancia.
+   */
   patientAmount?: string;
+  /**
+   * Valor de insurer amount mantenido por la instancia.
+   */
   insurerAmount?: string;
+  /**
+   * Valor de tax amount mantenido por la instancia.
+   */
   taxAmount?: string;
+  /**
+   * Valor de discount factor mantenido por la instancia.
+   */
   discountFactor?: string;
+  /**
+   * Valor de pricing rule json mantenido por la instancia.
+   */
   pricingRuleJson?: unknown;
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   effectiveFrom: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -25,6 +58,13 @@ export interface CreatePriceData {
  */
 @Injectable()
 export class DiagnosticStudyPricesRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<DiagnosticStudyPrices | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -63,6 +103,13 @@ export class DiagnosticStudyPricesRepository {
     return rows.length ? rows[0].versionNumber : 0;
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `DiagnosticStudyPrices`.
+   */
   create(em: EntityManager, data: CreatePriceData): DiagnosticStudyPrices {
     return em.create(
       DiagnosticStudyPrices,

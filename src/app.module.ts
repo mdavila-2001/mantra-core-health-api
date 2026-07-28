@@ -75,6 +75,9 @@ import { DocumentStoreModule } from './modules/document_store/document_store.mod
 import { RedisRuntimeModule } from './modules/redis_runtime/redis_runtime.module';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
 
+/**
+ * Configura las dependencias NestJS de app.
+ */
 @Module({
   imports: [
     // Validación del entorno antes que nada: si falta una credencial de base de

@@ -10,6 +10,11 @@ import { AddressResponseDto, CreateAddressDto } from '../dto';
 @ApiBearerAuth()
 @Controller('common/addresses')
 export class CommonAddressesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param addressesService - Valor de addresses service requerido por la operación.
+   */
   constructor(private readonly addressesService: AddressesService) {}
 
   /** UC-02-04: registra una dirección postal. */

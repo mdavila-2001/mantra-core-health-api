@@ -4,15 +4,45 @@ import { IntegrationContractVersions } from '../entities';
 
 /** Datos para publicar una nueva versión de contrato (UC-31-02). */
 export interface CreateVersionData {
+  /**
+   * Identificador asociado a integration contract.
+   */
   integrationContractId: string;
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
   versionNumber: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a request schema file.
+   */
   requestSchemaFileId?: string;
+  /**
+   * Identificador asociado a response schema file.
+   */
   responseSchemaFileId?: string;
+  /**
+   * Identificador asociado a openapi file.
+   */
   openapiFileId?: string;
+  /**
+   * Identificador asociado a mapping profile.
+   */
   mappingProfileId?: string;
+  /**
+   * Valor de contract hash mantenido por la instancia.
+   */
   contractHash?: string;
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   effectiveFrom?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

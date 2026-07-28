@@ -10,30 +10,93 @@ import { createdBy } from '../../../common';
 
 /** Datos de alta de media clínica. */
 export interface CreateClinicalMediaData {
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a media type concept.
+   */
   mediaTypeConceptId: string;
+  /**
+   * Identificador asociado a file.
+   */
   fileId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   custodianTenantId: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Identificador asociado a diagnostic report.
+   */
   diagnosticReportId?: string;
+  /**
+   * Identificador asociado a body site concept.
+   */
   bodySiteConceptId?: string;
+  /**
+   * Identificador asociado a view concept.
+   */
   viewConceptId?: string;
+  /**
+   * Valor de captured at mantenido por la instancia.
+   */
   capturedAt?: Date;
+  /**
+   * Identificador asociado a captured by profile.
+   */
   capturedByProfileId?: string;
+  /**
+   * Identificador asociado a patient visibility concept.
+   */
   patientVisibilityConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos de alta de un evento de calidad de datos. */
 export interface CreateDataQualityEventData {
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   custodianTenantId: string;
+  /**
+   * Identificador asociado a target type concept.
+   */
   targetTypeConceptId: string;
+  /**
+   * Identificador asociado a target.
+   */
   targetId: string;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt: Date;
+  /**
+   * Valor de rule code mantenido por la instancia.
+   */
   ruleCode: string;
+  /**
+   * Identificador asociado a severity concept.
+   */
   severityConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de details json mantenido por la instancia.
+   */
   detailsJson?: unknown;
 }
 
@@ -43,10 +106,24 @@ export interface CreateDataQualityEventData {
  */
 @Injectable()
 export class MediaQualityRepository {
+  /**
+   * Obtiene find media.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find media conforme al contrato `Promise<ClinicalMedia | null>`.
+   */
   findMedia(em: EntityManager, id: string): Promise<ClinicalMedia | null> {
     return em.findOne(ClinicalMedia, { id });
   }
 
+  /**
+   * Obtiene find media by file.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fileId - Identificador de file.
+   * @returns Resultado de find media by file conforme al contrato `Promise<ClinicalMedia | null>`.
+   */
   findMediaByFile(
     em: EntityManager,
     fileId: string,
@@ -54,6 +131,13 @@ export class MediaQualityRepository {
     return em.findOne(ClinicalMedia, { fileId });
   }
 
+  /**
+   * Crea create media.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create media conforme al contrato `ClinicalMedia`.
+   */
   createMedia(em: EntityManager, data: CreateClinicalMediaData): ClinicalMedia {
     return em.create(
       ClinicalMedia,
@@ -76,18 +160,55 @@ export class MediaQualityRepository {
     );
   }
 
+  /**
+   * Crea add annotation.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de add annotation conforme al contrato `MediaAnnotations`.
+   */
   addAnnotation(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a clinical media.
+       */
       clinicalMediaId: string;
+      /**
+       * Identificador asociado a annotation type concept.
+       */
       annotationTypeConceptId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de geometry json mantenido por la instancia.
+       */
       geometryJson?: unknown;
+      /**
+       * Identificador asociado a label concept.
+       */
       labelConceptId?: string;
+      /**
+       * Valor de label text mantenido por la instancia.
+       */
       labelText?: string;
+      /**
+       * Valor de confidence score mantenido por la instancia.
+       */
       confidenceScore?: string;
+      /**
+       * Identificador asociado a author profile.
+       */
       authorProfileId?: string;
+      /**
+       * Valor de algorithm model reference mantenido por la instancia.
+       */
       algorithmModelReference?: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): MediaAnnotations {
@@ -109,6 +230,13 @@ export class MediaQualityRepository {
     );
   }
 
+  /**
+   * Crea create data quality event.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create data quality event conforme al contrato `DiagnosticDataQualityEvents`.
+   */
   createDataQualityEvent(
     em: EntityManager,
     data: CreateDataQualityEventData,
@@ -134,14 +262,41 @@ export class MediaQualityRepository {
   addProvenanceLink(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a custodian tenant.
+       */
       custodianTenantId: string;
+      /**
+       * Identificador asociado a target type concept.
+       */
       targetTypeConceptId: string;
+      /**
+       * Identificador asociado a target.
+       */
       targetId: string;
+      /**
+       * Identificador asociado a source type concept.
+       */
       sourceTypeConceptId: string;
+      /**
+       * Identificador asociado a source.
+       */
       sourceId: string;
+      /**
+       * Identificador asociado a activity concept.
+       */
       activityConceptId: string;
+      /**
+       * Valor de content hash mantenido por la instancia.
+       */
       contentHash: string;
+      /**
+       * Valor de recorded at mantenido por la instancia.
+       */
       recordedAt: Date;
+      /**
+       * Identificador asociado a agent profile.
+       */
       agentProfileId?: string;
     },
   ): DiagnosticProvenanceLinks {

@@ -6,6 +6,9 @@ export type ObjectionResolution = 'UPHELD' | 'REJECTED';
 
 /** Cuerpo de `POST /consent/patient-objections/{id}/resolve` (UC-07-12). */
 export class ResolvePatientObjectionDto {
+  /**
+   * Valor de resolution mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Resultado de la resolución',
     enum: ['UPHELD', 'REJECTED'],
@@ -13,6 +16,9 @@ export class ResolvePatientObjectionDto {
   @IsIn(['UPHELD', 'REJECTED'])
   resolution!: ObjectionResolution;
 
+  /**
+   * Identificador asociado a reason concept.
+   */
   @ApiPropertyOptional({
     description: 'Motivo de la resolución (concept id)',
     format: 'uuid',

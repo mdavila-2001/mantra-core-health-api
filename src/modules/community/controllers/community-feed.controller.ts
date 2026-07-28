@@ -12,6 +12,11 @@ import { RebuildFeedDto, FeedRebuildResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('internal/community/feed')
 export class CommunityFeedController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CommunityFeedService) {}
 
   /** UC-19-15. */

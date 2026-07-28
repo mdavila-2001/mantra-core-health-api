@@ -23,12 +23,33 @@ import { CLIN } from '../clinical.concepts';
 
 /** Campos de valor recibidos por DTO (números; el modelo persiste string). */
 interface ValueLike {
+  /**
+   * Identificador asociado a value type concept.
+   */
   valueTypeConceptId?: string;
+  /**
+   * Valor de value decimal mantenido por la instancia.
+   */
   valueDecimal?: number;
+  /**
+   * Valor de value boolean mantenido por la instancia.
+   */
   valueBoolean?: boolean;
+  /**
+   * Valor de value text mantenido por la instancia.
+   */
   valueText?: string;
+  /**
+   * Identificador asociado a value concept.
+   */
   valueConceptId?: string;
+  /**
+   * Valor de quantity value mantenido por la instancia.
+   */
   quantityValue?: number;
+  /**
+   * Identificador asociado a quantity unit concept.
+   */
   quantityUnitConceptId?: string;
 }
 
@@ -39,6 +60,15 @@ interface ValueLike {
  */
 @Injectable()
 export class ObservationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param observationsRepo - Valor de observations repo requerido por la operación.
+   * @param encountersRepo - Valor de encounters repo requerido por la operación.
+   * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly observationsRepo: ObservationsRepository,

@@ -38,7 +38,18 @@ const VALUE_COLUMN: Record<TimeseriesTable, string | null> = {
  * ancho. Las demás series no tienen agregado continuo y siempre se leen crudas.
  */
 const ROLLUP_FOR: Partial<
-  Record<TimeseriesTable, { hourly: RollupName; daily: RollupName }>
+  Record<
+    TimeseriesTable,
+    {
+      /**
+       * Valor de hourly mantenido por la instancia.
+       */
+      hourly: RollupName; /**
+       * Valor de daily mantenido por la instancia.
+       */
+      daily: RollupName;
+    }
+  >
 > = {
   service_sli_series: {
     hourly: 'continuous_sli_hourly',
@@ -85,6 +96,13 @@ export function intervalToSeconds(interval: string): number {
  */
 @Injectable()
 export class SeriesQueryService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param timescaleRepo - Valor de timescale repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly timescaleRepo: TimescaleRepository,
@@ -93,6 +111,14 @@ export class SeriesQueryService {
     this.logger.setContext(SeriesQueryService.name);
   }
 
+  /**
+   * Ejecuta la operación query range.
+   *
+   * @param seriesId - Identificador de series.
+   * @param query - Valor de query requerido por la operación.
+   * @returns Resultado de query range conforme al contrato `Promise<QuerySeriesRangeResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async queryRange(
     seriesId: string,
     query: QuerySeriesRangeDto,

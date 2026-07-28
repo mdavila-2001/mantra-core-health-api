@@ -16,10 +16,16 @@ import {
 
 /** Un adjunto multimedia del post. */
 export class PostMediaInputDto {
+  /**
+   * Identificador asociado a file.
+   */
   @ApiProperty({ description: 'Id del archivo (common.files)', format: 'uuid' })
   @IsUUID()
   fileId!: string;
 
+  /**
+   * Valor de media role mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Rol del medio',
     enum: ['IMAGE', 'VIDEO', 'DOCUMENT'],
@@ -28,12 +34,18 @@ export class PostMediaInputDto {
   @IsString()
   mediaRole?: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
 
+  /**
+   * Valor de alt text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ maxLength: 300 })
   @IsOptional()
   @IsString()
   @MaxLength(300)
   altText?: string;
 
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Orden de despliegue' })
   @IsOptional()
   @IsInt()
@@ -43,16 +55,25 @@ export class PostMediaInputDto {
 
 /** Una mención a un perfil dentro del cuerpo. */
 export class MentionInputDto {
+  /**
+   * Identificador asociado a mentioned profile.
+   */
   @ApiProperty({ description: 'Perfil mencionado', format: 'uuid' })
   @IsUUID()
   mentionedProfileId!: string;
 
+  /**
+   * Valor de offset start mantenido por la instancia.
+   */
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
   @Min(0)
   offsetStart?: number;
 
+  /**
+   * Valor de offset end mantenido por la instancia.
+   */
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
@@ -62,6 +83,9 @@ export class MentionInputDto {
 
 /** Cuerpo de `POST /community/profiles/{profileId}/posts` (UC-19-01). */
 export class CreatePostDto {
+  /**
+   * Valor de body text mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Texto del post (sin PHI identificable)',
     maxLength: 5000,
@@ -71,16 +95,25 @@ export class CreatePostDto {
   @MaxLength(5000)
   bodyText!: string;
 
+  /**
+   * Valor de post type mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Tipo de post', enum: ['TEXT', 'POLL'] })
   @IsOptional()
   @IsString()
   postType?: 'TEXT' | 'POLL';
 
+  /**
+   * Valor de comments enabled mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Comentarios habilitados' })
   @IsOptional()
   @IsBoolean()
   commentsEnabled?: boolean;
 
+  /**
+   * Valor de media mantenido por la instancia.
+   */
   @ApiPropertyOptional({ type: [PostMediaInputDto] })
   @IsOptional()
   @IsArray()
@@ -89,6 +122,9 @@ export class CreatePostDto {
   @Type(() => PostMediaInputDto)
   media?: PostMediaInputDto[];
 
+  /**
+   * Valor de hashtags mantenido por la instancia.
+   */
   @ApiPropertyOptional({ type: [String], description: 'Hashtags (sin #)' })
   @IsOptional()
   @IsArray()
@@ -96,6 +132,9 @@ export class CreatePostDto {
   @IsString({ each: true })
   hashtags?: string[];
 
+  /**
+   * Valor de mentions mantenido por la instancia.
+   */
   @ApiPropertyOptional({ type: [MentionInputDto] })
   @IsOptional()
   @IsArray()

@@ -16,6 +16,13 @@ const LINE_SEPARATOR = '\n';
  */
 @Injectable()
 export class AddressesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param addressesRepo - Valor de addresses repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly addressesRepo: AddressesRepository,
@@ -60,6 +67,13 @@ export class AddressesService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param entity - Valor de entity requerido por la operación.
+   * @param dto - Datos validados de la operación.
+   * @returns Resultado de to response conforme al contrato `AddressResponseDto`.
+   */
   private toResponse(
     entity: Addresses,
     dto: CreateAddressDto,

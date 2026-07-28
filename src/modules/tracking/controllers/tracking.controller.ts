@@ -45,6 +45,11 @@ import {
 @ApiBearerAuth()
 @Controller('tracking')
 export class TrackingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param trackingService - Valor de tracking service requerido por la operación.
+   */
   constructor(private readonly trackingService: TrackingService) {}
 
   /** UC-37-01. */

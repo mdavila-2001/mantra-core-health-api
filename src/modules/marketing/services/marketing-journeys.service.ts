@@ -105,6 +105,14 @@ const WEIGHT_SCALE = 6;
  */
 @Injectable()
 export class MarketingJourneysService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param journeysRepo - Valor de journeys repo requerido por la operación.
+   * @param campaignsRepo - Valor de campaigns repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly journeysRepo: MarketingJourneysRepository,
@@ -836,6 +844,13 @@ export class MarketingJourneysService {
     return weights.map((w) => (w / 10 ** WEIGHT_SCALE).toFixed(WEIGHT_SCALE));
   }
 
+  /**
+   * Ejecuta la operación position of.
+   *
+   * @param index - Valor de index requerido por la operación.
+   * @param count - Valor de count requerido por la operación.
+   * @returns Resultado de position of conforme al contrato `string`.
+   */
   private positionOf(index: number, count: number): string {
     if (index === 0) return CONCEPTS.ATTR_POSITION_FIRST;
     if (index === count - 1) return CONCEPTS.ATTR_POSITION_LAST;

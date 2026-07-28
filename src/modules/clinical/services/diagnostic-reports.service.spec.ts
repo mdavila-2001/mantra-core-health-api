@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticReportsService } from './diagnostic-reports.service';
 import {
@@ -11,6 +17,10 @@ import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -26,6 +36,10 @@ function build() {
   return { service, reportsRepo, serviceRequestsRepo };
 }
 
+/**
+ * Ejecuta la operación report.
+ * @returns Resultado de report.
+ */
 const report = () => ({
   id: 'dr1',
   patientProfileId: 'p1',

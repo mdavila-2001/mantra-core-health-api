@@ -29,6 +29,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('diagnostics')
 export class DiagnosticsLabController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: DiagnosticsLabService) {}
 
   /** UC-20-04. */

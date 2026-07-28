@@ -5,15 +5,45 @@ import { createdBy } from '../../../common';
 
 /** Datos de un grant polimórfico sujeto→recurso (REC 3.1, sin FK). */
 export interface CreateResourceScopeGrantData {
+  /**
+   * Identificador asociado a subject type concept.
+   */
   subjectTypeConceptId: string;
+  /**
+   * Identificador asociado a subject.
+   */
   subjectId: string;
+  /**
+   * Identificador asociado a permission.
+   */
   permissionId: string;
+  /**
+   * Identificador asociado a resource type concept.
+   */
   resourceTypeConceptId: string;
+  /**
+   * Identificador asociado a resource.
+   */
   resourceId: string;
+  /**
+   * Identificador asociado a effect concept.
+   */
   effectConceptId: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -43,6 +73,13 @@ export class ResourceScopeGrantsRepository {
     return em.find(ResourceScopeGrants, { subjectId, resourceId });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `ResourceScopeGrants`.
+   */
   create(
     em: EntityManager,
     data: CreateResourceScopeGrantData,

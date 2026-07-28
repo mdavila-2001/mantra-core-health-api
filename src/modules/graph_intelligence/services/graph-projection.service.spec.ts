@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { GraphProjectionService } from './graph-projection.service';
@@ -13,6 +19,10 @@ const SOURCE_ID = '55555555-5555-5555-5555-555555555555';
 const DEF_ID = '66666666-6666-6666-6666-666666666666';
 const RUN_ID = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -301,6 +311,12 @@ describe('GraphProjectionService', () => {
   });
 
   describe('advanceProjectionRun (UC-61-03)', () => {
+    /**
+     * Ejecuta la operación with run.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with run.
+     */
     function withRun(overrides: any = {}) {
       return {
         id: RUN_ID,
@@ -372,6 +388,12 @@ describe('GraphProjectionService', () => {
   });
 
   describe('expireEdge (UC-61-10)', () => {
+    /**
+     * Ejecuta la operación with edge.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with edge.
+     */
     function withEdge(overrides: any = {}) {
       return {
         edgeId: EDGE_ID,
@@ -453,6 +475,12 @@ describe('GraphProjectionService', () => {
       sourceVersion: '20',
     } as any;
 
+    /**
+     * Ejecuta la operación with node.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with node.
+     */
     function withNode(overrides: any = {}) {
       return {
         nodeId: NODE_A,

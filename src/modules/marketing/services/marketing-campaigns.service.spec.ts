@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { MarketingCampaignsService } from './marketing-campaigns.service';
@@ -17,6 +23,10 @@ const CAMPAIGN = '33333333-3333-3333-3333-333333333333';
 const MEMBER_A = '44444444-4444-4444-4444-444444444444';
 const MEMBER_B = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -292,6 +302,10 @@ describe('MarketingCampaignsService', () => {
   });
 
   describe('materializeMembers (UC-50-04)', () => {
+    /**
+     * Ejecuta la operación scheduled campaign.
+     * @returns Resultado de scheduled campaign conforme al contrato `any`.
+     */
     function scheduledCampaign(): any {
       return {
         id: CAMPAIGN,

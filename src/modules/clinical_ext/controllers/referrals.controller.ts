@@ -27,6 +27,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('referrals')
 export class ReferralsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param referralsService - Valor de referrals service requerido por la operación.
+   */
   constructor(private readonly referralsService: ReferralsService) {}
 
   /** UC-18-07. */

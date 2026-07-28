@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingController } from './scheduling.controller';
@@ -10,6 +16,10 @@ const actor = { id: 'user-1', roles: ['SCHEDULING_ADMIN'] };
 const ID = '11111111-1111-1111-1111-111111111111';
 
 describe('SchedulingController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const catalogService = {
       createResource: mockFn(),
@@ -114,6 +124,10 @@ describe('SchedulingController', () => {
 });
 
 describe('SchedulingBookingsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const bookingsService = {
       reschedule: mockFn(),
@@ -173,6 +187,10 @@ describe('SchedulingBookingsController', () => {
 });
 
 describe('SchedulingInternalController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const bookingsService = { expireHolds: mockFn() };
     const waitlistService = {

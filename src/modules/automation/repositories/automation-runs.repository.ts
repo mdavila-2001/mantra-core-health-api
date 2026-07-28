@@ -9,53 +9,179 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common/persistence/audit-fields';
 
+/**
+ * Describe el contrato estructural de create workflow run data.
+ */
 export interface CreateWorkflowRunData {
+  /**
+   * Identificador asociado a workflow.
+   */
   workflowId: string;
+  /**
+   * Identificador asociado a trigger.
+   */
   triggerId?: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de run number mantenido por la instancia.
+   */
   runNumber: string;
+  /**
+   * Identificador asociado a trigger source concept.
+   */
   triggerSourceConceptId: string;
+  /**
+   * Valor de input json mantenido por la instancia.
+   */
   inputJson?: unknown;
+  /**
+   * Valor de context ref type mantenido por la instancia.
+   */
   contextRefType?: string;
+  /**
+   * Identificador asociado a context ref.
+   */
   contextRefId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create agent run data.
+ */
 export interface CreateAgentRunData {
+  /**
+   * Identificador asociado a workflow run.
+   */
   workflowRunId?: string;
+  /**
+   * Identificador asociado a agent.
+   */
   agentId: string;
+  /**
+   * Identificador asociado a agent version.
+   */
   agentVersionId: string;
+  /**
+   * Identificador asociado a task type concept.
+   */
   taskTypeConceptId: string;
+  /**
+   * Valor de input json mantenido por la instancia.
+   */
   inputJson?: unknown;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create agent run step data.
+ */
 export interface CreateAgentRunStepData {
+  /**
+   * Identificador asociado a agent run.
+   */
   agentRunId: string;
+  /**
+   * Valor de sequence no mantenido por la instancia.
+   */
   sequenceNo: number;
+  /**
+   * Identificador asociado a step kind concept.
+   */
   stepKindConceptId: string;
+  /**
+   * Identificador asociado a agent tool.
+   */
   agentToolId?: string;
+  /**
+   * Valor de thought text mantenido por la instancia.
+   */
   thoughtText?: string;
+  /**
+   * Valor de tool input json mantenido por la instancia.
+   */
   toolInputJson?: unknown;
+  /**
+   * Valor de tool output json mantenido por la instancia.
+   */
   toolOutputJson?: unknown;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de error text mantenido por la instancia.
+   */
   errorText?: string;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt?: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create approval data.
+ */
 export interface CreateApprovalData {
+  /**
+   * Identificador asociado a agent run.
+   */
   agentRunId: string;
+  /**
+   * Identificador asociado a agent run step.
+   */
   agentRunStepId?: string;
+  /**
+   * Identificador asociado a approval type concept.
+   */
   approvalTypeConceptId: string;
+  /**
+   * Valor de requested action json mantenido por la instancia.
+   */
   requestedActionJson?: unknown;
+  /**
+   * Valor de target resource type mantenido por la instancia.
+   */
   targetResourceType?: string;
+  /**
+   * Identificador asociado a target ref.
+   */
   targetRefId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -67,6 +193,13 @@ export interface CreateApprovalData {
 export class AutomationRunsRepository {
   // --- Runs de workflow (UC-48-08, 14) ---
 
+  /**
+   * Crea create workflow run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create workflow run conforme al contrato `WorkflowRuns`.
+   */
   createWorkflowRun(
     em: EntityManager,
     data: CreateWorkflowRunData,
@@ -90,6 +223,13 @@ export class AutomationRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find workflow run by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find workflow run by id conforme al contrato `Promise<WorkflowRuns | null>`.
+   */
   findWorkflowRunById(
     em: EntityManager,
     id: string,
@@ -97,6 +237,13 @@ export class AutomationRunsRepository {
     return em.findOne(WorkflowRuns, { id });
   }
 
+  /**
+   * Obtiene find workflow run for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find workflow run for update conforme al contrato `Promise<WorkflowRuns | null>`.
+   */
   findWorkflowRunForUpdate(
     em: EntityManager,
     id: string,
@@ -108,6 +255,13 @@ export class AutomationRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find workflow run by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runNumber - Valor de run number requerido por la operación.
+   * @returns Resultado de find workflow run by number conforme al contrato `Promise<WorkflowRuns | null>`.
+   */
   findWorkflowRunByNumber(
     em: EntityManager,
     runNumber: string,
@@ -140,6 +294,13 @@ export class AutomationRunsRepository {
 
   // --- Runs de agente (UC-48-09, 10, 11, 14) ---
 
+  /**
+   * Crea create agent run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create agent run conforme al contrato `AgentRuns`.
+   */
   createAgentRun(em: EntityManager, data: CreateAgentRunData): AgentRuns {
     return em.create(
       AgentRuns,
@@ -157,10 +318,24 @@ export class AutomationRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find agent run by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find agent run by id conforme al contrato `Promise<AgentRuns | null>`.
+   */
   findAgentRunById(em: EntityManager, id: string): Promise<AgentRuns | null> {
     return em.findOne(AgentRuns, { id });
   }
 
+  /**
+   * Obtiene find agent run for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find agent run for update conforme al contrato `Promise<AgentRuns | null>`.
+   */
   findAgentRunForUpdate(
     em: EntityManager,
     id: string,
@@ -172,6 +347,13 @@ export class AutomationRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find agent runs by workflow run for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param workflowRunId - Identificador de workflow run.
+   * @returns Resultado de find agent runs by workflow run for update conforme al contrato `Promise<AgentRuns[]>`.
+   */
   findAgentRunsByWorkflowRunForUpdate(
     em: EntityManager,
     workflowRunId: string,
@@ -213,6 +395,13 @@ export class AutomationRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find step by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find step by id conforme al contrato `Promise<AgentRunSteps | null>`.
+   */
   findStepById(em: EntityManager, id: string): Promise<AgentRunSteps | null> {
     return em.findOne(AgentRunSteps, { id });
   }
@@ -241,6 +430,13 @@ export class AutomationRunsRepository {
 
   // --- Aprobaciones (UC-48-10, 11, 14) ---
 
+  /**
+   * Crea create approval.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create approval conforme al contrato `AutomationApprovals`.
+   */
   createApproval(
     em: EntityManager,
     data: CreateApprovalData,
@@ -261,6 +457,13 @@ export class AutomationRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find approval for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find approval for update conforme al contrato `Promise<AutomationApprovals | null>`.
+   */
   findApprovalForUpdate(
     em: EntityManager,
     id: string,

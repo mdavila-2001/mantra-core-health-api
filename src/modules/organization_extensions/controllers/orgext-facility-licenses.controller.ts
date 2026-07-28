@@ -25,6 +25,11 @@ import {
 @ApiBearerAuth()
 @Controller('orgext/facility-licenses')
 export class OrgextFacilityLicensesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param licensesService - Valor de licenses service requerido por la operación.
+   */
   constructor(
     private readonly licensesService: OrgextFacilityLicensesService,
   ) {}

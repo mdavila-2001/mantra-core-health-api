@@ -46,8 +46,17 @@ const CONCEPT_DECISION: Readonly<Record<string, RuleDecision>> = {
 
 /** Valores de alcance que aporta la solicitud, por tipo de alcance. */
 export interface ScopeValues {
+  /**
+   * Identificador asociado a practice.
+   */
   practiceId?: string;
+  /**
+   * Identificador asociado a resource.
+   */
   resourceId?: string;
+  /**
+   * Identificador asociado a service concept.
+   */
   serviceConceptId?: string;
 }
 
@@ -60,6 +69,13 @@ export interface ScopeValues {
  */
 @Injectable()
 export class SchedulingConfirmationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: SchedulingConfirmationRepository,
@@ -74,7 +90,10 @@ export class SchedulingConfirmationService {
     actor: AuthenticatedUser,
   ): Promise<ConfirmationRuleResponseDto> {
     this.logger.info(
-      { operation: 'scheduling.confirmation-rule.create', tenantId: dto.tenantId },
+      {
+        operation: 'scheduling.confirmation-rule.create',
+        tenantId: dto.tenantId,
+      },
       'Creating booking confirmation rule',
     );
 
@@ -110,6 +129,15 @@ export class SchedulingConfirmationService {
     return this.setEnabled(id, false, actor);
   }
 
+  /**
+   * Actualiza set enabled.
+   *
+   * @param id - Identificador de id.
+   * @param enabled - Valor de enabled requerido por la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de set enabled conforme al contrato `Promise<ConfirmationRuleResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async setEnabled(
     id: string,
     enabled: boolean,
@@ -227,7 +255,10 @@ export class SchedulingConfirmationService {
   // --- Alcance -------------------------------------------------------------
 
   /** ¿Aplica el alcance de la regla a esta solicitud? */
-  private isInScope(rule: BookingConfirmationRules, scope: ScopeValues): boolean {
+  private isInScope(
+    rule: BookingConfirmationRules,
+    scope: ScopeValues,
+  ): boolean {
     // scope_id nulo ⇒ regla amplia sobre todo el tipo de alcance (aplica siempre
     // dentro del tenant ya filtrado).
     if (!rule.scopeId) return true;
@@ -236,6 +267,13 @@ export class SchedulingConfirmationService {
     return requestValue !== undefined && requestValue === rule.scopeId;
   }
 
+  /**
+   * Ejecuta la operación scope value for.
+   *
+   * @param scopeTypeConceptId - Identificador de scope type concept.
+   * @param scope - Valor de scope requerido por la operación.
+   * @returns Resultado de scope value for conforme al contrato `string | undefined`.
+   */
   private scopeValueFor(
     scopeTypeConceptId: string,
     scope: ScopeValues,
@@ -249,6 +287,12 @@ export class SchedulingConfirmationService {
     return undefined; // TENANT con scope_id concreto no se acota por valor de solicitud
   }
 
+  /**
+   * Ejecuta la operación specificity.
+   *
+   * @param rule - Valor de rule requerido por la operación.
+   * @returns Resultado de specificity conforme al contrato `number`.
+   */
   private specificity(rule: BookingConfirmationRules): number {
     const rank = SCOPE_RANK[rule.scopeTypeConceptId] ?? 0;
     return (rule.scopeId ? 100 : 0) + rank;
@@ -287,6 +331,12 @@ export class SchedulingConfirmationService {
     return false;
   }
 
+  /**
+   * Obtiene is recognized.
+   *
+   * @param x - Valor de x requerido por la operación.
+   * @returns Resultado de is recognized conforme al contrato `boolean`.
+   */
   private isRecognized(x: unknown): boolean {
     if (x == null || typeof x !== 'object') return false;
     const c = x as Record<string, unknown>;
@@ -298,6 +348,15 @@ export class SchedulingConfirmationService {
     );
   }
 
+  /**
+   * Ejecuta la operación eval leaf.
+   *
+   * @param field - Valor de field requerido por la operación.
+   * @param op - Valor de op requerido por la operación.
+   * @param value - Valor de value requerido por la operación.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de eval leaf conforme al contrato `boolean`.
+   */
   private evalLeaf(
     field: string,
     op: string,
@@ -337,6 +396,13 @@ export class SchedulingConfirmationService {
     }
   }
 
+  /**
+   * Obtiene read path.
+   *
+   * @param source - Valor de source requerido por la operación.
+   * @param path - Valor de path requerido por la operación.
+   * @returns Resultado de read path conforme al contrato `unknown`.
+   */
   private readPath(source: Record<string, unknown>, path: string): unknown {
     let current: unknown = source;
     for (const segment of path.split('.')) {
@@ -348,13 +414,35 @@ export class SchedulingConfirmationService {
 
   // --- Helpers de forma ----------------------------------------------------
 
+  /**
+   * Ejecuta la operación result.
+   *
+   * @param decision - Valor de decision requerido por la operación.
+   * @param explanation - Valor de explanation requerido por la operación.
+   * @returns Resultado de result conforme al contrato `EvaluateBookingResultDto`.
+   */
   private result(
     decision: RuleDecision,
     explanation: {
+      /**
+       * Identificador asociado a rule.
+       */
       ruleId?: string;
+      /**
+       * Valor de rule version mantenido por la instancia.
+       */
       ruleVersion?: number;
+      /**
+       * Valor de reason mantenido por la instancia.
+       */
       reason: string;
+      /**
+       * Valor de variables mantenido por la instancia.
+       */
       variables: Record<string, unknown>;
+      /**
+       * Valor de evaluated rule ids mantenido por la instancia.
+       */
       evaluatedRuleIds: string[];
     },
   ): EvaluateBookingResultDto {
@@ -365,6 +453,12 @@ export class SchedulingConfirmationService {
     };
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param rule - Valor de rule requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `ConfirmationRuleResponseDto`.
+   */
   private toResponse(
     rule: BookingConfirmationRules,
   ): ConfirmationRuleResponseDto {

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuthzCareRelationshipsService } from './authz-care-relationships.service';
 import {
@@ -12,6 +18,10 @@ import {
 const actor = { id: 'sec-1', roles: ['SECURITY_ADMIN'] } as any;
 const future = new Date(Date.now() + 3_600_000);
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const forkEm = {};

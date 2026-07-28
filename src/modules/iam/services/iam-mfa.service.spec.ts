@@ -2,6 +2,12 @@ import { jest } from '@jest/globals';
 import { generate, generateSecret } from 'otplib';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { IamMfaService } from './iam-mfa.service';
 import {
@@ -13,6 +19,10 @@ import {
 
 const actor = { id: 'u1', roles: ['USER'] };
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   // `fork()` devuelve un em independiente para el registro de auditoría de fallos

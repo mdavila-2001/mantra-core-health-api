@@ -34,6 +34,12 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller()
 export class DiagnosticsImagingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param imaging - Valor de imaging requerido por la operación.
+   * @param mediaQuality - Valor de media quality requerido por la operación.
+   */
   constructor(
     private readonly imaging: DiagnosticsImagingService,
     private readonly mediaQuality: DiagnosticsMediaQualityService,

@@ -12,6 +12,11 @@ import { CreateRestoreTestRunDto, RestoreTestRunResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('internal/ops')
 export class RestoreTestController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: BackupService) {}
 
   /** UC-11-10. */

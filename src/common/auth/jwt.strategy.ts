@@ -13,6 +13,9 @@ import type { AuthenticatedUser } from './authenticated-user.interface';
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   */
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

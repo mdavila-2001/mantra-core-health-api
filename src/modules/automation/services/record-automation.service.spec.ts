@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -11,6 +17,10 @@ const AUTOMATION_ID = '22222222-2222-2222-2222-222222222222';
 const AGENT_ID = '33333333-3333-3333-3333-333333333333';
 const SERVICE_USER_ID = '44444444-4444-4444-4444-444444444444';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -65,6 +75,12 @@ function build() {
   };
 }
 
+/**
+ * Ejecuta la operación automation.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de automation.
+ */
 function automation(overrides: any = {}) {
   return {
     id: AUTOMATION_ID,

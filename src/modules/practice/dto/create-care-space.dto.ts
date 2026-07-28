@@ -11,6 +11,9 @@ import {
 
 /** Cuerpo de `POST /sites/{siteId}/care-spaces` (UC-14-05). */
 export class CreateCareSpaceDto {
+  /**
+   * Identificador asociado a clinical unit.
+   */
   @ApiPropertyOptional({
     description: 'Unidad clínica (misma sede)',
     format: 'uuid',
@@ -19,6 +22,9 @@ export class CreateCareSpaceDto {
   @IsUUID()
   clinicalUnitId?: string;
 
+  /**
+   * Identificador asociado a parent space.
+   */
   @ApiPropertyOptional({
     description: 'Espacio padre (misma sede)',
     format: 'uuid',
@@ -27,6 +33,9 @@ export class CreateCareSpaceDto {
   @IsUUID()
   parentSpaceId?: string;
 
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Código único dentro de la sede',
     maxLength: 100,
@@ -36,12 +45,18 @@ export class CreateCareSpaceDto {
   @MaxLength(100)
   code!: string;
 
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Nombre del espacio', maxLength: 200 })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
   name!: string;
 
+  /**
+   * Identificador asociado a space type concept.
+   */
   @ApiPropertyOptional({
     description: 'Concepto de tipo de espacio',
     format: 'uuid',
@@ -50,6 +65,9 @@ export class CreateCareSpaceDto {
   @IsUUID()
   spaceTypeConceptId?: string;
 
+  /**
+   * Valor de capacity mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Capacidad (nº de plazas)' })
   @IsOptional()
   @IsInt()

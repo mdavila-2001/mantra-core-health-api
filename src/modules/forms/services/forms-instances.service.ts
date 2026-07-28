@@ -22,6 +22,14 @@ import { FORMS } from '../forms.concepts';
  */
 @Injectable()
 export class FormsInstancesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param instancesRepo - Valor de instances repo requerido por la operación.
+   * @param valuesRepo - Valor de values repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly instancesRepo: FormInstancesRepository,

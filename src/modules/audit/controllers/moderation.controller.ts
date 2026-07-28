@@ -12,6 +12,11 @@ import {
 @ApiBearerAuth()
 @Controller('moderation')
 export class ModerationController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param moderationService - Valor de moderation service requerido por la operación.
+   */
   constructor(private readonly moderationService: ModerationService) {}
 
   /** UC-10-11. */

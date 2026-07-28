@@ -10,9 +10,15 @@ import { randomUUID } from 'node:crypto';
  */
 @Entity({ schema: 'clinical', tableName: 'prescription_signature_policies' })
 export class PrescriptionSignaturePolicies {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
@@ -40,25 +46,47 @@ export class PrescriptionSignaturePolicies {
   @Property({ fieldName: 'signature_required', columnType: 'boolean' })
   signatureRequired: boolean = false;
 
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   @Property({ fieldName: 'effective_from', columnType: 'timestamptz' })
   effectiveFrom!: Date;
 
   /** Nulo = vigente indefinidamente. Desactivar = poblar con `now` (sin borrado duro). */
-  @Property({ fieldName: 'effective_to', columnType: 'timestamptz', nullable: true })
+  @Property({
+    fieldName: 'effective_to',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
   effectiveTo?: Date;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
+  /**
+   * Identificador asociado a created by user.
+   */
   @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
+  /**
+   * Identificador asociado a updated by user.
+   */
   @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 }

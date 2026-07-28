@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos para suscribir un webhook a un contrato (UC-31-04). */
 export interface CreateWebhookSubscriptionData {
+  /**
+   * Identificador asociado a integration contract.
+   */
   integrationContractId: string;
+  /**
+   * Identificador asociado a event type concept.
+   */
   eventTypeConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de callback uri mantenido por la instancia.
+   */
   callbackUri?: string;
+  /**
+   * Valor de signing key reference mantenido por la instancia.
+   */
   signingKeyReference?: string;
+  /**
+   * Valor de secret reference mantenido por la instancia.
+   */
   secretReference?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

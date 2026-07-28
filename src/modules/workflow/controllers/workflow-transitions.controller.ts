@@ -36,6 +36,11 @@ import {
 @ApiBearerAuth()
 @Controller('workflow/aggregates')
 export class WorkflowTransitionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param executionService - Valor de execution service requerido por la operación.
+   */
   constructor(private readonly executionService: TransitionExecutionService) {}
 
   /** UC-32-11. Va antes que la ruta de disparo para leerse en el mismo bloque. */

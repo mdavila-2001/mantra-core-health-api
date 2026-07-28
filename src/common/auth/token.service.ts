@@ -6,6 +6,9 @@ import type { JwtPayload } from './jwt-payload.interface';
 
 /** Par de tokens emitido al abrir o rotar una sesión. */
 export interface IssuedTokens {
+  /**
+   * Valor de access token mantenido por la instancia.
+   */
   accessToken: string;
   /** Refresh token en crudo; solo se devuelve al cliente, nunca se persiste. */
   refreshToken: string;
@@ -13,6 +16,9 @@ export interface IssuedTokens {
   refreshTokenHash: string;
   /** Identificador de sesión (`token_id`) embebido en el access token. */
   sessionTokenId: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt: Date;
 }
 
@@ -23,8 +29,16 @@ export interface IssuedTokens {
  */
 @Injectable()
 export class TokenService {
+  /**
+   * Valor de env mantenido por la instancia.
+   */
   private readonly env = loadAuthEnv();
 
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param jwt - Valor de jwt requerido por la operación.
+   */
   constructor(private readonly jwt: JwtService) {}
 
   /** Firma un access token para el sujeto y sesión indicados. */
@@ -56,7 +70,15 @@ export class TokenService {
    * una filtración de la tabla no basta para suplantar sesiones, y la
    * comparación en el refresh se hace por hash del valor presentado.
    */
-  issueRefreshToken(): { raw: string; hash: string } {
+  issueRefreshToken(): {
+    /**
+     * Valor de raw mantenido por la instancia.
+     */
+    raw: string; /**
+     * Valor de hash mantenido por la instancia.
+     */
+    hash: string;
+  } {
     const raw = randomBytes(48).toString('base64url');
     return { raw, hash: this.hashRefreshToken(raw) };
   }

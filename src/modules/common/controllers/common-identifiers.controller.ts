@@ -10,6 +10,11 @@ import { CreateIdentifierDto, IdentifierResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('common/identifiers')
 export class CommonIdentifiersController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param identifiersService - Valor de identifiers service requerido por la operación.
+   */
   constructor(private readonly identifiersService: IdentifiersService) {}
 
   /** UC-02-01: registra un identificador oficial. */

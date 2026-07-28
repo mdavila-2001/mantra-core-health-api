@@ -4,28 +4,85 @@ import { DataAccessLog, PatientContentAccessLog } from '../entities';
 
 /** Registro de acceso/lectura clínica (accounting WORM, UC-10-01). */
 export interface RecordDataAccessData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a action concept.
+   */
   actionConceptId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId?: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de purpose mantenido por la instancia.
+   */
   purpose?: string;
+  /**
+   * Identificador asociado a legal basis concept.
+   */
   legalBasisConceptId?: string;
+  /**
+   * Valor de resource type mantenido por la instancia.
+   */
   resourceType?: string;
+  /**
+   * Identificador asociado a resource.
+   */
   resourceId?: string;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
 /** Registro de acceso a contenido del paciente (detalle por recurso, UC-10-01). */
 export interface RecordPatientContentAccessData {
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a resource type concept.
+   */
   resourceTypeConceptId: string;
+  /**
+   * Identificador asociado a resource.
+   */
   resourceId: string;
+  /**
+   * Identificador asociado a action concept.
+   */
   actionConceptId: string;
+  /**
+   * Identificador asociado a purpose of use concept.
+   */
   purposeOfUseConceptId: string;
+  /**
+   * Identificador asociado a resource version.
+   */
   resourceVersionId?: string;
+  /**
+   * Identificador asociado a decision concept.
+   */
   decisionConceptId?: string;
+  /**
+   * Valor de policy version mantenido por la instancia.
+   */
   policyVersion?: string;
+  /**
+   * Identificador asociado a request.
+   */
   requestId?: string;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 

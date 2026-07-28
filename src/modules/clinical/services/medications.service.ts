@@ -44,6 +44,15 @@ import { PrescriptionSignaturePoliciesService } from './prescription-signature-p
  */
 @Injectable()
 export class MedicationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param requestsRepo - Valor de requests repo requerido por la operación.
+   * @param recordsRepo - Valor de records repo requerido por la operación.
+   * @param signaturePolicies - Valor de signature policies requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly requestsRepo: MedicationRequestsRepository,

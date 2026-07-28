@@ -10,9 +10,15 @@
 
 // --- Definiciones y suscripciones de proyección ---
 export const DEFINITION_STATES = ['ACTIVE', 'PAUSED', 'RETIRED'] as const;
+/**
+ * Define el tipo de dominio definition state.
+ */
 export type DefinitionState = (typeof DEFINITION_STATES)[number];
 
 export const SUBSCRIPTION_STATES = ['ACTIVE', 'PAUSED', 'RETIRED'] as const;
+/**
+ * Define el tipo de dominio subscription state.
+ */
 export type SubscriptionState = (typeof SUBSCRIPTION_STATES)[number];
 
 /**
@@ -24,17 +30,29 @@ export const DELIVERY_SEMANTICS = [
   'AT_MOST_ONCE',
   'EXACTLY_ONCE',
 ] as const;
+/**
+ * Define el tipo de dominio delivery semantics.
+ */
 export type DeliverySemantics = (typeof DELIVERY_SEMANTICS)[number];
 
 // --- Intentos de entrega ---
 export const ATTEMPT_STATUSES = ['IN_PROGRESS', 'SUCCEEDED', 'FAILED'] as const;
+/**
+ * Define el tipo de dominio attempt status.
+ */
 export type AttemptStatus = (typeof ATTEMPT_STATUSES)[number];
 
 export const DEAD_LETTER_STATES = ['OPEN', 'REPLAYED', 'DISCARDED'] as const;
+/**
+ * Define el tipo de dominio dead letter state.
+ */
 export type DeadLetterState = (typeof DEAD_LETTER_STATES)[number];
 
 // --- Consumidores ---
 export const CONSUMER_STATES = ['ACTIVE', 'DRAINING', 'STOPPED'] as const;
+/**
+ * Define el tipo de dominio consumer state.
+ */
 export type ConsumerState = (typeof CONSUMER_STATES)[number];
 
 // --- Reconciliación ---
@@ -43,6 +61,9 @@ export const RECONCILIATION_STATUSES = [
   'COMPLETED',
   'FAILED',
 ] as const;
+/**
+ * Define el tipo de dominio reconciliation status.
+ */
 export type ReconciliationStatus = (typeof RECONCILIATION_STATUSES)[number];
 
 /**
@@ -54,15 +75,24 @@ export type ReconciliationStatus = (typeof RECONCILIATION_STATUSES)[number];
  * - `EXTRA`: la proyección la tiene y el canónico ya no — un huérfano.
  */
 export const ITEM_RESULTS = ['MATCH', 'DIVERGENT', 'MISSING', 'EXTRA'] as const;
+/**
+ * Define el tipo de dominio item result.
+ */
 export type ItemResult = (typeof ITEM_RESULTS)[number];
 
 /** Resultados que abren un evento de deriva; `MATCH` no. */
 export const DRIFT_RESULTS = ['DIVERGENT', 'MISSING', 'EXTRA'] as const;
 
 export const DRIFT_STATUSES = ['OPEN', 'RESOLVED', 'DISMISSED'] as const;
+/**
+ * Define el tipo de dominio drift status.
+ */
 export type DriftStatus = (typeof DRIFT_STATUSES)[number];
 
 export const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
+/**
+ * Define el tipo de dominio severity.
+ */
 export type Severity = (typeof SEVERITIES)[number];
 
 /**
@@ -82,6 +112,9 @@ export const REPAIR_ACTIONS = [
   'REINDEX',
   'DELETE_ORPHAN',
 ] as const;
+/**
+ * Define el tipo de dominio repair action.
+ */
 export type RepairAction = (typeof REPAIR_ACTIONS)[number];
 
 export const JOB_STATUSES = [
@@ -90,6 +123,9 @@ export const JOB_STATUSES = [
   'COMPLETED',
   'FAILED',
 ] as const;
+/**
+ * Define el tipo de dominio job status.
+ */
 export type JobStatus = (typeof JOB_STATUSES)[number];
 
 // --- Borrado ---
@@ -100,6 +136,9 @@ export const DELETION_REQUEST_STATES = [
   'BLOCKED',
   'CANCELLED',
 ] as const;
+/**
+ * Define el tipo de dominio deletion request state.
+ */
 export type DeletionRequestState = (typeof DELETION_REQUEST_STATES)[number];
 
 export const DELETION_TARGET_STATES = [
@@ -108,6 +147,9 @@ export const DELETION_TARGET_STATES = [
   'VERIFIED',
   'BLOCKED',
 ] as const;
+/**
+ * Define el tipo de dominio deletion target state.
+ */
 export type DeletionTargetState = (typeof DELETION_TARGET_STATES)[number];
 
 /**
@@ -116,6 +158,9 @@ export type DeletionTargetState = (typeof DELETION_TARGET_STATES)[number];
  * que tienen que conservar la fila por integridad referencial.
  */
 export const DELETION_MODES = ['HARD', 'CRYPTO_SHRED', 'ANONYMIZE'] as const;
+/**
+ * Define el tipo de dominio deletion mode.
+ */
 export type DeletionMode = (typeof DELETION_MODES)[number];
 
 export const EXECUTION_STATUSES = [
@@ -123,6 +168,9 @@ export const EXECUTION_STATUSES = [
   'SUCCEEDED',
   'FAILED',
 ] as const;
+/**
+ * Define el tipo de dominio execution status.
+ */
 export type ExecutionStatus = (typeof EXECUTION_STATUSES)[number];
 
 export const VERIFICATION_METHODS = [
@@ -130,10 +178,16 @@ export const VERIFICATION_METHODS = [
   'CHECKSUM',
   'PROVIDER_RECEIPT',
 ] as const;
+/**
+ * Define el tipo de dominio verification method.
+ */
 export type VerificationMethod = (typeof VERIFICATION_METHODS)[number];
 
 // --- Mantenimiento ---
 export const MOVEMENT_MODES = ['COPY', 'MOVE'] as const;
+/**
+ * Define el tipo de dominio movement mode.
+ */
 export type MovementMode = (typeof MOVEMENT_MODES)[number];
 
 export const MIGRATION_STRATEGIES = [
@@ -141,13 +195,22 @@ export const MIGRATION_STRATEGIES = [
   'DUAL_WRITE',
   'BACKFILL',
 ] as const;
+/**
+ * Define el tipo de dominio migration strategy.
+ */
 export type MigrationStrategy = (typeof MIGRATION_STRATEGIES)[number];
 
 export const CACHE_JOB_STATUSES = ['PENDING', 'COMPLETED', 'FAILED'] as const;
+/**
+ * Define el tipo de dominio cache job status.
+ */
 export type CacheJobStatus = (typeof CACHE_JOB_STATUSES)[number];
 
 /** Ámbitos de caché que se pueden invalidar. */
 export const CACHE_SCOPES = ['ENTITY', 'DATASET', 'TENANT', 'SESSION'] as const;
+/**
+ * Define el tipo de dominio cache scope.
+ */
 export type CacheScope = (typeof CACHE_SCOPES)[number];
 
 /** Plazo por defecto para cumplir una solicitud de borrado, en días. */

@@ -13,10 +13,16 @@ import {
 
 /** Resultado (observación) a enlazar en una versión de informe. */
 export class ReportResultItemDto {
+  /**
+   * Identificador asociado a observation.
+   */
   @ApiProperty({ format: 'uuid', description: 'Observación enlazada' })
   @IsUUID()
   observationId!: string;
 
+  /**
+   * Identificador asociado a result role concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Rol del resultado (concept id)',
@@ -25,6 +31,9 @@ export class ReportResultItemDto {
   @IsUUID()
   resultRoleConceptId?: string;
 
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Orden dentro del informe' })
   @IsOptional()
   @IsInt()
@@ -34,10 +43,16 @@ export class ReportResultItemDto {
 
 /** Archivo a adjuntar a una versión de informe. */
 export class ReportFileItemDto {
+  /**
+   * Identificador asociado a file.
+   */
   @ApiProperty({ format: 'uuid', description: 'Archivo (common.files)' })
   @IsUUID()
   fileId!: string;
 
+  /**
+   * Identificador asociado a content role concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Rol del contenido (concept id)',
@@ -46,6 +61,9 @@ export class ReportFileItemDto {
   @IsUUID()
   contentRoleConceptId?: string;
 
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Orden' })
   @IsOptional()
   @IsInt()
@@ -55,6 +73,9 @@ export class ReportFileItemDto {
 
 /** Cuerpo de `POST /diagnostics/reports/{reportId}/versions` (UC-20-07). */
 export class CreateReportVersionDto {
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Tenant custodio (por defecto el del token)',
@@ -63,12 +84,18 @@ export class CreateReportVersionDto {
   @IsUUID()
   custodianTenantId?: string;
 
+  /**
+   * Valor de conclusion text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Conclusión clínica' })
   @IsOptional()
   @IsString()
   @MaxLength(20000)
   conclusionText?: string;
 
+  /**
+   * Identificador asociado a author profile.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Autor (profesional validador)',
@@ -77,6 +104,9 @@ export class CreateReportVersionDto {
   @IsUUID()
   authorProfileId?: string;
 
+  /**
+   * Identificador asociado a supersedes version.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Versión previa que enmienda',
@@ -85,6 +115,9 @@ export class CreateReportVersionDto {
   @IsUUID()
   supersedesVersionId?: string;
 
+  /**
+   * Identificador asociado a amendment reason concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Motivo de enmienda (concept id)',
@@ -93,12 +126,18 @@ export class CreateReportVersionDto {
   @IsUUID()
   amendmentReasonConceptId?: string;
 
+  /**
+   * Valor de amendment reason text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Texto del motivo de enmienda' })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
   amendmentReasonText?: string;
 
+  /**
+   * Valor de results mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     type: [ReportResultItemDto],
     description: 'Observaciones enlazadas',
@@ -109,6 +148,9 @@ export class CreateReportVersionDto {
   @Type(() => ReportResultItemDto)
   results?: ReportResultItemDto[];
 
+  /**
+   * Valor de files mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     type: [ReportFileItemDto],
     description: 'Archivos adjuntos',
@@ -122,6 +164,9 @@ export class CreateReportVersionDto {
 
 /** Cuerpo de `POST /diagnostics/reports/{reportId}/versions/{versionId}/release` (UC-20-08). */
 export class ReleaseReportVersionDto {
+  /**
+   * Valor de patient visibility mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Visibilidad al paciente',
     enum: ['VISIBLE', 'HIDDEN'],
@@ -130,11 +175,17 @@ export class ReleaseReportVersionDto {
   @IsString()
   patientVisibility?: 'VISIBLE' | 'HIDDEN';
 
+  /**
+   * Identificador asociado a reason concept.
+   */
   @ApiPropertyOptional({ format: 'uuid', description: 'Motivo (concept id)' })
   @IsOptional()
   @IsUUID()
   reasonConceptId?: string;
 
+  /**
+   * Valor de policy version mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Versión de la política aplicada' })
   @IsOptional()
   @IsString()
@@ -144,14 +195,23 @@ export class ReleaseReportVersionDto {
 
 /** Cuerpo de `POST /diagnostics/critical-results` (UC-20-09). */
 export class DetectCriticalResultDto {
+  /**
+   * Identificador asociado a observation.
+   */
   @ApiProperty({ format: 'uuid', description: 'Observación con valor crítico' })
   @IsUUID()
   observationId!: string;
 
+  /**
+   * Identificador asociado a patient profile.
+   */
   @ApiProperty({ format: 'uuid', description: 'Paciente afectado' })
   @IsUUID()
   patientProfileId!: string;
 
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Tenant custodio (por defecto el del token)',
@@ -160,6 +220,9 @@ export class DetectCriticalResultDto {
   @IsUUID()
   custodianTenantId?: string;
 
+  /**
+   * Identificador asociado a criticality concept.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Criticidad (concept id)',
@@ -168,6 +231,9 @@ export class DetectCriticalResultDto {
   @IsUUID()
   criticalityConceptId?: string;
 
+  /**
+   * Identificador asociado a diagnostic report.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Informe diagnóstico relacionado',
@@ -176,6 +242,9 @@ export class DetectCriticalResultDto {
   @IsUUID()
   diagnosticReportId?: string;
 
+  /**
+   * Identificador asociado a detected by profile.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Profesional que detecta',
@@ -184,6 +253,9 @@ export class DetectCriticalResultDto {
   @IsUUID()
   detectedByProfileId?: string;
 
+  /**
+   * Valor de escalation due in minutes mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Minutos hasta escalar (SLA)' })
   @IsOptional()
   @IsInt()
@@ -193,10 +265,16 @@ export class DetectCriticalResultDto {
 
 /** Cuerpo de `POST /diagnostics/critical-results/{id}/acknowledge` (UC-20-10). */
 export class AcknowledgeCriticalResultDto {
+  /**
+   * Identificador asociado a acknowledged by profile.
+   */
   @ApiProperty({ format: 'uuid', description: 'Profesional que acusa recibo' })
   @IsUUID()
   acknowledgedByProfileId!: string;
 
+  /**
+   * Identificador asociado a communication evidence.
+   */
   @ApiPropertyOptional({
     format: 'uuid',
     description: 'Evidencia de comunicación',

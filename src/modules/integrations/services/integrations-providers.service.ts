@@ -45,6 +45,15 @@ import {
  */
 @Injectable()
 export class IntegrationsProvidersService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param providersRepo - Valor de providers repo requerido por la operación.
+   * @param endpointsRepo - Valor de endpoints repo requerido por la operación.
+   * @param webhooksRepo - Valor de webhooks repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly providersRepo: ExternalProvidersRepository,

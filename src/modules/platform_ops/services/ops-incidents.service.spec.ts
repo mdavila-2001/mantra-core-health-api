@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { OpsIncidentsService } from './ops-incidents.service';
@@ -17,6 +23,10 @@ const INCIDENT = '33333333-3333-3333-3333-333333333333';
 const RUN = '44444444-4444-4444-4444-444444444444';
 const OWNER = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -51,6 +61,12 @@ function build() {
   return { service, tx, incidentsRepo, improvementsRepo, logger };
 }
 
+/**
+ * Ejecuta la operación enabled check.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de enabled check conforme al contrato `any`.
+ */
 function enabledCheck(overrides: Record<string, unknown> = {}): any {
   return {
     id: CHECK,
@@ -245,6 +261,12 @@ describe('OpsIncidentsService', () => {
   });
 
   describe('updateIncident (UC-46-07)', () => {
+    /**
+     * Ejecuta la operación live incident.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de live incident conforme al contrato `any`.
+     */
     function liveIncident(overrides: Record<string, unknown> = {}): any {
       return {
         id: INCIDENT,
@@ -471,6 +493,12 @@ describe('OpsIncidentsService', () => {
       ],
     };
 
+    /**
+     * Obtiene resolved incident.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de resolved incident conforme al contrato `any`.
+     */
     function resolvedIncident(overrides: Record<string, unknown> = {}): any {
       return {
         id: INCIDENT,

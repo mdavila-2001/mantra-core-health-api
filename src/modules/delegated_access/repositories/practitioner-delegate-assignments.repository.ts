@@ -5,24 +5,70 @@ import { createdBy } from '../../../common';
 
 /** Datos para crear una delegación de practitioner. */
 export interface CreateDelegateData {
+  /**
+   * Identificador asociado a practitioner role assignment.
+   */
   practitionerRoleAssignmentId: string;
+  /**
+   * Identificador asociado a delegate user assignment.
+   */
   delegateUserAssignmentId: string;
+  /**
+   * Identificador asociado a delegated permission set.
+   */
   delegatedPermissionSetId: string;
+  /**
+   * Identificador asociado a delegate role concept.
+   */
   delegateRoleConceptId: string;
+  /**
+   * Identificador asociado a patient scope concept.
+   */
   patientScopeConceptId?: string;
+  /**
+   * Identificador asociado a appointment scope concept.
+   */
   appointmentScopeConceptId?: string;
+  /**
+   * Valor de may view clinical content mantenido por la instancia.
+   */
   mayViewClinicalContent?: boolean;
+  /**
+   * Valor de may edit drafts mantenido por la instancia.
+   */
   mayEditDrafts?: boolean;
+  /**
+   * Valor de may sign clinical content mantenido por la instancia.
+   */
   maySignClinicalContent?: boolean;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `delegated_access.practitioner_delegate_assignments`. */
 @Injectable()
 export class PractitionerDelegateAssignmentsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<PractitionerDelegateAssignments | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -30,6 +76,13 @@ export class PractitionerDelegateAssignmentsRepository {
     return em.findOne(PractitionerDelegateAssignments, { id });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PractitionerDelegateAssignments`.
+   */
   create(
     em: EntityManager,
     data: CreateDelegateData,

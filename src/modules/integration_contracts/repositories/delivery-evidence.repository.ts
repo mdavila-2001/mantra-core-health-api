@@ -4,12 +4,33 @@ import { WebhookDeliveryEvidence } from '../entities';
 
 /** Datos para registrar evidencia de entrega de webhook (UC-31-09). */
 export interface CreateDeliveryEvidenceData {
+  /**
+   * Identificador asociado a webhook subscription.
+   */
   webhookSubscriptionId: string;
+  /**
+   * Identificador asociado a integration exchange record.
+   */
   integrationExchangeRecordId: string;
+  /**
+   * Identificador asociado a outcome concept.
+   */
   outcomeConceptId: string;
+  /**
+   * Valor de signature algorithm mantenido por la instancia.
+   */
   signatureAlgorithm?: string;
+  /**
+   * Identificador asociado a signature verification concept.
+   */
   signatureVerificationConceptId?: string;
+  /**
+   * Valor de delivered at mantenido por la instancia.
+   */
   deliveredAt?: Date;
+  /**
+   * Valor de acknowledged at mantenido por la instancia.
+   */
   acknowledgedAt?: Date;
 }
 

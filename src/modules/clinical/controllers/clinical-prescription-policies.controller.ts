@@ -27,10 +27,22 @@ import {
 @Roles('CLINICIAN', 'SECURITY_ADMIN')
 @Controller('clinical/prescription-signature-policies')
 export class ClinicalPrescriptionPoliciesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param policiesService - Valor de policies service requerido por la operación.
+   */
   constructor(
     private readonly policiesService: PrescriptionSignaturePoliciesService,
   ) {}
 
+  /**
+   * Crea create.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create conforme al contrato `Promise<PrescriptionSignaturePolicyResponseDto>`.
+   */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una política de firma de receta' })
@@ -41,6 +53,12 @@ export class ClinicalPrescriptionPoliciesController {
     return this.policiesService.create(dto, actor);
   }
 
+  /**
+   * Obtiene list.
+   *
+   * @param tenantId - Identificador de tenant.
+   * @returns Resultado de list conforme al contrato `Promise<PrescriptionSignaturePolicyResponseDto[]>`.
+   */
   @Get()
   @ApiOperation({ summary: 'Listar las políticas de firma de un tenant' })
   list(
@@ -49,6 +67,13 @@ export class ClinicalPrescriptionPoliciesController {
     return this.policiesService.list(tenantId);
   }
 
+  /**
+   * Ejecuta la operación deactivate.
+   *
+   * @param id - Identificador de id.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de deactivate conforme al contrato `Promise<PrescriptionSignaturePolicyResponseDto>`.
+   */
   @Post(':id/deactivate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

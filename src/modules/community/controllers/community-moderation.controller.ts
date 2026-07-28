@@ -24,6 +24,11 @@ import {
 @ApiBearerAuth()
 @Controller('community')
 export class CommunityModerationController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CommunityModerationService) {}
 
   /** UC-19-08 (cualquier miembro puede reportar). */

@@ -19,6 +19,14 @@ import { GEO } from '../geo.concepts';
  */
 @Injectable()
 export class GeoTripsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tripsRepo - Valor de trips repo requerido por la operación.
+   * @param sessionsRepo - Valor de sessions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly tripsRepo: TripsRepository,
@@ -138,13 +146,40 @@ export class GeoTripsService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param trip - Valor de trip requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `TripResponseDto`.
+   */
   private toResponse(trip: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a tracking session.
+     */
     trackingSessionId?: string;
+    /**
+     * Identificador asociado a status concept.
+     */
     statusConceptId: string;
+    /**
+     * Valor de distance m mantenido por la instancia.
+     */
     distanceM?: string;
+    /**
+     * Valor de duration s mantenido por la instancia.
+     */
     durationS?: number;
+    /**
+     * Valor de started at mantenido por la instancia.
+     */
     startedAt?: Date;
+    /**
+     * Valor de ended at mantenido por la instancia.
+     */
     endedAt?: Date;
   }): TripResponseDto {
     return {

@@ -27,6 +27,11 @@ import {
 @ApiBearerAuth()
 @Controller('consent/consents')
 export class ConsentsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param consentsService - Valor de consents service requerido por la operación.
+   */
   constructor(private readonly consentsService: ConsentsService) {}
 
   /** UC-07-01. */

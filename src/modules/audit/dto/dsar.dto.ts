@@ -16,6 +16,9 @@ export const DSAR_TRANSITIONS = [
 
 /** Cuerpo de `POST /privacy/dsar` (UC-10-08). */
 export class CreateDsarDto {
+  /**
+   * Valor de type mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Tipo de solicitud del titular',
     enum: DSAR_TYPES,
@@ -23,6 +26,9 @@ export class CreateDsarDto {
   @IsIn(DSAR_TYPES)
   type!: string;
 
+  /**
+   * Identificador asociado a user.
+   */
   @ApiPropertyOptional({
     description: 'Titular de los datos (FK iam.users); por defecto el actor',
     format: 'uuid',
@@ -31,6 +37,9 @@ export class CreateDsarDto {
   @IsUUID()
   userId?: string;
 
+  /**
+   * Valor de jurisdiction mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Jurisdicción aplicable',
     enum: ['PE', 'EU', 'US'],
@@ -42,6 +51,9 @@ export class CreateDsarDto {
 
 /** Cuerpo de `PATCH /privacy/dsar/{id}` (UC-10-08). */
 export class UpdateDsarDto {
+  /**
+   * Valor de status mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Nuevo estado de la máquina DSAR',
     enum: DSAR_TRANSITIONS,
@@ -49,6 +61,9 @@ export class UpdateDsarDto {
   @IsIn(DSAR_TRANSITIONS)
   status!: string;
 
+  /**
+   * Identificador asociado a result file.
+   */
   @ApiPropertyOptional({
     description: 'Paquete DSAR resultante (FK common.files)',
     format: 'uuid',
@@ -60,21 +75,39 @@ export class UpdateDsarDto {
 
 /** Respuesta de una solicitud DSAR. */
 export class DsarResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ description: 'Id de la solicitud' })
   id!: string;
 
+  /**
+   * Identificador asociado a user.
+   */
   @ApiProperty({ description: 'Titular de los datos' })
   userId!: string;
 
+  /**
+   * Valor de status mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Estado actual (concepto)' })
   status!: string;
 
+  /**
+   * Valor de type mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Tipo (concepto)' })
   type!: string;
 
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @ApiProperty({ description: 'Versión de fila optimista' })
   rowVersion!: number;
 
+  /**
+   * Valor de requested at mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Solicitada el',
     type: String,
@@ -82,6 +115,9 @@ export class DsarResponseDto {
   })
   requestedAt!: Date;
 
+  /**
+   * Valor de completed at mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Completada el',
     type: String,

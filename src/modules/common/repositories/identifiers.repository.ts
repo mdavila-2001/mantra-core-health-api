@@ -5,13 +5,37 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta un identificador oficial. */
 export interface CreateIdentifierData {
+  /**
+   * Identificador asociado a owner type concept.
+   */
   ownerTypeConceptId: string;
+  /**
+   * Identificador asociado a owner.
+   */
   ownerId: string;
+  /**
+   * Identificador asociado a type concept.
+   */
   typeConceptId: string;
+  /**
+   * Valor de system mantenido por la instancia.
+   */
   system?: string;
+  /**
+   * Valor de value mantenido por la instancia.
+   */
   value: string;
+  /**
+   * Identificador asociado a use concept.
+   */
   useConceptId?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -30,7 +54,18 @@ export class IdentifiersRepository {
    */
   findActiveDuplicate(
     em: EntityManager,
-    params: { typeConceptId: string; system?: string; value: string },
+    params: {
+      /**
+       * Identificador asociado a type concept.
+       */
+      typeConceptId: string; /**
+       * Valor de system mantenido por la instancia.
+       */
+      system?: string; /**
+       * Valor de value mantenido por la instancia.
+       */
+      value: string;
+    },
   ): Promise<Identifiers | null> {
     return em.findOne(Identifiers, {
       stateConceptId: CONCEPTS.STATE_ACTIVE,

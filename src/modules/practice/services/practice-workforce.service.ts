@@ -26,6 +26,16 @@ import {
  */
 @Injectable()
 export class PracticeWorkforceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practicesRepo - Valor de practices repo requerido por la operación.
+   * @param sitesRepo - Valor de sites repo requerido por la operación.
+   * @param rolesRepo - Valor de roles repo requerido por la operación.
+   * @param supportRepo - Valor de support repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: PracticesRepository,

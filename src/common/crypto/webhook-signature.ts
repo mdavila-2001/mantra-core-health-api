@@ -62,5 +62,7 @@ export function verifySignature(
  */
 export function deriveWebhookSecret(namespace: string, id: string): string {
   const rootKey = process.env.WEBHOOK_SIGNING_KEY ?? INSECURE_DEV_WEBHOOK_KEY;
-  return createHmac('sha256', rootKey).update(`${namespace}:${id}`).digest('hex');
+  return createHmac('sha256', rootKey)
+    .update(`${namespace}:${id}`)
+    .digest('hex');
 }

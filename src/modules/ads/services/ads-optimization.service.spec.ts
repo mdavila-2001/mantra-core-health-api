@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { AdsOptimizationService } from './ads-optimization.service';
@@ -21,6 +27,10 @@ const VIOLATION = '77777777-7777-7777-7777-777777777777';
 const FORM = '88888888-8888-8888-8888-888888888888';
 const PIPELINE = '99999999-9999-9999-9999-999999999999';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -89,6 +99,12 @@ function build() {
 
 describe('AdsOptimizationService', () => {
   describe('createExperiment (UC-43-10)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         name: 'Prueba creativo',
@@ -237,6 +253,12 @@ describe('AdsOptimizationService', () => {
   });
 
   describe('evaluateRule (UC-43-11)', () => {
+    /**
+     * Ejecuta la operación enabled rule.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de enabled rule conforme al contrato `any`.
+     */
     function enabledRule(overrides: Record<string, unknown> = {}): any {
       return {
         id: RULE,
@@ -337,6 +359,12 @@ describe('AdsOptimizationService', () => {
   });
 
   describe('recordReviewEvent (UC-43-12)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         reviewEventType: 'INITIAL' as const,
@@ -345,6 +373,12 @@ describe('AdsOptimizationService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       const ad: any = { id: AD, adSetId: AD_SET };
       d.campaignsRepo.findAdForUpdate.mockResolvedValue(ad);
@@ -517,6 +551,13 @@ describe('AdsOptimizationService', () => {
       periodEnd: '2026-07-31',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param rollups - Valor de rollups requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, rollups: any[]) {
       d.optimizationRepo.findInvoiceByNumber.mockResolvedValue(null);
       d.accountsRepo.findAdAccountForUpdate.mockResolvedValue({ id: ACCOUNT });
@@ -634,6 +675,12 @@ describe('AdsOptimizationService', () => {
   });
 
   describe('submitLead (UC-43-15)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param answers - Valor de answers requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(
       answers: any[] = [{ questionKey: 'email', answer: 'a@b.com' }],
     ): any {
@@ -644,6 +691,13 @@ describe('AdsOptimizationService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param form - Valor de form requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       form: Record<string, unknown> = {},

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CdsService } from './cds.service';
 import {
@@ -11,6 +17,10 @@ import { CEXT } from '../clinical_ext.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -201,7 +211,12 @@ describe('CdsService', () => {
     it('fails closed: an unparseable rule does not fire and is logged (warn)', async () => {
       const d = build();
       d.rulesRepo.findActive.mockResolvedValue([
-        { id: 'r-bad', name: 'bad', severityConceptId: CEXT.SEVERITY_HIGH, logicJson: { weird: true } },
+        {
+          id: 'r-bad',
+          name: 'bad',
+          severityConceptId: CEXT.SEVERITY_HIGH,
+          logicJson: { weird: true },
+        },
         { id: 'r-nologic', name: 'none', severityConceptId: CEXT.SEVERITY_LOW },
       ]);
       const res = await d.service.evaluate(

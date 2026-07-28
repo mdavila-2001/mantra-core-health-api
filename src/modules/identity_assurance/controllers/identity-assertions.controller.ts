@@ -17,6 +17,11 @@ import { RevokeAssertionDto, AssertionRevokedResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('identity/assertions')
 export class IdentityAssertionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param assertionsService - Valor de assertions service requerido por la operación.
+   */
   constructor(private readonly assertionsService: IdentityAssertionsService) {}
 
   /** UC-27-11. */

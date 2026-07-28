@@ -33,6 +33,15 @@ import {
  */
 @Injectable()
 export class EmbeddingPipelineService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param corpusRepo - Valor de corpus repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly catalogRepo: VectorCatalogRepository,

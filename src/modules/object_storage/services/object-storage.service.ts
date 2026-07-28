@@ -41,6 +41,14 @@ const DEFAULT_SIGNED_URL_SECONDS = 300;
  */
 @Injectable()
 export class ObjectStorageService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param storageRepo - Valor de storage repo requerido por la operación.
+   * @param dicomRepo - Valor de dicom repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly storageRepo: ObjectStorageRepository,
@@ -502,19 +510,61 @@ export class ObjectStorageService {
   private materialiseVersion(
     tx: EntityManager,
     data: {
+      /**
+       * Identificador asociado a manifest.
+       */
       manifestId: string;
+      /**
+       * Identificador asociado a namespace.
+       */
       namespaceId: string;
+      /**
+       * Valor de version number mantenido por la instancia.
+       */
       versionNumber: number;
+      /**
+       * Identificador asociado a provider version.
+       */
       providerVersionId: string;
+      /**
+       * Valor de object key mantenido por la instancia.
+       */
       objectKey: string;
+      /**
+       * Valor de mime type mantenido por la instancia.
+       */
       mimeType: string;
+      /**
+       * Valor de size bytes mantenido por la instancia.
+       */
       sizeBytes: string;
+      /**
+       * Valor de sha256 mantenido por la instancia.
+       */
       sha256: string;
+      /**
+       * Valor de etag mantenido por la instancia.
+       */
       etag: string;
+      /**
+       * Valor de compression mantenido por la instancia.
+       */
       compression?: string;
+      /**
+       * Identificador asociado a supersedes version.
+       */
       supersedesVersionId?: string;
+      /**
+       * Valor de provider uri mantenido por la instancia.
+       */
       providerUri: string;
+      /**
+       * Valor de storage class mantenido por la instancia.
+       */
       storageClass: string;
+      /**
+       * Valor de encryption mantenido por la instancia.
+       */
       encryption?: EncryptionEnvelopeDto;
     },
   ) {

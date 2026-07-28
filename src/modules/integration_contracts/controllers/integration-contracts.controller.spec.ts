@@ -1,11 +1,21 @@
 import { jest } from '@jest/globals';
 
 // Loose-typed mock factory: mantiene el runtime 'jest' evitando los tipos estrictos.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { IntegrationContractsController } from './integration-contracts.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const contractsService = {
     createContract: mockFn(),

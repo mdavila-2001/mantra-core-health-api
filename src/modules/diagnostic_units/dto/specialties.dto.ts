@@ -11,10 +11,16 @@ import {
 
 /** Una especialidad declarada por la unidad (UC-23-04). */
 export class SpecialtyItemDto {
+  /**
+   * Identificador asociado a specialty concept.
+   */
   @ApiProperty({ description: 'Especialidad (concept id)', format: 'uuid' })
   @IsUUID()
   specialtyConceptId!: string;
 
+  /**
+   * Valor de is primary mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Especialidad primaria de la unidad' })
   @IsOptional()
   @IsBoolean()
@@ -23,6 +29,9 @@ export class SpecialtyItemDto {
 
 /** Cuerpo de `PUT /diagnostic-units/{id}/specialties` (UC-23-04). */
 export class SetSpecialtiesDto {
+  /**
+   * Valor de specialties mantenido por la instancia.
+   */
   @ApiProperty({
     type: [SpecialtyItemDto],
     description: 'Conjunto vigente de especialidades',

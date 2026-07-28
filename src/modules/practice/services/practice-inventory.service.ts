@@ -34,6 +34,14 @@ const MOVEMENT_TYPE_BY_DIRECTION: Record<MovementDirection, string> = {
  */
 @Injectable()
 export class PracticeInventoryService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param itemsRepo - Valor de items repo requerido por la operación.
+   * @param movementsRepo - Valor de movements repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly itemsRepo: InventoryItemsRepository,

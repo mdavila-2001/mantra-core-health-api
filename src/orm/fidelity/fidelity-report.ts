@@ -24,8 +24,17 @@ export type DriftKind =
 
 /** Una diferencia concreta entre modelo y base. */
 export interface SchemaDrift {
+  /**
+   * Valor de kind mantenido por la instancia.
+   */
   readonly kind: DriftKind;
+  /**
+   * Valor de schema mantenido por la instancia.
+   */
   readonly schema: string;
+  /**
+   * Valor de table mantenido por la instancia.
+   */
   readonly table: string;
   /** Columna afectada; ausente cuando la deriva es de tabla completa. */
   readonly column?: string;
@@ -41,7 +50,13 @@ export interface FidelityReport {
   readonly tablesInDatabase: number;
   /** Diferencias encontradas, agrupadas por tipo en `byKind`. */
   readonly drift: readonly SchemaDrift[];
+  /**
+   * Valor de by kind mantenido por la instancia.
+   */
   readonly byKind: Readonly<Record<DriftKind, number>>;
+  /**
+   * Valor de took ms mantenido por la instancia.
+   */
   readonly tookMs: number;
 }
 

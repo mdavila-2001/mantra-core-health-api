@@ -20,19 +20,34 @@ export const ZONE_TYPES = [
   'curated',
   'research',
 ] as const;
+/**
+ * Define el tipo de dominio zone type.
+ */
 export type ZoneType = (typeof ZONE_TYPES)[number];
 
 export const ZONE_STATES = ['active', 'retired'] as const;
+/**
+ * Define el tipo de dominio zone state.
+ */
 export type ZoneState = (typeof ZONE_STATES)[number];
 
 export const CATALOG_STATES = ['active', 'retired'] as const;
+/**
+ * Define el tipo de dominio catalog state.
+ */
 export type CatalogState = (typeof CATALOG_STATES)[number];
 
 // --- Productos de datos ---
 export const PRODUCT_STATES = ['draft', 'published', 'deprecated'] as const;
+/**
+ * Define el tipo de dominio product state.
+ */
 export type ProductState = (typeof PRODUCT_STATES)[number];
 
 export const PRODUCT_VERSION_STATES = ['active', 'superseded'] as const;
+/**
+ * Define el tipo de dominio product version state.
+ */
 export type ProductVersionState = (typeof PRODUCT_VERSION_STATES)[number];
 
 // --- Datasets ---
@@ -42,6 +57,9 @@ export type ProductVersionState = (typeof PRODUCT_VERSION_STATES)[number];
  * dataset con datos malos seguiría alimentando informes.
  */
 export const DATASET_STATES = ['active', 'quarantined', 'retired'] as const;
+/**
+ * Define el tipo de dominio dataset state.
+ */
 export type DatasetState = (typeof DATASET_STATES)[number];
 
 export const COMPATIBILITY_MODES = [
@@ -50,6 +68,9 @@ export const COMPATIBILITY_MODES = [
   'forward',
   'full',
 ] as const;
+/**
+ * Define el tipo de dominio compatibility mode.
+ */
 export type CompatibilityMode = (typeof COMPATIBILITY_MODES)[number];
 
 export const STORAGE_FORMATS = [
@@ -59,6 +80,9 @@ export const STORAGE_FORMATS = [
   'avro',
   'orc',
 ] as const;
+/**
+ * Define el tipo de dominio storage format.
+ */
 export type StorageFormat = (typeof STORAGE_FORMATS)[number];
 
 // --- Particiones y archivos ---
@@ -68,13 +92,22 @@ export type StorageFormat = (typeof STORAGE_FORMATS)[number];
  * lakehouse una corrección **no** reescribe: crea una partición nueva.
  */
 export const PARTITION_STATES = ['pending', 'committed', 'superseded'] as const;
+/**
+ * Define el tipo de dominio partition state.
+ */
 export type PartitionState = (typeof PARTITION_STATES)[number];
 
 // --- Transformaciones ---
 export const DEFINITION_STATES = ['draft', 'active', 'retired'] as const;
+/**
+ * Define el tipo de dominio definition state.
+ */
 export type DefinitionState = (typeof DEFINITION_STATES)[number];
 
 export const RUN_STATUSES = ['running', 'succeeded', 'failed'] as const;
+/**
+ * Define el tipo de dominio run status.
+ */
 export type RunStatus = (typeof RUN_STATUSES)[number];
 
 /** Estados en los que una corrida sigue ocupando su dataset objetivo. */
@@ -82,6 +115,9 @@ export const LIVE_RUN_STATUSES = ['running'] as const;
 
 // --- Calidad ---
 export const QUALITY_RUN_STATUSES = ['running', 'passed', 'failed'] as const;
+/**
+ * Define el tipo de dominio quality run status.
+ */
 export type QualityRunStatus = (typeof QUALITY_RUN_STATUSES)[number];
 
 export const QUALITY_ISSUE_STATUSES = [
@@ -89,6 +125,9 @@ export const QUALITY_ISSUE_STATUSES = [
   'acknowledged',
   'resolved',
 ] as const;
+/**
+ * Define el tipo de dominio quality issue status.
+ */
 export type QualityIssueStatus = (typeof QUALITY_ISSUE_STATUSES)[number];
 
 export const QUALITY_DIMENSIONS = [
@@ -99,6 +138,9 @@ export const QUALITY_DIMENSIONS = [
   'uniqueness',
   'validity',
 ] as const;
+/**
+ * Define el tipo de dominio quality dimension.
+ */
 export type QualityDimension = (typeof QUALITY_DIMENSIONS)[number];
 
 /**
@@ -107,16 +149,28 @@ export type QualityDimension = (typeof QUALITY_DIMENSIONS)[number];
  * se puede servir".
  */
 export const RULE_SEVERITIES = ['info', 'warning', 'blocking'] as const;
+/**
+ * Define el tipo de dominio rule severity.
+ */
 export type RuleSeverity = (typeof RULE_SEVERITIES)[number];
 
 export const RULE_STATES = ['active', 'retired'] as const;
+/**
+ * Define el tipo de dominio rule state.
+ */
 export type RuleState = (typeof RULE_STATES)[number];
 
 // --- Investigación ---
 export const PROJECT_STATES = ['draft', 'approved', 'closed'] as const;
+/**
+ * Define el tipo de dominio project state.
+ */
 export type ProjectState = (typeof PROJECT_STATES)[number];
 
 export const COHORT_STATES = ['active', 'retired'] as const;
+/**
+ * Define el tipo de dominio cohort state.
+ */
 export type CohortState = (typeof COHORT_STATES)[number];
 
 /**
@@ -133,6 +187,9 @@ export const RELEASE_STATUSES = [
   'revoked',
   'rejected',
 ] as const;
+/**
+ * Define el tipo de dominio release status.
+ */
 export type ReleaseStatus = (typeof RELEASE_STATUSES)[number];
 
 /** Estados desde los que todavía se puede aprobar la solicitud. */

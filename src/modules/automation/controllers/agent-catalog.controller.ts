@@ -32,6 +32,11 @@ import {
 @ApiBearerAuth()
 @Controller('automation')
 export class AgentCatalogController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param catalogService - Valor de catalog service requerido por la operación.
+   */
   constructor(private readonly catalogService: AgentCatalogService) {}
 
   /** UC-48-01. */

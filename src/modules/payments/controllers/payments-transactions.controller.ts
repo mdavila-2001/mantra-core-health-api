@@ -23,6 +23,11 @@ import {
 @ApiBearerAuth()
 @Controller('payments/transactions')
 export class PaymentsTransactionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param transactionsService - Valor de transactions service requerido por la operación.
+   */
   constructor(
     private readonly transactionsService: PaymentsTransactionsService,
   ) {}

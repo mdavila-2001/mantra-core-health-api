@@ -5,16 +5,49 @@ import { createdBy } from '../../../common';
 
 /** Datos para registrar una sede dispensadora (UC-24-02). */
 export interface CreateSiteData {
+  /**
+   * Identificador asociado a pharmacy.
+   */
   pharmacyId: string;
+  /**
+   * Identificador asociado a practice site.
+   */
   practiceSiteId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a pharmacy site type concept.
+   */
   pharmacySiteTypeConceptId?: string;
+  /**
+   * Identificador asociado a dispensing mode concept.
+   */
   dispensingModeConceptId?: string;
+  /**
+   * Identificador asociado a controlled substance capability concept.
+   */
   controlledSubstanceCapabilityConceptId?: string;
+  /**
+   * Valor de home delivery available mantenido por la instancia.
+   */
   homeDeliveryAvailable?: boolean;
+  /**
+   * Valor de pickup available mantenido por la instancia.
+   */
   pickupAvailable?: boolean;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

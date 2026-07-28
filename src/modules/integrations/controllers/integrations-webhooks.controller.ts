@@ -12,6 +12,11 @@ import { InboundWebhookDto, InboundMessageResponseDto } from '../dto';
 @ApiTags('integrations-webhooks')
 @Controller('integrations')
 export class IntegrationsWebhooksController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param webhooksService - Valor de webhooks service requerido por la operación.
+   */
   constructor(private readonly webhooksService: IntegrationsWebhooksService) {}
 
   /** UC-12-09. */

@@ -18,6 +18,14 @@ import { CreateCommissionStatementDto, CreatedResourceDto } from '../dto';
  */
 @Injectable()
 export class BrokerCommissionService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param catalog - Valor de catalog requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: SettlementRepository,
@@ -27,6 +35,14 @@ export class BrokerCommissionService {
     this.logger.setContext(BrokerCommissionService.name);
   }
 
+  /**
+   * Crea generate.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de generate conforme al contrato `Promise<CreatedResourceDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async generate(
     dto: CreateCommissionStatementDto,
     actor: AuthenticatedUser,

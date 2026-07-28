@@ -26,6 +26,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('virtual-encounters')
 export class VirtualEncountersController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param virtualEncountersService - Valor de virtual encounters service requerido por la operación.
+   */
   constructor(
     private readonly virtualEncountersService: VirtualEncountersService,
   ) {}

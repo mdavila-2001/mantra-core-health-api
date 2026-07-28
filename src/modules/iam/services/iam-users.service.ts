@@ -38,6 +38,19 @@ import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
  */
 @Injectable()
 export class IamUsersService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param usersRepo - Valor de users repo requerido por la operación.
+   * @param credentialsRepo - Valor de credentials repo requerido por la operación.
+   * @param rolesRepo - Valor de roles repo requerido por la operación.
+   * @param sessionsRepo - Valor de sessions repo requerido por la operación.
+   * @param refreshRepo - Valor de refresh repo requerido por la operación.
+   * @param lockoutsRepo - Valor de lockouts repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly usersRepo: UsersRepository,

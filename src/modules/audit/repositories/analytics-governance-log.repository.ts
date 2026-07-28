@@ -4,12 +4,33 @@ import { AnalyticsGovernanceLog } from '../entities';
 
 /** Registro de gobernanza analítica (export/disclosure, UC-10-07/08/11). */
 export interface RecordGovernanceData {
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId: string;
+  /**
+   * Identificador asociado a action concept.
+   */
   actionConceptId: string;
+  /**
+   * Identificador asociado a approval status concept.
+   */
   approvalStatusConceptId: string;
+  /**
+   * Identificador asociado a purpose definition.
+   */
   purposeDefinitionId?: string;
+  /**
+   * Valor de export reference mantenido por la instancia.
+   */
   exportReference?: string;
+  /**
+   * Valor de affected subject count mantenido por la instancia.
+   */
   affectedSubjectCount?: number;
+  /**
+   * Valor de query hash mantenido por la instancia.
+   */
   queryHash?: string;
 }
 

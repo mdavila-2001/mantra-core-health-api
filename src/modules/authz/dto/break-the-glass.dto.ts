@@ -12,6 +12,9 @@ import {
 
 /** Cuerpo de `POST /authz/patients/{patientProfileId}/break-the-glass` (UC-06-07). */
 export class BreakTheGlassDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({
     description: 'Tenant del acceso de emergencia',
     format: 'uuid',
@@ -19,6 +22,9 @@ export class BreakTheGlassDto {
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de justification mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Justificación textual obligatoria',
     maxLength: 1000,
@@ -28,6 +34,9 @@ export class BreakTheGlassDto {
   @MaxLength(1000)
   justification!: string;
 
+  /**
+   * Valor de window minutes mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description:
       'Ventana de acceso en minutos (corta; por defecto 60, máx 240)',
@@ -40,6 +49,9 @@ export class BreakTheGlassDto {
   @Max(240)
   windowMinutes?: number;
 
+  /**
+   * Identificador asociado a encounter.
+   */
   @ApiPropertyOptional({
     description: 'Encuentro clínico asociado',
     format: 'uuid',

@@ -33,6 +33,14 @@ const CURRENCY_CONCEPT: Readonly<Record<'BOB' | 'USD', string>> = {
  */
 @Injectable()
 export class PaymentsOperationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param operationsRepo - Valor de operations repo requerido por la operación.
+   * @param transactionsRepo - Valor de transactions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly operationsRepo: PaymentOperationsRepository,

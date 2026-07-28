@@ -29,6 +29,12 @@ import {
 @ApiBearerAuth()
 @Controller('internal')
 export class PharmacyInventoryInternalController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param reservations - Valor de reservations requerido por la operación.
+   * @param sync - Valor de sync requerido por la operación.
+   */
   constructor(
     private readonly reservations: InventoryReservationsService,
     private readonly sync: InventorySyncService,

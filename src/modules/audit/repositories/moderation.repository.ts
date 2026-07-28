@@ -4,23 +4,65 @@ import { ModerationEvents, ModerationDecisionsHistory } from '../entities';
 
 /** Evento de moderación / gobernanza (WORM, UC-10-11). */
 export interface RecordModerationData {
+  /**
+   * Identificador asociado a target type concept.
+   */
   targetTypeConceptId: string;
+  /**
+   * Identificador asociado a target.
+   */
   targetId: string;
+  /**
+   * Identificador asociado a action concept.
+   */
   actionConceptId: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId?: string;
+  /**
+   * Valor de policy version mantenido por la instancia.
+   */
   policyVersion?: string;
+  /**
+   * Valor de evidence json mantenido por la instancia.
+   */
   evidenceJson?: unknown;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
 /** Versión (snapshot) de una decisión de moderación (append-only, UC-10-11). */
 export interface RecordModerationHistoryData {
+  /**
+   * Identificador asociado a moderation decisions.
+   */
   moderationDecisionsId: string;
+  /**
+   * Identificador asociado a operation concept.
+   */
   operationConceptId: string;
+  /**
+   * Valor de data snapshot mantenido por la instancia.
+   */
   dataSnapshot: unknown;
+  /**
+   * Identificador asociado a changed by user.
+   */
   changedByUserId?: string;
+  /**
+   * Identificador asociado a change reason concept.
+   */
   changeReasonConceptId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
 }
 

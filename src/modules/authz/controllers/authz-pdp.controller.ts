@@ -20,6 +20,11 @@ import {
 @ApiBearerAuth()
 @Controller('authz')
 export class AuthzPdpController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param pdpService - Valor de pdp service requerido por la operación.
+   */
   constructor(private readonly pdpService: AuthzPdpService) {}
 
   /** UC-06-11. */

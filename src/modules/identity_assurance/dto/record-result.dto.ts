@@ -13,6 +13,9 @@ export type CheckResultOutcome = 'MATCH' | 'NO_MATCH';
 
 /** Cuerpo de `POST /identity/checks/{id}/results` (UC-27-06). */
 export class RecordResultDto {
+  /**
+   * Valor de result mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Veredicto del check',
     enum: ['MATCH', 'NO_MATCH'],
@@ -21,6 +24,9 @@ export class RecordResultDto {
   @IsIn(['MATCH', 'NO_MATCH'])
   result!: CheckResultOutcome;
 
+  /**
+   * Valor de match score mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Puntaje de coincidencia (0..1)',
     example: '0.98',
@@ -29,6 +35,9 @@ export class RecordResultDto {
   @IsNumberString()
   matchScore?: string;
 
+  /**
+   * Valor de discrepancy codes mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Códigos de discrepancia detectados',
     type: [String],
@@ -38,6 +47,9 @@ export class RecordResultDto {
   @IsString({ each: true })
   discrepancyCodes?: string[];
 
+  /**
+   * Valor de source response hash mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Hash de la respuesta fuente',
     maxLength: 200,

@@ -12,6 +12,11 @@ import {
 @ApiBearerAuth()
 @Controller('consent/processing-legal-bases')
 export class ProcessingLegalBasesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param legalBasesService - Valor de legal bases service requerido por la operación.
+   */
   constructor(
     private readonly legalBasesService: ProcessingLegalBasesService,
   ) {}

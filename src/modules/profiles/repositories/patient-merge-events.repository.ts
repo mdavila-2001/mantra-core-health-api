@@ -8,19 +8,50 @@ import { PatientMergeEvents } from '../entities';
  * `approved_by`. No se actualiza nunca; la reversión es un nuevo evento.
  */
 export interface CreateMergeEventData {
+  /**
+   * Identificador asociado a surviving patient profile.
+   */
   survivingPatientProfileId: string;
+  /**
+   * Identificador asociado a merged patient profile.
+   */
   mergedPatientProfileId: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId: string;
+  /**
+   * Identificador asociado a decision status concept.
+   */
   decisionStatusConceptId: string;
+  /**
+   * Identificador asociado a approved by user.
+   */
   approvedByUserId?: string;
+  /**
+   * Identificador asociado a reversal of event.
+   */
   reversalOfEventId?: string;
+  /**
+   * Valor de recorded at mantenido por la instancia.
+   */
   recordedAt: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
 /** Acceso a datos de `profiles.patient_merge_events` (append-only). */
 @Injectable()
 export class PatientMergeEventsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<PatientMergeEvents | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<PatientMergeEvents | null> {
     return em.findOne(PatientMergeEvents, { id });
   }
@@ -33,6 +64,13 @@ export class PatientMergeEventsRepository {
     return em.findOne(PatientMergeEvents, { reversalOfEventId: eventId });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PatientMergeEvents`.
+   */
   create(em: EntityManager, data: CreateMergeEventData): PatientMergeEvents {
     return em.create(
       PatientMergeEvents,

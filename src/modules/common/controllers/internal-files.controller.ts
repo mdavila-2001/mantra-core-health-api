@@ -22,6 +22,11 @@ import { FileVersionResponseDto, ScanResultDto } from '../dto';
 @ApiBearerAuth()
 @Controller('internal/files')
 export class InternalFilesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param filesService - Valor de files service requerido por la operación.
+   */
   constructor(private readonly filesService: FilesService) {}
 
   /** UC-02-09: callback del antivirus con el resultado del escaneo. */

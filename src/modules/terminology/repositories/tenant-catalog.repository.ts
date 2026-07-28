@@ -6,25 +6,73 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar la política de catálogo de un tenant. */
 export interface UpsertTenantCatalogPolicyData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a value set.
+   */
   valueSetId: string;
+  /**
+   * Identificador asociado a mode concept.
+   */
   modeConceptId?: string;
+  /**
+   * Valor de allow subset mantenido por la instancia.
+   */
   allowSubset?: boolean;
+  /**
+   * Valor de allow alias mantenido por la instancia.
+   */
   allowAlias?: boolean;
+  /**
+   * Valor de allow local concepts mantenido por la instancia.
+   */
   allowLocalConcepts?: boolean;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos mínimos para materializar la configuración de un concepto por tenant. */
 export interface UpsertTenantConceptConfigData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a concept.
+   */
   conceptId: string;
+  /**
+   * Valor de enabled mantenido por la instancia.
+   */
   enabled: boolean;
+  /**
+   * Valor de alias display mantenido por la instancia.
+   */
   aliasDisplay?: string;
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   ordinal?: number;
+  /**
+   * Valor de is default mantenido por la instancia.
+   */
   isDefault?: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

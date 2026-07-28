@@ -58,6 +58,15 @@ import {
 @ApiBearerAuth()
 @Controller('health-data')
 export class HealthDataController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param ingestionService - Valor de ingestion service requerido por la operación.
+   * @param resourcesService - Valor de resources service requerido por la operación.
+   * @param validationService - Valor de validation service requerido por la operación.
+   * @param identityService - Valor de identity service requerido por la operación.
+   * @param releaseService - Valor de release service requerido por la operación.
+   */
   constructor(
     private readonly ingestionService: HealthIngestionService,
     private readonly resourcesService: CanonicalResourcesService,

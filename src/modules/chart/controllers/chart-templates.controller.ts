@@ -20,6 +20,11 @@ import { AssignmentResponseDto, AssignTemplateDto } from '../dto';
 @ApiBearerAuth()
 @Controller('charts/templates')
 export class ChartTemplatesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param templatesService - Valor de templates service requerido por la operación.
+   */
   constructor(private readonly templatesService: ChartTemplatesService) {}
 
   /** UC-15-12. */

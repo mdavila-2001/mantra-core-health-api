@@ -18,6 +18,14 @@ import { BILL } from '../billing.concepts';
  */
 @Injectable()
 export class DunningService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param dunningRepo - Valor de dunning repo requerido por la operación.
+   * @param invoicesRepo - Valor de invoices repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly dunningRepo: DunningRepository,
@@ -27,6 +35,14 @@ export class DunningService {
     this.logger.setContext(DunningService.name);
   }
 
+  /**
+   * Ejecuta la operación execute.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de execute conforme al contrato `Promise<DunningRunResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async execute(
     dto: ExecuteDunningRunDto,
     actor: AuthenticatedUser,

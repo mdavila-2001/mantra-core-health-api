@@ -23,6 +23,15 @@ import { RevokeAssertionDto, AssertionRevokedResponseDto } from '../dto';
  */
 @Injectable()
 export class IdentityAssertionsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param assertionsRepo - Valor de assertions repo requerido por la operación.
+   * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param fraudRepo - Valor de fraud repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly assertionsRepo: IdentityAssertionsRepository,

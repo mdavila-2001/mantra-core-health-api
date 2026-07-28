@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { MarketingJourneysService } from './marketing-journeys.service';
@@ -19,6 +25,10 @@ const CAMPAIGN = '55555555-5555-5555-5555-555555555555';
 const TEMPLATE = '66666666-6666-6666-6666-666666666666';
 const CONVERSION = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -59,6 +69,12 @@ function build() {
   return { service, tx, journeysRepo, campaignsRepo };
 }
 
+/**
+ * Ejecuta la operación active enrollment.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active enrollment conforme al contrato `any`.
+ */
 function activeEnrollment(overrides: Record<string, unknown> = {}): any {
   return {
     id: ENROLLMENT,
@@ -130,6 +146,10 @@ describe('MarketingJourneysService', () => {
   });
 
   describe('addSteps (UC-50-06)', () => {
+    /**
+     * Ejecuta la operación draft journey.
+     * @returns Resultado de draft journey conforme al contrato `any`.
+     */
     function draftJourney(): any {
       return { id: JOURNEY, stateConceptId: CONCEPTS.JOURNEY_DRAFT };
     }

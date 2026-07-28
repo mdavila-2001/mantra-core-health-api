@@ -20,16 +20,47 @@ import {
 export class DeletionRepository {
   // --- Solicitudes (UC-62-08, 09, 11) ---
 
+  /**
+   * Crea create request.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create request conforme al contrato `DeletionRequests`.
+   */
   createRequest(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de subject type mantenido por la instancia.
+       */
       subjectType: string;
+      /**
+       * Identificador asociado a subject.
+       */
       subjectId: string;
+      /**
+       * Valor de reason code mantenido por la instancia.
+       */
       reasonCode: string;
+      /**
+       * Valor de legal basis code mantenido por la instancia.
+       */
       legalBasisCode: string;
+      /**
+       * Identificador asociado a requested by user.
+       */
       requestedByUserId: string;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
+      /**
+       * Valor de due at mantenido por la instancia.
+       */
       dueAt: Date;
     },
   ): DeletionRequests {
@@ -40,6 +71,13 @@ export class DeletionRepository {
     );
   }
 
+  /**
+   * Obtiene find request for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find request for update conforme al contrato `Promise<DeletionRequests | null>`.
+   */
   findRequestForUpdate(
     em: EntityManager,
     id: string,
@@ -88,21 +126,56 @@ export class DeletionRepository {
     });
   }
 
+  /**
+   * Crea create target.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create target conforme al contrato `DeletionTargets`.
+   */
   createTarget(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a deletion request.
+       */
       deletionRequestId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Valor de backend code mantenido por la instancia.
+       */
       backendCode: string;
+      /**
+       * Valor de target locator mantenido por la instancia.
+       */
       targetLocator: string;
+      /**
+       * Valor de deletion mode mantenido por la instancia.
+       */
       deletionMode: string;
+      /**
+       * Valor de blocked by legal hold mantenido por la instancia.
+       */
       blockedByLegalHold: boolean;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): DeletionTargets {
     return em.create(DeletionTargets, data as never, { partial: true });
   }
 
+  /**
+   * Obtiene find target for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find target for update conforme al contrato `Promise<DeletionTargets | null>`.
+   */
   findTargetForUpdate(
     em: EntityManager,
     id: string,
@@ -132,6 +205,13 @@ export class DeletionRepository {
     return em.findOne(DeletionExecutions, { idempotencyKey });
   }
 
+  /**
+   * Ejecuta la operación count executions.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param deletionTargetId - Identificador de deletion target.
+   * @returns Resultado de count executions conforme al contrato `Promise<number>`.
+   */
   countExecutions(
     em: EntityManager,
     deletionTargetId: string,
@@ -139,15 +219,43 @@ export class DeletionRepository {
     return em.count(DeletionExecutions, { deletionTargetId });
   }
 
+  /**
+   * Crea create execution.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create execution conforme al contrato `DeletionExecutions`.
+   */
   createExecution(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a deletion target.
+       */
       deletionTargetId: string;
+      /**
+       * Valor de attempt number mantenido por la instancia.
+       */
       attemptNumber: number;
+      /**
+       * Valor de idempotency key mantenido por la instancia.
+       */
       idempotencyKey: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de provider receipt mantenido por la instancia.
+       */
       providerReceipt?: string;
+      /**
+       * Valor de error code mantenido por la instancia.
+       */
       errorCode?: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): DeletionExecutions {
@@ -163,10 +271,25 @@ export class DeletionRepository {
   createVerification(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a deletion target.
+       */
       deletionTargetId: string;
+      /**
+       * Valor de verification method mantenido por la instancia.
+       */
       verificationMethod: string;
+      /**
+       * Valor de verified absent mantenido por la instancia.
+       */
       verifiedAbsent: boolean;
+      /**
+       * Valor de residual reference count mantenido por la instancia.
+       */
       residualReferenceCount: number;
+      /**
+       * Identificador asociado a evidence object.
+       */
       evidenceObjectId?: string;
     },
   ): DeletionVerifications {
@@ -186,24 +309,64 @@ export class DeletionRepository {
   findCacheJob(
     em: EntityManager,
     key: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Identificador asociado a entity.
+       */
       entityId: string;
+      /**
+       * Valor de entity version mantenido por la instancia.
+       */
       entityVersion: string;
+      /**
+       * Valor de cache scope mantenido por la instancia.
+       */
       cacheScope: string;
     },
   ): Promise<CacheInvalidationJobs | null> {
     return em.findOne(CacheInvalidationJobs, key);
   }
 
+  /**
+   * Crea create cache job.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create cache job conforme al contrato `CacheInvalidationJobs`.
+   */
   createCacheJob(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Identificador asociado a entity.
+       */
       entityId: string;
+      /**
+       * Valor de entity version mantenido por la instancia.
+       */
       entityVersion: string;
+      /**
+       * Valor de cache scope mantenido por la instancia.
+       */
       cacheScope: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
     },
   ): CacheInvalidationJobs {
@@ -226,31 +389,90 @@ export class DeletionRepository {
     return em.findOne(DataMovementJobs, { tenantId, datasetId, manifestHash });
   }
 
+  /**
+   * Crea create movement job.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create movement job conforme al contrato `DataMovementJobs`.
+   */
   createMovementJob(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Identificador asociado a source placement.
+       */
       sourcePlacementId: string;
+      /**
+       * Identificador asociado a target placement.
+       */
       targetPlacementId: string;
+      /**
+       * Valor de movement mode mantenido por la instancia.
+       */
       movementMode: string;
+      /**
+       * Valor de manifest hash mantenido por la instancia.
+       */
       manifestHash: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): DataMovementJobs {
     return em.create(DataMovementJobs, data as never, { partial: true });
   }
 
+  /**
+   * Crea create schema migration job.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create schema migration job conforme al contrato `SchemaMigrationJobs`.
+   */
   createSchemaMigrationJob(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Identificador asociado a collection definition.
+       */
       collectionDefinitionId?: string;
+      /**
+       * Valor de from schema version mantenido por la instancia.
+       */
       fromSchemaVersion?: string;
+      /**
+       * Valor de to schema version mantenido por la instancia.
+       */
       toSchemaVersion?: string;
+      /**
+       * Valor de migration strategy mantenido por la instancia.
+       */
       migrationStrategy: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): SchemaMigrationJobs {
@@ -273,16 +495,47 @@ export class DeletionRepository {
     return em.findOne(ArchiveJobs, { tenantId, datasetId, retentionCutoff });
   }
 
+  /**
+   * Crea create archive job.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create archive job conforme al contrato `ArchiveJobs`.
+   */
   createArchiveJob(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Valor de retention cutoff mantenido por la instancia.
+       */
       retentionCutoff: Date;
+      /**
+       * Identificador asociado a archive manifest object.
+       */
       archiveManifestObjectId?: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de archived count mantenido por la instancia.
+       */
       archivedCount: string;
+      /**
+       * Valor de deleted hot count mantenido por la instancia.
+       */
       deletedHotCount: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): ArchiveJobs {

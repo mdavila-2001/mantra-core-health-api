@@ -33,6 +33,13 @@ import {
  */
 @Injectable()
 export class InsuranceBackboneService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: CatalogRepository,
@@ -41,6 +48,13 @@ export class InsuranceBackboneService {
     this.logger.setContext(InsuranceBackboneService.name);
   }
 
+  /**
+   * Crea create carrier.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create carrier conforme al contrato `Promise<ResourceStatusDto>`.
+   */
   async createCarrier(
     dto: CreateCarrierDto,
     actor: AuthenticatedUser,
@@ -68,6 +82,15 @@ export class InsuranceBackboneService {
     });
   }
 
+  /**
+   * Crea create product.
+   *
+   * @param carrierId - Identificador de carrier.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create product conforme al contrato `Promise<CreatedResourceDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async createProduct(
     carrierId: string,
     dto: CreateProductDto,
@@ -92,6 +115,15 @@ export class InsuranceBackboneService {
     });
   }
 
+  /**
+   * Crea create plan.
+   *
+   * @param productId - Identificador de product.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create plan conforme al contrato `Promise<CreatedResourceDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async createPlan(
     productId: string,
     dto: CreatePlanDto,
@@ -118,6 +150,15 @@ export class InsuranceBackboneService {
     });
   }
 
+  /**
+   * Crea create benefit.
+   *
+   * @param planId - Identificador de plan.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create benefit conforme al contrato `Promise<CreatedResourceDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async createBenefit(
     planId: string,
     dto: CreatePlanBenefitDto,
@@ -143,6 +184,14 @@ export class InsuranceBackboneService {
     });
   }
 
+  /**
+   * Crea create provider network.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create provider network conforme al contrato `Promise<CreatedResourceDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async createProviderNetwork(
     dto: CreateProviderNetworkDto,
     actor: AuthenticatedUser,
@@ -170,6 +219,13 @@ export class InsuranceBackboneService {
     });
   }
 
+  /**
+   * Crea create broker.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create broker conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   async createBroker(
     dto: CreateBrokerDto,
     actor: AuthenticatedUser,
@@ -189,6 +245,13 @@ export class InsuranceBackboneService {
     });
   }
 
+  /**
+   * Crea create employer group.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create employer group conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   async createEmployerGroup(
     dto: CreateEmployerGroupDto,
     actor: AuthenticatedUser,
@@ -206,6 +269,15 @@ export class InsuranceBackboneService {
     });
   }
 
+  /**
+   * Crea create agreement.
+   *
+   * @param brokerId - Identificador de broker.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create agreement conforme al contrato `Promise<CreatedResourceDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async createAgreement(
     brokerId: string,
     dto: CreateBrokerAgreementDto,

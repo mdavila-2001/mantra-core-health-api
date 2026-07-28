@@ -73,7 +73,9 @@ for (const f of controllers) {
     const near = lines.slice(i, i + 6).join(' ');
     const pub = deco.some((d) => /@Public\(/.test(d)) || /@Public\(/.test(near);
     const roles =
-      classHasRoles || deco.some((d) => /@Roles\(/.test(d)) || /@Roles\(/.test(near);
+      classHasRoles ||
+      deco.some((d) => /@Roles\(/.test(d)) ||
+      /@Roles\(/.test(near);
     if (['Post', 'Put', 'Patch', 'Delete'].includes(verb) && !roles && !pub) {
       orphanEndpoints.push({ file: rel(f), line: i + 1, verb, path: m[2] });
     }
@@ -87,7 +89,8 @@ for (const f of allFiles.filter((f) => /\/repositories\//.test(f))) {
   const mod = moduleOf(f);
   const text = readFileSync(f, 'utf8');
   for (const m of text.matchAll(/from '(\.\.\/)+modules\/([^/]+)\/entities/g)) {
-    if (m[2] !== mod) crossDomain.push({ file: rel(f), from: mod, imports: m[2] });
+    if (m[2] !== mod)
+      crossDomain.push({ file: rel(f), from: mod, imports: m[2] });
   }
   // import relativo a ../../<otro_modulo>/entities
   for (const m of text.matchAll(/from '\.\.\/\.\.\/([a-z_]+)\/entities/g)) {
@@ -102,19 +105,31 @@ const p = (s = '') => lines.push(s);
 p('# Informe de cobertura REDESA (estático)');
 p('');
 p(`- Entidades (tablas mapeadas): **${entities.length}**`);
-p(`- Endpoints declarados: **${endpointCount}** en ${controllers.length} controllers`);
+p(
+  `- Endpoints declarados: **${endpointCount}** en ${controllers.length} controllers`,
+);
 p(`- Módulos: **${new Set(entities.map((e) => e.module)).size}**`);
 p('');
-p(`## ORPHAN_TABLE — entidades sin consumidor fuera de \`entities/\` (${orphanTables.length})`);
-p('> Heurística estática: la entidad puede consumirse por catálogo ORM/migración; revisar antes de eliminar.');
-for (const e of orphanTables.slice(0, 60)) p(`- \`${e.module}\` · ${e.cls} (${rel(e.file)})`);
+p(
+  `## ORPHAN_TABLE — entidades sin consumidor fuera de \`entities/\` (${orphanTables.length})`,
+);
+p(
+  '> Heurística estática: la entidad puede consumirse por catálogo ORM/migración; revisar antes de eliminar.',
+);
+for (const e of orphanTables.slice(0, 60))
+  p(`- \`${e.module}\` · ${e.cls} (${rel(e.file)})`);
 if (orphanTables.length > 60) p(`- … +${orphanTables.length - 60} más`);
 p('');
-p(`## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (${orphanEndpoints.length})`);
-for (const e of orphanEndpoints.slice(0, 60)) p(`- ${e.file}:${e.line} — @${e.verb} ${e.path}`);
+p(
+  `## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (${orphanEndpoints.length})`,
+);
+for (const e of orphanEndpoints.slice(0, 60))
+  p(`- ${e.file}:${e.line} — @${e.verb} ${e.path}`);
 if (orphanEndpoints.length > 60) p(`- … +${orphanEndpoints.length - 60} más`);
 p('');
-p(`## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (${crossDomain.length})`);
+p(
+  `## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (${crossDomain.length})`,
+);
 for (const c of crossDomain.slice(0, 60)) p(`- ${c.file} → \`${c.imports}\``);
 if (crossDomain.length > 60) p(`- … +${crossDomain.length - 60} más`);
 

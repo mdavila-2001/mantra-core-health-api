@@ -12,6 +12,11 @@ import {
 @ApiBearerAuth()
 @Controller('consent/treatment-informed-consents')
 export class TreatmentInformedConsentsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param treatmentService - Valor de treatment service requerido por la operación.
+   */
   constructor(
     private readonly treatmentService: TreatmentInformedConsentsService,
   ) {}

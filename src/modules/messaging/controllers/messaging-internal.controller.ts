@@ -42,6 +42,13 @@ import {
 @ApiBearerAuth()
 @Controller('internal')
 export class MessagingInternalController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param outboxService - Valor de outbox service requerido por la operación.
+   * @param queuesService - Valor de queues service requerido por la operación.
+   * @param notificationsService - Valor de notifications service requerido por la operación.
+   */
   constructor(
     private readonly outboxService: OutboxService,
     private readonly queuesService: QueuesService,

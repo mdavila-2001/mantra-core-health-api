@@ -26,6 +26,15 @@ import { DUNIT } from '../diagnostic_units.concepts';
  */
 @Injectable()
 export class DiagnosticStudiesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param unitsRepo - Valor de units repo requerido por la operación.
+   * @param offeringsRepo - Valor de offerings repo requerido por la operación.
+   * @param componentsRepo - Valor de components repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly unitsRepo: DiagnosticUnitsRepository,

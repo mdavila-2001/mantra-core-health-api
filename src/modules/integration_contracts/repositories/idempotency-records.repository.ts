@@ -4,13 +4,37 @@ import { IntegrationIdempotencyRecords } from '../entities';
 
 /** Datos para registrar una clave de idempotencia (UC-31-05). */
 export interface CreateIdempotencyData {
+  /**
+   * Identificador asociado a integration contract.
+   */
   integrationContractId: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey: string;
+  /**
+   * Identificador asociado a operation concept.
+   */
   operationConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de request hash mantenido por la instancia.
+   */
   requestHash?: string;
+  /**
+   * Identificador asociado a first exchange record.
+   */
   firstExchangeRecordId?: string;
+  /**
+   * Valor de response reference mantenido por la instancia.
+   */
   responseReference?: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt?: Date;
 }
 

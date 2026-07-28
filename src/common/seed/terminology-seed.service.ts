@@ -34,6 +34,12 @@ import { MODULE_CONCEPT_SEEDS } from './module-concepts';
  */
 @Injectable()
 export class TerminologySeedService implements OnApplicationBootstrap {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param orm - Valor de orm requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly orm: MikroORM,
     private readonly logger: PinoLogger,
@@ -41,6 +47,9 @@ export class TerminologySeedService implements OnApplicationBootstrap {
     this.logger.setContext(TerminologySeedService.name);
   }
 
+  /**
+   * Ejecuta la operación on application bootstrap.
+   */
   async onApplicationBootstrap(): Promise<void> {
     try {
       await this.run();
@@ -62,7 +71,12 @@ export class TerminologySeedService implements OnApplicationBootstrap {
    * los conceptos y sus padres en el mismo flush violaría la FK del padre. El
    * flush intermedio impone el orden correcto de forma explícita.
    */
-  async run(): Promise<{ inserted: number }> {
+  async run(): Promise<{
+    /**
+     * Valor de inserted mantenido por la instancia.
+     */
+    inserted: number;
+  }> {
     await this.ensureRowVersionDefaults();
 
     const em = this.orm.em.fork();
@@ -128,7 +142,18 @@ export class TerminologySeedService implements OnApplicationBootstrap {
     // Nivel 2: conceptos. Une el catálogo base (transversal) con los conceptos
     // que declara cada módulo de dominio (MODULE_CONCEPT_SEEDS). Se deduplica por
     // id y se consultan de golpe los ya presentes para evitar el patrón N+1.
-    const catalog = new Map<string, { code: string; display: string }>();
+    const catalog = new Map<
+      string,
+      {
+        /**
+         * Valor de code mantenido por la instancia.
+         */
+        code: string; /**
+         * Valor de display mantenido por la instancia.
+         */
+        display: string;
+      }
+    >();
     for (const name of Object.keys(CONCEPT_DEFS)) {
       catalog.set(CONCEPTS[name], {
         code: CONCEPT_DEFS[name].code,
@@ -232,14 +257,21 @@ export class TerminologySeedService implements OnApplicationBootstrap {
    */
   private async ensureRowVersionDefaults(): Promise<void> {
     const connection = this.orm.em.getConnection();
-    const pending: Array<{ table_schema: string; table_name: string }> =
-      await connection.execute(
-        `select table_schema, table_name
+    const pending: Array<{
+      /**
+       * Valor de table schema mantenido por la instancia.
+       */
+      table_schema: string; /**
+       * Valor de table name mantenido por la instancia.
+       */
+      table_name: string;
+    }> = await connection.execute(
+      `select table_schema, table_name
            from information_schema.columns
           where column_name = 'row_version'
             and column_default is null
             and table_schema in ('iam', 'common', 'terminology', 'directory')`,
-      );
+    );
     for (const { table_schema, table_name } of pending) {
       await connection.execute(
         `alter table "${table_schema}"."${table_name}" alter column row_version set default 1`,

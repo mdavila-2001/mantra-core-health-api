@@ -47,6 +47,14 @@ import {
 @Roles('SECURITY_ADMIN')
 @Controller('integration/contracts')
 export class IntegrationContractsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param contractsService - Valor de contracts service requerido por la operación.
+   * @param authProfilesService - Valor de auth profiles service requerido por la operación.
+   * @param webhooksService - Valor de webhooks service requerido por la operación.
+   * @param exchangesService - Valor de exchanges service requerido por la operación.
+   */
   constructor(
     private readonly contractsService: IntegrationContractsService,
     private readonly authProfilesService: IntegrationAuthProfilesService,

@@ -24,6 +24,12 @@ import {
  */
 @Injectable()
 export class DocumentStoreService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param repo - Valor de repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly repo: DocumentStoreRepository,
     private readonly logger: PinoLogger,
@@ -104,7 +110,11 @@ export class DocumentStoreService {
     }
     const objectId = this.toObjectId(id);
     // Se distingue "no existe" de "versión desfasada" para dar un error preciso.
-    const current = await this.repo.findById(collection, objectId, dto.tenantId);
+    const current = await this.repo.findById(
+      collection,
+      objectId,
+      dto.tenantId,
+    );
     if (!current) {
       throw new ResourceNotFoundException('Documento no encontrado');
     }

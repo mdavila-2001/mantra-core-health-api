@@ -5,12 +5,33 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta un punto de contacto. */
 export interface CreateContactPointData {
+  /**
+   * Identificador asociado a owner type concept.
+   */
   ownerTypeConceptId: string;
+  /**
+   * Identificador asociado a owner.
+   */
   ownerId: string;
+  /**
+   * Identificador asociado a system concept.
+   */
   systemConceptId: string;
+  /**
+   * Valor de value mantenido por la instancia.
+   */
   value: string;
+  /**
+   * Identificador asociado a use concept.
+   */
   useConceptId?: string;
+  /**
+   * Valor de rank mantenido por la instancia.
+   */
   rank?: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { HealthIngestionService } from './health-ingestion.service';
@@ -19,6 +25,10 @@ const VERSION = '55555555-5555-5555-5555-555555555555';
 const TYPE = '66666666-6666-6666-6666-666666666666';
 const TENANT = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -56,6 +66,12 @@ function build() {
   return { service, tx, ingestionRepo, resourcesRepo, provenanceRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active connection.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active connection conforme al contrato `any`.
+ */
 function activeConnection(overrides: Record<string, unknown> = {}): any {
   return {
     id: CONNECTION,
@@ -64,10 +80,22 @@ function activeConnection(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación receiving batch.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de receiving batch conforme al contrato `any`.
+ */
 function receivingBatch(overrides: Record<string, unknown> = {}): any {
   return { id: BATCH, statusConceptId: CONCEPTS.BATCH_RECEIVING, ...overrides };
 }
 
+/**
+ * Ejecuta la operación queued record.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de queued record conforme al contrato `any`.
+ */
 function queuedRecord(overrides: Record<string, unknown> = {}): any {
   return {
     id: RECORD,

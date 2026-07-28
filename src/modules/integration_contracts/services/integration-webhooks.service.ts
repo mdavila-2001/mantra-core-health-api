@@ -31,6 +31,18 @@ import {
  */
 @Injectable()
 export class IntegrationWebhooksService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contractsRepo - Valor de contracts repo requerido por la operación.
+   * @param versionsRepo - Valor de versions repo requerido por la operación.
+   * @param subscriptionsRepo - Valor de subscriptions repo requerido por la operación.
+   * @param exchangeRecordsRepo - Valor de exchange records repo requerido por la operación.
+   * @param evidenceRepo - Valor de evidence repo requerido por la operación.
+   * @param http - Valor de http requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contractsRepo: ContractsRepository,
@@ -185,7 +197,8 @@ export class IntegrationWebhooksService {
           { subscriptionId },
         );
       }
-      const secret = sub.secretReference ?? deriveWebhookSecret('subscription', sub.id); // TODO secreto por conexión
+      const secret =
+        sub.secretReference ?? deriveWebhookSecret('subscription', sub.id); // TODO secreto por conexión
       const body = {
         contractVersionId: version.id,
         eventTypeConceptId: sub.eventTypeConceptId,

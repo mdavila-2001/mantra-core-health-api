@@ -8,6 +8,9 @@ import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
  * puerta a la paginación abusiva como vector de extracción masiva de datos.
  */
 export class PaginationQueryDto {
+  /**
+   * Valor de page mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     minimum: 1,
     default: 1,
@@ -19,6 +22,9 @@ export class PaginationQueryDto {
   @IsOptional()
   page: number = 1;
 
+  /**
+   * Valor de page size mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     minimum: 1,
     maximum: 100,
@@ -32,11 +38,17 @@ export class PaginationQueryDto {
   @IsOptional()
   pageSize: number = 20;
 
+  /**
+   * Valor de order mantenido por la instancia.
+   */
   @ApiPropertyOptional({ enum: ['ASC', 'DESC'], default: 'DESC' })
   @IsOptional()
   @IsIn(['ASC', 'DESC'])
   order: 'ASC' | 'DESC' = 'DESC';
 
+  /**
+   * Valor de sort by mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Campo de ordenamiento',
     default: 'createdAt',

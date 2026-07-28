@@ -26,6 +26,11 @@ import {
 @ApiBearerAuth()
 @Controller('integrations')
 export class IntegrationsConnectionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param connectionsService - Valor de connections service requerido por la operación.
+   */
   constructor(
     private readonly connectionsService: IntegrationsConnectionsService,
   ) {}

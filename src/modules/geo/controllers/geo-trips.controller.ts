@@ -19,6 +19,11 @@ import { StartTripDto, CloseTripDto, TripResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('geo/trips')
 export class GeoTripsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: GeoTripsService) {}
 
   /** UC-13-06. */

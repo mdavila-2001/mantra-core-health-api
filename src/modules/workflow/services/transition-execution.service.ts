@@ -30,8 +30,17 @@ import {
 
 /** Lo que ve una guarda al evaluarse. */
 interface GuardContext {
+  /**
+   * Valor de payload mantenido por la instancia.
+   */
   payload: Record<string, unknown>;
+  /**
+   * Valor de actor roles mantenido por la instancia.
+   */
   actorRoles: string[];
+  /**
+   * Identificador asociado a current state concept.
+   */
   currentStateConceptId: string;
 }
 
@@ -49,6 +58,16 @@ const MAX_HISTORY_LIMIT = 200;
  */
 @Injectable()
 export class TransitionExecutionService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param machinesRepo - Valor de machines repo requerido por la operación.
+   * @param runtimeRepo - Valor de runtime repo requerido por la operación.
+   * @param aggregateRepo - Valor de aggregate repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly machinesRepo: StateMachinesRepository,
@@ -575,7 +594,15 @@ export class TransitionExecutionService {
       // resuelven una vez por definición distinta, no una vez por evento.
       const definitions = new Map<
         string,
-        { transitionCode: string; commandCode: string }
+        {
+          /**
+           * Valor de transition code mantenido por la instancia.
+           */
+          transitionCode: string; /**
+           * Valor de command code mantenido por la instancia.
+           */
+          commandCode: string;
+        }
       >();
       for (const event of events) {
         if (definitions.has(event.transitionDefinitionId)) continue;
@@ -622,6 +649,14 @@ export class TransitionExecutionService {
 
   // --- Piezas compartidas -------------------------------------------------
 
+  /**
+   * Ejecuta la operación require active machine.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param machineCode - Valor de machine code requerido por la operación.
+   * @returns Resultado de require active machine conforme al contrato `Promise<StateMachineDefinitions>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async requireActiveMachine(
     tx: EntityManager,
     machineCode: string,
@@ -653,14 +688,41 @@ export class TransitionExecutionService {
     tx: EntityManager,
     transitionDefinitionId: string,
     context: {
+      /**
+       * Identificador asociado a event.
+       */
       eventId: string;
+      /**
+       * Identificador asociado a aggregate.
+       */
       aggregateId: string;
+      /**
+       * Valor de machine code mantenido por la instancia.
+       */
       machineCode?: string;
+      /**
+       * Identificador asociado a from state concept.
+       */
       fromStateConceptId: string;
+      /**
+       * Identificador asociado a to state concept.
+       */
       toStateConceptId: string;
+      /**
+       * Identificador asociado a correlation.
+       */
       correlationId?: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId: string;
+      /**
+       * Valor de compensating mantenido por la instancia.
+       */
       compensating: boolean;
+      /**
+       * Valor de idempotency key prefix mantenido por la instancia.
+       */
       idempotencyKeyPrefix?: string;
     },
   ): Promise<number> {
@@ -737,7 +799,13 @@ export class TransitionExecutionService {
   ): boolean {
     if (guard.guardTypeConceptId === CONCEPTS.WF_GUARD_STATE) {
       const expression = guard.expressionJson as
-        { stateConceptId?: string } | undefined;
+        | {
+            /**
+             * Identificador asociado a state concept.
+             */
+            stateConceptId?: string;
+          }
+        | undefined;
       return (
         typeof expression?.stateConceptId === 'string' &&
         expression.stateConceptId === context.currentStateConceptId
@@ -746,7 +814,13 @@ export class TransitionExecutionService {
 
     if (guard.guardTypeConceptId === CONCEPTS.WF_GUARD_PERMISSION) {
       const expression = guard.expressionJson as
-        { anyOfRoles?: unknown } | undefined;
+        | {
+            /**
+             * Valor de any of roles mantenido por la instancia.
+             */
+            anyOfRoles?: unknown;
+          }
+        | undefined;
       const roles = expression?.anyOfRoles;
       if (!Array.isArray(roles) || roles.length === 0) return false;
       return roles.some(
@@ -757,7 +831,19 @@ export class TransitionExecutionService {
     if (guard.guardTypeConceptId !== CONCEPTS.WF_GUARD_EXPRESSION) return false;
 
     const expression = guard.expressionJson as
-      { field?: unknown; op?: unknown; value?: unknown } | undefined;
+      | {
+          /**
+           * Valor de field mantenido por la instancia.
+           */
+          field?: unknown; /**
+           * Valor de op mantenido por la instancia.
+           */
+          op?: unknown; /**
+           * Valor de value mantenido por la instancia.
+           */
+          value?: unknown;
+        }
+      | undefined;
     if (
       typeof expression?.field !== 'string' ||
       typeof expression.op !== 'string'
@@ -792,6 +878,13 @@ export class TransitionExecutionService {
     }
   }
 
+  /**
+   * Obtiene read path.
+   *
+   * @param source - Valor de source requerido por la operación.
+   * @param path - Valor de path requerido por la operación.
+   * @returns Resultado de read path conforme al contrato `unknown`.
+   */
   private readPath(source: Record<string, unknown>, path: string): unknown {
     let current: unknown = source;
     for (const segment of path.split('.')) {

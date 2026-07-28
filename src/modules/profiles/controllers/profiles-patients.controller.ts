@@ -36,6 +36,11 @@ import {
 @ApiBearerAuth()
 @Controller('profiles')
 export class ProfilesPatientsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param patientsService - Valor de patients service requerido por la operación.
+   */
   constructor(private readonly patientsService: ProfilesPatientsService) {}
 
   /** UC-05-01. */

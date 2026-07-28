@@ -1,10 +1,20 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CareTeamsController } from './care-teams.controller';
 
 const actor = { id: 'cc-1', roles: ['USER'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const careTeamsService = { create: mockFn(), setResponsible: mockFn() };
   const controller = new CareTeamsController(careTeamsService as any);

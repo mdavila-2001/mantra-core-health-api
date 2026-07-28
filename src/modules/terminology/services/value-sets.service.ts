@@ -50,6 +50,17 @@ const IN_LIST_SEPARATOR = ',';
  */
 @Injectable()
 export class ValueSetsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param valueSetsRepo - Valor de value sets repo requerido por la operación.
+   * @param conceptsRepo - Valor de concepts repo requerido por la operación.
+   * @param versionsRepo - Valor de versions repo requerido por la operación.
+   * @param relationshipsRepo - Valor de relationships repo requerido por la operación.
+   * @param designationsRepo - Valor de designations repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly valueSetsRepo: ValueSetsRepository,

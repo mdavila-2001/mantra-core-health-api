@@ -2,6 +2,12 @@ import { jest } from '@jest/globals';
 
 // Mock laxo: conserva el runtime de jest pero evita los tipos Mock<never> estrictos
 // de @jest/globals bajo el tsconfig raíz (mismo criterio que los specs de iam).
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PaymentsIntentsService } from './payments-intents.service';
@@ -14,6 +20,10 @@ import {
 
 const actor = { id: 'user-1', roles: ['PAYMENTS_ADMIN'] };
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };

@@ -28,6 +28,12 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('forms/instances')
 export class FormsInstancesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param instancesService - Valor de instances service requerido por la operación.
+   * @param valuesService - Valor de values service requerido por la operación.
+   */
   constructor(
     private readonly instancesService: FormsInstancesService,
     private readonly valuesService: FormsValuesService,

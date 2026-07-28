@@ -2,15 +2,32 @@ import { deterministicId } from '../constants/concepts';
 
 /** Definición mínima de un concepto sembrable (código FHIR + display legible). */
 export interface ConceptSeed {
+  /**
+   * Valor de key mantenido por la instancia.
+   */
   key: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de display mantenido por la instancia.
+   */
   display: string;
 }
 
 /** Forma de la definición por módulo: nombre lógico -> código + display. */
 export type ConceptDefinitions = Record<
   string,
-  { code: string; display: string }
+  {
+    /**
+     * Valor de code mantenido por la instancia.
+     */
+    code: string; /**
+     * Valor de display mantenido por la instancia.
+     */
+    display: string;
+  }
 >;
 
 /**
@@ -29,7 +46,15 @@ export type ConceptDefinitions = Record<
 export function defineModuleConcepts<T extends ConceptDefinitions>(
   prefix: string,
   defs: T,
-): { seeds: ConceptSeed[]; ids: Record<keyof T, string> } {
+): {
+  /**
+   * Valor de seeds mantenido por la instancia.
+   */
+  seeds: ConceptSeed[]; /**
+   * Valor de ids mantenido por la instancia.
+   */
+  ids: Record<keyof T, string>;
+} {
   const seeds: ConceptSeed[] = [];
   const ids = {} as Record<keyof T, string>;
   for (const name of Object.keys(defs) as (keyof T)[]) {

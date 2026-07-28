@@ -3,6 +3,9 @@ import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /orgext/hospitals/{id}/service-lines` (UC-22-03). */
 export class CreateServiceLineDto {
+  /**
+   * Identificador asociado a clinical unit.
+   */
   @ApiPropertyOptional({
     description: 'Unidad clínica asociada',
     format: 'uuid',
@@ -11,6 +14,9 @@ export class CreateServiceLineDto {
   @IsUUID()
   clinicalUnitId?: string;
 
+  /**
+   * Identificador asociado a healthcare service.
+   */
   @ApiPropertyOptional({
     description: 'Servicio de salud asociado',
     format: 'uuid',
@@ -19,6 +25,9 @@ export class CreateServiceLineDto {
   @IsUUID()
   healthcareServiceId?: string;
 
+  /**
+   * Identificador asociado a service line concept.
+   */
   @ApiPropertyOptional({
     description: 'Línea de servicio (concepto)',
     format: 'uuid',
@@ -27,6 +36,9 @@ export class CreateServiceLineDto {
   @IsUUID()
   serviceLineConceptId?: string;
 
+  /**
+   * Identificador asociado a specialty concept.
+   */
   @ApiPropertyOptional({
     description: 'Especialidad (concepto)',
     format: 'uuid',
@@ -35,6 +47,9 @@ export class CreateServiceLineDto {
   @IsUUID()
   specialtyConceptId?: string;
 
+  /**
+   * Identificador asociado a acuity level concept.
+   */
   @ApiPropertyOptional({
     description: 'Nivel de agudeza (concepto)',
     format: 'uuid',
@@ -43,6 +58,9 @@ export class CreateServiceLineDto {
   @IsUUID()
   acuityLevelConceptId?: string;
 
+  /**
+   * Valor de referral required mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Requiere referencia/derivación' })
   @IsOptional()
   @IsBoolean()

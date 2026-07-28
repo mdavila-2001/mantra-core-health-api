@@ -48,6 +48,16 @@ const MASK_CONCEPT: Record<MaskStrategy, string> = {
  */
 @Injectable()
 export class AuthzRolesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param rolesRepo - Valor de roles repo requerido por la operación.
+   * @param rolePermsRepo - Valor de role perms repo requerido por la operación.
+   * @param permissionsRepo - Valor de permissions repo requerido por la operación.
+   * @param fieldPermsRepo - Valor de field perms repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly rolesRepo: RolesRepository,

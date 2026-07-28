@@ -11,30 +11,81 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar un conjunto de valores. */
 export interface CreateValueSetData {
+  /**
+   * Valor de internal code mantenido por la instancia.
+   */
   internalCode: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Valor de canonical url mantenido por la instancia.
+   */
   canonicalUrl: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos mínimos para materializar una versión de conjunto de valores. */
 export interface CreateValueSetVersionData {
+  /**
+   * Identificador asociado a value set.
+   */
   valueSetId: string;
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   version: string;
+  /**
+   * Valor de is default mantenido por la instancia.
+   */
   isDefault?: boolean;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos mínimos para materializar una regla de conjunto de valores. */
 export interface CreateValueSetRuleData {
+  /**
+   * Identificador asociado a value set version.
+   */
   valueSetVersionId: string;
+  /**
+   * Identificador asociado a code system.
+   */
   codeSystemId: string;
+  /**
+   * Identificador asociado a operator concept.
+   */
   operatorConceptId?: string;
+  /**
+   * Valor de property mantenido por la instancia.
+   */
   property?: string;
+  /**
+   * Valor de value mantenido por la instancia.
+   */
   value?: string;
+  /**
+   * Valor de included mantenido por la instancia.
+   */
   included: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -167,10 +218,25 @@ export class ValueSetsRepository {
   createMember(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a value set version.
+       */
       valueSetVersionId: string;
+      /**
+       * Identificador asociado a concept.
+       */
       conceptId: string;
+      /**
+       * Valor de included mantenido por la instancia.
+       */
       included: boolean;
+      /**
+       * Valor de ordinal mantenido por la instancia.
+       */
       ordinal: number;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): ValueSetMembers {

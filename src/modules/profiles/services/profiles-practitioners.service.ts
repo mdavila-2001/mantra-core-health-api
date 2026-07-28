@@ -39,6 +39,19 @@ import {
  */
 @Injectable()
 export class ProfilesPractitionersService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personsRepo - Valor de persons repo requerido por la operación.
+   * @param personProfilesRepo - Valor de person profiles repo requerido por la operación.
+   * @param practitionersRepo - Valor de practitioners repo requerido por la operación.
+   * @param authorizationsRepo - Valor de authorizations repo requerido por la operación.
+   * @param credentialsRepo - Valor de credentials repo requerido por la operación.
+   * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
+   * @param languagesRepo - Valor de languages repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly personsRepo: PersonsRepository,

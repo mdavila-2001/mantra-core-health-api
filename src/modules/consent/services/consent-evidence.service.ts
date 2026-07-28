@@ -27,6 +27,13 @@ const SUBJECT_TYPE_CONCEPT: Record<EvidenceSubjectType, string> = {
  */
 @Injectable()
 export class ConsentEvidenceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param evidenceRepo - Valor de evidence repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly evidenceRepo: ConsentEvidenceRepository,

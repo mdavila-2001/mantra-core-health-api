@@ -25,6 +25,9 @@ export const MOD_REASONS = ['POLICY', 'ABUSE', 'SPAM', 'LEGAL'] as const;
 
 /** Cuerpo de `POST /moderation/decisions` (UC-10-11). */
 export class CreateModerationDecisionDto {
+  /**
+   * Valor de target type mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Tipo de destino moderado',
     enum: MOD_TARGET_TYPES,
@@ -32,6 +35,9 @@ export class CreateModerationDecisionDto {
   @IsIn(MOD_TARGET_TYPES)
   targetType!: string;
 
+  /**
+   * Identificador asociado a target.
+   */
   @ApiProperty({
     description: 'Id del destino (validado vía entity_registry)',
     format: 'uuid',
@@ -39,10 +45,16 @@ export class CreateModerationDecisionDto {
   @IsUUID()
   targetId!: string;
 
+  /**
+   * Valor de action mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Acción de moderación', enum: MOD_ACTIONS })
   @IsIn(MOD_ACTIONS)
   action!: string;
 
+  /**
+   * Valor de reason mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Motivo de la decisión',
     enum: MOD_REASONS,
@@ -51,6 +63,9 @@ export class CreateModerationDecisionDto {
   @IsIn(MOD_REASONS)
   reason?: string;
 
+  /**
+   * Valor de policy version mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Versión de política aplicada',
     maxLength: 50,
@@ -60,11 +75,17 @@ export class CreateModerationDecisionDto {
   @MaxLength(50)
   policyVersion?: string;
 
+  /**
+   * Valor de evidence mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Evidencia estructurada de la decisión' })
   @IsOptional()
   @IsObject()
   evidence?: Record<string, unknown>;
 
+  /**
+   * Valor de governance mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description:
       'true si la decisión implica uso/gobernanza de datos (registra gobernanza)',
@@ -72,6 +93,9 @@ export class CreateModerationDecisionDto {
   @IsOptional()
   governance?: boolean;
 
+  /**
+   * Identificador asociado a moderation decision.
+   */
   @ApiPropertyOptional({
     description:
       'Id REAL de la decisión (FK community.moderation_decisions) para versionar su historial',
@@ -84,17 +108,29 @@ export class CreateModerationDecisionDto {
 
 /** Resultado de una decisión de moderación. */
 export class ModerationDecisionResultDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ description: 'Id del evento de moderación' })
   id!: string;
 
+  /**
+   * Identificador asociado a audit log.
+   */
   @ApiProperty({ description: 'Id del evento de auditoría (provenance)' })
   auditLogId!: string;
 
+  /**
+   * Valor de history recorded mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'true si se versionó el historial de la decisión',
   })
   historyRecorded!: boolean;
 
+  /**
+   * Valor de recorded at mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Momento del registro',
     type: String,

@@ -9,6 +9,9 @@ import {
 
 /** Cuerpo de `POST /integration/contracts/{id}/versions` (UC-31-02). */
 export class CreateContractVersionDto {
+  /**
+   * Identificador asociado a request schema file.
+   */
   @ApiPropertyOptional({
     description: 'Archivo de esquema de request',
     format: 'uuid',
@@ -17,6 +20,9 @@ export class CreateContractVersionDto {
   @IsUUID()
   requestSchemaFileId?: string;
 
+  /**
+   * Identificador asociado a response schema file.
+   */
   @ApiPropertyOptional({
     description: 'Archivo de esquema de response',
     format: 'uuid',
@@ -25,11 +31,17 @@ export class CreateContractVersionDto {
   @IsUUID()
   responseSchemaFileId?: string;
 
+  /**
+   * Identificador asociado a openapi file.
+   */
   @ApiPropertyOptional({ description: 'Archivo OpenAPI', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   openapiFileId?: string;
 
+  /**
+   * Identificador asociado a mapping profile.
+   */
   @ApiPropertyOptional({
     description: 'Perfil de mapeo asociado',
     format: 'uuid',
@@ -38,6 +50,9 @@ export class CreateContractVersionDto {
   @IsUUID()
   mappingProfileId?: string;
 
+  /**
+   * Valor de contract hash mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Hash del contrato para detectar drift de esquema',
     maxLength: 200,
@@ -47,6 +62,9 @@ export class CreateContractVersionDto {
   @MaxLength(200)
   contractHash?: string;
 
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Inicio de vigencia (ISO 8601)' })
   @IsOptional()
   @IsISO8601()

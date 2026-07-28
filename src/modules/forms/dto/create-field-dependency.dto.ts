@@ -11,6 +11,9 @@ import {
 
 /** Cuerpo de `POST /forms/fields/{id}/dependencies` (UC-09-04). */
 export class CreateFieldDependencyDto {
+  /**
+   * Identificador asociado a source field.
+   */
   @ApiProperty({
     description: 'Campo fuente que dispara la condición',
     format: 'uuid',
@@ -18,6 +21,9 @@ export class CreateFieldDependencyDto {
   @IsUUID()
   sourceFieldId!: string;
 
+  /**
+   * Valor de operator mantenido por la instancia.
+   */
   @ApiProperty({
     enum: ['EQ', 'NEQ', 'GT', 'LT'],
     description: 'Operador de comparación',
@@ -25,6 +31,9 @@ export class CreateFieldDependencyDto {
   @IsIn(['EQ', 'NEQ', 'GT', 'LT'])
   operator!: 'EQ' | 'NEQ' | 'GT' | 'LT';
 
+  /**
+   * Valor de behavior mantenido por la instancia.
+   */
   @ApiProperty({
     enum: ['SHOW', 'HIDE', 'REQUIRE'],
     description: 'Comportamiento aplicado',
@@ -32,6 +41,9 @@ export class CreateFieldDependencyDto {
   @IsIn(['SHOW', 'HIDE', 'REQUIRE'])
   behavior!: 'SHOW' | 'HIDE' | 'REQUIRE';
 
+  /**
+   * Valor de comparison value mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Valor de comparación (json)',
     type: Object,
@@ -39,6 +51,9 @@ export class CreateFieldDependencyDto {
   @IsOptional()
   comparisonValue?: unknown;
 
+  /**
+   * Valor de logical group mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Grupo lógico de la condición',
     maxLength: 100,
@@ -48,6 +63,9 @@ export class CreateFieldDependencyDto {
   @MaxLength(100)
   logicalGroup?: string;
 
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Orden de evaluación' })
   @IsOptional()
   @IsInt()

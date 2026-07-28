@@ -39,6 +39,16 @@ const DEFAULT_TOP_K = 10;
  */
 @Injectable()
 export class RetrievalService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param retrievalRepo - Valor de retrieval repo requerido por la operación.
+   * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param corpusRepo - Valor de corpus repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly retrievalRepo: RetrievalRepository,
@@ -219,8 +229,17 @@ export class RetrievalService {
 
       const deniedByReason: Record<string, number> = {};
       const evaluated: {
+        /**
+         * Identificador asociado a vector chunk.
+         */
         vectorChunkId: string;
+        /**
+         * Valor de rank mantenido por la instancia.
+         */
         rank: number;
+        /**
+         * Valor de decision mantenido por la instancia.
+         */
         decision: AuthorizationDecision;
       }[] = [];
 
@@ -527,6 +546,14 @@ export class RetrievalService {
 
   // --- Piezas compartidas -------------------------------------------------
 
+  /**
+   * Ejecuta la operación require published policy.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param accessPolicyId - Identificador de access policy.
+   * @returns Resultado de require published policy conforme al contrato `Promise<RagAccessPolicies>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async requirePublishedPolicy(
     tx: EntityManager,
     accessPolicyId: string | undefined,
@@ -564,7 +591,15 @@ export class RetrievalService {
   private decide(
     document: VectorDocuments,
     policy: RagAccessPolicies,
-    session: { patientProfileId?: string; consentDirectiveId?: string },
+    session: {
+      /**
+       * Identificador asociado a patient profile.
+       */
+      patientProfileId?: string; /**
+       * Identificador asociado a consent directive.
+       */
+      consentDirectiveId?: string;
+    },
   ): AuthorizationDecision {
     if (policy.patientScopeRequired) {
       if (!document.patientProfileId) return 'deny_scope';

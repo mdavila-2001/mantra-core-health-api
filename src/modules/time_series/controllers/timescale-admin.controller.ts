@@ -34,6 +34,11 @@ import {
 @ApiBearerAuth()
 @Controller('ts/admin')
 export class TimescaleAdminController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param adminService - Valor de admin service requerido por la operación.
+   */
   constructor(private readonly adminService: TimescaleAdminService) {}
 
   /** UC-58-04. */

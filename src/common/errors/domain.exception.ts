@@ -11,6 +11,14 @@ import { ErrorCode } from './error-codes';
  * contrato de error sea uniforme.
  */
 export class DomainException extends HttpException {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param status - Valor de status requerido por la operación.
+   * @param code - Valor de code requerido por la operación.
+   * @param message - Valor de message requerido por la operación.
+   * @param details - Valor de details requerido por la operación.
+   */
   constructor(
     status: HttpStatus,
     public readonly code: ErrorCode,
@@ -23,21 +31,25 @@ export class DomainException extends HttpException {
 
 /** Credencial/firma ausente o inválida (autenticación fallida). */
 export class UnauthorizedException extends DomainException {
-  constructor(
-    message = 'No autenticado',
-    details?: Record<string, unknown>,
-  ) {
-    super(
-      HttpStatus.UNAUTHORIZED,
-      ErrorCode.UNAUTHENTICATED,
-      message,
-      details,
-    );
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param message - Valor de message requerido por la operación.
+   * @param details - Valor de details requerido por la operación.
+   */
+  constructor(message = 'No autenticado', details?: Record<string, unknown>) {
+    super(HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHENTICATED, message, details);
   }
 }
 
 /** Recurso relacionado o principal inexistente. */
 export class ResourceNotFoundException extends DomainException {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param message - Valor de message requerido por la operación.
+   * @param details - Valor de details requerido por la operación.
+   */
   constructor(
     message = 'Recurso no encontrado',
     details?: Record<string, unknown>,
@@ -48,6 +60,12 @@ export class ResourceNotFoundException extends DomainException {
 
 /** Violación de unicidad o estado incompatible con la operación (duplicado). */
 export class ConflictException extends DomainException {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param message - Valor de message requerido por la operación.
+   * @param details - Valor de details requerido por la operación.
+   */
   constructor(
     message = 'Conflicto de estado',
     details?: Record<string, unknown>,
@@ -58,6 +76,12 @@ export class ConflictException extends DomainException {
 
 /** Precondición de negocio no satisfecha (estado del agregado, consentimiento). */
 export class PreconditionFailedException extends DomainException {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param message - Valor de message requerido por la operación.
+   * @param details - Valor de details requerido por la operación.
+   */
   constructor(
     message = 'Precondición no satisfecha',
     details?: Record<string, unknown>,
@@ -73,6 +97,12 @@ export class PreconditionFailedException extends DomainException {
 
 /** Colisión de concurrencia optimista (`row_version`). */
 export class ConcurrencyConflictException extends DomainException {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param message - Valor de message requerido por la operación.
+   * @param details - Valor de details requerido por la operación.
+   */
   constructor(
     message = 'Conflicto de concurrencia',
     details?: Record<string, unknown>,

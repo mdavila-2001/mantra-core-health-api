@@ -9,10 +9,16 @@ import {
 
 /** UC-26-12: emitir decisión de apelación (inmutable). */
 export class CreateAppealDecisionDto {
+  /**
+   * Valor de decision mantenido por la instancia.
+   */
   @ApiProperty({ enum: ['UPHELD', 'OVERTURNED'] })
   @IsIn(['UPHELD', 'OVERTURNED'])
   decision!: 'UPHELD' | 'OVERTURNED';
 
+  /**
+   * Valor de adjusted amount mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Monto ajustado tras la decisión',
     example: '15.00',
@@ -21,6 +27,9 @@ export class CreateAppealDecisionDto {
   @IsNumberString()
   adjustedAmount?: string;
 
+  /**
+   * Valor de rationale text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ maxLength: 2000 })
   @IsOptional()
   @IsString()

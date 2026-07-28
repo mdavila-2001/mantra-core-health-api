@@ -26,6 +26,12 @@ import {
 } from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
+/**
+ * Ejecuta la operación num.
+ *
+ * @param v - Valor de v requerido por la operación.
+ * @returns Resultado de num conforme al contrato `number`.
+ */
 const num = (v: string | null | undefined): number =>
   v == null ? 0 : Number(v);
 
@@ -37,6 +43,19 @@ const num = (v: string | null | undefined): number =>
  */
 @Injectable()
 export class PharmacyProcurementService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param suppliersRepo - Valor de suppliers repo requerido por la operación.
+   * @param ordersRepo - Valor de orders repo requerido por la operación.
+   * @param receiptsRepo - Valor de receipts repo requerido por la operación.
+   * @param locationsRepo - Valor de locations repo requerido por la operación.
+   * @param lotsRepo - Valor de lots repo requerido por la operación.
+   * @param ledgerRepo - Valor de ledger repo requerido por la operación.
+   * @param stockRepo - Valor de stock repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly suppliersRepo: SuppliersRepository,

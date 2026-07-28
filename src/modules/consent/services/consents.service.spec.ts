@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 
 // Fábrica de mocks laxa: mantiene el 'jest' de runtime pero evita el tipado estricto Mock<never>.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ConsentsService } from './consents.service';
 import { ConflictException, ResourceNotFoundException } from '../../../common';
@@ -8,6 +14,10 @@ import { CONS } from '../consent.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };

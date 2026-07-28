@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos para definir un geofence. */
 export interface CreateGeofenceData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a shape type concept.
+   */
   shapeTypeConceptId: string;
+  /**
+   * Valor de geometry json mantenido por la instancia.
+   */
   geometryJson?: unknown;
+  /**
+   * Valor de radius m mantenido por la instancia.
+   */
   radiusM?: string;
+  /**
+   * Valor de center lat mantenido por la instancia.
+   */
   centerLat?: string;
+  /**
+   * Valor de center lng mantenido por la instancia.
+   */
   centerLng?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

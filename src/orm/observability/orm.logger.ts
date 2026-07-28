@@ -33,8 +33,18 @@ import { QueryMetrics } from './query-metrics';
  * incremento de contadores y una comparación numérica.
  */
 export class OrmLogger extends DefaultLogger {
+  /**
+   * Valor de nest mantenido por la instancia.
+   */
   private readonly nest = new NestLogger('MikroORM');
 
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param options - Valor de options requerido por la operación.
+   * @param slowQueryMs - Valor de slow query ms requerido por la operación.
+   * @param metrics - Valor de metrics requerido por la operación.
+   */
   constructor(
     options: LoggerOptions,
     private readonly slowQueryMs: number,
@@ -47,7 +57,14 @@ export class OrmLogger extends DefaultLogger {
    * Consultas SQL. `context.took` es la duración medida por el driver, es decir
    * el tiempo real de ida y vuelta contra PostgreSQL, no el tiempo de CPU.
    */
-  override logQuery(context: { query: string } & LogContext): void {
+  override logQuery(
+    context: {
+      /**
+       * Valor de query mantenido por la instancia.
+       */
+      query: string;
+    } & LogContext,
+  ): void {
     const took = context.took ?? 0;
     const isSlow = took >= this.slowQueryMs;
 
@@ -76,6 +93,13 @@ export class OrmLogger extends DefaultLogger {
     }
   }
 
+  /**
+   * Ejecuta la operación log.
+   *
+   * @param namespace - Valor de namespace requerido por la operación.
+   * @param message - Valor de message requerido por la operación.
+   * @param context - Valor de context requerido por la operación.
+   */
   override log(
     namespace: LoggerNamespace,
     message: string,
@@ -88,10 +112,22 @@ export class OrmLogger extends DefaultLogger {
   // Las advertencias y los errores del ORM se registran siempre, sin consultar
   // `isEnabled`: no son trazas de depuración. Por eso estos dos métodos ignoran
   // el contexto de logging que sí usa `log`.
+  /**
+   * Ejecuta la operación warn.
+   *
+   * @param namespace - Valor de namespace requerido por la operación.
+   * @param message - Valor de message requerido por la operación.
+   */
   override warn(namespace: LoggerNamespace, message: string): void {
     this.nest.warn(`[${namespace}] ${message}`);
   }
 
+  /**
+   * Ejecuta la operación error.
+   *
+   * @param namespace - Valor de namespace requerido por la operación.
+   * @param message - Valor de message requerido por la operación.
+   */
   override error(namespace: LoggerNamespace, message: string): void {
     this.metrics.recordFailure();
     this.nest.error(`[${namespace}] ${message}`);

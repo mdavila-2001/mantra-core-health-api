@@ -50,6 +50,22 @@ import {
  */
 @Injectable()
 export class TelemetryEventsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param schemasRepo - Valor de schemas repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param propertiesRepo - Valor de properties repo requerido por la operación.
+   * @param journeysRepo - Valor de journeys repo requerido por la operación.
+   * @param contextsRepo - Valor de contexts repo requerido por la operación.
+   * @param webVitalsRepo - Valor de web vitals repo requerido por la operación.
+   * @param funnelsRepo - Valor de funnels repo requerido por la operación.
+   * @param conversionsRepo - Valor de conversions repo requerido por la operación.
+   * @param subjectsRepo - Valor de subjects repo requerido por la operación.
+   * @param consentsRepo - Valor de consents repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly schemasRepo: ActivityEventSchemaDefinitionsRepository,
@@ -400,10 +416,25 @@ export class TelemetryEventsService {
   private async resolveJourney(
     tx: EntityManager,
     opts: {
+      /**
+       * Identificador asociado a session journey.
+       */
       sessionJourneyId?: string;
+      /**
+       * Identificador asociado a session.
+       */
       sessionId?: string;
+      /**
+       * Identificador asociado a analytics subject.
+       */
       analyticsSubjectId?: string;
+      /**
+       * Identificador asociado a portal type concept.
+       */
       portalTypeConceptId?: string;
+      /**
+       * Valor de must exist mantenido por la instancia.
+       */
       mustExist?: boolean;
     },
   ): Promise<SessionJourneys> {
@@ -453,8 +484,17 @@ export class TelemetryEventsService {
 
   /** Determina el concepto de tipo de valor de una propiedad. */
   private valueType(prop: {
+    /**
+     * Valor de value type mantenido por la instancia.
+     */
     valueType?: 'STRING' | 'NUMBER' | 'BOOLEAN';
+    /**
+     * Valor de value number mantenido por la instancia.
+     */
     valueNumber?: number;
+    /**
+     * Valor de value boolean mantenido por la instancia.
+     */
     valueBoolean?: boolean;
   }): string {
     if (prop.valueType) return VALUE_TYPE_CONCEPT_BY_CODE[prop.valueType];

@@ -42,6 +42,15 @@ const REASON: Record<string, string> = {
  */
 @Injectable()
 export class ModerationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param moderationRepo - Valor de moderation repo requerido por la operación.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param auditLogRepo - Valor de audit log repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly moderationRepo: ModerationRepository,
@@ -52,6 +61,13 @@ export class ModerationService {
     this.logger.setContext(ModerationService.name);
   }
 
+  /**
+   * Ejecuta la operación record decision.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de record decision conforme al contrato `Promise<ModerationDecisionResultDto>`.
+   */
   async recordDecision(
     dto: CreateModerationDecisionDto,
     actor: AuthenticatedUser,

@@ -11,74 +11,251 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create journey data.
+ */
 export interface CreateJourneyData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a entry trigger concept.
+   */
   entryTriggerConceptId: string;
+  /**
+   * Identificador asociado a entry segment.
+   */
   entrySegmentId?: string;
+  /**
+   * Identificador asociado a goal metric concept.
+   */
   goalMetricConceptId?: string;
+  /**
+   * Valor de definition json mantenido por la instancia.
+   */
   definitionJson?: unknown;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create journey step data.
+ */
 export interface CreateJourneyStepData {
+  /**
+   * Identificador asociado a journey.
+   */
   journeyId: string;
+  /**
+   * Valor de step code mantenido por la instancia.
+   */
   stepCode: string;
+  /**
+   * Identificador asociado a step type concept.
+   */
   stepTypeConceptId: string;
+  /**
+   * Identificador asociado a channel concept.
+   */
   channelConceptId?: string;
+  /**
+   * Identificador asociado a content template.
+   */
   contentTemplateId?: string;
+  /**
+   * Valor de wait duration minutes mantenido por la instancia.
+   */
   waitDurationMinutes?: number;
+  /**
+   * Valor de condition json mantenido por la instancia.
+   */
   conditionJson?: unknown;
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   ordinal: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create enrollment data.
+ */
 export interface CreateEnrollmentData {
+  /**
+   * Identificador asociado a journey.
+   */
   journeyId: string;
+  /**
+   * Identificador asociado a member type concept.
+   */
   memberTypeConceptId: string;
+  /**
+   * Identificador asociado a member ref.
+   */
   memberRefId: string;
+  /**
+   * Identificador asociado a current step.
+   */
   currentStepId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create tracked link data.
+ */
 export interface CreateTrackedLinkData {
+  /**
+   * Identificador asociado a campaign.
+   */
   campaignId?: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de target url mantenido por la instancia.
+   */
   targetUrl: string;
+  /**
+   * Valor de utm source mantenido por la instancia.
+   */
   utmSource?: string;
+  /**
+   * Valor de utm medium mantenido por la instancia.
+   */
   utmMedium?: string;
+  /**
+   * Valor de utm campaign mantenido por la instancia.
+   */
   utmCampaign?: string;
+  /**
+   * Valor de utm content mantenido por la instancia.
+   */
   utmContent?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create touchpoint data.
+ */
 export interface CreateTouchpointData {
+  /**
+   * Identificador asociado a campaign.
+   */
   campaignId?: string;
+  /**
+   * Identificador asociado a journey.
+   */
   journeyId?: string;
+  /**
+   * Identificador asociado a tracked link.
+   */
   trackedLinkId?: string;
+  /**
+   * Identificador asociado a member type concept.
+   */
   memberTypeConceptId: string;
+  /**
+   * Identificador asociado a member ref.
+   */
   memberRefId: string;
+  /**
+   * Identificador asociado a touch type concept.
+   */
   touchTypeConceptId: string;
+  /**
+   * Identificador asociado a channel concept.
+   */
   channelConceptId: string;
+  /**
+   * Identificador asociado a content template.
+   */
   contentTemplateId?: string;
+  /**
+   * Valor de metadata json mantenido por la instancia.
+   */
   metadataJson?: unknown;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt?: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create attribution touch data.
+ */
 export interface CreateAttributionTouchData {
+  /**
+   * Valor de conversion ref type mantenido por la instancia.
+   */
   conversionRefType: string;
+  /**
+   * Identificador asociado a conversion ref.
+   */
   conversionRefId: string;
+  /**
+   * Identificador asociado a marketing touchpoint.
+   */
   marketingTouchpointId: string;
+  /**
+   * Identificador asociado a attribution model concept.
+   */
   attributionModelConceptId: string;
+  /**
+   * Valor de weight mantenido por la instancia.
+   */
   weight: string;
+  /**
+   * Valor de attributed value mantenido por la instancia.
+   */
   attributedValue?: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId?: string;
+  /**
+   * Identificador asociado a position concept.
+   */
   positionConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -90,6 +267,13 @@ export interface CreateAttributionTouchData {
 export class MarketingJourneysRepository {
   // --- Journeys y pasos (UC-50-06, UC-50-07) ---
 
+  /**
+   * Crea create journey.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create journey conforme al contrato `Journeys`.
+   */
   createJourney(em: EntityManager, data: CreateJourneyData): Journeys {
     return em.create(
       Journeys,
@@ -108,10 +292,24 @@ export class MarketingJourneysRepository {
     );
   }
 
+  /**
+   * Obtiene find journey by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find journey by id conforme al contrato `Promise<Journeys | null>`.
+   */
   findJourneyById(em: EntityManager, id: string): Promise<Journeys | null> {
     return em.findOne(Journeys, { id });
   }
 
+  /**
+   * Obtiene find journey for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find journey for update conforme al contrato `Promise<Journeys | null>`.
+   */
   findJourneyForUpdate(
     em: EntityManager,
     id: string,
@@ -123,6 +321,14 @@ export class MarketingJourneysRepository {
     );
   }
 
+  /**
+   * Obtiene find journey by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find journey by code conforme al contrato `Promise<Journeys | null>`.
+   */
   findJourneyByCode(
     em: EntityManager,
     tenantId: string,
@@ -131,6 +337,13 @@ export class MarketingJourneysRepository {
     return em.findOne(Journeys, { tenantId, code });
   }
 
+  /**
+   * Crea create journey step.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create journey step conforme al contrato `JourneySteps`.
+   */
   createJourneyStep(
     em: EntityManager,
     data: CreateJourneyStepData,
@@ -164,6 +377,13 @@ export class MarketingJourneysRepository {
     );
   }
 
+  /**
+   * Obtiene find step by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find step by id conforme al contrato `Promise<JourneySteps | null>`.
+   */
   findStepById(em: EntityManager, id: string): Promise<JourneySteps | null> {
     return em.findOne(JourneySteps, { id });
   }
@@ -182,6 +402,13 @@ export class MarketingJourneysRepository {
 
   // --- Inscripciones (UC-50-07, UC-50-08, UC-50-09) ---
 
+  /**
+   * Crea create enrollment.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create enrollment conforme al contrato `JourneyEnrollments`.
+   */
   createEnrollment(
     em: EntityManager,
     data: CreateEnrollmentData,
@@ -235,6 +462,13 @@ export class MarketingJourneysRepository {
     );
   }
 
+  /**
+   * Obtiene find enrollment for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find enrollment for update conforme al contrato `Promise<JourneyEnrollments | null>`.
+   */
   findEnrollmentForUpdate(
     em: EntityManager,
     id: string,
@@ -248,6 +482,13 @@ export class MarketingJourneysRepository {
 
   // --- Enlaces rastreables (UC-50-10) ---
 
+  /**
+   * Crea create tracked link.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create tracked link conforme al contrato `TrackedLinks`.
+   */
   createTrackedLink(
     em: EntityManager,
     data: CreateTrackedLinkData,
@@ -271,6 +512,13 @@ export class MarketingJourneysRepository {
     );
   }
 
+  /**
+   * Obtiene find tracked link by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find tracked link by code conforme al contrato `Promise<TrackedLinks | null>`.
+   */
   findTrackedLinkByCode(
     em: EntityManager,
     code: string,
@@ -339,6 +587,13 @@ export class MarketingJourneysRepository {
     );
   }
 
+  /**
+   * Crea create attribution touch.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create attribution touch conforme al contrato `AttributionTouches`.
+   */
   createAttributionTouch(
     em: EntityManager,
     data: CreateAttributionTouchData,
@@ -377,6 +632,12 @@ export class MarketingJourneysRepository {
     });
   }
 
+  /**
+   * Elimina o desactiva remove attribution touches.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param touches - Valor de touches requerido por la operación.
+   */
   removeAttributionTouches(
     em: EntityManager,
     touches: AttributionTouches[],

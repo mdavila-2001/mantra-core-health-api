@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PaymentsTransactionsService } from './payments-transactions.service';
@@ -18,8 +24,17 @@ import {
 function signCallback(
   gatewayId: string,
   body: {
+    /**
+     * Valor de gateway transaction ref mantenido por la instancia.
+     */
     gatewayTransactionRef: string;
+    /**
+     * Valor de outcome mantenido por la instancia.
+     */
     outcome: 'CAPTURED' | 'FAILED' | 'AUTHORIZED';
+    /**
+     * Valor de authorization code mantenido por la instancia.
+     */
     authorizationCode?: string;
   },
 ): string {
@@ -36,6 +51,10 @@ function signCallback(
 
 const actor = { id: 'user-1', roles: ['PAYMENTS_ADMIN'] };
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -189,7 +208,10 @@ describe('PaymentsTransactionsService', () => {
       d.transactionsRepo.findByGatewayRef.mockResolvedValue(transaction);
       d.intentsRepo.findByIdForUpdate.mockResolvedValue(intent);
 
-      const body = { gatewayTransactionRef: 'ref-1', outcome: 'CAPTURED' as const };
+      const body = {
+        gatewayTransactionRef: 'ref-1',
+        outcome: 'CAPTURED' as const,
+      };
       const res = await d.service.applyCallback('libelula', {
         ...body,
         signature: signCallback('gw-1', body),
@@ -227,7 +249,10 @@ describe('PaymentsTransactionsService', () => {
         statusConceptId: CONCEPTS.TXN_CAPTURED,
       });
 
-      const body = { gatewayTransactionRef: 'ref-1', outcome: 'CAPTURED' as const };
+      const body = {
+        gatewayTransactionRef: 'ref-1',
+        outcome: 'CAPTURED' as const,
+      };
       const res = await d.service.applyCallback('libelula', {
         ...body,
         signature: signCallback('gw-1', body),

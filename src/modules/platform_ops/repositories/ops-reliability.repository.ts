@@ -19,6 +19,13 @@ import {
 export class OpsReliabilityRepository {
   // --- SLO (UC-46-09) ---
 
+  /**
+   * Obtiene find slo by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find slo by id conforme al contrato `Promise<ServiceLevelObjectives | null>`.
+   */
   findSloById(
     em: EntityManager,
     id: string,
@@ -30,14 +37,41 @@ export class OpsReliabilityRepository {
   createSloMeasurement(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a service level objective.
+       */
       serviceLevelObjectiveId: string;
+      /**
+       * Valor de measured at mantenido por la instancia.
+       */
       measuredAt: Date;
+      /**
+       * Valor de window start mantenido por la instancia.
+       */
       windowStart: Date;
+      /**
+       * Valor de window end mantenido por la instancia.
+       */
       windowEnd: Date;
+      /**
+       * Valor de good events mantenido por la instancia.
+       */
       goodEvents: string;
+      /**
+       * Valor de total events mantenido por la instancia.
+       */
       totalEvents: string;
+      /**
+       * Valor de attained value mantenido por la instancia.
+       */
       attainedValue: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de source reference mantenido por la instancia.
+       */
       sourceReference?: string;
     },
   ): SloMeasurements {
@@ -67,6 +101,13 @@ export class OpsReliabilityRepository {
     return em.findOne(SloMeasurements, { serviceLevelObjectiveId, windowEnd });
   }
 
+  /**
+   * Obtiene find latest measurement.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param serviceLevelObjectiveId - Identificador de service level objective.
+   * @returns Resultado de find latest measurement conforme al contrato `Promise<SloMeasurements | null>`.
+   */
   findLatestMeasurement(
     em: EntityManager,
     serviceLevelObjectiveId: string,
@@ -80,6 +121,13 @@ export class OpsReliabilityRepository {
 
   // --- Error budget (UC-46-10) ---
 
+  /**
+   * Obtiene find policy by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find policy by id conforme al contrato `Promise<ErrorBudgetPolicies | null>`.
+   */
   findPolicyById(
     em: EntityManager,
     id: string,
@@ -87,6 +135,13 @@ export class OpsReliabilityRepository {
     return em.findOne(ErrorBudgetPolicies, { id });
   }
 
+  /**
+   * Obtiene find policy for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find policy for update conforme al contrato `Promise<ErrorBudgetPolicies | null>`.
+   */
   findPolicyForUpdate(
     em: EntityManager,
     id: string,
@@ -102,13 +157,37 @@ export class OpsReliabilityRepository {
   createBurnEvent(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a error budget policy.
+       */
       errorBudgetPolicyId: string;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt: Date;
+      /**
+       * Valor de window seconds mantenido por la instancia.
+       */
       windowSeconds: string;
+      /**
+       * Valor de burn rate mantenido por la instancia.
+       */
       burnRate: string;
+      /**
+       * Valor de remaining budget percent mantenido por la instancia.
+       */
       remainingBudgetPercent: string;
+      /**
+       * Identificador asociado a severity concept.
+       */
       severityConceptId: string;
+      /**
+       * Identificador asociado a health incident.
+       */
       healthIncidentId?: string;
+      /**
+       * Valor de action taken json mantenido por la instancia.
+       */
       actionTakenJson?: unknown;
     },
   ): ErrorBudgetBurnEvents {
@@ -128,6 +207,13 @@ export class OpsReliabilityRepository {
     );
   }
 
+  /**
+   * Obtiene find latest burn event.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param errorBudgetPolicyId - Identificador de error budget policy.
+   * @returns Resultado de find latest burn event conforme al contrato `Promise<ErrorBudgetBurnEvents | null>`.
+   */
   findLatestBurnEvent(
     em: EntityManager,
     errorBudgetPolicyId: string,
@@ -156,6 +242,13 @@ export class OpsReliabilityRepository {
 
   // --- Capacidad (UC-46-11) ---
 
+  /**
+   * Obtiene find capacity plan for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find capacity plan for update conforme al contrato `Promise<CapacityPlans | null>`.
+   */
   findCapacityPlanForUpdate(
     em: EntityManager,
     id: string,
@@ -171,12 +264,33 @@ export class OpsReliabilityRepository {
   createCapacityMeasurement(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a capacity plan.
+       */
       capacityPlanId: string;
+      /**
+       * Valor de measured at mantenido por la instancia.
+       */
       measuredAt: Date;
+      /**
+       * Identificador asociado a metric concept.
+       */
       metricConceptId: string;
+      /**
+       * Valor de observed value mantenido por la instancia.
+       */
       observedValue: string;
+      /**
+       * Valor de capacity value mantenido por la instancia.
+       */
       capacityValue: string;
+      /**
+       * Valor de utilization percent mantenido por la instancia.
+       */
       utilizationPercent: string;
+      /**
+       * Valor de source reference mantenido por la instancia.
+       */
       sourceReference?: string;
     },
   ): CapacityMeasurements {

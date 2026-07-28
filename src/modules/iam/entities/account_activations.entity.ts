@@ -16,9 +16,15 @@ import { randomUUID } from 'node:crypto';
  */
 @Entity({ schema: 'iam', tableName: 'account_activations' })
 export class AccountActivations {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Identificador asociado a user.
+   */
   @Property({ fieldName: 'user_id', type: 'uuid' }) // FK → iam.users
   userId!: string;
 
@@ -26,12 +32,21 @@ export class AccountActivations {
   @Property({ fieldName: 'token_hash', columnType: 'varchar' })
   tokenHash!: string;
 
+  /**
+   * Identificador asociado a state concept.
+   */
   @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   stateConceptId!: string;
 
+  /**
+   * Valor de reason mantenido por la instancia.
+   */
   @Property({ fieldName: 'reason', columnType: 'varchar', nullable: true })
   reason?: string;
 
+  /**
+   * Identificador asociado a legal representation.
+   */
   @Property({
     fieldName: 'legal_representation_id',
     type: 'uuid',
@@ -39,6 +54,9 @@ export class AccountActivations {
   }) // FK → authz.patient_legal_representations
   legalRepresentationId?: string;
 
+  /**
+   * Identificador asociado a legal representative user.
+   */
   @Property({
     fieldName: 'legal_representative_user_id',
     type: 'uuid',
@@ -46,9 +64,15 @@ export class AccountActivations {
   }) // FK → iam.users
   legalRepresentativeUserId?: string;
 
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   @Property({ fieldName: 'expires_at', columnType: 'timestamptz' })
   expiresAt!: Date;
 
+  /**
+   * Valor de consumed at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'consumed_at',
     columnType: 'timestamptz',
@@ -56,18 +80,33 @@ export class AccountActivations {
   })
   consumedAt?: Date;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
+  /**
+   * Identificador asociado a created by user.
+   */
   @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
+  /**
+   * Identificador asociado a updated by user.
+   */
   @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 }

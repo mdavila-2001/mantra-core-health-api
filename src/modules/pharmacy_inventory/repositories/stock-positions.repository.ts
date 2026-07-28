@@ -5,17 +5,41 @@ import { InventoryStockPositions } from '../entities';
 
 /** Clave lógica de una posición de stock (ubicación + producto + lote). */
 export interface StockPositionKey {
+  /**
+   * Identificador asociado a inventory location.
+   */
   inventoryLocationId: string;
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   pharmacyProductId: string;
+  /**
+   * Identificador asociado a inventory lot.
+   */
   inventoryLotId?: string;
 }
 
 /** Datos para crear una posición de stock nueva (en cero). */
 export interface CreateStockPositionData extends StockPositionKey {
+  /**
+   * Valor de on hand quantity mantenido por la instancia.
+   */
   onHandQuantity?: string;
+  /**
+   * Valor de reserved quantity mantenido por la instancia.
+   */
   reservedQuantity?: string;
+  /**
+   * Valor de quarantine quantity mantenido por la instancia.
+   */
   quarantineQuantity?: string;
+  /**
+   * Valor de available quantity mantenido por la instancia.
+   */
   availableQuantity?: string;
+  /**
+   * Valor de last ledger sequence mantenido por la instancia.
+   */
   lastLedgerSequence?: string;
 }
 
@@ -27,6 +51,13 @@ export interface CreateStockPositionData extends StockPositionKey {
  */
 @Injectable()
 export class StockPositionsRepository {
+  /**
+   * Obtiene find by key.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param key - Valor de key requerido por la operación.
+   * @returns Resultado de find by key conforme al contrato `Promise<InventoryStockPositions | null>`.
+   */
   findByKey(
     em: EntityManager,
     key: StockPositionKey,
@@ -67,6 +98,13 @@ export class StockPositionsRepository {
     return em.find(InventoryStockPositions, { inventoryLotId });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `InventoryStockPositions`.
+   */
   create(
     em: EntityManager,
     data: CreateStockPositionData,

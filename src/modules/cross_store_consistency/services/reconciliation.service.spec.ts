@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ReconciliationService } from './reconciliation.service';
@@ -11,6 +17,10 @@ const ENTITY_A = '33333333-3333-3333-3333-333333333333';
 const ENTITY_B = '44444444-4444-4444-4444-444444444444';
 const DRIFT_ID = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -44,6 +54,12 @@ function build() {
   return { service, em, tx, reconciliationRepo, outbox, logger };
 }
 
+/**
+ * Ejecuta la operación run dto.
+ *
+ * @param items - Valor de items requerido por la operación.
+ * @returns Resultado de run dto.
+ */
 function runDto(items: any[]) {
   return {
     tenantId: TENANT_ID,
@@ -148,6 +164,13 @@ describe('ReconciliationService', () => {
   });
 
   describe('repairDrift (UC-62-07)', () => {
+    /**
+     * Ejecuta la operación with drift.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with drift.
+     */
     function withDrift(d: ReturnType<typeof build>, overrides: any = {}) {
       const drift = {
         id: DRIFT_ID,

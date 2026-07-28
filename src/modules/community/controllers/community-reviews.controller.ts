@@ -17,6 +17,11 @@ import { CreateReviewDto, ReviewResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('community/profiles')
 export class CommunityReviewsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CommunityReviewsService) {}
 
   /** UC-19-11. */

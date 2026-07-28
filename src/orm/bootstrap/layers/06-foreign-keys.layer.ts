@@ -34,13 +34,27 @@ export const foreignKeysLayer: DdlLayer = {
   description:
     'Aplica las claves foráneas del modelo, que las entidades escalares no pueden declarar',
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply.
+   */
   async apply(context: DdlLayerContext) {
     // Una consulta para saber qué restricciones existen ya. Con 5993 FKs, la
     // alternativa (un bloque DO por restricción que capture duplicate_object)
     // costaría 5993 sentencias en cada arranque para no hacer nada.
     const existing = new Set(
       (
-        await context.query<{ nspname: string; conname: string }>(
+        await context.query<{
+          /**
+           * Valor de nspname mantenido por la instancia.
+           */
+          nspname: string; /**
+           * Valor de conname mantenido por la instancia.
+           */
+          conname: string;
+        }>(
           `SELECT n.nspname, c.conname
              FROM pg_constraint c
              JOIN pg_namespace n ON n.oid = c.connamespace

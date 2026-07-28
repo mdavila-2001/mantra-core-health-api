@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopIntraopService } from './periop-intraop.service';
@@ -21,6 +27,10 @@ const STAY = '77777777-7777-7777-7777-777777777777';
 const PROFILE = '88888888-8888-8888-8888-888888888888';
 const SPACE = '99999999-9999-9999-9999-999999999999';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -66,6 +76,12 @@ function build() {
   return { service, tx, intraopRepo, casesRepo, logger };
 }
 
+/**
+ * Ejecuta la operación case in progress.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de case in progress conforme al contrato `any`.
+ */
 function caseInProgress(overrides: Record<string, unknown> = {}): any {
   return {
     id: CASE,
@@ -121,6 +137,12 @@ describe('PeriopIntraopService', () => {
   describe('recordFinding (UC-53-08)', () => {
     const dto = { findingCodeConceptId: SITE, findingText: 'Adherencias' };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
       d.intraopRepo.createFinding.mockReturnValue({ id: 'finding-1' });
@@ -189,6 +211,12 @@ describe('PeriopIntraopService', () => {
   });
 
   describe('recordImplant (UC-53-09)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         procedureId: PROCEDURE,
@@ -206,6 +234,12 @@ describe('PeriopIntraopService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
       d.intraopRepo.createImplant.mockReturnValue({ id: 'implant-1' });
@@ -323,6 +357,12 @@ describe('PeriopIntraopService', () => {
   });
 
   describe('draftReport / signReport (UC-53-11)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         procedureId: PROCEDURE,

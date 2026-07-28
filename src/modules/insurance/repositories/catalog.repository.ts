@@ -22,12 +22,26 @@ import {
  */
 @Injectable()
 export class CatalogRepository {
+  /**
+   * Obtiene find carrier.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find carrier conforme al contrato `Promise<InsuranceCarriers | null>`.
+   */
   findCarrier(
     em: EntityManager,
     id: string,
   ): Promise<InsuranceCarriers | null> {
     return em.findOne(InsuranceCarriers, { id });
   }
+  /**
+   * Crea create carrier.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create carrier conforme al contrato `InsuranceCarriers`.
+   */
   createCarrier(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -39,12 +53,26 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Obtiene find product.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find product conforme al contrato `Promise<InsuranceProducts | null>`.
+   */
   findProduct(
     em: EntityManager,
     id: string,
   ): Promise<InsuranceProducts | null> {
     return em.findOne(InsuranceProducts, { id });
   }
+  /**
+   * Crea create product.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create product conforme al contrato `InsuranceProducts`.
+   */
   createProduct(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -56,9 +84,23 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Obtiene find plan.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find plan conforme al contrato `Promise<InsurancePlans | null>`.
+   */
   findPlan(em: EntityManager, id: string): Promise<InsurancePlans | null> {
     return em.findOne(InsurancePlans, { id });
   }
+  /**
+   * Crea create plan.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create plan conforme al contrato `InsurancePlans`.
+   */
   createPlan(em: EntityManager, data: Record<string, unknown>): InsurancePlans {
     return em.create(
       InsurancePlans,
@@ -67,6 +109,13 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Crea create benefit.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create benefit conforme al contrato `InsurancePlanBenefits`.
+   */
   createBenefit(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -78,12 +127,26 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Obtiene find provider network.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find provider network conforme al contrato `Promise<ProviderNetworks | null>`.
+   */
   findProviderNetwork(
     em: EntityManager,
     id: string,
   ): Promise<ProviderNetworks | null> {
     return em.findOne(ProviderNetworks, { id });
   }
+  /**
+   * Crea create provider network.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create provider network conforme al contrato `ProviderNetworks`.
+   */
   createProviderNetwork(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -95,6 +158,13 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Crea create membership.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create membership conforme al contrato `NetworkProviderMemberships`.
+   */
   createMembership(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -106,9 +176,23 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Obtiene find broker.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find broker conforme al contrato `Promise<InsuranceBrokers | null>`.
+   */
   findBroker(em: EntityManager, id: string): Promise<InsuranceBrokers | null> {
     return em.findOne(InsuranceBrokers, { id });
   }
+  /**
+   * Crea create broker.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create broker conforme al contrato `InsuranceBrokers`.
+   */
   createBroker(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -120,6 +204,13 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Crea create employer group.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create employer group conforme al contrato `EmployerGroups`.
+   */
   createEmployerGroup(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -131,12 +222,26 @@ export class CatalogRepository {
     );
   }
 
+  /**
+   * Obtiene find agreement.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find agreement conforme al contrato `Promise<BrokerCarrierAgreements | null>`.
+   */
   findAgreement(
     em: EntityManager,
     id: string,
   ): Promise<BrokerCarrierAgreements | null> {
     return em.findOne(BrokerCarrierAgreements, { id });
   }
+  /**
+   * Crea create agreement.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create agreement conforme al contrato `BrokerCarrierAgreements`.
+   */
   createAgreement(
     em: EntityManager,
     data: Record<string, unknown>,

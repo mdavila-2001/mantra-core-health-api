@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 
 // Mock laxo: conserva el 'jest' de runtime evitando los tipos estrictos de @jest/globals.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuditLogRepository } from './audit-log.repository';
 
@@ -77,7 +83,9 @@ describe('AuditLogRepository (serialización del hash-chain WORM)', () => {
     const row: any = await repo.append(em, baseData);
 
     // El lock se tomó antes de que findChainTip devolviera el previous_hash.
-    expect(em.calls.indexOf('execute')).toBeLessThan(em.calls.indexOf('findOne'));
+    expect(em.calls.indexOf('execute')).toBeLessThan(
+      em.calls.indexOf('findOne'),
+    );
     expect(row.previousHash).toBe('hash-anterior');
     expect(typeof row.recordHash).toBe('string');
   });

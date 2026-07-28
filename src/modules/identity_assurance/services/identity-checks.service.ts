@@ -36,6 +36,15 @@ const ATTEMPT_OUTCOME_CONCEPT: Record<AttemptOutcome, string> = {
  */
 @Injectable()
 export class IdentityChecksService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param checksRepo - Valor de checks repo requerido por la operación.
+   * @param attemptsRepo - Valor de attempts repo requerido por la operación.
+   * @param resultsRepo - Valor de results repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly checksRepo: IdentityChecksRepository,
@@ -149,6 +158,14 @@ export class IdentityChecksService {
     });
   }
 
+  /**
+   * Obtiene load check.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param checkId - Identificador de check.
+   * @returns Resultado de load check conforme al contrato `Promise<IdentityChecks>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async loadCheck(
     tx: EntityManager,
     checkId: string,

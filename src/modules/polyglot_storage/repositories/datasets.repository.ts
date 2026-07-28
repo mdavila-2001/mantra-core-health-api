@@ -19,6 +19,13 @@ import {
 export class DatasetsRepository {
   // --- Clasificaciones (UC-54-02, 05, 09) ---
 
+  /**
+   * Obtiene find classification by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find classification by id conforme al contrato `Promise<DataClassifications | null>`.
+   */
   findClassificationById(
     em: EntityManager,
     id: string,
@@ -26,6 +33,13 @@ export class DatasetsRepository {
     return em.findOne(DataClassifications, { id });
   }
 
+  /**
+   * Obtiene find classification by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find classification by code conforme al contrato `Promise<DataClassifications | null>`.
+   */
   findClassificationByCode(
     em: EntityManager,
     code: string,
@@ -35,15 +49,43 @@ export class DatasetsRepository {
 
   // --- Definiciones (UC-54-02, 03, 04, 07, 08, 13) ---
 
+  /**
+   * Crea create dataset.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create dataset conforme al contrato `DatasetDefinitions`.
+   */
   createDataset(
     em: EntityManager,
     data: {
+      /**
+       * Valor de code mantenido por la instancia.
+       */
       code: string;
+      /**
+       * Valor de name mantenido por la instancia.
+       */
       name: string;
+      /**
+       * Valor de owning module code mantenido por la instancia.
+       */
       owningModuleCode: string;
+      /**
+       * Identificador asociado a data classification.
+       */
       dataClassificationId: string;
+      /**
+       * Valor de source of truth mantenido por la instancia.
+       */
       sourceOfTruth: string;
+      /**
+       * Valor de canonical entity type mantenido por la instancia.
+       */
       canonicalEntityType?: string;
+      /**
+       * Valor de lifecycle state mantenido por la instancia.
+       */
       lifecycleState: string;
     },
   ): DatasetDefinitions {
@@ -62,6 +104,13 @@ export class DatasetsRepository {
     );
   }
 
+  /**
+   * Obtiene find dataset by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find dataset by id conforme al contrato `Promise<DatasetDefinitions | null>`.
+   */
   findDatasetById(
     em: EntityManager,
     id: string,
@@ -81,6 +130,13 @@ export class DatasetsRepository {
     );
   }
 
+  /**
+   * Obtiene find dataset by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find dataset by code conforme al contrato `Promise<DatasetDefinitions | null>`.
+   */
   findDatasetByCode(
     em: EntityManager,
     code: string,
@@ -90,15 +146,43 @@ export class DatasetsRepository {
 
   // --- Versiones (UC-54-02, 03, 04, 05) ---
 
+  /**
+   * Crea create dataset version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create dataset version conforme al contrato `DatasetVersions`.
+   */
   createDatasetVersion(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a dataset definition.
+       */
       datasetDefinitionId: string;
+      /**
+       * Valor de version mantenido por la instancia.
+       */
       version: string;
+      /**
+       * Valor de schema fingerprint mantenido por la instancia.
+       */
       schemaFingerprint: string;
+      /**
+       * Valor de compatibility mode mantenido por la instancia.
+       */
       compatibilityMode: string;
+      /**
+       * Identificador asociado a schema document file.
+       */
       schemaDocumentFileId?: string;
+      /**
+       * Valor de effective from mantenido por la instancia.
+       */
       effectiveFrom: Date;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): DatasetVersions {
@@ -117,6 +201,13 @@ export class DatasetsRepository {
     );
   }
 
+  /**
+   * Obtiene find dataset version by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find dataset version by id conforme al contrato `Promise<DatasetVersions | null>`.
+   */
   findDatasetVersionById(
     em: EntityManager,
     id: string,
@@ -124,6 +215,14 @@ export class DatasetsRepository {
     return em.findOne(DatasetVersions, { id });
   }
 
+  /**
+   * Obtiene find dataset version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param datasetDefinitionId - Identificador de dataset definition.
+   * @param version - Valor de version requerido por la operación.
+   * @returns Resultado de find dataset version conforme al contrato `Promise<DatasetVersions | null>`.
+   */
   findDatasetVersion(
     em: EntityManager,
     datasetDefinitionId: string,
@@ -147,17 +246,51 @@ export class DatasetsRepository {
 
   // --- Colecciones (UC-54-04, 05) ---
 
+  /**
+   * Crea create collection.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create collection conforme al contrato `CollectionDefinitions`.
+   */
   createCollection(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a storage backend.
+       */
       storageBackendId: string;
+      /**
+       * Identificador asociado a dataset definition.
+       */
       datasetDefinitionId: string;
+      /**
+       * Valor de logical name mantenido por la instancia.
+       */
       logicalName: string;
+      /**
+       * Valor de physical name pattern mantenido por la instancia.
+       */
       physicalNamePattern?: string;
+      /**
+       * Valor de partitioning strategy mantenido por la instancia.
+       */
       partitioningStrategy?: string;
+      /**
+       * Valor de tenant isolation mode mantenido por la instancia.
+       */
       tenantIsolationMode?: string;
+      /**
+       * Valor de routing key expression mantenido por la instancia.
+       */
       routingKeyExpression?: string;
+      /**
+       * Valor de shard key expression mantenido por la instancia.
+       */
       shardKeyExpression?: string;
+      /**
+       * Valor de lifecycle state mantenido por la instancia.
+       */
       lifecycleState: string;
     },
   ): CollectionDefinitions {
@@ -178,6 +311,13 @@ export class DatasetsRepository {
     );
   }
 
+  /**
+   * Obtiene find collection by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find collection by id conforme al contrato `Promise<CollectionDefinitions | null>`.
+   */
   findCollectionById(
     em: EntityManager,
     id: string,
@@ -194,16 +334,47 @@ export class DatasetsRepository {
     return em.findOne(CollectionDefinitions, { storageBackendId, logicalName });
   }
 
+  /**
+   * Crea create schema version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create schema version conforme al contrato `CollectionSchemaVersions`.
+   */
   createSchemaVersion(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a collection definition.
+       */
       collectionDefinitionId: string;
+      /**
+       * Identificador asociado a dataset version.
+       */
       datasetVersionId: string;
+      /**
+       * Valor de schema version mantenido por la instancia.
+       */
       schemaVersion: string;
+      /**
+       * Valor de validation mode mantenido por la instancia.
+       */
       validationMode: string;
+      /**
+       * Valor de schema document json mantenido por la instancia.
+       */
       schemaDocumentJson?: unknown;
+      /**
+       * Valor de migration strategy mantenido por la instancia.
+       */
       migrationStrategy?: string;
+      /**
+       * Valor de effective from mantenido por la instancia.
+       */
       effectiveFrom: Date;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): CollectionSchemaVersions {
@@ -223,6 +394,14 @@ export class DatasetsRepository {
     );
   }
 
+  /**
+   * Obtiene find schema version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param collectionDefinitionId - Identificador de collection definition.
+   * @param schemaVersion - Valor de schema version requerido por la operación.
+   * @returns Resultado de find schema version conforme al contrato `Promise<CollectionSchemaVersions | null>`.
+   */
   findSchemaVersion(
     em: EntityManager,
     collectionDefinitionId: string,
@@ -236,15 +415,43 @@ export class DatasetsRepository {
 
   // --- Políticas de acceso al dato (UC-54-07) ---
 
+  /**
+   * Crea create access policy.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create access policy conforme al contrato `DataAccessPolicies`.
+   */
   createAccessPolicy(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a dataset definition.
+       */
       datasetDefinitionId: string;
+      /**
+       * Valor de purpose of use code mantenido por la instancia.
+       */
       purposeOfUseCode: string;
+      /**
+       * Valor de principal type mantenido por la instancia.
+       */
       principalType: string;
+      /**
+       * Valor de field policy json mantenido por la instancia.
+       */
       fieldPolicyJson?: unknown;
+      /**
+       * Valor de row filter expression mantenido por la instancia.
+       */
       rowFilterExpression?: string;
+      /**
+       * Valor de masking profile code mantenido por la instancia.
+       */
       maskingProfileCode?: string;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): DataAccessPolicies {

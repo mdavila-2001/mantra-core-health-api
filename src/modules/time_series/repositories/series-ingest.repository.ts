@@ -39,30 +39,93 @@ const ENTITY_BY_TABLE = {
 
 /** Campos comunes a todo punto de cualquiera de las doce series. */
 export interface SeriesPointBase {
+  /**
+   * Valor de time mantenido por la instancia.
+   */
   time: Date;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a series.
+   */
   seriesId: string;
+  /**
+   * Identificador asociado a ingestion.
+   */
   ingestionId: string;
+  /**
+   * Valor de source version mantenido por la instancia.
+   */
   sourceVersion: string;
+  /**
+   * Valor de quality state mantenido por la instancia.
+   */
   qualityState: string;
 }
 
+/**
+ * Describe el contrato estructural de create vital data.
+ */
 export interface CreateVitalData extends SeriesPointBase {
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Valor de observation code mantenido por la instancia.
+   */
   observationCode: string;
+  /**
+   * Valor de numeric value mantenido por la instancia.
+   */
   numericValue: number;
+  /**
+   * Valor de unit code mantenido por la instancia.
+   */
   unitCode: string;
+  /**
+   * Identificador asociado a device.
+   */
   deviceId?: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Valor de validation state mantenido por la instancia.
+   */
   validationState: string;
 }
 
+/**
+ * Describe el contrato estructural de create pipeline metric data.
+ */
 export interface CreatePipelineMetricData extends SeriesPointBase {
+  /**
+   * Valor de pipeline code mantenido por la instancia.
+   */
   pipelineCode: string;
+  /**
+   * Identificador asociado a batch.
+   */
   batchId: string;
+  /**
+   * Valor de stage code mantenido por la instancia.
+   */
   stageCode: string;
+  /**
+   * Valor de metric code mantenido por la instancia.
+   */
   metricCode: string;
+  /**
+   * Valor de metric value mantenido por la instancia.
+   */
   metricValue: number;
+  /**
+   * Valor de dimensions mantenido por la instancia.
+   */
   dimensions?: unknown;
 }
 
@@ -142,17 +205,51 @@ export class SeriesIngestRepository {
     });
   }
 
+  /**
+   * Crea create device reading.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create device reading conforme al contrato `DeviceRawReadingSeries`.
+   */
   createDeviceReading(
     em: EntityManager,
     data: SeriesPointBase & {
+      /**
+       * Identificador asociado a device.
+       */
       deviceId: string;
+      /**
+       * Identificador asociado a patient profile.
+       */
       patientProfileId?: string;
+      /**
+       * Valor de channel code mantenido por la instancia.
+       */
       channelCode: string;
+      /**
+       * Valor de raw value mantenido por la instancia.
+       */
       rawValue: unknown;
+      /**
+       * Valor de numeric value mantenido por la instancia.
+       */
       numericValue?: number;
+      /**
+       * Valor de unit code mantenido por la instancia.
+       */
       unitCode?: string;
+      /**
+       * Valor de device sequence mantenido por la instancia.
+       */
       deviceSequence?: string;
+      /**
+       * Valor de observed at device mantenido por la instancia.
+       */
       observedAtDevice?: Date;
+      /**
+       * Valor de received at mantenido por la instancia.
+       */
       receivedAt: Date;
     },
   ): DeviceRawReadingSeries {
@@ -162,7 +259,18 @@ export class SeriesIngestRepository {
   /** La fila cruda que se va a normalizar, bloqueada para no promoverla dos veces. */
   findDeviceReadingForUpdate(
     em: EntityManager,
-    key: { time: Date; tenantId: string; seriesId: string },
+    key: {
+      /**
+       * Valor de time mantenido por la instancia.
+       */
+      time: Date; /**
+       * Identificador asociado a tenant.
+       */
+      tenantId: string; /**
+       * Identificador asociado a series.
+       */
+      seriesId: string;
+    },
   ): Promise<DeviceRawReadingSeries | null> {
     return em.findOne(DeviceRawReadingSeries, key, {
       lockMode: LockMode.PESSIMISTIC_WRITE,
@@ -189,6 +297,13 @@ export class SeriesIngestRepository {
     });
   }
 
+  /**
+   * Crea create vital.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create vital conforme al contrato `NormalizedVitalSeries`.
+   */
   createVital(em: EntityManager, data: CreateVitalData): NormalizedVitalSeries {
     return em.create(NormalizedVitalSeries, data as never, { partial: true });
   }
@@ -214,6 +329,13 @@ export class SeriesIngestRepository {
     });
   }
 
+  /**
+   * Crea create ads event.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create ads event conforme al contrato `AdsDeliveryEventSeries`.
+   */
   createAdsEvent(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -223,6 +345,13 @@ export class SeriesIngestRepository {
 
   // --- Pings de ubicación (UC-58-13) ---
 
+  /**
+   * Crea create location ping.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create location ping conforme al contrato `LocationPingSeries`.
+   */
   createLocationPing(
     em: EntityManager,
     data: Record<string, unknown>,

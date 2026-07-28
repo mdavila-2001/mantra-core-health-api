@@ -25,6 +25,14 @@ import { DELEGATE_TYPE_CONCEPT, STATUS } from './concept-maps';
  */
 @Injectable()
 export class PermissionSetsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param setsRepo - Valor de sets repo requerido por la operación.
+   * @param itemsRepo - Valor de items repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly setsRepo: DelegatedPermissionSetsRepository,

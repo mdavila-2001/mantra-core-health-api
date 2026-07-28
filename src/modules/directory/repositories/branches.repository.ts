@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos para dar de alta una branch. */
 export interface CreateBranchData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a branch type concept.
+   */
   branchTypeConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de time zone mantenido por la instancia.
+   */
   timeZone?: string;
+  /**
+   * Valor de latitude mantenido por la instancia.
+   */
   latitude?: string;
+  /**
+   * Valor de longitude mantenido por la instancia.
+   */
   longitude?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

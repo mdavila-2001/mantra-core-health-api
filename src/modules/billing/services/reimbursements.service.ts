@@ -24,6 +24,15 @@ import { fromCents, toCents } from '../money.util';
  */
 @Injectable()
 export class ReimbursementsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reimbursementsRepo - Valor de reimbursements repo requerido por la operación.
+   * @param invoicesRepo - Valor de invoices repo requerido por la operación.
+   * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly reimbursementsRepo: ReimbursementsRepository,
@@ -34,6 +43,14 @@ export class ReimbursementsService {
     this.logger.setContext(ReimbursementsService.name);
   }
 
+  /**
+   * Actualiza link.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de link conforme al contrato `Promise<ReimbursementResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async link(
     dto: LinkReimbursementDto,
     actor: AuthenticatedUser,

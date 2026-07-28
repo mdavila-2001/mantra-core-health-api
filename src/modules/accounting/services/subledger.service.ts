@@ -26,6 +26,14 @@ import {
  */
 @Injectable()
 export class SubledgerService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param subledgerRepo - Valor de subledger repo requerido por la operación.
+   * @param posting - Valor de posting requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly subledgerRepo: SubledgerRepository,

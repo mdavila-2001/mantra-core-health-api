@@ -14,36 +14,123 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create case data.
+ */
 export interface CreateCaseData {
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   custodianTenantId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Identificador asociado a service request.
+   */
   serviceRequestId?: string;
+  /**
+   * Identificador asociado a primary procedure.
+   */
   primaryProcedureId?: string;
+  /**
+   * Valor de case number mantenido por la instancia.
+   */
   caseNumber: string;
+  /**
+   * Identificador asociado a case type concept.
+   */
   caseTypeConceptId: string;
+  /**
+   * Identificador asociado a priority concept.
+   */
   priorityConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a surgical specialty concept.
+   */
   surgicalSpecialtyConceptId?: string;
+  /**
+   * Identificador asociado a requested by profile.
+   */
   requestedByProfileId?: string;
+  /**
+   * Identificador asociado a primary surgeon profile.
+   */
   primarySurgeonProfileId?: string;
+  /**
+   * Identificador asociado a practice site.
+   */
   practiceSiteId?: string;
+  /**
+   * Identificador asociado a operating room.
+   */
   operatingRoomId?: string;
+  /**
+   * Valor de scheduled start at mantenido por la instancia.
+   */
   scheduledStartAt?: Date;
+  /**
+   * Valor de scheduled end at mantenido por la instancia.
+   */
   scheduledEndAt?: Date;
+  /**
+   * Valor de urgency reason text mantenido por la instancia.
+   */
   urgencyReasonText?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create charge item data.
+ */
 export interface CreateChargeItemData {
+  /**
+   * Identificador asociado a procedure case.
+   */
   procedureCaseId: string;
+  /**
+   * Identificador asociado a procedure.
+   */
   procedureId?: string;
+  /**
+   * Identificador asociado a charge item type concept.
+   */
   chargeItemTypeConceptId: string;
+  /**
+   * Identificador asociado a billable item.
+   */
   billableItemId: string;
+  /**
+   * Valor de quantity mantenido por la instancia.
+   */
   quantity: string;
+  /**
+   * Valor de unit price mantenido por la instancia.
+   */
   unitPrice?: string;
+  /**
+   * Valor de currency code mantenido por la instancia.
+   */
   currencyCode?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -55,6 +142,13 @@ export interface CreateChargeItemData {
 export class PeriopCasesRepository {
   // --- Caso (UC-53-01, UC-53-13) ---
 
+  /**
+   * Crea create case.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create case conforme al contrato `ProcedureCases`.
+   */
   createCase(em: EntityManager, data: CreateCaseData): ProcedureCases {
     return em.create(
       ProcedureCases,
@@ -82,6 +176,13 @@ export class PeriopCasesRepository {
     );
   }
 
+  /**
+   * Obtiene find case by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find case by id conforme al contrato `Promise<ProcedureCases | null>`.
+   */
   findCaseById(em: EntityManager, id: string): Promise<ProcedureCases | null> {
     return em.findOne(ProcedureCases, { id });
   }
@@ -98,6 +199,13 @@ export class PeriopCasesRepository {
     );
   }
 
+  /**
+   * Obtiene find case by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseNumber - Valor de case number requerido por la operación.
+   * @returns Resultado de find case by number conforme al contrato `Promise<ProcedureCases | null>`.
+   */
   findCaseByNumber(
     em: EntityManager,
     caseNumber: string,
@@ -105,6 +213,13 @@ export class PeriopCasesRepository {
     return em.findOne(ProcedureCases, { caseNumber });
   }
 
+  /**
+   * Ejecuta la operación count cases.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param custodianTenantId - Identificador de custodian tenant.
+   * @returns Resultado de count cases conforme al contrato `Promise<number>`.
+   */
   countCases(em: EntityManager, custodianTenantId: string): Promise<number> {
     return em.count(ProcedureCases, { custodianTenantId });
   }
@@ -132,11 +247,29 @@ export class PeriopCasesRepository {
   createStatusHistory(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a from status concept.
+       */
       fromStatusConceptId: string;
+      /**
+       * Identificador asociado a to status concept.
+       */
       toStatusConceptId: string;
+      /**
+       * Identificador asociado a changed by user.
+       */
       changedByUserId: string;
+      /**
+       * Identificador asociado a reason concept.
+       */
       reasonConceptId?: string;
+      /**
+       * Valor de reason text mantenido por la instancia.
+       */
       reasonText?: string;
     },
   ): ProcedureCaseStatusHistory {
@@ -158,15 +291,43 @@ export class PeriopCasesRepository {
 
   // --- Hitos (UC-53-01, 03, 04, 05, 07) ---
 
+  /**
+   * Crea create milestone.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create milestone conforme al contrato `ProcedureCaseMilestones`.
+   */
   createMilestone(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a milestone type concept.
+       */
       milestoneTypeConceptId: string;
+      /**
+       * Valor de planned at mantenido por la instancia.
+       */
       plannedAt?: Date;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt?: Date;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a recorded by profile.
+       */
       recordedByProfileId?: string;
+      /**
+       * Valor de notes mantenido por la instancia.
+       */
       notes?: string;
     },
   ): ProcedureCaseMilestones {
@@ -186,6 +347,14 @@ export class PeriopCasesRepository {
     );
   }
 
+  /**
+   * Obtiene find milestone.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Identificador de procedure case.
+   * @param milestoneTypeConceptId - Identificador de milestone type concept.
+   * @returns Resultado de find milestone conforme al contrato `Promise<ProcedureCaseMilestones | null>`.
+   */
   findMilestone(
     em: EntityManager,
     procedureCaseId: string,
@@ -199,13 +368,35 @@ export class PeriopCasesRepository {
 
   // --- Diagnósticos y equipo (UC-53-02) ---
 
+  /**
+   * Crea create diagnosis.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create diagnosis conforme al contrato `ProcedureCaseDiagnoses`.
+   */
   createDiagnosis(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a condition.
+       */
       conditionId: string;
+      /**
+       * Identificador asociado a diagnosis role concept.
+       */
       diagnosisRoleConceptId: string;
+      /**
+       * Valor de sequence number mantenido por la instancia.
+       */
       sequenceNumber: number;
+      /**
+       * Valor de present on admission mantenido por la instancia.
+       */
       presentOnAdmission: boolean;
     },
   ): ProcedureCaseDiagnoses {
@@ -223,6 +414,13 @@ export class PeriopCasesRepository {
     );
   }
 
+  /**
+   * Obtiene find diagnoses by case.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Identificador de procedure case.
+   * @returns Resultado de find diagnoses by case conforme al contrato `Promise<ProcedureCaseDiagnoses[]>`.
+   */
   findDiagnosesByCase(
     em: EntityManager,
     procedureCaseId: string,
@@ -234,13 +432,35 @@ export class PeriopCasesRepository {
     );
   }
 
+  /**
+   * Crea create team member.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create team member conforme al contrato `ProcedureCaseTeamMembers`.
+   */
   createTeamMember(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a practitioner profile.
+       */
       practitionerProfileId: string;
+      /**
+       * Identificador asociado a team role concept.
+       */
       teamRoleConceptId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): ProcedureCaseTeamMembers {
@@ -268,12 +488,31 @@ export class PeriopCasesRepository {
 
   // --- Ubicaciones (UC-53-12) ---
 
+  /**
+   * Crea create location.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create location conforme al contrato `ProcedureCaseLocations`.
+   */
   createLocation(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a care space.
+       */
       careSpaceId: string;
+      /**
+       * Identificador asociado a location role concept.
+       */
       locationRoleConceptId: string;
+      /**
+       * Valor de starts at mantenido por la instancia.
+       */
       startsAt: Date;
     },
   ): ProcedureCaseLocations {
@@ -305,16 +544,47 @@ export class PeriopCasesRepository {
 
   // --- Uso de quirófano (UC-53-01, 13, 14) ---
 
+  /**
+   * Crea create utilization event.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create utilization event conforme al contrato `OperatingRoomUtilizationEvents`.
+   */
   createUtilizationEvent(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a operating room.
+       */
       operatingRoomId: string;
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId?: string;
+      /**
+       * Identificador asociado a event type concept.
+       */
       eventTypeConceptId: string;
+      /**
+       * Valor de duration seconds mantenido por la instancia.
+       */
       durationSeconds?: string;
+      /**
+       * Identificador asociado a delay reason concept.
+       */
       delayReasonConceptId?: string;
+      /**
+       * Identificador asociado a turnover category concept.
+       */
       turnoverCategoryConceptId?: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
+      /**
+       * Valor de details json mantenido por la instancia.
+       */
       detailsJson?: unknown;
     },
   ): OperatingRoomUtilizationEvents {
@@ -338,16 +608,47 @@ export class PeriopCasesRepository {
 
   // --- Cancelación (UC-53-13) ---
 
+  /**
+   * Crea create cancellation.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create cancellation conforme al contrato `ProcedureCancellations`.
+   */
   createCancellation(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a cancellation reason concept.
+       */
       cancellationReasonConceptId: string;
+      /**
+       * Identificador asociado a cancellation category concept.
+       */
       cancellationCategoryConceptId?: string;
+      /**
+       * Identificador asociado a cancelled by user.
+       */
       cancelledByUserId?: string;
+      /**
+       * Identificador asociado a preventable concept.
+       */
       preventableConceptId?: string;
+      /**
+       * Valor de explanation text mantenido por la instancia.
+       */
       explanationText?: string;
+      /**
+       * Valor de reschedule required mantenido por la instancia.
+       */
       rescheduleRequired: boolean;
+      /**
+       * Identificador asociado a replacement case.
+       */
       replacementCaseId?: string;
     },
   ): ProcedureCancellations {
@@ -371,6 +672,13 @@ export class PeriopCasesRepository {
 
   // --- Cargos (UC-53-14) ---
 
+  /**
+   * Crea create charge item.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create charge item conforme al contrato `ProcedureChargeItems`.
+   */
   createChargeItem(
     em: EntityManager,
     data: CreateChargeItemData,
@@ -400,6 +708,13 @@ export class PeriopCasesRepository {
     return em.find(ProcedureChargeItems, { procedureCaseId });
   }
 
+  /**
+   * Obtiene find charge items for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Identificador de procedure case.
+   * @returns Resultado de find charge items for update conforme al contrato `Promise<ProcedureChargeItems[]>`.
+   */
   findChargeItemsForUpdate(
     em: EntityManager,
     procedureCaseId: string,

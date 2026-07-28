@@ -12,8 +12,20 @@ import { CreateValueSetDto, ValueSetResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('terminology/value-sets')
 export class TerminologyValueSetsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param valueSetsService - Valor de value sets service requerido por la operación.
+   */
   constructor(private readonly valueSetsService: ValueSetsService) {}
 
+  /**
+   * Crea create value set.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create value set conforme al contrato `Promise<ValueSetResponseDto>`.
+   */
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

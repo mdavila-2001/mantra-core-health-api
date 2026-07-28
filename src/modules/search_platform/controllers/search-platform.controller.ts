@@ -32,6 +32,11 @@ import {
 @ApiBearerAuth()
 @Controller('search')
 export class SearchPlatformController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param searchService - Valor de search service requerido por la operación.
+   */
   constructor(private readonly searchService: SearchIndexService) {}
 
   /** Indexa (upsert) un documento en el índice indicado. */

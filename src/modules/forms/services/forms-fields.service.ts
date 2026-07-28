@@ -39,6 +39,13 @@ const LANGUAGE_CONCEPT_BY_CODE: Record<string, string> = {
  */
 @Injectable()
 export class FormsFieldsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldsRepo - Valor de fields repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly fieldsRepo: FieldDefinitionsRepository,

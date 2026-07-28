@@ -9,50 +9,145 @@ import { createdBy } from '../../../common';
 
 /** Alta de un check planificado del caso (UC-27-04). */
 export interface CreateCheckData {
+  /**
+   * Identificador asociado a identity verification case.
+   */
   identityVerificationCaseId: string;
+  /**
+   * Identificador asociado a check type concept.
+   */
   checkTypeConceptId: string;
+  /**
+   * Identificador asociado a authority.
+   */
   authorityId?: string;
+  /**
+   * Valor de required mantenido por la instancia.
+   */
   required?: boolean;
+  /**
+   * Valor de check sequence mantenido por la instancia.
+   */
   checkSequence?: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Registro de un intento contra autoridad externa (UC-27-05). */
 export interface CreateAttemptData {
+  /**
+   * Identificador asociado a identity verification case.
+   */
   identityVerificationCaseId: string;
+  /**
+   * Identificador asociado a identity authority endpoint.
+   */
   identityAuthorityEndpointId: string;
+  /**
+   * Valor de attempt number mantenido por la instancia.
+   */
   attemptNumber: number;
+  /**
+   * Identificador asociado a request message.
+   */
   requestMessageId?: string;
+  /**
+   * Identificador asociado a response message.
+   */
   responseMessageId?: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey?: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt?: Date;
+  /**
+   * Valor de completed at mantenido por la instancia.
+   */
   completedAt?: Date;
+  /**
+   * Identificador asociado a outcome concept.
+   */
   outcomeConceptId: string;
+  /**
+   * Valor de technical error code mantenido por la instancia.
+   */
   technicalErrorCode?: string;
+  /**
+   * Valor de retry eligible mantenido por la instancia.
+   */
   retryEligible?: boolean;
 }
 
 /** Registro append-only de un resultado de check (UC-27-06). */
 export interface CreateResultData {
+  /**
+   * Identificador asociado a identity check.
+   */
   identityCheckId: string;
+  /**
+   * Valor de result version mantenido por la instancia.
+   */
   resultVersion: number;
+  /**
+   * Identificador asociado a result concept.
+   */
   resultConceptId: string;
+  /**
+   * Valor de match score mantenido por la instancia.
+   */
   matchScore?: string;
+  /**
+   * Valor de discrepancy codes json mantenido por la instancia.
+   */
   discrepancyCodesJson?: unknown;
+  /**
+   * Valor de source response hash mantenido por la instancia.
+   */
   sourceResponseHash?: string;
+  /**
+   * Identificador asociado a supersedes result.
+   */
   supersedesResultId?: string;
+  /**
+   * Identificador asociado a checked by actor type concept.
+   */
   checkedByActorTypeConceptId?: string;
+  /**
+   * Identificador asociado a checked by actor.
+   */
   checkedByActorId?: string;
 }
 
 /** Acceso a datos de `identity_assurance.identity_checks`. */
 @Injectable()
 export class IdentityChecksRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<IdentityChecks | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<IdentityChecks | null> {
     return em.findOne(IdentityChecks, { id });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `IdentityChecks`.
+   */
   create(em: EntityManager, data: CreateCheckData): IdentityChecks {
     return em.create(
       IdentityChecks,
@@ -81,6 +176,14 @@ export class IdentityChecksRepository {
     });
   }
 
+  /**
+   * Ejecuta la operación count by case and status.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Identificador de case.
+   * @param statusConceptId - Identificador de status concept.
+   * @returns Resultado de count by case and status conforme al contrato `Promise<number>`.
+   */
   countByCaseAndStatus(
     em: EntityManager,
     caseId: string,
@@ -96,6 +199,13 @@ export class IdentityChecksRepository {
 /** Acceso a datos de `identity_assurance.identity_verification_attempts`. */
 @Injectable()
 export class IdentityVerificationAttemptsRepository {
+  /**
+   * Ejecuta la operación count by case.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Identificador de case.
+   * @returns Resultado de count by case conforme al contrato `Promise<number>`.
+   */
   countByCase(em: EntityManager, caseId: string): Promise<number> {
     return em.count(IdentityVerificationAttempts, {
       identityVerificationCaseId: caseId,
@@ -114,6 +224,13 @@ export class IdentityVerificationAttemptsRepository {
     return n > 0;
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `IdentityVerificationAttempts`.
+   */
   create(
     em: EntityManager,
     data: CreateAttemptData,
@@ -142,6 +259,13 @@ export class IdentityVerificationAttemptsRepository {
 /** Acceso a datos de `identity_assurance.identity_check_results` (append-only). */
 @Injectable()
 export class IdentityCheckResultsRepository {
+  /**
+   * Ejecuta la operación count by check.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param checkId - Identificador de check.
+   * @returns Resultado de count by check conforme al contrato `Promise<number>`.
+   */
   countByCheck(em: EntityManager, checkId: string): Promise<number> {
     return em.count(IdentityCheckResults, { identityCheckId: checkId });
   }
@@ -158,6 +282,13 @@ export class IdentityCheckResultsRepository {
     );
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `IdentityCheckResults`.
+   */
   create(em: EntityManager, data: CreateResultData): IdentityCheckResults {
     return em.create(
       IdentityCheckResults,

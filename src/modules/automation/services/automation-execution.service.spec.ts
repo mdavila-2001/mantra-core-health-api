@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -17,6 +23,10 @@ const VERSION_ID = '55555555-5555-5555-5555-555555555555';
 const TOOL_ID = '66666666-6666-6666-6666-666666666666';
 const SERVICE_USER_ID = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -210,6 +220,12 @@ describe('AutomationExecutionService', () => {
   describe('startAgentRun (UC-48-09)', () => {
     const DTO = { agentId: AGENT_ID, taskTypeConceptId: 'task-type' } as any;
 
+    /**
+     * Ejecuta la operación with running run.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de with running run.
+     */
     function withRunningRun(d: ReturnType<typeof build>) {
       d.runsRepo.findWorkflowRunById.mockResolvedValue({
         id: RUN_ID,
@@ -270,6 +286,12 @@ describe('AutomationExecutionService', () => {
   });
 
   describe('recordAgentStep (UC-48-09 y 10)', () => {
+    /**
+     * Ejecuta la operación with running agent run.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de with running agent run.
+     */
     function withRunningAgentRun(d: ReturnType<typeof build>) {
       const agentRun = {
         id: AGENT_RUN_ID,
@@ -449,6 +471,13 @@ describe('AutomationExecutionService', () => {
     });
 
     describe('guardrails', () => {
+      /**
+       * Ejecuta la operación with guardrail.
+       *
+       * @param d - Valor de d requerido por la operación.
+       * @param policy - Valor de policy requerido por la operación.
+       * @returns Resultado de with guardrail.
+       */
       function withGuardrail(d: ReturnType<typeof build>, policy: any) {
         d.governanceRepo.findEnabledGuardrailsByAgent.mockResolvedValue([
           { guardrailPolicyId: 'policy-1' },
@@ -641,6 +670,12 @@ describe('AutomationExecutionService', () => {
   });
 
   describe('decideApproval (UC-48-11)', () => {
+    /**
+     * Ejecuta la operación with pending.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de with pending.
+     */
     function withPending(d: ReturnType<typeof build>) {
       const approval = {
         id: 'approval-1',
@@ -751,6 +786,13 @@ describe('AutomationExecutionService', () => {
   });
 
   describe('finalizeWorkflowRun (UC-48-14)', () => {
+    /**
+     * Ejecuta la operación with run.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param agentRuns - Valor de agent runs requerido por la operación.
+     * @returns Resultado de with run.
+     */
     function withRun(d: ReturnType<typeof build>, agentRuns: any[]) {
       const run = {
         id: RUN_ID,

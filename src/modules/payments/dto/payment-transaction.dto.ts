@@ -28,6 +28,9 @@ export const TRANSACTION_OPERATIONS: readonly TransactionOperation[] = [
 
 /** Cuerpo de `POST /payments/intents/{id}/transactions` (UC-42-05). */
 export class ProcessTransactionDto {
+  /**
+   * Valor de operation mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Operación a ejecutar',
     enum: TRANSACTION_OPERATIONS,
@@ -35,6 +38,9 @@ export class ProcessTransactionDto {
   @IsIn(TRANSACTION_OPERATIONS as readonly string[])
   operation!: TransactionOperation;
 
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Importe a procesar. Si se omite se toma el del intent.',
     example: '150.00',
@@ -44,12 +50,18 @@ export class ProcessTransactionDto {
   @Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })
   amount?: string;
 
+  /**
+   * Valor de gateway transaction ref mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Referencia devuelta por el gateway' })
   @IsOptional()
   @IsString()
   @MaxLength(200)
   gatewayTransactionRef?: string;
 
+  /**
+   * Valor de authorization code mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Código de autorización del emisor' })
   @IsOptional()
   @IsString()
@@ -57,30 +69,54 @@ export class ProcessTransactionDto {
   authorizationCode?: string;
 }
 
+/**
+ * Define el contrato validado para transaction response.
+ */
 export class TransactionResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  /**
+   * Identificador asociado a payment intent.
+   */
   @ApiProperty({ format: 'uuid' })
   paymentIntentId!: string;
 
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   @ApiProperty({ example: '150.00' })
   amount!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 
+  /**
+   * Valor de gateway transaction ref mantenido por la instancia.
+   */
   @ApiPropertyOptional()
   gatewayTransactionRef?: string;
 }
 
 /** Cuerpo de `POST /payments/callbacks/{callbackPath}` (UC-42-06). */
 export class GatewayCallbackDto {
+  /**
+   * Valor de gateway transaction ref mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Referencia de la transacción en el gateway' })
   @IsString()
   @MaxLength(200)
   gatewayTransactionRef!: string;
 
+  /**
+   * Valor de outcome mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Resultado informado por el gateway',
     enum: ['CAPTURED', 'FAILED', 'AUTHORIZED'],
@@ -88,12 +124,18 @@ export class GatewayCallbackDto {
   @IsIn(['CAPTURED', 'FAILED', 'AUTHORIZED'])
   outcome!: 'CAPTURED' | 'FAILED' | 'AUTHORIZED';
 
+  /**
+   * Valor de authorization code mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Código de autorización' })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   authorizationCode?: string;
 
+  /**
+   * Valor de signature mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Firma del proveedor para verificar el origen',
   })
@@ -103,21 +145,36 @@ export class GatewayCallbackDto {
   signature?: string;
 }
 
+/**
+ * Define el contrato validado para callback result.
+ */
 export class CallbackResultDto {
+  /**
+   * Identificador asociado a transaction.
+   */
   @ApiProperty({ description: 'Transacción correlacionada', format: 'uuid' })
   transactionId!: string;
 
+  /**
+   * Valor de duplicate mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'true si el callback ya se había aplicado antes',
   })
   duplicate!: boolean;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 }
 
 /** Cuerpo de `POST /payments/transactions/{id}/refunds` (UC-42-08). */
 export class CreateRefundDto {
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Importe a reembolsar (parcial o total)',
     example: '50.00',
@@ -126,6 +183,9 @@ export class CreateRefundDto {
   @Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })
   amount!: string;
 
+  /**
+   * Valor de gateway refund ref mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Referencia del reembolso en el gateway',
   })
@@ -134,6 +194,9 @@ export class CreateRefundDto {
   @MaxLength(200)
   gatewayRefundRef?: string;
 
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Motivo libre del reembolso' })
   @IsOptional()
   @IsString()
@@ -141,26 +204,47 @@ export class CreateRefundDto {
   reasonText?: string;
 }
 
+/**
+ * Define el contrato validado para refund response.
+ */
 export class RefundResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  /**
+   * Identificador asociado a payment transaction.
+   */
   @ApiProperty({ format: 'uuid' })
   paymentTransactionId!: string;
 
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   @ApiProperty({ example: '50.00' })
   amount!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 }
 
 /** Cuerpo de `POST /payments/transactions/{id}/cancellation-requests` (UC-42-09). */
 export class CreateCancellationDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Identificador asociado a gateway connection.
+   */
   @ApiProperty({
     description: 'Conexión del gateway sobre la que se pide la anulación',
     format: 'uuid',
@@ -168,6 +252,9 @@ export class CreateCancellationDto {
   @IsUUID()
   gatewayConnectionId!: string;
 
+  /**
+   * Valor de request number mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Número de solicitud, único por tenant',
     maxLength: 100,
@@ -176,6 +263,9 @@ export class CreateCancellationDto {
   @MaxLength(100)
   requestNumber!: string;
 
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Detalle del motivo' })
   @IsOptional()
   @IsString()
@@ -183,25 +273,46 @@ export class CreateCancellationDto {
   reasonText?: string;
 }
 
+/**
+ * Define el contrato validado para cancellation response.
+ */
 export class CancellationResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  /**
+   * Valor de request number mantenido por la instancia.
+   */
   @ApiProperty()
   requestNumber!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 }
 
 /** Resultado de `POST /payments/transactions/{id}/status-inquiry` (UC-42-07). */
 export class StatusInquiryResponseDto {
+  /**
+   * Identificador asociado a transaction.
+   */
   @ApiProperty({ format: 'uuid' })
   transactionId!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 
+  /**
+   * Valor de reconciled mantenido por la instancia.
+   */
   @ApiProperty({ description: 'true si la consulta cambió el estado local' })
   reconciled!: boolean;
 }

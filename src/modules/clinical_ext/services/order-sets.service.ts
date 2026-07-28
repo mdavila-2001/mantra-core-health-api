@@ -26,6 +26,14 @@ import { CLIN } from '../../clinical/clinical.concepts';
  */
 @Injectable()
 export class OrderSetsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param orderSetsRepo - Valor de order sets repo requerido por la operación.
+   * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly orderSetsRepo: OrderSetsRepository,

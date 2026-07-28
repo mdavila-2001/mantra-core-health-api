@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos para definir una línea de servicio hospitalaria (UC-22-03). */
 export interface CreateServiceLineData {
+  /**
+   * Identificador asociado a hospital.
+   */
   hospitalId: string;
+  /**
+   * Identificador asociado a clinical unit.
+   */
   clinicalUnitId?: string;
+  /**
+   * Identificador asociado a healthcare service.
+   */
   healthcareServiceId?: string;
+  /**
+   * Identificador asociado a service line concept.
+   */
   serviceLineConceptId: string;
+  /**
+   * Identificador asociado a specialty concept.
+   */
   specialtyConceptId?: string;
+  /**
+   * Identificador asociado a acuity level concept.
+   */
   acuityLevelConceptId?: string;
+  /**
+   * Valor de referral required mantenido por la instancia.
+   */
   referralRequired?: boolean;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

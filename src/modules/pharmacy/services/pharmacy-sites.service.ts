@@ -17,6 +17,14 @@ import { CreateSiteDto, SiteResponseDto } from '../dto';
  */
 @Injectable()
 export class PharmacySitesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param pharmaciesRepo - Valor de pharmacies repo requerido por la operación.
+   * @param sitesRepo - Valor de sites repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly pharmaciesRepo: PharmaciesRepository,

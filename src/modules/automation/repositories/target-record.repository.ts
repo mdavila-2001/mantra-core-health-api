@@ -3,11 +3,23 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 
 /** Destino de la escritura, ya partido en esquema y tabla. */
 export interface TargetTable {
+  /**
+   * Valor de schema name mantenido por la instancia.
+   */
   schemaName: string;
+  /**
+   * Valor de table name mantenido por la instancia.
+   */
   tableName: string;
 }
 
+/**
+ * Describe el contrato estructural de write record result.
+ */
 export interface WriteRecordResult {
+  /**
+   * Identificador único de la instancia.
+   */
   id?: string;
   /** `false` cuando la clave de deduplicación ya existía y no se pidió actualizar. */
   written: boolean;
@@ -22,6 +34,14 @@ export interface WriteRecordResult {
  */
 const SAFE_IDENTIFIER = /^[a-z_][a-z0-9_]{0,62}$/;
 
+/**
+ * Ejecuta la operación quote identifier.
+ *
+ * @param value - Valor de value requerido por la operación.
+ * @param what - Valor de what requerido por la operación.
+ * @returns Resultado de quote identifier conforme al contrato `string`.
+ * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+ */
 function quoteIdentifier(value: string, what: string): string {
   if (!SAFE_IDENTIFIER.test(value)) {
     // No se devuelve el valor recibido: si alguien logró configurar un
@@ -118,14 +138,14 @@ export class TargetRecordRepository {
 
     sql += ' returning id';
 
-    const rows = await em
-      .getConnection()
-      .execute<{ id: string }[]>(
-        sql,
-        values,
-        'all',
-        em.getTransactionContext(),
-      );
+    const rows = await em.getConnection().execute<
+      {
+        /**
+         * Identificador único de la instancia.
+         */
+        id: string;
+      }[]
+    >(sql, values, 'all', em.getTransactionContext());
 
     const row = rows?.[0];
     // `do nothing` sobre una colisión no devuelve filas: eso es exactamente la

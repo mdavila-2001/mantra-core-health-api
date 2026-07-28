@@ -35,6 +35,13 @@ const GROUP_TYPE_BY_CODE: Record<string, string> = {
  */
 @Injectable()
 export class CommunityGroupsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param groupsRepo - Valor de groups repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly groupsRepo: GroupsRepository,

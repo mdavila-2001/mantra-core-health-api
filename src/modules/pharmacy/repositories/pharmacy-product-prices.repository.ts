@@ -4,17 +4,53 @@ import { PharmacyProductPrices } from '../entities';
 
 /** Datos para insertar una nueva versión de precio (UC-24-06). */
 export interface CreatePriceData {
+  /**
+   * Identificador asociado a pharmacy price list.
+   */
   pharmacyPriceListId: string;
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   pharmacyProductId: string;
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
   versionNumber: number;
+  /**
+   * Valor de unit amount mantenido por la instancia.
+   */
   unitAmount: string;
+  /**
+   * Valor de tax amount mantenido por la instancia.
+   */
   taxAmount?: string;
+  /**
+   * Valor de patient amount mantenido por la instancia.
+   */
   patientAmount?: string;
+  /**
+   * Valor de insurer amount mantenido por la instancia.
+   */
   insurerAmount?: string;
+  /**
+   * Valor de minimum quantity mantenido por la instancia.
+   */
   minimumQuantity?: string;
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   effectiveFrom: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de recorded at mantenido por la instancia.
+   */
   recordedAt: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 

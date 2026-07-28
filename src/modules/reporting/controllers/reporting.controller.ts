@@ -42,6 +42,12 @@ import {
 @ApiBearerAuth()
 @Controller('reporting')
 export class ReportingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param definitionsService - Valor de definitions service requerido por la operación.
+   * @param runsService - Valor de runs service requerido por la operación.
+   */
   constructor(
     private readonly definitionsService: ReportingDefinitionsService,
     private readonly runsService: ReportingRunsService,

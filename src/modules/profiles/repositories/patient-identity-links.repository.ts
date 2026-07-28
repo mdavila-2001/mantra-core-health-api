@@ -5,15 +5,45 @@ import { createdBy } from '../../../common';
 
 /** Datos de un vínculo de identidad externa (MPI) de un paciente. */
 export interface CreateIdentityLinkData {
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a source tenant.
+   */
   sourceTenantId: string;
+  /**
+   * Valor de source patient identifier mantenido por la instancia.
+   */
   sourcePatientIdentifier: string;
+  /**
+   * Valor de source system uri mantenido por la instancia.
+   */
   sourceSystemUri?: string;
+  /**
+   * Identificador asociado a link type concept.
+   */
   linkTypeConceptId: string;
+  /**
+   * Valor de confidence score mantenido por la instancia.
+   */
   confidenceScore: string;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Identificador asociado a verified by user.
+   */
   verifiedByUserId?: string;
+  /**
+   * Valor de verified at mantenido por la instancia.
+   */
   verifiedAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -34,6 +64,13 @@ export class PatientIdentityLinksRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PatientIdentityLinks`.
+   */
   create(
     em: EntityManager,
     data: CreateIdentityLinkData,

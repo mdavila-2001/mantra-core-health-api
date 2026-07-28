@@ -27,6 +27,12 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical')
 export class ClinicalEncountersController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param episodesService - Valor de episodes service requerido por la operación.
+   * @param encountersService - Valor de encounters service requerido por la operación.
+   */
   constructor(
     private readonly episodesService: CareEpisodesService,
     private readonly encountersService: EncountersService,

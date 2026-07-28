@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DatasetGovernanceService } from './dataset-governance.service';
@@ -29,6 +35,10 @@ const CLASSIFICATION = '77777777-7777-7777-7777-777777777777';
 const TENANT = '88888888-8888-8888-8888-888888888888';
 const PLACEMENT = '99999999-9999-9999-9999-999999999999';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -147,6 +157,12 @@ describe('DatasetGovernanceService', () => {
       compatibilityMode: COMPATIBILITY_MODE.BACKWARD,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.datasetsRepo.findDatasetForUpdate.mockResolvedValue({
         id: DATASET,
@@ -228,6 +244,12 @@ describe('DatasetGovernanceService', () => {
       encryptionProfileId: ENCRYPTION,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.datasetsRepo.findDatasetVersionById.mockResolvedValue({
         id: VERSION,

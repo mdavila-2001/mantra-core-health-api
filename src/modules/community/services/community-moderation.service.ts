@@ -39,6 +39,13 @@ const CONTENT_TYPE_BY_TARGET: Record<string, string> = {
  */
 @Injectable()
 export class CommunityModerationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param moderationRepo - Valor de moderation repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly moderationRepo: ModerationRepository,

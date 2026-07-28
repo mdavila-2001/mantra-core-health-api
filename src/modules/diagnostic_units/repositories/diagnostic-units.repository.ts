@@ -6,16 +6,49 @@ import { DUNIT } from '../diagnostic_units.concepts';
 
 /** Datos de alta de una unidad diagnóstica (UC-23-01). */
 export interface CreateDiagnosticUnitData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a diagnostic unit type concept.
+   */
   diagnosticUnitTypeConceptId: string;
+  /**
+   * Identificador asociado a ownership type concept.
+   */
   ownershipTypeConceptId?: string;
+  /**
+   * Identificador asociado a practice.
+   */
   practiceId?: string;
+  /**
+   * Identificador asociado a primary practice site.
+   */
   primaryPracticeSiteId?: string;
+  /**
+   * Valor de accepts external orders mantenido por la instancia.
+   */
   acceptsExternalOrders?: boolean;
+  /**
+   * Valor de walk in available mantenido por la instancia.
+   */
   walkInAvailable?: boolean;
+  /**
+   * Valor de home collection available mantenido por la instancia.
+   */
   homeCollectionAvailable?: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -25,6 +58,13 @@ export interface CreateDiagnosticUnitData {
  */
 @Injectable()
 export class DiagnosticUnitsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<DiagnosticUnits | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<DiagnosticUnits | null> {
     return em.findOne(DiagnosticUnits, { id });
   }

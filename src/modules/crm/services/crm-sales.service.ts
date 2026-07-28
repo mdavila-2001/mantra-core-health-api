@@ -53,6 +53,13 @@ const LOST_REASON_CONCEPT: Readonly<
  */
 @Injectable()
 export class CrmSalesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param salesRepo - Valor de sales repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly salesRepo: CrmSalesRepository,

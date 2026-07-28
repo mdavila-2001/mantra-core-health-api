@@ -28,6 +28,11 @@ import {
 @ApiBearerAuth()
 @Controller('forms')
 export class FormsFieldsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param fieldsService - Valor de fields service requerido por la operación.
+   */
   constructor(private readonly fieldsService: FormsFieldsService) {}
 
   /** UC-09-02. */

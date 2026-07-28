@@ -5,11 +5,29 @@ import { CONCEPTS } from '../../../common';
 
 /** Datos de un evento de seguridad append-only. */
 export interface RecordSecurityEventData {
+  /**
+   * Identificador asociado a event type concept.
+   */
   eventTypeConceptId: string;
+  /**
+   * Identificador asociado a outcome concept.
+   */
   outcomeConceptId: string;
+  /**
+   * Identificador asociado a user.
+   */
   userId?: string;
+  /**
+   * Valor de ip mantenido por la instancia.
+   */
   ip?: string;
+  /**
+   * Valor de detail json mantenido por la instancia.
+   */
   detailJson?: unknown;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 

@@ -6,20 +6,53 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar una designación de concepto. */
 export interface CreateConceptDesignationData {
+  /**
+   * Identificador asociado a concept.
+   */
   conceptId: string;
+  /**
+   * Valor de value mantenido por la instancia.
+   */
   value: string;
+  /**
+   * Identificador asociado a language concept.
+   */
   languageConceptId?: string;
+  /**
+   * Identificador asociado a designation type concept.
+   */
   designationTypeConceptId?: string;
+  /**
+   * Valor de preferred mantenido por la instancia.
+   */
   preferred?: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos mínimos para materializar una propiedad de concepto. */
 export interface CreateConceptPropertyData {
+  /**
+   * Identificador asociado a concept.
+   */
   conceptId: string;
+  /**
+   * Valor de property code mantenido por la instancia.
+   */
   propertyCode: string;
+  /**
+   * Valor de value json mantenido por la instancia.
+   */
   valueJson: unknown;
+  /**
+   * Valor de data type mantenido por la instancia.
+   */
   dataType: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -8,47 +8,150 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create transaction data.
+ */
 export interface CreateTransactionData {
+  /**
+   * Identificador asociado a payment intent.
+   */
   paymentIntentId: string;
+  /**
+   * Identificador asociado a gateway.
+   */
   gatewayId: string;
+  /**
+   * Identificador asociado a transaction type concept.
+   */
   transactionTypeConceptId: string;
+  /**
+   * Valor de gateway transaction ref mantenido por la instancia.
+   */
   gatewayTransactionRef?: string;
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de authorization code mantenido por la instancia.
+   */
   authorizationCode?: string;
+  /**
+   * Valor de processed at mantenido por la instancia.
+   */
   processedAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create refund data.
+ */
 export interface CreateRefundData {
+  /**
+   * Identificador asociado a payment transaction.
+   */
   paymentTransactionId: string;
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId: string;
+  /**
+   * Valor de gateway refund ref mantenido por la instancia.
+   */
   gatewayRefundRef?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de processed at mantenido por la instancia.
+   */
   processedAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create cancellation data.
+ */
 export interface CreateCancellationData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a gateway connection.
+   */
   gatewayConnectionId: string;
+  /**
+   * Identificador asociado a payment transaction.
+   */
   paymentTransactionId?: string;
+  /**
+   * Identificador asociado a payment debt.
+   */
   paymentDebtId?: string;
+  /**
+   * Valor de request number mantenido por la instancia.
+   */
   requestNumber: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId: string;
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
   reasonText?: string;
+  /**
+   * Identificador asociado a requested by user.
+   */
   requestedByUserId: string;
+  /**
+   * Valor de requested at mantenido por la instancia.
+   */
   requestedAt: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de transacciones de gateway, reembolsos y cancelaciones. */
 @Injectable()
 export class PaymentTransactionsRepository {
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PaymentTransactions`.
+   */
   create(em: EntityManager, data: CreateTransactionData): PaymentTransactions {
     return em.create(
       PaymentTransactions,
@@ -68,6 +171,13 @@ export class PaymentTransactionsRepository {
     );
   }
 
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<PaymentTransactions | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<PaymentTransactions | null> {
     return em.findOne(PaymentTransactions, { id });
   }
@@ -96,6 +206,13 @@ export class PaymentTransactionsRepository {
     return em.findOne(PaymentTransactions, { gatewayTransactionRef });
   }
 
+  /**
+   * Obtiene find by intent.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param paymentIntentId - Identificador de payment intent.
+   * @returns Resultado de find by intent conforme al contrato `Promise<PaymentTransactions[]>`.
+   */
   findByIntent(
     em: EntityManager,
     paymentIntentId: string,
@@ -103,6 +220,13 @@ export class PaymentTransactionsRepository {
     return em.find(PaymentTransactions, { paymentIntentId });
   }
 
+  /**
+   * Crea create refund.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create refund conforme al contrato `Refunds`.
+   */
   createRefund(em: EntityManager, data: CreateRefundData): Refunds {
     return em.create(
       Refunds,
@@ -128,6 +252,13 @@ export class PaymentTransactionsRepository {
     return em.find(Refunds, { paymentTransactionId });
   }
 
+  /**
+   * Crea create cancellation.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create cancellation conforme al contrato `PaymentCancellationRequests`.
+   */
   createCancellation(
     em: EntityManager,
     data: CreateCancellationData,

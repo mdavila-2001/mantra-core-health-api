@@ -15,6 +15,14 @@ import { CLIN } from '../clinical.concepts';
 /** UC-08-05: creación de órdenes de servicio (service_request) en estado activo. */
 @Injectable()
 export class ServiceRequestsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
+   * @param encountersRepo - Valor de encounters repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly serviceRequestsRepo: ServiceRequestsRepository,

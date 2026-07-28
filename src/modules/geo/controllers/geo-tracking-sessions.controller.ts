@@ -19,6 +19,11 @@ import { StartTrackingSessionDto, TrackingSessionResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('geo/tracking-sessions')
 export class GeoTrackingSessionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: GeoTrackingSessionsService) {}
 
   /** UC-13-02. */

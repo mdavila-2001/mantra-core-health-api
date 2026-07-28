@@ -9,6 +9,9 @@ import {
 
 /** Cuerpo de `POST /tenants/{tenantId}/child-tenants` (UC-04-03). */
 export class CreateChildTenantDto {
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Código único global del sub-tenant',
     maxLength: 100,
@@ -18,6 +21,9 @@ export class CreateChildTenantDto {
   @MaxLength(100)
   code!: string;
 
+  /**
+   * Valor de legal name mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Razón social / nombre legal del sub-tenant',
     maxLength: 300,
@@ -27,6 +33,9 @@ export class CreateChildTenantDto {
   @MaxLength(300)
   legalName!: string;
 
+  /**
+   * Identificador asociado a admin user.
+   */
   @ApiProperty({
     description: 'Usuario administrador inicial del sub-tenant',
     format: 'uuid',
@@ -34,6 +43,9 @@ export class CreateChildTenantDto {
   @IsUUID()
   adminUserId!: string;
 
+  /**
+   * Identificador asociado a tenant type concept.
+   */
   @ApiPropertyOptional({
     description: 'Concept id del tipo de tenant',
     format: 'uuid',
@@ -42,6 +54,9 @@ export class CreateChildTenantDto {
   @IsUUID()
   tenantTypeConceptId?: string;
 
+  /**
+   * Identificador asociado a legal entity type concept.
+   */
   @ApiPropertyOptional({
     description: 'Concept id del tipo de entidad legal',
     format: 'uuid',
@@ -50,6 +65,9 @@ export class CreateChildTenantDto {
   @IsUUID()
   legalEntityTypeConceptId?: string;
 
+  /**
+   * Identificador asociado a data residency region concept.
+   */
   @ApiPropertyOptional({
     description:
       'Región de residencia de datos (por defecto hereda la del padre)',

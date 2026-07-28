@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { EducationLearningService } from './education-learning.service';
@@ -22,6 +28,10 @@ const CERTIFICATE = '88888888-8888-8888-8888-888888888888';
 const PROFILE = '99999999-9999-9999-9999-999999999999';
 const INTENT = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -66,6 +76,12 @@ function build() {
   return { service, tx, learningRepo, catalogRepo, logger };
 }
 
+/**
+ * Ejecuta la operación published course.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de published course conforme al contrato `any`.
+ */
 function publishedCourse(overrides: Record<string, unknown> = {}): any {
   return {
     id: COURSE,
@@ -75,6 +91,12 @@ function publishedCourse(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación active enrollment.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active enrollment conforme al contrato `any`.
+ */
 function activeEnrollment(overrides: Record<string, unknown> = {}): any {
   return {
     id: ENROLLMENT,
@@ -88,6 +110,12 @@ function activeEnrollment(overrides: Record<string, unknown> = {}): any {
 
 describe('EducationLearningService', () => {
   describe('enrollLearner (UC-47-05)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         courseId: COURSE,
@@ -218,6 +246,14 @@ describe('EducationLearningService', () => {
   describe('recordProgress (UC-47-06)', () => {
     const dto = { lessonId: LESSON, status: 'COMPLETED' as const };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param log - Valor de log requerido por la operación.
+     * @param totalLessons - Valor de total lessons requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       log: any[] = [],
@@ -325,6 +361,13 @@ describe('EducationLearningService', () => {
   describe('startAttempt (UC-47-08)', () => {
     const dto = { enrollmentId: ENROLLMENT };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param assessment - Valor de assessment requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       assessment: Record<string, unknown> = {},
@@ -424,6 +467,12 @@ describe('EducationLearningService', () => {
   });
 
   describe('submitAttempt (UC-47-09)', () => {
+    /**
+     * Ejecuta la operación open attempt.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de open attempt conforme al contrato `any`.
+     */
     function openAttempt(overrides: Record<string, unknown> = {}): any {
       return {
         id: ATTEMPT,
@@ -435,6 +484,10 @@ describe('EducationLearningService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación questions.
+     * @returns Resultado de questions conforme al contrato `any[]`.
+     */
     function questions(): any[] {
       return [
         { id: 'q-1', points: '1', correctAnswerJson: { value: 'b' } },
@@ -578,6 +631,13 @@ describe('EducationLearningService', () => {
   });
 
   describe('completeEnrollment (UC-47-10)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       overrides: Record<string, unknown> = {},
@@ -662,6 +722,13 @@ describe('EducationLearningService', () => {
   });
 
   describe('issueCertificate (UC-47-11)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param course - Valor de course requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       course: Record<string, unknown> = {},
@@ -742,6 +809,13 @@ describe('EducationLearningService', () => {
   describe('recordCmeCredit (UC-47-12)', () => {
     const dto = { practitionerProfileId: PROFILE };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param certificate - Valor de certificate requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       certificate: Record<string, unknown> = {},

@@ -20,9 +20,19 @@ import { CONS } from '../../../src/modules/consent/consent.concepts';
  * para encadenar los casos dependientes (withdraw, provisions, revoke, resolve).
  */
 const patient = (c: {
+  /**
+   * Valor de vars mantenido por la instancia.
+   */
   vars: Record<string, string>;
+  /**
+   * Identificador asociado a admin user.
+   */
   adminUserId: string;
 }): string => c.vars.patientProfileId ?? c.adminUserId;
+/**
+ * Ejecuta la operación purpose.
+ * @returns Resultado de purpose conforme al contrato `string`.
+ */
 const purpose = (): string => SEED.processingPurposeId;
 
 export const CONSENT_SMOKE: SmokeCase[] = [

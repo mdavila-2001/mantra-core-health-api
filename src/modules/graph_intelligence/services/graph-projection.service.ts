@@ -42,6 +42,15 @@ import {
  */
 @Injectable()
 export class GraphProjectionService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param projectionRepo - Valor de projection repo requerido por la operación.
+   * @param analyticsRepo - Valor de analytics repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly projectionRepo: GraphProjectionRepository,

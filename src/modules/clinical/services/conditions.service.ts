@@ -9,6 +9,13 @@ import { CLIN } from '../clinical.concepts';
 /** UC-08-08: registro de condiciones/diagnósticos (activa + confirmada). */
 @Injectable()
 export class ConditionsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conditionsRepo - Valor de conditions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly conditionsRepo: ConditionsRepository,

@@ -18,6 +18,14 @@ import { CreateReviewDto, ReviewResponseDto } from '../dto';
  */
 @Injectable()
 export class CommunityReviewsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profilesRepo - Valor de profiles repo requerido por la operación.
+   * @param reviewsRepo - Valor de reviews repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly profilesRepo: PublicProfilesRepository,

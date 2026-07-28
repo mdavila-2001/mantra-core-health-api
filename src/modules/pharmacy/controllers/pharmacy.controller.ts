@@ -48,6 +48,16 @@ import {
 @Controller('pharmacies')
 @Roles('SECURITY_ADMIN')
 export class PharmacyController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param pharmaciesService - Valor de pharmacies service requerido por la operación.
+   * @param sitesService - Valor de sites service requerido por la operación.
+   * @param productsService - Valor de products service requerido por la operación.
+   * @param pricingService - Valor de pricing service requerido por la operación.
+   * @param integrationService - Valor de integration service requerido por la operación.
+   * @param catalogService - Valor de catalog service requerido por la operación.
+   */
   constructor(
     private readonly pharmaciesService: PharmaciesService,
     private readonly sitesService: PharmacySitesService,

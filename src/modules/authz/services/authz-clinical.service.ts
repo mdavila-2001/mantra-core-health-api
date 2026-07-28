@@ -46,6 +46,15 @@ const DEFAULT_BTG_WINDOW_MINUTES = 60;
  */
 @Injectable()
 export class AuthzClinicalService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param grantsRepo - Valor de grants repo requerido por la operación.
+   * @param btgRepo - Valor de btg repo requerido por la operación.
+   * @param dataAccessLogRepo - Valor de data access log repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly grantsRepo: ClinicalAccessGrantsRepository,

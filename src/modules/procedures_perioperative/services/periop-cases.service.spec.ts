@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopCasesService } from './periop-cases.service';
@@ -20,6 +26,10 @@ const CONDITION = '66666666-6666-6666-6666-666666666666';
 const REASON = '77777777-7777-7777-7777-777777777777';
 const BILLABLE = '88888888-8888-8888-8888-888888888888';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -50,6 +60,12 @@ function build() {
   return { service, tx, casesRepo, logger };
 }
 
+/**
+ * Ejecuta la operación schedule dto.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de schedule dto conforme al contrato `any`.
+ */
 function scheduleDto(overrides: Record<string, unknown> = {}): any {
   return {
     custodianTenantId: TENANT,
@@ -66,6 +82,12 @@ function scheduleDto(overrides: Record<string, unknown> = {}): any {
 
 describe('PeriopCasesService', () => {
   describe('scheduleCase (UC-53-01)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.casesRepo.findOverlappingCases.mockResolvedValue([]);
       d.casesRepo.countCases.mockResolvedValue(0);
@@ -168,6 +190,13 @@ describe('PeriopCasesService', () => {
   });
 
   describe('addDiagnoses (UC-53-02)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param existing - Valor de existing requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, existing: any[] = []) {
       d.casesRepo.findCaseForUpdate.mockResolvedValue({
         id: CASE,
@@ -272,6 +301,13 @@ describe('PeriopCasesService', () => {
   describe('assignTeamMember (UC-53-02)', () => {
     const dto = { practitionerProfileId: SURGEON, role: 'ASSISTANT' as const };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param team - Valor de team requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, team: any[] = []) {
       const surgicalCase: any = {
         id: CASE,
@@ -337,6 +373,12 @@ describe('PeriopCasesService', () => {
   describe('updateCase (C-13 · CAN-INT-001)', () => {
     const NEW_PATIENT = '99999999-9999-9999-9999-999999999999';
 
+    /**
+     * Ejecuta la operación draft case.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de draft case conforme al contrato `any`.
+     */
     function draftCase(overrides: Record<string, unknown> = {}): any {
       return {
         id: CASE,
@@ -599,6 +641,12 @@ describe('PeriopCasesService', () => {
   });
 
   describe('postCharges (UC-53-14)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         items: [
@@ -619,6 +667,12 @@ describe('PeriopCasesService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación completed case.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de completed case conforme al contrato `any`.
+     */
     function completedCase(overrides: Record<string, unknown> = {}): any {
       return {
         id: CASE,

@@ -49,6 +49,15 @@ class UnparseableCdsRuleError extends Error {}
  */
 @Injectable()
 export class CdsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param rulesRepo - Valor de rules repo requerido por la operación.
+   * @param alertsRepo - Valor de alerts repo requerido por la operación.
+   * @param interactionsRepo - Valor de interactions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly rulesRepo: CdsRulesRepository,
@@ -287,7 +296,12 @@ export class CdsService {
   async createDrugInteraction(
     dto: CreateDrugInteractionDto,
     actor: AuthenticatedUser,
-  ): Promise<{ id: string }> {
+  ): Promise<{
+    /**
+     * Identificador único de la instancia.
+     */
+    id: string;
+  }> {
     return this.em.transactional(async (tx) => {
       const interaction = this.interactionsRepo.create(tx, {
         substanceAConceptId: dto.substanceAConceptId,
@@ -325,7 +339,15 @@ export class CdsService {
    * la lógica no se entiende (o la regla no trae lógica), no dispara y se loguea.
    */
   private ruleMatches(
-    rule: { id: string; logicJson?: unknown },
+    rule: {
+      /**
+       * Identificador único de la instancia.
+       */
+      id: string; /**
+       * Valor de logic json mantenido por la instancia.
+       */
+      logicJson?: unknown;
+    },
     context: CdsEvalContext,
   ): boolean {
     try {
@@ -443,11 +465,32 @@ export class CdsService {
     return current;
   }
 
+  /**
+   * Transforma to rule response.
+   *
+   * @param rule - Valor de rule requerido por la operación.
+   * @returns Resultado de to rule response conforme al contrato `CdsRuleResponseDto`.
+   */
   private toRuleResponse(rule: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Valor de code mantenido por la instancia.
+     */
     code: string;
+    /**
+     * Valor de version mantenido por la instancia.
+     */
     version?: number;
+    /**
+     * Valor de is active mantenido por la instancia.
+     */
     isActive: boolean;
+    /**
+     * Identificador asociado a status concept.
+     */
     statusConceptId: string;
   }): CdsRuleResponseDto {
     return {

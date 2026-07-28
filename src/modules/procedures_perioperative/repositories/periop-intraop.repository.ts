@@ -19,31 +19,103 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create implant data.
+ */
 export interface CreateImplantData {
+  /**
+   * Identificador asociado a procedure case.
+   */
   procedureCaseId: string;
+  /**
+   * Identificador asociado a procedure.
+   */
   procedureId: string;
+  /**
+   * Identificador asociado a implant device.
+   */
   implantDeviceId: string;
+  /**
+   * Identificador asociado a implant role concept.
+   */
   implantRoleConceptId: string;
+  /**
+   * Identificador asociado a body site concept.
+   */
   bodySiteConceptId?: string;
+  /**
+   * Identificador asociado a laterality concept.
+   */
   lateralityConceptId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create operative report data.
+ */
 export interface CreateOperativeReportData {
+  /**
+   * Identificador asociado a procedure case.
+   */
   procedureCaseId: string;
+  /**
+   * Identificador asociado a procedure.
+   */
   procedureId: string;
+  /**
+   * Valor de report version mantenido por la instancia.
+   */
   reportVersion: number;
+  /**
+   * Identificador asociado a author profile.
+   */
   authorProfileId: string;
+  /**
+   * Valor de preoperative diagnosis text mantenido por la instancia.
+   */
   preoperativeDiagnosisText?: string;
+  /**
+   * Valor de postoperative diagnosis text mantenido por la instancia.
+   */
   postoperativeDiagnosisText?: string;
+  /**
+   * Valor de procedure description mantenido por la instancia.
+   */
   procedureDescription?: string;
+  /**
+   * Valor de findings text mantenido por la instancia.
+   */
   findingsText?: string;
+  /**
+   * Valor de estimated blood loss ml mantenido por la instancia.
+   */
   estimatedBloodLossMl?: string;
+  /**
+   * Valor de drains text mantenido por la instancia.
+   */
   drainsText?: string;
+  /**
+   * Valor de complications text mantenido por la instancia.
+   */
   complicationsText?: string;
+  /**
+   * Identificador asociado a disposition concept.
+   */
   dispositionConceptId?: string;
+  /**
+   * Identificador asociado a file.
+   */
   fileId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
 }
 
@@ -55,19 +127,59 @@ export interface CreateOperativeReportData {
 export class PeriopIntraopRepository {
   // --- Pasos y hallazgos (UC-53-08) ---
 
+  /**
+   * Crea create step.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create step conforme al contrato `OperativeSteps`.
+   */
   createStep(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a procedure.
+       */
       procedureId?: string;
+      /**
+       * Valor de step number mantenido por la instancia.
+       */
       stepNumber: number;
+      /**
+       * Identificador asociado a step code concept.
+       */
       stepCodeConceptId: string;
+      /**
+       * Valor de description mantenido por la instancia.
+       */
       description: string;
+      /**
+       * Identificador asociado a performed by profile.
+       */
       performedByProfileId?: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt?: Date;
+      /**
+       * Identificador asociado a body site concept.
+       */
       bodySiteConceptId?: string;
+      /**
+       * Identificador asociado a laterality concept.
+       */
       lateralityConceptId?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): OperativeSteps {
@@ -90,10 +202,24 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Obtiene find step by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find step by id conforme al contrato `Promise<OperativeSteps | null>`.
+   */
   findStepById(em: EntityManager, id: string): Promise<OperativeSteps | null> {
     return em.findOne(OperativeSteps, { id });
   }
 
+  /**
+   * Obtiene find step for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find step for update conforme al contrato `Promise<OperativeSteps | null>`.
+   */
   findStepForUpdate(
     em: EntityManager,
     id: string,
@@ -121,14 +247,41 @@ export class PeriopIntraopRepository {
   createFinding(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a operative step.
+       */
       operativeStepId?: string;
+      /**
+       * Identificador asociado a finding code concept.
+       */
       findingCodeConceptId: string;
+      /**
+       * Valor de finding text mantenido por la instancia.
+       */
       findingText: string;
+      /**
+       * Identificador asociado a body site concept.
+       */
       bodySiteConceptId?: string;
+      /**
+       * Identificador asociado a laterality concept.
+       */
       lateralityConceptId?: string;
+      /**
+       * Identificador asociado a severity concept.
+       */
       severityConceptId?: string;
+      /**
+       * Identificador asociado a observation.
+       */
       observationId?: string;
+      /**
+       * Identificador asociado a recorded by profile.
+       */
       recordedByProfileId?: string;
     },
   ): OperativeFindings {
@@ -151,13 +304,35 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Crea create body site.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create body site conforme al contrato `ProcedureBodySites`.
+   */
   createBodySite(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure.
+       */
       procedureId: string;
+      /**
+       * Identificador asociado a body site concept.
+       */
       bodySiteConceptId: string;
+      /**
+       * Identificador asociado a laterality concept.
+       */
       lateralityConceptId?: string;
+      /**
+       * Identificador asociado a role concept.
+       */
       roleConceptId: string;
+      /**
+       * Valor de description mantenido por la instancia.
+       */
       description?: string;
     },
   ): ProcedureBodySites {
@@ -175,6 +350,14 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Obtiene find body site.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureId - Identificador de procedure.
+   * @param bodySiteConceptId - Identificador de body site concept.
+   * @returns Resultado de find body site conforme al contrato `Promise<ProcedureBodySites | null>`.
+   */
   findBodySite(
     em: EntityManager,
     procedureId: string,
@@ -185,6 +368,13 @@ export class PeriopIntraopRepository {
 
   // --- Implantes y dispositivos (UC-53-09) ---
 
+  /**
+   * Crea create implant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create implant conforme al contrato `ProcedureImplants`.
+   */
   createImplant(em: EntityManager, data: CreateImplantData): ProcedureImplants {
     return em.create(
       ProcedureImplants,
@@ -207,12 +397,33 @@ export class PeriopIntraopRepository {
   createImplantIdentifier(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure implant.
+       */
       procedureImplantId: string;
+      /**
+       * Identificador asociado a identifier type concept.
+       */
       identifierTypeConceptId: string;
+      /**
+       * Valor de identifier value mantenido por la instancia.
+       */
       identifierValue: string;
+      /**
+       * Valor de issuing system mantenido por la instancia.
+       */
       issuingSystem?: string;
+      /**
+       * Valor de lot number mantenido por la instancia.
+       */
       lotNumber?: string;
+      /**
+       * Valor de serial number mantenido por la instancia.
+       */
       serialNumber?: string;
+      /**
+       * Valor de expiration date mantenido por la instancia.
+       */
       expirationDate?: Date;
     },
   ): ImplantIdentifiers {
@@ -232,14 +443,39 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Crea create device.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create device conforme al contrato `ProcedureDevices`.
+   */
   createDevice(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure.
+       */
       procedureId: string;
+      /**
+       * Identificador asociado a device.
+       */
       deviceId: string;
+      /**
+       * Identificador asociado a use role concept.
+       */
       useRoleConceptId: string;
+      /**
+       * Valor de lot number mantenido por la instancia.
+       */
       lotNumber?: string;
+      /**
+       * Valor de serial number mantenido por la instancia.
+       */
       serialNumber?: string;
+      /**
+       * Valor de udi carrier mantenido por la instancia.
+       */
       udiCarrier?: string;
     },
   ): ProcedureDevices {
@@ -261,13 +497,35 @@ export class PeriopIntraopRepository {
 
   // --- Medicación y muestras (UC-53-10) ---
 
+  /**
+   * Crea create medication use.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create medication use conforme al contrato `ProcedureMedicationUses`.
+   */
   createMedicationUse(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a procedure.
+       */
       procedureId?: string;
+      /**
+       * Identificador asociado a medication administration.
+       */
       medicationAdministrationId: string;
+      /**
+       * Identificador asociado a use role concept.
+       */
       useRoleConceptId: string;
+      /**
+       * Identificador asociado a operative step.
+       */
       operativeStepId?: string;
     },
   ): ProcedureMedicationUses {
@@ -285,16 +543,47 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Crea create specimen.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create specimen conforme al contrato `ProcedureSpecimens`.
+   */
   createSpecimen(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a procedure.
+       */
       procedureId: string;
+      /**
+       * Identificador asociado a specimen.
+       */
       specimenId: string;
+      /**
+       * Identificador asociado a specimen role concept.
+       */
       specimenRoleConceptId: string;
+      /**
+       * Identificador asociado a operative step.
+       */
       operativeStepId?: string;
+      /**
+       * Identificador asociado a body site concept.
+       */
       bodySiteConceptId?: string;
+      /**
+       * Valor de orientation text mantenido por la instancia.
+       */
       orientationText?: string;
+      /**
+       * Valor de surgeon comment mantenido por la instancia.
+       */
       surgeonComment?: string;
     },
   ): ProcedureSpecimens {
@@ -317,6 +606,13 @@ export class PeriopIntraopRepository {
 
   // --- Reporte operatorio (UC-53-11) ---
 
+  /**
+   * Crea create report.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create report conforme al contrato `OperativeReports`.
+   */
   createReport(
     em: EntityManager,
     data: CreateOperativeReportData,
@@ -345,6 +641,13 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Obtiene find report for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find report for update conforme al contrato `Promise<OperativeReports | null>`.
+   */
   findReportForUpdate(
     em: EntityManager,
     id: string,
@@ -372,13 +675,37 @@ export class PeriopIntraopRepository {
   createComplication(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a procedure.
+       */
       procedureId?: string;
+      /**
+       * Identificador asociado a complication code concept.
+       */
       complicationCodeConceptId: string;
+      /**
+       * Identificador asociado a severity concept.
+       */
       severityConceptId: string;
+      /**
+       * Identificador asociado a relatedness concept.
+       */
       relatednessConceptId: string;
+      /**
+       * Identificador asociado a condition.
+       */
       conditionId?: string;
+      /**
+       * Valor de management text mantenido por la instancia.
+       */
       managementText?: string;
+      /**
+       * Identificador asociado a reported by profile.
+       */
       reportedByProfileId?: string;
     },
   ): ProcedureComplications {
@@ -402,13 +729,35 @@ export class PeriopIntraopRepository {
 
   // --- PACU (UC-53-12) ---
 
+  /**
+   * Crea create pacu stay.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create pacu stay conforme al contrato `PacuStays`.
+   */
   createPacuStay(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a care space.
+       */
       careSpaceId: string;
+      /**
+       * Identificador asociado a admitted by profile.
+       */
       admittedByProfileId?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): PacuStays {
@@ -426,6 +775,13 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Obtiene find pacu stay for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find pacu stay for update conforme al contrato `Promise<PacuStays | null>`.
+   */
   findPacuStayForUpdate(
     em: EntityManager,
     id: string,
@@ -437,6 +793,13 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Obtiene find pacu stay by case.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Identificador de procedure case.
+   * @returns Resultado de find pacu stay by case conforme al contrato `Promise<PacuStays | null>`.
+   */
   findPacuStayByCase(
     em: EntityManager,
     procedureCaseId: string,
@@ -448,13 +811,37 @@ export class PeriopIntraopRepository {
   createPacuAssessment(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a pacu stay.
+       */
       pacuStayId: string;
+      /**
+       * Identificador asociado a assessed by profile.
+       */
       assessedByProfileId: string;
+      /**
+       * Valor de aldrete score mantenido por la instancia.
+       */
       aldreteScore?: number;
+      /**
+       * Valor de pain score mantenido por la instancia.
+       */
       painScore?: string;
+      /**
+       * Valor de nausea score mantenido por la instancia.
+       */
       nauseaScore?: string;
+      /**
+       * Identificador asociado a airway status concept.
+       */
       airwayStatusConceptId?: string;
+      /**
+       * Valor de observations json mantenido por la instancia.
+       */
       observationsJson?: unknown;
+      /**
+       * Valor de criteria json mantenido por la instancia.
+       */
       criteriaJson?: unknown;
     },
   ): PacuAssessments {
@@ -488,13 +875,35 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Crea create postoperative order.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create postoperative order conforme al contrato `PostoperativeOrders`.
+   */
   createPostoperativeOrder(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a service request.
+       */
       serviceRequestId: string;
+      /**
+       * Identificador asociado a order role concept.
+       */
       orderRoleConceptId: string;
+      /**
+       * Valor de start at mantenido por la instancia.
+       */
       startAt?: Date;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
     },
   ): PostoperativeOrders {
@@ -512,15 +921,43 @@ export class PeriopIntraopRepository {
     );
   }
 
+  /**
+   * Crea create followup.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create followup conforme al contrato `PostoperativeFollowups`.
+   */
   createFollowup(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a procedure case.
+       */
       procedureCaseId: string;
+      /**
+       * Identificador asociado a followup type concept.
+       */
       followupTypeConceptId: string;
+      /**
+       * Identificador asociado a appointment.
+       */
       appointmentId?: string;
+      /**
+       * Valor de due at mantenido por la instancia.
+       */
       dueAt?: Date;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de instructions text mantenido por la instancia.
+       */
       instructionsText?: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): PostoperativeFollowups {

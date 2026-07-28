@@ -6,6 +6,9 @@ import { IsUUID } from 'class-validator';
  * (UC-04-07: transferir membresía entre branches).
  */
 export class TransferMembershipDto {
+  /**
+   * Identificador asociado a from branch.
+   */
   @ApiProperty({
     description: 'Branch de origen (se cierra su asignación)',
     format: 'uuid',
@@ -13,6 +16,9 @@ export class TransferMembershipDto {
   @IsUUID()
   fromBranchId!: string;
 
+  /**
+   * Identificador asociado a to branch.
+   */
   @ApiProperty({
     description: 'Branch de destino (nueva asignación activa)',
     format: 'uuid',

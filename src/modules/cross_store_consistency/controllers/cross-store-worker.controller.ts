@@ -40,6 +40,13 @@ import {
 @ApiBearerAuth()
 @Controller('workers')
 export class CrossStoreWorkerController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param projectionService - Valor de projection service requerido por la operación.
+   * @param deletionService - Valor de deletion service requerido por la operación.
+   * @param maintenanceService - Valor de maintenance service requerido por la operación.
+   */
   constructor(
     private readonly projectionService: ProjectionDeliveryService,
     private readonly deletionService: DeletionService,

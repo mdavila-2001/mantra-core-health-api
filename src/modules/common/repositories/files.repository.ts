@@ -5,11 +5,29 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta el agregado archivo (sin su primera versión). */
 export interface CreateFileData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a category concept.
+   */
   categoryConceptId: string;
+  /**
+   * Identificador asociado a sensitivity concept.
+   */
   sensitivityConceptId: string;
+  /**
+   * Identificador asociado a lifecycle status concept.
+   */
   lifecycleStatusConceptId: string;
+  /**
+   * Valor de original name mantenido por la instancia.
+   */
   originalName?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

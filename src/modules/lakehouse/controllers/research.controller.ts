@@ -33,6 +33,11 @@ import {
 @ApiBearerAuth()
 @Controller('research')
 export class ResearchController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param releaseService - Valor de release service requerido por la operación.
+   */
   constructor(private readonly releaseService: ResearchReleaseService) {}
 
   /** UC-63-09. */

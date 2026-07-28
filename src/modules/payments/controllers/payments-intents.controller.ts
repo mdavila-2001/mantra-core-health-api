@@ -34,6 +34,12 @@ import {
 @ApiBearerAuth()
 @Controller('payments/intents')
 export class PaymentsIntentsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param intentsService - Valor de intents service requerido por la operación.
+   * @param transactionsService - Valor de transactions service requerido por la operación.
+   */
   constructor(
     private readonly intentsService: PaymentsIntentsService,
     private readonly transactionsService: PaymentsTransactionsService,

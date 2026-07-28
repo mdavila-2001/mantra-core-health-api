@@ -5,21 +5,58 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para versionar una base legal de procesamiento. */
 export interface CreateProcessingLegalBasisData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a processing purpose.
+   */
   processingPurposeId: string;
+  /**
+   * Identificador asociado a jurisdiction concept.
+   */
   jurisdictionConceptId: string;
+  /**
+   * Identificador asociado a general legal basis concept.
+   */
   generalLegalBasisConceptId: string;
+  /**
+   * Identificador asociado a special category condition concept.
+   */
   specialCategoryConditionConceptId?: string;
+  /**
+   * Valor de policy version mantenido por la instancia.
+   */
   policyVersion?: string;
+  /**
+   * Valor de legal reference uri mantenido por la instancia.
+   */
   legalReferenceUri?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `consent.processing_legal_bases` (entidad versionada). */
 @Injectable()
 export class ProcessingLegalBasesRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<ProcessingLegalBases | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -47,6 +84,13 @@ export class ProcessingLegalBasesRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `ProcessingLegalBases`.
+   */
   create(
     em: EntityManager,
     data: CreateProcessingLegalBasisData,

@@ -17,6 +17,13 @@ import { OpenCheckoutSessionDto, CheckoutSessionResponseDto } from '../dto';
  */
 @Injectable()
 export class PaymentsCheckoutService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param flowRepo - Valor de flow repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly flowRepo: PaymentFlowRepository,
@@ -36,7 +43,14 @@ export class PaymentsCheckoutService {
   async openSession(
     dto: OpenCheckoutSessionDto,
     actor: AuthenticatedUser,
-  ): Promise<CheckoutSessionResponseDto & { sessionToken: string }> {
+  ): Promise<
+    CheckoutSessionResponseDto & {
+      /**
+       * Valor de session token mantenido por la instancia.
+       */
+      sessionToken: string;
+    }
+  > {
     this.logger.info(
       {
         operation: 'payments.checkout.open',

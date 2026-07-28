@@ -15,6 +15,14 @@ import { BranchResponseDto, CreateBranchDto } from '../dto';
 /** Caso de uso UC-04-04: crear una branch / sede física con geolocalización. */
 @Injectable()
 export class DirectoryBranchesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param branchesRepo - Valor de branches repo requerido por la operación.
+   * @param tenantsRepo - Valor de tenants repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly branchesRepo: BranchesRepository,

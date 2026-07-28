@@ -16,6 +16,11 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class DelegatedAccessAuthzController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: DelegatedAccessEvaluationService) {}
 
   /** UC-29-08: disparador del worker de expiración (barrido de vencidos). */

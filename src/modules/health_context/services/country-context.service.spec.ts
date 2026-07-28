@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CountryContextService } from './country-context.service';
@@ -19,6 +25,10 @@ const DOMAIN = '55555555-5555-5555-5555-555555555555';
 const OBSERVATION = '66666666-6666-6666-6666-666666666666';
 const REVIEW_TYPE = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -54,6 +64,12 @@ function build() {
   return { service, tx, contextRepo, logger };
 }
 
+/**
+ * Ejecuta la operación draft context.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de draft context conforme al contrato `any`.
+ */
 function draftContext(overrides: Record<string, unknown> = {}): any {
   return {
     id: CONTEXT,
@@ -108,6 +124,13 @@ describe('CountryContextService', () => {
       facts: [FACT],
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param context - Valor de context requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, context = draftContext()) {
       d.contextRepo.findContextForUpdate.mockResolvedValue(context);
       d.contextRepo.findRunById.mockResolvedValue({
@@ -258,6 +281,12 @@ describe('CountryContextService', () => {
   describe('recordQualityReview (UC-44-08)', () => {
     const dto: any = { reviewTypeConceptId: REVIEW_TYPE, outcome: 'APPROVED' };
 
+    /**
+     * Ejecuta la operación draft version.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de draft version conforme al contrato `any`.
+     */
     function draftVersion(overrides: Record<string, unknown> = {}): any {
       return {
         id: VERSION,
@@ -348,6 +377,12 @@ describe('CountryContextService', () => {
   });
 
   describe('publishVersion (UC-44-09)', () => {
+    /**
+     * Ejecuta la operación approved version.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de approved version conforme al contrato `any`.
+     */
     function approvedVersion(overrides: Record<string, unknown> = {}): any {
       return {
         id: VERSION,
@@ -358,6 +393,13 @@ describe('CountryContextService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param version - Valor de version requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, version = approvedVersion()) {
       const context = draftContext();
       d.contextRepo.findVersionForUpdate.mockResolvedValue(version);
@@ -431,6 +473,12 @@ describe('CountryContextService', () => {
   });
 
   describe('supersedeVersion (UC-44-11)', () => {
+    /**
+     * Ejecuta la operación published version.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de published version conforme al contrato `any`.
+     */
     function publishedVersion(overrides: Record<string, unknown> = {}): any {
       return {
         id: VERSION,
@@ -440,6 +488,10 @@ describe('CountryContextService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación active context.
+     * @returns Resultado de active context conforme al contrato `any`.
+     */
     function activeContext(): any {
       return draftContext({
         statusConceptId: CONCEPTS.HCTX_CONTEXT_ACTIVE,
@@ -591,6 +643,10 @@ describe('CountryContextService', () => {
   });
 
   describe('resolveContext (UC-44-12)', () => {
+    /**
+     * Ejecuta la operación published context.
+     * @returns Resultado de published context conforme al contrato `any`.
+     */
     function publishedContext(): any {
       return draftContext({
         statusConceptId: CONCEPTS.HCTX_CONTEXT_ACTIVE,
@@ -598,6 +654,12 @@ describe('CountryContextService', () => {
       });
     }
 
+    /**
+     * Ejecuta la operación live version.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de live version conforme al contrato `any`.
+     */
     function liveVersion(overrides: Record<string, unknown> = {}): any {
       return {
         id: VERSION,

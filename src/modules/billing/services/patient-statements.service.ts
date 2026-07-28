@@ -23,6 +23,15 @@ import { fromCents, sumAmounts, toCents } from '../money.util';
  */
 @Injectable()
 export class PatientStatementsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param statementsRepo - Valor de statements repo requerido por la operación.
+   * @param invoicesRepo - Valor de invoices repo requerido por la operación.
+   * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly statementsRepo: PatientStatementsRepository,
@@ -33,6 +42,14 @@ export class PatientStatementsService {
     this.logger.setContext(PatientStatementsService.name);
   }
 
+  /**
+   * Crea generate.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de generate conforme al contrato `Promise<PatientStatementResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async generate(
     dto: GeneratePatientStatementDto,
     actor: AuthenticatedUser,

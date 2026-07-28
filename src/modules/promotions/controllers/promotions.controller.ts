@@ -30,6 +30,11 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class PromotionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param discountsService - Valor de discounts service requerido por la operación.
+   */
   constructor(private readonly discountsService: PromotionsDiscountsService) {}
 
   /** UC-51-07. */

@@ -26,6 +26,12 @@ import { WorkerBatchDto, WorkerBatchResultDto } from '../dto';
 @ApiBearerAuth()
 @Controller('scheduling/internal')
 export class SchedulingInternalController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param bookingsService - Valor de bookings service requerido por la operación.
+   * @param waitlistService - Valor de waitlist service requerido por la operación.
+   */
   constructor(
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,

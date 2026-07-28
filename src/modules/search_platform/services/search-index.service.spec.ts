@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SearchIndexService } from './search-index.service';
@@ -8,6 +14,12 @@ const TENANT_A = '11111111-1111-1111-1111-111111111111';
 const TENANT_B = '22222222-2222-2222-2222-222222222222';
 const INDEX = 'directory_profiles';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de build.
+ */
 function build(overrides: Record<string, any> = {}) {
   const client = {
     indices: {
@@ -18,7 +30,10 @@ function build(overrides: Record<string, any> = {}) {
     bulk: mockFn(async () => ({ body: { errors: false, items: [] } })),
     search: mockFn(async () => ({
       body: {
-        hits: { total: { value: 1 }, hits: [{ _id: 'd1', _score: 1.2, _source: { displayName: 'Dr. X' } }] },
+        hits: {
+          total: { value: 1 },
+          hits: [{ _id: 'd1', _score: 1.2, _source: { displayName: 'Dr. X' } }],
+        },
         aggregations: { city: { buckets: [{ key: 'lima', doc_count: 3 }] } },
       },
     })),
@@ -51,7 +66,9 @@ describe('SearchIndexService', () => {
       expect(res.created).toBe(true);
       const arg = (client.indices.create as any).mock.calls[0][0];
       expect(arg.index).toBe(INDEX);
-      expect(arg.body.mappings.properties.tenantId).toEqual({ type: 'keyword' });
+      expect(arg.body.mappings.properties.tenantId).toEqual({
+        type: 'keyword',
+      });
     });
 
     it('rechaza un índice fuera de la whitelist', async () => {
@@ -113,7 +130,9 @@ describe('SearchIndexService', () => {
         facets: ['city'],
       });
       const body = (client.search as any).mock.calls[0][0].body;
-      expect(body.query.bool.filter).toContainEqual({ terms: { city: ['lima'] } });
+      expect(body.query.bool.filter).toContainEqual({
+        terms: { city: ['lima'] },
+      });
       expect(body.aggs.city.terms.field).toBe('city');
       expect(result.facets.city).toEqual([{ key: 'lima', count: 3 }]);
       expect(result.total).toBe(1);
@@ -170,7 +189,9 @@ describe('SearchIndexService', () => {
         { field: 'status', values: ['inactive'] },
       ]);
       const body = (client.deleteByQuery as any).mock.calls[0][0].body;
-      expect(body.query.bool.filter[0]).toEqual({ term: { tenantId: TENANT_A } });
+      expect(body.query.bool.filter[0]).toEqual({
+        term: { tenantId: TENANT_A },
+      });
       expect(res.deleted).toBe(5);
     });
   });

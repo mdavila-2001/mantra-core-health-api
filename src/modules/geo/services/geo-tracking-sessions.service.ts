@@ -23,6 +23,15 @@ import { GEO } from '../geo.concepts';
  */
 @Injectable()
 export class GeoTrackingSessionsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param sessionsRepo - Valor de sessions repo requerido por la operación.
+   * @param subjectsRepo - Valor de subjects repo requerido por la operación.
+   * @param tripsRepo - Valor de trips repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly sessionsRepo: TrackingSessionsRepository,

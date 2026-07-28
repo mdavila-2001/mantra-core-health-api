@@ -57,6 +57,15 @@ const CAPTURED_STATES: readonly string[] = [
  */
 @Injectable()
 export class PaymentsTransactionsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param intentsRepo - Valor de intents repo requerido por la operación.
+   * @param flowRepo - Valor de flow repo requerido por la operación.
+   * @param transactionsRepo - Valor de transactions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly intentsRepo: PaymentIntentsRepository,
@@ -423,6 +432,12 @@ export class PaymentsTransactionsService {
     });
   }
 
+  /**
+   * Ejecuta la operación callback status.
+   *
+   * @param outcome - Valor de outcome requerido por la operación.
+   * @returns Resultado de callback status conforme al contrato `string`.
+   */
   private callbackStatus(outcome: GatewayCallbackDto['outcome']): string {
     if (outcome === 'CAPTURED') return CONCEPTS.TXN_CAPTURED;
     if (outcome === 'AUTHORIZED') return CONCEPTS.TXN_AUTHORIZED;

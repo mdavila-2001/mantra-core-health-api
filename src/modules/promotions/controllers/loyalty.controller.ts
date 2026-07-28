@@ -32,6 +32,11 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class LoyaltyController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param loyaltyService - Valor de loyalty service requerido por la operación.
+   */
   constructor(private readonly loyaltyService: PromotionsLoyaltyService) {}
 
   /** UC-51-01. */

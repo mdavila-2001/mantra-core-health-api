@@ -26,6 +26,14 @@ import { CLIN } from '../clinical.concepts';
  */
 @Injectable()
 export class DiagnosticReportsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reportsRepo - Valor de reports repo requerido por la operación.
+   * @param serviceRequestsRepo - Valor de service requests repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly reportsRepo: DiagnosticReportsRepository,
@@ -144,12 +152,36 @@ export class DiagnosticReportsService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param report - Valor de report requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `DiagnosticReportResponseDto`.
+   */
   private toResponse(report: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a patient profile.
+     */
     patientProfileId: string;
+    /**
+     * Identificador asociado a lifecycle status concept.
+     */
     lifecycleStatusConceptId: string;
+    /**
+     * Identificador asociado a result release status concept.
+     */
     resultReleaseStatusConceptId?: string;
+    /**
+     * Identificador asociado a service request.
+     */
     serviceRequestId?: string;
+    /**
+     * Fecha y hora en que se creó el registro.
+     */
     createdAt: Date;
   }): DiagnosticReportResponseDto {
     return {

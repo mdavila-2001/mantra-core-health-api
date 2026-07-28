@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { TrackingService } from './tracking.service';
@@ -18,6 +24,10 @@ const REF = '44444444-4444-4444-4444-444444444444';
 const FILE = '55555555-5555-5555-5555-555555555555';
 const COURIER = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -54,6 +64,12 @@ function build() {
   return { service, tx, trackingRepo, logger };
 }
 
+/**
+ * Ejecuta la operación open subject.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de open subject conforme al contrato `any`.
+ */
 function openSubject(overrides: Record<string, unknown> = {}): any {
   return {
     id: SUBJECT,
@@ -66,6 +82,12 @@ function openSubject(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación live shipment.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de live shipment conforme al contrato `any`.
+ */
 function liveShipment(overrides: Record<string, unknown> = {}): any {
   return {
     id: SHIPMENT,
@@ -84,6 +106,12 @@ describe('TrackingService', () => {
       subjectRefId: REF,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.trackingRepo.findOpenSubjectByRef.mockResolvedValue(null);
       d.trackingRepo.findSubjectByTrackingNumber.mockResolvedValue(null);
@@ -146,6 +174,12 @@ describe('TrackingService', () => {
   });
 
   describe('defineMilestones (UC-37-02)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param milestones - Valor de milestones requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(milestones: any[]): any {
       return { subjectType: 'SPECIMEN' as const, milestones };
     }
@@ -300,6 +334,12 @@ describe('TrackingService', () => {
   });
 
   describe('recordEvent (UC-37-04)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return { status: 'IN_TRANSIT' as const, ...overrides };
     }
@@ -367,6 +407,12 @@ describe('TrackingService', () => {
   });
 
   describe('ingestCarrierWebhook (UC-37-05)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         trackingNumber: 'ABC123',
@@ -376,6 +422,12 @@ describe('TrackingService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.trackingRepo.findCarrierByCode.mockResolvedValue({
         id: CARRIER,
@@ -588,6 +640,12 @@ describe('TrackingService', () => {
   });
 
   describe('recordDeliveryProof (UC-37-08)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         proofType: 'SIGNATURE' as const,
@@ -597,6 +655,12 @@ describe('TrackingService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       const shipment = liveShipment();
       d.trackingRepo.findShipmentForUpdate.mockResolvedValue(shipment);
@@ -676,6 +740,13 @@ describe('TrackingService', () => {
   describe('recordException (UC-37-09)', () => {
     const dto = { reason: 'Destinatario ausente' };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param priority - Valor de priority requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       priority = CONCEPTS.TRACK_PRIORITY_NORMAL,

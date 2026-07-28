@@ -89,6 +89,23 @@ const DECISION_TTL_SECONDS = 300;
  */
 @Injectable()
 export class AuthzPdpService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param rolesRepo - Valor de roles repo requerido por la operación.
+   * @param rolePermsRepo - Valor de role perms repo requerido por la operación.
+   * @param permissionsRepo - Valor de permissions repo requerido por la operación.
+   * @param assignmentsRepo - Valor de assignments repo requerido por la operación.
+   * @param permGrantsRepo - Valor de perm grants repo requerido por la operación.
+   * @param policiesRepo - Valor de policies repo requerido por la operación.
+   * @param clinicalRepo - Valor de clinical repo requerido por la operación.
+   * @param careRelationshipsRepo - Valor de care relationships repo requerido por la operación.
+   * @param legalRepresentationsRepo - Valor de legal representations repo requerido por la operación.
+   * @param resourceGrantsRepo - Valor de resource grants repo requerido por la operación.
+   * @param fieldPermsRepo - Valor de field perms repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly rolesRepo: RolesRepository,

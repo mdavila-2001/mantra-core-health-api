@@ -27,6 +27,14 @@ import {
  */
 @Injectable()
 export class DicomCatalogService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param dicomRepo - Valor de dicom repo requerido por la operación.
+   * @param storageRepo - Valor de storage repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly dicomRepo: DicomRepository,
@@ -184,6 +192,12 @@ export class DicomCatalogService {
     );
 
     return this.em.transactional(async (tx) => {
+      /**
+       * Ejecuta la operación deny.
+       *
+       * @param reason - Valor de reason requerido por la operación.
+       * @returns Resultado de deny conforme al contrato `DicomInstanceAccessResponseDto`.
+       */
       const deny = (reason: string): DicomInstanceAccessResponseDto => {
         const log = this.dicomRepo.createAccessLog(tx, {
           principalId: actor.id,

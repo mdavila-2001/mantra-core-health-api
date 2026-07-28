@@ -29,6 +29,11 @@ import {
 @ApiBearerAuth()
 @Controller('workflow/state-machines')
 export class WorkflowDefinitionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param definitionService - Valor de definition service requerido por la operación.
+   */
   constructor(
     private readonly definitionService: StateMachineDefinitionService,
   ) {}

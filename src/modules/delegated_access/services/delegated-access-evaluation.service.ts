@@ -32,6 +32,17 @@ import {
  */
 @Injectable()
 export class DelegatedAccessEvaluationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param grantsRepo - Valor de grants repo requerido por la operación.
+   * @param delegatesRepo - Valor de delegates repo requerido por la operación.
+   * @param orgAssignmentsRepo - Valor de org assignments repo requerido por la operación.
+   * @param itemsRepo - Valor de items repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly grantsRepo: DelegatedAccessGrantsRepository,

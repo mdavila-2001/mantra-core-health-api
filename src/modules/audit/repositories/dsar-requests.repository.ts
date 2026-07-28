@@ -5,10 +5,25 @@ import { createdBy } from '../../../common';
 
 /** Alta de una solicitud DSAR del titular (UC-10-08). */
 export interface CreateDsarData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a type concept.
+   */
   typeConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a jurisdiction concept.
+   */
   jurisdictionConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

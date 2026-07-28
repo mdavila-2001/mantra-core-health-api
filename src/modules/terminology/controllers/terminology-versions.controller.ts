@@ -24,8 +24,21 @@ import {
 @ApiBearerAuth()
 @Controller('terminology/versions')
 export class TerminologyVersionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param versionsService - Valor de versions service requerido por la operación.
+   */
   constructor(private readonly versionsService: CodeSystemVersionsService) {}
 
+  /**
+   * Ejecuta la operación import concepts.
+   *
+   * @param versionId - Identificador de version.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de import concepts conforme al contrato `Promise<ImportConceptsResponseDto>`.
+   */
   @Post(':versionId/import')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -40,6 +53,13 @@ export class TerminologyVersionsController {
     return this.versionsService.importConcepts(versionId, dto, user);
   }
 
+  /**
+   * Ejecuta la operación publish version.
+   *
+   * @param versionId - Identificador de version.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de publish version conforme al contrato `Promise<PublishVersionResponseDto>`.
+   */
   @Post(':versionId/publish')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

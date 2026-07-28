@@ -24,6 +24,14 @@ import { fromCents, toCents } from '../money.util';
  */
 @Injectable()
 export class BillsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param billsRepo - Valor de bills repo requerido por la operación.
+   * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly billsRepo: BillsRepository,
@@ -33,6 +41,14 @@ export class BillsService {
     this.logger.setContext(BillsService.name);
   }
 
+  /**
+   * Crea register.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de register conforme al contrato `Promise<BillResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async register(
     dto: RegisterBillDto,
     actor: AuthenticatedUser,

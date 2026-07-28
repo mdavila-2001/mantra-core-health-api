@@ -29,6 +29,12 @@ import {
 @ApiTags('iam-auth')
 @Controller('iam/auth')
 export class IamAuthController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param authService - Valor de auth service requerido por la operación.
+   * @param assistedRegistrationService - Valor de assisted registration service requerido por la operación.
+   */
   constructor(
     private readonly authService: IamAuthService,
     private readonly assistedRegistrationService: IamAssistedRegistrationService,
@@ -43,7 +49,8 @@ export class IamAuthController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Activar la cuenta con el token de un solo uso y fijar la contraseña',
+    summary:
+      'Activar la cuenta con el token de un solo uso y fijar la contraseña',
   })
   activate(
     @Body() dto: ActivateAccountDto,

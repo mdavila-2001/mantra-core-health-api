@@ -29,6 +29,12 @@ const LEGAL_BASIS: Record<string, string> = {
   CONSENT: AUD.LEGAL_BASIS_CONSENT,
   LEGAL_OBLIGATION: AUD.LEGAL_BASIS_LEGAL_OBLIGATION,
 };
+/**
+ * Ejecuta la operación outcome concept.
+ *
+ * @param o - Valor de o requerido por la operación.
+ * @returns Resultado de outcome concept conforme al contrato `string`.
+ */
 const outcomeConcept = (o: string): string =>
   o === 'FAILURE' ? CONCEPTS.OUTCOME_FAILURE : CONCEPTS.OUTCOME_SUCCESS;
 
@@ -46,6 +52,14 @@ const ANOMALY_THRESHOLD = 100;
  */
 @Injectable()
 export class AuditEventsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param auditLogRepo - Valor de audit log repo requerido por la operación.
+   * @param dataAccessRepo - Valor de data access repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly auditLogRepo: AuditLogRepository,

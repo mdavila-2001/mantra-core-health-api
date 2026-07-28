@@ -47,6 +47,17 @@ import type { DiagnosticUnits } from '../entities';
  */
 @Injectable()
 export class DiagnosticUnitsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param unitsRepo - Valor de units repo requerido por la operación.
+   * @param sitesRepo - Valor de sites repo requerido por la operación.
+   * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
+   * @param accreditationsRepo - Valor de accreditations repo requerido por la operación.
+   * @param assignmentsRepo - Valor de assignments repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly unitsRepo: DiagnosticUnitsRepository,
@@ -480,6 +491,14 @@ export class DiagnosticUnitsService {
     return unit;
   }
 
+  /**
+   * Transforma to unit response.
+   *
+   * @param unit - Valor de unit requerido por la operación.
+   * @param siteCount - Valor de site count requerido por la operación.
+   * @param accreditationCount - Valor de accreditation count requerido por la operación.
+   * @returns Resultado de to unit response conforme al contrato `DiagnosticUnitResponseDto`.
+   */
   private toUnitResponse(
     unit: DiagnosticUnits,
     siteCount: number,

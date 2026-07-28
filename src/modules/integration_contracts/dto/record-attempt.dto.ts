@@ -17,6 +17,9 @@ export type RetryDecision = 'RETRYABLE' | 'PERMANENT';
 
 /** Cuerpo de `POST /integration/contracts/{id}/exchanges/{recordId}/attempts` (UC-31-06). */
 export class RecordAttemptDto {
+  /**
+   * Valor de outcome mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Resultado del intento',
     enum: ['SUCCESS', 'FAILED'],
@@ -24,6 +27,9 @@ export class RecordAttemptDto {
   @IsIn(['SUCCESS', 'FAILED'])
   outcome!: AttemptOutcome;
 
+  /**
+   * Identificador asociado a endpoint.
+   */
   @ApiPropertyOptional({
     description: 'Endpoint destino usado',
     format: 'uuid',
@@ -32,6 +38,9 @@ export class RecordAttemptDto {
   @IsUUID()
   endpointId?: string;
 
+  /**
+   * Valor de http status mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Código de estado HTTP recibido',
     minimum: 100,
@@ -43,6 +52,9 @@ export class RecordAttemptDto {
   @Max(599)
   httpStatus?: number;
 
+  /**
+   * Valor de provider error code mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Código de error del proveedor',
     maxLength: 255,
@@ -52,6 +64,9 @@ export class RecordAttemptDto {
   @MaxLength(255)
   providerErrorCode?: string;
 
+  /**
+   * Valor de retry decision mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Decisión de reintento si falla',
     enum: ['RETRYABLE', 'PERMANENT'],
@@ -60,12 +75,18 @@ export class RecordAttemptDto {
   @IsIn(['RETRYABLE', 'PERMANENT'])
   retryDecision?: RetryDecision;
 
+  /**
+   * Valor de response hash mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Hash del response', maxLength: 255 })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   responseHash?: string;
 
+  /**
+   * Valor de response reference mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Referencia de respuesta idempotente',
     maxLength: 255,
@@ -75,6 +96,9 @@ export class RecordAttemptDto {
   @MaxLength(255)
   responseReference?: string;
 
+  /**
+   * Identificador asociado a trace.
+   */
   @ApiPropertyOptional({
     description: 'Id de traza distribuida',
     maxLength: 255,

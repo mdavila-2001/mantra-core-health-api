@@ -23,6 +23,13 @@ import {
 export class LakehouseRuntimeRepository {
   // --- Definiciones y corridas (UC-63-05) ---
 
+  /**
+   * Obtiene find definition by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find definition by id conforme al contrato `Promise<TransformationDefinitions | null>`.
+   */
   findDefinitionById(
     em: EntityManager,
     id: string,
@@ -47,13 +54,35 @@ export class LakehouseRuntimeRepository {
     );
   }
 
+  /**
+   * Crea create run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create run conforme al contrato `TransformationRuns`.
+   */
   createRun(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a transformation definition.
+       */
       transformationDefinitionId: string;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de source checkpoint mantenido por la instancia.
+       */
       sourceCheckpoint?: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): TransformationRuns {
@@ -69,6 +98,13 @@ export class LakehouseRuntimeRepository {
     );
   }
 
+  /**
+   * Obtiene find run by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find run by id conforme al contrato `Promise<TransformationRuns | null>`.
+   */
   findRunById(
     em: EntityManager,
     id: string,
@@ -93,22 +129,60 @@ export class LakehouseRuntimeRepository {
     });
   }
 
+  /**
+   * Crea create partition.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create partition conforme al contrato `LakehousePartitions`.
+   */
   createPartition(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a lakehouse dataset.
+       */
       lakehouseDatasetId: string;
+      /**
+       * Valor de partition spec hash mantenido por la instancia.
+       */
       partitionSpecHash: string;
+      /**
+       * Valor de partition values json mantenido por la instancia.
+       */
       partitionValuesJson?: unknown;
+      /**
+       * Valor de record count mantenido por la instancia.
+       */
       recordCount: string;
+      /**
+       * Valor de size bytes mantenido por la instancia.
+       */
       sizeBytes: string;
+      /**
+       * Valor de min event at mantenido por la instancia.
+       */
       minEventAt?: Date;
+      /**
+       * Valor de max event at mantenido por la instancia.
+       */
       maxEventAt?: Date;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): LakehousePartitions {
     return em.create(LakehousePartitions, data as never, { partial: true });
   }
 
+  /**
+   * Obtiene find partition by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find partition by id conforme al contrato `Promise<LakehousePartitions | null>`.
+   */
   findPartitionById(
     em: EntityManager,
     id: string,
@@ -125,12 +199,33 @@ export class LakehouseRuntimeRepository {
   createFile(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a lakehouse partition.
+       */
       lakehousePartitionId: string;
+      /**
+       * Identificador asociado a object manifest.
+       */
       objectManifestId?: string;
+      /**
+       * Valor de file format mantenido por la instancia.
+       */
       fileFormat: string;
+      /**
+       * Valor de row count mantenido por la instancia.
+       */
       rowCount: string;
+      /**
+       * Valor de size bytes mantenido por la instancia.
+       */
       sizeBytes: string;
+      /**
+       * Valor de content hash mantenido por la instancia.
+       */
       contentHash: string;
+      /**
+       * Valor de min max statistics json mantenido por la instancia.
+       */
       minMaxStatisticsJson?: unknown;
     },
   ): LakehouseFiles {
@@ -141,6 +236,14 @@ export class LakehouseRuntimeRepository {
     );
   }
 
+  /**
+   * Obtiene find file by hash.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param lakehousePartitionId - Identificador de lakehouse partition.
+   * @param contentHash - Valor de content hash requerido por la operación.
+   * @returns Resultado de find file by hash conforme al contrato `Promise<LakehouseFiles | null>`.
+   */
   findFileByHash(
     em: EntityManager,
     lakehousePartitionId: string,
@@ -155,11 +258,29 @@ export class LakehouseRuntimeRepository {
   createLineageEdge(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a source dataset.
+       */
       sourceDatasetId: string;
+      /**
+       * Identificador asociado a target dataset.
+       */
       targetDatasetId: string;
+      /**
+       * Identificador asociado a transformation run.
+       */
       transformationRunId: string;
+      /**
+       * Identificador asociado a source partition.
+       */
       sourcePartitionId?: string;
+      /**
+       * Identificador asociado a target partition.
+       */
       targetPartitionId?: string;
     },
   ): LakehouseLineageEdges {
@@ -172,13 +293,35 @@ export class LakehouseRuntimeRepository {
 
   // --- Calidad (UC-63-08) ---
 
+  /**
+   * Crea create quality run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create quality run conforme al contrato `LakehouseQualityRuns`.
+   */
   createQualityRun(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a lakehouse dataset.
+       */
       lakehouseDatasetId: string;
+      /**
+       * Identificador asociado a transformation run.
+       */
       transformationRunId?: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): LakehouseQualityRuns {
@@ -189,14 +332,39 @@ export class LakehouseRuntimeRepository {
     );
   }
 
+  /**
+   * Crea create quality issue.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create quality issue conforme al contrato `LakehouseQualityIssues`.
+   */
   createQualityIssue(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a lakehouse quality run.
+       */
       lakehouseQualityRunId: string;
+      /**
+       * Identificador asociado a lakehouse quality rule.
+       */
       lakehouseQualityRuleId: string;
+      /**
+       * Identificador asociado a partition.
+       */
       partitionId?: string;
+      /**
+       * Valor de issue count mantenido por la instancia.
+       */
       issueCount: string;
+      /**
+       * Identificador asociado a sample object manifest.
+       */
       sampleObjectManifestId?: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
     },
   ): LakehouseQualityIssues {

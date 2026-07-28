@@ -47,6 +47,12 @@ import {
 @ApiBearerAuth()
 @Controller('health-context')
 export class HealthContextController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param collectionService - Valor de collection service requerido por la operación.
+   * @param countryContextService - Valor de country context service requerido por la operación.
+   */
   constructor(
     private readonly collectionService: ContextCollectionService,
     private readonly countryContextService: CountryContextService,

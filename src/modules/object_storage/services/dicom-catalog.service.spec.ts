@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DicomCatalogService } from './dicom-catalog.service';
@@ -12,6 +18,10 @@ const SERIES = '22222222-2222-2222-2222-222222222222';
 const MANIFEST = '33333333-3333-3333-3333-333333333333';
 const VERSION = '44444444-4444-4444-4444-444444444444';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -126,6 +136,13 @@ describe('DicomCatalogService', () => {
   });
 
   describe('resolveInstance (UC-60-05)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param manifestOverrides - Valor de manifest overrides requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       manifestOverrides: Record<string, unknown> = {},

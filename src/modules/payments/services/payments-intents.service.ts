@@ -52,6 +52,14 @@ const RISK_LEVEL_THRESHOLDS = { medium: 40, high: 70 } as const;
  */
 @Injectable()
 export class PaymentsIntentsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param intentsRepo - Valor de intents repo requerido por la operación.
+   * @param flowRepo - Valor de flow repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly intentsRepo: PaymentIntentsRepository,
@@ -346,12 +354,34 @@ export class PaymentsIntentsService {
     });
   }
 
+  /**
+   * Transforma to intent response.
+   *
+   * @param intent - Valor de intent requerido por la operación.
+   * @param reused - Valor de reused requerido por la operación.
+   * @returns Resultado de to intent response conforme al contrato `PaymentIntentResponseDto`.
+   */
   private toIntentResponse(
     intent: {
+      /**
+       * Identificador único de la instancia.
+       */
       id: string;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de amount mantenido por la instancia.
+       */
       amount: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de idempotency key mantenido por la instancia.
+       */
       idempotencyKey: string;
     },
     reused: boolean,
@@ -366,6 +396,12 @@ export class PaymentsIntentsService {
     };
   }
 
+  /**
+   * Ejecuta la operación derive risk level.
+   *
+   * @param score - Valor de score requerido por la operación.
+   * @returns Resultado de derive risk level conforme al contrato `'LOW' | 'MEDIUM' | 'HIGH'`.
+   */
   private deriveRiskLevel(score: string): 'LOW' | 'MEDIUM' | 'HIGH' {
     const value = Number(score);
     if (value >= RISK_LEVEL_THRESHOLDS.high) return 'HIGH';
@@ -373,6 +409,12 @@ export class PaymentsIntentsService {
     return 'LOW';
   }
 
+  /**
+   * Ejecuta la operación risk level concept.
+   *
+   * @param level - Valor de level requerido por la operación.
+   * @returns Resultado de risk level concept conforme al contrato `string`.
+   */
   private riskLevelConcept(level: 'LOW' | 'MEDIUM' | 'HIGH'): string {
     if (level === 'HIGH') return CONCEPTS.RISK_HIGH;
     if (level === 'MEDIUM') return CONCEPTS.RISK_MEDIUM;
@@ -384,6 +426,13 @@ export class PaymentsIntentsService {
     return (Number(amount) * Number(rate)).toFixed(2);
   }
 
+  /**
+   * Ejecuta la operación percentage of.
+   *
+   * @param amount - Valor de amount requerido por la operación.
+   * @param percentage - Valor de percentage requerido por la operación.
+   * @returns Resultado de percentage of conforme al contrato `string`.
+   */
   private percentageOf(amount: string, percentage: string): string {
     return ((Number(amount) * Number(percentage)) / 100).toFixed(2);
   }

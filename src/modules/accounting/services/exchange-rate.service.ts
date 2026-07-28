@@ -12,6 +12,13 @@ import { RegisterExchangeRateDto, ExchangeRateResponseDto } from '../dto';
  */
 @Injectable()
 export class ExchangeRateService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ratesRepo - Valor de rates repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly ratesRepo: ExchangeRateRepository,
@@ -20,6 +27,13 @@ export class ExchangeRateService {
     this.logger.setContext(ExchangeRateService.name);
   }
 
+  /**
+   * Crea register rate.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de register rate conforme al contrato `Promise<ExchangeRateResponseDto>`.
+   */
   async registerRate(
     dto: RegisterExchangeRateDto,
     actor: AuthenticatedUser,

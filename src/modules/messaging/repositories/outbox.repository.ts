@@ -8,29 +8,95 @@ import {
   EventDeliveries,
 } from '../entities';
 
+/**
+ * Describe el contrato estructural de create domain event data.
+ */
 export interface CreateDomainEventData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de event type mantenido por la instancia.
+   */
   eventType: string;
+  /**
+   * Valor de event version mantenido por la instancia.
+   */
   eventVersion: number;
+  /**
+   * Valor de aggregate type mantenido por la instancia.
+   */
   aggregateType: string;
+  /**
+   * Identificador asociado a aggregate.
+   */
   aggregateId: string;
+  /**
+   * Valor de payload json mantenido por la instancia.
+   */
   payloadJson: unknown;
+  /**
+   * Valor de metadata json mantenido por la instancia.
+   */
   metadataJson?: unknown;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId?: string;
+  /**
+   * Identificador asociado a causation.
+   */
   causationId?: string;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt?: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create outbox message data.
+ */
 export interface CreateOutboxMessageData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a domain event.
+   */
   domainEventId: string;
+  /**
+   * Valor de aggregate type mantenido por la instancia.
+   */
   aggregateType: string;
+  /**
+   * Identificador asociado a aggregate.
+   */
   aggregateId: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey: string;
+  /**
+   * Valor de payload json mantenido por la instancia.
+   */
   payloadJson: unknown;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de max attempts mantenido por la instancia.
+   */
   maxAttempts: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -67,6 +133,13 @@ export class OutboxRepository {
     );
   }
 
+  /**
+   * Obtiene find domain event by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find domain event by id conforme al contrato `Promise<DomainEvents | null>`.
+   */
   findDomainEventById(
     em: EntityManager,
     id: string,
@@ -76,6 +149,13 @@ export class OutboxRepository {
 
   // --- Mensajes de outbox (UC-35-01, 02) ---
 
+  /**
+   * Crea create outbox message.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create outbox message conforme al contrato `OutboxMessages`.
+   */
   createOutboxMessage(
     em: EntityManager,
     data: CreateOutboxMessageData,
@@ -106,6 +186,13 @@ export class OutboxRepository {
     return em.findOne(OutboxMessages, { idempotencyKey });
   }
 
+  /**
+   * Obtiene find outbox by domain event.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param domainEventId - Identificador de domain event.
+   * @returns Resultado de find outbox by domain event conforme al contrato `Promise<OutboxMessages | null>`.
+   */
   findOutboxByDomainEvent(
     em: EntityManager,
     domainEventId: string,
@@ -157,13 +244,35 @@ export class OutboxRepository {
     });
   }
 
+  /**
+   * Crea create event delivery.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create event delivery conforme al contrato `EventDeliveries`.
+   */
   createEventDelivery(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a domain event.
+       */
       domainEventId: string;
+      /**
+       * Identificador asociado a subscription.
+       */
       subscriptionId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de attempt number mantenido por la instancia.
+       */
       attemptNumber: number;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): EventDeliveries {
@@ -190,6 +299,13 @@ export class OutboxRepository {
     return em.findOne(EventDeliveries, { domainEventId, subscriptionId });
   }
 
+  /**
+   * Obtiene find event delivery for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find event delivery for update conforme al contrato `Promise<EventDeliveries | null>`.
+   */
   findEventDeliveryForUpdate(
     em: EntityManager,
     id: string,

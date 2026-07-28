@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingCatalogService } from './scheduling-catalog.service';
@@ -15,6 +21,10 @@ const actor = { id: 'user-1', roles: ['SCHEDULING_ADMIN'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const RESOURCE = '22222222-2222-2222-2222-222222222222';
 
+/**
+ * Crea build catalog.
+ * @returns Resultado de build catalog.
+ */
 function buildCatalog() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -42,6 +52,10 @@ function buildCatalog() {
   return { service, tx, catalogRepo };
 }
 
+/**
+ * Crea build waitlist.
+ * @returns Resultado de build waitlist.
+ */
 function buildWaitlist() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };

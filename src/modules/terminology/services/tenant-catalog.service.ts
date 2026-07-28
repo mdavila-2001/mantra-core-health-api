@@ -35,6 +35,15 @@ const DEFAULT_CATALOG_MODE: CatalogMode = 'INHERIT';
  */
 @Injectable()
 export class TenantCatalogService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantCatalogRepo - Valor de tenant catalog repo requerido por la operación.
+   * @param valueSetsRepo - Valor de value sets repo requerido por la operación.
+   * @param conceptsRepo - Valor de concepts repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly tenantCatalogRepo: TenantCatalogRepository,

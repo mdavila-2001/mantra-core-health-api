@@ -18,6 +18,13 @@ import { CreateAppealDecisionDto, CreatedResourceDto } from '../dto';
  */
 @Injectable()
 export class AppealsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: DisputeRepository,
@@ -26,6 +33,15 @@ export class AppealsService {
     this.logger.setContext(AppealsService.name);
   }
 
+  /**
+   * Ejecuta la operación decide.
+   *
+   * @param disputeId - Identificador de dispute.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de decide conforme al contrato `Promise<CreatedResourceDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async decide(
     disputeId: string,
     dto: CreateAppealDecisionDto,

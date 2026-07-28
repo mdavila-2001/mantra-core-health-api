@@ -54,6 +54,14 @@ const REPRESENTATION_TYPE_CONCEPT: Record<LegalRepresentationType, string> = {
  */
 @Injectable()
 export class AuthzCareRelationshipsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param careRepo - Valor de care repo requerido por la operación.
+   * @param legalRepo - Valor de legal repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly careRepo: CareRelationshipsRepository,

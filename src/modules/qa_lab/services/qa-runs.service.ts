@@ -102,6 +102,14 @@ const MASKED_PLACEHOLDER = '***';
  */
 @Injectable()
 export class QaRunsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runsRepo - Valor de runs repo requerido por la operación.
+   * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly runsRepo: QaRunsRepository,
@@ -830,16 +838,34 @@ export class QaRunsService {
     return masked;
   }
 
+  /**
+   * Ejecuta la operación status name of.
+   *
+   * @param conceptId - Identificador de concept.
+   * @returns Resultado de status name of conforme al contrato `DefectStatus | undefined`.
+   */
   private statusNameOf(conceptId: string): DefectStatus | undefined {
     return (Object.keys(DEFECT_STATUS_CONCEPT) as DefectStatus[]).find(
       (status) => DEFECT_STATUS_CONCEPT[status] === conceptId,
     );
   }
 
+  /**
+   * Obtiene hash.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de hash conforme al contrato `string`.
+   */
   private hash(value: unknown): string {
     return createHash('sha256').update(JSON.stringify(value)).digest('hex');
   }
 
+  /**
+   * Ejecuta la operación size of.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de size of conforme al contrato `number`.
+   */
   private sizeOf(value: unknown): number {
     return Buffer.byteLength(JSON.stringify(value), 'utf8');
   }

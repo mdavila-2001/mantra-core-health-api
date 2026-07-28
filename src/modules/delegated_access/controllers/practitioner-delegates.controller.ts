@@ -31,6 +31,12 @@ import {
 @ApiBearerAuth()
 @Controller('practitioner-delegates')
 export class PractitionerDelegatesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param delegatesService - Valor de delegates service requerido por la operación.
+   * @param requestsService - Valor de requests service requerido por la operación.
+   */
   constructor(
     private readonly delegatesService: PractitionerDelegatesService,
     private readonly requestsService: AccessRequestsService,

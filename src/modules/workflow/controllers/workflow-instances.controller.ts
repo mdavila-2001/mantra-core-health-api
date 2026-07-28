@@ -24,6 +24,11 @@ import {
 @ApiBearerAuth()
 @Controller('workflow')
 export class WorkflowInstancesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param instancesService - Valor de instances service requerido por la operación.
+   */
   constructor(private readonly instancesService: WorkflowInstancesService) {}
 
   /**

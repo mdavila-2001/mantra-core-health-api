@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('common/contact-points')
 export class CommonContactPointsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param contactPointsService - Valor de contact points service requerido por la operación.
+   */
   constructor(private readonly contactPointsService: ContactPointsService) {}
 
   /** UC-02-02: registra un punto de contacto. */

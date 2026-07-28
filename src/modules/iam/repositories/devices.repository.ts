@@ -5,11 +5,29 @@ import { createdBy } from '../../../common';
 
 /** Alta de un dispositivo asociado a un usuario. */
 export interface CreateDeviceData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Valor de device fingerprint mantenido por la instancia.
+   */
   deviceFingerprint?: string;
+  /**
+   * Identificador asociado a platform concept.
+   */
   platformConceptId?: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name?: string;
+  /**
+   * Valor de trusted mantenido por la instancia.
+   */
   trusted?: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

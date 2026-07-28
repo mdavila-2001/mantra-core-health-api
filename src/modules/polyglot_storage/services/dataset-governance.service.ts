@@ -42,6 +42,16 @@ import {
  */
 @Injectable()
 export class DatasetGovernanceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param datasetsRepo - Valor de datasets repo requerido por la operación.
+   * @param placementsRepo - Valor de placements repo requerido por la operación.
+   * @param backendsRepo - Valor de backends repo requerido por la operación.
+   * @param policiesRepo - Valor de policies repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly datasetsRepo: DatasetsRepository,
@@ -508,11 +518,28 @@ export class DatasetGovernanceService {
    */
   private assertResidency(
     residency: {
+      /**
+       * Valor de allowed country codes mantenido por la instancia.
+       */
       allowedCountryCodes?: string[];
+      /**
+       * Valor de forbidden country codes mantenido por la instancia.
+       */
       forbiddenCountryCodes?: string[];
+      /**
+       * Valor de allowed region codes mantenido por la instancia.
+       */
       allowedRegionCodes?: string[];
     },
-    region: { countryCode: string; regionCode: string },
+    region: {
+      /**
+       * Valor de country code mantenido por la instancia.
+       */
+      countryCode: string; /**
+       * Valor de region code mantenido por la instancia.
+       */
+      regionCode: string;
+    },
     dto: ApprovePlacementDto,
   ): void {
     const forbidden = residency.forbiddenCountryCodes ?? [];

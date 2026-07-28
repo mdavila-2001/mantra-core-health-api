@@ -13,6 +13,13 @@ import {
  */
 @Injectable()
 export class PriorAuthRepository {
+  /**
+   * Obtiene find request.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find request conforme al contrato `Promise<PriorAuthorizationRequests | null>`.
+   */
   findRequest(
     em: EntityManager,
     id: string,
@@ -20,6 +27,13 @@ export class PriorAuthRepository {
     return em.findOne(PriorAuthorizationRequests, { id });
   }
 
+  /**
+   * Crea create request.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create request conforme al contrato `PriorAuthorizationRequests`.
+   */
   createRequest(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -31,6 +45,13 @@ export class PriorAuthRepository {
     );
   }
 
+  /**
+   * Crea create item.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create item conforme al contrato `PriorAuthorizationItems`.
+   */
   createItem(
     em: EntityManager,
     data: Record<string, unknown>,
@@ -55,6 +76,13 @@ export class PriorAuthRepository {
     return last?.determinationVersion ?? 0;
   }
 
+  /**
+   * Crea create determination.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create determination conforme al contrato `PriorAuthorizationDeterminations`.
+   */
   createDetermination(
     em: EntityManager,
     data: Record<string, unknown>,

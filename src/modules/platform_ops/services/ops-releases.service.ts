@@ -79,6 +79,15 @@ const DECIDABLE_CHANGE_STATES: readonly string[] = [
  */
 @Injectable()
 export class OpsReleasesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param releasesRepo - Valor de releases repo requerido por la operación.
+   * @param reliabilityRepo - Valor de reliability repo requerido por la operación.
+   * @param practicesRepo - Valor de practices repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly releasesRepo: OpsReleasesRepository,
@@ -723,6 +732,14 @@ export class OpsReleasesService {
     return false;
   }
 
+  /**
+   * Ejecuta la operación next change number.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @returns Resultado de next change number conforme al contrato `Promise<string>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async nextChangeNumber(
     tx: EntityManager,
     tenantId?: string,
@@ -743,6 +760,13 @@ export class OpsReleasesService {
     );
   }
 
+  /**
+   * Ejecuta la operación next deployment number.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @returns Resultado de next deployment number conforme al contrato `Promise<string>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async nextDeploymentNumber(tx: EntityManager): Promise<string> {
     const count = await this.releasesRepo.countDeployments(tx);
     for (let offset = 1; offset <= 50; offset += 1) {

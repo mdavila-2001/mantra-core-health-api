@@ -64,9 +64,21 @@ const MAX_CODE_ATTEMPTS = 5;
 
 /** Resultado de evaluar un cupón contra una orden. */
 interface CouponEvaluation {
+  /**
+   * Valor de coupon mantenido por la instancia.
+   */
   coupon: Coupons;
+  /**
+   * Valor de promotion mantenido por la instancia.
+   */
   promotion: Promotions;
+  /**
+   * Valor de rule mantenido por la instancia.
+   */
   rule: DiscountRules;
+  /**
+   * Valor de discount amount mantenido por la instancia.
+   */
   discountAmount: string;
 }
 
@@ -76,6 +88,14 @@ interface CouponEvaluation {
  */
 @Injectable()
 export class PromotionsDiscountsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param discountsRepo - Valor de discounts repo requerido por la operación.
+   * @param loyaltyRepo - Valor de loyalty repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly discountsRepo: PromotionsDiscountsRepository,
@@ -592,8 +612,17 @@ export class PromotionsDiscountsService {
     tx: EntityManager,
     code: string,
     context: {
+      /**
+       * Valor de order amount mantenido por la instancia.
+       */
       orderAmount: string;
+      /**
+       * Valor de redeemer type mantenido por la instancia.
+       */
       redeemerType: string;
+      /**
+       * Identificador asociado a redeemer ref.
+       */
       redeemerRefId: string;
     },
   ): Promise<CouponEvaluation> {
@@ -645,7 +674,12 @@ export class PromotionsDiscountsService {
   private rejectionReason(
     coupon: Coupons,
     promotion: Promotions,
-    context: { redeemerRefId: string },
+    context: {
+      /**
+       * Identificador asociado a redeemer ref.
+       */
+      redeemerRefId: string;
+    },
   ): string | undefined {
     const now = new Date();
     if (coupon.statusConceptId !== CONCEPTS.COUPON_ACTIVE)
@@ -676,6 +710,12 @@ export class PromotionsDiscountsService {
     return undefined;
   }
 
+  /**
+   * Valida assert promotion usable.
+   *
+   * @param promotion - Valor de promotion requerido por la operación.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private assertPromotionUsable(promotion: Promotions): void {
     const now = new Date();
     if (promotion.statusConceptId !== CONCEPTS.PROMOTION_ACTIVE) {
@@ -769,8 +809,28 @@ export class PromotionsDiscountsService {
   private bestRule(
     rules: DiscountRules[],
     orderAmount: string,
-  ): { rule: DiscountRules; amount: string } | undefined {
-    let best: { rule: DiscountRules; amount: string } | undefined;
+  ):
+    | {
+        /**
+         * Valor de rule mantenido por la instancia.
+         */
+        rule: DiscountRules; /**
+         * Valor de amount mantenido por la instancia.
+         */
+        amount: string;
+      }
+    | undefined {
+    let best:
+      | {
+          /**
+           * Valor de rule mantenido por la instancia.
+           */
+          rule: DiscountRules; /**
+           * Valor de amount mantenido por la instancia.
+           */
+          amount: string;
+        }
+      | undefined;
     for (const rule of rules) {
       const amount = this.discountFor(rule, orderAmount);
       if (amount === undefined) continue;
@@ -812,11 +872,32 @@ export class PromotionsDiscountsService {
     return discount > 0 ? this.round(discount) : undefined;
   }
 
+  /**
+   * Valida assert rule shape.
+   *
+   * @param rule - Valor de rule requerido por la operación.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private assertRuleShape(rule: {
+    /**
+     * Valor de discount type mantenido por la instancia.
+     */
     discountType: DiscountType;
+    /**
+     * Valor de percentage mantenido por la instancia.
+     */
     percentage?: string;
+    /**
+     * Valor de fixed amount mantenido por la instancia.
+     */
     fixedAmount?: string;
+    /**
+     * Valor de buy quantity mantenido por la instancia.
+     */
     buyQuantity?: number;
+    /**
+     * Valor de get quantity mantenido por la instancia.
+     */
     getQuantity?: number;
   }): void {
     if (rule.discountType === 'PERCENTAGE') {

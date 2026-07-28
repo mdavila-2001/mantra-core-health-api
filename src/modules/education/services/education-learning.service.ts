@@ -71,6 +71,14 @@ const VERIFICATION_CODE_BYTES = 8;
  */
 @Injectable()
 export class EducationLearningService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param learningRepo - Valor de learning repo requerido por la operación.
+   * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly learningRepo: EducationLearningRepository,
@@ -818,8 +826,17 @@ export class EducationLearningService {
     enrollmentId: string,
     courseId: string,
   ): Promise<{
+    /**
+     * Valor de completed lessons mantenido por la instancia.
+     */
     completedLessons: number;
+    /**
+     * Valor de total lessons mantenido por la instancia.
+     */
     totalLessons: number;
+    /**
+     * Valor de progress percent mantenido por la instancia.
+     */
     progressPercent: string;
   }> {
     const modules = await this.catalogRepo.findModulesByCourse(tx, courseId);
@@ -860,7 +877,15 @@ export class EducationLearningService {
   private grade(
     questions: AssessmentQuestions[],
     responses: Record<string, unknown>,
-  ): { score: string; correctAnswers: number } {
+  ): {
+    /**
+     * Valor de score mantenido por la instancia.
+     */
+    score: string; /**
+     * Valor de correct answers mantenido por la instancia.
+     */
+    correctAnswers: number;
+  } {
     if (questions.length === 0) return { score: '0.00', correctAnswers: 0 };
 
     let earned = 0;

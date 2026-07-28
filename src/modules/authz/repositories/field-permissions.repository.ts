@@ -5,13 +5,37 @@ import { createdBy } from '../../../common';
 
 /** Datos de una regla de enmascaramiento de campo por rol. */
 export interface UpsertFieldPermissionData {
+  /**
+   * Identificador asociado a role.
+   */
   roleId: string;
+  /**
+   * Valor de entity mantenido por la instancia.
+   */
   entity: string;
+  /**
+   * Valor de column name mantenido por la instancia.
+   */
   columnName: string;
+  /**
+   * Valor de can read mantenido por la instancia.
+   */
   canRead: boolean;
+  /**
+   * Valor de can write mantenido por la instancia.
+   */
   canWrite: boolean;
+  /**
+   * Identificador asociado a mask strategy concept.
+   */
   maskStrategyConceptId?: string;
+  /**
+   * Valor de condition json mantenido por la instancia.
+   */
   conditionJson?: unknown;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -37,6 +61,13 @@ export class FieldPermissionsRepository {
     return em.find(FieldPermissions, { roleId: { $in: roleIds } });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `FieldPermissions`.
+   */
   create(em: EntityManager, data: UpsertFieldPermissionData): FieldPermissions {
     return em.create(
       FieldPermissions,

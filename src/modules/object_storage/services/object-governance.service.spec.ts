@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ObjectGovernanceService } from './object-governance.service';
@@ -24,10 +30,18 @@ const NAMESPACE = '33333333-3333-3333-3333-333333333333';
 const HOLD = '44444444-4444-4444-4444-444444444444';
 const SHA = 'a'.repeat(64);
 
+/**
+ * Ejecuta la operación future.
+ * @returns Resultado de future conforme al contrato `string`.
+ */
 function future(): string {
   return new Date(Date.now() + 86_400_000).toISOString();
 }
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -66,6 +80,12 @@ function build() {
   return { service, tx, governanceRepo, storageRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active manifest.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active manifest conforme al contrato `any`.
+ */
 function activeManifest(overrides: Record<string, unknown> = {}): any {
   return {
     id: MANIFEST,
@@ -77,6 +97,13 @@ function activeManifest(overrides: Record<string, unknown> = {}): any {
 
 describe('ObjectGovernanceService', () => {
   describe('applyRetentionLock (UC-60-07)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param manifest - Valor de manifest requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, manifest = activeManifest()) {
       d.storageRepo.findVersionById.mockResolvedValue({
         id: VERSION,
@@ -173,6 +200,13 @@ describe('ObjectGovernanceService', () => {
   });
 
   describe('placeLegalHold / releaseLegalHold (UC-60-08)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param manifest - Valor de manifest requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, manifest = activeManifest()) {
       d.storageRepo.findVersionById.mockResolvedValue({
         id: VERSION,
@@ -296,6 +330,12 @@ describe('ObjectGovernanceService', () => {
   });
 
   describe('recordIntegrityCheck (UC-60-10)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       const manifest = activeManifest();
       d.storageRepo.findVersionById.mockResolvedValue({
@@ -371,6 +411,12 @@ describe('ObjectGovernanceService', () => {
       providerUri: 'glacier://vault/obj',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       const manifest = activeManifest();
       d.storageRepo.findManifestForUpdate.mockResolvedValue(manifest);
@@ -432,6 +478,12 @@ describe('ObjectGovernanceService', () => {
   describe('requestDeletion (UC-60-12)', () => {
     const dto: any = { reason: 'solicitud de supresión del titular' };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       const manifest = activeManifest();
       d.storageRepo.findManifestForUpdate.mockResolvedValue(manifest);

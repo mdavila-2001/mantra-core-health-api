@@ -15,42 +15,141 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create agent data.
+ */
 export interface CreateAgentData {
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a agent type concept.
+   */
   agentTypeConceptId: string;
+  /**
+   * Identificador asociado a provider.
+   */
   providerId?: string;
+  /**
+   * Valor de implementation ref mantenido por la instancia.
+   */
   implementationRef?: string;
+  /**
+   * Identificador asociado a owner tenant.
+   */
   ownerTenantId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create source data.
+ */
 export interface CreateSourceData {
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a source type concept.
+   */
   sourceTypeConceptId: string;
+  /**
+   * Valor de owner name mantenido por la instancia.
+   */
   ownerName?: string;
+  /**
+   * Valor de canonical url mantenido por la instancia.
+   */
   canonicalUrl?: string;
+  /**
+   * Identificador asociado a country concept.
+   */
   countryConceptId?: string;
+  /**
+   * Valor de license text mantenido por la instancia.
+   */
   licenseText?: string;
+  /**
+   * Identificador asociado a trust tier concept.
+   */
   trustTierConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create observation data.
+ */
 export interface CreateObservationData {
+  /**
+   * Identificador asociado a collection run.
+   */
   collectionRunId: string;
+  /**
+   * Identificador asociado a source.
+   */
   sourceId: string;
+  /**
+   * Identificador asociado a country concept.
+   */
   countryConceptId?: string;
+  /**
+   * Valor de source locator mantenido por la instancia.
+   */
   sourceLocator?: string;
+  /**
+   * Valor de published at mantenido por la instancia.
+   */
   publishedAt?: Date;
+  /**
+   * Valor de retrieved at mantenido por la instancia.
+   */
   retrievedAt?: Date;
+  /**
+   * Valor de media type mantenido por la instancia.
+   */
   mediaType?: string;
+  /**
+   * Identificador asociado a raw payload file.
+   */
   rawPayloadFileId?: string;
+  /**
+   * Valor de extracted payload json mantenido por la instancia.
+   */
   extractedPayloadJson?: unknown;
+  /**
+   * Valor de content hash mantenido por la instancia.
+   */
   contentHash: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
@@ -63,6 +162,13 @@ export interface CreateObservationData {
 export class HealthContextRepository {
   // --- Agentes (UC-44-01) ---
 
+  /**
+   * Crea create agent.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create agent conforme al contrato `ContextAgents`.
+   */
   createAgent(em: EntityManager, data: CreateAgentData): ContextAgents {
     return em.create(
       ContextAgents,
@@ -80,10 +186,24 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find agent by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find agent by id conforme al contrato `Promise<ContextAgents | null>`.
+   */
   findAgentById(em: EntityManager, id: string): Promise<ContextAgents | null> {
     return em.findOne(ContextAgents, { id });
   }
 
+  /**
+   * Obtiene find agent by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find agent by code conforme al contrato `Promise<ContextAgents | null>`.
+   */
   findAgentByCode(
     em: EntityManager,
     code: string,
@@ -93,6 +213,13 @@ export class HealthContextRepository {
 
   // --- Fuentes (UC-44-02) ---
 
+  /**
+   * Crea create source.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create source conforme al contrato `HealthContextSources`.
+   */
   createSource(
     em: EntityManager,
     data: CreateSourceData,
@@ -115,6 +242,13 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find source by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find source by id conforme al contrato `Promise<HealthContextSources | null>`.
+   */
   findSourceById(
     em: EntityManager,
     id: string,
@@ -122,6 +256,13 @@ export class HealthContextRepository {
     return em.findOne(HealthContextSources, { id });
   }
 
+  /**
+   * Obtiene find source by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find source by code conforme al contrato `Promise<HealthContextSources | null>`.
+   */
   findSourceByCode(
     em: EntityManager,
     code: string,
@@ -131,17 +272,51 @@ export class HealthContextRepository {
 
   // --- Programaciones (UC-44-03, 05, 10) ---
 
+  /**
+   * Crea create schedule.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create schedule conforme al contrato `CountryContextSchedules`.
+   */
   createSchedule(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a country concept.
+       */
       countryConceptId: string;
+      /**
+       * Identificador asociado a agent.
+       */
       agentId: string;
+      /**
+       * Valor de schedule expression mantenido por la instancia.
+       */
       scheduleExpression: string;
+      /**
+       * Identificador asociado a timezone concept.
+       */
       timezoneConceptId?: string;
+      /**
+       * Valor de lookback days mantenido por la instancia.
+       */
       lookbackDays?: number;
+      /**
+       * Valor de freshness ttl seconds mantenido por la instancia.
+       */
       freshnessTtlSeconds?: number;
+      /**
+       * Valor de next run at mantenido por la instancia.
+       */
       nextRunAt?: Date;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): CountryContextSchedules {
@@ -179,15 +354,43 @@ export class HealthContextRepository {
 
   // --- Contextos de país (UC-44-04, 09, 11, 12) ---
 
+  /**
+   * Crea create context.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create context conforme al contrato `CountryHealthContexts`.
+   */
   createContext(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a country concept.
+       */
       countryConceptId: string;
+      /**
+       * Identificador asociado a context domain concept.
+       */
       contextDomainConceptId: string;
+      /**
+       * Valor de context key mantenido por la instancia.
+       */
       contextKey: string;
+      /**
+       * Valor de title mantenido por la instancia.
+       */
       title: string;
+      /**
+       * Valor de description mantenido por la instancia.
+       */
       description?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): CountryHealthContexts {
@@ -206,6 +409,13 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find context by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find context by id conforme al contrato `Promise<CountryHealthContexts | null>`.
+   */
   findContextById(
     em: EntityManager,
     id: string,
@@ -241,20 +451,63 @@ export class HealthContextRepository {
 
   // --- Versiones (UC-44-07, 08, 09, 11, 12) ---
 
+  /**
+   * Crea create context version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create context version conforme al contrato `CountryHealthContextVersions`.
+   */
   createContextVersion(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a country health context.
+       */
       countryHealthContextId: string;
+      /**
+       * Valor de version number mantenido por la instancia.
+       */
       versionNumber: number;
+      /**
+       * Identificador asociado a collection run.
+       */
       collectionRunId?: string;
+      /**
+       * Valor de schema version mantenido por la instancia.
+       */
       schemaVersion?: string;
+      /**
+       * Valor de summary mantenido por la instancia.
+       */
       summary?: string;
+      /**
+       * Valor de context payload json mantenido por la instancia.
+       */
       contextPayloadJson?: unknown;
+      /**
+       * Valor de observed at mantenido por la instancia.
+       */
       observedAt?: Date;
+      /**
+       * Valor de expires at mantenido por la instancia.
+       */
       expiresAt?: Date;
+      /**
+       * Valor de confidence score mantenido por la instancia.
+       */
       confidenceScore?: string;
+      /**
+       * Valor de content hash mantenido por la instancia.
+       */
       contentHash: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): CountryHealthContextVersions {
@@ -279,6 +532,13 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find version by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find version by id conforme al contrato `Promise<CountryHealthContextVersions | null>`.
+   */
   findVersionById(
     em: EntityManager,
     id: string,
@@ -286,6 +546,13 @@ export class HealthContextRepository {
     return em.findOne(CountryHealthContextVersions, { id });
   }
 
+  /**
+   * Obtiene find version for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find version for update conforme al contrato `Promise<CountryHealthContextVersions | null>`.
+   */
   findVersionForUpdate(
     em: EntityManager,
     id: string,
@@ -297,6 +564,13 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find latest version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param countryHealthContextId - Identificador de country health context.
+   * @returns Resultado de find latest version conforme al contrato `Promise<CountryHealthContextVersions | null>`.
+   */
   findLatestVersion(
     em: EntityManager,
     countryHealthContextId: string,
@@ -327,15 +601,43 @@ export class HealthContextRepository {
 
   // --- Corridas de recolección (UC-44-05, 06, 10) ---
 
+  /**
+   * Crea create collection run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create collection run conforme al contrato `ContextCollectionRuns`.
+   */
   createCollectionRun(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a schedule.
+       */
       scheduleId?: string;
+      /**
+       * Identificador asociado a agent.
+       */
       agentId: string;
+      /**
+       * Identificador asociado a country concept.
+       */
       countryConceptId: string;
+      /**
+       * Valor de idempotency key mantenido por la instancia.
+       */
       idempotencyKey: string;
+      /**
+       * Identificador asociado a trigger concept.
+       */
       triggerConceptId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): ContextCollectionRuns {
@@ -356,6 +658,13 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find run by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find run by id conforme al contrato `Promise<ContextCollectionRuns | null>`.
+   */
   findRunById(
     em: EntityManager,
     id: string,
@@ -363,6 +672,13 @@ export class HealthContextRepository {
     return em.findOne(ContextCollectionRuns, { id });
   }
 
+  /**
+   * Obtiene find run for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find run for update conforme al contrato `Promise<ContextCollectionRuns | null>`.
+   */
   findRunForUpdate(
     em: EntityManager,
     id: string,
@@ -422,6 +738,13 @@ export class HealthContextRepository {
     });
   }
 
+  /**
+   * Obtiene find observations by run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param collectionRunId - Identificador de collection run.
+   * @returns Resultado de find observations by run conforme al contrato `Promise<ContextSourceObservations[]>`.
+   */
   findObservationsByRun(
     em: EntityManager,
     collectionRunId: string,
@@ -429,6 +752,14 @@ export class HealthContextRepository {
     return em.find(ContextSourceObservations, { collectionRunId });
   }
 
+  /**
+   * Ejecuta la operación count observations.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param collectionRunId - Identificador de collection run.
+   * @param statusConceptId - Identificador de status concept.
+   * @returns Resultado de count observations conforme al contrato `Promise<number>`.
+   */
   countObservations(
     em: EntityManager,
     collectionRunId: string,
@@ -448,16 +779,49 @@ export class HealthContextRepository {
   createFact(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a context version.
+       */
       contextVersionId: string;
+      /**
+       * Valor de fact key mantenido por la instancia.
+       */
       factKey: string;
+      /**
+       * Identificador asociado a metric concept.
+       */
       metricConceptId?: string;
+      /**
+       * Valor de value type mantenido por la instancia.
+       */
       valueType: string;
+      /**
+       * Valor de value json mantenido por la instancia.
+       */
       valueJson: unknown;
+      /**
+       * Identificador asociado a unit concept.
+       */
       unitConceptId?: string;
+      /**
+       * Valor de period start mantenido por la instancia.
+       */
       periodStart?: Date;
+      /**
+       * Valor de period end mantenido por la instancia.
+       */
       periodEnd?: Date;
+      /**
+       * Valor de confidence score mantenido por la instancia.
+       */
       confidenceScore?: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): HealthContextFacts {
@@ -481,6 +845,13 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find facts by version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contextVersionId - Identificador de context version.
+   * @returns Resultado de find facts by version conforme al contrato `Promise<HealthContextFacts[]>`.
+   */
   findFactsByVersion(
     em: EntityManager,
     contextVersionId: string,
@@ -492,11 +863,29 @@ export class HealthContextRepository {
   createFactEvidence(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a health context fact.
+       */
       healthContextFactId: string;
+      /**
+       * Identificador asociado a source observation.
+       */
       sourceObservationId: string;
+      /**
+       * Valor de evidence locator json mantenido por la instancia.
+       */
       evidenceLocatorJson?: unknown;
+      /**
+       * Valor de relevance score mantenido por la instancia.
+       */
       relevanceScore?: string;
+      /**
+       * Valor de evidence hash mantenido por la instancia.
+       */
       evidenceHash?: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): ContextFactEvidence {
@@ -515,6 +904,13 @@ export class HealthContextRepository {
     );
   }
 
+  /**
+   * Obtiene find evidence by facts.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param healthContextFactIds - Valor de health context fact ids requerido por la operación.
+   * @returns Resultado de find evidence by facts conforme al contrato `Promise<ContextFactEvidence[]>`.
+   */
   findEvidenceByFacts(
     em: EntityManager,
     healthContextFactIds: string[],
@@ -530,12 +926,33 @@ export class HealthContextRepository {
   createQualityReview(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a context version.
+       */
       contextVersionId: string;
+      /**
+       * Identificador asociado a reviewer agent.
+       */
       reviewerAgentId?: string;
+      /**
+       * Identificador asociado a reviewed by user.
+       */
       reviewedByUserId?: string;
+      /**
+       * Identificador asociado a review type concept.
+       */
       reviewTypeConceptId: string;
+      /**
+       * Identificador asociado a outcome concept.
+       */
       outcomeConceptId: string;
+      /**
+       * Valor de issues json mantenido por la instancia.
+       */
       issuesJson?: unknown;
+      /**
+       * Valor de notes mantenido por la instancia.
+       */
       notes?: string;
     },
   ): ContextQualityReviews {

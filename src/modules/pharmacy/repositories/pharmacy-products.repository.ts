@@ -5,19 +5,61 @@ import { createdBy } from '../../../common';
 
 /** Datos para publicar un producto de catálogo (UC-24-04). */
 export interface CreateProductData {
+  /**
+   * Identificador asociado a pharmacy.
+   */
   pharmacyId: string;
+  /**
+   * Valor de product code mantenido por la instancia.
+   */
   productCode: string;
+  /**
+   * Identificador asociado a medication concept.
+   */
   medicationConceptId?: string;
+  /**
+   * Identificador asociado a inventory item concept.
+   */
   inventoryItemConceptId?: string;
+  /**
+   * Identificador asociado a manufacturer tenant.
+   */
   manufacturerTenantId?: string;
+  /**
+   * Valor de brand name mantenido por la instancia.
+   */
   brandName?: string;
+  /**
+   * Valor de generic name mantenido por la instancia.
+   */
   genericName?: string;
+  /**
+   * Valor de strength text mantenido por la instancia.
+   */
   strengthText?: string;
+  /**
+   * Identificador asociado a dosage form concept.
+   */
   dosageFormConceptId?: string;
+  /**
+   * Valor de package size text mantenido por la instancia.
+   */
   packageSizeText?: string;
+  /**
+   * Valor de requires prescription mantenido por la instancia.
+   */
   requiresPrescription?: boolean;
+  /**
+   * Valor de cold chain required mantenido por la instancia.
+   */
   coldChainRequired?: boolean;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

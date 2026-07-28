@@ -13,6 +13,11 @@ import { ConsolidateCostSnapshotDto, CostSnapshotResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('finops')
 export class StorageFinOpsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param operationsService - Valor de operations service requerido por la operación.
+   */
   constructor(private readonly operationsService: StorageOperationsService) {}
 
   /** UC-54-12. */

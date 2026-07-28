@@ -6,12 +6,33 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar un mapeo entre conceptos. */
 export interface UpsertConceptMapData {
+  /**
+   * Identificador asociado a source concept.
+   */
   sourceConceptId: string;
+  /**
+   * Identificador asociado a target concept.
+   */
   targetConceptId: string;
+  /**
+   * Identificador asociado a equivalence concept.
+   */
   equivalenceConceptId?: string;
+  /**
+   * Valor de context mantenido por la instancia.
+   */
   context?: string;
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   version?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

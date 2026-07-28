@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('authz')
 export class AuthzGrantsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param grantsService - Valor de grants service requerido por la operación.
+   */
   constructor(private readonly grantsService: AuthzGrantsService) {}
 
   /** UC-06-04. */

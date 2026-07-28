@@ -32,6 +32,14 @@ import {
  */
 @Injectable()
 export class StateMachineDefinitionService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param machinesRepo - Valor de machines repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly machinesRepo: StateMachinesRepository,
@@ -508,8 +516,24 @@ export class StateMachineDefinitionService {
    */
   private findUnreachableStates(
     initialConceptId: string,
-    states: { conceptId: string; isTerminal: boolean }[],
-    transitions: { from: string; to: string }[],
+    states: {
+      /**
+       * Identificador asociado a concept.
+       */
+      conceptId: string; /**
+       * Valor de is terminal mantenido por la instancia.
+       */
+      isTerminal: boolean;
+    }[],
+    transitions: {
+      /**
+       * Valor de from mantenido por la instancia.
+       */
+      from: string; /**
+       * Valor de to mantenido por la instancia.
+       */
+      to: string;
+    }[],
   ): string[] {
     const outgoing = new Map<string, string[]>();
     for (const t of transitions) {

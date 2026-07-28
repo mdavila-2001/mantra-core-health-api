@@ -5,15 +5,45 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta una farmacia (UC-24-01). */
 export interface CreatePharmacyData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de legal name mantenido por la instancia.
+   */
   legalName: string;
+  /**
+   * Valor de trade name mantenido por la instancia.
+   */
   tradeName?: string;
+  /**
+   * Identificador asociado a pharmacy type concept.
+   */
   pharmacyTypeConceptId?: string;
+  /**
+   * Identificador asociado a ownership type concept.
+   */
   ownershipTypeConceptId?: string;
+  /**
+   * Identificador asociado a default currency concept.
+   */
   defaultCurrencyConceptId?: string;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

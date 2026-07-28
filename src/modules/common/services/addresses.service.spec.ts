@@ -5,6 +5,10 @@ import { AddressesService } from './addresses.service';
 import { CreateAddressDto, OwnerType } from '../dto';
 import type { AuthenticatedUser } from '../../../common';
 
+/**
+ * Crea create em mock.
+ * @returns Resultado de create em mock.
+ */
 function createEmMock() {
   const tx = { flush: fn().mockResolvedValue(undefined) };
   const em = { transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)) };
@@ -16,6 +20,10 @@ const actor: AuthenticatedUser = { id: 'user-1', roles: [] };
 describe('AddressesService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
 
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const { em, tx } = createEmMock();
     const repo = { create: fn() };
@@ -33,7 +41,15 @@ describe('AddressesService', () => {
   it('creates an address, joining lines and defaulting country to PE', async () => {
     const { service, tx, repo } = build();
     repo.create.mockImplementation(
-      (_tx: unknown, data: { lines?: string }) => ({
+      (
+        _tx: unknown,
+        data: {
+          /**
+           * Valor de lines mantenido por la instancia.
+           */
+          lines?: string;
+        },
+      ) => ({
         id: 'addr-1',
         ownerId: dto.ownerId,
         lines: data.lines,

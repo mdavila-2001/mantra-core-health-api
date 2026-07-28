@@ -27,6 +27,11 @@ import {
 @ApiBearerAuth()
 @Controller('ops')
 export class StorageOperationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param operationsService - Valor de operations service requerido por la operación.
+   */
   constructor(private readonly operationsService: StorageOperationsService) {}
 
   /** UC-54-11. */

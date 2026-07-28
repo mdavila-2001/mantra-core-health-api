@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('accounting')
 export class AccountingFiscalController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param fiscalService - Valor de fiscal service requerido por la operación.
+   */
   constructor(private readonly fiscalService: FiscalService) {}
 
   /** UC-16-04. */

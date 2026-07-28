@@ -51,6 +51,12 @@ const OPEN_AGENT_RUN_STATUSES = [
  * se ha superado.
  */
 export function compareDecimals(left: string, right: string): number {
+  /**
+   * Ejecuta la operación split.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de split conforme al contrato `[bigint, string]`.
+   */
   const split = (value: string): [bigint, string] => {
     const negative = value.trim().startsWith('-');
     const clean = value.trim().replace(/^[+-]/, '');
@@ -64,6 +70,13 @@ export function compareDecimals(left: string, right: string): number {
   const rightFraction = rightValue.split('.')[1];
   const scale = Math.max(leftFraction.length, rightFraction.length);
 
+  /**
+   * Transforma to integer.
+   *
+   * @param sign - Valor de sign requerido por la operación.
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de to integer conforme al contrato `bigint`.
+   */
   const toInteger = (sign: bigint, value: string): bigint => {
     const [whole, fraction] = value.split('.');
     return sign * BigInt(`${whole || '0'}${fraction.padEnd(scale, '0')}`);
@@ -81,6 +94,16 @@ export function compareDecimals(left: string, right: string): number {
  */
 @Injectable()
 export class AutomationExecutionService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runsRepo - Valor de runs repo requerido por la operación.
+   * @param agentsRepo - Valor de agents repo requerido por la operación.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly runsRepo: AutomationRunsRepository,
@@ -770,8 +793,17 @@ export class AutomationExecutionService {
     agentRun: AgentRuns,
     dto: RecordAgentStepDto,
   ): Promise<{
+    /**
+     * Valor de reason mantenido por la instancia.
+     */
     reason: string;
+    /**
+     * Identificador asociado a approval type concept.
+     */
     approvalTypeConceptId: string;
+    /**
+     * Valor de target resource type mantenido por la instancia.
+     */
     targetResourceType?: string;
   } | null> {
     if (dto.agentToolId) {
@@ -883,10 +915,25 @@ export class AutomationExecutionService {
     tx: EntityManager,
     agentRun: AgentRuns,
     input: {
+      /**
+       * Identificador asociado a approval type concept.
+       */
       approvalTypeConceptId: string;
+      /**
+       * Identificador asociado a agent run step.
+       */
       agentRunStepId?: string;
+      /**
+       * Valor de requested action json mantenido por la instancia.
+       */
       requestedActionJson?: unknown;
+      /**
+       * Valor de target resource type mantenido por la instancia.
+       */
       targetResourceType?: string;
+      /**
+       * Identificador asociado a target ref.
+       */
       targetRefId?: string;
     },
     actorUserId: string,
@@ -935,8 +982,20 @@ export class AutomationExecutionService {
 
   /** Suma de importes decimales sin coma flotante, con la escala del más largo. */
   private addDecimals(left: string, right: string): string {
+    /**
+     * Ejecuta la operación scale of.
+     *
+     * @param value - Valor de value requerido por la operación.
+     * @returns Resultado de scale of.
+     */
     const scaleOf = (value: string) => (value.split('.')[1] ?? '').length;
     const scale = Math.max(scaleOf(left), scaleOf(right));
+    /**
+     * Transforma to integer.
+     *
+     * @param value - Valor de value requerido por la operación.
+     * @returns Resultado de to integer.
+     */
     const toInteger = (value: string) => {
       const [whole, fraction = ''] = value.split('.');
       return BigInt(`${whole || '0'}${fraction.padEnd(scale, '0')}`);

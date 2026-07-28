@@ -18,9 +18,12 @@ import { OPENSEARCH_CLIENT, openSearchClientProvider } from './providers';
   exports: [SearchIndexService],
 })
 export class SearchPlatformModule implements OnModuleDestroy {
-  constructor(
-    @Inject(OPENSEARCH_CLIENT) private readonly client: Client,
-  ) {}
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param client - Valor de client requerido por la operación.
+   */
+  constructor(@Inject(OPENSEARCH_CLIENT) private readonly client: Client) {}
 
   /** Cierre limpio del pool de conexiones del cliente OpenSearch. */
   async onModuleDestroy(): Promise<void> {

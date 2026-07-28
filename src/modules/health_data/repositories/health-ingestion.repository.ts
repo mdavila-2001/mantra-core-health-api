@@ -7,26 +7,83 @@ import {
   HealthIngestionRecords,
 } from '../entities';
 
+/**
+ * Describe el contrato estructural de create batch data.
+ */
 export interface CreateBatchData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a health source connection.
+   */
   healthSourceConnectionId: string;
+  /**
+   * Valor de batch identifier mantenido por la instancia.
+   */
   batchIdentifier: string;
+  /**
+   * Identificador asociado a ingestion mode concept.
+   */
   ingestionModeConceptId: string;
+  /**
+   * Valor de source period start mantenido por la instancia.
+   */
   sourcePeriodStart?: Date;
+  /**
+   * Valor de source period end mantenido por la instancia.
+   */
   sourcePeriodEnd?: Date;
+  /**
+   * Identificador asociado a payload manifest file.
+   */
   payloadManifestFileId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
 }
 
+/**
+ * Describe el contrato estructural de create record data.
+ */
 export interface CreateRecordData {
+  /**
+   * Identificador asociado a health ingestion batch.
+   */
   healthIngestionBatchId: string;
+  /**
+   * Valor de source record identifier mantenido por la instancia.
+   */
   sourceRecordIdentifier: string;
+  /**
+   * Identificador asociado a resource type concept.
+   */
   resourceTypeConceptId: string;
+  /**
+   * Valor de source version mantenido por la instancia.
+   */
   sourceVersion?: string;
+  /**
+   * Valor de source last updated at mantenido por la instancia.
+   */
   sourceLastUpdatedAt?: Date;
+  /**
+   * Valor de payload hash mantenido por la instancia.
+   */
   payloadHash: string;
+  /**
+   * Identificador asociado a payload file.
+   */
   payloadFileId?: string;
+  /**
+   * Identificador asociado a validation status concept.
+   */
   validationStatusConceptId: string;
+  /**
+   * Identificador asociado a processing status concept.
+   */
   processingStatusConceptId: string;
 }
 
@@ -55,6 +112,13 @@ export class HealthIngestionRepository {
 
   // --- Lotes (UC-52-01, 02) ---
 
+  /**
+   * Crea create batch.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create batch conforme al contrato `HealthIngestionBatches`.
+   */
   createBatch(
     em: EntityManager,
     data: CreateBatchData,
@@ -76,6 +140,13 @@ export class HealthIngestionRepository {
     );
   }
 
+  /**
+   * Obtiene find batch by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find batch by id conforme al contrato `Promise<HealthIngestionBatches | null>`.
+   */
   findBatchById(
     em: EntityManager,
     id: string,
@@ -83,6 +154,13 @@ export class HealthIngestionRepository {
     return em.findOne(HealthIngestionBatches, { id });
   }
 
+  /**
+   * Obtiene find batch for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find batch for update conforme al contrato `Promise<HealthIngestionBatches | null>`.
+   */
   findBatchForUpdate(
     em: EntityManager,
     id: string,
@@ -108,6 +186,13 @@ export class HealthIngestionRepository {
 
   // --- Registros (UC-52-02, 03) ---
 
+  /**
+   * Crea create record.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create record conforme al contrato `HealthIngestionRecords`.
+   */
   createRecord(
     em: EntityManager,
     data: CreateRecordData,
@@ -129,6 +214,13 @@ export class HealthIngestionRepository {
     );
   }
 
+  /**
+   * Obtiene find record by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find record by id conforme al contrato `Promise<HealthIngestionRecords | null>`.
+   */
   findRecordById(
     em: EntityManager,
     id: string,
@@ -136,6 +228,13 @@ export class HealthIngestionRepository {
     return em.findOne(HealthIngestionRecords, { id });
   }
 
+  /**
+   * Obtiene find record for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find record for update conforme al contrato `Promise<HealthIngestionRecords | null>`.
+   */
   findRecordForUpdate(
     em: EntityManager,
     id: string,
@@ -161,6 +260,13 @@ export class HealthIngestionRepository {
     });
   }
 
+  /**
+   * Obtiene find records by batch.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param healthIngestionBatchId - Identificador de health ingestion batch.
+   * @returns Resultado de find records by batch conforme al contrato `Promise<HealthIngestionRecords[]>`.
+   */
   findRecordsByBatch(
     em: EntityManager,
     healthIngestionBatchId: string,

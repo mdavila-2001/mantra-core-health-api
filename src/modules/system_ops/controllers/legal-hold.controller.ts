@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('admin/governance')
 export class LegalHoldController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: LegalHoldService) {}
 
   /** UC-11-08. */

@@ -42,6 +42,20 @@ const BACKOFF_BASE_SECONDS = 60;
  */
 @Injectable()
 export class IntegrationsMessagingService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param connectionsRepo - Valor de connections repo requerido por la operación.
+   * @param providersRepo - Valor de providers repo requerido por la operación.
+   * @param endpointsRepo - Valor de endpoints repo requerido por la operación.
+   * @param outboundRepo - Valor de outbound repo requerido por la operación.
+   * @param responsesRepo - Valor de responses repo requerido por la operación.
+   * @param retriesRepo - Valor de retries repo requerido por la operación.
+   * @param inboundRepo - Valor de inbound repo requerido por la operación.
+   * @param http - Valor de http requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly connectionsRepo: ProviderConnectionsRepository,

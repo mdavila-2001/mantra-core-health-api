@@ -23,6 +23,9 @@ export const DECISION_PURPOSES = [
   'OPERATIONS',
   'EMERGENCY',
 ] as const;
+/**
+ * Define el tipo de dominio decision purpose.
+ */
 export type DecisionPurpose = (typeof DECISION_PURPOSES)[number];
 
 /**
@@ -33,18 +36,30 @@ export type DecisionPurpose = (typeof DECISION_PURPOSES)[number];
  * `POST /authz/decisions/evaluate` (documentado en el README del módulo).
  */
 export class EvaluateDecisionDto {
+  /**
+   * Identificador asociado a user.
+   */
   @ApiProperty({ description: 'Usuario sujeto de la decisión', format: 'uuid' })
   @IsUUID()
   userId!: string;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({ description: 'Tenant de la evaluación', format: 'uuid' })
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de action mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Acción evaluada', enum: PERMISSION_ACTIONS })
   @IsIn(PERMISSION_ACTIONS)
   action!: PermissionAction;
 
+  /**
+   * Valor de resource mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Recurso protegido (debe casar con permissions.resource)',
     maxLength: 150,
@@ -54,6 +69,9 @@ export class EvaluateDecisionDto {
   @MaxLength(150)
   resource!: string;
 
+  /**
+   * Valor de resource type mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Tipo de recurso concreto',
     enum: RESOURCE_TYPES,
@@ -62,6 +80,9 @@ export class EvaluateDecisionDto {
   @IsIn(RESOURCE_TYPES)
   resourceType?: ResourceType;
 
+  /**
+   * Identificador asociado a resource.
+   */
   @ApiPropertyOptional({
     description: 'Id del recurso concreto',
     format: 'uuid',
@@ -70,6 +91,9 @@ export class EvaluateDecisionDto {
   @IsUUID()
   resourceId?: string;
 
+  /**
+   * Identificador asociado a patient profile.
+   */
   @ApiPropertyOptional({
     description: 'Perfil de paciente si el recurso es clínico',
     format: 'uuid',
@@ -78,6 +102,9 @@ export class EvaluateDecisionDto {
   @IsUUID()
   patientProfileId?: string;
 
+  /**
+   * Identificador asociado a practitioner profile.
+   */
   @ApiPropertyOptional({
     description:
       'Perfil de practicante del actor (habilita evaluación de relación asistencial C-06)',
@@ -87,6 +114,9 @@ export class EvaluateDecisionDto {
   @IsUUID()
   practitionerProfileId?: string;
 
+  /**
+   * Valor de purpose of use mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Propósito de uso',
     enum: DECISION_PURPOSES,

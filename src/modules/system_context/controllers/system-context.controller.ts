@@ -47,6 +47,12 @@ import {
 @ApiBearerAuth()
 @Controller('system-context')
 export class SystemContextController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param enumsService - Valor de enums service requerido por la operación.
+   * @param contextsService - Valor de contexts service requerido por la operación.
+   */
   constructor(
     private readonly enumsService: DynamicEnumsService,
     private readonly contextsService: SystemContextsService,

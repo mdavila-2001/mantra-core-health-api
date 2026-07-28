@@ -5,10 +5,25 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar una versión de sistema de códigos. */
 export interface CreateCodeSystemVersionData {
+  /**
+   * Identificador asociado a code system.
+   */
   codeSystemId: string;
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   version: string;
+  /**
+   * Valor de is default mantenido por la instancia.
+   */
   isDefault?: boolean;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

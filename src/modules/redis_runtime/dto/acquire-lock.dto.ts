@@ -1,10 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  IsInt,
+  IsString,
+  Matches,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { REDIS_KEY_PATTERN } from './set-cache.dto';
 
 /** Cuerpo de `POST /redis-runtime/locks`: adquisición de un lock distribuido. */
 export class AcquireLockDto {
-  @ApiProperty({ description: 'Clave del recurso a bloquear (namespaced por tenant)', maxLength: 200 })
+  /**
+   * Valor de key mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Clave del recurso a bloquear (namespaced por tenant)',
+    maxLength: 200,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(200)
@@ -13,7 +27,14 @@ export class AcquireLockDto {
   })
   key!: string;
 
-  @ApiProperty({ description: 'Tiempo de vida del lock en segundos', minimum: 1, maximum: 3600 })
+  /**
+   * Valor de ttl sec mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Tiempo de vida del lock en segundos',
+    minimum: 1,
+    maximum: 3600,
+  })
   @IsInt()
   @Min(1)
   @Max(3600)

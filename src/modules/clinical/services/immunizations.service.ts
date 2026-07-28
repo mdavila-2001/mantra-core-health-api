@@ -9,6 +9,13 @@ import { CLIN } from '../clinical.concepts';
 /** UC-08-13: registro de inmunizaciones; evita doble dosis por vacuna+número. */
 @Injectable()
 export class ImmunizationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param immunizationsRepo - Valor de immunizations repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly immunizationsRepo: ImmunizationsRepository,

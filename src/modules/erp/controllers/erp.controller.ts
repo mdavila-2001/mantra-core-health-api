@@ -48,6 +48,12 @@ import {
 @ApiBearerAuth()
 @Controller('erp')
 export class ErpController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param contractsService - Valor de contracts service requerido por la operación.
+   * @param operationsService - Valor de operations service requerido por la operación.
+   */
   constructor(
     private readonly contractsService: ErpContractsService,
     private readonly operationsService: ErpOperationsService,

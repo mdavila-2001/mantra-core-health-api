@@ -27,9 +27,21 @@ import {
 
 /** Lo que deja materializar un lote de particiones. */
 interface MaterializationResult {
+  /**
+   * Valor de partitions committed mantenido por la instancia.
+   */
   partitionsCommitted: number;
+  /**
+   * Valor de partitions skipped mantenido por la instancia.
+   */
   partitionsSkipped: number;
+  /**
+   * Valor de files written mantenido por la instancia.
+   */
   filesWritten: number;
+  /**
+   * Valor de lineage edges mantenido por la instancia.
+   */
   lineageEdges: number;
 }
 
@@ -45,6 +57,16 @@ interface MaterializationResult {
  */
 @Injectable()
 export class TransformationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runtimeRepo - Valor de runtime repo requerido por la operación.
+   * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param dataReleaseRepo - Valor de data release repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly runtimeRepo: LakehouseRuntimeRepository,
@@ -419,6 +441,14 @@ export class TransformationService {
 
   // --- Piezas compartidas -------------------------------------------------
 
+  /**
+   * Ejecuta la operación require writable dataset.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param datasetId - Identificador de dataset.
+   * @returns Resultado de require writable dataset conforme al contrato `Promise<LakehouseDatasets>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async requireWritableDataset(
     tx: EntityManager,
     datasetId: string,
@@ -451,10 +481,25 @@ export class TransformationService {
   private async materialize(
     tx: EntityManager,
     input: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de dataset mantenido por la instancia.
+       */
       dataset: LakehouseDatasets;
+      /**
+       * Valor de partitions mantenido por la instancia.
+       */
       partitions: MaterializedPartitionDto[];
+      /**
+       * Identificador asociado a run.
+       */
       runId?: string;
+      /**
+       * Valor de source dataset ids mantenido por la instancia.
+       */
       sourceDatasetIds: string[];
     },
   ): Promise<MaterializationResult> {

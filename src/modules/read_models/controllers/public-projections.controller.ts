@@ -11,6 +11,11 @@ import { PublicProjectionResponseDto } from '../dto';
 @ApiTags('read-models-public')
 @Controller('public')
 export class PublicProjectionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: PublicProjectionsService) {}
 
   /** UC-30-10: catálogo público de directorio (city/specialty). */

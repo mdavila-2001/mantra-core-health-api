@@ -9,36 +9,93 @@ import { MongoConnection } from './mongo-connection.provider';
  * optimista, marcas temporales y `deletedAt` para el borrado lógico.
  */
 export interface StoredDocument {
+  /**
+   * Identificador único de la instancia.
+   */
   _id: ObjectId;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
   documentType: string;
+  /**
+   * Valor de payload mantenido por la instancia.
+   */
   payload: Record<string, unknown>;
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   version: number;
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   createdAt: Date;
+  /**
+   * Fecha y hora de la última actualización.
+   */
   updatedAt: Date;
+  /**
+   * Fecha y hora de la eliminación lógica, si corresponde.
+   */
   deletedAt: Date | null;
 }
 
 /** Datos de alta de un documento. */
 export interface InsertDocumentInput {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
   documentType: string;
+  /**
+   * Valor de payload mantenido por la instancia.
+   */
   payload: Record<string, unknown>;
 }
 
 /** Parámetros de listado gobernado por tenant. */
 export interface ListDocumentsInput {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
   documentType?: string;
+  /**
+   * Valor de offset mantenido por la instancia.
+   */
   offset: number;
+  /**
+   * Valor de limit mantenido por la instancia.
+   */
   limit: number;
+  /**
+   * Valor de order mantenido por la instancia.
+   */
   order: 'ASC' | 'DESC';
+  /**
+   * Valor de sort by mantenido por la instancia.
+   */
   sortBy: string;
 }
 
 /** Parche aplicable en una actualización con versión optimista. */
 export interface PatchDocumentInput {
+  /**
+   * Valor de payload mantenido por la instancia.
+   */
   payload?: Record<string, unknown>;
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
   documentType?: string;
 }
 
@@ -53,8 +110,19 @@ const SORTABLE_FIELDS = new Set(['createdAt', 'updatedAt', 'version']);
  */
 @Injectable()
 export class DocumentStoreRepository {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param mongo - Valor de mongo requerido por la operación.
+   */
   constructor(private readonly mongo: MongoConnection) {}
 
+  /**
+   * Ejecuta la operación collection.
+   *
+   * @param collection - Valor de collection requerido por la operación.
+   * @returns Resultado de collection conforme al contrato `Promise<Collection<StoredDocument>>`.
+   */
   private collection(collection: string): Promise<Collection<StoredDocument>> {
     return this.mongo.collection<StoredDocument>(collection);
   }
@@ -94,7 +162,15 @@ export class DocumentStoreRepository {
   async list(
     collection: string,
     input: ListDocumentsInput,
-  ): Promise<{ items: StoredDocument[]; total: number }> {
+  ): Promise<{
+    /**
+     * Valor de items mantenido por la instancia.
+     */
+    items: StoredDocument[]; /**
+     * Valor de total mantenido por la instancia.
+     */
+    total: number;
+  }> {
     const col = await this.collection(collection);
     const filter: Filter<StoredDocument> = {
       tenantId: input.tenantId,

@@ -17,6 +17,11 @@ import { CreateDraftDto, DraftResponseDto, PublishDraftDto } from '../dto';
 @ApiBearerAuth()
 @Controller('admin/governance')
 export class DraftController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: DraftService) {}
 
   /** UC-11-15. */

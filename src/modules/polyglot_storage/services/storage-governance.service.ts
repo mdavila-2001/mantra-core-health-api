@@ -40,6 +40,15 @@ import {
  */
 @Injectable()
 export class StorageGovernanceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param backendsRepo - Valor de backends repo requerido por la operación.
+   * @param datasetsRepo - Valor de datasets repo requerido por la operación.
+   * @param policiesRepo - Valor de policies repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly backendsRepo: StorageBackendsRepository,
@@ -483,6 +492,14 @@ export class StorageGovernanceService {
 
   // --- Apoyo ---
 
+  /**
+   * Valida assert unique.
+   *
+   * @param values - Valor de values requerido por la operación.
+   * @param message - Valor de message requerido por la operación.
+   * @param code - Valor de code requerido por la operación.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private assertUnique(values: string[], message: string, code: string): void {
     const seen = new Set<string>();
     for (const value of values) {

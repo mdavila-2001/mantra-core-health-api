@@ -5,6 +5,9 @@ import { PermissionSetItemDto } from './permission-set-item.dto';
 
 /** Cuerpo de `POST /delegated-permission-sets/{id}/versions` (UC-29-02). */
 export class PublishSetVersionDto {
+  /**
+   * Valor de items mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Ítems de permiso de la nueva versión',
     type: [PermissionSetItemDto],

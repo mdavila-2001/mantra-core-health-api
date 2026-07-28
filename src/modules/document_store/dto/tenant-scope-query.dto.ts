@@ -7,7 +7,13 @@ import { IsUUID } from 'class-validator';
  * acotada a un tenant, igual que el listado.
  */
 export class TenantScopeQueryDto {
-  @ApiProperty({ description: 'Tenant propietario del documento', format: 'uuid' })
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({
+    description: 'Tenant propietario del documento',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 }

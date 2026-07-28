@@ -3,6 +3,9 @@ import { IsISO8601, IsOptional } from 'class-validator';
 
 /** Cuerpo de `POST /integration/contracts/{id}/versions/{versionId}/activate` (UC-31-10). */
 export class ActivateVersionDto {
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Inicio de vigencia explícito (ISO 8601); por defecto now()',
   })

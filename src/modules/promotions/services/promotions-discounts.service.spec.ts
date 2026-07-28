@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PromotionsDiscountsService } from './promotions-discounts.service';
@@ -19,6 +25,10 @@ const ORDER = '55555555-5555-5555-5555-555555555555';
 const REDEMPTION = '66666666-6666-6666-6666-666666666666';
 const MEMBERSHIP = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -55,6 +65,12 @@ function build() {
   return { service, tx, discountsRepo, loyaltyRepo };
 }
 
+/**
+ * Ejecuta la operación active promotion.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active promotion conforme al contrato `any`.
+ */
 function activePromotion(overrides: Record<string, unknown> = {}): any {
   return {
     id: PROMOTION,
@@ -66,6 +82,12 @@ function activePromotion(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación active coupon.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active coupon conforme al contrato `any`.
+ */
 function activeCoupon(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'coupon-1',
@@ -80,6 +102,12 @@ function activeCoupon(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación percentage rule.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de percentage rule conforme al contrato `any`.
+ */
 function percentageRule(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'rule-1',
@@ -594,6 +622,12 @@ describe('PromotionsDiscountsService', () => {
   });
 
   describe('reverseRedemption (UC-51-11)', () => {
+    /**
+     * Ejecuta la operación applied redemption.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de applied redemption conforme al contrato `any`.
+     */
     function appliedRedemption(overrides: Record<string, unknown> = {}): any {
       return {
         id: REDEMPTION,

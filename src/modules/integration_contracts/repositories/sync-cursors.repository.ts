@@ -4,11 +4,29 @@ import { IntegrationSyncCursors } from '../entities';
 
 /** Datos para crear un cursor de sincronización (UC-31-08). */
 export interface CreateSyncCursorData {
+  /**
+   * Identificador asociado a integration contract.
+   */
   integrationContractId: string;
+  /**
+   * Valor de cursor scope mantenido por la instancia.
+   */
   cursorScope: string;
+  /**
+   * Valor de cursor value mantenido por la instancia.
+   */
   cursorValue: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de watermark at mantenido por la instancia.
+   */
   watermarkAt?: Date;
+  /**
+   * Identificador asociado a last successful exchange.
+   */
   lastSuccessfulExchangeId?: string;
 }
 

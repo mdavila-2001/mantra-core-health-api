@@ -5,12 +5,33 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar un sistema de códigos. */
 export interface CreateCodeSystemData {
+  /**
+   * Identificador asociado a source.
+   */
   sourceId: string;
+  /**
+   * Valor de internal code mantenido por la instancia.
+   */
   internalCode: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Valor de canonical url mantenido por la instancia.
+   */
   canonicalUrl: string;
+  /**
+   * Identificador asociado a content type concept.
+   */
   contentTypeConceptId?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

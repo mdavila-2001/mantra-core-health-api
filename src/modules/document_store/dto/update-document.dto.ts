@@ -18,10 +18,19 @@ const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
  * menos uno de `payload`/`documentType` debe venir; el servicio lo valida.
  */
 export class UpdateDocumentDto {
-  @ApiProperty({ description: 'Tenant propietario del documento', format: 'uuid' })
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({
+    description: 'Tenant propietario del documento',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de expected version mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Versión que el cliente cree vigente (concurrencia optimista)',
     minimum: 1,
@@ -30,6 +39,9 @@ export class UpdateDocumentDto {
   @Min(1)
   expectedVersion!: number;
 
+  /**
+   * Valor de payload mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Nuevo contenido flexible del documento',
     type: 'object',
@@ -39,6 +51,9 @@ export class UpdateDocumentDto {
   @IsObject()
   payload?: Record<string, unknown>;
 
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Nueva clasificación del documento' })
   @IsOptional()
   @Matches(DOCUMENT_TYPE_RE, {

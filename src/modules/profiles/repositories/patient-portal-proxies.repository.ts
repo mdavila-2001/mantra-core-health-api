@@ -6,20 +6,54 @@ import { PROF } from '../profiles.concepts';
 
 /** Datos de un proxy de portal delegado a un representante. */
 export interface CreatePortalProxyData {
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a proxy user.
+   */
   proxyUserId: string;
+  /**
+   * Identificador asociado a related person.
+   */
   relatedPersonId?: string;
+  /**
+   * Identificador asociado a scope value set.
+   */
   scopeValueSetId: string;
+  /**
+   * Identificador asociado a legal basis record.
+   */
   legalBasisRecordId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `profiles.patient_portal_proxies`. */
 @Injectable()
 export class PatientPortalProxiesRepository {
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PatientPortalProxies`.
+   */
   create(em: EntityManager, data: CreatePortalProxyData): PatientPortalProxies {
     return em.create(
       PatientPortalProxies,

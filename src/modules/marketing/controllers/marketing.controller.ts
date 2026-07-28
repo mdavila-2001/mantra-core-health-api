@@ -47,6 +47,12 @@ import {
 @ApiBearerAuth()
 @Controller('marketing')
 export class MarketingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param campaignsService - Valor de campaigns service requerido por la operación.
+   * @param journeysService - Valor de journeys service requerido por la operación.
+   */
   constructor(
     private readonly campaignsService: MarketingCampaignsService,
     private readonly journeysService: MarketingJourneysService,

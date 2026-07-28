@@ -6,18 +6,46 @@ import { PROF } from '../profiles.concepts';
 
 /** Datos de un vínculo persona-cuenta de portal. */
 export interface CreateAccountLinkData {
+  /**
+   * Identificador asociado a person.
+   */
   personId: string;
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a link type concept.
+   */
   linkTypeConceptId: string;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `profiles.person_account_links`. */
 @Injectable()
 export class PersonAccountLinksRepository {
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PersonAccountLinks`.
+   */
   create(em: EntityManager, data: CreateAccountLinkData): PersonAccountLinks {
     return em.create(
       PersonAccountLinks,

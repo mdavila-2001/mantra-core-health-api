@@ -20,6 +20,11 @@ import { AccreditationResponseDto, RenewAccreditationDto } from '../dto';
 @ApiBearerAuth()
 @Controller('diagnostic-unit-accreditations')
 export class DiagnosticUnitAccreditationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param unitsService - Valor de units service requerido por la operación.
+   */
   constructor(private readonly unitsService: DiagnosticUnitsService) {}
 
   /** UC-23-11. */

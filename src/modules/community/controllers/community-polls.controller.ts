@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('community')
 export class CommunityPollsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CommunityPollsService) {}
 
   /** Bootstrap: crea una encuesta con sus opciones sobre un post. */

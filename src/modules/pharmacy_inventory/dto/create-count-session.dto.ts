@@ -10,10 +10,16 @@ import {
 
 /** Un producto/lote a incluir en el snapshot de conteo. */
 export class CountSessionItemDto {
+  /**
+   * Identificador asociado a pharmacy product.
+   */
   @ApiProperty({ format: 'uuid', description: 'Producto de farmacia' })
   @IsUUID()
   pharmacyProductId!: string;
 
+  /**
+   * Identificador asociado a inventory lot.
+   */
   @ApiPropertyOptional({ format: 'uuid', description: 'Lote específico' })
   @IsOptional()
   @IsUUID()
@@ -22,10 +28,16 @@ export class CountSessionItemDto {
 
 /** Cuerpo de `POST /pharmacy/:siteId/count-sessions` (UC-25-06). */
 export class CreateCountSessionDto {
+  /**
+   * Identificador asociado a inventory location.
+   */
   @ApiProperty({ format: 'uuid', description: 'Ubicación a contar' })
   @IsUUID()
   inventoryLocationId!: string;
 
+  /**
+   * Valor de freeze mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Congelar movimientos durante el conteo',
   })
@@ -33,6 +45,9 @@ export class CreateCountSessionDto {
   @IsBoolean()
   freeze?: boolean;
 
+  /**
+   * Valor de items mantenido por la instancia.
+   */
   @ApiProperty({
     type: [CountSessionItemDto],
     description: 'Productos/lotes a contar',

@@ -84,6 +84,16 @@ const TOTAL_SPLIT_PERCENT = 100;
  */
 @Injectable()
 export class AdsOptimizationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param optimizationRepo - Valor de optimization repo requerido por la operación.
+   * @param campaignsRepo - Valor de campaigns repo requerido por la operación.
+   * @param accountsRepo - Valor de accounts repo requerido por la operación.
+   * @param dataRepo - Valor de data repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly optimizationRepo: AdsOptimizationRepository,
@@ -569,7 +579,18 @@ export class AdsOptimizationService {
       // de factura agrega todo el consumo de esa campaña.
       const byCampaign = new Map<
         string,
-        { impressions: number; clicks: number; amount: number }
+        {
+          /**
+           * Valor de impressions mantenido por la instancia.
+           */
+          impressions: number; /**
+           * Valor de clicks mantenido por la instancia.
+           */
+          clicks: number; /**
+           * Valor de amount mantenido por la instancia.
+           */
+          amount: number;
+        }
       >();
       for (const row of rollups) {
         const current = byCampaign.get(row.entityRefId) ?? {
@@ -827,6 +848,12 @@ export class AdsOptimizationService {
     return true;
   }
 
+  /**
+   * Obtiene hash.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de hash conforme al contrato `string`.
+   */
   private hash(value: string): string {
     return createHash('sha256').update(value).digest('hex');
   }

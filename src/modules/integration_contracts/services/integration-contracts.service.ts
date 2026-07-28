@@ -34,6 +34,14 @@ import {
  */
 @Injectable()
 export class IntegrationContractsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contractsRepo - Valor de contracts repo requerido por la operación.
+   * @param versionsRepo - Valor de versions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contractsRepo: ContractsRepository,
@@ -291,11 +299,32 @@ export class IntegrationContractsService {
     });
   }
 
+  /**
+   * Transforma to contract response.
+   *
+   * @param c - Valor de c requerido por la operación.
+   * @returns Resultado de to contract response conforme al contrato `ContractResponseDto`.
+   */
   private toContractResponse(c: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Valor de contract code mantenido por la instancia.
+     */
     contractCode: string;
+    /**
+     * Identificador asociado a external provider.
+     */
     externalProviderId: string;
+    /**
+     * Identificador asociado a status concept.
+     */
     statusConceptId: string;
+    /**
+     * Fecha y hora en que se creó el registro.
+     */
     createdAt: Date;
   }): ContractResponseDto {
     return {
@@ -307,11 +336,32 @@ export class IntegrationContractsService {
     };
   }
 
+  /**
+   * Transforma to version response.
+   *
+   * @param v - Valor de v requerido por la operación.
+   * @returns Resultado de to version response conforme al contrato `ContractVersionResponseDto`.
+   */
   private toVersionResponse(v: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a integration contract.
+     */
     integrationContractId: string;
+    /**
+     * Valor de version number mantenido por la instancia.
+     */
     versionNumber: number;
+    /**
+     * Identificador asociado a status concept.
+     */
     statusConceptId: string;
+    /**
+     * Valor de effective from mantenido por la instancia.
+     */
     effectiveFrom?: Date;
   }): ContractVersionResponseDto {
     return {

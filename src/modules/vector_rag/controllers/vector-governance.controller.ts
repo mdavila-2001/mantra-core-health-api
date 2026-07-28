@@ -43,6 +43,12 @@ import {
 @ApiBearerAuth()
 @Controller('vector-rag')
 export class VectorGovernanceController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param governanceService - Valor de governance service requerido por la operación.
+   * @param pipelineService - Valor de pipeline service requerido por la operación.
+   */
   constructor(
     private readonly governanceService: VectorGovernanceService,
     private readonly pipelineService: EmbeddingPipelineService,

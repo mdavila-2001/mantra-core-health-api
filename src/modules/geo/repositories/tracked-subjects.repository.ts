@@ -5,11 +5,29 @@ import { createdBy } from '../../../common';
 
 /** Datos para dar de alta un sujeto rastreado. */
 export interface CreateTrackedSubjectData {
+  /**
+   * Identificador asociado a subject type concept.
+   */
   subjectTypeConceptId: string;
+  /**
+   * Identificador asociado a subject.
+   */
   subjectId: string;
+  /**
+   * Identificador asociado a device.
+   */
   deviceId?: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

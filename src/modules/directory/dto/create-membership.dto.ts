@@ -8,6 +8,9 @@ export type AccessScopeCode = 'ALL_TENANT' | 'BRANCH';
 
 /** Cuerpo de `POST /tenants/{tenantId}/memberships` (UC-04-05: incorporar usuario). */
 export class CreateMembershipDto {
+  /**
+   * Identificador asociado a user.
+   */
   @ApiProperty({
     description: 'Usuario a incorporar al tenant',
     format: 'uuid',
@@ -15,6 +18,9 @@ export class CreateMembershipDto {
   @IsUUID()
   userId!: string;
 
+  /**
+   * Valor de role mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Rol dentro del tenant',
     enum: ['OWNER', 'ADMIN', 'STAFF'],
@@ -23,6 +29,9 @@ export class CreateMembershipDto {
   @IsIn(['OWNER', 'ADMIN', 'STAFF'])
   role?: TenantRoleCode;
 
+  /**
+   * Valor de access scope mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Scope de acceso',
     enum: ['ALL_TENANT', 'BRANCH'],
@@ -31,6 +40,9 @@ export class CreateMembershipDto {
   @IsIn(['ALL_TENANT', 'BRANCH'])
   accessScope?: AccessScopeCode;
 
+  /**
+   * Identificador asociado a primary branch.
+   */
   @ApiPropertyOptional({
     description: 'Branch primaria opcional',
     format: 'uuid',

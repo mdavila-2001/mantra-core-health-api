@@ -25,6 +25,11 @@ import { DicomInstanceAccessResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('dicomweb')
 export class DicomWebController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param dicomService - Valor de dicom service requerido por la operación.
+   */
   constructor(private readonly dicomService: DicomCatalogService) {}
 
   /** UC-60-05. */

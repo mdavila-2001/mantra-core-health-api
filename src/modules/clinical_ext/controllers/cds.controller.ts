@@ -30,6 +30,11 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class CdsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param cdsService - Valor de cds service requerido por la operación.
+   */
   constructor(private readonly cdsService: CdsService) {}
 
   /** Crea una regla CDS en borrador (precondición de UC-18-13). */
@@ -101,7 +106,12 @@ export class CdsController {
   createDrugInteraction(
     @Body() dto: CreateDrugInteractionDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<{ id: string }> {
+  ): Promise<{
+    /**
+     * Identificador único de la instancia.
+     */
+    id: string;
+  }> {
     return this.cdsService.createDrugInteraction(dto, actor);
   }
 }

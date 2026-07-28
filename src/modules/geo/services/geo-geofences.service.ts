@@ -30,6 +30,15 @@ import {
  */
 @Injectable()
 export class GeoGeofencesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param geofencesRepo - Valor de geofences repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param subjectsRepo - Valor de subjects repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly geofencesRepo: GeofencesRepository,

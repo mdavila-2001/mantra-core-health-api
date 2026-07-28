@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('identity/authorities')
 export class IdentityAuthoritiesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param authoritiesService - Valor de authorities service requerido por la operación.
+   */
   constructor(
     private readonly authoritiesService: IdentityAuthoritiesService,
   ) {}

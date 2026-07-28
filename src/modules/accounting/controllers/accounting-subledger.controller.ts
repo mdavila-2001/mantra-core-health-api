@@ -14,6 +14,11 @@ import {
 @ApiBearerAuth()
 @Controller('accounting')
 export class AccountingSubledgerController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param subledgerService - Valor de subledger service requerido por la operación.
+   */
   constructor(private readonly subledgerService: SubledgerService) {}
 
   /** UC-16-08. */

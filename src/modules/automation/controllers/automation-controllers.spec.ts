@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { AgentCatalogController } from './agent-catalog.controller';
@@ -10,6 +16,10 @@ const ID = '11111111-1111-1111-1111-111111111111';
 const SECOND_ID = '22222222-2222-2222-2222-222222222222';
 
 describe('AgentCatalogController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const catalogService = {
       registerAgent: mockFn(async () => ({ id: ID })),
@@ -104,6 +114,10 @@ describe('AgentCatalogController', () => {
 });
 
 describe('AutomationOrchestrationController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const definitionService = {
       defineWorkflow: mockFn(async () => ({ id: ID })),

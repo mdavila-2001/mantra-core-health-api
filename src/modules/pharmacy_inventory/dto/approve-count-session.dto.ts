@@ -11,10 +11,16 @@ import {
 
 /** Conteo capturado para una línea de la sesión. */
 export class CountResultDto {
+  /**
+   * Identificador asociado a line.
+   */
   @ApiProperty({ format: 'uuid', description: 'Línea de conteo' })
   @IsUUID()
   lineId!: string;
 
+  /**
+   * Valor de counted quantity mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Cantidad efectivamente contada', minimum: 0 })
   @IsNumber()
   @Min(0)
@@ -23,6 +29,9 @@ export class CountResultDto {
 
 /** Cuerpo de `POST /pharmacy/count-sessions/:id/approve` (UC-25-07). */
 export class ApproveCountSessionDto {
+  /**
+   * Valor de counts mantenido por la instancia.
+   */
   @ApiProperty({ type: [CountResultDto] })
   @IsArray()
   @ArrayMinSize(1)

@@ -5,15 +5,39 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta una dirección postal. */
 export interface CreateAddressData {
+  /**
+   * Identificador asociado a owner type concept.
+   */
   ownerTypeConceptId: string;
+  /**
+   * Identificador asociado a owner.
+   */
   ownerId: string;
   /** Líneas de la dirección ya serializadas a una sola cadena (la columna es varchar). */
   lines?: string;
+  /**
+   * Valor de city mantenido por la instancia.
+   */
   city?: string;
+  /**
+   * Valor de postal code mantenido por la instancia.
+   */
   postalCode?: string;
+  /**
+   * Identificador asociado a country concept.
+   */
   countryConceptId: string;
+  /**
+   * Identificador asociado a use concept.
+   */
   useConceptId?: string;
+  /**
+   * Identificador asociado a type concept.
+   */
   typeConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

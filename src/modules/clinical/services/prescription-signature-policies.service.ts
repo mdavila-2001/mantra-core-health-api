@@ -15,8 +15,17 @@ import { PrescriptionSignaturePolicies } from '../entities';
 
 /** Criterio de resolución de la política de firma para una receta concreta. */
 export interface SignaturePolicyCriteria {
+  /**
+   * Valor de medication type mantenido por la instancia.
+   */
   medicationType?: string;
+  /**
+   * Valor de channel mantenido por la instancia.
+   */
   channel?: string;
+  /**
+   * Valor de jurisdiction mantenido por la instancia.
+   */
   jurisdiction?: string;
 }
 
@@ -30,6 +39,13 @@ export interface SignaturePolicyCriteria {
  */
 @Injectable()
 export class PrescriptionSignaturePoliciesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: PrescriptionSignaturePoliciesRepository,
@@ -38,6 +54,12 @@ export class PrescriptionSignaturePoliciesService {
     this.logger.setContext(PrescriptionSignaturePoliciesService.name);
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param policy - Valor de policy requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `PrescriptionSignaturePolicyResponseDto`.
+   */
   private toResponse(
     policy: PrescriptionSignaturePolicies,
   ): PrescriptionSignaturePolicyResponseDto {
@@ -149,8 +171,7 @@ export class PrescriptionSignaturePoliciesService {
           p.jurisdictionCode === criteria.jurisdiction) &&
         (p.medicationTypeConceptId == null ||
           p.medicationTypeConceptId === criteria.medicationType) &&
-        (p.channelConceptId == null ||
-          p.channelConceptId === criteria.channel),
+        (p.channelConceptId == null || p.channelConceptId === criteria.channel),
     );
 
     if (applicable.length === 0) {

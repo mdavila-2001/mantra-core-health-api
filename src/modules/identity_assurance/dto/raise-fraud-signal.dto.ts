@@ -9,6 +9,9 @@ import {
 
 /** Cuerpo de `POST /identity/verification-cases/{id}/fraud-signals` (UC-27-07). */
 export class RaiseFraudSignalDto {
+  /**
+   * Identificador asociado a signal type concept.
+   */
   @ApiProperty({
     description: 'Concepto: tipo de señal de fraude',
     format: 'uuid',
@@ -16,6 +19,9 @@ export class RaiseFraudSignalDto {
   @IsUUID()
   signalTypeConceptId!: string;
 
+  /**
+   * Identificador asociado a severity concept.
+   */
   @ApiProperty({
     description: 'Concepto: severidad de la señal',
     format: 'uuid',
@@ -23,6 +29,9 @@ export class RaiseFraudSignalDto {
   @IsUUID()
   severityConceptId!: string;
 
+  /**
+   * Valor de confidence score mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Puntaje de confianza (0..1)',
     example: '0.75',
@@ -31,6 +40,9 @@ export class RaiseFraudSignalDto {
   @IsNumberString()
   confidenceScore?: string;
 
+  /**
+   * Identificador asociado a source concept.
+   */
   @ApiPropertyOptional({
     description: 'Concepto: fuente de la señal',
     format: 'uuid',
@@ -39,6 +51,9 @@ export class RaiseFraudSignalDto {
   @IsUUID()
   sourceConceptId?: string;
 
+  /**
+   * Valor de evidence reference mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Referencia a la evidencia de la señal',
     maxLength: 200,

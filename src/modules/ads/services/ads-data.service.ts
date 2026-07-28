@@ -84,6 +84,14 @@ const TRANSFORMABLE_FIELDS = [
  */
 @Injectable()
 export class AdsDataService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param dataRepo - Valor de data repo requerido por la operación.
+   * @param accountsRepo - Valor de accounts repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly dataRepo: AdsDataRepository,
@@ -807,9 +815,21 @@ export class AdsDataService {
     rules: AdEventFieldRules[],
     eventName: string,
   ): {
+    /**
+     * Valor de blocked mantenido por la instancia.
+     */
     blocked: boolean;
+    /**
+     * Valor de blocked fields mantenido por la instancia.
+     */
     blockedFields: string[];
+    /**
+     * Valor de hashed fields mantenido por la instancia.
+     */
     hashedFields: string[];
+    /**
+     * Valor de dropped fields mantenido por la instancia.
+     */
     droppedFields: string[];
   } {
     const applicable = rules.filter((rule) =>
@@ -844,6 +864,12 @@ export class AdsDataService {
     return pattern === eventName;
   }
 
+  /**
+   * Obtiene hash.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de hash conforme al contrato `string`.
+   */
   private hash(value: string): string {
     return createHash('sha256').update(value).digest('hex');
   }

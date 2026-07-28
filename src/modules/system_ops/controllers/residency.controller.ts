@@ -17,6 +17,11 @@ import {
 @ApiBearerAuth()
 @Controller('admin/governance')
 export class ResidencyController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: ResidencyService) {}
 
   /** UC-11-06. */

@@ -39,6 +39,13 @@ import { CreateFrameworkDto } from '../dto';
  */
 @Injectable()
 export class AssessmentService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: AssessmentRepository,
@@ -77,7 +84,18 @@ export class AssessmentService {
       await tx.flush();
 
       // Primera pasada: crear todos los controles (sin padre) y mapear code -> id.
-      const byCode = new Map<string, { id: string; parentCode?: string }>();
+      const byCode = new Map<
+        string,
+        {
+          /**
+           * Identificador único de la instancia.
+           */
+          id: string; /**
+           * Valor de parent code mantenido por la instancia.
+           */
+          parentCode?: string;
+        }
+      >();
       const controls = dto.controls.map((c) => {
         const control = this.repo.createControl(tx, {
           operationalFrameworkId: framework.id,

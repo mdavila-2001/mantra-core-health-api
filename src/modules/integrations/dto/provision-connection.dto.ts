@@ -12,6 +12,9 @@ import type { EnvironmentCode, SecretTypeCode } from '../integrations.concepts';
 
 /** Cuerpo de `POST /integrations/providers/{id}/connections` (UC-12-02). */
 export class ProvisionConnectionDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({
     description: 'Tenant propietario de la conexión',
     format: 'uuid',
@@ -19,6 +22,9 @@ export class ProvisionConnectionDto {
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de environment mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Entorno',
     enum: ['SANDBOX', 'PRODUCTION'],
@@ -27,6 +33,9 @@ export class ProvisionConnectionDto {
   @IsIn(['SANDBOX', 'PRODUCTION'])
   environment?: EnvironmentCode;
 
+  /**
+   * Valor de config json mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Configuración específica de la conexión',
   })
@@ -34,6 +43,9 @@ export class ProvisionConnectionDto {
   @IsObject()
   configJson?: Record<string, unknown>;
 
+  /**
+   * Valor de secret type mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Tipo del secreto inicial',
     enum: ['API_KEY', 'OAUTH_TOKEN', 'HMAC'],
@@ -41,6 +53,9 @@ export class ProvisionConnectionDto {
   @IsIn(['API_KEY', 'OAUTH_TOKEN', 'HMAC'])
   secretType!: SecretTypeCode;
 
+  /**
+   * Valor de secret ref mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Referencia al secreto en la bóveda externa (no el secreto)',
   })
@@ -49,6 +64,9 @@ export class ProvisionConnectionDto {
   @MaxLength(200)
   secretRef!: string;
 
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Fecha de expiración del secreto',
     type: String,

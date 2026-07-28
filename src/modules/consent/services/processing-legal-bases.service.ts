@@ -16,6 +16,13 @@ import {
  */
 @Injectable()
 export class ProcessingLegalBasesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param legalBasesRepo - Valor de legal bases repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly legalBasesRepo: ProcessingLegalBasesRepository,

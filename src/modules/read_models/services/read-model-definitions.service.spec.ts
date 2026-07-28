@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict typings.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ReadModelDefinitionsService } from './read-model-definitions.service';
@@ -13,6 +19,10 @@ import { RM } from '../read_models.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   // Conexión SQL simulada: `execute` resuelve vacío por defecto (REFRESH ok,

@@ -2,26 +2,60 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { LockMode } from '@mikro-orm/core';
 import { createdBy } from '../../../common';
-import {
-  BookingConfirmationRules,
-  type RuleCondition,
-} from '../entities';
+import { BookingConfirmationRules, type RuleCondition } from '../entities';
 
+/**
+ * Describe el contrato estructural de create confirmation rule data.
+ */
 export interface CreateConfirmationRuleData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a scope type concept.
+   */
   scopeTypeConceptId: string;
+  /**
+   * Identificador asociado a scope.
+   */
   scopeId?: string;
+  /**
+   * Valor de priority mantenido por la instancia.
+   */
   priority: number;
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   effectiveFrom: Date;
+  /**
+   * Valor de effective to mantenido por la instancia.
+   */
   effectiveTo?: Date;
+  /**
+   * Valor de condition json mantenido por la instancia.
+   */
   conditionJson: RuleCondition;
+  /**
+   * Identificador asociado a decision concept.
+   */
   decisionConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos del motor de confirmación automática y del historial de transiciones. */
 @Injectable()
 export class SchedulingConfirmationRepository {
+  /**
+   * Crea create rule.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create rule conforme al contrato `BookingConfirmationRules`.
+   */
   createRule(
     em: EntityManager,
     data: CreateConfirmationRuleData,
@@ -45,6 +79,13 @@ export class SchedulingConfirmationRepository {
     );
   }
 
+  /**
+   * Obtiene find rule by id for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find rule by id for update conforme al contrato `Promise<BookingConfirmationRules | null>`.
+   */
   findRuleByIdForUpdate(
     em: EntityManager,
     id: string,
@@ -56,6 +97,14 @@ export class SchedulingConfirmationRepository {
     );
   }
 
+  /**
+   * Obtiene find rules by tenant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @param onlyEnabled - Valor de only enabled requerido por la operación.
+   * @returns Resultado de find rules by tenant conforme al contrato `Promise<BookingConfirmationRules[]>`.
+   */
   findRulesByTenant(
     em: EntityManager,
     tenantId: string,

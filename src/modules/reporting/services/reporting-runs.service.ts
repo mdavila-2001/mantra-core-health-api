@@ -40,6 +40,14 @@ const DEFAULT_INTERVAL_MINUTES = 1440;
  */
 @Injectable()
 export class ReportingRunsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runsRepo - Valor de runs repo requerido por la operación.
+   * @param definitionsRepo - Valor de definitions repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly runsRepo: ReportingRunsRepository,
@@ -409,9 +417,21 @@ export class ReportingRunsService {
       let skipped = 0;
 
       const targets: Array<{
+        /**
+         * Identificador asociado a recipient type concept.
+         */
         recipientTypeConceptId: string;
+        /**
+         * Identificador asociado a recipient user.
+         */
         recipientUserId?: string;
+        /**
+         * Valor de recipient address mantenido por la instancia.
+         */
         recipientAddress?: string;
+        /**
+         * Identificador asociado a channel.
+         */
         channelId: string;
       }> = [];
 
@@ -635,8 +655,17 @@ export class ReportingRunsService {
    */
   private resolveParameters(
     declared: Array<{
+      /**
+       * Valor de code mantenido por la instancia.
+       */
       code: string;
+      /**
+       * Valor de required mantenido por la instancia.
+       */
       required?: boolean;
+      /**
+       * Valor de default value json mantenido por la instancia.
+       */
       defaultValueJson?: unknown;
     }>,
     received: Record<string, unknown>,

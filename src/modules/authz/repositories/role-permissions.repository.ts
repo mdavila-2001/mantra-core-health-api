@@ -5,12 +5,33 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos de un binding rol↔permiso. */
 export interface CreateRolePermissionData {
+  /**
+   * Identificador asociado a role.
+   */
   roleId: string;
+  /**
+   * Identificador asociado a permission.
+   */
   permissionId: string;
+  /**
+   * Identificador asociado a effect concept.
+   */
   effectConceptId: string;
+  /**
+   * Identificador asociado a scope concept.
+   */
   scopeConceptId?: string;
+  /**
+   * Valor de constraint json mantenido por la instancia.
+   */
   constraintJson?: unknown;
+  /**
+   * Identificador asociado a field value set.
+   */
   fieldValueSetId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -42,6 +63,13 @@ export class RolePermissionsRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `RolePermissions`.
+   */
   create(em: EntityManager, data: CreateRolePermissionData): RolePermissions {
     return em.create(
       RolePermissions,

@@ -30,7 +30,13 @@ const DEFAULT_LINK_EXPIRY_MINUTES = 30;
 
 /** Resultado interno de la evaluación de reglas de aprovisionamiento. */
 interface ProvisioningDecision {
+  /**
+   * Valor de allowed mantenido por la instancia.
+   */
   allowed: boolean;
+  /**
+   * Identificador asociado a matched rule.
+   */
   matchedRuleId?: string;
 }
 
@@ -45,6 +51,13 @@ interface ProvisioningDecision {
  */
 @Injectable()
 export class FederatedLoginService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param providersRepo - Valor de providers repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly providersRepo: AuthProvidersRepository,
@@ -201,6 +214,12 @@ export class FederatedLoginService {
       }
 
       const tenantId = dto.tenantId ?? initiated.tenantId;
+      /**
+       * Ejecuta la operación reject.
+       *
+       * @param reasonConceptId - Identificador de reason concept.
+       * @returns Resultado de reject conforme al contrato `CallbackResponseDto`.
+       */
       const reject = (reasonConceptId: string): CallbackResponseDto => {
         const attempt = this.providersRepo.createLoginAttempt(tx, {
           providerId: provider.id,
@@ -617,11 +636,31 @@ export class FederatedLoginService {
 
   // --- Apoyo ---
 
+  /**
+   * Crea build authorize url.
+   *
+   * @param base - Valor de base requerido por la operación.
+   * @param clientId - Identificador de client.
+   * @param scopes - Valor de scopes requerido por la operación.
+   * @param params - Valor de params requerido por la operación.
+   * @returns Resultado de build authorize url conforme al contrato `string`.
+   */
   private buildAuthorizeUrl(
     base: string,
     clientId: string | undefined,
     scopes: string | undefined,
-    params: { state: string; nonce: string; responseType?: string },
+    params: {
+      /**
+       * Valor de state mantenido por la instancia.
+       */
+      state: string; /**
+       * Valor de nonce mantenido por la instancia.
+       */
+      nonce: string; /**
+       * Valor de response type mantenido por la instancia.
+       */
+      responseType?: string;
+    },
   ): string {
     const query = new URLSearchParams({
       response_type: params.responseType ?? 'code',
@@ -634,6 +673,13 @@ export class FederatedLoginService {
     return `${base}${base.includes('?') ? '&' : '?'}${query.toString()}`;
   }
 
+  /**
+   * Obtiene has claim.
+   *
+   * @param claims - Valor de claims requerido por la operación.
+   * @param claim - Valor de claim requerido por la operación.
+   * @returns Resultado de has claim conforme al contrato `boolean`.
+   */
   private hasClaim(claims: Record<string, unknown>, claim: string): boolean {
     const value = claims[claim];
     return value !== undefined && value !== null && value !== '';
@@ -654,6 +700,13 @@ export class FederatedLoginService {
     return typeof value === 'string' && value !== '' ? value : undefined;
   }
 
+  /**
+   * Ejecuta la operación domain allowed.
+   *
+   * @param email - Valor de email requerido por la operación.
+   * @param allowedDomains - Valor de allowed domains requerido por la operación.
+   * @returns Resultado de domain allowed conforme al contrato `boolean`.
+   */
   private domainAllowed(
     email: string | undefined,
     allowedDomains: string,
@@ -695,6 +748,13 @@ export class FederatedLoginService {
     return { allowed: rules.length === 0 };
   }
 
+  /**
+   * Ejecuta la operación matches condition.
+   *
+   * @param condition - Valor de condition requerido por la operación.
+   * @param claims - Valor de claims requerido por la operación.
+   * @returns Resultado de matches condition conforme al contrato `boolean`.
+   */
   private matchesCondition(
     condition: unknown,
     claims: Record<string, unknown>,
@@ -707,15 +767,39 @@ export class FederatedLoginService {
     );
   }
 
-  private mintLinkToken(): { token: string; hash: string } {
+  /**
+   * Ejecuta la operación mint link token.
+   * @returns Resultado de mint link token conforme al contrato `{ token: string; hash: string }`.
+   */
+  private mintLinkToken(): {
+    /**
+     * Valor de token mantenido por la instancia.
+     */
+    token: string; /**
+     * Valor de hash mantenido por la instancia.
+     */
+    hash: string;
+  } {
     const token = randomBytes(32).toString('base64url');
     return { token, hash: this.hashToken(token) };
   }
 
+  /**
+   * Obtiene hash token.
+   *
+   * @param token - Valor de token requerido por la operación.
+   * @returns Resultado de hash token conforme al contrato `string`.
+   */
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
   }
 
+  /**
+   * Ejecuta la operación expiry from now.
+   *
+   * @param minutes - Valor de minutes requerido por la operación.
+   * @returns Resultado de expiry from now conforme al contrato `Date`.
+   */
   private expiryFromNow(minutes: number): Date {
     return new Date(Date.now() + minutes * 60 * 1000);
   }

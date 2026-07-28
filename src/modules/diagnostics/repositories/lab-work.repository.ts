@@ -11,35 +11,101 @@ import { createdBy } from '../../../common';
 
 /** Datos de alta de una orden de trabajo. */
 export interface CreateWorkOrderData {
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   custodianTenantId: string;
+  /**
+   * Identificador asociado a laboratory accession.
+   */
   laboratoryAccessionId: string;
+  /**
+   * Valor de work order number mantenido por la instancia.
+   */
   workOrderNumber: string;
+  /**
+   * Identificador asociado a priority concept.
+   */
   priorityConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a assigned laboratory unit.
+   */
   assignedLaboratoryUnitId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos de alta de una prueba de la orden. */
 export interface CreateWorkOrderTestData {
+  /**
+   * Identificador asociado a laboratory work order.
+   */
   laboratoryWorkOrderId: string;
+  /**
+   * Identificador asociado a service request.
+   */
   serviceRequestId: string;
+  /**
+   * Identificador asociado a test code concept.
+   */
   testCodeConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a specimen.
+   */
   specimenId?: string;
+  /**
+   * Identificador asociado a method concept.
+   */
   methodConceptId?: string;
+  /**
+   * Identificador asociado a analyzer device.
+   */
   analyzerDeviceId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Datos de alta de una corrida de analizador. */
 export interface CreateAnalyzerRunData {
+  /**
+   * Identificador asociado a custodian tenant.
+   */
   custodianTenantId: string;
+  /**
+   * Identificador asociado a analyzer device.
+   */
   analyzerDeviceId: string;
+  /**
+   * Valor de run identifier mantenido por la instancia.
+   */
   runIdentifier: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a reagent lot.
+   */
   reagentLotId?: string;
+  /**
+   * Valor de calibration reference mantenido por la instancia.
+   */
   calibrationReference?: string;
 }
 
@@ -50,6 +116,13 @@ export interface CreateAnalyzerRunData {
  */
 @Injectable()
 export class LabWorkRepository {
+  /**
+   * Obtiene find work order.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find work order conforme al contrato `Promise<LaboratoryWorkOrders | null>`.
+   */
   findWorkOrder(
     em: EntityManager,
     id: string,
@@ -57,6 +130,13 @@ export class LabWorkRepository {
     return em.findOne(LaboratoryWorkOrders, { id });
   }
 
+  /**
+   * Obtiene find work order test.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find work order test conforme al contrato `Promise<LaboratoryWorkOrderTests | null>`.
+   */
   findWorkOrderTest(
     em: EntityManager,
     id: string,
@@ -64,10 +144,24 @@ export class LabWorkRepository {
     return em.findOne(LaboratoryWorkOrderTests, { id });
   }
 
+  /**
+   * Obtiene find analyzer run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find analyzer run conforme al contrato `Promise<AnalyzerRuns | null>`.
+   */
   findAnalyzerRun(em: EntityManager, id: string): Promise<AnalyzerRuns | null> {
     return em.findOne(AnalyzerRuns, { id });
   }
 
+  /**
+   * Crea create work order.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create work order conforme al contrato `LaboratoryWorkOrders`.
+   */
   createWorkOrder(
     em: EntityManager,
     data: CreateWorkOrderData,
@@ -87,6 +181,13 @@ export class LabWorkRepository {
     );
   }
 
+  /**
+   * Crea create work order test.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create work order test conforme al contrato `LaboratoryWorkOrderTests`.
+   */
   createWorkOrderTest(
     em: EntityManager,
     data: CreateWorkOrderTestData,
@@ -107,6 +208,13 @@ export class LabWorkRepository {
     );
   }
 
+  /**
+   * Crea create analyzer run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create analyzer run conforme al contrato `AnalyzerRuns`.
+   */
   createAnalyzerRun(
     em: EntityManager,
     data: CreateAnalyzerRunData,
@@ -143,14 +251,41 @@ export class LabWorkRepository {
   recordMessage(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a analyzer run.
+       */
       analyzerRunId: string;
+      /**
+       * Valor de received at mantenido por la instancia.
+       */
       receivedAt: Date;
+      /**
+       * Identificador asociado a message format concept.
+       */
       messageFormatConceptId: string;
+      /**
+       * Valor de payload hash mantenido por la instancia.
+       */
       payloadHash: string;
+      /**
+       * Identificador asociado a validation status concept.
+       */
       validationStatusConceptId: string;
+      /**
+       * Identificador asociado a message control.
+       */
       messageControlId?: string;
+      /**
+       * Identificador asociado a laboratory work order test.
+       */
       laboratoryWorkOrderTestId?: string;
+      /**
+       * Identificador asociado a mapped observation.
+       */
       mappedObservationId?: string;
+      /**
+       * Identificador asociado a raw message file.
+       */
       rawMessageFileId?: string;
     },
   ): AnalyzerResultMessages {
@@ -176,14 +311,41 @@ export class LabWorkRepository {
   recordVerification(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a custodian tenant.
+       */
       custodianTenantId: string;
+      /**
+       * Identificador asociado a verifiable type concept.
+       */
       verifiableTypeConceptId: string;
+      /**
+       * Identificador asociado a verifiable.
+       */
       verifiableId: string;
+      /**
+       * Identificador asociado a verification level concept.
+       */
       verificationLevelConceptId: string;
+      /**
+       * Identificador asociado a result concept.
+       */
       resultConceptId: string;
+      /**
+       * Identificador asociado a verified by profile.
+       */
       verifiedByProfileId: string;
+      /**
+       * Valor de verified at mantenido por la instancia.
+       */
       verifiedAt: Date;
+      /**
+       * Valor de verification comment mantenido por la instancia.
+       */
       verificationComment?: string;
+      /**
+       * Identificador asociado a previous verification.
+       */
       previousVerificationId?: string;
     },
   ): ResultVerifications {

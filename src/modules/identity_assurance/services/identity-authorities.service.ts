@@ -26,6 +26,14 @@ import {
  */
 @Injectable()
 export class IdentityAuthoritiesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param authoritiesRepo - Valor de authorities repo requerido por la operación.
+   * @param endpointsRepo - Valor de endpoints repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly authoritiesRepo: IdentityAuthoritiesRepository,

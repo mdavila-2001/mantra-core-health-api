@@ -5,11 +5,29 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para vincular un archivo a un propietario polimórfico. */
 export interface CreateFileLinkData {
+  /**
+   * Identificador asociado a file.
+   */
   fileId: string;
+  /**
+   * Identificador asociado a owner type concept.
+   */
   ownerTypeConceptId: string;
+  /**
+   * Identificador asociado a owner.
+   */
   ownerId: string;
+  /**
+   * Identificador asociado a link role concept.
+   */
   linkRoleConceptId: string;
+  /**
+   * Identificador asociado a visibility concept.
+   */
   visibilityConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -1,7 +1,7 @@
 # Informe de cobertura REDESA (estático)
 
-- Entidades (tablas mapeadas): **1182**
-- Endpoints declarados: **830** en 189 controllers
+- Entidades (tablas mapeadas): **1184**
+- Endpoints declarados: **838** en 190 controllers
 - Módulos: **57**
 
 ## ORPHAN_TABLE — entidades sin consumidor fuera de `entities/` (303)
@@ -69,29 +69,29 @@
 - … +243 más
 
 ## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (23)
-- src/modules/common/controllers/common-addresses.controller.ts:16 — @Post 
-- src/modules/common/controllers/common-contact-points.controller.ts:28 — @Post 
-- src/modules/common/controllers/common-contact-points.controller.ts:39 — @Post ':id/verify'
-- src/modules/common/controllers/common-files.controller.ts:36 — @Post 
-- src/modules/common/controllers/common-files.controller.ts:49 — @Post ':id/versions'
-- src/modules/common/controllers/common-files.controller.ts:61 — @Post ':id/versions/:vid/derivatives'
-- src/modules/common/controllers/common-files.controller.ts:74 — @Post ':id/links'
-- src/modules/common/controllers/common-files.controller.ts:86 — @Delete ':id'
-- src/modules/common/controllers/common-files.controller.ts:97 — @Post ':id/download-url'
-- src/modules/common/controllers/common-identifiers.controller.ts:16 — @Post 
-- src/modules/community/controllers/community-groups.controller.ts:28 — @Post 
-- src/modules/community/controllers/community-groups.controller.ts:39 — @Post ':groupId/members'
-- src/modules/community/controllers/community-messaging.controller.ts:30 — @Post 
-- src/modules/community/controllers/community-messaging.controller.ts:41 — @Post ':conversationId/messages'
-- src/modules/community/controllers/community-messaging.controller.ts:53 — @Post ':conversationId/read'
-- src/modules/community/controllers/community-polls.controller.ts:28 — @Post 'posts/:postId/polls'
-- src/modules/community/controllers/community-polls.controller.ts:40 — @Post 'polls/:pollId/votes'
-- src/modules/community/controllers/community-reviews.controller.ts:23 — @Post ':profileId/reviews'
-- src/modules/telemetry/controllers/telemetry-events.controller.ts:36 — @Post 'activity-events'
-- src/modules/telemetry/controllers/telemetry-events.controller.ts:48 — @Post 'client-contexts'
-- src/modules/telemetry/controllers/telemetry-events.controller.ts:60 — @Post 'web-vitals'
-- src/modules/telemetry/controllers/telemetry-events.controller.ts:72 — @Post 'conversion-events'
-- src/modules/telemetry/controllers/telemetry-events.controller.ts:82 — @Post 'session-journeys/:id/close'
+- src/modules/common/controllers/common-addresses.controller.ts:21 — @Post 
+- src/modules/common/controllers/common-contact-points.controller.ts:33 — @Post 
+- src/modules/common/controllers/common-contact-points.controller.ts:44 — @Post ':id/verify'
+- src/modules/common/controllers/common-files.controller.ts:41 — @Post 
+- src/modules/common/controllers/common-files.controller.ts:54 — @Post ':id/versions'
+- src/modules/common/controllers/common-files.controller.ts:66 — @Post ':id/versions/:vid/derivatives'
+- src/modules/common/controllers/common-files.controller.ts:79 — @Post ':id/links'
+- src/modules/common/controllers/common-files.controller.ts:91 — @Delete ':id'
+- src/modules/common/controllers/common-files.controller.ts:102 — @Post ':id/download-url'
+- src/modules/common/controllers/common-identifiers.controller.ts:21 — @Post 
+- src/modules/community/controllers/community-groups.controller.ts:33 — @Post 
+- src/modules/community/controllers/community-groups.controller.ts:44 — @Post ':groupId/members'
+- src/modules/community/controllers/community-messaging.controller.ts:35 — @Post 
+- src/modules/community/controllers/community-messaging.controller.ts:46 — @Post ':conversationId/messages'
+- src/modules/community/controllers/community-messaging.controller.ts:58 — @Post ':conversationId/read'
+- src/modules/community/controllers/community-polls.controller.ts:33 — @Post 'posts/:postId/polls'
+- src/modules/community/controllers/community-polls.controller.ts:45 — @Post 'polls/:pollId/votes'
+- src/modules/community/controllers/community-reviews.controller.ts:28 — @Post ':profileId/reviews'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:41 — @Post 'activity-events'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:53 — @Post 'client-contexts'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:65 — @Post 'web-vitals'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:77 — @Post 'conversion-events'
+- src/modules/telemetry/controllers/telemetry-events.controller.ts:87 — @Post 'session-journeys/:id/close'
 
 ## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (2)
 - src/modules/promotions/repositories/promotions-loyalty.repository.ts → `payments`

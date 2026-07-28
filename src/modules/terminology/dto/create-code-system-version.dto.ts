@@ -9,6 +9,9 @@ import {
 
 /** Alta de una versión de sistema de códigos (UC-03-02). */
 export class CreateCodeSystemVersionDto {
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Etiqueta de versión (p. ej. 1.0.0)',
     maxLength: 255,
@@ -18,6 +21,9 @@ export class CreateCodeSystemVersionDto {
   @MaxLength(255)
   version!: string;
 
+  /**
+   * Valor de is default mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Marca la versión como predeterminada' })
   @IsOptional()
   @IsBoolean()
@@ -26,12 +32,21 @@ export class CreateCodeSystemVersionDto {
 
 /** Respuesta del alta de versión. */
 export class CodeSystemVersionResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ description: 'Id de la versión creada' })
   id!: string;
 
+  /**
+   * Valor de version mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Etiqueta de versión' })
   version!: string;
 
+  /**
+   * Valor de state mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Estado del ciclo de vida (código de concepto)' })
   state!: string;
 }

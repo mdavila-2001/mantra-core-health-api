@@ -17,6 +17,11 @@ import { CreateAccessPolicyDto, AuthzIdResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('authz/tenants')
 export class AuthzPoliciesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param policiesService - Valor de policies service requerido por la operación.
+   */
   constructor(private readonly policiesService: AuthzPoliciesService) {}
 
   /** UC-06-02. */

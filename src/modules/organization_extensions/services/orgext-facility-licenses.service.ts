@@ -24,6 +24,13 @@ import { ORGEXT } from '../organization_extensions.concepts';
  */
 @Injectable()
 export class OrgextFacilityLicensesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param licensesRepo - Valor de licenses repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly licensesRepo: FacilityLicensesRepository,
@@ -123,11 +130,32 @@ export class OrgextFacilityLicensesService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param license - Valor de license requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `FacilityLicenseResponseDto`.
+   */
   private toResponse(license: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a tenant.
+     */
     tenantId: string;
+    /**
+     * Valor de license number mantenido por la instancia.
+     */
     licenseNumber: string;
+    /**
+     * Identificador asociado a verification status concept.
+     */
     verificationStatusConceptId: string;
+    /**
+     * Fecha y hora en que se creó el registro.
+     */
     createdAt: Date;
   }): FacilityLicenseResponseDto {
     return {

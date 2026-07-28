@@ -4,19 +4,50 @@ import { IdentityFraudSignals } from '../entities';
 
 /** Registro append-only de una señal de fraude (UC-27-07). */
 export interface CreateFraudSignalData {
+  /**
+   * Identificador asociado a identity verification case.
+   */
   identityVerificationCaseId: string;
+  /**
+   * Identificador asociado a signal type concept.
+   */
   signalTypeConceptId: string;
+  /**
+   * Identificador asociado a severity concept.
+   */
   severityConceptId: string;
+  /**
+   * Valor de confidence score mantenido por la instancia.
+   */
   confidenceScore?: string;
+  /**
+   * Identificador asociado a source concept.
+   */
   sourceConceptId?: string;
+  /**
+   * Valor de evidence reference mantenido por la instancia.
+   */
   evidenceReference?: string;
+  /**
+   * Valor de detected at mantenido por la instancia.
+   */
   detectedAt?: Date;
+  /**
+   * Identificador asociado a resolution concept.
+   */
   resolutionConceptId: string;
 }
 
 /** Acceso a datos de `identity_assurance.identity_fraud_signals` (log append-only). */
 @Injectable()
 export class IdentityFraudSignalsRepository {
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `IdentityFraudSignals`.
+   */
   create(em: EntityManager, data: CreateFraudSignalData): IdentityFraudSignals {
     return em.create(
       IdentityFraudSignals,

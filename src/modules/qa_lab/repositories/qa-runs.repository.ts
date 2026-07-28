@@ -12,31 +12,103 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create run data.
+ */
 export interface CreateRunData {
+  /**
+   * Identificador asociado a suite.
+   */
   suiteId: string;
+  /**
+   * Identificador asociado a environment.
+   */
   environmentId: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de run number mantenido por la instancia.
+   */
   runNumber: string;
+  /**
+   * Identificador asociado a trigger concept.
+   */
   triggerConceptId: string;
+  /**
+   * Identificador asociado a triggered by user.
+   */
   triggeredByUserId?: string;
+  /**
+   * Valor de git ref mantenido por la instancia.
+   */
   gitRef?: string;
+  /**
+   * Valor de total cases mantenido por la instancia.
+   */
   totalCases: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create defect data.
+ */
 export interface CreateDefectData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a test case.
+   */
   testCaseId: string;
+  /**
+   * Identificador asociado a test case result.
+   */
   testCaseResultId?: string;
+  /**
+   * Valor de defect number mantenido por la instancia.
+   */
   defectNumber: string;
+  /**
+   * Identificador asociado a defect type concept.
+   */
   defectTypeConceptId: string;
+  /**
+   * Identificador asociado a severity concept.
+   */
   severityConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de failure signature hash mantenido por la instancia.
+   */
   failureSignatureHash: string;
+  /**
+   * Valor de title mantenido por la instancia.
+   */
   title: string;
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   description?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -48,6 +120,13 @@ export interface CreateDefectData {
 export class QaRunsRepository {
   // --- Corridas (UC-36-04, UC-36-07, UC-36-12) ---
 
+  /**
+   * Crea create run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create run conforme al contrato `TestRuns`.
+   */
   createRun(em: EntityManager, data: CreateRunData): TestRuns {
     return em.create(
       TestRuns,
@@ -71,10 +150,24 @@ export class QaRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find run by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find run by id conforme al contrato `Promise<TestRuns | null>`.
+   */
   findRunById(em: EntityManager, id: string): Promise<TestRuns | null> {
     return em.findOne(TestRuns, { id });
   }
 
+  /**
+   * Obtiene find run for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find run for update conforme al contrato `Promise<TestRuns | null>`.
+   */
   findRunForUpdate(em: EntityManager, id: string): Promise<TestRuns | null> {
     return em.findOne(
       TestRuns,
@@ -83,6 +176,13 @@ export class QaRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find run by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runNumber - Valor de run number requerido por la operación.
+   * @returns Resultado de find run by number conforme al contrato `Promise<TestRuns | null>`.
+   */
   findRunByNumber(
     em: EntityManager,
     runNumber: string,
@@ -116,17 +216,51 @@ export class QaRunsRepository {
 
   // --- Resultados de caso (UC-36-05, UC-36-06) ---
 
+  /**
+   * Crea create case result.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create case result conforme al contrato `TestCaseResults`.
+   */
   createCaseResult(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a test run.
+       */
       testRunId: string;
+      /**
+       * Identificador asociado a test case.
+       */
       testCaseId: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de duration ms mantenido por la instancia.
+       */
       durationMs?: number;
+      /**
+       * Identificador asociado a error type concept.
+       */
       errorTypeConceptId?: string;
+      /**
+       * Valor de error text mantenido por la instancia.
+       */
       errorText?: string;
+      /**
+       * Valor de stack trace mantenido por la instancia.
+       */
       stackTrace?: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt?: Date;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): TestCaseResults {
@@ -148,6 +282,13 @@ export class QaRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find case result by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find case result by id conforme al contrato `Promise<TestCaseResults | null>`.
+   */
   findCaseResultById(
     em: EntityManager,
     id: string,
@@ -155,6 +296,13 @@ export class QaRunsRepository {
     return em.findOne(TestCaseResults, { id });
   }
 
+  /**
+   * Obtiene find case result for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find case result for update conforme al contrato `Promise<TestCaseResults | null>`.
+   */
   findCaseResultForUpdate(
     em: EntityManager,
     id: string,
@@ -187,11 +335,29 @@ export class QaRunsRepository {
   createAssertionResult(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a test case result.
+       */
       testCaseResultId: string;
+      /**
+       * Identificador asociado a test assertion.
+       */
       testAssertionId: string;
+      /**
+       * Valor de passed mantenido por la instancia.
+       */
       passed: boolean;
+      /**
+       * Valor de actual value mantenido por la instancia.
+       */
       actualValue?: string;
+      /**
+       * Valor de message mantenido por la instancia.
+       */
       message?: string;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): AssertionResults {
@@ -210,6 +376,13 @@ export class QaRunsRepository {
     );
   }
 
+  /**
+   * Ejecuta la operación count assertion results.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param testCaseResultId - Identificador de test case result.
+   * @returns Resultado de count assertion results conforme al contrato `Promise<number>`.
+   */
   countAssertionResults(
     em: EntityManager,
     testCaseResultId: string,
@@ -223,15 +396,45 @@ export class QaRunsRepository {
   createRequestPayload(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a test case result.
+       */
       testCaseResultId: string;
+      /**
+       * Identificador asociado a direction concept.
+       */
       directionConceptId: string;
+      /**
+       * Valor de sequence no mantenido por la instancia.
+       */
       sequenceNo: number;
+      /**
+       * Identificador asociado a http method concept.
+       */
       httpMethodConceptId?: string;
+      /**
+       * Valor de target url mantenido por la instancia.
+       */
       targetUrl?: string;
+      /**
+       * Valor de headers json mantenido por la instancia.
+       */
       headersJson?: unknown;
+      /**
+       * Valor de body json mantenido por la instancia.
+       */
       bodyJson: unknown;
+      /**
+       * Valor de body hash mantenido por la instancia.
+       */
       bodyHash?: string;
+      /**
+       * Valor de size bytes mantenido por la instancia.
+       */
       sizeBytes?: number;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): RequestPayloads {
@@ -255,17 +458,51 @@ export class QaRunsRepository {
     );
   }
 
+  /**
+   * Crea create response payload.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create response payload conforme al contrato `ResponsePayloads`.
+   */
   createResponsePayload(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a test case result.
+       */
       testCaseResultId: string;
+      /**
+       * Identificador asociado a request payload.
+       */
       requestPayloadId?: string;
+      /**
+       * Valor de http status mantenido por la instancia.
+       */
       httpStatus?: number;
+      /**
+       * Valor de headers json mantenido por la instancia.
+       */
       headersJson?: unknown;
+      /**
+       * Valor de body json mantenido por la instancia.
+       */
       bodyJson: unknown;
+      /**
+       * Valor de body hash mantenido por la instancia.
+       */
       bodyHash?: string;
+      /**
+       * Valor de latency ms mantenido por la instancia.
+       */
       latencyMs?: number;
+      /**
+       * Valor de size bytes mantenido por la instancia.
+       */
       sizeBytes?: number;
+      /**
+       * Identificador asociado a recorded by user.
+       */
       recordedByUserId?: string;
     },
   ): ResponsePayloads {
@@ -290,14 +527,39 @@ export class QaRunsRepository {
 
   // --- Artefactos (UC-36-08, UC-36-12) ---
 
+  /**
+   * Crea create artifact.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create artifact conforme al contrato `RunArtifacts`.
+   */
   createArtifact(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a test run.
+       */
       testRunId: string;
+      /**
+       * Identificador asociado a test case result.
+       */
       testCaseResultId?: string;
+      /**
+       * Identificador asociado a artifact type concept.
+       */
       artifactTypeConceptId: string;
+      /**
+       * Identificador asociado a file.
+       */
       fileId?: string;
+      /**
+       * Valor de label mantenido por la instancia.
+       */
       label?: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): RunArtifacts {
@@ -325,6 +587,13 @@ export class QaRunsRepository {
 
   // --- Defectos (UC-36-09, UC-36-10) ---
 
+  /**
+   * Crea create defect.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create defect conforme al contrato `TestDefects`.
+   */
   createDefect(em: EntityManager, data: CreateDefectData): TestDefects {
     return em.create(
       TestDefects,
@@ -350,6 +619,13 @@ export class QaRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find defect for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find defect for update conforme al contrato `Promise<TestDefects | null>`.
+   */
   findDefectForUpdate(
     em: EntityManager,
     id: string,
@@ -377,6 +653,13 @@ export class QaRunsRepository {
     );
   }
 
+  /**
+   * Obtiene find defect by number.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param defectNumber - Valor de defect number requerido por la operación.
+   * @returns Resultado de find defect by number conforme al contrato `Promise<TestDefects | null>`.
+   */
   findDefectByNumber(
     em: EntityManager,
     defectNumber: string,
@@ -384,6 +667,12 @@ export class QaRunsRepository {
     return em.findOne(TestDefects, { defectNumber });
   }
 
+  /**
+   * Ejecuta la operación count defects.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @returns Resultado de count defects conforme al contrato `Promise<number>`.
+   */
   countDefects(em: EntityManager): Promise<number> {
     return em.count(TestDefects, {});
   }

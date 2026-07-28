@@ -5,12 +5,33 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos de alta de una política de acceso ABAC (por tenant). */
 export interface CreateAccessPolicyData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a effect concept.
+   */
   effectConceptId: string;
+  /**
+   * Valor de target resource mantenido por la instancia.
+   */
   targetResource?: string;
+  /**
+   * Valor de condition json mantenido por la instancia.
+   */
   conditionJson?: unknown;
+  /**
+   * Valor de priority mantenido por la instancia.
+   */
   priority?: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -49,6 +70,13 @@ export class AccessPoliciesRepository {
     );
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `AccessPolicies`.
+   */
   create(em: EntityManager, data: CreateAccessPolicyData): AccessPolicies {
     return em.create(
       AccessPolicies,

@@ -5,16 +5,49 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos para dar de alta un perfil público (anchor social del módulo). */
 export interface CreatePublicProfileData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a target type concept.
+   */
   targetTypeConceptId: string;
+  /**
+   * Identificador asociado a target.
+   */
   targetId: string;
+  /**
+   * Valor de slug mantenido por la instancia.
+   */
   slug: string;
+  /**
+   * Valor de display name mantenido por la instancia.
+   */
   displayName: string;
+  /**
+   * Valor de headline mantenido por la instancia.
+   */
   headline?: string;
+  /**
+   * Valor de biography mantenido por la instancia.
+   */
   biography?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de accepts reviews mantenido por la instancia.
+   */
   acceptsReviews?: boolean;
+  /**
+   * Valor de comments default enabled mantenido por la instancia.
+   */
   commentsDefaultEnabled?: boolean;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -25,10 +58,24 @@ export interface CreatePublicProfileData {
  */
 @Injectable()
 export class PublicProfilesRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<PublicProfiles | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<PublicProfiles | null> {
     return em.findOne(PublicProfiles, { id });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `PublicProfiles`.
+   */
   create(em: EntityManager, data: CreatePublicProfileData): PublicProfiles {
     return em.create(
       PublicProfiles,

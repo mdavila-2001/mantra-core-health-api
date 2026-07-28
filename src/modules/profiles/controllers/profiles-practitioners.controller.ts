@@ -29,6 +29,11 @@ import {
 @ApiBearerAuth()
 @Controller('profiles')
 export class ProfilesPractitionersController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param practitionersService - Valor de practitioners service requerido por la operación.
+   */
   constructor(
     private readonly practitionersService: ProfilesPractitionersService,
   ) {}

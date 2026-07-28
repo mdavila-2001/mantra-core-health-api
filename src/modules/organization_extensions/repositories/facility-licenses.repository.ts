@@ -5,18 +5,57 @@ import { createdBy } from '../../../common';
 
 /** Datos para registrar una licencia de instalación (UC-22-05). */
 export interface CreateFacilityLicenseData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a practice site.
+   */
   practiceSiteId?: string;
+  /**
+   * Identificador asociado a facility type concept.
+   */
   facilityTypeConceptId: string;
+  /**
+   * Identificador asociado a license type concept.
+   */
   licenseTypeConceptId: string;
+  /**
+   * Valor de license number mantenido por la instancia.
+   */
   licenseNumber: string;
+  /**
+   * Identificador asociado a issuing authority tenant.
+   */
   issuingAuthorityTenantId?: string;
+  /**
+   * Valor de issuing authority name mantenido por la instancia.
+   */
   issuingAuthorityName?: string;
+  /**
+   * Identificador asociado a jurisdiction concept.
+   */
   jurisdictionConceptId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a evidence file.
+   */
   evidenceFileId?: string;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

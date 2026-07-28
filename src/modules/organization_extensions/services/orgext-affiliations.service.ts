@@ -30,6 +30,14 @@ import { ORGEXT } from '../organization_extensions.concepts';
  */
 @Injectable()
 export class OrgextAffiliationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param affiliationsRepo - Valor de affiliations repo requerido por la operación.
+   * @param boundariesRepo - Valor de boundaries repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly affiliationsRepo: OrganizationAffiliationsRepository,
@@ -168,11 +176,32 @@ export class OrgextAffiliationsService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param affiliation - Valor de affiliation requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `AffiliationResponseDto`.
+   */
   private toResponse(affiliation: {
+    /**
+     * Identificador único de la instancia.
+     */
     id: string;
+    /**
+     * Identificador asociado a primary tenant.
+     */
     primaryTenantId: string;
+    /**
+     * Identificador asociado a participating tenant.
+     */
     participatingTenantId: string;
+    /**
+     * Identificador asociado a status concept.
+     */
     statusConceptId: string;
+    /**
+     * Fecha y hora en que se creó el registro.
+     */
     createdAt: Date;
   }): AffiliationResponseDto {
     return {

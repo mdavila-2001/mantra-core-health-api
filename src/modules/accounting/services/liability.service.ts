@@ -20,6 +20,14 @@ import { PayLiabilityDto, LiabilityPaymentResponseDto } from '../dto';
  */
 @Injectable()
 export class LiabilityService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param liabilityRepo - Valor de liability repo requerido por la operación.
+   * @param posting - Valor de posting requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly liabilityRepo: LiabilityRepository,
@@ -29,6 +37,15 @@ export class LiabilityService {
     this.logger.setContext(LiabilityService.name);
   }
 
+  /**
+   * Ejecuta la operación pay liability.
+   *
+   * @param liabilityId - Identificador de liability.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de pay liability conforme al contrato `Promise<LiabilityPaymentResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async payLiability(
     liabilityId: string,
     dto: PayLiabilityDto,

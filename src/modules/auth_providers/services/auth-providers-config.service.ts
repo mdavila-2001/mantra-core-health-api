@@ -70,6 +70,13 @@ const DEFAULT_GRACE_HOURS = 24;
  */
 @Injectable()
 export class AuthProvidersConfigService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param providersRepo - Valor de providers repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly providersRepo: AuthProvidersRepository,
@@ -690,6 +697,13 @@ export class AuthProvidersConfigService {
     }
   }
 
+  /**
+   * Valida assert unique claims.
+   *
+   * @param claims - Valor de claims requerido por la operación.
+   * @param providerId - Identificador de provider.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private assertUniqueClaims(claims: string[], providerId: string): void {
     const seen = new Set<string>();
     for (const claim of claims) {

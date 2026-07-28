@@ -19,10 +19,16 @@ export const PAYMENT_PURPOSES: readonly PaymentPurpose[] = [
 
 /** Cuerpo de `POST /payments/intents` (UC-42-01). */
 export class CreatePaymentIntentDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({ description: 'Tenant propietario del cobro', format: 'uuid' })
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Identificador asociado a gateway.
+   */
   @ApiProperty({
     description: 'Gateway a través del cual se cobrará',
     format: 'uuid',
@@ -30,6 +36,9 @@ export class CreatePaymentIntentDto {
   @IsUUID()
   gatewayId!: string;
 
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   @ApiProperty({
     description:
       'Importe a cobrar, como cadena decimal para no perder precisión',
@@ -38,6 +47,9 @@ export class CreatePaymentIntentDto {
   @IsNumberString()
   amount!: string;
 
+  /**
+   * Valor de currency mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Moneda ISO-4217 del cobro',
     enum: ['BOB', 'USD'],
@@ -45,10 +57,16 @@ export class CreatePaymentIntentDto {
   @IsIn(['BOB', 'USD'])
   currency!: 'BOB' | 'USD';
 
+  /**
+   * Valor de purpose mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Propósito del cobro', enum: PAYMENT_PURPOSES })
   @IsIn(PAYMENT_PURPOSES as readonly string[])
   purpose!: PaymentPurpose;
 
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   @ApiProperty({
     description:
       'Clave de idempotencia del cliente. Repetirla devuelve el intent existente en lugar de cobrar dos veces.',
@@ -58,6 +76,9 @@ export class CreatePaymentIntentDto {
   @MaxLength(200)
   idempotencyKey!: string;
 
+  /**
+   * Identificador asociado a gateway connection.
+   */
   @ApiPropertyOptional({
     description: 'Conexión concreta del gateway',
     format: 'uuid',
@@ -66,6 +87,9 @@ export class CreatePaymentIntentDto {
   @IsUUID()
   gatewayConnectionId?: string;
 
+  /**
+   * Identificador asociado a practice.
+   */
   @ApiPropertyOptional({
     description: 'Práctica que origina el cobro',
     format: 'uuid',
@@ -74,6 +98,9 @@ export class CreatePaymentIntentDto {
   @IsUUID()
   practiceId?: string;
 
+  /**
+   * Identificador asociado a invoice.
+   */
   @ApiPropertyOptional({
     description: 'Factura que se está cobrando',
     format: 'uuid',
@@ -82,6 +109,9 @@ export class CreatePaymentIntentDto {
   @IsUUID()
   invoiceId?: string;
 
+  /**
+   * Valor de source ref type mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Tipo del recurso de origen (referencia polimórfica)',
   })
@@ -90,6 +120,9 @@ export class CreatePaymentIntentDto {
   @MaxLength(100)
   sourceRefType?: string;
 
+  /**
+   * Identificador asociado a source ref.
+   */
   @ApiPropertyOptional({
     description: 'Id del recurso de origen',
     format: 'uuid',
@@ -98,6 +131,9 @@ export class CreatePaymentIntentDto {
   @IsUUID()
   sourceRefId?: string;
 
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Vencimiento del intent',
     format: 'date-time',
@@ -109,21 +145,39 @@ export class CreatePaymentIntentDto {
 
 /** Representación de un intent devuelta por la API. */
 export class PaymentIntentResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' })
   id!: string;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({ format: 'uuid' })
   tenantId!: string;
 
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   @ApiProperty({ example: '150.00' })
   amount!: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @ApiProperty({ description: 'Concepto de estado del intent', format: 'uuid' })
   statusConceptId!: string;
 
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Clave de idempotencia con la que se creó' })
   idempotencyKey!: string;
 
+  /**
+   * Valor de reused mantenido por la instancia.
+   */
   @ApiProperty({
     description:
       'true si la petición reutilizó un intent ya existente (reintento idempotente)',

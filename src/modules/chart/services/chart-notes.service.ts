@@ -37,6 +37,13 @@ import type { ClinicalNoteVersions } from '../entities';
  */
 @Injectable()
 export class ChartNotesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param notesRepo - Valor de notes repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly notesRepo: ClinicalNotesRepository,
@@ -508,6 +515,14 @@ export class ChartNotesService {
     return { header, version };
   }
 
+  /**
+   * Transforma to version response.
+   *
+   * @param noteId - Identificador de note.
+   * @param version - Valor de version requerido por la operación.
+   * @param lifecycleStatusConceptId - Identificador de lifecycle status concept.
+   * @returns Resultado de to version response conforme al contrato `NoteVersionResponseDto`.
+   */
   private toVersionResponse(
     noteId: string,
     version: ClinicalNoteVersions,

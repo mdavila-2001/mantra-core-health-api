@@ -412,9 +412,21 @@ export const REPORT_REASON_CONCEPT_BY_CODE: Record<string, string> = {
 export const MODERATION_DECISION_BY_CODE: Record<
   string,
   {
+    /**
+     * Valor de decision mantenido por la instancia.
+     */
     decision: string;
+    /**
+     * Valor de action mantenido por la instancia.
+     */
     action: string;
+    /**
+     * Valor de moderation mantenido por la instancia.
+     */
     moderation?: string;
+    /**
+     * Valor de publication mantenido por la instancia.
+     */
     publication?: string;
   }
 > = {
@@ -458,7 +470,15 @@ export const REVIEW_DIMENSION_BY_CODE: Record<string, string> = {
 /** Strike severity enum → { severity concept, points } (UC-19-09). */
 export const STRIKE_SEVERITY_BY_CODE: Record<
   string,
-  { concept: string; points: number }
+  {
+    /**
+     * Valor de concept mantenido por la instancia.
+     */
+    concept: string; /**
+     * Valor de points mantenido por la instancia.
+     */
+    points: number;
+  }
 > = {
   LOW: { concept: COMM.STRIKE_SEVERITY_LOW, points: 1 },
   MEDIUM: { concept: COMM.STRIKE_SEVERITY_MEDIUM, points: 3 },

@@ -53,6 +53,18 @@ const ACTIVATION_TTL_MS = 72 * 60 * 60 * 1000;
  */
 @Injectable()
 export class IamAssistedRegistrationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tokenService - Valor de token service requerido por la operación.
+   * @param usersRepo - Valor de users repo requerido por la operación.
+   * @param credentialsRepo - Valor de credentials repo requerido por la operación.
+   * @param rolesRepo - Valor de roles repo requerido por la operación.
+   * @param activationsRepo - Valor de activations repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly tokenService: TokenService,
@@ -192,7 +204,9 @@ export class IamAssistedRegistrationService {
         ip,
         'token-already-used',
       );
-      throw new UnauthorizedException('El token de activación ya fue utilizado');
+      throw new UnauthorizedException(
+        'El token de activación ya fue utilizado',
+      );
     }
 
     if (activation.expiresAt.getTime() < Date.now()) {

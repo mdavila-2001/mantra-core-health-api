@@ -45,6 +45,12 @@ import {
 @ApiBearerAuth()
 @Controller('education')
 export class EducationController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param catalogService - Valor de catalog service requerido por la operación.
+   * @param learningService - Valor de learning service requerido por la operación.
+   */
   constructor(
     private readonly catalogService: EducationCatalogService,
     private readonly learningService: EducationLearningService,

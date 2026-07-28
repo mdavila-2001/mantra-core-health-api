@@ -8,11 +8,17 @@ import { IsOptional, IsUUID } from 'class-validator';
  * opcionales: sin ninguno se invalida el ámbito global del tenant.
  */
 export class InvalidateCacheDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiPropertyOptional({ description: 'Tenant afectado', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
+  /**
+   * Identificador asociado a user.
+   */
   @ApiPropertyOptional({
     description: 'Usuario cuya decisión se invalida',
     format: 'uuid',
@@ -21,6 +27,9 @@ export class InvalidateCacheDto {
   @IsUUID()
   userId?: string;
 
+  /**
+   * Identificador asociado a role.
+   */
   @ApiPropertyOptional({
     description: 'Rol cuya decisión se invalida',
     format: 'uuid',

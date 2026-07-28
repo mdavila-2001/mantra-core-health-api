@@ -32,6 +32,14 @@ const DEFAULT_CONCURRENCY_LIMIT = 1;
  */
 @Injectable()
 export class ProjectionDeliveryService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param projectionRepo - Valor de projection repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly projectionRepo: ProjectionRepository,
@@ -513,6 +521,12 @@ export class ProjectionDeliveryService {
     return true;
   }
 
+  /**
+   * Actualiza touch consumer.
+   *
+   * @param tx - Contexto de persistencia o transacción activa.
+   * @param consumerCode - Valor de consumer code requerido por la operación.
+   */
   private async touchConsumer(
     tx: EntityManager,
     consumerCode: string,

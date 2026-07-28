@@ -4,18 +4,46 @@ import { SessionJourneys } from '../entities';
 
 /** Datos de creación de un journey de sesión. */
 export interface CreateSessionJourneyData {
+  /**
+   * Identificador asociado a session.
+   */
   sessionId: string;
+  /**
+   * Identificador asociado a analytics subject.
+   */
   analyticsSubjectId?: string;
+  /**
+   * Identificador asociado a portal type concept.
+   */
   portalTypeConceptId: string;
+  /**
+   * Identificador asociado a journey status concept.
+   */
   journeyStatusConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt?: Date;
+  /**
+   * Identificador asociado a entry event.
+   */
   entryEventId?: string;
+  /**
+   * Valor de event count mantenido por la instancia.
+   */
   eventCount?: number;
 }
 
 /** Acceso a `telemetry.session_journeys`. */
 @Injectable()
 export class SessionJourneysRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<SessionJourneys | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<SessionJourneys | null> {
     return em.findOne(SessionJourneys, { id });
   }
@@ -32,6 +60,13 @@ export class SessionJourneysRepository {
     );
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `SessionJourneys`.
+   */
   create(em: EntityManager, data: CreateSessionJourneyData): SessionJourneys {
     const now = new Date();
     return em.create(

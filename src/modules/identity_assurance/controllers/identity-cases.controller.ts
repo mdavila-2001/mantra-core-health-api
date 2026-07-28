@@ -34,6 +34,11 @@ import {
 @ApiBearerAuth()
 @Controller('identity/verification-cases')
 export class IdentityCasesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param casesService - Valor de cases service requerido por la operación.
+   */
   constructor(private readonly casesService: IdentityCasesService) {}
 
   /** UC-27-12 (barrido programado). Declarado antes que las rutas con `:id`. */

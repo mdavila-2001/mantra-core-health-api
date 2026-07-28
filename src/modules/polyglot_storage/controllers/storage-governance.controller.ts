@@ -44,6 +44,13 @@ import {
 @ApiBearerAuth()
 @Controller('governance')
 export class StorageGovernanceController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param governanceService - Valor de governance service requerido por la operación.
+   * @param datasetService - Valor de dataset service requerido por la operación.
+   * @param operationsService - Valor de operations service requerido por la operación.
+   */
   constructor(
     private readonly governanceService: StorageGovernanceService,
     private readonly datasetService: DatasetGovernanceService,

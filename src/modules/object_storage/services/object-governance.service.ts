@@ -47,6 +47,14 @@ import {
  */
 @Injectable()
 export class ObjectGovernanceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param storageRepo - Valor de storage repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly governanceRepo: ObjectGovernanceRepository,

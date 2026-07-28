@@ -20,15 +20,43 @@ import {
 export class ProjectionRepository {
   // --- Definiciones y suscripciones (UC-62-01) ---
 
+  /**
+   * Crea create definition.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create definition conforme al contrato `ProjectionDefinitions`.
+   */
   createDefinition(
     em: EntityManager,
     data: {
+      /**
+       * Valor de code mantenido por la instancia.
+       */
       code: string;
+      /**
+       * Identificador asociado a source dataset.
+       */
       sourceDatasetId: string;
+      /**
+       * Identificador asociado a target dataset.
+       */
       targetDatasetId: string;
+      /**
+       * Valor de projection version mantenido por la instancia.
+       */
       projectionVersion: string;
+      /**
+       * Valor de delivery semantics mantenido por la instancia.
+       */
       deliverySemantics: string;
+      /**
+       * Valor de transformation ref mantenido por la instancia.
+       */
       transformationRef?: string;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): ProjectionDefinitions {
@@ -48,6 +76,13 @@ export class ProjectionRepository {
     return em.findOne(ProjectionDefinitions, { code, projectionVersion });
   }
 
+  /**
+   * Obtiene find definition by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find definition by id conforme al contrato `Promise<ProjectionDefinitions | null>`.
+   */
   findDefinitionById(
     em: EntityManager,
     id: string,
@@ -55,16 +90,47 @@ export class ProjectionRepository {
     return em.findOne(ProjectionDefinitions, { id });
   }
 
+  /**
+   * Crea create subscription.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create subscription conforme al contrato `ProjectionSubscriptions`.
+   */
   createSubscription(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a projection definition.
+       */
       projectionDefinitionId: string;
+      /**
+       * Valor de source event type mantenido por la instancia.
+       */
       sourceEventType: string;
+      /**
+       * Valor de consumer code mantenido por la instancia.
+       */
       consumerCode: string;
+      /**
+       * Valor de target backend code mantenido por la instancia.
+       */
       targetBackendCode: string;
+      /**
+       * Valor de concurrency limit mantenido por la instancia.
+       */
       concurrencyLimit: number;
+      /**
+       * Valor de retry policy json mantenido por la instancia.
+       */
       retryPolicyJson?: unknown;
+      /**
+       * Valor de dead letter enabled mantenido por la instancia.
+       */
       deadLetterEnabled: boolean;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): ProjectionSubscriptions {
@@ -85,6 +151,13 @@ export class ProjectionRepository {
     });
   }
 
+  /**
+   * Obtiene find subscription by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find subscription by id conforme al contrato `Promise<ProjectionSubscriptions | null>`.
+   */
   findSubscriptionById(
     em: EntityManager,
     id: string,
@@ -94,6 +167,14 @@ export class ProjectionRepository {
 
   // --- SLO de consistencia (UC-62-01, 05) ---
 
+  /**
+   * Obtiene find slo for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param datasetId - Identificador de dataset.
+   * @param targetBackendCode - Valor de target backend code requerido por la operación.
+   * @returns Resultado de find slo for update conforme al contrato `Promise<StoreConsistencySlos | null>`.
+   */
   findSloForUpdate(
     em: EntityManager,
     datasetId: string,
@@ -106,15 +187,43 @@ export class ProjectionRepository {
     );
   }
 
+  /**
+   * Crea create slo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create slo conforme al contrato `StoreConsistencySlos`.
+   */
   createSlo(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Valor de target backend code mantenido por la instancia.
+       */
       targetBackendCode: string;
+      /**
+       * Valor de max projection lag seconds mantenido por la instancia.
+       */
       maxProjectionLagSeconds: number;
+      /**
+       * Valor de max drift rate mantenido por la instancia.
+       */
       maxDriftRate?: string;
+      /**
+       * Valor de reconciliation interval minutes mantenido por la instancia.
+       */
       reconciliationIntervalMinutes: number;
+      /**
+       * Valor de alert policy code mantenido por la instancia.
+       */
       alertPolicyCode?: string;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): StoreConsistencySlos {
@@ -123,6 +232,13 @@ export class ProjectionRepository {
 
   // --- Consumidores (UC-62-02) ---
 
+  /**
+   * Obtiene find consumer by code for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find consumer by code for update conforme al contrato `Promise<ProjectionConsumers | null>`.
+   */
   findConsumerByCodeForUpdate(
     em: EntityManager,
     code: string,
@@ -134,13 +250,35 @@ export class ProjectionRepository {
     );
   }
 
+  /**
+   * Crea create consumer.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create consumer conforme al contrato `ProjectionConsumers`.
+   */
   createConsumer(
     em: EntityManager,
     data: {
+      /**
+       * Valor de code mantenido por la instancia.
+       */
       code: string;
+      /**
+       * Valor de service name mantenido por la instancia.
+       */
       serviceName?: string;
+      /**
+       * Valor de deployment region mantenido por la instancia.
+       */
       deploymentRegion?: string;
+      /**
+       * Valor de consumer group mantenido por la instancia.
+       */
       consumerGroup?: string;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): ProjectionConsumers {
@@ -181,16 +319,47 @@ export class ProjectionRepository {
     });
   }
 
+  /**
+   * Crea create attempt.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create attempt conforme al contrato `ProjectionDeliveryAttempts`.
+   */
   createAttempt(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a projection subscription.
+       */
       projectionSubscriptionId: string;
+      /**
+       * Identificador asociado a outbox event.
+       */
       outboxEventId: string;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Valor de attempt number mantenido por la instancia.
+       */
       attemptNumber: number;
+      /**
+       * Valor de idempotency key mantenido por la instancia.
+       */
       idempotencyKey: string;
+      /**
+       * Valor de payload hash mantenido por la instancia.
+       */
       payloadHash: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): ProjectionDeliveryAttempts {
@@ -199,6 +368,13 @@ export class ProjectionRepository {
     });
   }
 
+  /**
+   * Obtiene find attempt for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find attempt for update conforme al contrato `Promise<ProjectionDeliveryAttempts | null>`.
+   */
   findAttemptForUpdate(
     em: EntityManager,
     id: string,
@@ -230,14 +406,39 @@ export class ProjectionRepository {
     );
   }
 
+  /**
+   * Crea create checkpoint.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create checkpoint conforme al contrato `ProjectionCheckpoints`.
+   */
   createCheckpoint(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a projection subscription.
+       */
       projectionSubscriptionId: string;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de partition key mantenido por la instancia.
+       */
       partitionKey: string;
+      /**
+       * Valor de source position mantenido por la instancia.
+       */
       sourcePosition: string;
+      /**
+       * Identificador asociado a source event.
+       */
       sourceEventId?: string;
+      /**
+       * Valor de target version mantenido por la instancia.
+       */
       targetVersion?: string;
     },
   ): ProjectionCheckpoints {
@@ -258,13 +459,35 @@ export class ProjectionRepository {
     return em.findOne(ProjectionDeadLetters, { projectionDeliveryAttemptId });
   }
 
+  /**
+   * Crea create dead letter.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create dead letter conforme al contrato `ProjectionDeadLetters`.
+   */
   createDeadLetter(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a projection delivery attempt.
+       */
       projectionDeliveryAttemptId: string;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Valor de reason code mantenido por la instancia.
+       */
       reasonCode: string;
+      /**
+       * Identificador asociado a payload object.
+       */
       payloadObjectId?: string;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): ProjectionDeadLetters {
@@ -275,6 +498,13 @@ export class ProjectionRepository {
     );
   }
 
+  /**
+   * Obtiene find dead letter for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find dead letter for update conforme al contrato `Promise<ProjectionDeadLetters | null>`.
+   */
   findDeadLetterForUpdate(
     em: EntityManager,
     id: string,

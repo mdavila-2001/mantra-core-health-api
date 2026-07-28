@@ -33,8 +33,20 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class InsuranceBackboneController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: InsuranceBackboneService) {}
 
+  /**
+   * Crea create carrier.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create carrier conforme al contrato `Promise<ResourceStatusDto>`.
+   */
   @Post('insurance-carriers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -46,6 +58,14 @@ export class InsuranceBackboneController {
     return this.service.createCarrier(dto, actor);
   }
 
+  /**
+   * Crea create product.
+   *
+   * @param id - Identificador de id.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create product conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   @Post('insurance-carriers/:id/products')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -58,6 +78,14 @@ export class InsuranceBackboneController {
     return this.service.createProduct(id, dto, actor);
   }
 
+  /**
+   * Crea create plan.
+   *
+   * @param id - Identificador de id.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create plan conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   @Post('insurance-products/:id/plans')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +98,14 @@ export class InsuranceBackboneController {
     return this.service.createPlan(id, dto, actor);
   }
 
+  /**
+   * Crea create benefit.
+   *
+   * @param id - Identificador de id.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create benefit conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   @Post('insurance-plans/:id/benefits')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -82,6 +118,13 @@ export class InsuranceBackboneController {
     return this.service.createBenefit(id, dto, actor);
   }
 
+  /**
+   * Crea create provider network.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create provider network conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   @Post('provider-networks')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -106,6 +149,13 @@ export class InsuranceBackboneController {
     return this.service.addMembership(id, dto, actor);
   }
 
+  /**
+   * Crea create broker.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create broker conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   @Post('insurance-brokers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -117,6 +167,14 @@ export class InsuranceBackboneController {
     return this.service.createBroker(dto, actor);
   }
 
+  /**
+   * Crea create agreement.
+   *
+   * @param id - Identificador de id.
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create agreement conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   @Post('insurance-brokers/:id/agreements')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -129,6 +187,13 @@ export class InsuranceBackboneController {
     return this.service.createAgreement(id, dto, actor);
   }
 
+  /**
+   * Crea create employer group.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create employer group conforme al contrato `Promise<CreatedResourceDto>`.
+   */
   @Post('employer-groups')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

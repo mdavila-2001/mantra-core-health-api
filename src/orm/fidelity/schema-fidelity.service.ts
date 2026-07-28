@@ -10,10 +10,25 @@ import {
 
 /** Fila de `information_schema.columns` que interesa comparar. */
 interface DatabaseColumn {
+  /**
+   * Valor de table schema mantenido por la instancia.
+   */
   table_schema: string;
+  /**
+   * Valor de table name mantenido por la instancia.
+   */
   table_name: string;
+  /**
+   * Valor de column name mantenido por la instancia.
+   */
   column_name: string;
+  /**
+   * Valor de is nullable mantenido por la instancia.
+   */
   is_nullable: 'YES' | 'NO';
+  /**
+   * Valor de column default mantenido por la instancia.
+   */
   column_default: string | null;
 }
 
@@ -34,8 +49,16 @@ interface DatabaseColumn {
  */
 @Injectable()
 export class SchemaFidelityService {
+  /**
+   * Valor de logger mantenido por la instancia.
+   */
   private readonly logger = new Logger(SchemaFidelityService.name);
 
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param orm - Valor de orm requerido por la operación.
+   */
   constructor(private readonly orm: MikroORM) {}
 
   /** Verifica y deja el resultado en el log con el nivel adecuado. */
@@ -140,8 +163,17 @@ export class SchemaFidelityService {
    */
   private compareColumns(
     meta: {
+      /**
+       * Valor de class name mantenido por la instancia.
+       */
       className: string;
+      /**
+       * Valor de table name mantenido por la instancia.
+       */
       tableName: string;
+      /**
+       * Valor de props mantenido por la instancia.
+       */
       props: readonly MappedProp[];
     },
     schema: string,
@@ -209,8 +241,20 @@ export class SchemaFidelityService {
 
 /** Forma mínima de una propiedad de la metadata que este servicio necesita leer. */
 interface MappedProp {
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Valor de field names mantenido por la instancia.
+   */
   fieldNames?: string[];
+  /**
+   * Valor de nullable mantenido por la instancia.
+   */
   nullable?: boolean;
+  /**
+   * Valor de persist mantenido por la instancia.
+   */
   persist?: boolean;
 }

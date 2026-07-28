@@ -8,6 +8,10 @@ import type { AuthenticatedUser } from '../../../common';
 const user: AuthenticatedUser = { id: 'user-1', roles: [] };
 
 describe('CommonContactPointsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const service = { create: fn(), verify: fn() };
     const controller = new CommonContactPointsController(service as never);

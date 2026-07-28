@@ -5,13 +5,31 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos para emitir una activación de cuenta de un solo uso (registro asistido). */
 export interface CreateActivationData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
   /** SHA-256 (hex) del token de activación; el token en claro nunca se persiste. */
   tokenHash: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt: Date;
+  /**
+   * Valor de reason mantenido por la instancia.
+   */
   reason?: string;
+  /**
+   * Identificador asociado a legal representation.
+   */
   legalRepresentationId?: string;
+  /**
+   * Identificador asociado a legal representative user.
+   */
   legalRepresentativeUserId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

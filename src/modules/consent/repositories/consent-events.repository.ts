@@ -4,13 +4,37 @@ import { ConsentEvents } from '../entities';
 
 /** Datos de un evento append-only del ciclo de vida de una directiva. */
 export interface RecordEventData {
+  /**
+   * Identificador asociado a subject type concept.
+   */
   subjectTypeConceptId: string;
+  /**
+   * Identificador asociado a subject.
+   */
   subjectId: string;
+  /**
+   * Identificador asociado a event type concept.
+   */
   eventTypeConceptId: string;
+  /**
+   * Identificador asociado a previous status concept.
+   */
   previousStatusConceptId: string;
+  /**
+   * Identificador asociado a new status concept.
+   */
   newStatusConceptId: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId?: string;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId?: string;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 
@@ -20,6 +44,13 @@ export interface RecordEventData {
  */
 @Injectable()
 export class ConsentEventsRepository {
+  /**
+   * Ejecuta la operación record.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de record conforme al contrato `ConsentEvents`.
+   */
   record(em: EntityManager, data: RecordEventData): ConsentEvents {
     return em.create(
       ConsentEvents,

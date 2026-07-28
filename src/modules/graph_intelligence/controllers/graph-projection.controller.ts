@@ -34,6 +34,11 @@ import {
 @ApiBearerAuth()
 @Controller('graph')
 export class GraphProjectionController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param projectionService - Valor de projection service requerido por la operación.
+   */
   constructor(private readonly projectionService: GraphProjectionService) {}
 
   /** UC-61-01. */

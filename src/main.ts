@@ -22,6 +22,10 @@ const BANNER = `
  =============================================================================
 `;
 
+/**
+ * Ejecuta la operación bootstrap.
+ * @returns Resultado de bootstrap.
+ */
 async function bootstrap() {
   process.stdout.write(BANNER);
 

@@ -5,11 +5,29 @@ import { createdBy } from '../../../common';
 
 /** Datos para iniciar un viaje. */
 export interface CreateTripData {
+  /**
+   * Identificador asociado a tracking session.
+   */
   trackingSessionId: string;
+  /**
+   * Identificador asociado a origin address.
+   */
   originAddressId?: string;
+  /**
+   * Identificador asociado a destination address.
+   */
   destinationAddressId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -9,6 +9,11 @@ import { ConsentEvidenceResponseDto, CreateConsentEvidenceDto } from '../dto';
 @ApiBearerAuth()
 @Controller('consent/consent-evidence')
 export class ConsentEvidenceController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param evidenceService - Valor de evidence service requerido por la operación.
+   */
   constructor(private readonly evidenceService: ConsentEvidenceService) {}
 
   /** UC-07-10. */

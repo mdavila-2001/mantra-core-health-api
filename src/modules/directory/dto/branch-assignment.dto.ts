@@ -6,6 +6,9 @@ import { IsOptional, IsUUID } from 'class-validator';
  * (UC-04-06: asignar usuario a branch).
  */
 export class BranchAssignmentDto {
+  /**
+   * Identificador asociado a branch.
+   */
   @ApiProperty({
     description: 'Branch a la que se asigna la membresía',
     format: 'uuid',
@@ -13,6 +16,9 @@ export class BranchAssignmentDto {
   @IsUUID()
   branchId!: string;
 
+  /**
+   * Identificador asociado a local role concept.
+   */
   @ApiPropertyOptional({
     description: 'Concept id del rol local en la branch',
     format: 'uuid',

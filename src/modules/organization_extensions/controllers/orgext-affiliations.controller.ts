@@ -24,6 +24,11 @@ import {
 @ApiBearerAuth()
 @Controller('orgext/affiliations')
 export class OrgextAffiliationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param affiliationsService - Valor de affiliations service requerido por la operación.
+   */
   constructor(
     private readonly affiliationsService: OrgextAffiliationsService,
   ) {}

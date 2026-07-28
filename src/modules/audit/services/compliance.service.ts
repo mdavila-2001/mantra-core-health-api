@@ -51,6 +51,15 @@ const TERMINAL = new Set<string>([AUD.DSAR_COMPLETED, AUD.DSAR_REJECTED]);
  */
 @Injectable()
 export class ComplianceService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param dsarRepo - Valor de dsar repo requerido por la operación.
+   * @param auditLogRepo - Valor de audit log repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly governanceRepo: AnalyticsGovernanceLogRepository,
@@ -206,14 +215,37 @@ export class ComplianceService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param id - Identificador de id.
+   * @param userId - Identificador de user.
+   * @param dsar - Valor de dsar requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `DsarResponseDto`.
+   */
   private toResponse(
     id: string,
     userId: string,
     dsar: {
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a type concept.
+       */
       typeConceptId: string;
+      /**
+       * Versión usada para controlar actualizaciones concurrentes.
+       */
       rowVersion: number;
+      /**
+       * Valor de requested at mantenido por la instancia.
+       */
       requestedAt: Date;
+      /**
+       * Valor de completed at mantenido por la instancia.
+       */
       completedAt?: Date;
     },
   ): DsarResponseDto {

@@ -1,11 +1,21 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { AccountingLedgerController } from './accounting-ledger.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const ledgerService = {
     createAccount: mockFn(),
@@ -40,14 +50,21 @@ describe('AccountingLedgerController', () => {
 
   it('delega el flujo de estados (REDESA C-17)', async () => {
     const d = build();
-    await d.controller.createDraft({ practiceId: 'p', lines: [] } as any, actor);
+    await d.controller.createDraft(
+      { practiceId: 'p', lines: [] } as any,
+      actor,
+    );
     expect(d.ledgerService.createDraft).toHaveBeenCalled();
 
     await d.controller.classify('t1', {}, actor);
     expect(d.ledgerService.classify).toHaveBeenCalledWith('t1', {}, actor);
 
     await d.controller.submitReview('t1', {}, actor);
-    expect(d.ledgerService.submitForReview).toHaveBeenCalledWith('t1', {}, actor);
+    expect(d.ledgerService.submitForReview).toHaveBeenCalledWith(
+      't1',
+      {},
+      actor,
+    );
 
     await d.controller.approve('t1', {}, actor);
     expect(d.ledgerService.approve).toHaveBeenCalledWith('t1', {}, actor);

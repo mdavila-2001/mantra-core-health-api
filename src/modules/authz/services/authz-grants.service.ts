@@ -46,6 +46,17 @@ const RESOURCE_TYPE_CONCEPT: Record<ResourceType, string> = {
  */
 @Injectable()
 export class AuthzGrantsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param rolesRepo - Valor de roles repo requerido por la operación.
+   * @param assignmentsRepo - Valor de assignments repo requerido por la operación.
+   * @param permissionsRepo - Valor de permissions repo requerido por la operación.
+   * @param permGrantsRepo - Valor de perm grants repo requerido por la operación.
+   * @param resourceGrantsRepo - Valor de resource grants repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly rolesRepo: RolesRepository,

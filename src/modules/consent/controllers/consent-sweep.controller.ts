@@ -13,6 +13,11 @@ import { ExpirationSweepResultDto } from '../dto';
 @ApiBearerAuth()
 @Controller('consent/internal')
 export class ConsentSweepController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param sweepService - Valor de sweep service requerido por la operación.
+   */
   constructor(private readonly sweepService: ConsentSweepService) {}
 
   /** UC-07-11. */

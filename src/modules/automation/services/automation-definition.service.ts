@@ -29,6 +29,15 @@ const CRON_FIELD_COUNT = 5;
  */
 @Injectable()
 export class AutomationDefinitionService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param agentsRepo - Valor de agents repo requerido por la operación.
+   * @param outbox - Valor de outbox requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly governanceRepo: AutomationGovernanceRepository,
@@ -143,7 +152,15 @@ export class AutomationDefinitionService {
       // Primero se crean todos los pasos y después se resuelven los saltos: una
       // arista puede apuntar hacia atrás o hacia adelante, y en el segundo caso el
       // destino aún no existiría.
-      const byCode = new Map<string, { id: string }>();
+      const byCode = new Map<
+        string,
+        {
+          /**
+           * Identificador único de la instancia.
+           */
+          id: string;
+        }
+      >();
       const created = dto.steps.map((step) => {
         const row = this.governanceRepo.createWorkflowStep(tx, {
           workflowId: workflow.id,

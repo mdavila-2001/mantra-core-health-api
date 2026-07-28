@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ObjectStorageService } from './object-storage.service';
@@ -22,6 +28,10 @@ const MANIFEST = '33333333-3333-3333-3333-333333333333';
 const VERSION = '44444444-4444-4444-4444-444444444444';
 const SHA = 'a'.repeat(64);
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -58,6 +68,12 @@ function build() {
   return { service, tx, storageRepo, dicomRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active namespace.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active namespace conforme al contrato `any`.
+ */
 function activeNamespace(overrides: Record<string, unknown> = {}): any {
   return {
     id: NAMESPACE,
@@ -70,6 +86,12 @@ function activeNamespace(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación initiated upload.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de initiated upload conforme al contrato `any`.
+ */
 function initiatedUpload(overrides: Record<string, unknown> = {}): any {
   return {
     id: UPLOAD,
@@ -150,6 +172,13 @@ describe('ObjectStorageService', () => {
   });
 
   describe('completeUpload (UC-60-02)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param upload - Valor de upload requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, upload = initiatedUpload()) {
       d.storageRepo.findUploadForUpdate.mockResolvedValue(upload);
       d.storageRepo.findNamespaceById.mockResolvedValue(activeNamespace());
@@ -258,6 +287,13 @@ describe('ObjectStorageService', () => {
       providerUri: 's3://bucket/obj2',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param namespace - Valor de namespace requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, namespace = activeNamespace()) {
       d.storageRepo.findManifestForUpdate.mockResolvedValue({
         id: MANIFEST,
@@ -370,6 +406,14 @@ describe('ObjectStorageService', () => {
   describe('issueSignedUrl (UC-60-09)', () => {
     const dto: any = { purposeOfUseCode: 'TREATMENT' };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param manifestOverrides - Valor de manifest overrides requerido por la operación.
+     * @param locationOverrides - Valor de location overrides requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       manifestOverrides: Record<string, unknown> = {},

@@ -38,10 +38,25 @@ export const authEnvSchema = Joi.object({
   ACCOUNT_LOCK_THRESHOLD: Joi.number().integer().min(1).default(5),
 }).unknown(true);
 
+/**
+ * Describe el contrato estructural de auth env.
+ */
 export interface AuthEnv {
+  /**
+   * Valor de secret mantenido por la instancia.
+   */
   secret: string;
+  /**
+   * Valor de access ttl mantenido por la instancia.
+   */
   accessTtl: string;
+  /**
+   * Valor de refresh ttl days mantenido por la instancia.
+   */
   refreshTtlDays: number;
+  /**
+   * Valor de lock threshold mantenido por la instancia.
+   */
   lockThreshold: number;
 }
 

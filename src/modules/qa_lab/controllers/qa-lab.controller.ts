@@ -41,6 +41,12 @@ import {
 @ApiBearerAuth()
 @Controller('qa')
 export class QaLabController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param catalogService - Valor de catalog service requerido por la operación.
+   * @param runsService - Valor de runs service requerido por la operación.
+   */
   constructor(
     private readonly catalogService: QaCatalogService,
     private readonly runsService: QaRunsService,

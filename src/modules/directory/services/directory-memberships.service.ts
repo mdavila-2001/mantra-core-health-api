@@ -36,6 +36,15 @@ import {
  */
 @Injectable()
 export class DirectoryMembershipsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param membershipsRepo - Valor de memberships repo requerido por la operación.
+   * @param branchMembershipsRepo - Valor de branch memberships repo requerido por la operación.
+   * @param branchesRepo - Valor de branches repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly membershipsRepo: TenantMembershipsRepository,

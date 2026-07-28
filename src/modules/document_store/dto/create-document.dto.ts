@@ -13,10 +13,19 @@ const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
  * escalares sueltos.
  */
 export class CreateDocumentDto {
-  @ApiProperty({ description: 'Tenant propietario del documento', format: 'uuid' })
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({
+    description: 'Tenant propietario del documento',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Tipo/clasificación del documento (p. ej. fhir_bundle_raw)',
     example: 'fhir_bundle_raw',
@@ -28,6 +37,9 @@ export class CreateDocumentDto {
   })
   documentType!: string;
 
+  /**
+   * Valor de payload mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Contenido flexible del documento (JSON/semiestructurado)',
     type: 'object',

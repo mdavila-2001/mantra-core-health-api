@@ -13,6 +13,11 @@ import { CreateCommissionStatementDto, CreatedResourceDto } from '../dto';
 @Roles('BILLING', 'FINANCE')
 @Controller('broker-commission-statements')
 export class BrokerCommissionController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: BrokerCommissionService) {}
 
   /** UC-26-14. */

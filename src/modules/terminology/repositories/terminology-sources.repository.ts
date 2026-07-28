@@ -5,10 +5,25 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para materializar una fuente de terminología. */
 export interface CreateTerminologySourceData {
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Identificador asociado a source type concept.
+   */
   sourceTypeConceptId?: string;
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

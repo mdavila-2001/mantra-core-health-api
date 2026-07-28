@@ -18,6 +18,11 @@ import { CreateDsarDto, UpdateDsarDto, DsarResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('privacy')
 export class PrivacyController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param complianceService - Valor de compliance service requerido por la operación.
+   */
   constructor(private readonly complianceService: ComplianceService) {}
 
   /** UC-10-08 (alta). */

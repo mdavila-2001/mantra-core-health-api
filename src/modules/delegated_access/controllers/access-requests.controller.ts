@@ -17,6 +17,11 @@ import { DecideAccessRequestDto, DecisionResultDto } from '../dto';
 @ApiBearerAuth()
 @Controller('access-requests')
 export class AccessRequestsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: AccessRequestsService) {}
 
   /** UC-29-05. */

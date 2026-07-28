@@ -41,6 +41,13 @@ import {
 @ApiBearerAuth()
 @Controller('payments')
 export class PaymentsOperationsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param checkoutService - Valor de checkout service requerido por la operación.
+   * @param transactionsService - Valor de transactions service requerido por la operación.
+   * @param operationsService - Valor de operations service requerido por la operación.
+   */
   constructor(
     private readonly checkoutService: PaymentsCheckoutService,
     private readonly transactionsService: PaymentsTransactionsService,
@@ -59,7 +66,14 @@ export class PaymentsOperationsController {
   openCheckout(
     @Body() dto: OpenCheckoutSessionDto,
     @CurrentUser() actor: AuthenticatedUser,
-  ): Promise<CheckoutSessionResponseDto & { sessionToken: string }> {
+  ): Promise<
+    CheckoutSessionResponseDto & {
+      /**
+       * Valor de session token mantenido por la instancia.
+       */
+      sessionToken: string;
+    }
+  > {
     return this.checkoutService.openSession(dto, actor);
   }
 

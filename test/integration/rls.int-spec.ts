@@ -57,7 +57,9 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
     );
     await admin.query('ALTER TABLE public.rls_probe ENABLE ROW LEVEL SECURITY');
     await admin.query('ALTER TABLE public.rls_probe FORCE ROW LEVEL SECURITY');
-    await admin.query('DROP POLICY IF EXISTS tenant_isolation ON public.rls_probe');
+    await admin.query(
+      'DROP POLICY IF EXISTS tenant_isolation ON public.rls_probe',
+    );
     await admin.query(`
       CREATE POLICY tenant_isolation ON public.rls_probe
         USING (current_setting('app.current_tenant_id', true) IS NULL
@@ -67,18 +69,25 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
           OR current_setting('app.current_tenant_id', true) = ''
           OR tenant_id = current_setting('app.current_tenant_id', true)::uuid)
     `);
-    await admin.query('GRANT SELECT, INSERT, UPDATE, DELETE ON public.rls_probe TO mantra_app');
-    await admin.query('GRANT USAGE, SELECT ON SEQUENCE public.rls_probe_id_seq TO mantra_app');
+    await admin.query(
+      'GRANT SELECT, INSERT, UPDATE, DELETE ON public.rls_probe TO mantra_app',
+    );
+    await admin.query(
+      'GRANT USAGE, SELECT ON SEQUENCE public.rls_probe_id_seq TO mantra_app',
+    );
     // Semilla: una fila por tenant (admin es superusuario y omite RLS).
     await admin.query('TRUNCATE public.rls_probe');
-    await admin.query('INSERT INTO public.rls_probe (tenant_id, label) VALUES ($1,$2),($3,$4)', [
-      TENANT_A, 'de-tenant-A', TENANT_B, 'de-tenant-B',
-    ]);
+    await admin.query(
+      'INSERT INTO public.rls_probe (tenant_id, label) VALUES ($1,$2),($3,$4)',
+      [TENANT_A, 'de-tenant-A', TENANT_B, 'de-tenant-B'],
+    );
   }, 120000);
 
   afterAll(async () => {
     if (admin) {
-      await admin.query('DROP TABLE IF EXISTS public.rls_probe').catch(() => undefined);
+      await admin
+        .query('DROP TABLE IF EXISTS public.rls_probe')
+        .catch(() => undefined);
       await admin.end();
     }
   });
@@ -95,8 +104,12 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
     const app = new pg.Client(APP);
     await app.connect();
     try {
-      await app.query("SELECT set_config('app.current_tenant_id', $1, false)", [TENANT_A]);
-      const { rows } = await app.query('SELECT tenant_id, label FROM public.rls_probe');
+      await app.query("SELECT set_config('app.current_tenant_id', $1, false)", [
+        TENANT_A,
+      ]);
+      const { rows } = await app.query(
+        'SELECT tenant_id, label FROM public.rls_probe',
+      );
       expect(rows).toHaveLength(1);
       expect(rows[0].tenant_id).toBe(TENANT_A);
     } finally {
@@ -108,11 +121,14 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
     const app = new pg.Client(APP);
     await app.connect();
     try {
-      await app.query("SELECT set_config('app.current_tenant_id', $1, false)", [TENANT_A]);
+      await app.query("SELECT set_config('app.current_tenant_id', $1, false)", [
+        TENANT_A,
+      ]);
       await expect(
-        app.query('INSERT INTO public.rls_probe (tenant_id, label) VALUES ($1,$2)', [
-          TENANT_B, 'intruso',
-        ]),
+        app.query(
+          'INSERT INTO public.rls_probe (tenant_id, label) VALUES ($1,$2)',
+          [TENANT_B, 'intruso'],
+        ),
       ).rejects.toThrow(/row-level security|violates/i);
     } finally {
       await app.end();
@@ -123,7 +139,9 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
     const app = new pg.Client(APP);
     await app.connect();
     try {
-      const { rows } = await app.query('SELECT count(*)::int AS n FROM public.rls_probe');
+      const { rows } = await app.query(
+        'SELECT count(*)::int AS n FROM public.rls_probe',
+      );
       expect(rows[0].n).toBe(2);
     } finally {
       await app.end();

@@ -14,59 +14,197 @@ import {
 import { AppointmentBookingsHistory } from '../../audit/entities/appointment_bookings_history.entity';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de booking history data.
+ */
 export interface BookingHistoryData {
+  /**
+   * Identificador asociado a appointment booking.
+   */
   appointmentBookingId: string;
+  /**
+   * Valor de revision no mantenido por la instancia.
+   */
   revisionNo: number;
+  /**
+   * Identificador asociado a operation concept.
+   */
   operationConceptId: string;
+  /**
+   * Valor de data snapshot mantenido por la instancia.
+   */
   dataSnapshot: unknown;
+  /**
+   * Identificador asociado a changed by user.
+   */
   changedByUserId?: string;
+  /**
+   * Identificador asociado a change reason concept.
+   */
   changeReasonConceptId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create hold data.
+ */
 export interface CreateHoldData {
+  /**
+   * Identificador asociado a bookable slot.
+   */
   bookableSlotId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId?: string;
+  /**
+   * Identificador asociado a held by user.
+   */
   heldByUserId: string;
+  /**
+   * Valor de hold token mantenido por la instancia.
+   */
   holdToken: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create booking data.
+ */
 export interface CreateBookingData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a bookable slot.
+   */
   bookableSlotId: string;
+  /**
+   * Identificador asociado a resource.
+   */
   resourceId?: string;
+  /**
+   * Identificador asociado a service concept.
+   */
   serviceConceptId?: string;
+  /**
+   * Identificador asociado a booking channel concept.
+   */
   bookingChannelConceptId: string;
+  /**
+   * Identificador asociado a booked by user.
+   */
   bookedByUserId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de confirmed at mantenido por la instancia.
+   */
   confirmedAt?: Date;
+  /**
+   * Identificador asociado a booking policy.
+   */
   bookingPolicyId?: string;
+  /**
+   * Valor de cancellation policy snapshot mantenido por la instancia.
+   */
   cancellationPolicySnapshot?: CancellationPolicySnapshot;
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
   reasonText?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create waitlist data.
+ */
 export interface CreateWaitlistData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a resource.
+   */
   resourceId?: string;
+  /**
+   * Identificador asociado a service concept.
+   */
   serviceConceptId?: string;
+  /**
+   * Valor de desired from mantenido por la instancia.
+   */
   desiredFrom?: Date;
+  /**
+   * Valor de desired to mantenido por la instancia.
+   */
   desiredTo?: Date;
+  /**
+   * Valor de priority mantenido por la instancia.
+   */
   priority: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create reminder data.
+ */
 export interface CreateReminderData {
+  /**
+   * Identificador asociado a booking.
+   */
   bookingId: string;
+  /**
+   * Identificador asociado a channel concept.
+   */
   channelConceptId: string;
+  /**
+   * Valor de offset minutes mantenido por la instancia.
+   */
   offsetMinutes: number;
+  /**
+   * Valor de scheduled at mantenido por la instancia.
+   */
   scheduledAt: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -88,10 +226,24 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Obtiene find slot by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find slot by id conforme al contrato `Promise<BookableSlots | null>`.
+   */
   findSlotById(em: EntityManager, id: string): Promise<BookableSlots | null> {
     return em.findOne(BookableSlots, { id });
   }
 
+  /**
+   * Crea create hold.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create hold conforme al contrato `SlotHolds`.
+   */
   createHold(em: EntityManager, data: CreateHoldData): SlotHolds {
     return em.create(
       SlotHolds,
@@ -137,6 +289,13 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Crea create booking.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create booking conforme al contrato `AppointmentBookings`.
+   */
   createBooking(
     em: EntityManager,
     data: CreateBookingData,
@@ -162,6 +321,13 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Obtiene find booking by id for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find booking by id for update conforme al contrato `Promise<AppointmentBookings | null>`.
+   */
   findBookingByIdForUpdate(
     em: EntityManager,
     id: string,
@@ -185,14 +351,39 @@ export class SchedulingBookingsRepository {
     });
   }
 
+  /**
+   * Ejecuta la operación record reschedule.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de record reschedule conforme al contrato `BookingReschedules`.
+   */
   recordReschedule(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a booking.
+       */
       bookingId: string;
+      /**
+       * Identificador asociado a from slot.
+       */
       fromSlotId: string;
+      /**
+       * Identificador asociado a to slot.
+       */
       toSlotId: string;
+      /**
+       * Identificador asociado a reason concept.
+       */
       reasonConceptId?: string;
+      /**
+       * Identificador asociado a rescheduled by user.
+       */
       rescheduledByUserId?: string;
+      /**
+       * Valor de occurred at mantenido por la instancia.
+       */
       occurredAt: Date;
     },
   ): BookingReschedules {
@@ -212,17 +403,51 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Crea create cancellation.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create cancellation conforme al contrato `BookingCancellations`.
+   */
   createCancellation(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a booking.
+       */
       bookingId: string;
+      /**
+       * Identificador asociado a reason concept.
+       */
       reasonConceptId: string;
+      /**
+       * Identificador asociado a cancelled by user.
+       */
       cancelledByUserId?: string;
+      /**
+       * Valor de is no show mantenido por la instancia.
+       */
       isNoShow: boolean;
+      /**
+       * Valor de fee amount mantenido por la instancia.
+       */
       feeAmount?: string;
+      /**
+       * Identificador asociado a currency concept.
+       */
       currencyConceptId?: string;
+      /**
+       * Valor de cancelled at mantenido por la instancia.
+       */
       cancelledAt: Date;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Identificador asociado a actor user.
+       */
       actorUserId?: string;
     },
   ): BookingCancellations {
@@ -243,6 +468,13 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Crea create waitlist entry.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create waitlist entry conforme al contrato `WaitlistEntries`.
+   */
   createWaitlistEntry(
     em: EntityManager,
     data: CreateWaitlistData,
@@ -281,6 +513,13 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /**
+   * Crea create reminder.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create reminder conforme al contrato `AppointmentReminders`.
+   */
   createReminder(
     em: EntityManager,
     data: CreateReminderData,

@@ -116,6 +116,13 @@ const TRACKING_NUMBER_BYTES = 8;
  */
 @Injectable()
 export class TrackingService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param trackingRepo - Valor de tracking repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly trackingRepo: TrackingRepository,
@@ -1129,12 +1136,37 @@ export class TrackingService {
   private nextPendingMilestone(
     subject: TrackableSubjects,
     milestones: Array<{
+      /**
+       * Identificador único de la instancia.
+       */
       id: string;
+      /**
+       * Valor de code mantenido por la instancia.
+       */
       code: string;
+      /**
+       * Valor de ordinal mantenido por la instancia.
+       */
       ordinal?: number;
+      /**
+       * Valor de sla minutes mantenido por la instancia.
+       */
       slaMinutes?: number;
     }>,
-  ): { id: string; code: string; slaMinutes?: number } | undefined {
+  ):
+    | {
+        /**
+         * Identificador único de la instancia.
+         */
+        id: string; /**
+         * Valor de code mantenido por la instancia.
+         */
+        code: string; /**
+         * Valor de sla minutes mantenido por la instancia.
+         */
+        slaMinutes?: number;
+      }
+    | undefined {
     if (milestones.length === 0) return undefined;
     if (!subject.currentMilestoneId) return milestones[0];
 

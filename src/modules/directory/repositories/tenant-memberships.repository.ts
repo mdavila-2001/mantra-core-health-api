@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos para dar de alta una membresía de tenant. */
 export interface CreateMembershipData {
+  /**
+   * Identificador asociado a user.
+   */
   userId: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a tenant role concept.
+   */
   tenantRoleConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a access scope concept.
+   */
   accessScopeConceptId: string;
+  /**
+   * Identificador asociado a primary branch.
+   */
   primaryBranchId?: string;
+  /**
+   * Valor de start date mantenido por la instancia.
+   */
   startDate: Date;
+  /**
+   * Identificador asociado a invited by user.
+   */
   invitedByUserId?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

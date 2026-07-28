@@ -5,16 +5,49 @@ import { createdBy } from '../../../common';
 
 /** Datos para dar de alta un tenant (raíz o sub-tenant). */
 export interface CreateTenantData {
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de legal name mantenido por la instancia.
+   */
   legalName: string;
+  /**
+   * Valor de trade name mantenido por la instancia.
+   */
   tradeName?: string;
+  /**
+   * Identificador asociado a tenant type concept.
+   */
   tenantTypeConceptId: string;
+  /**
+   * Identificador asociado a legal entity type concept.
+   */
   legalEntityTypeConceptId: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Identificador asociado a data residency region concept.
+   */
   dataResidencyRegionConceptId?: string;
+  /**
+   * Identificador asociado a parent tenant.
+   */
   parentTenantId?: string;
+  /**
+   * Valor de time zone mantenido por la instancia.
+   */
   timeZone?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('consent/patient-objections')
 export class PatientObjectionsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param objectionsService - Valor de objections service requerido por la operación.
+   */
   constructor(private readonly objectionsService: PatientObjectionsService) {}
 
   /** UC-07-03. */

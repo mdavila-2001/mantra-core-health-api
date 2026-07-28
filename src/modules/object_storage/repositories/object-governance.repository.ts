@@ -22,12 +22,31 @@ import {
 export class ObjectGovernanceRepository {
   // --- Retención (UC-60-07, 11, 12) ---
 
+  /**
+   * Crea create retention lock.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create retention lock conforme al contrato `ObjectRetentionLocks`.
+   */
   createRetentionLock(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a object version.
+       */
       objectVersionId: string;
+      /**
+       * Valor de lock mode mantenido por la instancia.
+       */
       lockMode: string;
+      /**
+       * Valor de retain until mantenido por la instancia.
+       */
       retainUntil: Date;
+      /**
+       * Valor de policy code mantenido por la instancia.
+       */
       policyCode?: string;
     },
   ): ObjectRetentionLocks {
@@ -72,12 +91,31 @@ export class ObjectGovernanceRepository {
 
   // --- Retención legal (UC-60-08, 11, 12) ---
 
+  /**
+   * Crea create legal hold.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create legal hold conforme al contrato `ObjectLegalHolds`.
+   */
   createLegalHold(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a object version.
+       */
       objectVersionId: string;
+      /**
+       * Valor de legal case reference mantenido por la instancia.
+       */
       legalCaseReference: string;
+      /**
+       * Valor de hold state mantenido por la instancia.
+       */
       holdState: string;
+      /**
+       * Identificador asociado a placed by user.
+       */
       placedByUserId: string;
     },
   ): ObjectLegalHolds {
@@ -94,6 +132,13 @@ export class ObjectGovernanceRepository {
     );
   }
 
+  /**
+   * Obtiene find legal hold for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find legal hold for update conforme al contrato `Promise<ObjectLegalHolds | null>`.
+   */
   findLegalHoldForUpdate(
     em: EntityManager,
     id: string,
@@ -117,6 +162,14 @@ export class ObjectGovernanceRepository {
     });
   }
 
+  /**
+   * Obtiene find active legal holds for versions.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param objectVersionIds - Valor de object version ids requerido por la operación.
+   * @param activeState - Valor de active state requerido por la operación.
+   * @returns Resultado de find active legal holds for versions conforme al contrato `Promise<ObjectLegalHolds[]>`.
+   */
   findActiveLegalHoldsForVersions(
     em: EntityManager,
     objectVersionIds: string[],
@@ -134,11 +187,29 @@ export class ObjectGovernanceRepository {
   createIntegrityCheck(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a object version.
+       */
       objectVersionId: string;
+      /**
+       * Valor de check type mantenido por la instancia.
+       */
       checkType: string;
+      /**
+       * Valor de expected hash mantenido por la instancia.
+       */
       expectedHash: string;
+      /**
+       * Valor de actual hash mantenido por la instancia.
+       */
       actualHash: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Identificador asociado a repair job.
+       */
       repairJobId?: string;
     },
   ): ObjectIntegrityChecks {
@@ -159,13 +230,35 @@ export class ObjectGovernanceRepository {
 
   // --- Borrado (UC-60-12) ---
 
+  /**
+   * Crea create deletion marker.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create deletion marker conforme al contrato `ObjectDeletionMarkers`.
+   */
   createDeletionMarker(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a object manifest.
+       */
       objectManifestId: string;
+      /**
+       * Identificador asociado a requested by job.
+       */
       requestedByJobId?: string;
+      /**
+       * Valor de provider delete marker mantenido por la instancia.
+       */
       providerDeleteMarker?: string;
+      /**
+       * Valor de effective at mantenido por la instancia.
+       */
       effectiveAt?: Date;
+      /**
+       * Valor de verification status mantenido por la instancia.
+       */
       verificationStatus: string;
     },
   ): ObjectDeletionMarkers {
@@ -193,15 +286,37 @@ export class ObjectGovernanceRepository {
 
   // --- Archivado (UC-60-11) ---
 
+  /**
+   * Crea create archive manifest.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create archive manifest conforme al contrato `ArchiveManifests`.
+   */
   createArchiveManifest(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Valor de archive type mantenido por la instancia.
+       */
       archiveType: string;
+      /**
+       * Valor de source scope json mantenido por la instancia.
+       */
       sourceScopeJson?: unknown;
+      /**
+       * Identificador asociado a object manifest.
+       */
       objectManifestId: string;
       /** `bigint` en el modelo: viaja como cadena. */
       recordCount: string;
+      /**
+       * Valor de manifest hash mantenido por la instancia.
+       */
       manifestHash: string;
     },
   ): ArchiveManifests {

@@ -39,6 +39,13 @@ import {
 @ApiBearerAuth()
 @Controller('vector-rag')
 export class VectorRuntimeController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param pipelineService - Valor de pipeline service requerido por la operación.
+   * @param retrievalService - Valor de retrieval service requerido por la operación.
+   * @param maintenanceService - Valor de maintenance service requerido por la operación.
+   */
   constructor(
     private readonly pipelineService: EmbeddingPipelineService,
     private readonly retrievalService: RetrievalService,

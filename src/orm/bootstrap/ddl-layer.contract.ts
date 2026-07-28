@@ -56,6 +56,9 @@ export interface DdlLayerContext {
 
 /** Resultado de aplicar una capa; se agrega en el informe final del arranque. */
 export interface DdlLayerResult {
+  /**
+   * Valor de layer mantenido por la instancia.
+   */
   readonly layer: string;
   /** Objetos creados o sentencias ejecutadas en esta pasada. */
   readonly applied: number;
@@ -75,6 +78,12 @@ export interface DdlLayer {
   readonly name: string;
   /** Qué materializa y por qué va en esta posición. */
   readonly description: string;
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply conforme al contrato `Promise<Omit<DdlLayerResult, 'layer' | 'tookMs'>>`.
+   */
   apply(
     context: DdlLayerContext,
   ): Promise<Omit<DdlLayerResult, 'layer' | 'tookMs'>>;

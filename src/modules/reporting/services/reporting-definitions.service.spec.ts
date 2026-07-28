@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ReportingDefinitionsService } from './reporting-definitions.service';
@@ -16,6 +22,10 @@ const DEFINITION = '22222222-2222-2222-2222-222222222222';
 const READ_MODEL = '33333333-3333-3333-3333-333333333333';
 const PERMISSION = '44444444-4444-4444-4444-444444444444';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -112,6 +122,12 @@ describe('ReportingDefinitionsService', () => {
   });
 
   describe('createDefinition (UC-39-02)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         code: 'REP-01',
@@ -123,6 +139,12 @@ describe('ReportingDefinitionsService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.definitionsRepo.findDefinitionByCode.mockResolvedValue(null);
       d.definitionsRepo.findDataSourceById.mockResolvedValue({
@@ -235,6 +257,13 @@ describe('ReportingDefinitionsService', () => {
   });
 
   describe('publishVersion (UC-39-03)', () => {
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param definition - Valor de definition requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(
       d: ReturnType<typeof build>,
       definition: Record<string, unknown> = {},
@@ -316,6 +345,12 @@ describe('ReportingDefinitionsService', () => {
   });
 
   describe('createDashboard (UC-39-10)', () => {
+    /**
+     * Ejecuta la operación dto.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de dto conforme al contrato `any`.
+     */
     function dto(overrides: Record<string, unknown> = {}): any {
       return {
         code: 'DASH-01',

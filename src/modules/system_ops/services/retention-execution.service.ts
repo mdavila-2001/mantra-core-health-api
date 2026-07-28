@@ -26,6 +26,14 @@ import { RetentionExecutionResponseDto, RunRetentionDto } from '../dto';
  */
 @Injectable()
 export class RetentionExecutionService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param governanceRepo - Valor de governance repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: RetentionExecutionRepository,
@@ -136,6 +144,12 @@ export class RetentionExecutionService {
     });
   }
 
+  /**
+   * Ejecuta la operación disposition to operation.
+   *
+   * @param dispositionConceptId - Identificador de disposition concept.
+   * @returns Resultado de disposition to operation conforme al contrato `string`.
+   */
   private dispositionToOperation(dispositionConceptId?: string): string {
     if (dispositionConceptId === SYSOPS.DISPOSITION_DELETE)
       return SYSOPS.OP_DELETE;
@@ -144,13 +158,38 @@ export class RetentionExecutionService {
     return SYSOPS.OP_UPDATE;
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param e - Valor de e requerido por la operación.
+   * @param blocked - Valor de blocked requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `RetentionExecutionResponseDto`.
+   */
   private toResponse(
     e: {
+      /**
+       * Identificador único de la instancia.
+       */
       id: string;
+      /**
+       * Identificador asociado a status concept.
+       */
       statusConceptId: string;
+      /**
+       * Valor de total scanned mantenido por la instancia.
+       */
       totalScanned?: string;
+      /**
+       * Valor de total deleted mantenido por la instancia.
+       */
       totalDeleted?: string;
+      /**
+       * Valor de total anonymized mantenido por la instancia.
+       */
       totalAnonymized?: string;
+      /**
+       * Valor de total archived mantenido por la instancia.
+       */
       totalArchived?: string;
     },
     blocked: boolean,

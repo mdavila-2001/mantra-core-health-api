@@ -2,10 +2,22 @@ import { Controller, Get } from '@nestjs/common';
 import { Public } from './common';
 import { AppService } from './app.service';
 
+/**
+ * Expone las operaciones HTTP de app.
+ */
 @Controller()
 export class AppController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param appService - Valor de app service requerido por la operación.
+   */
   constructor(private readonly appService: AppService) {}
 
+  /**
+   * Obtiene get hello.
+   * @returns Resultado de get hello conforme al contrato `string`.
+   */
   @Get()
   getHello(): string {
     return this.appService.getHello();
@@ -18,7 +30,12 @@ export class AppController {
    */
   @Get('health')
   @Public()
-  health(): { status: string } {
+  health(): {
+    /**
+     * Valor de status mantenido por la instancia.
+     */
+    status: string;
+  } {
     return { status: 'ok' };
   }
 }

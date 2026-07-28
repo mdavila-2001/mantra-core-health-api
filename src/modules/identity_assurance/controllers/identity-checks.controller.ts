@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('identity/checks')
 export class IdentityChecksController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param checksService - Valor de checks service requerido por la operación.
+   */
   constructor(private readonly checksService: IdentityChecksService) {}
 
   /** UC-27-05. */

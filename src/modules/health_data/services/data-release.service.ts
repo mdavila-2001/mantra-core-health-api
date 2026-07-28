@@ -36,6 +36,16 @@ const FIRST_MANIFEST_VERSION = 1;
  */
 @Injectable()
 export class DataReleaseService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param releaseRepo - Valor de release repo requerido por la operación.
+   * @param resourcesRepo - Valor de resources repo requerido por la operación.
+   * @param identityRepo - Valor de identity repo requerido por la operación.
+   * @param provenanceRepo - Valor de provenance repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly releaseRepo: DataReleaseRepository,

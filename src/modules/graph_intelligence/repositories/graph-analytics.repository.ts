@@ -19,6 +19,14 @@ import {
 export class GraphAnalyticsRepository {
   // --- Alcances de acceso (UC-61-04, 05) ---
 
+  /**
+   * Obtiene find scope by code for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @param scopeCode - Valor de scope code requerido por la operación.
+   * @returns Resultado de find scope by code for update conforme al contrato `Promise<GraphAccessScopes | null>`.
+   */
   findScopeByCodeForUpdate(
     em: EntityManager,
     tenantId: string,
@@ -31,6 +39,13 @@ export class GraphAnalyticsRepository {
     );
   }
 
+  /**
+   * Obtiene find scope by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find scope by id conforme al contrato `Promise<GraphAccessScopes | null>`.
+   */
   findScopeById(
     em: EntityManager,
     id: string,
@@ -38,16 +53,47 @@ export class GraphAnalyticsRepository {
     return em.findOne(GraphAccessScopes, { id });
   }
 
+  /**
+   * Crea create scope.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create scope conforme al contrato `GraphAccessScopes`.
+   */
   createScope(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de scope code mantenido por la instancia.
+       */
       scopeCode: string;
+      /**
+       * Valor de allowed node types mantenido por la instancia.
+       */
       allowedNodeTypes: string[];
+      /**
+       * Valor de allowed relationship types mantenido por la instancia.
+       */
       allowedRelationshipTypes: string[];
+      /**
+       * Valor de purpose of use codes mantenido por la instancia.
+       */
       purposeOfUseCodes: string[];
+      /**
+       * Valor de max hops mantenido por la instancia.
+       */
       maxHops: number;
+      /**
+       * Valor de requires patient context mantenido por la instancia.
+       */
       requiresPatientContext: boolean;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): GraphAccessScopes {
@@ -56,29 +102,82 @@ export class GraphAnalyticsRepository {
 
   // --- Caché de rutas (UC-61-05, 10, 12) ---
 
+  /**
+   * Obtiene find cached path.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param key - Valor de key requerido por la operación.
+   * @returns Resultado de find cached path conforme al contrato `Promise<GraphPathCache | null>`.
+   */
   findCachedPath(
     em: EntityManager,
     key: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a start node.
+       */
       startNodeId: string;
+      /**
+       * Identificador asociado a end node.
+       */
       endNodeId: string;
+      /**
+       * Valor de relationship filter hash mantenido por la instancia.
+       */
       relationshipFilterHash: string;
+      /**
+       * Valor de max hops mantenido por la instancia.
+       */
       maxHops: number;
     },
   ): Promise<GraphPathCache | null> {
     return em.findOne(GraphPathCache, key);
   }
 
+  /**
+   * Crea create cached path.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create cached path conforme al contrato `GraphPathCache`.
+   */
   createCachedPath(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a start node.
+       */
       startNodeId: string;
+      /**
+       * Identificador asociado a end node.
+       */
       endNodeId: string;
+      /**
+       * Valor de relationship filter hash mantenido por la instancia.
+       */
       relationshipFilterHash: string;
+      /**
+       * Valor de max hops mantenido por la instancia.
+       */
       maxHops: number;
+      /**
+       * Valor de path nodes mantenido por la instancia.
+       */
       pathNodes: string[];
+      /**
+       * Valor de path edges mantenido por la instancia.
+       */
       pathEdges: string[];
+      /**
+       * Valor de expires at mantenido por la instancia.
+       */
       expiresAt: Date;
     },
   ): GraphPathCache {
@@ -111,6 +210,14 @@ export class GraphAnalyticsRepository {
     });
   }
 
+  /**
+   * Elimina o desactiva delete cached paths touching nodes.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @param nodeIds - Valor de node ids requerido por la operación.
+   * @returns Resultado de delete cached paths touching nodes conforme al contrato `Promise<number>`.
+   */
   async deleteCachedPathsTouchingNodes(
     em: EntityManager,
     tenantId: string,
@@ -150,13 +257,35 @@ export class GraphAnalyticsRepository {
     });
   }
 
+  /**
+   * Crea create community.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create community conforme al contrato `GraphCommunities`.
+   */
   createCommunity(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de community type mantenido por la instancia.
+       */
       communityType: string;
+      /**
+       * Valor de algorithm version mantenido por la instancia.
+       */
       algorithmVersion: string;
+      /**
+       * Valor de member node ids mantenido por la instancia.
+       */
       memberNodeIds: string[];
+      /**
+       * Valor de score mantenido por la instancia.
+       */
       score: number;
     },
   ): GraphCommunities {
@@ -167,11 +296,25 @@ export class GraphAnalyticsRepository {
     );
   }
 
+  /**
+   * Elimina o desactiva delete communities.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Valor de ids requerido por la operación.
+   * @returns Resultado de delete communities conforme al contrato `Promise<number>`.
+   */
   async deleteCommunities(em: EntityManager, ids: string[]): Promise<number> {
     if (ids.length === 0) return 0;
     return em.nativeDelete(GraphCommunities, { id: { $in: ids } });
   }
 
+  /**
+   * Obtiene find communities by tenant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Identificador de tenant.
+   * @returns Resultado de find communities by tenant conforme al contrato `Promise<GraphCommunities[]>`.
+   */
   findCommunitiesByTenant(
     em: EntityManager,
     tenantId: string,
@@ -181,12 +324,31 @@ export class GraphAnalyticsRepository {
 
   // --- Riesgo (UC-61-07, 11, 12) ---
 
+  /**
+   * Obtiene find risk score for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param key - Valor de key requerido por la operación.
+   * @returns Resultado de find risk score for update conforme al contrato `Promise<GraphRiskScores | null>`.
+   */
   findRiskScoreForUpdate(
     em: EntityManager,
     key: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a node.
+       */
       nodeId: string;
+      /**
+       * Valor de risk type mantenido por la instancia.
+       */
       riskType: string;
+      /**
+       * Valor de model version mantenido por la instancia.
+       */
       modelVersion: string;
     },
   ): Promise<GraphRiskScores | null> {
@@ -195,15 +357,43 @@ export class GraphAnalyticsRepository {
     });
   }
 
+  /**
+   * Crea create risk score.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create risk score conforme al contrato `GraphRiskScores`.
+   */
   createRiskScore(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a node.
+       */
       nodeId: string;
+      /**
+       * Valor de risk type mantenido por la instancia.
+       */
       riskType: string;
+      /**
+       * Valor de score mantenido por la instancia.
+       */
       score: number;
+      /**
+       * Valor de model version mantenido por la instancia.
+       */
       modelVersion: string;
+      /**
+       * Valor de explanation redacted mantenido por la instancia.
+       */
       explanationRedacted?: string;
+      /**
+       * Valor de expires at mantenido por la instancia.
+       */
       expiresAt: Date;
     },
   ): GraphRiskScores {
@@ -227,6 +417,13 @@ export class GraphAnalyticsRepository {
     );
   }
 
+  /**
+   * Elimina o desactiva delete risk scores by nodes.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param nodeIds - Valor de node ids requerido por la operación.
+   * @returns Resultado de delete risk scores by nodes conforme al contrato `Promise<number>`.
+   */
   async deleteRiskScoresByNodes(
     em: EntityManager,
     nodeIds: string[],
@@ -237,6 +434,13 @@ export class GraphAnalyticsRepository {
 
   // --- Reglas y hallazgos (UC-61-08, 09) ---
 
+  /**
+   * Obtiene find rule definition by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find rule definition by id conforme al contrato `Promise<GraphRuleDefinitions | null>`.
+   */
   findRuleDefinitionById(
     em: EntityManager,
     id: string,
@@ -262,14 +466,39 @@ export class GraphAnalyticsRepository {
     });
   }
 
+  /**
+   * Crea create hit.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create hit conforme al contrato `GraphRuleHits`.
+   */
   createHit(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a graph rule definition.
+       */
       graphRuleDefinitionId: string;
+      /**
+       * Identificador asociado a primary node.
+       */
       primaryNodeId: string;
+      /**
+       * Valor de related node ids mantenido por la instancia.
+       */
       relatedNodeIds: string[];
+      /**
+       * Valor de evidence edge ids mantenido por la instancia.
+       */
       evidenceEdgeIds: string[];
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
     },
   ): GraphRuleHits {
@@ -280,6 +509,13 @@ export class GraphAnalyticsRepository {
     );
   }
 
+  /**
+   * Obtiene find hit for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find hit for update conforme al contrato `Promise<GraphRuleHits | null>`.
+   */
   findHitForUpdate(
     em: EntityManager,
     id: string,
@@ -309,12 +545,31 @@ export class GraphAnalyticsRepository {
     });
   }
 
+  /**
+   * Crea create deletion job.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create deletion job conforme al contrato `GraphDeletionJobs`.
+   */
   createDeletionJob(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Valor de source entity type mantenido por la instancia.
+       */
       sourceEntityType: string;
+      /**
+       * Identificador asociado a source entity.
+       */
       sourceEntityId: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
     },
   ): GraphDeletionJobs {
@@ -330,6 +585,13 @@ export class GraphAnalyticsRepository {
     );
   }
 
+  /**
+   * Obtiene find deletion job for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find deletion job for update conforme al contrato `Promise<GraphDeletionJobs | null>`.
+   */
   findDeletionJobForUpdate(
     em: EntityManager,
     id: string,

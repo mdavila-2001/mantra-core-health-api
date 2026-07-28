@@ -5,16 +5,49 @@ import { createdBy } from '../../../common';
 
 /** Datos para registrar una licencia de farmacia (UC-24-01). */
 export interface CreateLicenseData {
+  /**
+   * Identificador asociado a pharmacy.
+   */
   pharmacyId: string;
+  /**
+   * Identificador asociado a pharmacy site.
+   */
   pharmacySiteId?: string;
+  /**
+   * Identificador asociado a license type concept.
+   */
   licenseTypeConceptId: string;
+  /**
+   * Valor de license number mantenido por la instancia.
+   */
   licenseNumber: string;
+  /**
+   * Identificador asociado a issuing authority tenant.
+   */
   issuingAuthorityTenantId?: string;
+  /**
+   * Identificador asociado a jurisdiction concept.
+   */
   jurisdictionConceptId?: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom?: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo?: Date;
+  /**
+   * Identificador asociado a evidence file.
+   */
   evidenceFileId?: string;
+  /**
+   * Identificador asociado a verification status concept.
+   */
   verificationStatusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

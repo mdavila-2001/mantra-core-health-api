@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos para registrar una dosis de un calendario de inmunización. */
 export interface CreateImmunizationScheduleData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a vaccine concept.
+   */
   vaccineConceptId: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Valor de recommended age days mantenido por la instancia.
+   */
   recommendedAgeDays?: number;
+  /**
+   * Valor de dose number mantenido por la instancia.
+   */
   doseNumber?: number;
+  /**
+   * Valor de interval days mantenido por la instancia.
+   */
   intervalDays?: number;
+  /**
+   * Identificador asociado a jurisdiction concept.
+   */
   jurisdictionConceptId?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -37,6 +64,13 @@ export class ImmunizationSchedulesRepository {
     );
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `ImmunizationSchedules`.
+   */
   create(
     em: EntityManager,
     data: CreateImmunizationScheduleData,

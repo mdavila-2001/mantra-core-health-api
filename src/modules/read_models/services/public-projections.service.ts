@@ -22,7 +22,9 @@ const PUBLIC_DIRECTORY_FIELDS = [
 const PUBLIC_DIRECTORY_PAGE_SIZE = 50;
 
 const QUALIFIED_VIEW = `"${PUBLIC_DIRECTORY_SCHEMA}"."${PUBLIC_DIRECTORY_VIEW}"`;
-const SELECTED_COLUMNS = PUBLIC_DIRECTORY_FIELDS.map((c) => `"${c}"`).join(', ');
+const SELECTED_COLUMNS = PUBLIC_DIRECTORY_FIELDS.map((c) => `"${c}"`).join(
+  ', ',
+);
 
 /**
  * UC-30-10: sirve proyecciones públicas (sin sesión, sin PHI). Solo se exponen
@@ -33,6 +35,12 @@ const SELECTED_COLUMNS = PUBLIC_DIRECTORY_FIELDS.map((c) => `"${c}"`).join(', ')
  */
 @Injectable()
 export class PublicProjectionsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly logger: PinoLogger,
@@ -73,7 +81,13 @@ export class PublicProjectionsService {
 
   /** GET /public/directory: catálogo público filtrable por ciudad/especialidad. */
   async searchDirectory(filters: {
+    /**
+     * Valor de city mantenido por la instancia.
+     */
     city?: string;
+    /**
+     * Valor de specialty mantenido por la instancia.
+     */
     specialty?: string;
   }): Promise<PublicProjectionResponseDto> {
     this.logger.info(

@@ -22,6 +22,11 @@ import { ProviderReceiptDto, ProviderReceiptResponseDto } from '../dto';
 @ApiTags('messaging-webhooks')
 @Controller('webhooks/providers')
 export class ProviderWebhooksController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param notificationsService - Valor de notifications service requerido por la operación.
+   */
   constructor(private readonly notificationsService: NotificationsService) {}
 
   /** UC-35-12. */

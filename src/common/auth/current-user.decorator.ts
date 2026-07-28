@@ -15,9 +15,14 @@ import type { AuthenticatedUser } from './authenticated-user.interface';
  */
 export const CurrentUser = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
-    const request = ctx
-      .switchToHttp()
-      .getRequest<Request & { user?: AuthenticatedUser }>();
+    const request = ctx.switchToHttp().getRequest<
+      Request & {
+        /**
+         * Valor de user mantenido por la instancia.
+         */
+        user?: AuthenticatedUser;
+      }
+    >();
     if (!request.user) {
       throw new InternalServerErrorException(
         'CurrentUser usado en un handler sin autenticación aplicada',

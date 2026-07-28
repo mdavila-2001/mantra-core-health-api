@@ -22,25 +22,73 @@ import {
 
 /** Lo que un módulo de negocio entrega para publicar un hecho suyo. */
 export interface PublishDomainEventInput {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Valor de event type mantenido por la instancia.
+   */
   eventType: string;
+  /**
+   * Valor de event version mantenido por la instancia.
+   */
   eventVersion?: number;
+  /**
+   * Valor de aggregate type mantenido por la instancia.
+   */
   aggregateType: string;
+  /**
+   * Identificador asociado a aggregate.
+   */
   aggregateId: string;
+  /**
+   * Valor de payload json mantenido por la instancia.
+   */
   payloadJson: Record<string, unknown>;
+  /**
+   * Valor de metadata json mantenido por la instancia.
+   */
   metadataJson?: Record<string, unknown>;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId?: string;
+  /**
+   * Identificador asociado a causation.
+   */
   causationId?: string;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt?: Date;
   /** Si no se declara, se deriva del contenido del evento. */
   idempotencyKey?: string;
+  /**
+   * Valor de max attempts mantenido por la instancia.
+   */
   maxAttempts?: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de publish domain event result.
+ */
 export interface PublishDomainEventResult {
+  /**
+   * Identificador asociado a domain event.
+   */
   domainEventId: string;
+  /**
+   * Identificador asociado a outbox message.
+   */
   outboxMessageId: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey: string;
   /** `true` si ese hecho ya estaba publicado y no se volvió a encolar. */
   duplicate: boolean;
@@ -63,6 +111,14 @@ const BACKOFF_CAP_SECONDS = 3600;
  */
 @Injectable()
 export class OutboxService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param outboxRepo - Valor de outbox repo requerido por la operación.
+   * @param queuesRepo - Valor de queues repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly outboxRepo: OutboxRepository,
@@ -428,11 +484,29 @@ export class OutboxService {
     tx: EntityManager,
     queueCode: string,
     payload: {
+      /**
+       * Identificador asociado a domain event.
+       */
       domainEventId: string;
+      /**
+       * Identificador asociado a subscription.
+       */
       subscriptionId: string;
+      /**
+       * Valor de subscriber code mantenido por la instancia.
+       */
       subscriberCode: string;
+      /**
+       * Valor de event type mantenido por la instancia.
+       */
       eventType: string;
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId?: string;
+      /**
+       * Valor de payload json mantenido por la instancia.
+       */
       payloadJson: unknown;
     },
   ): Promise<string | undefined> {

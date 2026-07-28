@@ -34,6 +34,11 @@ import {
 @ApiBearerAuth()
 @Controller('community')
 export class CommunitySocialController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: CommunitySocialService) {}
 
   /** Bootstrap: crea el perfil público (nodo raíz social). */

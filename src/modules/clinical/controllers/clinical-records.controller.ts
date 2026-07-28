@@ -44,6 +44,15 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical')
 export class ClinicalRecordsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param conditionsService - Valor de conditions service requerido por la operación.
+   * @param allergyService - Valor de allergy service requerido por la operación.
+   * @param medicationsService - Valor de medications service requerido por la operación.
+   * @param proceduresService - Valor de procedures service requerido por la operación.
+   * @param immunizationsService - Valor de immunizations service requerido por la operación.
+   */
   constructor(
     private readonly conditionsService: ConditionsService,
     private readonly allergyService: AllergyIntolerancesService,
@@ -145,7 +154,9 @@ export class ClinicalRecordsController {
   /** CAN-RX: reemplaza una receta emitida y devuelve la nueva (DRAFT). */
   @Post('medication-requests/:id/replace')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Reemplazar una receta emitida (crea la corrección)' })
+  @ApiOperation({
+    summary: 'Reemplazar una receta emitida (crea la corrección)',
+  })
   replaceMedicationRequest(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReplaceMedicationRequestDto,
@@ -157,7 +168,9 @@ export class ClinicalRecordsController {
   /** CAN-RX: renueva una receta copiando datos y devuelve la nueva (DRAFT). */
   @Post('medication-requests/:id/renew')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Renovar una receta (crea una nueva copiando datos)' })
+  @ApiOperation({
+    summary: 'Renovar una receta (crea una nueva copiando datos)',
+  })
   renewMedicationRequest(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: RenewMedicationRequestDto,

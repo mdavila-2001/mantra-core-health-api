@@ -25,8 +25,20 @@ import {
 @ApiBearerAuth()
 @Controller('terminology/code-systems')
 export class TerminologyCodeSystemsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param codeSystemsService - Valor de code systems service requerido por la operación.
+   */
   constructor(private readonly codeSystemsService: CodeSystemsService) {}
 
+  /**
+   * Crea create code system.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create code system conforme al contrato `Promise<CodeSystemResponseDto>`.
+   */
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -38,6 +50,14 @@ export class TerminologyCodeSystemsController {
     return this.codeSystemsService.createCodeSystem(dto, user);
   }
 
+  /**
+   * Crea create version.
+   *
+   * @param id - Identificador de id.
+   * @param dto - Datos validados de la operación.
+   * @param user - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de create version conforme al contrato `Promise<CodeSystemVersionResponseDto>`.
+   */
   @Post(':id/versions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

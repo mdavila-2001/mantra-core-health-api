@@ -14,6 +14,11 @@ import {
 @ApiBearerAuth()
 @Controller('accounting')
 export class AccountingAssetController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param assetService - Valor de asset service requerido por la operación.
+   */
   constructor(private readonly assetService: AssetService) {}
 
   /** UC-16-10. */

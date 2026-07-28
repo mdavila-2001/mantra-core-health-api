@@ -55,6 +55,16 @@ const DOWNLOAD_URL_SECRET =
  */
 @Injectable()
 export class FilesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filesRepo - Valor de files repo requerido por la operación.
+   * @param fileVersionsRepo - Valor de file versions repo requerido por la operación.
+   * @param fileDerivativesRepo - Valor de file derivatives repo requerido por la operación.
+   * @param fileLinksRepo - Valor de file links repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly filesRepo: FilesRepository,
@@ -446,6 +456,14 @@ export class FilesService {
     return { url, expiresAt };
   }
 
+  /**
+   * Ejecuta la operación file to response.
+   *
+   * @param file - Valor de file requerido por la operación.
+   * @param category - Valor de category requerido por la operación.
+   * @param sensitivity - Valor de sensitivity requerido por la operación.
+   * @returns Resultado de file to response conforme al contrato `FileResponseDto`.
+   */
   private fileToResponse(
     file: Files,
     category: FileCategory,
@@ -462,6 +480,12 @@ export class FilesService {
     };
   }
 
+  /**
+   * Ejecuta la operación version to response.
+   *
+   * @param version - Valor de version requerido por la operación.
+   * @returns Resultado de version to response conforme al contrato `FileVersionResponseDto`.
+   */
   private versionToResponse(version: FileVersions): FileVersionResponseDto {
     return {
       id: version.id,

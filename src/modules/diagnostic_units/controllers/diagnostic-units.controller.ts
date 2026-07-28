@@ -42,6 +42,13 @@ import {
 @ApiBearerAuth()
 @Controller('diagnostic-units')
 export class DiagnosticUnitsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param unitsService - Valor de units service requerido por la operación.
+   * @param studiesService - Valor de studies service requerido por la operación.
+   * @param pricingService - Valor de pricing service requerido por la operación.
+   */
   constructor(
     private readonly unitsService: DiagnosticUnitsService,
     private readonly studiesService: DiagnosticStudiesService,

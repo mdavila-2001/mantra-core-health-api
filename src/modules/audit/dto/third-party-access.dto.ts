@@ -13,6 +13,9 @@ export const TPA_CHANNELS = [
  * log especializado se registra; cada canal exige sus FKs NOT NULL propias.
  */
 export class RecordThirdPartyAccessDto {
+  /**
+   * Valor de channel mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Canal de acceso de tercero',
     enum: TPA_CHANNELS,
@@ -20,6 +23,9 @@ export class RecordThirdPartyAccessDto {
   @IsIn(TPA_CHANNELS)
   channel!: string;
 
+  /**
+   * Valor de outcome mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Resultado del acceso',
     enum: ['SUCCESS', 'FAILURE'],
@@ -27,6 +33,9 @@ export class RecordThirdPartyAccessDto {
   @IsIn(['SUCCESS', 'FAILURE'])
   outcome!: string;
 
+  /**
+   * Valor de purpose of use mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Propósito de uso',
     enum: ['TREATMENT', 'PAYMENT', 'OPERATIONS', 'COVERAGE', 'VERIFICATION'],
@@ -36,6 +45,9 @@ export class RecordThirdPartyAccessDto {
   purposeOfUse?: string;
 
   // --- DELEGATED ---
+  /**
+   * Identificador asociado a delegating practitioner profile.
+   */
   @ApiPropertyOptional({
     description: 'DELEGATED: perfil de profesional delegante',
     format: 'uuid',
@@ -44,6 +56,9 @@ export class RecordThirdPartyAccessDto {
   @IsUUID()
   delegatingPractitionerProfileId?: string;
 
+  /**
+   * Identificador asociado a patient profile.
+   */
   @ApiPropertyOptional({
     description: 'DELEGATED/INSURANCE: perfil de paciente',
     format: 'uuid',
@@ -52,6 +67,9 @@ export class RecordThirdPartyAccessDto {
   @IsUUID()
   patientProfileId?: string;
 
+  /**
+   * Identificador asociado a delegated assignment.
+   */
   @ApiPropertyOptional({
     description: 'DELEGATED: asignación de delegación',
     format: 'uuid',
@@ -60,12 +78,18 @@ export class RecordThirdPartyAccessDto {
   @IsUUID()
   delegatedAssignmentId?: string;
 
+  /**
+   * Identificador asociado a resource.
+   */
   @ApiPropertyOptional({ description: 'Recurso accedido', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   resourceId?: string;
 
   // --- INSURANCE ---
+  /**
+   * Identificador asociado a insurance carrier.
+   */
   @ApiPropertyOptional({
     description: 'INSURANCE: aseguradora',
     format: 'uuid',
@@ -74,11 +98,17 @@ export class RecordThirdPartyAccessDto {
   @IsUUID()
   insuranceCarrierId?: string;
 
+  /**
+   * Identificador asociado a claim.
+   */
   @ApiPropertyOptional({ description: 'INSURANCE: reclamo', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   claimId?: string;
 
+  /**
+   * Identificador asociado a authorization request.
+   */
   @ApiPropertyOptional({
     description: 'INSURANCE: solicitud de autorización',
     format: 'uuid',
@@ -88,6 +118,9 @@ export class RecordThirdPartyAccessDto {
   authorizationRequestId?: string;
 
   // --- IDENTITY ---
+  /**
+   * Identificador asociado a verification case.
+   */
   @ApiPropertyOptional({
     description: 'IDENTITY: caso de verificación',
     format: 'uuid',
@@ -97,11 +130,17 @@ export class RecordThirdPartyAccessDto {
   verificationCaseId?: string;
 
   // --- PHARMACY ---
+  /**
+   * Identificador asociado a pharmacy.
+   */
   @ApiPropertyOptional({ description: 'PHARMACY: farmacia', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   pharmacyId?: string;
 
+  /**
+   * Identificador asociado a correlation.
+   */
   @ApiPropertyOptional({
     description: 'PHARMACY: correlación end-to-end',
     format: 'uuid',
@@ -113,12 +152,21 @@ export class RecordThirdPartyAccessDto {
 
 /** Resultado de un acceso de tercero registrado. */
 export class ThirdPartyAccessResultDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ description: 'Id de la fila del log especializado' })
   id!: string;
 
+  /**
+   * Valor de channel mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Canal usado' })
   channel!: string;
 
+  /**
+   * Identificador asociado a audit log.
+   */
   @ApiProperty({ description: 'Id del evento de auditoría (provenance)' })
   auditLogId!: string;
 }

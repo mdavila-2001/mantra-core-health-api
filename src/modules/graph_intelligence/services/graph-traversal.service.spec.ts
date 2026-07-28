@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { GraphTraversalService } from './graph-traversal.service';
@@ -11,6 +17,12 @@ const NODE_B = '33333333-3333-3333-3333-333333333333';
 const NODE_C = '44444444-4444-4444-4444-444444444444';
 const SCOPE_ID = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Ejecuta la operación scope.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de scope.
+ */
 function scope(overrides: any = {}) {
   return {
     id: SCOPE_ID,
@@ -26,6 +38,13 @@ function scope(overrides: any = {}) {
   };
 }
 
+/**
+ * Ejecuta la operación node.
+ *
+ * @param id - Identificador de id.
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de node.
+ */
 function node(id: string, overrides: any = {}) {
   return {
     nodeId: id,
@@ -37,6 +56,10 @@ function node(id: string, overrides: any = {}) {
   };
 }
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -302,6 +325,12 @@ describe('GraphTraversalService', () => {
   describe('findPath (UC-61-05)', () => {
     const PATH_DTO = { ...TRAVERSE_DTO, endNodeId: NODE_C };
 
+    /**
+     * Ejecuta la operación with chain.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de with chain.
+     */
     function withChain(d: ReturnType<typeof build>) {
       d.projectionRepo.findActiveEdgesFrom.mockImplementation(
         async (_tx: any, _t: any, from: string[]) => {

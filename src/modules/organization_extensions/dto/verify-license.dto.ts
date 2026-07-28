@@ -6,6 +6,9 @@ export type LicenseDecision = 'VERIFY' | 'REJECT';
 
 /** Cuerpo de `POST /orgext/facility-licenses/{id}/verify` (UC-22-06). */
 export class VerifyLicenseDto {
+  /**
+   * Valor de decision mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Decisión de verificación',
     enum: ['VERIFY', 'REJECT'],

@@ -5,11 +5,29 @@ import { DUNIT } from '../diagnostic_units.concepts';
 
 /** Datos de un componente de un panel compuesto (UC-23-05). */
 export interface CreateComponentData {
+  /**
+   * Identificador asociado a parent offering.
+   */
   parentOfferingId: string;
+  /**
+   * Identificador asociado a component offering.
+   */
   componentOfferingId: string;
+  /**
+   * Identificador asociado a component role concept.
+   */
   componentRoleConceptId?: string;
+  /**
+   * Valor de quantity mantenido por la instancia.
+   */
   quantity?: string;
+  /**
+   * Valor de ordinal mantenido por la instancia.
+   */
   ordinal?: number;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -19,6 +37,13 @@ export interface CreateComponentData {
  */
 @Injectable()
 export class DiagnosticStudyComponentsRepository {
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `DiagnosticStudyComponents`.
+   */
   create(
     em: EntityManager,
     data: CreateComponentData,

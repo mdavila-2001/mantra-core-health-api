@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PaymentsIntentsController } from './payments-intents.controller';
@@ -16,6 +22,10 @@ const TXN_ID = '22222222-2222-2222-2222-222222222222';
  * specs de servicio).
  */
 describe('PaymentsIntentsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const intentsService = {
       createIntent: mockFn(),
@@ -95,6 +105,10 @@ describe('PaymentsIntentsController', () => {
 });
 
 describe('PaymentsTransactionsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const service = {
       inquireStatus: mockFn(),
@@ -142,6 +156,10 @@ describe('PaymentsTransactionsController', () => {
 });
 
 describe('PaymentsOperationsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const checkoutService = { openSession: mockFn() };
     const transactionsService = { applyCallback: mockFn() };

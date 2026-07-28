@@ -26,7 +26,15 @@ describe('Common (integración)', () => {
     await ctx.app.close();
   });
 
+  /**
+   * Ejecuta la operación http.
+   * @returns Resultado de http.
+   */
   const http = () => request(ctx.app.getHttpServer());
+  /**
+   * Ejecuta la operación owner.
+   * @returns Resultado de owner.
+   */
   const owner = () => ({ ownerType: 'USER', ownerId: ctx.adminUserId });
 
   it('UC-02-01 crea un identificador y lo persiste', async () => {

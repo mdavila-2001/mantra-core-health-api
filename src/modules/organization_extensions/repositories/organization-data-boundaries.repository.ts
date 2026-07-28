@@ -5,17 +5,53 @@ import { createdBy } from '../../../common';
 
 /** Datos para definir una frontera de datos (residencia/RLS) (UC-22-08). */
 export interface CreateDataBoundaryData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a boundary type concept.
+   */
   boundaryTypeConceptId: string;
+  /**
+   * Identificador asociado a data controller tenant.
+   */
   dataControllerTenantId: string;
+  /**
+   * Identificador asociado a data processor tenant.
+   */
   dataProcessorTenantId?: string;
+  /**
+   * Identificador asociado a jurisdiction concept.
+   */
   jurisdictionConceptId?: string;
+  /**
+   * Identificador asociado a residency region concept.
+   */
   residencyRegionConceptId?: string;
+  /**
+   * Identificador asociado a allowed purpose value set.
+   */
   allowedPurposeValueSetId?: string;
+  /**
+   * Valor de isolation schema name mantenido por la instancia.
+   */
   isolationSchemaName?: string;
+  /**
+   * Valor de isolation policy version mantenido por la instancia.
+   */
   isolationPolicyVersion?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de effective from mantenido por la instancia.
+   */
   effectiveFrom: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

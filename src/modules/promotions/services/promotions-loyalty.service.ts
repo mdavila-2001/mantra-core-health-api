@@ -116,6 +116,13 @@ const WALLET_CREDIT_ENTRY_TYPE = CONCEPTS.AWARD_WALLET_CREDIT;
  */
 @Injectable()
 export class PromotionsLoyaltyService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param loyaltyRepo - Valor de loyalty repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly loyaltyRepo: PromotionsLoyaltyRepository,
@@ -1092,6 +1099,12 @@ export class PromotionsLoyaltyService {
     }
   }
 
+  /**
+   * Ejecuta la operación period days.
+   *
+   * @param periodConceptId - Identificador de period concept.
+   * @returns Resultado de period days conforme al contrato `number`.
+   */
   private periodDays(periodConceptId: string): number {
     const entry = (Object.keys(CAP_PERIOD_CONCEPT) as CapPeriod[]).find(
       (p) => CAP_PERIOD_CONCEPT[p] === periodConceptId,
@@ -1101,7 +1114,13 @@ export class PromotionsLoyaltyService {
 
   /** Reproyecta saldo y puntos de por vida recorriendo el ledger completo. */
   private projectLedger(ledger: PointsLedgerEntries[]): {
+    /**
+     * Valor de points balance mantenido por la instancia.
+     */
     pointsBalance: string;
+    /**
+     * Valor de lifetime points mantenido por la instancia.
+     */
     lifetimePoints: string;
   } {
     let balance = 0;
@@ -1140,6 +1159,14 @@ export class PromotionsLoyaltyService {
     return match ?? tiers[0];
   }
 
+  /**
+   * Ejecuta la operación expiry for.
+   *
+   * @param expiryPolicyConceptId - Identificador de expiry policy concept.
+   * @param pointsExpiryDays - Valor de points expiry days requerido por la operación.
+   * @param from - Valor de from requerido por la operación.
+   * @returns Resultado de expiry for conforme al contrato `Date | undefined`.
+   */
   private expiryFor(
     expiryPolicyConceptId: string | undefined,
     pointsExpiryDays: number | undefined,
@@ -1150,6 +1177,15 @@ export class PromotionsLoyaltyService {
     return new Date(from.getTime() + pointsExpiryDays * 24 * 60 * 60 * 1000);
   }
 
+  /**
+   * Valida assert rule award.
+   *
+   * @param awardType - Valor de award type requerido por la operación.
+   * @param pointsAmount - Valor de points amount requerido por la operación.
+   * @param creditAmount - Valor de credit amount requerido por la operación.
+   * @param ruleCode - Valor de rule code requerido por la operación.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private assertRuleAward(
     awardType: AwardType,
     pointsAmount: string | undefined,
@@ -1174,6 +1210,14 @@ export class PromotionsLoyaltyService {
     }
   }
 
+  /**
+   * Ejecuta la operación ledger response.
+   *
+   * @param entry - Valor de entry requerido por la operación.
+   * @param membership - Valor de membership requerido por la operación.
+   * @param duplicate - Valor de duplicate requerido por la operación.
+   * @returns Resultado de ledger response conforme al contrato `PointsLedgerResponseDto`.
+   */
   private ledgerResponse(
     entry: PointsLedgerEntries,
     membership: LoyaltyMemberships | null,

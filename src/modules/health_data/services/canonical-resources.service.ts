@@ -30,6 +30,14 @@ import {
  */
 @Injectable()
 export class CanonicalResourcesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourcesRepo - Valor de resources repo requerido por la operación.
+   * @param provenanceRepo - Valor de provenance repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly resourcesRepo: CanonicalResourcesRepository,

@@ -4,11 +4,29 @@ import { GeofenceEvents } from '../entities';
 
 /** Datos de un evento de geofence append-only. */
 export interface RecordGeofenceEventData {
+  /**
+   * Identificador asociado a geofence.
+   */
   geofenceId: string;
+  /**
+   * Identificador asociado a tracked subject.
+   */
   trackedSubjectId: string;
+  /**
+   * Identificador asociado a event type concept.
+   */
   eventTypeConceptId: string;
+  /**
+   * Identificador asociado a location ping.
+   */
   locationPingId?: string;
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
   occurredAt?: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 

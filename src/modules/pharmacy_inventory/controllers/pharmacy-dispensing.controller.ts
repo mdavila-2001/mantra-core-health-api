@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('pharmacy')
 export class PharmacyDispensingController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param dispensations - Valor de dispensations requerido por la operación.
+   */
   constructor(private readonly dispensations: MedicationDispensationsService) {}
 
   /** UC-25-03: dispensar prescripción a paciente. */

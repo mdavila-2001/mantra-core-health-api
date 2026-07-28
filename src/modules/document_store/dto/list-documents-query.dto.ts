@@ -9,11 +9,22 @@ const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
  * paginación común y exige `tenantId`: no hay listado global entre tenants.
  */
 export class ListDocumentsQueryDto extends PaginationQueryDto {
-  @ApiProperty({ description: 'Tenant cuyos documentos se listan', format: 'uuid' })
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({
+    description: 'Tenant cuyos documentos se listan',
+    format: 'uuid',
+  })
   @IsUUID()
   tenantId!: string;
 
-  @ApiPropertyOptional({ description: 'Filtrar por clasificación de documento' })
+  /**
+   * Valor de document type mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Filtrar por clasificación de documento',
+  })
   @IsOptional()
   @Matches(DOCUMENT_TYPE_RE)
   documentType?: string;

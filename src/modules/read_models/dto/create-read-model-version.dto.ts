@@ -21,6 +21,9 @@ import { ReadModelDependencyInputDto } from './create-read-model-definition.dto'
  * ACTIVE para rollback hasta el corte.
  */
 export class CreateReadModelVersionDto {
+  /**
+   * Valor de object type mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Tipo de objeto físico',
     enum: ['VIEW', 'MATERIALIZED_VIEW'],
@@ -28,6 +31,9 @@ export class CreateReadModelVersionDto {
   @IsIn(['VIEW', 'MATERIALIZED_VIEW'])
   objectType!: 'VIEW' | 'MATERIALIZED_VIEW';
 
+  /**
+   * Valor de refresh mode mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Modo de refresh',
     enum: ['CONCURRENT', 'SCHEDULED'],
@@ -36,6 +42,9 @@ export class CreateReadModelVersionDto {
   @IsIn(['CONCURRENT', 'SCHEDULED'])
   refreshMode?: 'CONCURRENT' | 'SCHEDULED';
 
+  /**
+   * Valor de maximum staleness seconds mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Máxima antigüedad tolerada en segundos',
   })
@@ -44,22 +53,34 @@ export class CreateReadModelVersionDto {
   @Min(0)
   maximumStalenessSeconds?: number;
 
+  /**
+   * Valor de purpose text mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Propósito legible del read model' })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
   purposeText?: string;
 
+  /**
+   * Valor de contains pii mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'La vista contiene PII' })
   @IsOptional()
   @IsBoolean()
   containsPii?: boolean;
 
+  /**
+   * Valor de contains phi mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'La vista contiene PHI' })
   @IsOptional()
   @IsBoolean()
   containsPhi?: boolean;
 
+  /**
+   * Valor de dependencies mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Dependencias upstream de la nueva versión',
     type: [ReadModelDependencyInputDto],

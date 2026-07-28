@@ -36,6 +36,18 @@ import {
  */
 @Injectable()
 export class IntegrationExchangesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contractsRepo - Valor de contracts repo requerido por la operación.
+   * @param versionsRepo - Valor de versions repo requerido por la operación.
+   * @param recordsRepo - Valor de records repo requerido por la operación.
+   * @param attemptsRepo - Valor de attempts repo requerido por la operación.
+   * @param idempotencyRepo - Valor de idempotency repo requerido por la operación.
+   * @param cursorsRepo - Valor de cursors repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contractsRepo: ContractsRepository,
@@ -421,6 +433,12 @@ export class IntegrationExchangesService {
     });
   }
 
+  /**
+   * Transforma map retry decision.
+   *
+   * @param decision - Valor de decision requerido por la operación.
+   * @returns Resultado de map retry decision conforme al contrato `string`.
+   */
   private mapRetryDecision(decision?: 'RETRYABLE' | 'PERMANENT'): string {
     return decision === 'PERMANENT'
       ? ICON.RETRY_PERMANENT
@@ -432,8 +450,17 @@ export class IntegrationExchangesService {
     tx: EntityManager,
     _versionId: string,
     record: {
+      /**
+       * Identificador único de la instancia.
+       */
       id: string;
+      /**
+       * Valor de idempotency key mantenido por la instancia.
+       */
       idempotencyKey?: string;
+      /**
+       * Identificador asociado a integration contract version.
+       */
       integrationContractVersionId: string;
     },
     responseReference?: string,

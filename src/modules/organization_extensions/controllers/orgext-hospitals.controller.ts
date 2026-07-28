@@ -28,6 +28,11 @@ import {
 @ApiBearerAuth()
 @Controller('orgext/hospitals')
 export class OrgextHospitalsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param hospitalsService - Valor de hospitals service requerido por la operación.
+   */
   constructor(private readonly hospitalsService: OrgextHospitalsService) {}
 
   /** UC-22-01. */

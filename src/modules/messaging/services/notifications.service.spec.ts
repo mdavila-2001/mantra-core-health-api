@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { NotificationsService } from './notifications.service';
@@ -22,6 +28,10 @@ const PROVIDER = '55555555-5555-5555-5555-555555555555';
 const CONFIG = '66666666-6666-6666-6666-666666666666';
 const CATEGORY = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -56,6 +66,12 @@ function build() {
   return { service, tx, notificationsRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active channel.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active channel conforme al contrato `any`.
+ */
 function activeChannel(overrides: Record<string, unknown> = {}): any {
   return { id: CHANNEL, stateConceptId: CONCEPTS.STATE_ACTIVE, ...overrides };
 }
@@ -194,6 +210,12 @@ describe('NotificationsService', () => {
   describe('deliverNotification (UC-35-11)', () => {
     const dto: any = { outcome: 'SENT', providerMessageRef: 'prov-1' };
 
+    /**
+     * Ejecuta la operación pending request.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de pending request conforme al contrato `any`.
+     */
     function pendingRequest(overrides: Record<string, unknown> = {}): any {
       return {
         id: REQUEST,
@@ -204,6 +226,13 @@ describe('NotificationsService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param channel - Valor de channel requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, channel = activeChannel()) {
       d.notificationsRepo.findRequestForUpdate.mockResolvedValue(
         pendingRequest(),
@@ -343,6 +372,12 @@ describe('NotificationsService', () => {
       signature: SIGNATURE,
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.notificationsRepo.findProviderByCode.mockResolvedValue({
         id: PROVIDER,
@@ -447,6 +482,12 @@ describe('NotificationsService', () => {
   });
 
   describe('markInAppRead (UC-35-13)', () => {
+    /**
+     * Ejecuta la operación unread.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de unread conforme al contrato `any`.
+     */
     function unread(overrides: Record<string, unknown> = {}): any {
       return {
         id: 'in-app-1',

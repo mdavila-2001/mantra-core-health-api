@@ -8,19 +8,61 @@ import {
   StoreHealthChecks,
 } from '../entities';
 
+/**
+ * Describe el contrato estructural de create backend data.
+ */
 export interface CreateBackendData {
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   name: string;
+  /**
+   * Valor de backend type mantenido por la instancia.
+   */
   backendType: string;
+  /**
+   * Valor de provider code mantenido por la instancia.
+   */
   providerCode: string;
+  /**
+   * Valor de control plane endpoint mantenido por la instancia.
+   */
   controlPlaneEndpoint?: string;
+  /**
+   * Valor de supports transactions mantenido por la instancia.
+   */
   supportsTransactions: boolean;
+  /**
+   * Valor de supports ttl mantenido por la instancia.
+   */
   supportsTtl: boolean;
+  /**
+   * Valor de supports encryption mantenido por la instancia.
+   */
   supportsEncryption: boolean;
+  /**
+   * Valor de supports versioning mantenido por la instancia.
+   */
   supportsVersioning: boolean;
+  /**
+   * Valor de supports worm mantenido por la instancia.
+   */
   supportsWorm: boolean;
+  /**
+   * Valor de supports vector search mantenido por la instancia.
+   */
   supportsVectorSearch: boolean;
+  /**
+   * Valor de supports full text mantenido por la instancia.
+   */
   supportsFullText: boolean;
+  /**
+   * Valor de state mantenido por la instancia.
+   */
   state: string;
 }
 
@@ -32,6 +74,13 @@ export interface CreateBackendData {
 export class StorageBackendsRepository {
   // --- Backends (UC-54-01, 04) ---
 
+  /**
+   * Crea create backend.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create backend conforme al contrato `StorageBackends`.
+   */
   createBackend(em: EntityManager, data: CreateBackendData): StorageBackends {
     return em.create(
       StorageBackends,
@@ -54,6 +103,13 @@ export class StorageBackendsRepository {
     );
   }
 
+  /**
+   * Obtiene find backend by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find backend by id conforme al contrato `Promise<StorageBackends | null>`.
+   */
   findBackendById(
     em: EntityManager,
     id: string,
@@ -61,6 +117,13 @@ export class StorageBackendsRepository {
     return em.findOne(StorageBackends, { id });
   }
 
+  /**
+   * Obtiene find backend by code.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param code - Valor de code requerido por la operación.
+   * @returns Resultado de find backend by code conforme al contrato `Promise<StorageBackends | null>`.
+   */
   findBackendByCode(
     em: EntityManager,
     code: string,
@@ -70,15 +133,43 @@ export class StorageBackendsRepository {
 
   // --- Regiones (UC-54-01, 05, 11) ---
 
+  /**
+   * Crea create region.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create region conforme al contrato `StorageBackendRegions`.
+   */
   createRegion(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a storage backend.
+       */
       storageBackendId: string;
+      /**
+       * Valor de region code mantenido por la instancia.
+       */
       regionCode: string;
+      /**
+       * Valor de country code mantenido por la instancia.
+       */
       countryCode: string;
+      /**
+       * Valor de jurisdiction code mantenido por la instancia.
+       */
       jurisdictionCode?: string;
+      /**
+       * Valor de endpoint uri mantenido por la instancia.
+       */
       endpointUri?: string;
+      /**
+       * Valor de is primary mantenido por la instancia.
+       */
       isPrimary: boolean;
+      /**
+       * Valor de state mantenido por la instancia.
+       */
       state: string;
     },
   ): StorageBackendRegions {
@@ -97,6 +188,13 @@ export class StorageBackendsRepository {
     );
   }
 
+  /**
+   * Obtiene find region by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find region by id conforme al contrato `Promise<StorageBackendRegions | null>`.
+   */
   findRegionById(
     em: EntityManager,
     id: string,
@@ -104,6 +202,14 @@ export class StorageBackendsRepository {
     return em.findOne(StorageBackendRegions, { id });
   }
 
+  /**
+   * Obtiene find region.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param storageBackendId - Identificador de storage backend.
+   * @param regionCode - Valor de region code requerido por la operación.
+   * @returns Resultado de find region conforme al contrato `Promise<StorageBackendRegions | null>`.
+   */
   findRegion(
     em: EntityManager,
     storageBackendId: string,
@@ -114,13 +220,35 @@ export class StorageBackendsRepository {
 
   // --- Capacidades (UC-54-01, 04) ---
 
+  /**
+   * Crea create capability.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create capability conforme al contrato `StorageCapabilities`.
+   */
   createCapability(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a storage backend.
+       */
       storageBackendId: string;
+      /**
+       * Valor de capability code mantenido por la instancia.
+       */
       capabilityCode: string;
+      /**
+       * Valor de capability version mantenido por la instancia.
+       */
       capabilityVersion: string;
+      /**
+       * Valor de configuration json mantenido por la instancia.
+       */
       configurationJson?: unknown;
+      /**
+       * Valor de verification status mantenido por la instancia.
+       */
       verificationStatus: string;
     },
   ): StorageCapabilities {
@@ -137,6 +265,15 @@ export class StorageBackendsRepository {
     );
   }
 
+  /**
+   * Obtiene find capability.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param storageBackendId - Identificador de storage backend.
+   * @param capabilityCode - Valor de capability code requerido por la operación.
+   * @param capabilityVersion - Valor de capability version requerido por la operación.
+   * @returns Resultado de find capability conforme al contrato `Promise<StorageCapabilities | null>`.
+   */
   findCapability(
     em: EntityManager,
     storageBackendId: string,
@@ -156,10 +293,25 @@ export class StorageBackendsRepository {
   createHealthCheck(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a storage backend region.
+       */
       storageBackendRegionId: string;
+      /**
+       * Valor de check type mantenido por la instancia.
+       */
       checkType: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de latency ms mantenido por la instancia.
+       */
       latencyMs?: number;
+      /**
+       * Valor de details json mantenido por la instancia.
+       */
       detailsJson?: unknown;
     },
   ): StoreHealthChecks {

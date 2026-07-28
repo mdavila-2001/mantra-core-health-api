@@ -12,6 +12,13 @@ import { ComputeKpiSnapshotDto, KpiSnapshotResponseDto } from '../dto';
  */
 @Injectable()
 export class KpiSnapshotsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param kpiRepo - Valor de kpi repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly kpiRepo: KpiSnapshotsRepository,
@@ -20,6 +27,14 @@ export class KpiSnapshotsService {
     this.logger.setContext(KpiSnapshotsService.name);
   }
 
+  /**
+   * Ejecuta la operación compute.
+   *
+   * @param dto - Datos validados de la operación.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Resultado de compute conforme al contrato `Promise<KpiSnapshotResponseDto>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async compute(
     dto: ComputeKpiSnapshotDto,
     actor: AuthenticatedUser,

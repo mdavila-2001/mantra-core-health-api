@@ -14,7 +14,10 @@ import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
 } from '../repositories';
-import type { AppointmentBookings, CancellationPolicySnapshot } from '../entities';
+import type {
+  AppointmentBookings,
+  CancellationPolicySnapshot,
+} from '../entities';
 import { SCHED } from '../scheduling.concepts';
 import { isValidBookingTransition } from '../state/booking-state-machine';
 import {
@@ -58,6 +61,14 @@ const DEFAULT_CANCELLATION_WINDOW_MINUTES = 24 * 60;
  */
 @Injectable()
 export class SchedulingBookingsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param bookingsRepo - Valor de bookings repo requerido por la operación.
+   * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly bookingsRepo: SchedulingBookingsRepository,

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { QueuesService } from './queues.service';
@@ -14,6 +20,10 @@ const QUEUE = '11111111-1111-1111-1111-111111111111';
 const JOB = '22222222-2222-2222-2222-222222222222';
 const DEAD = '33333333-3333-3333-3333-333333333333';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -33,6 +43,12 @@ function build() {
   return { service, tx, queuesRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active queue.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active queue conforme al contrato `any`.
+ */
 function activeQueue(overrides: Record<string, unknown> = {}): any {
   return {
     id: QUEUE,
@@ -45,6 +61,12 @@ function activeQueue(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/**
+ * Ejecuta la operación running job.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de running job conforme al contrato `any`.
+ */
 function runningJob(overrides: Record<string, unknown> = {}): any {
   return {
     id: JOB,
@@ -288,6 +310,12 @@ describe('QueuesService', () => {
   describe('redriveDeadLetter (UC-35-09)', () => {
     const dto: any = { reason: 'corregido el timeout del proveedor' };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.queuesRepo.findDeadLetterJobById.mockResolvedValue({
         id: DEAD,

@@ -1,11 +1,21 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { MedicationDispensationsService } from './medication-dispensations.service';
 import { PreconditionFailedException } from '../../../common';
 
 const actor = { id: 'pharm-1', roles: ['PHARMACIST'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -39,7 +49,14 @@ function build() {
     ledgerRepo as any,
     logger as any,
   );
-  return { service, tx, dispensationsRepo, reservationsRepo, stockRepo, ledgerRepo };
+  return {
+    service,
+    tx,
+    dispensationsRepo,
+    reservationsRepo,
+    stockRepo,
+    ledgerRepo,
+  };
 }
 
 describe('MedicationDispensationsService', () => {
@@ -100,7 +117,9 @@ describe('MedicationDispensationsService', () => {
 
   it('dispense: idempotent retry returns the existing dispensation without touching stock', async () => {
     const d = build();
-    d.dispensationsRepo.findByIdempotencyKey.mockResolvedValue({ id: 'disp-existing' });
+    d.dispensationsRepo.findByIdempotencyKey.mockResolvedValue({
+      id: 'disp-existing',
+    });
     d.dispensationsRepo.findLines.mockResolvedValue([{ id: 'dl-existing' }]);
     d.ledgerRepo.findEntryIdsBySource.mockResolvedValue(['led-existing']);
     const dto = {

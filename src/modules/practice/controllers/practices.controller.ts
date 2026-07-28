@@ -46,6 +46,16 @@ import {
 @ApiBearerAuth()
 @Controller('practices')
 export class PracticesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param sitesService - Valor de sites service requerido por la operación.
+   * @param accreditationsService - Valor de accreditations service requerido por la operación.
+   * @param structureService - Valor de structure service requerido por la operación.
+   * @param settingsService - Valor de settings service requerido por la operación.
+   * @param workforceService - Valor de workforce service requerido por la operación.
+   * @param inventoryService - Valor de inventory service requerido por la operación.
+   */
   constructor(
     private readonly sitesService: PracticeSitesService,
     private readonly accreditationsService: PracticeAccreditationsService,

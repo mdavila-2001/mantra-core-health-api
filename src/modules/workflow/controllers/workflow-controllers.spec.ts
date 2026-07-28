@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { WorkflowDefinitionsController } from './workflow-definitions.controller';
@@ -11,6 +17,10 @@ const ID = '11111111-1111-1111-1111-111111111111';
 const EVENT_ID = '22222222-2222-2222-2222-222222222222';
 
 describe('WorkflowDefinitionsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const definitionService = {
       registerStateMachine: mockFn(async () => ({ id: ID })),
@@ -77,6 +87,10 @@ describe('WorkflowDefinitionsController', () => {
 });
 
 describe('WorkflowTransitionsController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const executionService = {
       triggerTransition: mockFn(async () => ({ id: ID })),
@@ -147,6 +161,10 @@ describe('WorkflowTransitionsController', () => {
 });
 
 describe('WorkflowInstancesController', () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
   function build() {
     const instancesService = {
       createInstance: mockFn(async () => ({ id: ID })),

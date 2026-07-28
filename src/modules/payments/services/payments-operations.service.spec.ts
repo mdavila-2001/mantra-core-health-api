@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PaymentsOperationsService } from './payments-operations.service';
@@ -14,6 +20,10 @@ const actor = { id: 'user-1', roles: ['PAYMENTS_ADMIN'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const GATEWAY = '22222222-2222-2222-2222-222222222222';
 
+/**
+ * Crea build operations.
+ * @returns Resultado de build operations.
+ */
 function buildOperations() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -44,6 +54,10 @@ function buildOperations() {
   return { service, tx, operationsRepo, transactionsRepo };
 }
 
+/**
+ * Crea build checkout.
+ * @returns Resultado de build checkout.
+ */
 function buildCheckout() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };

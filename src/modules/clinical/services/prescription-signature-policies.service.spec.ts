@@ -1,11 +1,21 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
 import { ResourceNotFoundException } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = {
@@ -161,9 +171,9 @@ describe('PrescriptionSignaturePoliciesService', () => {
     it('throws when the policy is missing', async () => {
       const d = build();
       d.repo.findById.mockResolvedValue(null);
-      await expect(d.service.deactivate('missing', actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.deactivate('missing', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

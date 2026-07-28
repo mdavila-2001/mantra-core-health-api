@@ -52,6 +52,13 @@ import {
 @ApiBearerAuth()
 @Controller('object-storage')
 export class ObjectStorageController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param storageService - Valor de storage service requerido por la operación.
+   * @param dicomService - Valor de dicom service requerido por la operación.
+   * @param governanceService - Valor de governance service requerido por la operación.
+   */
   constructor(
     private readonly storageService: ObjectStorageService,
     private readonly dicomService: DicomCatalogService,

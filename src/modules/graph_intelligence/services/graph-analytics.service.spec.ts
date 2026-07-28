@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { GraphAnalyticsService } from './graph-analytics.service';
@@ -11,6 +17,10 @@ const RULE_ID = '33333333-3333-3333-3333-333333333333';
 const HIT_ID = '44444444-4444-4444-4444-444444444444';
 const SOURCE_ID = '55555555-5555-5555-5555-555555555555';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -286,6 +296,12 @@ describe('GraphAnalyticsService', () => {
   });
 
   describe('triageRuleHit (UC-61-09)', () => {
+    /**
+     * Ejecuta la operación with hit.
+     *
+     * @param status - Valor de status requerido por la operación.
+     * @returns Resultado de with hit.
+     */
     function withHit(status: string) {
       const hit = {
         id: HIT_ID,
@@ -356,6 +372,12 @@ describe('GraphAnalyticsService', () => {
       sourceEntityId: SOURCE_ID,
     } as any;
 
+    /**
+     * Ejecuta la operación with node.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de with node.
+     */
     function withNode(d: ReturnType<typeof build>) {
       d.projectionRepo.findNodeBySourceForUpdate.mockResolvedValue({
         nodeId: NODE_A,

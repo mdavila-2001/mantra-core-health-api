@@ -21,6 +21,11 @@ import { OverrideAlertDto, ClinicalAlertResponseDto } from '../dto';
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('clinical-alerts')
 export class ClinicalAlertsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param alertsService - Valor de alerts service requerido por la operación.
+   */
   constructor(private readonly alertsService: ClinicalAlertsService) {}
 
   /** UC-18-05 (acknowledge). */

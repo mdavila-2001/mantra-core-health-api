@@ -1,11 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  MongoClient,
-  type Db,
-  type Collection,
-  type Document,
-} from 'mongodb';
+import { MongoClient, type Db, type Collection, type Document } from 'mongodb';
 
 /**
  * Proveedor de conexión a MongoDB para el almacén de documentos flexibles.
@@ -18,11 +13,22 @@ import {
  */
 @Injectable()
 export class MongoConnection implements OnModuleDestroy {
+  /**
+   * Valor de client mantenido por la instancia.
+   */
   private client?: MongoClient;
+  /**
+   * Valor de db mantenido por la instancia.
+   */
   private db?: Db;
   /** Promesa en vuelo para colapsar conexiones concurrentes en una sola. */
   private connecting?: Promise<Db>;
 
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(private readonly logger: PinoLogger) {
     this.logger.setContext(MongoConnection.name);
   }
@@ -46,6 +52,11 @@ export class MongoConnection implements OnModuleDestroy {
     return db.collection<T>(name);
   }
 
+  /**
+   * Actualiza connect.
+   * @returns Resultado de connect conforme al contrato `Promise<Db>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   private async connect(): Promise<Db> {
     const uri = process.env.MONGODB_URI;
     if (!uri) {

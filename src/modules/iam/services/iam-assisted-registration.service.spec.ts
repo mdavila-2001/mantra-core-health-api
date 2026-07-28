@@ -1,6 +1,12 @@
 import { jest } from '@jest/globals';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { UnauthorizedException } from '@nestjs/common';
 import { IamAssistedRegistrationService } from './iam-assisted-registration.service';
@@ -8,6 +14,10 @@ import { CONCEPTS, ConflictException } from '../../../common';
 
 const actor = { id: 'clinician-1', roles: ['CLINICIAN'] };
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = {
@@ -98,7 +108,9 @@ describe('IamAssistedRegistrationService', () => {
         d.tx,
         expect.objectContaining({
           eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
-          detailJson: expect.objectContaining({ flow: 'assisted-registration' }),
+          detailJson: expect.objectContaining({
+            flow: 'assisted-registration',
+          }),
         }),
       );
     });

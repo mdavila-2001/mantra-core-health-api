@@ -22,6 +22,11 @@ import {
 @ApiBearerAuth()
 @Controller('telemetry')
 export class TelemetryGovernanceController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param governance - Valor de governance requerido por la operación.
+   */
   constructor(private readonly governance: TelemetryGovernanceService) {}
 
   /** UC-28-01. */

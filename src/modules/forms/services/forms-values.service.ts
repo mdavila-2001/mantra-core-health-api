@@ -29,6 +29,14 @@ import { buildValueColumns } from './value-columns';
  */
 @Injectable()
 export class FormsValuesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param valuesRepo - Valor de values repo requerido por la operación.
+   * @param instancesRepo - Valor de instances repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly valuesRepo: FieldValuesRepository,
@@ -171,8 +179,17 @@ export class FormsValuesService {
     );
     return this.em.transactional(async (tx) => {
       const created: {
+        /**
+         * Identificador único de la instancia.
+         */
         id: string;
+        /**
+         * Valor de snapshot mantenido por la instancia.
+         */
         snapshot: unknown;
+        /**
+         * Valor de item mantenido por la instancia.
+         */
         item: (typeof dto.items)[number];
       }[] = [];
 
@@ -229,17 +246,53 @@ export class FormsValuesService {
 
   /** Congela el estado observable de un valor para el log de auditoría. */
   private snapshot(value: {
+    /**
+     * Identificador asociado a field.
+     */
     fieldId: string;
+    /**
+     * Valor de ordinal mantenido por la instancia.
+     */
     ordinal: number;
+    /**
+     * Identificador asociado a value status concept.
+     */
     valueStatusConceptId?: string;
+    /**
+     * Valor de value version mantenido por la instancia.
+     */
     valueVersion?: number;
+    /**
+     * Valor de value string mantenido por la instancia.
+     */
     valueString?: string;
+    /**
+     * Valor de value text mantenido por la instancia.
+     */
     valueText?: string;
+    /**
+     * Valor de value integer mantenido por la instancia.
+     */
     valueInteger?: string;
+    /**
+     * Valor de value decimal mantenido por la instancia.
+     */
     valueDecimal?: string;
+    /**
+     * Valor de value boolean mantenido por la instancia.
+     */
     valueBoolean?: boolean;
+    /**
+     * Valor de value json mantenido por la instancia.
+     */
     valueJson?: unknown;
+    /**
+     * Identificador asociado a value concept.
+     */
     valueConceptId?: string;
+    /**
+     * Identificador asociado a value reference.
+     */
     valueReferenceId?: string;
   }): Record<string, unknown> {
     return {

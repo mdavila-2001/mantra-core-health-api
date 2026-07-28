@@ -25,6 +25,11 @@ import {
 @ApiBearerAuth()
 @Controller('reconciliation-batches')
 export class ReconciliationController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: ReconciliationService) {}
 
   /** UC-26-13a. */

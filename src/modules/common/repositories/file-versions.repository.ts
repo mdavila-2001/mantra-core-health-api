@@ -7,19 +7,55 @@ import { FileVersions } from '../entities';
  * no tiene `updated_at` ni `row_version`, solo `recorded_at` + autor.
  */
 export interface CreateFileVersionData {
+  /**
+   * Identificador asociado a file.
+   */
   fileId: string;
+  /**
+   * Valor de version number mantenido por la instancia.
+   */
   versionNumber: number;
+  /**
+   * Identificador asociado a storage provider concept.
+   */
   storageProviderConceptId: string;
+  /**
+   * Identificador asociado a storage region concept.
+   */
   storageRegionConceptId: string;
+  /**
+   * Valor de storage uri mantenido por la instancia.
+   */
   storageUri: string;
+  /**
+   * Valor de mime type mantenido por la instancia.
+   */
   mimeType: string;
   /** La columna `size_bytes` es bigint → se materializa como string. */
   sizeBytes: string;
+  /**
+   * Identificador asociado a checksum algorithm concept.
+   */
   checksumAlgorithmConceptId: string;
+  /**
+   * Valor de content hash mantenido por la instancia.
+   */
   contentHash: string;
+  /**
+   * Identificador asociado a encryption status concept.
+   */
   encryptionStatusConceptId: string;
+  /**
+   * Identificador asociado a malware scan status concept.
+   */
   malwareScanStatusConceptId: string;
+  /**
+   * Valor de recorded at mantenido por la instancia.
+   */
   recordedAt: Date;
+  /**
+   * Identificador asociado a recorded by user.
+   */
   recordedByUserId?: string;
 }
 

@@ -98,4 +98,7 @@ export const WEB_VITAL_METRIC_CODES = [
   'TTFB',
   'FCP',
 ] as const;
+/**
+ * Define el tipo de dominio web vital metric code.
+ */
 export type WebVitalMetricCode = (typeof WEB_VITAL_METRIC_CODES)[number];

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ContextCollectionService } from './context-collection.service';
@@ -19,6 +25,10 @@ const COUNTRY = '55555555-5555-5555-5555-555555555555';
 const TYPE = '66666666-6666-6666-6666-666666666666';
 const TRUST = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -49,10 +59,22 @@ function build() {
   return { service, tx, contextRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active agent.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active agent conforme al contrato `any`.
+ */
 function activeAgent(overrides: Record<string, unknown> = {}): any {
   return { id: AGENT, statusConceptId: CONCEPTS.STATE_ACTIVE, ...overrides };
 }
 
+/**
+ * Ejecuta la operación running run.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de running run conforme al contrato `any`.
+ */
 function runningRun(overrides: Record<string, unknown> = {}): any {
   return {
     id: RUN,
@@ -177,6 +199,12 @@ describe('ContextCollectionService', () => {
       scheduleId: SCHEDULE,
     };
 
+    /**
+     * Ejecuta la operación active schedule.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de active schedule conforme al contrato `any`.
+     */
     function activeSchedule(overrides: Record<string, unknown> = {}): any {
       return {
         id: SCHEDULE,
@@ -302,6 +330,13 @@ describe('ContextCollectionService', () => {
       status: 'ACCEPTED',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param run - Valor de run requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, run = runningRun()) {
       d.contextRepo.findRunForUpdate.mockResolvedValue(run);
       d.contextRepo.findSourceById.mockResolvedValue({

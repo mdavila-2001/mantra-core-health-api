@@ -22,6 +22,14 @@ import {
  */
 @Injectable()
 export class IntegrationAuthProfilesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contractsRepo - Valor de contracts repo requerido por la operación.
+   * @param authProfilesRepo - Valor de auth profiles repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contractsRepo: ContractsRepository,

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { EmbeddingPipelineService } from './embedding-pipeline.service';
@@ -13,6 +19,10 @@ const JOB_ID = '55555555-5555-5555-5555-555555555555';
 const DOC_ID = '66666666-6666-6666-6666-666666666666';
 const VERSION_ID = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -65,6 +75,12 @@ function build() {
   return { service, em, tx, catalogRepo, corpusRepo, outbox, logger };
 }
 
+/**
+ * Ejecuta la operación collection.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de collection.
+ */
 function collection(overrides: any = {}) {
   return {
     id: COLLECTION_ID,
@@ -78,6 +94,12 @@ function collection(overrides: any = {}) {
   };
 }
 
+/**
+ * Ejecuta la operación job.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de job.
+ */
 function job(overrides: any = {}) {
   return {
     id: JOB_ID,

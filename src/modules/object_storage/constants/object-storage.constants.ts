@@ -27,6 +27,9 @@ export const OBJECT_LIFECYCLE = {
   PENDING_DELETION: 'pending_deletion',
 } as const;
 
+/**
+ * Define el tipo de dominio object lifecycle.
+ */
 export type ObjectLifecycle =
   (typeof OBJECT_LIFECYCLE)[keyof typeof OBJECT_LIFECYCLE];
 
@@ -44,6 +47,9 @@ export const RETENTION_LOCK_MODE = {
   GOVERNANCE: 'governance',
 } as const;
 
+/**
+ * Define el tipo de dominio retention lock mode.
+ */
 export type RetentionLockMode =
   (typeof RETENTION_LOCK_MODE)[keyof typeof RETENTION_LOCK_MODE];
 

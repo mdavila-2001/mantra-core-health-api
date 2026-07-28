@@ -17,6 +17,11 @@ import { PayLiabilityDto, LiabilityPaymentResponseDto } from '../dto';
 @ApiBearerAuth()
 @Controller('accounting')
 export class AccountingLiabilityController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param liabilityService - Valor de liability service requerido por la operación.
+   */
   constructor(private readonly liabilityService: LiabilityService) {}
 
   /** UC-16-12. */

@@ -7,6 +7,9 @@ import { IsString, MaxLength, MinLength } from 'class-validator';
  * cuenta nunca ve esta contraseña.
  */
 export class ActivateAccountDto {
+  /**
+   * Valor de activation token mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Token de activación de un solo uso recibido por canal seguro',
   })
@@ -15,6 +18,9 @@ export class ActivateAccountDto {
   @MaxLength(500)
   activationToken!: string;
 
+  /**
+   * Valor de new password mantenido por la instancia.
+   */
   @ApiProperty({
     description:
       'Contraseña definitiva elegida por el titular (se persiste solo su hash argon2id)',
@@ -27,12 +33,24 @@ export class ActivateAccountDto {
 
 /** Resultado de `POST /iam/auth/activate`: la cuenta queda activa. */
 export class ActivationResultDto {
+  /**
+   * Identificador asociado a user.
+   */
   @ApiProperty({ description: 'Id de la cuenta activada', format: 'uuid' })
   userId!: string;
 
-  @ApiProperty({ description: 'Estado resultante de la cuenta', example: 'ACTIVE' })
+  /**
+   * Valor de status mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Estado resultante de la cuenta',
+    example: 'ACTIVE',
+  })
   status!: string;
 
+  /**
+   * Valor de activated mantenido por la instancia.
+   */
   @ApiProperty({ description: 'true si la activación se aplicó' })
   activated!: boolean;
 }

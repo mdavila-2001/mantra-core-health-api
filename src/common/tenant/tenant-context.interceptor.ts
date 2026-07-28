@@ -27,20 +27,43 @@ import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
  */
 @Injectable()
 export class TenantContextInterceptor implements NestInterceptor {
+  /**
+   * Valor de enforce mantenido por la instancia.
+   */
   private readonly enforce = process.env.RLS_ENFORCE === 'true';
 
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   */
   constructor(private readonly em: EntityManager) {}
 
+  /**
+   * Ejecuta la operación intercept.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @param next - Valor de next requerido por la operación.
+   * @returns Resultado de intercept conforme al contrato `Observable<unknown>`.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     if (context.getType() !== 'http') {
       return next.handle();
     }
-    const request = context
-      .switchToHttp()
-      .getRequest<Request & { user?: AuthenticatedUser }>();
+    const request = context.switchToHttp().getRequest<
+      Request & {
+        /**
+         * Valor de user mantenido por la instancia.
+         */
+        user?: AuthenticatedUser;
+      }
+    >();
 
     const headerTenant = request.headers['x-tenant-id'];
-    const tenantId = Array.isArray(headerTenant) ? headerTenant[0] : headerTenant;
+    const tenantId = Array.isArray(headerTenant)
+      ? headerTenant[0]
+      : headerTenant;
 
     if (!tenantId) {
       return next.handle();

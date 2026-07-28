@@ -42,8 +42,25 @@ import { TenantMemberships } from '../../directory/entities';
  */
 @Injectable()
 export class IamAuthService {
+  /**
+   * Valor de auth env mantenido por la instancia.
+   */
   private readonly authEnv: AuthEnv = loadAuthEnv();
 
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tokenService - Valor de token service requerido por la operación.
+   * @param usersRepo - Valor de users repo requerido por la operación.
+   * @param credentialsRepo - Valor de credentials repo requerido por la operación.
+   * @param sessionsRepo - Valor de sessions repo requerido por la operación.
+   * @param refreshRepo - Valor de refresh repo requerido por la operación.
+   * @param rolesRepo - Valor de roles repo requerido por la operación.
+   * @param lockoutsRepo - Valor de lockouts repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly tokenService: TokenService,

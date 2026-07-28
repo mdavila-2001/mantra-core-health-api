@@ -5,14 +5,41 @@ import { createdBy } from '../../../common';
 
 /** Datos para registrar un par de interacción medicamentosa (dato de referencia). */
 export interface CreateDrugInteractionData {
+  /**
+   * Identificador asociado a substance aconcept.
+   */
   substanceAConceptId: string;
+  /**
+   * Identificador asociado a substance bconcept.
+   */
   substanceBConceptId: string;
+  /**
+   * Identificador asociado a severity concept.
+   */
   severityConceptId: string;
+  /**
+   * Valor de mechanism text mantenido por la instancia.
+   */
   mechanismText?: string;
+  /**
+   * Valor de management text mantenido por la instancia.
+   */
   managementText?: string;
+  /**
+   * Identificador asociado a evidence level concept.
+   */
   evidenceLevelConceptId?: string;
+  /**
+   * Valor de source mantenido por la instancia.
+   */
   source?: string;
+  /**
+   * Valor de source version mantenido por la instancia.
+   */
   sourceVersion?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -33,6 +60,13 @@ export class DrugInteractionsRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `DrugInteractions`.
+   */
   create(em: EntityManager, data: CreateDrugInteractionData): DrugInteractions {
     return em.create(
       DrugInteractions,

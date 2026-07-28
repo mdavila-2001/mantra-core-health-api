@@ -45,6 +45,14 @@ import {
 @ApiBearerAuth()
 @Controller('admin')
 export class CrossStoreAdminController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param projectionService - Valor de projection service requerido por la operación.
+   * @param reconciliationService - Valor de reconciliation service requerido por la operación.
+   * @param deletionService - Valor de deletion service requerido por la operación.
+   * @param maintenanceService - Valor de maintenance service requerido por la operación.
+   */
   constructor(
     private readonly projectionService: ProjectionDeliveryService,
     private readonly reconciliationService: ReconciliationService,

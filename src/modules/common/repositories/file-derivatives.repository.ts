@@ -7,10 +7,25 @@ import { FileDerivatives } from '../entities';
  * Fila de estilo *append*: solo `created_at` + autor, sin `updated_at`/`row_version`.
  */
 export interface CreateFileDerivativeData {
+  /**
+   * Identificador asociado a source file version.
+   */
   sourceFileVersionId: string;
+  /**
+   * Identificador asociado a derivative file version.
+   */
   derivativeFileVersionId: string;
+  /**
+   * Identificador asociado a derivative type concept.
+   */
   derivativeTypeConceptId: string;
+  /**
+   * Valor de generation profile mantenido por la instancia.
+   */
   generationProfile?: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

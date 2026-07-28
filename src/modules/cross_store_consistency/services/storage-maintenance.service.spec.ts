@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { StorageMaintenanceService } from './storage-maintenance.service';
@@ -14,6 +20,10 @@ const MANIFEST_OBJECT = '66666666-6666-6666-6666-666666666666';
 
 const PAST_CUTOFF = new Date(Date.now() - 30 * 86_400_000).toISOString();
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };

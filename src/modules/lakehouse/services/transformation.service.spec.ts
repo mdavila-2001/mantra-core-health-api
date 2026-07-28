@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -14,6 +20,12 @@ const RUN_ID = '55555555-5555-5555-5555-555555555555';
 const PROFILE_ID = '66666666-6666-6666-6666-666666666666';
 const PURPOSE_ID = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Ejecuta la operación partition.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de partition.
+ */
 function partition(overrides: any = {}) {
   return {
     partitionSpecHash: 'ph-1',
@@ -31,6 +43,10 @@ function partition(overrides: any = {}) {
   };
 }
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -270,6 +286,13 @@ describe('TransformationService', () => {
   describe('runQualityCheck (UC-63-08)', () => {
     const DTO = { tenantId: TENANT_ID, evaluatedRecordCount: '1000' } as any;
 
+    /**
+     * Ejecuta la operación with rule.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with rule.
+     */
     function withRule(d: ReturnType<typeof build>, overrides: any = {}) {
       d.catalogRepo.findActiveQualityRules.mockResolvedValue([
         {

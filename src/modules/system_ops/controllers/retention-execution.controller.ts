@@ -12,6 +12,11 @@ import { RetentionExecutionResponseDto, RunRetentionDto } from '../dto';
 @ApiBearerAuth()
 @Controller('internal/governance')
 export class RetentionExecutionController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param service - Valor de service requerido por la operación.
+   */
   constructor(private readonly service: RetentionExecutionService) {}
 
   /** UC-11-05. */

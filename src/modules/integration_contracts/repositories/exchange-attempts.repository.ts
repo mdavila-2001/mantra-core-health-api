@@ -4,16 +4,49 @@ import { IntegrationExchangeAttempts } from '../entities';
 
 /** Datos para registrar un intento de intercambio (UC-31-06 / UC-31-07). */
 export interface CreateAttemptData {
+  /**
+   * Identificador asociado a integration exchange record.
+   */
   integrationExchangeRecordId: string;
+  /**
+   * Valor de attempt number mantenido por la instancia.
+   */
   attemptNumber: number;
+  /**
+   * Identificador asociado a outcome concept.
+   */
   outcomeConceptId: string;
+  /**
+   * Identificador asociado a endpoint.
+   */
   endpointId?: string;
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   startedAt?: Date;
+  /**
+   * Valor de completed at mantenido por la instancia.
+   */
   completedAt?: Date;
+  /**
+   * Valor de http status mantenido por la instancia.
+   */
   httpStatus?: number;
+  /**
+   * Valor de provider error code mantenido por la instancia.
+   */
   providerErrorCode?: string;
+  /**
+   * Identificador asociado a retry decision concept.
+   */
   retryDecisionConceptId?: string;
+  /**
+   * Valor de next retry at mantenido por la instancia.
+   */
   nextRetryAt?: Date;
+  /**
+   * Identificador asociado a trace.
+   */
   traceId?: string;
 }
 

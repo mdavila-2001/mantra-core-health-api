@@ -53,6 +53,15 @@ const BLOCKING_FINDING_SEVERITIES: readonly string[] = [
  */
 @Injectable()
 export class OpsPracticesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practicesRepo - Valor de practices repo requerido por la operación.
+   * @param incidentsRepo - Valor de incidents repo requerido por la operación.
+   * @param improvementsRepo - Valor de improvements repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: OpsPracticesRepository,

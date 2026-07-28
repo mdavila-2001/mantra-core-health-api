@@ -6,19 +6,61 @@ import { createdBy } from '../../../common';
 
 /** Alta de una intención de pago (UC-42-01). */
 export interface CreateIntentData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a practice.
+   */
   practiceId?: string;
+  /**
+   * Identificador asociado a gateway.
+   */
   gatewayId: string;
+  /**
+   * Identificador asociado a gateway connection.
+   */
   gatewayConnectionId?: string;
+  /**
+   * Identificador asociado a purpose concept.
+   */
   purposeConceptId: string;
+  /**
+   * Identificador asociado a invoice.
+   */
   invoiceId?: string;
+  /**
+   * Valor de source ref type mantenido por la instancia.
+   */
   sourceRefType?: string;
+  /**
+   * Identificador asociado a source ref.
+   */
   sourceRefId?: string;
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   amount: string;
+  /**
+   * Identificador asociado a currency concept.
+   */
   currencyConceptId: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
   idempotencyKey: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt?: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -49,6 +91,13 @@ export class PaymentIntentsRepository {
     );
   }
 
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<PaymentIntents | null>`.
+   */
   findById(em: EntityManager, id: string): Promise<PaymentIntents | null> {
     return em.findOne(PaymentIntents, { id });
   }

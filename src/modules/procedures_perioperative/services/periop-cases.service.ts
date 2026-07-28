@@ -137,6 +137,13 @@ const CONFIRMABLE_CASE_STATES: readonly string[] = [
  */
 @Injectable()
 export class PeriopCasesService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly casesRepo: PeriopCasesRepository,
@@ -461,7 +468,15 @@ export class PeriopCasesService {
    */
   private async caseHasBlockingDependencies(
     tx: EntityManager,
-    surgicalCase: { id: string; primarySurgeonProfileId?: string },
+    surgicalCase: {
+      /**
+       * Identificador único de la instancia.
+       */
+      id: string; /**
+       * Identificador asociado a primary surgeon profile.
+       */
+      primarySurgeonProfileId?: string;
+    },
   ): Promise<boolean> {
     const team = await this.casesRepo.findTeamByCase(tx, surgicalCase.id);
     const extraAssignments = team.some(

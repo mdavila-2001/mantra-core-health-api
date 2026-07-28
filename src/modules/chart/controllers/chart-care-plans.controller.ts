@@ -24,6 +24,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('charts/care-plans')
 export class ChartCarePlansController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param carePlansService - Valor de care plans service requerido por la operación.
+   */
   constructor(private readonly carePlansService: ChartCarePlansService) {}
 
   /** UC-15-10. */

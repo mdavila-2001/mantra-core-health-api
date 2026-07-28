@@ -30,6 +30,10 @@ describe('IAM (integración)', () => {
     await ctx.app.close();
   });
 
+  /**
+   * Ejecuta la operación http.
+   * @returns Resultado de http.
+   */
   const http = () => request(ctx.app.getHttpServer());
 
   it('UC-01-01 crea un usuario y lo persiste', async () => {

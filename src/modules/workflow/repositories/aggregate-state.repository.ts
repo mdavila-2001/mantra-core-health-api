@@ -3,7 +3,13 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 
 /** Fila del agregado tal como la necesita la máquina: sólo estado y versión. */
 export interface AggregateStateRow {
+  /**
+   * Identificador asociado a state concept.
+   */
   stateConceptId: string;
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   rowVersion: number;
 }
 
@@ -16,6 +22,14 @@ export interface AggregateStateRow {
  */
 const SAFE_IDENTIFIER = /^[a-z_][a-z0-9_]{0,62}$/;
 
+/**
+ * Ejecuta la operación quote identifier.
+ *
+ * @param value - Valor de value requerido por la operación.
+ * @param what - Valor de what requerido por la operación.
+ * @returns Resultado de quote identifier conforme al contrato `string`.
+ * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+ */
 function quoteIdentifier(value: string, what: string): string {
   if (!SAFE_IDENTIFIER.test(value)) {
     // No se filtra el valor recibido al mensaje: si alguien logró escribir una
@@ -49,8 +63,17 @@ export class AggregateStateRepository {
   async findForUpdate(
     em: EntityManager,
     location: {
+      /**
+       * Valor de schema name mantenido por la instancia.
+       */
       schemaName: string;
+      /**
+       * Valor de entity name mantenido por la instancia.
+       */
       entityName: string;
+      /**
+       * Valor de status field name mantenido por la instancia.
+       */
       statusFieldName: string;
     },
     aggregateId: string,
@@ -62,14 +85,17 @@ export class AggregateStateRepository {
       'campo de estado',
     );
 
-    const rows = await em
-      .getConnection()
-      .execute<{ state_concept_id: string; row_version: number }[]>(
-        `select ${statusColumn} as state_concept_id, row_version from ${schema}.${table} where id = ? for update`,
-        [aggregateId],
-        'all',
-        em.getTransactionContext(),
-      );
+    const rows = await em.getConnection().execute<
+      {
+        /**
+         * Identificador asociado a state concept.
+         */
+        state_concept_id: string; /**
+         * Versión usada para controlar actualizaciones concurrentes.
+         */
+        row_version: number;
+      }[]
+    >(`select ${statusColumn} as state_concept_id, row_version from ${schema}.${table} where id = ? for update`, [aggregateId], 'all', em.getTransactionContext());
 
     const row = rows?.[0];
     if (!row) return null;
@@ -94,8 +120,17 @@ export class AggregateStateRepository {
   async updateState(
     em: EntityManager,
     location: {
+      /**
+       * Valor de schema name mantenido por la instancia.
+       */
       schemaName: string;
+      /**
+       * Valor de entity name mantenido por la instancia.
+       */
       entityName: string;
+      /**
+       * Valor de status field name mantenido por la instancia.
+       */
       statusFieldName: string;
     },
     aggregateId: string,
@@ -126,8 +161,16 @@ export class AggregateStateRepository {
 
     // El driver devuelve `affectedRows` en `run`; si no lo expone, se asume que
     // el UPDATE se aplicó, porque el `FOR UPDATE` previo ya garantizó la fila.
-    const affected = (result as { affectedRows?: number } | undefined)
-      ?.affectedRows;
+    const affected = (
+      result as
+        | {
+            /**
+             * Valor de affected rows mantenido por la instancia.
+             */
+            affectedRows?: number;
+          }
+        | undefined
+    )?.affectedRows;
     return affected === undefined ? true : affected > 0;
   }
 }

@@ -38,6 +38,13 @@ import { BadRequestException } from '@nestjs/common';
 @ApiBearerAuth()
 @Controller('ts')
 export class SeriesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param ingestService - Valor de ingest service requerido por la operación.
+   * @param normalizationService - Valor de normalization service requerido por la operación.
+   * @param queryService - Valor de query service requerido por la operación.
+   */
   constructor(
     private readonly ingestService: SeriesIngestService,
     private readonly normalizationService: VitalNormalizationService,

@@ -5,16 +5,49 @@ import { createdBy } from '../../../common';
 
 /** Datos para especializar un practice/tenant como hospital (UC-22-01). */
 export interface CreateHospitalData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a practice.
+   */
   practiceId: string;
+  /**
+   * Identificador asociado a hospital type concept.
+   */
   hospitalTypeConceptId: string;
+  /**
+   * Identificador asociado a care level concept.
+   */
   careLevelConceptId?: string;
+  /**
+   * Identificador asociado a ownership type concept.
+   */
   ownershipTypeConceptId?: string;
+  /**
+   * Identificador asociado a teaching status concept.
+   */
   teachingStatusConceptId?: string;
+  /**
+   * Identificador asociado a emergency capability concept.
+   */
   emergencyCapabilityConceptId?: string;
+  /**
+   * Valor de licensed bed capacity mantenido por la instancia.
+   */
   licensedBedCapacity?: number;
+  /**
+   * Valor de operational bed capacity mantenido por la instancia.
+   */
   operationalBedCapacity?: number;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 

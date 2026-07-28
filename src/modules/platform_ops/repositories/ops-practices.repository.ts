@@ -21,6 +21,13 @@ import { createdBy } from '../../../common';
 export class OpsPracticesRepository {
   // --- Revisión de preparación (UC-46-12) ---
 
+  /**
+   * Obtiene find review for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find review for update conforme al contrato `Promise<OperationalReadinessReviews | null>`.
+   */
   findReviewForUpdate(
     em: EntityManager,
     id: string,
@@ -67,6 +74,13 @@ export class OpsPracticesRepository {
 
   // --- Runbooks (UC-46-13) ---
 
+  /**
+   * Obtiene find runbook for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find runbook for update conforme al contrato `Promise<Runbooks | null>`.
+   */
   findRunbookForUpdate(
     em: EntityManager,
     id: string,
@@ -82,10 +96,25 @@ export class OpsPracticesRepository {
   createRunbookVersion(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a runbook.
+       */
       runbookId: string;
+      /**
+       * Valor de version number mantenido por la instancia.
+       */
       versionNumber: number;
+      /**
+       * Valor de content markdown mantenido por la instancia.
+       */
       contentMarkdown: string;
+      /**
+       * Valor de automation definition json mantenido por la instancia.
+       */
       automationDefinitionJson?: unknown;
+      /**
+       * Identificador asociado a approved by user.
+       */
       approvedByUserId: string;
     },
   ): RunbookVersions {
@@ -103,6 +132,14 @@ export class OpsPracticesRepository {
     );
   }
 
+  /**
+   * Obtiene find runbook version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runbookId - Identificador de runbook.
+   * @param versionNumber - Valor de version number requerido por la operación.
+   * @returns Resultado de find runbook version conforme al contrato `Promise<RunbookVersions | null>`.
+   */
   findRunbookVersion(
     em: EntityManager,
     runbookId: string,
@@ -111,6 +148,13 @@ export class OpsPracticesRepository {
     return em.findOne(RunbookVersions, { runbookId, versionNumber });
   }
 
+  /**
+   * Obtiene find runbook version by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find runbook version by id conforme al contrato `Promise<RunbookVersions | null>`.
+   */
   findRunbookVersionById(
     em: EntityManager,
     id: string,
@@ -118,6 +162,13 @@ export class OpsPracticesRepository {
     return em.findOne(RunbookVersions, { id });
   }
 
+  /**
+   * Obtiene find latest runbook version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runbookId - Identificador de runbook.
+   * @returns Resultado de find latest runbook version conforme al contrato `Promise<RunbookVersions | null>`.
+   */
   findLatestRunbookVersion(
     em: EntityManager,
     runbookId: string,
@@ -133,15 +184,45 @@ export class OpsPracticesRepository {
   createRunbookExecution(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a runbook version.
+       */
       runbookVersionId: string;
+      /**
+       * Identificador asociado a health incident.
+       */
       healthIncidentId?: string;
+      /**
+       * Identificador asociado a change request.
+       */
       changeRequestId?: string;
+      /**
+       * Identificador asociado a execution mode concept.
+       */
       executionModeConceptId: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
+      /**
+       * Valor de ended at mantenido por la instancia.
+       */
       endedAt?: Date;
+      /**
+       * Identificador asociado a result concept.
+       */
       resultConceptId: string;
+      /**
+       * Identificador asociado a initiated by user.
+       */
       initiatedByUserId: string;
+      /**
+       * Valor de execution log uri mantenido por la instancia.
+       */
       executionLogUri?: string;
+      /**
+       * Valor de output json mantenido por la instancia.
+       */
       outputJson?: unknown;
     },
   ): RunbookExecutions {
@@ -165,6 +246,13 @@ export class OpsPracticesRepository {
 
   // --- Resiliencia (UC-46-14) ---
 
+  /**
+   * Obtiene find exercise for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find exercise for update conforme al contrato `Promise<ResilienceExercises | null>`.
+   */
   findExerciseForUpdate(
     em: EntityManager,
     id: string,

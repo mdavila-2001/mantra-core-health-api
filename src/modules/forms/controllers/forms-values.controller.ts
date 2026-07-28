@@ -28,6 +28,11 @@ import {
 @Roles('CLINICIAN', 'PRACTITIONER')
 @Controller('forms/values')
 export class FormsValuesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param valuesService - Valor de values service requerido por la operación.
+   */
   constructor(private readonly valuesService: FormsValuesService) {}
 
   /** UC-09-10. */

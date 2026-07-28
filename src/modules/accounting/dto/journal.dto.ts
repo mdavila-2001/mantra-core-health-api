@@ -26,10 +26,16 @@ export type LedgerDirection = 'DEBIT' | 'CREDIT';
 
 /** Una línea (partida) del asiento. La suma de DEBIT debe igualar la de CREDIT. */
 export class LedgerLineDto {
+  /**
+   * Identificador asociado a account.
+   */
   @ApiProperty({ description: 'Cuenta contable postable', format: 'uuid' })
   @IsUUID()
   accountId!: string;
 
+  /**
+   * Valor de direction mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Dirección de la partida',
     enum: ['DEBIT', 'CREDIT'],
@@ -37,6 +43,9 @@ export class LedgerLineDto {
   @IsIn(['DEBIT', 'CREDIT'])
   direction!: LedgerDirection;
 
+  /**
+   * Valor de amount mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Importe positivo de la línea',
     example: '100.00',
@@ -47,21 +56,33 @@ export class LedgerLineDto {
   })
   amount!: string;
 
+  /**
+   * Identificador asociado a cost center.
+   */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
   costCenterId?: string;
 
+  /**
+   * Identificador asociado a profit center.
+   */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
   profitCenterId?: string;
 
+  /**
+   * Identificador asociado a currency concept.
+   */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
   currencyConceptId?: string;
 
+  /**
+   * Valor de fx rate mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Tipo de cambio a moneda base',
     example: '3.75',
@@ -70,6 +91,9 @@ export class LedgerLineDto {
   @IsNumberString()
   fxRate?: string;
 
+  /**
+   * Valor de amount base mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Importe convertido a moneda base',
     example: '375.00',
@@ -78,6 +102,9 @@ export class LedgerLineDto {
   @IsNumberString()
   amountBase?: string;
 
+  /**
+   * Valor de memo mantenido por la instancia.
+   */
   @ApiPropertyOptional({ maxLength: 500 })
   @IsOptional()
   @IsString()
@@ -87,6 +114,9 @@ export class LedgerLineDto {
 
 /** Cuerpo de `POST /accounting/journal-transactions` (UC-16-01). */
 export class PostJournalDto {
+  /**
+   * Identificador asociado a practice.
+   */
   @ApiProperty({
     description: 'Práctica propietaria del asiento',
     format: 'uuid',
@@ -94,6 +124,9 @@ export class PostJournalDto {
   @IsUUID()
   practiceId!: string;
 
+  /**
+   * Valor de transaction number mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description:
       'Número de asiento (único por práctica); autogenerado si se omite',
@@ -103,6 +136,9 @@ export class PostJournalDto {
   @MaxLength(60)
   transactionNumber?: string;
 
+  /**
+   * Valor de transaction date mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Fecha contable',
     format: 'date',
@@ -111,6 +147,9 @@ export class PostJournalDto {
   @IsDateString()
   transactionDate!: string;
 
+  /**
+   * Identificador asociado a fiscal period.
+   */
   @ApiPropertyOptional({
     description: 'Periodo fiscal ABIERTO',
     format: 'uuid',
@@ -119,23 +158,35 @@ export class PostJournalDto {
   @IsUUID()
   fiscalPeriodId?: string;
 
+  /**
+   * Identificador asociado a currency concept.
+   */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
   currencyConceptId?: string;
 
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   @ApiPropertyOptional({ maxLength: 500 })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   description?: string;
 
+  /**
+   * Valor de reference mantenido por la instancia.
+   */
   @ApiPropertyOptional({ maxLength: 120 })
   @IsOptional()
   @IsString()
   @MaxLength(120)
   reference?: string;
 
+  /**
+   * Valor de lines mantenido por la instancia.
+   */
   @ApiProperty({
     type: [LedgerLineDto],
     description: 'Líneas balanceadas (>=2)',
@@ -154,6 +205,9 @@ export class PostJournalDto {
  * fiscal si el borrador no lo fijó; `approve`/`post` admiten una nota de auditoría).
  */
 export class JournalTransitionDto {
+  /**
+   * Identificador asociado a fiscal period.
+   */
   @ApiPropertyOptional({
     description:
       'Periodo fiscal ABIERTO a enlazar en el posteo (solo `post`, si el borrador no lo fijó)',
@@ -163,6 +217,9 @@ export class JournalTransitionDto {
   @IsUUID()
   fiscalPeriodId?: string;
 
+  /**
+   * Valor de note mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Nota de auditoría de la transición',
     maxLength: 500,
@@ -175,6 +232,9 @@ export class JournalTransitionDto {
 
 /** Cuerpo de `POST /accounting/journal-transactions/:id/reverse` (UC-16-03). */
 export class ReverseJournalDto {
+  /**
+   * Identificador asociado a fiscal period.
+   */
   @ApiPropertyOptional({
     description: 'Periodo fiscal ABIERTO de la reversa',
     format: 'uuid',
@@ -183,6 +243,9 @@ export class ReverseJournalDto {
   @IsUUID()
   fiscalPeriodId?: string;
 
+  /**
+   * Valor de reason mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Motivo de la reversa', maxLength: 500 })
   @IsOptional()
   @IsString()
@@ -192,14 +255,23 @@ export class ReverseJournalDto {
 
 /** Cuerpo de `POST /accounting/postings/determine-accounts` (UC-16-02). */
 export class DetermineAccountsDto {
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiProperty({ description: 'Tenant al que aplica la regla', format: 'uuid' })
   @IsUUID()
   tenantId!: string;
 
+  /**
+   * Identificador asociado a posting scenario concept.
+   */
   @ApiProperty({ description: 'Escenario de posteo', format: 'uuid' })
   @IsUUID()
   postingScenarioConceptId!: string;
 
+  /**
+   * Identificador asociado a account role concept.
+   */
   @ApiPropertyOptional({ description: 'Rol de cuenta buscado', format: 'uuid' })
   @IsOptional()
   @IsUUID()
@@ -208,6 +280,9 @@ export class DetermineAccountsDto {
 
 /** Cuerpo de `POST /accounting/journal-transactions/:id/files` (UC-16-13). */
 export class AttachFileDto {
+  /**
+   * Identificador asociado a file.
+   */
   @ApiProperty({
     description: 'Archivo ya cargado en object storage',
     format: 'uuid',
@@ -215,6 +290,9 @@ export class AttachFileDto {
   @IsUUID()
   fileId!: string;
 
+  /**
+   * Identificador asociado a category concept.
+   */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
   @IsUUID()
@@ -223,23 +301,56 @@ export class AttachFileDto {
 
 /** Respuesta con el asiento posteado. */
 export class JournalTransactionResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiProperty({ format: 'uuid' }) id!: string;
+  /**
+   * Valor de transaction number mantenido por la instancia.
+   */
   @ApiProperty() transactionNumber!: string;
+  /**
+   * Valor de status mantenido por la instancia.
+   */
   @ApiProperty() status!: string;
+  /**
+   * Valor de total amount mantenido por la instancia.
+   */
   @ApiProperty() totalAmount!: string;
+  /**
+   * Valor de line count mantenido por la instancia.
+   */
   @ApiProperty({ type: Number }) lineCount!: number;
+  /**
+   * Valor de posted at mantenido por la instancia.
+   */
   @ApiProperty() postedAt!: Date | null;
 }
 
 /** Respuesta de la determinación de cuentas. */
 export class DeterminedAccountResponseDto {
+  /**
+   * Identificador asociado a rule.
+   */
   @ApiProperty({ format: 'uuid' }) ruleId!: string;
+  /**
+   * Identificador asociado a target account.
+   */
   @ApiProperty({ format: 'uuid' }) targetAccountId!: string;
+  /**
+   * Valor de priority mantenido por la instancia.
+   */
   @ApiProperty({ type: Number, nullable: true }) priority!: number | null;
 }
 
 /** Respuesta genérica de estado. */
 export class AccountingStatusDto {
+  /**
+   * Valor de ok mantenido por la instancia.
+   */
   @ApiProperty({ example: true }) ok!: boolean;
+  /**
+   * Identificador único de la instancia.
+   */
   @ApiPropertyOptional({ format: 'uuid' }) id?: string;
 }

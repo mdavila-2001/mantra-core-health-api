@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { OpsPracticesService } from './ops-practices.service';
@@ -19,6 +25,10 @@ const EXERCISE = '55555555-5555-5555-5555-555555555555';
 const INCIDENT = '66666666-6666-6666-6666-666666666666';
 const OWNER = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -60,6 +70,12 @@ function build() {
   };
 }
 
+/**
+ * Ejecuta la operación open finding.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de open finding conforme al contrato `any`.
+ */
 function openFinding(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'finding-1',
@@ -75,6 +91,10 @@ describe('OpsPracticesService', () => {
   describe('completeReadinessReview (UC-46-12)', () => {
     const dto: any = { decision: 'GO', improvementOwnerUserId: OWNER };
 
+    /**
+     * Ejecuta la operación in progress review.
+     * @returns Resultado de in progress review conforme al contrato `any`.
+     */
     function inProgressReview(): any {
       return {
         id: REVIEW,
@@ -231,6 +251,10 @@ describe('OpsPracticesService', () => {
   describe('publishRunbookVersion (UC-46-13)', () => {
     const dto: any = { contentMarkdown: '# Reiniciar el gateway' };
 
+    /**
+     * Ejecuta la operación active runbook.
+     * @returns Resultado de active runbook conforme al contrato `any`.
+     */
     function activeRunbook(): any {
       return { id: RUNBOOK, stateConceptId: CONCEPTS.STATE_ACTIVE };
     }
@@ -406,6 +430,10 @@ describe('OpsPracticesService', () => {
       improvementOwnerUserId: OWNER,
     };
 
+    /**
+     * Ejecuta la operación pending exercise.
+     * @returns Resultado de pending exercise conforme al contrato `any`.
+     */
     function pendingExercise(): any {
       return {
         id: EXERCISE,
@@ -415,6 +443,12 @@ describe('OpsPracticesService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación objective.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de objective conforme al contrato `any`.
+     */
     function objective(overrides: Record<string, unknown> = {}): any {
       return {
         id: 'objective-1',

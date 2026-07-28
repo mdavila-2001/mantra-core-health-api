@@ -28,6 +28,12 @@ import {
 @ApiBearerAuth()
 @Controller('scheduling/bookings')
 export class SchedulingBookingsController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param bookingsService - Valor de bookings service requerido por la operación.
+   * @param waitlistService - Valor de waitlist service requerido por la operación.
+   */
   constructor(
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,

@@ -27,6 +27,14 @@ import {
  */
 @Injectable()
 export class DiagnosticsLabService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param specimensRepo - Valor de specimens repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: LabWorkRepository,

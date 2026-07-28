@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CrmSalesService } from './crm-sales.service';
@@ -14,6 +20,10 @@ const actor = { id: 'user-1', roles: ['CRM_AGENT'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const UUID = '22222222-2222-2222-2222-222222222222';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };

@@ -21,8 +21,22 @@ import {
 } from '../dto';
 import { PINV } from '../pharmacy_inventory.concepts';
 
+/**
+ * Ejecuta la operación num.
+ *
+ * @param v - Valor de v requerido por la operación.
+ * @returns Resultado de num conforme al contrato `number`.
+ */
 const num = (v: string | null | undefined): number =>
   v == null ? 0 : Number(v);
+/**
+ * Ejecuta la operación recompute.
+ *
+ * @param onHand - Valor de on hand requerido por la operación.
+ * @param reserved - Valor de reserved requerido por la operación.
+ * @param quarantine - Valor de quarantine requerido por la operación.
+ * @returns Resultado de recompute conforme al contrato `string`.
+ */
 const recompute = (
   onHand: string,
   reserved: string,
@@ -32,6 +46,16 @@ const recompute = (
 /** Dispensación de prescripciones (UC-25-03) y su reversión/devolución (UC-25-11). */
 @Injectable()
 export class MedicationDispensationsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param dispensationsRepo - Valor de dispensations repo requerido por la operación.
+   * @param reservationsRepo - Valor de reservations repo requerido por la operación.
+   * @param stockRepo - Valor de stock repo requerido por la operación.
+   * @param ledgerRepo - Valor de ledger repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly dispensationsRepo: DispensationsRepository,
@@ -71,8 +95,10 @@ export class MedicationDispensationsService {
             tx,
             existing.id,
           );
-          const existingLedgerIds =
-            await this.ledgerRepo.findEntryIdsBySource(tx, existing.id);
+          const existingLedgerIds = await this.ledgerRepo.findEntryIdsBySource(
+            tx,
+            existing.id,
+          );
           return {
             id: existing.id,
             lineIds: existingLines.map((l) => l.id),

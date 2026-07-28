@@ -5,22 +5,62 @@ import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos de un acceso clínico con propósito de uso. */
 export interface CreateClinicalAccessGrantData {
+  /**
+   * Identificador asociado a patient profile.
+   */
   patientProfileId: string;
+  /**
+   * Identificador asociado a granted user.
+   */
   grantedUserId: string;
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId: string;
+  /**
+   * Identificador asociado a branch.
+   */
   branchId?: string;
+  /**
+   * Identificador asociado a encounter.
+   */
   encounterId?: string;
+  /**
+   * Identificador asociado a consent.
+   */
   consentId?: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId: string;
+  /**
+   * Identificador asociado a access level concept.
+   */
   accessLevelConceptId: string;
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   validFrom: Date;
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   validTo: Date;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
 /** Acceso a datos de `authz.clinical_access_grants`. */
 @Injectable()
 export class ClinicalAccessGrantsRepository {
+  /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<ClinicalAccessGrants | null>`.
+   */
   findById(
     em: EntityManager,
     id: string,
@@ -54,6 +94,13 @@ export class ClinicalAccessGrantsRepository {
     });
   }
 
+  /**
+   * Crea create.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create conforme al contrato `ClinicalAccessGrants`.
+   */
   create(
     em: EntityManager,
     data: CreateClinicalAccessGrantData,

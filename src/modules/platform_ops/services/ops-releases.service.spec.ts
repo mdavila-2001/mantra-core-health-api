@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { OpsReleasesService } from './ops-releases.service';
@@ -19,6 +25,10 @@ const DEPLOYMENT = '44444444-4444-4444-4444-444444444444';
 const WINDOW = '55555555-5555-5555-5555-555555555555';
 const TOOL = '66666666-6666-6666-6666-666666666666';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -62,10 +72,20 @@ function build() {
   return { service, tx, releasesRepo, reliabilityRepo, practicesRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active component.
+ * @returns Resultado de active component conforme al contrato `any`.
+ */
 function activeComponent(): any {
   return { id: COMPONENT, stateConceptId: CONCEPTS.STATE_ACTIVE };
 }
 
+/**
+ * Ejecuta la operación approved change.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de approved change conforme al contrato `any`.
+ */
 function approvedChange(overrides: Record<string, unknown> = {}): any {
   return {
     id: CHANGE,
@@ -85,6 +105,12 @@ describe('OpsReleasesService', () => {
       risk: 'MEDIUM',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.releasesRepo.findComponentById.mockResolvedValue(activeComponent());
       d.releasesRepo.createChangeRequest.mockReturnValue({ id: CHANGE });
@@ -240,6 +266,12 @@ describe('OpsReleasesService', () => {
   });
 
   describe('recordApproval (UC-46-02)', () => {
+    /**
+     * Ejecuta la operación requested change.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de requested change conforme al contrato `any`.
+     */
     function requestedChange(overrides: Record<string, unknown> = {}): any {
       return {
         id: CHANGE,
@@ -249,6 +281,13 @@ describe('OpsReleasesService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param change - Valor de change requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, change = requestedChange()) {
       d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(change);
       d.releasesRepo.createApproval.mockReturnValue({ id: 'approval-1' });
@@ -422,6 +461,12 @@ describe('OpsReleasesService', () => {
       contentHash: 'AABBCC'.padEnd(64, '0'),
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>) {
       d.releasesRepo.findComponentById.mockResolvedValue(activeComponent());
       d.releasesRepo.createArtifact.mockReturnValue({ id: ARTIFACT });
@@ -529,6 +574,13 @@ describe('OpsReleasesService', () => {
       strategy: 'ROLLING',
     };
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param change - Valor de change requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, change = approvedChange()) {
       d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(change);
       d.releasesRepo.findArtifactById.mockResolvedValue({
@@ -711,6 +763,12 @@ describe('OpsReleasesService', () => {
   });
 
   describe('rollbackDeployment (UC-46-05)', () => {
+    /**
+     * Ejecuta la operación current deployment.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de current deployment conforme al contrato `any`.
+     */
     function currentDeployment(overrides: Record<string, unknown> = {}): any {
       return {
         id: DEPLOYMENT,
@@ -722,6 +780,12 @@ describe('OpsReleasesService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación previous deployment.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de previous deployment conforme al contrato `any`.
+     */
     function previousDeployment(overrides: Record<string, unknown> = {}): any {
       return {
         id: 'deployment-prev',

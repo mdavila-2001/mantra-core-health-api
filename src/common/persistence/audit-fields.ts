@@ -8,9 +8,21 @@
  * (ver TerminologySeedService.ensureRowVersionDefaults) y MikroORM la gestiona.
  */
 export interface AuditableCreate {
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   createdAt: Date;
+  /**
+   * Fecha y hora de la última actualización.
+   */
   updatedAt: Date;
+  /**
+   * Identificador asociado a created by user.
+   */
   createdByUserId?: string;
+  /**
+   * Identificador asociado a updated by user.
+   */
   updatedByUserId?: string;
 }
 
@@ -28,11 +40,17 @@ export function createdBy(
 }
 
 /** Actualiza las marcas de modificación conservando las de creación. */
-export function touch<T extends { updatedAt: Date; updatedByUserId?: string }>(
-  entity: T,
-  userId?: string,
-  now: Date = new Date(),
-): T {
+export function touch<
+  T extends {
+    /**
+     * Fecha y hora de la última actualización.
+     */
+    updatedAt: Date; /**
+     * Identificador asociado a updated by user.
+     */
+    updatedByUserId?: string;
+  },
+>(entity: T, userId?: string, now: Date = new Date()): T {
   entity.updatedAt = now;
   entity.updatedByUserId = userId;
   return entity;

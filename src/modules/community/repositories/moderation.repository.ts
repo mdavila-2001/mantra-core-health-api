@@ -9,52 +9,169 @@ import {
 } from '../entities';
 import { createdBy } from '../../../common';
 
+/**
+ * Describe el contrato estructural de create report data.
+ */
 export interface CreateReportData {
+  /**
+   * Identificador asociado a reporter user.
+   */
   reporterUserId: string;
+  /**
+   * Identificador asociado a target type concept.
+   */
   targetTypeConceptId: string;
+  /**
+   * Identificador asociado a target.
+   */
   targetId: string;
+  /**
+   * Identificador asociado a reason concept.
+   */
   reasonConceptId: string;
+  /**
+   * Valor de detail text mantenido por la instancia.
+   */
   detailText?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
 }
 
+/**
+ * Describe el contrato estructural de create queue data.
+ */
 export interface CreateQueueData {
+  /**
+   * Identificador asociado a tenant.
+   */
   tenantId?: string;
+  /**
+   * Identificador asociado a content type concept.
+   */
   contentTypeConceptId: string;
+  /**
+   * Identificador asociado a content ref.
+   */
   contentRefId: string;
+  /**
+   * Identificador asociado a source concept.
+   */
   sourceConceptId: string;
+  /**
+   * Identificador asociado a content report.
+   */
   contentReportId?: string;
+  /**
+   * Identificador asociado a priority concept.
+   */
   priorityConceptId?: string;
+  /**
+   * Valor de ml score mantenido por la instancia.
+   */
   mlScore?: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create decision data.
+ */
 export interface CreateDecisionData {
+  /**
+   * Identificador asociado a moderation queue.
+   */
   moderationQueueId: string;
+  /**
+   * Identificador asociado a decision concept.
+   */
   decisionConceptId: string;
+  /**
+   * Identificador asociado a policy concept.
+   */
   policyConceptId: string;
+  /**
+   * Valor de rationale text mantenido por la instancia.
+   */
   rationaleText?: string;
+  /**
+   * Identificador asociado a action taken concept.
+   */
   actionTakenConceptId?: string;
+  /**
+   * Identificador asociado a decided by user.
+   */
   decidedByUserId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create strike data.
+ */
 export interface CreateStrikeData {
+  /**
+   * Identificador asociado a subject profile.
+   */
   subjectProfileId: string;
+  /**
+   * Identificador asociado a moderation decision.
+   */
   moderationDecisionId: string;
+  /**
+   * Identificador asociado a severity concept.
+   */
   severityConceptId: string;
+  /**
+   * Valor de points mantenido por la instancia.
+   */
   points: number;
+  /**
+   * Valor de expires at mantenido por la instancia.
+   */
   expiresAt?: Date;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
+/**
+ * Describe el contrato estructural de create appeal data.
+ */
 export interface CreateAppealData {
+  /**
+   * Identificador asociado a moderation decision.
+   */
   moderationDecisionId: string;
+  /**
+   * Identificador asociado a appellant profile.
+   */
   appellantProfileId: string;
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
   reasonText: string;
+  /**
+   * Identificador asociado a status concept.
+   */
   statusConceptId: string;
+  /**
+   * Identificador asociado a actor user.
+   */
   actorUserId?: string;
 }
 
@@ -62,6 +179,13 @@ export interface CreateAppealData {
 @Injectable()
 export class ModerationRepository {
   // --- Reports ---
+  /**
+   * Crea create report.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create report conforme al contrato `ContentReports`.
+   */
   createReport(em: EntityManager, data: CreateReportData): ContentReports {
     return em.create(
       ContentReports,
@@ -79,6 +203,13 @@ export class ModerationRepository {
     );
   }
 
+  /**
+   * Obtiene find reports by target.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetId - Identificador de target.
+   * @returns Resultado de find reports by target conforme al contrato `Promise<ContentReports[]>`.
+   */
   findReportsByTarget(
     em: EntityManager,
     targetId: string,
@@ -87,6 +218,13 @@ export class ModerationRepository {
   }
 
   // --- Queue ---
+  /**
+   * Obtiene find queue by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find queue by id conforme al contrato `Promise<ModerationQueue | null>`.
+   */
   findQueueById(
     em: EntityManager,
     id: string,
@@ -106,6 +244,13 @@ export class ModerationRepository {
     });
   }
 
+  /**
+   * Crea create queue.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create queue conforme al contrato `ModerationQueue`.
+   */
   createQueue(em: EntityManager, data: CreateQueueData): ModerationQueue {
     return em.create(
       ModerationQueue,
@@ -126,6 +271,13 @@ export class ModerationRepository {
   }
 
   // --- Decisions ---
+  /**
+   * Obtiene find decision by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find decision by id conforme al contrato `Promise<ModerationDecisions | null>`.
+   */
   findDecisionById(
     em: EntityManager,
     id: string,
@@ -133,6 +285,13 @@ export class ModerationRepository {
     return em.findOne(ModerationDecisions, { id });
   }
 
+  /**
+   * Crea create decision.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create decision conforme al contrato `ModerationDecisions`.
+   */
   createDecision(
     em: EntityManager,
     data: CreateDecisionData,
@@ -154,6 +313,13 @@ export class ModerationRepository {
   }
 
   // --- Strikes ---
+  /**
+   * Crea create strike.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create strike conforme al contrato `ModerationStrikes`.
+   */
   createStrike(em: EntityManager, data: CreateStrikeData): ModerationStrikes {
     return em.create(
       ModerationStrikes,
@@ -171,6 +337,13 @@ export class ModerationRepository {
   }
 
   // --- Appeals ---
+  /**
+   * Crea create appeal.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create appeal conforme al contrato `ModerationAppeals`.
+   */
   createAppeal(em: EntityManager, data: CreateAppealData): ModerationAppeals {
     return em.create(
       ModerationAppeals,
@@ -185,6 +358,14 @@ export class ModerationRepository {
     );
   }
 
+  /**
+   * Obtiene find open appeal for decision.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param moderationDecisionId - Identificador de moderation decision.
+   * @param openStatusConceptId - Identificador de open status concept.
+   * @returns Resultado de find open appeal for decision conforme al contrato `Promise<ModerationAppeals | null>`.
+   */
   findOpenAppealForDecision(
     em: EntityManager,
     moderationDecisionId: string,

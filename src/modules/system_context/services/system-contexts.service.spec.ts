@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SystemContextsService } from './system-contexts.service';
@@ -19,6 +25,10 @@ const CONSUMER = '55555555-5555-5555-5555-555555555555';
 const CONSUMER_TYPE = '66666666-6666-6666-6666-666666666666';
 const SOURCE_TYPE = '77777777-7777-7777-7777-777777777777';
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -49,6 +59,12 @@ function build() {
   return { service, tx, contextRepo, logger };
 }
 
+/**
+ * Ejecuta la operación active context.
+ *
+ * @param overrides - Valor de overrides requerido por la operación.
+ * @returns Resultado de active context conforme al contrato `any`.
+ */
 function activeContext(overrides: Record<string, unknown> = {}): any {
   return {
     id: CONTEXT,
@@ -276,6 +292,12 @@ describe('SystemContextsService', () => {
   });
 
   describe('activateVersion (UC-45-09)', () => {
+    /**
+     * Ejecuta la operación draft version.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de draft version conforme al contrato `any`.
+     */
     function draftVersion(overrides: Record<string, unknown> = {}): any {
       return {
         id: VERSION,
@@ -286,6 +308,13 @@ describe('SystemContextsService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param version - Valor de version requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, version = draftVersion()) {
       d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
       d.contextRepo.findContextVersionForUpdate.mockResolvedValue(version);
@@ -480,6 +509,12 @@ describe('SystemContextsService', () => {
       reason: 'la versión 3 rompió el cálculo de IVA',
     };
 
+    /**
+     * Ejecuta la operación superseded version.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de superseded version conforme al contrato `any`.
+     */
     function supersededVersion(overrides: Record<string, unknown> = {}): any {
       return {
         id: 'version-2',
@@ -490,6 +525,13 @@ describe('SystemContextsService', () => {
       };
     }
 
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param target - Valor de target requerido por la operación.
+     * @returns Resultado de wire.
+     */
     function wire(d: ReturnType<typeof build>, target = supersededVersion()) {
       const context = activeContext();
       const current: any = {

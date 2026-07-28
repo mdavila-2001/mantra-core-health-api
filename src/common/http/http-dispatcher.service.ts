@@ -46,6 +46,12 @@ export interface OutboundDispatchResult {
  */
 @Injectable()
 export class HttpDispatcherService {
+  /**
+   * Ejecuta la operación post.
+   *
+   * @param input - Valor de input requerido por la operación.
+   * @returns Resultado de post conforme al contrato `Promise<OutboundDispatchResult>`.
+   */
   async post(input: OutboundDispatchInput): Promise<OutboundDispatchResult> {
     assertOutboundUrlAllowed(input.url);
 
@@ -81,7 +87,15 @@ export class HttpDispatcherService {
       };
     } catch (error) {
       const latencyMs = Date.now() - startedAt;
-      const err = error as { code?: string; message?: string };
+      const err = error as {
+        /**
+         * Valor de code mantenido por la instancia.
+         */
+        code?: string; /**
+         * Valor de message mantenido por la instancia.
+         */
+        message?: string;
+      };
       return {
         ok: false,
         httpStatus: 0,

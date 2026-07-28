@@ -10,18 +10,30 @@
 
 // --- Ciclo de vida de la colección ---
 export const COLLECTION_STATES = ['active', 'sealed', 'deprecated'] as const;
+/**
+ * Define el tipo de dominio collection state.
+ */
 export type CollectionState = (typeof COLLECTION_STATES)[number];
 
 // --- Vínculo del tenant ---
 export const BINDING_STATES = ['active', 'frozen'] as const;
+/**
+ * Define el tipo de dominio binding state.
+ */
 export type BindingState = (typeof BINDING_STATES)[number];
 
 // --- Política de acceso RAG ---
 export const POLICY_STATES = ['draft', 'published'] as const;
+/**
+ * Define el tipo de dominio policy state.
+ */
 export type PolicyState = (typeof POLICY_STATES)[number];
 
 // --- Jobs de embedding ---
 export const JOB_TYPES = ['backfill', 'incremental', 're_embed'] as const;
+/**
+ * Define el tipo de dominio job type.
+ */
 export type JobType = (typeof JOB_TYPES)[number];
 
 export const JOB_STATUSES = [
@@ -30,6 +42,9 @@ export const JOB_STATUSES = [
   'completed',
   'failed',
 ] as const;
+/**
+ * Define el tipo de dominio job status.
+ */
 export type JobStatus = (typeof JOB_STATUSES)[number];
 
 /** Estados en los que un job todavía depende del modelo de la colección. */
@@ -37,9 +52,15 @@ export const ACTIVE_JOB_STATUSES = ['queued', 'running'] as const;
 
 // --- Ciclo de vida de documentos, chunks y embeddings ---
 export const DOCUMENT_STATES = ['active', 'purged'] as const;
+/**
+ * Define el tipo de dominio document state.
+ */
 export type DocumentState = (typeof DOCUMENT_STATES)[number];
 
 export const EMBEDDING_STATES = ['active', 'superseded', 'retired'] as const;
+/**
+ * Define el tipo de dominio embedding state.
+ */
 export type EmbeddingState = (typeof EMBEDDING_STATES)[number];
 
 // --- Sesión de retrieval ---
@@ -49,6 +70,9 @@ export const SESSION_STATUSES = [
   'completed',
   'flagged',
 ] as const;
+/**
+ * Define el tipo de dominio session status.
+ */
 export type SessionStatus = (typeof SESSION_STATUSES)[number];
 
 /**
@@ -65,10 +89,16 @@ export const AUTHORIZATION_DECISIONS = [
   'deny_label',
   'deny_scope',
 ] as const;
+/**
+ * Define el tipo de dominio authorization decision.
+ */
 export type AuthorizationDecision = (typeof AUTHORIZATION_DECISIONS)[number];
 
 // --- Feedback ---
 export const FEEDBACK_TYPES = ['relevance', 'safety', 'accuracy'] as const;
+/**
+ * Define el tipo de dominio feedback type.
+ */
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 
 // --- Borrado ---
@@ -77,6 +107,9 @@ export const DELETION_STATUSES = [
   'verifying',
   'verified',
 ] as const;
+/**
+ * Define el tipo de dominio deletion status.
+ */
 export type DeletionStatus = (typeof DELETION_STATUSES)[number];
 
 export const DELETION_REASONS = [
@@ -84,6 +117,9 @@ export const DELETION_REASONS = [
   'patient_erasure',
   'orphan_purge',
 ] as const;
+/**
+ * Define el tipo de dominio deletion reason.
+ */
 export type DeletionReason = (typeof DELETION_REASONS)[number];
 
 // --- Reconciliación ---
@@ -92,6 +128,9 @@ export const RECONCILIATION_STATUSES = [
   'clean',
   'drift_detected',
 ] as const;
+/**
+ * Define el tipo de dominio reconciliation status.
+ */
 export type ReconciliationStatus = (typeof RECONCILIATION_STATUSES)[number];
 
 // --- Métrica de distancia ---
@@ -102,10 +141,16 @@ export type ReconciliationStatus = (typeof RECONCILIATION_STATUSES)[number];
  * escaneo completo del corpus.
  */
 export const DISTANCE_METRICS = ['cosine', 'l2', 'inner_product'] as const;
+/**
+ * Define el tipo de dominio distance metric.
+ */
 export type DistanceMetric = (typeof DISTANCE_METRICS)[number];
 
 /** Tipos de principal que pueden abrir una sesión de retrieval. */
 export const PRINCIPAL_TYPES = ['user', 'agent', 'service'] as const;
+/**
+ * Define el tipo de dominio principal type.
+ */
 export type PrincipalType = (typeof PRINCIPAL_TYPES)[number];
 
 /** Tope de candidatos que devuelve una búsqueda. */

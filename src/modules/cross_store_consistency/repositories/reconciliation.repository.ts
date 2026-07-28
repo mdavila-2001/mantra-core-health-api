@@ -22,15 +22,43 @@ import {
 export class ReconciliationRepository {
   // --- Corridas e ítems (UC-62-05) ---
 
+  /**
+   * Crea create run.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create run conforme al contrato `ReconciliationRuns`.
+   */
   createRun(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Valor de source backend code mantenido por la instancia.
+       */
       sourceBackendCode: string;
+      /**
+       * Valor de target backend code mantenido por la instancia.
+       */
       targetBackendCode: string;
+      /**
+       * Valor de reconciliation scope json mantenido por la instancia.
+       */
       reconciliationScopeJson?: unknown;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): ReconciliationRuns {
@@ -52,16 +80,47 @@ export class ReconciliationRepository {
     });
   }
 
+  /**
+   * Crea create item.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create item conforme al contrato `ReconciliationItems`.
+   */
   createItem(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a reconciliation run.
+       */
       reconciliationRunId: string;
+      /**
+       * Identificador asociado a canonical entity.
+       */
       canonicalEntityId: string;
+      /**
+       * Valor de canonical version mantenido por la instancia.
+       */
       canonicalVersion?: string;
+      /**
+       * Identificador asociado a target document.
+       */
       targetDocumentId?: string;
+      /**
+       * Valor de target version mantenido por la instancia.
+       */
       targetVersion?: string;
+      /**
+       * Valor de canonical hash mantenido por la instancia.
+       */
       canonicalHash?: string;
+      /**
+       * Valor de target hash mantenido por la instancia.
+       */
       targetHash?: string;
+      /**
+       * Valor de result mantenido por la instancia.
+       */
       result: string;
     },
   ): ReconciliationItems {
@@ -82,9 +141,21 @@ export class ReconciliationRepository {
   findOpenDrift(
     em: EntityManager,
     key: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Identificador asociado a canonical entity.
+       */
       canonicalEntityId: string;
+      /**
+       * Valor de drift type mantenido por la instancia.
+       */
       driftType: string;
     },
     openStatus: string,
@@ -92,17 +163,51 @@ export class ReconciliationRepository {
     return em.findOne(ProjectionDriftEvents, { ...key, status: openStatus });
   }
 
+  /**
+   * Crea create drift.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create drift conforme al contrato `ProjectionDriftEvents`.
+   */
   createDrift(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Identificador asociado a canonical entity.
+       */
       canonicalEntityId: string;
+      /**
+       * Valor de drift type mantenido por la instancia.
+       */
       driftType: string;
+      /**
+       * Valor de severity mantenido por la instancia.
+       */
       severity: string;
+      /**
+       * Valor de canonical version mantenido por la instancia.
+       */
       canonicalVersion?: string;
+      /**
+       * Valor de target version mantenido por la instancia.
+       */
       targetVersion?: string;
+      /**
+       * Identificador asociado a reconciliation item.
+       */
       reconciliationItemId: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
     },
   ): ProjectionDriftEvents {
@@ -113,6 +218,13 @@ export class ReconciliationRepository {
     );
   }
 
+  /**
+   * Obtiene find drift for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find drift for update conforme al contrato `Promise<ProjectionDriftEvents | null>`.
+   */
   findDriftForUpdate(
     em: EntityManager,
     id: string,
@@ -134,13 +246,35 @@ export class ReconciliationRepository {
     return em.findOne(ProjectionRepairJobs, { idempotencyKey });
   }
 
+  /**
+   * Crea create repair job.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create repair job conforme al contrato `ProjectionRepairJobs`.
+   */
   createRepairJob(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a projection drift event.
+       */
       projectionDriftEventId: string;
+      /**
+       * Valor de repair action mantenido por la instancia.
+       */
       repairAction: string;
+      /**
+       * Valor de idempotency key mantenido por la instancia.
+       */
       idempotencyKey: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
     },
   ): ProjectionRepairJobs {
@@ -151,15 +285,43 @@ export class ReconciliationRepository {
     );
   }
 
+  /**
+   * Crea create reindex job.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create reindex job conforme al contrato `ReindexJobs`.
+   */
   createReindexJob(
     em: EntityManager,
     data: {
+      /**
+       * Identificador asociado a tenant.
+       */
       tenantId: string;
+      /**
+       * Identificador asociado a dataset.
+       */
       datasetId: string;
+      /**
+       * Valor de source alias mantenido por la instancia.
+       */
       sourceAlias?: string;
+      /**
+       * Valor de target index mantenido por la instancia.
+       */
       targetIndex?: string;
+      /**
+       * Valor de target schema version mantenido por la instancia.
+       */
       targetSchemaVersion?: string;
+      /**
+       * Valor de status mantenido por la instancia.
+       */
       status: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
       startedAt: Date;
     },
   ): ReindexJobs {

@@ -19,6 +19,14 @@ import {
  */
 @Injectable()
 export class PrivacyRestrictionsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param restrictionsRepo - Valor de restrictions repo requerido por la operación.
+   * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly restrictionsRepo: PrivacyRestrictionsRepository,

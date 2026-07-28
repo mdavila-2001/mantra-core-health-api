@@ -7,12 +7,18 @@ import { IsInt, IsNumber, IsOptional, Min } from 'class-validator';
  * como override opcional.
  */
 export class CloseTripDto {
+  /**
+   * Valor de distance m mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Distancia recorrida (m)' })
   @IsOptional()
   @IsNumber()
   @Min(0)
   distanceM?: number;
 
+  /**
+   * Valor de duration s mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Duración del viaje (s)' })
   @IsOptional()
   @IsInt()

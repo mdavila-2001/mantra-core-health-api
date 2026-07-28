@@ -11,11 +11,29 @@ import { ErrorCode } from '../errors/error-codes';
 
 /** Forma estable del cuerpo de error que ve el cliente. */
 interface ErrorResponseBody {
+  /**
+   * Valor de code mantenido por la instancia.
+   */
   code: string;
+  /**
+   * Valor de message mantenido por la instancia.
+   */
   message: string;
+  /**
+   * Identificador asociado a correlation.
+   */
   correlationId?: string;
+  /**
+   * Valor de details mantenido por la instancia.
+   */
   details?: unknown;
+  /**
+   * Valor de timestamp mantenido por la instancia.
+   */
   timestamp: string;
+  /**
+   * Valor de path mantenido por la instancia.
+   */
   path: string;
 }
 
@@ -32,14 +50,32 @@ interface ErrorResponseBody {
  */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(private readonly logger: PinoLogger) {
     this.logger.setContext(AllExceptionsFilter.name);
   }
 
+  /**
+   * Ejecuta la operación catch.
+   *
+   * @param exception - Valor de exception requerido por la operación.
+   * @param host - Valor de host requerido por la operación.
+   */
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request & { id?: string }>();
+    const request = ctx.getRequest<
+      Request & {
+        /**
+         * Identificador único de la instancia.
+         */
+        id?: string;
+      }
+    >();
 
     // pino-http asigna `req.id`; se reutiliza como correlationId para hilar el
     // error del cliente con la línea de log del servidor.
@@ -90,9 +126,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   /** Traduce cualquier excepción a la tupla estable (status, code, message, details). */
   private normalize(exception: unknown): {
+    /**
+     * Valor de status mantenido por la instancia.
+     */
     status: number;
+    /**
+     * Valor de code mantenido por la instancia.
+     */
     code: string;
+    /**
+     * Valor de message mantenido por la instancia.
+     */
     message: string;
+    /**
+     * Valor de details mantenido por la instancia.
+     */
     details?: unknown;
   } {
     if (exception instanceof HttpException) {
@@ -126,6 +174,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
   }
 
+  /**
+   * Ejecuta la operación extract message.
+   *
+   * @param obj - Valor de obj requerido por la operación.
+   * @returns Resultado de extract message conforme al contrato `string | undefined`.
+   */
   private extractMessage(obj: Record<string, unknown>): string | undefined {
     if (typeof obj.message === 'string') return obj.message;
     if (Array.isArray(obj.message)) return 'Error de validación';
@@ -137,6 +191,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     return Array.isArray(obj.message) ? { violations: obj.message } : undefined;
   }
 
+  /**
+   * Ejecuta la operación default code.
+   *
+   * @param status - Valor de status requerido por la operación.
+   * @returns Resultado de default code conforme al contrato `string`.
+   */
   private defaultCode(status: number): string {
     switch (status) {
       case HttpStatus.BAD_REQUEST:
@@ -156,6 +216,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
   }
 
+  /**
+   * Obtiene is optimistic lock error.
+   *
+   * @param exception - Valor de exception requerido por la operación.
+   * @returns Resultado de is optimistic lock error conforme al contrato `boolean`.
+   */
   private isOptimisticLockError(exception: unknown): boolean {
     return (
       exception instanceof Error &&

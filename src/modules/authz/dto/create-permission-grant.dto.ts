@@ -18,6 +18,9 @@ import {
 
 /** Cuerpo de `POST /authz/users/{userId}/permission-grants` (UC-06-05). */
 export class CreatePermissionGrantDto {
+  /**
+   * Identificador asociado a permission.
+   */
   @ApiProperty({
     description: 'Permiso concedido/denegado excepcionalmente',
     format: 'uuid',
@@ -25,6 +28,9 @@ export class CreatePermissionGrantDto {
   @IsUUID()
   permissionId!: string;
 
+  /**
+   * Valor de effect mantenido por la instancia.
+   */
   @ApiProperty({
     description: 'Efecto (deny individual prevalece sobre allow de rol)',
     enum: EFFECTS,
@@ -32,22 +38,34 @@ export class CreatePermissionGrantDto {
   @IsIn(EFFECTS)
   effect!: Effect;
 
+  /**
+   * Valor de reason mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Justificación obligatoria', maxLength: 500 })
   @IsString()
   @MinLength(1)
   @MaxLength(500)
   reason!: string;
 
+  /**
+   * Valor de scope mantenido por la instancia.
+   */
   @ApiPropertyOptional({ description: 'Ámbito', enum: PERMISSION_SCOPES })
   @IsOptional()
   @IsIn(PERMISSION_SCOPES)
   scope?: PermissionScope;
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @ApiPropertyOptional({ description: 'Tenant del grant', format: 'uuid' })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
+  /**
+   * Valor de resource selector json mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Selector de recursos (JSON)',
     type: Object,
@@ -56,6 +74,9 @@ export class CreatePermissionGrantDto {
   @IsObject()
   resourceSelectorJson?: Record<string, unknown>;
 
+  /**
+   * Valor de valid from mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Inicio de vigencia',
     type: String,
@@ -66,6 +87,9 @@ export class CreatePermissionGrantDto {
   @IsDate()
   validFrom?: Date;
 
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Fin de vigencia (acotado)',
     type: String,

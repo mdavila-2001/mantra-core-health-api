@@ -24,6 +24,13 @@ import {
  */
 @Injectable()
 export class ContactPointsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contactPointsRepo - Valor de contact points repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contactPointsRepo: ContactPointsRepository,
@@ -109,6 +116,12 @@ export class ContactPointsService {
     });
   }
 
+  /**
+   * Transforma to response.
+   *
+   * @param entity - Valor de entity requerido por la operación.
+   * @returns Resultado de to response conforme al contrato `ContactPointResponseDto`.
+   */
   private toResponse(entity: ContactPoints): ContactPointResponseDto {
     return {
       id: entity.id,
@@ -121,12 +134,24 @@ export class ContactPointsService {
     };
   }
 
+  /**
+   * Ejecuta la operación owner type of.
+   *
+   * @param conceptId - Identificador de concept.
+   * @returns Resultado de owner type of conforme al contrato `OwnerType`.
+   */
   private ownerTypeOf(conceptId: string): OwnerType {
     if (conceptId === CONCEPTS.OWNER_PATIENT) return OwnerType.PATIENT;
     if (conceptId === CONCEPTS.OWNER_TENANT) return OwnerType.TENANT;
     return OwnerType.USER;
   }
 
+  /**
+   * Ejecuta la operación system of.
+   *
+   * @param conceptId - Identificador de concept.
+   * @returns Resultado de system of conforme al contrato `ContactSystem`.
+   */
   private systemOf(conceptId: string): ContactSystem {
     return conceptId === CONCEPTS.CONTACT_PHONE
       ? ContactSystem.PHONE

@@ -67,6 +67,13 @@ const MATERIALIZABLE_CAMPAIGN_STATES: readonly string[] = [
  */
 @Injectable()
 export class MarketingCampaignsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param campaignsRepo - Valor de campaigns repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly campaignsRepo: MarketingCampaignsRepository,

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DirectoryMembershipsService } from './directory-memberships.service';
 import { DIR } from '../directory.concepts';
@@ -11,6 +17,10 @@ import {
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -37,6 +47,12 @@ function build() {
   return { service, tx, membershipsRepo, branchMembershipsRepo, branchesRepo };
 }
 
+/**
+ * Ejecuta la operación active membership.
+ *
+ * @param over - Valor de over requerido por la operación.
+ * @returns Resultado de active membership.
+ */
 const activeMembership = (over: any = {}) => ({
   id: 'm1',
   userId: 'u1',

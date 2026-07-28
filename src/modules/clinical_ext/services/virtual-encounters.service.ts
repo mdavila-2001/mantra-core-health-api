@@ -23,6 +23,13 @@ import { CEXT } from '../clinical_ext.concepts';
  */
 @Injectable()
 export class VirtualEncountersService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param encountersRepo - Valor de encounters repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly encountersRepo: VirtualEncountersRepository,

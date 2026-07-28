@@ -1,10 +1,20 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuthzPdpController } from './authz-pdp.controller';
 
 const actor = { id: 'sys-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const pdpService = { invalidateCache: mockFn(), evaluate: mockFn() };
   const controller = new AuthzPdpController(pdpService as any);

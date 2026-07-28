@@ -29,6 +29,12 @@ import {
 @ApiBearerAuth()
 @Controller('diagnostic-unit-sites')
 export class DiagnosticUnitSitesController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param unitsService - Valor de units service requerido por la operación.
+   * @param equipmentService - Valor de equipment service requerido por la operación.
+   */
   constructor(
     private readonly unitsService: DiagnosticUnitsService,
     private readonly equipmentService: DiagnosticEquipmentService,

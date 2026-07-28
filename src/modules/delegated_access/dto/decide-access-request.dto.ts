@@ -14,10 +14,16 @@ const RESOURCE_TYPES = [
  * emite un grant scoped; los campos de grant (purpose/resource/valid_to) lo acotan.
  */
 export class DecideAccessRequestDto {
+  /**
+   * Valor de decision mantenido por la instancia.
+   */
   @ApiProperty({ description: 'Decisión del aprobador', enum: DECISIONS })
   @IsIn(DECISIONS)
   decision!: (typeof DECISIONS)[number];
 
+  /**
+   * Valor de purpose mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Propósito de uso del grant emitido',
     enum: PURPOSES,
@@ -26,6 +32,9 @@ export class DecideAccessRequestDto {
   @IsIn(PURPOSES)
   purpose?: (typeof PURPOSES)[number];
 
+  /**
+   * Valor de resource type mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Tipo de recurso del grant',
     enum: RESOURCE_TYPES,
@@ -34,6 +43,9 @@ export class DecideAccessRequestDto {
   @IsIn(RESOURCE_TYPES)
   resourceType?: (typeof RESOURCE_TYPES)[number];
 
+  /**
+   * Valor de valid to mantenido por la instancia.
+   */
   @ApiPropertyOptional({
     description: 'Fin de vigencia del grant (ISO)',
     format: 'date-time',
@@ -42,6 +54,9 @@ export class DecideAccessRequestDto {
   @IsDateString()
   validTo?: string;
 
+  /**
+   * Identificador asociado a encounter.
+   */
   @ApiPropertyOptional({ description: 'Encuentro del grant', format: 'uuid' })
   @IsOptional()
   @IsUUID()

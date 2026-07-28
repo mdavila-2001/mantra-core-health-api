@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
@@ -14,6 +20,10 @@ const STATE_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
 const MACHINE = { id: 'machine-1', machineCode: 'encounter-lifecycle' };
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -133,6 +143,13 @@ describe('WorkflowInstancesService', () => {
   });
 
   describe('completeTask (UC-32-13)', () => {
+    /**
+     * Ejecuta la operación with open task.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de with open task.
+     */
     function withOpenTask(d: ReturnType<typeof build>, overrides: any = {}) {
       const task = {
         id: TASK_ID,

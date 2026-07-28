@@ -66,6 +66,13 @@ import {
 @ApiBearerAuth()
 @Controller()
 export class PeriopController {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param casesService - Valor de cases service requerido por la operación.
+   * @param preopService - Valor de preop service requerido por la operación.
+   * @param intraopService - Valor de intraop service requerido por la operación.
+   */
   constructor(
     private readonly casesService: PeriopCasesService,
     private readonly preopService: PeriopPreopService,
@@ -110,7 +117,8 @@ export class PeriopController {
   @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Confirmar la intervención verificando las credenciales del equipo',
+    summary:
+      'Confirmar la intervención verificando las credenciales del equipo',
     description:
       'Bloquea la confirmación si algún integrante no tiene credencial profesional vigente (CAN-INT-002).',
   })

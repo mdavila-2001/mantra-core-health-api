@@ -43,7 +43,4 @@ export {
   RULE_SCOPES,
   RULE_DECISIONS,
 } from './scheduling-confirmation.dto';
-export type {
-  RuleScope,
-  RuleDecision,
-} from './scheduling-confirmation.dto';
+export type { RuleScope, RuleDecision } from './scheduling-confirmation.dto';

@@ -1,5 +1,11 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { FrontendViewsService } from './frontend-views.service';
@@ -14,6 +20,10 @@ import { RM } from '../read_models.concepts';
 const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 const endUser = { id: 'user-1', roles: ['USER'] } as any;
 
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = {

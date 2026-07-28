@@ -40,6 +40,13 @@ const DEFAULT_SCHEMA_VERSION = '1';
  */
 @Injectable()
 export class SystemContextsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contextRepo - Valor de context repo requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
   constructor(
     private readonly em: EntityManager,
     private readonly contextRepo: SystemContextRepository,
@@ -591,6 +598,12 @@ export class SystemContextsService {
       .digest('hex');
   }
 
+  /**
+   * Obtiene canonicalise.
+   *
+   * @param value - Valor de value requerido por la operación.
+   * @returns Resultado de canonicalise conforme al contrato `string`.
+   */
   private canonicalise(value: unknown): string {
     if (value === null || typeof value !== 'object')
       return JSON.stringify(value) ?? 'null';
