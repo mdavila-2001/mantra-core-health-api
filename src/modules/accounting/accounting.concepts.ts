@@ -42,7 +42,23 @@ export const { seeds: ACCOUNTING_CONCEPT_SEEDS, ids: ACCT } =
     },
 
     // --- Estado de la transacción (journal_transactions.status_concept_id) ---
+    // Máquina de estados canónica REDESA C-17:
+    //   DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED → REVERSED
+    // El asiento efectivo en el mayor solo ocurre al pasar a POSTED (comando `post`
+    // desde APPROVED). Un asiento POSTED se corrige por reversión, nunca se edita.
     TXN_DRAFT: { code: 'ACCT_TXN_DRAFT', display: 'Draft transaction' },
+    TXN_AUTO_CLASSIFIED: {
+      code: 'ACCT_TXN_AUTO_CLASSIFIED',
+      display: 'Auto-classified transaction',
+    },
+    TXN_PENDING_REVIEW: {
+      code: 'ACCT_TXN_PENDING_REVIEW',
+      display: 'Transaction pending review',
+    },
+    TXN_APPROVED: {
+      code: 'ACCT_TXN_APPROVED',
+      display: 'Approved transaction',
+    },
     TXN_POSTED: { code: 'ACCT_TXN_POSTED', display: 'Posted transaction' },
     TXN_REVERSED: {
       code: 'ACCT_TXN_REVERSED',

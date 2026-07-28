@@ -14,7 +14,9 @@ import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
 } from '../repositories';
-import type { CancellationPolicySnapshot } from '../entities';
+import type { AppointmentBookings, CancellationPolicySnapshot } from '../entities';
+import { SCHED } from '../scheduling.concepts';
+import { isValidBookingTransition } from '../state/booking-state-machine';
 import {
   CreateHoldDto,
   HoldResponseDto,
@@ -440,6 +442,11 @@ export class SchedulingBookingsService {
         throw new ConflictException('La cita ya está cancelada', { bookingId });
       }
 
+      // C-10: sólo se cancela desde un estado que la máquina permite cancelar
+      // (no desde COMPLETED ni NO_SHOW).
+      const fromState = booking.statusConceptId;
+      this.assertTransition(fromState, CONCEPTS.BOOKING_CANCELLED);
+
       const isNoShow = dto.isNoShow ?? false;
 
       // CAN-APT-001: la ventana y el cargo salen del snapshot congelado de la
@@ -499,6 +506,13 @@ export class SchedulingBookingsService {
 
       booking.statusConceptId = CONCEPTS.BOOKING_CANCELLED;
       touch(booking, actor.id);
+      this.recordTransition(
+        tx,
+        booking,
+        fromState,
+        CONCEPTS.BOOKING_CANCELLED,
+        actor,
+      );
 
       let capacityReleased = false;
       if (slot) {
@@ -534,21 +548,67 @@ export class SchedulingBookingsService {
           bookingId,
         });
       }
-      if (booking.statusConceptId !== CONCEPTS.BOOKING_CONFIRMED) {
-        throw new PreconditionFailedException(
-          'Solo se hace check-in de una cita confirmada',
-          {
-            bookingId,
-          },
-        );
-      }
+      // C-10: la máquina de estados sólo admite check-in desde CONFIRMED.
+      const fromState = booking.statusConceptId;
+      this.assertTransition(fromState, CONCEPTS.BOOKING_CHECKED_IN);
 
       const checkedInAt = new Date();
       booking.statusConceptId = CONCEPTS.BOOKING_CHECKED_IN;
       booking.checkedInAt = checkedInAt;
       touch(booking, actor.id);
+      this.recordTransition(
+        tx,
+        booking,
+        fromState,
+        CONCEPTS.BOOKING_CHECKED_IN,
+        actor,
+      );
 
       return { bookingId, checkedInAt: checkedInAt.toISOString() };
+    });
+  }
+
+  /**
+   * Guarda de la máquina de estados de cita (C-10): rechaza cualquier transición
+   * que la máquina no declara con `PreconditionFailedException`
+   * (INVALID_STATE_TRANSITION). Es lo que impide, por ejemplo, hacer check-in de
+   * una cita cancelada o completar una que nunca empezó.
+   */
+  private assertTransition(from: string, to: string): void {
+    if (!isValidBookingTransition(from, to)) {
+      throw new PreconditionFailedException(
+        'Transición de estado de cita no permitida',
+        {
+          failureCode: 'INVALID_STATE_TRANSITION',
+          fromStateConceptId: from,
+          toStateConceptId: to,
+        },
+      );
+    }
+  }
+
+  /**
+   * Registra la transición en el historial existente
+   * (`audit.appointment_bookings_history`). Se llama tras validar la transición y
+   * aplicar el nuevo estado, con el estado de origen capturado antes de mutar.
+   */
+  private recordTransition(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    fromStateConceptId: string,
+    toStateConceptId: string,
+    actor: AuthenticatedUser,
+  ): void {
+    this.bookingsRepo.recordBookingHistory(tx, {
+      appointmentBookingId: booking.id,
+      revisionNo: (booking.rowVersion ?? 0) + 1,
+      operationConceptId: SCHED.HISTORY_OP_STATE_TRANSITION,
+      dataSnapshot: {
+        bookingId: booking.id,
+        fromStateConceptId,
+        toStateConceptId,
+      },
+      changedByUserId: actor.id,
     });
   }
 

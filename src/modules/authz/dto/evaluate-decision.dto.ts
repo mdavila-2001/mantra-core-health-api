@@ -79,6 +79,15 @@ export class EvaluateDecisionDto {
   patientProfileId?: string;
 
   @ApiPropertyOptional({
+    description:
+      'Perfil de practicante del actor (habilita evaluación de relación asistencial C-06)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  practitionerProfileId?: string;
+
+  @ApiPropertyOptional({
     description: 'Propósito de uso',
     enum: DECISION_PURPOSES,
   })

@@ -1,10 +1,10 @@
 # Informe de cobertura REDESA (estático)
 
-- Entidades (tablas mapeadas): **1179**
-- Endpoints declarados: **814** en 187 controllers
+- Entidades (tablas mapeadas): **1182**
+- Endpoints declarados: **830** en 189 controllers
 - Módulos: **57**
 
-## ORPHAN_TABLE — entidades sin consumidor fuera de `entities/` (304)
+## ORPHAN_TABLE — entidades sin consumidor fuera de `entities/` (303)
 > Heurística estática: la entidad puede consumirse por catálogo ORM/migración; revisar antes de eliminar.
 - `accounting` · AccountGroups (src/modules/accounting/entities/account_groups.entity.ts)
 - `accounting` · AssetClasses (src/modules/accounting/entities/asset_classes.entity.ts)
@@ -44,7 +44,6 @@
 - `audit` · AgentVersionsHistory (src/modules/audit/entities/agent_versions_history.entity.ts)
 - `audit` · AgentsHistory (src/modules/audit/entities/agents_history.entity.ts)
 - `audit` · AllergyIntolerancesHistory (src/modules/audit/entities/allergy_intolerances_history.entity.ts)
-- `audit` · AppointmentBookingsHistory (src/modules/audit/entities/appointment_bookings_history.entity.ts)
 - `audit` · AssetsHistory (src/modules/audit/entities/assets_history.entity.ts)
 - `audit` · AutomatedRulesHistory (src/modules/audit/entities/automated_rules_history.entity.ts)
 - `audit` · BillsHistory (src/modules/audit/entities/bills_history.entity.ts)
@@ -66,7 +65,8 @@
 - `audit` · ContractsHistory (src/modules/audit/entities/contracts_history.entity.ts)
 - `audit` · ConversationsHistory (src/modules/audit/entities/conversations_history.entity.ts)
 - `audit` · CouponsHistory (src/modules/audit/entities/coupons_history.entity.ts)
-- … +244 más
+- `audit` · CourseVersionsHistory (src/modules/audit/entities/course_versions_history.entity.ts)
+- … +243 más
 
 ## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (23)
 - src/modules/common/controllers/common-addresses.controller.ts:16 — @Post 
@@ -93,5 +93,6 @@
 - src/modules/telemetry/controllers/telemetry-events.controller.ts:72 — @Post 'conversion-events'
 - src/modules/telemetry/controllers/telemetry-events.controller.ts:82 — @Post 'session-journeys/:id/close'
 
-## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (1)
+## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (2)
 - src/modules/promotions/repositories/promotions-loyalty.repository.ts → `payments`
+- src/modules/scheduling/repositories/scheduling-bookings.repository.ts → `audit`

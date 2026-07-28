@@ -5,15 +5,18 @@ import {
   SchedulingController,
   SchedulingBookingsController,
   SchedulingInternalController,
+  SchedulingConfirmationController,
 } from './controllers';
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
   SchedulingWaitlistService,
+  SchedulingConfirmationService,
 } from './services';
 import {
   SchedulingCatalogRepository,
   SchedulingBookingsRepository,
+  SchedulingConfirmationRepository,
 } from './repositories';
 
 /**
@@ -26,13 +29,16 @@ import {
     SchedulingController,
     SchedulingBookingsController,
     SchedulingInternalController,
+    SchedulingConfirmationController,
   ],
   providers: [
     SchedulingCatalogRepository,
     SchedulingBookingsRepository,
+    SchedulingConfirmationRepository,
     SchedulingCatalogService,
     SchedulingBookingsService,
     SchedulingWaitlistService,
+    SchedulingConfirmationService,
   ],
 })
 export class SchedulingModule {}

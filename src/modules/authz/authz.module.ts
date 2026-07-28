@@ -7,6 +7,7 @@ import {
   AuthzRolesController,
   AuthzGrantsController,
   AuthzClinicalController,
+  AuthzCareRelationshipsController,
   AuthzPdpController,
 } from './controllers';
 import {
@@ -15,6 +16,7 @@ import {
   AuthzRolesService,
   AuthzGrantsService,
   AuthzClinicalService,
+  AuthzCareRelationshipsService,
   AuthzPdpService,
 } from './services';
 import {
@@ -27,6 +29,8 @@ import {
   UserPermissionGrantsRepository,
   ClinicalAccessGrantsRepository,
   BreakGlassSessionsRepository,
+  CareRelationshipsRepository,
+  PatientLegalRepresentationsRepository,
   FieldPermissionsRepository,
   ResourceScopeGrantsRepository,
 } from './repositories';
@@ -48,6 +52,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     AuthzRolesController,
     AuthzGrantsController,
     AuthzClinicalController,
+    AuthzCareRelationshipsController,
     AuthzPdpController,
   ],
   providers: [
@@ -61,6 +66,8 @@ import { DataAccessLogRepository } from '../audit/repositories';
     UserPermissionGrantsRepository,
     ClinicalAccessGrantsRepository,
     BreakGlassSessionsRepository,
+    CareRelationshipsRepository,
+    PatientLegalRepresentationsRepository,
     FieldPermissionsRepository,
     ResourceScopeGrantsRepository,
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
@@ -71,6 +78,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     AuthzRolesService,
     AuthzGrantsService,
     AuthzClinicalService,
+    AuthzCareRelationshipsService,
     AuthzPdpService,
   ],
 })

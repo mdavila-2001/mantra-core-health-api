@@ -33,3 +33,17 @@ export {
   BOOKING_CHANNELS,
 } from './scheduling-bookings.dto';
 export type { BookingChannel } from './scheduling-bookings.dto';
+
+export {
+  CreateConfirmationRuleDto,
+  ConfirmationRuleResponseDto,
+  EvaluateBookingRequestDto,
+  EvaluationExplanationDto,
+  EvaluateBookingResultDto,
+  RULE_SCOPES,
+  RULE_DECISIONS,
+} from './scheduling-confirmation.dto';
+export type {
+  RuleScope,
+  RuleDecision,
+} from './scheduling-confirmation.dto';

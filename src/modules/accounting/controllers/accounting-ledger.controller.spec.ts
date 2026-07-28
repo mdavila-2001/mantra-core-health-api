@@ -10,6 +10,11 @@ function build() {
   const ledgerService = {
     createAccount: mockFn(),
     postJournal: mockFn(),
+    createDraft: mockFn(),
+    classify: mockFn(),
+    submitForReview: mockFn(),
+    approve: mockFn(),
+    post: mockFn(),
     determineAccounts: mockFn(),
     reverseJournal: mockFn(),
     attachFile: mockFn(),
@@ -31,6 +36,24 @@ describe('AccountingLedgerController', () => {
     const dto = { practiceId: 'p', lines: [] };
     await d.controller.postJournal(dto as any, actor);
     expect(d.ledgerService.postJournal).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delega el flujo de estados (REDESA C-17)', async () => {
+    const d = build();
+    await d.controller.createDraft({ practiceId: 'p', lines: [] } as any, actor);
+    expect(d.ledgerService.createDraft).toHaveBeenCalled();
+
+    await d.controller.classify('t1', {}, actor);
+    expect(d.ledgerService.classify).toHaveBeenCalledWith('t1', {}, actor);
+
+    await d.controller.submitReview('t1', {}, actor);
+    expect(d.ledgerService.submitForReview).toHaveBeenCalledWith('t1', {}, actor);
+
+    await d.controller.approve('t1', {}, actor);
+    expect(d.ledgerService.approve).toHaveBeenCalledWith('t1', {}, actor);
+
+    await d.controller.post('t1', {}, actor);
+    expect(d.ledgerService.post).toHaveBeenCalledWith('t1', {}, actor);
   });
 
   it('delega determineAccounts (UC-16-02)', async () => {

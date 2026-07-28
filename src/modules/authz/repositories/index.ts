@@ -7,5 +7,7 @@ export * from './user-role-assignments.repository';
 export * from './user-permission-grants.repository';
 export * from './clinical-access-grants.repository';
 export * from './break-glass-sessions.repository';
+export * from './care-relationships.repository';
+export * from './patient-legal-representations.repository';
 export * from './field-permissions.repository';
 export * from './resource-scope-grants.repository';

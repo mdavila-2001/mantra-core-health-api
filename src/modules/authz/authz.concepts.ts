@@ -102,5 +102,41 @@ export const { seeds: AUTHZ_CONCEPT_SEEDS, ids: AUTHZ } = defineModuleConcepts(
       code: 'BG_UNJUSTIFIED',
       display: 'Break-the-glass unjustified',
     },
+
+    // --- Tipo de relación asistencial (care_relationships.relationship_type_concept_id) ---
+    // (C-06 / CAN-AUTH-001). El estado del vínculo reutiliza los genéricos
+    // CONCEPTS.STATE_ACTIVE / STATE_REVOKED / STATE_EXPIRED, y el propósito
+    // reutiliza PURPOSE_TREATMENT / PURPOSE_PAYMENT / PURPOSE_OPERATIONS / PURPOSE_EMERGENCY.
+    CARE_REL_TREATING: {
+      code: 'CARE_TREATING',
+      display: 'Treating practitioner relationship',
+    },
+    CARE_REL_CONSULTING: {
+      code: 'CARE_CONSULTING',
+      display: 'Consulting practitioner relationship',
+    },
+    CARE_REL_EMERGENCY: {
+      code: 'CARE_EMERGENCY',
+      display: 'Emergency care relationship',
+    },
+
+    // --- Tipo de representación legal (patient_legal_representations.representation_type_concept_id) ---
+    // (C-07 / A-03). El estado reutiliza los genéricos CONCEPTS.STATE_*.
+    REPRESENTATION_LEGAL_GUARDIAN: {
+      code: 'REP_LEGAL_GUARDIAN',
+      display: 'Legal guardian representation',
+    },
+    REPRESENTATION_PARENT: {
+      code: 'REP_PARENT',
+      display: 'Parental representation',
+    },
+    REPRESENTATION_ATTORNEY: {
+      code: 'REP_ATTORNEY',
+      display: 'Attorney-in-fact (apoderado) representation',
+    },
+    REPRESENTATION_CURATOR: {
+      code: 'REP_CURATOR',
+      display: 'Curator representation',
+    },
   },
 );

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { type AuthenticatedUser } from '../../../common';
+import { CONCEPTS, type AuthenticatedUser } from '../../../common';
 import {
   RolesRepository,
   RolePermissionsRepository,
@@ -10,6 +10,8 @@ import {
   UserPermissionGrantsRepository,
   AccessPoliciesRepository,
   ClinicalAccessGrantsRepository,
+  CareRelationshipsRepository,
+  PatientLegalRepresentationsRepository,
   ResourceScopeGrantsRepository,
   FieldPermissionsRepository,
 } from '../repositories';
@@ -96,6 +98,8 @@ export class AuthzPdpService {
     private readonly permGrantsRepo: UserPermissionGrantsRepository,
     private readonly policiesRepo: AccessPoliciesRepository,
     private readonly clinicalRepo: ClinicalAccessGrantsRepository,
+    private readonly careRelationshipsRepo: CareRelationshipsRepository,
+    private readonly legalRepresentationsRepo: PatientLegalRepresentationsRepository,
     private readonly resourceGrantsRepo: ResourceScopeGrantsRepository,
     private readonly fieldPermsRepo: FieldPermissionsRepository,
     private readonly logger: PinoLogger,
@@ -283,6 +287,59 @@ export class AuthzPdpService {
         reasons.push(
           'sin acceso clínico que habilite la acción/propósito solicitados',
         );
+      }
+
+      // 6c. Relación asistencial vigente (C-06 / CAN-AUTH-001). Además de un grant
+      // explícito, un vínculo asistencial ACTIVO y vigente entre el practicante
+      // (actor) y el paciente concede acceso. Fail-closed: solo se evalúa si el
+      // actor porta su perfil de practicante, la relación está vigente y —si la
+      // relación fija un propósito— este coincide con el solicitado.
+      if (dto.practitionerProfileId) {
+        const careRels =
+          await this.careRelationshipsRepo.findActiveForPractitionerPatient(
+            em,
+            dto.practitionerProfileId,
+            dto.patientProfileId,
+          );
+        const matchingRel = careRels.filter((r) => {
+          if (r.statusConceptId !== CONCEPTS.STATE_ACTIVE) return false;
+          if (!this.isWithinWindow(r.validFrom, r.validTo, now)) return false;
+          // Si la relación acota un propósito, debe coincidir con el solicitado.
+          if (r.purposeConceptId) {
+            return (
+              !!requestedPurposeConcept &&
+              r.purposeConceptId === requestedPurposeConcept
+            );
+          }
+          return true;
+        });
+        if (matchingRel.length > 0) {
+          hasAllow = true;
+          reasons.push(
+            'allow por relación asistencial vigente (C-06/CAN-AUTH-001)',
+          );
+        } else {
+          reasons.push('sin relación asistencial vigente que habilite');
+        }
+      }
+
+      // 6d. Representación legal del paciente (C-07 / A-03). El usuario que
+      // representa legalmente al paciente está autorizado sobre sus datos. Fail-
+      // closed: la representación debe estar ACTIVA y vigente.
+      const legalReps =
+        await this.legalRepresentationsRepo.findActiveForRepresentativePatient(
+          em,
+          dto.userId,
+          dto.patientProfileId,
+        );
+      const validRep = legalReps.find(
+        (r) =>
+          r.statusConceptId === CONCEPTS.STATE_ACTIVE &&
+          this.isWithinWindow(r.validFrom, r.validTo, now),
+      );
+      if (validRep) {
+        hasAllow = true;
+        reasons.push('allow por representación legal vigente (C-07/A-03)');
       }
     }
 

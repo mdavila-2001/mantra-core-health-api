@@ -11,7 +11,17 @@ import {
   AppointmentReminders,
   type CancellationPolicySnapshot,
 } from '../entities';
+import { AppointmentBookingsHistory } from '../../audit/entities/appointment_bookings_history.entity';
 import { createdBy } from '../../../common';
+
+export interface BookingHistoryData {
+  appointmentBookingId: string;
+  revisionNo: number;
+  operationConceptId: string;
+  dataSnapshot: unknown;
+  changedByUserId?: string;
+  changeReasonConceptId?: string;
+}
 
 export interface CreateHoldData {
   bookableSlotId: string;
@@ -284,6 +294,31 @@ export class SchedulingBookingsRepository {
         scheduledAt: data.scheduledAt,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
+  }
+
+  /**
+   * Registra una transición de estado de la cita en el historial existente
+   * (`audit.appointment_bookings_history`, append-only). Es lo que deja constancia
+   * de cada cambio de estado gobernado por la máquina de estados (C-10).
+   */
+  recordBookingHistory(
+    em: EntityManager,
+    data: BookingHistoryData,
+  ): AppointmentBookingsHistory {
+    return em.create(
+      AppointmentBookingsHistory,
+      {
+        appointmentBookingId: data.appointmentBookingId,
+        revisionNo: data.revisionNo,
+        operationConceptId: data.operationConceptId,
+        validFrom: new Date(),
+        dataSnapshot: data.dataSnapshot,
+        changedByUserId: data.changedByUserId,
+        changeReasonConceptId: data.changeReasonConceptId,
+        recordedAt: new Date(),
       },
       { partial: true },
     );

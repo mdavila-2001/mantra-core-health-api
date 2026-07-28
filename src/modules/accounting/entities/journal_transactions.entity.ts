@@ -60,6 +60,16 @@ export class JournalTransactions {
   @Property({ fieldName: 'posted_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   postedByUserId?: string;
 
+  @Property({
+    fieldName: 'approved_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  approvedAt?: Date;
+
+  @Property({ fieldName: 'approved_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  approvedByUserId?: string;
+
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 

@@ -20,6 +20,7 @@ import {
   PostJournalDto,
   LedgerLineDto,
   ReverseJournalDto,
+  JournalTransitionDto,
   DetermineAccountsDto,
   AttachFileDto,
   CreateAccountDto,
@@ -46,6 +47,28 @@ const NORMAL_BALANCE_CONCEPT: Record<NormalBalance, string> = {
 };
 
 /**
+ * Máquina de estados canónica del asiento (REDESA C-17). Cada estado declara sus
+ * transiciones válidas; cualquier otra combinación la rechaza `assertTransition`
+ * con 422 (PreconditionFailed). El efecto en el mayor (sellado de `postedAt`) solo
+ * ocurre en la transición APPROVED → POSTED.
+ */
+const ALLOWED_TRANSITIONS: Record<string, readonly string[]> = {
+  [ACCT.TXN_DRAFT]: [ACCT.TXN_AUTO_CLASSIFIED],
+  [ACCT.TXN_AUTO_CLASSIFIED]: [ACCT.TXN_PENDING_REVIEW],
+  [ACCT.TXN_PENDING_REVIEW]: [ACCT.TXN_APPROVED],
+  [ACCT.TXN_APPROVED]: [ACCT.TXN_POSTED],
+  [ACCT.TXN_POSTED]: [ACCT.TXN_REVERSED],
+  [ACCT.TXN_REVERSED]: [],
+};
+
+/**
+ * Roles con autoridad para aprobar un asiento (transición → APPROVED). `approve`
+ * exige que el actor porte al menos uno; el gate autoritativo es el `@Roles` del
+ * controlador, esta comprobación es la defensa en profundidad a nivel de servicio.
+ */
+const APPROVAL_ROLES: readonly string[] = ['ACCOUNTING_APPROVER', 'SECURITY_ADMIN'];
+
+/**
  * Casos de uso del libro mayor: posteo de asientos por partida doble balanceada
  * (UC-16-01, incluye determinación UC-16-02), reversa espejo (UC-16-03), adjunto
  * de soporte (UC-16-13) y alta de cuenta del plan contable (soporte).
@@ -67,7 +90,21 @@ export class LedgerService {
     this.logger.setContext(LedgerService.name);
   }
 
-  /** UC-16-01: registra y postea un asiento balanceado con sus líneas y dimensiones. */
+  /**
+   * UC-16-01 / atajo directo (crear+postear). Registra un asiento balanceado y lo
+   * deja POSTEADO en un solo paso, saltándose el flujo de revisión/aprobación.
+   *
+   * DECISIÓN DE COMPATIBILIDAD (REDESA C-17): el flujo canónico es
+   * `createDraft → classify → submitForReview → approve → post`. Este atajo se
+   * conserva para no romper integraciones/tests existentes y está controlado por:
+   *   - ROL: el controlador lo restringe a `SECURITY_ADMIN` (`@Roles`), el mismo
+   *     rol con autoridad de aprobación; equivale a auto-aprobar el asiento.
+   *   - IDEMPOTENCIA: `transactionNumber` es único por práctica (409 si se repite),
+   *     de modo que un reintento no duplica el asiento.
+   * El posteo efectivo (líneas del mayor + `postedAt`) ocurre aquí, igual que en
+   * `post`, aplicando las mismas validaciones (balance de partida doble y periodo
+   * ABIERTO).
+   */
   async postJournal(
     dto: PostJournalDto,
     actor: AuthenticatedUser,
@@ -167,6 +204,181 @@ export class LedgerService {
     });
   }
 
+  /**
+   * REDESA C-17 — estado inicial DRAFT. Registra el asiento y sus líneas del mayor
+   * SIN postearlo: queda en DRAFT (`postedAt` nulo). El efecto en el mayor se aplaza
+   * al comando `post`. Se valida la partida doble por adelantado para no aceptar un
+   * borrador estructuralmente inválido; el periodo ABIERTO se valida en `post`.
+   */
+  async createDraft(
+    dto: PostJournalDto,
+    actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    const { debitCents } = this.assertBalanced(dto.lines);
+
+    return this.em.transactional(async (tx) => {
+      const number = dto.transactionNumber ?? this.generateNumber('JT');
+      const clash = await this.journalRepo.findByTransactionNumber(
+        tx,
+        dto.practiceId,
+        number,
+      );
+      if (clash) {
+        throw new ConflictException(
+          'El número de asiento ya existe en la práctica',
+          { transactionNumber: number },
+        );
+      }
+
+      const transaction = this.journalRepo.createTransaction(tx, {
+        practiceId: dto.practiceId,
+        transactionNumber: number,
+        transactionTypeConceptId: ACCT.TXN_TYPE_STANDARD,
+        transactionDate: new Date(dto.transactionDate),
+        statusConceptId: ACCT.TXN_DRAFT,
+        fiscalPeriodId: dto.fiscalPeriodId,
+        currencyConceptId: dto.currencyConceptId,
+        totalAmount: fromCents(debitCents),
+        description: dto.description,
+        reference: dto.reference,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      await this.writeLines(
+        tx,
+        transaction.id,
+        dto.lines,
+        actor.id,
+        dto.currencyConceptId,
+      );
+
+      this.logger.info(
+        {
+          operation: 'accounting.journal.draft',
+          transactionId: transaction.id,
+          lines: dto.lines.length,
+        },
+        'Journal draft created',
+      );
+
+      return this.toResponse(transaction, dto.lines.length);
+    });
+  }
+
+  /**
+   * REDESA C-17 — DRAFT → AUTO_CLASSIFIED. Clasificación automática por reglas.
+   * PLACEHOLDER determinista y documentado: en ausencia de un motor de reglas de
+   * clasificación, se marca el asiento como auto-clasificado conservando su tipo
+   * STANDARD. Punto de extensión: aquí se resolvería `transactionTypeConceptId`
+   * (y/o cuentas por defecto) a partir de reglas de determinación por escenario.
+   */
+  classify(
+    id: string,
+    _dto: JournalTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.transition(id, ACCT.TXN_AUTO_CLASSIFIED, actor, 'classify');
+  }
+
+  /** REDESA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
+  submitForReview(
+    id: string,
+    _dto: JournalTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.transition(
+      id,
+      ACCT.TXN_PENDING_REVIEW,
+      actor,
+      'submit-review',
+    );
+  }
+
+  /**
+   * REDESA C-17 — PENDING_REVIEW → APPROVED. Exige rol de aprobación y sella
+   * quién/ cuándo aprobó (segregación de funciones respecto al posteo).
+   */
+  async approve(
+    id: string,
+    _dto: JournalTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    this.assertApprovalRole(actor);
+    return this.transition(id, ACCT.TXN_APPROVED, actor, 'approve', (txn) => {
+      txn.approvedAt = new Date();
+      txn.approvedByUserId = actor.id;
+    });
+  }
+
+  /**
+   * REDESA C-17 — APPROVED → POSTED. ES el posteo efectivo en el mayor: valida la
+   * partida doble (recalculada desde las líneas persistidas) y que el periodo esté
+   * ABIERTO, y sella `postedAt`/`postedByUserId`. Solo transita desde APPROVED.
+   */
+  async post(
+    id: string,
+    dto: JournalTransitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const txn = await this.journalRepo.findTransactionById(tx, id);
+      if (!txn) {
+        throw new ResourceNotFoundException('Asiento no encontrado', {
+          transactionId: id,
+        });
+      }
+      this.assertTransition(txn.statusConceptId, ACCT.TXN_POSTED);
+
+      // Permite enlazar el periodo en el posteo si el borrador no lo fijó.
+      if (dto.fiscalPeriodId && !txn.fiscalPeriodId) {
+        txn.fiscalPeriodId = dto.fiscalPeriodId;
+      }
+
+      // UC-16-05 (include): un asiento solo se postea en un periodo ABIERTO.
+      if (txn.fiscalPeriodId) {
+        const period = await this.fiscalRepo.findPeriodById(
+          tx,
+          txn.fiscalPeriodId,
+        );
+        if (!period) {
+          throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
+            fiscalPeriodId: txn.fiscalPeriodId,
+          });
+        }
+        if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
+          throw new PreconditionFailedException(
+            'El periodo fiscal no está ABIERTO',
+            {
+              fiscalPeriodId: txn.fiscalPeriodId,
+              status: period.statusConceptId,
+            },
+          );
+        }
+      }
+
+      const entries = await this.journalRepo.ledgerEntriesForTransaction(tx, id);
+      const debitCents = this.assertBalancedEntries(entries);
+
+      const now = new Date();
+      txn.statusConceptId = ACCT.TXN_POSTED;
+      txn.postedAt = now;
+      txn.postedByUserId = actor.id;
+      touch(txn, actor.id);
+
+      this.logger.info(
+        {
+          operation: 'accounting.journal.post',
+          transactionId: id,
+          total: fromCents(debitCents),
+        },
+        'Journal transaction posted from APPROVED',
+      );
+
+      return this.toResponse(txn, entries.length);
+    });
+  }
+
   /** UC-16-03: crea una transacción de reversa con líneas espejo (débito<->crédito). */
   async reverseJournal(
     transactionId: string,
@@ -192,15 +404,9 @@ export class LedgerService {
           transactionId,
         });
       }
-      if (original.statusConceptId !== ACCT.TXN_POSTED) {
-        throw new PreconditionFailedException(
-          'Solo un asiento POSTEADO puede reversarse',
-          {
-            transactionId,
-            status: original.statusConceptId,
-          },
-        );
-      }
+      // REDESA C-17: la reversa es la única transición desde POSTED (POSTED→REVERSED);
+      // `assertTransition` rechaza (422) reversar un asiento en cualquier otro estado.
+      this.assertTransition(original.statusConceptId, ACCT.TXN_REVERSED);
       const existingLink = await this.journalRepo.findLink(
         tx,
         transactionId,
@@ -439,6 +645,109 @@ export class LedgerService {
       entryIds.push(entry.id);
     }
     return entryIds;
+  }
+
+  /**
+   * Guarda de la máquina de estados: rechaza (422) cualquier transición que no
+   * esté declarada en `ALLOWED_TRANSITIONS`. Único punto de verdad del flujo.
+   */
+  assertTransition(from: string, to: string): void {
+    const allowed = ALLOWED_TRANSITIONS[from] ?? [];
+    if (!allowed.includes(to)) {
+      throw new PreconditionFailedException('Transición de estado inválida', {
+        from,
+        to,
+      });
+    }
+  }
+
+  /**
+   * Transición genérica de estado: carga el asiento, valida la transición y aplica
+   * el nuevo estado (más una mutación opcional específica del comando).
+   */
+  private transition(
+    id: string,
+    to: string,
+    actor: AuthenticatedUser,
+    operation: string,
+    mutate?: (txn: {
+      statusConceptId: string;
+      approvedAt?: Date;
+      approvedByUserId?: string;
+    }) => void,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const txn = await this.journalRepo.findTransactionById(tx, id);
+      if (!txn) {
+        throw new ResourceNotFoundException('Asiento no encontrado', {
+          transactionId: id,
+        });
+      }
+      this.assertTransition(txn.statusConceptId, to);
+      txn.statusConceptId = to;
+      mutate?.(txn);
+      touch(txn, actor.id);
+      this.logger.info(
+        { operation: `accounting.journal.${operation}`, transactionId: id, to },
+        'Journal transaction transitioned',
+      );
+      return this.toResponse(txn);
+    });
+  }
+
+  /** Exige que el actor porte un rol con autoridad de aprobación (defensa en profundidad). */
+  private assertApprovalRole(actor: AuthenticatedUser): void {
+    const roles = actor.roles ?? [];
+    if (!roles.some((r) => APPROVAL_ROLES.includes(r))) {
+      throw new PreconditionFailedException(
+        'Se requiere un rol con autoridad de aprobación para aprobar el asiento',
+        { requiredAnyOf: APPROVAL_ROLES },
+      );
+    }
+  }
+
+  /** Serializa una transacción a la respuesta estándar del asiento. */
+  private toResponse(
+    txn: {
+      id: string;
+      transactionNumber: string;
+      statusConceptId: string;
+      totalAmount?: string;
+      postedAt?: Date;
+    },
+    lineCount = 0,
+  ): JournalTransactionResponseDto {
+    return {
+      id: txn.id,
+      transactionNumber: txn.transactionNumber,
+      status: txn.statusConceptId,
+      totalAmount: txn.totalAmount ?? '0.00',
+      lineCount,
+      postedAt: txn.postedAt ?? null,
+    };
+  }
+
+  /** Recalcula la partida doble desde las líneas persistidas del mayor (usado por `post`). */
+  private assertBalancedEntries(
+    entries: { directionConceptId: string; amount: string }[],
+  ): number {
+    const debitCents = sumCents(
+      entries
+        .filter((e) => e.directionConceptId === ACCT.DIRECTION_DEBIT)
+        .map((e) => e.amount),
+    );
+    const creditCents = sumCents(
+      entries
+        .filter((e) => e.directionConceptId === ACCT.DIRECTION_CREDIT)
+        .map((e) => e.amount),
+    );
+    if (debitCents <= 0 || debitCents !== creditCents) {
+      throw new PreconditionFailedException(
+        'El asiento no balancea (debe != haber)',
+        { debit: fromCents(debitCents), credit: fromCents(creditCents) },
+      );
+    }
+    return debitCents;
   }
 
   /** Valida partida doble: suma de débitos == suma de créditos. Lanza 422 si no. */

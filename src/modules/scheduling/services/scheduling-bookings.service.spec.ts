@@ -29,6 +29,7 @@ function build() {
     recordReschedule: mockFn(),
     createCancellation: mockFn(),
     createReminder: mockFn(),
+    recordBookingHistory: mockFn(),
   };
   const catalogRepo = {
     findTemplateById: mockFn(),

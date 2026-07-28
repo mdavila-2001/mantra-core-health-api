@@ -15,6 +15,7 @@ import {
   AccountResponseDto,
   PostJournalDto,
   JournalTransactionResponseDto,
+  JournalTransitionDto,
   ReverseJournalDto,
   DetermineAccountsDto,
   DeterminedAccountResponseDto,
@@ -56,6 +57,75 @@ export class AccountingLedgerController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
     return this.ledgerService.postJournal(dto, actor);
+  }
+
+  /**
+   * REDESA C-17 — crea el asiento en estado DRAFT (sin postear). Punto de entrada
+   * del flujo canónico DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED.
+   */
+  @Post('journal-transactions/drafts')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear un asiento en borrador (DRAFT, sin postear)' })
+  createDraft(
+    @Body() dto: PostJournalDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.ledgerService.createDraft(dto, actor);
+  }
+
+  /** REDESA C-17 — DRAFT → AUTO_CLASSIFIED. */
+  @Post('journal-transactions/:id/classify')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Clasificar automáticamente el asiento' })
+  classify(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: JournalTransitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.ledgerService.classify(id, dto, actor);
+  }
+
+  /** REDESA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
+  @Post('journal-transactions/:id/submit-review')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Enviar el asiento a revisión' })
+  submitReview(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: JournalTransitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.ledgerService.submitForReview(id, dto, actor);
+  }
+
+  /** REDESA C-17 — PENDING_REVIEW → APPROVED (exige rol de aprobación). */
+  @Post('journal-transactions/:id/approve')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Aprobar el asiento (rol de aprobación)' })
+  approve(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: JournalTransitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.ledgerService.approve(id, dto, actor);
+  }
+
+  /** REDESA C-17 — APPROVED → POSTED (posteo efectivo en el mayor). */
+  @Post('journal-transactions/:id/post')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Postear el asiento aprobado (efecto en el mayor)',
+  })
+  post(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: JournalTransitionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<JournalTransactionResponseDto> {
+    return this.ledgerService.post(id, dto, actor);
   }
 
   /** UC-16-02. */

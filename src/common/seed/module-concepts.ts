@@ -26,6 +26,7 @@ import { TELEMETRY_CONCEPT_SEEDS } from '../../modules/telemetry/telemetry.conce
 import { DELEGATED_ACCESS_CONCEPT_SEEDS } from '../../modules/delegated_access/delegated_access.concepts';
 import { READ_MODELS_CONCEPT_SEEDS } from '../../modules/read_models/read_models.concepts';
 import { INTEGRATION_CONTRACTS_CONCEPT_SEEDS } from '../../modules/integration_contracts/integration_contracts.concepts';
+import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/scheduling.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -66,4 +67,5 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...DELEGATED_ACCESS_CONCEPT_SEEDS,
   ...READ_MODELS_CONCEPT_SEEDS,
   ...INTEGRATION_CONTRACTS_CONCEPT_SEEDS,
+  ...SCHEDULING_CONCEPT_SEEDS,
 ];

@@ -197,6 +197,141 @@ describe('LedgerService', () => {
     });
   });
 
+  describe('máquina de estados del asiento (REDESA C-17)', () => {
+    const balanced = {
+      practiceId: 'p1',
+      transactionDate: '2026-01-31',
+      lines: [
+        { accountId: 'acc-d', direction: 'DEBIT', amount: '100.00' },
+        { accountId: 'acc-c', direction: 'CREDIT', amount: '100.00' },
+      ],
+    };
+    const balancedEntries = [
+      { directionConceptId: ACCT.DIRECTION_DEBIT, amount: '100.00' },
+      { directionConceptId: ACCT.DIRECTION_CREDIT, amount: '100.00' },
+    ];
+
+    it('createDraft crea el asiento en DRAFT sin postear (postedAt nulo)', async () => {
+      const d = build();
+      const res = await d.service.createDraft(balanced as any, actor);
+      expect(res.status).toBe(ACCT.TXN_DRAFT);
+      expect(res.postedAt).toBeNull();
+      expect(d.journalRepo.createLedgerEntry).toHaveBeenCalledTimes(2);
+    });
+
+    it('recorre DRAFT→AUTO_CLASSIFIED→PENDING_REVIEW→APPROVED→POSTED→REVERSED', async () => {
+      const d = build();
+      const draft = await d.service.createDraft(balanced as any, actor);
+      expect(draft.status).toBe(ACCT.TXN_DRAFT);
+
+      const txn: any = {
+        id: 't1',
+        transactionNumber: 'JT-1',
+        statusConceptId: ACCT.TXN_DRAFT,
+      };
+      d.journalRepo.findTransactionById.mockResolvedValue(txn);
+
+      expect((await d.service.classify('t1', {}, actor)).status).toBe(
+        ACCT.TXN_AUTO_CLASSIFIED,
+      );
+      expect((await d.service.submitForReview('t1', {}, actor)).status).toBe(
+        ACCT.TXN_PENDING_REVIEW,
+      );
+      const approved = await d.service.approve('t1', {}, actor);
+      expect(approved.status).toBe(ACCT.TXN_APPROVED);
+      expect(txn.approvedByUserId).toBe('admin-1');
+      expect(txn.approvedAt).toBeInstanceOf(Date);
+
+      d.journalRepo.ledgerEntriesForTransaction.mockResolvedValue(
+        balancedEntries,
+      );
+      const posted = await d.service.post('t1', {}, actor);
+      expect(posted.status).toBe(ACCT.TXN_POSTED);
+      expect(txn.postedAt).toBeInstanceOf(Date);
+      expect(txn.postedByUserId).toBe('admin-1');
+
+      // reversa desde POSTED
+      d.journalRepo.ledgerEntriesForTransaction.mockResolvedValue([]);
+      await d.service.reverseJournal('t1', {}, actor);
+      expect(txn.statusConceptId).toBe(ACCT.TXN_REVERSED);
+    });
+
+    it('assertTransition rechaza saltos inválidos y acepta los válidos', () => {
+      const d = build();
+      expect(() =>
+        d.service.assertTransition(ACCT.TXN_DRAFT, ACCT.TXN_POSTED),
+      ).toThrow(PreconditionFailedException);
+      expect(() =>
+        d.service.assertTransition(ACCT.TXN_DRAFT, ACCT.TXN_AUTO_CLASSIFIED),
+      ).not.toThrow();
+    });
+
+    it('post solo transita desde APPROVED (rechaza otros estados)', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        statusConceptId: ACCT.TXN_PENDING_REVIEW,
+      });
+      await expect(
+        d.service.post('t1', {}, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('post rechaza (422) si las líneas persistidas no balancean', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        statusConceptId: ACCT.TXN_APPROVED,
+      });
+      d.journalRepo.ledgerEntriesForTransaction.mockResolvedValue([
+        { directionConceptId: ACCT.DIRECTION_DEBIT, amount: '100.00' },
+        { directionConceptId: ACCT.DIRECTION_CREDIT, amount: '90.00' },
+      ]);
+      await expect(
+        d.service.post('t1', {}, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('post rechaza (422) en un periodo BLOQUEADO', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        statusConceptId: ACCT.TXN_APPROVED,
+        fiscalPeriodId: 'fp1',
+      });
+      d.journalRepo.ledgerEntriesForTransaction.mockResolvedValue(
+        balancedEntries,
+      );
+      d.fiscalRepo.findPeriodById.mockResolvedValue({
+        id: 'fp1',
+        statusConceptId: ACCT.PERIOD_LOCKED,
+      });
+      await expect(
+        d.service.post('t1', {}, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('approve exige un rol con autoridad de aprobación', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't1',
+        statusConceptId: ACCT.TXN_PENDING_REVIEW,
+      });
+      const noRole = { id: 'u2', roles: [] } as any;
+      await expect(
+        d.service.approve('t1', {}, noRole),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('lanza 404 al transicionar un asiento inexistente', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue(null);
+      await expect(
+        d.service.classify('nope', {}, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('determineAccounts (UC-16-02)', () => {
     it('lanza 404 si no hay regla vigente', async () => {
       const d = build();

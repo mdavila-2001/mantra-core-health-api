@@ -3,6 +3,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuthzPdpService } from './authz-pdp.service';
 import { AUTHZ } from '../authz.concepts';
+import { CONCEPTS } from '../../../common';
 
 const actor = { id: 'sys-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -20,6 +21,12 @@ function build() {
   const clinicalRepo = {
     findActiveForUserPatient: mockFn().mockResolvedValue([]),
   };
+  const careRelationshipsRepo = {
+    findActiveForPractitionerPatient: mockFn().mockResolvedValue([]),
+  };
+  const legalRepresentationsRepo = {
+    findActiveForRepresentativePatient: mockFn().mockResolvedValue([]),
+  };
   const resourceGrantsRepo = {
     findForSubjectResource: mockFn().mockResolvedValue([]),
   };
@@ -34,6 +41,8 @@ function build() {
     permGrantsRepo as any,
     policiesRepo as any,
     clinicalRepo as any,
+    careRelationshipsRepo as any,
+    legalRepresentationsRepo as any,
     resourceGrantsRepo as any,
     fieldPermsRepo as any,
     logger as any,
@@ -47,6 +56,8 @@ function build() {
     permGrantsRepo,
     policiesRepo,
     clinicalRepo,
+    careRelationshipsRepo,
+    legalRepresentationsRepo,
     resourceGrantsRepo,
     fieldPermsRepo,
   };
@@ -234,6 +245,87 @@ describe('AuthzPdpService', () => {
         actor,
       );
       expect(res.decision).toBe('DENY');
+    });
+
+    it('PERMIT via an active care relationship (C-06/CAN-AUTH-001)', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.careRelationshipsRepo.findActiveForPractitionerPatient.mockResolvedValue(
+        [
+          {
+            statusConceptId: CONCEPTS.STATE_ACTIVE,
+            validFrom: null,
+            validTo: new Date(Date.now() + 3_600_000),
+            purposeConceptId: null,
+          },
+        ],
+      );
+      const res = await d.service.evaluate(
+        {
+          ...baseDto,
+          patientProfileId: 'pat-1',
+          practitionerProfileId: 'prac-1',
+        },
+        actor,
+      );
+      expect(res.decision).toBe('PERMIT');
+      expect(res.reason).toContain('relación asistencial vigente');
+      expect(
+        d.careRelationshipsRepo.findActiveForPractitionerPatient,
+      ).toHaveBeenCalledWith({}, 'prac-1', 'pat-1');
+    });
+
+    it('DENY: an expired care relationship does not authorize', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.careRelationshipsRepo.findActiveForPractitionerPatient.mockResolvedValue(
+        [
+          {
+            statusConceptId: CONCEPTS.STATE_ACTIVE,
+            validFrom: new Date(Date.now() - 7_200_000),
+            validTo: new Date(Date.now() - 3_600_000),
+            purposeConceptId: null,
+          },
+        ],
+      );
+      const res = await d.service.evaluate(
+        {
+          ...baseDto,
+          patientProfileId: 'pat-1',
+          practitionerProfileId: 'prac-1',
+        },
+        actor,
+      );
+      expect(res.decision).toBe('DENY');
+    });
+
+    it('PERMIT via an active legal representation (C-07/A-03)', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.legalRepresentationsRepo.findActiveForRepresentativePatient.mockResolvedValue(
+        [
+          {
+            statusConceptId: CONCEPTS.STATE_ACTIVE,
+            validFrom: null,
+            validTo: null,
+          },
+        ],
+      );
+      const res = await d.service.evaluate(
+        { ...baseDto, patientProfileId: 'pat-1' },
+        actor,
+      );
+      expect(res.decision).toBe('PERMIT');
+      expect(res.reason).toContain('representación legal vigente');
+      expect(
+        d.legalRepresentationsRepo.findActiveForRepresentativePatient,
+      ).toHaveBeenCalledWith({}, 'u1', 'pat-1');
     });
 
     it('reports masked fields from field permissions', async () => {

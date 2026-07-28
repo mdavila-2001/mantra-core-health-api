@@ -147,6 +147,32 @@ export class PostJournalDto {
   lines!: LedgerLineDto[];
 }
 
+/**
+ * Cuerpo común de los comandos de transición del asiento (REDESA C-17):
+ * `classify`, `submit-review`, `approve`, `post`. Todos los campos son opcionales;
+ * cada comando usa los que le apliquen (p. ej. `post` puede enlazar el periodo
+ * fiscal si el borrador no lo fijó; `approve`/`post` admiten una nota de auditoría).
+ */
+export class JournalTransitionDto {
+  @ApiPropertyOptional({
+    description:
+      'Periodo fiscal ABIERTO a enlazar en el posteo (solo `post`, si el borrador no lo fijó)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  fiscalPeriodId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nota de auditoría de la transición',
+    maxLength: 500,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  note?: string;
+}
+
 /** Cuerpo de `POST /accounting/journal-transactions/:id/reverse` (UC-16-03). */
 export class ReverseJournalDto {
   @ApiPropertyOptional({
