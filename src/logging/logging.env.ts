@@ -38,8 +38,17 @@ export const loggingEnvSchema = Joi.object({
   LOG_PRETTY: Joi.boolean().truthy('true').falsy('false').default(false),
 }).unknown(true);
 
+/**
+ * Describe el contrato estructural de raw logging env.
+ */
 interface RawLoggingEnv {
+  /**
+   * Valor de log level mantenido por la instancia.
+   */
   LOG_LEVEL: LogLevel;
+  /**
+   * Valor de log pretty mantenido por la instancia.
+   */
   LOG_PRETTY: boolean;
 }
 

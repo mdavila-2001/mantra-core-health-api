@@ -1,20 +1,38 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
+/**
+ * Mapea la entidad persistente asociada a `company_bank_accounts`.
+ */
 @Entity({ schema: 'accounting', tableName: 'company_bank_accounts' })
 export class CompanyBankAccounts {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Identificador asociado a tenant.
+   */
   @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
   tenantId!: string;
 
+  /**
+   * Identificador asociado a account.
+   */
   @Property({ fieldName: 'account_id', type: 'uuid' }) // FK → accounting.accounts
   accountId!: string;
 
+  /**
+   * Valor de bank name mantenido por la instancia.
+   */
   @Property({ fieldName: 'bank_name', columnType: 'varchar' })
   bankName!: string;
 
+  /**
+   * Valor de account holder name mantenido por la instancia.
+   */
   @Property({
     fieldName: 'account_holder_name',
     columnType: 'varchar',
@@ -22,6 +40,9 @@ export class CompanyBankAccounts {
   })
   accountHolderName?: string;
 
+  /**
+   * Identificador asociado a account holder tax.
+   */
   @Property({
     fieldName: 'account_holder_tax_id',
     columnType: 'varchar',
@@ -29,6 +50,9 @@ export class CompanyBankAccounts {
   })
   accountHolderTaxId?: string;
 
+  /**
+   * Valor de bank identifier code mantenido por la instancia.
+   */
   @Property({
     fieldName: 'bank_identifier_code',
     columnType: 'varchar',
@@ -36,9 +60,15 @@ export class CompanyBankAccounts {
   })
   bankIdentifierCode?: string;
 
+  /**
+   * Valor de iban masked mantenido por la instancia.
+   */
   @Property({ fieldName: 'iban_masked', columnType: 'varchar', nullable: true })
   ibanMasked?: string;
 
+  /**
+   * Valor de account number hash mantenido por la instancia.
+   */
   @Property({
     fieldName: 'account_number_hash',
     columnType: 'varchar',
@@ -46,30 +76,57 @@ export class CompanyBankAccounts {
   })
   accountNumberHash?: string;
 
+  /**
+   * Identificador asociado a currency concept.
+   */
   @Property({ fieldName: 'currency_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   currencyConceptId!: string;
 
+  /**
+   * Identificador asociado a branch.
+   */
   @Property({ fieldName: 'branch_id', type: 'uuid', nullable: true }) // FK → directory.branches
   branchId?: string;
 
+  /**
+   * Identificador asociado a clearing account.
+   */
   @Property({ fieldName: 'clearing_account_id', type: 'uuid', nullable: true }) // FK → accounting.accounts
   clearingAccountId?: string;
 
+  /**
+   * Identificador asociado a status concept.
+   */
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
+  /**
+   * Fecha y hora de la última actualización.
+   */
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
+  /**
+   * Identificador asociado a created by user.
+   */
   @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   createdByUserId?: string;
 
+  /**
+   * Identificador asociado a updated by user.
+   */
   @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   updatedByUserId?: string;
 
+  /**
+   * Versión usada para controlar actualizaciones concurrentes.
+   */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
 }

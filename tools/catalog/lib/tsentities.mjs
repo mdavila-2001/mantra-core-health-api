@@ -9,7 +9,11 @@ export function readTsEntities() {
   for (const mod of readdirSync(SRC_MODULES)) {
     const dir = join(SRC_MODULES, mod, 'entities');
     let files = [];
-    try { files = readdirSync(dir); } catch { continue; }
+    try {
+      files = readdirSync(dir);
+    } catch {
+      continue;
+    }
     for (const f of files) {
       if (!f.endsWith('.entity.ts')) continue;
       const path = join(dir, f);
@@ -18,13 +22,15 @@ export function readTsEntities() {
       const table = (text.match(/tableName:\s*'([^']+)'/) || [])[1];
       const className = (text.match(/export class (\w+)/) || [])[1];
       const props = [];
-      const re = /@(PrimaryKey|Property|ManyToOne|OneToOne|Enum)\(\{([\s\S]*?)\}\)\s*(?:\/\/[^\n]*\n\s*)?(\w+)([!?]?):/g;
+      const re =
+        /@(PrimaryKey|Property|ManyToOne|OneToOne|Enum)\(\{([\s\S]*?)\}\)\s*(?:\/\/[^\n]*\n\s*)?(\w+)([!?]?):/g;
       let m;
       while ((m = re.exec(text))) {
         const opts = m[2];
         props.push({
           propName: m[3],
-          fieldName: (opts.match(/fieldName:\s*'([^']+)'/) || [])[1] || snake(m[3]),
+          fieldName:
+            (opts.match(/fieldName:\s*'([^']+)'/) || [])[1] || snake(m[3]),
           type: (opts.match(/\btype:\s*'([^']+)'/) || [])[1],
           columnType: (opts.match(/columnType:\s*'([^']+)'/) || [])[1],
           nullable: /nullable:\s*true/.test(opts),
@@ -34,7 +40,12 @@ export function readTsEntities() {
       }
       if (!schema || !table) continue;
       map.set(`${schema}.${table}`, {
-        schema, table, className, props, module: mod, file: f,
+        schema,
+        table,
+        className,
+        props,
+        module: mod,
+        file: f,
         loc: text.split('\n').length,
       });
     }
@@ -42,6 +53,14 @@ export function readTsEntities() {
   return map;
 }
 
-export const snake = (s) => s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
-export const pascal = (s) => s.split('_').map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('');
-export const camel = (s) => { const p = pascal(s); return p.charAt(0).toLowerCase() + p.slice(1); };
+export const snake = (s) =>
+  s.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+export const pascal = (s) =>
+  s
+    .split('_')
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join('');
+export const camel = (s) => {
+  const p = pascal(s);
+  return p.charAt(0).toLowerCase() + p.slice(1);
+};

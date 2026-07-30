@@ -31,10 +31,25 @@ export type SchemaSyncMode =
 export interface OrmEnv {
   /** Parámetros de conexión a PostgreSQL. */
   readonly connection: {
+    /**
+     * Valor de host mantenido por la instancia.
+     */
     readonly host: string;
+    /**
+     * Valor de port mantenido por la instancia.
+     */
     readonly port: number;
+    /**
+     * Valor de user mantenido por la instancia.
+     */
     readonly user: string;
+    /**
+     * Valor de password mantenido por la instancia.
+     */
     readonly password: string;
+    /**
+     * Valor de name mantenido por la instancia.
+     */
     readonly name: string;
   };
   /**
@@ -44,11 +59,20 @@ export interface OrmEnv {
    * `max_connections` del servidor y provoca rechazos de conexión bajo carga.
    */
   readonly pool: {
+    /**
+     * Valor de min mantenido por la instancia.
+     */
     readonly min: number;
+    /**
+     * Valor de max mantenido por la instancia.
+     */
     readonly max: number;
   };
   /** Comportamiento de la secuencia de arranque que materializa el DDL. */
   readonly schema: {
+    /**
+     * Valor de sync mode mantenido por la instancia.
+     */
     readonly syncMode: SchemaSyncMode;
     /** Si true, tras sincronizar se compara la base real contra el modelo y se reporta la deriva. */
     readonly verifyFidelity: boolean;
@@ -99,16 +123,49 @@ export const ormEnvSchema = Joi.object({
 
 /** Forma cruda del entorno una vez que Joi aplicó defaults y coerción de tipos. */
 interface RawOrmEnv {
+  /**
+   * Valor de db host mantenido por la instancia.
+   */
   DB_HOST: string;
+  /**
+   * Valor de db port mantenido por la instancia.
+   */
   DB_PORT: number;
+  /**
+   * Valor de db user mantenido por la instancia.
+   */
   DB_USER: string;
+  /**
+   * Valor de db password mantenido por la instancia.
+   */
   DB_PASSWORD: string;
+  /**
+   * Valor de db name mantenido por la instancia.
+   */
   DB_NAME: string;
+  /**
+   * Valor de db pool min mantenido por la instancia.
+   */
   DB_POOL_MIN: number;
+  /**
+   * Valor de db pool max mantenido por la instancia.
+   */
   DB_POOL_MAX: number;
+  /**
+   * Valor de orm schema sync mantenido por la instancia.
+   */
   ORM_SCHEMA_SYNC: SchemaSyncMode;
+  /**
+   * Valor de orm verify fidelity mantenido por la instancia.
+   */
   ORM_VERIFY_FIDELITY: boolean;
+  /**
+   * Valor de mikro orm debug mantenido por la instancia.
+   */
   MIKRO_ORM_DEBUG: boolean;
+  /**
+   * Valor de orm slow query ms mantenido por la instancia.
+   */
   ORM_SLOW_QUERY_MS: number;
 }
 

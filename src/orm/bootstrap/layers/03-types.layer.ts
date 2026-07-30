@@ -23,11 +23,26 @@ export const typesLayer: DdlLayer = {
   description:
     'Crea los tipos enumerados nativos del modelo antes de que se declare ninguna columna que los use',
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply.
+   */
   async apply(context: DdlLayerContext) {
     // Etiquetas existentes por tipo, en una sola consulta.
     const rows = await context.query<{
+      /**
+       * Valor de schema mantenido por la instancia.
+       */
       schema: string;
+      /**
+       * Valor de name mantenido por la instancia.
+       */
       name: string;
+      /**
+       * Valor de label mantenido por la instancia.
+       */
       label: string;
     }>(
       `SELECT n.nspname AS schema, t.typname AS name, e.enumlabel AS label

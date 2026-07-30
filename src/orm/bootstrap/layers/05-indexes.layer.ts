@@ -29,12 +29,26 @@ export const indexesLayer: DdlLayer = {
   description:
     'Materializa los índices secundarios del modelo que aún no existen en la base',
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply.
+   */
   async apply(context: DdlLayerContext) {
     // Un único viaje: nombre cualificado de todos los índices ya presentes en
     // los schemas del modelo.
     const existing = new Set(
       (
-        await context.query<{ schemaname: string; indexname: string }>(
+        await context.query<{
+          /**
+           * Valor de schemaname mantenido por la instancia.
+           */
+          schemaname: string; /**
+           * Valor de indexname mantenido por la instancia.
+           */
+          indexname: string;
+        }>(
           `SELECT schemaname, indexname FROM pg_indexes
             WHERE schemaname NOT IN ('pg_catalog', 'information_schema')`,
         )

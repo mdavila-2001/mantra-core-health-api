@@ -1,3 +1,4 @@
+export * from './account_activations.entity';
 export * from './account_lockouts.entity';
 export * from './api_key_scopes.entity';
 export * from './api_keys.entity';

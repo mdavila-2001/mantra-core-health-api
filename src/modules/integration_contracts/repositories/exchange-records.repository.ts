@@ -1,0 +1,93 @@
+import { Injectable } from '@nestjs/common';
+import type { EntityManager } from '@mikro-orm/postgresql';
+import { IntegrationExchangeRecords } from '../entities';
+
+/** Datos para registrar un intercambio (UC-31-05 / UC-31-09). */
+export interface CreateExchangeRecordData {
+  /**
+   * Identificador asociado a integration contract version.
+   */
+  integrationContractVersionId: string;
+  /**
+   * Identificador asociado a direction concept.
+   */
+  directionConceptId: string;
+  /**
+   * Identificador asociado a message type concept.
+   */
+  messageTypeConceptId: string;
+  /**
+   * Identificador asociado a outcome concept.
+   */
+  outcomeConceptId: string;
+  /**
+   * Valor de business identifier mantenido por la instancia.
+   */
+  businessIdentifier?: string;
+  /**
+   * Valor de idempotency key mantenido por la instancia.
+   */
+  idempotencyKey?: string;
+  /**
+   * Identificador asociado a correlation.
+   */
+  correlationId?: string;
+  /**
+   * Identificador asociado a subject type concept.
+   */
+  subjectTypeConceptId?: string;
+  /**
+   * Identificador asociado a subject entity.
+   */
+  subjectEntityId?: string;
+  /**
+   * Valor de request hash mantenido por la instancia.
+   */
+  requestHash?: string;
+  /**
+   * Identificador asociado a payload file.
+   */
+  payloadFileId?: string;
+  /**
+   * Valor de received at mantenido por la instancia.
+   */
+  receivedAt?: Date;
+}
+
+/** Acceso a datos de `integration_contracts.integration_exchange_records`. */
+@Injectable()
+export class ExchangeRecordsRepository {
+  /** Busca un registro de intercambio por id; `null` si no existe. */
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<IntegrationExchangeRecords | null> {
+    return em.findOne(IntegrationExchangeRecords, { id });
+  }
+
+  /** Crea la entidad de registro en la unidad de trabajo (sin flush). */
+  create(
+    em: EntityManager,
+    data: CreateExchangeRecordData,
+  ): IntegrationExchangeRecords {
+    return em.create(
+      IntegrationExchangeRecords,
+      {
+        integrationContractVersionId: data.integrationContractVersionId,
+        directionConceptId: data.directionConceptId,
+        messageTypeConceptId: data.messageTypeConceptId,
+        businessIdentifier: data.businessIdentifier,
+        idempotencyKey: data.idempotencyKey,
+        correlationId: data.correlationId,
+        subjectTypeConceptId: data.subjectTypeConceptId,
+        subjectEntityId: data.subjectEntityId,
+        requestHash: data.requestHash,
+        receivedAt: data.receivedAt,
+        payloadFileId: data.payloadFileId,
+        outcomeConceptId: data.outcomeConceptId,
+        createdAt: new Date(),
+      },
+      { partial: true },
+    );
+  }
+}

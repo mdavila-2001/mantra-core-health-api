@@ -4,6 +4,7 @@ export * from './availability_exceptions.entity';
 export * from './availability_slots.entity';
 export * from './bookable_slots.entity';
 export * from './booking_cancellations.entity';
+export * from './booking_confirmation_rules.entity';
 export * from './booking_policies.entity';
 export * from './booking_reschedules.entity';
 export * from './calendar_absences.entity';

@@ -1,12 +1,54 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { IamController } from './iam.controller';
-import { IamService } from './iam.service';
 import * as entities from './entities';
+import { IamUsersController, IamAuthController } from './controllers';
+import {
+  IamUsersService,
+  IamCredentialsService,
+  IamMfaService,
+  IamDevicesService,
+  IamAuthService,
+  IamAssistedRegistrationService,
+} from './services';
+import {
+  UsersRepository,
+  CredentialsRepository,
+  SessionsRepository,
+  RefreshTokensRepository,
+  MfaFactorsRepository,
+  DevicesRepository,
+  UserGlobalRolesRepository,
+  AccountLockoutsRepository,
+  SecurityEventsRepository,
+  AccountActivationsRepository,
+} from './repositories';
 
+/**
+ * Módulo IAM: identidad, credenciales, sesiones, MFA, dispositivos, roles
+ * globales y eventos de seguridad. `TokenService` llega vía `AuthModule` (global).
+ */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [IamController],
-  providers: [IamService],
+  controllers: [IamUsersController, IamAuthController],
+  providers: [
+    // Repositorios
+    UsersRepository,
+    CredentialsRepository,
+    SessionsRepository,
+    RefreshTokensRepository,
+    MfaFactorsRepository,
+    DevicesRepository,
+    UserGlobalRolesRepository,
+    AccountLockoutsRepository,
+    SecurityEventsRepository,
+    AccountActivationsRepository,
+    // Servicios
+    IamUsersService,
+    IamCredentialsService,
+    IamMfaService,
+    IamDevicesService,
+    IamAuthService,
+    IamAssistedRegistrationService,
+  ],
 })
 export class IamModule {}

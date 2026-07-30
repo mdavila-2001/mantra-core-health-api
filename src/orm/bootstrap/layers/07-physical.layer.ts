@@ -28,12 +28,21 @@ export const physicalLayer: DdlLayer = {
   description:
     'Aplica hypertables de TimescaleDB e índices vectoriales de pgvector sobre las tablas ya creadas',
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply.
+   */
   async apply(context: DdlLayerContext) {
     const installed = new Set(
       (
-        await context.query<{ extname: string }>(
-          'SELECT extname FROM pg_extension',
-        )
+        await context.query<{
+          /**
+           * Valor de extname mantenido por la instancia.
+           */
+          extname: string;
+        }>('SELECT extname FROM pg_extension')
       ).map((row) => row.extname),
     );
 
@@ -103,7 +112,12 @@ async function isSatisfied(
   precondition: string,
 ): Promise<boolean> {
   try {
-    const [row] = await context.query<{ ok: boolean | null }>(precondition);
+    const [row] = await context.query<{
+      /**
+       * Valor de ok mantenido por la instancia.
+       */
+      ok: boolean | null;
+    }>(precondition);
     return row?.ok === true;
   } catch {
     return false;

@@ -21,15 +21,25 @@ export const extensionsLayer: DdlLayer = {
   description:
     'Instala las extensiones de PostgreSQL de las que dependen tipos y operadores del modelo',
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply.
+   * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
+   */
   async apply(context: DdlLayerContext) {
     // Una sola consulta al catálogo en vez de un CREATE EXTENSION por extensión:
     // así el caso normal (todas ya instaladas) cuesta un único viaje de ida y
     // vuelta a la base, no uno por extensión.
     const installed = new Set(
       (
-        await context.query<{ extname: string }>(
-          'SELECT extname FROM pg_extension',
-        )
+        await context.query<{
+          /**
+           * Valor de extname mantenido por la instancia.
+           */
+          extname: string;
+        }>('SELECT extname FROM pg_extension')
       ).map((row) => row.extname),
     );
 

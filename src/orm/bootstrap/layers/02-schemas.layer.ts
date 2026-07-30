@@ -23,12 +23,21 @@ export const schemasLayer: DdlLayer = {
   description:
     'Crea los 57 espacios de nombres del modelo antes de que se materialice ninguna tabla',
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply.
+   */
   async apply(context: DdlLayerContext) {
     const existing = new Set(
       (
-        await context.query<{ nspname: string }>(
-          'SELECT nspname FROM pg_namespace',
-        )
+        await context.query<{
+          /**
+           * Valor de nspname mantenido por la instancia.
+           */
+          nspname: string;
+        }>('SELECT nspname FROM pg_namespace')
       ).map((row) => row.nspname),
     );
 

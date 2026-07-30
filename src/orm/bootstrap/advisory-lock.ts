@@ -40,6 +40,9 @@ export const SCHEMA_BOOTSTRAP_LOCK_KEY = 728_431_905_112_004;
 
 /** Fila que devuelve `pg_try_advisory_xact_lock`. */
 interface AdvisoryLockAttempt {
+  /**
+   * Valor de locked mantenido por la instancia.
+   */
   locked: boolean;
 }
 
