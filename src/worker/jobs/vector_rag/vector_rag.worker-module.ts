@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EmbeddingDrainJob } from './embedding-drain.job';
+import { MockProviderWiringService } from './mock-provider-wiring.service';
 
 export { EmbeddingDrainJob } from './embedding-drain.job';
 
@@ -12,6 +13,6 @@ export { EmbeddingDrainJob } from './embedding-drain.job';
  * descubrimiento propio de este módulo.
  */
 @Module({
-  providers: [EmbeddingDrainJob],
+  providers: [EmbeddingDrainJob, MockProviderWiringService],
 })
 export class VectorRagWorkerModule {}
