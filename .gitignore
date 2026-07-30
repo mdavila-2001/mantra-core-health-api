@@ -77,18 +77,6 @@ CLAUDE.md
 # Cachés de Python (toolkit de generación).
 *.pyc
 
-# Documentación/contrato generados (misma razón que /database/ y /docs/ arriba):
-# se regeneran con `yarn docs:openapi:generate`/`yarn docs:build`, no se versionan.
-# El workflow de CI que los construía y validaba tampoco se versiona con ellos —
-# un check permanentemente roto (sin su contenido en un checkout limpio) es peor
-# que no tenerlo.
-/openapi/
-/asyncapi/
-/mkdocs.yml
-/redocly.yaml
-/structurizr/
-/.github/workflows/docs.yml
-
 # prompt 
 CLAUDE.md
 /coverage-integration
