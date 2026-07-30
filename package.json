@@ -5,6 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "packageManager": "yarn@4.14.1",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -12,7 +13,9 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "typecheck": "tsc --noEmit --incremental false -p tsconfig.json",
     "test": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --watch",
     "test:cov": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --coverage",
@@ -22,12 +25,14 @@
     "smoke": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-smoke.json",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest-cli/bin/jest.js --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "openapi:generate": "yarn build && node tools/documentation/generate-openapi.js",
+    "openapi:validate": "node tools/documentation/validate-openapi.js",
     "orm": "mikro-orm",
     "orm:gen": "mikro-orm generate-entities --config ./src/orm/config/orm.generator.config.ts --save",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
     "orm:entities:missing": "node tools/catalog/generate-missing-entities.mjs",
-    "orm:audit": "node tools/catalog/audit-fidelity.mjs graphify-out/fidelity-audit.json",
-    "orm:schema:dump": "ORM_SCHEMA_SYNC=dry-run node dist/main",
+    "orm:audit": "node tools/catalog/audit-fidelity.mjs fidelity-audit.json",
+    "orm:schema:dump": "cross-env ORM_SCHEMA_SYNC=dry-run node dist/main",
     "redesa:guardrails": "node tools/redesa/guardrails.mjs",
     "redesa:coverage": "node tools/redesa/coverage-report.mjs"
   },
@@ -70,6 +75,7 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.22.0",
     "pgvector": "^0.3.0",
+    "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
@@ -85,7 +91,6 @@
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@testcontainers/postgresql": "^12.0.4",
-    "@types/add": "^2",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/luxon": "^3",
@@ -94,7 +99,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8",
     "@types/supertest": "^7.0.0",
-    "add": "^2.0.9",
+    "cross-env": "^10.1.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -109,8 +114,7 @@
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.23.1",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0",
-    "yarn": "^1.22.22"
+    "typescript-eslint": "^8.20.0"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -119,7 +123,6 @@
       "ts"
     ],
     "rootDir": "src",
-    "//maxWorkers": "argon2 es memory/CPU-hard; limitar la paralelización evita que las pruebas de IAM (hash de contraseña) se agoten por contención bajo la suite completa.",
     "maxWorkers": "50%",
     "testRegex": ".*\\.spec\\.ts$",
     "extensionsToTreatAsEsm": [

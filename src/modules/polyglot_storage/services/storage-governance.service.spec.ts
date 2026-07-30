@@ -174,9 +174,12 @@ describe('StorageGovernanceService', () => {
      * @param lifecycleState - Valor de lifecycle state requerido por la operación.
      * @returns Resultado de wire.
      */
+    // El tipo del parámetro se declara explícitamente: si se dejara inferir del
+    // valor por defecto, TypeScript lo fijaría en el literal 'ACTIVE' y llamar a
+    // `wire(d, DATASET_LIFECYCLE.DRAFT)` dejaría de compilar.
     function wire(
       d: ReturnType<typeof build>,
-      lifecycleState = DATASET_LIFECYCLE.ACTIVE,
+      lifecycleState: (typeof DATASET_LIFECYCLE)[keyof typeof DATASET_LIFECYCLE] = DATASET_LIFECYCLE.ACTIVE,
     ) {
       d.datasetsRepo.findDatasetById.mockResolvedValue({
         id: DATASET,

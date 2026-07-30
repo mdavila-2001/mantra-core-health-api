@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import type { GraphNodes } from '../entities';
 import { GraphProjectionService } from './graph-projection.service';
 
 const actor = { id: 'user-1', roles: ['SYSTEM'] } as any;
@@ -129,7 +130,10 @@ describe('GraphProjectionService', () => {
 
     it('aplica un evento con la misma versión', async () => {
       const d = build();
-      const existing = {
+      // Doble parcial del nodo: `displayLabelRedacted` lo escribe el servicio al
+      // aplicar el evento, así que no se inicializa aquí. `Partial<GraphNodes>`
+      // deja la propiedad legible para la aserción sin fingir que el mock la trae.
+      const existing: Partial<GraphNodes> = {
         nodeId: NODE_A,
         nodeType: 'person',
         sourceVersion: '10',

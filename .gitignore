@@ -74,10 +74,11 @@ CLAUDE.md
 # ignore por accidente otras carpetas del mismo nombre en el árbol (p. ej. src/database).
 /database/
 /docs/
+!/docs/endpoints/
 # Cachés de Python (toolkit de generación).
 *.pyc
 
-# prompt 
+# prompt
 CLAUDE.md
 /coverage-integration
 

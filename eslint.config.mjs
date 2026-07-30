@@ -13,6 +13,8 @@ export default defineConfig([
     // el límite de 300 líneas del proyecto. Ver .prettierignore.
     ignores: [
       'eslint.config.mjs',
+      'tools/**/*.js',
+      'tools/**/*.mjs',
       'src/orm/catalog/indexes/**',
       'src/orm/catalog/foreign-keys/**',
       'src/orm/catalog/schemas.catalog.ts',

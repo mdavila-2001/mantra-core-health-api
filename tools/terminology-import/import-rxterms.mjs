@@ -44,10 +44,10 @@
 //     duplicados en destino.
 //
 // -----------------------------------------------------------------------------
-// Modelo de datos de destino (terminology.*, ver database/SQL/03_terminology):
+// Modelo de datos de destino (terminology.*, ver SQL/03_terminology):
 //
 //   * Reutiliza terminology_sources code='RXNORM' (creado por el seed
-//     database/SQL/98_seeds/vademecum_medications.sql) — NO crea uno nuevo.
+//     SQL/patches/2026-07-30_vademecum_dev_seed.sql) — NO crea uno nuevo.
 //   * Crea/reutiliza 1 code_systems (internal_code='rxterms').
 //   * Crea/reutiliza 1 code_system_versions (version='YYYY.MM' del día de
 //     ejecución, is_default=true).
