@@ -27,6 +27,12 @@ export const tablesLayer: DdlLayer = {
   description:
     'Sincroniza tablas y columnas contra la metadata de las entidades, en modo estrictamente aditivo',
 
+  /**
+   * Ejecuta la operación apply.
+   *
+   * @param context - Valor de context requerido por la operación.
+   * @returns Resultado de apply.
+   */
   async apply(context: DdlLayerContext) {
     // `getUpdateSchemaSQL` calcula el diff sin aplicarlo. Se usa siempre esta
     // variante, incluso fuera de dry-run, porque el DDL hay que filtrarlo antes
@@ -111,7 +117,13 @@ const TABLE_BATCH_SIZE = 200;
  * Cada capa toca solo lo suyo.
  */
 function keepAdditiveStatements(statements: string[]): {
+  /**
+   * Valor de kept mantenido por la instancia.
+   */
   kept: string[];
+  /**
+   * Valor de discarded mantenido por la instancia.
+   */
   discarded: string[];
 } {
   const kept: string[] = [];

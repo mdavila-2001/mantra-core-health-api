@@ -1,5 +1,9 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
+import helmet from 'helmet';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 
 /**
@@ -18,6 +22,10 @@ const BANNER = `
  =============================================================================
 `;
 
+/**
+ * Ejecuta la operación bootstrap.
+ * @returns Resultado de bootstrap.
+ */
 async function bootstrap() {
   process.stdout.write(BANNER);
 
@@ -33,6 +41,46 @@ async function bootstrap() {
   // servicios) queda enrutado a pino.
   app.useLogger(app.get(Logger));
   app.flushLogs();
+
+  // Cabeceras de seguridad HTTP (HSTS, X-Content-Type-Options, X-Frame-Options,
+  // Referrer-Policy, etc.). Imprescindible en un backend de salud expuesto.
+  app.use(helmet());
+
+  // Límite explícito de tamaño de payload. El default de Express (100 kb) queda
+  // documentado aquí de forma intencional; las cargas grandes (imágenes, DICOM)
+  // van por el flujo de almacenamiento de objetos, no por el body JSON.
+  app.use(json({ limit: '1mb' }));
+  app.use(urlencoded({ extended: true, limit: '1mb' }));
+
+  // CORS deshabilitado por defecto de forma explícita (deny-by-default). Cuando
+  // haya un frontend con origen conocido, declarar aquí la allowlist de orígenes.
+  app.enableCors({ origin: false });
+
+  // Validación global de DTO. `whitelist` + `forbidNonWhitelisted` cierran el
+  // mass-assignment: cualquier propiedad no declarada en el DTO se rechaza en
+  // lugar de filtrarse a la capa de dominio. `transform` habilita la coerción de
+  // tipos declarada con class-transformer (p. ej. query params numéricos).
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  // OpenAPI/Swagger en /docs. Solo fuera de producción: en producción publicaría
+  // el mapa completo de endpoints y esquemas (divulgación de superficie de ataque).
+  if (process.env.NODE_ENV !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('REDESA Health API')
+      .setDescription('Mantra Core Technologies - REDESA Health Ecosystem')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }

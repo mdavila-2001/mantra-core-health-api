@@ -14,9 +14,21 @@
 
 /** Definición declarativa de un tipo enumerado. */
 export interface EnumTypeSpec {
+  /**
+   * Valor de schema mantenido por la instancia.
+   */
   readonly schema: string;
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   readonly name: string;
+  /**
+   * Valor de values mantenido por la instancia.
+   */
   readonly values: readonly string[];
+  /**
+   * Valor de purpose mantenido por la instancia.
+   */
   readonly purpose: string;
   /** Marcado cuando el conjunto de valores todavía no está fijado por el modelo. */
   readonly provisional: boolean;

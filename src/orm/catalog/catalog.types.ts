@@ -90,8 +90,17 @@ export type SchemaSpec = readonly [
  * la capa de extensiones registra el fallo y continúa.
  */
 export interface ExtensionSpec {
+  /**
+   * Valor de name mantenido por la instancia.
+   */
   readonly name: string;
+  /**
+   * Valor de purpose mantenido por la instancia.
+   */
   readonly purpose: string;
+  /**
+   * Valor de required mantenido por la instancia.
+   */
   readonly required: boolean;
 }
 
@@ -105,8 +114,17 @@ export interface ExtensionSpec {
  * de arranque la ejecuta en cada despliegue.
  */
 export interface PhysicalStatementSpec {
+  /**
+   * Identificador único de la instancia.
+   */
   readonly id: string;
+  /**
+   * Valor de description mantenido por la instancia.
+   */
   readonly description: string;
+  /**
+   * Valor de sql mantenido por la instancia.
+   */
   readonly sql: string;
   /** Extensión de la que depende; si no está instalada, la sentencia se omite. */
   readonly requiresExtension?: string;

@@ -1,12 +1,25 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { ErpController } from './erp.controller';
-import { ErpService } from './erp.service';
 import * as entities from './entities';
+import { ErpController } from './controllers';
+import { ErpContractsService, ErpOperationsService } from './services';
+import {
+  ErpContractsRepository,
+  ErpOperationsRepository,
+} from './repositories';
 
+/**
+ * Módulo ERP: socios de negocio, ciclo de vida contractual, RR. HH., compras y
+ * recepción, conciliación de facturas, ventas y arrendamientos (UC-38-01 … 16).
+ */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
   controllers: [ErpController],
-  providers: [ErpService],
+  providers: [
+    ErpContractsRepository,
+    ErpOperationsRepository,
+    ErpContractsService,
+    ErpOperationsService,
+  ],
 })
 export class ErpModule {}

@@ -1,9 +1,18 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { OrmModule, ormEnvSchema } from './orm';
 import { LoggingModule, loggingEnvSchema } from './logging';
+import {
+  AllExceptionsFilter,
+  AuthModule,
+  TenantContextInterceptor,
+  authEnvSchema,
+} from './common';
+import { SeedModule } from './common/seed/seed.module';
 import { IamModule } from './modules/iam/iam.module';
 import { DirectoryModule } from './modules/directory/directory.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -61,7 +70,14 @@ import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
 import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
+// Módulos 55/56/57: almacenamiento poliglota sobre motores no-PostgreSQL.
+import { DocumentStoreModule } from './modules/document_store/document_store.module';
+import { RedisRuntimeModule } from './modules/redis_runtime/redis_runtime.module';
+import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
 
+/**
+ * Configura las dependencias NestJS de app.
+ */
 @Module({
   imports: [
     // Validación del entorno antes que nada: si falta una credencial de base de
@@ -70,14 +86,35 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
     // esquemas Joi (persistencia + logging) en la única validación global.
     ConfigModule.forRoot({
       isGlobal: true,
-      validationSchema: ormEnvSchema.concat(loggingEnvSchema),
+      validationSchema: ormEnvSchema
+        .concat(loggingEnvSchema)
+        .concat(authEnvSchema),
+    }),
+    // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
+    // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
+    // límite estricto propio con `@Throttle`. Almacenamiento en memoria por
+    // instancia; para un despliegue multi-réplica conviene el storage Redis.
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 300 }],
+      // Se desactiva en pruebas de integración/smoke, donde todas las peticiones
+      // salen del mismo IP (127.0.0.1) y comparten cubo: sin esto un smoke de
+      // decenas de módulos daría 429. En producción la variable no se define.
+      skipIf: () =>
+        process.env.RATE_LIMIT_DISABLED === 'true' ||
+        process.env.NODE_ENV === 'test',
     }),
     // Logging estructurado con pino para todas las capas. Va primero para que el
     // logger de peticiones y el `PinoLogger` estén disponibles desde el arranque.
     LoggingModule,
+    // Autenticación/autorización transversal: estrategia JWT, guards globales y
+    // emisión de tokens. Global, se aplica a todos los dominios.
+    AuthModule,
     // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
     // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
     OrmModule,
+    // Datos estructurales iniciales (catálogo de conceptos internos). Va tras
+    // OrmModule para que el esquema esté materializado cuando corre el seed.
+    SeedModule,
     IamModule,
     DirectoryModule,
     ProfilesModule,
@@ -137,6 +174,16 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
     VectorRagModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Filtro global de excepciones: homogeneiza el contrato de error y decide
+    // qué se registra y qué se oculta al cliente. Ver AllExceptionsFilter.
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+    // Guard de rate limiting aplicado a todas las rutas HTTP.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Contexto de tenant por request: valida X-Tenant-Id contra la membresía del
+    // actor y, con RLS_ENFORCE=true, fija app.current_tenant_id para las políticas.
+    { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
+  ],
 })
 export class AppModule {}

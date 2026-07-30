@@ -32,13 +32,25 @@ import type { DdlLayerContext, DdlLayerResult } from './ddl-layer.contract';
  */
 @Injectable()
 export class SchemaBootstrapService implements OnApplicationBootstrap {
+  /**
+   * Valor de logger mantenido por la instancia.
+   */
   private readonly logger = new Logger(SchemaBootstrapService.name);
 
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param orm - Valor de orm requerido por la operación.
+   * @param fidelity - Valor de fidelity requerido por la operación.
+   */
   constructor(
     private readonly orm: MikroORM,
     private readonly fidelity: SchemaFidelityService,
   ) {}
 
+  /**
+   * Ejecuta la operación on application bootstrap.
+   */
   async onApplicationBootstrap(): Promise<void> {
     const env = loadOrmEnv();
 

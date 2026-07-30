@@ -15,9 +15,16 @@ const { entities: vault, indexSets, foreignKeys } = readVault();
 const ts = readTsEntities();
 
 // Stores que no viven en PostgreSQL: fuera del alcance de MikroORM.
-const NON_RELATIONAL_SCHEMAS = new Set(['document_store', 'redis_runtime', 'search_platform']);
+const NON_RELATIONAL_SCHEMAS = new Set([
+  'document_store',
+  'redis_runtime',
+  'search_platform',
+]);
 const NON_RELATIONAL_TIPOS = new Set([
-  'mongodb_collection', 'redis_keyspace', 'opensearch_index', 'graph_collection',
+  'mongodb_collection',
+  'redis_keyspace',
+  'opensearch_index',
+  'graph_collection',
 ]);
 // Elementos del modelo que no son tablas: stubs de referencia y definiciones de
 // máquina de estado.
@@ -35,13 +42,15 @@ const report = {
 };
 
 for (const [key, v] of vault) {
-  if (NON_RELATIONAL_SCHEMAS.has(v.schema) || NON_RELATIONAL_TIPOS.has(v.tipo)) continue;
+  if (NON_RELATIONAL_SCHEMAS.has(v.schema) || NON_RELATIONAL_TIPOS.has(v.tipo))
+    continue;
   if (v.referenceOnly) continue;
 
   // Las vistas se cuentan aparte: su DDL es una consulta que la bóveda no
   // publica, así que no se pueden materializar sin inventarse la semántica.
   if (v.tipo === 'view' || v.tipo === 'materialized_view') {
-    if (!ts.has(key)) report.vistasNoMaterializadas.push({ key, campos: v.fields.length });
+    if (!ts.has(key))
+      report.vistasNoMaterializadas.push({ key, campos: v.fields.length });
     continue;
   }
   if (NON_TABLE_TIPOS.has(v.tipo)) continue;
@@ -51,7 +60,11 @@ for (const [key, v] of vault) {
     // Sin campos declarados en la bóveda no hay nada que materializar: la nota
     // describe la entidad en prosa pero no da su estructura.
     if (v.fields.length > 0) {
-      report.entidadesFaltantes.push({ key, tipo: v.tipo, campos: v.fields.length });
+      report.entidadesFaltantes.push({
+        key,
+        tipo: v.tipo,
+        campos: v.fields.length,
+      });
     }
     continue;
   }
@@ -60,10 +73,18 @@ for (const [key, v] of vault) {
   const tNames = t.props.map((p) => p.fieldName);
 
   for (const name of vNames.filter((n) => !tNames.includes(n))) {
-    report.columnasFaltantes.push({ key, columna: name, archivo: `${t.module}/entities/${t.file}` });
+    report.columnasFaltantes.push({
+      key,
+      columna: name,
+      archivo: `${t.module}/entities/${t.file}`,
+    });
   }
   for (const name of tNames.filter((n) => !vNames.includes(n))) {
-    report.columnasSobrantes.push({ key, columna: name, archivo: `${t.module}/entities/${t.file}` });
+    report.columnasSobrantes.push({
+      key,
+      columna: name,
+      archivo: `${t.module}/entities/${t.file}`,
+    });
   }
 
   for (const f of v.fields) {
@@ -71,16 +92,25 @@ for (const [key, v] of vault) {
     if (!p) continue;
     const tsType = (p.columnType || p.type || '').toLowerCase();
     if (!typeCompatible(f.type.toLowerCase(), tsType)) {
-      report.tiposDivergentes.push({ key, columna: f.name, boveda: f.type, entidad: tsType });
+      report.tiposDivergentes.push({
+        key,
+        columna: f.name,
+        boveda: f.type,
+        entidad: tsType,
+      });
     }
     if (f.required && p.nullable) {
       report.obligatoriedadDivergente.push({
-        key, columna: f.name, detalle: 'bóveda NOT NULL, entidad opcional',
+        key,
+        columna: f.name,
+        detalle: 'bóveda NOT NULL, entidad opcional',
       });
     }
     if (!f.required && !p.nullable && !p.primary && !p.version) {
       report.obligatoriedadDivergente.push({
-        key, columna: f.name, detalle: 'bóveda NULL, entidad obligatoria',
+        key,
+        columna: f.name,
+        detalle: 'bóveda NULL, entidad obligatoria',
       });
     }
   }
@@ -88,12 +118,17 @@ for (const [key, v] of vault) {
 
 for (const [key, t] of ts) {
   if (!vault.has(key)) {
-    report.entidadesSobrantes.push({ key, archivo: `${t.module}/entities/${t.file}` });
+    report.entidadesSobrantes.push({
+      key,
+      archivo: `${t.module}/entities/${t.file}`,
+    });
   }
 }
 
 // Cobertura del catálogo declarativo frente a lo que declara el modelo.
-const idxDeclarados = [...indexSets.values()].flat().filter((i) => i.kind !== 'PK').length;
+const idxDeclarados = [...indexSets.values()]
+  .flat()
+  .filter((i) => i.kind !== 'PK').length;
 const idxMapeables = [...indexSets.entries()]
   .filter(([key]) => ts.has(key))
   .flatMap(([key, defs]) => {
@@ -102,7 +137,10 @@ const idxMapeables = [...indexSets.entries()]
     // comprobar que existe hay que quedarse solo con el nombre.
     const columnName = (c) => c.split(/\s+/)[0];
     return defs.filter(
-      (d) => d.kind !== 'PK' && d.cols.length > 0 && d.cols.every((c) => cols.has(columnName(c))),
+      (d) =>
+        d.kind !== 'PK' &&
+        d.cols.length > 0 &&
+        d.cols.every((c) => cols.has(columnName(c))),
     );
   }).length;
 const fkMapeables = foreignKeys.filter((fk) => {

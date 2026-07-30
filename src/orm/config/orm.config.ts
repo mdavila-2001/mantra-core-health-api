@@ -36,8 +36,13 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
   return defineConfig({
     host: env.connection.host,
     port: env.connection.port,
-    user: env.connection.user,
-    password: env.connection.password,
+    // Rol de runtime opcional sujeto a RLS. Si se define `DB_APP_USER`
+    // (p. ej. `mantra_app`, sin BYPASSRLS) la app opera bajo las políticas de
+    // aislamiento por tenant; el rol propietario (`DB_USER`) se reserva para
+    // migraciones/DDL/seed. Requiere `ORM_SCHEMA_SYNC=off` (no puede alterar el
+    // esquema al no ser propietario).
+    user: process.env.DB_APP_USER ?? env.connection.user,
+    password: process.env.DB_APP_PASSWORD ?? env.connection.password,
     dbName: env.connection.name,
 
     // Descubrimiento de entidades. En producción se leen los .js compilados; en

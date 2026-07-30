@@ -22,11 +22,29 @@ export type QueryKind =
 
 /** Instantánea inmutable de los contadores, apta para serializar a JSON. */
 export interface QueryMetricsSnapshot {
+  /**
+   * Valor de total mantenido por la instancia.
+   */
   readonly total: number;
+  /**
+   * Valor de by kind mantenido por la instancia.
+   */
   readonly byKind: Readonly<Record<QueryKind, number>>;
+  /**
+   * Valor de slow queries mantenido por la instancia.
+   */
   readonly slowQueries: number;
+  /**
+   * Valor de failed queries mantenido por la instancia.
+   */
   readonly failedQueries: number;
+  /**
+   * Valor de total ms mantenido por la instancia.
+   */
   readonly totalMs: number;
+  /**
+   * Valor de max ms mantenido por la instancia.
+   */
   readonly maxMs: number;
   /** Consulta más lenta observada, ya recortada a una longitud manejable. */
   readonly slowestQuery: string | null;
@@ -59,12 +77,33 @@ export function classifyQuery(sql: string): QueryKind {
 
 /** Acumulador mutable. Una única instancia por proceso, expuesta como proveedor Nest. */
 export class QueryMetrics {
+  /**
+   * Valor de total mantenido por la instancia.
+   */
   private total = 0;
+  /**
+   * Valor de slow mantenido por la instancia.
+   */
   private slow = 0;
+  /**
+   * Valor de failed mantenido por la instancia.
+   */
   private failed = 0;
+  /**
+   * Valor de total ms mantenido por la instancia.
+   */
   private totalMs = 0;
+  /**
+   * Valor de max ms mantenido por la instancia.
+   */
   private maxMs = 0;
+  /**
+   * Valor de slowest query mantenido por la instancia.
+   */
   private slowestQuery: string | null = null;
+  /**
+   * Valor de by kind mantenido por la instancia.
+   */
   private readonly byKind: Record<QueryKind, number> = {
     select: 0,
     insert: 0,
