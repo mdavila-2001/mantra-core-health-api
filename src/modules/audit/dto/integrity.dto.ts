@@ -1,8 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /** Cuerpo de `POST /audit/integrity/verify` (UC-10-06). */
+@ApiSchema({ name: 'AuditVerifyIntegrityDto' })
 export class VerifyIntegrityDto {
   /**
    * Identificador asociado a tenant.

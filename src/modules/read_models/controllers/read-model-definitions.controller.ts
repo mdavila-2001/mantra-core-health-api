@@ -65,9 +65,15 @@ export class ReadModelDefinitionsController {
     return this.service.createVersion(schema, object, dto, actor);
   }
 
-  /** UC-30-12. */
+  /**
+   * UC-30-12. `SYSTEM` se añade junto al rol humano: el worker de
+   * reconciliación (Fase 4 del plan de corrección de workers) usa este mismo
+   * endpoint para descubrir qué definiciones están `stale` antes de llamar
+   * `reconcile`, igual que el resto de endpoints que ya sirven a un worker
+   * (`GRAPH_PROJECTION_WORKER`, `EMBEDDING_WORKER`, etc. ya incluyen `SYSTEM`).
+   */
   @Get('health')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @ApiOperation({
     summary: 'Detectar y reportar staleness/degradación de las MV',
   })
@@ -115,9 +121,13 @@ export class ReadModelDefinitionsController {
     return this.service.invalidate(definitionId, actor);
   }
 
-  /** UC-30-07. */
+  /**
+   * UC-30-07. `SYSTEM` se añade junto al rol humano por la misma razón que en
+   * `health()`: el worker periódico llama este endpoint para cada definición
+   * `stale` que descubre.
+   */
   @Post(':definitionId/reconcile')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Reconciliar read model divergente contra la fuente canónica',

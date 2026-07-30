@@ -24,6 +24,7 @@ function build() {
     createAgent: mockFn(),
     createSource: mockFn(),
     createSchedule: mockFn(),
+    runDueSchedules: mockFn(),
     startCollectionRun: mockFn(),
     recordObservation: mockFn(),
     finishCollectionRun: mockFn(),
@@ -75,6 +76,23 @@ describe('HealthContextController', () => {
     await d.controller.createSchedule(dto, actor);
 
     expect(d.collectionService.createSchedule).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates evaluating due schedules (tick de recolección)', async () => {
+    const d = build();
+    const dto = { limit: 10 } as any;
+    d.collectionService.runDueSchedules.mockResolvedValue({
+      claimed: 0,
+      queued: 0,
+      results: [],
+    });
+
+    await d.controller.runDueSchedules(dto, actor);
+
+    expect(d.collectionService.runDueSchedules).toHaveBeenCalledWith(
+      dto,
+      actor,
+    );
   });
 
   it('delegates creating the context (UC-44-04)', async () => {

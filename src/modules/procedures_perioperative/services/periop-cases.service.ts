@@ -10,6 +10,9 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PeriopCasesRepository } from '../repositories';
+import { ProfessionalCredentialsRepository } from '../../profiles/repositories';
+import { AuditTrailService } from '../../audit/services';
+import { OutboxService } from '../../messaging/services';
 import {
   ScheduleCaseDto,
   CaseResponseDto,
@@ -147,6 +150,9 @@ export class PeriopCasesService {
   constructor(
     private readonly em: EntityManager,
     private readonly casesRepo: PeriopCasesRepository,
+    private readonly credentialsRepo: ProfessionalCredentialsRepository,
+    private readonly auditTrail: AuditTrailService,
+    private readonly outbox: OutboxService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopCasesService.name);
@@ -385,7 +391,7 @@ export class PeriopCasesService {
       'Confirming surgical case',
     );
 
-    return this.em.transactional(async (tx) => {
+    const result = await this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
         throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
@@ -405,18 +411,36 @@ export class PeriopCasesService {
       }
 
       const team = await this.casesRepo.findTeamByCase(tx, caseId);
-      // C-14: cada integrante con rol que exige credencial debe estar vigente.
-      const withoutCurrentCredential = team.filter(
-        (member) =>
-          CREDENTIAL_REQUIRED_TEAM_ROLES.includes(member.teamRoleConceptId) &&
-          !CREDENTIAL_CURRENT_MEMBER_STATES.includes(member.statusConceptId),
-      );
+      // C-14 / CAN-INT-002: cada integrante con rol que exige credencial debe
+      // (a) haber aceptado su participación y (b) tener una credencial profesional
+      // VIGENTE según la fuente autoritativa (`profiles.professional_credentials`):
+      // verificada/activa y no expirada. Antes solo se comprobaba el estado de
+      // aceptación del miembro (proxy), que no detectaba credenciales vencidas o
+      // suspendidas de un miembro ya aceptado. Fail-closed.
+      const now = new Date();
+      const withoutCurrentCredential: typeof team = [];
+      for (const member of team) {
+        if (
+          !CREDENTIAL_REQUIRED_TEAM_ROLES.includes(member.teamRoleConceptId)
+        ) {
+          continue;
+        }
+        const accepted = CREDENTIAL_CURRENT_MEMBER_STATES.includes(
+          member.statusConceptId,
+        );
+        const credentialCurrent = accepted
+          ? await this.credentialsRepo.hasCurrentCredential(
+              tx,
+              member.practitionerProfileId,
+              now,
+            )
+          : false;
+        if (!accepted || !credentialCurrent) {
+          withoutCurrentCredential.push(member);
+        }
+      }
       if (withoutCurrentCredential.length > 0) {
-        // Gancho de notificación: avisar al médico responsable del caso
-        // (cirujano principal) y a la organización custodia de que la
-        // confirmación se bloqueó por credenciales no vigentes. El envío real
-        // (correo/evento) lo resolverá el módulo de notificaciones; aquí se deja
-        // registrada la intención con los datos necesarios.
+        const memberIds = withoutCurrentCredential.map((m) => m.id);
         this.logger.warn(
           {
             operation: 'periop.case.confirm.blocked',
@@ -424,20 +448,35 @@ export class PeriopCasesService {
             caseId,
             custodianTenantId: surgicalCase.custodianTenantId,
             responsibleProfileId: surgicalCase.primarySurgeonProfileId,
-            memberIds: withoutCurrentCredential.map((m) => m.id),
+            memberIds,
           },
           'Blocked case confirmation: team members without current professional credential',
         );
-        throw new PreconditionFailedException(
-          'CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesional vigente',
-          {
-            code: 'CAN-INT-002',
-            caseId,
-            membersWithoutCurrentCredential: withoutCurrentCredential.map(
-              (m) => m.id,
-            ),
+        // CAN-INT-002: NOTIFICACIÓN real al médico responsable y a la organización
+        // custodia del bloqueo, vía evento de dominio transaccional (outbox). El
+        // bloqueo NO muta el caso, así que estos efectos se confirman con la
+        // transacción y luego se lanza la excepción FUERA de ella (si se lanzara
+        // dentro, el rollback perdería la notificación y el sello de auditoría).
+        await this.outbox.publishDomainEvent(tx, {
+          tenantId: surgicalCase.custodianTenantId,
+          eventType: 'periop.case.confirmation_blocked',
+          aggregateType: 'procedure_case',
+          aggregateId: caseId,
+          payloadJson: {
+            reason: 'CAN-INT-002',
+            responsibleProfileId: surgicalCase.primarySurgeonProfileId,
+            membersWithoutCurrentCredential: memberIds,
           },
-        );
+          actorUserId: actor.id,
+        });
+        await this.auditTrail.record(tx, actor, {
+          action: 'PERIOP_CONFIRM_BLOCKED',
+          entity: 'procedure_case',
+          entityId: caseId,
+          tenantId: surgicalCase.custodianTenantId,
+          success: false,
+        });
+        return { blocked: true as const, caseId, memberIds };
       }
 
       let statusConceptId = surgicalCase.statusConceptId;
@@ -454,8 +493,37 @@ export class PeriopCasesService {
       }
       touch(surgicalCase, actor.id);
 
-      return { id: caseId, statusConceptId, teamVerified: team.length };
+      // CAN-AUDIT-001: sella la confirmación en la cadena WORM.
+      await this.auditTrail.record(tx, actor, {
+        action: 'PERIOP_CASE_CONFIRMED',
+        entity: 'procedure_case',
+        entityId: caseId,
+        tenantId: surgicalCase.custodianTenantId,
+      });
+
+      return {
+        blocked: false as const,
+        id: caseId,
+        statusConceptId,
+        teamVerified: team.length,
+      };
     });
+
+    if (result.blocked) {
+      throw new PreconditionFailedException(
+        'CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesional vigente',
+        {
+          code: 'CAN-INT-002',
+          caseId: result.caseId,
+          membersWithoutCurrentCredential: result.memberIds,
+        },
+      );
+    }
+    return {
+      id: result.id,
+      statusConceptId: result.statusConceptId,
+      teamVerified: result.teamVerified,
+    };
   }
 
   /**

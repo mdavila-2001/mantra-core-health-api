@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -12,6 +12,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
@@ -1209,6 +1210,7 @@ export class AgentStepResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /automation/agent-runs/{id}/approvals` (UC-48-10). */
+@ApiSchema({ name: 'AutomationRequestApprovalDto' })
 export class RequestApprovalDto {
   /**
    * Identificador asociado a approval type concept.
@@ -1598,4 +1600,84 @@ export class FinalizeWorkflowRunResponseDto {
     description: 'Verdadero si el run ya estaba cerrado y no se tocó nada',
   })
   alreadyFinalized!: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// UC-48-07 (worker) · Evaluar disparadores de calendario vencidos
+// ---------------------------------------------------------------------------
+
+/** Cuerpo de `POST /automation/triggers/calendar/tick`. */
+export class EvaluateCalendarTriggersDto {
+  /**
+   * Valor de batch size mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Disparadores de calendario a evaluar por tick',
+    default: 50,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(500)
+  batchSize?: number;
+}
+
+/**
+ * Define el contrato validado para fired trigger.
+ */
+export class FiredTriggerDto {
+  /**
+   * Identificador asociado a trigger.
+   */
+  @ApiProperty({ format: 'uuid' })
+  triggerId!: string;
+
+  /**
+   * Identificador asociado a workflow run.
+   */
+  @ApiProperty({ format: 'uuid' })
+  workflowRunId!: string;
+
+  /**
+   * Valor de fired at mantenido por la instancia.
+   */
+  @ApiProperty({
+    format: 'date-time',
+    description: 'Marca del cron que disparó esta ejecución',
+  })
+  firedAt!: string;
+}
+
+/**
+ * Define el contrato validado para evaluate calendar triggers response.
+ */
+export class EvaluateCalendarTriggersResponseDto {
+  /**
+   * Valor de scanned mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Disparadores de calendario tomados en este tick',
+  })
+  scanned!: number;
+
+  /**
+   * Valor de fired mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Ejecuciones de workflow arrancadas' })
+  fired!: number;
+
+  /**
+   * Valor de skipped mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'Disparadores evaluados que aún no vencían o cuyo workflow ya no está activo',
+  })
+  skipped!: number;
+
+  /**
+   * Valor de fired triggers mantenido por la instancia.
+   */
+  @ApiProperty({ type: [FiredTriggerDto] })
+  firedTriggers!: FiredTriggerDto[];
 }

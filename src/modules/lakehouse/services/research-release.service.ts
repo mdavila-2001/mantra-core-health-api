@@ -28,9 +28,12 @@ import {
   ReleaseManifestResponseDto,
   RevokeDatasetReleaseDto,
   RevokeReleaseResponseDto,
+  ExpiredReleaseSummaryDto,
+  PendingExpiredReleasesResponseDto,
 } from '../dto';
 
 const MILLISECONDS_PER_DAY = 86_400_000;
+const DEFAULT_EXPIRED_RELEASES_BATCH = 50;
 
 /**
  * Investigación (UC-63-09 … 12): proyectos con aprobación ética, cohortes,
@@ -560,5 +563,42 @@ export class ResearchReleaseService {
 
       return { id: request.id, status: request.status, alreadyClosed: false };
     });
+  }
+
+  /**
+   * UC-63-12 (descubrimiento del worker): releases con manifiesto vencido que
+   * todavía no se cerraron. El propio README lo deja explícito como
+   * pendiente: el endpoint es idempotente, "quien lo llama en bucle es el
+   * worker" — esta es la consulta de descubrimiento que le faltaba.
+   */
+  async listExpiredReleases(
+    limit = DEFAULT_EXPIRED_RELEASES_BATCH,
+  ): Promise<PendingExpiredReleasesResponseDto> {
+    const now = new Date();
+    const manifests = await this.researchRepo.findExpiredManifests(
+      this.em,
+      now,
+      limit,
+    );
+
+    const releases: ExpiredReleaseSummaryDto[] = [];
+    for (const manifest of manifests) {
+      const request = await this.researchRepo.findReleaseRequestById(
+        this.em,
+        manifest.datasetReleaseRequestId,
+      );
+      // Sólo lo que sigue "abierto": ya cerrado (revocado o expirado antes)
+      // no debe volver a ofrecerse al worker en cada tick para siempre.
+      if (
+        request &&
+        (CLOSEABLE_RELEASE_STATUSES as readonly string[]).includes(
+          request.status,
+        )
+      ) {
+        releases.push({ requestId: request.id, expiresAt: manifest.expiresAt });
+      }
+    }
+
+    return { releases };
   }
 }

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsDateString,
@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /practices/{practiceId}/role-assignments` (UC-14-08). */
+@ApiSchema({ name: 'PracticeCreateRoleAssignmentDto' })
 export class CreateRoleAssignmentDto {
   /**
    * Identificador asociado a practitioner profile.

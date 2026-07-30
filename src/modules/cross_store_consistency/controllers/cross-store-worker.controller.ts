@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DeletionService,
   ProjectionDeliveryService,
@@ -27,6 +34,8 @@ import {
   VerificationResponseDto,
   InvalidateCacheDto,
   CacheInvalidationResponseDto,
+  PendingDeletionTargetsResponseDto,
+  ExecutedDeletionTargetsResponseDto,
 } from '../dto';
 
 /**
@@ -102,6 +111,25 @@ export class CrossStoreWorkerController {
     return this.deletionService.expandDeletion(id, dto, actor);
   }
 
+  /**
+   * Descubrimiento (Fase 4 del plan de corrección de workers): objetivos
+   * `PENDING` sin bloqueo, listos para `executions`. No es uno de los 14 UC
+   * del módulo — es la infraestructura de lectura que el propio README exige
+   * ("Concurrencia": "el barrido de objetivos pendientes... lo hace el
+   * worker antes de llamar"), en el mismo estilo que
+   * `GET /internal/notifications/pending` de `messaging`.
+   */
+  @Get('deletion-targets/pending')
+  @Roles('SYSTEM', 'DELETION_WORKER', 'PLATFORM_ADMIN')
+  @ApiOperation({
+    summary: 'Listar objetivos de borrado pendientes de ejecución',
+  })
+  listPendingDeletionTargets(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PendingDeletionTargetsResponseDto> {
+    return this.deletionService.listPendingTargets(limit);
+  }
+
   /** UC-62-10. */
   @Post('deletion-targets/:id/executions')
   @Roles('SYSTEM', 'DELETION_WORKER', 'PLATFORM_ADMIN')
@@ -117,6 +145,21 @@ export class CrossStoreWorkerController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DeletionExecutionResponseDto> {
     return this.deletionService.executeDeletion(id, dto, actor);
+  }
+
+  /**
+   * Descubrimiento (Fase 4): objetivos `EXECUTED` listos para `verifications`.
+   * Misma razón que `listPendingDeletionTargets`.
+   */
+  @Get('deletion-targets/executed')
+  @Roles('SYSTEM', 'DELETION_WORKER', 'PLATFORM_ADMIN')
+  @ApiOperation({
+    summary: 'Listar objetivos ejecutados pendientes de verificación',
+  })
+  listExecutedDeletionTargets(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ExecutedDeletionTargetsResponseDto> {
+    return this.deletionService.listExecutedTargets(limit);
   }
 
   /** UC-62-11 (verificación). */

@@ -30,6 +30,7 @@ import {
   CareGapsRepository,
   ImmunizationSchedulesRepository,
   VirtualEncountersRepository,
+  ReferenceRangesRepository,
 } from './repositories';
 import { ServiceRequestsRepository } from '../clinical/repositories';
 
@@ -61,6 +62,7 @@ import { ServiceRequestsRepository } from '../clinical/repositories';
     CareGapsRepository,
     ImmunizationSchedulesRepository,
     VirtualEncountersRepository,
+    ReferenceRangesRepository,
     // Repositorio de otro módulo (clinical) reutilizado por el fan-out de order sets
     ServiceRequestsRepository,
     // Servicios

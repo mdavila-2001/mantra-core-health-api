@@ -33,8 +33,11 @@ import {
   PatientLegalRepresentationsRepository,
   FieldPermissionsRepository,
   ResourceScopeGrantsRepository,
+  AuthzServicePrincipalsRepository,
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
+import { AuditModule } from '../audit/audit.module';
+import { MessagingModule } from '../messaging/messaging.module';
 
 /**
  * Módulo 06 — Authorization, Purpose of Use and Field Masking.
@@ -45,7 +48,11 @@ import { DataAccessLogRepository } from '../audit/repositories';
  * y evaluación de decisiones efectivas).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    AuditModule,
+    MessagingModule,
+  ],
   controllers: [
     AuthzCatalogController,
     AuthzPoliciesController,
@@ -70,6 +77,7 @@ import { DataAccessLogRepository } from '../audit/repositories';
     PatientLegalRepresentationsRepository,
     FieldPermissionsRepository,
     ResourceScopeGrantsRepository,
+    AuthzServicePrincipalsRepository,
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
     DataAccessLogRepository,
     // Servicios

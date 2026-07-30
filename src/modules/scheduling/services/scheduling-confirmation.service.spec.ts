@@ -87,7 +87,7 @@ function build(activeRules: unknown[]) {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new SchedulingConfirmationService(
     em as any,
-    repo as any,
+    repo,
     logger as any,
   );
   return { service, repo };

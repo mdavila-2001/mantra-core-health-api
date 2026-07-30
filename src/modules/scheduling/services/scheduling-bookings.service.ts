@@ -14,6 +14,7 @@ import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
 } from '../repositories';
+import { HistoryRepository } from '../../audit/repositories';
 import type {
   AppointmentBookings,
   CancellationPolicySnapshot,
@@ -73,6 +74,7 @@ export class SchedulingBookingsService {
     private readonly em: EntityManager,
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly catalogRepo: SchedulingCatalogRepository,
+    private readonly historyRepo: HistoryRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
@@ -517,7 +519,7 @@ export class SchedulingBookingsService {
 
       booking.statusConceptId = CONCEPTS.BOOKING_CANCELLED;
       touch(booking, actor.id);
-      this.recordTransition(
+      await this.recordTransition(
         tx,
         booking,
         fromState,
@@ -567,7 +569,7 @@ export class SchedulingBookingsService {
       booking.statusConceptId = CONCEPTS.BOOKING_CHECKED_IN;
       booking.checkedInAt = checkedInAt;
       touch(booking, actor.id);
-      this.recordTransition(
+      await this.recordTransition(
         tx,
         booking,
         fromState,
@@ -603,16 +605,16 @@ export class SchedulingBookingsService {
    * (`audit.appointment_bookings_history`). Se llama tras validar la transición y
    * aplicar el nuevo estado, con el estado de origen capturado antes de mutar.
    */
-  private recordTransition(
+  private async recordTransition(
     tx: EntityManager,
     booking: AppointmentBookings,
     fromStateConceptId: string,
     toStateConceptId: string,
     actor: AuthenticatedUser,
-  ): void {
-    this.bookingsRepo.recordBookingHistory(tx, {
-      appointmentBookingId: booking.id,
-      revisionNo: (booking.rowVersion ?? 0) + 1,
+  ): Promise<void> {
+    // C-10: versiona la transición vía el historial del módulo audit (contrato de
+    // dominio), no escribiendo su tabla directamente (evita DIRECT_CROSS_DOMAIN).
+    await this.historyRepo.append(tx, 'appointment_bookings', booking.id, {
       operationConceptId: SCHED.HISTORY_OP_STATE_TRANSITION,
       dataSnapshot: {
         bookingId: booking.id,

@@ -108,6 +108,22 @@ export class MedicationRequestsRepository {
   }
 
   /**
+   * Busca una receta por su clave de idempotencia de emisión. `issue_idempotency_key`
+   * tiene un índice UNIQUE global (parcial, `WHERE ... IS NOT NULL`); esto permite
+   * detectar en el propio servicio la reutilización de una clave sobre una receta
+   * *distinta* antes de intentar el `flush` y devolver un 409 claro en vez de dejar
+   * que la violación de restricción llegue cruda a la capa de persistencia.
+   */
+  findByIssueIdempotencyKey(
+    em: EntityManager,
+    idempotencyKey: string,
+  ): Promise<MedicationRequests | null> {
+    return em.findOne(MedicationRequests, {
+      issueIdempotencyKey: idempotencyKey,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

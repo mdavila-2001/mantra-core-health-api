@@ -14,6 +14,8 @@ import {
   BreakGlassSessionsRepository,
 } from '../repositories';
 import { DataAccessLogRepository } from '../../audit/repositories';
+import { AuditTrailService } from '../../audit/services';
+import { OutboxService } from '../../messaging/services';
 import { AUD } from '../../audit/audit.concepts';
 import {
   CreateClinicalAccessGrantDto,
@@ -60,6 +62,8 @@ export class AuthzClinicalService {
     private readonly grantsRepo: ClinicalAccessGrantsRepository,
     private readonly btgRepo: BreakGlassSessionsRepository,
     private readonly dataAccessLogRepo: DataAccessLogRepository,
+    private readonly auditTrail: AuditTrailService,
+    private readonly outbox: OutboxService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AuthzClinicalService.name);
@@ -125,6 +129,12 @@ export class AuthzClinicalService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      await this.auditTrail.record(tx, actor, {
+        action: 'CLINICAL_ACCESS_GRANTED',
+        entity: 'clinical_access_grant',
+        entityId: grant.id,
+        tenantId: dto.tenantId,
+      });
       return { id: grant.id, status: 'ACTIVE', createdAt: grant.createdAt };
     });
   }
@@ -199,12 +209,32 @@ export class AuthzClinicalService {
 
       await tx.flush();
 
-      // NOTIFICACIÓN AL PACIENTE (break-the-glass): aquí se dispararía la
-      // notificación posterior obligatoria al paciente informando del acceso de
-      // emergencia a su historia (p. ej. emitir un evento de dominio/outbox
-      // `authz.break_glass.activated` que el módulo de mensajería consume). No se
-      // envía de forma síncrona para no acoplar el acceso clínico al canal de
-      // notificación; el evento se drena tras el COMMIT de esta transacción.
+      // CAN-EMERG-001 — NOTIFICACIÓN POSTERIOR AL PACIENTE. Se publica un evento
+      // de dominio transaccional (`authz.break_glass.activated`) en el outbox: se
+      // confirma con esta misma transacción y el módulo de mensajería lo drena
+      // tras el COMMIT para notificar al paciente/representante, sin acoplar el
+      // acceso clínico al canal de envío. Antes esto era solo un comentario.
+      await this.outbox.publishDomainEvent(tx, {
+        tenantId: dto.tenantId,
+        eventType: 'authz.break_glass.activated',
+        aggregateType: 'clinical_access_grant',
+        aggregateId: grant.id,
+        payloadJson: {
+          patientProfileId,
+          grantedUserId: actor.id,
+          reason: dto.justification,
+          expiresAt: expiresAt.toISOString(),
+        },
+        actorUserId: actor.id,
+      });
+
+      // CAN-AUDIT-001: sella el acceso de emergencia en la cadena WORM hash.
+      await this.auditTrail.record(tx, actor, {
+        action: 'BREAK_GLASS_ACTIVATED',
+        entity: 'clinical_access_grant',
+        entityId: grant.id,
+        tenantId: dto.tenantId,
+      });
 
       return { id: grant.id, status: 'ACTIVE', createdAt: grant.createdAt };
     });
@@ -243,6 +273,13 @@ export class AuthzClinicalService {
       if (!expired) grant.validTo = now;
       touch(grant, actor.id);
       await tx.flush();
+
+      await this.auditTrail.record(tx, actor, {
+        action: expired ? 'CLINICAL_ACCESS_EXPIRED' : 'CLINICAL_ACCESS_REVOKED',
+        entity: 'clinical_access_grant',
+        entityId: grant.id,
+        tenantId: grant.tenantId,
+      });
 
       return { ok: true, affected: 1 };
     });

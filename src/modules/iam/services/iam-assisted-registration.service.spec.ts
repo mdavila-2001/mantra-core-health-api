@@ -46,7 +46,7 @@ function build() {
     usersRepo as any,
     credentialsRepo as any,
     rolesRepo as any,
-    activationsRepo as any,
+    activationsRepo,
     eventsRepo as any,
     logger as any,
   );
@@ -76,7 +76,7 @@ describe('IamAssistedRegistrationService', () => {
           email: 'paciente@x.io',
           reason: 'paciente sin acceso digital',
         },
-        actor as any,
+        actor,
       );
 
       // La respuesta entrega el token en claro, nunca una contraseña.

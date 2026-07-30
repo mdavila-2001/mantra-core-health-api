@@ -104,8 +104,13 @@ describe('ClinicalRecordsController', () => {
 
   it('delegates issueMedicationRequest (CAN-RX)', async () => {
     const d = build();
-    await d.controller.issueMedicationRequest('mr1', actor);
-    expect(d.medicationsService.issue).toHaveBeenCalledWith('mr1', actor);
+    await d.controller.issueMedicationRequest('mr1', actor, 'idem-key-1');
+    // CAN §6: propaga la clave de idempotencia (header Idempotency-Key) al servicio.
+    expect(d.medicationsService.issue).toHaveBeenCalledWith(
+      'mr1',
+      actor,
+      'idem-key-1',
+    );
   });
 
   it('delegates invalidateMedicationRequest (CAN-RX)', async () => {

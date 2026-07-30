@@ -24,6 +24,8 @@ import {
   SourceResponseDto,
   CreateScheduleDto,
   ScheduleResponseDto,
+  RunDueSchedulesDto,
+  RunDueSchedulesResponseDto,
   CreateContextDto,
   ContextResponseDto,
   StartCollectionRunDto,
@@ -95,6 +97,25 @@ export class HealthContextController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ScheduleResponseDto> {
     return this.collectionService.createSchedule(dto, actor);
+  }
+
+  /**
+   * Fase 2 del plan de corrección de workers: cierra el "Pendiente" del
+   * README sobre la resolución de la expresión cron, que hoy no evaluaba
+   * ningún proceso. Lo llama el worker en bucle, no la UI.
+   */
+  @Post('internal/schedules/run-due')
+  @Roles('SYSTEM')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Evaluar programaciones vencidas y encolar sus corridas',
+    description: 'Toma el lote con SKIP LOCKED; avanza next_run_at siempre.',
+  })
+  runDueSchedules(
+    @Body() dto: RunDueSchedulesDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<RunDueSchedulesResponseDto> {
+    return this.collectionService.runDueSchedules(dto, actor);
   }
 
   /** UC-44-04. */

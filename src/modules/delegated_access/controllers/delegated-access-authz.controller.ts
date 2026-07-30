@@ -25,7 +25,7 @@ export class DelegatedAccessAuthzController {
 
   /** UC-29-08: disparador del worker de expiración (barrido de vencidos). */
   @Post('delegated-access/expiry-sweep')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Expirar delegaciones y grants vencidos (barrido)' })
   expirySweep(

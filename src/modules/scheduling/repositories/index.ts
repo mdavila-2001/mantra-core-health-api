@@ -13,8 +13,9 @@ export type {
   CreateBookingData,
   CreateWaitlistData,
   CreateReminderData,
-  BookingHistoryData,
 } from './scheduling-bookings.repository';
 
 export { SchedulingConfirmationRepository } from './scheduling-confirmation.repository';
 export type { CreateConfirmationRuleData } from './scheduling-confirmation.repository';
+
+export { SchedulingAbsencesRepository } from './scheduling-absences.repository';

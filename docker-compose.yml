@@ -17,6 +17,47 @@
 # =========================================================================
 name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
 
+# Entorno compartido por la API y los 20 procesos worker (un dominio cada
+# uno — ver `PLAN-CORRECCION-WORKERS-2026-07-28.md`). `x-app-env` es una
+# extension field (Compose la ignora como servicio; solo sirve de ancla YAML)
+# para no repetir 20 veces el mismo bloque. Los host/puerto son los nombres de
+# servicio DENTRO de la red de compose (no los `*_PORT` expuestos al host, que
+# son solo para conectarse desde fuera de Docker).
+x-app-env: &app-env
+  NODE_ENV: production
+  PORT: "3000"
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  DB_NAME: ${POSTGRES_DB}
+  MONGODB_URI: mongodb://mongodb:27017/${MONGO_DB:-mantra_redesa_health_document_store}
+  MONGO_DB: ${MONGO_DB:-mantra_redesa_health_document_store}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  OPENSEARCH_NODE: http://opensearch:9200
+  MINIO_ENDPOINT: minio
+  MINIO_PORT: "9000"
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+  MINIO_BUCKET: ${MINIO_BUCKET:-mantra-redesa-health-files}
+  JWT_SECRET: ${JWT_SECRET}
+  JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+  JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
+  ACCOUNT_LOCK_THRESHOLD: ${ACCOUNT_LOCK_THRESHOLD:-5}
+  MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  MIKRO_ORM_DEBUG: ${MIKRO_ORM_DEBUG:-false}
+  # Los 20 workers llaman la API por el nombre del servicio, no localhost.
+  WORKER_API_BASE_URL: http://api:3000
+  WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
+  MESSAGING_QUEUE_CODES: ${MESSAGING_QUEUE_CODES:-}
+  TS_COMPRESSION_OLDER_THAN: ${TS_COMPRESSION_OLDER_THAN:-7 days}
+  TS_ROLLUP_REFRESH_WINDOW_HOURS: ${TS_ROLLUP_REFRESH_WINDOW_HOURS:-2}
+  # Vacío por defecto a propósito: retención de time_series es opt-in por
+  # tabla (ver `apply-retention.job.ts`). Formato: "tabla=intervalo,..."
+  TS_RETENTION_POLICIES: ${TS_RETENTION_POLICIES:-}
+
 services:
   postgres:
     image: timescale/timescaledb-ha:pg18
@@ -173,6 +214,347 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - mantra-redesa-network
+
+  # -----------------------------------------------------------------------
+  # API + workers. Misma imagen para los 17 (build una sola vez; el
+  # `command` es lo único que cambia). Cada worker es SU PROPIO proceso/
+  # contenedor — no un único monolito con los 17 dominios adentro — para que
+  # un fallo o un pico de carga en uno no toque a los demás, y cada uno
+  # escale por separado. Ver `PLAN-CORRECCION-WORKERS-2026-07-28.md`.
+  # -----------------------------------------------------------------------
+  api:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/main.js"]
+    environment:
+      <<: *app-env
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      # No basta con que Postgres esté healthy: `TerminologySeedService`
+      # corre en `onApplicationBootstrap` y necesita el esquema ya aplicado
+      # (`postgres-init`), o la API arranca contra una base sin tablas en un
+      # `docker compose up` desde cero. Mismo razonamiento para Mongo/OpenSearch:
+      # document_store/search_platform asumen sus colecciones/índices creados.
+      postgres:
+        condition: service_healthy
+      postgres-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
+      opensearch:
+        condition: service_healthy
+      opensearch-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-billing:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-billing.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-automation:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-automation.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-consent:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-consent.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-cross_store_consistency:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-cross_store_consistency.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-delegated_access:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-delegated_access.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-health_context:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-health_context.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-identity_assurance:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-identity_assurance.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-integrations:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-integrations.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-messaging:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-messaging.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-pharmacy_inventory:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-pharmacy_inventory.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-promotions:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-promotions.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-qa_lab:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-qa_lab.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-read_models:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-read_models.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-reporting:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-reporting.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-scheduling:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-scheduling.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-tracking:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-tracking.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-workflow:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-workflow.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-vector_rag:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-vector_rag.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-lakehouse:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-lakehouse.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - mantra-redesa-network
+
+  worker-time_series:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/worker-time_series.js"]
+    environment:
+      <<: *app-env
+    depends_on:
+      api:
+        condition: service_started
     networks:
       - mantra-redesa-network
 

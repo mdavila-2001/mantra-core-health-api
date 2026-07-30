@@ -11,6 +11,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PromotionsLoyaltyRepository } from '../repositories';
+import { WalletsService } from '../../payments/services';
 import {
   LoyaltyTiers,
   LoyaltyMemberships,
@@ -27,6 +28,7 @@ import {
   RecomputeBalanceResponseDto,
   ExpirePointsDto,
   ExpirePointsResponseDto,
+  ListActiveLoyaltyProgramsResponseDto,
   CreateReferralDto,
   ReferralResponseDto,
   QualifyReferralDto,
@@ -126,6 +128,7 @@ export class PromotionsLoyaltyService {
   constructor(
     private readonly em: EntityManager,
     private readonly loyaltyRepo: PromotionsLoyaltyRepository,
+    private readonly walletsService: WalletsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PromotionsLoyaltyService.name);
@@ -612,6 +615,30 @@ export class PromotionsLoyaltyService {
   }
 
   /**
+   * UC-51-06 (descubrimiento del worker): programas activos que el barrido de
+   * puntos debe recorrer. `expirePoints` exige un `loyaltyProgramId` puntual y
+   * no había forma de listar qué programas están vigentes.
+   */
+  async listActivePrograms(
+    limit = DEFAULT_SWEEP_BATCH,
+    tenantId?: string,
+  ): Promise<ListActiveLoyaltyProgramsResponseDto> {
+    const programs = await this.loyaltyRepo.findActivePrograms(
+      this.em,
+      CONCEPTS.LOYALTY_ACTIVE,
+      limit,
+      tenantId,
+    );
+    return {
+      programs: programs.map((program) => ({
+        id: program.id,
+        code: program.code,
+        name: program.name,
+      })),
+    };
+  }
+
+  /**
    * UC-51-06: barrido de expiración. Cada expiración lleva una clave derivada
    * de la entrada vencida, de modo que dos pasadas del worker no expiran dos
    * veces los mismos puntos.
@@ -998,14 +1025,6 @@ export class PromotionsLoyaltyService {
     tenantId: string,
     currencyConceptId: string | undefined,
   ): Promise<string | undefined> {
-    // Idempotencia: la clave del referido (UNIQUE en el ledger) convierte un
-    // reintento del evento en una lectura, sin volver a abonar.
-    const existing = await this.loyaltyRepo.findWalletLedgerEntryByKey(
-      tx,
-      idempotencyKey,
-    );
-    if (existing) return existing.id;
-
     // Sin moneda no se puede liquidar el crédito: fail-closed.
     if (!currencyConceptId) {
       throw new PreconditionFailedException(
@@ -1031,43 +1050,29 @@ export class PromotionsLoyaltyService {
       WALLET_OWNER_CONCEPT[membership.memberTypeConceptId] ??
       CONCEPTS.OWNER_USER;
 
-    let wallet = await this.loyaltyRepo.findWalletForUpdate(tx, {
-      tenantId,
-      ownerTypeConceptId,
-      ownerRefId: membership.memberRefId,
-      currencyConceptId,
-    });
-    if (!wallet) {
-      wallet = this.loyaltyRepo.createWallet(tx, {
+    // La billetera es del dominio de pagos: se acredita por su servicio, que
+    // resuelve idempotencia (clave UNIQUE), find-or-create y saldo dentro de ESTA
+    // transacción. Antes este servicio escribía las tablas de pagos directamente.
+    const result = await this.walletsService.creditWallet(
+      tx,
+      {
         tenantId,
         ownerTypeConceptId,
         ownerRefId: membership.memberRefId,
         walletTypeConceptId: WALLET_TYPE_CONCEPT,
         currencyConceptId,
-        statusConceptId: WALLET_STATUS_ACTIVE,
-        actorUserId: actor.id,
-      });
-    }
-
-    const balanceAfter = this.round(
-      Number(wallet.availableBalance ?? '0') + Number(awardAmount),
+        walletStatusConceptId: WALLET_STATUS_ACTIVE,
+        amount: awardAmount,
+        directionConceptId: WALLET_CREDIT_DIRECTION,
+        entryTypeConceptId: WALLET_CREDIT_ENTRY_TYPE,
+        idempotencyKey,
+        sourceType: 'member_referral',
+        sourceRefId: referralId,
+      },
+      actor,
     );
-    const entry = this.loyaltyRepo.createWalletLedgerEntry(tx, {
-      walletId: wallet.id,
-      directionConceptId: WALLET_CREDIT_DIRECTION,
-      amount: awardAmount,
-      currencyConceptId,
-      entryTypeConceptId: WALLET_CREDIT_ENTRY_TYPE,
-      balanceAfter,
-      idempotencyKey,
-      sourceType: 'member_referral',
-      sourceRefId: referralId,
-      recordedByUserId: actor.id,
-    });
-    wallet.availableBalance = balanceAfter;
-    touch(wallet, actor.id);
 
-    return entry.id;
+    return result.entryId;
   }
 
   /** Verifica que la regla no haya superado su tope dentro del periodo. */

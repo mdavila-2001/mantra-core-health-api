@@ -1,14 +1,22 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  getCurrentTenantId,
+  PreconditionFailedException,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PromotionsLoyaltyService } from '../services';
 import {
   CreateLoyaltyProgramDto,
@@ -21,6 +29,8 @@ import {
   RecomputeBalanceResponseDto,
   ExpirePointsDto,
   ExpirePointsResponseDto,
+  ListActiveLoyaltyProgramsResponseDto,
+  ListActiveLoyaltyProgramsQueryDto,
   CreateReferralDto,
   ReferralResponseDto,
   QualifyReferralDto,
@@ -38,6 +48,36 @@ export class LoyaltyController {
    * @param loyaltyService - Valor de loyalty service requerido por la operación.
    */
   constructor(private readonly loyaltyService: PromotionsLoyaltyService) {}
+
+  /**
+   * UC-51-06 (descubrimiento). `loyalty/jobs/expire-points` exige un
+   * `loyaltyProgramId` puntual y no existía forma de listar qué programas
+   * activos barrer; este endpoint alimenta ese descubrimiento.
+   */
+  @Get('loyalty/programs')
+  @Roles('SYSTEM', 'PROMOTIONS_ADMIN', 'MARKETING_MANAGER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar programas de lealtad activos',
+  })
+  listActivePrograms(
+    @Query() query: ListActiveLoyaltyProgramsQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ListActiveLoyaltyProgramsResponseDto> {
+    // El worker SYSTEM barre todos los tenants; cualquier otro rol debe
+    // acotarse al tenant del contexto (X-Tenant-Id), igual que el resto de
+    // endpoints de administración de lealtad.
+    if (actor.roles.includes('SYSTEM')) {
+      return this.loyaltyService.listActivePrograms(query.limit);
+    }
+    const tenantId = getCurrentTenantId();
+    if (!tenantId) {
+      throw new PreconditionFailedException(
+        'Se requiere X-Tenant-Id para listar programas de lealtad',
+      );
+    }
+    return this.loyaltyService.listActivePrograms(query.limit, tenantId);
+  }
 
   /** UC-51-01. */
   @Post('loyalty/programs')

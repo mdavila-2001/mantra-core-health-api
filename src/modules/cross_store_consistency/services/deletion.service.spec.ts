@@ -23,7 +23,11 @@ const DATASET_ID = '55555555-5555-5555-5555-555555555555';
  */
 function build() {
   const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const forkEm = {};
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => forkEm),
+  };
   const deletionRepo = {
     findLiveRequestBySubject: mockFn(async () => null),
     createRequest: mockFn((_tx: any, data: any) => ({
@@ -35,6 +39,8 @@ function build() {
     createTarget: mockFn((_tx: any, data: any) => ({ id: TARGET_ID, ...data })),
     findTargetForUpdate: mockFn(async () => null),
     findTargetsByRequest: mockFn(async () => []),
+    findPendingTargets: mockFn(async () => []),
+    findExecutedTargets: mockFn(async () => []),
     countExecutions: mockFn(async () => 0),
     findExecutionByKey: mockFn(async () => null),
     createExecution: mockFn((_tx: any, data: any) => ({
@@ -182,6 +188,78 @@ describe('DeletionService', () => {
       await expect(
         d.service.expandDeletion(REQUEST_ID, DTO, actor),
       ).rejects.toThrow(/no admite expansión/);
+    });
+  });
+
+  describe('listPendingTargets (descubrimiento Fase 4)', () => {
+    it('mapea los objetivos PENDING descubiertos por el repositorio', async () => {
+      const d = build();
+      d.deletionRepo.findPendingTargets.mockResolvedValue([
+        {
+          id: TARGET_ID,
+          deletionRequestId: REQUEST_ID,
+          datasetId: DATASET_ID,
+          backendCode: 'MONGO',
+          targetLocator: 'db.patients:doc-1',
+          deletionMode: 'HARD',
+        },
+      ]);
+
+      const result = await d.service.listPendingTargets();
+
+      expect(d.deletionRepo.findPendingTargets).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.any(Number),
+      );
+      expect(result.targets).toHaveLength(1);
+      expect(result.targets[0]).toEqual(
+        expect.objectContaining({ id: TARGET_ID, backendCode: 'MONGO' }),
+      );
+    });
+
+    it('usa el límite pedido en vez del valor por omisión', async () => {
+      const d = build();
+
+      await d.service.listPendingTargets(5);
+
+      expect(d.deletionRepo.findPendingTargets).toHaveBeenCalledWith(
+        expect.anything(),
+        5,
+      );
+    });
+  });
+
+  describe('listExecutedTargets (descubrimiento Fase 4)', () => {
+    it('mapea los objetivos EXECUTED descubiertos por el repositorio', async () => {
+      const d = build();
+      d.deletionRepo.findExecutedTargets.mockResolvedValue([
+        {
+          id: TARGET_ID,
+          deletionRequestId: REQUEST_ID,
+          datasetId: DATASET_ID,
+          backendCode: 'OPENSEARCH',
+          targetLocator: 'idx:doc-2',
+          deletionMode: 'HARD',
+        },
+      ]);
+
+      const result = await d.service.listExecutedTargets();
+
+      expect(result.targets).toHaveLength(1);
+      expect(result.targets[0]).toEqual(
+        expect.objectContaining({ id: TARGET_ID, backendCode: 'OPENSEARCH' }),
+      );
+    });
+
+    it('usa el límite pedido en vez del valor por omisión', async () => {
+      const d = build();
+
+      await d.service.listExecutedTargets(7);
+
+      expect(d.deletionRepo.findExecutedTargets).toHaveBeenCalledWith(
+        expect.anything(),
+        7,
+      );
     });
   });
 

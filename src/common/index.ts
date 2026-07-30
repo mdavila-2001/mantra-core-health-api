@@ -63,6 +63,7 @@ export type {
   OutboundDispatchResult,
 } from './http/http-dispatcher.service';
 export { assertOutboundUrlAllowed } from './http/ssrf-guard';
+export { ParseOptionalLimitPipe } from './http/parse-optional-limit.pipe';
 
 // Conceptos de dominio
 export {

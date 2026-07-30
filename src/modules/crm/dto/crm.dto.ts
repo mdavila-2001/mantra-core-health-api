@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsIn,
@@ -22,6 +22,7 @@ export const ACCOUNT_TYPES: readonly AccountType[] = [
 ];
 
 /** Cuerpo de `POST /crm/accounts` (UC-49-01). */
+@ApiSchema({ name: 'CrmCreateAccountDto' })
 export class CreateAccountDto {
   /**
    * Identificador asociado a tenant.

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -621,6 +621,7 @@ export class SnapshotResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /reporting/definitions/{id}/schedules` (UC-39-06). */
+@ApiSchema({ name: 'ReportingCreateScheduleDto' })
 export class CreateScheduleDto {
   /**
    * Identificador asociado a tenant.

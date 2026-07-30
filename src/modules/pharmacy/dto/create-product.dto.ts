@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -63,6 +63,7 @@ export class ProductIdentifierDto {
 }
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/products` (UC-24-04). */
+@ApiSchema({ name: 'PharmacyCreateProductDto' })
 export class CreateProductDto {
   /**
    * Valor de product code mantenido por la instancia.

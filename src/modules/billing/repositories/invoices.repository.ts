@@ -169,6 +169,33 @@ export class InvoicesRepository {
   }
 
   /**
+   * Facturas vencidas con saldo pendiente, de las prácticas indicadas
+   * (`practiceIds` ya resueltas al tenant por el llamante — `invoices` no
+   * tiene `tenant_id` propio, solo `practice_id`). La usa el worker de
+   * morosidad (Fase 4 del plan de corrección de workers) para descubrir qué
+   * incluir en la corrida — sin esto, `dunning-runs:execute` no tenía forma
+   * de saber qué facturas están en mora.
+   */
+  findOverdueByPractices(
+    em: EntityManager,
+    practiceIds: string[],
+    eligibleStatusConceptIds: string[],
+    now: Date,
+    limit: number,
+  ): Promise<Invoices[]> {
+    return em.find(
+      Invoices,
+      {
+        practiceId: { $in: practiceIds },
+        statusConceptId: { $in: eligibleStatusConceptIds },
+        dueDate: { $lt: now },
+        balance: { $gt: '0' },
+      },
+      { orderBy: { dueDate: 'ASC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

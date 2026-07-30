@@ -11,3 +11,5 @@ export * from './reviews.repository';
 export * from './polls.repository';
 export * from './groups.repository';
 export * from './feed.repository';
+export * from './community-feedback.repository';
+export * from './community-prestige.repository';

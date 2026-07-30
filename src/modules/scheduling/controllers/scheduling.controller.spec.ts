@@ -196,6 +196,7 @@ describe('SchedulingInternalController', () => {
     const waitlistService = {
       promoteWaitlist: mockFn(),
       dispatchReminders: mockFn(),
+      findSlotsWithCandidates: mockFn(),
     };
     const controller = new SchedulingInternalController(
       bookingsService as any,
@@ -229,5 +230,17 @@ describe('SchedulingInternalController', () => {
     await d.controller.dispatchReminders({});
 
     expect(d.waitlistService.dispatchReminders).toHaveBeenCalledWith(undefined);
+  });
+
+  it('forwards the limit to the waitlist-candidate discovery query (UC-41-12)', async () => {
+    const d = build();
+    d.waitlistService.findSlotsWithCandidates.mockResolvedValue({
+      slotIds: [ID],
+    });
+
+    const res = await d.controller.listWaitlistCandidates({ limit: 25 });
+
+    expect(d.waitlistService.findSlotsWithCandidates).toHaveBeenCalledWith(25);
+    expect(res).toEqual({ slotIds: [ID] });
   });
 });

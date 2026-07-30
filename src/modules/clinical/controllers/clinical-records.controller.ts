@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -135,8 +136,9 @@ export class ClinicalRecordsController {
   issueMedicationRequest(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ): Promise<MedicationRequestResponseDto> {
-    return this.medicationsService.issue(id, actor);
+    return this.medicationsService.issue(id, actor, idempotencyKey);
   }
 
   /** CAN-RX: invalida una receta emitida (motivo obligatorio; se conserva). */

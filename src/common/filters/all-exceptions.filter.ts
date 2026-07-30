@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 
@@ -164,6 +165,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus.CONFLICT,
         code: ErrorCode.CONCURRENCY_CONFLICT,
         message: 'El recurso fue modificado por otra operación; reintente',
+      };
+    }
+
+    // Violación de restricción UNIQUE (p. ej. carrera entre dos flujos que
+    // reutilizan el mismo valor único, como una clave de idempotencia): es un
+    // conflicto de negocio esperado, no un fallo interno; nunca debe
+    // devolverse como 500 opaco.
+    if (exception instanceof UniqueConstraintViolationException) {
+      return {
+        status: HttpStatus.CONFLICT,
+        code: ErrorCode.CONFLICT,
+        message: 'El valor ya está en uso por otro registro',
       };
     }
 

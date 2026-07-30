@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -138,6 +138,7 @@ export class VerifyBankAccountResponseDto {
 export type ContractType = 'SERVICE' | 'SUPPLY' | 'LEASE';
 
 /** Cuerpo de `POST /erp/contracts` (UC-38-03). */
+@ApiSchema({ name: 'ErpCreateContractDto' })
 export class CreateContractDto {
   /**
    * Identificador asociado a tenant.
@@ -242,6 +243,7 @@ export class ContractResponseDto {
 }
 
 /** Cuerpo de `POST /erp/contracts/{id}/approval-requests` (UC-38-04). */
+@ApiSchema({ name: 'ErpRequestApprovalDto' })
 export class RequestApprovalDto {
   /**
    * Valor de due at mantenido por la instancia.
@@ -643,6 +645,7 @@ export class PurchaseOrderItemDto {
 }
 
 /** Cuerpo de `POST /erp/purchase-orders` (UC-38-10). */
+@ApiSchema({ name: 'ErpCreatePurchaseOrderDto' })
 export class CreatePurchaseOrderDto {
   /**
    * Identificador asociado a tenant.
@@ -765,6 +768,7 @@ export class GoodsReceiptItemDto {
 }
 
 /** Cuerpo de `POST /erp/purchase-orders/{id}/goods-receipts` (UC-38-11). */
+@ApiSchema({ name: 'ErpCreateGoodsReceiptDto' })
 export class CreateGoodsReceiptDto {
   /**
    * Identificador asociado a tenant.

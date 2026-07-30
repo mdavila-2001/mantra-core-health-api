@@ -32,6 +32,10 @@ function build() {
     create: mockFn(),
   };
   const eventsRepo = { record: mockFn() };
+  const clinicalGrantsRepo = {
+    revokeForConsent: mockFn().mockResolvedValue(0),
+  };
+  const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ConsentsService(
@@ -39,9 +43,19 @@ function build() {
     consentsRepo,
     provisionsRepo,
     eventsRepo,
+    clinicalGrantsRepo as any,
+    auditTrail as any,
     logger as any,
   );
-  return { service, tx, consentsRepo, provisionsRepo, eventsRepo };
+  return {
+    service,
+    tx,
+    consentsRepo,
+    provisionsRepo,
+    eventsRepo,
+    clinicalGrantsRepo,
+    auditTrail,
+  };
 }
 
 describe('ConsentsService', () => {
@@ -136,6 +150,19 @@ describe('ConsentsService', () => {
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventTypeConceptId: CONS.EVENT_WITHDRAWN }),
+      );
+      // C-20: propaga la revocación a los accesos clínicos dependientes.
+      expect(d.clinicalGrantsRepo.revokeForConsent).toHaveBeenCalledWith(
+        d.tx,
+        'c1',
+        actor.id,
+        expect.any(Date),
+      );
+      // CAN-AUDIT-001: sella el retiro en la cadena WORM.
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+        expect.objectContaining({ action: 'CONSENT_WITHDRAWN' }),
       );
     });
   });

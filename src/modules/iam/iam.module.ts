@@ -21,6 +21,7 @@ import {
   AccountLockoutsRepository,
   SecurityEventsRepository,
   AccountActivationsRepository,
+  IamApiKeysRepository,
 } from './repositories';
 
 /**
@@ -42,6 +43,7 @@ import {
     AccountLockoutsRepository,
     SecurityEventsRepository,
     AccountActivationsRepository,
+    IamApiKeysRepository,
     // Servicios
     IamUsersService,
     IamCredentialsService,

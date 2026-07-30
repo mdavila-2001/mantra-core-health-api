@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsOptional,
@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/sites` (UC-24-02). */
+@ApiSchema({ name: 'PharmacyCreateSiteDto' })
 export class CreateSiteDto {
   /**
    * Identificador asociado a practice site.

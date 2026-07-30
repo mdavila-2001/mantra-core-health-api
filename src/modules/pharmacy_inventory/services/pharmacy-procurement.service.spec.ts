@@ -54,7 +54,7 @@ function build() {
   const service = new PharmacyProcurementService(
     em as any,
     suppliersRepo,
-    ordersRepo as any,
+    ordersRepo,
     receiptsRepo as any,
     locationsRepo as any,
     lotsRepo as any,
@@ -183,7 +183,7 @@ describe('PharmacyProcurementService', () => {
       idempotencyKey: 'idem-po',
       lines: [{ pharmacyProductId: 'p1', orderedQuantity: 5 }],
     };
-    const res = await d.service.createPurchaseOrder('ph1', dto as any, actor);
+    const res = await d.service.createPurchaseOrder('ph1', dto, actor);
     expect(res).toEqual({
       id: 'po-existing',
       purchaseOrderNumber: 'PO-existing',
@@ -215,7 +215,7 @@ describe('PharmacyProcurementService', () => {
       idempotencyKey: 'idem-gr',
       lines: [],
     };
-    const res = await d.service.receiveGoods('ph1', dto as any, actor);
+    const res = await d.service.receiveGoods('ph1', dto, actor);
     expect(res).toEqual({
       id: 'gr-existing',
       receiptNumber: 'GR-existing',

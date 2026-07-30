@@ -10,10 +10,9 @@ import {
   ReferralPrograms,
   MemberReferrals,
 } from '../entities';
-// La billetera vive en el módulo de pagos; el crédito de un referido con premio
-// `wallet_credit` la acredita reutilizando esas entidades (MikroORM las descubre
-// globalmente, así que el `em` opera sobre ellas sin acoplarse al servicio 42B).
-import { Wallets, WalletLedgerEntries } from '../../payments/entities';
+// La billetera pertenece al dominio de pagos: el crédito de un referido con
+// premio `wallet_credit` se acredita a través de `payments.WalletsService`, no
+// tocando sus tablas desde aquí (evita DIRECT_CROSS_DOMAIN_ACCESS).
 import { createdBy } from '../../../common';
 
 /**
@@ -255,86 +254,6 @@ export interface CreateLedgerEntryData {
 }
 
 /**
- * Describe el contrato estructural de create wallet data.
- */
-export interface CreateWalletData {
-  /**
-   * Identificador asociado a tenant.
-   */
-  tenantId: string;
-  /**
-   * Identificador asociado a owner type concept.
-   */
-  ownerTypeConceptId: string;
-  /**
-   * Identificador asociado a owner ref.
-   */
-  ownerRefId: string;
-  /**
-   * Identificador asociado a wallet type concept.
-   */
-  walletTypeConceptId: string;
-  /**
-   * Identificador asociado a currency concept.
-   */
-  currencyConceptId: string;
-  /**
-   * Identificador asociado a status concept.
-   */
-  statusConceptId: string;
-  /**
-   * Identificador asociado a actor user.
-   */
-  actorUserId?: string;
-}
-
-/**
- * Describe el contrato estructural de create wallet ledger entry data.
- */
-export interface CreateWalletLedgerEntryData {
-  /**
-   * Identificador asociado a wallet.
-   */
-  walletId: string;
-  /**
-   * Identificador asociado a direction concept.
-   */
-  directionConceptId: string;
-  /**
-   * Valor de amount mantenido por la instancia.
-   */
-  amount: string;
-  /**
-   * Identificador asociado a currency concept.
-   */
-  currencyConceptId: string;
-  /**
-   * Identificador asociado a entry type concept.
-   */
-  entryTypeConceptId: string;
-  /**
-   * Valor de balance after mantenido por la instancia.
-   */
-  balanceAfter: string;
-  /**
-   * Valor de idempotency key mantenido por la instancia.
-   */
-  idempotencyKey: string;
-  /**
-   * Valor de source type mantenido por la instancia.
-   */
-  sourceType?: string;
-  /**
-   * Identificador asociado a source ref.
-   */
-  sourceRefId?: string;
-  /**
-   * Identificador asociado a recorded by user.
-   */
-  recordedByUserId?: string;
-}
-
-/**
  * Describe el contrato estructural de create referral data.
  */
 export interface CreateReferralData {
@@ -430,6 +349,31 @@ export class PromotionsLoyaltyRepository {
     code: string,
   ): Promise<LoyaltyPrograms | null> {
     return em.findOne(LoyaltyPrograms, { tenantId, code });
+  }
+
+  /**
+   * Programas activos, para el descubrimiento del worker de UC-51-06:
+   * `expire-points` exige un `loyaltyProgramId` puntual y no había forma de
+   * listar qué programas barrer.
+   *
+   * `tenantId` es opcional únicamente para el barrido `SYSTEM` (recorre todos
+   * los tenants); cualquier otro llamador debe acotarlo, igual que el resto
+   * de métodos de este repositorio.
+   */
+  findActivePrograms(
+    em: EntityManager,
+    activeStateConceptId: string,
+    limit: number,
+    tenantId?: string,
+  ): Promise<LoyaltyPrograms[]> {
+    return em.find(
+      LoyaltyPrograms,
+      {
+        stateConceptId: activeStateConceptId,
+        ...(tenantId ? { tenantId } : {}),
+      },
+      { orderBy: { createdAt: 'ASC' }, limit },
+    );
   }
 
   /**
@@ -672,111 +616,6 @@ export class PromotionsLoyaltyRepository {
         expiresAt: { $ne: null, $lte: now },
       },
       { orderBy: { recordedAt: 'ASC' } },
-    );
-  }
-
-  // --- Billetera del referido (UC-51-13, premio wallet_credit) ---
-
-  /**
-   * Billetera del propietario en la moneda del premio, tomada con `FOR UPDATE`:
-   * el saldo es un contador compartido, mismo patrón de bloqueo que la membresía
-   * en earn/redeem.
-   */
-  findWalletForUpdate(
-    em: EntityManager,
-    data: {
-      /**
-       * Identificador asociado a tenant.
-       */
-      tenantId: string;
-      /**
-       * Identificador asociado a owner type concept.
-       */
-      ownerTypeConceptId: string;
-      /**
-       * Identificador asociado a owner ref.
-       */
-      ownerRefId: string;
-      /**
-       * Identificador asociado a currency concept.
-       */
-      currencyConceptId: string;
-    },
-  ): Promise<Wallets | null> {
-    return em.findOne(
-      Wallets,
-      {
-        tenantId: data.tenantId,
-        ownerTypeConceptId: data.ownerTypeConceptId,
-        ownerRefId: data.ownerRefId,
-        currencyConceptId: data.currencyConceptId,
-      },
-      { lockMode: LockMode.PESSIMISTIC_WRITE },
-    );
-  }
-
-  /**
-   * Crea create wallet.
-   *
-   * @param em - Contexto de persistencia o transacción activa.
-   * @param data - Valor de data requerido por la operación.
-   * @returns Resultado de create wallet conforme al contrato `Wallets`.
-   */
-  createWallet(em: EntityManager, data: CreateWalletData): Wallets {
-    return em.create(
-      Wallets,
-      {
-        tenantId: data.tenantId,
-        ownerTypeConceptId: data.ownerTypeConceptId,
-        ownerRefId: data.ownerRefId,
-        walletTypeConceptId: data.walletTypeConceptId,
-        currencyConceptId: data.currencyConceptId,
-        availableBalance: '0',
-        pendingBalance: '0',
-        reservedBalance: '0',
-        statusConceptId: data.statusConceptId,
-        ...createdBy(data.actorUserId),
-      },
-      { partial: true },
-    );
-  }
-
-  /** La clave de idempotencia (UNIQUE) convierte un reintento del referido en lectura. */
-  findWalletLedgerEntryByKey(
-    em: EntityManager,
-    idempotencyKey: string,
-  ): Promise<WalletLedgerEntries | null> {
-    return em.findOne(WalletLedgerEntries, { idempotencyKey });
-  }
-
-  /**
-   * Crea create wallet ledger entry.
-   *
-   * @param em - Contexto de persistencia o transacción activa.
-   * @param data - Valor de data requerido por la operación.
-   * @returns Resultado de create wallet ledger entry conforme al contrato `WalletLedgerEntries`.
-   */
-  createWalletLedgerEntry(
-    em: EntityManager,
-    data: CreateWalletLedgerEntryData,
-  ): WalletLedgerEntries {
-    return em.create(
-      WalletLedgerEntries,
-      {
-        walletId: data.walletId,
-        directionConceptId: data.directionConceptId,
-        amount: data.amount,
-        currencyConceptId: data.currencyConceptId,
-        entryTypeConceptId: data.entryTypeConceptId,
-        balanceAfter: data.balanceAfter,
-        sourceType: data.sourceType,
-        sourceRefId: data.sourceRefId,
-        idempotencyKey: data.idempotencyKey,
-        occurredAt: new Date(),
-        recordedAt: new Date(),
-        recordedByUserId: data.recordedByUserId,
-      },
-      { partial: true },
     );
   }
 

@@ -31,11 +31,17 @@ async function fetchLiveProduct(
     search: `product_ndc:"${productNdc}"`,
     limit: '1',
   });
-  const res = await fetch(`https://api.fda.gov/drug/ndc.json?${params.toString()}`);
+  const res = await fetch(
+    `https://api.fda.gov/drug/ndc.json?${params.toString()}`,
+  );
   if (res.status === 404) return null;
   if (!res.ok)
-    throw new Error(`openFDA respondió HTTP ${res.status} para product_ndc=${productNdc}`);
-  const json = (await res.json()) as { results?: Array<Record<string, unknown>> };
+    throw new Error(
+      `openFDA respondió HTTP ${res.status} para product_ndc=${productNdc}`,
+    );
+  const json = (await res.json()) as {
+    results?: Array<Record<string, unknown>>;
+  };
   const result = json.results?.[0];
   if (!result) return null;
   return {

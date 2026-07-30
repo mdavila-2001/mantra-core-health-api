@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   OutboxService,
   QueuesService,
@@ -29,6 +36,7 @@ import {
   FailJobResponseDto,
   DeliverNotificationDto,
   DeliverNotificationResponseDto,
+  PendingNotificationsResponseDto,
 } from '../dto';
 
 /**
@@ -143,6 +151,23 @@ export class MessagingInternalController {
     @Body() dto: FailJobDto,
   ): Promise<FailJobResponseDto> {
     return this.queuesService.failJob(id, dto);
+  }
+
+  /**
+   * Descubrimiento para el worker de notificaciones (Fase 1 del plan de
+   * corrección de workers): sin esto, `deliverNotification` no tenía forma de
+   * saber qué `requestId` llamar. No es uno de los 13 UC del módulo — es
+   * infraestructura de lectura que el propio "Pendiente" del README exigía.
+   */
+  @Get('notifications/pending')
+  @Roles('SYSTEM', 'MESSAGING_ADMIN')
+  @ApiOperation({
+    summary: 'Listar solicitudes de notificación listas para entregar',
+  })
+  listPendingNotifications(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PendingNotificationsResponseDto> {
+    return this.notificationsService.listDeliverable(limit);
   }
 
   /** UC-35-11. */

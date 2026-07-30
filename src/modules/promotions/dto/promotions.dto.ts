@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -654,6 +654,53 @@ export class ExpirePointsResponseDto {
    */
   @ApiProperty({ description: 'Total de puntos expirados' })
   pointsExpired!: string;
+}
+
+/** Query de `GET /loyalty/programs` (descubrimiento de programas activos). */
+export class ListActiveLoyaltyProgramsQueryDto {
+  /**
+   * Valor de limit mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ description: 'Tamaño máximo del lote', default: 100 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  limit?: number;
+}
+
+/**
+ * Resumen de un programa activo para el descubrimiento del worker de
+ * UC-51-06: `expire-points` exige un `loyaltyProgramId` puntual y no existía
+ * una consulta para listar qué programas barrer.
+ */
+export class ActiveLoyaltyProgramSummaryDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Valor de code mantenido por la instancia.
+   */
+  @ApiProperty()
+  code!: string;
+
+  /**
+   * Valor de name mantenido por la instancia.
+   */
+  @ApiProperty()
+  name!: string;
+}
+
+/** Respuesta de `GET /loyalty/programs` filtrado por estado activo. */
+export class ListActiveLoyaltyProgramsResponseDto {
+  /**
+   * Valor de programs mantenido por la instancia.
+   */
+  @ApiProperty({ type: [ActiveLoyaltyProgramSummaryDto] })
+  programs!: ActiveLoyaltyProgramSummaryDto[];
 }
 
 // ---------------------------------------------------------------------------
@@ -1364,6 +1411,7 @@ export class ReverseRedemptionResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /referral-programs/{id}/referrals` (UC-51-12). */
+@ApiSchema({ name: 'PromotionsCreateReferralDto' })
 export class CreateReferralDto {
   /**
    * Valor de referee contact mantenido por la instancia.

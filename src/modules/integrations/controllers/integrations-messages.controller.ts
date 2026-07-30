@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IntegrationsMessagingService } from '../services';
 import {
   EnqueueOutboundDto,
@@ -18,6 +25,9 @@ import {
   RetryResultDto,
   DeadLetterResultDto,
   CorrelateResultDto,
+  PendingDispatchResponseDto,
+  PendingRetryResponseDto,
+  PendingCorrelationResponseDto,
 } from '../dto';
 
 /**
@@ -49,9 +59,23 @@ export class IntegrationsMessagesController {
     return this.messagingService.enqueueOutbound(dto, actor);
   }
 
-  /** UC-12-06. Worker de envío. */
+  /**
+   * Descubrimiento para el worker de despacho (Fase 5 del plan de corrección
+   * de workers): sin esto, `dispatch` no tenía forma de saber qué
+   * `messageId` despachar.
+   */
+  @Get('messages/pending-dispatch')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar mensajes QUEUED listos para despachar' })
+  listPendingDispatch(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PendingDispatchResponseDto> {
+    return this.messagingService.listQueuedForDispatch(limit);
+  }
+
+  /** UC-12-06. Worker de envío: el rol `SYSTEM` sólo lo firma `SystemApiClient`. */
   @Post('messages/:id\\:dispatch')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Despachar un mensaje y registrar su respuesta' })
   dispatch(
@@ -62,9 +86,25 @@ export class IntegrationsMessagesController {
     return this.messagingService.dispatch(id, dto, actor);
   }
 
+  /**
+   * Descubrimiento para el worker de reintentos (Fase 5): lista los mensajes
+   * `FAILED` con si ya agotaron `MAX_ATTEMPTS`, para que el worker decida
+   * entre `retry` y `deadLetter`.
+   */
+  @Get('messages/pending-retry')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Listar mensajes FAILED candidatos a reintento o dead-letter',
+  })
+  listPendingRetry(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PendingRetryResponseDto> {
+    return this.messagingService.listFailedForRetry(limit);
+  }
+
   /** UC-12-07. Worker de reintentos. */
   @Post('messages/:id\\:retry')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Programar un reintento con backoff exponencial' })
   retry(
@@ -76,7 +116,7 @@ export class IntegrationsMessagesController {
 
   /** UC-12-08. Worker de reintentos. */
   @Post('messages/:id\\:dead-letter')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Enviar a dead-letter tras agotar reintentos' })
   deadLetter(
@@ -86,9 +126,24 @@ export class IntegrationsMessagesController {
     return this.messagingService.deadLetter(id, actor);
   }
 
+  /**
+   * Descubrimiento para el worker de correlación (Fase 5): sin esto,
+   * `correlate` no tenía forma de saber qué `inboundMessageId` traer.
+   */
+  @Get('messages/pending-correlation')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Listar mensajes entrantes RECEIVED listos para correlacionar',
+  })
+  listPendingCorrelation(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PendingCorrelationResponseDto> {
+    return this.messagingService.listReceivedForCorrelation(limit);
+  }
+
   /** UC-12-10. Worker de correlación ({id} = mensaje entrante). */
   @Post('messages/:id\\:correlate')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Procesar callback/respuesta asíncrona del proveedor',

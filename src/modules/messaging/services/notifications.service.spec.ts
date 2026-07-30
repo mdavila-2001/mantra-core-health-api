@@ -34,10 +34,12 @@ const CATEGORY = '77777777-7777-7777-7777-777777777777';
  */
 function build() {
   const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
   const notificationsRepo = {
     findChannelById: mockFn(),
     findTemplateById: mockFn(),
+    findClaimableRequests: mockFn(() => Promise.resolve([])),
     findPreference: mockFn(() => Promise.resolve(null)),
     createNotificationRequest: mockFn(() => ({ id: REQUEST })),
     findRequestById: mockFn(),
@@ -59,7 +61,7 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new NotificationsService(
-    em as any,
+    em,
     notificationsRepo,
     logger as any,
   );
@@ -77,6 +79,61 @@ function activeChannel(overrides: Record<string, unknown> = {}): any {
 }
 
 describe('NotificationsService', () => {
+  describe('listDeliverable (worker de notificaciones)', () => {
+    it('lista las solicitudes que el repo devuelve, mapeadas al DTO del worker, y las reclama a SENDING', async () => {
+      const d = build();
+      const claimed = {
+        id: REQUEST,
+        channelId: CHANNEL,
+        statusConceptId: CONCEPTS.NOTIF_PENDING,
+        payloadJson: { foo: 'bar' },
+        recipientAddress: 'user@example.com',
+        recipientUserId: RECIPIENT,
+      };
+      d.notificationsRepo.findClaimableRequests.mockResolvedValue([claimed]);
+
+      const res = await d.service.listDeliverable(25);
+
+      expect(d.notificationsRepo.findClaimableRequests).toHaveBeenCalledWith(
+        d.tx,
+        CONCEPTS.NOTIF_PENDING,
+        CONCEPTS.NOTIF_SENDING,
+        expect.any(Date),
+        expect.any(Date),
+        25,
+      );
+      // Reclamo: la fila devuelta ya quedó en SENDING antes del flush, para
+      // que un tick solapado no la vuelva a descubrir.
+      expect(claimed.statusConceptId).toBe(CONCEPTS.NOTIF_SENDING);
+      expect(d.tx.flush).toHaveBeenCalled();
+      expect(res.requests).toEqual([
+        {
+          id: REQUEST,
+          channelId: CHANNEL,
+          statusConceptId: CONCEPTS.NOTIF_SENDING,
+          payloadJson: { foo: 'bar' },
+          recipientAddress: 'user@example.com',
+          recipientUserId: RECIPIENT,
+        },
+      ]);
+    });
+
+    it('usa el tamaño de lote por defecto si no se declara límite', async () => {
+      const d = build();
+
+      await d.service.listDeliverable();
+
+      expect(d.notificationsRepo.findClaimableRequests).toHaveBeenCalledWith(
+        d.tx,
+        CONCEPTS.NOTIF_PENDING,
+        CONCEPTS.NOTIF_SENDING,
+        expect.any(Date),
+        expect.any(Date),
+        50,
+      );
+    });
+  });
+
   describe('createRequest (UC-35-10)', () => {
     const dto: any = {
       channelId: CHANNEL,

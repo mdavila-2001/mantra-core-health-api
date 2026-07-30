@@ -224,3 +224,10 @@ export const MAX_RECONCILIATION_ITEMS = 5000;
 
 /** Tope de intentos de entrega antes de mandar a dead-letter. */
 export const DEFAULT_MAX_ATTEMPTS = 5;
+
+/**
+ * Lote por defecto de las consultas de descubrimiento del worker de borrado
+ * (Fase 4 del plan de corrección de workers): cuántos objetivos `PENDING`/
+ * `EXECUTED` trae cada tick cuando la petición no fija `limit`.
+ */
+export const DEFAULT_DELETION_DISCOVERY_BATCH = 20;

@@ -64,7 +64,7 @@ describe('DocumentStoreService', () => {
       d.repo.insert.mockResolvedValue(storedDoc());
       const res = await d.service.create(
         'clinical_drafts',
-        { tenantId: TENANT, documentType: 'draft', payload: { a: 1 } } as any,
+        { tenantId: TENANT, documentType: 'draft', payload: { a: 1 } },
         actor,
       );
       expect(d.repo.insert).toHaveBeenCalledWith('clinical_drafts', {
@@ -172,7 +172,7 @@ describe('DocumentStoreService', () => {
       const res = await d.service.update(
         'c',
         '507f1f77bcf86cd799439011',
-        { tenantId: TENANT, expectedVersion: 1, payload: { b: 2 } } as any,
+        { tenantId: TENANT, expectedVersion: 1, payload: { b: 2 } },
         actor,
       );
       expect(res.version).toBe(2);

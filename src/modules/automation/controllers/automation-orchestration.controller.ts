@@ -33,6 +33,8 @@ import {
   ExecuteRecordAutomationResponseDto,
   FinalizeWorkflowRunDto,
   FinalizeWorkflowRunResponseDto,
+  EvaluateCalendarTriggersDto,
+  EvaluateCalendarTriggersResponseDto,
 } from '../dto';
 
 /** Definición y ejecución de la orquestación (UC-48-06 … 11, 13, 14). */
@@ -83,6 +85,22 @@ export class AutomationOrchestrationController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TriggerResponseDto> {
     return this.definitionService.configureTrigger(dto, actor);
+  }
+
+  /** Worker · UC-48-07 (evaluación periódica). */
+  @Post('triggers/calendar/tick')
+  @Roles('SYSTEM')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Evaluar los disparadores de calendario vencidos',
+    description:
+      'Toma con SKIP LOCKED: arranca un run por disparador vencido y avanza su marca.',
+  })
+  evaluateCalendarTriggers(
+    @Body() dto: EvaluateCalendarTriggersDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<EvaluateCalendarTriggersResponseDto> {
+    return this.executionService.evaluateCalendarTriggers(dto, actor);
   }
 
   /** UC-48-08. */

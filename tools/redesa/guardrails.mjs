@@ -35,6 +35,36 @@ const IMMUTABLE_RESOURCE =
 const ALLOWED_COMMANDS =
   /(amend|addend|invalidate|replace|renew|reverse|sign|cosign|finalize|release|issue|deprecate|version|dsar)/i;
 
+/**
+ * Controladores cuyos endpoints mutantes están autenticados por el `JwtAuthGuard`
+ * GLOBAL (APP_GUARD en common/auth) y autorizados a nivel de RECURSO en el servicio
+ * (pertenencia/propiedad), no por `@Roles`. El analizador es estático y no ve el
+ * guard global ni la autorización de recurso, así que sin esta allowlist los marca
+ * como UNSCOPED_MUTATION (falso positivo, verificado en el triage 2026-07):
+ *   - telemetry: ingesta autenticada por diseño (SDK/portal), no scoping por rol.
+ *   - community: features sociales peer-to-peer (mensajería, reseñas, encuestas,
+ *     grupos) gobernadas por participación/propiedad en el servicio.
+ *   - common: recursos propios del actor (archivos, direcciones, identificadores)
+ *     con `actorUserId` en el servicio.
+ * NO exime del requisito de autenticación (el guard global lo garantiza).
+ */
+const AUTHN_NON_ROLE_ALLOWLIST =
+  /modules\/(telemetry|community|common)\/controllers\//;
+
+/** ¿Existe un JwtAuthGuard registrado como APP_GUARD global? (defensa por defecto) */
+function hasGlobalJwtGuard() {
+  try {
+    const authModule = readFileSync(
+      join(SRC, 'common', 'auth', 'auth.module.ts'),
+      'utf8',
+    );
+    return /APP_GUARD/.test(authModule) && /JwtAuthGuard/.test(authModule);
+  } catch {
+    return false;
+  }
+}
+const GLOBAL_JWT_GUARD = hasGlobalJwtGuard();
+
 function walk(dir) {
   const out = [];
   for (const name of readdirSync(dir)) {
@@ -104,11 +134,14 @@ for (const file of controllers) {
         `@${verb} sobre recurso inmutable sin comando de negocio: ${path}`,
       );
     }
-    // Endpoint mutante sin autorización por rol y sin ser público.
+    // Endpoint mutante sin autorización por rol y sin ser público. Con guard JWT
+    // global, "sin @Roles" NO significa "sin autenticación"; se exime a los
+    // controladores autenticados+autorizados a nivel de recurso (allowlist).
     if (
       ['Post', 'Put', 'Patch', 'Delete'].includes(verb) &&
       !hasRolesHere &&
-      !hasPublic
+      !hasPublic &&
+      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(file))
     ) {
       add(
         'UNSCOPED_MUTATION',

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -11,6 +11,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
@@ -232,6 +233,7 @@ export class SourceResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /health-context/schedules` (UC-44-03). */
+@ApiSchema({ name: 'HealthContextCreateScheduleDto' })
 export class CreateScheduleDto {
   /**
    * Identificador asociado a country concept.
@@ -332,6 +334,79 @@ export class ScheduleResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
+}
+
+/** Cuerpo de `POST /internal/health-context/schedules/run-due`. */
+export class RunDueSchedulesDto {
+  /**
+   * Valor de limit mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Tamaño máximo del lote de programaciones a evaluar',
+    default: 20,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+}
+
+/** Resultado de evaluar una programación vencida del lote. */
+export class DueScheduleRunResultDto {
+  /**
+   * Identificador asociado a schedule.
+   */
+  @ApiProperty({ format: 'uuid' })
+  scheduleId!: string;
+
+  /**
+   * Identificador asociado a run.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Corrida encolada, si la programación pudo dispararse',
+  })
+  runId?: string;
+
+  /**
+   * Valor de next run at mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ format: 'date-time' })
+  nextRunAt?: string;
+
+  /**
+   * Valor de skipped reason mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Motivo si no se pudo encolar la corrida',
+  })
+  skippedReason?: string;
+}
+
+/** Respuesta de `POST /internal/health-context/schedules/run-due`. */
+export class RunDueSchedulesResponseDto {
+  /**
+   * Valor de claimed mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Programaciones vencidas reclamadas en este lote',
+  })
+  claimed!: number;
+
+  /**
+   * Valor de queued mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Corridas efectivamente encoladas' })
+  queued!: number;
+
+  /**
+   * Valor de results mantenido por la instancia.
+   */
+  @ApiProperty({ type: [DueScheduleRunResultDto] })
+  results!: DueScheduleRunResultDto[];
 }
 
 // ---------------------------------------------------------------------------

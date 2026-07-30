@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsOptional,
   IsString,
@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /integration/contracts` (UC-31-01). */
+@ApiSchema({ name: 'IntegrationContractsCreateContractDto' })
 export class CreateContractDto {
   /**
    * Identificador asociado a external provider.

@@ -779,6 +779,57 @@ export class NotificationRequestResponseDto {
   debounced!: boolean;
 }
 
+/**
+ * Fila de `GET /internal/notifications/pending`: lo mínimo que el worker
+ * necesita para decidir a qué proveedor llamar y con qué intentar el envío.
+ */
+export class PendingNotificationRequestDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a channel.
+   */
+  @ApiProperty({ format: 'uuid' })
+  channelId!: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /**
+   * Valor de payload json mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ description: 'Carga de la solicitud' })
+  payloadJson?: unknown;
+
+  /**
+   * Valor de recipient address mantenido por la instancia.
+   */
+  @ApiPropertyOptional()
+  recipientAddress?: string;
+
+  /**
+   * Identificador asociado a recipient user.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  recipientUserId?: string;
+}
+
+/** Respuesta de `GET /internal/notifications/pending`. */
+export class PendingNotificationsResponseDto {
+  /**
+   * Valor de requests mantenido por la instancia.
+   */
+  @ApiProperty({ type: [PendingNotificationRequestDto] })
+  requests!: PendingNotificationRequestDto[];
+}
+
 // ---------------------------------------------------------------------------
 // UC-35-11 · Entrega multicanal
 // ---------------------------------------------------------------------------

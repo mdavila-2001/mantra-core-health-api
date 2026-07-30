@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsIn,
@@ -12,6 +12,7 @@ import {
 export type AttemptOutcome = 'SUCCESS' | 'PENDING' | 'FAILED';
 
 /** Cuerpo de `POST /identity/checks/{id}/attempts` (UC-27-05). */
+@ApiSchema({ name: 'IdentityAssuranceRecordAttemptDto' })
 export class RecordAttemptDto {
   /**
    * Identificador asociado a identity authority endpoint.

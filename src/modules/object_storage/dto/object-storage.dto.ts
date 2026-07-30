@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -1182,6 +1182,7 @@ export class ArchiveJobResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /object-storage/objects/{manifestId}/request-deletion` (UC-60-12). */
+@ApiSchema({ name: 'ObjectStorageRequestDeletionDto' })
 export class RequestDeletionDto {
   /**
    * Valor de reason mantenido por la instancia.

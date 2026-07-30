@@ -10,7 +10,10 @@ import {
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
 import { DeletionRepository } from '../repositories';
-import { DEFAULT_DELETION_SLA_DAYS } from '../constants';
+import {
+  DEFAULT_DELETION_SLA_DAYS,
+  DEFAULT_DELETION_DISCOVERY_BATCH,
+} from '../constants';
 import {
   RequestDeletionDto,
   DeletionRequestResponseDto,
@@ -22,6 +25,8 @@ import {
   VerificationResponseDto,
   CloseDeletionRequestDto,
   CloseDeletionResponseDto,
+  PendingDeletionTargetsResponseDto,
+  ExecutedDeletionTargetsResponseDto,
 } from '../dto';
 
 const MILLISECONDS_PER_DAY = 86_400_000;
@@ -218,6 +223,57 @@ export class DeletionService {
         blockedByLegalHold,
       };
     });
+  }
+
+  /**
+   * Descubrimiento (Fase 4 del plan de corrección de workers): objetivos
+   * `PENDING` sin bloqueo, listos para que el worker llame `executeDeletion`.
+   * Sin esto, el worker no tenía forma de saber qué `targetId` procesar — el
+   * propio README documenta que ese barrido "lo hace el worker antes de
+   * llamar".
+   */
+  async listPendingTargets(
+    limit?: number,
+  ): Promise<PendingDeletionTargetsResponseDto> {
+    const em = this.em.fork();
+    const targets = await this.deletionRepo.findPendingTargets(
+      em,
+      limit ?? DEFAULT_DELETION_DISCOVERY_BATCH,
+    );
+    return {
+      targets: targets.map((target) => ({
+        id: target.id,
+        deletionRequestId: target.deletionRequestId,
+        datasetId: target.datasetId,
+        backendCode: target.backendCode,
+        targetLocator: target.targetLocator,
+        deletionMode: target.deletionMode,
+      })),
+    };
+  }
+
+  /**
+   * Descubrimiento (Fase 4): objetivos `EXECUTED` listos para que el worker
+   * llame `verifyDeletion`. Misma razón que `listPendingTargets`.
+   */
+  async listExecutedTargets(
+    limit?: number,
+  ): Promise<ExecutedDeletionTargetsResponseDto> {
+    const em = this.em.fork();
+    const targets = await this.deletionRepo.findExecutedTargets(
+      em,
+      limit ?? DEFAULT_DELETION_DISCOVERY_BATCH,
+    );
+    return {
+      targets: targets.map((target) => ({
+        id: target.id,
+        deletionRequestId: target.deletionRequestId,
+        datasetId: target.datasetId,
+        backendCode: target.backendCode,
+        targetLocator: target.targetLocator,
+        deletionMode: target.deletionMode,
+      })),
+    };
   }
 
   /**

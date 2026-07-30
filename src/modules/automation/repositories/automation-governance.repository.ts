@@ -499,6 +499,43 @@ export class AutomationGovernanceRepository {
     return em.findOne(AutomationTriggers, { code });
   }
 
+  /**
+   * Disparadores de calendario activos y habilitados, tomados con
+   * `FOR UPDATE SKIP LOCKED`: varios ticks del worker pueden solaparse, y
+   * saltar lo que otro ya tiene tomado es lo que da un disparo por marca y no
+   * dos (mismo patrón que `ReportingRunsRepository.findDueSchedules`).
+   *
+   * A diferencia de `report_schedules`, `automation_triggers` no declara una
+   * columna `next_run_at`: quien llama usa `updated_at` como referencia de la
+   * última vez que se evaluó el cron, el mismo recurso que ya documenta
+   * `findRecordAutomationForUpdate` para `record_automations` ("su
+   * `updated_at` es la métrica de último uso"). El filtro por vencimiento no
+   * puede vivir en SQL sin interpretar el cron, así que este método sólo
+   * acota el lote; calcular la próxima marca es responsabilidad de quien
+   * llama.
+   */
+  findEnabledCalendarTriggers(
+    em: EntityManager,
+    triggerTypeConceptId: string,
+    activeStateConceptId: string,
+    limit: number,
+  ): Promise<AutomationTriggers[]> {
+    return em.find(
+      AutomationTriggers,
+      {
+        triggerTypeConceptId,
+        stateConceptId: activeStateConceptId,
+        isEnabled: true,
+        scheduleCron: { $ne: null },
+      },
+      {
+        limit,
+        orderBy: { updatedAt: 'ASC' },
+        lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,
+      },
+    );
+  }
+
   // --- Automatizaciones de registro (UC-48-13) ---
 
   /**

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsIn,
   IsOptional,
@@ -9,6 +9,7 @@ import {
 import type { SecretTypeCode } from '../integrations.concepts';
 
 /** Cuerpo de `POST /integrations/connections/{id}/credentials:rotate` (UC-12-03). */
+@ApiSchema({ name: 'IntegrationsRotateCredentialDto' })
 export class RotateCredentialDto {
   /**
    * Valor de secret ref mantenido por la instancia.

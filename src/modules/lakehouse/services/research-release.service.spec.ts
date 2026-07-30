@@ -72,6 +72,8 @@ function build() {
       ...data,
     })),
     findReleaseRequestForUpdate: mockFn(async () => null),
+    findReleaseRequestById: mockFn(async () => null),
+    findExpiredManifests: mockFn(async () => []),
     findManifestByRequestForUpdate: mockFn(async () => null),
     createManifest: mockFn((_tx: any, data: any) => ({
       id: 'manifest-1',
@@ -465,6 +467,51 @@ describe('ResearchReleaseService', () => {
       await d.service.revokeRelease(REQUEST_ID, {}, actor);
 
       expect(d.logger.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe('listExpiredReleases (UC-63-12, descubrimiento)', () => {
+    it('lista solo los releases vencidos cuya solicitud sigue released', async () => {
+      const d = build();
+      const expiresAt = new Date(Date.now() - 1000);
+      d.researchRepo.findExpiredManifests.mockResolvedValue([
+        { datasetReleaseRequestId: REQUEST_ID, expiresAt },
+      ]);
+      d.researchRepo.findReleaseRequestById.mockResolvedValue({
+        id: REQUEST_ID,
+        status: 'released',
+      });
+
+      const res = await d.service.listExpiredReleases(10);
+
+      expect(res.releases).toEqual([{ requestId: REQUEST_ID, expiresAt }]);
+    });
+
+    it('omite un release cuyo manifiesto venció pero ya se cerró', async () => {
+      const d = build();
+      d.researchRepo.findExpiredManifests.mockResolvedValue([
+        { datasetReleaseRequestId: REQUEST_ID, expiresAt: new Date() },
+      ]);
+      d.researchRepo.findReleaseRequestById.mockResolvedValue({
+        id: REQUEST_ID,
+        status: 'revoked',
+      });
+
+      const res = await d.service.listExpiredReleases(10);
+
+      expect(res.releases).toEqual([]);
+    });
+
+    it('usa el tamaño de lote por defecto si no se declara límite', async () => {
+      const d = build();
+
+      await d.service.listExpiredReleases();
+
+      expect(d.researchRepo.findExpiredManifests).toHaveBeenCalledWith(
+        d.em,
+        expect.any(Date),
+        50,
+      );
     });
   });
 });

@@ -67,6 +67,23 @@ export class InboundMessagesRepository {
   }
 
   /**
+   * Descubrimiento para el worker de correlación (Fase 5 del plan de
+   * corrección de workers, UC-12-10): mensajes entrantes `RECEIVED` listos
+   * para correlacionarse con su saliente, del más antiguo al más nuevo.
+   */
+  findReceived(
+    em: EntityManager,
+    receivedStatusConceptId: string,
+    limit: number,
+  ): Promise<InboundMessages[]> {
+    return em.find(
+      InboundMessages,
+      { statusConceptId: receivedStatusConceptId },
+      { orderBy: { receivedAt: 'ASC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

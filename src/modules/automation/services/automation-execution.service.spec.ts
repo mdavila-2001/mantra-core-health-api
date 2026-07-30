@@ -83,6 +83,7 @@ function build() {
     findTriggerById: mockFn(async () => null),
     findEnabledGuardrailsByAgent: mockFn(async () => []),
     findGuardrailPolicyById: mockFn(async () => null),
+    findEnabledCalendarTriggers: mockFn(async () => []),
   };
   const outbox = {
     publishDomainEvent: mockFn(async () => ({ duplicate: false })),
@@ -889,6 +890,118 @@ describe('AutomationExecutionService', () => {
       await expect(
         d.service.finalizeWorkflowRun(RUN_ID, {} as any, actor),
       ).rejects.toThrow(/aprobaciones pendientes/);
+    });
+  });
+
+  describe('evaluateCalendarTriggers (UC-48-07, worker)', () => {
+    const EVERY_MINUTE_CRON = '* * * * *';
+    /** Cron con la próxima marca años en el futuro: nunca vence en la prueba. */
+    const YEARLY_CRON = '0 0 1 1 *';
+
+    it('arranca un workflow_run por cada disparador vencido y avanza su marca', async () => {
+      const d = build();
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60_000);
+      const trigger = {
+        id: 'trigger-1',
+        tenantId: undefined,
+        workflowId: WORKFLOW_ID,
+        scheduleCron: EVERY_MINUTE_CRON,
+        updatedAt: twoMinutesAgo,
+      };
+      d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
+
+      const result = await d.service.evaluateCalendarTriggers({}, actor);
+
+      expect(result.scanned).toBe(1);
+      expect(result.fired).toBe(1);
+      expect(result.skipped).toBe(0);
+      expect(result.firedTriggers[0].triggerId).toBe('trigger-1');
+      expect(
+        d.runsRepo.createWorkflowRun.mock.calls[0][1].triggerSourceConceptId,
+      ).toBe(CONCEPTS.AUTO_SOURCE_SCHEDULE);
+      expect(d.runsRepo.createWorkflowRun.mock.calls[0][1].triggerId).toBe(
+        'trigger-1',
+      );
+      // La marca avanza al instante exacto que tocaba, no a "ahora".
+      expect(trigger.updatedAt.getTime()).toBeGreaterThan(
+        twoMinutesAgo.getTime(),
+      );
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalled();
+    });
+
+    it('no dispara un disparador cuya marca todavía no vence', async () => {
+      const d = build();
+      const trigger = {
+        id: 'trigger-2',
+        workflowId: WORKFLOW_ID,
+        scheduleCron: YEARLY_CRON,
+        updatedAt: new Date(),
+      };
+      d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
+
+      const result = await d.service.evaluateCalendarTriggers({}, actor);
+
+      expect(result.fired).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(d.runsRepo.createWorkflowRun).not.toHaveBeenCalled();
+    });
+
+    it('salta y avanza igual un disparador cuyo workflow ya no está activo', async () => {
+      const d = build();
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60_000);
+      const trigger = {
+        id: 'trigger-3',
+        workflowId: WORKFLOW_ID,
+        scheduleCron: EVERY_MINUTE_CRON,
+        updatedAt: twoMinutesAgo,
+      };
+      d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
+      d.governanceRepo.findWorkflowById.mockResolvedValue({
+        id: WORKFLOW_ID,
+        code: 'triage',
+        stateConceptId: CONCEPTS.AUTO_WORKFLOW_ARCHIVED,
+      });
+
+      const result = await d.service.evaluateCalendarTriggers({}, actor);
+
+      expect(result.fired).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(d.runsRepo.createWorkflowRun).not.toHaveBeenCalled();
+      expect(trigger.updatedAt.getTime()).toBeGreaterThan(
+        twoMinutesAgo.getTime(),
+      );
+    });
+
+    it('salta sin avanzar un disparador con un cron que el intérprete rechaza', async () => {
+      const d = build();
+      const reference = new Date(Date.now() - 2 * 60_000);
+      const trigger = {
+        id: 'trigger-4',
+        workflowId: WORKFLOW_ID,
+        scheduleCron: 'not a cron',
+        updatedAt: reference,
+      };
+      d.governanceRepo.findEnabledCalendarTriggers.mockResolvedValue([trigger]);
+
+      const result = await d.service.evaluateCalendarTriggers({}, actor);
+
+      expect(result.fired).toBe(0);
+      expect(result.skipped).toBe(1);
+      expect(trigger.updatedAt).toBe(reference);
+      expect(d.logger.warn).toHaveBeenCalled();
+    });
+
+    it('respeta el batchSize pedido al consultar el repositorio', async () => {
+      const d = build();
+
+      await d.service.evaluateCalendarTriggers({ batchSize: 10 }, actor);
+
+      expect(d.governanceRepo.findEnabledCalendarTriggers).toHaveBeenCalledWith(
+        d.tx,
+        CONCEPTS.AUTO_TRIGGER_TYPE_SCHEDULE,
+        CONCEPTS.AUTO_TRIGGER_ACTIVE,
+        10,
+      );
     });
   });
 });

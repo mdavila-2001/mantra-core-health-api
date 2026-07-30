@@ -10,6 +10,7 @@ import {
   PromotionsLoyaltyRepository,
   PromotionsDiscountsRepository,
 } from './repositories';
+import { PaymentsModule } from '../payments/payments.module';
 
 /**
  * Módulo de promociones: programas de lealtad con niveles y ledger de puntos,
@@ -17,7 +18,7 @@ import {
  * (UC-51-01 … 13).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), PaymentsModule],
   controllers: [LoyaltyController, PromotionsController],
   providers: [
     PromotionsLoyaltyRepository,

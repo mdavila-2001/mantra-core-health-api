@@ -18,7 +18,7 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const ledgerService = { postToLedger: mockFn() };
   const reconciliationService = { clear: mockFn() };
-  const dunningService = { execute: mockFn() };
+  const dunningService = { execute: mockFn(), runDueDunning: mockFn() };
   const kpiService = { compute: mockFn() };
   const controller = new BillingOperationsController(
     ledgerService as any,
@@ -59,6 +59,13 @@ describe('BillingOperationsController', () => {
     const dto = { tenantId: 't1', runNumber: 'R-1', items: [] };
     await d.controller.executeDunning(dto, actor);
     expect(d.dunningService.execute).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates runDueDunning (tick de morosidad automática)', async () => {
+    const d = build();
+    const dto = { limit: 100 };
+    await d.controller.runDueDunning(dto, actor);
+    expect(d.dunningService.runDueDunning).toHaveBeenCalledWith(dto, actor);
   });
 
   it('delegates computeKpi (UC-17-12)', async () => {

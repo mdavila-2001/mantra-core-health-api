@@ -1,8 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsOptional, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /authz/users/{userId}/role-assignments` (UC-06-04). */
+@ApiSchema({ name: 'AuthzCreateRoleAssignmentDto' })
 export class CreateRoleAssignmentDto {
   /**
    * Identificador asociado a role.

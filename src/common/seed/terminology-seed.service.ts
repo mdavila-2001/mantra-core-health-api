@@ -9,6 +9,7 @@ import {
 } from '../../modules/terminology/entities';
 import { Tenants } from '../../modules/directory/entities';
 import { ProcessingPurposes } from '../../modules/consent/entities';
+import { Users } from '../../modules/iam/entities';
 import {
   CONCEPT_DEFS,
   CONCEPTS,
@@ -229,6 +230,28 @@ export class TerminologySeedService implements OnApplicationBootstrap {
           name: 'General care',
           purposeCategoryConceptId: CONCEPTS.PURPOSE_CATEGORY_CARE,
           statusConceptId: CONCEPTS.STATE_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      inserted++;
+      await em.flush();
+    }
+
+    // Nivel 5: cuenta de servicio compartida por los 17 procesos worker
+    // (depende de CONCEPTS.USER_ACTIVE, ya materializado en el nivel 2). Sin
+    // fila real en `iam.users` violaría la FK NOT NULL de
+    // `recorded_by_user_id`/`actor_user_id` en cuanto cualquiera de los
+    // workers (`src/worker-<dominio>.ts`) llamara un endpoint interno con su
+    // token autofirmado.
+    if (!(await em.findOne(Users, { id: SEED.systemWorkerUserId }))) {
+      em.create(
+        Users,
+        {
+          id: SEED.systemWorkerUserId,
+          statusConceptId: CONCEPTS.USER_ACTIVE,
+          displayName: SEED.systemWorkerDisplayName,
           createdAt: now,
           updatedAt: now,
         },
