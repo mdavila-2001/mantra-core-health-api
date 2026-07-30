@@ -38,7 +38,7 @@
 //   sin sobrescribir el primero).
 //
 // -----------------------------------------------------------------------------
-// Modelo de datos de destino (terminology.*, ver database/SQL/03_terminology):
+// Modelo de datos de destino (terminology.*, ver SQL/03_terminology):
 //
 //   * REUSA terminology_sources code='RXNORM' (creado por el seed de
 //     vademécum / el importador de rxterms) — se hace SELECT de su id, NUNCA

@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
+import type { WorkflowInstances } from '../entities';
 import { WorkflowInstancesService } from './workflow-instances.service';
 
 const actor = { id: 'user-1', roles: ['CLINICIAN'] } as any;
@@ -159,7 +160,22 @@ describe('WorkflowInstancesService', () => {
         updatedAt: new Date(),
         ...overrides,
       };
-      const instance = {
+      // `currentStepCode` y `contextJson` los escribe el servicio, no el mock.
+      // Se declaran igual (opcionales, como en la entidad) para que el doble
+      // tenga la forma real: si no, las aserciones leen propiedades que el tipo
+      // del literal no conoce y el spec deja de compilar.
+      const instance: Pick<
+        WorkflowInstances,
+        | 'id'
+        | 'workflowCode'
+        | 'tenantId'
+        | 'subjectId'
+        | 'currentStateConceptId'
+        | 'statusConceptId'
+        | 'updatedAt'
+        | 'currentStepCode'
+        | 'contextJson'
+      > = {
         id: 'instancia-1',
         workflowCode: 'encounter-lifecycle',
         tenantId: TENANT_ID,

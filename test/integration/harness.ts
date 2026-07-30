@@ -122,10 +122,11 @@ export async function bootstrapTestApp(
   );
   await app.init();
 
-  // `app.get(MikroORM)` infiere el genérico con una tupla `readonly` de entidades
-  // que no es asignable al `MikroORM` mutable esperado; es una varianza puramente
-  // de tipos del contenedor, sin efecto en runtime. Se afirma el tipo en la frontera.
-  const orm = app.get(MikroORM);
+  // Sin el parámetro de tipo explícito, `app.get` infiere el genérico con una
+  // tupla `readonly` de entidades que no es asignable al `MikroORM` mutable que
+  // declaran `TestApp.orm` y `seedAdmin`. Es varianza pura del contenedor, sin
+  // efecto en runtime; fijar `TResult` lo resuelve sin recurrir a una aserción.
+  const orm = app.get<MikroORM>(MikroORM);
   await seedAdmin(orm);
 
   const tokenService = app.get(TokenService);

@@ -50,7 +50,7 @@
 //
 // Idempotencia: UUIDs deterministas `md5('mantra:icd10cm:...')::uuid` +
 // `ON CONFLICT DO NOTHING` en todas las inserciones, siguiendo el mismo
-// patrón que `database/SQL/98_seeds/vademecum_medications.sql`.
+// patrón que `SQL/patches/2026-07-30_vademecum_dev_seed.sql`.
 // =============================================================================
 
 import 'dotenv/config';
