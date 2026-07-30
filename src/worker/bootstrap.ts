@@ -8,6 +8,7 @@ import { LoggingModule, loggingEnvSchema } from '../logging';
 import { workerEnvSchema } from './worker.env';
 import { SystemApiClientModule } from './system-api-client.module';
 import { MockProviderClientModule } from './mock-provider-client.module';
+import { GoogleEmailClientModule } from './google-email-client.module';
 
 /**
  * Arranca UN worker por dominio como proceso Node independiente.
@@ -43,6 +44,7 @@ export async function bootstrapWorker(
       AuthModule,
       SystemApiClientModule,
       MockProviderClientModule,
+      GoogleEmailClientModule,
       ScheduleModule.forRoot(),
       domainModule,
     ],

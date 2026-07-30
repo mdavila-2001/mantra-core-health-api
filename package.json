@@ -64,6 +64,7 @@
     "orm:schema:dump": "ORM_SCHEMA_SYNC=dry-run node dist/main",
     "redesa:guardrails": "node tools/redesa/guardrails.mjs",
     "redesa:coverage": "node tools/redesa/coverage-report.mjs",
+    "google:oauth:get-refresh-token": "node tools/google-oauth/get-refresh-token.mjs",
     "docs:openapi:generate": "yarn build && node tools/openapi/generate-openapi.mjs",
     "docs:openapi:lint": "redocly lint openapi/openapi.yaml",
     "docs:openapi:bundle": "redocly bundle openapi/openapi.yaml -o dist-docs/openapi.yaml",

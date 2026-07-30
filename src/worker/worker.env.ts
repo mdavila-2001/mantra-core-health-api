@@ -52,6 +52,23 @@ export const workerEnvSchema = Joi.object({
     .allow('')
     .default('http://127.0.0.1:4100'),
   MOCK_PROVIDER_API_KEY: Joi.string().allow('').default(''),
+  /**
+   * Proveedor real de envío de email para `NotificationDeliveryJob` (canal
+   * EMAIL) vía Gmail API con OAuth2 de 3 patas (cuenta Gmail normal, no
+   * Workspace: no hay delegación de dominio, así que se necesita un
+   * `refresh_token` obtenido una vez con consentimiento interactivo — ver
+   * `tools/google-oauth/get-refresh-token.mjs`). Las 4 deben estar presentes
+   * para que `GoogleProviderWiringService` reemplace el adapter; si falta
+   * alguna, el job sigue con el stub `PROVIDER_NOT_CONFIGURED` (o con
+   * `mock-provider-server` si `MOCK_PROVIDER_BASE_URL` está configurada).
+   * Si ambos proveedores están configurados a la vez, Google gana (el real
+   * se registra después del mock en `messaging.worker-module.ts`).
+   */
+  GOOGLE_OAUTH_CLIENT_ID: Joi.string().allow('').default(''),
+  GOOGLE_OAUTH_CLIENT_SECRET: Joi.string().allow('').default(''),
+  GOOGLE_OAUTH_REFRESH_TOKEN: Joi.string().allow('').default(''),
+  /** Buzón remitente real (debe ser la misma cuenta que otorgó el consentimiento OAuth2). */
+  GOOGLE_SENDER_EMAIL: Joi.string().allow('').default(''),
 }).unknown(true);
 
 /**
@@ -66,6 +83,10 @@ export interface WorkerEnv {
   tsRetentionPolicies: Record<string, string>;
   mockProviderBaseUrl: string;
   mockProviderApiKey: string;
+  googleOAuthClientId: string;
+  googleOAuthClientSecret: string;
+  googleOAuthRefreshToken: string;
+  googleSenderEmail: string;
 }
 
 /** Lee la configuración del worker desde `process.env`. */
@@ -87,6 +108,10 @@ export function loadWorkerEnv(): WorkerEnv {
     mockProviderBaseUrl:
       process.env.MOCK_PROVIDER_BASE_URL ?? 'http://127.0.0.1:4100',
     mockProviderApiKey: process.env.MOCK_PROVIDER_API_KEY ?? '',
+    googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID ?? '',
+    googleOAuthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? '',
+    googleOAuthRefreshToken: process.env.GOOGLE_OAUTH_REFRESH_TOKEN ?? '',
+    googleSenderEmail: process.env.GOOGLE_SENDER_EMAIL ?? '',
   };
 }
 

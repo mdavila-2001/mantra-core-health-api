@@ -66,6 +66,16 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
   existe en los 3 puntos de extensión reales (`messaging`, `cross_store_consistency`,
   `vector_rag`): conectar Twilio/SendGrid/OpenAI/etc. es escribir un adapter que cumpla el tipo y
   un `OnModuleInit` que lo registre según una variable de entorno — nada más.
+- **Primer proveedor real conectado (2026-07-30, para desarrollo): Gmail API vía OAuth2** para el
+  canal EMAIL de `messaging` (`GoogleEmailClient` +
+  `GoogleProviderWiringService`, registrado después del mock para que gane si ambos están
+  configurados). Cuenta Gmail normal, sin Workspace — sin delegación de dominio, así que necesita
+  un `refresh_token` obtenido una vez con consentimiento interactivo
+  (`yarn google:oauth:get-refresh-token`, ver `tools/google-oauth/get-refresh-token.mjs`). El
+  proveedor de producción sigue siendo una decisión pendiente del negocio (SendGrid mencionado
+  como candidato); Google es explícitamente el adapter de **desarrollo**, no el definitivo.
+  Cubierto con integración real opt-in (`google-email-provider.int-spec.ts`, corre sólo si las 4
+  variables `GOOGLE_OAUTH_*`/`GOOGLE_SENDER_EMAIL` están configuradas).
 - Hay pruebas unitarias, de integración y smoke; los cambios sobre persistencia deben validarse
   contra una base real, no sólo con `EntityManager` simulado.
 
