@@ -5,6 +5,7 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "packageManager": "yarn@4.14.1",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -22,6 +23,8 @@
     "smoke": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-smoke.json",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest-cli/bin/jest.js --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "openapi:generate": "yarn build && node tools/documentation/generate-openapi.js",
+    "openapi:validate": "node tools/documentation/validate-openapi.js",
     "orm": "mikro-orm",
     "orm:gen": "mikro-orm generate-entities --config ./src/orm/config/orm.generator.config.ts --save",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
