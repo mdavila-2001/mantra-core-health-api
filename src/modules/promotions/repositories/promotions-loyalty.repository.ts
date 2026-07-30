@@ -519,6 +519,13 @@ export class PromotionsLoyaltyRepository {
   /**
    * Membresías activas del programa, tomadas con `FOR UPDATE SKIP LOCKED`: el
    * barrido de expiración procesa por lotes y no debe esperar a otra pasada.
+   *
+   * `ORDER BY updated_at ASC`: el servicio marca (`touch`) cada membresía que
+   * revisa, tenga o no puntos vencidos que retirar, así que la próxima pasada
+   * trae a las menos revisadas recientemente. Sin este orden, un programa con
+   * más miembros que `limit` repetía SIEMPRE el mismo primer lote (el orden
+   * físico de la tabla es estable entre llamadas sin escrituras de por medio)
+   * y nunca llegaba a expirar puntos vencidos del resto.
    */
   findMembershipsForSweep(
     em: EntityManager,
@@ -529,7 +536,11 @@ export class PromotionsLoyaltyRepository {
     return em.find(
       LoyaltyMemberships,
       { loyaltyProgramId, statusConceptId: activeStatusConceptId },
-      { limit, lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE },
+      {
+        limit,
+        orderBy: { updatedAt: 'ASC' },
+        lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,
+      },
     );
   }
 

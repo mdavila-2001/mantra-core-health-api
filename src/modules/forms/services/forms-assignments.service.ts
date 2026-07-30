@@ -67,6 +67,7 @@ export class FormsAssignmentsService {
           tx,
           dto.targetResourceConceptId,
           FORMS.ASSIGNMENT_ACTIVE,
+          dto.tenantId,
         );
         if (active >= policy.maximumFields) {
           throw new PreconditionFailedException(

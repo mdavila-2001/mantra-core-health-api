@@ -26,7 +26,7 @@ import {
 import { DocumentStoreService } from '../services';
 import { CollectionNameGuard } from './collection-name.guard';
 import {
-  CreateDocumentDto,
+  CreateFlexibleDocumentDto,
   DocumentResponseDto,
   ListDocumentsQueryDto,
   TenantScopeQueryDto,
@@ -66,7 +66,7 @@ export class DocumentStoreController {
   @ApiOperation({ summary: 'Crear un documento flexible en la colección' })
   create(
     @Param('collection') collection: string,
-    @Body() dto: CreateDocumentDto,
+    @Body() dto: CreateFlexibleDocumentDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DocumentResponseDto> {
     return this.service.create(collection, dto, actor);

@@ -17966,6 +17966,342 @@ paths:
       summary: Reconciliar el manifiesto canónico contra el vectorial
       tags:
         - vector_rag
+  /document-store/collections/{collection}/documents:
+    post:
+      operationId: DocumentStoreController_create
+      parameters:
+        - name: collection
+          required: true
+          in: path
+          description: Colección lógica de documentos
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFlexibleDocumentDto'
+      responses:
+        '201':
+          description: ''
+      security:
+        - bearer: []
+      summary: Crear un documento flexible en la colección
+      tags:
+        - document-store
+    get:
+      operationId: DocumentStoreController_list
+      parameters:
+        - name: collection
+          required: true
+          in: path
+          description: Colección lógica de documentos
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Página (1-based)
+          schema:
+            minimum: 1
+            default: 1
+            type: number
+        - name: pageSize
+          required: false
+          in: query
+          description: Tamaño de página
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 20
+            type: number
+        - name: order
+          required: false
+          in: query
+          schema:
+            default: DESC
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sortBy
+          required: false
+          in: query
+          description: Campo de ordenamiento
+          schema:
+            default: createdAt
+            type: string
+        - name: tenantId
+          required: true
+          in: query
+          description: Tenant cuyos documentos se listan
+          schema:
+            format: uuid
+            type: string
+        - name: documentType
+          required: false
+          in: query
+          description: Filtrar por clasificación de documento
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Listar documentos del tenant (paginado)
+      tags:
+        - document-store
+  /document-store/collections/{collection}/documents/{id}:
+    get:
+      operationId: DocumentStoreController_findOne
+      parameters:
+        - name: collection
+          required: true
+          in: path
+          description: Colección lógica de documentos
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: tenantId
+          required: true
+          in: query
+          description: Tenant propietario del documento
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Leer un documento por id (acotado por tenant)
+      tags:
+        - document-store
+    patch:
+      operationId: DocumentStoreController_update
+      parameters:
+        - name: collection
+          required: true
+          in: path
+          description: Colección lógica de documentos
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDocumentDto'
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Actualizar un documento con concurrencia optimista
+      tags:
+        - document-store
+    delete:
+      operationId: DocumentStoreController_softDelete
+      parameters:
+        - name: collection
+          required: true
+          in: path
+          description: Colección lógica de documentos
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: tenantId
+          required: true
+          in: query
+          description: Tenant propietario del documento
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Borrado lógico de un documento (soft-delete)
+      tags:
+        - document-store
+  /redis-runtime/cache:
+    post:
+      operationId: RedisRuntimeController_setCache
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCacheDto'
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Escribir un valor en caché con TTL (namespaced por tenant)
+      tags:
+        - redis-runtime
+  /redis-runtime/cache/{key}:
+    get:
+      operationId: RedisRuntimeController_getCache
+      parameters:
+        - name: key
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Leer un valor de caché por clave (namespaced por tenant)
+      tags:
+        - redis-runtime
+    delete:
+      operationId: RedisRuntimeController_deleteCache
+      parameters:
+        - name: key
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Borrar una clave de caché (namespaced por tenant)
+      tags:
+        - redis-runtime
+  /redis-runtime/locks:
+    post:
+      operationId: RedisRuntimeController_acquireLock
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcquireLockDto'
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Adquirir un lock distribuido (SET NX PX + token)
+      tags:
+        - redis-runtime
+  /redis-runtime/locks/{key}:
+    delete:
+      operationId: RedisRuntimeController_releaseLock
+      parameters:
+        - name: key
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: token
+          required: true
+          in: query
+          description: Token devuelto al adquirir el lock (CAS de liberación)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Liberar un lock si el token coincide (CAS)
+      tags:
+        - redis-runtime
+  /search/{index}/documents:
+    post:
+      description: El servidor sella el documento con el `tenantId` del contexto; el del cuerpo se ignora.
+      operationId: SearchPlatformController_indexDocument
+      parameters:
+        - name: index
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IndexDocumentDto'
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Indexar un documento
+      tags:
+        - search_platform
+  /search/{index}/_search:
+    post:
+      description: 'Búsqueda tipada: texto + filtros/facetas declarados. Se inyecta siempre el filtro de tenant.'
+      operationId: SearchPlatformController_search
+      parameters:
+        - name: index
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequestDto'
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Buscar documentos
+      tags:
+        - search_platform
+  /search/{index}/documents/{id}:
+    delete:
+      operationId: SearchPlatformController_deleteDocument
+      parameters:
+        - name: index
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+      summary: Eliminar un documento
+      tags:
+        - search_platform
 info:
   title: REDESA Health API
   description: >-
@@ -18054,6 +18390,7 @@ tags:
   - name: dicomweb
   - name: directory-admin-tenants
   - name: directory-tenants
+  - name: document-store
   - name: education
   - name: erp
   - name: fhir-r5
@@ -18122,11 +18459,13 @@ tags:
   - name: read-models
   - name: read-models-public
   - name: read-models-views
+  - name: redis-runtime
   - name: reporting
   - name: scheduling
   - name: scheduling-bookings
   - name: scheduling-confirmation
   - name: scheduling-internal
+  - name: search_platform
   - name: system-context
   - name: system-ops-assessments
   - name: system-ops-backup
@@ -42303,3 +42642,132 @@ components:
       required:
         - canonicalDocumentIds
         - canonicalManifestHash
+    CreateFlexibleDocumentDto:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: Tenant propietario del documento
+          format: uuid
+        documentType:
+          type: string
+          description: Tipo/clasificación del documento (p. ej. fhir_bundle_raw)
+          example: fhir_bundle_raw
+        payload:
+          type: object
+          description: Contenido flexible del documento (JSON/semiestructurado)
+          additionalProperties: true
+      required:
+        - tenantId
+        - documentType
+        - payload
+    UpdateDocumentDto:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          description: Tenant propietario del documento
+          format: uuid
+        expectedVersion:
+          type: number
+          description: Versión que el cliente cree vigente (concurrencia optimista)
+          minimum: 1
+        payload:
+          type: object
+          description: Nuevo contenido flexible del documento
+          additionalProperties: true
+        documentType:
+          type: string
+          description: Nueva clasificación del documento
+      required:
+        - tenantId
+        - expectedVersion
+    SetCacheDto:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Clave lógica (se namespacea por tenant)
+          maxLength: 200
+        value:
+          type: string
+          description: Valor a almacenar (string)
+          maxLength: 65536
+        ttlSec:
+          type: number
+          description: TTL en segundos
+          minimum: 1
+          maximum: 2592000
+      required:
+        - key
+        - value
+        - ttlSec
+    AcquireLockDto:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Clave del recurso a bloquear (namespaced por tenant)
+          maxLength: 200
+        ttlSec:
+          type: number
+          description: Tiempo de vida del lock en segundos
+          minimum: 1
+          maximum: 3600
+      required:
+        - key
+        - ttlSec
+    IndexDocumentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 256
+          description: Identificador del documento en el índice (idempotente).
+        document:
+          type: object
+          additionalProperties: true
+          description: Documento de negocio. El servicio sobrescribe `tenantId` con el del contexto.
+      required:
+        - id
+        - document
+    SearchFilterDto:
+      type: object
+      properties:
+        field:
+          type: string
+          maxLength: 100
+          description: Campo permitido del índice.
+        values:
+          description: Valores admitidos (OR); se traduce a un `terms` acotado.
+          type: array
+          items:
+            type: string
+      required:
+        - field
+        - values
+    SearchRequestDto:
+      type: object
+      properties:
+        query:
+          type: string
+          maxLength: 512
+          description: Texto a buscar en los campos full-text del índice.
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchFilterDto'
+        facets:
+          description: Campos a agregar como faceta (allowlist del índice).
+          type: array
+          items:
+            type: string
+        from:
+          type: number
+          minimum: 0
+          default: 0
+        size:
+          type: number
+          minimum: 1
+          maximum: 100
+          default: 20

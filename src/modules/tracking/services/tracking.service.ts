@@ -251,6 +251,7 @@ export class TrackingService {
         tx,
         subjectTypeConceptId,
         CONCEPTS.STATE_ACTIVE,
+        dto.tenantId,
       );
       const existingCodes = new Set(existing.map((m) => m.code));
       const existingTerminals = existing.filter((m) => m.isTerminal).length;
@@ -419,6 +420,7 @@ export class TrackingService {
             tx,
             subject.subjectTypeConceptId,
             dto.milestoneCode,
+            subject.tenantId,
           )
         : null;
       if (dto.milestoneCode && !milestone) {
@@ -859,6 +861,7 @@ export class TrackingService {
           tx,
           subject.subjectTypeConceptId,
           CONCEPTS.STATE_ACTIVE,
+          subject.tenantId,
         )
       ).find((m) => m.isTerminal);
 
@@ -1084,6 +1087,7 @@ export class TrackingService {
           tx,
           subject.subjectTypeConceptId,
           CONCEPTS.STATE_ACTIVE,
+          subject.tenantId,
         );
         const pending = this.nextPendingMilestone(subject, milestones);
         if (!pending?.slaMinutes) continue;

@@ -1,6 +1,6 @@
 # Estado y pendientes
 
-Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-28**.
+Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
 
 ## Estado actual
 
@@ -11,6 +11,16 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-28**.
   huérfanas; queda 1 acceso directo entre repositorios de dominios distintos, justificado
   (`billing/repositories/practices-lookup.repository.ts` lee `practice.practices` de solo lectura
   porque `invoices` no tiene `tenant_id` propio — ver `dunning.service.ts`).
+- **Guardrail nuevo (2026-07-30): `TENANT_SCOPE_MISSING`** en `tools/redesa/guardrails.mjs`. Detecta
+  estáticamente un `em.find`/`em.count` sobre una entidad con `tenant_id` que no acota ni por
+  `tenantId` ni por un id de principal/recurso puntual — el patrón exacto del bug real de
+  `promotions-loyalty.repository.ts:findActivePrograms` (sesión 2026-07-29). Trae una allowlist
+  explícita para barridos `SYSTEM` legítimamente cross-tenant (worker discovery) y para módulos
+  enteramente globales (`identity_assurance`, `delegated_access`, `pharmacy_inventory`,
+  `time_series`). Al escribirlo, encontró y se corrigieron 3 fugas reales más: suscripciones de
+  webhook en `messaging` (un tenant podía recibir eventos de otro), catálogo de hitos de `tracking`
+  (podía asignarse el hito terminal de otro tenant a un envío) y el presupuesto de asignaciones de
+  `forms` (el consumo de un tenant bloqueaba el alta de otro).
 - Hay 20 procesos worker separados (`src/worker-<dominio>.ts`, uno por dominio, arrancados vía
   `bootstrapWorker`), cada uno como cliente HTTP autenticado (`SystemApiClient`, rol `SYSTEM`) de
   la propia API — nunca importan servicios de dominio directamente. Cubren scheduling, pharmacy
@@ -22,10 +32,40 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-28**.
   bucle sin fabricar datos de proyección). **time_series** tiene worker de compresión y rollups
   (automáticos) y de retención (`drop_chunks`, irreversible) — la retención es **opt-in por tabla**
   vía `TS_RETENTION_POLICIES`; sin configurarla, no borra nada.
+- **`OutboxService.publishDomainEvent` estaba roto contra una base real (2026-07-30), 100% de las
+  veces.** Es la API que "desbloquea a los demás módulos" (70+ call-sites en automation,
+  cross_store_consistency, graph_intelligence, lakehouse, time_series, vector_rag, workflow, authz,
+  procedures_perioperative) y nunca tuvo una prueba de integración contra Postgres real —los tests
+  unitarios mockean el repositorio, así que nunca lo habrían visto. Tres bugs compuestos, todos
+  corregidos con evidencia de integración nueva (`test/integration/outbox-relay-race.int-spec.ts`):
+  (1) `createOutboxMessage` nunca seteaba `createdAt`/`updatedAt` (columnas `NOT NULL`, sin
+  default) — faltaba el `...createdBy(...)` que sí llevan el resto de repositorios; (2)
+  `domain_event_id` es un uuid plano (no una relación de MikroORM), así que el ORM no sabía que el
+  outbox message depende del evento y podía insertarlos en el orden equivocado en el mismo flush,
+  violando la FK — se corrigió con un `await tx.flush()` explícito entre ambos creates (mismo
+  patrón que ya usa `accounting/services/ledger.service.ts`); (3) `correlationId` es `NOT NULL` en
+  el esquema pero opcional en la firma, y ~85% de los call-sites reales nunca lo pasaban — ahora se
+  deriva con `randomUUID()` si el llamador no trae uno de un flujo mayor que propagar.
+- **Módulos 55/56/57 (Document Store, Redis Runtime, Search Platform) estaban completamente
+  inalcanzables por HTTP (2026-07-30).** Sus tres módulos se importaban en `app.module.ts` con un
+  comentario que los describía, pero nunca se agregaron al array `imports: []` — un error de
+  copiar/pegar que dejó tres dominios enteros (controllers, servicios, DTOs, README) como código
+  muerto pese a que sus stores reales (`mantra-redesa-mongodb-1`, `redis-1`, `opensearch-1`) sí
+  corrían en `docker-compose.yml`. Corregido; cubierto ahora con integración real
+  (`document-store.int-spec.ts`, `redis-runtime.int-spec.ts`, `search-platform.int-spec.ts`).
 - Los adapters de proveedor externo (envío real de notificaciones, borrado real en el store
   destino de cross-store, cálculo real de embeddings) son stubs que **fallan de forma visible**
   (`PROVIDER_NOT_CONFIGURED`) en vez de fingir éxito: ningún proveedor concreto vive en este repo
-  todavía. Conectar uno real es sustituir el adapter (`job.providerAdapter = ...`), no tocar el job.
+  todavía. Conectar uno real es sustituir el adapter (`job.providerAdapter = ...`), no tocar el
+  job — verificado de punta a punta (2026-07-30) contra `mock-provider-server` real, no sólo por
+  lectura de código: `test/integration/worker-provider-adapter-swap.int-spec.ts` demuestra que (1)
+  sin el proveedor configurado el job falla visible con `PROVIDER_NOT_CONFIGURED`, y (2) con
+  `MOCK_PROVIDER_BASE_URL` fijado, el `OnModuleInit` de wiring reemplaza `job.providerAdapter` y la
+  siguiente llamada es una petición HTTP real (no un stub), sin tocar el job. El mismo patrón
+  (tipo `XxxProviderAdapter` + default fail-closed + propiedad mutable + `*WiringService`) ya
+  existe en los 3 puntos de extensión reales (`messaging`, `cross_store_consistency`,
+  `vector_rag`): conectar Twilio/SendGrid/OpenAI/etc. es escribir un adapter que cumpla el tipo y
+  un `OnModuleInit` que lo registre según una variable de entorno — nada más.
 - Hay pruebas unitarias, de integración y smoke; los cambios sobre persistencia deben validarse
   contra una base real, no sólo con `EntityManager` simulado.
 
@@ -43,6 +83,11 @@ Las cifras anteriores son una fotografía. Regenerar `REDESA-COBERTURA.md` con
 - Emisión idempotente y auditada de solicitudes de medicación.
 - Eliminación de escrituras directas de promotions a payments y de scheduling a tablas de audit.
 - Worker HTTP autenticado para relay, dispatch, colas y notificaciones de mensajería.
+- Guardrail estático de aislamiento por tenant (`TENANT_SCOPE_MISSING`) + 3 fugas reales cerradas
+  (messaging, tracking, forms) + reparación del barrido de puntos de loyalty (rotación por
+  `updatedAt` para que un programa con más miembros que el lote sí llegue a barrerlos todos).
+- `OutboxService.publishDomainEvent` reparado (createdAt, orden de FK, correlationId) y los
+  módulos 55/56/57 reconectados a `AppModule` — ver detalle arriba.
 
 El detalle comprobable de cada punto, con archivos y pruebas, está en
 `REDESA-TRAZABILIDAD.md`; las reglas propias de cada dominio están en
@@ -94,18 +139,31 @@ Lo que sigue siendo una decisión de despliegue, no de código:
 
 ### P1 · Ampliar integración real
 
-Hechos contra DB real (2026-07-29): RLS con dos tenants y roles distintos
-(`rls.int-spec.ts`, opt-in) y los triggers WORM de `audit.audit_log`/`data_access_log`
-(`audit-worm.int-spec.ts`, siempre corre — confirma que ni siquiera el rol propietario puede
-UPDATE/DELETE una fila real de auditoría). Sigue priorizando escenarios donde un mock no demuestra
-el comportamiento:
+Hechos contra DB real: RLS con dos tenants y roles distintos (`rls.int-spec.ts`, opt-in, 2026-07-29)
+y los triggers WORM de `audit.audit_log`/`data_access_log` (`audit-worm.int-spec.ts`, siempre corre
+— confirma que ni siquiera el rol propietario puede UPDATE/DELETE una fila real de auditoría).
 
-- `FOR UPDATE`, `SKIP LOCKED`, carreras e idempotencia concurrente (dos conexiones reales
-  disputando el mismo lock — ninguna prueba actual lo hace, sólo se confía en el código);
+**Cerrado 2026-07-30** (los tres ítems que este documento marcaba como pendientes el 29):
+
+- `FOR UPDATE`/`SKIP LOCKED` con dos conexiones reales disputando el mismo lote —
+  `outbox-relay-race.int-spec.ts` dispara dos `POST /internal/outbox/relay/run` concurrentes y
+  confirma que cada mensaje sembrado lo reclama exactamente una de las dos pasadas (encontró, de
+  paso, los 3 bugs de `publishDomainEvent` ya descritos arriba);
+- MongoDB, Redis y OpenSearch — `document-store.int-spec.ts`, `redis-runtime.int-spec.ts`,
+  `search-platform.int-spec.ts` (encontraron, de paso, que los tres módulos nunca estaban
+  registrados en `AppModule` — ver arriba);
+- el punto de extensión de proveedores — `worker-provider-adapter-swap.int-spec.ts` contra
+  `mock-provider-server` real.
+
+Sigue priorizando escenarios donde un mock no demuestra el comportamiento:
+
 - restricciones `UNIQUE`/FK e historiales (`*_history` vía `HistoryMirrorSubscriber`);
-- outbox, reintentos y recuperación tras fallo parcial;
-- operaciones sobre MongoDB, Redis y OpenSearch (las importaciones de terminología ya tienen 7
-  suites de integración; falta lo mismo para document_store/redis_runtime/search_platform).
+- outbox: reintentos y recuperación tras fallo parcial (el relay/dispatch ya tiene cobertura real;
+  falta el camino de reintento agotado → cola muerta con datos reales);
+- el resto de los 70+ call-sites de `publishDomainEvent` (automation, cross_store_consistency,
+  graph_intelligence, lakehouse, time_series, vector_rag, workflow, authz,
+  procedures_perioperative) siguen sin una prueba de integración propia — sólo se verificó el
+  mecanismo genérico, no cada evento de negocio específico que publican.
 
 ### P1 · Cerrado — entidades huérfanas
 

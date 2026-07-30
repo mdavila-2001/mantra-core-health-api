@@ -616,6 +616,17 @@ describe('PromotionsLoyaltyService', () => {
 
       expect(res).toEqual({ scanned: 1, affected: 0, pointsExpired: '0.00' });
     });
+
+    it('touches every scanned membership even without expirable points, so the next sweep rotates past it', async () => {
+      const d = build();
+      const member = membership({ updatedByUserId: undefined });
+      d.loyaltyRepo.findMembershipsForSweep.mockResolvedValue([member]);
+      d.loyaltyRepo.findExpirableEntries.mockResolvedValue([]);
+
+      await d.service.expirePoints(dto, actor);
+
+      expect(member.updatedByUserId).toBe(actor.id);
+    });
   });
 
   describe('listActivePrograms (UC-51-06, descubrimiento)', () => {

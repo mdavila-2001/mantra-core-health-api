@@ -172,6 +172,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     WorkflowModule,
     TimeSeriesModule,
     VectorRagModule,
+    DocumentStoreModule,
+    RedisRuntimeModule,
+    SearchPlatformModule,
   ],
   controllers: [AppController],
   providers: [

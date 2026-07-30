@@ -11,7 +11,8 @@ import { IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
  */
 export class SendNotificationDto {
   @ApiProperty({
-    description: 'Tipo o id de canal (SMS, EMAIL, o el channelId real del worker)',
+    description:
+      'Tipo o id de canal (SMS, EMAIL, o el channelId real del worker)',
   })
   @IsString()
   @MaxLength(200)

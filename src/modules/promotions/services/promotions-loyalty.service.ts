@@ -704,10 +704,14 @@ export class PromotionsLoyaltyService {
 
         if (membershipExpired > 0) {
           membership.pointsBalance = this.round(balance);
-          touch(membership, actor.id);
           affected += 1;
           pointsExpired += membershipExpired;
         }
+        // Se marca aunque no haya expirado nada: `findMembershipsForSweep`
+        // ordena por `updatedAt` ascendente, así que esto es lo que rota el
+        // lote — sin tocar TODAS las revisadas, las mismas primeras `limit`
+        // membresías volverían a salir siempre y las demás nunca se barrerían.
+        touch(membership, actor.id);
       }
 
       return {
