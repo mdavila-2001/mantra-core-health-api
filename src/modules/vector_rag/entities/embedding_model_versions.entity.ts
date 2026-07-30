@@ -27,9 +27,9 @@ export class EmbeddingModelVersions {
   @Property({ fieldName: 'approved_for_phi', type: 'boolean' })
   approvedForPhi!: boolean;
 
-  @Property({ fieldName: 'approved_at', columnType: 'timestamptz' })
-  approvedAt!: Date;
+  @Property({ fieldName: 'approved_at', columnType: 'timestamptz', nullable: true })
+  approvedAt?: Date;
 
-  @Property({ fieldName: 'retired_at', columnType: 'timestamptz' })
-  retiredAt!: Date;
+  @Property({ fieldName: 'retired_at', columnType: 'timestamptz', nullable: true })
+  retiredAt?: Date;
 }

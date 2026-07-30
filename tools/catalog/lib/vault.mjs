@@ -5,9 +5,14 @@ import { join } from 'node:path';
 // Raíz de la bóveda SALUD (Obsidian). Se puede reapuntar con SALUD_VAULT sin
 // tocar el código: por defecto se asume que la bóveda es hermana del repositorio.
 export const VAULT = process.env.SALUD_VAULT
-  ?? join(process.cwd(), '..', 'mantra_core_technologies_health_docs', 'SALUD');
+  ?? join(process.cwd(), '..', 'Mantra Core Health Vault', 'SALUD');
 const ENT = join(VAULT, 'Entidades');
 const FKDIR = join(VAULT, 'FK');
+
+// Las notas de la bóveda se guardan con finales de línea CRLF (Obsidian en Windows).
+// Todas las expresiones de abajo anclan bloques con `\n`, así que la normalización va
+// en la lectura: sin esto ningún bloque ```puml``` casa y la bóveda se lee sin campos.
+const read = (path) => readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
 
 const puml = (t) => { const m = t.match(/```puml\n([\s\S]*?)```/); return m ? m[1].split('\n') : []; };
 
@@ -21,7 +26,7 @@ export function readVault() {
     const dot = base.indexOf('.');
     const schema = base.slice(0, dot);
     const table = base.slice(dot + 1);
-    const text = readFileSync(join(ENT, file), 'utf8');
+    const text = read(join(ENT, file));
     const tipo = (text.match(/^  - tipo\/(\S+)$/m) || [, 'plain'])[1];
     const module = (text.match(/^  - modulo\/(\d+)$/m) || [, null])[1];
 
@@ -78,7 +83,7 @@ export function readVault() {
       const base = f.replace(/^Ext /, '').replace(/\.md$/, '');
       const target = entities.get(base);
       if (!target) continue;
-      const text = readFileSync(join(dir, f), 'utf8');
+      const text = read(join(dir, f));
       const tb = text.match(/```text\n([\s\S]*?)```/);
       for (const raw of tb ? tb[1].split('\n') : []) {
         const m = raw.match(/^-\s+([a-z_0-9]+)(?:\s+([a-z0-9_]+(?:\[\])?))?\s*(.*)$/i);
@@ -105,7 +110,7 @@ export function readVault() {
     if (parts.length < 3) continue;
     const [schema, table] = parts;
     const column = parts.slice(2).join('.');
-    const text = readFileSync(join(FKDIR, file), 'utf8');
+    const text = read(join(FKDIR, file));
     const t = text.match(/## Apunta a →\n- \[\[E ([a-z_0-9]+)\.([a-z_0-9]+)[|\]]/);
     if (!t) continue;
     foreignKeys.push({
