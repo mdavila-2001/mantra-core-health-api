@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ResearchReleaseService } from '../services';
 import {
   DefineCohortDto,
@@ -19,6 +26,7 @@ import {
   ReleaseManifestResponseDto,
   RevokeDatasetReleaseDto,
   RevokeReleaseResponseDto,
+  PendingExpiredReleasesResponseDto,
 } from '../dto';
 
 /**
@@ -88,6 +96,19 @@ export class ResearchController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ReleaseManifestResponseDto> {
     return this.releaseService.approveRelease(id, dto, actor);
+  }
+
+  /**
+   * Descubrimiento del worker de revocación: `revoke` exige un `requestId`
+   * puntual y no había forma de listar qué releases vencidos cerrar.
+   */
+  @Get('dataset-releases/expired')
+  @Roles('RESEARCH_GOVERNANCE', 'DPO', 'SYSTEM', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Listar releases con manifiesto vencido sin cerrar' })
+  listExpiredReleases(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PendingExpiredReleasesResponseDto> {
+    return this.releaseService.listExpiredReleases(limit);
   }
 
   /** UC-63-12. */

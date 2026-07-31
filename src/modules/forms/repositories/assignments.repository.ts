@@ -101,15 +101,24 @@ export class AssignmentsRepository {
     });
   }
 
-  /** Cuenta asignaciones activas para un target (presupuesto de campos). */
+  /**
+   * Cuenta asignaciones activas para un target (presupuesto de campos).
+   *
+   * Acotado por tenant: sin esto, el consumo de un tenant contaba para el
+   * presupuesto de `maximumFields` de otro tenant distinto sobre el mismo
+   * `targetResourceConceptId`, pudiendo bloquear altas legítimas por un
+   * límite ya alcanzado por terceros.
+   */
   countActiveAssignments(
     em: EntityManager,
     targetResourceConceptId: string,
     stateConceptId: string,
+    tenantId: string | undefined,
   ): Promise<number> {
     return em.count(FieldAssignments, {
       targetResourceConceptId,
       stateConceptId,
+      tenantId: tenantId ?? null,
     });
   }
 

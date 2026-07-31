@@ -258,6 +258,82 @@ export class WebhookSubscriptionResponseDto {
   updated!: boolean;
 }
 
+/** Un mensaje saliente `QUEUED` listo para despachar. */
+export class PendingDispatchItemDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+}
+
+/**
+ * Descubrimiento para el worker de despacho (Fase 5 del plan de corrección
+ * de workers, UC-12-06): sin esto, el worker no tenía forma de saber qué
+ * `messageId` despachar.
+ */
+export class PendingDispatchResponseDto {
+  /**
+   * Valor de messages mantenido por la instancia.
+   */
+  @ApiProperty({ type: [PendingDispatchItemDto] })
+  messages!: PendingDispatchItemDto[];
+}
+
+/** Un mensaje saliente `FAILED`, anotado con si ya agotó sus reintentos. */
+export class PendingRetryItemDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /**
+   * Valor de next attempt number mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Número que tendría el próximo intento' })
+  nextAttemptNumber!: number;
+  /**
+   * Valor de exhausted mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'true si el próximo intento excede MAX_ATTEMPTS: el worker debe ' +
+      'enviarlo a dead-letter en vez de reintentar',
+  })
+  exhausted!: boolean;
+}
+
+/**
+ * Descubrimiento para el worker de reintentos (Fase 5, UC-12-07/08): calcula
+ * server-side si el mensaje ya agotó sus reintentos para que el worker no
+ * tenga que adivinar `MAX_ATTEMPTS` a partir del cuerpo de un error 422.
+ */
+export class PendingRetryResponseDto {
+  /**
+   * Valor de messages mantenido por la instancia.
+   */
+  @ApiProperty({ type: [PendingRetryItemDto] })
+  messages!: PendingRetryItemDto[];
+}
+
+/** Un mensaje entrante `RECEIVED` listo para correlacionarse. */
+export class PendingCorrelationItemDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+}
+
+/**
+ * Descubrimiento para el worker de correlación (Fase 5, UC-12-10): sin esto,
+ * el worker no tenía forma de saber qué `inboundMessageId` correlacionar.
+ */
+export class PendingCorrelationResponseDto {
+  /**
+   * Valor de messages mantenido por la instancia.
+   */
+  @ApiProperty({ type: [PendingCorrelationItemDto] })
+  messages!: PendingCorrelationItemDto[];
+}
+
 /** Respuesta tras pausar una conexión (UC-12-12). */
 export class PauseConnectionResultDto {
   /**

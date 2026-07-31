@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -50,6 +50,7 @@ export class SetMemberInputDto {
 }
 
 /** Cuerpo de `POST /forms/definition-sets/{id}/versions/{ver}/publish` (UC-09-03). */
+@ApiSchema({ name: 'FormsPublishVersionDto' })
 export class PublishVersionDto {
   /**
    * Valor de members mantenido por la instancia.

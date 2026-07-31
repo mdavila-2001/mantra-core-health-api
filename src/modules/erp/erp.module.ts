@@ -6,6 +6,7 @@ import { ErpContractsService, ErpOperationsService } from './services';
 import {
   ErpContractsRepository,
   ErpOperationsRepository,
+  ErpContractsExtRepository,
 } from './repositories';
 
 /**
@@ -18,6 +19,7 @@ import {
   providers: [
     ErpContractsRepository,
     ErpOperationsRepository,
+    ErpContractsExtRepository,
     ErpContractsService,
     ErpOperationsService,
   ],

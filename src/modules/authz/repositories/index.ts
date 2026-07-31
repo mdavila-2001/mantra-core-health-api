@@ -11,3 +11,4 @@ export * from './care-relationships.repository';
 export * from './patient-legal-representations.repository';
 export * from './field-permissions.repository';
 export * from './resource-scope-grants.repository';
+export * from './authz-service-principals.repository';

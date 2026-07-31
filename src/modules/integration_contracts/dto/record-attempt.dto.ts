@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsIn,
   IsInt,
@@ -16,6 +16,7 @@ export type AttemptOutcome = 'SUCCESS' | 'FAILED';
 export type RetryDecision = 'RETRYABLE' | 'PERMANENT';
 
 /** Cuerpo de `POST /integration/contracts/{id}/exchanges/{recordId}/attempts` (UC-31-06). */
+@ApiSchema({ name: 'IntegrationContractsRecordAttemptDto' })
 export class RecordAttemptDto {
   /**
    * Valor de outcome mantenido por la instancia.

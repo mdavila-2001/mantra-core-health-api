@@ -74,12 +74,37 @@ describe('OutboxService', () => {
         outboxMessageId: MESSAGE,
         duplicate: false,
       });
-      // No abre transacción propia: se enlista en la que le pasan.
-      expect(d.tx.flush).not.toHaveBeenCalled();
       expect((d as any).service).toBeDefined();
       expect(d.outboxRepo.createOutboxMessage).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ statusConceptId: CONCEPTS.OUTBOX_PENDING }),
+      );
+    });
+
+    it('derives a correlationId when the caller has none to propagate (column is NOT NULL)', async () => {
+      const d = build();
+
+      await d.service.publishDomainEvent(d.tx as any, INPUT);
+
+      expect(d.outboxRepo.createDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ correlationId: expect.any(String) }),
+      );
+      const passed = (d.outboxRepo.createDomainEvent.mock.calls[0] as any)[1];
+      expect(passed.correlationId.length).toBeGreaterThan(0);
+    });
+
+    it("propagates the caller's correlationId instead of overriding it", async () => {
+      const d = build();
+
+      await d.service.publishDomainEvent(d.tx as any, {
+        ...INPUT,
+        correlationId: 'req-abc-123',
+      });
+
+      expect(d.outboxRepo.createDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ correlationId: 'req-abc-123' }),
       );
     });
 
@@ -88,8 +113,12 @@ describe('OutboxService', () => {
 
       await d.service.publishDomainEvent(d.tx as any, INPUT);
 
-      // Si abriera la suya, el evento podría confirmarse sin el cambio de negocio.
-      expect(d.tx.flush).not.toHaveBeenCalled();
+      // Sí llama `tx.flush()` (necesario: `domain_event_id` es un uuid plano,
+      // no una relación, así que el evento debe existir en la fila antes de
+      // insertar el mensaje que lo referencia) — pero SIEMPRE sobre el `tx`
+      // del llamador, nunca abriendo su propia transacción, que es lo que sí
+      // podría confirmar el evento sin el cambio de negocio que lo originó.
+      expect(d.tx.flush).toHaveBeenCalled();
       expect((d.service as any).em.transactional).not.toHaveBeenCalled();
     });
 
@@ -218,6 +247,7 @@ describe('OutboxService', () => {
         id: EVENT,
         eventType: 'OrderPlaced',
         eventVersion: 1,
+        tenantId: 'tenant-a',
         payloadJson: { region: 'norte' },
       });
       d.outboxRepo.findOutboxByDomainEvent.mockResolvedValue({
@@ -257,6 +287,21 @@ describe('OutboxService', () => {
         deliveryId: 'delivery-1',
         duplicate: false,
       });
+    });
+
+    it("scopes the subscription lookup to the event's own tenant", async () => {
+      const d = build();
+      wire(d, [subscription()]);
+
+      await d.service.dispatchEvent(EVENT, {}, actor);
+
+      expect(d.outboxRepo.findActiveSubscriptions).toHaveBeenCalledWith(
+        d.tx,
+        'OrderPlaced',
+        1,
+        expect.any(String),
+        'tenant-a',
+      );
     });
 
     it('skips subscriptions whose filter does not match', async () => {

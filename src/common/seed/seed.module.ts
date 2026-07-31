@@ -8,6 +8,7 @@ import {
 } from '../../modules/terminology/entities';
 import { Tenants } from '../../modules/directory/entities';
 import { ProcessingPurposes } from '../../modules/consent/entities';
+import { Users } from '../../modules/iam/entities';
 import { TerminologySeedService } from './terminology-seed.service';
 
 /**
@@ -24,6 +25,7 @@ import { TerminologySeedService } from './terminology-seed.service';
       CatalogConcepts,
       Tenants,
       ProcessingPurposes,
+      Users,
     ]),
   ],
   providers: [TerminologySeedService],

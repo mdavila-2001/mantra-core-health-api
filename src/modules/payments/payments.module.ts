@@ -11,12 +11,15 @@ import {
   PaymentsCheckoutService,
   PaymentsTransactionsService,
   PaymentsOperationsService,
+  WalletsService,
 } from './services';
 import {
   PaymentIntentsRepository,
   PaymentFlowRepository,
   PaymentTransactionsRepository,
   PaymentOperationsRepository,
+  PaymentsWalletsRepository,
+  PaymentsSubscriptionPlansRepository,
 } from './repositories';
 
 /**
@@ -36,11 +39,17 @@ import {
     PaymentFlowRepository,
     PaymentTransactionsRepository,
     PaymentOperationsRepository,
+    PaymentsWalletsRepository,
+    PaymentsSubscriptionPlansRepository,
     // Servicios
     PaymentsIntentsService,
     PaymentsCheckoutService,
     PaymentsTransactionsService,
     PaymentsOperationsService,
+    WalletsService,
   ],
+  // Contrato entre dominios para acreditar saldo sin acceso directo a las tablas
+  // de pagos (cierra DIRECT_CROSS_DOMAIN_ACCESS promotions→payments).
+  exports: [WalletsService],
 })
 export class PaymentsModule {}

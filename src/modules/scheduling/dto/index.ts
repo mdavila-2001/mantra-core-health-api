@@ -30,6 +30,7 @@ export {
   ScheduleRemindersResponseDto,
   WorkerBatchResultDto,
   WorkerBatchDto,
+  WaitlistCandidateSlotsResponseDto,
   BOOKING_CHANNELS,
 } from './scheduling-bookings.dto';
 export type { BookingChannel } from './scheduling-bookings.dto';

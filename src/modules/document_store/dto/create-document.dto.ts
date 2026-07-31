@@ -12,7 +12,7 @@ const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
  * del almacén flexible-, pero se exige que sea un objeto para no almacenar
  * escalares sueltos.
  */
-export class CreateDocumentDto {
+export class CreateFlexibleDocumentDto {
   /**
    * Identificador asociado a tenant.
    */

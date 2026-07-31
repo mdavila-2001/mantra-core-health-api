@@ -11,7 +11,11 @@ import {
   PeriopCasesRepository,
   PeriopPreopRepository,
   PeriopIntraopRepository,
+  PeriopInstrumentsRepository,
 } from './repositories';
+import { ProfessionalCredentialsRepository } from '../profiles/repositories';
+import { AuditModule } from '../audit/audit.module';
+import { MessagingModule } from '../messaging/messaging.module';
 
 /**
  * Módulo perioperatorio: programación del caso quirúrgico, valoración y
@@ -20,12 +24,19 @@ import {
  * (UC-53-01 … 14).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    AuditModule,
+    MessagingModule,
+  ],
   controllers: [PeriopController],
   providers: [
     PeriopCasesRepository,
     PeriopPreopRepository,
     PeriopIntraopRepository,
+    PeriopInstrumentsRepository,
+    // Fuente autoritativa de vigencia de credencial del equipo (C-14).
+    ProfessionalCredentialsRepository,
     PeriopCasesService,
     PeriopPreopService,
     PeriopIntraopService,

@@ -195,6 +195,41 @@ export class DeletionRepository {
     return em.find(DeletionTargets, { deletionRequestId });
   }
 
+  /**
+   * Objetivos `PENDING` sin bloqueo de retención legal, listos para que el
+   * worker intente `executeDeletion`. El README lo sitúa así ("Concurrencia"):
+   * "el barrido de objetivos pendientes... lo hace el worker antes de
+   * llamar" — este módulo no bloquea aquí porque la exclusión real ocurre al
+   * tomar el objetivo con `findTargetForUpdate` dentro de la propia ejecución
+   * (dos workers descubriendo el mismo lote sólo compiten por el lock de fila,
+   * no corrompen nada).
+   */
+  findPendingTargets(
+    em: EntityManager,
+    limit: number,
+  ): Promise<DeletionTargets[]> {
+    return em.find(
+      DeletionTargets,
+      { state: 'PENDING', blockedByLegalHold: false },
+      { orderBy: { id: 'ASC' }, limit },
+    );
+  }
+
+  /**
+   * Objetivos `EXECUTED` listos para que el worker intente `verifyDeletion`.
+   * Misma lógica de descubrimiento sin bloqueo que `findPendingTargets`.
+   */
+  findExecutedTargets(
+    em: EntityManager,
+    limit: number,
+  ): Promise<DeletionTargets[]> {
+    return em.find(
+      DeletionTargets,
+      { state: 'EXECUTED' },
+      { orderBy: { id: 'ASC' }, limit },
+    );
+  }
+
   // --- Ejecuciones (UC-62-10) ---
 
   /** Una ejecución efectiva por clave: reintentar no borra dos veces. */

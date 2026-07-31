@@ -47,7 +47,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ReadModelDefinitionsService(
-    em as any,
+    em,
     definitionsRepo as any,
     dependenciesRepo as any,
     runsRepo,

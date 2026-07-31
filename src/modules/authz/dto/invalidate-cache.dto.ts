@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { IsOptional, IsUUID } from 'class-validator';
 
 /**
@@ -7,6 +7,7 @@ import { IsOptional, IsUUID } from 'class-validator';
  * La clave de cache del PDP es `(tenantId, userId|roleId)`. Todos los campos son
  * opcionales: sin ninguno se invalida el ámbito global del tenant.
  */
+@ApiSchema({ name: 'AuthzInvalidateCacheDto' })
 export class InvalidateCacheDto {
   /**
    * Identificador asociado a tenant.

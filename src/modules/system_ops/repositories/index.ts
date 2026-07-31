@@ -5,3 +5,4 @@ export * from './legal-hold.repository';
 export * from './backup.repository';
 export * from './assessment.repository';
 export * from './draft.repository';
+export * from './system-ops-security.repository';

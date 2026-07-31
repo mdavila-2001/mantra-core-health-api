@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { MedicationsService } from './medications.service';
 import {
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
@@ -23,21 +24,36 @@ const actor = { id: 'user-1', roles: [] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const requestsRepo = { findById: mockFn(), create: mockFn() };
+  const requestsRepo = {
+    findById: mockFn(),
+    create: mockFn(),
+    findByIssueIdempotencyKey: mockFn().mockResolvedValue(null),
+  };
   const recordsRepo = { create: mockFn() };
   // Por defecto FAIL-SAFE: sin política, la firma no se exige.
   const signaturePolicies = {
     isSignatureRequired: mockFn().mockResolvedValue(false),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
+  const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
     recordsRepo as any,
     signaturePolicies as any,
+    auditTrail as any,
+    historyRepo as any,
     logger as any,
   );
-  return { service, requestsRepo, recordsRepo, signaturePolicies };
+  return {
+    service,
+    requestsRepo,
+    recordsRepo,
+    signaturePolicies,
+    auditTrail,
+    historyRepo,
+  };
 }
 
 describe('MedicationsService', () => {
@@ -116,6 +132,54 @@ describe('MedicationsService', () => {
       expect(res.status).toBe(CLIN.MEDICATION_REQUEST_ISSUED);
       expect(request.statusConceptId).toBe(CLIN.MEDICATION_REQUEST_ISSUED);
       expect((request as any).issuedAt).toBeInstanceOf(Date);
+      // CAN-AUDIT-001: la emisión sella un eslabón en la cadena WORM.
+      expect(d.auditTrail.record).toHaveBeenCalledTimes(1);
+      expect(d.auditTrail.record.mock.calls[0][2].action).toBe(
+        'MEDICATION_ISSUED',
+      );
+      // §2: sella la primera revisión versionada en medication_requests_history.
+      expect(d.historyRepo.append).toHaveBeenCalledWith(
+        expect.anything(),
+        'medication_requests',
+        'mr1',
+        expect.objectContaining({ dataSnapshot: expect.any(Object) }),
+      );
+    });
+
+    it('is idempotent: replays the issued result for the same idempotency key (CAN §6)', async () => {
+      const d = build();
+      const request = {
+        id: 'mr1',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
+        issueIdempotencyKey: 'key-1',
+        issuedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      const res = await d.service.issue('mr1', actor, 'key-1');
+      expect(res.status).toBe(CLIN.MEDICATION_REQUEST_ISSUED);
+      // Replay: no re-sella ni vuelve a auditar.
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+    });
+
+    it('rejects issuing with an idempotency key already used by a different request', async () => {
+      const d = build();
+      const request = {
+        id: 'mr2',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.MEDICATION_REQUEST_DRAFT,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      };
+      d.requestsRepo.findById.mockResolvedValue(request);
+      d.requestsRepo.findByIssueIdempotencyKey.mockResolvedValue({
+        id: 'mr1',
+      });
+      await expect(
+        d.service.issue('mr2', actor, 'key-1'),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
     });
 
     it('rejects issuing a non-draft request', async () => {

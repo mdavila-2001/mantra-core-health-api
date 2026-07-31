@@ -28,6 +28,7 @@ import {
   BackupRepository,
   AssessmentRepository,
   DraftRepository,
+  SystemOpsSecurityRepository,
 } from './repositories';
 
 /**
@@ -58,6 +59,7 @@ import {
     BackupRepository,
     AssessmentRepository,
     DraftRepository,
+    SystemOpsSecurityRepository,
     // Servicios
     GovernanceCatalogService,
     RetentionExecutionService,

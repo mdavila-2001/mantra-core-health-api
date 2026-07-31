@@ -186,6 +186,12 @@ export class AuthzPdpService {
 
     let hasAllow = false;
     let hasDeny = false;
+    // CAN-AUTH-001 / C-07: alcance clínico sobre el paciente concreto. Cuando la
+    // decisión es sobre datos de un paciente (`patientProfileId` presente), un
+    // ALLOW por rol/política NO basta: además debe existir una señal de vínculo
+    // con ESE paciente (grant clínico, relación asistencial o representación
+    // legal). Así la pertenencia/rol deja de conceder acceso indiscriminado a PHI.
+    let clinicalScopeSatisfied = false;
     const reasons: string[] = [];
 
     if (!permission) {
@@ -297,6 +303,7 @@ export class AuthzPdpService {
 
       if (matching.length > 0) {
         hasAllow = true;
+        clinicalScopeSatisfied = true;
         reasons.push(
           'allow por acceso clínico vigente (nivel y propósito verificados)',
         );
@@ -332,6 +339,7 @@ export class AuthzPdpService {
         });
         if (matchingRel.length > 0) {
           hasAllow = true;
+          clinicalScopeSatisfied = true;
           reasons.push(
             'allow por relación asistencial vigente (C-06/CAN-AUTH-001)',
           );
@@ -356,6 +364,7 @@ export class AuthzPdpService {
       );
       if (validRep) {
         hasAllow = true;
+        clinicalScopeSatisfied = true;
         reasons.push('allow por representación legal vigente (C-07/A-03)');
       }
     }
@@ -363,8 +372,25 @@ export class AuthzPdpService {
     // 7. Campos a enmascarar según field_permissions de los roles efectivos.
     const maskedFields = await this.computeMaskedFields(em, effectiveRoleIds);
 
-    // Resolución final: deny-overrides.
-    const permit = hasDeny ? false : hasAllow;
+    // Resolución final: deny-overrides + alcance clínico obligatorio para PHI.
+    // Si la petición apunta a un paciente concreto, exigir además de `hasAllow`
+    // (capacidad) una señal de alcance clínico sobre ESE paciente; el ALLOW por
+    // rol/política no concede acceso a PHI por sí solo (cierra UNSCOPED_ACCESS).
+    if (
+      dto.patientProfileId &&
+      !hasDeny &&
+      hasAllow &&
+      !clinicalScopeSatisfied
+    ) {
+      reasons.push(
+        'deny: acceso a datos de paciente sin alcance clínico (grant/relación/representación) — CAN-AUTH-001',
+      );
+    }
+    const permit = hasDeny
+      ? false
+      : dto.patientProfileId
+        ? hasAllow && clinicalScopeSatisfied
+        : hasAllow;
     const decision: 'PERMIT' | 'DENY' = permit ? 'PERMIT' : 'DENY';
     const reason =
       reasons.length > 0

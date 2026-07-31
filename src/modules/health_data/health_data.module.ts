@@ -16,6 +16,7 @@ import {
   PatientIdentityRepository,
   DataReleaseRepository,
   HealthProvenanceRepository,
+  HealthTerminologyMappingRepository,
 } from './repositories';
 
 /**
@@ -35,6 +36,7 @@ import {
     PatientIdentityRepository,
     DataReleaseRepository,
     HealthProvenanceRepository,
+    HealthTerminologyMappingRepository,
     HealthIngestionService,
     CanonicalResourcesService,
     HealthValidationService,

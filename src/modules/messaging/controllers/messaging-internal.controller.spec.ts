@@ -28,7 +28,10 @@ function build() {
     completeJob: mockFn(),
     failJob: mockFn(),
   };
-  const notificationsService = { deliverNotification: mockFn() };
+  const notificationsService = {
+    deliverNotification: mockFn(),
+    listDeliverable: mockFn(),
+  };
   return {
     controller: new MessagingInternalController(
       outboxService as any,
@@ -116,5 +119,14 @@ describe('MessagingInternalController', () => {
       dto,
       actor,
     );
+  });
+
+  it('delegates listing pending notifications (worker de notificaciones)', async () => {
+    const d = build();
+    d.notificationsService.listDeliverable.mockResolvedValue({ requests: [] });
+
+    await d.controller.listPendingNotifications(25);
+
+    expect(d.notificationsService.listDeliverable).toHaveBeenCalledWith(25);
   });
 });

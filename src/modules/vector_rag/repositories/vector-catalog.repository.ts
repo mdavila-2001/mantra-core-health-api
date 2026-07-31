@@ -510,6 +510,27 @@ export class VectorCatalogRepository {
     );
   }
 
+  /**
+   * Lote de jobs en cola, para el descubrimiento del worker de embeddings
+   * (UC-59-05): sin esto no había forma de listar qué `jobId` ejecutar. Cruza
+   * todos los tenants a propósito (barrido `SYSTEM`); `runEmbeddingJob` vuelve
+   * a bloquear la fila por su cuenta, así que una lectura sin lock aquí no
+   * arriesga una carrera — dos ticks solapados que descubren el mismo job
+   * simplemente hacen que el segundo choque con el guard de estado y falle
+   * limpio (ver `EmbeddingPipelineService.runEmbeddingJob`).
+   */
+  findQueuedJobs(
+    em: EntityManager,
+    queuedStatus: string,
+    limit: number,
+  ): Promise<EmbeddingJobs[]> {
+    return em.find(
+      EmbeddingJobs,
+      { status: queuedStatus },
+      { orderBy: { createdAt: 'ASC' }, limit },
+    );
+  }
+
   /** Jobs vivos que dependen de la colección; bloquean retirar su modelo. */
   findActiveJobsByCollection(
     em: EntityManager,

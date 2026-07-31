@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { ClinicalAccessGrants } from '../entities';
-import { CONCEPTS, createdBy } from '../../../common';
+import { CONCEPTS, createdBy, touch } from '../../../common';
 
 /** Datos de un acceso clínico con propósito de uso. */
 export interface CreateClinicalAccessGrantData {
@@ -92,6 +92,38 @@ export class ClinicalAccessGrantsRepository {
       patientProfileId,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
     });
+  }
+
+  /** Grants ACTIVOS que se apoyan en un consentimiento concreto (C-20). */
+  findActiveByConsent(
+    em: EntityManager,
+    consentId: string,
+  ): Promise<ClinicalAccessGrants[]> {
+    return em.find(ClinicalAccessGrants, {
+      consentId,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
+  /**
+   * C-20: revoca (soft-state) todos los accesos clínicos ACTIVOS que se apoyaban
+   * en un consentimiento retirado. La revocación del consentimiento debe propagar
+   * a los grants: el PDP dejará de concederlos. No borra nada (append-only);
+   * marca REVOKED y cierra la ventana. Devuelve cuántos revocó.
+   */
+  async revokeForConsent(
+    em: EntityManager,
+    consentId: string,
+    actorUserId: string,
+    now: Date,
+  ): Promise<number> {
+    const grants = await this.findActiveByConsent(em, consentId);
+    for (const grant of grants) {
+      grant.stateConceptId = CONCEPTS.STATE_REVOKED;
+      grant.validTo = now;
+      touch(grant, actorUserId);
+    }
+    return grants.length;
   }
 
   /**

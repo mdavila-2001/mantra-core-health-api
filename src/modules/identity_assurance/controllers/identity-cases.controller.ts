@@ -43,7 +43,7 @@ export class IdentityCasesController {
 
   /** UC-27-12 (barrido programado). Declarado antes que las rutas con `:id`. */
   @Post('\\:expire-sweep')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Expirar por lote los casos vencidos (job programado)',

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { QaLabController } from './controllers';
+import { QaLabController, QaLabInternalController } from './controllers';
 import { QaCatalogService, QaRunsService } from './services';
 import { QaCatalogRepository, QaRunsRepository } from './repositories';
 
@@ -12,7 +12,7 @@ import { QaCatalogRepository, QaRunsRepository } from './repositories';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [QaLabController],
+  controllers: [QaLabController, QaLabInternalController],
   providers: [
     QaCatalogRepository,
     QaRunsRepository,

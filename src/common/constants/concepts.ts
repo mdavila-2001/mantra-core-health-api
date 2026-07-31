@@ -81,6 +81,17 @@ export const SEED = {
    */
   processingPurposeId: deterministicId('seed:processing-purpose:default'),
   processingPurposeCode: 'GENERAL_CARE',
+  /**
+   * Cuenta de servicio de los 17 procesos worker (`src/worker-<dominio>.ts`,
+   * `src/worker/bootstrap.ts`). No tiene
+   * credencial de login: el worker firma su propio access token con
+   * `TokenService` (rol `SYSTEM`, que por diseño no es asignable vía
+   * `iam.user_global_roles` — ver `RoleCode`). Existe como fila real en
+   * `iam.users` únicamente porque `recorded_by_user_id`/`actor_user_id` de las
+   * tablas que el worker muta son FK NOT NULL a `iam.users.id`.
+   */
+  systemWorkerUserId: deterministicId('seed:user:system-worker'),
+  systemWorkerDisplayName: 'System Worker',
 };
 
 /**

@@ -43,10 +43,10 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new MedicationDispensationsService(
     em as any,
-    dispensationsRepo as any,
+    dispensationsRepo,
     reservationsRepo as any,
     stockRepo as any,
-    ledgerRepo as any,
+    ledgerRepo,
     logger as any,
   );
   return {
@@ -80,7 +80,7 @@ describe('MedicationDispensationsService', () => {
         },
       ],
     };
-    const res = await d.service.dispense('ph1', dto as any, actor);
+    const res = await d.service.dispense('ph1', dto, actor);
     expect(res.id).toBe('disp1');
     // Toma el lock, no un read suelto.
     expect(d.stockRepo.findByKeyForUpdate).toHaveBeenCalledWith(d.tx, {
@@ -134,7 +134,7 @@ describe('MedicationDispensationsService', () => {
         },
       ],
     };
-    const res = await d.service.dispense('ph1', dto as any, actor);
+    const res = await d.service.dispense('ph1', dto, actor);
     expect(res).toEqual({
       id: 'disp-existing',
       lineIds: ['dl-existing'],

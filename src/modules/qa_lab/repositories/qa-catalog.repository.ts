@@ -464,4 +464,34 @@ export class QaCatalogRepository {
   ): Promise<TestSchedules | null> {
     return em.findOne(TestSchedules, { suiteId, environmentId, code });
   }
+
+  /**
+   * Programaciones vencidas: habilitadas, activas y con `next_run_at` ya
+   * cumplido. La usa el tick del worker (Fase 2 del plan de corrección de
+   * workers) para descubrir qué disparar — el README documenta "el tick que
+   * las dispara" como pendiente; esta es la consulta de descubrimiento que le
+   * faltaba. `PESSIMISTIC_PARTIAL_WRITE` (`SKIP LOCKED`) reparte el lote entre
+   * varios ticks concurrentes sin que se bloqueen entre sí, igual que
+   * `QueuesRepository.claimReadyJobs`.
+   */
+  claimDueSchedules(
+    em: EntityManager,
+    now: Date,
+    activeStateConceptId: string,
+    limit: number,
+  ): Promise<TestSchedules[]> {
+    return em.find(
+      TestSchedules,
+      {
+        isEnabled: true,
+        stateConceptId: activeStateConceptId,
+        nextRunAt: { $lte: now },
+      },
+      {
+        lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,
+        orderBy: { nextRunAt: 'ASC' },
+        limit,
+      },
+    );
+  }
 }

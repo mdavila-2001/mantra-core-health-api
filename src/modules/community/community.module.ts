@@ -33,6 +33,8 @@ import {
   PollsRepository,
   GroupsRepository,
   FeedRepository,
+  CommunityFeedbackRepository,
+  CommunityPrestigeRepository,
 } from './repositories';
 
 /**
@@ -67,6 +69,8 @@ import {
     PollsRepository,
     GroupsRepository,
     FeedRepository,
+    CommunityFeedbackRepository,
+    CommunityPrestigeRepository,
     // Servicios
     CommunitySocialService,
     CommunityMessagingService,

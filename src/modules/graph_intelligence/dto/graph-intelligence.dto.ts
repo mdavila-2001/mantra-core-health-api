@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -1122,6 +1122,7 @@ export class RuleMatchDto {
 }
 
 /** Cuerpo de `POST /graph/rules/{id}/evaluate` (UC-61-08). */
+@ApiSchema({ name: 'GraphIntelligenceEvaluateRuleDto' })
 export class EvaluateRuleDto {
   /**
    * Identificador asociado a tenant.

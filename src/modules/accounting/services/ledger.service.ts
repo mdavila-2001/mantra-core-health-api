@@ -32,6 +32,10 @@ import {
   NormalBalance,
 } from '../dto';
 import { sumCents, fromCents } from './money';
+import { AuditTrailService } from '../../audit/services';
+
+/** Recurso sellado en la cadena WORM para cada transición contable (CAN-AUDIT-001). */
+const JOURNAL_AUDIT_ENTITY = 'journal_transaction';
 
 const ACCOUNT_TYPE_CONCEPT: Record<AccountType, string> = {
   ASSET: ACCT.ACCOUNT_TYPE_ASSET,
@@ -97,6 +101,7 @@ export class LedgerService {
     private readonly journalRepo: JournalRepository,
     private readonly accountsRepo: AccountsRepository,
     private readonly fiscalRepo: FiscalRepository,
+    private readonly auditTrail: AuditTrailService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LedgerService.name);
@@ -195,6 +200,12 @@ export class LedgerService {
         actor.id,
         dto.currencyConceptId,
       );
+
+      await this.auditTrail.record(tx, actor, {
+        action: 'JOURNAL_POSTED',
+        entity: JOURNAL_AUDIT_ENTITY,
+        entityId: transaction.id,
+      });
 
       this.logger.info(
         {
@@ -376,6 +387,12 @@ export class LedgerService {
       txn.postedByUserId = actor.id;
       touch(txn, actor.id);
 
+      await this.auditTrail.record(tx, actor, {
+        action: 'JOURNAL_POSTED',
+        entity: JOURNAL_AUDIT_ENTITY,
+        entityId: txn.id,
+      });
+
       this.logger.info(
         {
           operation: 'accounting.journal.post',
@@ -497,6 +514,12 @@ export class LedgerService {
 
       original.statusConceptId = ACCT.TXN_REVERSED;
       touch(original, actor.id);
+
+      await this.auditTrail.record(tx, actor, {
+        action: 'JOURNAL_REVERSED',
+        entity: JOURNAL_AUDIT_ENTITY,
+        entityId: original.id,
+      });
 
       return {
         id: reversal.id,

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -775,6 +775,7 @@ export class RepairJobResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /admin/deletion-requests` (UC-62-08). */
+@ApiSchema({ name: 'CrossStoreConsistencyRequestDeletionDto' })
 export class RequestDeletionDto {
   /**
    * Identificador asociado a tenant.
@@ -969,6 +970,70 @@ export class ExpandDeletionResponseDto {
    */
   @ApiProperty({ description: 'Objetivos bloqueados por retención legal' })
   blockedByLegalHold!: number;
+}
+
+// ---------------------------------------------------------------------------
+// Descubrimiento del worker de borrado (Fase 4 del plan de corrección de
+// workers) · sin UC propio: infraestructura de lectura para que el worker
+// sepa qué `targetId` llamar en `executions`/`verifications`, tal como el
+// README documenta que le corresponde al worker ("Concurrencia").
+// ---------------------------------------------------------------------------
+
+/** Un objetivo de borrado, resumido para el worker que lo descubre. */
+export class DeletionTargetSummaryDto {
+  /**
+   * Identificador único del objetivo.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a deletion request.
+   */
+  @ApiProperty({ format: 'uuid' })
+  deletionRequestId!: string;
+
+  /**
+   * Identificador asociado a dataset.
+   */
+  @ApiProperty({ format: 'uuid' })
+  datasetId!: string;
+
+  /**
+   * Valor de backend code mantenido por la instancia.
+   */
+  @ApiProperty()
+  backendCode!: string;
+
+  /**
+   * Valor de target locator mantenido por la instancia.
+   */
+  @ApiProperty()
+  targetLocator!: string;
+
+  /**
+   * Valor de deletion mode mantenido por la instancia.
+   */
+  @ApiProperty()
+  deletionMode!: string;
+}
+
+/** Cuerpo de respuesta de `GET /workers/deletion-targets/pending`. */
+export class PendingDeletionTargetsResponseDto {
+  /**
+   * Valor de targets mantenido por la instancia.
+   */
+  @ApiProperty({ type: [DeletionTargetSummaryDto] })
+  targets!: DeletionTargetSummaryDto[];
+}
+
+/** Cuerpo de respuesta de `GET /workers/deletion-targets/executed`. */
+export class ExecutedDeletionTargetsResponseDto {
+  /**
+   * Valor de targets mantenido por la instancia.
+   */
+  @ApiProperty({ type: [DeletionTargetSummaryDto] })
+  targets!: DeletionTargetSummaryDto[];
 }
 
 // ---------------------------------------------------------------------------
@@ -1173,6 +1238,7 @@ export class CloseDeletionResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /workers/cache/invalidations` (UC-62-12). */
+@ApiSchema({ name: 'CrossStoreConsistencyInvalidateCacheDto' })
 export class InvalidateCacheDto {
   /**
    * Identificador asociado a tenant.

@@ -4,6 +4,7 @@ export { HealthValidationRepository } from './health-validation.repository';
 export { PatientIdentityRepository } from './patient-identity.repository';
 export { DataReleaseRepository } from './data-release.repository';
 export { HealthProvenanceRepository } from './health-provenance.repository';
+export { HealthTerminologyMappingRepository } from './health-terminology-mapping.repository';
 export type {
   CreateBatchData,
   CreateRecordData,

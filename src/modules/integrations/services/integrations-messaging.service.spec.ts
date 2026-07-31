@@ -22,22 +22,32 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(),
+  };
+  em.fork.mockReturnValue(em);
   const connectionsRepo = { findById: mockFn() };
   const providersRepo = { findById: mockFn() };
   const endpointsRepo = { findById: mockFn() };
   const outboundRepo = {
     findById: mockFn(),
+    findByIdForUpdate: mockFn(),
     findByIdempotencyKey: mockFn(),
     findByCorrelationId: mockFn(),
     create: mockFn(),
+    findQueuedForDispatch: mockFn().mockResolvedValue([]),
+    findFailed: mockFn().mockResolvedValue([]),
   };
   const responsesRepo = { create: mockFn() };
   const retriesRepo = {
     maxAttempt: mockFn().mockResolvedValue(0),
     create: mockFn(),
   };
-  const inboundRepo = { findById: mockFn() };
+  const inboundRepo = {
+    findById: mockFn(),
+    findReceived: mockFn().mockResolvedValue([]),
+  };
   // Despacho HTTP real mockeado: por defecto responde 2xx.
   const http = {
     post: mockFn().mockResolvedValue({
@@ -58,12 +68,13 @@ function build() {
     responsesRepo,
     retriesRepo,
     inboundRepo as any,
-    http as any,
+    http,
     logger as any,
   );
   return {
     service,
     tx,
+    em,
     connectionsRepo,
     providersRepo,
     endpointsRepo,
@@ -147,7 +158,7 @@ describe('IntegrationsMessagingService', () => {
   describe('dispatch (UC-12-06)', () => {
     it('rejects a message not in queue (precondition)', async () => {
       const d = build();
-      d.outboundRepo.findById.mockResolvedValue({
+      d.outboundRepo.findByIdForUpdate.mockResolvedValue({
         id: 'm1',
         statusConceptId: INTEG.MSG_SENT,
       });
@@ -164,7 +175,7 @@ describe('IntegrationsMessagingService', () => {
      * @returns Resultado de wire dispatch.
      */
     function wireDispatch(d: ReturnType<typeof build>, msg: any) {
-      d.outboundRepo.findById.mockResolvedValue(msg);
+      d.outboundRepo.findByIdForUpdate.mockResolvedValue(msg);
       d.connectionsRepo.findById.mockResolvedValue({
         id: 'c1',
         providerId: 'p1',
@@ -196,6 +207,9 @@ describe('IntegrationsMessagingService', () => {
         d.tx,
         expect.objectContaining({ httpStatus: 200, latencyMs: 12 }),
       );
+      // Lee con FOR UPDATE: dos ticks del worker que descubren el mismo
+      // mensaje QUEUED no deben poder despacharlo al proveedor real dos veces.
+      expect(d.outboundRepo.findByIdForUpdate).toHaveBeenCalledWith(d.tx, 'm1');
     });
 
     it('marks FAILED when the provider responds with an error', async () => {
@@ -231,7 +245,7 @@ describe('IntegrationsMessagingService', () => {
         statusConceptId: INTEG.MSG_QUEUED,
         requestPayloadJson: {},
       };
-      d.outboundRepo.findById.mockResolvedValue(msg);
+      d.outboundRepo.findByIdForUpdate.mockResolvedValue(msg);
       d.connectionsRepo.findById.mockResolvedValue({
         id: 'c1',
         providerId: 'p1',
@@ -361,6 +375,66 @@ describe('IntegrationsMessagingService', () => {
       expect(inbound.statusConceptId).toBe(INTEG.INBOUND_PROCESSED);
       expect(res.outboundMessageId).toBe('m1');
       expect(d.responsesRepo.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('listQueuedForDispatch (Fase 5, descubrimiento UC-12-06)', () => {
+    it('proyecta sólo los ids de los mensajes QUEUED encontrados', async () => {
+      const d = build();
+      d.outboundRepo.findQueuedForDispatch.mockResolvedValue([
+        { id: 'm1' },
+        { id: 'm2' },
+      ]);
+      const res = await d.service.listQueuedForDispatch();
+      expect(res).toEqual({ messages: [{ id: 'm1' }, { id: 'm2' }] });
+      expect(d.outboundRepo.findQueuedForDispatch).toHaveBeenCalledWith(
+        d.em,
+        INTEG.MSG_QUEUED,
+        expect.any(Date),
+        50,
+      );
+    });
+
+    it('respeta el límite explícito', async () => {
+      const d = build();
+      await d.service.listQueuedForDispatch(5);
+      expect(d.outboundRepo.findQueuedForDispatch).toHaveBeenCalledWith(
+        d.em,
+        INTEG.MSG_QUEUED,
+        expect.any(Date),
+        5,
+      );
+    });
+  });
+
+  describe('listFailedForRetry (Fase 5, descubrimiento UC-12-07/08)', () => {
+    it('marca exhausted cuando el próximo intento excede MAX_ATTEMPTS', async () => {
+      const d = build();
+      d.outboundRepo.findFailed.mockResolvedValue([{ id: 'm1' }, { id: 'm2' }]);
+      d.retriesRepo.maxAttempt.mockImplementation(
+        async (_em: any, id: string) => (id === 'm1' ? 1 : 5),
+      );
+      const res = await d.service.listFailedForRetry();
+      expect(res).toEqual({
+        messages: [
+          { id: 'm1', nextAttemptNumber: 2, exhausted: false },
+          { id: 'm2', nextAttemptNumber: 6, exhausted: true },
+        ],
+      });
+    });
+  });
+
+  describe('listReceivedForCorrelation (Fase 5, descubrimiento UC-12-10)', () => {
+    it('proyecta sólo los ids de los mensajes entrantes RECEIVED', async () => {
+      const d = build();
+      d.inboundRepo.findReceived.mockResolvedValue([{ id: 'i1' }]);
+      const res = await d.service.listReceivedForCorrelation();
+      expect(res).toEqual({ messages: [{ id: 'i1' }] });
+      expect(d.inboundRepo.findReceived).toHaveBeenCalledWith(
+        d.em,
+        INTEG.INBOUND_RECEIVED,
+        50,
+      );
     });
   });
 });

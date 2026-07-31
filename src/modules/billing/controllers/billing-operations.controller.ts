@@ -19,6 +19,8 @@ import {
   PostToLedgerDto,
   ReconciliationClearDto,
   ExecuteDunningRunDto,
+  RunDueDunningDto,
+  RunDueDunningResponseDto,
   ComputeKpiSnapshotDto,
   PostingResultDto,
   ReconciliationResultDto,
@@ -84,6 +86,28 @@ export class BillingOperationsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DunningRunResponseDto> {
     return this.dunningService.execute(dto, actor);
+  }
+
+  /**
+   * Fase 4 del plan de corrección de workers: descubrimiento + disparo diario
+   * de morosidad, por tenant. `dunning-runs:execute` (arriba) sigue siendo el
+   * contrato para una corrida puntual con facturas elegidas a mano; este
+   * endpoint es lo que hace falta para que exista una corrida automática sin
+   * que nadie tenga que armar la lista de facturas.
+   */
+  @Post('internal/dunning-runs/run-due')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Evaluar y disparar morosidad automática por tenant',
+    description:
+      'Idempotente por día (`AUTO-<fecha>` por tenant): reintentar el mismo día no duplica la corrida.',
+  })
+  runDueDunning(
+    @Body() dto: RunDueDunningDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<RunDueDunningResponseDto> {
+    return this.dunningService.runDueDunning(dto, actor);
   }
 
   /** UC-17-12. */

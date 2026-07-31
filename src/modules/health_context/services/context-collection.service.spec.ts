@@ -41,6 +41,7 @@ function build() {
     findSourceByCode: mockFn(() => Promise.resolve(null)),
     createSchedule: mockFn(() => ({ id: SCHEDULE })),
     findScheduleForUpdate: mockFn(),
+    claimDueSchedules: mockFn(() => Promise.resolve([])),
     createCollectionRun: mockFn(() => ({ id: RUN })),
     findRunById: mockFn(),
     findRunForUpdate: mockFn(),
@@ -189,6 +190,93 @@ describe('ContextCollectionService', () => {
       await expect(
         d.service.createSchedule(dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('runDueSchedules (tick de recolección)', () => {
+    /**
+     * Programación vencida de referencia, apta para disparar.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de schedule conforme al contrato `any`.
+     */
+    function dueSchedule(overrides: Record<string, unknown> = {}): any {
+      return {
+        id: SCHEDULE,
+        agentId: AGENT,
+        countryConceptId: COUNTRY,
+        scheduleExpression: '0 2 * * *',
+        nextRunAt: new Date('2026-08-01T02:00:00Z'),
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        ...overrides,
+      };
+    }
+
+    it('queues a run for a due schedule and advances next_run_at', async () => {
+      const d = build();
+      d.contextRepo.findAgentById.mockResolvedValue(activeAgent());
+      d.contextRepo.createCollectionRun.mockReturnValue({ id: RUN });
+      const due = dueSchedule();
+      d.contextRepo.claimDueSchedules.mockResolvedValue([due]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.claimed).toBe(1);
+      expect(res.queued).toBe(1);
+      expect(res.results[0]).toMatchObject({
+        scheduleId: SCHEDULE,
+        runId: RUN,
+      });
+      expect(d.contextRepo.createCollectionRun).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          scheduleId: SCHEDULE,
+          agentId: AGENT,
+          countryConceptId: COUNTRY,
+          triggerConceptId: CONCEPTS.HCTX_TRIGGER_SCHEDULED,
+          idempotencyKey: `schedule:${SCHEDULE}:2026-08-01T02:00:00.000Z`,
+        }),
+      );
+      // La próxima marca de `0 2 * * *` desde el 2026-08-01T02:00Z es el día siguiente.
+      expect(due.nextRunAt.toISOString()).toBe('2026-08-02T02:00:00.000Z');
+    });
+
+    it('skips but still reschedules when the agent is not active', async () => {
+      const d = build();
+      d.contextRepo.findAgentById.mockResolvedValue(
+        activeAgent({ statusConceptId: CONCEPTS.STATE_REVOKED }),
+      );
+      const due = dueSchedule();
+      d.contextRepo.claimDueSchedules.mockResolvedValue([due]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.queued).toBe(0);
+      expect(res.results[0].skippedReason).toBe('AGENT_NOT_ACTIVE');
+      expect(d.contextRepo.createCollectionRun).not.toHaveBeenCalled();
+      expect(due.nextRunAt.toISOString()).toBe('2026-08-02T02:00:00.000Z');
+    });
+
+    it('is idempotent: a run already recorded for the due mark is not duplicated', async () => {
+      const d = build();
+      d.contextRepo.findAgentById.mockResolvedValue(activeAgent());
+      d.contextRepo.findRunByIdempotencyKey.mockResolvedValue({ id: RUN });
+      const due = dueSchedule();
+      d.contextRepo.claimDueSchedules.mockResolvedValue([due]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.results[0].runId).toBe(RUN);
+      expect(d.contextRepo.createCollectionRun).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty batch when nothing is due', async () => {
+      const d = build();
+      d.contextRepo.claimDueSchedules.mockResolvedValue([]);
+
+      const res = await d.service.runDueSchedules({ limit: 5 }, actor);
+
+      expect(res).toEqual({ claimed: 0, queued: 0, results: [] });
     });
   });
 

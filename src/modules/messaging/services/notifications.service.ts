@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  SEED,
   UnauthorizedException,
   canonicalJson,
   deriveWebhookSecret,
@@ -16,6 +17,7 @@ import { NotificationsRepository } from '../repositories';
 import {
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
+  PendingNotificationsResponseDto,
   DeliverNotificationDto,
   DeliverNotificationResponseDto,
   ProviderReceiptDto,
@@ -46,6 +48,15 @@ const LIVE_REQUEST_STATES: readonly string[] = [
 ];
 
 const DEFAULT_PRIORITY = 5;
+const DEFAULT_PENDING_BATCH = 50;
+/** Cuánto puede quedar `NOTIF_SENDING` antes de considerarse huérfana y reclamable de nuevo. */
+const SENDING_CLAIM_STALE_MS = 5 * 60_000;
+
+/** Estados que todavía admiten un intento de entrega. */
+const DELIVERABLE_REQUEST_STATES: readonly string[] = [
+  CONCEPTS.NOTIF_PENDING,
+  CONCEPTS.NOTIF_SENDING,
+];
 
 /**
  * Notificaciones: solicitud consciente del consentimiento, entrega multicanal,
@@ -197,6 +208,50 @@ export class NotificationsService {
         suppressed: suppression !== undefined,
         suppressionReason: suppression,
         debounced: false,
+      };
+    });
+  }
+
+  /**
+   * Lote de solicitudes listas para intentar entrega, por prioridad y
+   * antigüedad. La usa el worker de notificaciones (Fase 1) para descubrir
+   * qué llamar en `deliverNotification` — sin esta consulta el worker no
+   * tenía forma de saber qué solicitudes existían.
+   */
+  async listDeliverable(
+    limit?: number,
+  ): Promise<PendingNotificationsResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const now = new Date();
+      const requests = await this.notificationsRepo.findClaimableRequests(
+        tx,
+        CONCEPTS.NOTIF_PENDING,
+        CONCEPTS.NOTIF_SENDING,
+        now,
+        new Date(now.getTime() - SENDING_CLAIM_STALE_MS),
+        limit ?? DEFAULT_PENDING_BATCH,
+      );
+
+      // Reclama el lote (PENDING/SENDING-huérfana → SENDING) ANTES de
+      // devolverlo: el llamador entrega al proveedor real fuera de esta
+      // transacción, así que sólo el estado persistido (no el lock, que se
+      // libera al hacer commit) evita que un tick solapado vuelva a
+      // descubrir y reenviar la misma solicitud.
+      for (const request of requests) {
+        request.statusConceptId = CONCEPTS.NOTIF_SENDING;
+        touch(request, SEED.systemWorkerUserId, now);
+      }
+      await tx.flush();
+
+      return {
+        requests: requests.map((request) => ({
+          id: request.id,
+          channelId: request.channelId,
+          statusConceptId: request.statusConceptId,
+          payloadJson: request.payloadJson,
+          recipientAddress: request.recipientAddress,
+          recipientUserId: request.recipientUserId,
+        })),
       };
     });
   }

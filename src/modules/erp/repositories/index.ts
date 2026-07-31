@@ -8,3 +8,4 @@ export type {
   CreateEmployeeData,
   CreatePurchaseOrderData,
 } from './erp-operations.repository';
+export { ErpContractsExtRepository } from './erp-contracts-ext.repository';

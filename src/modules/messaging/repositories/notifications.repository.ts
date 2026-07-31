@@ -210,6 +210,48 @@ export class NotificationsRepository {
   }
 
   /**
+   * Lote de solicitudes reclamables: las que ya llegaron a su `scheduledAt` y
+   * están `NOTIF_PENDING`, o quedaron `NOTIF_SENDING` de un intento que nunca
+   * volvió (proceso caído a mitad de entrega) hace más de `staleSendingBefore`.
+   *
+   * Bloquea el lote (`PESSIMISTIC_PARTIAL_WRITE`, equivalente a
+   * `FOR UPDATE SKIP LOCKED`) para que dos relays concurrentes no se lleven la
+   * misma fila. El *llamador* debe, dentro de la misma transacción, dejar cada
+   * fila en `NOTIF_SENDING` antes de hacer `flush` — si sólo se leyera, dos
+   * ticks del worker que se solapan (el intervalo es de 5s y la llamada al
+   * proveedor real puede tardar más) descubrirían la misma solicitud dos
+   * veces y la enviarían dos veces al proveedor real, algo que ya no se puede
+   * deshacer aunque la base quede consistente después.
+   */
+  findClaimableRequests(
+    em: EntityManager,
+    pendingStatusConceptId: string,
+    sendingStatusConceptId: string,
+    now: Date,
+    staleSendingBefore: Date,
+    limit: number,
+  ): Promise<NotificationRequests[]> {
+    return em.find(
+      NotificationRequests,
+      {
+        scheduledAt: { $lte: now },
+        $or: [
+          { statusConceptId: pendingStatusConceptId },
+          {
+            statusConceptId: sendingStatusConceptId,
+            updatedAt: { $lte: staleSendingBefore },
+          },
+        ],
+      },
+      {
+        lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,
+        orderBy: { priority: 'ASC', scheduledAt: 'ASC' },
+        limit,
+      },
+    );
+  }
+
+  /**
    * Solicitud viva con la misma clave de rebote: colapsa las notificaciones
    * repetidas sin perder la que ya está registrada.
    */

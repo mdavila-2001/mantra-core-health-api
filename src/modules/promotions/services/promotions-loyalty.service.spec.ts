@@ -36,6 +36,7 @@ function build() {
     createProgram: mockFn(),
     findProgramById: mockFn(),
     findProgramByCode: mockFn(),
+    findActivePrograms: mockFn(),
     createTier: mockFn(),
     findTiersByProgram: mockFn(),
     createEarningRule: mockFn(),
@@ -54,18 +55,25 @@ function build() {
     findReferralByCode: mockFn(),
     findReferralForUpdate: mockFn(),
     findReferralsByReferrer: mockFn(),
-    findWalletForUpdate: mockFn(),
-    createWallet: mockFn(),
-    findWalletLedgerEntryByKey: mockFn(),
-    createWalletLedgerEntry: mockFn(),
+  };
+  // El crédito de billetera se delega al servicio de pagos (contrato entre
+  // dominios): find-or-create + idempotencia + saldo viven allí.
+  const walletsService = {
+    creditWallet: mockFn().mockResolvedValue({
+      walletId: 'w-1',
+      entryId: 'wle-1',
+      balanceAfter: '10.00',
+      duplicate: false,
+    }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PromotionsLoyaltyService(
     em as any,
     loyaltyRepo,
+    walletsService as any,
     logger as any,
   );
-  return { service, tx, loyaltyRepo };
+  return { service, em, tx, loyaltyRepo, walletsService };
 }
 
 /** Niveles típicos: bronce desde 0, plata desde 100, oro desde 500. */
@@ -608,6 +616,67 @@ describe('PromotionsLoyaltyService', () => {
 
       expect(res).toEqual({ scanned: 1, affected: 0, pointsExpired: '0.00' });
     });
+
+    it('touches every scanned membership even without expirable points, so the next sweep rotates past it', async () => {
+      const d = build();
+      const member = membership({ updatedByUserId: undefined });
+      d.loyaltyRepo.findMembershipsForSweep.mockResolvedValue([member]);
+      d.loyaltyRepo.findExpirableEntries.mockResolvedValue([]);
+
+      await d.service.expirePoints(dto, actor);
+
+      expect(member.updatedByUserId).toBe(actor.id);
+    });
+  });
+
+  describe('listActivePrograms (UC-51-06, descubrimiento)', () => {
+    it('maps active programs to their summary and uses the active-state concept', async () => {
+      const d = build();
+      d.loyaltyRepo.findActivePrograms.mockResolvedValue([
+        { id: PROGRAM, code: 'LOY-01', name: 'Programa 1' },
+      ]);
+
+      const res = await d.service.listActivePrograms();
+
+      expect(d.loyaltyRepo.findActivePrograms).toHaveBeenCalledWith(
+        d.em,
+        CONCEPTS.LOYALTY_ACTIVE,
+        100,
+        undefined,
+      );
+      expect(res).toEqual({
+        programs: [{ id: PROGRAM, code: 'LOY-01', name: 'Programa 1' }],
+      });
+    });
+
+    it('forwards a custom limit and returns an empty list when there are none', async () => {
+      const d = build();
+      d.loyaltyRepo.findActivePrograms.mockResolvedValue([]);
+
+      const res = await d.service.listActivePrograms(10);
+
+      expect(d.loyaltyRepo.findActivePrograms).toHaveBeenCalledWith(
+        d.em,
+        CONCEPTS.LOYALTY_ACTIVE,
+        10,
+        undefined,
+      );
+      expect(res).toEqual({ programs: [] });
+    });
+
+    it('scopes the query to the caller tenant when one is provided', async () => {
+      const d = build();
+      d.loyaltyRepo.findActivePrograms.mockResolvedValue([]);
+
+      await d.service.listActivePrograms(10, 'tenant-1');
+
+      expect(d.loyaltyRepo.findActivePrograms).toHaveBeenCalledWith(
+        d.em,
+        CONCEPTS.LOYALTY_ACTIVE,
+        10,
+        'tenant-1',
+      );
+    });
   });
 
   describe('createReferral (UC-51-12)', () => {
@@ -783,7 +852,7 @@ describe('PromotionsLoyaltyService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('credits the wallet for a wallet-credit award, locking and creating it if absent', async () => {
+    it('credits the wallet for a wallet-credit award via the payments WalletsService', async () => {
       const d = build();
       d.loyaltyRepo.findReferralForUpdate.mockResolvedValue(pendingReferral());
       d.loyaltyRepo.findReferralProgramById.mockResolvedValue({
@@ -791,44 +860,35 @@ describe('PromotionsLoyaltyService', () => {
         referrerAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
         refereeAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
       });
-      d.loyaltyRepo.findWalletLedgerEntryByKey.mockResolvedValue(null);
       d.loyaltyRepo.findMembershipForUpdate.mockResolvedValue(membership());
-      // La billetera del referidor no existe; la del referido sí (saldo 20).
-      d.loyaltyRepo.findWalletForUpdate
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({
-          id: 'wallet-referee',
-          availableBalance: '20',
-        });
-      d.loyaltyRepo.createWallet.mockReturnValue({
-        id: 'wallet-referrer',
-        availableBalance: '0',
-      });
       let n = 0;
-      d.loyaltyRepo.createWalletLedgerEntry.mockImplementation(() => ({
-        id: `wled-${++n}`,
-      }));
+      d.walletsService.creditWallet.mockImplementation(() =>
+        Promise.resolve({
+          walletId: `w-${n}`,
+          entryId: `wled-${++n}`,
+          balanceAfter: '70.00',
+          duplicate: false,
+        }),
+      );
 
       const res = await d.service.qualifyReferral(REFERRAL, dto, actor);
 
       expect(res.statusConceptId).toBe(CONCEPTS.REFERRAL_QUALIFIED);
       expect(res.referrerLedgerEntryId).toBe('wled-1');
       expect(res.refereeLedgerEntryId).toBe('wled-2');
-      // Se creó la billetera ausente y no se tocó el ledger de puntos.
-      expect(d.loyaltyRepo.createWallet).toHaveBeenCalledTimes(1);
+      // El crédito se delega al servicio de pagos (2 abonos), no se toca el ledger
+      // de puntos ni se escriben las tablas de pagos desde promotions.
+      expect(d.walletsService.creditWallet).toHaveBeenCalledTimes(2);
       expect(d.loyaltyRepo.createLedgerEntry).not.toHaveBeenCalled();
-      // El abono suma sobre el saldo existente del referido: 20 + 50 = 70.00.
-      const refereeEntry =
-        d.loyaltyRepo.createWalletLedgerEntry.mock.calls[1][1];
-      expect(refereeEntry).toMatchObject({
-        walletId: 'wallet-referee',
+      const refereeCall = d.walletsService.creditWallet.mock.calls[1][1];
+      expect(refereeCall).toMatchObject({
         amount: '50',
-        balanceAfter: '70.00',
         idempotencyKey: `referral:${REFERRAL}:referee`,
+        sourceType: 'member_referral',
       });
     });
 
-    it('is idempotent on wallet credit: an existing entry is not re-credited', async () => {
+    it('is idempotent on wallet credit: the payments service dedupes by key', async () => {
       const d = build();
       d.loyaltyRepo.findReferralForUpdate.mockResolvedValue(pendingReferral());
       d.loyaltyRepo.findReferralProgramById.mockResolvedValue({
@@ -836,15 +896,19 @@ describe('PromotionsLoyaltyService', () => {
         referrerAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
         refereeAwardTypeConceptId: CONCEPTS.AWARD_WALLET_CREDIT,
       });
-      d.loyaltyRepo.findWalletLedgerEntryByKey.mockResolvedValue({
-        id: 'wled-existing',
+      d.loyaltyRepo.findMembershipForUpdate.mockResolvedValue(membership());
+      d.walletsService.creditWallet.mockResolvedValue({
+        walletId: 'w-1',
+        entryId: 'wled-existing',
+        balanceAfter: '20.00',
+        duplicate: true,
       });
 
       const res = await d.service.qualifyReferral(REFERRAL, dto, actor);
 
       expect(res.referrerLedgerEntryId).toBe('wled-existing');
-      expect(d.loyaltyRepo.createWalletLedgerEntry).not.toHaveBeenCalled();
-      expect(d.loyaltyRepo.findWalletForUpdate).not.toHaveBeenCalled();
+      // La idempotencia la resuelve el servicio de pagos (clave UNIQUE del ledger).
+      expect(d.walletsService.creditWallet).toHaveBeenCalled();
     });
   });
 });

@@ -42,6 +42,7 @@ function build() {
     })),
     findJobForUpdate: mockFn(async () => job()),
     createJob: mockFn((_tx: any, data: any) => ({ id: JOB_ID, ...data })),
+    findQueuedJobs: mockFn(async () => []),
   };
   const corpusRepo = {
     findDocument: mockFn(async () => null),
@@ -63,7 +64,12 @@ function build() {
   const outbox = {
     publishDomainEvent: mockFn(async () => ({ duplicate: false })),
   };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const logger = {
+    setContext: mockFn(),
+    info: mockFn(),
+    warn: mockFn(),
+    error: mockFn(),
+  };
 
   const service = new EmbeddingPipelineService(
     em as any,
@@ -270,6 +276,23 @@ describe('EmbeddingPipelineService', () => {
       ).rejects.toThrow(/está retirado/);
     });
 
+    it('marca el job failed sin tocar el corpus cuando el proveedor no calculó nada', async () => {
+      const d = build();
+
+      const result = await d.service.runEmbeddingJob(
+        JOB_ID,
+        { failed: true, errorCode: 'PROVIDER_NOT_CONFIGURED' } as any,
+        actor,
+      );
+
+      expect(result.status).toBe('failed');
+      expect(result.documentsUpserted).toBe(0);
+      expect(result.chunksCreated).toBe(0);
+      expect(d.corpusRepo.createDocument).not.toHaveBeenCalled();
+      expect(d.corpusRepo.createChunk).not.toHaveBeenCalled();
+      expect(d.corpusRepo.createEmbedding).not.toHaveBeenCalled();
+    });
+
     it('rechaza un job que ya terminó', async () => {
       const d = build();
       d.catalogRepo.findJobForUpdate.mockResolvedValue(
@@ -307,6 +330,38 @@ describe('EmbeddingPipelineService', () => {
 
       expect(result.status).toBe('running');
       expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listQueuedJobs (UC-59-05, descubrimiento)', () => {
+    it('mapea los jobs en cola al DTO del worker', async () => {
+      const d = build();
+      d.catalogRepo.findQueuedJobs.mockResolvedValue([
+        { id: JOB_ID, vectorCollectionId: COLLECTION_ID, jobType: 'backfill' },
+      ]);
+
+      const res = await d.service.listQueuedJobs(10);
+
+      expect(d.catalogRepo.findQueuedJobs).toHaveBeenCalledWith(
+        d.em,
+        'queued',
+        10,
+      );
+      expect(res.jobs).toEqual([
+        { id: JOB_ID, vectorCollectionId: COLLECTION_ID, jobType: 'backfill' },
+      ]);
+    });
+
+    it('usa el tamaño de lote por defecto si no se declara límite', async () => {
+      const d = build();
+
+      await d.service.listQueuedJobs();
+
+      expect(d.catalogRepo.findQueuedJobs).toHaveBeenCalledWith(
+        d.em,
+        'queued',
+        50,
+      );
     });
   });
 

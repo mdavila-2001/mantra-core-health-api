@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -37,6 +37,7 @@ export class ReviewDimensionInputDto {
 }
 
 /** Cuerpo de `POST /community/profiles/{profileId}/reviews` (UC-19-11). */
+@ApiSchema({ name: 'CommunityCreateReviewDto' })
 export class CreateReviewDto {
   /**
    * Identificador asociado a reviewer patient profile.

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -1694,6 +1694,7 @@ export class IntegrityPolicyResponseDto {
 }
 
 /** Cuerpo de `POST /ops/integrity/{datasetId}/verify` (UC-54-13). */
+@ApiSchema({ name: 'PolyglotStorageVerifyIntegrityDto' })
 export class VerifyIntegrityDto {
   /**
    * Identificador asociado a placement.

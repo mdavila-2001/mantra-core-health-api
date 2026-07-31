@@ -27,6 +27,9 @@ import {
   RetryResultDto,
   DeadLetterResultDto,
   CorrelateResultDto,
+  PendingDispatchResponseDto,
+  PendingRetryResponseDto,
+  PendingCorrelationResponseDto,
 } from '../dto';
 import { INTEG } from '../integrations.concepts';
 
@@ -34,6 +37,8 @@ import { INTEG } from '../integrations.concepts';
 const MAX_ATTEMPTS = 5;
 /** Backoff base (segundos) para el reintento exponencial. */
 const BACKOFF_BASE_SECONDS = 60;
+/** Lote por defecto de las consultas de descubrimiento del worker (Fase 5). */
+const DEFAULT_DISCOVERY_BATCH = 50;
 
 /**
  * Casos de uso de mensajería saliente y correlación de callbacks: encolar
@@ -158,7 +163,7 @@ export class IntegrationsMessagingService {
       'Dispatching message',
     );
     return this.em.transactional(async (tx) => {
-      const message = await this.outboundRepo.findById(tx, messageId);
+      const message = await this.outboundRepo.findByIdForUpdate(tx, messageId);
       if (!message)
         throw new ResourceNotFoundException('Mensaje no encontrado', {
           messageId,
@@ -441,5 +446,69 @@ export class IntegrationsMessagingService {
         status: inbound.statusConceptId,
       };
     });
+  }
+
+  /**
+   * Descubrimiento para el worker de despacho (Fase 5 del plan de corrección
+   * de workers, UC-12-06): sin esto, `dispatch` no tenía forma de saber qué
+   * `messageId` despachar. No es uno de los UC del módulo — es
+   * infraestructura de lectura, en el mismo espíritu que el `/pending` de
+   * `messaging`.
+   */
+  async listQueuedForDispatch(
+    limit?: number,
+  ): Promise<PendingDispatchResponseDto> {
+    const em = this.em.fork();
+    const messages = await this.outboundRepo.findQueuedForDispatch(
+      em,
+      INTEG.MSG_QUEUED,
+      new Date(),
+      limit ?? DEFAULT_DISCOVERY_BATCH,
+    );
+    return { messages: messages.map((message) => ({ id: message.id })) };
+  }
+
+  /**
+   * Descubrimiento para el worker de reintentos (Fase 5, UC-12-07/08): lista
+   * los mensajes `FAILED` y calcula aquí mismo, con el mismo `MAX_ATTEMPTS`
+   * que usa `retry`, si el próximo intento ya lo agotaría — así el worker
+   * decide entre `retry` y `deadLetter` sin tener que inferirlo del cuerpo de
+   * un error 422.
+   */
+  async listFailedForRetry(limit?: number): Promise<PendingRetryResponseDto> {
+    const em = this.em.fork();
+    const messages = await this.outboundRepo.findFailed(
+      em,
+      INTEG.MSG_FAILED,
+      limit ?? DEFAULT_DISCOVERY_BATCH,
+    );
+    const items = await Promise.all(
+      messages.map(async (message) => {
+        const nextAttemptNumber =
+          (await this.retriesRepo.maxAttempt(em, message.id)) + 1;
+        return {
+          id: message.id,
+          nextAttemptNumber,
+          exhausted: nextAttemptNumber > MAX_ATTEMPTS,
+        };
+      }),
+    );
+    return { messages: items };
+  }
+
+  /**
+   * Descubrimiento para el worker de correlación (Fase 5, UC-12-10): sin
+   * esto, `correlate` no tenía forma de saber qué `inboundMessageId` traer.
+   */
+  async listReceivedForCorrelation(
+    limit?: number,
+  ): Promise<PendingCorrelationResponseDto> {
+    const em = this.em.fork();
+    const inbound = await this.inboundRepo.findReceived(
+      em,
+      INTEG.INBOUND_RECEIVED,
+      limit ?? DEFAULT_DISCOVERY_BATCH,
+    );
+    return { messages: inbound.map((message) => ({ id: message.id })) };
   }
 }

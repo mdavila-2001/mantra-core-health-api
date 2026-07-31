@@ -1,10 +1,11 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { IsIn, IsUUID, IsOptional, IsInt, Min } from 'class-validator';
 
 /** Tipos de relación admitidos entre conceptos. */
 export type RelationshipType = 'IS_A' | 'PART_OF';
 
 /** Alta de una relación entre conceptos (UC-03-06). */
+@ApiSchema({ name: 'TerminologyCreateRelationshipDto' })
 export class CreateRelationshipDto {
   /**
    * Identificador asociado a target concept.

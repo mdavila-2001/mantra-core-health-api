@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { CronTime } from 'cron';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
@@ -10,6 +11,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { HealthContextRepository } from '../repositories';
+import type { CountryContextSchedules } from '../entities';
 import {
   CreateAgentDto,
   AgentResponseDto,
@@ -17,6 +19,9 @@ import {
   SourceResponseDto,
   CreateScheduleDto,
   ScheduleResponseDto,
+  RunDueSchedulesDto,
+  RunDueSchedulesResponseDto,
+  DueScheduleRunResultDto,
   StartCollectionRunDto,
   CollectionRunResponseDto,
   RecordObservationDto,
@@ -47,6 +52,13 @@ const RUN_OUTCOME_CONCEPT: Readonly<Record<RunOutcome, string>> = {
 
 /** Cron de cinco campos: minuto, hora, día del mes, mes y día de la semana. */
 const CRON_FIELDS = 5;
+const DEFAULT_DUE_SCHEDULES_BATCH = 20;
+/**
+ * `timezone_concept_id` es opcional y hoy no hay catálogo que traduzca un
+ * concepto a una zona IANA — se asume UTC hasta que exista esa resolución,
+ * igual que `automation`/`qa_lab` con sus disparadores de calendario.
+ */
+const DEFAULT_SCHEDULE_TIMEZONE = 'UTC';
 
 /**
  * Recolección de contexto: agentes, fuentes, programaciones, corridas y
@@ -194,6 +206,139 @@ export class ContextCollectionService {
         statusConceptId: CONCEPTS.STATE_ACTIVE,
       };
     });
+  }
+
+  /**
+   * Tick de recolección (Fase 2 del plan de corrección de workers): cierra
+   * el "Pendiente" del README ("resolución de la expresión cron... pertenece
+   * al planificador, fuera de la [API]") — antes de este método nada
+   * evaluaba si una programación estaba vencida ni la disparaba.
+   *
+   * Reclama el lote con `SKIP LOCKED` y, para cada programación, encola la
+   * corrida (misma idempotencia que `startCollectionRun`: `schedule:<id>:<marca
+   * vencida>`) y avanza `next_run_at` siempre — haya o no corrida — para que
+   * una marca que no pudo dispararse no deje al tick reintentando el mismo
+   * instante para siempre.
+   */
+  async runDueSchedules(
+    dto: RunDueSchedulesDto,
+    actor: AuthenticatedUser,
+  ): Promise<RunDueSchedulesResponseDto> {
+    const now = new Date();
+    const limit = dto.limit ?? DEFAULT_DUE_SCHEDULES_BATCH;
+
+    this.logger.info(
+      { operation: 'health-context.schedule.run-due', limit },
+      'Evaluating due country context schedules',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const due = await this.contextRepo.claimDueSchedules(
+        tx,
+        now,
+        CONCEPTS.STATE_ACTIVE,
+        limit,
+      );
+
+      const results: DueScheduleRunResultDto[] = [];
+      let queued = 0;
+
+      for (const schedule of due) {
+        const result = await this.runDueSchedule(tx, schedule, now, actor);
+        if (result.runId) queued += 1;
+        results.push(result);
+      }
+
+      if (due.length > 0) {
+        this.logger.info(
+          {
+            operation: 'health-context.schedule.run-due',
+            claimed: due.length,
+            queued,
+            skipped: due.length - queued,
+          },
+          'Due country context schedules evaluated',
+        );
+      }
+
+      return { claimed: due.length, queued, results };
+    });
+  }
+
+  /** Evalúa una única programación vencida: encola la corrida y avanza la marca. */
+  private async runDueSchedule(
+    tx: EntityManager,
+    schedule: CountryContextSchedules,
+    now: Date,
+    actor: AuthenticatedUser,
+  ): Promise<DueScheduleRunResultDto> {
+    const dueAt = schedule.nextRunAt ?? now;
+    let runId: string | undefined;
+    let skippedReason: string | undefined;
+
+    const agent = await this.contextRepo.findAgentById(tx, schedule.agentId);
+    if (!agent || agent.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
+      skippedReason = 'AGENT_NOT_ACTIVE';
+    } else {
+      const idempotencyKey = `schedule:${schedule.id}:${dueAt.toISOString()}`;
+      const existing = await this.contextRepo.findRunByIdempotencyKey(
+        tx,
+        idempotencyKey,
+      );
+      if (existing) {
+        runId = existing.id;
+      } else {
+        const run = this.contextRepo.createCollectionRun(tx, {
+          scheduleId: schedule.id,
+          agentId: schedule.agentId,
+          countryConceptId: schedule.countryConceptId,
+          idempotencyKey,
+          triggerConceptId: TRIGGER_CONCEPT.SCHEDULED,
+          statusConceptId: CONCEPTS.HCTX_RUN_RUNNING,
+          recordedByUserId: actor.id,
+        });
+        runId = run.id;
+      }
+    }
+
+    // `scheduleExpression` es NOT NULL en el esquema (a diferencia de
+    // `qa_lab.test_schedules.cronExpression`, que sí admite nulo): toda fila
+    // que pasó por `createSchedule` (la única forma de crearla) trae una
+    // expresión válida, así que `computeNextRunAt` siempre devuelve una marca.
+    schedule.nextRunAt = this.computeNextRunAt(schedule, dueAt);
+    touch(schedule, actor.id);
+
+    if (skippedReason) {
+      this.logger.warn(
+        {
+          operation: 'health-context.schedule.run-due',
+          scheduleId: schedule.id,
+          reason: skippedReason,
+        },
+        'Scheduled context collection skipped',
+      );
+    }
+
+    return {
+      scheduleId: schedule.id,
+      runId,
+      nextRunAt: schedule.nextRunAt?.toISOString(),
+      skippedReason,
+    };
+  }
+
+  /** Próxima marca del cron a partir de la marca vencida. */
+  private computeNextRunAt(
+    schedule: CountryContextSchedules,
+    from: Date,
+  ): Date | undefined {
+    if (!schedule.scheduleExpression) return undefined;
+    const timezone = DEFAULT_SCHEDULE_TIMEZONE;
+    const cronTime = new CronTime(schedule.scheduleExpression, timezone);
+    // `getNextDateFrom` sin segundo argumento deriva la zona de `from` (la del
+    // proceso, si `from` es un `Date` nativo) en vez de la zona con la que se
+    // construyó `CronTime` — hay que pasarla explícita también aquí.
+    return cronTime.getNextDateFrom(from, timezone).toJSDate();
   }
 
   /**

@@ -40,7 +40,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new OrderSetsService(
     em as any,
-    orderSetsRepo as any,
+    orderSetsRepo,
     serviceRequestsRepo as any,
     logger as any,
   );

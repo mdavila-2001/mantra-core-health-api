@@ -28,3 +28,4 @@ export type {
   CreateInvoiceData,
   CreateLeadSubmissionData,
 } from './ads-optimization.repository';
+export { AdsInsightsConfigRepository } from './ads-insights-config.repository';

@@ -39,22 +39,24 @@ function build() {
     recordReschedule: mockFn(),
     createCancellation: mockFn(),
     createReminder: mockFn(),
-    recordBookingHistory: mockFn(),
   };
   const catalogRepo = {
     findTemplateById: mockFn(),
     findPolicyById: mockFn(),
     findResourceById: mockFn(),
   };
+  // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
+  const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new SchedulingBookingsService(
     em as any,
     bookingsRepo as any,
     catalogRepo as any,
+    historyRepo as any,
     logger as any,
   );
-  return { service, tx, bookingsRepo, catalogRepo };
+  return { service, tx, bookingsRepo, catalogRepo, historyRepo };
 }
 
 /**

@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsOptional,
@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify` (UC-24-03). */
+@ApiSchema({ name: 'PharmacyVerifyLicenseDto' })
 export class VerifyLicenseDto {
   /**
    * Valor de approve mantenido por la instancia.

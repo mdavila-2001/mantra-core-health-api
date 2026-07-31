@@ -181,7 +181,7 @@ describe('TrackingService', () => {
      * @returns Resultado de dto conforme al contrato `any`.
      */
     function dto(milestones: any[]): any {
-      return { subjectType: 'SPECIMEN' as const, milestones };
+      return { subjectType: 'SPECIMEN' as const, milestones, tenantId: 'tenant-a' };
     }
 
     it('creates the milestones numbering them in order', async () => {
@@ -220,6 +220,26 @@ describe('TrackingService', () => {
       expect(
         d.trackingRepo.createMilestoneDefinition.mock.calls[1][1].ordinal,
       ).toBe(2);
+    });
+
+    it("checks existing codes scoped to the catalog's own tenant", async () => {
+      const d = build();
+      d.trackingRepo.findMilestonesBySubjectType.mockResolvedValue([]);
+      d.trackingRepo.createMilestoneDefinition.mockReturnValue({ id: 'ms-1' });
+
+      await d.service.defineMilestones(
+        dto([{ code: 'PICKED', name: 'Recogido', milestoneStatus: 'IN_TRANSIT' as const }]),
+        actor,
+      );
+
+      expect(
+        d.trackingRepo.findMilestonesBySubjectType,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.any(String),
+        expect.any(String),
+        'tenant-a',
+      );
     });
 
     it('skips a code that already exists', async () => {
@@ -361,7 +381,7 @@ describe('TrackingService', () => {
 
     it('a terminal milestone closes the subject', async () => {
       const d = build();
-      const subject = openSubject();
+      const subject = openSubject({ tenantId: 'tenant-a' });
       d.trackingRepo.findSubjectForUpdate.mockResolvedValue(subject);
       d.trackingRepo.findMilestoneByCode.mockResolvedValue({
         id: 'ms-1',
@@ -378,6 +398,12 @@ describe('TrackingService', () => {
       expect(res.subjectClosed).toBe(true);
       expect(subject.stateConceptId).toBe(CONCEPTS.SUBJECT_CLOSED);
       expect(subject.closedAt).toBeInstanceOf(Date);
+      expect(d.trackingRepo.findMilestoneByCode).toHaveBeenCalledWith(
+        d.tx,
+        subject.subjectTypeConceptId,
+        'DELIVERED',
+        'tenant-a',
+      );
     });
 
     it('refuses to record on a closed subject', async () => {

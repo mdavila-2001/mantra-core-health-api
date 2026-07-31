@@ -256,6 +256,14 @@ export class ResearchRepository {
     );
   }
 
+  /** Igual que `findReleaseRequestForUpdate`, sin lock: solo para descubrimiento. */
+  findReleaseRequestById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DatasetReleaseRequests | null> {
+    return em.findOne(DatasetReleaseRequests, { id });
+  }
+
   // --- Manifiestos (UC-63-11, 12) ---
 
   /**
@@ -271,6 +279,25 @@ export class ResearchRepository {
       DatasetReleaseManifests,
       { datasetReleaseRequestId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Manifiestos vencidos (`expires_at <= now`), para el descubrimiento del
+   * worker de revocación (UC-63-12): `revoke` exige un `requestId` puntual y
+   * no había forma de listar qué releases cerrar al vencer. Sin lock: el
+   * cierre real (`revokeRelease`) vuelve a bloquear la solicitud por su
+   * cuenta y es idempotente vía `CLOSEABLE_RELEASE_STATUSES`.
+   */
+  findExpiredManifests(
+    em: EntityManager,
+    now: Date,
+    limit: number,
+  ): Promise<DatasetReleaseManifests[]> {
+    return em.find(
+      DatasetReleaseManifests,
+      { expiresAt: { $lte: now } },
+      { orderBy: { expiresAt: 'ASC' }, limit },
     );
   }
 

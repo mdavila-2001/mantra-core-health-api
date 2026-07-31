@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -24,6 +25,14 @@ import {
 import { MedicationRequests } from '../entities';
 import { CLIN } from '../clinical.concepts';
 import { PrescriptionSignaturePoliciesService } from './prescription-signature-policies.service';
+import { AuditTrailService } from '../../audit/services';
+import { HistoryRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
+
+/** Recurso sellado en la cadena WORM para cada evento de receta (CAN-AUDIT-001). */
+const RX_AUDIT_ENTITY = 'medication_request';
+/** Clave de la tabla `audit.medication_requests_history` en el registro (§2). */
+const RX_HISTORY_ENTITY = 'medication_requests';
 
 /**
  * UC-08-10 (prescribir) y UC-08-11 (administrar/registrar) de medicación, más la
@@ -58,9 +67,29 @@ export class MedicationsService {
     private readonly requestsRepo: MedicationRequestsRepository,
     private readonly recordsRepo: MedicationRecordsRepository,
     private readonly signaturePolicies: PrescriptionSignaturePoliciesService,
+    private readonly auditTrail: AuditTrailService,
+    private readonly historyRepo: HistoryRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MedicationsService.name);
+  }
+
+  /** Snapshot del contenido clínico sellado, para la tabla de historial. */
+  private snapshot(request: MedicationRequests): Record<string, unknown> {
+    return {
+      status: request.statusConceptId,
+      medicationConceptId: request.medicationConceptId,
+      substanceAtcConceptId: request.substanceAtcConceptId,
+      doseText: request.doseText,
+      routeConceptId: request.routeConceptId,
+      frequencyText: request.frequencyText,
+      quantityDecimal: request.quantityDecimal,
+      unitConceptId: request.unitConceptId,
+      validFrom: request.validFrom ?? null,
+      validTo: request.validTo ?? null,
+      issuedAt: request.issuedAt ?? null,
+      statusReasonText: request.statusReasonText ?? null,
+    };
   }
 
   /** Proyección estable de una receta a su DTO de respuesta. */
@@ -220,6 +249,12 @@ export class MedicationsService {
         request.signedByUserId = actor.id;
         touch(request, actor.id);
         await tx.flush();
+        await this.auditTrail.record(tx, actor, {
+          action: 'MEDICATION_SIGNED',
+          entity: RX_AUDIT_ENTITY,
+          entityId: request.id,
+          tenantId: request.custodianTenantId,
+        });
       }
       return this.toRequestResponse(request);
     });
@@ -236,6 +271,7 @@ export class MedicationsService {
   async issue(
     requestId: string,
     actor: AuthenticatedUser,
+    idempotencyKey?: string,
   ): Promise<MedicationRequestResponseDto> {
     this.logger.info(
       { operation: 'clinical.medication.issue', requestId },
@@ -243,11 +279,38 @@ export class MedicationsService {
     );
     return this.em.transactional(async (tx) => {
       const request = await this.loadRequestOrThrow(tx, requestId);
+      // CAN §6 (idempotencia): un reintento de la emisión con la MISMA clave sobre
+      // una receta ya emitida devuelve el resultado sellado (replay), sin volver a
+      // emitir ni fallar. Sin clave o clave distinta, el guard de estado se mantiene.
+      if (
+        idempotencyKey &&
+        request.statusConceptId === CLIN.MEDICATION_REQUEST_ISSUED &&
+        request.issueIdempotencyKey === idempotencyKey
+      ) {
+        return this.toRequestResponse(request);
+      }
       if (request.statusConceptId !== CLIN.MEDICATION_REQUEST_DRAFT) {
         throw new PreconditionFailedException(
           'Solo un borrador (DRAFT) puede emitirse',
           { requestId, status: request.statusConceptId },
         );
+      }
+
+      // `issue_idempotency_key` es UNIQUE global sobre la tabla: si la clave ya
+      // pertenece a OTRA receta (no un replay de esta misma), rechazar aquí con
+      // un 409 claro en vez de dejar que el `flush` falle con una violación de
+      // restricción cruda.
+      if (idempotencyKey) {
+        const existing = await this.requestsRepo.findByIssueIdempotencyKey(
+          tx,
+          idempotencyKey,
+        );
+        if (existing && existing.id !== request.id) {
+          throw new ConflictException(
+            'La clave de idempotencia ya fue usada para emitir otra receta',
+            { requestId, idempotencyKey },
+          );
+        }
       }
 
       if (!request.signedAt) {
@@ -266,8 +329,22 @@ export class MedicationsService {
 
       request.statusConceptId = CLIN.MEDICATION_REQUEST_ISSUED;
       request.issuedAt = new Date();
+      if (idempotencyKey) request.issueIdempotencyKey = idempotencyKey;
       touch(request, actor.id);
       await tx.flush();
+
+      await this.auditTrail.record(tx, actor, {
+        action: 'MEDICATION_ISSUED',
+        entity: RX_AUDIT_ENTITY,
+        entityId: request.id,
+        tenantId: request.custodianTenantId,
+      });
+      // §2: sella la primera revisión versionada del contenido emitido.
+      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
+        operationConceptId: AUD.OPERATION_INSERT,
+        dataSnapshot: this.snapshot(request),
+        changedByUserId: actor.id,
+      });
 
       this.logger.info(
         {
@@ -306,6 +383,18 @@ export class MedicationsService {
       request.statusReasonText = dto.reasonText;
       touch(request, actor.id);
       await tx.flush();
+
+      await this.auditTrail.record(tx, actor, {
+        action: 'MEDICATION_INVALIDATED',
+        entity: RX_AUDIT_ENTITY,
+        entityId: request.id,
+        tenantId: request.custodianTenantId,
+      });
+      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
+        operationConceptId: AUD.OPERATION_UPDATE,
+        dataSnapshot: this.snapshot(request),
+        changedByUserId: actor.id,
+      });
 
       this.logger.info(
         {
@@ -374,6 +463,18 @@ export class MedicationsService {
       touch(original, actor.id);
       await tx.flush();
 
+      await this.auditTrail.record(tx, actor, {
+        action: 'MEDICATION_REPLACED',
+        entity: RX_AUDIT_ENTITY,
+        entityId: original.id,
+        tenantId: original.custodianTenantId,
+      });
+      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, original.id, {
+        operationConceptId: AUD.OPERATION_UPDATE,
+        dataSnapshot: this.snapshot(original),
+        changedByUserId: actor.id,
+      });
+
       this.logger.info(
         {
           operation: 'clinical.medication.replace',
@@ -437,6 +538,13 @@ export class MedicationsService {
         actorUserId: actor.id,
       });
       await tx.flush();
+
+      await this.auditTrail.record(tx, actor, {
+        action: 'MEDICATION_RENEWED',
+        entity: RX_AUDIT_ENTITY,
+        entityId: renewal.id,
+        tenantId: source.custodianTenantId,
+      });
 
       this.logger.info(
         {

@@ -13,6 +13,7 @@ import {
   AdsCampaignsRepository,
   AdsDataRepository,
   AdsOptimizationRepository,
+  AdsInsightsConfigRepository,
 } from './repositories';
 
 /**
@@ -29,6 +30,7 @@ import {
     AdsCampaignsRepository,
     AdsDataRepository,
     AdsOptimizationRepository,
+    AdsInsightsConfigRepository,
     AdsAccountsService,
     AdsCampaignsService,
     AdsDataService,

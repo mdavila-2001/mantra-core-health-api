@@ -5,7 +5,17 @@ import {
   PatientProfilesHistory,
   ConsentsHistory,
   ModerationDecisionsHistory,
+  MedicationRequestsHistory,
+  AppointmentBookingsHistory,
 } from '../entities';
+
+/** Datos para sellar una revisión en una tabla `*_history` (write-side). */
+export interface AppendHistoryData {
+  operationConceptId: string;
+  dataSnapshot: unknown;
+  changedByUserId?: string;
+  changeReasonConceptId?: string;
+}
 
 /** Una revisión de la línea de tiempo de un registro (proyección de lectura). */
 export interface HistoryRevision {
@@ -47,7 +57,6 @@ export interface HistoryRevision {
  * Describe el contrato estructural de history binding.
  */
 interface HistoryBinding {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   /**
    * Valor de entity mantenido por la instancia.
    */
@@ -75,6 +84,14 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
     entity: ModerationDecisionsHistory,
     sourceField: 'moderationDecisionsId',
   },
+  medication_requests: {
+    entity: MedicationRequestsHistory,
+    sourceField: 'medicationRequestId',
+  },
+  appointment_bookings: {
+    entity: AppointmentBookingsHistory,
+    sourceField: 'appointmentBookingId',
+  },
 };
 
 /**
@@ -86,6 +103,54 @@ export class HistoryRepository {
   /** ¿Está soportada la entidad polimórfica? */
   isSupported(entity: string): boolean {
     return entity in HISTORY_REGISTRY;
+  }
+
+  /**
+   * Write-side genérico del versionado append-only (§2 «consumidor verificable»):
+   * sella una revisión en `<entity>_history` dentro de la transacción del llamador.
+   * El nº de revisión es el siguiente correlativo del agregado. Cierra la ventana
+   * (`valid_to`) de la revisión anterior para reconstruir el estado point-in-time.
+   * Ampliar cobertura = registrar la entidad en `HISTORY_REGISTRY` y llamar aquí en
+   * su punto de mutación (mismo patrón que `AuditTrailService`).
+   */
+  async append(
+    em: EntityManager,
+    entity: string,
+    id: string,
+    data: AppendHistoryData,
+  ): Promise<void> {
+    const binding = HISTORY_REGISTRY[entity];
+    if (!binding) {
+      throw new Error(`Entidad de historial no registrada: ${entity}`);
+    }
+    const now = new Date();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prev = await (em.find as any)(
+      binding.entity,
+      { [binding.sourceField]: id, validTo: null },
+      {},
+    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    for (const row of prev as any[]) row.validTo = now;
+
+    const revisionNo =
+      (await em.count(binding.entity, { [binding.sourceField]: id })) + 1;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (em.create as any)(
+      binding.entity,
+      {
+        [binding.sourceField]: id,
+        revisionNo,
+        operationConceptId: data.operationConceptId,
+        validFrom: now,
+        dataSnapshot: data.dataSnapshot,
+        changedByUserId: data.changedByUserId,
+        changeReasonConceptId: data.changeReasonConceptId,
+        recordedAt: now,
+      },
+      { partial: true },
+    );
   }
 
   /**

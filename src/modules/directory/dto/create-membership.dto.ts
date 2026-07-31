@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsUUID } from 'class-validator';
 
 /** Roles de tenant asignables a una membresía. */
@@ -7,6 +7,7 @@ export type TenantRoleCode = 'OWNER' | 'ADMIN' | 'STAFF';
 export type AccessScopeCode = 'ALL_TENANT' | 'BRANCH';
 
 /** Cuerpo de `POST /tenants/{tenantId}/memberships` (UC-04-05: incorporar usuario). */
+@ApiSchema({ name: 'DirectoryCreateMembershipDto' })
 export class CreateMembershipDto {
   /**
    * Identificador asociado a user.

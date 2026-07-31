@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from './common';
 import { AppService } from './app.service';
 
@@ -6,6 +7,7 @@ import { AppService } from './app.service';
  * Expone las operaciones HTTP de app.
  */
 @Controller()
+@ApiTags('app')
 export class AppController {
   /**
    * Inicializa la instancia y sus dependencias.
@@ -19,6 +21,8 @@ export class AppController {
    * @returns Resultado de get hello conforme al contrato `string`.
    */
   @Get()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Saludo raíz de verificación de despliegue' })
   getHello(): string {
     return this.appService.getHello();
   }
@@ -30,6 +34,7 @@ export class AppController {
    */
   @Get('health')
   @Public()
+  @ApiOperation({ summary: 'Sonda de liveness (sin autenticación)' })
   health(): {
     /**
      * Valor de status mantenido por la instancia.
