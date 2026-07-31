@@ -48,6 +48,29 @@ x-app-env: &app-env
   MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   MIKRO_ORM_DEBUG: ${MIKRO_ORM_DEBUG:-false}
+  # Materialización del esquema. ESTA VARIABLE TIENE QUE ESTAR AQUÍ.
+  #
+  # Compose usa el `.env` solo para sustituir `${VARIABLE}` dentro de este YAML;
+  # NO lo inyecta dentro de los contenedores. Una variable que no figure en este
+  # bloque, el contenedor no la ve por más que esté en el `.env`. Mientras
+  # `ORM_SCHEMA_SYNC` no estuvo listada, la API dockerizada caía al default del
+  # código (`'safe'` en `src/orm/config/orm.env.ts`) y aplicaba DDL aditivo por
+  # su cuenta al arrancar: exactamente la dirección de cambio que el protocolo
+  # de 4 capas (.puml -> SQL/ -> BD -> ORM) prohíbe, y el mecanismo por el que
+  # llegaron a la base tablas que el modelo canónico no declara. Fijar
+  # `ORM_SCHEMA_SYNC=off` en el `.env` local NO cubría este camino: solo protege
+  # a quien corre la API en el host con `yarn start:dev`.
+  #
+  # El default del contenedor es `dry-run` y no `off` a propósito: con `off`,
+  # `onApplicationBootstrap` retorna antes de llamar a `run()` y el chequeo de
+  # fidelidad tampoco corre, así que se pierde la red de seguridad. `dry-run` no
+  # toca la base -registra el DDL que habría aplicado y sigue- y sí verifica
+  # fidelidad. Quien quiera otro modo lo declara en su `.env`, que gana sobre
+  # este default.
+  ORM_SCHEMA_SYNC: ${ORM_SCHEMA_SYNC:-dry-run}
+  # La verificación de fidelidad solo compara y registra advertencias; nunca
+  # lanza ni aborta el arranque (`SchemaFidelityService.verifyAndReport`).
+  ORM_VERIFY_FIDELITY: ${ORM_VERIFY_FIDELITY:-true}
   # Los 20 workers llaman la API por el nombre del servicio, no localhost.
   WORKER_API_BASE_URL: http://api:3000
   WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
