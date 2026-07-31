@@ -9,8 +9,10 @@ import { LoggingModule, loggingEnvSchema } from './logging';
 import {
   AllExceptionsFilter,
   AuthModule,
+  FileStorageModule,
   TenantContextInterceptor,
   authEnvSchema,
+  storageEnvSchema,
 } from './common';
 import { SeedModule } from './common/seed/seed.module';
 import { IamModule } from './modules/iam/iam.module';
@@ -88,7 +90,8 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
       isGlobal: true,
       validationSchema: ormEnvSchema
         .concat(loggingEnvSchema)
-        .concat(authEnvSchema),
+        .concat(authEnvSchema)
+        .concat(storageEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
     // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
@@ -109,6 +112,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,
+    // Almacenamiento de archivos: resuelve el adaptador activo (`local` en
+    // disco por ahora) a partir de FILE_STORAGE_ADAPTER. Global.
+    FileStorageModule,
     // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
     // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
     OrmModule,
