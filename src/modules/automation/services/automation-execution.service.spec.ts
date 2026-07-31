@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
+import type { AgentRuns, AutomationApprovals } from '../entities';
 import {
   AutomationExecutionService,
   compareDecimals,
@@ -678,7 +679,13 @@ describe('AutomationExecutionService', () => {
      * @returns Resultado de with pending.
      */
     function withPending(d: ReturnType<typeof build>) {
-      const approval = {
+      // `decidedByUserId` lo escribe el servicio al resolver la aprobación; se
+      // declara en el doble (opcional, como en la entidad) para que el mock tenga
+      // la forma real y las aserciones compilen.
+      const approval: Pick<
+        AutomationApprovals,
+        'id' | 'agentRunId' | 'statusConceptId' | 'updatedAt' | 'decidedByUserId'
+      > = {
         id: 'approval-1',
         agentRunId: AGENT_RUN_ID,
         statusConceptId: CONCEPTS.AUTO_APPROVAL_PENDING,
@@ -833,7 +840,12 @@ describe('AutomationExecutionService', () => {
 
     it('cierra los agent_runs abiertos y calcula su latencia', async () => {
       const d = build();
-      const agentRun = {
+      // `latencyMs` la calcula el servicio al cerrar el run; se declara en el
+      // doble (opcional, como en la entidad) para que la aserción compile.
+      const agentRun: Pick<
+        AgentRuns,
+        'id' | 'statusConceptId' | 'startedAt' | 'updatedAt' | 'latencyMs'
+      > = {
         id: 'ar-1',
         statusConceptId: CONCEPTS.AUTO_AGENT_RUN_RUNNING,
         startedAt: new Date(Date.now() - 5000),

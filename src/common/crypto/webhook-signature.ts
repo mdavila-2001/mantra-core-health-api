@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { resolveSecret } from './dev-secret';
 
 /**
  * Firma y verificación HMAC-SHA256 compartida para webhooks salientes y
@@ -61,7 +62,11 @@ export function verifySignature(
  * de secretos (misma raíz `WEBHOOK_SIGNING_KEY`).
  */
 export function deriveWebhookSecret(namespace: string, id: string): string {
-  const rootKey = process.env.WEBHOOK_SIGNING_KEY ?? INSECURE_DEV_WEBHOOK_KEY;
+  const rootKey = resolveSecret(
+    'WEBHOOK_SIGNING_KEY',
+    INSECURE_DEV_WEBHOOK_KEY,
+    'firma y verificación de webhooks entrantes y salientes',
+  );
   return createHmac('sha256', rootKey)
     .update(`${namespace}:${id}`)
     .digest('hex');

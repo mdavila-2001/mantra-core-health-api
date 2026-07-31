@@ -6,9 +6,10 @@ import pg from 'pg';
 /**
  * Verificación REAL de Row Level Security por tenant contra la base de datos.
  *
- * Aplica `database/SQL/99_rls/01_tenant_rls.sql` (crea el rol `mantra_app` sin
- * BYPASSRLS, otorga privilegios y activa las políticas en todas las tablas con
- * `tenant_id`) y demuestra, conectado COMO `mantra_app`, que:
+ * Aplica `SQL/patches/2026-07-30_tenant_rls.sql`, en la raíz del repositorio
+ * (crea el rol `mantra_app` sin BYPASSRLS, otorga privilegios y activa las
+ * políticas en todas las tablas con `tenant_id`), y demuestra, conectado COMO
+ * `mantra_app`, que:
  *   1. Con `app.current_tenant_id` fijado a un tenant, sólo se ven sus filas.
  *   2. Insertar una fila de otro tenant se rechaza (WITH CHECK).
  *   3. Sin el GUC fijado, la política es permisiva (contexto de sistema).
@@ -34,6 +35,13 @@ const TENANT_B = '22222222-2222-4222-8222-222222222222';
 // RLS en las ~284 tablas con `tenant_id`). Es una mutación de esquema irreversible,
 // así que no corre por defecto: ejecútala con `RLS_TEST=1 yarn test:integration`
 // tras decidir aplicar RLS en este entorno.
+//
+// El opt-in se mantiene a propósito, pero ya NO es lo que sostiene el aislamiento:
+// cubre la capa de base (defensa en profundidad). El aislamiento de aplicación
+// —que el tenant lo fije el actor y no el cuerpo de la petición— lo hace cumplir
+// `TenantContextInterceptor` y está cubierto sin base por
+// `src/common/tenant/tenant-context.interceptor.spec.ts`. Antes de eso, esta
+// prueba apagada era la única evidencia del P0, que es tanto como no tener ninguna.
 const describeRls = process.env.RLS_TEST === '1' ? describe : describe.skip;
 
 describeRls('RLS de aislamiento por tenant (DB real)', () => {
@@ -45,7 +53,7 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
 
     // Aplica la migración de RLS (idempotente).
     const sql = readFileSync(
-      join(process.cwd(), 'database/SQL/99_rls/01_tenant_rls.sql'),
+      join(process.cwd(), '..', 'SQL', 'patches', '2026-07-30_tenant_rls.sql'),
       'utf8',
     );
     await admin.query(sql);

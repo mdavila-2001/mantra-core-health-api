@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHmac } from 'node:crypto';
+import { resolveSecret } from '../../../common/crypto/dev-secret';
 import {
   AuthenticatedUser,
   CONCEPTS,
@@ -42,9 +43,25 @@ const DOWNLOAD_URL_TTL_MS = 15 * 60 * 1000;
 /**
  * Secreto de firma para las URL de descarga simuladas. En producción la firma la
  * genera el proveedor de almacenamiento (S3 presign); aquí basta un HMAC estable.
+ *
+ * El valor de desarrollo está en el repositorio, así que es público: con él
+ * cualquiera puede forjar una URL firmada para un archivo clínico arbitrario. Por
+ * eso `resolveSecret` aborta si `NODE_ENV==='production'` y no hay uno propio.
  */
-const DOWNLOAD_URL_SECRET =
-  process.env.DOWNLOAD_URL_SECRET ?? 'redesa-dev-download-secret';
+const INSECURE_DEV_DOWNLOAD_SECRET = 'redesa-dev-download-secret';
+
+/**
+ * Resuelve el secreto en cada uso, no al importar el módulo: así el corte por
+ * producción ocurre en el flujo que firma —donde el error es diagnosticable— y no
+ * como efecto colateral de un `import` en una herramienta o un test.
+ */
+function downloadUrlSecret(): string {
+  return resolveSecret(
+    'DOWNLOAD_URL_SECRET',
+    INSECURE_DEV_DOWNLOAD_SECRET,
+    'firma de las URL de descarga de archivos clínicos',
+  );
+}
 
 /**
  * Casos de uso del subsistema de archivos (UC-02-05 … UC-02-11).
@@ -442,7 +459,7 @@ export class FilesService {
 
     const expiresAt = new Date(Date.now() + DOWNLOAD_URL_TTL_MS);
     const expiry = expiresAt.getTime();
-    const signature = createHmac('sha256', DOWNLOAD_URL_SECRET)
+    const signature = createHmac('sha256', downloadUrlSecret())
       .update(`${file.id}:${version.id}:${expiry}`)
       .digest('hex');
     const url =

@@ -25,7 +25,7 @@ export function readVault() {
     const dot = base.indexOf('.');
     const schema = base.slice(0, dot);
     const table = base.slice(dot + 1);
-    const text = readFileSync(join(ENT, file), 'utf8');
+    const text = read(join(ENT, file));
     const tipo = (text.match(/^  - tipo\/(\S+)$/m) || [, 'plain'])[1];
     const module = (text.match(/^  - modulo\/(\d+)$/m) || [, null])[1];
 
@@ -111,7 +111,7 @@ export function readVault() {
       const base = f.replace(/^Ext /, '').replace(/\.md$/, '');
       const target = entities.get(base);
       if (!target) continue;
-      const text = readFileSync(join(dir, f), 'utf8');
+      const text = read(join(dir, f));
       const tb = text.match(/```text\n([\s\S]*?)```/);
       for (const raw of tb ? tb[1].split('\n') : []) {
         const m = raw.match(

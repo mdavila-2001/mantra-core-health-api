@@ -1242,13 +1242,27 @@ describe('Smoke test — 30 endpoints', () => {
     }
 
     // Señal de salud global: la batería no debe tener fallos.
-    const failed = results.filter((r) => !r.pass);
-    if (failed.length > 0) {
-      // No lanza: deja constancia en consola; el detalle vive en el JSON/CSV.
-
-      console.warn(`Smoke: ${failed.length}/${results.length} casos fallaron`);
-    }
+    //
+    // Esto TIENE que aseverar. Antes solo se emitía un `console.warn` y la suite
+    // pasaba en verde con los 761 casos rotos: un semáforo que nunca se pone en
+    // rojo hace más daño que no tener semáforo, porque se lee como cobertura.
+    // El detalle completo sigue viviendo en el JSON/CSV que escribe writeReports().
     expect(results.length).toBeGreaterThan(0);
+
+    const failed = results.filter((r) => !r.pass);
+    const detail = failed
+      .map(
+        (r) =>
+          `  ${r.module} · ${r.testCase}: ${r.method} ${r.path} ` +
+          `esperaba ${r.expectedStatus}, obtuvo ${r.actualStatus}`,
+      )
+      .join('\n');
+
+    expect(
+      failed.length === 0
+        ? ''
+        : `Smoke: ${failed.length}/${results.length} casos fallaron\n${detail}`,
+    ).toBe('');
   });
 });
 

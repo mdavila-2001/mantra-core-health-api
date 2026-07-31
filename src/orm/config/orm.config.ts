@@ -49,7 +49,10 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
     // Descubrimiento de entidades. En producción se leen los .js compilados; en
     // desarrollo, los .ts, que es lo que necesita el proveedor de metadata
     // basado en el AST de TypeScript.
-    entities: ['dist/modules/**/entities/*.entity.js'],
+    entities: [
+      'dist/modules/**/entities/*.entity.js',
+      'dist/src/modules/**/entities/*.entity.js',
+    ],
     entitiesTs: ['src/modules/**/entities/*.entity.ts'],
 
     // Las entidades declaran el tipo de columna de forma explícita en cada

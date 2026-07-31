@@ -69,7 +69,7 @@
 //      TIME_ASPCT, SYSTEM, SCALE_TYP, METHOD_TYP, CLASS.
 // ---------------------------------------------------------------------------
 //
-// Convención de idempotencia (igual que database/SQL/98_seeds/vademecum_medications.sql):
+// Convención de idempotencia (igual que SQL/patches/2026-07-30_vademecum_dev_seed.sql):
 //   - UUIDs deterministas: md5('mantra:loinc:...clave-unica...')::uuid,
 //     calculados EN SQL (misma función md5 que usa Postgres) para garantizar
 //     bit-a-bit el mismo resultado que si se hubiera escrito a mano.

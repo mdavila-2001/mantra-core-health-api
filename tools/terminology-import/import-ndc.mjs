@@ -60,7 +60,7 @@
 //   * REQUEST_DELAY_MS entre requests (~1.6s) + backoff exponencial en 429/5xx.
 //
 // -----------------------------------------------------------------------------
-// Modelo de datos de destino (terminology.*, ver database/SQL/03_terminology):
+// Modelo de datos de destino (terminology.*, ver SQL/03_terminology):
 //
 //   * 1 terminology_sources: code='FDA_NDC'.
 //   * 1 code_systems: internal_code='ndc'.
@@ -74,7 +74,7 @@
 //     con strengths tal cual viene de la API), 'product_type'.
 //
 // Idempotencia: IDs deterministas (md5('mantra:ndc:...clave...')::uuid,
-// mismo patrón que database/SQL/98_seeds/vademecum_medications.sql y
+// mismo patrón que SQL/patches/2026-07-30_vademecum_dev_seed.sql y
 // tools/terminology-import/import-rxterms.mjs) + `ON CONFLICT DO NOTHING` en
 // todos los INSERT. Volver a ejecutar el script no duplica filas.
 // =============================================================================
