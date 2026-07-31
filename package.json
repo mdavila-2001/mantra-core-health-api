@@ -12,7 +12,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "typecheck": "tsc --noEmit --incremental false -p tsconfig.json",
@@ -32,7 +32,7 @@
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
     "orm:entities:missing": "node tools/catalog/generate-missing-entities.mjs",
     "orm:audit": "node tools/catalog/audit-fidelity.mjs fidelity-audit.json",
-    "orm:schema:dump": "cross-env ORM_SCHEMA_SYNC=dry-run node dist/main",
+    "orm:schema:dump": "cross-env ORM_SCHEMA_SYNC=dry-run node dist/src/main.js",
     "redesa:guardrails": "node tools/redesa/guardrails.mjs",
     "redesa:coverage": "node tools/redesa/coverage-report.mjs"
   },
