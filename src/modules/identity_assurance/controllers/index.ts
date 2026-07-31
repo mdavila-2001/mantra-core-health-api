@@ -4,3 +4,5 @@ export * from './identity-cases.controller';
 export * from './identity-checks.controller';
 export * from './identity-manual-review.controller';
 export * from './identity-assertions.controller';
+export * from './identity-worker.controller';
+export * from './identity-self-service.controller';

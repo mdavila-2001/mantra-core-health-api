@@ -47,6 +47,20 @@ export interface CreateJurisdictionAuthorizationData {
 @Injectable()
 export class JurisdictionAuthorizationsRepository {
   /**
+   * Obtiene find by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find by id conforme al contrato `Promise<JurisdictionAuthorizations | null>`.
+   */
+  findById(
+    em: EntityManager,
+    id: string,
+  ): Promise<JurisdictionAuthorizations | null> {
+    return em.findOne(JurisdictionAuthorizations, { id });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

@@ -92,9 +92,27 @@ export class IamAuthService {
     return [...new Set(memberships.map((m) => m.tenantId))];
   }
 
-  /** UC-01-04: autentica por email+contraseña y abre una sesión. */
+  /**
+   * UC-01-04: autentica por identificador+contraseña y abre una sesión.
+   *
+   * El identificador es el `external_subject` de la credencial: el correo para
+   * las altas por correo, el documento de identidad para los pacientes
+   * auto-registrados. Ambos viven en la misma columna, así que la búsqueda es
+   * idéntica; sólo cambia de qué campo del DTO sale.
+   */
   async login(dto: LoginDto, ip?: string): Promise<TokenResponseDto> {
+    const subject = dto.nationalId ?? dto.email;
+    if (!subject) {
+      // El DTO ya lo exige, pero sin esta guarda un cuerpo inesperado buscaría
+      // una credencial con subject `undefined` y devolvería la primera que
+      // encontrara con ese valor nulo.
+      await this.recordLoginFailure(undefined, ip, 'no-subject');
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
     this.logger.info(
+      // El documento de identidad no se registra: es un dato personal y el
+      // correo ya bastaba para diagnosticar un intento fallido.
       { operation: 'iam.auth.login', email: dto.email },
       'Login attempt',
     );
@@ -102,7 +120,7 @@ export class IamAuthService {
 
     const cred = await this.credentialsRepo.findActivePasswordBySubject(
       readEm,
-      dto.email,
+      subject,
     );
     if (!cred || !cred.secretHash) {
       await this.recordLoginFailure(undefined, ip, 'no-credential');

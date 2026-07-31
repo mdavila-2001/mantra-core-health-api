@@ -8,6 +8,8 @@ function build(env: Partial<MockProviderEnv> = {}) {
     notificationsFailureRate: 0,
     deletionsFailureRate: 0,
     simulatedLatencyMs: 0,
+    identityVerificationDelayMs: 0,
+    identityVerificationRejectionRate: 0,
     ...env,
   };
   return new DeletionsService(fullEnv);

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -8,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  RequiresVerifiedIdentity,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ProfilesPatientsService } from '../services';
 import {
   CreatePatientDto,
@@ -26,11 +32,16 @@ import {
   PortalProxyResponseDto,
   DeceasePersonDto,
   DeceaseResponseDto,
+  PatientSummaryResponseDto,
 } from '../dto';
 
 /**
  * Endpoints de personas y pacientes. Capa fina: valida parámetros y delega en el
- * servicio de dominio. Todas las operaciones exigen rol `SECURITY_ADMIN`.
+ * servicio de dominio.
+ *
+ * Las operaciones de gobierno exigen rol `SECURITY_ADMIN`. La excepción es
+ * `GET /profiles/patients/me/summary`, que el propio paciente consulta sobre sí
+ * mismo y que, en su lugar, exige tener la identidad verificada.
  */
 @ApiTags('profiles-patients')
 @ApiBearerAuth()
@@ -42,6 +53,21 @@ export class ProfilesPatientsController {
    * @param patientsService - Valor de patients service requerido por la operación.
    */
   constructor(private readonly patientsService: ProfilesPatientsService) {}
+
+  /**
+   * Resumen del propio paciente. Ejemplo de función que sólo se habilita con la
+   * identidad verificada: sin aserción vigente el guard responde 403.
+   */
+  @Get('patients/me/summary')
+  @RequiresVerifiedIdentity()
+  @ApiOperation({
+    summary: 'Consultar el resumen propio (requiere identidad verificada)',
+  })
+  getOwnSummary(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PatientSummaryResponseDto> {
+    return this.patientsService.getOwnSummary(actor);
+  }
 
   /** UC-05-01. */
   @Post('patients')

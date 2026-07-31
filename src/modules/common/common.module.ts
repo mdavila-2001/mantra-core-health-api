@@ -11,6 +11,7 @@ import {
 import {
   AddressesService,
   ContactPointsService,
+  FileUploadService,
   FilesService,
   IdentifiersService,
 } from './services';
@@ -43,6 +44,7 @@ import {
     ContactPointsService,
     AddressesService,
     FilesService,
+    FileUploadService,
     IdentifiersRepository,
     ContactPointsRepository,
     AddressesRepository,
@@ -51,5 +53,8 @@ import {
     FileDerivativesRepository,
     FileLinksRepository,
   ],
+  // Documento de identidad y correo del auto-registro de pacientes los escribe
+  // IAM dentro de su propia transacción, así que necesita estos repositorios.
+  exports: [IdentifiersRepository, ContactPointsRepository],
 })
 export class CommonModule {}

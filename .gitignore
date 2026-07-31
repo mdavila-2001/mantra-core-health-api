@@ -87,3 +87,6 @@ CLAUDE.md
 /output.smoke.test.csv
 site/
 dist-docs/
+
+# Archivos subidos por el adaptador de almacenamiento local (FILE_STORAGE_LOCAL_DIR)
+/storage/

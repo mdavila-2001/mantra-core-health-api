@@ -35,6 +35,7 @@ import {
   PortalProxyResponseDto,
   DeceasePersonDto,
   DeceaseResponseDto,
+  PatientSummaryResponseDto,
 } from '../dto';
 
 /**
@@ -148,6 +149,49 @@ export class ProfilesPatientsService {
         createdAt: patient.createdAt,
       };
     });
+  }
+
+  /**
+   * Resumen del propio paciente, tras la verificación de identidad.
+   *
+   * Es el ejemplo mínimo de una función que exige identidad probada (el guard
+   * `@RequiresVerifiedIdentity` la corta antes de llegar aquí): no es la ficha
+   * médica completa, es el patrón que seguirían los endpoints clínicos cuando se
+   * les aplique el mismo guard.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Datos básicos del paciente.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async getOwnSummary(
+    actor: AuthenticatedUser,
+  ): Promise<PatientSummaryResponseDto> {
+    const em = this.em.fork();
+
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene una persona vinculada',
+      );
+    }
+
+    const person = await this.personsRepo.findById(em, link.personId);
+    const patient = await this.patientProfilesRepo.findById(em, link.personId);
+    if (!person || !patient) {
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        personId: link.personId,
+      });
+    }
+
+    return {
+      personId: person.id,
+      patientProfileId: patient.profileId,
+      patientCode: patient.patientCode,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      personStatus: person.personStatusConceptId,
+    };
   }
 
   /** UC-05-02: vincula una cuenta de portal a la persona (supersede el vínculo previo). */

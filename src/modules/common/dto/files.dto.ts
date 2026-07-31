@@ -75,6 +75,43 @@ export class CreateFileDto {
   storageUri!: string;
 }
 
+/**
+ * Parte no binaria de `POST /common/files/upload`. El nombre original, el tipo
+ * MIME, el tamaño y el hash no se declaran: salen del propio archivo subido y
+ * del adaptador de almacenamiento, que es lo único verificable.
+ */
+export class UploadFileDto {
+  /**
+   * Valor de category mantenido por la instancia.
+   */
+  @ApiProperty({ enum: FileCategory })
+  @IsEnum(FileCategory)
+  category!: FileCategory;
+
+  /**
+   * Valor de sensitivity mantenido por la instancia.
+   */
+  @ApiProperty({ enum: FileSensitivity })
+  @IsEnum(FileSensitivity)
+  sensitivity!: FileSensitivity;
+}
+
+/** Contenido de un archivo listo para servirse por HTTP. */
+export interface FileContentDto {
+  /**
+   * Contenido binario del archivo.
+   */
+  buffer: Buffer;
+  /**
+   * Tipo MIME con el que servirlo.
+   */
+  mimeType: string;
+  /**
+   * Nombre original, para la cabecera de descarga.
+   */
+  originalName?: string;
+}
+
 /** Cuerpo de `POST /common/files/:id/versions`. */
 export class CreateFileVersionDto {
   /**

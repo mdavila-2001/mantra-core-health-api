@@ -194,6 +194,55 @@ export class IdentityChecksRepository {
       statusConceptId,
     });
   }
+
+  /**
+   * Cuántos checks OBLIGATORIOS del caso siguen sin cerrarse.
+   *
+   * Sustenta la transición del caso a verificado: mientras quede un check
+   * requerido sin resolver, el caso no puede darse por bueno. Los opcionales no
+   * cuentan — por eso el filtro por `required`, y no un simple "todos".
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Identificador de case.
+   * @param openStatuses - Estados que se consideran "sin cerrar".
+   * @param excludeCheckId - Check que se está resolviendo en esta misma
+   *   transacción; su estado nuevo aún no está flusheado, así que se excluye
+   *   para no contarlo con el valor viejo.
+   * @returns Cuántos checks requeridos siguen abiertos.
+   */
+  countOpenRequiredByCase(
+    em: EntityManager,
+    caseId: string,
+    openStatuses: string[],
+    excludeCheckId: string,
+  ): Promise<number> {
+    return em.count(IdentityChecks, {
+      identityVerificationCaseId: caseId,
+      required: true,
+      statusConceptId: { $in: openStatuses },
+      id: { $ne: excludeCheckId },
+    });
+  }
+
+  /**
+   * Checks listos para despacharse contra la autoridad externa.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param statuses - Estados que admiten despacho o seguimiento.
+   * @param limit - Tamaño máximo del lote.
+   * @returns Los checks del lote, más antiguos primero.
+   */
+  findDispatchable(
+    em: EntityManager,
+    statuses: string[],
+    limit: number,
+  ): Promise<IdentityChecks[]> {
+    return em.find(
+      IdentityChecks,
+      { statusConceptId: { $in: statuses } },
+      { orderBy: { createdAt: 'ASC' }, limit },
+    );
+  }
 }
 
 /** Acceso a datos de `identity_assurance.identity_verification_attempts`. */
@@ -222,6 +271,27 @@ export class IdentityVerificationAttemptsRepository {
       completedAt: { $ne: null },
     });
     return n > 0;
+  }
+
+  /**
+   * Último intento registrado del caso, sin importar su desenlace.
+   *
+   * Lo usa el worker para saber si ya despachó el check y sigue esperando
+   * veredicto (intento PENDIENTE) o si todavía no lo ha despachado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Identificador de case.
+   * @returns El intento más reciente, o `null` si no hay ninguno.
+   */
+  findLatestByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityVerificationAttempts | null> {
+    return em.findOne(
+      IdentityVerificationAttempts,
+      { identityVerificationCaseId: caseId },
+      { orderBy: { attemptNumber: 'DESC' } },
+    );
   }
 
   /**

@@ -38,6 +38,7 @@ function build() {
   };
   const accountLinksRepo = {
     create: mockFn(),
+    findActiveByUser: mockFn().mockResolvedValue(null),
     supersedeActiveForUser: mockFn().mockResolvedValue(0),
     revokeActiveForPerson: mockFn().mockResolvedValue(0),
   };

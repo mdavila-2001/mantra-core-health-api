@@ -5430,6 +5430,41 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'CHANNEL_IN_APP',
     'In-app channel',
   ),
+  /** Canal de correo electrónico (lo entrega un proveedor externo). */
+  CHANNEL_TYPE_EMAIL: def(
+    'messaging:channel-type:email',
+    'CHANNEL_EMAIL',
+    'Email channel',
+  ),
+  /**
+   * Naturaleza del destinatario (`notification_requests.recipient_type_concept_id`).
+   * Hoy toda notificación va dirigida a una cuenta interna; existen como concepto
+   * propio —y no reutilizando `OWNER_USER`— porque la tabla admitirá destinatarios
+   * que no son usuarios (un contacto de CRM, un endpoint de organización).
+   */
+  NOTIF_RECIPIENT_USER: def(
+    'messaging:recipient-type:user',
+    'NOTIF_RCPT_USER',
+    'Notification recipient is a user account',
+  ),
+  /** Origen de la solicitud: la generó el propio backend, no una persona. */
+  NOTIF_SOURCE_SYSTEM: def(
+    'messaging:notification-source:system',
+    'NOTIF_SRC_SYSTEM',
+    'Notification originated by the system',
+  ),
+  /** El proveedor no reporta estado: se da por entregado al aceptarlo. */
+  MSG_TRACKING_MODE_NONE: def(
+    'messaging:tracking-mode:none',
+    'MSG_TRACK_NONE',
+    'No delivery tracking',
+  ),
+  /** Tipo de proveedor de mensajería que entrega correo. */
+  MSG_PROVIDER_TYPE_EMAIL: def(
+    'messaging:provider-type:email',
+    'MSG_PROV_EMAIL',
+    'Email messaging provider',
+  ),
 
   // ==========================================================================
   // Módulo 32 · workflow — máquinas de estado y flujos entre dominios

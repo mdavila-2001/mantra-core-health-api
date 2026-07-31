@@ -1,11 +1,30 @@
 import { Module } from '@nestjs/common';
 import { ExpireSweepJob } from './expire-sweep.job';
+import { DispatchIdentityChecksJob } from './dispatch-identity-checks.job';
+import { MockProviderWiringService } from './mock-provider-wiring.service';
+
+export {
+  DispatchIdentityChecksJob,
+  defaultIdentityVerificationAdapter,
+  type DispatchableCheck,
+  type IdentityDispatchOutcome,
+  type IdentityVerdictOutcome,
+  type IdentityVerificationProviderAdapter,
+} from './dispatch-identity-checks.job';
 
 /**
- * Fase 3 del plan de corrección de workers: barrido por expiración de
- * `identity_assurance` (UC-27-12).
+ * Worker de `identity_assurance`: barrido por expiración (UC-27-12) y despacho
+ * de checks contra la autoridad externa.
+ *
+ * El despacho es lo que cierra el ciclo que antes no existía: descubre los
+ * checks planificados, los encola en la autoridad y asienta su veredicto, que
+ * es lo que verifica el caso y emite su aserción.
  */
 @Module({
-  providers: [ExpireSweepJob],
+  providers: [
+    ExpireSweepJob,
+    DispatchIdentityChecksJob,
+    MockProviderWiringService,
+  ],
 })
 export class IdentityAssuranceWorkerModule {}

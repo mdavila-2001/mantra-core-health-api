@@ -47,6 +47,13 @@ function build() {
     findLiveRequestByDebounceKey: mockFn(() => Promise.resolve(null)),
     findChannelConfigs: mockFn(() => Promise.resolve([])),
     findProviderByCode: mockFn(),
+    findProviderById: mockFn(() =>
+      Promise.resolve({
+        id: 'provider-1',
+        adapterCode: 'MOCK',
+        adapterVersion: '1',
+      }),
+    ),
     createDelivery: mockFn(() => ({
       id: 'delivery-1',
       statusConceptId: CONCEPTS.NOTIF_DELIVERY_SENT,
@@ -153,6 +160,40 @@ describe('NotificationsService', () => {
         suppressed: false,
         debounced: false,
       });
+    });
+
+    it('fills every NOT NULL evidence column of the request', async () => {
+      const d = build();
+      d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+
+      await d.service.createRequest(dto, actor);
+
+      // Estas columnas son NOT NULL en `messaging.notification_requests`: si
+      // alguna vuelve a quedar sin poblar, el INSERT falla contra la base real
+      // y ningún test unitario lo notaría sin esta comprobación.
+      const [, persisted] =
+        d.notificationsRepo.createNotificationRequest.mock.calls[0];
+      expect(persisted).toMatchObject({
+        recipientTypeConceptId: CONCEPTS.NOTIF_RECIPIENT_USER,
+        recipientRefId: RECIPIENT,
+        sourceConceptId: CONCEPTS.NOTIF_SOURCE_SYSTEM,
+        authorizedByUserId: actor.id,
+      });
+      expect(persisted.idempotencyKey).toEqual(expect.any(String));
+      expect(persisted.contentHash).toMatch(/^[0-9a-f]{64}$/);
+      expect(persisted.contentSnapshotJson).toBeDefined();
+      expect(persisted.authorizationSnapshotJson).toBeDefined();
+    });
+
+    it('reuses the debounce key as idempotency key when one is given', async () => {
+      const d = build();
+      d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+
+      await d.service.createRequest({ ...dto, debounceKey: 'dk-1' }, actor);
+
+      const [, persisted] =
+        d.notificationsRepo.createNotificationRequest.mock.calls[0];
+      expect(persisted.idempotencyKey).toBe('dk-1');
     });
 
     it('suppresses but still records when the recipient opted out', async () => {

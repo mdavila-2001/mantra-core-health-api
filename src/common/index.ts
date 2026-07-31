@@ -8,6 +8,7 @@
 
 // Auth / Authz
 export { AuthModule } from './auth/auth.module';
+export { AuthTokenModule } from './auth/auth-token.module';
 export { TokenService } from './auth/token.service';
 export type { IssuedTokens } from './auth/token.service';
 export { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -15,6 +16,8 @@ export { RolesGuard } from './auth/roles.guard';
 export { CurrentUser } from './auth/current-user.decorator';
 export { Public } from './auth/public.decorator';
 export { Roles } from './auth/roles.decorator';
+export { RequiresVerifiedIdentity } from './auth/requires-verified-identity.decorator';
+export { VerifiedIdentityGuard } from './auth/verified-identity.guard';
 export { authEnvSchema, loadAuthEnv } from './auth/auth.env';
 export type { AuthEnv } from './auth/auth.env';
 export { runWithTenant, getCurrentTenantId } from './tenant/tenant-context';
@@ -64,6 +67,18 @@ export type {
 } from './http/http-dispatcher.service';
 export { assertOutboundUrlAllowed } from './http/ssrf-guard';
 export { ParseOptionalLimitPipe } from './http/parse-optional-limit.pipe';
+
+// Almacenamiento de archivos (adaptador seleccionado por entorno)
+export { FileStorageModule } from './storage/file-storage.module';
+export { FILE_STORAGE_ADAPTER } from './storage/file-storage.adapter';
+export type {
+  FileStorageAdapter,
+  StoredFile,
+  StoredFileInput,
+} from './storage/file-storage.adapter';
+export { LocalDiskFileStorageAdapter } from './storage/local-disk-file-storage.adapter';
+export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
+export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
 
 // Conceptos de dominio
 export {
