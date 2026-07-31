@@ -74,6 +74,30 @@ describe('TenantContextInterceptor', () => {
       );
     });
 
+    it('SUPERADMIN sin cabecera opera en modo sistema, sin acotar a un tenant', async () => {
+      const ctx = httpContext({}, { id: 'admin', roles: ['SUPERADMIN'] });
+      let visto: string | undefined = 'sin-fijar';
+      const spy = { handle: () => of((visto = getCurrentTenantId())) };
+
+      const res = await lastValueFrom(
+        build().intercept(ctx, spy as any) as any,
+      );
+      expect(res).toBeUndefined();
+      expect(visto).toBeUndefined();
+    });
+
+    it('SUPERADMIN en modo sistema puede declarar cualquier tenant en el cuerpo', async () => {
+      const ctx = httpContext(
+        {},
+        { id: 'admin', roles: ['SUPERADMIN'] },
+        { tenantId: 'tenant-Z' },
+      );
+      const res = await lastValueFrom(
+        build().intercept(ctx, handler('ok')) as any,
+      );
+      expect(res).toBe('ok');
+    });
+
     it('rechaza (403) si el actor no es miembro del tenant indicado', () => {
       const ctx = httpContext(
         { 'x-tenant-id': 'tenant-B' },

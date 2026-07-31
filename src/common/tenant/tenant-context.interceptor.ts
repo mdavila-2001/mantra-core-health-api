@@ -95,6 +95,10 @@ export class TenantContextInterceptor implements NestInterceptor {
     }
 
     const tenantId = this.resolveTenantId(request, user);
+    if (tenantId === undefined) {
+      // Actor comodín sin tenant declarado: opera en modo sistema, entre tenants.
+      return next.handle();
+    }
     this.assertBodyStaysInTenant(request.body, tenantId, user);
 
     if (!this.enforceRls) {
@@ -117,9 +121,16 @@ export class TenantContextInterceptor implements NestInterceptor {
   /**
    * Determina el tenant del request y verifica que el actor pertenezca a él.
    *
-   * @throws ForbiddenException si falta, es ambiguo o el actor no es miembro.
+   * @returns el tenant resuelto, o `undefined` cuando el actor es `SUPERADMIN` y
+   *          no declara ninguno: ese es el modo sistema (workers, operaciones
+   *          administrativas entre tenants), que no debe quedar acotado a uno.
+   * @throws ForbiddenException si un actor normal no puede resolver un tenant sin
+   *         ambigüedad, o si declara uno del que no es miembro.
    */
-  private resolveTenantId(request: Request, user: AuthenticatedUser): string {
+  private resolveTenantId(
+    request: Request,
+    user: AuthenticatedUser,
+  ): string | undefined {
     const header = request.headers['x-tenant-id'];
     const declared = Array.isArray(header) ? header[0] : header;
     const memberships = user.tenantIds ?? [];
@@ -136,6 +147,13 @@ export class TenantContextInterceptor implements NestInterceptor {
 
     if (memberships.length === 1) {
       return memberships[0];
+    }
+
+    // `SUPERADMIN` sin cabecera opera entre tenants: acotarlo a uno rompería los
+    // flujos de sistema. Un actor normal, en cambio, tiene que poder resolver su
+    // tenant sin ambigüedad, o el `tenantId` del cuerpo volvería a ser su elección.
+    if (isWildcard) {
+      return undefined;
     }
 
     throw new ForbiddenException(

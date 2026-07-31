@@ -167,6 +167,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
 
+    // Violaciones de integridad de PostgreSQL. Son fallos de la petición, no del
+    // servidor: referenciar algo inexistente o repetir una clave es un 4xx. Sin
+    // esto salían como 500 «Error interno del servidor», que además de mentir
+    // sobre la culpa oculta el dato accionable (qué columna y qué valor).
+    const integridad = this.integrityViolation(exception);
+    if (integridad) {
+      return integridad;
+    }
+
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       code: ErrorCode.INTERNAL,
@@ -227,5 +236,81 @@ export class AllExceptionsFilter implements ExceptionFilter {
       exception instanceof Error &&
       exception.constructor?.name === 'OptimisticLockError'
     );
+  }
+
+  /**
+   * Traduce una violación de integridad de PostgreSQL al 4xx que le corresponde.
+   *
+   * Solo se mapean los `SQLSTATE` cuya causa es el contenido de la petición:
+   *   - `23503` clave foránea: referencia a algo que no existe → 422.
+   *   - `23505` clave única: el recurso ya existe → 409.
+   *   - `23502` NOT NULL y `22P02` sintaxis de entrada (p. ej. un valor que no
+   *     pertenece a un enum) → 422.
+   * El resto sigue cayendo a 500, que es donde deben quedar los fallos reales del
+   * servidor. `details` lleva la columna y la tabla que Postgres reporta, para que
+   * el cliente sepa qué corregir sin tener que pedir el log.
+   *
+   * @returns el mapeo, o `undefined` si la excepción no es una violación mapeable.
+   */
+  private integrityViolation(exception: unknown):
+    | {
+        /** Código HTTP resultante. */
+        status: number;
+        /** Código de error estable del contrato de la API. */
+        code: string;
+        /** Mensaje legible para el cliente. */
+        message: string;
+        /** Columna y tabla implicadas, cuando Postgres las informa. */
+        details?: unknown;
+      }
+    | undefined {
+    // El driver adjunta el SQLSTATE en `code`; MikroORM lo envuelve conservándolo.
+    const causa = exception as {
+      code?: unknown;
+      column?: unknown;
+      table?: unknown;
+      constraint?: unknown;
+      detail?: unknown;
+    };
+    const sqlstate = typeof causa?.code === 'string' ? causa.code : undefined;
+    if (!sqlstate) {
+      return undefined;
+    }
+
+    const details = {
+      constraint: causa.constraint,
+      table: causa.table,
+      column: causa.column,
+      detail: causa.detail,
+    };
+
+    switch (sqlstate) {
+      case '23503':
+        return {
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          code: ErrorCode.VALIDATION_FAILED,
+          message:
+            'La petición referencia un recurso que no existe: ' +
+            'verifique los identificadores enviados',
+          details,
+        };
+      case '23505':
+        return {
+          status: HttpStatus.CONFLICT,
+          code: ErrorCode.CONFLICT,
+          message: 'Ya existe un recurso con esa clave',
+          details,
+        };
+      case '23502':
+      case '22P02':
+        return {
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          code: ErrorCode.VALIDATION_FAILED,
+          message: 'La petición trae un valor ausente o inválido para el modelo',
+          details,
+        };
+      default:
+        return undefined;
+    }
   }
 }

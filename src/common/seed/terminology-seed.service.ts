@@ -77,8 +77,13 @@ export class TerminologySeedService implements OnApplicationBootstrap {
      */
     inserted: number;
   }> {
-    await this.ensureRowVersionDefaults();
-
+    // `row_version` no se fija acá ni en ningún `em.create` de la aplicación:
+    // MikroORM no inicializa la propiedad de versión y la base la aporta con su
+    // `DEFAULT 1`, declarado en el DDL canónico desde v4.0.8. Antes esto se
+    // parcheaba en caliente desde este mismo servicio con un `ALTER TABLE … SET
+    // DEFAULT`, que es la dirección de cambio que el protocolo de 4 capas prohíbe
+    // —y además solo cubría 4 de los 52 schemas, así que las escrituras del ORM
+    // contra los otros 48 morían con 23502.
     const em = this.orm.em.fork();
     let inserted = 0;
     const now = new Date();
@@ -247,41 +252,4 @@ export class TerminologySeedService implements OnApplicationBootstrap {
     return { inserted };
   }
 
-  /**
-   * Garantiza `DEFAULT 1` en toda columna `row_version` de los esquemas de datos
-   * de negocio. Es necesario porque las entidades generadas declaran la columna de
-   * versión sin `type` explícito: MikroORM 7 no puede inicializarla y la omite del
-   * INSERT, de modo que sin un default a nivel de base cada alta violaría el
-   * NOT NULL. `SET DEFAULT` es idempotente; tras la primera pasada no quedan
-   * columnas pendientes y el coste es una única consulta a `information_schema`.
-   */
-  private async ensureRowVersionDefaults(): Promise<void> {
-    const connection = this.orm.em.getConnection();
-    const pending: Array<{
-      /**
-       * Valor de table schema mantenido por la instancia.
-       */
-      table_schema: string; /**
-       * Valor de table name mantenido por la instancia.
-       */
-      table_name: string;
-    }> = await connection.execute(
-      `select table_schema, table_name
-           from information_schema.columns
-          where column_name = 'row_version'
-            and column_default is null
-            and table_schema in ('iam', 'common', 'terminology', 'directory')`,
-    );
-    for (const { table_schema, table_name } of pending) {
-      await connection.execute(
-        `alter table "${table_schema}"."${table_name}" alter column row_version set default 1`,
-      );
-    }
-    if (pending.length > 0) {
-      this.logger.info(
-        { columns: pending.length },
-        'Defaults de row_version asegurados',
-      );
-    }
-  }
 }
