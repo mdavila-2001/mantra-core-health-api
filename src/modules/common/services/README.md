@@ -16,6 +16,7 @@ references it (file → version → derivative). Domain rules throw the shared
 | `ContactPointsService` | UC-02-02, UC-02-03 | `verify` requires an existing contact point → `ResourceNotFoundException` |
 | `AddressesService` | UC-02-04 | Country defaults to `PE`; use=HOME, type=POSTAL |
 | `FilesService` | UC-02-05 … UC-02-11 | See below |
+| `FileUploadService` | `POST /common/files/upload`, `GET /common/files/:id/content` | See below |
 
 ## `FilesService` rules
 
@@ -34,6 +35,22 @@ references it (file → version → derivative). Domain rules throw the shared
 - **generateDownloadUrl (UC-02-11)**: file must exist and not be deleted; current
   version must be `SCAN_CLEAN`. Returns an HMAC-signed URL (`node:crypto`, 15-min
   expiry) — a real S3 presign would replace this deterministic string.
+
+## `FileUploadService` rules
+
+Counterpart of `FilesService` for callers that bring the **bytes** rather than a
+`storageUri` a provider already gave them. Delegates to the adapter selected by
+`FILE_STORAGE_ADAPTER` (see `src/common/storage`), then reuses
+`FilesService.createFile` for the metadata.
+
+- **upload**: rejects empty content and anything over `FILE_STORAGE_MAX_SIZE_BYTES`
+  (`PreconditionFailedException`). Size and content hash come from the adapter's
+  view of the bytes actually written — never from what the client declares.
+- **download**: refuses a deleted file or a version known `SCAN_INFECTED`, but
+  **does** serve one still `SCAN_PENDING`: no antivirus is wired in this
+  deployment, so demanding `SCAN_CLEAN` would make every upload permanently
+  unreadable. `generateDownloadUrl` keeps the strict rule because a signed URL
+  cannot be re-checked once issued; this route revalidates on every request.
 
 ## Tests
 

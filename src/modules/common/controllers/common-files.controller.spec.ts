@@ -30,8 +30,12 @@ describe('CommonFilesController', () => {
       softDelete: fn(),
       generateDownloadUrl: fn(),
     };
-    const controller = new CommonFilesController(service as never);
-    return { service, controller };
+    const uploadService = { upload: fn(), download: fn() };
+    const controller = new CommonFilesController(
+      service as never,
+      uploadService as never,
+    );
+    return { service, uploadService, controller };
   }
 
   it('delegates createFile', async () => {

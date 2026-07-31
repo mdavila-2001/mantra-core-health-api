@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { ProfilesModule } from '../profiles/profiles.module';
+import { DirectoryModule } from '../directory/directory.module';
 import {
   IdentityAuthoritiesController,
   IdentityPoliciesController,
@@ -8,6 +10,8 @@ import {
   IdentityChecksController,
   IdentityManualReviewController,
   IdentityAssertionsController,
+  IdentityWorkerController,
+  IdentitySelfServiceController,
 } from './controllers';
 import {
   IdentityAuthoritiesService,
@@ -16,6 +20,8 @@ import {
   IdentityChecksService,
   IdentityManualReviewService,
   IdentityAssertionsService,
+  IdentityVerificationEffectsService,
+  IdentitySelfServiceService,
 } from './services';
 import {
   IdentityAuthoritiesRepository,
@@ -38,7 +44,14 @@ import {
  * aserciones. Autenticación vía guard global (`AuthModule`).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // Verificar una matrícula o una institución cambia el estado de esos
+    // dominios, no del propio caso: el efecto lo aplica
+    // `IdentityVerificationEffectsService` con sus repositorios.
+    ProfilesModule,
+    DirectoryModule,
+  ],
   controllers: [
     IdentityAuthoritiesController,
     IdentityPoliciesController,
@@ -46,6 +59,8 @@ import {
     IdentityChecksController,
     IdentityManualReviewController,
     IdentityAssertionsController,
+    IdentityWorkerController,
+    IdentitySelfServiceController,
   ],
   providers: [
     // Repositorios
@@ -67,6 +82,8 @@ import {
     IdentityChecksService,
     IdentityManualReviewService,
     IdentityAssertionsService,
+    IdentityVerificationEffectsService,
+    IdentitySelfServiceService,
   ],
 })
 export class IdentityAssuranceModule {}

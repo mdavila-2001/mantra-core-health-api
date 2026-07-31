@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   CONCEPTS,
   PreconditionFailedException,
@@ -172,6 +173,23 @@ export class NotificationsService {
         ? CONCEPTS.NOTIF_SUPPRESSED
         : CONCEPTS.NOTIF_PENDING;
 
+      // La solicitud es evidencia: además del qué y a quién, la tabla exige
+      // dejar asentado por qué se consideró autorizada y con qué contenido
+      // exacto se decidió enviar. El hash permite detectar después que un
+      // reintento salió con un contenido distinto del que se autorizó.
+      const contentSnapshotJson = {
+        templateId: dto.templateId,
+        payloadJson: dto.payloadJson ?? null,
+        categoryConceptId: dto.categoryConceptId ?? null,
+      };
+      const authorizationSnapshotJson = {
+        consentId: dto.consentId ?? null,
+        suppressed: suppression !== undefined,
+        suppressionReason: suppression ?? null,
+        evaluatedAt: new Date().toISOString(),
+        authorizedByUserId: actor.id,
+      };
+
       const request = this.notificationsRepo.createNotificationRequest(tx, {
         tenantId: dto.tenantId,
         recipientUserId: dto.recipientUserId,
@@ -188,6 +206,20 @@ export class NotificationsService {
         statusConceptId,
         scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : new Date(),
         consentId: dto.consentId,
+        // `debounceKey` ya identifica una solicitud lógica repetida; cuando no
+        // se aporta, cada solicitud es única por definición.
+        idempotencyKey: dto.debounceKey ?? `notif-${randomUUID()}`,
+        recipientTypeConceptId: CONCEPTS.NOTIF_RECIPIENT_USER,
+        // Un canal externo puede no tener destinatario interno; en ese caso la
+        // referencia es el propio actor que solicitó el envío.
+        recipientRefId: dto.recipientUserId ?? actor.id,
+        sourceConceptId: CONCEPTS.NOTIF_SOURCE_SYSTEM,
+        authorizedByUserId: actor.id,
+        authorizationSnapshotJson,
+        contentSnapshotJson,
+        contentHash: createHash('sha256')
+          .update(canonicalJson(contentSnapshotJson))
+          .digest('hex'),
         actorUserId: actor.id,
       });
 
@@ -334,6 +366,19 @@ export class NotificationsService {
         };
       }
 
+      // `adapter_code`/`adapter_version` son NOT NULL en la entrega: los declara
+      // el proveedor, que es quien sabe con qué implementación se envió.
+      const provider = await this.notificationsRepo.findProviderById(
+        tx,
+        config.providerId,
+      );
+      if (!provider) {
+        throw new ResourceNotFoundException(
+          'El proveedor configurado para el canal no existe',
+          { requestId, providerId: config.providerId },
+        );
+      }
+
       const sent = dto.outcome === 'SENT';
       const now = new Date();
       const delivery = this.notificationsRepo.createDelivery(tx, {
@@ -341,6 +386,8 @@ export class NotificationsService {
         providerId: config.providerId,
         channelId: request.channelId,
         providerChannelConfigId: config.id,
+        adapterCode: provider.adapterCode,
+        adapterVersion: provider.adapterVersion,
         attemptNumber,
         providerMessageRef: dto.providerMessageRef,
         statusConceptId: sent
@@ -377,6 +424,9 @@ export class NotificationsService {
           {
             recipientUserId: request.recipientUserId,
             tenantId: request.tenantId,
+            // NOT NULL: qué clase de canal originó la bandeja. Aquí siempre es
+            // in-app, que es la única rama que crea esta fila.
+            channelConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
             categoryConceptId: request.categoryConceptId,
             subject: dto.subject,
             bodyText: dto.bodyText,

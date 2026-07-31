@@ -22,11 +22,21 @@ function build() {
     purgeSessions: mockFn(),
   };
   const assistedRegistrationService = { activateAccount: mockFn() };
+  const selfRegistrationService = {
+    registerPatient: mockFn(),
+    verifyEmail: mockFn(),
+  };
   const controller = new IamAuthController(
     authService as any,
     assistedRegistrationService as any,
+    selfRegistrationService as any,
   );
-  return { controller, authService, assistedRegistrationService };
+  return {
+    controller,
+    authService,
+    assistedRegistrationService,
+    selfRegistrationService,
+  };
 }
 
 describe('IamAuthController', () => {
@@ -59,5 +69,26 @@ describe('IamAuthController', () => {
     const actor = { id: 'admin', roles: ['SECURITY_ADMIN'] } as any;
     await d.controller.purge(actor);
     expect(d.authService.purgeSessions).toHaveBeenCalledWith(actor);
+  });
+
+  it('delegates patient self-registration with the client ip', async () => {
+    const d = build();
+    const dto = {
+      nationalId: '1234567',
+      password: 'password123',
+      displayName: 'Ana',
+    };
+    await d.controller.registerPatient(dto as any, '1.2.3.4');
+    expect(d.selfRegistrationService.registerPatient).toHaveBeenCalledWith(
+      dto,
+      '1.2.3.4',
+    );
+  });
+
+  it('delegates email verification', async () => {
+    const d = build();
+    const dto = { token: 'raw-token' };
+    await d.controller.verifyEmail(dto as any);
+    expect(d.selfRegistrationService.verifyEmail).toHaveBeenCalledWith(dto);
   });
 });

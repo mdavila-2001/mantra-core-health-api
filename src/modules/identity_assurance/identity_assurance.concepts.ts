@@ -1,13 +1,23 @@
 import { defineModuleConcepts } from '../../common/seed/concept-seed';
 
 /**
- * Conceptos propios del módulo Identity Assurance (27 — proofing de identidad,
+ * Conceptos propios del módulo Identity Assurance (proofing de identidad,
  * aserciones NIST 800-63 IAL/AAL y controles de fraude). Cada estado / resultado
  * que los servicios fijan en una columna `*_concept_id` NOT NULL sale de aquí; los
- * valores que aporta el cliente (tipo de autoridad, capacidad del endpoint, tipo
- * de evidencia, tipo de check, tipo/severidad de señal, etc.) se reciben por DTO
- * y no se declaran en este catálogo. Para el estado genérico "activo" de
- * autoridades / endpoints / políticas se reutiliza `CONCEPTS.STATE_ACTIVE`.
+ * valores que aporta el cliente (tipo/severidad de señal de fraude, calidad de
+ * evidencia, etc.) se reciben por DTO y no se declaran en este catálogo. Para el
+ * estado genérico "activo" de autoridades / endpoints / políticas se reutiliza
+ * `CONCEPTS.STATE_ACTIVE`.
+ *
+ * **Excepción deliberada**: los bloques `SUBJECT_*`, `CHECK_TYPE_*`,
+ * `EVIDENCE_TYPE_*`, `AUTHORITY_TYPE_*`, `ASSURANCE_*` y `TRANSACTION_RISK_*` SÍ
+ * se declaran aquí aunque el resto del módulo los trate como valores del cliente.
+ * La razón: los flujos de autoservicio (paciente sube foto con su carnet,
+ * profesional pide verificar su matrícula, institución sus documentos) abren el
+ * caso desde el propio backend, no desde un admin que conozca ids de concepto —
+ * el backend necesita nombrarlos, y el worker necesita elegir el endpoint de la
+ * autoridad por capacidad. Los datos de referencia que los usan (autoridad,
+ * endpoints y las tres políticas) los siembra `IdentityVerificationSeedService`.
  *
  * El prefijo `identity_assurance` espacia las claves para derivar UUIDv5 sin
  * colisionar con otros módulos. `IDENTITY_ASSURANCE_CONCEPT_SEEDS` lo consume el
@@ -120,5 +130,69 @@ export const { seeds: IDENTITY_ASSURANCE_CONCEPT_SEEDS, ids: IDA } =
     REVOCATION_FRAUD: {
       code: 'IDA_REVOCATION_FRAUD',
       display: 'Assertion revoked for fraud',
+    },
+
+    // --- Sujeto del caso (cases.subject_type_concept_id) ----------------------
+    // Distinguen QUÉ se está verificando, y por tanto qué efecto de dominio se
+    // aplica al verificarse (ver `IdentityVerificationEffectsService`).
+    SUBJECT_PATIENT_IDENTITY: {
+      code: 'IDA_SUBJECT_PATIENT_IDENTITY',
+      display: 'Patient identity',
+    },
+    SUBJECT_PRACTITIONER_IDENTITY: {
+      code: 'IDA_SUBJECT_PRACTITIONER_IDENTITY',
+      display: 'Practitioner identity',
+    },
+    SUBJECT_PRACTITIONER_LICENSE: {
+      code: 'IDA_SUBJECT_PRACTITIONER_LICENSE',
+      display: 'Practitioner professional license',
+    },
+    SUBJECT_TENANT_IDENTITY: {
+      code: 'IDA_SUBJECT_TENANT_IDENTITY',
+      display: 'Institution identity',
+    },
+
+    // --- Tipo de check (checks.check_type_concept_id) -------------------------
+    // Doble uso: también son la `capability_concept_id` del endpoint de la
+    // autoridad, para que el worker sepa a qué endpoint despachar cada check.
+    CHECK_TYPE_IDENTITY_CARD: {
+      code: 'IDA_CHECK_TYPE_IDENTITY_CARD',
+      display: 'Identity card check',
+    },
+    CHECK_TYPE_MEDICAL_LICENSE: {
+      code: 'IDA_CHECK_TYPE_MEDICAL_LICENSE',
+      display: 'Medical license check',
+    },
+    CHECK_TYPE_INSTITUTION_DOCUMENT: {
+      code: 'IDA_CHECK_TYPE_INSTITUTION_DOCUMENT',
+      display: 'Institution document check',
+    },
+
+    // --- Tipo de evidencia (evidence.evidence_type_concept_id) ---------------
+    EVIDENCE_TYPE_SELFIE_WITH_ID: {
+      code: 'IDA_EVIDENCE_TYPE_SELFIE_WITH_ID',
+      display: 'Selfie holding identity document',
+    },
+    EVIDENCE_TYPE_LICENSE_DOCUMENT: {
+      code: 'IDA_EVIDENCE_TYPE_LICENSE_DOCUMENT',
+      display: 'Professional license document',
+    },
+    EVIDENCE_TYPE_INSTITUTION_DOCUMENT: {
+      code: 'IDA_EVIDENCE_TYPE_INSTITUTION_DOCUMENT',
+      display: 'Institution registration document',
+    },
+
+    // --- Datos de referencia sembrados (autoridad y políticas) ---------------
+    AUTHORITY_TYPE_REGISTRY: {
+      code: 'IDA_AUTHORITY_TYPE_REGISTRY',
+      display: 'Official registry authority',
+    },
+    ASSURANCE_LEVEL_IAL2: {
+      code: 'IDA_ASSURANCE_IAL2',
+      display: 'Identity assurance level 2',
+    },
+    TRANSACTION_RISK_STANDARD: {
+      code: 'IDA_TRANSACTION_RISK_STANDARD',
+      display: 'Standard transaction risk',
     },
   });

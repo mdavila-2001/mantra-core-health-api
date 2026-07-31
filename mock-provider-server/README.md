@@ -1,6 +1,6 @@
 # mock-provider-server
 
-Emulador **standalone** de los tres proveedores externos que
+Emulador **standalone** de los cuatro proveedores externos que
 `mantra-core-health-redesa-api` todavía no conecta de verdad porque ningún
 vendor concreto vive en ese repo (ver `ESTADO-Y-PENDIENTES.md` del backend
 principal, sección "Conectar proveedores externos reales a los workers"):
@@ -10,6 +10,17 @@ principal, sección "Conectar proveedores externos reales a los workers"):
 | Gateway de mensajería (SMS/email/push) | `POST /notifications/send` | `NotificationProviderAdapter` en `src/worker/jobs/messaging/notification-delivery.job.ts` |
 | Backends destino de borrado cross-store | `POST /deletions/execute`, `POST /deletions/verify` | `DeletionExecutionProviderAdapter`/`DeletionVerificationProviderAdapter` en `src/worker/jobs/cross_store_consistency/deletion-pipeline.job.ts` |
 | API de embeddings | `POST /embeddings/compute` | `EmbeddingProviderAdapter` en `src/worker/jobs/vector_rag/embedding-drain.job.ts` |
+| Autoridad de verificación de identidad (registro civil / colegio profesional / registro de sociedades) | `POST /identity-verification/execute`, `POST /identity-verification/verify` | `IdentityVerificationProviderAdapter` en `src/worker/jobs/identity_assurance/dispatch-identity-checks.job.ts` |
+
+### El único proveedor con veredicto diferido
+
+Los otros tres responden en la misma llamada. La verificación de identidad no:
+`execute` acepta la solicitud al instante y devuelve un comprobante, y `verify`
+responde `PENDING` hasta que pasa `IDENTITY_VERIFICATION_DELAY_MS` (10s por
+defecto), momento en el que da `ACCEPTED` o `REJECTED`. Es a propósito — una
+autoridad real se comporta así, y es lo único que ejercita de verdad el bucle de
+espera del worker. El veredicto se decide **al encolar** y se recuerda, de modo
+que dos consultas seguidas nunca se contradicen.
 
 ## Por qué es un proyecto aparte
 
@@ -75,6 +86,8 @@ esté arriba.
 | `NOTIFICATIONS_FAILURE_RATE` | `0.1` | Probabilidad (0-1) de que `/notifications/send` falle |
 | `DELETIONS_FAILURE_RATE` | `0.05` | Probabilidad (0-1) de que `/deletions/execute` falle |
 | `SIMULATED_LATENCY_MS` | `50` | Latencia añadida a cada respuesta |
+| `IDENTITY_VERIFICATION_DELAY_MS` | `10000` | Cuánto tarda la autoridad en dar el veredicto (mientras tanto, `/verify` responde `PENDING`) |
+| `IDENTITY_VERIFICATION_REJECTION_RATE` | `0` | Probabilidad (0-1) de que la verificación acabe `REJECTED` |
 
 ## Cómo lo consume el backend principal
 
@@ -83,7 +96,7 @@ esté arriba.
 (`http://127.0.0.1:4100`, sin API key) — no es opt-in. `MockProviderClient`
 (`src/worker/mock-provider-client.service.ts`) es el cliente HTTP; cada
 `*WorkerModule` relevante (`messaging`, `cross_store_consistency`,
-`vector_rag`) trae un `MockProviderWiringService` (`OnModuleInit`) que
+`vector_rag`, `identity_assurance`) trae un `MockProviderWiringService` (`OnModuleInit`) que
 sustituye el adapter por defecto del job — el que falla con
 `PROVIDER_NOT_CONFIGURED` — por uno que llama a este emulador, sólo si
 `MockProviderClient.isConfigured()` es verdadero. Para volver al

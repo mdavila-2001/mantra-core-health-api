@@ -34,7 +34,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuditHistoryService(
     em as any,
-    historyRepo,
+    historyRepo as any,
     dataAccessRepo as any,
     auditLogRepo as any,
     logger as any,

@@ -19,6 +19,8 @@ function envWithKey(apiKey?: string): MockProviderEnv {
     notificationsFailureRate: 0,
     deletionsFailureRate: 0,
     simulatedLatencyMs: 0,
+    identityVerificationDelayMs: 0,
+    identityVerificationRejectionRate: 0,
   };
 }
 

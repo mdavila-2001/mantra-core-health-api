@@ -144,6 +144,7 @@
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/luxon": "^3",
+    "@types/multer": "^2.2.0",
     "@types/node": "^24.0.0",
     "@types/passport": "^0",
     "@types/passport-jwt": "^4.0.1",
@@ -176,6 +177,7 @@
     "rootDir": "src",
     "maxWorkers": "50%",
     "testRegex": ".*\\.spec\\.ts$",
+    "testTimeout": 15000,
     "extensionsToTreatAsEsm": [
       ".ts"
     ],

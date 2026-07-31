@@ -32,11 +32,12 @@ function build() {
     findByCode: mockFn(),
     create: mockFn(),
   };
-  const authorizationsRepo = { create: mockFn() };
+  const authorizationsRepo = { create: mockFn(), findById: mockFn() };
   const credentialsRepo = {
     findById: mockFn(),
     create: mockFn(),
     countInStateExcept: mockFn().mockResolvedValue(0),
+    hasCurrentCredential: mockFn().mockResolvedValue(false),
   };
   const specialtiesRepo = {
     create: mockFn(),
@@ -52,7 +53,7 @@ function build() {
     personProfilesRepo as any,
     practitionersRepo,
     authorizationsRepo,
-    credentialsRepo,
+    credentialsRepo as any,
     specialtiesRepo,
     languagesRepo,
     logger as any,

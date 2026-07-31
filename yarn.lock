@@ -7197,6 +7197,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/multer@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@types/multer@npm:2.2.0"
+  dependencies:
+    "@types/express": "npm:*"
+  checksum: 10c0/72472c2da0a9afe86e2d64cfec53f4564727affcb691f78fcbdef495978857903f03326e4ecf58f6d1c3c4c89bb39e5d94fb97d4722a1f448f777c4fa690754b
+  languageName: node
+  linkType: hard
+
 "@types/mute-stream@npm:^0.0.4":
   version: 0.0.4
   resolution: "@types/mute-stream@npm:0.0.4"
@@ -15343,6 +15352,7 @@ __metadata:
     "@types/jest": "npm:^30.0.0"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/luxon": "npm:^3"
+    "@types/multer": "npm:^2.2.0"
     "@types/node": "npm:^24.0.0"
     "@types/passport": "npm:^0"
     "@types/passport-jwt": "npm:^4.0.1"

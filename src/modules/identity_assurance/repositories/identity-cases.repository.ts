@@ -90,6 +90,31 @@ export class IdentityVerificationCasesRepository {
     );
   }
 
+  /**
+   * Cuántas verificaciones sigue habiendo en marcha para un sujeto.
+   *
+   * Evita que reenviar el formulario abra un segundo caso del mismo sujeto, que
+   * dejaría dos verdades compitiendo sobre la misma identidad.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param subjectTypeConceptId - Qué clase de sujeto.
+   * @param subjectEntityId - Qué sujeto concreto.
+   * @param liveStatuses - Estados que cuentan como "en marcha".
+   * @returns Cuántos casos vivos hay.
+   */
+  countLiveForSubject(
+    em: EntityManager,
+    subjectTypeConceptId: string,
+    subjectEntityId: string,
+    liveStatuses: string[],
+  ): Promise<number> {
+    return em.count(IdentityVerificationCases, {
+      subjectTypeConceptId,
+      subjectEntityId,
+      statusConceptId: { $in: liveStatuses },
+    });
+  }
+
   /** Casos vencidos (expires_at < now) aún no completados (UC-27-12). */
   findExpirable(
     em: EntityManager,
