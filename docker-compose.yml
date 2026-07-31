@@ -89,9 +89,6 @@ services:
 
   # One-shot: aplica SQL/ (apply_all → apply_deferred) y los stores PG de
   # NoSQL/ (58 TimescaleDB, 59 pgvector) solo si las tablas no existen.
-  # El esquema NO vive en este directorio: es el de la RAÍZ del repositorio
-  # (`SQL/` y `NoSQL/`, generados desde los `.puml` por `salud-db/`), montado
-  # con rutas relativas `../`. Ver el comentario de `volumes` más abajo.
   postgres-init:
     image: timescale/timescaledb-ha:pg18
     restart: "no"
@@ -100,15 +97,9 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    # Se montan los directorios CANÓNICOS de la raíz del repositorio, no una copia
-    # local. Antes esto apuntaba a `./database/SQL` y `./database/NoSQL`, que eran
-    # copias sin versionar (`/database/` está en .gitignore): una tercera fuente de
-    # verdad que podía quedar desfasada del `SQL/` que generan los `.puml` sin que
-    # nadie se enterara. Montando el original, lo que se aplica es siempre lo que
-    # el modelo declara.
     volumes:
-      - ../SQL:/init/SQL:ro
-      - ../NoSQL:/init/NoSQL:ro
+      - ./database/SQL:/init/SQL:ro
+      - ./database/NoSQL:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
@@ -140,7 +131,7 @@ services:
     environment:
       MONGO_DB: ${MONGO_DB:-salud_document_store}
     volumes:
-      - ../NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
@@ -202,7 +193,7 @@ services:
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
-      - ../NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:
