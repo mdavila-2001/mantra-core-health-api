@@ -1,0 +1,17 @@
+nav:
+  - Inicio: index.md
+  - getting-started
+  - business
+  - architecture
+  - modules
+  - api
+  - data
+  - events
+  - security
+  - observability
+  - operations
+  - testing
+  - adr
+  - governance
+  - reports
+  - postman
