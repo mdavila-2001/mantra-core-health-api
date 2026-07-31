@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamPatientSelfRegistrationService } from './iam-patient-self-registration.service';
+import { TracingService } from '../../../observability';
 // `UnauthorizedException` es la de Nest, no la de dominio: es la que usan el
 // resto de flujos de autenticación de IAM (login, activación de cuenta).
 import { UnauthorizedException } from '@nestjs/common';
@@ -72,6 +73,7 @@ describe('IamPatientSelfRegistrationService', () => {
       notificationsService as never,
       tenantMembershipsRepo as never,
       logger as never,
+      new TracingService(),
     );
     return {
       service,

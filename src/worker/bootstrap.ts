@@ -1,3 +1,10 @@
+// Primera importación del proceso worker: los 20 entrypoints
+// (`src/worker-<dominio>.ts`) importan este archivo antes que ningún otro, así
+// que la telemetría queda inicializada antes que NestJS, axios y pg. El nombre
+// del servicio (`redesa-worker-<dominio>`) se deriva del entrypoint en ejecución
+// — ver `resolveServiceName` en `observability/telemetry.config.ts`.
+import '../observability/telemetry.bootstrap';
+
 import { Module, type Type } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -5,6 +12,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { Logger } from 'nestjs-pino';
 import { AuthTokenModule, authEnvSchema } from '../common';
 import { LoggingModule, loggingEnvSchema } from '../logging';
+import { ObservabilityModule, telemetryEnvSchema } from '../observability';
 import { workerEnvSchema } from './worker.env';
 import { SystemApiClientModule } from './system-api-client.module';
 import { MockProviderClientModule } from './mock-provider-client.module';
@@ -38,9 +46,11 @@ export async function bootstrapWorker(
         isGlobal: true,
         validationSchema: authEnvSchema
           .concat(loggingEnvSchema)
-          .concat(workerEnvSchema),
+          .concat(workerEnvSchema)
+          .concat(telemetryEnvSchema),
       }),
       LoggingModule,
+      ObservabilityModule,
       AuthTokenModule,
       SystemApiClientModule,
       MockProviderClientModule,

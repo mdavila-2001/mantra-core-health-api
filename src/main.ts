@@ -1,3 +1,9 @@
+// PRIMERA IMPORTACIÓN DEL PROCESO, y debe seguir siéndolo. Las instrumentaciones
+// automáticas de OpenTelemetry parchean `http`, `express`, `pg` e `ioredis` en el
+// momento en que Node los carga; si NestJS se importa antes, el parcheo llega
+// tarde y no se emite ni un span. Ver `src/observability/telemetry.bootstrap.ts`.
+import './observability/telemetry.bootstrap';
+
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

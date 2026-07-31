@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { UnauthorizedException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { IamAuthService } from './iam-auth.service';
+import { TracingService } from '../../../observability';
 import { CONCEPTS } from '../../../common';
 
 const PASSWORD = 'correct-horse-1';
@@ -78,6 +79,7 @@ function build() {
     lockoutsRepo,
     eventsRepo,
     logger as any,
+    new TracingService(),
   );
   return {
     service,

@@ -1,6 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import {
+  APP_ATTR,
+  TracingService,
+  type TraceSpan,
+} from '../../../observability';
 import * as argon2 from 'argon2';
 import { randomUUID } from 'node:crypto';
 import {
@@ -102,6 +107,7 @@ export class IamPatientSelfRegistrationService {
     private readonly notificationsService: NotificationsService,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
     private readonly logger: PinoLogger,
+    private readonly tracing: TracingService,
   ) {
     this.logger.setContext(IamPatientSelfRegistrationService.name);
   }
@@ -117,6 +123,35 @@ export class IamPatientSelfRegistrationService {
    */
   async registerPatient(
     dto: RegisterPatientDto,
+    ip?: string,
+  ): Promise<RegisterPatientResponseDto> {
+    // Span de negocio: el auto-registro crea siete filas en cinco tablas y
+    // además encola un correo fuera de la transacción. Cuando algo sale mal
+    // ("se registró pero no le llegó el correo"), el span dice exactamente
+    // hasta dónde llegó el flujo.
+    //
+    // Privacidad: no se registra el documento de identidad, ni el correo, ni la
+    // fecha de nacimiento. Solo si el flujo incluía correo (booleano) y los
+    // identificadores internos ya creados.
+    return this.tracing.runInSpan(
+      'iam.patient.self-register',
+      {
+        [APP_ATTR.MODULE]: 'iam',
+        [APP_ATTR.OPERATION]: 'patient.self-register',
+        [APP_ATTR.ENTITY_TYPE]: 'iam.users',
+        'iam.registration.with_email': Boolean(dto.email),
+      },
+      (span) => this.performRegisterPatient(dto, span, ip),
+    );
+  }
+
+  /**
+   * Registro propiamente dicho. La lógica no cambió al instrumentar; se extrajo
+   * para que `registerPatient` sea solo la declaración del span de negocio.
+   */
+  private async performRegisterPatient(
+    dto: RegisterPatientDto,
+    span: TraceSpan,
     ip?: string,
   ): Promise<RegisterPatientResponseDto> {
     this.logger.info(
@@ -286,6 +321,9 @@ export class IamPatientSelfRegistrationService {
     // El correo se encola FUERA de la transacción del registro: si la mensajería
     // falla, la cuenta ya creada no debe deshacerse — el usuario puede entrar
     // igual, que es justamente el requisito, y el correo se puede reemitir.
+    span.setAttribute(APP_ATTR.ENTITY_ID, created.userId);
+    span.addEvent('registration.persisted');
+
     let emailVerificationSent = false;
     if (dto.email && created.emailVerificationToken) {
       emailVerificationSent = await this.sendVerificationEmail(
@@ -295,6 +333,7 @@ export class IamPatientSelfRegistrationService {
       );
     }
 
+    span.setAttribute('iam.registration.email_sent', emailVerificationSent);
     this.logger.info(
       { operation: 'iam.auth.register-patient', userId: created.userId },
       'Patient self-registered',
