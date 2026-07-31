@@ -5,6 +5,7 @@ import { MockProviderClient } from '../../src/worker/mock-provider-client.servic
 import { WORKER_ENV } from '../../src/worker/worker.tokens';
 import { loadWorkerEnv } from '../../src/worker/worker.env';
 import { NotificationDeliveryJob } from '../../src/worker/jobs/messaging/notification-delivery.job';
+import { TracingService } from '../../src/observability';
 import { MockProviderWiringService } from '../../src/worker/jobs/messaging/mock-provider-wiring.service';
 
 /**
@@ -49,7 +50,7 @@ describe('Worker — intercambio de adapter de proveedor (integración, mock-pro
       .overrideProvider(NotificationDeliveryJob)
       .useFactory({
         factory: (logger: PinoLogger) =>
-          new NotificationDeliveryJob({} as any, logger),
+          new NotificationDeliveryJob({} as any, logger, new TracingService()),
         inject: [PinoLogger],
       })
       .compile();

@@ -65,6 +65,25 @@ x-app-env: &app-env
   # `mock-provider-server/README.md`.
   MOCK_PROVIDER_BASE_URL: ${MOCK_PROVIDER_BASE_URL:-http://mock-provider-server:4100}
   MOCK_PROVIDER_API_KEY: ${MOCK_PROVIDER_API_KEY:-}
+  # Trazas distribuidas. Apagadas por defecto; se activan con OTEL_ENABLED=true
+  # en el `.env` DESPUÉS de levantar Jaeger (`yarn jaeger:up`), que se une a
+  # esta misma red y por eso se alcanza por su nombre de servicio y no por
+  # localhost. `OTEL_SERVICE_NAME` NO se declara aquí a propósito: cada
+  # contenedor deriva el suyo del entrypoint que ejecuta
+  # (`redesa-api`, `redesa-worker-messaging`, …); fijarlo aquí haría que los 21
+  # procesos exportaran bajo el mismo nombre. Ver `docs/observability/`.
+  OTEL_ENABLED: ${OTEL_ENABLED:-false}
+  OTEL_SERVICE_NAMESPACE: ${OTEL_SERVICE_NAMESPACE:-redesa}
+  OTEL_SERVICE_VERSION: ${OTEL_SERVICE_VERSION:-}
+  OTEL_DEPLOYMENT_ENVIRONMENT: ${OTEL_DEPLOYMENT_ENVIRONMENT:-}
+  OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT_DOCKER:-http://jaeger:4318/v1/traces}
+  OTEL_EXPORT_TIMEOUT_MS: ${OTEL_EXPORT_TIMEOUT_MS:-10000}
+  OTEL_TRACES_SAMPLER: ${OTEL_TRACES_SAMPLER:-parentbased_traceidratio}
+  OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-1.0}
+  OTEL_PROPAGATORS: ${OTEL_PROPAGATORS:-tracecontext,baggage}
+  OTEL_DIAG_LOG_LEVEL: ${OTEL_DIAG_LOG_LEVEL:-ERROR}
+  OTEL_TRACE_RESPONSE_HEADER: ${OTEL_TRACE_RESPONSE_HEADER:-true}
 
 # Límites de recursos: sin esto, un proceso Node con un memory leak o un tick
 # de worker atascado puede consumir toda la RAM del host sin que nada lo

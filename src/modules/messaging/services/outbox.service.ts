@@ -8,7 +8,14 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import {
+  APP_ATTR,
+  MessagingTraceService,
+  TRACE_CARRIER_KEY,
+  type TraceCarrier,
+} from '../../../observability';
 import { OutboxRepository, QueuesRepository } from '../repositories';
+import { DomainEvents } from '../entities';
 import {
   RunOutboxRelayDto,
   OutboxRelayResponseDto,
@@ -101,6 +108,27 @@ const DEFAULT_VISIBILITY_SECONDS = 60;
 const BACKOFF_BASE_SECONDS = 5;
 const BACKOFF_CAP_SECONDS = 3600;
 
+/** Versión efectiva del evento; centraliza el default para no repetirlo. */
+function eventVersionOf(input: PublishDomainEventInput): number {
+  return input.eventVersion ?? DEFAULT_EVENT_VERSION;
+}
+
+/**
+ * Adjunta el contexto de traza a la metadata del evento.
+ *
+ * Con la telemetría deshabilitada el carrier viene vacío y se devuelve la
+ * metadata original **sin tocar** —incluido `undefined`—, de modo que la fila
+ * escrita en `messaging.domain_events` es byte a byte la misma que antes de
+ * esta iniciativa.
+ */
+function withTraceCarrier(
+  metadata: Record<string, unknown> | undefined,
+  carrier: TraceCarrier,
+): Record<string, unknown> | undefined {
+  if (Object.keys(carrier).length === 0) return metadata;
+  return { ...(metadata ?? {}), [TRACE_CARRIER_KEY]: carrier };
+}
+
 /**
  * Outbox: publicación transaccional de eventos de dominio, relay a publicado y
  * fan-out a suscriptores (UC-35-01 … 04).
@@ -118,12 +146,16 @@ export class OutboxService {
    * @param outboxRepo - Valor de outbox repo requerido por la operación.
    * @param queuesRepo - Valor de queues repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param messagingTrace - Propagación del contexto de traza a través del
+   *                         outbox: sin ella, publicación y consumo aparecen
+   *                         como dos trazas inconexas separadas por minutos.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly outboxRepo: OutboxRepository,
     private readonly queuesRepo: QueuesRepository,
     private readonly logger: PinoLogger,
+    private readonly messagingTrace: MessagingTraceService,
   ) {
     this.logger.setContext(OutboxService.name);
   }
@@ -153,7 +185,48 @@ export class OutboxService {
     tx: EntityManager,
     input: PublishDomainEventInput,
   ): Promise<PublishDomainEventResult> {
-    const eventVersion = input.eventVersion ?? DEFAULT_EVENT_VERSION;
+    // Span PRODUCER: es el punto donde la traza de la petición HTTP se "guarda"
+    // dentro del evento para que el consumidor, en otro proceso y otro momento,
+    // pueda continuarla en vez de empezar una nueva.
+    return this.messagingTrace.runInProducerSpan(
+      'messaging.outbox publish',
+      {
+        [APP_ATTR.MODULE]: 'messaging',
+        [APP_ATTR.OPERATION]: 'outbox.publish',
+        [APP_ATTR.EVENT_TYPE]: input.eventType,
+        [APP_ATTR.ENTITY_TYPE]: input.aggregateType,
+        [APP_ATTR.ENTITY_ID]: input.aggregateId,
+        [APP_ATTR.TENANT_ID]: input.tenantId,
+        'messaging.system': 'postgresql_outbox',
+        'messaging.destination.name': 'messaging.outbox_messages',
+        'messaging.operation.type': 'publish',
+      },
+      (span, carrier) =>
+        this.persistDomainEvent(tx, input, eventVersionOf(input), carrier).then(
+          (result) => {
+            span.setAttributes({
+              [APP_ATTR.EVENT_ID]: result.domainEventId,
+              'messaging.message.id': result.outboxMessageId,
+              'messaging.outbox.duplicate': result.duplicate,
+            });
+            return result;
+          },
+        ),
+    );
+  }
+
+  /**
+   * Escritura transaccional del evento y su mensaje de outbox.
+   *
+   * Se separó de `publishDomainEvent` al añadir el span productor: la lógica de
+   * persistencia no cambió, solo dejó de estar mezclada con la instrumentación.
+   */
+  private async persistDomainEvent(
+    tx: EntityManager,
+    input: PublishDomainEventInput,
+    eventVersion: number,
+    carrier: TraceCarrier,
+  ): Promise<PublishDomainEventResult> {
     const idempotencyKey =
       input.idempotencyKey ??
       this.deriveIdempotencyKey(
@@ -185,7 +258,11 @@ export class OutboxService {
       aggregateType: input.aggregateType,
       aggregateId: input.aggregateId,
       payloadJson: input.payloadJson,
-      metadataJson: input.metadataJson,
+      // El contexto de traza viaja en la METADATA, nunca en el payload: el
+      // payload alimenta `deriveIdempotencyKey`, y meter ahí un `traceparent`
+      // -distinto en cada petición- haría que el mismo hecho publicado dos
+      // veces generara claves distintas y rompiera la idempotencia del outbox.
+      metadataJson: withTraceCarrier(input.metadataJson, carrier),
       // La columna es NOT NULL: sin un correlation id de un flujo mayor que
       // propagar (p. ej. el de la petición HTTP que originó el cambio), el
       // evento es su propia correlación — nunca dejar la inserción sin valor.
@@ -343,13 +420,56 @@ export class OutboxService {
         );
       }
 
-      const subscriptions = await this.outboxRepo.findActiveSubscriptions(
-        tx,
-        event.eventType,
-        event.eventVersion,
-        CONCEPTS.STATE_ACTIVE,
-        event.tenantId,
+      // Span CONSUMER colgado del contexto que el productor guardó en la
+      // metadata del evento: publicación y fan-out comparten `trace_id` aunque
+      // los separen minutos y dos procesos. Un evento antiguo sin `_trace`
+      // devuelve un carrier vacío y el span queda bajo la traza actual, sin
+      // ninguna rama especial.
+      return this.messagingTrace.runInConsumerSpan(
+        'messaging.outbox process',
+        {
+          [APP_ATTR.MODULE]: 'messaging',
+          [APP_ATTR.OPERATION]: 'event.dispatch',
+          [APP_ATTR.EVENT_TYPE]: event.eventType,
+          [APP_ATTR.EVENT_ID]: domainEventId,
+          [APP_ATTR.TENANT_ID]: event.tenantId,
+          'messaging.system': 'postgresql_outbox',
+          'messaging.destination.name': 'messaging.outbox_messages',
+          'messaging.operation.type': 'process',
+        },
+        this.messagingTrace.extract(event.metadataJson),
+        (span) =>
+          this.fanOutToSubscribers(tx, event, dto, actor).then((result) => {
+            span.setAttributes({
+              [APP_ATTR.RESULT_COUNT]: result.matched,
+              'messaging.outbox.filtered_out': result.filteredOut,
+            });
+            return result;
+          }),
       );
+    });
+  }
+
+  /**
+   * Reparte un evento ya publicado entre sus suscripciones activas.
+   *
+   * Se separó de `dispatchEvent` al añadir el span consumidor; la lógica de
+   * fan-out (filtro, idempotencia por suscripción, encolado) no cambió.
+   */
+  private async fanOutToSubscribers(
+    tx: EntityManager,
+    event: DomainEvents,
+    dto: DispatchEventDto,
+    actor: AuthenticatedUser,
+  ): Promise<DispatchEventResponseDto> {
+    const domainEventId = event.id;
+    const subscriptions = await this.outboxRepo.findActiveSubscriptions(
+      tx,
+      event.eventType,
+      event.eventVersion,
+      CONCEPTS.STATE_ACTIVE,
+      event.tenantId,
+    );
 
       const deliveries: DispatchedSubscriberDto[] = [];
       let filteredOut = 0;
@@ -414,13 +534,12 @@ export class OutboxService {
         });
       }
 
-      return {
-        domainEventId,
-        matched: deliveries.length,
-        filteredOut,
-        deliveries,
-      };
-    });
+    return {
+      domainEventId,
+      matched: deliveries.length,
+      filteredOut,
+      deliveries,
+    };
   }
 
   /** UC-35-04: registrar el acuse del consumidor sobre una entrega. */

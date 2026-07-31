@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { OutboxService } from './outbox.service';
+import { MessagingTraceService } from '../../../observability';
 import {
   CONCEPTS,
   PreconditionFailedException,
@@ -46,11 +47,15 @@ function build() {
     createJob: mockFn(() => ({ id: 'job-1' })),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // Servicio real, no un doble: no tiene dependencias y con la telemetría
+  // apagada sus métodos son no-ops, así que la prueba ejercita el mismo camino
+  // de propagación que producción sin necesitar un SDK arrancado.
   const service = new OutboxService(
     em as any,
     outboxRepo,
     queuesRepo as any,
     logger as any,
+    new MessagingTraceService(),
   );
   return { service, tx, outboxRepo, queuesRepo, logger };
 }
