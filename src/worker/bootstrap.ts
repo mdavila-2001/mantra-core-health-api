@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Logger } from 'nestjs-pino';
-import { AuthModule, authEnvSchema } from '../common';
+import { AuthTokenModule, authEnvSchema } from '../common';
 import { LoggingModule, loggingEnvSchema } from '../logging';
 import { workerEnvSchema } from './worker.env';
 import { SystemApiClientModule } from './system-api-client.module';
@@ -41,7 +41,7 @@ export async function bootstrapWorker(
           .concat(workerEnvSchema),
       }),
       LoggingModule,
-      AuthModule,
+      AuthTokenModule,
       SystemApiClientModule,
       MockProviderClientModule,
       GoogleEmailClientModule,

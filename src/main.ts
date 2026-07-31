@@ -36,6 +36,13 @@ async function bootstrap() {
   // por el logger por defecto de Nest y no por pino.
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
+  // Sin esto, Nest ignora SIGTERM/SIGINT y no dispara `onModuleDestroy` /
+  // `beforeApplicationShutdown` (cierre de conexiones de MikroORM, Redis,
+  // etc.) — `docker stop`/`docker compose down` cortarían el proceso en seco
+  // en vez de drenar las requests en vuelo. Los 20 workers ya lo hacían
+  // (`worker/bootstrap.ts`); a la API le faltaba.
+  app.enableShutdownHooks();
+
   // Sustituye el logger por defecto de Nest por pino. A partir de aquí, todas las
   // capas emiten por el mismo transporte estructurado: no solo lo que inyecta
   // `PinoLogger`, también cada `Logger` de `@nestjs/common` (arranque del ORM,

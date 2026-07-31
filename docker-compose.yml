@@ -66,6 +66,19 @@ x-app-env: &app-env
   MOCK_PROVIDER_BASE_URL: ${MOCK_PROVIDER_BASE_URL:-http://mock-provider-server:4100}
   MOCK_PROVIDER_API_KEY: ${MOCK_PROVIDER_API_KEY:-}
 
+# Límites de recursos: sin esto, un proceso Node con un memory leak o un tick
+# de worker atascado puede consumir toda la RAM del host sin que nada lo
+# frene. Son defaults conservadores para desarrollo/staging, no una medición
+# de carga real de producción — ajustar con datos reales antes de operar así.
+x-api-resources: &api-resources
+  limits:
+    cpus: "2.0"
+    memory: 1536M
+x-worker-resources: &worker-resources
+  limits:
+    cpus: "0.5"
+    memory: 512M
+
 services:
   postgres:
     image: timescale/timescaledb-ha:pg18
@@ -268,11 +281,29 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/main.js"]
+    command: ["node", "dist/src/main.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *api-resources
     ports:
       - "${PORT:-3000}:3000"
+    volumes:
+      - api_storage:/app/storage
+    healthcheck:
+      # Sin curl/wget en `node:24-bookworm-slim`: se usa el `fetch` nativo de
+      # Node en vez de instalar un paquete extra sólo para el healthcheck.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     depends_on:
       # No basta con que Postgres esté healthy: `TerminologySeedService`
       # corre en `onApplicationBootstrap` y necesita el esquema ya aplicado
@@ -302,12 +333,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-billing.js"]
+    command: ["node", "dist/src/worker-billing.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -317,12 +350,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-automation.js"]
+    command: ["node", "dist/src/worker-automation.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -332,12 +367,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-consent.js"]
+    command: ["node", "dist/src/worker-consent.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -347,12 +384,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-cross_store_consistency.js"]
+    command: ["node", "dist/src/worker-cross_store_consistency.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
       mock-provider-server:
         condition: service_healthy
     networks:
@@ -364,12 +403,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-delegated_access.js"]
+    command: ["node", "dist/src/worker-delegated_access.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -379,12 +420,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-health_context.js"]
+    command: ["node", "dist/src/worker-health_context.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -394,12 +437,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-identity_assurance.js"]
+    command: ["node", "dist/src/worker-identity_assurance.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -409,12 +454,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-integrations.js"]
+    command: ["node", "dist/src/worker-integrations.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -424,12 +471,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-messaging.js"]
+    command: ["node", "dist/src/worker-messaging.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
       mock-provider-server:
         condition: service_healthy
     networks:
@@ -441,12 +490,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-pharmacy_inventory.js"]
+    command: ["node", "dist/src/worker-pharmacy_inventory.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -456,12 +507,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-promotions.js"]
+    command: ["node", "dist/src/worker-promotions.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -471,12 +524,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-qa_lab.js"]
+    command: ["node", "dist/src/worker-qa_lab.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -486,12 +541,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-read_models.js"]
+    command: ["node", "dist/src/worker-read_models.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -501,12 +558,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-reporting.js"]
+    command: ["node", "dist/src/worker-reporting.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -516,12 +575,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-scheduling.js"]
+    command: ["node", "dist/src/worker-scheduling.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -531,12 +592,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-tracking.js"]
+    command: ["node", "dist/src/worker-tracking.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -546,12 +609,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-workflow.js"]
+    command: ["node", "dist/src/worker-workflow.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -561,12 +626,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-vector_rag.js"]
+    command: ["node", "dist/src/worker-vector_rag.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
       mock-provider-server:
         condition: service_healthy
     networks:
@@ -578,12 +645,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-lakehouse.js"]
+    command: ["node", "dist/src/worker-lakehouse.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -593,12 +662,14 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    command: ["node", "dist/worker-time_series.js"]
+    command: ["node", "dist/src/worker-time_series.js"]
     environment:
       <<: *app-env
+    deploy:
+      resources: *worker-resources
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
     networks:
       - mantra-redesa-network
 
@@ -620,6 +691,13 @@ services:
 #       device: ${POSTGRES_DATA_DIR:-./data/postgres}
 # -------------------------------------------------------------------------
 volumes:
+  # `FileStorageModule` sólo tiene el adaptador local en disco hoy (MinIO está
+  # provisionado pero sin un `S3FileStorageAdapter` que lo use — ver
+  # `src/common/storage/README.md`); hasta que exista ese adaptador, sin este
+  # volumen cada `docker compose up`/redeploy recrea el contenedor `api` con
+  # `storage/uploads` vacío y los archivos subidos se pierden.
+  api_storage:
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_api_storage
   postgres_data:
     name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_postgres_data
   mongodb_data:

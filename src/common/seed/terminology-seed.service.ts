@@ -277,33 +277,63 @@ export class TerminologySeedService implements OnApplicationBootstrap {
    * INSERT, de modo que sin un default a nivel de base cada alta violaría el
    * NOT NULL. `SET DEFAULT` es idempotente; tras la primera pasada no quedan
    * columnas pendientes y el coste es una única consulta a `information_schema`.
+   *
+   * Cubre todos los esquemas de negocio excluyendo los del sistema, no una lista
+   * fija: cada módulo nuevo trae tablas con `row_version` y enumerarlos a mano
+   * dejaba fuera silenciosamente a los que se integraran después.
+   *
+   * Los `ALTER` van dentro de un solo `DO`, no en un bucle de consultas: son más
+   * de mil tablas y una ida y vuelta por cada una añadía varios MINUTOS al primer
+   * arranque, con el proceso ya escuchando pero sin poder atender nada.
    */
   private async ensureRowVersionDefaults(): Promise<void> {
     const connection = this.orm.em.getConnection();
-    const pending: Array<{
-      /**
-       * Valor de table schema mantenido por la instancia.
-       */
-      table_schema: string; /**
-       * Valor de table name mantenido por la instancia.
-       */
-      table_name: string;
-    }> = await connection.execute(
-      `select table_schema, table_name
-           from information_schema.columns
-          where column_name = 'row_version'
-            and column_default is null
-            and table_schema in ('iam', 'common', 'terminology', 'directory')`,
+    // Dos `execute()` separados, no un único string con `do $$...$$;` seguido de
+    // `select`: bajo Kysely (MikroORM >= 6), un solo round-trip con varias
+    // sentencias no garantiza que el result set devuelto sea el de la última
+    // (`connection.execute` puede resolver con un array vacío), así que el
+    // destructuring `[{ altered }]` fallaba con "Cannot read properties of
+    // undefined" y el seed completo se abortaba en cada arranque.
+    await connection.execute(
+      `do $$
+       declare
+         target record;
+       begin
+         for target in
+           select table_schema, table_name
+             from information_schema.columns
+            where column_name = 'row_version'
+              and column_default is null
+              and table_schema not in ('pg_catalog', 'information_schema')
+              and table_schema not like 'pg_%'
+         loop
+           execute format(
+             'alter table %I.%I alter column row_version set default 1',
+             target.table_schema, target.table_name);
+         end loop;
+       end $$;`,
     );
-    for (const { table_schema, table_name } of pending) {
-      await connection.execute(
-        `alter table "${table_schema}"."${table_name}" alter column row_version set default 1`,
-      );
-    }
-    if (pending.length > 0) {
-      this.logger.info(
-        { columns: pending.length },
-        'Defaults de row_version asegurados',
+
+    const [{ altered }]: Array<{
+      /**
+       * Cuántas columnas quedaron con default en esta pasada.
+       */
+      altered: number;
+    }> = await connection.execute(
+      `select count(*)::int as altered
+         from information_schema.columns
+        where column_name = 'row_version'
+          and column_default is null
+          and table_schema not in ('pg_catalog', 'information_schema')
+          and table_schema not like 'pg_%'`,
+    );
+
+    if (altered > 0) {
+      // Si algo queda sin default después del bloque, es que no se pudo alterar
+      // (vista, permisos): mejor que se vea a que falle el primer INSERT.
+      this.logger.warn(
+        { columns: altered },
+        'Quedan columnas row_version sin DEFAULT tras el barrido',
       );
     }
   }
