@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 
@@ -167,13 +168,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
 
-    // Violaciones de integridad de PostgreSQL. Son fallos de la petición, no del
-    // servidor: referenciar algo inexistente o repetir una clave es un 4xx. Sin
-    // esto salían como 500 «Error interno del servidor», que además de mentir
-    // sobre la culpa oculta el dato accionable (qué columna y qué valor).
-    const integridad = this.integrityViolation(exception);
-    if (integridad) {
-      return integridad;
+    // Violación de restricción UNIQUE (p. ej. carrera entre dos flujos que
+    // reutilizan el mismo valor único, como una clave de idempotencia): es un
+    // conflicto de negocio esperado, no un fallo interno; nunca debe
+    // devolverse como 500 opaco.
+    if (exception instanceof UniqueConstraintViolationException) {
+      return {
+        status: HttpStatus.CONFLICT,
+        code: ErrorCode.CONFLICT,
+        message: 'El valor ya está en uso por otro registro',
+      };
     }
 
     return {

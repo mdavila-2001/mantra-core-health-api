@@ -22,7 +22,7 @@ export class ConsentSweepController {
 
   /** UC-07-11. */
   @Post('expiration-sweep')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Expirar consentimientos y autorizaciones vencidas (barrido)',

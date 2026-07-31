@@ -338,6 +338,32 @@ export class HealthContextRepository {
   }
 
   /**
+   * Lote de programaciones vencidas (`next_run_at` ya pasó), activas, con
+   * `SKIP LOCKED` para que varios ticks del worker no se disputen la misma
+   * fila. La usa el tick de recolección (Fase 2 del plan de corrección de
+   * workers) — antes de esto nada evaluaba si una programación estaba vencida.
+   */
+  claimDueSchedules(
+    em: EntityManager,
+    now: Date,
+    activeStatusConceptId: string,
+    limit: number,
+  ): Promise<CountryContextSchedules[]> {
+    return em.find(
+      CountryContextSchedules,
+      {
+        statusConceptId: activeStatusConceptId,
+        nextRunAt: { $lte: now },
+      },
+      {
+        lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,
+        orderBy: { nextRunAt: 'ASC' },
+        limit,
+      },
+    );
+  }
+
+  /**
    * Programación bloqueada. Arrancar una corrida recalcula `next_run_at`, y dos
    * disparos simultáneos dejarían la cola del scheduler con la misma marca.
    */

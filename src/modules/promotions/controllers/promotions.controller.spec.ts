@@ -10,6 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { LoyaltyController } from './loyalty.controller';
 import { PromotionsController } from './promotions.controller';
+import { runWithTenant } from '../../../common';
 
 const actor = { id: 'user-1', roles: ['PROMOTIONS_ADMIN'] };
 const ID = '11111111-1111-1111-1111-111111111111';
@@ -26,6 +27,7 @@ function build() {
     redeemPoints: mockFn(),
     recomputeBalance: mockFn(),
     expirePoints: mockFn(),
+    listActivePrograms: mockFn(),
     createReferral: mockFn(),
     qualifyReferral: mockFn(),
   };
@@ -105,6 +107,42 @@ describe('LoyaltyController', () => {
     await d.loyalty.expirePoints(dto, actor);
 
     expect(d.loyaltyService.expirePoints).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('scopes the active-program discovery query to the caller tenant (UC-51-06)', async () => {
+    const d = build();
+    d.loyaltyService.listActivePrograms.mockResolvedValue({
+      programs: [{ id: ID, code: 'LOY-01', name: 'Loyalty' }],
+    });
+
+    const res = await runWithTenant('tenant-1', () =>
+      d.loyalty.listActivePrograms({ limit: 20 }, actor),
+    );
+
+    expect(d.loyaltyService.listActivePrograms).toHaveBeenCalledWith(
+      20,
+      'tenant-1',
+    );
+    expect(res.programs).toHaveLength(1);
+  });
+
+  it('rejects the active-program discovery query when a tenant-scoped caller has no tenant context', () => {
+    const d = build();
+
+    expect(() => d.loyalty.listActivePrograms({ limit: 20 }, actor)).toThrow(
+      'Se requiere X-Tenant-Id',
+    );
+    expect(d.loyaltyService.listActivePrograms).not.toHaveBeenCalled();
+  });
+
+  it('lets the SYSTEM worker sweep active programs across all tenants', async () => {
+    const d = build();
+    d.loyaltyService.listActivePrograms.mockResolvedValue({ programs: [] });
+    const systemActor = { id: 'worker-1', roles: ['SYSTEM'] };
+
+    await d.loyalty.listActivePrograms({ limit: 20 }, systemActor);
+
+    expect(d.loyaltyService.listActivePrograms).toHaveBeenCalledWith(20);
   });
 
   it('delegates referral creation and qualification (UC-51-12, UC-51-13)', async () => {

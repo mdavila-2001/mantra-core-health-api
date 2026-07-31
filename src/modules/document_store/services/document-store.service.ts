@@ -10,7 +10,7 @@ import {
 } from '../../../common';
 import { DocumentStoreRepository } from '../repositories';
 import {
-  CreateDocumentDto,
+  CreateFlexibleDocumentDto,
   DocumentResponseDto,
   ListDocumentsQueryDto,
   UpdateDocumentDto,
@@ -40,7 +40,7 @@ export class DocumentStoreService {
   /** Crea un documento en la colección, gobernado por tenant y tipo. */
   async create(
     collection: string,
-    dto: CreateDocumentDto,
+    dto: CreateFlexibleDocumentDto,
     actor: AuthenticatedUser,
   ): Promise<DocumentResponseDto> {
     this.logger.info(

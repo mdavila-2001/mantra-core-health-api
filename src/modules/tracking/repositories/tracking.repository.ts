@@ -435,23 +435,39 @@ export class TrackingRepository {
    * @param code - Valor de code requerido por la operación.
    * @returns Resultado de find milestone by code conforme al contrato `Promise<MilestoneDefinitions | null>`.
    */
+  /**
+   * `tenant_id` es nullable en `milestone_definitions`: sin filtro, un código
+   * definido por el tenant A "existía" para el tenant B (bloqueaba su alta) y,
+   * peor, al cerrar un envío el hito terminal elegido podía ser el de OTRO
+   * tenant, dejando `subject.currentMilestoneId` apuntando a una fila ajena.
+   */
   findMilestoneByCode(
     em: EntityManager,
     subjectTypeConceptId: string,
     code: string,
+    tenantId: string | undefined,
   ): Promise<MilestoneDefinitions | null> {
-    return em.findOne(MilestoneDefinitions, { subjectTypeConceptId, code });
+    return em.findOne(MilestoneDefinitions, {
+      subjectTypeConceptId,
+      code,
+      $or: [{ tenantId: null }, { tenantId: tenantId ?? null }],
+    });
   }
 
-  /** Hitos esperados del tipo de sujeto, en orden. */
+  /** Hitos esperados del tipo de sujeto, en orden (catálogo global + override del tenant). */
   findMilestonesBySubjectType(
     em: EntityManager,
     subjectTypeConceptId: string,
     activeStateConceptId: string,
+    tenantId: string | undefined,
   ): Promise<MilestoneDefinitions[]> {
     return em.find(
       MilestoneDefinitions,
-      { subjectTypeConceptId, stateConceptId: activeStateConceptId },
+      {
+        subjectTypeConceptId,
+        stateConceptId: activeStateConceptId,
+        $or: [{ tenantId: null }, { tenantId: tenantId ?? null }],
+      },
       { orderBy: { ordinal: 'ASC' } },
     );
   }

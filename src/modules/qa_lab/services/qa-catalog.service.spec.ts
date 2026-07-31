@@ -43,10 +43,22 @@ function build() {
     findAssertionsByCase: mockFn(),
     createSchedule: mockFn(),
     findScheduleByCode: mockFn(),
+    claimDueSchedules: mockFn(),
+  };
+  const runsRepo = {
+    findRunsInProgress: mockFn(),
+    createRun: mockFn(),
+    findLastRun: mockFn(),
+    findRunByNumber: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new QaCatalogService(em as any, catalogRepo, logger as any);
-  return { service, tx, catalogRepo };
+  const service = new QaCatalogService(
+    em as any,
+    catalogRepo,
+    runsRepo as any,
+    logger as any,
+  );
+  return { service, tx, catalogRepo, runsRepo };
 }
 
 describe('QaCatalogService', () => {
@@ -380,6 +392,157 @@ describe('QaCatalogService', () => {
       await expect(
         d.service.createSchedule(dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('runDueSchedules (tick de disparo programado)', () => {
+    /**
+     * Programación vencida de referencia, apta para disparar.
+     *
+     * @param overrides - Valor de overrides requerido por la operación.
+     * @returns Resultado de schedule conforme al contrato `any`.
+     */
+    function schedule(overrides: Record<string, unknown> = {}): any {
+      return {
+        id: 'sched-1',
+        suiteId: SUITE,
+        environmentId: ENVIRONMENT,
+        tenantId: undefined,
+        cronExpression: '0 2 * * *',
+        timezone: 'UTC',
+        concurrencyPolicyConceptId: CONCEPTS.CONCURRENCY_FORBID,
+        nextRunAt: new Date('2026-08-01T02:00:00Z'),
+        isEnabled: true,
+        ...overrides,
+      };
+    }
+
+    /**
+     * Ejecuta la operación wire.
+     *
+     * @param d - Valor de d requerido por la operación.
+     * @returns Resultado de wire.
+     */
+    function wire(d: ReturnType<typeof build>) {
+      d.catalogRepo.findSuiteById.mockResolvedValue({
+        id: SUITE,
+        code: 'SMOKE',
+        stateConceptId: CONCEPTS.SUITE_ACTIVE,
+      });
+      d.catalogRepo.findEnvironmentById.mockResolvedValue({
+        id: ENVIRONMENT,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      d.runsRepo.findRunsInProgress.mockResolvedValue([]);
+      d.catalogRepo.countActiveCases.mockResolvedValue(3);
+      d.runsRepo.findLastRun.mockResolvedValue(null);
+      d.runsRepo.findRunByNumber.mockResolvedValue(null);
+      d.runsRepo.createRun.mockReturnValue({ id: 'run-1' });
+    }
+
+    it('queues a run for a due schedule and advances next_run_at', async () => {
+      const d = build();
+      wire(d);
+      const due = schedule();
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([due]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.claimed).toBe(1);
+      expect(res.queued).toBe(1);
+      expect(res.skipped).toBe(0);
+      expect(res.results[0]).toMatchObject({
+        scheduleId: 'sched-1',
+        runId: 'run-1',
+      });
+      expect(d.runsRepo.createRun).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          suiteId: SUITE,
+          environmentId: ENVIRONMENT,
+          triggerConceptId: CONCEPTS.QA_TRIGGER_SCHEDULED,
+        }),
+      );
+      // La próxima marca de `0 2 * * *` desde el 2026-08-01T02:00Z es el día siguiente.
+      expect(due.nextRunAt.toISOString()).toBe('2026-08-02T02:00:00.000Z');
+      expect(due.lastRunId).toBe('run-1');
+    });
+
+    it('skips but still reschedules when the suite is not published', async () => {
+      const d = build();
+      wire(d);
+      d.catalogRepo.findSuiteById.mockResolvedValue({
+        id: SUITE,
+        code: 'SMOKE',
+        stateConceptId: CONCEPTS.SUITE_DRAFT,
+      });
+      const due = schedule();
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([due]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.queued).toBe(0);
+      expect(res.skipped).toBe(1);
+      expect(res.results[0].skippedReason).toBe('SUITE_NOT_ACTIVE');
+      expect(d.runsRepo.createRun).not.toHaveBeenCalled();
+      expect(due.nextRunAt.toISOString()).toBe('2026-08-02T02:00:00.000Z');
+    });
+
+    it('skips when the suite already has a run in progress under FORBID', async () => {
+      const d = build();
+      wire(d);
+      d.runsRepo.findRunsInProgress.mockResolvedValue([{ id: 'run-existing' }]);
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([schedule()]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.results[0].skippedReason).toBe('SUITE_ALREADY_RUNNING');
+      expect(d.runsRepo.createRun).not.toHaveBeenCalled();
+    });
+
+    it('skips when the suite has no active cases', async () => {
+      const d = build();
+      wire(d);
+      d.catalogRepo.countActiveCases.mockResolvedValue(0);
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([schedule()]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.results[0].skippedReason).toBe('NO_ACTIVE_CASES');
+      expect(d.runsRepo.createRun).not.toHaveBeenCalled();
+    });
+
+    it('disables the schedule when it has no cron expression to compute the next mark', async () => {
+      const d = build();
+      wire(d);
+      const originalNextRunAt = new Date('2026-08-01T02:00:00Z');
+      const due = schedule({
+        cronExpression: undefined,
+        nextRunAt: originalNextRunAt,
+      });
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([due]);
+
+      const res = await d.service.runDueSchedules({}, actor);
+
+      expect(res.results[0].skippedReason).toBe('NO_CRON_EXPRESSION');
+      expect(due.isEnabled).toBe(false);
+      // Sin cron no hay marca que calcular: `next_run_at` queda tal como estaba.
+      expect(due.nextRunAt).toBe(originalNextRunAt);
+    });
+
+    it('returns an empty batch when nothing is due', async () => {
+      const d = build();
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([]);
+
+      const res = await d.service.runDueSchedules({ limit: 5 }, actor);
+
+      expect(res).toEqual({ claimed: 0, queued: 0, skipped: 0, results: [] });
+      expect(d.catalogRepo.claimDueSchedules).toHaveBeenCalledWith(
+        d.tx,
+        expect.any(Date),
+        CONCEPTS.STATE_ACTIVE,
+        5,
+      );
     });
   });
 });

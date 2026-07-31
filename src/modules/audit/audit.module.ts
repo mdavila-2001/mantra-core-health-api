@@ -10,6 +10,7 @@ import {
 import {
   AuditEventsService,
   AuditHistoryService,
+  AuditTrailService,
   ComplianceService,
   ModerationService,
   ThirdPartyAccessService,
@@ -50,9 +51,13 @@ import {
     // Servicios
     AuditEventsService,
     AuditHistoryService,
+    AuditTrailService,
     ComplianceService,
     ModerationService,
     ThirdPartyAccessService,
   ],
+  // Exportados para la auditoría TRANSVERSAL (CAN-AUDIT-001): otros dominios
+  // sellan sus mutaciones sensibles en la misma transacción vía AuditTrailService.
+  exports: [AuditTrailService, AuditLogRepository, HistoryRepository],
 })
 export class AuditModule {}

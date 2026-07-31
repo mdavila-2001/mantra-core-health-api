@@ -6,6 +6,7 @@ export { SubledgerRepository } from './subledger.repository';
 export { AssetRepository } from './asset.repository';
 export { LiabilityRepository } from './liability.repository';
 export { ExchangeRateRepository } from './exchange-rate.repository';
+export { AccountingControllingRepository } from './accounting-controlling.repository';
 
 export type { CreateAccountData } from './accounts.repository';
 export type {

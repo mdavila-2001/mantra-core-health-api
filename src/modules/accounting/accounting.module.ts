@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { AuditModule } from '../audit/audit.module';
 import {
   AccountingLedgerController,
   AccountingFiscalController,
@@ -29,6 +30,7 @@ import {
   AssetRepository,
   LiabilityRepository,
   ExchangeRateRepository,
+  AccountingControllingRepository,
 } from './repositories';
 
 /**
@@ -38,7 +40,7 @@ import {
  * entidades del esquema `accounting`.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuditModule],
   controllers: [
     AccountingLedgerController,
     AccountingFiscalController,
@@ -58,6 +60,7 @@ import {
     AssetRepository,
     LiabilityRepository,
     ExchangeRateRepository,
+    AccountingControllingRepository,
     // Servicios
     PostingHelper,
     LedgerService,

@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
@@ -69,8 +70,12 @@ async function bootstrap() {
     }),
   );
 
-  // OpenAPI/Swagger en /docs. Solo fuera de producción: en producción publicaría
-  // el mapa completo de endpoints y esquemas (divulgación de superficie de ataque).
+  // OpenAPI/Swagger en /docs y referencia interactiva Scalar en /reference.
+  // Solo fuera de producción: en producción publicarían el mapa completo de
+  // endpoints y esquemas (divulgación de superficie de ataque). La estrategia
+  // de exposición en producción (Scalar protegido, entorno separado, etc.) es
+  // una decisión pendiente — ver `SEC-002` en
+  // `docs/governance/traceability-matrix.md` y `docs/api/conventions.md`.
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('REDESA Health API')
@@ -80,6 +85,20 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('docs', app, document);
+
+    app.use(
+      '/reference',
+      apiReference({
+        content: document,
+        pageTitle: 'REDESA Health API — Referencia',
+        theme: 'default',
+        metaData: {
+          title: 'REDESA Health API',
+          description:
+            'Referencia interactiva del contrato OpenAPI real, generado desde los decoradores del backend.',
+        },
+      }),
+    );
   }
 
   await app.listen(process.env.PORT ?? 3000);

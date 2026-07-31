@@ -469,6 +469,36 @@ export class EmbeddingJobResponseDto {
   duplicate!: boolean;
 }
 
+/** Un job en cola, tal como lo necesita el worker para llamar `run`. */
+export class QueuedEmbeddingJobSummaryDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a vector collection.
+   */
+  @ApiProperty({ format: 'uuid' })
+  vectorCollectionId!: string;
+
+  /**
+   * Valor de job type mantenido por la instancia.
+   */
+  @ApiProperty()
+  jobType!: string;
+}
+
+/** Respuesta de `GET /vector-rag/embedding-jobs/pending` (descubrimiento del worker). */
+export class PendingEmbeddingJobsResponseDto {
+  /**
+   * Valor de jobs mantenido por la instancia.
+   */
+  @ApiProperty({ type: [QueuedEmbeddingJobSummaryDto] })
+  jobs!: QueuedEmbeddingJobSummaryDto[];
+}
+
 // ---------------------------------------------------------------------------
 // UC-59-05 · Ejecutar job: chunking + embedding + upsert
 // ---------------------------------------------------------------------------
@@ -645,14 +675,19 @@ export class EmbeddedDocumentDto {
 /** Cuerpo de `POST /vector-rag/embedding-jobs/{id}/run` (UC-59-05). */
 export class RunEmbeddingJobDto {
   /**
-   * Valor de documents mantenido por la instancia.
+   * Documentos ya troceados y embebidos por el proveedor real. Ausente u
+   * omitido cuando `failed=true`: el propio worker no calcula embeddings
+   * (ver `EmbeddingPipelineService`), así que sin un proveedor conectado no
+   * hay nada que enviar aquí — inventar un vector sería peor que declarar el
+   * fallo.
    */
-  @ApiProperty({ type: [EmbeddedDocumentDto] })
+  @ApiPropertyOptional({ type: [EmbeddedDocumentDto] })
+  @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => EmbeddedDocumentDto)
-  documents!: EmbeddedDocumentDto[];
+  documents?: EmbeddedDocumentDto[];
 
   /**
    * Valor de final batch mantenido por la instancia.
@@ -664,6 +699,26 @@ export class RunEmbeddingJobDto {
   @IsOptional()
   @IsBoolean()
   finalBatch?: boolean;
+
+  /**
+   * El proveedor de embeddings no pudo calcular este lote (p. ej. no está
+   * configurado). Sin `documents`; el job pasa a `failed` sin tocar el corpus.
+   */
+  @ApiPropertyOptional({
+    description: 'El lote falló antes de calcular ningún embedding',
+  })
+  @IsOptional()
+  @IsBoolean()
+  failed?: boolean;
+
+  /**
+   * Motivo del fallo, para diagnóstico (p. ej. `PROVIDER_NOT_CONFIGURED`).
+   */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  errorCode?: string;
 }
 
 /**

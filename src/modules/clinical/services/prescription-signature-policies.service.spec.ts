@@ -31,7 +31,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PrescriptionSignaturePoliciesService(
     em as any,
-    repo as any,
+    repo,
     logger as any,
   );
   return { service, em, repo };

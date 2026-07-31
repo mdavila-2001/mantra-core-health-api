@@ -55,9 +55,33 @@ function build() {
     findChargeItemsByCase: mockFn(),
     findChargeItemsForUpdate: mockFn(),
   };
+  const credentialsRepo = {
+    // Por defecto, toda credencial es vigente; los tests que prueban el bloqueo
+    // por credencial vencida lo sobreescriben a false.
+    hasCurrentCredential: mockFn().mockResolvedValue(true),
+  };
+  const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
+  const outbox = {
+    publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new PeriopCasesService(em as any, casesRepo, logger as any);
-  return { service, tx, casesRepo, logger };
+  const service = new PeriopCasesService(
+    em as any,
+    casesRepo,
+    credentialsRepo as any,
+    auditTrail as any,
+    outbox as any,
+    logger as any,
+  );
+  return {
+    service,
+    tx,
+    casesRepo,
+    credentialsRepo,
+    auditTrail,
+    outbox,
+    logger,
+  };
 }
 
 /**
@@ -496,11 +520,13 @@ describe('PeriopCasesService', () => {
       d.casesRepo.findTeamByCase.mockResolvedValue([
         {
           id: 'm-1',
+          practitionerProfileId: 'prac-1',
           teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
           statusConceptId: CONCEPTS.TEAM_ACCEPTED,
         },
         {
           id: 'm-2',
+          practitionerProfileId: 'prac-2',
           teamRoleConceptId: CONCEPTS.TEAM_ROLE_ANESTHESIOLOGIST,
           statusConceptId: CONCEPTS.TEAM_ACCEPTED,
         },
@@ -516,9 +542,17 @@ describe('PeriopCasesService', () => {
         CONCEPTS.CASE_READY_FOR_SURGERY,
       );
       expect(d.casesRepo.createStatusHistory).toHaveBeenCalled();
+      // Verifica la credencial real de cada miembro con rol acreditado.
+      expect(d.credentialsRepo.hasCurrentCredential).toHaveBeenCalledTimes(2);
+      // CAN-AUDIT-001: sella la confirmación en la cadena WORM.
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+        expect.objectContaining({ action: 'PERIOP_CASE_CONFIRMED' }),
+      );
     });
 
-    it('blocks confirmation when a member has no current credential (fail-closed)', async () => {
+    it('blocks confirmation when a member is assigned but not accepted (fail-closed)', async () => {
       const d = build();
       d.casesRepo.findCaseForUpdate.mockResolvedValue({
         id: CASE,
@@ -528,8 +562,9 @@ describe('PeriopCasesService', () => {
       d.casesRepo.findTeamByCase.mockResolvedValue([
         {
           id: 'm-1',
+          practitionerProfileId: 'prac-1',
           teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
-          // Assigned but not accepted/verified: credential not current.
+          // Assigned but not accepted: credential not current.
           statusConceptId: CONCEPTS.TEAM_ASSIGNED,
         },
       ]);
@@ -539,6 +574,42 @@ describe('PeriopCasesService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
       expect(d.logger.warn).toHaveBeenCalled();
+      // CAN-INT-002: notifica el bloqueo al responsable/organización (outbox).
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          eventType: 'periop.case.confirmation_blocked',
+        }),
+      );
+    });
+
+    it('blocks confirmation when an accepted member has an expired/suspended credential (real vigency, fail-closed)', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        primarySurgeonProfileId: SURGEON,
+      });
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          id: 'm-1',
+          practitionerProfileId: 'prac-1',
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+          // Accepted, but the authoritative credential is NOT current.
+          statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        },
+      ]);
+      d.credentialsRepo.hasCurrentCredential.mockResolvedValue(false);
+
+      await expect(
+        d.service.confirmCase(CASE, actor as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.credentialsRepo.hasCurrentCredential).toHaveBeenCalledWith(
+        d.tx,
+        'prac-1',
+        expect.any(Date),
+      );
+      expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
     });
 
     it('refuses to confirm a case that is not in a confirmable state', async () => {

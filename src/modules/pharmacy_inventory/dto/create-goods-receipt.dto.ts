@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -84,6 +84,7 @@ export class GoodsReceiptLineDto {
 }
 
 /** Cuerpo de `POST /pharmacy/:pharmacyId/goods-receipts` (UC-25-02). */
+@ApiSchema({ name: 'PharmacyInventoryCreateGoodsReceiptDto' })
 export class CreateGoodsReceiptDto {
   /**
    * Identificador asociado a pharmacy purchase order.

@@ -85,3 +85,5 @@ CLAUDE.md
 # Salidas del smoke test (artefactos generados)
 /output.smoke.test.json
 /output.smoke.test.csv
+site/
+dist-docs/

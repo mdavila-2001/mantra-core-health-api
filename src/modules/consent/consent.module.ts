@@ -32,6 +32,8 @@ import {
   ProcessingLegalBasesRepository,
   TreatmentInformedConsentsRepository,
 } from './repositories';
+import { ClinicalAccessGrantsRepository } from '../authz/repositories';
+import { AuditModule } from '../audit/audit.module';
 
 /**
  * Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence):
@@ -40,7 +42,7 @@ import {
  * de tratamiento, evidencia inmutable y barrido de expiraciones.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuditModule],
   controllers: [
     ConsentsController,
     HipaaAuthorizationsController,
@@ -62,6 +64,9 @@ import {
     PrivacyRestrictionsRepository,
     ProcessingLegalBasesRepository,
     TreatmentInformedConsentsRepository,
+    // Repositorio de authz reutilizado para propagar la revocación de consent a
+    // los accesos clínicos que se apoyaban en él (C-20).
+    ClinicalAccessGrantsRepository,
     // Servicios
     ConsentsService,
     HipaaAuthorizationsService,

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsIn,
   IsOptional,
@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /integration/contracts/{id}/auth-profiles/{apId}/rotate` (UC-31-11). */
+@ApiSchema({ name: 'IntegrationContractsRotateCredentialDto' })
 export class RotateCredentialDto {
   /**
    * Valor de credential secret reference mantenido por la instancia.

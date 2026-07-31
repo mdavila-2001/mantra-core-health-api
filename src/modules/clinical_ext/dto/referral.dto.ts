@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsIn,
   IsISO8601,
@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /referrals` (UC-18-07). */
+@ApiSchema({ name: 'ClinicalExtCreateReferralDto' })
 export class CreateReferralDto {
   /**
    * Identificador asociado a patient profile.

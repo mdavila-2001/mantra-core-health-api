@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   EmbeddingPipelineService,
   RetrievalService,
@@ -17,6 +24,7 @@ import {
 import {
   RunEmbeddingJobDto,
   RunEmbeddingJobResponseDto,
+  PendingEmbeddingJobsResponseDto,
   OpenRetrievalSessionDto,
   RetrievalSessionResponseDto,
   RankCandidatesDto,
@@ -51,6 +59,19 @@ export class VectorRuntimeController {
     private readonly retrievalService: RetrievalService,
     private readonly maintenanceService: VectorMaintenanceService,
   ) {}
+
+  /**
+   * Descubrimiento del worker de embeddings: `run` exige un `jobId` puntual y
+   * no había forma de listar qué jobs en cola ejecutar.
+   */
+  @Get('embedding-jobs/pending')
+  @Roles('SYSTEM', 'EMBEDDING_WORKER', 'PLATFORM_ADMIN')
+  @ApiOperation({ summary: 'Listar jobs de embedding en cola' })
+  listQueuedJobs(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PendingEmbeddingJobsResponseDto> {
+    return this.pipelineService.listQueuedJobs(limit);
+  }
 
   /** UC-59-05. */
   @Post('embedding-jobs/:id/run')

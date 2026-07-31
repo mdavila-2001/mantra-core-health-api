@@ -14,6 +14,7 @@ import {
   ScheduleRemindersDto,
   ScheduleRemindersResponseDto,
   WorkerBatchResultDto,
+  WaitlistCandidateSlotsResponseDto,
 } from '../dto';
 
 const DEFAULT_WORKER_BATCH = 100;
@@ -123,6 +124,24 @@ export class SchedulingWaitlistService {
         detail: 'Candidatos notificados; la reserva la confirma el paciente',
       };
     });
+  }
+
+  /**
+   * UC-41-12 (descubrimiento del worker): slots con cupo libre cuyo recurso
+   * tiene candidatos activos en la lista de espera. `promoteWaitlist` exige un
+   * `slotId` puntual y no devuelve ids, así que el worker necesita esta
+   * consulta para saber qué slot promover en cada tick.
+   */
+  async findSlotsWithCandidates(
+    limit = DEFAULT_WORKER_BATCH,
+  ): Promise<WaitlistCandidateSlotsResponseDto> {
+    const slotIds = await this.bookingsRepo.findSlotsWithWaitlistCandidates(
+      this.em,
+      CONCEPTS.WAITLIST_ACTIVE,
+      limit,
+      new Date(),
+    );
+    return { slotIds };
   }
 
   /** UC-41-13: programa recordatorios adicionales para una cita. */

@@ -11,6 +11,7 @@ import {
   OutboxRepository,
   QueuesRepository,
   NotificationsRepository,
+  DeliveryStatusTransitionsRepository,
 } from './repositories';
 
 /**
@@ -34,6 +35,7 @@ import {
     OutboxRepository,
     QueuesRepository,
     NotificationsRepository,
+    DeliveryStatusTransitionsRepository,
     OutboxService,
     QueuesService,
     NotificationsService,

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsOptional,
   IsString,
@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /practices/{practiceId}/sites` (UC-14-01). */
+@ApiSchema({ name: 'PracticeCreateSiteDto' })
 export class CreateSiteDto {
   /**
    * Valor de code mantenido por la instancia.

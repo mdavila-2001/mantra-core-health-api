@@ -1455,3 +1455,27 @@ export class RevokeReleaseResponseDto {
   @ApiProperty({ description: 'Verdadero si el release ya estaba cerrado' })
   alreadyClosed!: boolean;
 }
+
+/** Una solicitud de release vencida, tal como la necesita el worker para llamar `revoke`. */
+export class ExpiredReleaseSummaryDto {
+  /**
+   * Identificador asociado a request.
+   */
+  @ApiProperty({ format: 'uuid' })
+  requestId!: string;
+
+  /**
+   * Fecha y hora en que venció el manifiesto.
+   */
+  @ApiProperty({ format: 'date-time' })
+  expiresAt!: Date;
+}
+
+/** Respuesta de `GET /research/dataset-releases/expired` (descubrimiento del worker). */
+export class PendingExpiredReleasesResponseDto {
+  /**
+   * Valor de releases mantenido por la instancia.
+   */
+  @ApiProperty({ type: [ExpiredReleaseSummaryDto] })
+  releases!: ExpiredReleaseSummaryDto[];
+}

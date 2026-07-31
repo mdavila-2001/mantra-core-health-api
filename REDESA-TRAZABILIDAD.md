@@ -57,5 +57,7 @@ Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de neg
 ## Guardrails de CI (criterios de rechazo §9)
 
 `yarn redesa:guardrails` (bloqueante): `HARD_DELETE_RESTRICTED_DATA`, `GENERIC_CRUD_ON_IMMUTABLE`,
-`UNSCOPED_MUTATION`, `CASCADE_ON_RESTRICTED`. `yarn redesa:coverage` (informe): `ORPHAN_TABLE`,
-`ORPHAN_ENDPOINT`, `DIRECT_CROSS_DOMAIN_ACCESS`. Ver `REDESA-COBERTURA.md`.
+`UNSCOPED_MUTATION`, `CASCADE_ON_RESTRICTED`, `TENANT_SCOPE_MISSING` (2026-07-30: listado/conteo
+sobre entidad con `tenant_id` sin acotar por tenant ni por id de principal/recurso puntual — ver
+`ESTADO-Y-PENDIENTES.md`). `yarn redesa:coverage` (informe): `ORPHAN_TABLE`, `ORPHAN_ENDPOINT`,
+`DIRECT_CROSS_DOMAIN_ACCESS`. Ver `REDESA-COBERTURA.md`.

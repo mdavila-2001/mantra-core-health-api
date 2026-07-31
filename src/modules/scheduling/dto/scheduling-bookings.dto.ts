@@ -394,3 +394,19 @@ export class WorkerBatchDto {
   @Min(1)
   limit?: number;
 }
+
+/**
+ * Respuesta del descubrimiento de candidatos de promoción (UC-41-12): slots
+ * con cupo libre cuyo recurso tiene lista de espera activa.
+ */
+export class WaitlistCandidateSlotsResponseDto {
+  /**
+   * Valor de slot ids mantenido por la instancia.
+   */
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Slots candidatos a promoción, del más próximo al más lejano',
+  })
+  slotIds!: string[];
+}

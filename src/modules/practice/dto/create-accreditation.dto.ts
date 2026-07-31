@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsDateString,
   IsOptional,
@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /practices/{practiceId}/accreditations` (UC-14-02). */
+@ApiSchema({ name: 'PracticeCreateAccreditationDto' })
 export class CreateAccreditationDto {
   /**
    * Identificador asociado a practice site.

@@ -13,6 +13,8 @@ import {
   ConsentProvisionsRepository,
   ConsentEventsRepository,
 } from '../repositories';
+import { ClinicalAccessGrantsRepository } from '../../authz/repositories';
+import { AuditTrailService } from '../../audit/services';
 import { CONS } from '../consent.concepts';
 import {
   AmendProvisionsDto,
@@ -48,6 +50,8 @@ export class ConsentsService {
     private readonly consentsRepo: ConsentsRepository,
     private readonly provisionsRepo: ConsentProvisionsRepository,
     private readonly eventsRepo: ConsentEventsRepository,
+    private readonly clinicalGrantsRepo: ClinicalAccessGrantsRepository,
+    private readonly auditTrail: AuditTrailService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ConsentsService.name);
@@ -165,6 +169,35 @@ export class ConsentsService {
         reasonConceptId: dto.withdrawalReasonConceptId,
         recordedByUserId: actor.id,
       });
+
+      // C-20: la revocación PROPAGA a los accesos clínicos que se apoyaban en este
+      // consentimiento. Sin esto, retirar el consentimiento no invalidaba el grant
+      // y el PDP seguía concediendo acceso. No borra accesos ya realizados (el
+      // data_access_log es WORM); solo cierra los grants vigentes.
+      const revokedGrants = await this.clinicalGrantsRepo.revokeForConsent(
+        tx,
+        consent.id,
+        actor.id,
+        now,
+      );
+      await tx.flush();
+
+      // CAN-AUDIT-001: sella el retiro en la cadena WORM (mutación sensible).
+      await this.auditTrail.record(tx, actor, {
+        action: 'CONSENT_WITHDRAWN',
+        entity: 'consent',
+        entityId: consent.id,
+        tenantId: consent.tenantId,
+      });
+
+      this.logger.info(
+        {
+          operation: 'consent.consent.withdraw',
+          consentId: consent.id,
+          revokedGrants,
+        },
+        'Consent withdrawn; dependent clinical access grants revoked',
+      );
 
       return { ok: true };
     });

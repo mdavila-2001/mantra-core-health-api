@@ -19,6 +19,8 @@ export {
   RedriveResponseDto,
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
+  PendingNotificationRequestDto,
+  PendingNotificationsResponseDto,
   DeliverNotificationDto,
   DeliverNotificationResponseDto,
   ProviderReceiptDto,

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { CronTime } from 'cron';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
@@ -9,7 +10,8 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { QaCatalogRepository } from '../repositories';
+import { QaCatalogRepository, QaRunsRepository } from '../repositories';
+import { TestSchedules } from '../entities';
 import {
   CreateEnvironmentDto,
   EnvironmentResponseDto,
@@ -19,6 +21,9 @@ import {
   PublishSuiteResponseDto,
   CreateTestScheduleDto,
   TestScheduleResponseDto,
+  RunDueSchedulesDto,
+  DueScheduleRunResultDto,
+  RunDueSchedulesResponseDto,
   type EnvironmentKind,
   type CaseType,
   type AssertionType,
@@ -71,6 +76,19 @@ export const CONCURRENCY_CONCEPT: Readonly<
 };
 
 /**
+ * Estados en los que una corrida está viva y compite por el entorno. Mismo
+ * criterio que `QaRunsService` para la política `FORBID`; se repite aquí en
+ * vez de importarlo para no crear un ciclo entre los dos servicios.
+ */
+const RUN_IN_PROGRESS_STATES: readonly string[] = [
+  CONCEPTS.RUN_QUEUED,
+  CONCEPTS.RUN_STATUS_RUNNING,
+];
+
+/** Zona horaria por defecto cuando la programación no declara la suya. */
+const DEFAULT_SCHEDULE_TIMEZONE = 'UTC';
+
+/**
  * Catálogo de pruebas: entornos, casos con aserciones, publicación de suite y
  * programaciones (UC-36-01, 02, 03, 11).
  */
@@ -81,11 +99,15 @@ export class QaCatalogService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param runsRepo - Valor de runs repo requerido por la operación (sólo
+   *   para el tick de programaciones: encolar la corrida y comprobar
+   *   concurrencia vive en `QaRunsRepository`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly catalogRepo: QaCatalogRepository,
+    private readonly runsRepo: QaRunsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(QaCatalogService.name);
@@ -393,6 +415,236 @@ export class QaCatalogService {
         nextRunAt: nextRunAt.toISOString(),
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       };
+    });
+  }
+
+  /**
+   * Tick de disparo programado (Fase 2 del plan de corrección de workers):
+   * cierra el "Disparo programado" que el README documenta como pendiente.
+   * `test_schedules` guarda cron y `next_run_at`, pero nada evaluaba si ya
+   * estaba vencido ni disparaba la corrida — este método es exactamente eso,
+   * y lo llama el worker por `POST /internal/qa/schedules/run-due`.
+   *
+   * Reclama el lote con `SKIP LOCKED` y, para cada programación, encola la
+   * corrida si la suite y el entorno siguen aptos y la política de
+   * concurrencia lo permite. `next_run_at` se avanza siempre (haya o no
+   * corrida), para que una marca que no pudo dispararse no deje al tick
+   * reintentando el mismo instante para siempre.
+   */
+  async runDueSchedules(
+    dto: RunDueSchedulesDto,
+    actor: AuthenticatedUser,
+  ): Promise<RunDueSchedulesResponseDto> {
+    const now = new Date();
+    const limit = dto.limit ?? 20;
+
+    this.logger.info(
+      { operation: 'qa.schedule.run-due', limit },
+      'Evaluating due test schedules',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const due = await this.catalogRepo.claimDueSchedules(
+        tx,
+        now,
+        CONCEPTS.STATE_ACTIVE,
+        limit,
+      );
+
+      const results: DueScheduleRunResultDto[] = [];
+      let queued = 0;
+
+      for (const schedule of due) {
+        const result = await this.runDueSchedule(tx, schedule, now, actor);
+        if (result.runId) queued += 1;
+        results.push(result);
+      }
+
+      if (due.length > 0) {
+        this.logger.info(
+          {
+            operation: 'qa.schedule.run-due',
+            claimed: due.length,
+            queued,
+            skipped: due.length - queued,
+          },
+          'Due test schedules evaluated',
+        );
+      }
+
+      return {
+        claimed: due.length,
+        queued,
+        skipped: due.length - queued,
+        results,
+      };
+    });
+  }
+
+  /**
+   * Evalúa una única programación vencida: intenta encolar la corrida y
+   * siempre calcula y asienta la próxima marca.
+   */
+  private async runDueSchedule(
+    tx: EntityManager,
+    schedule: TestSchedules,
+    now: Date,
+    actor: AuthenticatedUser,
+  ): Promise<DueScheduleRunResultDto> {
+    let runId: string | undefined;
+    let runNumber: string | undefined;
+    let skippedReason: string | undefined;
+
+    const suite = await this.catalogRepo.findSuiteById(tx, schedule.suiteId);
+    const environment = await this.catalogRepo.findEnvironmentById(
+      tx,
+      schedule.environmentId,
+    );
+
+    if (!suite || suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE) {
+      skippedReason = 'SUITE_NOT_ACTIVE';
+    } else if (
+      !environment ||
+      environment.stateConceptId !== CONCEPTS.STATE_ACTIVE
+    ) {
+      skippedReason = 'ENVIRONMENT_NOT_ACTIVE';
+    } else {
+      const policy =
+        this.policyNameOf(schedule.concurrencyPolicyConceptId) ?? 'FORBID';
+      if (policy === 'FORBID') {
+        const running = await this.runsRepo.findRunsInProgress(
+          tx,
+          schedule.suiteId,
+          [...RUN_IN_PROGRESS_STATES],
+        );
+        if (running.length > 0) skippedReason = 'SUITE_ALREADY_RUNNING';
+      }
+
+      if (!skippedReason) {
+        const totalCases = await this.catalogRepo.countActiveCases(
+          tx,
+          schedule.suiteId,
+          CONCEPTS.CASE_ACTIVE,
+        );
+        if (totalCases === 0) {
+          skippedReason = 'NO_ACTIVE_CASES';
+        } else {
+          runNumber = await this.nextRunNumber(
+            tx,
+            schedule.suiteId,
+            suite.code,
+          );
+          const run = this.runsRepo.createRun(tx, {
+            suiteId: schedule.suiteId,
+            environmentId: schedule.environmentId,
+            tenantId: schedule.tenantId,
+            runNumber,
+            triggerConceptId: CONCEPTS.QA_TRIGGER_SCHEDULED,
+            triggeredByUserId: actor.id,
+            totalCases,
+            statusConceptId: CONCEPTS.RUN_QUEUED,
+            actorUserId: actor.id,
+          });
+          runId = run.id;
+        }
+      }
+    }
+
+    // Se ancla en la marca vencida (`schedule.nextRunAt`), no en `now`: si el
+    // tick corre tarde, avanzar desde el reloj actual iría corriendo la
+    // cadencia del cron hacia adelante en cada pasada en vez de mantenerla fija.
+    const nextRunAt = this.computeNextRunAt(
+      schedule,
+      schedule.nextRunAt ?? now,
+    );
+    if (nextRunAt) {
+      schedule.nextRunAt = nextRunAt;
+    } else {
+      // El esquema permite `cron_expression` nulo, pero `POST /qa/schedules`
+      // siempre lo exige; si de todos modos falta (dato heredado, por
+      // ejemplo), no hay marca que calcular. Deshabilitar la programación es
+      // más seguro que dejarla vencida para siempre: sin una migración que
+      // añada una columna nueva, no hay otra forma de que el tick deje de
+      // reencontrarla en cada pasada.
+      schedule.isEnabled = false;
+      skippedReason ??= 'NO_CRON_EXPRESSION';
+    }
+    if (runId) {
+      schedule.lastRunId = runId;
+      schedule.lastRunAt = now;
+    }
+    touch(schedule, actor.id);
+
+    if (skippedReason) {
+      this.logger.warn(
+        {
+          operation: 'qa.schedule.run-due',
+          scheduleId: schedule.id,
+          reason: skippedReason,
+        },
+        'Scheduled test run skipped',
+      );
+    }
+
+    return {
+      scheduleId: schedule.id,
+      runId,
+      runNumber,
+      nextRunAt: nextRunAt?.toISOString(),
+      skippedReason,
+    };
+  }
+
+  /**
+   * Próxima marca del cron a partir de la marca vencida. `cron` valida y
+   * calcula; el resultado llega en `DateTime` de luxon (dependencia que este
+   * repo ya usa) y se convierte a `Date` nativo para la entidad.
+   */
+  private computeNextRunAt(
+    schedule: TestSchedules,
+    from: Date,
+  ): Date | undefined {
+    if (!schedule.cronExpression) return undefined;
+    const timezone = schedule.timezone ?? DEFAULT_SCHEDULE_TIMEZONE;
+    const cronTime = new CronTime(schedule.cronExpression, timezone);
+    // `getNextDateFrom` sin segundo argumento deriva la zona de `from` (la del
+    // proceso, si `from` es un `Date` nativo) en vez de la zona con la que se
+    // construyó `CronTime` — hay que pasarla explícita también aquí, o la
+    // marca calculada queda corrida por el offset entre ambas zonas.
+    return cronTime.getNextDateFrom(from, timezone).toJSDate();
+  }
+
+  /** Nombre de la política a partir de su concepto, inverso de `CONCURRENCY_CONCEPT`. */
+  private policyNameOf(
+    conceptId?: string,
+  ): 'ALLOW' | 'FORBID' | 'QUEUE' | undefined {
+    if (!conceptId) return undefined;
+    return (
+      Object.keys(CONCURRENCY_CONCEPT) as Array<'ALLOW' | 'FORBID' | 'QUEUE'>
+    ).find((name) => CONCURRENCY_CONCEPT[name] === conceptId);
+  }
+
+  /**
+   * Número de corrida secuencial por suite. Mismo criterio que
+   * `QaRunsService.nextRunNumber`, repetido aquí en vez de importado para no
+   * cruzar la frontera de servicios sólo por esta utilidad.
+   */
+  private async nextRunNumber(
+    tx: EntityManager,
+    suiteId: string,
+    suiteCode: string,
+  ): Promise<string> {
+    const last = await this.runsRepo.findLastRun(tx, suiteId);
+    const lastSequence = last
+      ? Number(last.runNumber.split('-').pop() ?? '0')
+      : 0;
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      const candidate = `${suiteCode}-${String(lastSequence + attempt).padStart(5, '0')}`;
+      if (!(await this.runsRepo.findRunByNumber(tx, candidate)))
+        return candidate;
+    }
+    throw new ConflictException('No se pudo asignar número de corrida', {
+      suiteId,
     });
   }
 }

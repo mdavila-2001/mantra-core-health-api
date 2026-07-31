@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -186,11 +186,20 @@ export class OutboxService {
       aggregateId: input.aggregateId,
       payloadJson: input.payloadJson,
       metadataJson: input.metadataJson,
-      correlationId: input.correlationId,
+      // La columna es NOT NULL: sin un correlation id de un flujo mayor que
+      // propagar (p. ej. el de la petición HTTP que originó el cambio), el
+      // evento es su propia correlación — nunca dejar la inserción sin valor.
+      correlationId: input.correlationId ?? randomUUID(),
       causationId: input.causationId,
       occurredAt: input.occurredAt,
       recordedByUserId: input.actorUserId,
     });
+    // `domain_event_id` es un uuid plano (no una relación de MikroORM), así
+    // que el ORM no sabe que el outbox message depende del evento y puede
+    // intentar insertarlos en el orden equivocado dentro del mismo flush.
+    // Flush explícito para que el evento ya exista en la fila antes de crear
+    // el mensaje que lo referencia por FK.
+    await tx.flush();
 
     const message = this.outboxRepo.createOutboxMessage(tx, {
       tenantId: input.tenantId,
@@ -339,6 +348,7 @@ export class OutboxService {
         event.eventType,
         event.eventVersion,
         CONCEPTS.STATE_ACTIVE,
+        event.tenantId,
       );
 
       const deliveries: DispatchedSubscriberDto[] = [];

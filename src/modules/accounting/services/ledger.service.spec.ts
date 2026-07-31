@@ -66,14 +66,16 @@ function build() {
     }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const service = new LedgerService(
     em as any,
     journalRepo,
     accountsRepo as any,
     fiscalRepo as any,
+    auditTrail as any,
     logger as any,
   );
-  return { service, tx, em, journalRepo, accountsRepo, fiscalRepo };
+  return { service, tx, em, journalRepo, accountsRepo, fiscalRepo, auditTrail };
 }
 
 describe('LedgerService', () => {

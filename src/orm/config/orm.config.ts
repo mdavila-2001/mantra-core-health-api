@@ -3,6 +3,7 @@ import { defineConfig } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { loadOrmEnv, type OrmEnv } from './orm.env';
 import { createOrmLoggerFactory } from '../observability/orm.logger';
+import { HistoryMirrorSubscriber } from '../subscribers/history-mirror.subscriber';
 
 /**
  * Configuración de runtime de MikroORM para la capa relacional PostgreSQL.
@@ -110,6 +111,10 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
       createForeignKeyConstraints: false,
       disableForeignKeys: false,
     },
+
+    // Espejo de versionado (REDESA §2): puebla `audit.<tabla>_history` en cada
+    // flush para todo agregado con tabla de historial, dentro de su transacción.
+    subscribers: [new HistoryMirrorSubscriber()],
 
     // `debug` activa el volcado de cada consulta; el logger propio decide luego
     // qué nivel usar y qué registrar siempre (las consultas lentas).

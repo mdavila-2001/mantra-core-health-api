@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsIn,
@@ -15,6 +15,7 @@ export type AccountType =
 export type NormalBalance = 'DEBIT' | 'CREDIT';
 
 /** Cuerpo de `POST /accounting/accounts` (soporte del plan de cuentas). */
+@ApiSchema({ name: 'AccountingCreateAccountDto' })
 export class CreateAccountDto {
   /**
    * Identificador asociado a practice.

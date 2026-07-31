@@ -49,7 +49,7 @@ describe('FormsAssignmentsService', () => {
       d.assignmentsRepo.createAssignment.mockReturnValue({ id: 'as1' });
 
       const res = await d.service.createAssignment(
-        { fieldId: 'f1', targetResourceConceptId: 'rt-1' },
+        { fieldId: 'f1', targetResourceConceptId: 'rt-1', tenantId: 'tenant-a' },
         actor,
       );
 
@@ -68,11 +68,38 @@ describe('FormsAssignmentsService', () => {
 
       await expect(
         d.service.createAssignment(
-          { fieldId: 'f1', targetResourceConceptId: 'rt-1' } as any,
+          {
+            fieldId: 'f1',
+            targetResourceConceptId: 'rt-1',
+            tenantId: 'tenant-a',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.assignmentsRepo.createAssignment).not.toHaveBeenCalled();
+    });
+
+    it('only counts the budget against the assignment tenant, not others sharing the same target', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldById.mockResolvedValue({ id: 'f1' });
+      d.assignmentsRepo.findActivePolicy.mockResolvedValue({
+        maximumFields: 1,
+      });
+      d.assignmentsRepo.countActiveAssignments.mockResolvedValue(0);
+      d.assignmentsRepo.createSection.mockReturnValue({ id: 'sec1' });
+      d.assignmentsRepo.createAssignment.mockReturnValue({ id: 'as1' });
+
+      await d.service.createAssignment(
+        { fieldId: 'f1', targetResourceConceptId: 'rt-1', tenantId: 'tenant-a' },
+        actor,
+      );
+
+      expect(d.assignmentsRepo.countActiveAssignments).toHaveBeenCalledWith(
+        d.tx,
+        'rt-1',
+        expect.any(String),
+        'tenant-a',
+      );
     });
 
     it('throws when the field does not exist', async () => {

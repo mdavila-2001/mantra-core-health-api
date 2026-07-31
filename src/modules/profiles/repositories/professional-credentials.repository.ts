@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { ProfessionalCredentials } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
+
+/** Estados de credencial que la acreditan como VIGENTE (verificada/activa). */
+const CURRENT_CREDENTIAL_STATES: readonly string[] = [
+  CONCEPTS.STATE_VERIFIED,
+  CONCEPTS.STATE_ACTIVE,
+];
 
 /** Datos de una credencial profesional. */
 export interface CreateCredentialData {
@@ -76,6 +82,26 @@ export class ProfessionalCredentialsRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * ¿Tiene el profesional al menos una credencial VIGENTE en este instante?
+   * Fuente autoritativa de C-14/CAN-INT-002: la credencial debe estar en estado
+   * verificado/activo (no suspendida ni no verificada) y no expirada
+   * (`expiry_date` nula o futura). Reemplaza al proxy de "estado del miembro del
+   * equipo" que no detectaba una credencial vencida/suspendida.
+   */
+  async hasCurrentCredential(
+    em: EntityManager,
+    practitionerProfileId: string,
+    now: Date,
+  ): Promise<boolean> {
+    const count = await em.count(ProfessionalCredentials, {
+      practitionerProfileId,
+      stateConceptId: { $in: [...CURRENT_CREDENTIAL_STATES] },
+      $or: [{ expiryDate: null }, { expiryDate: { $gte: now } }],
+    });
+    return count > 0;
   }
 
   /**

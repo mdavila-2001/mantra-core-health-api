@@ -15,6 +15,12 @@ export type {
   CreateCancellationData,
 } from './payment-transactions.repository';
 export { PaymentOperationsRepository } from './payment-operations.repository';
+export { PaymentsWalletsRepository } from './payments-wallets.repository';
+export { PaymentsSubscriptionPlansRepository } from './payments-subscription-plans.repository';
+export type {
+  FindOrCreateWalletData,
+  CreateWalletLedgerEntryData,
+} from './payments-wallets.repository';
 export type {
   CreateFeeScheduleData,
   CreateSettlementData,

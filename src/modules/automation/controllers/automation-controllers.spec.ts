@@ -130,6 +130,7 @@ describe('AutomationOrchestrationController', () => {
       requestApproval: mockFn(async () => ({ id: ID })),
       decideApproval: mockFn(async () => ({ id: ID })),
       finalizeWorkflowRun: mockFn(async () => ({ id: ID })),
+      evaluateCalendarTriggers: mockFn(async () => ({ scanned: 0 })),
     };
     const recordService = {
       executeRecordAutomation: mockFn(async () => ({ written: true })),
@@ -162,6 +163,18 @@ describe('AutomationOrchestrationController', () => {
     await d.controller.configureTrigger(dto, actor);
 
     expect(d.definitionService.configureTrigger).toHaveBeenCalledWith(
+      dto,
+      actor,
+    );
+  });
+
+  it('delega la evaluación de disparadores de calendario (worker, UC-48-07)', async () => {
+    const d = build();
+    const dto = { batchSize: 25 } as any;
+
+    await d.controller.evaluateCalendarTriggers(dto, actor);
+
+    expect(d.executionService.evaluateCalendarTriggers).toHaveBeenCalledWith(
       dto,
       actor,
     );

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { OutboundMessages } from '../entities';
 import { createdBy } from '../../../common';
@@ -69,6 +70,24 @@ export class OutboundMessagesRepository {
     return em.findOne(OutboundMessages, { id });
   }
 
+  /**
+   * Igual que `findById` pero con `FOR UPDATE`: `dispatch()` decide si hacer
+   * la llamada saliente real según `statusConceptId`, y dos ticks del worker
+   * que se solapan (el mismo mensaje `QUEUED` descubierto dos veces antes de
+   * que el primer despacho confirme) no deben poder pasar la comprobación a
+   * la vez y despachar el mismo mensaje al proveedor externo dos veces.
+   */
+  findByIdForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<OutboundMessages | null> {
+    return em.findOne(
+      OutboundMessages,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
   /** Idempotencia del productor: misma idempotency_key -> misma fila. */
   findByIdempotencyKey(
     em: EntityManager,
@@ -127,6 +146,47 @@ export class OutboundMessagesRepository {
       OutboundMessages,
       { connectionId, statusConceptId: queuedStateConceptId },
       { statusConceptId: heldStateConceptId },
+    );
+  }
+
+  /**
+   * Descubrimiento para el worker de despacho (Fase 5 del plan de corrección
+   * de workers, UC-12-06): mensajes `QUEUED` cuyo `scheduled_at` ya se
+   * cumplió, del más antiguo al más nuevo. Lectura simple (sin lock): el
+   * propio `dispatch()` valida de nuevo el estado `QUEUED` antes de despachar,
+   * así que una carrera entre dos workers sólo hace que el segundo reciba una
+   * `PreconditionFailedException` inofensiva.
+   */
+  findQueuedForDispatch(
+    em: EntityManager,
+    queuedStatusConceptId: string,
+    now: Date,
+    limit: number,
+  ): Promise<OutboundMessages[]> {
+    return em.find(
+      OutboundMessages,
+      {
+        statusConceptId: queuedStatusConceptId,
+        scheduledAt: { $lte: now },
+      },
+      { orderBy: { scheduledAt: 'ASC' }, limit },
+    );
+  }
+
+  /**
+   * Descubrimiento para el worker de reintentos (Fase 5, UC-12-07/08):
+   * mensajes `FAILED` candidatos a un nuevo intento o a dead-letter, del más
+   * antiguo al más nuevo.
+   */
+  findFailed(
+    em: EntityManager,
+    failedStatusConceptId: string,
+    limit: number,
+  ): Promise<OutboundMessages[]> {
+    return em.find(
+      OutboundMessages,
+      { statusConceptId: failedStatusConceptId },
+      { orderBy: { updatedAt: 'ASC' }, limit },
     );
   }
 }

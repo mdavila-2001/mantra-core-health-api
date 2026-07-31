@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { AuditModule } from '../audit/audit.module';
 import {
   ClinicalEncountersController,
   ClinicalObservationsController,
@@ -43,7 +44,7 @@ import {
  * medicación, procedimiento, inmunización y cierre de encuentro).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuditModule],
   controllers: [
     ClinicalEncountersController,
     ClinicalObservationsController,

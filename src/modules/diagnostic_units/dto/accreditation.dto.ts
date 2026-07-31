@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /diagnostic-units/{id}/accreditations` (UC-23-11). */
+@ApiSchema({ name: 'DiagnosticUnitsCreateAccreditationDto' })
 export class CreateAccreditationDto {
   /**
    * Identificador asociado a accreditation concept.

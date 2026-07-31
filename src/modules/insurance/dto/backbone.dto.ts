@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsNumberString,
@@ -47,6 +47,7 @@ export class CreateCarrierDto {
 }
 
 /** Alta de producto de aseguradora. */
+@ApiSchema({ name: 'InsuranceCreateProductDto' })
 export class CreateProductDto {
   /**
    * Valor de product code mantenido por la instancia.
@@ -275,6 +276,7 @@ export class CreateBrokerAgreementDto {
 }
 
 /** UC-26-01: alta de membresía de prestador en una red. */
+@ApiSchema({ name: 'InsuranceCreateMembershipDto' })
 export class CreateMembershipDto {
   /**
    * Identificador asociado a provider entity.

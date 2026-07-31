@@ -1,0 +1,58 @@
+# Gobierno automático del contrato OpenAPI. Fase 7 del plan de documentación.
+# `openapi/openapi.yaml` se genera con `yarn docs:openapi:generate` desde los
+# decoradores @nestjs/swagger reales del código — este archivo evita que se
+# degrade con cambios futuros sin gobierno.
+apis:
+  redesa-health@v1:
+    root: openapi/openapi.yaml
+
+extends:
+  - recommended
+
+rules:
+  operation-operationId: error
+  operation-operationId-unique: error
+  operation-2xx-response: error
+  operation-4xx-response: warn
+  operation-description: warn
+  operation-summary: error
+  operation-tag-defined: error
+  tags-alphabetical: off # 60+ módulos; orden temático > alfabético
+  # 2 colisiones reales y ya existentes en las rutas de `delegated_access` y
+  # `read_models` (un segmento literal coincide con el nombre de un parámetro
+  # de otra ruta hermana). Backend real, Express las resuelve por orden de
+  # registro sin ambigüedad práctica; rediseñar las rutas es un cambio de
+  # comportamiento de API fuera del alcance de esta iniciativa documental.
+  # Registrado y aceptado en docs/governance/traceability-matrix.md (ARCH-004).
+  no-ambiguous-paths: warn
+  no-identical-paths: error
+  no-path-trailing-slash: error
+  path-declaration-must-exist: error
+  path-not-include-query: error
+  path-params-defined: error
+  security-defined: error
+  # El único server documentado es el de desarrollo local (`localhost:3000`,
+  # ver src/main.ts). No hay URL de producción/staging real para declarar sin
+  # inventarla — se documenta la ausencia en docs/api/conventions.md en vez de
+  # fabricar un servidor que no existe.
+  no-server-example.com: off
+  no-server-trailing-slash: error
+  info-contact: off # sin propietario técnico único definido aún (ver GOV-002)
+  info-license: off # API interna, sin licencia pública
+  no-unused-components: warn
+  spec-strict-refs: off
+
+  # Reglas propias sobre el modelo de error de dominio real (ver
+  # docs/api/error-model.md) — no genérico, deriva de
+  # src/common/errors/domain.exception.ts.
+  component-name-unique: error
+
+decorators:
+  remove-x-internal: off
+
+theme:
+  openapi:
+    generateCodeSamples:
+      languages:
+        - lang: curl
+        - lang: JavaScript

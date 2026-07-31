@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { CronTime } from 'cron';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
@@ -29,6 +30,8 @@ import {
   DecideApprovalResponseDto,
   FinalizeWorkflowRunDto,
   FinalizeWorkflowRunResponseDto,
+  EvaluateCalendarTriggersDto,
+  EvaluateCalendarTriggersResponseDto,
 } from '../dto';
 
 /** Estados en los que un `workflow_run` sigue ocupando su contexto. */
@@ -43,6 +46,12 @@ const OPEN_AGENT_RUN_STATUSES = [
   CONCEPTS.AUTO_AGENT_RUN_RUNNING,
   CONCEPTS.AUTO_AGENT_RUN_PAUSED,
 ];
+
+/** Disparadores de calendario a evaluar por tick si el llamante no fija otro. */
+const DEFAULT_CALENDAR_TICK_BATCH = 50;
+
+/** Zona horaria con la que se interpreta el cron cuando el disparador no declara una. */
+const DEFAULT_TRIGGER_TIME_ZONE = 'UTC';
 
 /**
  * Compara dos importes decimales sin pasar por coma flotante. Escala los dos a
@@ -774,6 +783,170 @@ export class AutomationExecutionService {
         totalCostAmount: totalCost,
         closedAgentRuns,
         alreadyFinalized: false,
+      };
+    });
+  }
+
+  /**
+   * Worker · UC-48-07 (evaluación periódica): dispara los disparadores de
+   * calendario vencidos, arrancando un `workflow_run` por cada uno.
+   *
+   * `automation/README.md` deja esto explícitamente pendiente ("Suscripción
+   * real del disparador al bus ... y registro del cron en el planificador
+   * ... la suscripción es el worker"): hasta ahora ningún proceso evaluaba
+   * `schedule_cron`.
+   *
+   * `automation_triggers` no declara una columna `next_run_at` (a diferencia
+   * de `report_schedules`, que sí la tiene) ni una zona horaria propia. En
+   * vez de añadir columnas nuevas, se reutiliza `updated_at` como referencia
+   * de la última vez que se evaluó el cron del disparador —el mismo recurso
+   * que `findRecordAutomationForUpdate` ya documenta para
+   * `record_automations` ("su `updated_at` es la métrica de último uso")— y
+   * se interpreta siempre en UTC. Al disparar (o al saltar un disparador cuyo
+   * workflow ya no está activo), `updated_at` avanza a la marca exacta que
+   * tocaba —no a "ahora"— para que el cálculo siguiente quede alineado a la
+   * grilla del cron en vez de derivar con la duración de cada tick.
+   *
+   * Toma el lote con `FOR UPDATE SKIP LOCKED` (mismo patrón que
+   * `ReportingRunsService.schedulerTick`): varios ticks solapados no deben
+   * disparar dos veces la misma marca.
+   */
+  async evaluateCalendarTriggers(
+    dto: EvaluateCalendarTriggersDto,
+    actor: AuthenticatedUser,
+  ): Promise<EvaluateCalendarTriggersResponseDto> {
+    const now = new Date();
+
+    return this.em.transactional(async (tx) => {
+      const candidates = await this.governanceRepo.findEnabledCalendarTriggers(
+        tx,
+        CONCEPTS.AUTO_TRIGGER_TYPE_SCHEDULE,
+        CONCEPTS.AUTO_TRIGGER_ACTIVE,
+        dto.batchSize ?? DEFAULT_CALENDAR_TICK_BATCH,
+      );
+
+      const firedTriggers: Array<{
+        /** Identificador asociado a trigger. */
+        triggerId: string;
+        /** Identificador asociado a workflow run. */
+        workflowRunId: string;
+        /** Valor de fired at mantenido por la instancia. */
+        firedAt: string;
+      }> = [];
+      let skipped = 0;
+
+      for (const trigger of candidates) {
+        if (!trigger.scheduleCron) {
+          skipped += 1;
+          continue;
+        }
+
+        let nextFireAt: Date;
+        try {
+          // `getNextDateFrom` sin segundo argumento deriva la zona horaria de
+          // `trigger.updatedAt` (la del proceso, tratándose de un `Date`
+          // nativo) en vez de la zona con la que se construyó `CronTime` — se
+          // pasa explícita también aquí para que no quede corrida por el
+          // offset entre ambas zonas.
+          nextFireAt = new CronTime(
+            trigger.scheduleCron,
+            DEFAULT_TRIGGER_TIME_ZONE,
+          )
+            .getNextDateFrom(trigger.updatedAt, DEFAULT_TRIGGER_TIME_ZONE)
+            .toJSDate();
+        } catch (error) {
+          // `assertCron` ya valida cinco campos al configurar el disparador;
+          // esto sólo cubre una expresión que pasó esa validación estructural
+          // pero que el intérprete del cron rechaza en semántica.
+          this.logger.warn(
+            {
+              operation: 'automation.trigger.calendar-tick',
+              triggerId: trigger.id,
+              err: error,
+            },
+            'No se pudo calcular la próxima marca del disparador; se salta sin avanzarlo',
+          );
+          skipped += 1;
+          continue;
+        }
+
+        if (nextFireAt.getTime() > now.getTime()) {
+          skipped += 1;
+          continue;
+        }
+
+        const workflow = await this.governanceRepo.findWorkflowById(
+          tx,
+          trigger.workflowId,
+        );
+        if (
+          !workflow ||
+          workflow.stateConceptId === CONCEPTS.AUTO_WORKFLOW_ARCHIVED
+        ) {
+          // El workflow ya no está en marcha: la marca se consume igual, si no
+          // este disparador se reevaluaría en cada tick para siempre (mismo
+          // criterio que `ReportingRunsService.schedulerTick` con una
+          // definición que dejó de estar activa).
+          touch(trigger, actor.id, nextFireAt);
+          skipped += 1;
+          continue;
+        }
+
+        const previousRuns = await this.runsRepo.countRunsByWorkflow(
+          tx,
+          workflow.id,
+        );
+        const run = this.runsRepo.createWorkflowRun(tx, {
+          workflowId: workflow.id,
+          triggerId: trigger.id,
+          tenantId: trigger.tenantId ?? workflow.tenantId,
+          runNumber: `${workflow.code}-${previousRuns + 1}`,
+          triggerSourceConceptId: CONCEPTS.AUTO_SOURCE_SCHEDULE,
+          statusConceptId: CONCEPTS.AUTO_RUN_RUNNING,
+          startedAt: now,
+          actorUserId: actor.id,
+        });
+
+        touch(trigger, actor.id, nextFireAt);
+
+        await this.outbox.publishDomainEvent(tx, {
+          tenantId: run.tenantId,
+          eventType: 'WorkflowRunStarted',
+          aggregateType: 'automation.workflow_runs',
+          aggregateId: run.id,
+          payloadJson: {
+            workflowId: workflow.id,
+            runNumber: run.runNumber,
+            triggerId: trigger.id,
+            contextRefId: null,
+          },
+          actorUserId: actor.id,
+        });
+
+        firedTriggers.push({
+          triggerId: trigger.id,
+          workflowRunId: run.id,
+          firedAt: nextFireAt.toISOString(),
+        });
+      }
+
+      if (firedTriggers.length > 0) {
+        this.logger.info(
+          {
+            operation: 'automation.trigger.calendar-tick',
+            scanned: candidates.length,
+            fired: firedTriggers.length,
+            skipped,
+          },
+          'Disparadores de calendario evaluados',
+        );
+      }
+
+      return {
+        scanned: candidates.length,
+        fired: firedTriggers.length,
+        skipped,
+        firedTriggers,
       };
     });
   }

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -318,6 +318,7 @@ export class CourseResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /education/courses/{id}/versions/publish` (UC-47-02). */
+@ApiSchema({ name: 'EducationPublishVersionDto' })
 export class PublishVersionDto {
   /**
    * Valor de changelog mantenido por la instancia.
@@ -1213,6 +1214,7 @@ export class CmeCreditResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /education/courses/{id}/reviews` (UC-47-13). */
+@ApiSchema({ name: 'EducationCreateReviewDto' })
 export class CreateReviewDto {
   /**
    * Valor de rating mantenido por la instancia.

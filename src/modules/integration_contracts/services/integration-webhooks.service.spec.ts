@@ -51,7 +51,7 @@ function build() {
     subscriptionsRepo as any,
     exchangeRecordsRepo as any,
     evidenceRepo,
-    http as any,
+    http,
     logger as any,
   );
   return {
@@ -231,7 +231,7 @@ describe('IntegrationWebhooksService', () => {
         errorText: 'HTTP 500',
       });
 
-      const res = await d.service.deliver('s1', {} as any, actor);
+      const res = await d.service.deliver('s1', {}, actor);
 
       expect(res.outcome).toBe(ICON.DELIVERY_FAILED);
       expect(d.evidenceRepo.create).toHaveBeenCalledWith(

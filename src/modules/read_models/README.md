@@ -16,12 +16,12 @@ orden y acciones), aplican masking heredado y derivan las acciones en servidor.
 | UC-30-04 | `POST /read-models/:definitionId/backfill` | `SECURITY_ADMIN` | Backfill inicial (FULL) de la MV |
 | UC-30-05 | `GET /portals/:portalCode/routes/:routeCode/views/:viewCode/data` | autenticado | Servir el read model (masking + cursor + staleness) |
 | UC-30-06 | `POST /read-models/:definitionId/invalidate` | `SECURITY_ADMIN` | Invalidar y recomputar tras cambio upstream |
-| UC-30-07 | `POST /read-models/:definitionId/reconcile` | `SECURITY_ADMIN` | Reconciliar la MV divergente (result REPAIRED) |
+| UC-30-07 | `POST /read-models/:definitionId/reconcile` | `SECURITY_ADMIN`, `SYSTEM` | Reconciliar la MV divergente (result REPAIRED) |
 | UC-30-08 | `POST /read-models/definitions/:schema/:object/versions` | `SECURITY_ADMIN` | Nueva versión N+1 en DRAFT (anterior sigue ACTIVE) |
 | UC-30-09 | `PUT /views/:frontendPageViewId/preferences` | autenticado | Preferencias de vista (validadas contra el allow-list) |
 | UC-30-10 | `GET /public/directory`, `GET /public/:slug` | `@Public()` | Proyecciones públicas (sin PHI, sin sesión) |
 | UC-30-11 | `GET /portals/:portalCode/routes/:routeCode/views/:viewCode/actions` | autenticado | Derivar available_actions_json (estado + permiso) |
-| UC-30-12 | `GET /read-models/health` | `SECURITY_ADMIN` | Detectar staleness/degradación de las MV |
+| UC-30-12 | `GET /read-models/health` | `SECURITY_ADMIN`, `SYSTEM` | Detectar staleness/degradación de las MV |
 | UC-30-13 | `POST /read-models/definitions/:id/deprecate`, `DELETE /read-models/definitions/:id` | `SECURITY_ADMIN` | Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK) |
 
 ## Entidades
@@ -46,6 +46,10 @@ orden y acciones), aplican masking heredado y derivan las acciones en servidor.
   el estado genérico `ACTIVE` reutiliza `CONCEPTS.STATE_ACTIVE` transversal.
 - Auth: guard global; endpoints admin `@Roles('SECURITY_ADMIN')`; datos/acciones/
   preferencias con usuario autenticado; proyecciones públicas `@Public()`.
+  `health` (UC-30-12) y `reconcile` (UC-30-07) suman `SYSTEM` al rol humano:
+  el worker de reconciliación (Fase 4 del plan de corrección de workers)
+  descubre definiciones `stale` por el primero y actúa con el segundo — mismo
+  patrón que `GRAPH_PROJECTION_WORKER`/`EMBEDDING_WORKER` en otros módulos.
 - Logs Pino estructurados (`operation`, ids); sin secretos ni PHI.
 - Tests: unit specs de servicios y controladores (`*.spec.ts`) y smoke transversal
   en `test/smoke/modules/read_models.smoke.ts` (`READ_MODELS_SMOKE`).

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -557,6 +557,7 @@ export class IdentifierResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /health-data/canonical-resources/{id}/relationships` (UC-52-05). */
+@ApiSchema({ name: 'HealthDataCreateRelationshipDto' })
 export class CreateRelationshipDto {
   /**
    * Identificador asociado a target resource.

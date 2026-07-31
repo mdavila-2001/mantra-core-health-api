@@ -42,7 +42,7 @@ export class PharmacyInventoryInternalController {
 
   /** UC-25-05: liberar reservas expiradas. */
   @Post('reservations/expire')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Liberar reservas vencidas (UC-25-05)' })
   expireReservations(

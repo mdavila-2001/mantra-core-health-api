@@ -139,6 +139,18 @@ export class MedicationRequests {
   })
   issuedAt?: Date;
 
+  /**
+   * Clave de idempotencia de la EMISIÓN (CAN §6). Un reintento de `issue` con la
+   * misma clave devuelve la receta ya emitida (replay) sin re-emitir. Nula si se
+   * emitió sin clave. UNIQUE parcial (donde no es nula) en la migración.
+   */
+  @Property({
+    fieldName: 'issue_idempotency_key',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  issueIdempotencyKey?: string;
+
   // --- Firma de receta (REDESA D-05 / CAN-RX, aditivo, fail-safe) -------------
   // La receta no traía columnas de firma; se añaden nullable. Una receta sin
   // firmar tiene ambas en NULL. La emisión solo las exige cuando una política

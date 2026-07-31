@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -1984,6 +1984,7 @@ export class ExperimentResponseDto {
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /ads/automated-rules/{id}/evaluate` (UC-43-11). */
+@ApiSchema({ name: 'AdsEvaluateRuleDto' })
 export class EvaluateRuleDto {
   /**
    * Valor de matched entity ids mantenido por la instancia.

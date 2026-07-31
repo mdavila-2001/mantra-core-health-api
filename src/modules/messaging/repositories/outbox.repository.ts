@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { createdBy } from '../../../common';
 import {
   DomainEvents,
   OutboxMessages,
@@ -173,6 +174,7 @@ export class OutboxRepository {
         availableAt: new Date(),
         attempts: 0,
         maxAttempts: data.maxAttempts,
+        ...createdBy(data.actorUserId),
       },
       { partial: true },
     );
@@ -229,18 +231,28 @@ export class OutboxRepository {
 
   // --- Suscripciones y entregas (UC-35-03, 04) ---
 
-  /** Suscripciones vivas que casan con el tipo y la versión del evento. */
+  /**
+   * Suscripciones vivas que casan con el tipo y la versión del evento.
+   *
+   * `tenant_id` es nullable en `event_subscriptions`: una suscripción sin
+   * tenant es un consumidor de plataforma (analítica, auditoría) que quiere
+   * TODOS los eventos de ese tipo; una con tenant sólo debe recibir eventos
+   * de ese mismo tenant. Sin este filtro, el webhook de un tenant recibía
+   * los eventos de cualquier otro tenant que compartiera `eventType`.
+   */
   findActiveSubscriptions(
     em: EntityManager,
     eventType: string,
     eventVersion: number,
     activeStateConceptId: string,
+    eventTenantId: string | undefined,
   ): Promise<EventSubscriptions[]> {
     return em.find(EventSubscriptions, {
       eventType,
       eventVersion,
       isActive: true,
       stateConceptId: activeStateConceptId,
+      $or: [{ tenantId: null }, { tenantId: eventTenantId ?? null }],
     });
   }
 

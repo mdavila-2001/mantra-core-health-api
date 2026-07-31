@@ -31,15 +31,29 @@ function build() {
   };
   const btgRepo = { create: mockFn() };
   const dataAccessLogRepo = { record: mockFn() };
+  const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
+  const outbox = {
+    publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuthzClinicalService(
     em as any,
     grantsRepo as any,
     btgRepo,
     dataAccessLogRepo as any,
+    auditTrail as any,
+    outbox as any,
     logger as any,
   );
-  return { service, tx, grantsRepo, btgRepo, dataAccessLogRepo };
+  return {
+    service,
+    tx,
+    grantsRepo,
+    btgRepo,
+    dataAccessLogRepo,
+    auditTrail,
+    outbox,
+  };
 }
 
 const future = new Date(Date.now() + 3_600_000);
@@ -145,6 +159,17 @@ describe('AuthzClinicalService', () => {
         }),
       );
       expect(d.tx.flush).toHaveBeenCalledTimes(2);
+      // CAN-EMERG-001: notificación posterior al paciente vía outbox transaccional.
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ eventType: 'authz.break_glass.activated' }),
+      );
+      // CAN-AUDIT-001: sellado en la cadena WORM.
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+        expect.objectContaining({ action: 'BREAK_GLASS_ACTIVATED' }),
+      );
     });
   });
 

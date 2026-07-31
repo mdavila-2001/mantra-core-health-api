@@ -22,6 +22,9 @@ function build() {
     retry: mockFn(),
     deadLetter: mockFn(),
     correlate: mockFn(),
+    listQueuedForDispatch: mockFn(),
+    listFailedForRetry: mockFn(),
+    listReceivedForCorrelation: mockFn(),
   };
   const controller = new IntegrationsMessagesController(
     messagingService as any,
@@ -64,5 +67,33 @@ describe('IntegrationsMessagesController', () => {
     const d = build();
     await d.controller.correlate('i1', actor);
     expect(d.messagingService.correlate).toHaveBeenCalledWith('i1', actor);
+  });
+
+  it('delegates listPendingDispatch with a parsed limit (Fase 5)', async () => {
+    const d = build();
+    await d.controller.listPendingDispatch(10);
+    expect(d.messagingService.listQueuedForDispatch).toHaveBeenCalledWith(10);
+  });
+
+  it('delegates listPendingDispatch without a limit', async () => {
+    const d = build();
+    await d.controller.listPendingDispatch();
+    expect(d.messagingService.listQueuedForDispatch).toHaveBeenCalledWith(
+      undefined,
+    );
+  });
+
+  it('delegates listPendingRetry with a parsed limit (Fase 5)', async () => {
+    const d = build();
+    await d.controller.listPendingRetry(20);
+    expect(d.messagingService.listFailedForRetry).toHaveBeenCalledWith(20);
+  });
+
+  it('delegates listPendingCorrelation with a parsed limit (Fase 5)', async () => {
+    const d = build();
+    await d.controller.listPendingCorrelation(30);
+    expect(d.messagingService.listReceivedForCorrelation).toHaveBeenCalledWith(
+      30,
+    );
   });
 });

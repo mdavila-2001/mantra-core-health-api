@@ -20,6 +20,9 @@ export {
   TriageDefectResponseDto,
   CreateTestScheduleDto,
   TestScheduleResponseDto,
+  RunDueSchedulesDto,
+  DueScheduleRunResultDto,
+  RunDueSchedulesResponseDto,
   LinkReleaseDto,
   LinkReleaseResponseDto,
 } from './qa-lab.dto';

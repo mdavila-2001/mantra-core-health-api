@@ -13,3 +13,4 @@ export type {
   CreateImplantData,
   CreateOperativeReportData,
 } from './periop-intraop.repository';
+export { PeriopInstrumentsRepository } from './periop-instruments.repository';

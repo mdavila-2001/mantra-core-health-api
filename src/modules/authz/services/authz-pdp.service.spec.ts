@@ -143,6 +143,26 @@ describe('AuthzPdpService', () => {
       expect(res.decision).toBe('DENY');
     });
 
+    it('DENY: a role ALLOW alone does not grant access to a patient without clinical scope (CAN-AUTH-001/UNSCOPED_ACCESS)', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'role-1', validFrom: null, validTo: null },
+      ]);
+      d.rolePermsRepo.findActiveForRoles.mockResolvedValue([
+        { permissionId: 'perm-1', effectConceptId: AUTHZ.EFFECT_ALLOW },
+      ]);
+      // Sin grant clínico, ni relación asistencial, ni representación legal.
+      const res = await d.service.evaluate(
+        { ...baseDto, patientProfileId: 'pat-1', purposeOfUse: 'TREATMENT' },
+        actor,
+      );
+      expect(res.decision).toBe('DENY');
+      expect(res.reason).toContain('sin alcance clínico');
+    });
+
     it('resolves role inheritance through parent_role_id', async () => {
       const d = build();
       d.permissionsRepo.findByResourceAction.mockResolvedValue({

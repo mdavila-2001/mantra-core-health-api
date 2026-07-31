@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../common';
@@ -13,7 +15,11 @@ import {
   SchedulingBookingsService,
   SchedulingWaitlistService,
 } from '../services';
-import { WorkerBatchDto, WorkerBatchResultDto } from '../dto';
+import {
+  WorkerBatchDto,
+  WorkerBatchResultDto,
+  WaitlistCandidateSlotsResponseDto,
+} from '../dto';
 
 /**
  * Endpoints internos que dispara el scheduler, no la interfaz de usuario.
@@ -39,7 +45,7 @@ export class SchedulingInternalController {
 
   /** UC-41-07. */
   @Post('expire-holds')
-  @Roles('SYSTEM_WORKER')
+  @Roles('SYSTEM', 'SYSTEM_WORKER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Liberar las reservas temporales vencidas',
@@ -50,9 +56,26 @@ export class SchedulingInternalController {
     return this.bookingsService.expireHolds(dto.limit);
   }
 
+  /**
+   * UC-41-12 (descubrimiento). `promote-waitlist/:slotId` exige un slot
+   * puntual y `expire-holds` no devuelve ids, así que este endpoint es lo que
+   * le permite al worker saber qué slot promover en cada tick.
+   */
+  @Get('waitlist-candidates')
+  @Roles('SYSTEM', 'SYSTEM_WORKER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar slots con cupo libre y candidatos activos en espera',
+  })
+  listWaitlistCandidates(
+    @Query() query: WorkerBatchDto,
+  ): Promise<WaitlistCandidateSlotsResponseDto> {
+    return this.waitlistService.findSlotsWithCandidates(query.limit);
+  }
+
   /** UC-41-12. */
   @Post('promote-waitlist/:slotId')
-  @Roles('SYSTEM_WORKER')
+  @Roles('SYSTEM', 'SYSTEM_WORKER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Promover candidatos de la lista de espera a un slot con cupo',
@@ -67,7 +90,7 @@ export class SchedulingInternalController {
 
   /** UC-41-14. */
   @Post('dispatch-reminders')
-  @Roles('SYSTEM_WORKER')
+  @Roles('SYSTEM', 'SYSTEM_WORKER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Despachar los recordatorios cuya hora ya llegó' })
   dispatchReminders(

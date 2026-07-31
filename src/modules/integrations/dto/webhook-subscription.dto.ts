@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
   IsOptional,
   IsString,
@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 
 /** Cuerpo de `POST /integrations/providers/{id}/webhook-subscriptions` (UC-12-11). */
+@ApiSchema({ name: 'IntegrationsCreateWebhookSubscriptionDto' })
 export class CreateWebhookSubscriptionDto {
   /**
    * Identificador asociado a tenant.

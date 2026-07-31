@@ -64,7 +64,7 @@ describe('SearchIndexService', () => {
       });
       const res = await service.ensureIndex(INDEX);
       expect(res.created).toBe(true);
-      const arg = (client.indices.create as any).mock.calls[0][0];
+      const arg = client.indices.create.mock.calls[0][0];
       expect(arg.index).toBe(INDEX);
       expect(arg.body.mappings.properties.tenantId).toEqual({
         type: 'keyword',
@@ -86,7 +86,7 @@ describe('SearchIndexService', () => {
         displayName: 'Dr. X',
         tenantId: TENANT_B, // intento de suplantar tenant
       });
-      const arg = (client.index as any).mock.calls[0][0];
+      const arg = client.index.mock.calls[0][0];
       expect(arg.index).toBe(INDEX);
       expect(arg.id).toBe('d1');
       expect(arg.body.tenantId).toBe(TENANT_A);
@@ -105,7 +105,7 @@ describe('SearchIndexService', () => {
     it('inyecta SIEMPRE el filtro term { tenantId } en el bool query', async () => {
       const { service, client } = build();
       await service.search(INDEX, { tenantId: TENANT_A, query: 'cardio' });
-      const body = (client.search as any).mock.calls[0][0].body;
+      const body = client.search.mock.calls[0][0].body;
       expect(body.query.bool.filter).toContainEqual({
         term: { tenantId: TENANT_A },
       });
@@ -118,7 +118,7 @@ describe('SearchIndexService', () => {
     it('usa match_all cuando no hay texto', async () => {
       const { service, client } = build();
       await service.search(INDEX, { tenantId: TENANT_A });
-      const body = (client.search as any).mock.calls[0][0].body;
+      const body = client.search.mock.calls[0][0].body;
       expect(body.query.bool.must[0]).toEqual({ match_all: {} });
     });
 
@@ -129,7 +129,7 @@ describe('SearchIndexService', () => {
         filters: [{ field: 'city', values: ['lima'] }],
         facets: ['city'],
       });
-      const body = (client.search as any).mock.calls[0][0].body;
+      const body = client.search.mock.calls[0][0].body;
       expect(body.query.bool.filter).toContainEqual({
         terms: { city: ['lima'] },
       });
@@ -188,7 +188,7 @@ describe('SearchIndexService', () => {
       const res = await service.deleteByQuery(INDEX, TENANT_A, [
         { field: 'status', values: ['inactive'] },
       ]);
-      const body = (client.deleteByQuery as any).mock.calls[0][0].body;
+      const body = client.deleteByQuery.mock.calls[0][0].body;
       expect(body.query.bool.filter[0]).toEqual({
         term: { tenantId: TENANT_A },
       });

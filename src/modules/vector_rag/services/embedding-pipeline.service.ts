@@ -21,7 +21,10 @@ import {
   RunEmbeddingJobResponseDto,
   ReEmbedCollectionDto,
   ReEmbedResponseDto,
+  PendingEmbeddingJobsResponseDto,
 } from '../dto';
+
+const DEFAULT_PENDING_JOBS_BATCH = 50;
 
 /**
  * Pipeline de embeddings (UC-59-04, 05, 11): encolar el trabajo, ejecutarlo por
@@ -200,12 +203,39 @@ export class EmbeddingPipelineService {
 
       job.status = 'running';
 
+      // Sin proveedor de embeddings real conectado, el worker no puede
+      // calcular nada: se declara el fallo (terminal, requiere intervención)
+      // en vez de reintentar en bucle contra un proveedor que nunca va a
+      // aparecer, o peor, inventar un vector.
+      if (dto.failed === true) {
+        job.status = 'failed';
+        job.completedAt = new Date();
+
+        this.logger.error(
+          {
+            operation: 'vector.job.run',
+            jobId,
+            errorCode: dto.errorCode,
+          },
+          'Embedding job failed: no provider computed embeddings for this batch',
+        );
+
+        return {
+          jobId: job.id,
+          status: job.status,
+          documentsUpserted: 0,
+          chunksCreated: 0,
+          embeddingsCreated: 0,
+          chunksSkipped: 0,
+        };
+      }
+
       let documentsUpserted = 0;
       let chunksCreated = 0;
       let embeddingsCreated = 0;
       let chunksSkipped = 0;
 
-      for (const input of dto.documents) {
+      for (const input of dto.documents ?? []) {
         // Una colección sin PHI no puede recibir un documento marcado con datos de
         // paciente: la política de acceso de la colección no está pensada para eso.
         if (input.containsPhi === true && !collection.containsPhi) {
@@ -463,6 +493,27 @@ export class EmbeddingPipelineService {
         supersededEmbeddings,
       };
     });
+  }
+
+  /**
+   * UC-59-05 (descubrimiento del worker): jobs en cola listos para `run`. Cruza
+   * todos los tenants (barrido `SYSTEM`); ver `VectorCatalogRepository.findQueuedJobs`.
+   */
+  async listQueuedJobs(
+    limit = DEFAULT_PENDING_JOBS_BATCH,
+  ): Promise<PendingEmbeddingJobsResponseDto> {
+    const jobs = await this.catalogRepo.findQueuedJobs(
+      this.em,
+      'queued',
+      limit,
+    );
+    return {
+      jobs: jobs.map((job) => ({
+        id: job.id,
+        vectorCollectionId: job.vectorCollectionId,
+        jobType: job.jobType,
+      })),
+    };
   }
 
   /**

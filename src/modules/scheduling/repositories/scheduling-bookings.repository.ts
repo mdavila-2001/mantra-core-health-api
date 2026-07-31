@@ -11,38 +11,7 @@ import {
   AppointmentReminders,
   type CancellationPolicySnapshot,
 } from '../entities';
-import { AppointmentBookingsHistory } from '../../audit/entities/appointment_bookings_history.entity';
 import { createdBy } from '../../../common';
-
-/**
- * Describe el contrato estructural de booking history data.
- */
-export interface BookingHistoryData {
-  /**
-   * Identificador asociado a appointment booking.
-   */
-  appointmentBookingId: string;
-  /**
-   * Valor de revision no mantenido por la instancia.
-   */
-  revisionNo: number;
-  /**
-   * Identificador asociado a operation concept.
-   */
-  operationConceptId: string;
-  /**
-   * Valor de data snapshot mantenido por la instancia.
-   */
-  dataSnapshot: unknown;
-  /**
-   * Identificador asociado a changed by user.
-   */
-  changedByUserId?: string;
-  /**
-   * Identificador asociado a change reason concept.
-   */
-  changeReasonConceptId?: string;
-}
 
 /**
  * Describe el contrato estructural de create hold data.
@@ -538,31 +507,6 @@ export class SchedulingBookingsRepository {
     );
   }
 
-  /**
-   * Registra una transición de estado de la cita en el historial existente
-   * (`audit.appointment_bookings_history`, append-only). Es lo que deja constancia
-   * de cada cambio de estado gobernado por la máquina de estados (C-10).
-   */
-  recordBookingHistory(
-    em: EntityManager,
-    data: BookingHistoryData,
-  ): AppointmentBookingsHistory {
-    return em.create(
-      AppointmentBookingsHistory,
-      {
-        appointmentBookingId: data.appointmentBookingId,
-        revisionNo: data.revisionNo,
-        operationConceptId: data.operationConceptId,
-        validFrom: new Date(),
-        dataSnapshot: data.dataSnapshot,
-        changedByUserId: data.changedByUserId,
-        changeReasonConceptId: data.changeReasonConceptId,
-        recordedAt: new Date(),
-      },
-      { partial: true },
-    );
-  }
-
   /** Recordatorios cuya hora ya llegó y siguen pendientes de envío. */
   findDueReminders(
     em: EntityManager,
@@ -575,5 +519,48 @@ export class SchedulingBookingsRepository {
       { statusConceptId: scheduledStatusConceptId, scheduledAt: { $lte: now } },
       { limit },
     );
+  }
+
+  /**
+   * Descubrimiento para el worker de UC-41-12: `promoteWaitlist` recibe un
+   * `slotId` puntual y su resultado no trae ids, así que no hay forma de saber
+   * qué slot promover sin esta consulta. Un slot es candidato cuando le queda
+   * cupo libre y su recurso tiene al menos una entrada activa en la lista de
+   * espera; se resuelve en dos pasos con `em.find` (sin SQL crudo) porque
+   * `WaitlistEntries` no referencia el slot, sólo el recurso.
+   */
+  async findSlotsWithWaitlistCandidates(
+    em: EntityManager,
+    activeWaitlistStatusConceptId: string,
+    limit: number,
+    now: Date,
+  ): Promise<string[]> {
+    const entries = await em.find(
+      WaitlistEntries,
+      {
+        statusConceptId: activeWaitlistStatusConceptId,
+        resourceId: { $ne: null },
+      },
+      { limit: limit * 20 },
+    );
+    const resourceIds = [
+      ...new Set(
+        entries
+          .map((entry) => entry.resourceId)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    if (resourceIds.length === 0) return [];
+
+    const slots = await em.find(
+      BookableSlots,
+      {
+        resourceId: { $in: resourceIds },
+        remainingCapacity: { $gt: 0 },
+        startAt: { $gt: now },
+      },
+      { orderBy: { startAt: 'ASC' }, limit },
+    );
+    return slots.map((slot) => slot.id);
   }
 }

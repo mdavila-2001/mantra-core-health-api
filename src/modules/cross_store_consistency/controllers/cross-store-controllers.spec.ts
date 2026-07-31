@@ -155,6 +155,8 @@ describe('CrossStoreWorkerController', () => {
       expandDeletion: mockFn(async () => ({ deletionRequestId: ID })),
       executeDeletion: mockFn(async () => ({ id: ID })),
       verifyDeletion: mockFn(async () => ({ id: ID })),
+      listPendingTargets: mockFn(async () => ({ targets: [] })),
+      listExecutedTargets: mockFn(async () => ({ targets: [] })),
     };
     const maintenanceService = {
       invalidateCache: mockFn(async () => ({ id: ID })),
@@ -206,6 +208,32 @@ describe('CrossStoreWorkerController', () => {
       dto,
       actor,
     );
+  });
+
+  it('delega el listado de objetivos pendientes (descubrimiento Fase 4)', async () => {
+    const d = build();
+
+    await d.controller.listPendingDeletionTargets(5);
+
+    expect(d.deletionService.listPendingTargets).toHaveBeenCalledWith(5);
+  });
+
+  it('el listado de objetivos pendientes usa el límite por omisión sin query', async () => {
+    const d = build();
+
+    await d.controller.listPendingDeletionTargets();
+
+    expect(d.deletionService.listPendingTargets).toHaveBeenCalledWith(
+      undefined,
+    );
+  });
+
+  it('delega el listado de objetivos ejecutados (descubrimiento Fase 4)', async () => {
+    const d = build();
+
+    await d.controller.listExecutedDeletionTargets(3);
+
+    expect(d.deletionService.listExecutedTargets).toHaveBeenCalledWith(3);
   });
 
   it('delega la ejecución con el id de objetivo (UC-62-10)', async () => {
