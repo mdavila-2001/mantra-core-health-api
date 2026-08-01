@@ -148,7 +148,8 @@ describe('ProfilesPractitionersService', () => {
           'c1',
           {
             decision: 'VERIFIED',
-            verificationSourceUri: 'https://colegiomedico.example/registro/LIC-12345',
+            verificationSourceUri:
+              'https://colegiomedico.example/registro/LIC-12345',
           } as any,
           actor,
         ),
@@ -159,7 +160,11 @@ describe('ProfilesPractitionersService', () => {
       const d = build();
 
       await expect(
-        d.service.verifyCredential('c1', { decision: 'VERIFIED' } as any, actor),
+        d.service.verifyCredential(
+          'c1',
+          { decision: 'VERIFIED' } as any,
+          actor,
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       // Falla ANTES de tocar la base: no es una precondición de estado, es que
       // la petición en sí no es una verificación.
@@ -215,7 +220,8 @@ describe('ProfilesPractitionersService', () => {
         'c1',
         {
           decision: 'VERIFIED',
-          verificationSourceUri: 'https://colegiomedico.example/registro/LIC-12345',
+          verificationSourceUri:
+            'https://colegiomedico.example/registro/LIC-12345',
         } as any,
         actor,
       );
@@ -224,7 +230,8 @@ describe('ProfilesPractitionersService', () => {
       // La fuente queda persistida: es el rastro que permite auditar después
       // si la habilitación era legítima.
       expect(credential).toMatchObject({
-        verificationSourceUri: 'https://colegiomedico.example/registro/LIC-12345',
+        verificationSourceUri:
+          'https://colegiomedico.example/registro/LIC-12345',
         verifiedByUserId: actor.id,
       });
       expect(practitioner.verificationStatusConceptId).toBe(

@@ -1,4 +1,7 @@
-import { assertMockProviderNotInProduction, workerEnvSchema } from './worker.env';
+import {
+  assertMockProviderNotInProduction,
+  workerEnvSchema,
+} from './worker.env';
 
 /**
  * Guardarraíl del emulador de proveedores.
@@ -73,10 +76,9 @@ describe('workerEnvSchema · default de MOCK_PROVIDER_BASE_URL', () => {
 
   it('apunta al emulador local fuera de producción', () => {
     process.env.NODE_ENV = 'development';
-    const { value } = workerEnvSchema.validate(
-      {},
-      { allowUnknown: true },
-    ) as { value: Record<string, unknown> };
+    const { value } = workerEnvSchema.validate({}, { allowUnknown: true }) as {
+      value: Record<string, unknown>;
+    };
 
     expect(value.MOCK_PROVIDER_BASE_URL).toBe('http://127.0.0.1:4100');
   });
@@ -87,10 +89,9 @@ describe('workerEnvSchema · default de MOCK_PROVIDER_BASE_URL', () => {
     // haría que la comprobación de producción nunca viera la variable vacía y
     // el proceso abortara en todo despliegue productivo.
     process.env.NODE_ENV = 'production';
-    const { value } = workerEnvSchema.validate(
-      {},
-      { allowUnknown: true },
-    ) as { value: Record<string, unknown> };
+    const { value } = workerEnvSchema.validate({}, { allowUnknown: true }) as {
+      value: Record<string, unknown>;
+    };
 
     expect(value.MOCK_PROVIDER_BASE_URL).toBe('');
   });
