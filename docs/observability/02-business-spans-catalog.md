@@ -31,7 +31,7 @@ nada. Los cinco spans de este catálogo cumplen al menos uno de estos criterios:
 
 | | |
 | --- | --- |
-| **Archivo** | [src/modules/iam/services/iam-auth.service.ts](../../src/modules/iam/services/iam-auth.service.ts) |
+| **Archivo** | [src/modules/iam/services/iam-auth.service.ts](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/iam/services/iam-auth.service.ts) |
 | **Módulo** | `iam` |
 | **Operación** | Autenticación por identificador + contraseña (UC-01-04) |
 | **Kind** | `INTERNAL` |
@@ -71,7 +71,7 @@ cuando la autenticación ya tuvo éxito.
 
 | | |
 | --- | --- |
-| **Archivo** | [src/modules/iam/services/iam-patient-self-registration.service.ts](../../src/modules/iam/services/iam-patient-self-registration.service.ts) |
+| **Archivo** | [src/modules/iam/services/iam-patient-self-registration.service.ts](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/iam/services/iam-patient-self-registration.service.ts) |
 | **Módulo** | `iam` |
 | **Operación** | Auto-registro de paciente |
 | **Kind** | `INTERNAL` |
@@ -93,11 +93,18 @@ cuando la autenticación ya tuvo éxito.
 | --- | --- |
 | `registration.persisted` | La transacción confirmó cuenta, persona y perfil |
 
-**Motivo de negocio.** El registro escribe siete filas en cinco tablas y luego encola el correo de
-verificación **fuera** de la transacción, a propósito: si la mensajería falla, la cuenta no debe
-deshacerse. Eso crea un estado intermedio legítimo ("registrado pero sin correo") que sin traza es
-indistinguible de un fallo. Los dos booleanos separan las dos preguntas: si el flujo incluía correo
-y si el correo llegó a enviarse.
+**Motivo de negocio.** El registro escribe **nueve filas en nueve tablas** de cuatro esquemas
+(`iam.users`, `iam.credentials`, `iam.user_global_roles`, `profiles.persons`,
+`profiles.person_profiles`, `profiles.patient_profiles`, `profiles.person_account_links`,
+`common.identifiers`, `directory.tenant_memberships`), más dos si se aporta correo
+(`common.contact_points` e `iam.email_verifications`). Sobre esas escrituras, el
+`HistoryMirrorSubscriber` sella además la revisión 1 en `audit.users_history` y
+`audit.patient_profiles_history`, dentro de la misma transacción.
+
+Luego encola el correo de verificación **fuera** de la transacción, a propósito: si la mensajería
+falla, la cuenta ya creada no debe deshacerse. Eso crea un estado intermedio legítimo ("registrado
+pero sin correo") que sin traza es indistinguible de un fallo. Los dos booleanos separan las dos
+preguntas: si el flujo incluía correo y si el correo llegó a enviarse.
 
 **Riesgos de privacidad.** No se registra el documento de identidad, ni el correo, ni la fecha de
 nacimiento, ni el nombre. Solo booleanos e identificadores internos ya creados.
@@ -108,7 +115,7 @@ nacimiento, ni el nombre. Solo booleanos e identificadores internos ya creados.
 
 | | |
 | --- | --- |
-| **Archivo** | [src/modules/messaging/services/outbox.service.ts](../../src/modules/messaging/services/outbox.service.ts) |
+| **Archivo** | [src/modules/messaging/services/outbox.service.ts](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/messaging/services/outbox.service.ts) |
 | **Módulo** | `messaging` |
 | **Operación** | Publicación transaccional de un evento de dominio (UC-35-01) |
 | **Kind** | **`PRODUCER`** |
@@ -147,7 +154,7 @@ exactamente igual que antes de esta iniciativa.
 
 | | |
 | --- | --- |
-| **Archivo** | [src/modules/messaging/services/outbox.service.ts](../../src/modules/messaging/services/outbox.service.ts) |
+| **Archivo** | [src/modules/messaging/services/outbox.service.ts](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/messaging/services/outbox.service.ts) |
 | **Módulo** | `messaging` |
 | **Operación** | Fan-out del evento a sus suscriptores (UC-35-03) |
 | **Kind** | **`CONSUMER`** |
@@ -172,7 +179,7 @@ especial para mensajes antiguos.
 
 | | |
 | --- | --- |
-| **Archivo** | [src/worker/jobs/messaging/notification-delivery.job.ts](../../src/worker/jobs/messaging/notification-delivery.job.ts) |
+| **Archivo** | [src/worker/jobs/messaging/notification-delivery.job.ts](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/worker/jobs/messaging/notification-delivery.job.ts) |
 | **Módulo** | `messaging` (proceso `redesa-worker-messaging`) |
 | **Operación** | Intento de entrega contra el proveedor externo (UC-35-11) |
 | **Kind** | `INTERNAL` |
@@ -202,7 +209,7 @@ ni el contenido del mensaje. El canal es de baja cardinalidad y sirve para compa
 
 | | |
 | --- | --- |
-| **Archivo** | [src/worker/run-tick.util.ts](../../src/worker/run-tick.util.ts) |
+| **Archivo** | [src/worker/run-tick.util.ts](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/worker/run-tick.util.ts) |
 | **Nombre** | el mismo `operation` que ya viajaba en los logs, p. ej. `worker.messaging.outbox-relay` |
 | **Cobertura** | **los 30 jobs** de los 20 procesos worker, con una sola instrumentación |
 
