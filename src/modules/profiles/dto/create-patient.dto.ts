@@ -112,3 +112,45 @@ export class PatientProfileResponseDto {
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
 }
+
+/**
+ * Resumen que el propio paciente ve de sí mismo, una vez verificada su
+ * identidad. No incluye datos clínicos: es el patrón de acceso, no la ficha.
+ */
+export class PatientSummaryResponseDto {
+  /**
+   * Identificador asociado a person.
+   */
+  @ApiProperty({ format: 'uuid' })
+  personId!: string;
+
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiProperty({ format: 'uuid' })
+  patientProfileId!: string;
+
+  /**
+   * Valor de patient code mantenido por la instancia.
+   */
+  @ApiProperty()
+  patientCode!: string;
+
+  /**
+   * Valor de display name mantenido por la instancia.
+   */
+  @ApiPropertyOptional()
+  displayName?: string;
+
+  /**
+   * Valor de birth date mantenido por la instancia.
+   */
+  @ApiPropertyOptional()
+  birthDate?: Date;
+
+  /**
+   * Identificador asociado a person status concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  personStatus!: string;
+}

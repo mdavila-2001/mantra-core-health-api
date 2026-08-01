@@ -3,6 +3,11 @@ import { Interval } from '@nestjs/schedule';
 import { PinoLogger } from 'nestjs-pino';
 import { SystemApiClient } from '../../system-api-client.service';
 import { runTick } from '../../run-tick.util';
+import {
+  APP_ATTR,
+  TracingService,
+  type TraceSpan,
+} from '../../../observability';
 
 const DELIVERY_INTERVAL_MS = 5_000;
 
@@ -68,6 +73,7 @@ export class NotificationDeliveryJob {
   constructor(
     private readonly api: SystemApiClient,
     private readonly logger: PinoLogger,
+    private readonly tracing: TracingService,
   ) {
     this.logger.setContext(NotificationDeliveryJob.name);
   }
@@ -94,7 +100,35 @@ export class NotificationDeliveryJob {
   }
 
   private async deliverOne(request: PendingNotificationRequest): Promise<void> {
+    // Span de negocio: el envío atraviesa un proveedor externo cuya latencia y
+    // cuyos fallos no son visibles en ninguna otra parte del sistema. El
+    // `canal` es de baja cardinalidad y sirve para comparar proveedores; la
+    // dirección del destinatario (correo, teléfono) NUNCA se registra.
+    return this.tracing.runInSpan(
+      'notification.dispatch',
+      {
+        [APP_ATTR.MODULE]: 'messaging',
+        [APP_ATTR.OPERATION]: 'notification.dispatch',
+        [APP_ATTR.ENTITY_TYPE]: 'messaging.notification_requests',
+        [APP_ATTR.ENTITY_ID]: request.id,
+        'messaging.channel.id': request.channelId,
+      },
+      (span) => this.performDelivery(request, span),
+    );
+  }
+
+  /**
+   * Entrega propiamente dicha. La lógica no cambió al instrumentar; se extrajo
+   * para que `deliverOne` sea solo la declaración del span de negocio.
+   */
+  private async performDelivery(
+    request: PendingNotificationRequest,
+    span: TraceSpan,
+  ): Promise<void> {
+    span.addEvent('provider.attempt.started');
     const result = await this.providerAdapter(request);
+    span.setAttribute('messaging.delivery.outcome', result.outcome);
+    span.addEvent('provider.attempt.finished');
 
     const response = await this.api.post<DeliverNotificationResponse>(
       `/internal/notifications/${request.id}/deliver`,

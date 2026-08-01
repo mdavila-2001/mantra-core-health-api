@@ -34,6 +34,21 @@ async function bootstrap(): Promise<void> {
     `mock-provider-server escuchando en :${env.port} (docs en /docs)`,
     'Bootstrap',
   );
+
+  // Con la tasa de rechazo en 0 -el valor por defecto- este emulador acepta
+  // TODA verificación: el documento de identidad de un paciente y la matrícula
+  // de un médico salen ACCEPTED por igual. Es lo correcto para probar el camino
+  // feliz, y es exactamente lo que no debe pasar inadvertido: sin este aviso,
+  // un backend conectado aquí parece verificar identidades cuando en realidad
+  // no comprueba nada.
+  if (env.identityVerificationRejectionRate === 0) {
+    Logger.warn(
+      'VERIFICACIÓN AUTOMÁTICA ACTIVA: tasa de rechazo 0, se ACEPTA toda ' +
+        'verificación de identidad y de matrícula profesional. Para simular ' +
+        'rechazos, definir IDENTITY_VERIFICATION_REJECTION_RATE (0..1).',
+      'Bootstrap',
+    );
+  }
 }
 
 void bootstrap();

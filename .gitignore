@@ -69,12 +69,18 @@ CLAUDE.md
 # Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
 /temp
 
-# database/ y docs/ de la RAÍZ — documentación y artefactos generados, no código.
-# No se versionan (viven en local). Anclados con "/" inicial para que la regla NO
-# ignore por accidente otras carpetas del mismo nombre en el árbol (p. ej. src/database).
+# database/ de la RAÍZ — modelo canónico (.puml) y DDL, con su propio flujo de
+# trabajo (.puml -> SQL/ -> BD -> ORM). No se versiona aquí: vive en local.
+# Anclado con "/" inicial para que la regla NO ignore por accidente otras
+# carpetas del mismo nombre en el árbol (p. ej. src/database).
 /database/
-/docs/
-!/docs/endpoints/
+
+# docs/ SÍ se versiona: es el portal de documentación técnica que construye
+# mkdocs (`yarn docs:build`) y que valida el workflow de CI `docs.yml`. Un
+# portal cuyas páginas solo existen en la máquina de quien las escribió no
+# puede ser un gate de CI ni servir a nadie más. El único artefacto generado a
+# partir de él, `site/`, sigue ignorado más abajo.
+
 # Cachés de Python (toolkit de generación).
 *.pyc
 
@@ -87,3 +93,6 @@ CLAUDE.md
 /output.smoke.test.csv
 site/
 dist-docs/
+
+# Archivos subidos por el adaptador de almacenamiento local (FILE_STORAGE_LOCAL_DIR)
+/storage/

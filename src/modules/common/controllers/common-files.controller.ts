@@ -2,16 +2,30 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../../../common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CurrentUser, loadStorageEnv } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
-import { FilesService } from '../services';
+import { FileUploadService, FilesService } from '../services';
+import type { UploadedFileBytes } from '../services';
 import {
   CreateFileDerivativeDto,
   CreateFileDto,
@@ -23,6 +37,7 @@ import {
   FileLinkResponseDto,
   FileResponseDto,
   FileVersionResponseDto,
+  UploadFileDto,
 } from '../dto';
 
 /** Endpoints del subsistema de archivos del módulo Common. */
@@ -34,8 +49,69 @@ export class CommonFilesController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param filesService - Valor de files service requerido por la operación.
+   * @param uploadService - Valor de upload service requerido por la operación.
    */
-  constructor(private readonly filesService: FilesService) {}
+  constructor(
+    private readonly filesService: FilesService,
+    private readonly uploadService: FileUploadService,
+  ) {}
+
+  /**
+   * Sube el contenido de un archivo y registra su metadata.
+   *
+   * Es la contraparte de `POST /common/files`: aquel registra un archivo que el
+   * llamador ya subió a un proveedor externo y del que sólo aporta la
+   * `storageUri`; éste recibe los bytes y deja que el adaptador de
+   * almacenamiento decida dónde viven.
+   */
+  @Post('upload')
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: loadStorageEnv().maxSizeBytes, files: 1 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file', 'category', 'sensitivity'],
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        category: { type: 'string', enum: ['DOCUMENT', 'IMAGE'] },
+        sensitivity: { type: 'string', enum: ['NORMAL', 'PHI'] },
+      },
+    },
+  })
+  @ApiOperation({ summary: 'Subir el contenido de un archivo (multipart)' })
+  upload(
+    @UploadedFile() file: UploadedFileBytes | undefined,
+    @Body() dto: UploadFileDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<FileResponseDto> {
+    return this.uploadService.upload(file, dto, user);
+  }
+
+  /** Devuelve el contenido de la versión vigente de un archivo. */
+  @Get(':id/content')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Descargar el contenido vigente de un archivo' })
+  async downloadContent(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    const content = await this.uploadService.download(id, actor);
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
+      // Se codifica el nombre para que no pueda inyectar cabeceras ni comillas.
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
+      );
+    }
+    res.send(content.buffer);
+  }
 
   /** UC-02-05: crea un archivo y su primera versión. */
   @Post()

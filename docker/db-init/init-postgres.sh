@@ -5,7 +5,7 @@
 # (58 TimescaleDB, 59 pgvector) si aún no existen. Idempotente.
 #
 # Orden: apply_all.sql (sin 90_fk_deferred) → apply_deferred.sql (FK
-# cross-schema) → time_series → vector_rag.
+# cross-schema) → 99_migrations → time_series → vector_rag.
 # =========================================================================
 set -euo pipefail
 
@@ -36,6 +36,19 @@ else
     echo ">>> apply_deferred.sql (90_fk_deferred, FK cross-schema)"
     "${PSQL[@]}" -f /init/SQL/apply_deferred.sql
 fi
+
+# Migraciones posteriores a la generación de SQL/ (tablas y columnas que los
+# módulos añadieron después). Todas son ADITIVAS e idempotentes por contrato
+# (IF NOT EXISTS), así que se aplican siempre y en orden de nombre — que al ser
+# `YYYY-MM-DD_*.sql` es también orden cronológico. Sin este paso quedaban sin
+# aplicar contra una base recién levantada y las tablas que declaran (p. ej.
+# iam.account_activations) sólo existían si se arrancaba con ORM_SCHEMA_SYNC=safe.
+shopt -s nullglob
+for migration in /init/SQL/99_migrations/*.sql; do
+    echo ">>> 99_migrations/$(basename "$migration")"
+    "${PSQL[@]}" -f "$migration"
+done
+shopt -u nullglob
 
 # 58/59 son extensiones PG en esta misma instancia y 100% idempotentes
 # (CREATE ... IF NOT EXISTS, create_hypertable if_not_exists) — se aplican siempre.

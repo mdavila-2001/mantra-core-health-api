@@ -57,6 +57,38 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
+## Trazabilidad distribuida (OpenTelemetry → Jaeger)
+
+Los 21 procesos del backend (API + 20 workers) exportan trazas por OTLP. Está **apagada por
+defecto**: activarla es una decisión explícita del operador.
+
+```bash
+# 1. Jaeger local (se une a la red del docker-compose principal)
+yarn jaeger:up
+
+# 2. En el .env
+OTEL_ENABLED=true
+
+# 3. Arrancar como siempre
+yarn start:dev
+
+# 4. UI de trazas
+open http://localhost:16686
+
+# 5. Verificación extremo a extremo (Jaeger + backend + traza + privacidad)
+yarn jaeger:verify
+
+# Apagar Jaeger
+yarn jaeger:down
+```
+
+Cada respuesta HTTP incluye la cabecera `x-trace-id` y cada línea de log lleva `trace_id`, así que
+un usuario puede entregar un identificador a soporte y soporte llega a la traza exacta.
+
+Documentación completa en [`docs/observability/`](docs/observability/README.md): guía para
+desarrolladores, catálogo de spans de negocio, topología de producción, política de privacidad de
+datos, resultados de rendimiento medidos y runbook operativo.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

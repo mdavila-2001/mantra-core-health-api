@@ -81,7 +81,35 @@ export interface CreateNotificationRequestData {
   /**
    * Valor de idempotency key mantenido por la instancia.
    */
-  idempotencyKey?: string;
+  idempotencyKey: string;
+  /**
+   * Identificador asociado a recipient type concept.
+   */
+  recipientTypeConceptId: string;
+  /**
+   * Identificador asociado a recipient ref (la entidad destinataria).
+   */
+  recipientRefId: string;
+  /**
+   * Identificador asociado a source concept (qué originó la solicitud).
+   */
+  sourceConceptId: string;
+  /**
+   * Identificador asociado a authorized by user.
+   */
+  authorizedByUserId: string;
+  /**
+   * Instantánea de por qué se consideró autorizado el envío.
+   */
+  authorizationSnapshotJson: unknown;
+  /**
+   * Instantánea del contenido tal como se decidió enviarlo.
+   */
+  contentSnapshotJson: unknown;
+  /**
+   * Hash del contenido, para detectar reenvíos con contenido distinto.
+   */
+  contentHash: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -171,6 +199,16 @@ export class NotificationsRepository {
         scheduledAt: data.scheduledAt,
         consentId: data.consentId,
         idempotencyKey: data.idempotencyKey,
+        // Columnas NOT NULL del contrato WORM de la solicitud: quién es el
+        // destinatario, qué originó el envío, quién lo autorizó y con qué
+        // contenido. Sin ellas el INSERT viola la restricción de la tabla.
+        recipientTypeConceptId: data.recipientTypeConceptId,
+        recipientRefId: data.recipientRefId,
+        sourceConceptId: data.sourceConceptId,
+        authorizedByUserId: data.authorizedByUserId,
+        authorizationSnapshotJson: data.authorizationSnapshotJson,
+        contentSnapshotJson: data.contentSnapshotJson,
+        contentHash: data.contentHash,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -298,6 +336,20 @@ export class NotificationsRepository {
     return em.findOne(MessagingProviders, { code });
   }
 
+  /**
+   * Obtiene find provider by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find provider by id conforme al contrato `Promise<MessagingProviders | null>`.
+   */
+  findProviderById(
+    em: EntityManager,
+    id: string,
+  ): Promise<MessagingProviders | null> {
+    return em.findOne(MessagingProviders, { id });
+  }
+
   // --- Entregas y acuses (UC-35-11, 12) ---
 
   /**
@@ -326,6 +378,14 @@ export class NotificationsRepository {
        * Identificador asociado a provider channel config.
        */
       providerChannelConfigId?: string;
+      /**
+       * Código del adaptador que realizó el intento.
+       */
+      adapterCode: string;
+      /**
+       * Versión del adaptador que realizó el intento.
+       */
+      adapterVersion: string;
       /**
        * Valor de attempt number mantenido por la instancia.
        */
@@ -371,6 +431,10 @@ export class NotificationsRepository {
         providerId: data.providerId,
         channelId: data.channelId,
         providerChannelConfigId: data.providerChannelConfigId,
+        // NOT NULL: qué adaptador hizo el intento. Se toma del proveedor, que es
+        // quien declara su implementación y versión.
+        adapterCode: data.adapterCode,
+        adapterVersion: data.adapterVersion,
         attemptNumber: data.attemptNumber,
         providerMessageRef: data.providerMessageRef,
         statusConceptId: data.statusConceptId,

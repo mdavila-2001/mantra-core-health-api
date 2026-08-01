@@ -62,6 +62,27 @@ export class PersonAccountLinksRepository {
     );
   }
 
+  /**
+   * Vínculo ACTIVO de un usuario con su persona.
+   *
+   * Es lo que permite que un endpoint de autoservicio resuelva "la persona del
+   * que llama" sin aceptar un id en el cuerpo — que sería pedirle al cliente que
+   * declare a quién representa.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Cuenta autenticada.
+   * @returns El vínculo activo, o `null` si la cuenta no tiene persona.
+   */
+  findActiveByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<PersonAccountLinks | null> {
+    return em.findOne(PersonAccountLinks, {
+      userId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+  }
+
   /** Marca SUPERSEDED el vínculo activo previo del mismo usuario (uq active_user). */
   supersedeActiveForUser(
     em: EntityManager,

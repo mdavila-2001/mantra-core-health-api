@@ -54,5 +54,23 @@ import {
     ProfilesPatientsService,
     ProfilesPractitionersService,
   ],
+  // Los repositorios que necesita el auto-registro de pacientes (IAM crea en la
+  // misma transacción la cuenta y su persona/perfil). Se exportan los
+  // repositorios y no el servicio porque `registerPatient` de este módulo es
+  // admin-only y abre su propia transacción.
+  exports: [
+    PersonsRepository,
+    PersonProfilesRepository,
+    PatientProfilesRepository,
+    PersonAccountLinksRepository,
+    // Los necesita identity_assurance para activar la matrícula (y con ella al
+    // profesional) cuando la autoridad externa la aprueba.
+    JurisdictionAuthorizationsRepository,
+    HealthPractitionerProfilesRepository,
+    // Los necesita iam para el auto-registro público de profesionales, que crea
+    // perfil, licencia, título e idioma en la misma transacción que la cuenta.
+    ProfessionalCredentialsRepository,
+    PractitionerLanguagesRepository,
+  ],
 })
 export class ProfilesModule {}

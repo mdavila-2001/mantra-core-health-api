@@ -1,6 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import {
+  APP_ATTR,
+  TracingService,
+  type TraceSpan,
+} from '../../../observability';
 import * as argon2 from 'argon2';
 import {
   CONCEPTS,
@@ -72,6 +77,7 @@ export class IamAuthService {
     private readonly lockoutsRepo: AccountLockoutsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
     private readonly logger: PinoLogger,
+    private readonly tracing: TracingService,
   ) {
     this.logger.setContext(IamAuthService.name);
   }
@@ -92,9 +98,58 @@ export class IamAuthService {
     return [...new Set(memberships.map((m) => m.tenantId))];
   }
 
-  /** UC-01-04: autentica por email+contraseña y abre una sesión. */
+  /**
+   * UC-01-04: autentica por identificador+contraseña y abre una sesión.
+   *
+   * El identificador es el `external_subject` de la credencial: el correo para
+   * las altas por correo, el documento de identidad para los pacientes
+   * auto-registrados. Ambos viven en la misma columna, así que la búsqueda es
+   * idéntica; sólo cambia de qué campo del DTO sale.
+   */
   async login(dto: LoginDto, ip?: string): Promise<TokenResponseDto> {
+    // Span de negocio: la autenticación es la operación con más caminos de
+    // fallo distintos del sistema (sin credencial, usuario inactivo, contraseña
+    // incorrecta, cuenta bloqueada) y todos devuelven el mismo 401 opaco al
+    // cliente, por diseño. Los eventos del span son el único sitio donde queda
+    // registrado CUÁL de los cuatro ocurrió, sin filtrarlo al atacante.
+    //
+    // Nunca se registran aquí ni la contraseña, ni el documento de identidad,
+    // ni el correo: son datos personales o secretos. El `userId` solo se añade
+    // cuando ya está autenticado.
+    return this.tracing.runInSpan(
+      'iam.authenticate',
+      {
+        [APP_ATTR.MODULE]: 'iam',
+        [APP_ATTR.OPERATION]: 'authenticate',
+        [APP_ATTR.ENTITY_TYPE]: 'iam.users',
+        'iam.auth.subject_kind': dto.nationalId ? 'national_id' : 'email',
+      },
+      (span) => this.performLogin(dto, span, ip),
+    );
+  }
+
+  /**
+   * Autenticación propiamente dicha. La lógica no cambió al instrumentar; se
+   * extrajo para que `login` sea solo la declaración del span de negocio.
+   */
+  private async performLogin(
+    dto: LoginDto,
+    span: TraceSpan,
+    ip?: string,
+  ): Promise<TokenResponseDto> {
+    const subject = dto.nationalId ?? dto.email;
+    if (!subject) {
+      // El DTO ya lo exige, pero sin esta guarda un cuerpo inesperado buscaría
+      // una credencial con subject `undefined` y devolvería la primera que
+      // encontrara con ese valor nulo.
+      span.addEvent('auth.rejected', { reason: 'no-subject' });
+      await this.recordLoginFailure(undefined, ip, 'no-subject');
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
     this.logger.info(
+      // El documento de identidad no se registra: es un dato personal y el
+      // correo ya bastaba para diagnosticar un intento fallido.
       { operation: 'iam.auth.login', email: dto.email },
       'Login attempt',
     );
@@ -102,15 +157,17 @@ export class IamAuthService {
 
     const cred = await this.credentialsRepo.findActivePasswordBySubject(
       readEm,
-      dto.email,
+      subject,
     );
     if (!cred || !cred.secretHash) {
+      span.addEvent('auth.rejected', { reason: 'no-credential' });
       await this.recordLoginFailure(undefined, ip, 'no-credential');
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const user = await this.usersRepo.findById(readEm, cred.userId);
     if (!user || user.statusConceptId !== CONCEPTS.USER_ACTIVE) {
+      span.addEvent('auth.rejected', { reason: 'user-not-active' });
       await this.recordLoginFailure(user?.id, ip, 'user-not-active');
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -119,6 +176,7 @@ export class IamAuthService {
       .verify(cred.secretHash, dto.password)
       .catch(() => false);
     if (!passwordOk) {
+      span.addEvent('auth.rejected', { reason: 'bad-password' });
       await this.handleFailedPassword(user.id, ip);
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -163,6 +221,8 @@ export class IamAuthService {
         ip,
       });
 
+      span.setAttribute(APP_ATTR.ENTITY_ID, user.id);
+      span.addEvent('auth.session.issued');
       this.logger.info(
         { operation: 'iam.auth.login', userId: user.id },
         'Login succeeded',

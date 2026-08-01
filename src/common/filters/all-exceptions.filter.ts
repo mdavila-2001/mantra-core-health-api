@@ -9,6 +9,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
+import { APP_ATTR, TracingService, applyTraceHeader } from '../../observability';
 
 /** Forma estable del cuerpo de error que ve el cliente. */
 interface ErrorResponseBody {
@@ -55,8 +56,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
    * Inicializa la instancia y sus dependencias.
    *
    * @param logger - Valor de logger requerido por la operación.
+   * @param tracing - Capa de trazas; marca el span activo según la política de
+   *                  errores. Es un no-op cuando la telemetría está apagada.
    */
-  constructor(private readonly logger: PinoLogger) {
+  constructor(
+    private readonly logger: PinoLogger,
+    private readonly tracing: TracingService,
+  ) {
     this.logger.setContext(AllExceptionsFilter.name);
   }
 
@@ -95,6 +101,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       path: request.url,
     };
 
+    // La traza se marca ANTES de escribir la respuesta, mientras el span HTTP
+    // sigue activo. Y la cabecera `x-trace-id` se aplica también aquí: un fallo
+    // rechazado por un guard (401/403) no llega nunca al interceptor global, y
+    // esa respuesta también debe poder rastrearse.
+    this.markTrace(status, code, exception);
+    applyTraceHeader(response);
+
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       // Error no anticipado: log completo (con stack), respuesta genérica.
       this.logger.error(
@@ -123,6 +136,30 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     response.status(status).json(body);
+  }
+
+  /**
+   * Aplica la política de errores sobre el span HTTP activo.
+   *
+   * Un 4xx **no** marca la traza como fallida: un 404 o un 409 de idempotencia
+   * son respuestas correctas del sistema, y marcarlas como error dispararía la
+   * tasa de error de Jaeger hasta volverla inútil para detectar incidentes
+   * reales. Se registran como evento, con su código estable, para que sigan
+   * siendo visibles en la traza.
+   *
+   * Los 5xx sí marcan el span y adjuntan la excepción. El filtro no crea ni
+   * cierra spans: solo anota el que la instrumentación HTTP ya abrió.
+   */
+  private markTrace(status: number, code: string, exception: unknown): void {
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.tracing.setAttribute(APP_ATTR.ERROR_CODE, code);
+      this.tracing.recordException(exception);
+      return;
+    }
+    this.tracing.addEvent('http.business_error', {
+      [APP_ATTR.ERROR_CODE]: code,
+      'http.response.status_code': status,
+    });
   }
 
   /** Traduce cualquier excepción a la tupla estable (status, code, message, details). */

@@ -1,3 +1,9 @@
+// PRIMERA IMPORTACIÓN DEL PROCESO, y debe seguir siéndolo. Las instrumentaciones
+// automáticas de OpenTelemetry parchean `http`, `express`, `pg` e `ioredis` en el
+// momento en que Node los carga; si NestJS se importa antes, el parcheo llega
+// tarde y no se emite ni un span. Ver `src/observability/telemetry.bootstrap.ts`.
+import './observability/telemetry.bootstrap';
+
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -35,6 +41,13 @@ async function bootstrap() {
   // hasta que se fija el logger definitivo. Sin esto, esos primeros logs saldrían
   // por el logger por defecto de Nest y no por pino.
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  // Sin esto, Nest ignora SIGTERM/SIGINT y no dispara `onModuleDestroy` /
+  // `beforeApplicationShutdown` (cierre de conexiones de MikroORM, Redis,
+  // etc.) — `docker stop`/`docker compose down` cortarían el proceso en seco
+  // en vez de drenar las requests en vuelo. Los 20 workers ya lo hacían
+  // (`worker/bootstrap.ts`); a la API le faltaba.
+  app.enableShutdownHooks();
 
   // Sustituye el logger por defecto de Nest por pino. A partir de aquí, todas las
   // capas emiten por el mismo transporte estructurado: no solo lo que inyecta

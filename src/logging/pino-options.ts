@@ -1,5 +1,6 @@
 import type { Params } from 'nestjs-pino';
 import { loadLoggingEnv } from './logging.env';
+import { currentTraceContext } from '../observability/trace-context.service';
 
 /**
  * Construcción de las opciones de pino que consume `LoggingModule`.
@@ -59,6 +60,21 @@ export function buildPinoOptions(): Params {
     pinoHttp: {
       level: env.level,
       redact: { paths: REDACT_PATHS, remove: true },
+
+      // Correlación log ↔ traza. `mixin` se evalúa en CADA línea de log y añade
+      // el contexto de traza activo en ese instante, de modo que buscar
+      // `trace_id:"..."` en el agregador devuelve exactamente los logs de esa
+      // operación —incluidos los de los workers, que comparten esta misma
+      // configuración vía `LoggingModule`.
+      //
+      // El identificador procede SIEMPRE del contexto activo de OpenTelemetry,
+      // nunca de una cabecera del cliente: un `trace_id` que el cliente pudiera
+      // elegir sería falsificable y permitiría envenenar la correlación.
+      //
+      // Cuando no hay traza activa (arranque, telemetría deshabilitada) el
+      // mixin devuelve `{}` y la línea sale exactamente como antes: `req.id`
+      // sigue siendo la correlación disponible.
+      mixin: () => currentTraceContext(),
 
       // Logging automático de peticiones HTTP con mensajes en español, para no
       // mezclar el inglés por defecto de pino-http con el resto de los logs.

@@ -23,6 +23,7 @@ function build() {
     findById: jest.fn(),
     findByIdForUpdate: jest.fn(),
     findByVersionAndCode: jest.fn(),
+    search: jest.fn(() => Promise.resolve([])),
   } as any;
   const designationsRepo = {
     createDesignation: jest.fn(),
@@ -59,6 +60,7 @@ function build() {
   return {
     service,
     tx,
+    em,
     conceptsRepo,
     designationsRepo,
     relationshipsRepo,
@@ -458,6 +460,58 @@ describe('ConceptsService', () => {
       await expect(
         service.lookupConcept('http://x', 'ZZZ'),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('searchConcepts', () => {
+    it('devuelve los conceptos con el id que espera el resto del contrato', async () => {
+      const { service, conceptsRepo } = build();
+      conceptsRepo.search.mockResolvedValue([
+        {
+          id: 'concept-1',
+          code: 'GENDER_FEMALE',
+          display: 'Administrative gender female',
+          definition: undefined,
+          selectable: true,
+          codeSystemVersionId: 'version-1',
+        },
+      ]);
+
+      const result = await service.searchConcepts('GENDER', undefined, 50);
+
+      // `conceptId` es justo el valor que hay que mandar en los campos
+      // `*ConceptId`: sin esta búsqueda no hay forma de averiguarlo.
+      expect(result.items[0]).toMatchObject({
+        conceptId: 'concept-1',
+        code: 'GENDER_FEMALE',
+      });
+      expect(result.count).toBe(1);
+      expect(result.limit).toBe(50);
+    });
+
+    it('propaga el filtro de versión y el tope al repositorio', async () => {
+      const { service, conceptsRepo, em } = build();
+
+      await service.searchConcepts('phone', 'version-9', 10);
+
+      expect(conceptsRepo.search).toHaveBeenCalledWith(
+        em,
+        { query: 'phone', codeSystemVersionId: 'version-9' },
+        10,
+      );
+    });
+
+    it('sin texto devuelve el catálogo acotado por el tope, no un error', async () => {
+      const { service, conceptsRepo } = build();
+
+      const result = await service.searchConcepts(undefined, undefined, 5);
+
+      expect(conceptsRepo.search).toHaveBeenCalledWith(
+        expect.anything(),
+        { query: undefined, codeSystemVersionId: undefined },
+        5,
+      );
+      expect(result.count).toBe(0);
     });
   });
 });

@@ -35,5 +35,9 @@ import {
     DirectoryBranchesService,
     DirectoryMembershipsService,
   ],
+  // `TenantsRepository` lo necesita identity_assurance para marcar verificada la
+  // institución cuando la autoridad externa la aprueba; `TenantMembershipsRepository`
+  // para comprobar que quien pide la verificación manda en ese tenant.
+  exports: [TenantsRepository, TenantMembershipsRepository],
 })
 export class DirectoryModule {}

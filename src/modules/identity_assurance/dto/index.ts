@@ -12,3 +12,5 @@ export * from './review-decision.dto';
 export * from './issue-assertion.dto';
 export * from './revoke-assertion.dto';
 export * from './identity-responses.dto';
+export * from './dispatchable-check.dto';
+export * from './request-verification.dto';

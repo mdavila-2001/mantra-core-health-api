@@ -7,10 +7,17 @@ import { AppService } from './app.service';
 import { OrmModule, ormEnvSchema } from './orm';
 import { LoggingModule, loggingEnvSchema } from './logging';
 import {
+  ObservabilityModule,
+  TraceResponseInterceptor,
+  telemetryEnvSchema,
+} from './observability';
+import {
   AllExceptionsFilter,
   AuthModule,
+  FileStorageModule,
   TenantContextInterceptor,
   authEnvSchema,
+  storageEnvSchema,
 } from './common';
 import { SeedModule } from './common/seed/seed.module';
 import { IamModule } from './modules/iam/iam.module';
@@ -88,7 +95,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
       isGlobal: true,
       validationSchema: ormEnvSchema
         .concat(loggingEnvSchema)
-        .concat(authEnvSchema),
+        .concat(authEnvSchema)
+        .concat(storageEnvSchema)
+        .concat(telemetryEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
     // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
@@ -106,9 +115,16 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // Logging estructurado con pino para todas las capas. Va primero para que el
     // logger de peticiones y el `PinoLogger` estén disponibles desde el arranque.
     LoggingModule,
+    // Trazas distribuidas. Global, como LoggingModule: cualquier dominio inyecta
+    // `TracingService` sin reimportar nada. No arranca el SDK -eso ocurre en la
+    // primera línea de `main.ts`-, solo expone la API que lo consume.
+    ObservabilityModule,
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,
+    // Almacenamiento de archivos: resuelve el adaptador activo (`local` en
+    // disco por ahora) a partir de FILE_STORAGE_ADAPTER. Global.
+    FileStorageModule,
     // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
     // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
     OrmModule,
@@ -187,6 +203,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // Contexto de tenant por request: valida X-Tenant-Id contra la membresía del
     // actor y, con RLS_ENFORCE=true, fija app.current_tenant_id para las políticas.
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
+    // Cabecera `x-trace-id` en la respuesta: el identificador que un usuario
+    // puede entregar a soporte para que localice la traza exacta en Jaeger.
+    { provide: APP_INTERCEPTOR, useClass: TraceResponseInterceptor },
   ],
 })
 export class AppModule {}

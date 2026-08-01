@@ -150,6 +150,14 @@ export class CheckResultResponseDto {
    * Valor de check status mantenido por la instancia.
    */
   @ApiProperty({ format: 'uuid' }) checkStatus!: string;
+  /**
+   * Estado del caso si este resultado lo cerró; ausente si no lo cambió.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Estado del caso si este resultado lo resolvió',
+  })
+  caseStatus?: string;
 }
 
 /** Respuesta de una señal de fraude (UC-27-07). */

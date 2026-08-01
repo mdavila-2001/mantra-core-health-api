@@ -4,6 +4,7 @@ import {
   IsIn,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -43,6 +44,23 @@ export class CreateUserDto {
   @MinLength(8)
   @MaxLength(200)
   password!: string;
+
+  /**
+   * Teléfono de contacto del usuario. Se persiste como punto de contacto
+   * (`common.contact_points`) porque `iam.users` no tiene columna de teléfono:
+   * sólo guarda si está verificado.
+   */
+  @ApiPropertyOptional({
+    description: 'Teléfono de contacto en formato E.164 o nacional',
+    maxLength: 40,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
+    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
+  })
+  phone?: string;
 
   /**
    * Valor de time zone mantenido por la instancia.

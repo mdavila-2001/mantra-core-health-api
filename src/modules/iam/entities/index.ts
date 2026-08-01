@@ -4,6 +4,7 @@ export * from './api_key_scopes.entity';
 export * from './api_keys.entity';
 export * from './authentication_credentials.entity';
 export * from './devices.entity';
+export * from './email_verifications.entity';
 export * from './mfa_factors.entity';
 export * from './refresh_tokens.entity';
 export * from './security_events.entity';

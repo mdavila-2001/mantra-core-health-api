@@ -173,4 +173,79 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
     // Proxies de portal
     PROXY_ACTIVE: { code: 'PROXY_ACTIVE', display: 'Portal proxy active' },
     PROXY_REVOKED: { code: 'PROXY_REVOKED', display: 'Portal proxy revoked' },
+
+    // Género administrativo de la persona (`persons.administrative_gender_concept_id`).
+    // Valores de HL7 FHIR AdministrativeGender: es el género con el que la persona
+    // consta a efectos administrativos, no su sexo biológico.
+    GENDER_MALE: { code: 'GENDER_MALE', display: 'Administrative gender male' },
+    GENDER_FEMALE: {
+      code: 'GENDER_FEMALE',
+      display: 'Administrative gender female',
+    },
+    GENDER_OTHER: {
+      code: 'GENDER_OTHER',
+      display: 'Administrative gender other',
+    },
+    GENDER_UNKNOWN: {
+      code: 'GENDER_UNKNOWN',
+      display: 'Administrative gender unknown',
+    },
+
+    // Sexo asignado al nacer (`persons.sex_at_birth_concept_id`). Se modela aparte
+    // del género porque son datos clínicamente distintos: el sexo al nacer
+    // condiciona rangos de referencia y tamizajes; el género, el trato y el registro.
+    BIRTH_SEX_MALE: { code: 'BIRTH_SEX_MALE', display: 'Sex at birth male' },
+    BIRTH_SEX_FEMALE: {
+      code: 'BIRTH_SEX_FEMALE',
+      display: 'Sex at birth female',
+    },
+    BIRTH_SEX_INTERSEX: {
+      code: 'BIRTH_SEX_INTERSEX',
+      display: 'Sex at birth intersex',
+    },
+    BIRTH_SEX_UNKNOWN: {
+      code: 'BIRTH_SEX_UNKNOWN',
+      display: 'Sex at birth unknown',
+    },
   });
+
+/** Códigos de género administrativo que aceptan los DTO de cara al cliente. */
+export type AdministrativeGenderCode = 'MALE' | 'FEMALE' | 'OTHER' | 'UNKNOWN';
+
+/** Códigos de sexo al nacer que aceptan los DTO de cara al cliente. */
+export type BirthSexCode = 'MALE' | 'FEMALE' | 'INTERSEX' | 'UNKNOWN';
+
+/**
+ * Traduce el código de género del cliente al concepto que persiste la columna.
+ *
+ * Los formularios públicos no conocen —ni deben conocer— los UUID del catálogo de
+ * terminología: piden un código legible y el backend lo resuelve, igual que hacen
+ * `TENANT_TYPE_CONCEPT_BY_CODE` o `ROLE_CONCEPT_BY_CODE`.
+ */
+export const ADMIN_GENDER_CONCEPT_BY_CODE: Readonly<
+  Record<AdministrativeGenderCode, string>
+> = {
+  MALE: PROF.GENDER_MALE,
+  FEMALE: PROF.GENDER_FEMALE,
+  OTHER: PROF.GENDER_OTHER,
+  UNKNOWN: PROF.GENDER_UNKNOWN,
+};
+
+/** Traduce el código de sexo al nacer al concepto que persiste la columna. */
+export const BIRTH_SEX_CONCEPT_BY_CODE: Readonly<Record<BirthSexCode, string>> =
+  {
+    MALE: PROF.BIRTH_SEX_MALE,
+    FEMALE: PROF.BIRTH_SEX_FEMALE,
+    INTERSEX: PROF.BIRTH_SEX_INTERSEX,
+    UNKNOWN: PROF.BIRTH_SEX_UNKNOWN,
+  };
+
+/** Códigos admitidos, para los validadores `@IsIn` de los DTO. */
+export const ADMIN_GENDER_CODES = Object.keys(
+  ADMIN_GENDER_CONCEPT_BY_CODE,
+) as AdministrativeGenderCode[];
+
+/** Códigos admitidos, para los validadores `@IsIn` de los DTO. */
+export const BIRTH_SEX_CODES = Object.keys(
+  BIRTH_SEX_CONCEPT_BY_CODE,
+) as BirthSexCode[];
