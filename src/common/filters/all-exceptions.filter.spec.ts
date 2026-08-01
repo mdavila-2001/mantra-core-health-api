@@ -6,7 +6,10 @@ import type { TracingService } from '../../observability';
 import { ErrorCode } from '../errors/error-codes';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 
-function build() {
+function build(
+  requestId?: string | number,
+  requestHeaders: Record<string, unknown> = {},
+) {
   const logger = {
     setContext: jest.fn(),
     warn: jest.fn(),
@@ -25,9 +28,10 @@ function build() {
   };
   response.status.mockReturnValue(response);
   const request = {
-    headers: {},
+    headers: requestHeaders,
     url: '/resource',
     method: 'POST',
+    ...(requestId === undefined ? {} : { id: requestId }),
   } as Request;
   const host = {
     switchToHttp: () => ({
@@ -119,5 +123,63 @@ describe('AllExceptionsFilter HTTP infrastructure errors', () => {
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining({ code: 'INTERNAL' }),
     );
+  });
+});
+
+describe('AllExceptionsFilter correlationId', () => {
+  /** Lo que efectivamente se serializó al cliente. */
+  function bodyOf(response: { json: { mock: { calls: unknown[][] } } }) {
+    return response.json.mock.calls[0]?.[0] as { correlationId?: unknown };
+  }
+
+  it('normaliza a texto el id numérico que asigna pino-http', () => {
+    // El generador por defecto de pino numera las peticiones, así que `req.id`
+    // llega como número. El contrato publicado promete `string`: sin esta
+    // normalización el cuerpo salía con un número y el tipo era una mentira.
+    const { filter, host, response } = build(9451);
+
+    filter.catch(new HttpException('Rechazado', HttpStatus.BAD_REQUEST), host);
+
+    expect(bodyOf(response).correlationId).toBe('9451');
+  });
+
+  it('deja intacto el id de texto que manda el cliente', () => {
+    const { filter, host, response } = build(undefined, {
+      'x-request-id': 'trace-abc-123',
+    });
+
+    filter.catch(new HttpException('Rechazado', HttpStatus.BAD_REQUEST), host);
+
+    expect(bodyOf(response).correlationId).toBe('trace-abc-123');
+  });
+
+  it('con `x-request-id` repetido toma el primero en vez de descartarlo', () => {
+    // Express entrega las cabeceras repetidas como array. Un correlationId
+    // aproximado sirve para encontrar la línea de log; ninguno, no.
+    const { filter, host, response } = build(undefined, {
+      'x-request-id': ['primero', 'segundo'],
+    });
+
+    filter.catch(new HttpException('Rechazado', HttpStatus.BAD_REQUEST), host);
+
+    expect(bodyOf(response).correlationId).toBe('primero');
+  });
+
+  it('sin identificador queda `undefined`, no la cadena "undefined"', () => {
+    const { filter, host, response } = build();
+
+    filter.catch(new HttpException('Rechazado', HttpStatus.BAD_REQUEST), host);
+
+    expect(bodyOf(response).correlationId).toBeUndefined();
+  });
+
+  it('`req.id` gana sobre la cabecera: es el que quedó en el log del servidor', () => {
+    const { filter, host, response } = build(77, {
+      'x-request-id': 'del-cliente',
+    });
+
+    filter.catch(new HttpException('Rechazado', HttpStatus.BAD_REQUEST), host);
+
+    expect(bodyOf(response).correlationId).toBe('77');
   });
 });
