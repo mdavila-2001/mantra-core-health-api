@@ -300,6 +300,15 @@ services:
       NOTIFICATIONS_FAILURE_RATE: ${MOCK_NOTIFICATIONS_FAILURE_RATE:-0.1}
       DELETIONS_FAILURE_RATE: ${MOCK_DELETIONS_FAILURE_RATE:-0.05}
       SIMULATED_LATENCY_MS: ${MOCK_SIMULATED_LATENCY_MS:-50}
+      # Verificación de identidad. Estas dos NO estaban declaradas y por eso el
+      # comportamiento por defecto -aceptar TODA verificación- solo se podía
+      # descubrir leyendo el código del emulador. Con la tasa en 0, el documento
+      # de identidad de un paciente y la matrícula de un médico salen ACCEPTED
+      # por igual; subirla es cómo se prueba el camino de rechazo.
+      IDENTITY_VERIFICATION_REJECTION_RATE: ${MOCK_IDENTITY_REJECTION_RATE:-0}
+      # Retardo del veredicto: la autoridad acepta la solicitud al instante y
+      # tarda en resolverla. Es lo que ejercita el bucle de espera del worker.
+      IDENTITY_VERIFICATION_DELAY_MS: ${MOCK_IDENTITY_DELAY_MS:-10000}
     ports:
       - "${MOCK_PROVIDER_PORT:-4100}:4100"
     healthcheck:

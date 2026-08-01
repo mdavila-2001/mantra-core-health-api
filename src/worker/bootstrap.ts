@@ -13,7 +13,10 @@ import { Logger } from 'nestjs-pino';
 import { AuthTokenModule, authEnvSchema } from '../common';
 import { LoggingModule, loggingEnvSchema } from '../logging';
 import { ObservabilityModule, telemetryEnvSchema } from '../observability';
-import { workerEnvSchema } from './worker.env';
+import {
+  assertMockProviderNotInProduction,
+  workerEnvSchema,
+} from './worker.env';
 import { SystemApiClientModule } from './system-api-client.module';
 import { MockProviderClientModule } from './mock-provider-client.module';
 import { GoogleEmailClientModule } from './google-email-client.module';
@@ -40,6 +43,12 @@ export async function bootstrapWorker(
   domainModule: Type<unknown>,
   name: string,
 ): Promise<void> {
+  // ANTES de construir nada: si el emulador de proveedores está configurado en
+  // producción, el proceso no debe arrancar. Se comprueba aquí y no solo dentro
+  // de `loadWorkerEnv` para que el fallo ocurra en el arranque y no en el primer
+  // tick, media hora después y en un log que nadie mira.
+  assertMockProviderNotInProduction();
+
   @Module({
     imports: [
       ConfigModule.forRoot({
@@ -68,5 +77,24 @@ export async function bootstrapWorker(
   app.useLogger(app.get(Logger));
   app.flushLogs();
   app.enableShutdownHooks();
+
+  // Aviso explícito cuando el emulador está activo. En producción esto ya no se
+  // alcanza (el proceso habría abortado antes), pero en desarrollo es fácil
+  // olvidar que toda verificación de identidad y de matrícula se está aceptando
+  // automáticamente y confundir "el flujo funciona" con "la identidad se
+  // comprobó". Que quede en el log del arranque hace la diferencia entre las dos
+  // lecturas.
+  const mockProviderUrl = (process.env.MOCK_PROVIDER_BASE_URL ?? '').trim();
+  if (mockProviderUrl.length > 0) {
+    app
+      .get(Logger)
+      .warn(
+        `Emulador de proveedores ACTIVO (${mockProviderUrl}): las verificaciones ` +
+          'de identidad y de matrícula profesional se aceptan automáticamente. ' +
+          'Ningún registro civil ni colegio médico las comprobó. Para simular ' +
+          'rechazos, subir IDENTITY_VERIFICATION_REJECTION_RATE en el emulador.',
+      );
+  }
+
   app.get(Logger).log(`Worker "${name}" en marcha`);
 }
