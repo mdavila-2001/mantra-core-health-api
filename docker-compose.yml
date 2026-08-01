@@ -24,9 +24,13 @@ name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
 # servicio DENTRO de la red de compose (no los `*_PORT` expuestos al host, que
 # son solo para conectarse desde fuera de Docker).
 x-app-env: &app-env
-  # Este compose es exclusivamente local. Producción usa manifiestos separados;
-  # etiquetarlo como production activaría restricciones de secretos/proveedores
-  # que un entorno de desarrollo deliberadamente no satisface.
+  # Este compose es el de DESARROLLO LOCAL (ver la cabecera del archivo): monta
+  # el emulador de proveedores, publica puertos en el host y siembra la base con
+  # credenciales de ejemplo. Declararlo como `production` era una contradicción
+  # con lo que el archivo realmente levanta, y además activa las restricciones
+  # pensadas para un despliegue real —`JWT_SECRET` obligatorio, prohibición del
+  # emulador de proveedores— que este entorno deliberadamente no satisface.
+  # Producción usa manifiestos propios, no este archivo.
   NODE_ENV: ${NODE_ENV:-development}
   PORT: "3000"
   DB_HOST: postgres
@@ -303,6 +307,15 @@ services:
       NOTIFICATIONS_FAILURE_RATE: ${MOCK_NOTIFICATIONS_FAILURE_RATE:-0.1}
       DELETIONS_FAILURE_RATE: ${MOCK_DELETIONS_FAILURE_RATE:-0.05}
       SIMULATED_LATENCY_MS: ${MOCK_SIMULATED_LATENCY_MS:-50}
+      # Verificación de identidad. Estas dos NO estaban declaradas y por eso el
+      # comportamiento por defecto -aceptar TODA verificación- solo se podía
+      # descubrir leyendo el código del emulador. Con la tasa en 0, el documento
+      # de identidad de un paciente y la matrícula de un médico salen ACCEPTED
+      # por igual; subirla es cómo se prueba el camino de rechazo.
+      IDENTITY_VERIFICATION_REJECTION_RATE: ${MOCK_IDENTITY_REJECTION_RATE:-0}
+      # Retardo del veredicto: la autoridad acepta la solicitud al instante y
+      # tarda en resolverla. Es lo que ejercita el bucle de espera del worker.
+      IDENTITY_VERIFICATION_DELAY_MS: ${MOCK_IDENTITY_DELAY_MS:-10000}
     ports:
       - "${MOCK_PROVIDER_PORT:-4100}:4100"
     healthcheck:

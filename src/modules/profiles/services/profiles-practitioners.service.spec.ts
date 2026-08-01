@@ -146,10 +146,56 @@ describe('ProfilesPractitionersService', () => {
       await expect(
         d.service.verifyCredential(
           'c1',
-          { decision: 'VERIFIED' } as any,
+          {
+            decision: 'VERIFIED',
+            verificationSourceUri: 'https://colegiomedico.example/registro/LIC-12345',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects verifying without declaring the source consulted', async () => {
+      const d = build();
+
+      await expect(
+        d.service.verifyCredential('c1', { decision: 'VERIFIED' } as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      // Falla ANTES de tocar la base: no es una precondición de estado, es que
+      // la petición en sí no es una verificación.
+      expect(d.credentialsRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('rejects a blank source as if it were absent', async () => {
+      const d = build();
+
+      await expect(
+        d.service.verifyCredential(
+          'c1',
+          { decision: 'VERIFIED', verificationSourceUri: '   ' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('allows rejecting without a source: se rechaza por defectos de forma', async () => {
+      const d = build();
+      const credential = {
+        id: 'c1',
+        stateConceptId: PROF.CRED_PENDING,
+        practitionerProfileId: 'pp1',
+        updatedAt: new Date(),
+      };
+      d.credentialsRepo.findById.mockResolvedValue(credential);
+
+      const res = await d.service.verifyCredential(
+        'c1',
+        { decision: 'REJECTED' } as any,
+        actor,
+      );
+
+      expect(credential.stateConceptId).toBe(PROF.CRED_REJECTED);
+      expect(res).toMatchObject({ id: 'c1', practitionerVerified: false });
     });
 
     it('verifies the credential and activates the practitioner when none remain pending', async () => {
@@ -167,11 +213,20 @@ describe('ProfilesPractitionersService', () => {
 
       const res = await d.service.verifyCredential(
         'c1',
-        { decision: 'VERIFIED' } as any,
+        {
+          decision: 'VERIFIED',
+          verificationSourceUri: 'https://colegiomedico.example/registro/LIC-12345',
+        } as any,
         actor,
       );
 
       expect(credential.stateConceptId).toBe(PROF.CRED_VERIFIED);
+      // La fuente queda persistida: es el rastro que permite auditar después
+      // si la habilitación era legítima.
+      expect(credential).toMatchObject({
+        verificationSourceUri: 'https://colegiomedico.example/registro/LIC-12345',
+        verifiedByUserId: actor.id,
+      });
       expect(practitioner.verificationStatusConceptId).toBe(
         PROF.PRACT_VERIF_VERIFIED,
       );

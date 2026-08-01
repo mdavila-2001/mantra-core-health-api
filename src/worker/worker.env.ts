@@ -1,7 +1,7 @@
 import * as Joi from 'joi';
 
 /**
- * Esquema de entorno compartido por los 20 procesos worker
+ * Esquema de entorno compartido por los 17 procesos worker
  * (`src/worker-<dominio>.ts`, arrancados vía `bootstrapWorker` en
  * `src/worker/bootstrap.ts`). Se concatena al esquema global de
  * `ConfigModule` en cada uno, igual que `authEnvSchema` en `AppModule`: una
@@ -41,21 +41,26 @@ export const workerEnvSchema = Joi.object({
    * (`notification-delivery.job.ts`), borrado cross-store
    * (`deletion-pipeline.job.ts`) y embeddings (`embedding-drain.job.ts`).
    *
-   * Configurada por defecto (no opt-in, a diferencia de `TS_RETENTION_POLICIES`):
-   * apunta a `http://127.0.0.1:4100` porque un adapter que "falla siempre" es
-   * peor que probar contra un doble de prueba honesto en desarrollo. En
-   * producción esta variable sólo admite vacío: cada integración real debe
-   * usar su configuración y adapter dedicados. Así un nombre de variable
-   * heredado de desarrollo nunca puede hacer que un mock aparente éxito.
+   * Configurada por defecto FUERA DE PRODUCCIÓN (no opt-in, a diferencia de
+   * `TS_RETENTION_POLICIES`): apunta a `http://127.0.0.1:4100` porque un adapter
+   * que "falla siempre" es peor que probar contra un doble de prueba honesto en
+   * desarrollo. En un entorno real esto debe apuntar al proveedor real, o quedar
+   * vacío para volver al adapter por defecto, que falla visible en vez de fingir
+   * éxito.
+   *
+   * El default es CONDICIONAL al entorno y no una constante. `ConfigModule`
+   * escribe los defaults de Joi de vuelta en `process.env`
+   * (`assignVariablesToProcess`, solo para claves ausentes), así que un default
+   * fijo aquí gana siempre sobre cualquier comprobación posterior sobre
+   * `process.env`: la guarda de producción de `loadWorkerEnv` nunca llegaría a
+   * ver la variable vacía. Ver `assertMockProviderNotInProduction`.
    */
   MOCK_PROVIDER_BASE_URL: Joi.string()
     .uri()
     .allow('')
-    .when('NODE_ENV', {
-      is: 'production',
-      then: Joi.string().valid('').default(''),
-      otherwise: Joi.string().default('http://127.0.0.1:4100'),
-    }),
+    .default(() =>
+      process.env.NODE_ENV === 'production' ? '' : 'http://127.0.0.1:4100',
+    ),
   MOCK_PROVIDER_API_KEY: Joi.string().allow('').default(''),
   /**
    * Proveedor real de envío de email para `NotificationDeliveryJob` (canal
@@ -94,10 +99,43 @@ export interface WorkerEnv {
   googleSenderEmail: string;
 }
 
+/**
+ * Aborta el arranque si el emulador de proveedores está configurado en
+ * producción.
+ *
+ * `mock-provider-server` **acepta por defecto toda verificación de identidad**:
+ * su tasa de rechazo es 0, así que responde `ACCEPTED` tanto para el documento
+ * de identidad de un paciente (`IDA_CHECK_TYPE_IDENTITY_CARD`) como para la
+ * matrícula de un médico (`IDA_CHECK_TYPE_MEDICAL_LICENSE`). En producción eso
+ * significaría dar por verificada la identidad y la habilitación profesional de
+ * cualquiera, sin que ningún registro civil ni colegio médico haya dicho nada.
+ *
+ * No es una advertencia sino un fallo de arranque, en la misma línea que
+ * `loadAuthEnv` con `JWT_SECRET`: un doble de prueba en producción no es una
+ * configuración inusual que merezca un aviso, es un incidente de seguridad.
+ *
+ * @param source entorno a evaluar; se parametriza para poder probarlo sin
+ *               contaminar `process.env`.
+ */
+export function assertMockProviderNotInProduction(
+  source: NodeJS.ProcessEnv = process.env,
+): void {
+  if (source.NODE_ENV !== 'production') return;
+  const configured = (source.MOCK_PROVIDER_BASE_URL ?? '').trim();
+  if (configured.length === 0) return;
+
+  throw new Error(
+    'MOCK_PROVIDER_BASE_URL está configurada en producción ' +
+      `("${configured}"). mock-provider-server acepta por defecto TODA ` +
+      'verificación de identidad y de matrícula profesional (tasa de rechazo 0), ' +
+      'así que el sistema daría por verificado a cualquiera. Deje la variable ' +
+      'vacía para volver al adapter que falla visible, o apúntela al proveedor real.',
+  );
+}
+
 /** Lee la configuración del worker desde `process.env`. */
 export function loadWorkerEnv(): WorkerEnv {
-  const mockProviderDefault =
-    process.env.NODE_ENV === 'production' ? '' : 'http://127.0.0.1:4100';
+  assertMockProviderNotInProduction();
   return {
     apiBaseUrl: process.env.WORKER_API_BASE_URL ?? 'http://127.0.0.1:3000',
     httpTimeoutMs: Number(process.env.WORKER_HTTP_TIMEOUT_MS ?? 30_000),
@@ -113,7 +151,7 @@ export function loadWorkerEnv(): WorkerEnv {
       process.env.TS_RETENTION_POLICIES ?? '',
     ),
     mockProviderBaseUrl:
-      process.env.MOCK_PROVIDER_BASE_URL ?? mockProviderDefault,
+      process.env.MOCK_PROVIDER_BASE_URL ?? 'http://127.0.0.1:4100',
     mockProviderApiKey: process.env.MOCK_PROVIDER_API_KEY ?? '',
     googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID ?? '',
     googleOAuthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? '',
