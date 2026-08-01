@@ -25,7 +25,10 @@ const ADMIN = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
-describe('Importación de ICD-10-CM (DB real)', () => {
+const describeDataset =
+  process.env.TERMINOLOGY_DATASET_TESTS === '1' ? describe : describe.skip;
+
+describeDataset('Importación de ICD-10-CM (DB real)', () => {
   let db: pg.Client;
 
   beforeAll(async () => {

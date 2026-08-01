@@ -54,7 +54,7 @@ export class DicomCatalogService {
    */
   async catalogStudy(
     dto: CatalogDicomStudyDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<CatalogDicomStudyResponseDto> {
     this.logger.info(
       {

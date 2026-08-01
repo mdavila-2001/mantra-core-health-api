@@ -1,5 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
+import { ACCT } from '../../../src/modules/accounting/accounting.concepts';
 
 /**
  * Smoke del módulo Billing (17). Encadena recursos vía `ctx.vars`:
@@ -165,7 +167,10 @@ export const BILLING_SMOKE: SmokeCase[] = [
     name: 'happy: contabiliza la factura',
     method: 'post',
     path: (c) => `/billing/documents/${c.vars.billingInvoiceId}:post-to-ledger`,
-    body: () => ({ documentType: 'INVOICE', transactionId: UUID_ABSENT }),
+    body: (c) => ({
+      documentType: 'INVOICE',
+      transactionId: c.vars.acctJournalId,
+    }),
     expectedStatus: 200,
   },
   {
@@ -174,7 +179,10 @@ export const BILLING_SMOKE: SmokeCase[] = [
     name: 'límite: doble contabilización -> 409',
     method: 'post',
     path: (c) => `/billing/documents/${c.vars.billingInvoiceId}:post-to-ledger`,
-    body: () => ({ documentType: 'INVOICE', transactionId: UUID_ABSENT }),
+    body: (c) => ({
+      documentType: 'INVOICE',
+      transactionId: c.vars.acctJournalId,
+    }),
     expectedStatus: 409,
   },
   {
@@ -196,8 +204,30 @@ export const BILLING_SMOKE: SmokeCase[] = [
     name: 'happy: concilia el pago recibido',
     method: 'post',
     path: () => '/billing/reconciliation:clear',
+    setup: async (c) => {
+      const clearingDocumentId = randomUUID();
+      await c.orm.em
+        .fork()
+        .getConnection()
+        .execute(
+          `INSERT INTO accounting.clearing_documents
+          (id, tenant_id, clearing_number, transaction_id, clearing_date,
+           company_bank_account_id, payment_transaction_id, status_concept_id,
+           created_at, created_by_user_id)
+         VALUES (?, ?, ?, ?, CURRENT_DATE, NULL, NULL, ?, now(), ?)`,
+          [
+            clearingDocumentId,
+            c.tenantId,
+            `SMOKE-CLEAR-${c.u}`,
+            c.vars.acctJournalId,
+            ACCT.CLEARING_COMPLETED,
+            c.adminUserId,
+          ],
+        );
+      c.vars.billingClearingDocumentId = clearingDocumentId;
+    },
     body: (c) => ({
-      clearingDocumentId: UUID_ABSENT,
+      clearingDocumentId: c.vars.billingClearingDocumentId,
       paymentReceivedIds: [c.vars.billingPaymentReceivedId],
     }),
     expectedStatus: 200,
@@ -210,7 +240,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
     path: () => '/billing/reconciliation:clear',
     auth: false,
     body: (c) => ({
-      clearingDocumentId: UUID_ABSENT,
+      clearingDocumentId: c.vars.billingClearingDocumentId,
       paymentReceivedIds: [c.vars.billingPaymentReceivedId],
     }),
     expectedStatus: 401,

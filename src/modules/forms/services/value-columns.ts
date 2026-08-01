@@ -1,6 +1,46 @@
 import { PreconditionFailedException } from '../../../common';
 import type { ValueColumns } from '../repositories';
 
+function scalarString(dataType: string, value: unknown): string {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'bigint' ||
+    typeof value === 'boolean'
+  ) {
+    return `${value}`;
+  }
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+  throw new PreconditionFailedException(
+    `El valor de ${dataType} debe ser escalar`,
+    { dataType },
+  );
+}
+
+function dateValue(dataType: string, value: unknown): Date {
+  const parsed = new Date(scalarString(dataType, value));
+  if (Number.isNaN(parsed.getTime())) {
+    throw new PreconditionFailedException(
+      `El valor de ${dataType} no es válido`,
+      {
+        dataType,
+      },
+    );
+  }
+  return parsed;
+}
+
+function booleanValue(value: unknown): boolean {
+  if (typeof value === 'boolean') return value;
+  if (value === 'true' || value === 1 || value === '1') return true;
+  if (value === 'false' || value === 0 || value === '0') return false;
+  throw new PreconditionFailedException('El valor boolean no es válido', {
+    dataType: 'boolean',
+  });
+}
+
 /**
  * Traduce un `dataType` técnico + valor a la única columna `value_*` que
  * corresponde (REC 3.4: value[x] exclusivo). Centraliza la exclusividad para que
@@ -18,29 +58,29 @@ export function buildValueColumns(
   }
   switch (dataType) {
     case 'string':
-      return { valueString: String(value) };
+      return { valueString: scalarString(dataType, value) };
     case 'text':
-      return { valueText: String(value) };
+      return { valueText: scalarString(dataType, value) };
     case 'integer':
-      return { valueInteger: String(value) };
+      return { valueInteger: scalarString(dataType, value) };
     case 'decimal':
-      return { valueDecimal: String(value) };
+      return { valueDecimal: scalarString(dataType, value) };
     case 'boolean':
-      return { valueBoolean: Boolean(value) };
+      return { valueBoolean: booleanValue(value) };
     case 'date':
-      return { valueDate: new Date(String(value)) };
+      return { valueDate: dateValue(dataType, value) };
     case 'datetime':
-      return { valueDatetime: new Date(String(value)) };
+      return { valueDatetime: dateValue(dataType, value) };
     case 'time':
-      return { valueTime: String(value) };
+      return { valueTime: scalarString(dataType, value) };
     case 'code':
-      return { valueConceptId: String(value) };
+      return { valueConceptId: scalarString(dataType, value) };
     case 'reference':
-      return { valueReferenceId: String(value) };
+      return { valueReferenceId: scalarString(dataType, value) };
     case 'uuid':
-      return { valueReferenceId: String(value) };
+      return { valueReferenceId: scalarString(dataType, value) };
     case 'binary':
-      return { fileId: String(value) };
+      return { fileId: scalarString(dataType, value) };
     case 'json':
       return { valueJson: value };
     default:

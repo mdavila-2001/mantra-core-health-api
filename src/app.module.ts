@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AppReadinessService } from './app-readiness.service';
 import { OrmModule, ormEnvSchema } from './orm';
 import { LoggingModule, loggingEnvSchema } from './logging';
 import {
@@ -16,6 +17,7 @@ import {
   AuthModule,
   FileStorageModule,
   TenantContextInterceptor,
+  appSecurityEnvSchema,
   authEnvSchema,
   storageEnvSchema,
 } from './common';
@@ -96,6 +98,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
       validationSchema: ormEnvSchema
         .concat(loggingEnvSchema)
         .concat(authEnvSchema)
+        .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(telemetryEnvSchema),
     }),
@@ -195,6 +198,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
   controllers: [AppController],
   providers: [
     AppService,
+    AppReadinessService,
     // Filtro global de excepciones: homogeneiza el contrato de error y decide
     // qué se registra y qué se oculta al cliente. Ver AllExceptionsFilter.
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

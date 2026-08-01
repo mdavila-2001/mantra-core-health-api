@@ -71,7 +71,10 @@ async function fetchLiveShortName(code: string): Promise<string | null> {
   return ef.SHORTNAME[idx] ?? null;
 }
 
-describe('Importación de LOINC (DB real vs. API NLM en vivo)', () => {
+const describeDataset =
+  process.env.TERMINOLOGY_DATASET_TESTS === '1' ? describe : describe.skip;
+
+describeDataset('Importación de LOINC (DB real vs. API NLM en vivo)', () => {
   let db: pg.Client;
 
   beforeAll(async () => {

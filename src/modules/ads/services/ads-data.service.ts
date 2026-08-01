@@ -376,7 +376,7 @@ export class AdsDataService {
   async sendConversion(
     datasetId: string,
     dto: SendConversionDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<SendConversionResponseDto> {
     this.logger.info(
       { operation: 'ads.conversion.send', datasetId, eventName: dto.eventName },

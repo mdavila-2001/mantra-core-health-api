@@ -40,7 +40,7 @@ function build() {
     em as any,
     dunningRepo,
     invoicesRepo as any,
-    practicesLookupRepo,
+    practicesLookupRepo as any,
     logger as any,
   );
   return { service, tx, dunningRepo, invoicesRepo, practicesLookupRepo };
@@ -133,6 +133,9 @@ describe('DunningService.runDueDunning (tick de morosidad automática)', () => {
     const res = await d.service.runDueDunning({}, actor);
 
     expect(res.tenantsProcessed).toBe(1);
+    expect(d.practicesLookupRepo.findActive).toHaveBeenCalledWith(
+      CONCEPTS.STATE_ACTIVE,
+    );
     expect(res.results[0]).toMatchObject({
       tenantId: 't1',
       itemCount: 1,

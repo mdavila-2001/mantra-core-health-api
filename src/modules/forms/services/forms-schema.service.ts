@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHash } from 'node:crypto';
 import {
-  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,

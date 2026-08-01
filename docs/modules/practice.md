@@ -9,7 +9,7 @@
 # Módulo `practice`
 
 **Fuente:** [`src/modules/practice/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/practice/README.md)
-· 5 controllers · 6 services · 11 repositories · 11 entidades · 13 DTO
+· 5 controllers · 7 services · 11 repositories · 11 entidades · 13 DTO
 
 ---
 

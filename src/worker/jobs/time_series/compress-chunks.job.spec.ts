@@ -62,9 +62,11 @@ describe('CompressChunksJob', () => {
 
   it('un fallo en una tabla no impide comprimir el resto', async () => {
     const d = build();
-    d.api.post
-      .mockRejectedValueOnce(new Error('API caída'))
-      .mockResolvedValue({ table: 'x', chunksCompressed: 0, remainingChunks: [] });
+    d.api.post.mockRejectedValueOnce(new Error('API caída')).mockResolvedValue({
+      table: 'x',
+      chunksCompressed: 0,
+      remainingChunks: [],
+    });
 
     await d.job.tick();
 

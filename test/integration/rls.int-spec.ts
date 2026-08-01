@@ -6,14 +6,15 @@ import pg from 'pg';
 /**
  * Verificación REAL de Row Level Security por tenant contra la base de datos.
  *
- * Aplica `SQL/patches/2026-07-30_tenant_rls.sql`, en la raíz del repositorio
+ * Aplica `database/SQL/99_rls/01_tenant_rls.sql`, en la raíz del repositorio
  * (crea el rol `mantra_app` sin BYPASSRLS, otorga privilegios y activa las
  * políticas en todas las tablas con `tenant_id`), y demuestra, conectado COMO
  * `mantra_app`, que:
  *   1. Con `app.current_tenant_id` fijado a un tenant, sólo se ven sus filas.
  *   2. Insertar una fila de otro tenant se rechaza (WITH CHECK).
- *   3. Sin el GUC fijado, la política es permisiva (contexto de sistema).
- *   4. RLS quedó activado en las tablas reales con `tenant_id`.
+ *   3. Sin el GUC fijado, la política falla cerrada (cero filas).
+ *   4. La elevación SYSTEM explícita puede barrer todos los tenants.
+ *   5. RLS quedó activado en las tablas reales con `tenant_id`.
  *
  * La prueba usa una tabla-sonda con la MISMA política que la migración aplica a
  * las 284 tablas reales, así que prueba el mecanismo (GUC + FORCE + rol no
@@ -26,7 +27,14 @@ const ADMIN = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
-const APP = { ...ADMIN, user: 'mantra_app', password: 'mantra_app_dev' };
+const BOOTSTRAP_LOCAL_ROLE = process.env.RLS_TEST_BOOTSTRAP_LOCAL_ROLE === '1';
+const APP = {
+  ...ADMIN,
+  user: process.env.DB_APP_USER ?? 'mantra_app',
+  password:
+    process.env.DB_APP_PASSWORD ??
+    (BOOTSTRAP_LOCAL_ROLE ? 'mantra_app_dev' : undefined),
+};
 
 const TENANT_A = '11111111-1111-4111-8111-111111111111';
 const TENANT_B = '22222222-2222-4222-8222-222222222222';
@@ -53,10 +61,21 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
 
     // Aplica la migración de RLS (idempotente).
     const sql = readFileSync(
-      join(process.cwd(), '..', 'SQL', 'patches', '2026-07-30_tenant_rls.sql'),
+      join(process.cwd(), 'database', 'SQL', '99_rls', '01_tenant_rls.sql'),
       'utf8',
     );
     await admin.query(sql);
+
+    if (!APP.password) {
+      throw new Error(
+        'Defina DB_APP_PASSWORD o use RLS_TEST_BOOTSTRAP_LOCAL_ROLE=1 sólo en una base local desechable',
+      );
+    }
+    if (BOOTSTRAP_LOCAL_ROLE) {
+      await admin.query(
+        "ALTER ROLE mantra_app LOGIN PASSWORD 'mantra_app_dev'",
+      );
+    }
 
     // Tabla-sonda con la misma política que la migración.
     await admin.query('DROP TABLE IF EXISTS public.rls_probe');
@@ -70,12 +89,12 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
     );
     await admin.query(`
       CREATE POLICY tenant_isolation ON public.rls_probe
-        USING (current_setting('app.current_tenant_id', true) IS NULL
-          OR current_setting('app.current_tenant_id', true) = ''
-          OR tenant_id = current_setting('app.current_tenant_id', true)::uuid)
-        WITH CHECK (current_setting('app.current_tenant_id', true) IS NULL
-          OR current_setting('app.current_tenant_id', true) = ''
-          OR tenant_id = current_setting('app.current_tenant_id', true)::uuid)
+        USING (tenant_id = NULLIF(
+          current_setting('app.current_tenant_id', true), ''
+        )::uuid OR current_setting('app.system_context', true) = 'true')
+        WITH CHECK (tenant_id = NULLIF(
+          current_setting('app.current_tenant_id', true), ''
+        )::uuid OR current_setting('app.system_context', true) = 'true')
     `);
     await admin.query(
       'GRANT SELECT, INSERT, UPDATE, DELETE ON public.rls_probe TO mantra_app',
@@ -96,6 +115,11 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
       await admin
         .query('DROP TABLE IF EXISTS public.rls_probe')
         .catch(() => undefined);
+      if (BOOTSTRAP_LOCAL_ROLE) {
+        await admin
+          .query('ALTER ROLE mantra_app NOLOGIN')
+          .catch(() => undefined);
+      }
       await admin.end();
     }
   });
@@ -143,10 +167,24 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
     }
   });
 
-  it('sin GUC fijado la política es permisiva (contexto de sistema)', async () => {
+  it('sin GUC fijado la política falla cerrada', async () => {
     const app = new pg.Client(APP);
     await app.connect();
     try {
+      const { rows } = await app.query(
+        'SELECT count(*)::int AS n FROM public.rls_probe',
+      );
+      expect(rows[0].n).toBe(0);
+    } finally {
+      await app.end();
+    }
+  });
+
+  it('el contexto SYSTEM explícito puede barrer todos los tenants', async () => {
+    const app = new pg.Client(APP);
+    await app.connect();
+    try {
+      await app.query("SELECT set_config('app.system_context', 'true', false)");
       const { rows } = await app.query(
         'SELECT count(*)::int AS n FROM public.rls_probe',
       );

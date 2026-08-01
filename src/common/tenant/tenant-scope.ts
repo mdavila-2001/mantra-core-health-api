@@ -29,6 +29,27 @@ export interface TenantScopeViolation {
   readonly declared: string;
 }
 
+/** Campo de propiedad de tenant declarado por una entrada HTTP. */
+export interface TenantScopeDeclaration {
+  readonly field: string;
+  readonly declared: string;
+}
+
+/** Lista las declaraciones de tenant propietario presentes en el primer nivel. */
+export function listTenantScopeDeclarations(
+  input: unknown,
+): TenantScopeDeclaration[] {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    return [];
+  }
+
+  const record = input as Record<string, unknown>;
+  return OWNERSHIP_FIELDS.flatMap((field) => {
+    const declared = record[field];
+    return typeof declared === 'string' ? [{ field, declared }] : [];
+  });
+}
+
 /**
  * Busca en `body` un campo de propiedad cuyo valor difiera de `tenantId`.
  *
@@ -41,15 +62,9 @@ export function findTenantScopeViolation(
   body: unknown,
   tenantId: string,
 ): TenantScopeViolation | undefined {
-  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
-    return undefined;
-  }
-
-  const record = body as Record<string, unknown>;
-  for (const field of OWNERSHIP_FIELDS) {
-    const declared = record[field];
-    if (typeof declared === 'string' && declared !== tenantId) {
-      return { field, declared };
+  for (const declaration of listTenantScopeDeclarations(body)) {
+    if (declaration.declared !== tenantId) {
+      return declaration;
     }
   }
   return undefined;

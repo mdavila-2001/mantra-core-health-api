@@ -129,6 +129,14 @@ export class SearchIndexService {
     this.logger.setContext(SearchIndexService.name);
   }
 
+  /** Comprueba que el cluster responde y no está en estado rojo. */
+  async ping(): Promise<void> {
+    const response = await this.client.cluster.health({ timeout: '2s' });
+    if (response.body.status === 'red') {
+      throw new Error('OpenSearch está en estado red');
+    }
+  }
+
   /**
    * Crea el índice con sus mappings si aún no existe. Idempotente: si ya existe
    * no lo recrea (y no reescribe mappings, que en OpenSearch no se reducen).
@@ -252,7 +260,10 @@ export class SearchIndexService {
         ]
       : [{ match_all: {} }];
 
-    const aggregations: Record<string, any> = {};
+    const aggregations: Record<
+      string,
+      { terms: { field: string; size: number } }
+    > = {};
     for (const field of params.facets ?? []) {
       this.assertAllowedField(def, field, def.facetFields, 'faceta');
       aggregations[field] = {
@@ -352,15 +363,24 @@ export class SearchIndexService {
   // --- Internos -------------------------------------------------------------
 
   /** Traduce el cuerpo de OpenSearch a la forma normalizada del dominio. */
-  private normalizeResult(body: any): SearchResult {
-    const rawHits: any[] = body?.hits?.hits ?? [];
-    const totalValue = body?.hits?.total?.value ?? body?.hits?.total ?? 0;
+  private normalizeResult(body: unknown): SearchResult {
+    const root = this.asRecord(body);
+    const hitContainer = this.asRecord(root.hits);
+    const rawHits = this.asUnknownArray(hitContainer.hits);
+    const totalRecord = this.asRecord(hitContainer.total);
+    const totalValue =
+      this.asNumber(totalRecord.value) ??
+      this.asNumber(hitContainer.total) ??
+      0;
 
-    const hits: SearchHit[] = rawHits.map((hit) => ({
-      id: String(hit._id),
-      score: hit._score ?? null,
-      source: (hit._source ?? {}) as Record<string, unknown>,
-    }));
+    const hits: SearchHit[] = rawHits.map((rawHit) => {
+      const hit = this.asRecord(rawHit);
+      return {
+        id: this.asString(hit._id),
+        score: this.asNumber(hit._score),
+        source: this.asRecord(hit._source),
+      };
+    });
 
     const facets: Record<
       string,
@@ -374,16 +394,42 @@ export class SearchIndexService {
         count: number;
       }>
     > = {};
-    const aggregations = body?.aggregations ?? {};
-    for (const [field, agg] of Object.entries<any>(aggregations)) {
-      const buckets: any[] = agg?.buckets ?? [];
-      facets[field] = buckets.map((bucket) => ({
-        key: String(bucket.key),
-        count: Number(bucket.doc_count ?? 0),
-      }));
+    const aggregations = this.asRecord(root.aggregations);
+    for (const [field, rawAggregation] of Object.entries(aggregations)) {
+      const aggregation = this.asRecord(rawAggregation);
+      const buckets = this.asUnknownArray(aggregation.buckets);
+      facets[field] = buckets.map((rawBucket) => {
+        const bucket = this.asRecord(rawBucket);
+        return {
+          key: this.asString(bucket.key),
+          count: this.asNumber(bucket.doc_count) ?? 0,
+        };
+      });
     }
 
-    return { total: Number(totalValue), hits, facets };
+    return { total: totalValue, hits, facets };
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  }
+
+  private asUnknownArray(value: unknown): unknown[] {
+    return Array.isArray(value) ? (value as unknown[]) : [];
+  }
+
+  private asNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
+  private asString(value: unknown): string {
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'bigint') {
+      return `${value}`;
+    }
+    return '';
   }
 
   /** Resuelve el índice por la whitelist o lanza 404. */

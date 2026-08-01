@@ -4,7 +4,7 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "extensionsToTreatAsEsm": [".ts"],
   "transform": {
-    "^.+\\.(t|j)s$": ["ts-jest", { "useESM": true, "tsconfig": "<rootDir>/test/tsconfig.integration.json" }]
+    "^.+\\.(t|j)s$": "@swc/jest"
   },
   "testEnvironment": "node",
   "testTimeout": 180000,

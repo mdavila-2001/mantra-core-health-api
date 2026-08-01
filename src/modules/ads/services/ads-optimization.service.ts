@@ -673,7 +673,7 @@ export class AdsOptimizationService {
   async submitLead(
     leadFormId: string,
     dto: SubmitLeadDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<LeadSubmissionResponseDto> {
     this.logger.info(
       { operation: 'ads.lead.submit', leadFormId },

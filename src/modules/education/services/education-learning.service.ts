@@ -919,16 +919,23 @@ export class EducationLearningService {
    */
   private answersMatch(expected: unknown, given: unknown): boolean {
     if (given === undefined || given === null) return false;
-    if (Array.isArray(expected) && Array.isArray(given)) {
+    if (this.isUnknownArray(expected) && this.isUnknownArray(given)) {
       if (expected.length !== given.length) return false;
-      const sortedExpected = [...expected].map(String).sort();
-      const sortedGiven = [...given].map(String).sort();
+      const sortedExpected = expected.map(this.answerToken).sort();
+      const sortedGiven = given.map(this.answerToken).sort();
       return sortedExpected.every(
         (value, index) => value === sortedGiven[index],
       );
     }
     return JSON.stringify(expected) === JSON.stringify(given);
   }
+
+  private isUnknownArray(value: unknown): value is unknown[] {
+    return Array.isArray(value);
+  }
+
+  private readonly answerToken = (value: unknown): string =>
+    JSON.stringify(value) ?? 'undefined';
 
   /** Número legible del certificado, único; se reintenta si colisiona. */
   private async generateCertificateNumber(

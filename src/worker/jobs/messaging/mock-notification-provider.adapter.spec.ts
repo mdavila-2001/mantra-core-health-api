@@ -38,7 +38,11 @@ describe('createMockNotificationProviderAdapter', () => {
 
   it('usa recipientUserId si no hay recipientAddress', async () => {
     const client = { post: mockFn() };
-    client.post.mockResolvedValue({ id: 'x', outcome: 'FAILED', errorCode: 'E' });
+    client.post.mockResolvedValue({
+      id: 'x',
+      outcome: 'FAILED',
+      errorCode: 'E',
+    });
     const adapter = createMockNotificationProviderAdapter(client as any);
 
     await adapter({

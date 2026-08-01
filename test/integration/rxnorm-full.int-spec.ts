@@ -45,40 +45,45 @@ const ADMIN = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
-describe('Importación de RxNorm completo (todos los TTY, vía RxNav REST) (DB real)', () => {
-  let db: pg.Client;
+const describeDataset =
+  process.env.TERMINOLOGY_DATASET_TESTS === '1' ? describe : describe.skip;
 
-  beforeAll(async () => {
-    db = new pg.Client(ADMIN);
-    await db.connect();
-  }, 30000);
+describeDataset(
+  'Importación de RxNorm completo (todos los TTY, vía RxNav REST) (DB real)',
+  () => {
+    let db: pg.Client;
 
-  afterAll(async () => {
-    if (db) await db.end();
-  });
+    beforeAll(async () => {
+      db = new pg.Client(ADMIN);
+      await db.connect();
+    }, 30000);
 
-  it('el catálogo rxnorm_full tiene más de 100,000 conceptos (RXCUIs) importados', async () => {
-    const { rows } = await db.query(`
+    afterAll(async () => {
+      if (db) await db.end();
+    });
+
+    it('el catálogo rxnorm_full tiene más de 100,000 conceptos (RXCUIs) importados', async () => {
+      const { rows } = await db.query(`
       SELECT count(*)::bigint AS n
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
       JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
       WHERE cs.internal_code = 'rxnorm_full'
     `);
-    const count = Number(rows[0].n);
-    expect(count).toBeGreaterThan(100000);
-  });
+      const count = Number(rows[0].n);
+      expect(count).toBeGreaterThan(100000);
+    });
 
-  it.each([
-    ['IN', 10000],
-    ['SCD', 15000],
-    ['SBD', 8000],
-    ['BN', 4000],
-  ])(
-    'el TTY %s tiene más de %d conceptos con la propiedad term_type correspondiente',
-    async (tty, minCount) => {
-      const { rows } = await db.query(
-        `
+    it.each([
+      ['IN', 10000],
+      ['SCD', 15000],
+      ['SBD', 8000],
+      ['BN', 4000],
+    ])(
+      'el TTY %s tiene más de %d conceptos con la propiedad term_type correspondiente',
+      async (tty, minCount) => {
+        const { rows } = await db.query(
+          `
       SELECT count(*)::bigint AS n
       FROM terminology.concept_properties p
       JOIN terminology.catalog_concepts cc ON cc.id = p.concept_id
@@ -88,21 +93,21 @@ describe('Importación de RxNorm completo (todos los TTY, vía RxNav REST) (DB r
         AND p.property_code = 'term_type'
         AND p.value_json #>> '{}' = $1
       `,
-        [tty],
-      );
-      expect(Number(rows[0].n)).toBeGreaterThan(minCount);
-    },
-  );
+          [tty],
+        );
+        expect(Number(rows[0].n)).toBeGreaterThan(minCount);
+      },
+    );
 
-  it.each([
-    ['197884', 'lisinopril 40 MG Oral Tablet', 'SCD'],
-    ['29046', 'lisinopril', 'IN'],
-    ['5640', 'ibuprofen', 'IN'],
-  ])(
-    'el RXCUI %s existe con display "%s" y term_type "%s"',
-    async (rxcui, expectedDisplay, expectedTty) => {
-      const { rows } = await db.query(
-        `
+    it.each([
+      ['197884', 'lisinopril 40 MG Oral Tablet', 'SCD'],
+      ['29046', 'lisinopril', 'IN'],
+      ['5640', 'ibuprofen', 'IN'],
+    ])(
+      'el RXCUI %s existe con display "%s" y term_type "%s"',
+      async (rxcui, expectedDisplay, expectedTty) => {
+        const { rows } = await db.query(
+          `
       SELECT cc.code, cc.display, p.value_json #>> '{}' AS term_type
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
@@ -112,43 +117,43 @@ describe('Importación de RxNorm completo (todos los TTY, vía RxNav REST) (DB r
       WHERE cs.internal_code = 'rxnorm_full'
         AND cc.code = $1
       `,
-        [rxcui],
-      );
-      expect(rows).toHaveLength(1);
-      expect(rows[0].display).toBe(expectedDisplay);
-      expect(rows[0].term_type).toBe(expectedTty);
-    },
-  );
+          [rxcui],
+        );
+        expect(rows).toHaveLength(1);
+        expect(rows[0].display).toBe(expectedDisplay);
+        expect(rows[0].term_type).toBe(expectedTty);
+      },
+    );
 
-  it('el code_system_version de rxnorm_full está marcado como default', async () => {
-    const { rows } = await db.query(`
+    it('el code_system_version de rxnorm_full está marcado como default', async () => {
+      const { rows } = await db.query(`
       SELECT csv.version, csv.is_default
       FROM terminology.code_system_versions csv
       JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
       WHERE cs.internal_code = 'rxnorm_full'
     `);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].is_default).toBe(true);
-  });
+      expect(rows).toHaveLength(1);
+      expect(rows[0].is_default).toBe(true);
+    });
 
-  it('el code_systems rxnorm_full reutiliza el terminology_sources RXNORM existente (no duplica la fuente)', async () => {
-    const { rows } = await db.query(`
+    it('el code_systems rxnorm_full reutiliza el terminology_sources RXNORM existente (no duplica la fuente)', async () => {
+      const { rows } = await db.query(`
       SELECT ts.code AS source_code
       FROM terminology.code_systems cs
       JOIN terminology.terminology_sources ts ON ts.id = cs.source_id
       WHERE cs.internal_code = 'rxnorm_full'
     `);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].source_code).toBe('RXNORM');
+      expect(rows).toHaveLength(1);
+      expect(rows[0].source_code).toBe('RXNORM');
 
-    const { rows: sourceRows } = await db.query(
-      `SELECT count(*)::bigint AS n FROM terminology.terminology_sources WHERE code = 'RXNORM'`,
-    );
-    expect(Number(sourceRows[0].n)).toBe(1);
-  });
+      const { rows: sourceRows } = await db.query(
+        `SELECT count(*)::bigint AS n FROM terminology.terminology_sources WHERE code = 'RXNORM'`,
+      );
+      expect(Number(sourceRows[0].n)).toBe(1);
+    });
 
-  it('rxnorm_full es un catálogo separado de rxterms: ambos coexisten y rxterms conserva su conteo previo (>15,000)', async () => {
-    const { rows } = await db.query(`
+    it('rxnorm_full es un catálogo separado de rxterms: ambos coexisten y rxterms conserva su conteo previo (>15,000)', async () => {
+      const { rows } = await db.query(`
       SELECT cs.internal_code, count(*)::bigint AS n
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
@@ -156,10 +161,11 @@ describe('Importación de RxNorm completo (todos los TTY, vía RxNav REST) (DB r
       WHERE cs.internal_code IN ('rxterms', 'rxnorm_full')
       GROUP BY cs.internal_code
     `);
-    const byCode = Object.fromEntries(
-      rows.map((r) => [r.internal_code, Number(r.n)]),
-    );
-    expect(byCode.rxterms).toBeGreaterThan(15000);
-    expect(byCode.rxnorm_full).toBeGreaterThan(100000);
-  });
-});
+      const byCode = Object.fromEntries(
+        rows.map((r) => [r.internal_code, Number(r.n)]),
+      );
+      expect(byCode.rxterms).toBeGreaterThan(15000);
+      expect(byCode.rxnorm_full).toBeGreaterThan(100000);
+    });
+  },
+);

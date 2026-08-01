@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { Practices } from '../practice/entities';
+import { PracticeModule } from '../practice/practice.module';
 import {
   BillingReceivablesController,
   BillingPayablesController,
@@ -29,7 +29,6 @@ import {
   PatientStatementsRepository,
   DunningRepository,
   KpiSnapshotsRepository,
-  PracticesLookupRepository,
 } from './repositories';
 
 /**
@@ -41,9 +40,9 @@ import {
 @Module({
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
-    // Sólo para PracticesLookupRepository (agrupar facturas por tenant vía
-    // practice_id — ver su docstring). No importa el resto de `practice`.
-    MikroOrmModule.forFeature([Practices]),
+    // Puerto de lectura público para agrupar facturas por tenant sin importar
+    // la entidad ORM de Practice dentro del dominio Billing.
+    PracticeModule,
   ],
   controllers: [
     BillingReceivablesController,
@@ -61,7 +60,6 @@ import {
     PatientStatementsRepository,
     DunningRepository,
     KpiSnapshotsRepository,
-    PracticesLookupRepository,
     // Servicios
     InvoicesService,
     PaymentsReceivedService,

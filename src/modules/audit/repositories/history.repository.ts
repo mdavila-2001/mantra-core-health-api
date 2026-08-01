@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { EntityClass, EntityData, FilterQuery } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   UsersHistory,
@@ -56,15 +57,29 @@ export interface HistoryRevision {
 /**
  * Describe el contrato estructural de history binding.
  */
+interface HistoryEntity {
+  revisionNo?: number;
+  rowVersion?: number;
+  operationConceptId: string;
+  validFrom?: Date;
+  validTo?: Date;
+  changedByUserId?: string;
+  changeReasonConceptId?: string;
+  recordedAt: Date;
+  dataSnapshot: unknown;
+}
+
 interface HistoryBinding {
   /**
    * Valor de entity mantenido por la instancia.
    */
-  entity: any;
+  entity: EntityClass<HistoryEntity>;
   /**
    * Valor de source field mantenido por la instancia.
    */
   sourceField: string;
+  /** Campo correlativo real de la tabla; algunos historiales legados usan row_version. */
+  revisionField: 'revisionNo' | 'rowVersion';
 }
 
 /**
@@ -74,23 +89,35 @@ interface HistoryBinding {
  * añadiendo entradas.
  */
 const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
-  users: { entity: UsersHistory, sourceField: 'userId' },
+  users: {
+    entity: UsersHistory,
+    sourceField: 'userId',
+    revisionField: 'revisionNo',
+  },
   patient_profiles: {
     entity: PatientProfilesHistory,
     sourceField: 'patientProfileId',
+    revisionField: 'revisionNo',
   },
-  consents: { entity: ConsentsHistory, sourceField: 'consentId' },
+  consents: {
+    entity: ConsentsHistory,
+    sourceField: 'consentId',
+    revisionField: 'revisionNo',
+  },
   moderation_decisions: {
     entity: ModerationDecisionsHistory,
     sourceField: 'moderationDecisionsId',
+    revisionField: 'rowVersion',
   },
   medication_requests: {
     entity: MedicationRequestsHistory,
     sourceField: 'medicationRequestId',
+    revisionField: 'revisionNo',
   },
   appointment_bookings: {
     entity: AppointmentBookingsHistory,
     sourceField: 'appointmentBookingId',
+    revisionField: 'revisionNo',
   },
 };
 
@@ -124,33 +151,28 @@ export class HistoryRepository {
       throw new Error(`Entidad de historial no registrada: ${entity}`);
     }
     const now = new Date();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const prev = await (em.find as any)(
-      binding.entity,
-      { [binding.sourceField]: id, validTo: null },
-      {},
-    );
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const row of prev as any[]) row.validTo = now;
+    const sourceFilter = {
+      [binding.sourceField]: id,
+    } as FilterQuery<HistoryEntity>;
+    const prev = await em.find(binding.entity, {
+      ...sourceFilter,
+      validTo: null,
+    });
+    for (const row of prev) row.validTo = now;
 
-    const revisionNo =
-      (await em.count(binding.entity, { [binding.sourceField]: id })) + 1;
+    const revisionNo = (await em.count(binding.entity, sourceFilter)) + 1;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (em.create as any)(
-      binding.entity,
-      {
-        [binding.sourceField]: id,
-        revisionNo,
-        operationConceptId: data.operationConceptId,
-        validFrom: now,
-        dataSnapshot: data.dataSnapshot,
-        changedByUserId: data.changedByUserId,
-        changeReasonConceptId: data.changeReasonConceptId,
-        recordedAt: now,
-      },
-      { partial: true },
-    );
+    const historyData: EntityData<HistoryEntity> & Record<string, unknown> = {
+      operationConceptId: data.operationConceptId,
+      validFrom: now,
+      dataSnapshot: data.dataSnapshot,
+      changedByUserId: data.changedByUserId,
+      changeReasonConceptId: data.changeReasonConceptId,
+      recordedAt: now,
+    };
+    historyData[binding.sourceField] = id;
+    historyData[binding.revisionField] = revisionNo;
+    em.create(binding.entity, historyData, { partial: true });
   }
 
   /**
@@ -166,21 +188,22 @@ export class HistoryRepository {
     const binding = HISTORY_REGISTRY[entity];
     if (!binding) return [];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: Record<string, any> = { [binding.sourceField]: id };
-    if (asOf) {
-      where.validFrom = { $lte: asOf };
-      where.$or = [{ validTo: null }, { validTo: { $gt: asOf } }];
-    }
+    const where = (
+      asOf
+        ? {
+            [binding.sourceField]: id,
+            validFrom: { $lte: asOf },
+            $or: [{ validTo: null }, { validTo: { $gt: asOf } }],
+          }
+        : { [binding.sourceField]: id }
+    ) as FilterQuery<HistoryEntity>;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = await (em.find as any)(binding.entity, where, {
+    const rows = await em.find(binding.entity, where, {
       orderBy: { recordedAt: 'asc' },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (rows as any[]).map((r) => ({
-      revisionNo: r.revisionNo,
+    return rows.map((r) => ({
+      revisionNo: r.revisionNo ?? r.rowVersion,
       operationConceptId: r.operationConceptId,
       validFrom: r.validFrom,
       validTo: r.validTo,

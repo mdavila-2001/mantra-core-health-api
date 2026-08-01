@@ -273,6 +273,21 @@ export class IdentityVerificationAttemptsRepository {
     return n > 0;
   }
 
+  /** Último intento completado, usado para atribuir la autoridad emisora. */
+  findLatestCompletedByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityVerificationAttempts | null> {
+    return em.findOne(
+      IdentityVerificationAttempts,
+      {
+        identityVerificationCaseId: caseId,
+        completedAt: { $ne: null },
+      },
+      { orderBy: { attemptNumber: 'DESC' } },
+    );
+  }
+
   /**
    * Último intento registrado del caso, sin importar su desenlace.
    *

@@ -10,18 +10,12 @@ import { UUID_ABSENT } from '../smoke-kit';
  * afiliación (que la incluye) → terminarla.
  *
  * Referencias cross-módulo (`tenant_id`, `practice_id`, `participating_tenant_id`)
- * son columnas uuid sin FK forzada en BD, así que se derivan por corrida a partir
- * de `ctx.u` para no colisionar con las reglas de unicidad de la app (hospital
- * 1:1 por tenant/practice, licencia por número, frontera por tenant/tipo). El
- * único FK forzado que se encadena es `hospital_service_lines.hospital_id`.
+ * se resuelven con los recursos reales creados por Directory y Practice. Así se
+ * ejercita una afiliación entre dos tenants distintos y sus fronteras de datos.
  *
  * Ids expuestos: `vars.orgextHospitalId`, `vars.orgextLicenseId`,
  * `vars.orgextLineId`, `vars.orgextAffiliationId`.
  */
-
-/** UUID estable por corrida (y por eje `tag`) para tenants/practices sin FK forzada. */
-const runUuid = (u: number, tag: string): string =>
-  `00000000-0000-4000-8000-${tag}${String(u).padStart(11, '0').slice(-11)}`;
 
 // hospitals.tenant_id es FK a directory.tenants → usar el tenant sembrado.
 /**
@@ -38,16 +32,15 @@ const hospitalTenant = (c: SmokeCtx) => c.tenantId;
  * @returns Resultado de hospital practice.
  */
 const hospitalPractice = (c: SmokeCtx) => c.vars.pracPracticeId;
-// data_boundaries.tenant_id también es FK a directory.tenants → tenant sembrado.
-// (Las afiliaciones exigen dos tenants distintos; con uno solo su happy-path queda
-// documentado como limitación por falta de un segundo tenant sembrado.)
+// data_boundaries.tenant_id también es FK a directory.tenants; Directory crea un
+// segundo tenant que permite probar una afiliación real entre organizaciones.
 /**
  * Ejecuta la operación participating tenant.
  *
  * @param c - Valor de c requerido por la operación.
  * @returns Resultado de participating tenant.
  */
-const participatingTenant = (c: SmokeCtx) => c.tenantId;
+const participatingTenant = (c: SmokeCtx) => c.vars.dirTenantId;
 
 export const ORGANIZATION_EXTENSIONS_SMOKE: SmokeCase[] = [
   // ---- UC-22-01: especializar hospital -------------------------------------

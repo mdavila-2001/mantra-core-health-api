@@ -37,6 +37,11 @@ export class DocumentStoreService {
     this.logger.setContext(DocumentStoreService.name);
   }
 
+  /** Verifica MongoDB para readiness sin exponer el driver al controlador raíz. */
+  ping(): Promise<void> {
+    return this.repo.ping();
+  }
+
   /** Crea un documento en la colección, gobernado por tenant y tipo. */
   async create(
     collection: string,

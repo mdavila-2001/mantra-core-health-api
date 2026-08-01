@@ -412,11 +412,26 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'Direct care',
   ),
 
-  // --- Directory: tenant por defecto ---
+  // --- Directory: tipo de organización (tenants.tenant_type_concept_id) ---
+  // Los tres perfiles que el sistema distingue de verdad: quien presta la
+  // atención, quien la financia y quien la intermedia. No son etiquetas
+  // decorativas — `insurance` ya modela `insurance_carriers` e
+  // `insurance_brokers` colgando de un tenant, así que sin estos tipos una
+  // aseguradora y un prestador quedaban indistinguibles en `directory`.
   TENANT_TYPE_PROVIDER: def(
     'directory:tenant-type:provider',
     'PROVIDER',
     'Healthcare provider',
+  ),
+  TENANT_TYPE_PAYER: def(
+    'directory:tenant-type:payer',
+    'PAYER',
+    'Insurance payer / carrier',
+  ),
+  TENANT_TYPE_BROKER: def(
+    'directory:tenant-type:broker',
+    'BROKER',
+    'Insurance broker',
   ),
   LEGAL_ENTITY_COMPANY: def(
     'directory:legal-entity:company',

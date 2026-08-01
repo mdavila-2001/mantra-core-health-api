@@ -148,7 +148,7 @@ export class DeletionService {
   async expandDeletion(
     requestId: string,
     dto: ExpandDeletionDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ExpandDeletionResponseDto> {
     return this.em.transactional(async (tx) => {
       const request = await this.deletionRepo.findRequestForUpdate(
@@ -290,7 +290,7 @@ export class DeletionService {
   async executeDeletion(
     targetId: string,
     dto: ExecuteDeletionDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<DeletionExecutionResponseDto> {
     return this.em.transactional(async (tx) => {
       const target = await this.deletionRepo.findTargetForUpdate(tx, targetId);
@@ -379,7 +379,7 @@ export class DeletionService {
   async verifyDeletion(
     targetId: string,
     dto: VerifyDeletionDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<VerificationResponseDto> {
     return this.em.transactional(async (tx) => {
       const target = await this.deletionRepo.findTargetForUpdate(tx, targetId);

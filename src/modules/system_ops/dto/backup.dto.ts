@@ -8,7 +8,6 @@ import {
   IsUUID,
   MaxLength,
   Min,
-  MinLength,
 } from 'class-validator';
 
 /** Cuerpo de `POST /admin/ops/backup-policies` (UC-11-09). */

@@ -74,20 +74,22 @@ export class EmbeddingDrainJob {
 
   @Interval(DRAIN_INTERVAL_MS)
   async tick(): Promise<void> {
-    await runTick(this.logger, 'worker.vector_rag.embedding-drain', async () => {
-      const pending = await this.api.get<PendingEmbeddingJobsResponse>(
-        '/vector-rag/embedding-jobs/pending',
-        { limit: JOB_LIMIT },
-      );
-
-      for (const job of pending.jobs) {
-        await runTick(
-          this.logger,
-          'worker.vector_rag.embedding-drain',
-          () => this.runOne(job),
+    await runTick(
+      this.logger,
+      'worker.vector_rag.embedding-drain',
+      async () => {
+        const pending = await this.api.get<PendingEmbeddingJobsResponse>(
+          '/vector-rag/embedding-jobs/pending',
+          { limit: JOB_LIMIT },
         );
-      }
-    });
+
+        for (const job of pending.jobs) {
+          await runTick(this.logger, 'worker.vector_rag.embedding-drain', () =>
+            this.runOne(job),
+          );
+        }
+      },
+    );
   }
 
   private async runOne(job: QueuedEmbeddingJobSummary): Promise<void> {

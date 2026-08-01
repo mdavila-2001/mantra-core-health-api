@@ -5,7 +5,6 @@ import { randomUUID } from 'node:crypto';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
-  type AuthenticatedUser,
 } from '../../../common';
 import {
   TELE,
@@ -28,7 +27,6 @@ import {
 import type { SessionJourneys } from '../entities';
 import {
   CaptureActivityEventsDto,
-  ActivityEventItemDto,
   ActivityEventsResponseDto,
   CreateClientContextDto,
   ClientContextResponseDto,

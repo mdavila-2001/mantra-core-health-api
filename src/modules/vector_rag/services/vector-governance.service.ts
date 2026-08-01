@@ -271,7 +271,7 @@ export class VectorGovernanceService {
   /** UC-59-03 (primera mitad): definir la política de acceso RAG en borrador. */
   async defineRagPolicy(
     dto: DefineRagPolicyDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<RagPolicyResponseDto> {
     return this.em.transactional(async (tx) => {
       const duplicate = await this.catalogRepo.findPolicyByCodeForUpdate(

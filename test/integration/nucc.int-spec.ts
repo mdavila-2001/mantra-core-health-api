@@ -32,33 +32,38 @@ const ADMIN = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
-describe('Importación de NUCC Health Care Provider Taxonomy (DB real)', () => {
-  let db: pg.Client;
+const describeDataset =
+  process.env.TERMINOLOGY_DATASET_TESTS === '1' ? describe : describe.skip;
 
-  beforeAll(async () => {
-    db = new pg.Client(ADMIN);
-    await db.connect();
-  }, 30000);
+describeDataset(
+  'Importación de NUCC Health Care Provider Taxonomy (DB real)',
+  () => {
+    let db: pg.Client;
 
-  afterAll(async () => {
-    if (db) await db.end();
-  });
+    beforeAll(async () => {
+      db = new pg.Client(ADMIN);
+      await db.connect();
+    }, 30000);
 
-  it('el catálogo nucc_taxonomy tiene más de 800 conceptos (especialidades) importados', async () => {
-    const { rows } = await db.query(`
+    afterAll(async () => {
+      if (db) await db.end();
+    });
+
+    it('el catálogo nucc_taxonomy tiene más de 800 conceptos (especialidades) importados', async () => {
+      const { rows } = await db.query(`
       SELECT count(*)::bigint AS n
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
       JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
       WHERE cs.internal_code = 'nucc_taxonomy'
     `);
-    const count = Number(rows[0].n);
-    expect(count).toBeGreaterThan(800);
-  });
+      const count = Number(rows[0].n);
+      expect(count).toBeGreaterThan(800);
+    });
 
-  it('el código 207R00000X (Internal Medicine) existe con el display oficial', async () => {
-    const { rows } = await db.query(
-      `
+    it('el código 207R00000X (Internal Medicine) existe con el display oficial', async () => {
+      const { rows } = await db.query(
+        `
       SELECT cc.code, cc.display, cc.definition
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
@@ -66,15 +71,15 @@ describe('Importación de NUCC Health Care Provider Taxonomy (DB real)', () => {
       WHERE cs.internal_code = 'nucc_taxonomy'
         AND cc.code = '207R00000X'
       `,
-    );
-    expect(rows).toHaveLength(1);
-    expect(rows[0].display).toBe('Internal Medicine Physician');
-    expect(rows[0].definition).toContain('long-term, comprehensive care');
-  });
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0].display).toBe('Internal Medicine Physician');
+      expect(rows[0].definition).toContain('long-term, comprehensive care');
+    });
 
-  it('el código 207Q00000X (Family Medicine) existe', async () => {
-    const { rows } = await db.query(
-      `
+    it('el código 207Q00000X (Family Medicine) existe', async () => {
+      const { rows } = await db.query(
+        `
       SELECT cc.code, cc.display
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
@@ -82,31 +87,32 @@ describe('Importación de NUCC Health Care Provider Taxonomy (DB real)', () => {
       WHERE cs.internal_code = 'nucc_taxonomy'
         AND cc.code = '207Q00000X'
       `,
-    );
-    expect(rows).toHaveLength(1);
-    expect(rows[0].display).toBe('Family Medicine Physician');
-  });
+      );
+      expect(rows).toHaveLength(1);
+      expect(rows[0].display).toBe('Family Medicine Physician');
+    });
 
-  it('el code_system_version de nucc_taxonomy está marcado como default', async () => {
-    const { rows } = await db.query(`
+    it('el code_system_version de nucc_taxonomy está marcado como default', async () => {
+      const { rows } = await db.query(`
       SELECT csv.version, csv.is_default
       FROM terminology.code_system_versions csv
       JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
       WHERE cs.internal_code = 'nucc_taxonomy'
     `);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].is_default).toBe(true);
-  });
+      expect(rows).toHaveLength(1);
+      expect(rows[0].is_default).toBe(true);
+    });
 
-  it('el terminology_sources NUCC existe con owner National Uniform Claim Committee', async () => {
-    const { rows } = await db.query(`
+    it('el terminology_sources NUCC existe con owner National Uniform Claim Committee', async () => {
+      const { rows } = await db.query(`
       SELECT ts.code, ts.owner
       FROM terminology.code_systems cs
       JOIN terminology.terminology_sources ts ON ts.id = cs.source_id
       WHERE cs.internal_code = 'nucc_taxonomy'
     `);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].code).toBe('NUCC');
-    expect(rows[0].owner).toBe('National Uniform Claim Committee');
-  });
-});
+      expect(rows).toHaveLength(1);
+      expect(rows[0].code).toBe('NUCC');
+      expect(rows[0].owner).toBe('National Uniform Claim Committee');
+    });
+  },
+);

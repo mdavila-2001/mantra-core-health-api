@@ -58,7 +58,7 @@ export class ProjectionDeliveryService {
    */
   async registerProjection(
     dto: RegisterProjectionDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ProjectionDefinitionResponseDto> {
     return this.em.transactional(async (tx) => {
       const duplicate = await this.projectionRepo.findDefinitionByVersion(
@@ -196,7 +196,7 @@ export class ProjectionDeliveryService {
    */
   async processDelivery(
     dto: ProcessDeliveryDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<DeliveryResponseDto> {
     return this.em.transactional(async (tx) => {
       const subscription = await this.projectionRepo.findSubscriptionById(
@@ -407,7 +407,7 @@ export class ProjectionDeliveryService {
   async replayDeadLetter(
     deadLetterId: string,
     dto: ReplayDeadLetterDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ReplayResponseDto> {
     return this.em.transactional(async (tx) => {
       const deadLetter = await this.projectionRepo.findDeadLetterForUpdate(

@@ -5,9 +5,8 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
 import { ROLES_KEY } from './roles.decorator';
-import type { AuthenticatedUser } from './authenticated-user.interface';
+import type { AuthenticatedRequest } from './authenticated-user.interface';
 
 /**
  * Autorización basada en roles globales. Se ejecuta después del `JwtAuthGuard`,
@@ -39,14 +38,7 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<
-      Request & {
-        /**
-         * Valor de user mantenido por la instancia.
-         */
-        user?: AuthenticatedUser;
-      }
-    >();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const roles = request.user?.roles ?? [];
 
     // SUPERADMIN es un comodín deliberado: evita tener que enumerar cada rol en

@@ -16,6 +16,7 @@ import { AUD } from '../../modules/audit/audit.concepts';
 const HISTORY_META_COLUMNS = new Set([
   'history_id',
   'revision_no',
+  'row_version',
   'operation_concept_id',
   'valid_from',
   'valid_to',
@@ -40,6 +41,13 @@ interface HistoryBinding {
   historyTable: string;
   /** Columna que referencia el id del agregado fuente, p. ej. `condition_id`. */
   sourceIdColumn: string;
+  /** Columna correlativa declarada por el DDL (`revision_no` o `row_version`). */
+  versionColumn: 'revision_no' | 'row_version';
+}
+
+interface HistoryRegistryColumn {
+  tableName: string;
+  columnName: string;
 }
 
 /**
@@ -49,9 +57,10 @@ interface HistoryBinding {
  * y sella una nueva con un snapshot del estado, DENTRO de la transacción del
  * cambio (SQL crudo → sin re-entrar en la unidad de trabajo del ORM).
  *
- * Es DEFENSIVO por diseño: un fallo del espejo se registra pero NUNCA tumba la
- * escritura de negocio (la historia es una red de seguridad; los agregados
- * clínicos críticos se versionan además de forma explícita y transaccional).
+ * Es fail-closed por diseño: un fallo del espejo se registra y aborta la misma
+ * transacción. PostgreSQL invalida una transacción después de cualquier error
+ * SQL; ocultarlo dejaría al caller recibir después un fallo opaco y podría hacer
+ * creer que la escritura de negocio quedó confirmada sin su historia.
  */
 export class HistoryMirrorSubscriber implements EventSubscriber {
   /** Registro `tablaFuente -> binding`, derivado una vez del `information_schema`. */
@@ -67,27 +76,34 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
     em: SqlEntityManager,
   ): Promise<Map<string, HistoryBinding>> {
     const map = new Map<string, HistoryBinding>();
-    const rows = await em.getConnection().execute(
+    const rawRows: unknown = await em.getConnection().execute(
       `SELECT table_name, column_name
          FROM information_schema.columns
         WHERE table_schema = 'audit' AND table_name LIKE '%\\_history'`,
     );
+    const rows = this.parseRegistryColumns(rawRows);
 
     const byTable = new Map<string, string[]>();
     for (const r of rows) {
-      const cols = byTable.get(r.table_name) ?? [];
-      cols.push(r.column_name);
-      byTable.set(r.table_name, cols);
+      const cols = byTable.get(r.tableName) ?? [];
+      cols.push(r.columnName);
+      byTable.set(r.tableName, cols);
     }
     for (const [tableName, cols] of byTable) {
       const sourceTable = tableName.slice(0, -'_history'.length);
+      const versionColumn = cols.includes('revision_no')
+        ? 'revision_no'
+        : cols.includes('row_version')
+          ? 'row_version'
+          : undefined;
       const sourceIdColumn = cols.find(
         (c) => c.endsWith('_id') && !HISTORY_META_COLUMNS.has(c),
       );
-      if (!sourceIdColumn) continue;
+      if (!sourceIdColumn || !versionColumn) continue;
       map.set(sourceTable, {
         historyTable: `audit."${tableName}"`,
         sourceIdColumn,
+        versionColumn,
       });
     }
     if (process.env.HIST_DEBUG) {
@@ -98,6 +114,34 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
       );
     }
     return map;
+  }
+
+  private parseRegistryColumns(value: unknown): HistoryRegistryColumn[] {
+    if (!Array.isArray(value)) return [];
+    return (value as unknown[]).flatMap((row) => {
+      if (typeof row !== 'object' || row === null) return [];
+      const record = row as Record<string, unknown>;
+      return typeof record.table_name === 'string' &&
+        typeof record.column_name === 'string'
+        ? [
+            {
+              tableName: record.table_name,
+              columnName: record.column_name,
+            },
+          ]
+        : [];
+    });
+  }
+
+  private formatSourceId(value: unknown): string {
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'bigint'
+    ) {
+      return `${value}`;
+    }
+    return '<identificador-no-escalar>';
   }
 
   private operationConcept(type: ChangeSetType): string {
@@ -147,17 +191,16 @@ export class HistoryMirrorSubscriber implements EventSubscriber {
         // Sella la nueva revisión con nº correlativo atómico (MAX+1).
         await em.execute(
           `INSERT INTO ${binding.historyTable} ` +
-            `(history_id, "${binding.sourceIdColumn}", revision_no, operation_concept_id, valid_from, data_snapshot, recorded_at) ` +
-            `SELECT gen_random_uuid(), ?, COALESCE(MAX(revision_no), 0) + 1, ?, now(), ?::jsonb, now() ` +
+            `(history_id, "${binding.sourceIdColumn}", "${binding.versionColumn}", operation_concept_id, valid_from, data_snapshot, recorded_at) ` +
+            `SELECT gen_random_uuid(), ?, COALESCE(MAX("${binding.versionColumn}"), 0) + 1, ?, now(), ?::jsonb, now() ` +
             `FROM ${binding.historyTable} WHERE "${binding.sourceIdColumn}" = ?`,
           [sourceId, this.operationConcept(cs.type), snapshot, sourceId],
         );
       } catch (err) {
-        // Red de seguridad: nunca romper la escritura de negocio por el espejo.
-
         console.error(
-          `[history-mirror] fallo al versionar ${meta.tableName} ${String(sourceId)}: ${(err as Error).message}`,
+          `[history-mirror] fallo al versionar ${meta.tableName} ${this.formatSourceId(sourceId)}: ${(err as Error).message}`,
         );
+        throw err;
       }
     }
   }

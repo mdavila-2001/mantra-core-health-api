@@ -64,6 +64,8 @@ export interface SmokeCase {
   expectedStatus: number;
   /** Código de error estable esperado en respuestas 4xx (opcional). */
   expectedCode?: string;
+  /** Prepara prerrequisitos que el API no permite crear directamente. */
+  setup?: (c: SmokeCtx) => Promise<void>;
   /** Captura ids de la respuesta hacia `ctx.vars` para casos posteriores. */
   capture?: (resBody: Record<string, unknown>, c: SmokeCtx) => void;
 }

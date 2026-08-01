@@ -26,12 +26,15 @@ export function createMockNotificationProviderAdapter(
   return async (
     request: PendingNotificationRequest,
   ): Promise<ProviderDeliveryOutcome> => {
-    const response = await client.post<MockSendResponse>('/notifications/send', {
-      channel: request.channelId,
-      to: request.recipientAddress ?? request.recipientUserId ?? 'unknown',
-      body: JSON.stringify(request.payloadJson ?? {}),
-      metadata: { notificationRequestId: request.id },
-    });
+    const response = await client.post<MockSendResponse>(
+      '/notifications/send',
+      {
+        channel: request.channelId,
+        to: request.recipientAddress ?? request.recipientUserId ?? 'unknown',
+        body: JSON.stringify(request.payloadJson ?? {}),
+        metadata: { notificationRequestId: request.id },
+      },
+    );
 
     return {
       outcome: response.outcome,

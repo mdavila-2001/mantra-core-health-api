@@ -51,7 +51,12 @@ interface ErrorResponseBody {
  * aproximado sirve para encontrar la línea de log; ninguno, no.
  */
 function toCorrelationId(value: unknown): string | undefined {
-  const single = Array.isArray(value) ? value[0] : value;
+  // El elemento de un `unknown[]` sigue siendo `unknown`: anotarlo evita que
+  // TypeScript lo degrade a `any` al indexar y que la regla de asignación
+  // insegura salte por un valor que después se comprueba con `typeof`.
+  const single: unknown = Array.isArray(value)
+    ? (value as unknown[])[0]
+    : value;
 
   if (typeof single === 'string') {
     return single === '' ? undefined : single;

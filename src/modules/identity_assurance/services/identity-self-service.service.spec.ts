@@ -50,7 +50,7 @@ describe('IdentitySelfServiceService', () => {
     const service = new IdentitySelfServiceService(
       em as never,
       casesRepo as never,
-      evidenceRepo as never,
+      evidenceRepo,
       checksRepo as never,
       accountLinksRepo as never,
       practitionersRepo as never,

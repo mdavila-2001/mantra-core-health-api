@@ -145,7 +145,7 @@ span.
 
 Para un span de negocio dentro de un job, el patrón es idéntico al de §4. Ejemplo real:
 `notification.dispatch` en
-[notification-delivery.job.ts](../../src/worker/jobs/messaging/notification-delivery.job.ts).
+[notification-delivery.job.ts](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/worker/jobs/messaging/notification-delivery.job.ts).
 
 ## 8. Instrumentar un proceso programado nuevo
 

@@ -19,10 +19,6 @@ import { MockProviderWiringService } from '../../src/worker/jobs/messaging/mock-
 describe('Worker — intercambio de adapter de proveedor (integración, mock-provider-server real)', () => {
   const originalBaseUrl = process.env.MOCK_PROVIDER_BASE_URL;
 
-  beforeAll(() => {
-    process.env.MOCK_PROVIDER_BASE_URL = 'http://localhost:4100';
-  });
-
   afterAll(() => {
     process.env.MOCK_PROVIDER_BASE_URL = originalBaseUrl;
   });
@@ -58,6 +54,7 @@ describe('Worker — intercambio de adapter de proveedor (integración, mock-pro
   }
 
   it('sin MOCK_PROVIDER_BASE_URL configurada, el adapter por defecto falla visible (PROVIDER_NOT_CONFIGURED)', async () => {
+    process.env.MOCK_PROVIDER_BASE_URL = '';
     const moduleRef = await buildModule();
     const job = moduleRef.get(NotificationDeliveryJob);
 
@@ -75,33 +72,40 @@ describe('Worker — intercambio de adapter de proveedor (integración, mock-pro
     await moduleRef.close();
   });
 
-  it('con MOCK_PROVIDER_BASE_URL configurada, el wiring reemplaza el adapter y hace una llamada HTTP real', async () => {
-    const moduleRef = await buildModule();
-    const job = moduleRef.get(NotificationDeliveryJob);
-    const client = moduleRef.get(MockProviderClient);
-    const wiring = moduleRef.get(MockProviderWiringService);
+  const itWithLiveProvider =
+    process.env.MOCK_PROVIDER_INTEGRATION_TEST === '1' ? it : it.skip;
 
-    expect(client.isConfigured()).toBe(true);
+  itWithLiveProvider(
+    'con MOCK_PROVIDER_BASE_URL configurada, el wiring reemplaza el adapter y hace una llamada HTTP real',
+    async () => {
+      process.env.MOCK_PROVIDER_BASE_URL = 'http://localhost:4100';
+      const moduleRef = await buildModule();
+      const job = moduleRef.get(NotificationDeliveryJob);
+      const client = moduleRef.get(MockProviderClient);
+      const wiring = moduleRef.get(MockProviderWiringService);
 
-    wiring.onModuleInit();
+      expect(client.isConfigured()).toBe(true);
 
-    const outcome = await job.providerAdapter({
-      id: 'req-2',
-      channelId: 'sms',
-      statusConceptId: 'x',
-      recipientAddress: '+51999999999',
-      payloadJson: { text: 'hola' },
-    });
+      wiring.onModuleInit();
 
-    // `mock-provider-server` corre con NOTIFICATIONS_FAILURE_RATE=0 en este
-    // entorno de prueba: si la llamada HTTP real no ocurriera, seguiríamos
-    // viendo el stub PROVIDER_NOT_CONFIGURED.
-    expect(outcome.errorCode).not.toBe('PROVIDER_NOT_CONFIGURED');
-    expect(outcome).toMatchObject({
-      outcome: 'SENT',
-      providerMessageRef: expect.any(String),
-    });
+      const outcome = await job.providerAdapter({
+        id: 'req-2',
+        channelId: 'sms',
+        statusConceptId: 'x',
+        recipientAddress: '+51999999999',
+        payloadJson: { text: 'hola' },
+      });
 
-    await moduleRef.close();
-  });
+      // `mock-provider-server` corre con NOTIFICATIONS_FAILURE_RATE=0 en este
+      // entorno de prueba: si la llamada HTTP real no ocurriera, seguiríamos
+      // viendo el stub PROVIDER_NOT_CONFIGURED.
+      expect(outcome.errorCode).not.toBe('PROVIDER_NOT_CONFIGURED');
+      expect(outcome).toMatchObject({
+        outcome: 'SENT',
+        providerMessageRef: expect.any(String),
+      });
+
+      await moduleRef.close();
+    },
+  );
 });

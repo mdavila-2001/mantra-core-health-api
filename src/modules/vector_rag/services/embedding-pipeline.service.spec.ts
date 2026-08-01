@@ -281,7 +281,7 @@ describe('EmbeddingPipelineService', () => {
 
       const result = await d.service.runEmbeddingJob(
         JOB_ID,
-        { failed: true, errorCode: 'PROVIDER_NOT_CONFIGURED' } as any,
+        { failed: true, errorCode: 'PROVIDER_NOT_CONFIGURED' },
         actor,
       );
 

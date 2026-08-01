@@ -248,7 +248,7 @@ export class CheckInteractionsDto {
   })
   @IsArray()
   @ArrayMinSize(2)
-  @IsUUID('4', { each: true })
+  @IsUUID(undefined, { each: true })
   substanceConceptIds!: string[];
 }
 

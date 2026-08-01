@@ -18,6 +18,7 @@ import {
   CommunityGroupsService,
   CommunityPollsService,
   CommunityFeedService,
+  PublicProfileProjectionService,
 } from './services';
 import {
   PublicProfilesRepository,
@@ -79,6 +80,8 @@ import {
     CommunityGroupsService,
     CommunityPollsService,
     CommunityFeedService,
+    PublicProfileProjectionService,
   ],
+  exports: [PublicProfileProjectionService],
 })
 export class CommunityModule {}

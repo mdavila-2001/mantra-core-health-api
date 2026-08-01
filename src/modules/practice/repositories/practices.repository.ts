@@ -49,6 +49,14 @@ export interface CreatePracticeData {
  */
 @Injectable()
 export class PracticesRepository {
+  /** Prácticas cuyo estado coincide con el indicado. */
+  findActive(
+    em: EntityManager,
+    activeStatusConceptId: string,
+  ): Promise<Practices[]> {
+    return em.find(Practices, { statusConceptId: activeStatusConceptId });
+  }
+
   /**
    * Obtiene find by id.
    *

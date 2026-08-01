@@ -10,12 +10,19 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { lastValueFrom, from, Observable } from 'rxjs';
 import type { Request } from 'express';
 import { runWithTenant } from './tenant-context';
-import { findTenantScopeViolation } from './tenant-scope';
+import {
+  findTenantScopeViolation,
+  listTenantScopeDeclarations,
+} from './tenant-scope';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
-import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
+import type {
+  AuthenticatedRequest,
+  AuthenticatedUser,
+} from '../auth/authenticated-user.interface';
 
-/** Rol comodín que puede operar sobre cualquier tenant. */
-const WILDCARD_ROLE = 'SUPERADMIN';
+/** Roles internos que pueden seleccionar cualquier tenant explícitamente. */
+const PRIVILEGED_TENANT_ROLES = new Set(['SUPERADMIN', 'SYSTEM']);
+const SYSTEM_ROLE = 'SYSTEM';
 
 /**
  * Establece y **hace cumplir** el contexto de tenant de cada petición.
@@ -27,10 +34,13 @@ const WILDCARD_ROLE = 'SUPERADMIN';
  *     única del actor. Con varias membresías y sin cabecera se rechaza (403):
  *     adivinar cuál de ellas quiso usar sería exactamente el tipo de suposición
  *     que este interceptor existe para evitar.
- *  3. El tenant resuelto debe pertenecer al actor, salvo que sea `SUPERADMIN`.
- *  4. El cuerpo no puede declarar un tenant propietario distinto del resuelto
- *     (ver `tenant-scope.ts`). Este es el punto que cierra el agujero real: sin
- *     él, `dto.tenantId` viaja del cliente a la fila sin que nadie lo contraste.
+ *  3. El tenant resuelto debe pertenecer al actor, salvo roles internos
+ *     `SUPERADMIN`/`SYSTEM`, que pueden seleccionarlo pero no declarar valores
+ *     contradictorios entre cabecera, ruta, cuerpo y query.
+ *  4. Ni la ruta, el cuerpo ni la query pueden declarar un tenant propietario distinto
+ *     del resuelto (ver `tenant-scope.ts`). Este es el punto que cierra el
+ *     agujero real: sin él, `dto.tenantId` o `?tenantId=` viajan del cliente al
+ *     servicio sin que nadie los contraste.
  *
  * Las cuatro reglas se aplican SIEMPRE. `RLS_ENFORCE` no las gobierna: es una
  * capa adicional —fijar `app.current_tenant_id` para las políticas RLS de la
@@ -65,9 +75,12 @@ export class TenantContextInterceptor implements NestInterceptor {
    * @param next - Siguiente eslabón de la cadena.
    * @returns El flujo del handler, ejecutado dentro del contexto de tenant.
    * @throws ForbiddenException si el tenant no se puede resolver sin ambigüedad,
-   *         no pertenece al actor, o el cuerpo declara uno distinto.
+   *         no pertenece al actor, o el cuerpo/query declara uno distinto.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler<unknown>,
+  ): Observable<unknown> {
     if (context.getType() !== 'http') {
       return next.handle();
     }
@@ -80,12 +93,7 @@ export class TenantContextInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const request = context.switchToHttp().getRequest<
-      Request & {
-        /** Sujeto autenticado que inyecta `JwtAuthGuard`. */
-        user?: AuthenticatedUser;
-      }
-    >();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     const user = request.user;
     if (!user) {
@@ -94,8 +102,17 @@ export class TenantContextInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    const tenantId = this.resolveTenantId(request, user);
-    this.assertBodyStaysInTenant(request.body, tenantId, user);
+    const privilegedTenantId = this.hasPrivilegedTenantRole(user)
+      ? this.resolvePrivilegedTenantId(request)
+      : undefined;
+    if (user.roles?.includes(SYSTEM_ROLE) && !privilegedTenantId) {
+      return this.runSystemSweep(next);
+    }
+
+    const tenantId = privilegedTenantId ?? this.resolveTenantId(request, user);
+    this.assertInputStaysInTenant(request.params, 'ruta', tenantId);
+    this.assertInputStaysInTenant(request.body, 'cuerpo', tenantId);
+    this.assertInputStaysInTenant(request.query, 'query', tenantId);
 
     if (!this.enforceRls) {
       return from(runWithTenant(tenantId, () => lastValueFrom(next.handle())));
@@ -104,6 +121,9 @@ export class TenantContextInterceptor implements NestInterceptor {
     return from(
       runWithTenant(tenantId, () =>
         this.em.transactional(async () => {
+          await this.em.execute(
+            "select set_config('app.system_context', 'false', true)",
+          );
           await this.em.execute(
             "select set_config('app.current_tenant_id', ?, true)",
             [tenantId],
@@ -123,10 +143,10 @@ export class TenantContextInterceptor implements NestInterceptor {
     const header = request.headers['x-tenant-id'];
     const declared = Array.isArray(header) ? header[0] : header;
     const memberships = user.tenantIds ?? [];
-    const isWildcard = user.roles?.includes(WILDCARD_ROLE) ?? false;
+    const isPrivileged = this.hasPrivilegedTenantRole(user);
 
     if (declared) {
-      if (!isWildcard && !memberships.includes(declared)) {
+      if (!isPrivileged && !memberships.includes(declared)) {
         throw new ForbiddenException(
           'El actor no pertenece al tenant indicado en X-Tenant-Id',
         );
@@ -146,24 +166,65 @@ export class TenantContextInterceptor implements NestInterceptor {
   }
 
   /**
-   * Rechaza el request si el cuerpo declara un tenant propietario distinto del
-   * resuelto. `SUPERADMIN` queda exento: opera a través de tenants por diseño.
+   * Un rol privilegiado puede elegir cualquier tenant, pero todas las fuentes
+   * de propiedad presentes deben elegir el mismo. Esto evita que RLS se fije a
+   * A mientras el servicio persiste B.
+   */
+  private resolvePrivilegedTenantId(request: Request): string | undefined {
+    const header = request.headers['x-tenant-id'];
+    const headerValue = Array.isArray(header) ? header[0] : header;
+    const declarations = [
+      ...(headerValue ? [{ field: 'X-Tenant-Id', declared: headerValue }] : []),
+      ...listTenantScopeDeclarations(request.params),
+      ...listTenantScopeDeclarations(request.body),
+      ...listTenantScopeDeclarations(request.query),
+    ];
+    const distinct = [...new Set(declarations.map(({ declared }) => declared))];
+    if (distinct.length > 1) {
+      throw new ForbiddenException(
+        'La solicitud privilegiada declara tenants propietarios contradictorios',
+      );
+    }
+    return distinct[0];
+  }
+
+  /** Ejecuta un barrido cross-tenant sólo para el rol SYSTEM firmado interno. */
+  private runSystemSweep(next: CallHandler<unknown>): Observable<unknown> {
+    if (!this.enforceRls) {
+      return from(lastValueFrom(next.handle()));
+    }
+    return from(
+      this.em.transactional(async () => {
+        await this.em.execute(
+          "select set_config('app.system_context', 'true', true)",
+        );
+        return lastValueFrom(next.handle());
+      }),
+    );
+  }
+
+  private hasPrivilegedTenantRole(user: AuthenticatedUser): boolean {
+    return (
+      user.roles?.some((role) => PRIVILEGED_TENANT_ROLES.has(role)) ?? false
+    );
+  }
+
+  /**
+   * Rechaza el request si el cuerpo o la query declaran un tenant propietario
+   * distinto del resuelto. Los roles privilegiados pueden elegir el tenant,
+   * pero una vez resuelto tampoco pueden mezclar propietarios.
    *
    * @throws ForbiddenException con el campo y el valor en conflicto.
    */
-  private assertBodyStaysInTenant(
-    body: unknown,
+  private assertInputStaysInTenant(
+    input: unknown,
+    source: 'ruta' | 'cuerpo' | 'query',
     tenantId: string,
-    user: AuthenticatedUser,
   ): void {
-    if (user.roles?.includes(WILDCARD_ROLE)) {
-      return;
-    }
-
-    const violation = findTenantScopeViolation(body, tenantId);
+    const violation = findTenantScopeViolation(input, tenantId);
     if (violation) {
       throw new ForbiddenException(
-        `El cuerpo declara ${violation.field}=${violation.declared}, ajeno al ` +
+        `La ${source} declara ${violation.field}=${violation.declared}, ajeno al ` +
           `tenant del actor (${tenantId}).`,
       );
     }

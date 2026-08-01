@@ -54,7 +54,8 @@ describe('GoogleEmailClient', () => {
 
       expect(result).toEqual({ messageId: 'gmail-id-1' });
 
-      const [tokenUrl, tokenBody, tokenConfig] = d.http.post.mock.calls[0] as any[];
+      const [tokenUrl, tokenBody, tokenConfig] = d.http.post.mock
+        .calls[0] as any[];
       expect(tokenUrl).toBe('https://oauth2.googleapis.com/token');
       expect(tokenBody).toContain('refresh_token=refresh-token');
       expect(tokenBody).toContain('client_id=client-id');

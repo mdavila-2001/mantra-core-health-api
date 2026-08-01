@@ -86,7 +86,7 @@ export class RecordAutomationService {
     agentRunId: string,
     recordAutomationId: string,
     dto: ExecuteRecordAutomationDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ExecuteRecordAutomationResponseDto> {
     return this.em.transactional(async (tx) => {
       const agentRun = await this.runsRepo.findAgentRunForUpdate(

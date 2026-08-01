@@ -42,7 +42,7 @@ export class IdentityCasesController {
   constructor(private readonly casesService: IdentityCasesService) {}
 
   /** UC-27-12 (barrido programado). Declarado antes que las rutas con `:id`. */
-  @Post('\\:expire-sweep')
+  @Post('expire-sweep')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

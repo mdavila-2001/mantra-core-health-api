@@ -18,13 +18,12 @@ rules:
   operation-summary: error
   operation-tag-defined: error
   tags-alphabetical: off # 60+ módulos; orden temático > alfabético
-  # 2 colisiones reales y ya existentes en las rutas de `delegated_access` y
-  # `read_models` (un segmento literal coincide con el nombre de un parámetro
-  # de otra ruta hermana). Backend real, Express las resuelve por orden de
-  # registro sin ambigüedad práctica; rediseñar las rutas es un cambio de
-  # comportamiento de API fuera del alcance de esta iniciativa documental.
-  # Registrado y aceptado en docs/governance/traceability-matrix.md (ARCH-004).
-  no-ambiguous-paths: warn
+  # Dos pares de rutas (`delegated_access` y `read_models`) comparten la forma
+  # de segmentos, pero nunca el método HTTP: POST/PATCH y DELETE/POST,
+  # respectivamente. No existe una request que pueda resolver a dos handlers.
+  # Redocly compara solo la forma del path y produce falsos positivos al ignorar
+  # el método; se conserva la justificación en ARCH-004.
+  no-ambiguous-paths: off
   no-identical-paths: error
   no-path-trailing-slash: error
   path-declaration-must-exist: error
@@ -49,10 +48,3 @@ rules:
 
 decorators:
   remove-x-internal: off
-
-theme:
-  openapi:
-    generateCodeSamples:
-      languages:
-        - lang: curl
-        - lang: JavaScript

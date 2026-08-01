@@ -16,9 +16,6 @@ import { UUID_ABSENT } from '../smoke-kit';
  * módulo. `patientProfileId` usa `ctx.vars.patientProfileId` si un módulo previo lo
  * pobló; si no, se omite (la columna es nullable).
  */
-const PERMISSION_A = '00000000-0000-4000-8000-0000000d2901';
-const PERMISSION_STEP_UP = '00000000-0000-4000-8000-0000000d2902';
-const ROLE_ASSIGNMENT = '00000000-0000-4000-8000-0000000d2903';
 const FAR_FUTURE = '2030-01-01T00:00:00.000Z';
 
 export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
@@ -141,7 +138,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/practitioner-delegates',
     body: (c) => ({
-      practitionerRoleAssignmentId: ROLE_ASSIGNMENT,
+      practitionerRoleAssignmentId: c.vars.pracRoleId,
       delegateUserAssignmentId: c.vars.daOrgAssignmentId,
       delegatedPermissionSetId: c.vars.daSetId,
       delegateRole: 'ASSISTANT',
@@ -160,7 +157,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/practitioner-delegates',
     body: (c) => ({
-      practitionerRoleAssignmentId: ROLE_ASSIGNMENT,
+      practitionerRoleAssignmentId: c.vars.pracRoleId,
       delegateUserAssignmentId: UUID_ABSENT,
       delegatedPermissionSetId: c.vars.daSetId,
     }),
@@ -173,7 +170,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/practitioner-delegates',
     body: (c) => ({
-      practitionerRoleAssignmentId: ROLE_ASSIGNMENT,
+      practitionerRoleAssignmentId: c.vars.pracRoleId,
       delegateUserAssignmentId: c.vars.daOrgAssignmentId,
     }),
     expectedStatus: 400,
@@ -188,7 +185,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     path: (c) =>
       `/practitioner-delegates/${c.vars.daDelegateId}/access-requests`,
     body: (c) => ({
-      requestedPermissionId: PERMISSION_A,
+      requestedPermissionId: c.vars.authzPermissionId,
       patientProfileId: c.vars.patientProfileId,
       reasonText: 'Cobertura de agenda',
     }),
@@ -205,7 +202,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     path: (c) =>
       `/practitioner-delegates/${c.vars.daDelegateId}/access-requests`,
     body: (c) => ({
-      requestedPermissionId: PERMISSION_A,
+      requestedPermissionId: c.vars.authzPermissionId,
       patientProfileId: c.vars.patientProfileId,
     }),
     expectedStatus: 409,
@@ -216,7 +213,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
     name: 'límite: delegación inexistente -> 404',
     method: 'post',
     path: () => `/practitioner-delegates/${UUID_ABSENT}/access-requests`,
-    body: () => ({ requestedPermissionId: PERMISSION_A }),
+    body: (c) => ({ requestedPermissionId: c.vars.authzPermissionId }),
     expectedStatus: 404,
   },
 

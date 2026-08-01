@@ -74,7 +74,7 @@ export class TimescaleAdminService {
    */
   async configureHypertable(
     dto: ConfigureHypertableDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<HypertableResponseDto> {
     return this.em.transactional(async (tx) => {
       await this.timescaleRepo.createHypertable(tx, dto.table);
@@ -122,7 +122,7 @@ export class TimescaleAdminService {
   async updateHypertable(
     table: string,
     dto: UpdateHypertableDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<HypertableResponseDto> {
     return this.em.transactional(async (tx) => {
       const info = await this.timescaleRepo.describeHypertable(tx, table);

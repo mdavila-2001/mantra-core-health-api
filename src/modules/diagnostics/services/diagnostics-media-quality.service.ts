@@ -102,7 +102,7 @@ export class DiagnosticsMediaQualityService {
   /** UC-20-14: registra un evento de calidad de datos y su enlace de provenance. */
   async recordDataQualityEvent(
     dto: CreateDataQualityEventDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
       { operation: 'diagnostics.dataQuality.record', ruleCode: dto.ruleCode },

@@ -28,12 +28,12 @@ describe('Search Platform (integración, OpenSearch real)', () => {
     'X-Tenant-Id': tenantId,
   });
 
-  it('rechaza operar sin X-Tenant-Id (fail-closed)', async () => {
+  it('rechaza un actor sin membresías ni X-Tenant-Id (fail-closed)', async () => {
     await http()
       .post(`/search/${index}/documents`)
-      .set(bearer(ctx.adminToken))
+      .set(bearer(ctx.tenantlessAdminToken))
       .send({ id: 'doc-1', document: { displayName: 'x' } })
-      .expect(422);
+      .expect(403);
   });
 
   it('UC-57 indexa y encuentra el documento por texto (refresh inmediato)', async () => {
@@ -59,9 +59,7 @@ describe('Search Platform (integración, OpenSearch real)', () => {
       .expect(200);
 
     expect(found.body.total).toBeGreaterThanOrEqual(1);
-    expect(found.body.hits.some((h: { id: string }) => h.id === id)).toBe(
-      true,
-    );
+    expect(found.body.hits.some((h: { id: string }) => h.id === id)).toBe(true);
   });
 
   it('sella el tenantId del contexto: el mismo id indexado por otro tenant no aparece en la búsqueda del primero', async () => {

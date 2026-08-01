@@ -273,7 +273,20 @@ export const PRACTICE_SMOKE: SmokeCase[] = [
     name: 'happy: adjuntar apoyo',
     method: 'post',
     path: (c) => `/role-assignments/${c.vars.pracRoleId}/support-assignments`,
-    body: (c) => ({ supportProfileId: c.adminUserId }),
+    setup: async (c) => {
+      await c.orm.em
+        .fork()
+        .getConnection()
+        .execute(
+          `INSERT INTO profiles.secretary_profiles
+          (profile_id, role_concept_id, created_at, updated_at,
+           created_by_user_id, updated_by_user_id, row_version)
+         VALUES (?, NULL, now(), now(), ?, ?, 1)
+         ON CONFLICT (profile_id) DO NOTHING`,
+          [c.vars.patientProfileId, c.adminUserId, c.adminUserId],
+        );
+    },
+    body: (c) => ({ supportProfileId: c.vars.patientProfileId }),
     expectedStatus: 201,
   },
   {

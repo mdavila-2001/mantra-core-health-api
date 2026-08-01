@@ -39,7 +39,9 @@ export function createGoogleEmailProviderAdapter(
     const subject = payload.subject ?? 'Notificación';
     const bodyText =
       payload.bodyText ??
-      (payload.bodyHtml ? undefined : JSON.stringify(request.payloadJson ?? {}));
+      (payload.bodyHtml
+        ? undefined
+        : JSON.stringify(request.payloadJson ?? {}));
 
     try {
       const result = await client.sendEmail({
