@@ -10,8 +10,6 @@ import {
   ResilienceExercises,
   RecoveryObjectives,
 } from '../entities';
-import { createdBy } from '../../../common';
-
 /**
  * Acceso a las prácticas operativas de `platform_ops.*`: revisiones de
  * preparación con sus hallazgos, runbooks con sus versiones y ejecuciones, y

@@ -48,10 +48,12 @@ const ALLOWED_COMMANDS =
  *     grupos) gobernadas por participación/propiedad en el servicio.
  *   - common: recursos propios del actor (archivos, direcciones, identificadores)
  *     con `actorUserId` en el servicio.
+ *   - identity-self-service: el sujeto se deriva del actor autenticado y la
+ *     pertenencia de tenant se valida en el servicio, no por rol global.
  * NO exime del requisito de autenticación (el guard global lo garantiza).
  */
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\//;
+  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts/;
 
 /** ¿Existe un JwtAuthGuard registrado como APP_GUARD global? (defensa por defecto) */
 function hasGlobalJwtGuard() {
@@ -261,7 +263,7 @@ const isEmptyCriteria = (criteria) => /^\{\s*\}$/.test(criteria.trim());
  */
 const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
   'src/modules/automation/repositories/automation-governance.repository.ts#findEnabledCalendarTriggers',
-  'src/modules/billing/repositories/practices-lookup.repository.ts#findActive',
+  'src/modules/practice/repositories/practices.repository.ts#findActive',
   'src/modules/consent/repositories/consents.repository.ts#findExpirable',
   'src/modules/consent/repositories/hipaa-authorizations.repository.ts#findExpirable',
   'src/modules/consent/repositories/privacy-restrictions.repository.ts#findExpirable',
@@ -302,7 +304,10 @@ for (const file of repoFiles) {
     if (verb === 'count' && isEmptyCriteria(criteria)) continue;
 
     const method = enclosingMethodName(lines, i);
-    if (method && TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(`${rel(file)}#${method}`))
+    if (
+      method &&
+      TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(`${rel(file)}#${method}`)
+    )
       continue;
 
     // Ventana generosa alrededor de la llamada: firma del método suele caber
@@ -320,8 +325,7 @@ for (const file of repoFiles) {
     const keys = [...criteria.matchAll(/[{,]\s*([A-Za-z]\w*)\s*[,:}]/g)].map(
       (k) => k[1],
     );
-    if (keys.some((k) => k !== 'tenantId' && SPECIFIC_ID_KEY.test(k)))
-      continue;
+    if (keys.some((k) => k !== 'tenantId' && SPECIFIC_ID_KEY.test(k))) continue;
 
     add(
       'TENANT_SCOPE_MISSING',

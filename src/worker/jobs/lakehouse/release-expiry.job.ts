@@ -48,10 +48,8 @@ export class ReleaseExpiryJob {
       );
 
       for (const release of pending.releases) {
-        await runTick(
-          this.logger,
-          'worker.lakehouse.release-expiry',
-          () => this.revokeOne(release),
+        await runTick(this.logger, 'worker.lakehouse.release-expiry', () =>
+          this.revokeOne(release),
         );
       }
     });

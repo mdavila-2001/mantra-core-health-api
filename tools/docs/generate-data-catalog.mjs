@@ -18,18 +18,40 @@ mkdirSync(OUT_DIR, { recursive: true });
 const ts = readTsEntities(); // schema.table -> {schema, table, className, props, module, ...}
 const { entities: vault, indexSets, foreignKeys } = readVault(); // schema.table -> {...}
 
+// Fallbacks documentados en el propio repositorio cuando una entidad nueva aún
+// no llegó a la bóveda hermana. Cada entrada debe estar respaldada por el JSDoc
+// de la clase correspondiente; no se generan frases heurísticas.
+const REPOSITORY_VERIFIED_SUMMARIES = new Map([
+  [
+    'iam.email_verifications',
+    'Registra verificaciones de correo de un solo uso: persiste sólo el hash SHA-256 del token, su expiración y consumo para confirmar que la dirección es alcanzable sin condicionar el acceso del paciente.',
+  ],
+]);
+
 function extractBusinessSummary(vaultEntry) {
   if (!vaultEntry?.raw) return null;
-  const m = vaultEntry.raw.match(/\*\*Negocio:\*\*\s*(.+?)(?:\n\n|\*\*Ejemplo)/s);
+  const m = vaultEntry.raw.match(
+    /\*\*Negocio:\*\*\s*(.+?)(?:\n\n|\*\*Ejemplo)/s,
+  );
   if (!m) return null;
-  return m[1].replace(/\*\*/g, '').replace(/\[\[([^|\]]+)\|?([^\]]*)\]\]/g, (_x, a, b) => b || a).replace(/\s+/g, ' ').trim();
+  return m[1]
+    .replace(/\*\*/g, '')
+    .replace(/\[\[([^|\]]+)\|?([^\]]*)\]\]/g, (_x, a, b) => b || a)
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 // readVault() no expone el markdown crudo directamente en todas las versiones de la librería;
 // se relee aquí solo el campo de propósito de forma defensiva si vault entries no lo trae.
 import { readFileSync } from 'node:fs';
 import { readdirSync } from 'node:fs';
-const VAULT_ENT_DIR = join(process.cwd(), '..', 'mantra_core_technologies_health_docs', 'SALUD', 'Entidades');
+const VAULT_ENT_DIR = join(
+  process.cwd(),
+  '..',
+  'mantra_core_technologies_health_docs',
+  'SALUD',
+  'Entidades',
+);
 const summaryByKey = new Map();
 try {
   for (const file of readdirSync(VAULT_ENT_DIR)) {
@@ -43,23 +65,31 @@ try {
     if (m) {
       const clean = m[1]
         .replace(/\*\*/g, '')
-        .replace(/\[\[([^|\]]+)\|?([^\]]*)\]\]/g, (_x, a, b) => (b || a))
+        .replace(/\[\[([^|\]]+)\|?([^\]]*)\]\]/g, (_x, a, b) => b || a)
         .replace(/\s+/g, ' ')
         .trim();
       summaryByKey.set(`${schema}.${table}`, clean);
     }
   }
 } catch (e) {
-  console.error('No se pudo leer la bóveda SALUD en', VAULT_ENT_DIR, '—', e.message);
+  console.error(
+    'No se pudo leer la bóveda SALUD en',
+    VAULT_ENT_DIR,
+    '—',
+    e.message,
+  );
 }
 
 const rows = [];
 let withSummary = 0;
 for (const [key, entity] of ts) {
-  const summary = summaryByKey.get(key) ?? null;
+  const summary =
+    summaryByKey.get(key) ?? REPOSITORY_VERIFIED_SUMMARIES.get(key) ?? null;
   if (summary) withSummary++;
   const pk = entity.props.find((p) => p.primary);
-  const fkCount = entity.props.filter((p) => /_id$/.test(p.fieldName) && !p.primary).length;
+  const fkCount = entity.props.filter(
+    (p) => /_id$/.test(p.fieldName) && !p.primary,
+  ).length;
   const hasRowVersion = entity.props.some((p) => p.version);
   rows.push({
     key,
@@ -88,24 +118,28 @@ let md = `# Catálogo de entidades
 > **${ts.size} entidades MikroORM reales** (\`tools/catalog/lib/tsentities.mjs\`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > \`../mantra_core_technologies_health_docs/SALUD/Entidades\`, la misma fuente que usa
-> \`yarn orm:catalog\`). **${withSummary}/${rows.length}** entidades tienen descripción de negocio
-> verificada en la bóveda; las que no, se marcan explícitamente en vez de fabricar una frase
-> genérica.
+> \`yarn orm:catalog\`) y fallbacks respaldados por el JSDoc de la entidad en este
+> repositorio. **${withSummary}/${rows.length}** entidades tienen descripción de negocio
+> verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
 > Este es el catálogo de lo **implementado**. La bóveda describe ${vault.size} entidades en total
 > — la diferencia (${vault.size - ts.size}) son entidades diseñadas pero no materializadas aún en
-> código; ver [entidades no implementadas](#entidades-diseñadas-no-implementadas) al final.
+> código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
 ## Por schema (${bySchema.size} schemas · ${rows.length} entidades)
 
 `;
 
-for (const [schema, list] of [...bySchema.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+for (const [schema, list] of [...bySchema.entries()].sort((a, b) =>
+  a[0].localeCompare(b[0]),
+)) {
   md += `### \`${schema}\` (${list.length} entidades, módulo \`${list[0].module}\`)\n\n`;
   md += `| Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |\n`;
   md += `|---|---|---:|---|:---:|---|\n`;
   for (const r of list) {
-    const purpose = r.summary ? r.summary.slice(0, 220) + (r.summary.length > 220 ? '…' : '') : '_sin descripción verificada en la bóveda_';
+    const purpose = r.summary
+      ? r.summary.slice(0, 220) + (r.summary.length > 220 ? '…' : '')
+      : '_sin descripción verificada en la bóveda_';
     md += `| \`${r.table}\` | \`${r.className}\` | ${r.fieldCount} | \`${r.pk}\` | ${r.hasRowVersion ? '✅' : '—'} | ${purpose} |\n`;
   }
   md += '\n';
@@ -121,4 +155,6 @@ md += vaultOnly.map((k) => `- \`${k}\``).join('\n');
 md += '\n\n</details>\n';
 
 writeFileSync(join(OUT_DIR, 'entity-catalog.md'), md, 'utf-8');
-console.log(`Catálogo generado: ${rows.length} entidades implementadas (${withSummary} con descripción de negocio), ${vaultOnly.length} solo-diseño → docs/data/entity-catalog.md`);
+console.log(
+  `Catálogo generado: ${rows.length} entidades implementadas (${withSummary} con descripción de negocio), ${vaultOnly.length} solo-diseño → docs/data/entity-catalog.md`,
+);

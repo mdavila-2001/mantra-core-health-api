@@ -268,4 +268,73 @@ export class ValueSetsRepository {
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
+
+  // --- Lectura de la expansión (UC-03-08, cara de consulta) ---
+
+  /** Versión marcada por defecto del conjunto; `null` si todavía no hay ninguna. */
+  findDefaultVersion(
+    em: EntityManager,
+    valueSetId: string,
+  ): Promise<ValueSetVersions | null> {
+    return em.findOne(ValueSetVersions, { valueSetId, isDefault: true });
+  }
+
+  /** Versión concreta por id; `null` si no existe. */
+  findVersionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ValueSetVersions | null> {
+    return em.findOne(ValueSetVersions, { id });
+  }
+
+  /**
+   * Una página de miembros incluidos de una versión, por cursor keyset.
+   *
+   * El orden es `(ordinal, concept_id)`, y el desempate por `concept_id` no es
+   * decorativo: `ordinal` no es único —dos miembros pueden compartirlo si una
+   * expansión previa quedó a medias— y sin desempate determinista dos páginas
+   * consecutivas podrían repetir u omitir filas. El índice único
+   * `uq_value_set_members_version_concept` garantiza que el par sí es total
+   * dentro de la versión.
+   *
+   * `ordinal` es nullable en el esquema, así que la comparación se parte en dos
+   * casos. Postgres ordena los `NULL` al final en `ASC`, y `ordinal > :n` es
+   * `NULL` (falso) para una fila sin ordinal: sin el `$or` explícito, esas filas
+   * quedarían fuera de toda página posterior a la primera.
+   *
+   * @param em - Contexto de persistencia.
+   * @param valueSetVersionId - Versión cuya expansión se lee.
+   * @param after - Última fila de la página anterior, o `undefined` en la primera.
+   * @param limit - Tope de filas a devolver.
+   * @returns Miembros incluidos, ordenados por `(ordinal, concept_id)`.
+   */
+  findMembersPage(
+    em: EntityManager,
+    valueSetVersionId: string,
+    after: { ordinal: number | null; conceptId: string } | undefined,
+    limit: number,
+  ): Promise<ValueSetMembers[]> {
+    const where: Record<string, unknown> = {
+      valueSetVersionId,
+      included: true,
+    };
+
+    if (after) {
+      where.$or =
+        after.ordinal === null
+          ? // Ya estamos en la cola de los `NULL`: sólo quedan sus hermanos.
+            [{ ordinal: null, conceptId: { $gt: after.conceptId } }]
+          : [
+              { ordinal: { $gt: after.ordinal } },
+              { ordinal: after.ordinal, conceptId: { $gt: after.conceptId } },
+              // Los `NULL` van después de cualquier ordinal, nunca antes.
+              { ordinal: null },
+            ];
+    }
+
+    return em.find(ValueSetMembers, where, {
+      orderBy: [{ ordinal: 'ASC' }, { conceptId: 'ASC' }],
+      limit,
+    });
+  }
 }

@@ -76,12 +76,8 @@ describe('Outbox relay — carrera real con dos conexiones (integración)', () =
     expect(resA.status).toBe(200);
     expect(resB.status).toBe(200);
 
-    const idsA: string[] = resA.body.messages.map(
-      (m: { id: string }) => m.id,
-    );
-    const idsB: string[] = resB.body.messages.map(
-      (m: { id: string }) => m.id,
-    );
+    const idsA: string[] = resA.body.messages.map((m: { id: string }) => m.id);
+    const idsB: string[] = resB.body.messages.map((m: { id: string }) => m.id);
 
     const ownIdsA = seededIds.filter((id) => idsA.includes(id));
     const ownIdsB = seededIds.filter((id) => idsB.includes(id));

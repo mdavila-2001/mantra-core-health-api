@@ -37,9 +37,7 @@ export function createMockIdentityVerificationAdapter(
   });
 
   return {
-    async dispatch(
-      check: DispatchableCheck,
-    ): Promise<IdentityDispatchOutcome> {
+    async dispatch(check: DispatchableCheck): Promise<IdentityDispatchOutcome> {
       return client.post<MockExecuteResponse>(
         '/identity-verification/execute',
         refOf(check),

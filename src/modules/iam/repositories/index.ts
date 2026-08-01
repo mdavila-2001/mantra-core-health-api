@@ -3,6 +3,7 @@ export * from './credentials.repository';
 export * from './sessions.repository';
 export * from './refresh-tokens.repository';
 export * from './mfa-factors.repository';
+export * from './password-resets.repository';
 export * from './devices.repository';
 export * from './user-global-roles.repository';
 export * from './account-lockouts.repository';

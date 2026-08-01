@@ -471,68 +471,64 @@ export class OutboxService {
       event.tenantId,
     );
 
-      const deliveries: DispatchedSubscriberDto[] = [];
-      let filteredOut = 0;
+    const deliveries: DispatchedSubscriberDto[] = [];
+    let filteredOut = 0;
 
-      for (const subscription of subscriptions) {
-        if (!this.matchesFilter(subscription.filterJson, event.payloadJson)) {
-          filteredOut += 1;
-          continue;
-        }
+    for (const subscription of subscriptions) {
+      if (!this.matchesFilter(subscription.filterJson, event.payloadJson)) {
+        filteredOut += 1;
+        continue;
+      }
 
-        const existing = await this.outboxRepo.findEventDelivery(
-          tx,
-          domainEventId,
-          subscription.id,
-        );
-        if (existing) {
-          deliveries.push({
-            subscriptionId: subscription.id,
-            subscriberCode: subscription.subscriberCode,
-            deliveryId: existing.id,
-            duplicate: true,
-          });
-          continue;
-        }
-
-        const delivery = this.outboxRepo.createEventDelivery(tx, {
-          domainEventId,
-          subscriptionId: subscription.id,
-          statusConceptId: CONCEPTS.EVENT_DELIVERY_DISPATCHED,
-          attemptNumber: 1,
-          recordedByUserId: actor.id,
-        });
-
-        let jobId: string | undefined;
-        const wantsJob = dto.enqueueJobs !== false;
-        if (
-          wantsJob &&
-          subscription.deliveryModeConceptId ===
-            CONCEPTS.MSG_DELIVERY_MODE_QUEUE &&
-          subscription.targetQueue
-        ) {
-          jobId = await this.enqueueSubscriberJob(
-            tx,
-            subscription.targetQueue,
-            {
-              domainEventId,
-              subscriptionId: subscription.id,
-              subscriberCode: subscription.subscriberCode,
-              eventType: event.eventType,
-              tenantId: event.tenantId,
-              payloadJson: event.payloadJson,
-            },
-          );
-        }
-
+      const existing = await this.outboxRepo.findEventDelivery(
+        tx,
+        domainEventId,
+        subscription.id,
+      );
+      if (existing) {
         deliveries.push({
           subscriptionId: subscription.id,
           subscriberCode: subscription.subscriberCode,
-          deliveryId: delivery.id,
-          jobId,
-          duplicate: false,
+          deliveryId: existing.id,
+          duplicate: true,
+        });
+        continue;
+      }
+
+      const delivery = this.outboxRepo.createEventDelivery(tx, {
+        domainEventId,
+        subscriptionId: subscription.id,
+        statusConceptId: CONCEPTS.EVENT_DELIVERY_DISPATCHED,
+        attemptNumber: 1,
+        recordedByUserId: actor.id,
+      });
+
+      let jobId: string | undefined;
+      const wantsJob = dto.enqueueJobs !== false;
+      if (
+        wantsJob &&
+        subscription.deliveryModeConceptId ===
+          CONCEPTS.MSG_DELIVERY_MODE_QUEUE &&
+        subscription.targetQueue
+      ) {
+        jobId = await this.enqueueSubscriberJob(tx, subscription.targetQueue, {
+          domainEventId,
+          subscriptionId: subscription.id,
+          subscriberCode: subscription.subscriberCode,
+          eventType: event.eventType,
+          tenantId: event.tenantId,
+          payloadJson: event.payloadJson,
         });
       }
+
+      deliveries.push({
+        subscriptionId: subscription.id,
+        subscriberCode: subscription.subscriberCode,
+        deliveryId: delivery.id,
+        jobId,
+        duplicate: false,
+      });
+    }
 
     return {
       domainEventId,

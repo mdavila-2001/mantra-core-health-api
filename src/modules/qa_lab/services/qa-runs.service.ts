@@ -12,7 +12,6 @@ import {
 } from '../../../common';
 import { QaCatalogRepository, QaRunsRepository } from '../repositories';
 import { TestAssertions } from '../entities';
-import { HTTP_METHOD_CONCEPT } from './qa-catalog.service';
 import {
   CreateRunDto,
   RunResponseDto,

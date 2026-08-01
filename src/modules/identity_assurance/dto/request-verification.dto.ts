@@ -54,7 +54,10 @@ export class VerificationRequestResponseDto {
   /**
    * Identificador asociado a status concept.
    */
-  @ApiProperty({ format: 'uuid', description: 'Estado del caso recién abierto' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado del caso recién abierto',
+  })
   status!: string;
 }
 

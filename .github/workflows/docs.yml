@@ -4,12 +4,9 @@ name: Documentación
 # obligatoria del producto: un PR que rompe el contrato OpenAPI/AsyncAPI, deja
 # un enlace roto, o hace fallar `mkdocs build --strict`, no puede mergearse.
 #
-# Deliberadamente NO incluye `yarn lint` como gate bloqueante: el lint
-# estricto de ESLint tiene ~22500 errores preexistentes de tipado
-# (docs/reports/baseline.md §3.1, TEST-003 en la matriz de trazabilidad) que
-# son deuda fuera del alcance de esta iniciativa documental — bloquear CI con
-# eso dejaría el pipeline permanentemente rojo por una razón no relacionada
-# con la documentación.
+# Incluye build, tipos, lint, auditoría runtime, pruebas y contratos. El lint
+# productivo es type-aware; los fixtures de prueba conservan una política
+# específica para dobles parciales sin relajar ningún archivo de runtime.
 
 on:
   pull_request:
@@ -94,13 +91,22 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://localhost:9000/minio/health/live && break; sleep 2; done
 
       - name: Instalar dependencias Node
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Instalar dependencias de documentación (MkDocs)
         run: pip install -r docs/requirements.txt
 
       - name: Compilar
         run: yarn build
+
+      - name: Verificar tipos
+        run: yarn typecheck
+
+      - name: Lint TypeScript — cero errores y cero advertencias
+        run: yarn lint --max-warnings=0
+
+      - name: Auditoría de dependencias runtime — sin vulnerabilidades conocidas
+        run: yarn npm audit --all --recursive --environment production
 
       - name: Pruebas unitarias
         run: yarn test
@@ -131,6 +137,9 @@ jobs:
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
         run: node tools/openapi/generate-openapi.mjs
 
+      - name: Generar documentación detallada de endpoints
+        run: yarn docs:endpoints:generate
+
       - name: Lint del contrato OpenAPI (Redocly) — 0 errores obligatorio
         run: yarn docs:openapi:lint
 
@@ -154,6 +163,16 @@ jobs:
         run: |
           yarn docs:modules:sync
           yarn docs:data:sync
+
+      - name: Verificar que los artefactos generados están versionados y al día
+        run: |
+          git diff --exit-code -- \
+            openapi/openapi.yaml \
+            openapi/openapi.json \
+            openapi/ENDPOINTS.md \
+            openapi/endpoints \
+            docs/modules \
+            docs/data
 
       - name: Cobertura documental — sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar
         run: yarn docs:coverage

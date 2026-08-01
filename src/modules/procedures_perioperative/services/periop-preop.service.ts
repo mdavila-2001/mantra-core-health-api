@@ -333,7 +333,7 @@ export class PeriopPreopService {
     caseId: string,
     checklistId: string,
     dto: SubmitChecklistPhaseDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ChecklistPhaseResponseDto> {
     this.logger.info(
       { operation: 'periop.checklist.phase', caseId, phase: dto.phase },

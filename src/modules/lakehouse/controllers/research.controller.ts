@@ -104,7 +104,9 @@ export class ResearchController {
    */
   @Get('dataset-releases/expired')
   @Roles('RESEARCH_GOVERNANCE', 'DPO', 'SYSTEM', 'PLATFORM_ADMIN')
-  @ApiOperation({ summary: 'Listar releases con manifiesto vencido sin cerrar' })
+  @ApiOperation({
+    summary: 'Listar releases con manifiesto vencido sin cerrar',
+  })
   listExpiredReleases(
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PendingExpiredReleasesResponseDto> {

@@ -53,12 +53,6 @@ const DEFAULT_PENDING_BATCH = 50;
 /** Cuánto puede quedar `NOTIF_SENDING` antes de considerarse huérfana y reclamable de nuevo. */
 const SENDING_CLAIM_STALE_MS = 5 * 60_000;
 
-/** Estados que todavía admiten un intento de entrega. */
-const DELIVERABLE_REQUEST_STATES: readonly string[] = [
-  CONCEPTS.NOTIF_PENDING,
-  CONCEPTS.NOTIF_SENDING,
-];
-
 /**
  * Notificaciones: solicitud consciente del consentimiento, entrega multicanal,
  * conciliación de acuses del proveedor y bandeja in-app

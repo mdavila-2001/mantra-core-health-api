@@ -12,10 +12,9 @@
 --   * Cada request fija `app.current_tenant_id` (GUC de sesión) tras verificar la
 --     membresía del actor en `directory.tenant_memberships`. La política compara
 --     `tenant_id` contra ese GUC.
---   * Cuando el GUC NO está fijado (contexto de sistema: arranque, seed, workers
---     cross-tenant), la política es permisiva. Esto la hace no disruptiva: el
---     código existente que aún no propaga tenant sigue funcionando, y el
---     aislamiento entra en vigor en cuanto el request fija su tenant.
+--   * Cuando el GUC NO está fijado, la política falla cerrada: no permite leer
+--     ni escribir ninguna fila. Migraciones, seed y trabajos cross-tenant usan
+--     el rol owner o una elevación SYSTEM explícita, local a la transacción.
 --
 -- Idempotente: se puede re-ejecutar. Cubre TODAS las tablas con `tenant_id uuid`.
 -- =============================================================================
@@ -24,10 +23,13 @@
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mantra_app') THEN
-    -- La contraseña real se inyecta desde el gestor de secretos en despliegue;
-    -- este default sólo aplica al entorno local de desarrollo.
-    CREATE ROLE mantra_app LOGIN PASSWORD 'mantra_app_dev'
-      NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+    -- IaC habilita LOGIN y obtiene la contraseña del gestor de secretos. La
+    -- migración nunca debe crear una credencial conocida.
+    CREATE ROLE mantra_app NOLOGIN
+      NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
+  ELSE
+    ALTER ROLE mantra_app
+      NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
   END IF;
 END $$;
 
@@ -74,14 +76,18 @@ BEGIN
     EXECUTE format($pol$
       CREATE POLICY tenant_isolation ON %I.%I
         USING (
-          current_setting('app.current_tenant_id', true) IS NULL
-          OR current_setting('app.current_tenant_id', true) = ''
-          OR tenant_id = current_setting('app.current_tenant_id', true)::uuid
+          tenant_id = NULLIF(
+            current_setting('app.current_tenant_id', true),
+            ''
+          )::uuid
+          OR current_setting('app.system_context', true) = 'true'
         )
         WITH CHECK (
-          current_setting('app.current_tenant_id', true) IS NULL
-          OR current_setting('app.current_tenant_id', true) = ''
-          OR tenant_id = current_setting('app.current_tenant_id', true)::uuid
+          tenant_id = NULLIF(
+            current_setting('app.current_tenant_id', true),
+            ''
+          )::uuid
+          OR current_setting('app.system_context', true) = 'true'
         )
     $pol$, r.table_schema, r.table_name);
   END LOOP;

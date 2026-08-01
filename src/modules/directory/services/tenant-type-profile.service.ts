@@ -1,0 +1,165 @@
+import { Injectable } from '@nestjs/common';
+import type { EntityManager } from '@mikro-orm/postgresql';
+import { PreconditionFailedException } from '../../../common';
+import { CatalogRepository } from '../../insurance/repositories';
+import { INS } from '../../insurance/insurance.concepts';
+import type { TenantTypeCode } from '../directory.concepts';
+import type { BrokerProfileDto, PayerProfileDto } from '../dto';
+
+/** Datos por tipo que acompañan al alta de un tenant. */
+export interface TenantTypeProfileInput {
+  /**
+   * Tipo elegido para el tenant. Es obligatorio en el alta.
+   */
+  tenantType: TenantTypeCode;
+  /**
+   * Razón social, que se replica en la fila del tipo.
+   */
+  legalName: string;
+  /**
+   * País declarado; obligatorio para `PROVIDER`.
+   */
+  countryConceptId?: string;
+  /**
+   * Jurisdicción declarada; obligatoria para `PROVIDER`.
+   */
+  jurisdictionConceptId?: string;
+  /**
+   * Datos de aseguradora; obligatorios para `PAYER`.
+   */
+  payer?: PayerProfileDto;
+  /**
+   * Datos de corredor; obligatorios para `BROKER`.
+   */
+  broker?: BrokerProfileDto;
+}
+
+/**
+ * Hace cumplir el contrato "un tenant declara su tipo y aporta lo que ese tipo
+ * exige", y materializa la fila específica del tipo.
+ *
+ * Sin esto, elegir `PAYER` no producía ninguna aseguradora ni `BROKER` ningún
+ * corredor: el tenant quedaba etiquetado con un tipo que no se sostenía en
+ * ninguna parte del modelo, y el primer siniestro o la primera comisión
+ * fallaban por una fila que nadie llegó a crear. Un `PROVIDER` no tiene tabla
+ * propia —opera a través de sus sedes y servicios— pero sí necesita país y
+ * jurisdicción, que es lo que determina bajo qué regulador presta atención.
+ *
+ * La validación va aquí y no sólo en los DTO porque las tres puertas de alta
+ * (auto-registro público, aprovisionamiento administrativo y sub-tenant)
+ * comparten la regla: dejarla en cada DTO invitaría a que una de ellas se
+ * quedase atrás.
+ */
+@Injectable()
+export class TenantTypeProfileService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param catalogRepo - Repositorio del catálogo de seguros (carriers/brokers).
+   */
+  constructor(private readonly catalogRepo: CatalogRepository) {}
+
+  /**
+   * Verifica que el bloque aportado corresponda al tipo declarado.
+   *
+   * Se comprueba antes de escribir nada: un alta a la que le falta el bloque de
+   * su tipo, o que trae el de otro, es un error del cliente, no un tenant a
+   * medias que alguien tendrá que reparar después.
+   *
+   * @param input - Tipo declarado y datos que lo acompañan.
+   * @throws PreconditionFailedException si falta el bloque del tipo o sobra otro.
+   */
+  assertProfileMatchesType(input: TenantTypeProfileInput): void {
+    const { tenantType } = input;
+
+    if (tenantType === 'PAYER' && !input.payer) {
+      throw new PreconditionFailedException(
+        'Un tenant de tipo PAYER exige el bloque `payer`',
+        { tenantType },
+      );
+    }
+    if (tenantType === 'BROKER' && !input.broker) {
+      throw new PreconditionFailedException(
+        'Un tenant de tipo BROKER exige el bloque `broker`',
+        { tenantType },
+      );
+    }
+    if (tenantType === 'PROVIDER') {
+      const missing = [
+        input.countryConceptId ? undefined : 'countryConceptId',
+        input.jurisdictionConceptId ? undefined : 'jurisdictionConceptId',
+      ].filter(Boolean);
+      if (missing.length > 0) {
+        throw new PreconditionFailedException(
+          'Un tenant de tipo PROVIDER exige país y jurisdicción',
+          { tenantType, missing },
+        );
+      }
+    }
+
+    if (tenantType !== 'PAYER' && input.payer) {
+      throw new PreconditionFailedException(
+        'El bloque `payer` sólo corresponde a un tenant de tipo PAYER',
+        { tenantType },
+      );
+    }
+    if (tenantType !== 'BROKER' && input.broker) {
+      throw new PreconditionFailedException(
+        'El bloque `broker` sólo corresponde a un tenant de tipo BROKER',
+        { tenantType },
+      );
+    }
+  }
+
+  /**
+   * Materializa la fila propia del tipo dentro de la transacción del alta.
+   *
+   * Nace con `VERIFY_PENDING` por la misma razón que el tenant nace PENDIENTE:
+   * declarar que se es aseguradora o corredor no equivale a estarlo; quien lo
+   * contrasta es la plataforma.
+   *
+   * @param tx - Transacción activa del alta del tenant.
+   * @param tenantId - Tenant recién creado.
+   * @param input - Tipo declarado y datos que lo acompañan.
+   * @param actorUserId - Actor al que se imputa la escritura.
+   * @returns Id de la fila creada, o `undefined` si el tipo no tiene tabla propia.
+   */
+  materializeProfile(
+    tx: EntityManager,
+    tenantId: string,
+    input: TenantTypeProfileInput,
+    actorUserId: string,
+  ): string | undefined {
+    if (input.tenantType === 'PAYER' && input.payer) {
+      const carrier = this.catalogRepo.createCarrier(tx, {
+        tenantId,
+        carrierCode: input.payer.carrierCode,
+        legalName: input.legalName,
+        regulatorIdentifier: input.payer.regulatorIdentifier,
+        jurisdictionConceptId: input.payer.jurisdictionConceptId,
+        verificationStatusConceptId: INS.VERIFY_PENDING,
+        statusConceptId: INS.CARRIER_ACTIVE,
+        actorUserId,
+      });
+      return carrier.id;
+    }
+
+    if (input.tenantType === 'BROKER' && input.broker) {
+      const broker = this.catalogRepo.createBroker(tx, {
+        tenantId,
+        brokerCode: input.broker.brokerCode,
+        legalName: input.legalName,
+        licenseNumber: input.broker.licenseNumber,
+        jurisdictionConceptId: input.broker.jurisdictionConceptId,
+        verificationStatusConceptId: INS.VERIFY_PENDING,
+        statusConceptId: INS.BROKER_ACTIVE,
+        actorUserId,
+      });
+      return broker.id;
+    }
+
+    // PROVIDER no tiene fila propia: su realidad operativa son las sedes y los
+    // servicios de salud, que se crean después con su propio caso de uso.
+    return undefined;
+  }
+}

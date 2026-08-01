@@ -4,3 +4,4 @@ export * from './clinical-structure.service';
 export * from './practice-settings.service';
 export * from './practice-workforce.service';
 export * from './practice-inventory.service';
+export * from './practice-tenant-lookup.service';

@@ -365,12 +365,12 @@ export const ACCOUNTING_SMOKE: SmokeCase[] = [
   {
     module: 'Accounting',
     endpoint: 'POST /accounting/journal-transactions/{id}/reverse',
-    name: 'límite: ya reversado (409)',
+    name: 'límite: ya reversado (422)',
     method: 'post',
     path: (c) =>
       `/accounting/journal-transactions/${c.vars.acctJournalId}/reverse`,
     body: () => ({}),
-    expectedStatus: 409,
+    expectedStatus: 422,
   },
   {
     module: 'Accounting',

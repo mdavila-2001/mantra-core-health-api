@@ -1,8 +1,9 @@
 # REDESA Health API
 
 Backend del ecosistema de salud REDESA (Mantra Core Technologies): una API NestJS modular de
-**60 módulos de dominio**, **841 operaciones HTTP** documentadas en OpenAPI, sobre PostgreSQL con
-aislamiento por tenant, complementada por MongoDB, Redis, OpenSearch, MinIO y **17 procesos
+**60 módulos de negocio documentados** (más el grupo raíz `app`), **869 operaciones HTTP**
+documentadas en OpenAPI, sobre PostgreSQL con aislamiento por tenant, complementada por MongoDB,
+Redis, OpenSearch, MinIO y **20 procesos
 worker** independientes.
 
 Esta documentación se genera y verifica junto al código: cada afirmación técnica aquí es
@@ -10,7 +11,7 @@ rastreable a un archivo, un comando o una prueba real — no hay contenido gené
 funcionalidad documentada que no exista. Ver el mandato completo en
 [`PLAN_MAESTRO_DOCUMENTACION_BACKEND_PRODUCCION.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/PLAN_MAESTRO_DOCUMENTACION_BACKEND_PRODUCCION.md).
 
-**Versión documentada:** `0.0.1`, commit `15c132d3`, 2026-07-29. Ver
+**Última reconciliación del contrato:** `0.0.1`, 2026-07-31. Ver
 [reportes de auditoría](reports/baseline.md) para el detalle de cómo se verificó.
 
 ## Diagrama de contexto
@@ -18,7 +19,7 @@ funcionalidad documentada que no exista. Ver el mandato completo en
 ```mermaid
 flowchart LR
   Client[Cliente HTTP externo] -->|HTTPS + JWT Bearer| API[API NestJS]
-  API --> PG[(PostgreSQL<br/>1184 entidades, RLS)]
+  API --> PG[(PostgreSQL<br/>1185 entidades, RLS)]
   API --> Mongo[(MongoDB<br/>document_store)]
   API --> Redis[(Redis<br/>redis_runtime)]
   API --> OS[(OpenSearch<br/>search_platform)]
@@ -28,7 +29,7 @@ flowchart LR
     direction TB
     W1[worker-messaging]
     W2[worker-billing]
-    Wn[... 15 más]
+    Wn[... 18 más]
   end
   W -->|HTTP interno /internal/*| API
 ```
@@ -49,20 +50,21 @@ uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad 
 
 ## Enlaces rápidos
 
-| Quiero... | Ir a |
-|---|---|
-| Ejecutar el backend en local | [Arranque local](getting-started/local-setup.md) |
-| Ver el contrato de la API | `/reference` (Scalar) o `/docs` (Swagger UI) con el servidor arriba, o [`openapi/openapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/openapi/openapi.yaml) |
-| Entender la autenticación/autorización | [Autenticación](api/authentication.md) · [Autorización](api/authorization.md) |
-| Entender el modelo de error | [Modelo de error](api/error-model.md) |
-| Ver un módulo de negocio concreto | [Catálogo de módulos](modules/index.md) |
-| Entender cómo se relacionan los módulos | [Dependencias entre módulos](architecture/module-dependencies.md) |
-| Ver qué se auditó y cómo | [Línea base](reports/baseline.md) · [Auditoría Graphify](reports/graphify-audit.md) |
-| Ver brechas documentales conocidas y su estado | [Análisis de brechas](reports/documentation-gap-analysis.md) |
-| Ver riesgos y su trazabilidad | [Matriz de trazabilidad](governance/traceability-matrix.md) |
-| Responder a un incidente en producción | [Runbooks](operations/runbooks/index.md) |
-| Ver qué se corrigió antes de documentar | [Corrección de inconsistencias](reports/inconsistency-remediation.md) |
-| Probar la API sin Scalar | [Colección Postman](postman/README.md) |
+| Quiero...                                      | Ir a                                                                                                                                                                                            |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ejecutar el backend en local                   | [Arranque local](getting-started/local-setup.md)                                                                                                                                                |
+| Ver el contrato de la API                      | `/reference` (Scalar) o `/docs` (Swagger UI) con el servidor arriba, o [`openapi/openapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/openapi/openapi.yaml) |
+| Entender la autenticación/autorización         | [Autenticación](api/authentication.md) · [Autorización](api/authorization.md)                                                                                                                   |
+| Entender el modelo de error                    | [Modelo de error](api/error-model.md)                                                                                                                                                           |
+| Ver un módulo de negocio concreto              | [Catálogo de módulos](modules/index.md)                                                                                                                                                         |
+| Entender cómo se relacionan los módulos        | [Dependencias entre módulos](architecture/module-dependencies.md)                                                                                                                               |
+| Ver qué se auditó y cómo                       | [Línea base](reports/baseline.md) · [Auditoría Graphify](reports/graphify-audit.md)                                                                                                             |
+| Ver el estado real para producción             | [Auditoría de producción 2026-07-31](reports/production-readiness-2026-07-31.md)                                                                                                                |
+| Ver brechas documentales conocidas y su estado | [Análisis de brechas](reports/documentation-gap-analysis.md)                                                                                                                                    |
+| Ver riesgos y su trazabilidad                  | [Matriz de trazabilidad](governance/traceability-matrix.md)                                                                                                                                     |
+| Responder a un incidente en producción         | [Runbooks](operations/runbooks/index.md)                                                                                                                                                        |
+| Ver qué se corrigió antes de documentar        | [Corrección de inconsistencias](reports/inconsistency-remediation.md)                                                                                                                           |
+| Probar la API sin Scalar                       | [Colección Postman](postman/README.md)                                                                                                                                                          |
 
 ## Cómo consumir la API
 

@@ -104,7 +104,7 @@ export class DiagnosticsLabService {
   /** Soporte: abre una corrida de analizador. */
   async createAnalyzerRun(
     dto: CreateAnalyzerRunDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
       {
@@ -207,7 +207,7 @@ export class DiagnosticsLabService {
   async verifyResult(
     observationId: string,
     dto: VerifyResultDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
       {

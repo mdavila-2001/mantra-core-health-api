@@ -149,7 +149,9 @@ describe('FileUploadService', () => {
       withVersion(context, CONCEPTS.SCAN_PENDING);
       context.storage.retrieve.mockResolvedValue(Buffer.from('bytes'));
 
-      await expect(context.service.download('file-1', actor)).resolves.toMatchObject({
+      await expect(
+        context.service.download('file-1', actor),
+      ).resolves.toMatchObject({
         mimeType: 'image/jpeg',
       });
     });
@@ -158,9 +160,9 @@ describe('FileUploadService', () => {
       const context = build();
       withVersion(context, CONCEPTS.SCAN_INFECTED);
 
-      await expect(context.service.download('file-1', actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        context.service.download('file-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(context.storage.retrieve).not.toHaveBeenCalled();
     });
 
@@ -174,18 +176,18 @@ describe('FileUploadService', () => {
         createdByUserId: actor.id,
       });
 
-      await expect(context.service.download('file-1', actor)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
-      );
+      await expect(
+        context.service.download('file-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('fails when the file does not exist', async () => {
       const context = build();
       context.filesRepo.findById.mockResolvedValue(null);
 
-      await expect(context.service.download('file-1', actor)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        context.service.download('file-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('refuses a user who neither uploaded the file nor has a review role', async () => {

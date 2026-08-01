@@ -1,3 +1,7 @@
+// Se importa el módulo de constantes directamente, no el barril `../../common`:
+// este archivo lo consumen servicios de otros módulos y el barril arrastra
+// guards, filtros e interceptores que no hacen falta para resolver un concepto.
+import { CONCEPTS } from '../../common/constants/concepts';
 import { defineModuleConcepts } from '../../common/seed/concept-seed';
 
 /**
@@ -87,6 +91,30 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
       display: 'Local staff role',
     },
   });
+
+/**
+ * Códigos de tipo de organización aceptados por la API.
+ *
+ * El DTO habla en códigos y no en UUIDs porque `tenant_type_concept_id` es una
+ * FK a `terminology.catalog_concepts`: pedirle al cliente que adivine el UUID
+ * del concepto convierte un campo de negocio en un acertijo cuyo único error
+ * posible es un 500 por violación de FK.
+ */
+export type TenantTypeCode = 'PROVIDER' | 'PAYER' | 'BROKER';
+
+/** Mapea el código de tipo de organización (DTO) a su concept id. */
+export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
+  Record<TenantTypeCode, string>
+> = {
+  PROVIDER: CONCEPTS.TENANT_TYPE_PROVIDER,
+  PAYER: CONCEPTS.TENANT_TYPE_PAYER,
+  BROKER: CONCEPTS.TENANT_TYPE_BROKER,
+};
+
+/** Los códigos válidos, para `@IsIn` y para la documentación OpenAPI. */
+export const TENANT_TYPE_CODES = Object.keys(
+  TENANT_TYPE_CONCEPT_BY_CODE,
+) as TenantTypeCode[];
 
 /** Mapea el código de rol de tenant (DTO) a su concept id. */
 export const TENANT_ROLE_CONCEPT_BY_CODE: Record<

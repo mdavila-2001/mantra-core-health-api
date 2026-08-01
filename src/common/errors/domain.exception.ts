@@ -42,6 +42,34 @@ export class UnauthorizedException extends DomainException {
   }
 }
 
+/**
+ * 403 por identidad sin verificar.
+ *
+ * Se distingue del 403 por rol insuficiente a propósito: el cliente tiene que
+ * poder ofrecer el flujo de verificación en un caso y no en el otro, y hacerlo
+ * comparando el texto del mensaje ata la interfaz a una redacción que este
+ * contrato declara cambiable.
+ */
+export class IdentityVerificationRequiredException extends DomainException {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param message - Mensaje para la persona.
+   * @param details - Contexto estructurado; `reason` separa los subcasos.
+   */
+  constructor(
+    message = 'Se requiere una identidad verificada',
+    details?: Record<string, unknown>,
+  ) {
+    super(
+      HttpStatus.FORBIDDEN,
+      ErrorCode.IDENTITY_VERIFICATION_REQUIRED,
+      message,
+      details,
+    );
+  }
+}
+
 /** Recurso relacionado o principal inexistente. */
 export class ResourceNotFoundException extends DomainException {
   /**

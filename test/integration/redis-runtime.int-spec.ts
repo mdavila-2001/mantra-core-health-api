@@ -26,12 +26,12 @@ describe('Redis Runtime (integración, Redis real)', () => {
     'X-Tenant-Id': tenantId,
   });
 
-  it('rechaza operar sin X-Tenant-Id (fail-closed)', async () => {
+  it('rechaza un actor sin membresías ni X-Tenant-Id (fail-closed)', async () => {
     await http()
       .post('/redis-runtime/cache')
-      .set(bearer(ctx.adminToken))
+      .set(bearer(ctx.tenantlessAdminToken))
       .send({ key: 'k1', value: 'v1', ttlSec: 60 })
-      .expect(422);
+      .expect(403);
   });
 
   it('UC-56 escribe y lee un valor de caché con TTL', async () => {

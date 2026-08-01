@@ -20,12 +20,14 @@ import {
   IamPatientSelfRegistrationService,
   IamOrganizationSelfRegistrationService,
   IamPractitionerSelfRegistrationService,
+  IamPasswordResetService,
 } from '../services';
 import {
   LoginDto,
   RefreshTokenDto,
   TokenResponseDto,
   LogoutAllResultDto,
+  LogoutResultDto,
   PurgeResultDto,
   ActivateAccountDto,
   ActivationResultDto,
@@ -37,6 +39,10 @@ import {
   RegisterPractitionerResponseDto,
   VerifyEmailDto,
   VerifyEmailResponseDto,
+  ForgotPasswordDto,
+  ForgotPasswordResponseDto,
+  ResetPasswordDto,
+  ResetPasswordResponseDto,
 } from '../dto';
 
 /** Endpoints de sesión bajo `/iam/auth`. Capa fina sobre `IamAuthService`. */
@@ -56,6 +62,7 @@ export class IamAuthController {
     private readonly selfRegistrationService: IamPatientSelfRegistrationService,
     private readonly organizationRegistrationService: IamOrganizationSelfRegistrationService,
     private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
+    private readonly passwordResetService: IamPasswordResetService,
   ) {}
 
   /**
@@ -168,6 +175,52 @@ export class IamAuthController {
     return this.authService.login(dto, ip);
   }
 
+  /**
+   * UC-01-13: pide el enlace de restablecimiento.
+   *
+   * Responde **202 y el mismo mensaje siempre**, exista o no la cuenta. Un 404
+   * cuando el correo no está registrado convertiría este formulario, que es
+   * público, en un oráculo de qué direcciones tienen cuenta en una plataforma
+   * de salud.
+   *
+   * El límite es más estricto que el del login porque cada solicitud válida
+   * dispara un correo: sin techo, el formulario es un amplificador de spam
+   * contra la bandeja de un tercero.
+   */
+  @Post('forgot-password')
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: 'Solicitar el restablecimiento de la contraseña',
+  })
+  forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+    @Ip() ip: string,
+  ): Promise<ForgotPasswordResponseDto> {
+    return this.passwordResetService.requestReset(dto, ip);
+  }
+
+  /**
+   * UC-01-13: consume el token recibido por correo y fija la contraseña nueva.
+   *
+   * Cierra todas las sesiones abiertas del usuario: quien recupera su cuenta lo
+   * hace porque perdió el control de la clave anterior.
+   */
+  @Post('reset-password')
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Fijar una contraseña nueva con el token recibido por correo',
+  })
+  resetPassword(
+    @Body() dto: ResetPasswordDto,
+    @Ip() ip: string,
+  ): Promise<ResetPasswordResponseDto> {
+    return this.passwordResetService.resetPassword(dto, ip);
+  }
+
   /** UC-01-06. */
   @Post('token/refresh')
   @Public()
@@ -176,6 +229,21 @@ export class IamAuthController {
   @ApiOperation({ summary: 'Rotar el refresh token' })
   refresh(@Body() dto: RefreshTokenDto): Promise<TokenResponseDto> {
     return this.authService.refresh(dto);
+  }
+
+  /**
+   * Cierra la sesión del token en uso.
+   *
+   * Complementa a `logout-all`, que cierra todas. Sin esta ruta, salir de la
+   * aplicación sólo limpiaba el navegador y el refresh token seguía sirviendo
+   * hasta caducar.
+   */
+  @Post('logout')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Cerrar la sesión actual del usuario' })
+  logout(@CurrentUser() actor: AuthenticatedUser): Promise<LogoutResultDto> {
+    return this.authService.logout(actor);
   }
 
   /** UC-01-08. */

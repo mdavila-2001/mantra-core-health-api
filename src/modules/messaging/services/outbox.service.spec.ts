@@ -95,7 +95,7 @@ describe('OutboxService', () => {
         d.tx,
         expect.objectContaining({ correlationId: expect.any(String) }),
       );
-      const passed = (d.outboxRepo.createDomainEvent.mock.calls[0] as any)[1];
+      const passed = d.outboxRepo.createDomainEvent.mock.calls[0][1];
       expect(passed.correlationId.length).toBeGreaterThan(0);
     });
 

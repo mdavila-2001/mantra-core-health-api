@@ -16,6 +16,7 @@ import {
   IamPatientSelfRegistrationService,
   IamOrganizationSelfRegistrationService,
   IamPractitionerSelfRegistrationService,
+  IamPasswordResetService,
 } from './services';
 import {
   UsersRepository,
@@ -30,6 +31,7 @@ import {
   AccountActivationsRepository,
   EmailVerificationsRepository,
   IamApiKeysRepository,
+  PasswordResetsRepository,
 } from './repositories';
 
 /**
@@ -65,6 +67,7 @@ import {
     AccountActivationsRepository,
     EmailVerificationsRepository,
     IamApiKeysRepository,
+    PasswordResetsRepository,
     // Servicios
     IamUsersService,
     IamCredentialsService,
@@ -75,6 +78,10 @@ import {
     IamPatientSelfRegistrationService,
     IamOrganizationSelfRegistrationService,
     IamPractitionerSelfRegistrationService,
+    IamPasswordResetService,
   ],
+  // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
+  // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
+  exports: [IamUsersService],
 })
 export class IamModule {}

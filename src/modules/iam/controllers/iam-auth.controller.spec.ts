@@ -28,12 +28,17 @@ function build() {
   };
   const organizationRegistrationService = { registerOrganization: mockFn() };
   const practitionerRegistrationService = { registerPractitioner: mockFn() };
+  const passwordResetService = {
+    requestReset: mockFn(),
+    resetPassword: mockFn(),
+  };
   const controller = new IamAuthController(
     authService as any,
     assistedRegistrationService as any,
     selfRegistrationService as any,
     organizationRegistrationService as any,
     practitionerRegistrationService as any,
+    passwordResetService as any,
   );
   return {
     controller,
@@ -42,6 +47,7 @@ function build() {
     selfRegistrationService,
     organizationRegistrationService,
     practitionerRegistrationService,
+    passwordResetService,
   };
 }
 
@@ -112,5 +118,25 @@ describe('IamAuthController', () => {
     const dto = { token: 'raw-token' };
     await d.controller.verifyEmail(dto);
     expect(d.selfRegistrationService.verifyEmail).toHaveBeenCalledWith(dto);
+  });
+
+  it('delegates the reset request with the client ip', async () => {
+    const d = build();
+    const dto = { identifier: 'alguien@redesa.test' };
+    await d.controller.forgotPassword(dto as any, '1.2.3.4');
+    expect(d.passwordResetService.requestReset).toHaveBeenCalledWith(
+      dto,
+      '1.2.3.4',
+    );
+  });
+
+  it('delegates the reset consumption with the client ip', async () => {
+    const d = build();
+    const dto = { token: 'raw-token', newPassword: 'nueva-clave-123' };
+    await d.controller.resetPassword(dto as any, '1.2.3.4');
+    expect(d.passwordResetService.resetPassword).toHaveBeenCalledWith(
+      dto,
+      '1.2.3.4',
+    );
   });
 });

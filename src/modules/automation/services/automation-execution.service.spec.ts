@@ -684,7 +684,11 @@ describe('AutomationExecutionService', () => {
       // la forma real y las aserciones compilen.
       const approval: Pick<
         AutomationApprovals,
-        'id' | 'agentRunId' | 'statusConceptId' | 'updatedAt' | 'decidedByUserId'
+        | 'id'
+        | 'agentRunId'
+        | 'statusConceptId'
+        | 'updatedAt'
+        | 'decidedByUserId'
       > = {
         id: 'approval-1',
         agentRunId: AGENT_RUN_ID,

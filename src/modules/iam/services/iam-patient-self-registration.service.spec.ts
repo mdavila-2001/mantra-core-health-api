@@ -8,6 +8,7 @@ import { TracingService } from '../../../observability';
 import { UnauthorizedException } from '@nestjs/common';
 import { CONCEPTS, ConflictException } from '../../../common';
 import { PROF } from '../../profiles/profiles.concepts';
+import { DIR } from '../../directory/directory.concepts';
 import type { RegisterPatientDto } from '../dto';
 
 const dto: RegisterPatientDto = {
@@ -42,7 +43,11 @@ describe('IamPatientSelfRegistrationService', () => {
     };
     const rolesRepo = { create: fn() };
     const eventsRepo = { record: fn() };
-    const emailVerificationsRepo = { create: fn(), findByTokenHash: fn() };
+    const emailVerificationsRepo = {
+      create: fn(),
+      findByTokenHash: fn(),
+      findLatestByUser: fn(),
+    };
     const personsRepo = { create: fn(() => ({ id: 'person-1' })) };
     const personProfilesRepo = { create: fn() };
     const patientProfilesRepo = {
@@ -63,7 +68,7 @@ describe('IamPatientSelfRegistrationService', () => {
       credentialsRepo as never,
       rolesRepo as never,
       eventsRepo as never,
-      emailVerificationsRepo as never,
+      emailVerificationsRepo,
       personsRepo as never,
       personProfilesRepo as never,
       patientProfilesRepo as never,
@@ -147,11 +152,16 @@ describe('IamPatientSelfRegistrationService', () => {
       // ruta autenticada no @Public()) rechaza con 403 cualquier request
       // posterior del paciente — la cuenta quedaría inutilizable más allá del
       // login. Ver el comentario en el servicio.
+      //
+      // El status es el concepto de directory, que es el dominio de la tabla.
+      // Antes se escribía `CONCEPTS.MEMBERSHIP_ACTIVE`, que pese al nombre es
+      // el de promotions, sólo porque era el único que miraba
+      // `loadActiveTenantIds`; ese método ya acepta ambos.
       expect(d.tenantMembershipsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           userId: 'user-1',
-          statusConceptId: CONCEPTS.MEMBERSHIP_ACTIVE,
+          statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         }),
       );
     });
@@ -242,7 +252,11 @@ describe('IamPatientSelfRegistrationService', () => {
       d: ReturnType<typeof build>,
       overrides: Record<string, unknown> = {},
     ) {
-      const user = { id: 'user-1', emailVerified: false, updatedAt: new Date() };
+      const user = {
+        id: 'user-1',
+        emailVerified: false,
+        updatedAt: new Date(),
+      };
       const verification = {
         userId: 'user-1',
         stateConceptId: CONCEPTS.STATE_ACTIVE,

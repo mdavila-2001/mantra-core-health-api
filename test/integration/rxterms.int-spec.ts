@@ -35,37 +35,44 @@ const ADMIN = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
-describe('Importación de RxTerms / medicamentos RxNorm (DB real)', () => {
-  let db: pg.Client;
+const describeDataset =
+  process.env.TERMINOLOGY_DATASET_TESTS === '1' ? describe : describe.skip;
 
-  beforeAll(async () => {
-    db = new pg.Client(ADMIN);
-    await db.connect();
-  }, 30000);
+describeDataset(
+  'Importación de RxTerms / medicamentos RxNorm (DB real)',
+  () => {
+    let db: pg.Client;
 
-  afterAll(async () => {
-    if (db) await db.end();
-  });
+    beforeAll(async () => {
+      db = new pg.Client(ADMIN);
+      await db.connect();
+    }, 30000);
 
-  it('el catálogo rxterms tiene más de 15,000 conceptos (RXCUIs) importados', async () => {
-    const { rows } = await db.query(`
+    afterAll(async () => {
+      if (db) await db.end();
+    });
+
+    it('el catálogo rxterms tiene más de 15,000 conceptos (RXCUIs) importados', async () => {
+      const { rows } = await db.query(`
       SELECT count(*)::bigint AS n
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
       JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
       WHERE cs.internal_code = 'rxterms'
     `);
-    const count = Number(rows[0].n);
-    expect(count).toBeGreaterThan(15000);
-  });
+      const count = Number(rows[0].n);
+      expect(count).toBeGreaterThan(15000);
+    });
 
-  it.each([
-    ['311354', 'Lisinopril (Oral Pill) 5 mg Tab'],
-    ['314076', 'Lisinopril (Oral Pill) 10 mg Tab'],
-    ['861007', 'metFORMIN (Oral Pill) 500 mg Tab'],
-  ])('el RXCUI %s existe con display "%s"', async (rxcui, expectedDisplay) => {
-    const { rows } = await db.query(
-      `
+    it.each([
+      ['311354', 'Lisinopril (Oral Pill) 5 mg Tab'],
+      ['314076', 'Lisinopril (Oral Pill) 10 mg Tab'],
+      ['861007', 'metFORMIN (Oral Pill) 500 mg Tab'],
+    ])(
+      'el RXCUI %s existe con display "%s"',
+      async (rxcui, expectedDisplay) => {
+        const { rows } = await db.query(
+          `
       SELECT cc.code, cc.display
       FROM terminology.catalog_concepts cc
       JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
@@ -73,14 +80,15 @@ describe('Importación de RxTerms / medicamentos RxNorm (DB real)', () => {
       WHERE cs.internal_code = 'rxterms'
         AND cc.code = $1
       `,
-      [rxcui],
+          [rxcui],
+        );
+        expect(rows).toHaveLength(1);
+        expect(rows[0].display).toBe(expectedDisplay);
+      },
     );
-    expect(rows).toHaveLength(1);
-    expect(rows[0].display).toBe(expectedDisplay);
-  });
 
-  it('el RXCUI 311354 (lisinopril 5 mg) tiene la propiedad strength_and_form correcta', async () => {
-    const { rows } = await db.query(`
+    it('el RXCUI 311354 (lisinopril 5 mg) tiene la propiedad strength_and_form correcta', async () => {
+      const { rows } = await db.query(`
       SELECT p.value_json #>> '{}' AS strength_and_form
       FROM terminology.concept_properties p
       JOIN terminology.catalog_concepts cc ON cc.id = p.concept_id
@@ -90,34 +98,35 @@ describe('Importación de RxTerms / medicamentos RxNorm (DB real)', () => {
         AND cc.code = '311354'
         AND p.property_code = 'strength_and_form'
     `);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].strength_and_form).toBe('5 mg Tab');
-  });
+      expect(rows).toHaveLength(1);
+      expect(rows[0].strength_and_form).toBe('5 mg Tab');
+    });
 
-  it('el code_system_version de rxterms está marcado como default', async () => {
-    const { rows } = await db.query(`
+    it('el code_system_version de rxterms está marcado como default', async () => {
+      const { rows } = await db.query(`
       SELECT csv.version, csv.is_default
       FROM terminology.code_system_versions csv
       JOIN terminology.code_systems cs ON cs.id = csv.code_system_id
       WHERE cs.internal_code = 'rxterms'
     `);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].is_default).toBe(true);
-  });
+      expect(rows).toHaveLength(1);
+      expect(rows[0].is_default).toBe(true);
+    });
 
-  it('el code_systems rxterms reutiliza el terminology_sources RXNORM existente (no duplica la fuente)', async () => {
-    const { rows } = await db.query(`
+    it('el code_systems rxterms reutiliza el terminology_sources RXNORM existente (no duplica la fuente)', async () => {
+      const { rows } = await db.query(`
       SELECT ts.code AS source_code, count(*) OVER () AS source_row_count
       FROM terminology.code_systems cs
       JOIN terminology.terminology_sources ts ON ts.id = cs.source_id
       WHERE cs.internal_code = 'rxterms'
     `);
-    expect(rows).toHaveLength(1);
-    expect(rows[0].source_code).toBe('RXNORM');
+      expect(rows).toHaveLength(1);
+      expect(rows[0].source_code).toBe('RXNORM');
 
-    const { rows: sourceRows } = await db.query(
-      `SELECT count(*)::bigint AS n FROM terminology.terminology_sources WHERE code = 'RXNORM'`,
-    );
-    expect(Number(sourceRows[0].n)).toBe(1);
-  });
-});
+      const { rows: sourceRows } = await db.query(
+        `SELECT count(*)::bigint AS n FROM terminology.terminology_sources WHERE code = 'RXNORM'`,
+      );
+      expect(Number(sourceRows[0].n)).toBe(1);
+    });
+  },
+);

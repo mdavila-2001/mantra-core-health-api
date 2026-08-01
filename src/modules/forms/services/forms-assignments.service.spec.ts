@@ -49,7 +49,11 @@ describe('FormsAssignmentsService', () => {
       d.assignmentsRepo.createAssignment.mockReturnValue({ id: 'as1' });
 
       const res = await d.service.createAssignment(
-        { fieldId: 'f1', targetResourceConceptId: 'rt-1', tenantId: 'tenant-a' },
+        {
+          fieldId: 'f1',
+          targetResourceConceptId: 'rt-1',
+          tenantId: 'tenant-a',
+        },
         actor,
       );
 
@@ -90,7 +94,11 @@ describe('FormsAssignmentsService', () => {
       d.assignmentsRepo.createAssignment.mockReturnValue({ id: 'as1' });
 
       await d.service.createAssignment(
-        { fieldId: 'f1', targetResourceConceptId: 'rt-1', tenantId: 'tenant-a' },
+        {
+          fieldId: 'f1',
+          targetResourceConceptId: 'rt-1',
+          tenantId: 'tenant-a',
+        },
         actor,
       );
 

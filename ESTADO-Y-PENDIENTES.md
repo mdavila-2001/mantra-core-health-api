@@ -76,6 +76,33 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
   como candidato); Google es explícitamente el adapter de **desarrollo**, no el definitivo.
   Cubierto con integración real opt-in (`google-email-provider.int-spec.ts`, corre sólo si las 4
   variables `GOOGLE_OAUTH_*`/`GOOGLE_SENDER_EMAIL` están configuradas).
+- **La expansión de conjuntos de valores nunca devolvió un solo miembro (2026-08-01).** Las dos
+  mitades del módulo `terminology` estaban en desacuerdo desde siempre: `importConcepts` creaba los
+  conceptos **sin estado** (`state_concept_id` nulo) y la expansión sólo selecciona los que están
+  en `TERM_ACTIVE`. El resultado es que todo el camino documentado —crear sistema, crear versión,
+  importar, publicar, expandir— terminaba en `includedMembers: 0` **sin ningún error**: la versión
+  figuraba publicada y no seleccionaba nada. No lo vio ninguna prueba porque las unitarias mockean
+  el repositorio y devuelven los conceptos que se les pide devolver. Corregido en los dos extremos:
+  los conceptos nacen en `TERM_DRAFT` y publicar la versión los promueve a `TERM_ACTIVE`, saltando
+  los que UC-03-10 retiró. Verificado contra la API viva: 25 conceptos importados → publicados →
+  `includedMembers: 25`.
+- **Lectura de la expansión (`GET /terminology/value-sets/:id/$expand`, 2026-08-01)**, paginada por
+  cursor keyset sobre `(ordinal, concept_id)` y **sin exigir rol de administración** — es lo que el
+  frontend necesitaba para poder rellenar un campo `*ConceptId`. El `POST` homónimo sigue siendo de
+  `SECURITY_ADMIN` porque materializa. Ver `src/modules/terminology/README.md`.
+- **Primer `SECURITY_ADMIN` sembrado al arrancar (2026-08-01)**: `BootstrapAdminSeedService`
+  (`src/common/seed/`), opt-in por `BOOTSTRAP_ADMIN_EMAIL`/`BOOTSTRAP_ADMIN_PASSWORD`, idempotente,
+  y **se niega en `NODE_ENV=production`** salvo `BOOTSTRAP_ADMIN_ALLOW_PRODUCTION=true`. Reutiliza
+  `IamUsersService.createUser`, así que la credencial se hashea con argon2id igual que por API en
+  vez de duplicar los parámetros del hash. `yarn postman:bootstrap` pasó a ser un disparador manual
+  del mismo servicio: dos caminos, una sola implementación.
+- **Recuperación de contraseña (UC-01-13, 2026-08-01)**: `POST /iam/auth/forgot-password` y
+  `POST /iam/auth/reset-password`, ambos públicos. No enumera cuentas (202 y el mismo cuerpo exista
+  o no), sólo persiste el SHA-256 del token, y restablecer revoca todas las sesiones y refresh
+  tokens del usuario. Tabla nueva `iam.password_resets` por migración aditiva
+  (`database/SQL/99_migrations/2026-08-01_password_reset.sql`), separada de `email_verifications`
+  a propósito: comparten forma pero no consecuencia, y con una sola tabla un token emitido para
+  probar un correo serviría para reescribir una credencial.
 - Hay pruebas unitarias, de integración y smoke; los cambios sobre persistencia deben validarse
   contra una base real, no sólo con `EntityManager` simulado.
 
@@ -181,6 +208,23 @@ Sigue priorizando escenarios donde un mock no demuestra el comportamiento:
 grafo de FK o un repositorio propietario de solo lectura en su módulo. Cada `findById`/`listByX`
 nuevo quedó acotado por `tenantId` (mismo patrón defensivo que el resto del repositorio), aunque la
 mayoría siguen sin controller que los use todavía — si conectas uno, mantén el parámetro de tenant.
+
+### P1 · Cerrado — lo que el frontend esperaba
+
+Las tres cosas que `PENDIENTES-BACKEND.md` (repo del frontend) marcaba como bloqueo están
+entregadas y verificadas contra la API viva, no sólo compilando:
+
+| Pedía | Estado |
+| --- | --- |
+| Catálogo de formas reales de error | Entregado (`cac7251b`, doce capturas literales) |
+| `GET /terminology/value-sets/:id/$expand` paginado por cursor | Entregado y verificado |
+| `BootstrapAdminSeedService` con `OnApplicationBootstrap` y guardia de producción | Entregado |
+| Recuperación de contraseña (estaba fuera de la cola, decisión abierta) | **Implementada** |
+
+De las tres opciones que el documento del frontend planteaba para la recuperación de contraseña
+—implementarla, sacar el enlace de la maqueta, o dejarlo apuntando a un aviso— se tomó la primera,
+que es la única que no reduce lo que el diseño ya prometía. **Sigue siendo una decisión revisable
+por producto**, y la anotación queda acá para que lo sea a la vista y no por omisión.
 
 ### P2 · Cerrar decisiones funcionales parametrizadas
 

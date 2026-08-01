@@ -29,9 +29,12 @@ describe('EmbeddingDrainJob', () => {
 
     await d.job.tick();
 
-    expect(d.api.get).toHaveBeenCalledWith('/vector-rag/embedding-jobs/pending', {
-      limit: 20,
-    });
+    expect(d.api.get).toHaveBeenCalledWith(
+      '/vector-rag/embedding-jobs/pending',
+      {
+        limit: 20,
+      },
+    );
     expect(d.api.post).not.toHaveBeenCalled();
   });
 

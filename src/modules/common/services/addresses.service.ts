@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { AuthenticatedUser, CONCEPTS, ConceptName } from '../../../common';
+import { AuthenticatedUser, CONCEPTS } from '../../../common';
 import { AddressesRepository } from '../repositories';
 import { Addresses } from '../entities';
-import { AddressResponseDto, CreateAddressDto, OwnerType } from '../dto';
+import { AddressResponseDto, CreateAddressDto } from '../dto';
 
 /** Separador con el que se serializan las líneas en la columna `lines` (varchar). */
 const LINE_SEPARATOR = '\n';

@@ -6,7 +6,7 @@ import pg from 'pg';
 /**
  * Verificación REAL del seed de VADEMÉCUM contra la base de datos.
  *
- * Aplica `SQL/patches/2026-07-30_vademecum_dev_seed.sql`, en la raíz del
+ * Aplica `database/SQL/98_seeds/vademecum_medications.sql`, desde la raíz del
  * repositorio (idempotente: usa UUIDs deterministas y `ON CONFLICT DO NOTHING`),
  * y comprueba que:
  *   1. La vancomicina existe como concepto con su código ATC J01XA01.
@@ -32,7 +32,13 @@ describe('Seed de Vademécum de medicamentos (DB real)', () => {
 
     // Aplica el seed (idempotente).
     const sql = readFileSync(
-      join(process.cwd(), '..', 'SQL', 'patches', '2026-07-30_vademecum_dev_seed.sql'),
+      join(
+        process.cwd(),
+        'database',
+        'SQL',
+        '98_seeds',
+        'vademecum_medications.sql',
+      ),
       'utf8',
     );
     await db.query(sql);

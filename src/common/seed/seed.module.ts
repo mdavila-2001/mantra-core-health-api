@@ -23,9 +23,13 @@ import {
   MessagingProviders,
   ProviderChannelConfigs,
 } from '../../modules/messaging/entities';
+import { IamModule } from '../../modules/iam/iam.module';
+import { TenantMemberships } from '../../modules/directory/entities';
 import { TerminologySeedService } from './terminology-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
+import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { SeedBootstrapService } from './seed-bootstrap.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -34,9 +38,8 @@ import { MessagingSeedService } from './messaging-seed.service';
  * puedan invocarlos tras materializar el esquema. Se importa una sola vez en
  * `AppModule`.
  *
- * El orden del array `providers` importa: los hooks `OnApplicationBootstrap`
- * corren en ese orden, y los seeds de dominio necesitan que los conceptos y el
- * tenant por defecto ya estén materializados.
+ * `SeedBootstrapService` impone el orden: primero catálogo/tenant, después los
+ * dominios que dependen de esas filas.
  */
 @Module({
   imports: [
@@ -56,17 +59,25 @@ import { MessagingSeedService } from './messaging-seed.service';
       MessageChannels,
       MessagingProviders,
       ProviderChannelConfigs,
+      TenantMemberships,
     ]),
+    // El seed del administrador reutiliza `IamUsersService.createUser` para que
+    // la credencial se hashee con argon2id igual que por API, en vez de duplicar
+    // aquí los parámetros del hash.
+    IamModule,
   ],
   providers: [
     TerminologySeedService,
     MessagingSeedService,
     IdentityVerificationSeedService,
+    BootstrapAdminSeedService,
+    SeedBootstrapService,
   ],
   exports: [
     TerminologySeedService,
     MessagingSeedService,
     IdentityVerificationSeedService,
+    BootstrapAdminSeedService,
   ],
 })
 export class SeedModule {}

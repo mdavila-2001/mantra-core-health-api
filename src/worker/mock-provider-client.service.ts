@@ -43,8 +43,9 @@ export class MockProviderClient {
 
   private static toWorkerError(path: string, error: unknown): HttpException {
     if (error instanceof AxiosError) {
-      const status = error.response?.status ?? 0;
-      const body = error.response?.data;
+      const axiosError: AxiosError<unknown> = error;
+      const status = axiosError.response?.status ?? 0;
+      const body = axiosError.response?.data;
       return new HttpException(
         { path, status, body },
         status >= 400 ? status : 500,

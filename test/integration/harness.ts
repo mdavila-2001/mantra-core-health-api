@@ -4,9 +4,13 @@ import { MikroORM } from '@mikro-orm/postgresql';
 import type { INestApplication } from '@nestjs/common';
 import pg from 'pg';
 import { AppModule } from '../../src/app.module';
-import { CONCEPTS, TokenService, createdBy } from '../../src/common';
+import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
+import {
+  HttpDispatcherService,
+  type OutboundDispatchResult,
+} from '../../src/common';
 
 /**
  * Vacía todos los datos de negocio antes de un arranque, dejando la base limpia
@@ -37,7 +41,13 @@ export async function resetBusinessData(): Promise<void> {
       `select format('%I.%I', table_schema, table_name) as qualified
          from information_schema.tables
         where table_type = 'BASE TABLE'
-          and table_schema not in ('pg_catalog', 'information_schema', 'public', 'pg_toast')`,
+          and table_schema not in ('pg_catalog', 'information_schema', 'public', 'pg_toast')
+          and table_schema !~ '^_'
+          and table_schema not in (
+            'timescaledb_experimental',
+            'timescaledb_information',
+            'toolkit_experimental'
+          )`,
     );
     if (rows.length > 0) {
       const list = rows.map((r) => r.qualified).join(', ');
@@ -74,6 +84,8 @@ export interface TestContext {
    * Valor de admin token mantenido por la instancia.
    */
   adminToken: string;
+  /** Token privilegiado sin membresías, reservado para pruebas fail-closed. */
+  tenantlessAdminToken: string;
 }
 
 /** Id determinista del administrador de pruebas (FK válida para created_by). */
@@ -91,6 +103,8 @@ export async function bootstrapTestApp(
      * Valor de reset mantenido por la instancia.
      */
     reset?: boolean;
+    /** Sustituto determinista del transporte HTTP para pruebas de contrato. */
+    httpDispatch?: (input: unknown) => Promise<OutboundDispatchResult>;
   } = {},
 ): Promise<TestContext> {
   process.env.ORM_SCHEMA_SYNC = process.env.ORM_SCHEMA_SYNC ?? 'off';
@@ -103,9 +117,15 @@ export async function bootstrapTestApp(
     await resetBusinessData();
   }
 
-  const moduleRef = await Test.createTestingModule({
+  const builder = Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  });
+  if (opts.httpDispatch) {
+    builder.overrideProvider(HttpDispatcherService).useValue({
+      post: opts.httpDispatch,
+    });
+  }
+  const moduleRef = await builder.compile();
 
   const app = moduleRef.createNestApplication({ bufferLogs: true });
   // Mismo logger que producción (nestjs-pino). El filtro global de excepciones ya
@@ -134,9 +154,21 @@ export async function bootstrapTestApp(
     TEST_ADMIN_ID,
     'test-session',
     ['SUPERADMIN', 'SECURITY_ADMIN'],
+    [SEED.tenantId],
+  );
+  const tenantlessAdminToken = tokenService.signAccessToken(
+    TEST_ADMIN_ID,
+    'test-session-tenantless',
+    ['SUPERADMIN', 'SECURITY_ADMIN'],
   );
 
-  return { app, orm, adminUserId: TEST_ADMIN_ID, adminToken };
+  return {
+    app,
+    orm,
+    adminUserId: TEST_ADMIN_ID,
+    adminToken,
+    tenantlessAdminToken,
+  };
 }
 
 /**

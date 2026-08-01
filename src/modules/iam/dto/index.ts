@@ -5,6 +5,7 @@ export * from './credential-response.dto';
 export * from './mfa-factor.dto';
 export * from './mfa-factor-response.dto';
 export * from './login.dto';
+export * from './password-reset.dto';
 export * from './token-response.dto';
 export * from './refresh-token.dto';
 export * from './create-device.dto';

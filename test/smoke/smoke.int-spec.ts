@@ -72,6 +72,27 @@ const results: CaseResult[] = [];
 const UUID_ABSENT = '00000000-0000-4000-8000-0000000000ff';
 const UUID_BAD = 'not-a-uuid';
 
+/** Resume el error HTTP en el reporte sin volcar cuerpos completos o secretos. */
+function responseMessage(body: unknown): string {
+  if (typeof body !== 'object' || body === null) return String(body ?? '');
+  const message = (body as Record<string, unknown>).message;
+  const details = (body as Record<string, unknown>).details;
+  const serialized = Array.isArray(message)
+    ? message.map(String).join('; ')
+    : typeof message === 'string'
+      ? message
+      : '';
+  const serializedDetails =
+    details === undefined ? '' : JSON.stringify(details);
+  const combined = [
+    serialized ? `mensaje=${serialized}` : '',
+    serializedDetails ? `detalles=${serializedDetails}` : '',
+  ]
+    .filter(Boolean)
+    .join('; ');
+  return combined ? `; ${combined.slice(0, 500)}` : '';
+}
+
 describe('Smoke test — 30 endpoints', () => {
   let ctx: TestContext;
   let orm: MikroORM;
@@ -80,7 +101,17 @@ describe('Smoke test — 30 endpoints', () => {
   beforeAll(async () => {
     // reset: parte de una base limpia para que el smoke sea reproducible entre
     // corridas (evita colisiones de unicidad por datos acumulados).
-    ctx = await bootstrapTestApp({ reset: true });
+    ctx = await bootstrapTestApp({
+      reset: true,
+      httpDispatch: async () => ({
+        ok: false,
+        httpStatus: 503,
+        latencyMs: 1,
+        signature: 'smoke-signature',
+        responseBody: { error: 'deterministic smoke transport' },
+        errorText: 'deterministic smoke transport',
+      }),
+    });
     orm = ctx.orm;
     server = ctx.app.getHttpServer();
   });
@@ -119,6 +150,7 @@ describe('Smoke test — 30 endpoints', () => {
     const started = Date.now();
     try {
       let req = request(server)[method](path);
+      req = req.timeout({ response: 10_000, deadline: 15_000 });
       if (opts.token) req = req.set('Authorization', `Bearer ${opts.token}`);
       if (opts.body !== undefined) req = req.send(opts.body as object);
       const res = await req;
@@ -140,7 +172,7 @@ describe('Smoke test — 30 endpoints', () => {
         durationMs,
         note: pass
           ? ''
-          : `esperaba ${opts.expectedStatus}${opts.expectedCode ? '/' + opts.expectedCode : ''}, recibió ${res.status}/${res.body?.code ?? '-'}`,
+          : `esperaba ${opts.expectedStatus}${opts.expectedCode ? '/' + opts.expectedCode : ''}, recibió ${res.status}/${res.body?.code ?? '-'}${responseMessage(res.body)}`,
       });
       return res;
     } catch (error) {
@@ -167,9 +199,12 @@ describe('Smoke test — 30 endpoints', () => {
     c: SmokeCase,
   ): Promise<void> {
     const started = Date.now();
-    const path = c.path(smokeCtx);
+    let path = '<setup pendiente>';
     try {
+      if (c.setup) await c.setup(smokeCtx);
+      path = c.path(smokeCtx);
       let req = request(server)[c.method](path);
+      req = req.timeout({ response: 10_000, deadline: 15_000 });
       if (c.auth !== false)
         req = req.set('Authorization', `Bearer ${smokeCtx.adminToken}`);
       if (c.body) req = req.send(c.body(smokeCtx) as object);
@@ -191,7 +226,7 @@ describe('Smoke test — 30 endpoints', () => {
         durationMs,
         note: pass
           ? ''
-          : `esperaba ${c.expectedStatus}${c.expectedCode ? '/' + c.expectedCode : ''}, recibió ${res.status}/${res.body?.code ?? '-'}`,
+          : `esperaba ${c.expectedStatus}${c.expectedCode ? '/' + c.expectedCode : ''}, recibió ${res.status}/${res.body?.code ?? '-'}${responseMessage(res.body)}`,
       });
     } catch (error) {
       results.push({

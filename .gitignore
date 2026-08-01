@@ -69,11 +69,13 @@ CLAUDE.md
 # Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
 /temp
 
-# database/ de la RAÍZ — modelo canónico (.puml) y DDL, con su propio flujo de
-# trabajo (.puml -> SQL/ -> BD -> ORM). No se versiona aquí: vive en local.
-# Anclado con "/" inicial para que la regla NO ignore por accidente otras
-# carpetas del mismo nombre en el árbol (p. ej. src/database).
-/database/
+# database/ de la RAÍZ — modelo canónico (.puml), DDL y mappings NoSQL. SÍ se
+# versiona: `docker-compose.yml` monta `./database/SQL` en `postgres-init` y
+# `./database/NoSQL` en `mongo-init`, así que un clon sin esta carpeta levanta
+# los contenedores de inicialización sin nada que aplicar. Mientras vivió solo
+# en local, cualquiera que clonara el repo se quedaba sin el esquema y sin los
+# índices de búsqueda, que es exactamente el bloqueo que reportó el equipo.
+# (Son 6,6 MB de texto: DDL, mappings y modelo. Sin dumps ni datos de paciente.)
 
 # docs/ SÍ se versiona: es el portal de documentación técnica que construye
 # mkdocs (`yarn docs:build`) y que valida el workflow de CI `docs.yml`. Un
@@ -96,3 +98,7 @@ dist-docs/
 
 # Archivos subidos por el adaptador de almacenamiento local (FILE_STORAGE_LOCAL_DIR)
 /storage/
+
+# Salida del pipeline legacy `yarn openapi:generate`, que duplica el contrato ya
+# versionado en `openapi/`. El contrato bueno lo produce `yarn docs:openapi:generate`.
+docs/endpoints/

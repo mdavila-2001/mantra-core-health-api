@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { CommunityModule } from '../community/community.module';
 import * as entities from './entities';
 import {
   DiagnosticUnitsController,
@@ -34,7 +35,10 @@ import {
  * expone las entidades del esquema `diagnostic_units`.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    CommunityModule,
+  ],
   controllers: [
     DiagnosticUnitsController,
     DiagnosticUnitSitesController,

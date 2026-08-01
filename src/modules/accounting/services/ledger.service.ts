@@ -6,7 +6,6 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
-  createdBy,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -135,7 +134,7 @@ export class LedgerService {
       'Posting journal transaction',
     );
 
-    const { debitCents, creditCents } = this.assertBalanced(dto.lines);
+    const { debitCents } = this.assertBalanced(dto.lines);
 
     return this.em.transactional(async (tx) => {
       // UC-16-05 (include): un asiento solo se postea en un periodo ABIERTO.

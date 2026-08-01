@@ -1,5 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
+import { CONCEPTS } from '../../../src/common';
 
 /**
  * Smoke del módulo Chart (15). Encadena el ciclo de vida de una nota clínica
@@ -144,7 +146,7 @@ export const CHART_SMOKE: SmokeCase[] = [
     method: 'post',
     path: (c) =>
       `/charts/notes/${c.vars.chartNoteId}/versions/${c.vars.chartVersionId}/cosign`,
-    body: (c) => ({ signerProfileId: c.adminUserId }),
+    body: (c) => ({ signerProfileId: c.vars.practitionerProfileId }),
     expectedStatus: 201,
   },
   {
@@ -346,7 +348,31 @@ export const CHART_SMOKE: SmokeCase[] = [
     endpoint: 'POST /charts/templates/{templateId}/assignments',
     name: 'happy: asignar plantilla (default)',
     method: 'post',
-    path: (c) => `/charts/templates/${UUID_ABSENT}/assignments`,
+    setup: async (c) => {
+      const templateId = randomUUID();
+      await c.orm.em
+        .fork()
+        .getConnection()
+        .execute(
+          `INSERT INTO chart.specialty_chart_templates
+          (id, specialty_concept_id, tenant_id, code, name, section_id,
+           version, status_concept_id, created_at, updated_at,
+           created_by_user_id, updated_by_user_id, row_version)
+         VALUES (?, ?, ?, ?, ?, NULL, 1, ?, now(), now(), ?, ?, 1)`,
+          [
+            templateId,
+            CONCEPTS.STATE_ACTIVE,
+            c.tenantId,
+            `SMOKE-${c.u}`,
+            'Plantilla smoke',
+            CONCEPTS.STATE_ACTIVE,
+            c.adminUserId,
+            c.adminUserId,
+          ],
+        );
+      c.vars.chartTemplateId = templateId;
+    },
+    path: (c) => `/charts/templates/${c.vars.chartTemplateId}/assignments`,
     body: (c) => ({
       practitionerProfileId: c.vars.practitionerProfileId,
       isDefault: true,

@@ -39,7 +39,10 @@ const ADMIN = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
-describe('Importación de HCPCS Level II (DB real)', () => {
+const describeDataset =
+  process.env.TERMINOLOGY_DATASET_TESTS === '1' ? describe : describe.skip;
+
+describeDataset('Importación de HCPCS Level II (DB real)', () => {
   let db: pg.Client;
 
   beforeAll(async () => {

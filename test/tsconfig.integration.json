@@ -5,7 +5,7 @@
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": false,
     "resolvePackageJsonExports": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "noEmit": false
   }
 }

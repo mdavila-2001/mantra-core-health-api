@@ -7,11 +7,8 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import {
-  DunningRepository,
-  InvoicesRepository,
-  PracticesLookupRepository,
-} from '../repositories';
+import { DunningRepository, InvoicesRepository } from '../repositories';
+import { PracticeTenantLookupService } from '../../practice/services';
 import {
   ExecuteDunningRunDto,
   DunningRunResponseDto,
@@ -50,7 +47,7 @@ export class DunningService {
     private readonly em: EntityManager,
     private readonly dunningRepo: DunningRepository,
     private readonly invoicesRepo: InvoicesRepository,
-    private readonly practicesLookupRepo: PracticesLookupRepository,
+    private readonly practicesLookupRepo: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DunningService.name);
@@ -170,7 +167,6 @@ export class DunningService {
     const runDateKey = now.toISOString().slice(0, 10);
 
     const practices = await this.practicesLookupRepo.findActive(
-      this.em,
       CONCEPTS.STATE_ACTIVE,
     );
     const practiceIdsByTenant = new Map<string, string[]>();
