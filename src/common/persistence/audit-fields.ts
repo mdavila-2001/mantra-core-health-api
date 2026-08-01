@@ -4,8 +4,11 @@
  * en cada `em.create` y garantiza que `createdBy`/`updatedBy` se pueblen de forma
  * consistente para la trazabilidad de seguridad.
  *
- * `rowVersion` se omite a propósito: la columna tiene `DEFAULT 1` a nivel de base
- * (ver TerminologySeedService.ensureRowVersionDefaults) y MikroORM la gestiona.
+ * `rowVersion` se omite a propósito: MikroORM no inicializa la propiedad de versión
+ * al crear la entidad, así que el valor inicial lo aporta la base con el `DEFAULT 1`
+ * que el DDL canónico declara desde v4.0.8 (`column_default()` en `salud-db/gen_ddl.py`;
+ * es la única columna con default en todo el modelo). A partir de ahí la gestiona
+ * MikroORM por `@Property({ version: true })` — nunca se escribe a mano.
  */
 export interface AuditableCreate {
   /**

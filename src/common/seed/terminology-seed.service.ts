@@ -63,8 +63,13 @@ export class TerminologySeedService {
      */
     inserted: number;
   }> {
-    await this.ensureRowVersionDefaults();
-
+    // `row_version` no se fija acá ni en ningún `em.create` de la aplicación:
+    // MikroORM no inicializa la propiedad de versión y la base la aporta con su
+    // `DEFAULT 1`, declarado en el DDL canónico desde v4.0.8. Antes esto se
+    // parcheaba en caliente desde este mismo servicio con un `ALTER TABLE … SET
+    // DEFAULT`, que es la dirección de cambio que el protocolo de 4 capas prohíbe
+    // —y además solo cubría 4 de los 52 schemas, así que las escrituras del ORM
+    // contra los otros 48 morían con 23502.
     const em = this.orm.em.fork();
     let inserted = 0;
     const now = new Date();

@@ -25,7 +25,7 @@ const BANNER = `
  | |  | | (_| | | | | |_| | | (_| | |__| (_) | | |  __/    | |  __/ (__| | | |
  |_|  |_|\\__,_|_| |_|\\__|_|  \\__,_|\\____\\___/|_|  \\___|    |_|\\___|\\___|_| |_|
  =============================================================================
-  MANTRA CORE TECHNOLOGIES - REDESA HEALTH API
+  MANTRA CORE TECHNOLOGIES - REDSAT HEALTH API
  =============================================================================
 `;
 
@@ -36,7 +36,7 @@ const BANNER = `
 async function bootstrap() {
   process.stdout.write(BANNER);
 
-  // `bufferLogs: true` retiene todo lo que se registre durante la inicialización
+  // `bufferLogs: true` retiene la totalidad de lo registrado durante la inicialización
   // -incluida la materialización del DDL, que ocurre en OnApplicationBootstrap-
   // hasta que se fija el logger definitivo. Sin esto, esos primeros logs saldrían
   // por el logger por defecto de Nest y no por pino.
@@ -91,8 +91,8 @@ async function bootstrap() {
   // `docs/governance/traceability-matrix.md` y `docs/api/conventions.md`.
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('REDESA Health API')
-      .setDescription('Mantra Core Technologies - REDESA Health Ecosystem')
+      .setTitle('REDSAT Health API')
+      .setDescription('Mantra Core Technologies - REDSAT Health Ecosystem')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
@@ -101,12 +101,16 @@ async function bootstrap() {
 
     app.use(
       '/reference',
-      apiReference({
+      (
+        apiReference as (
+          options: unknown,
+        ) => (req: unknown, res: unknown) => void
+      )({
         content: document,
-        pageTitle: 'REDESA Health API — Referencia',
+        pageTitle: 'REDSAT Health API — Referencia',
         theme: 'default',
         metaData: {
-          title: 'REDESA Health API',
+          title: 'REDSAT Health API',
           description:
             'Referencia interactiva del contrato OpenAPI real, generado desde los decoradores del backend.',
         },
