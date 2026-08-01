@@ -221,6 +221,23 @@ export class ProfilesPractitionersService {
     dto: VerifyCredentialDto,
     actor: AuthenticatedUser,
   ): Promise<CredentialResponseDto> {
+    // Verificar una matrícula sin declarar contra QUÉ se verificó no es una
+    // verificación: es una afirmación. Y de esta credencial depende que el
+    // profesional quede habilitado para ejercer, así que la fuente consultada
+    // -el registro del colegio médico, la resolución de la autoridad- es el
+    // único rastro que permite auditar después si la habilitación era legítima.
+    //
+    // Rechazar sí puede ir sin fuente: se rechaza por defectos de forma del
+    // propio documento, sin necesidad de consultar a nadie. Mismo criterio
+    // asimétrico que `OutboxService.ackDelivery`, donde solo el acuse fallido
+    // está obligado a declarar qué falló.
+    if (dto.decision === 'VERIFIED' && !dto.verificationSourceUri?.trim()) {
+      throw new PreconditionFailedException(
+        'Una credencial verificada debe declarar la fuente consultada',
+        { credentialId },
+      );
+    }
+
     this.logger.info(
       { operation: 'profiles.credential.verify', credentialId },
       'Verifying credential',
