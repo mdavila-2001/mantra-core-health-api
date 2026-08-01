@@ -24,7 +24,14 @@ name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
 # servicio DENTRO de la red de compose (no los `*_PORT` expuestos al host, que
 # son solo para conectarse desde fuera de Docker).
 x-app-env: &app-env
-  NODE_ENV: production
+  # Este compose es el de DESARROLLO LOCAL (ver la cabecera del archivo): monta
+  # el emulador de proveedores, publica puertos en el host y siembra la base con
+  # credenciales de ejemplo. Declararlo como `production` era una contradicción
+  # con lo que el archivo realmente levanta, y además activa las restricciones
+  # pensadas para un despliegue real —`JWT_SECRET` obligatorio, prohibición del
+  # emulador de proveedores— que este entorno deliberadamente no satisface.
+  # Producción usa manifiestos propios, no este archivo.
+  NODE_ENV: ${NODE_ENV:-development}
   PORT: "3000"
   DB_HOST: postgres
   DB_PORT: "5432"
