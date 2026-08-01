@@ -16,6 +16,23 @@ Agrupa los componentes relacionados con **smoke** y mantiene cohesionada esta re
 | `smoke-kit.ts` | Implementación o recurso de soporte de esta carpeta. |
 | `smoke.int-spec.ts` | Implementación o recurso de soporte de esta carpeta. |
 
+## Cómo correrlo
+
+```bash
+docker compose stop $(docker compose config --services | grep '^worker-')  # imprescindible
+yarn smoke
+docker compose start $(docker compose config --services | grep '^worker-')
+```
+
+**Los workers tienen que estar parados.** El smoke arranca con `reset: true`, que trunca todas
+las tablas de negocio para ser reproducible; con los 21 workers corriendo contra la misma base
+ocurren dos cosas: escriben filas mientras se trunca —lo que produce fallos erráticos que cambian
+de caso en cada corrida— y la carga combinada llegó a tumbar Postgres a modo recuperación. Con los
+workers parados la batería es determinista: 766/766.
+
+Tras cada corrida la base queda vacía de datos de negocio. Para volver a usar Postman:
+`yarn postman:bootstrap`.
+
 ## Criterios de mantenimiento
 
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.

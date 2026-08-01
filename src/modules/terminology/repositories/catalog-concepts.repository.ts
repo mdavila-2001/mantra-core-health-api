@@ -124,4 +124,43 @@ export class CatalogConceptsRepository {
       { orderBy: { code: 'ASC' } },
     );
   }
+
+  /**
+   * Busca conceptos por texto libre sobre código y display, opcionalmente
+   * acotado a una versión de sistema de códigos.
+   *
+   * Es la contrapartida de `$lookup`, que exige conocer sistema **y** código
+   * exactos: sin una búsqueda, los ~280 campos `*ConceptId` del contrato son
+   * irrellenables desde fuera, porque los códigos internos no están publicados
+   * en ninguna parte.
+   *
+   * @param em - Contexto de persistencia.
+   * @param filters - Texto a buscar y versión opcional.
+   * @param limit - Tope de resultados.
+   * @returns Conceptos que casan, ordenados por código.
+   */
+  search(
+    em: EntityManager,
+    filters: { query?: string; codeSystemVersionId?: string },
+    limit: number,
+  ): Promise<CatalogConcepts[]> {
+    const where: Record<string, unknown> = {};
+    if (filters.codeSystemVersionId) {
+      where.codeSystemVersionId = filters.codeSystemVersionId;
+    }
+    if (filters.query) {
+      // `$ilike` cubre los dos formatos de código que conviven en el catálogo:
+      // los cortos del núcleo (`PHONE`) y los prefijados por módulo
+      // (`profiles:GENDER_FEMALE`).
+      const pattern = `%${filters.query}%`;
+      where.$or = [
+        { code: { $ilike: pattern } },
+        { display: { $ilike: pattern } },
+      ];
+    }
+    return em.find(CatalogConcepts, where, {
+      orderBy: { code: 'ASC' },
+      limit,
+    });
+  }
 }

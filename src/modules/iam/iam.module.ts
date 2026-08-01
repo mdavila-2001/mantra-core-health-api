@@ -14,6 +14,8 @@ import {
   IamAuthService,
   IamAssistedRegistrationService,
   IamPatientSelfRegistrationService,
+  IamOrganizationSelfRegistrationService,
+  IamPractitionerSelfRegistrationService,
 } from './services';
 import {
   UsersRepository,
@@ -34,10 +36,11 @@ import {
  * Módulo IAM: identidad, credenciales, sesiones, MFA, dispositivos, roles
  * globales y eventos de seguridad. `TokenService` llega vía `AuthModule` (global).
  *
- * Importa Profiles, Common, Messaging y Directory porque el auto-registro de
- * pacientes crea, en una sola transacción, la cuenta con su persona y su
- * perfil, su documento de identidad y su correo, su membresía en el tenant
- * por defecto, y encola la verificación del correo.
+ * Importa Profiles, Common, Messaging y Directory porque los tres auto-registros
+ * cruzan módulos en una sola transacción: el de pacientes crea la cuenta con su
+ * persona y su perfil, su documento de identidad y su correo, y su membresía en
+ * el tenant por defecto; el de organizaciones crea la cuenta del owner junto al
+ * tenant y su membresía OWNER. Ambos encolan la verificación del correo.
  */
 @Module({
   imports: [
@@ -70,6 +73,8 @@ import {
     IamAuthService,
     IamAssistedRegistrationService,
     IamPatientSelfRegistrationService,
+    IamOrganizationSelfRegistrationService,
+    IamPractitionerSelfRegistrationService,
   ],
 })
 export class IamModule {}

@@ -295,13 +295,71 @@ export const IDENTITY_ASSURANCE_SMOKE: SmokeCase[] = [
   },
 
   // ---- UC-27-08: escalar a revisión manual ---------------------------------
+  // La revisión manual necesita un caso PROPIO: `recordResult` con un check
+  // requerido en MATCH liquida el caso y lo deja en CASE_ASSERTED, que es
+  // terminal. Escalar exige CASE_IN_VERIFICATION o CASE_AT_RISK, así que el
+  // caso del flujo de checks ya no sirve para esta rama del use case.
+  {
+    module: 'IdentityAssurance',
+    endpoint: 'POST /identity/verification-cases',
+    name: 'happy: abrir caso para la rama de revisión manual',
+    method: 'post',
+    path: () => '/identity/verification-cases',
+    body: (c) => ({
+      identityVerificationPolicyId: c.vars.idaPolicyId,
+      subjectTypeConceptId: CID,
+      subjectEntityId: c.adminUserId,
+    }),
+    expectedStatus: 201,
+    capture: (b, c) => {
+      c.vars.idaReviewCaseId = String(b.id);
+    },
+  },
+  {
+    module: 'IdentityAssurance',
+    endpoint: 'POST /identity/verification-cases/{id}/checks:plan',
+    name: 'happy: planifica check OPCIONAL del caso de revisión (pasa a IN_VERIFICATION)',
+    method: 'post',
+    path: (c) =>
+      `/identity/verification-cases/${c.vars.idaReviewCaseId}/checks:plan`,
+    // `required: false` a propósito: un check opcional completa sin liquidar el
+    // caso (`settleCase` sale antes si no es requerido), así que el caso llega a
+    // la revisión manual en IN_VERIFICATION y con un check completado — que es
+    // justo lo que después exige la emisión de la aserción.
+    body: () => ({ checks: [{ checkTypeConceptId: CID, required: false }] }),
+    expectedStatus: 201,
+    capture: (b, c) => {
+      c.vars.idaReviewCheckId = String((b.checkIds as string[])[0]);
+    },
+  },
+  {
+    module: 'IdentityAssurance',
+    endpoint: 'POST /identity/checks/{id}/attempts',
+    name: 'happy: intento del check de revisión',
+    method: 'post',
+    path: (c) => `/identity/checks/${c.vars.idaReviewCheckId}/attempts`,
+    body: (c) => ({
+      identityAuthorityEndpointId: c.vars.idaEndpointId,
+      outcome: 'SUCCESS',
+    }),
+    expectedStatus: 201,
+  },
+  {
+    module: 'IdentityAssurance',
+    endpoint: 'POST /identity/checks/{id}/results',
+    name: 'happy: resultado del check de revisión (queda COMPLETED)',
+    method: 'post',
+    path: (c) => `/identity/checks/${c.vars.idaReviewCheckId}/results`,
+    body: () => ({ result: 'MATCH', matchScore: '0.99' }),
+    expectedStatus: 201,
+  },
   {
     module: 'IdentityAssurance',
     endpoint: 'POST /identity/verification-cases/{id}/manual-review',
     name: 'happy: escalar a revisión manual',
     method: 'post',
     path: (c) =>
-      `/identity/verification-cases/${c.vars.idaCaseId}/manual-review`,
+      `/identity/verification-cases/${c.vars.idaReviewCaseId}/manual-review`,
     body: (c) => ({
       reviewReasonConceptId: CID,
       assignedToUserId: c.adminUserId,
@@ -317,7 +375,7 @@ export const IDENTITY_ASSURANCE_SMOKE: SmokeCase[] = [
     name: 'límite: sin auth',
     method: 'post',
     path: (c) =>
-      `/identity/verification-cases/${c.vars.idaCaseId}/manual-review`,
+      `/identity/verification-cases/${c.vars.idaReviewCaseId}/manual-review`,
     auth: false,
     body: () => ({ reviewReasonConceptId: CID }),
     expectedStatus: 401,
@@ -352,7 +410,8 @@ export const IDENTITY_ASSURANCE_SMOKE: SmokeCase[] = [
     endpoint: 'POST /identity/verification-cases/{id}/assertions',
     name: 'happy: emitir aserción',
     method: 'post',
-    path: (c) => `/identity/verification-cases/${c.vars.idaCaseId}/assertions`,
+    path: (c) =>
+      `/identity/verification-cases/${c.vars.idaReviewCaseId}/assertions`,
     body: (c) => ({
       issuerIdentityAuthorityId: c.vars.idaAuthorityId,
       assuranceLevelConceptId: CID,
@@ -367,7 +426,8 @@ export const IDENTITY_ASSURANCE_SMOKE: SmokeCase[] = [
     endpoint: 'POST /identity/verification-cases/{id}/assertions',
     name: 'límite: sin auth',
     method: 'post',
-    path: (c) => `/identity/verification-cases/${c.vars.idaCaseId}/assertions`,
+    path: (c) =>
+      `/identity/verification-cases/${c.vars.idaReviewCaseId}/assertions`,
     auth: false,
     body: (c) => ({ issuerIdentityAuthorityId: c.vars.idaAuthorityId }),
     expectedStatus: 401,
@@ -396,19 +456,19 @@ export const IDENTITY_ASSURANCE_SMOKE: SmokeCase[] = [
   // ---- UC-27-12: barrido de expiración -------------------------------------
   {
     module: 'IdentityAssurance',
-    endpoint: 'POST /identity/verification-cases:expire-sweep',
+    endpoint: 'POST /identity/verification-cases/expire-sweep',
     name: 'happy: barrido de expiración',
     method: 'post',
-    path: () => '/identity/verification-cases:expire-sweep',
+    path: () => '/identity/verification-cases/expire-sweep',
     body: () => ({}),
     expectedStatus: 200,
   },
   {
     module: 'IdentityAssurance',
-    endpoint: 'POST /identity/verification-cases:expire-sweep',
+    endpoint: 'POST /identity/verification-cases/expire-sweep',
     name: 'límite: sin auth',
     method: 'post',
-    path: () => '/identity/verification-cases:expire-sweep',
+    path: () => '/identity/verification-cases/expire-sweep',
     auth: false,
     body: () => ({}),
     expectedStatus: 401,

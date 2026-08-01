@@ -1,0 +1,440 @@
+import { Injectable } from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { PinoLogger } from 'nestjs-pino';
+import * as argon2 from 'argon2';
+import { randomUUID } from 'node:crypto';
+import {
+  APP_ATTR,
+  TracingService,
+  type TraceSpan,
+} from '../../../observability';
+import {
+  CONCEPTS,
+  ConflictException,
+  SEED,
+  TokenService,
+  type AuthenticatedUser,
+} from '../../../common';
+import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
+import {
+  ADMIN_GENDER_CONCEPT_BY_CODE,
+  BIRTH_SEX_CONCEPT_BY_CODE,
+  PROF,
+} from '../../profiles/profiles.concepts';
+import {
+  HealthPractitionerProfilesRepository,
+  JurisdictionAuthorizationsRepository,
+  PersonAccountLinksRepository,
+  PersonProfilesRepository,
+  PersonsRepository,
+  PractitionerLanguagesRepository,
+  ProfessionalCredentialsRepository,
+} from '../../profiles/repositories';
+import {
+  ContactPointsRepository,
+  IdentifiersRepository,
+} from '../../common/repositories';
+import { NotificationsService } from '../../messaging/services';
+import { DIR } from '../../directory/directory.concepts';
+import { TenantMembershipsRepository } from '../../directory/repositories';
+import {
+  CredentialsRepository,
+  EmailVerificationsRepository,
+  SecurityEventsRepository,
+  UserGlobalRolesRepository,
+  UsersRepository,
+} from '../repositories';
+import {
+  RegisterPractitionerDto,
+  RegisterPractitionerResponseDto,
+} from '../dto';
+import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+
+/** Vida útil del token de verificación de correo (24 h). */
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Auto-registro público de profesionales de salud.
+ *
+ * Existe por la misma razón que el de organizaciones: obligar a que un
+ * administrador cree cada médico convierte el alta en un cuello de botella
+ * manual y hace imposible que la plataforma crezca por sí sola. El profesional
+ * se registra solo, con su correo como identidad de login.
+ *
+ * Lo que **no** hace es habilitarlo para ejercer. La licencia se guarda con
+ * `AUTH_PENDING`, la credencial con `CRED_PENDING` y el perfil con
+ * `PRACT_VERIF_PENDING`: exactamente el mismo estado en el que los deja el alta
+ * administrativa (`ProfilesPractitionersService`). Registrarse es declarar una
+ * matrícula, no probarla; la verificación sigue siendo un acto de la plataforma.
+ * Por eso `acceptsNewPatients` nace en `false` salvo petición explícita.
+ *
+ * Cruza cuatro módulos —iam (cuenta), profiles (persona, perfil, licencia),
+ * common (documento y contacto) y directory (membresía)— en una sola
+ * transacción: una cuenta sin perfil profesional, o un perfil sin membresía de
+ * tenant, no sirve para nada y obligaría a un flujo de reparación manual.
+ */
+@Injectable()
+export class IamPractitionerSelfRegistrationService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tokenService - Emisor del token de verificación de correo.
+   * @param usersRepo - Repositorio de cuentas.
+   * @param credentialsRepo - Repositorio de credenciales de autenticación.
+   * @param rolesRepo - Repositorio de roles globales.
+   * @param emailVerificationsRepo - Repositorio de verificaciones de correo.
+   * @param eventsRepo - Repositorio de eventos de seguridad.
+   * @param personsRepo - Repositorio de personas.
+   * @param personProfilesRepo - Repositorio de clasificación de perfiles.
+   * @param practitionersRepo - Repositorio de perfiles profesionales.
+   * @param authorizationsRepo - Repositorio de licencias jurisdiccionales.
+   * @param professionalCredentialsRepo - Repositorio de títulos profesionales.
+   * @param languagesRepo - Repositorio de idiomas de atención.
+   * @param accountLinksRepo - Repositorio de vínculos cuenta-persona.
+   * @param identifiersRepo - Repositorio de identificadores oficiales.
+   * @param contactPointsRepo - Repositorio de puntos de contacto.
+   * @param tenantMembershipsRepo - Repositorio de membresías de tenant.
+   * @param notificationsService - Encolado del correo de verificación.
+   * @param logger - Logger estructurado.
+   * @param tracing - Trazado del span de negocio.
+   */
+  constructor(
+    private readonly em: EntityManager,
+    private readonly tokenService: TokenService,
+    private readonly usersRepo: UsersRepository,
+    private readonly credentialsRepo: CredentialsRepository,
+    private readonly rolesRepo: UserGlobalRolesRepository,
+    private readonly emailVerificationsRepo: EmailVerificationsRepository,
+    private readonly eventsRepo: SecurityEventsRepository,
+    private readonly personsRepo: PersonsRepository,
+    private readonly personProfilesRepo: PersonProfilesRepository,
+    private readonly practitionersRepo: HealthPractitionerProfilesRepository,
+    private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
+    private readonly professionalCredentialsRepo: ProfessionalCredentialsRepository,
+    private readonly languagesRepo: PractitionerLanguagesRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly identifiersRepo: IdentifiersRepository,
+    private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly tenantMembershipsRepo: TenantMembershipsRepository,
+    private readonly notificationsService: NotificationsService,
+    private readonly logger: PinoLogger,
+    private readonly tracing: TracingService,
+  ) {
+    this.logger.setContext(IamPractitionerSelfRegistrationService.name);
+  }
+
+  /**
+   * Da de alta al profesional, su persona, su perfil y su licencia.
+   *
+   * @param dto - Datos de la cuenta, la persona y la matrícula.
+   * @param ip - IP de origen, para el evento de seguridad.
+   * @returns Identificadores de lo creado y si salió el correo de verificación.
+   * @throws ConflictException si el correo ya tiene una credencial activa.
+   */
+  async registerPractitioner(
+    dto: RegisterPractitionerDto,
+    ip?: string,
+  ): Promise<RegisterPractitionerResponseDto> {
+    // Privacidad: el span no lleva correo, nombre ni número de matrícula — sólo
+    // los identificadores internos que el alta va creando.
+    return this.tracing.runInSpan(
+      'iam.practitioner.self-register',
+      {
+        [APP_ATTR.MODULE]: 'iam',
+        [APP_ATTR.OPERATION]: 'practitioner.self-register',
+        [APP_ATTR.ENTITY_TYPE]: 'profiles.health_practitioner_profiles',
+      },
+      (span) => this.performRegisterPractitioner(dto, span, ip),
+    );
+  }
+
+  /**
+   * Registro propiamente dicho. Se extrajo para que `registerPractitioner` sea
+   * sólo la declaración del span de negocio.
+   */
+  private async performRegisterPractitioner(
+    dto: RegisterPractitionerDto,
+    span: TraceSpan,
+    ip?: string,
+  ): Promise<RegisterPractitionerResponseDto> {
+    this.logger.info(
+      { operation: 'iam.auth.register-practitioner' },
+      'Practitioner self-registration',
+    );
+
+    const created = await this.em.transactional(async (tx) => {
+      // El correo es la identidad de login: comprobarlo antes de escribir nada
+      // convierte una violación de constraint (500) en un 409 explicativo.
+      const clash = await this.credentialsRepo.findLivePasswordBySubject(
+        tx,
+        dto.email,
+      );
+      if (clash) {
+        this.logger.warn(
+          {
+            operation: 'iam.auth.register-practitioner',
+            reason: 'email-in-use',
+          },
+          'Rejected self-registration: email already registered',
+        );
+        throw new ConflictException('Ya existe una cuenta con ese correo');
+      }
+
+      const practitionerCode = `PRC-${randomUUID()}`;
+      const clashCode = await this.practitionersRepo.findByCode(
+        tx,
+        practitionerCode,
+      );
+      if (clashCode) {
+        throw new ConflictException('El practitioner_code ya está en uso', {
+          practitionerCode,
+        });
+      }
+
+      // 1) Cuenta ACTIVA: el titular está presente y fija su propia contraseña,
+      // así que no hay token de activación ni `mustChangePassword`.
+      const user = this.usersRepo.create(tx, {
+        displayName: dto.displayName,
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
+        timeZone: dto.timeZone,
+      });
+      // Las FK son columnas uuid planas: persistir el padre antes de los hijos.
+      await tx.flush();
+
+      this.credentialsRepo.createPassword(tx, {
+        userId: user.id,
+        externalSubject: dto.email,
+        secretHash: await argon2.hash(dto.password),
+        actorUserId: user.id,
+      });
+      this.rolesRepo.create(tx, {
+        userId: user.id,
+        roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
+        actorUserId: user.id,
+      });
+
+      // 2) Persona con sus datos demográficos. El código legible del DTO se
+      // traduce aquí al concepto de terminología que persiste la columna.
+      const person = this.personsRepo.create(tx, {
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+        vitalStatusConceptId: PROF.VITAL_ALIVE,
+        displayName: dto.displayName,
+        birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+        administrativeGenderConceptId: dto.gender
+          ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender]
+          : undefined,
+        sexAtBirthConceptId: dto.sexAtBirth
+          ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
+          : undefined,
+        actorUserId: user.id,
+      });
+      await tx.flush();
+
+      this.personProfilesRepo.create(tx, {
+        personId: person.id,
+        profileTypeConceptId: PROF.PROFILE_TYPE_PRACTITIONER,
+        statusConceptId: PROF.PROFILE_ACTIVE,
+        actorUserId: user.id,
+      });
+      await tx.flush();
+
+      // 3) Perfil profesional. `health_practitioner_profiles.profile_id` ES
+      // `persons.id` (ver ProfilesPractitionersService), no un id propio.
+      const practitioner = this.practitionersRepo.create(tx, {
+        profileId: person.id,
+        practitionerCode,
+        practitionerCategoryConceptId:
+          dto.practitionerCategoryConceptId ?? PROF.PRACT_CATEGORY_GENERAL,
+        professionalTitle: dto.professionalTitle,
+        // PENDIENTE de verificación: el alta declara la matrícula, no la prueba.
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        acceptsNewPatients: dto.acceptsNewPatients ?? false,
+        actorUserId: user.id,
+      });
+      await tx.flush();
+
+      // 4) Licencia y título, ambos pendientes de validación.
+      const license = this.authorizationsRepo.create(tx, {
+        practitionerProfileId: person.id,
+        jurisdictionConceptId:
+          dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
+        licenseNumber: dto.licenseNumber,
+        regulatoryAuthority: dto.regulatoryAuthority,
+        stateConceptId: PROF.AUTH_PENDING,
+        actorUserId: user.id,
+      });
+      this.professionalCredentialsRepo.create(tx, {
+        practitionerProfileId: person.id,
+        credentialTypeConceptId:
+          dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
+        number: dto.credentialNumber,
+        stateConceptId: PROF.CRED_PENDING,
+        actorUserId: user.id,
+      });
+      this.languagesRepo.create(tx, {
+        practitionerProfileId: person.id,
+        languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
+        proficiencyConceptId: PROF.LANG_PROFICIENCY_NATIVE,
+        clinicalInterpretationAllowed: true,
+        actorUserId: user.id,
+      });
+      await tx.flush();
+
+      // 5) Vínculo cuenta-persona: el titular es él mismo.
+      this.accountLinksRepo.create(tx, {
+        personId: person.id,
+        userId: user.id,
+        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+        verificationStatusConceptId: PROF.ACCOUNT_LINK_VERIFIED,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        validFrom: new Date(),
+        actorUserId: user.id,
+      });
+
+      if (dto.nationalId) {
+        this.identifiersRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+          ownerId: person.id,
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: dto.nationalId,
+          useConceptId: CONCEPTS.USE_OFFICIAL,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          actorUserId: user.id,
+        });
+      }
+
+      // 6) Contacto: el correo siempre, el teléfono si lo aportó.
+      this.contactPointsRepo.create(tx, {
+        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+        ownerId: person.id,
+        systemConceptId: CONCEPTS.CONTACT_EMAIL,
+        value: dto.email,
+        useConceptId: CONCEPTS.CONTACT_USE_WORK,
+        actorUserId: user.id,
+      });
+      if (dto.phone) {
+        this.contactPointsRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+          ownerId: person.id,
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: dto.phone,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+          actorUserId: user.id,
+        });
+      }
+
+      // 7) Membresía en el tenant por defecto. Sin esta fila,
+      // `TenantContextInterceptor` rechaza con 403 cualquier request posterior
+      // del profesional: la cuenta quedaría inutilizable más allá del login.
+      // Cuando se incorpore a una organización real, esa alta le dará su propia
+      // membresía; ésta es el mínimo para que la cuenta funcione desde el día 1.
+      this.tenantMembershipsRepo.create(tx, {
+        userId: user.id,
+        tenantId: SEED.tenantId,
+        tenantRoleConceptId: DIR.ROLE_STAFF,
+        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+        accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
+        startDate: new Date(),
+        actorUserId: user.id,
+      });
+
+      // 8) Verificación del correo. No condiciona el acceso.
+      const { raw, hash } = this.tokenService.issueRefreshToken();
+      this.emailVerificationsRepo.create(tx, {
+        userId: user.id,
+        email: dto.email,
+        tokenHash: hash,
+        expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
+        actorUserId: user.id,
+      });
+
+      this.eventsRepo.record(tx, {
+        eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
+        outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+        userId: user.id,
+        recordedByUserId: user.id,
+        ip,
+        detailJson: { flow: 'practitioner-self-registration' },
+      });
+
+      return {
+        userId: user.id,
+        personId: person.id,
+        practitionerProfileId: practitioner.profileId,
+        practitionerCode,
+        licenseId: license.id,
+        emailVerificationToken: raw,
+      };
+    });
+
+    // El correo se encola FUERA de la transacción: si la mensajería falla, la
+    // cuenta ya creada no debe deshacerse — el profesional puede entrar igual.
+    span.setAttribute(APP_ATTR.ENTITY_ID, created.practitionerProfileId);
+    span.addEvent('registration.persisted');
+
+    const emailVerificationSent = await this.sendVerificationEmail(
+      created.userId,
+      dto.email,
+      created.emailVerificationToken,
+    );
+
+    span.setAttribute('iam.registration.email_sent', emailVerificationSent);
+    this.logger.info(
+      { operation: 'iam.auth.register-practitioner', userId: created.userId },
+      'Practitioner self-registered',
+    );
+
+    return {
+      userId: created.userId,
+      personId: created.personId,
+      practitionerProfileId: created.practitionerProfileId,
+      practitionerCode: created.practitionerCode,
+      licenseId: created.licenseId,
+      verificationStatus: 'PENDING',
+      emailVerificationSent,
+    };
+  }
+
+  /**
+   * Encola el correo de verificación sin dejar que su fallo tumbe el alta.
+   *
+   * @param userId - Destinatario interno.
+   * @param email - Dirección a la que va el correo.
+   * @param token - Token en claro, que sólo viaja en el correo.
+   * @returns `true` si la solicitud de notificación quedó registrada.
+   */
+  private async sendVerificationEmail(
+    userId: string,
+    email: string,
+    token: string,
+  ): Promise<boolean> {
+    const actor: AuthenticatedUser = { id: userId, roles: [] };
+    try {
+      await this.notificationsService.createRequest(
+        {
+          channelId: MESSAGING_SEED.emailChannelId,
+          recipientUserId: userId,
+          recipientAddress: email,
+          payloadJson: {
+            subject: 'Verificá tu correo profesional',
+            bodyText:
+              'Para verificar tu correo, usá este código: ' +
+              `${token}\n\nTu matrícula quedó registrada y está pendiente de ` +
+              'verificación por parte de la plataforma.',
+          },
+        },
+        actor,
+      );
+      return true;
+    } catch (error) {
+      this.logger.warn(
+        { operation: 'iam.auth.register-practitioner', userId, err: error },
+        'Could not enqueue the verification email; the practitioner is registered anyway',
+      );
+      return false;
+    }
+  }
+}

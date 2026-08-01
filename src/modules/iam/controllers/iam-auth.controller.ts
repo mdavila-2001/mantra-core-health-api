@@ -18,6 +18,8 @@ import {
   IamAuthService,
   IamAssistedRegistrationService,
   IamPatientSelfRegistrationService,
+  IamOrganizationSelfRegistrationService,
+  IamPractitionerSelfRegistrationService,
 } from '../services';
 import {
   LoginDto,
@@ -29,6 +31,10 @@ import {
   ActivationResultDto,
   RegisterPatientDto,
   RegisterPatientResponseDto,
+  RegisterOrganizationDto,
+  RegisterOrganizationResponseDto,
+  RegisterPractitionerDto,
+  RegisterPractitionerResponseDto,
   VerifyEmailDto,
   VerifyEmailResponseDto,
 } from '../dto';
@@ -48,6 +54,8 @@ export class IamAuthController {
     private readonly authService: IamAuthService,
     private readonly assistedRegistrationService: IamAssistedRegistrationService,
     private readonly selfRegistrationService: IamPatientSelfRegistrationService,
+    private readonly organizationRegistrationService: IamOrganizationSelfRegistrationService,
+    private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
   ) {}
 
   /**
@@ -68,6 +76,49 @@ export class IamAuthController {
     @Ip() ip: string,
   ): Promise<RegisterPatientResponseDto> {
     return this.selfRegistrationService.registerPatient(dto, ip);
+  }
+
+  /**
+   * Auto-registro de una organización con la cuenta de su owner. La
+   * organización queda PENDIENTE de verificación por la plataforma; el owner
+   * puede iniciar sesión de inmediato y preparar su cuenta mientras tanto.
+   */
+  @Post('register-organization')
+  @Public()
+  // Mismo límite estricto que el resto de rutas públicas de escritura: crear
+  // cuentas es la superficie más golpeada por automatización.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar una organización con su cuenta owner',
+  })
+  registerOrganization(
+    @Body() dto: RegisterOrganizationDto,
+    @Ip() ip: string,
+  ): Promise<RegisterOrganizationResponseDto> {
+    return this.organizationRegistrationService.registerOrganization(dto, ip);
+  }
+
+  /**
+   * Auto-registro de un profesional de salud. Crea su cuenta, su persona, su
+   * perfil profesional y su licencia en una sola operación. La matrícula queda
+   * PENDIENTE de verificación: puede iniciar sesión de inmediato, pero no está
+   * habilitado para ejercer hasta que la plataforma valide la documentación.
+   */
+  @Post('register-practitioner')
+  @Public()
+  // Mismo límite estricto que el resto de rutas públicas de escritura: crear
+  // cuentas es la superficie más golpeada por automatización.
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrarse como profesional de salud con su matrícula',
+  })
+  registerPractitioner(
+    @Body() dto: RegisterPractitionerDto,
+    @Ip() ip: string,
+  ): Promise<RegisterPractitionerResponseDto> {
+    return this.practitionerRegistrationService.registerPractitioner(dto, ip);
   }
 
   /**

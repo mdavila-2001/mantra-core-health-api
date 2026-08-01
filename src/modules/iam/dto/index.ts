@@ -15,3 +15,5 @@ export * from './operation-result.dto';
 export * from './assisted-registration.dto';
 export * from './activate-account.dto';
 export * from './register-patient.dto';
+export * from './register-organization.dto';
+export * from './register-practitioner.dto';

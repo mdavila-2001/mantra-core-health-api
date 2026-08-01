@@ -67,6 +67,10 @@ import {
     // profesional) cuando la autoridad externa la aprueba.
     JurisdictionAuthorizationsRepository,
     HealthPractitionerProfilesRepository,
+    // Los necesita iam para el auto-registro público de profesionales, que crea
+    // perfil, licencia, título e idioma en la misma transacción que la cuenta.
+    ProfessionalCredentialsRepository,
+    PractitionerLanguagesRepository,
   ],
 })
 export class ProfilesModule {}
