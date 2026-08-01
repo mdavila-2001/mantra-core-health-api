@@ -20,3 +20,9 @@ export interface AuthenticatedUser {
    */
   readonly tenantIds?: string[];
 }
+
+/** Request de Express después de que `JwtAuthGuard` adjunta el sujeto validado. */
+export type AuthenticatedRequest = Omit<Request, 'user'> & {
+  readonly user?: AuthenticatedUser;
+};
+import type { Request } from 'express';

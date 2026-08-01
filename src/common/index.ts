@@ -10,7 +10,7 @@
 export { AuthModule } from './auth/auth.module';
 export { AuthTokenModule } from './auth/auth-token.module';
 export { TokenService } from './auth/token.service';
-export type { IssuedTokens } from './auth/token.service';
+export type { IssuedTokens, TokenDisplayData } from './auth/token.service';
 export { JwtAuthGuard } from './auth/jwt-auth.guard';
 export { RolesGuard } from './auth/roles.guard';
 export { CurrentUser } from './auth/current-user.decorator';
@@ -35,12 +35,18 @@ export {
   ConflictException,
   PreconditionFailedException,
   ConcurrencyConflictException,
+  IdentityVerificationRequiredException,
 } from './errors/domain.exception';
 export { AllExceptionsFilter } from './filters/all-exceptions.filter';
 
 // Paginación
 export { PaginationQueryDto } from './dto/pagination-query.dto';
 export { PageResponseDto, PageMetaDto } from './dto/page-response.dto';
+export {
+  encodeKeysetCursor,
+  decodeKeysetCursor,
+} from './pagination/keyset-cursor';
+export type { KeysetCursorKey } from './pagination/keyset-cursor';
 
 // Persistencia
 export { createdBy, touch } from './persistence/audit-fields';
@@ -79,6 +85,7 @@ export type {
 export { LocalDiskFileStorageAdapter } from './storage/local-disk-file-storage.adapter';
 export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
 export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
+export { appSecurityEnvSchema } from './security/app-security.env';
 
 // Conceptos de dominio
 export {

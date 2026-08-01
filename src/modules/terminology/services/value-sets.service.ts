@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -6,6 +6,8 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -22,6 +24,7 @@ import {
   type ValueSetResponseDto,
   type ExpandValueSetDto,
   type ExpandValueSetResponseDto,
+  type ReadValueSetExpansionResponseDto,
 } from '../dto';
 
 /** Versión inicial que recibe todo conjunto de valores recién creado. */
@@ -290,6 +293,138 @@ export class ValueSetsService {
   }
 
   /**
+   * UC-03-08 (cara de lectura): devuelve una página de la expansión ya
+   * materializada de un conjunto de valores.
+   *
+   * Es de sólo lectura y **no exige rol de administración**, por el mismo motivo
+   * que la búsqueda de conceptos: la expansión es metadato compartido, sin datos
+   * de paciente, y es lo que necesita cualquier cliente autenticado para poder
+   * rellenar un campo del contrato con un id válido. Exigir `SECURITY_ADMIN`
+   * dejaría los ~280 campos `*ConceptId` sin forma legítima de completarse.
+   *
+   * No expande nada: si la versión nunca se materializó, devuelve una página
+   * vacía. Expandir desde un `GET` convertiría una lectura en una escritura y
+   * dejaría que cualquier lector reescribiera los miembros del catálogo.
+   *
+   * @param valueSetId - Conjunto de valores a leer.
+   * @param options - Versión concreta, cursor de continuación y tope de página.
+   * @returns Página de miembros con su concepto resuelto y el cursor siguiente.
+   * @throws ResourceNotFoundException si el conjunto o la versión no existen.
+   * @throws ConflictException si la versión pedida es de otro conjunto.
+   */
+  async readExpansion(
+    valueSetId: string,
+    options: {
+      /** Versión concreta a leer; por defecto, la marcada como vigente. */
+      valueSetVersionId?: string;
+      /** Cursor opaco devuelto por la página anterior. */
+      cursor?: string;
+      /** Tope de miembros de la página. */
+      limit: number;
+    },
+  ): Promise<ReadValueSetExpansionResponseDto> {
+    const valueSet = await this.valueSetsRepo.findById(this.em, valueSetId);
+    if (!valueSet) {
+      throw new ResourceNotFoundException('Conjunto de valores no encontrado', {
+        valueSetId,
+      });
+    }
+
+    const version = options.valueSetVersionId
+      ? await this.valueSetsRepo.findVersionById(
+          this.em,
+          options.valueSetVersionId,
+        )
+      : await this.valueSetsRepo.findDefaultVersion(this.em, valueSetId);
+
+    if (!version) {
+      throw new ResourceNotFoundException(
+        options.valueSetVersionId
+          ? 'Versión del conjunto de valores no encontrada'
+          : 'El conjunto de valores no tiene una versión vigente',
+        { valueSetId, valueSetVersionId: options.valueSetVersionId },
+      );
+    }
+    // Leer la versión de otro conjunto devolvería miembros ajenos bajo un id que
+    // el cliente cree suyo. Es un 409 y no un 404 porque la versión sí existe.
+    if (version.valueSetId !== valueSetId) {
+      throw new ConflictException(
+        'La versión no pertenece a ese conjunto de valores',
+        { valueSetId, valueSetVersionId: version.id },
+      );
+    }
+
+    const after = options.cursor
+      ? decodeExpansionCursor(options.cursor)
+      : undefined;
+
+    // Se pide una fila de más para saber si hay página siguiente sin contar el
+    // total: un `COUNT` sobre la expansión entera en cada página cuesta más que
+    // la propia página y nadie que rellene un desplegable lo necesita.
+    const rows = await this.valueSetsRepo.findMembersPage(
+      this.em,
+      version.id,
+      after,
+      options.limit + 1,
+    );
+    const hasMore = rows.length > options.limit;
+    const page = hasMore ? rows.slice(0, options.limit) : rows;
+
+    const concepts = await this.conceptsRepo.findByIds(
+      this.em,
+      page.map((member) => member.conceptId),
+    );
+
+    const items = page.flatMap((member) => {
+      const concept = concepts.get(member.conceptId);
+      // Un miembro sin concepto es una FK rota: se omite en vez de devolver una
+      // fila a medias que el cliente pintaría como una opción sin etiqueta.
+      if (!concept) {
+        this.logger.warn(
+          {
+            operation: 'terminology.value-set.read-expansion',
+            valueSetVersionId: version.id,
+            conceptId: member.conceptId,
+          },
+          'Miembro de la expansión sin concepto en el catálogo',
+        );
+        return [];
+      }
+      return [
+        {
+          conceptId: concept.id,
+          code: concept.code,
+          display: concept.display,
+          definition: concept.definition,
+          selectable: concept.selectable,
+          codeSystemVersionId: concept.codeSystemVersionId,
+          ordinal: member.ordinal,
+        },
+      ];
+    });
+
+    const last = page.at(-1);
+    return {
+      valueSetId,
+      valueSetVersionId: version.id,
+      version: version.version,
+      items,
+      count: items.length,
+      limit: options.limit,
+      // El cursor se arma con la última fila **leída**, no con el último ítem
+      // devuelto: si se omitió un miembro con FK rota, seguir desde el ítem
+      // visible haría que la página siguiente repitiera lo ya entregado.
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({
+              ordinal: last.ordinal ?? null,
+              conceptId: last.conceptId,
+            })
+          : null,
+    };
+  }
+
+  /**
    * Evalúa las reglas de una versión y devuelve los ids de concepto seleccionados,
    * en orden estable.
    *
@@ -463,6 +598,29 @@ export class ValueSetsService {
       .filter((concept) => matching.has(concept.id))
       .map((concept) => concept.id);
   }
+}
+
+/**
+ * Traduce el cursor opaco a la clave `(ordinal, conceptId)` con la que se ordena
+ * la expansión.
+ *
+ * La validación de forma vive aquí y no en el codificador genérico porque las
+ * columnas de ordenación son de este listado: un cursor bien formado de **otro**
+ * endpoint no debe colar una comparación contra columnas que no existen.
+ */
+function decodeExpansionCursor(cursor: string): {
+  ordinal: number | null;
+  conceptId: string;
+} {
+  const key = decodeKeysetCursor(cursor);
+  const { ordinal, conceptId } = key;
+  if (
+    typeof conceptId !== 'string' ||
+    (ordinal !== null && typeof ordinal !== 'number')
+  ) {
+    throw new BadRequestException('El cursor de paginación no es válido');
+  }
+  return { ordinal, conceptId };
 }
 
 /** Forma textual de un `value_json` para compararlo con el `value` de una regla. */

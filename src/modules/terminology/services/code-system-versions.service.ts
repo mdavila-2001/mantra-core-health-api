@@ -102,6 +102,11 @@ export class CodeSystemVersionsService {
           code: concept.code,
           display: concept.display,
           definition: concept.definition,
+          // Se importa en una versión en borrador, así que el concepto nace en
+          // borrador: lo promueve la publicación (UC-03-04). Sin estado, el
+          // concepto no lo selecciona ninguna expansión —que sólo mira los
+          // activos— y el value set sale vacío sin que nada falle.
+          stateConceptId: CONCEPTS.TERM_DRAFT,
           actorUserId: actor.id,
         });
         inserted++;
@@ -158,10 +163,28 @@ export class CodeSystemVersionsService {
       version.stateConceptId = CONCEPTS.TERM_ACTIVE;
       version.publishedAt = now;
       touch(version, actor.id, now);
+
+      // Publicar la versión activa también sus conceptos. Sin esto la versión
+      // quedaba activa con todos sus conceptos en borrador, y como la expansión
+      // de un value set sólo selecciona conceptos activos, TODA expansión salía
+      // vacía sin error: el catálogo parecía publicado y no seleccionaba nada.
+      const promoted = await this.conceptsRepo.findPromotableByVersion(
+        tx,
+        versionId,
+        CONCEPTS.TERM_DRAFT,
+      );
+      for (const concept of promoted) {
+        concept.stateConceptId = CONCEPTS.TERM_ACTIVE;
+        touch(concept, actor.id, now);
+      }
       await tx.flush();
 
       this.logger.info(
-        { operation: 'terminology.version.publish', versionId },
+        {
+          operation: 'terminology.version.publish',
+          versionId,
+          promotedConcepts: promoted.length,
+        },
         'Versión publicada',
       );
       return { id: version.id, state: 'TERM_ACTIVE', publishedAt: now };

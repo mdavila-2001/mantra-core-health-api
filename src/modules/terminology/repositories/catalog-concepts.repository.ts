@@ -126,6 +126,54 @@ export class CatalogConceptsRepository {
   }
 
   /**
+   * Conceptos de una versión que la publicación debe promover a activos: los que
+   * están en borrador y los que quedaron sin estado.
+   *
+   * El `null` está incluido porque las importaciones anteriores a que
+   * `importConcepts` fijara `TERM_DRAFT` dejaron la columna vacía, y esas filas
+   * son tan publicables como las demás — el estado ausente era un olvido, no una
+   * decisión sobre el concepto.
+   *
+   * Deliberadamente **no** toca los retirados ni los deprecados: publicar una
+   * versión no debe resucitar un concepto que UC-03-10 sacó de circulación.
+   *
+   * @param em - Contexto de persistencia.
+   * @param codeSystemVersionId - Versión que se está publicando.
+   * @param draftStateConceptId - Estado de borrador del catálogo.
+   * @returns Conceptos a promover, ya gestionados por la unidad de trabajo.
+   */
+  findPromotableByVersion(
+    em: EntityManager,
+    codeSystemVersionId: string,
+    draftStateConceptId: string,
+  ): Promise<CatalogConcepts[]> {
+    return em.find(CatalogConcepts, {
+      codeSystemVersionId,
+      $or: [{ stateConceptId: draftStateConceptId }, { stateConceptId: null }],
+    });
+  }
+
+  /**
+   * Resuelve un lote de conceptos por id, indexados por id.
+   *
+   * Se consulta en bloque porque el llamador ya tiene la lista completa (los
+   * miembros de una página de expansión): pedirlos de a uno sería el patrón N+1
+   * sobre la tabla más consultada del catálogo.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ids - Ids de concepto a resolver.
+   * @returns Mapa `id -> concepto`; los ids inexistentes simplemente no aparecen.
+   */
+  async findByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<Map<string, CatalogConcepts>> {
+    if (ids.length === 0) return new Map();
+    const rows = await em.find(CatalogConcepts, { id: { $in: ids } });
+    return new Map(rows.map((row) => [row.id, row]));
+  }
+
+  /**
    * Busca conceptos por texto libre sobre código y display, opcionalmente
    * acotado a una versión de sistema de códigos.
    *

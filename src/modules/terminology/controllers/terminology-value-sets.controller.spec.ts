@@ -17,4 +17,32 @@ describe('TerminologyValueSetsController', () => {
     expect(service.createValueSet).toHaveBeenCalledWith(dto, user);
     expect(result).toBe(expected);
   });
+
+  it('readExpansion aplica el tope por defecto cuando el cliente no pide uno', async () => {
+    const service = { readExpansion: jest.fn() } as any;
+    const controller = new TerminologyValueSetsController(service);
+    service.readExpansion.mockResolvedValue({ items: [] });
+
+    await controller.readExpansion('vs-1');
+
+    expect(service.readExpansion).toHaveBeenCalledWith('vs-1', {
+      valueSetVersionId: undefined,
+      cursor: undefined,
+      limit: 50,
+    });
+  });
+
+  it('readExpansion propaga versión, cursor y tope tal como llegan', async () => {
+    const service = { readExpansion: jest.fn() } as any;
+    const controller = new TerminologyValueSetsController(service);
+    service.readExpansion.mockResolvedValue({ items: [] });
+
+    await controller.readExpansion('vs-1', 'vsv-2', 'cursor-opaco', 10);
+
+    expect(service.readExpansion).toHaveBeenCalledWith('vs-1', {
+      valueSetVersionId: 'vsv-2',
+      cursor: 'cursor-opaco',
+      limit: 10,
+    });
+  });
 });

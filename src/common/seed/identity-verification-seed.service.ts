@@ -1,4 +1,4 @@
-import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MikroORM, type EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -35,7 +35,7 @@ import { CONCEPTS, SEED } from '../constants/concepts';
  * relacionadas.
  */
 @Injectable()
-export class IdentityVerificationSeedService implements OnApplicationBootstrap {
+export class IdentityVerificationSeedService {
   /**
    * Inicializa la instancia y sus dependencias.
    *
@@ -47,23 +47,6 @@ export class IdentityVerificationSeedService implements OnApplicationBootstrap {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityVerificationSeedService.name);
-  }
-
-  /**
-   * Ejecuta la operación on application bootstrap.
-   */
-  async onApplicationBootstrap(): Promise<void> {
-    try {
-      await this.run();
-    } catch (error) {
-      // Mismo criterio que el seed de terminología: no tumbar el arranque si el
-      // esquema todavía no existe. Quien intente abrir un caso fallará con un
-      // error claro de política inexistente.
-      this.logger.warn(
-        { err: error },
-        'Seed de verificación de identidad omitido',
-      );
-    }
   }
 
   /**

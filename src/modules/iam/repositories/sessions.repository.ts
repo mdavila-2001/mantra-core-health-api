@@ -60,6 +60,23 @@ export class SessionsRepository {
     return em.findOne(Sessions, { id });
   }
 
+  /**
+   * Sesión ACTIVA por su `token_id`, que es el `sid` del JWT.
+   *
+   * El token no lleva el id de fila de la sesión sino su `token_id`, así que el
+   * cierre de sesión tiene que resolverla por acá: buscar por `id` no
+   * encontraría nada.
+   */
+  findActiveByTokenId(
+    em: EntityManager,
+    tokenId: string,
+  ): Promise<Sessions | null> {
+    return em.findOne(Sessions, {
+      tokenId,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
   /** Revoca una sesión concreta (detección de reuso de refresh token). */
   revokeById(em: EntityManager, id: string): Promise<number> {
     return em.nativeUpdate(

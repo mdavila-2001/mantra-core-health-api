@@ -1,4 +1,4 @@
-import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -15,7 +15,6 @@ import {
   CONCEPTS,
   SEED,
   deterministicId,
-  type ConceptName,
 } from '../constants/concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
@@ -34,7 +33,7 @@ import { MODULE_CONCEPT_SEEDS } from './module-concepts';
  * la raíz del árbol y no necesitan a otro concepto para existir.
  */
 @Injectable()
-export class TerminologySeedService implements OnApplicationBootstrap {
+export class TerminologySeedService {
   /**
    * Inicializa la instancia y sus dependencias.
    *
@@ -46,20 +45,6 @@ export class TerminologySeedService implements OnApplicationBootstrap {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(TerminologySeedService.name);
-  }
-
-  /**
-   * Ejecuta la operación on application bootstrap.
-   */
-  async onApplicationBootstrap(): Promise<void> {
-    try {
-      await this.run();
-    } catch (error) {
-      // El seed no debe tumbar el arranque si el esquema aún no existe (modo
-      // ORM_SCHEMA_SYNC=off contra base vacía). Se registra y se sigue: las
-      // operaciones que necesiten los conceptos fallarán con un error claro.
-      this.logger.warn({ err: error }, 'Seed de terminología omitido');
-    }
   }
 
   /**
