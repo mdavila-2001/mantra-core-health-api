@@ -58,13 +58,13 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "VALIDATION_FAILED",
   "message": "Error de validación",
-  "correlationId": 3,
+  "correlationId": "4",
   "details": {
     "violations": [
       "email must be an email"
     ]
   },
-  "timestamp": "2026-08-01T06:15:16.739Z",
+  "timestamp": "2026-08-01T11:12:53.099Z",
   "path": "/iam/auth/login"
 }
 ```
@@ -77,8 +77,8 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "VALIDATION_FAILED",
   "message": "Validation failed (uuid is expected)",
-  "correlationId": 4,
-  "timestamp": "2026-08-01T06:15:16.742Z",
+  "correlationId": "5",
+  "timestamp": "2026-08-01T11:12:53.104Z",
   "path": "/iam/users/no-es-uuid/lock"
 }
 ```
@@ -91,8 +91,8 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "UNAUTHENTICATED",
   "message": "Unauthorized",
-  "correlationId": 5,
-  "timestamp": "2026-08-01T06:15:16.743Z",
+  "correlationId": "6",
+  "timestamp": "2026-08-01T11:12:53.106Z",
   "path": "/terminology/concepts?q=X"
 }
 ```
@@ -105,8 +105,8 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "UNAUTHENTICATED",
   "message": "Unauthorized",
-  "correlationId": 6,
-  "timestamp": "2026-08-01T06:15:16.745Z",
+  "correlationId": "7",
+  "timestamp": "2026-08-01T11:12:53.108Z",
   "path": "/terminology/concepts?q=X"
 }
 ```
@@ -119,22 +119,22 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "FORBIDDEN",
   "message": "Rol insuficiente para la operación",
-  "correlationId": 32,
-  "timestamp": "2026-08-01T06:16:44.032Z",
+  "correlationId": "10",
+  "timestamp": "2026-08-01T11:12:53.221Z",
   "path": "/iam/users"
 }
 ```
 
 ### 403 · el actor no pertenece a ningún tenant
 
-`GET /terminology/concepts` → **403**
+`GET /terminology/concepts?q=X` → **403**
 
 ```json
 {
   "code": "FORBIDDEN",
   "message": "El actor no pertenece a ningún tenant: indique X-Tenant-Id.",
-  "correlationId": 35,
-  "timestamp": "2026-08-01T06:16:45.205Z",
+  "correlationId": "13",
+  "timestamp": "2026-08-01T11:12:53.285Z",
   "path": "/terminology/concepts?q=X"
 }
 ```
@@ -147,11 +147,11 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "NOT_FOUND",
   "message": "Usuario no encontrado",
-  "correlationId": 7,
+  "correlationId": "14",
   "details": {
     "userId": "00000000-0000-4000-8000-0000000000ff"
   },
-  "timestamp": "2026-08-01T06:15:16.748Z",
+  "timestamp": "2026-08-01T11:12:53.288Z",
   "path": "/iam/users/00000000-0000-4000-8000-0000000000ff/lock"
 }
 ```
@@ -164,8 +164,8 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "NOT_FOUND",
   "message": "Cannot GET /esta-ruta-no-existe",
-  "correlationId": 8,
-  "timestamp": "2026-08-01T06:15:16.754Z",
+  "correlationId": "15",
+  "timestamp": "2026-08-01T11:12:53.295Z",
   "path": "/esta-ruta-no-existe"
 }
 ```
@@ -178,11 +178,11 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "CONFLICT",
   "message": "El email ya tiene una credencial de contraseña activa",
-  "correlationId": 10,
+  "correlationId": "17",
   "details": {
-    "email": "dup-1785564916@example.test"
+    "email": "dup-1785582773@example.test"
   },
-  "timestamp": "2026-08-01T06:15:16.789Z",
+  "timestamp": "2026-08-01T11:12:53.327Z",
   "path": "/iam/users"
 }
 ```
@@ -195,11 +195,11 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "PRECONDITION_FAILED",
   "message": "Un tenant de tipo PAYER exige el bloque `payer`",
-  "correlationId": 11,
+  "correlationId": "18",
   "details": {
     "tenantType": "PAYER"
   },
-  "timestamp": "2026-08-01T06:15:16.823Z",
+  "timestamp": "2026-08-01T11:12:53.356Z",
   "path": "/iam/auth/register-organization"
 }
 ```
@@ -212,22 +212,21 @@ recibe el cliente, el que está mal es este documento.
 {
   "code": "PAYLOAD_TOO_LARGE",
   "message": "El cuerpo de la petición excede el tamaño máximo permitido",
-  "timestamp": "2026-08-01T06:15:16.836Z",
+  "timestamp": "2026-08-01T11:12:53.368Z",
   "path": "/iam/auth/login"
 }
 ```
 
 ### 429 · límite de peticiones por minuto
 
-`POST /iam/auth/login` → **429**
- · cabecera `Retry-After: 60`
+`POST /iam/auth/login` → **429** · cabecera `Retry-After: 60`
 
 ```json
 {
   "code": "RATE_LIMITED",
   "message": "ThrottlerException: Too Many Requests",
-  "correlationId": 23,
-  "timestamp": "2026-08-01T06:15:16.895Z",
+  "correlationId": "30",
+  "timestamp": "2026-08-01T11:12:53.388Z",
   "path": "/iam/auth/login"
 }
 ```
@@ -247,10 +246,11 @@ Reglas para un interceptor de errores, en orden de importancia:
    `code: "NOT_FOUND"` y un mensaje de Express (`Cannot GET /…`). Si el cliente distingue "no
    existe el recurso" de "me equivoqué de URL", el discriminante es que el mensaje de negocio
    llega acompañado de `details`.
-4. **`correlationId` es numérico**, no una cadena. Es el `req.id` de `pino-http`. Conviene
+4. **`correlationId` es siempre una cadena**, aunque el generador de `pino-http` numere las
+   peticiones: el filtro lo normaliza a texto porque es lo que declara el contrato. Conviene
    mostrarlo en la UI de error: es con lo que soporte encuentra la línea de log. **No siempre
    está**: el 413 lo omite, porque el cuerpo se rechaza en el parser antes de que la petición
-   entre en el ciclo que asigna el id. Trátalo como opcional.
+   entre en el ciclo que asigna el id. Trátalo como `string | undefined`.
 5. **429 sí trae `Retry-After`**, con los segundos que faltan para que se libere la ventana
    (`Retry-After: 60` en la captura). Es el valor a respetar antes de reintentar; no hace falta
    inventar un backoff.
