@@ -27,6 +27,7 @@ import {
   type DeprecateConceptDto,
   type DeprecateConceptResponseDto,
   type LookupResponseDto,
+  SearchConceptsResponseDto,
 } from '../dto';
 
 /** Tipo de dato por defecto para propiedades de concepto sin `dataType` explícito. */
@@ -503,6 +504,52 @@ export class ConceptsService {
         dataType: property.dataType,
         valueJson: property.valueJson,
       })),
+    };
+  }
+
+  /**
+   * UC-03-13: busca conceptos por texto sobre código y denominación.
+   *
+   * `$lookup` sólo resuelve cuando ya se conocen sistema y código exactos, así
+   * que no sirve para descubrir. Sin esta operación, los campos `*ConceptId`
+   * que exige el contrato —casi trescientos— no se pueden rellenar desde fuera:
+   * los códigos internos del catálogo no están publicados en ningún sitio.
+   *
+   * No expone datos de paciente: el catálogo de terminología es metadato
+   * compartido, idéntico para todos los tenants.
+   *
+   * @param query - Texto a buscar en código o denominación.
+   * @param codeSystemVersionId - Versión a la que acotar, si se indica.
+   * @param limit - Tope de resultados.
+   * @returns Conceptos que casan, con el id que espera el resto del contrato.
+   */
+  async searchConcepts(
+    query: string | undefined,
+    codeSystemVersionId: string | undefined,
+    limit: number,
+  ): Promise<SearchConceptsResponseDto> {
+    this.logger.info(
+      { operation: 'terminology.concept.search', query, limit },
+      'Buscando conceptos',
+    );
+
+    const concepts = await this.conceptsRepo.search(
+      this.em,
+      { query, codeSystemVersionId },
+      limit,
+    );
+
+    return {
+      items: concepts.map((concept) => ({
+        conceptId: concept.id,
+        code: concept.code,
+        display: concept.display,
+        definition: concept.definition,
+        selectable: concept.selectable,
+        codeSystemVersionId: concept.codeSystemVersionId,
+      })),
+      count: concepts.length,
+      limit,
     };
   }
 }

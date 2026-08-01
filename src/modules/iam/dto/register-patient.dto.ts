@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsIn,
   IsISO8601,
   IsOptional,
   IsString,
@@ -9,6 +10,12 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import {
+  ADMIN_GENDER_CODES,
+  BIRTH_SEX_CODES,
+  type AdministrativeGenderCode,
+  type BirthSexCode,
+} from '../../profiles/profiles.concepts';
 
 /**
  * Cuerpo de `POST /iam/auth/register-patient`.
@@ -30,7 +37,7 @@ export class RegisterPatientDto {
   @MaxLength(40)
   // Sólo caracteres de un documento: dígitos, letras y separadores habituales.
   // Evita que el identificador de login acepte espacios o control.
-  @Matches(/^[A-Za-z0-9.\-]+$/, {
+  @Matches(/^[A-Za-z0-9.-]+$/, {
     message: 'El documento sólo admite letras, dígitos, punto y guion',
   })
   nationalId!: string;
@@ -71,7 +78,47 @@ export class RegisterPatientDto {
   birthDate?: string;
 
   /**
-   * Identificador asociado a administrative gender concept.
+   * Teléfono de contacto. Se guarda como punto de contacto de la persona; que
+   * esté verificado o no es independiente (`iam.users.phone_verified`).
+   */
+  @ApiPropertyOptional({
+    description: 'Teléfono de contacto en formato E.164 o nacional',
+    maxLength: 40,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
+    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
+  })
+  phone?: string;
+
+  /**
+   * Género administrativo por código legible.
+   */
+  @ApiPropertyOptional({
+    enum: ADMIN_GENDER_CODES,
+    description: 'Género administrativo (HL7 AdministrativeGender)',
+  })
+  @IsOptional()
+  @IsIn(ADMIN_GENDER_CODES)
+  gender?: AdministrativeGenderCode;
+
+  /**
+   * Sexo asignado al nacer por código legible. Es un dato clínico distinto del
+   * género: condiciona rangos de referencia y tamizajes.
+   */
+  @ApiPropertyOptional({
+    enum: BIRTH_SEX_CODES,
+    description: 'Sexo asignado al nacer',
+  })
+  @IsOptional()
+  @IsIn(BIRTH_SEX_CODES)
+  sexAtBirth?: BirthSexCode;
+
+  /**
+   * Escape hatch para clientes que ya conocen el catálogo de terminología. Si
+   * viene, gana sobre `gender`.
    */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
@@ -79,7 +126,8 @@ export class RegisterPatientDto {
   administrativeGenderConceptId?: string;
 
   /**
-   * Identificador asociado a sex at birth concept.
+   * Escape hatch equivalente para el sexo al nacer. Si viene, gana sobre
+   * `sexAtBirth`.
    */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

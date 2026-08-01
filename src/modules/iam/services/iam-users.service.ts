@@ -18,6 +18,7 @@ import {
   AccountLockoutsRepository,
   SecurityEventsRepository,
 } from '../repositories';
+import { ContactPointsRepository } from '../../common/repositories';
 import {
   CreateUserDto,
   UserResponseDto,
@@ -49,6 +50,7 @@ export class IamUsersService {
    * @param refreshRepo - Valor de refresh repo requerido por la operación.
    * @param lockoutsRepo - Valor de lockouts repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param contactPointsRepo - Puntos de contacto donde vive el teléfono del usuario.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -60,6 +62,7 @@ export class IamUsersService {
     private readonly refreshRepo: RefreshTokensRepository,
     private readonly lockoutsRepo: AccountLockoutsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
+    private readonly contactPointsRepo: ContactPointsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamUsersService.name);
@@ -109,6 +112,19 @@ export class IamUsersService {
         secretHash,
         actorUserId: actor.id,
       });
+
+      // `iam.users` no tiene columna de teléfono —sólo `phone_verified`—, así que
+      // el número vive en `common.contact_points` colgado del propio usuario.
+      if (dto.phone) {
+        this.contactPointsRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_USER,
+          ownerId: user.id,
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: dto.phone,
+          useConceptId: CONCEPTS.CONTACT_USE_WORK,
+          actorUserId: actor.id,
+        });
+      }
 
       const roleCode = dto.initialRole ?? 'USER';
       this.rolesRepo.create(tx, {

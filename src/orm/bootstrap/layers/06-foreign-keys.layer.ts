@@ -44,39 +44,79 @@ export const foreignKeysLayer: DdlLayer = {
     // Una consulta para saber qué restricciones existen ya. Con 5993 FKs, la
     // alternativa (un bloque DO por restricción que capture duplicate_object)
     // costaría 5993 sentencias en cada arranque para no hacer nada.
-    const existing = new Set(
+    // Se trae también el destino real de cada restricción, no sólo su nombre:
+    // comprobar únicamente la existencia deja pasar las que apuntan a otra
+    // tabla. Ocurrió de verdad —`webhook_delivery_evidence` referenciaba
+    // `integrations.webhook_subscriptions` en vez de
+    // `integration_contracts.contract_webhook_subscriptions`— y como el nombre
+    // ya existía, cada arranque la daba por buena: la entrega de webhooks
+    // respondía 500 con una violación de FK y la base mentía sobre su propia
+    // integridad, que es justo lo que esta capa existe para impedir.
+    const existing = new Map(
       (
         await context.query<{
           /**
-           * Valor de nspname mantenido por la instancia.
+           * Esquema de la tabla origen.
            */
           nspname: string; /**
-           * Valor de conname mantenido por la instancia.
+           * Nombre de la restricción.
            */
-          conname: string;
+          conname: string; /**
+           * Esquema de la tabla destino.
+           */
+          target_schema: string; /**
+           * Tabla destino.
+           */
+          target_table: string;
         }>(
-          `SELECT n.nspname, c.conname
+          `SELECT n.nspname, c.conname,
+                  tn.nspname AS target_schema, tc.relname AS target_table
              FROM pg_constraint c
              JOIN pg_namespace n ON n.oid = c.connamespace
+             JOIN pg_class tc ON tc.oid = c.confrelid
+             JOIN pg_namespace tn ON tn.oid = tc.relnamespace
             WHERE c.contype = 'f'`,
         )
-      ).map((row) => `${row.nspname}.${row.conname}`),
+      ).map((row) => [
+        `${row.nspname}.${row.conname}`,
+        `${row.target_schema}.${row.target_table}`,
+      ]),
     );
 
     const pending: string[] = [];
     let skipped = 0;
+    let repaired = 0;
 
     for (const [schema, batches] of Object.entries(foreignKeyCatalog)) {
       for (const batch of batches) {
         for (const foreignKey of batch) {
           const name = constraintName(foreignKey);
-          if (existing.has(`${schema}.${name}`)) {
-            skipped += 1;
-            continue;
+          const [table, , targetSchema, targetTable] = foreignKey;
+          const current = existing.get(`${schema}.${name}`);
+          if (current !== undefined) {
+            if (current === `${targetSchema}.${targetTable}`) {
+              skipped += 1;
+              continue;
+            }
+            // Divergente: se recrea. El DROP va en la misma sentencia que el
+            // ADD para que un fallo al validar los datos deje la restricción
+            // anterior en su sitio en vez de quedarse sin ninguna.
+            context.logger.warn(
+              `Clave foránea divergente ${schema}.${name}: apunta a ${current} ` +
+                `y el modelo declara ${targetSchema}.${targetTable}; se recrea`,
+            );
+            pending.push(
+              `ALTER TABLE "${schema}"."${table}" DROP CONSTRAINT "${name}"`,
+            );
+            repaired += 1;
           }
           pending.push(buildAddConstraint(schema, name, foreignKey));
         }
       }
+    }
+
+    if (repaired > 0) {
+      context.logger.warn(`Claves foráneas divergentes reparadas: ${repaired}`);
     }
 
     if (pending.length === 0) {

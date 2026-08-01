@@ -9,3 +9,4 @@ export * from './concept-properties.dto';
 export * from './expand-value-set.dto';
 export * from './translate-concept.dto';
 export * from './tenant-catalog-policy.dto';
+export * from './search-concepts.dto';

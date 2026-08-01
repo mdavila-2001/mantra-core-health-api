@@ -1,0 +1,250 @@
+import { jest } from '@jest/globals';
+// Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
+const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
+import { IamPractitionerSelfRegistrationService } from './iam-practitioner-self-registration.service';
+import { TracingService } from '../../../observability';
+import { CONCEPTS, ConflictException, SEED } from '../../../common';
+import { PROF } from '../../profiles/profiles.concepts';
+import { DIR } from '../../directory/directory.concepts';
+import type { RegisterPractitionerDto } from '../dto';
+
+const dto: RegisterPractitionerDto = {
+  email: 'dra.rojas@sanrafael.bo',
+  password: 'password123',
+  displayName: 'Dra. Ana Rojas',
+  licenseNumber: 'MP-45821',
+  credentialNumber: 'TIT-99310',
+};
+
+describe('IamPractitionerSelfRegistrationService', () => {
+  const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
+
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
+  function build() {
+    const tx = { flush: fn().mockResolvedValue(undefined) };
+    const em = {
+      transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
+    };
+    const tokenService = {
+      issueRefreshToken: fn(() => ({ raw: 'raw-token', hash: 'hashed' })),
+    };
+    const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
+    const credentialsRepo = {
+      findLivePasswordBySubject: fn().mockResolvedValue(null),
+      createPassword: fn(),
+    };
+    const rolesRepo = { create: fn() };
+    const emailVerificationsRepo = { create: fn() };
+    const eventsRepo = { record: fn() };
+    const personsRepo = { create: fn(() => ({ id: 'person-1' })) };
+    const personProfilesRepo = { create: fn() };
+    const practitionersRepo = {
+      findByCode: fn().mockResolvedValue(null),
+      create: fn((_tx: unknown, data: { practitionerCode: string }) => ({
+        profileId: 'person-1',
+        practitionerCode: data.practitionerCode,
+      })),
+    };
+    const authorizationsRepo = { create: fn(() => ({ id: 'license-1' })) };
+    const professionalCredentialsRepo = {
+      create: fn(() => ({ id: 'cred-1' })),
+    };
+    const languagesRepo = { create: fn() };
+    const accountLinksRepo = { create: fn() };
+    const identifiersRepo = { create: fn() };
+    const contactPointsRepo = { create: fn() };
+    const tenantMembershipsRepo = { create: fn() };
+    const notificationsService = {
+      createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
+    };
+
+    const service = new IamPractitionerSelfRegistrationService(
+      em as never,
+      tokenService as never,
+      usersRepo as never,
+      credentialsRepo as never,
+      rolesRepo as never,
+      emailVerificationsRepo as never,
+      eventsRepo as never,
+      personsRepo as never,
+      personProfilesRepo as never,
+      practitionersRepo as never,
+      authorizationsRepo as never,
+      professionalCredentialsRepo as never,
+      languagesRepo as never,
+      accountLinksRepo as never,
+      identifiersRepo as never,
+      contactPointsRepo as never,
+      tenantMembershipsRepo as never,
+      notificationsService as never,
+      logger as never,
+      new TracingService(),
+    );
+    return {
+      service,
+      tx,
+      usersRepo,
+      credentialsRepo,
+      rolesRepo,
+      personsRepo,
+      practitionersRepo,
+      authorizationsRepo,
+      professionalCredentialsRepo,
+      accountLinksRepo,
+      identifiersRepo,
+      contactPointsRepo,
+      tenantMembershipsRepo,
+      notificationsService,
+    };
+  }
+
+  it('creates the account, the person and the practitioner profile in one call', async () => {
+    const d = build();
+
+    const result = await d.service.registerPractitioner(dto);
+
+    expect(result).toMatchObject({
+      userId: 'user-1',
+      personId: 'person-1',
+      practitionerProfileId: 'person-1',
+      licenseId: 'license-1',
+      verificationStatus: 'PENDING',
+      emailVerificationSent: true,
+    });
+    expect(result.practitionerCode).toMatch(/^PRC-/);
+  });
+
+  it('uses the email as the login subject', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    expect(d.credentialsRepo.createPassword).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ externalSubject: dto.email }),
+    );
+  });
+
+  it('leaves licence, credential and profile PENDING: registering is not being licensed', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    // Si esto se relajara, cualquiera podría figurar como profesional habilitado
+    // rellenando un formulario. Verificar la matrícula es un acto de la plataforma.
+    expect(d.practitionersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        acceptsNewPatients: false,
+      }),
+    );
+    expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ stateConceptId: PROF.AUTH_PENDING }),
+    );
+    expect(d.professionalCredentialsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({ stateConceptId: PROF.CRED_PENDING }),
+    );
+  });
+
+  it('gives the account a tenant membership so it is usable beyond login', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    // Sin esta fila, TenantContextInterceptor responde 403 a todo request
+    // posterior y la cuenta recién creada queda inservible.
+    expect(d.tenantMembershipsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        userId: 'user-1',
+        tenantId: SEED.tenantId,
+        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+      }),
+    );
+  });
+
+  it('translates the gender and birth-sex codes into terminology concepts', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      gender: 'FEMALE',
+      sexAtBirth: 'FEMALE',
+      birthDate: '1985-04-12',
+    });
+
+    expect(d.personsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        administrativeGenderConceptId: PROF.GENDER_FEMALE,
+        sexAtBirthConceptId: PROF.BIRTH_SEX_FEMALE,
+        birthDate: new Date('1985-04-12'),
+      }),
+    );
+  });
+
+  it('stores the phone as a contact point and the document as an identifier', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner({
+      ...dto,
+      phone: '+591 70012345',
+      nationalId: '4821993',
+    });
+
+    expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        systemConceptId: CONCEPTS.CONTACT_PHONE,
+        value: '+591 70012345',
+      }),
+    );
+    expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '4821993',
+      }),
+    );
+  });
+
+  it('omits the identifier when no document is supplied', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects an email that already has a live credential', async () => {
+    const d = build();
+    d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+      id: 'cred-existing',
+    });
+
+    await expect(d.service.registerPractitioner(dto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(d.usersRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('registers the practitioner even if the verification email cannot be queued', async () => {
+    const d = build();
+    d.notificationsService.createRequest.mockRejectedValue(
+      new Error('messaging down'),
+    );
+
+    const result = await d.service.registerPractitioner(dto);
+
+    // El correo se encola fuera de la transacción justamente para esto: un fallo
+    // de mensajería no puede deshacer un alta que ya es válida.
+    expect(result.userId).toBe('user-1');
+    expect(result.emailVerificationSent).toBe(false);
+  });
+});

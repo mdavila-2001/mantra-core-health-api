@@ -17,7 +17,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
-import { PROF } from '../../profiles/profiles.concepts';
+import {
+  ADMIN_GENDER_CONCEPT_BY_CODE,
+  BIRTH_SEX_CONCEPT_BY_CODE,
+  PROF,
+} from '../../profiles/profiles.concepts';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
@@ -205,8 +209,16 @@ export class IamPatientSelfRegistrationService {
         vitalStatusConceptId: PROF.VITAL_ALIVE,
         displayName: dto.displayName,
         birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
-        administrativeGenderConceptId: dto.administrativeGenderConceptId,
-        sexAtBirthConceptId: dto.sexAtBirthConceptId,
+        // El concepto explícito gana sobre el código: es el escape hatch para
+        // clientes que ya manejan el catálogo de terminología.
+        administrativeGenderConceptId:
+          dto.administrativeGenderConceptId ??
+          (dto.gender ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender] : undefined),
+        sexAtBirthConceptId:
+          dto.sexAtBirthConceptId ??
+          (dto.sexAtBirth
+            ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
+            : undefined),
         actorUserId: user.id,
       });
       await tx.flush();
@@ -264,19 +276,32 @@ export class IamPatientSelfRegistrationService {
       // pragmático — el catálogo de roles de tenant (`DIR.ROLE_*`) sólo modela
       // personal de una clínica, no hay un rol "paciente"; qué tenant/rol le
       // corresponde a un paciente directo-al-consumidor es una decisión de
-      // producto pendiente, no algo que este fix deba inventar. El status usa
-      // `CONCEPTS.MEMBERSHIP_ACTIVE` (no `DIR.MEMBERSHIP_ACTIVE`) porque es el
-      // concepto que `IamAuthService.loadActiveTenantIds` realmente consulta
-      // para poblar `tenants` en el JWT.
+      // producto pendiente, no algo que este fix deba inventar. El status es
+      // `DIR.MEMBERSHIP_ACTIVE`, el concepto propio de directory: antes se
+      // escribía el de promotions porque era el único que
+      // `IamAuthService.loadActiveTenantIds` consultaba — ese método ya acepta
+      // ambos, así que la fila puede llevar por fin el concepto que le toca.
       this.tenantMembershipsRepo.create(tx, {
         userId: user.id,
         tenantId: SEED.tenantId,
         tenantRoleConceptId: DIR.ROLE_STAFF,
-        statusConceptId: CONCEPTS.MEMBERSHIP_ACTIVE,
+        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
         actorUserId: user.id,
       });
+
+      // El teléfono es independiente del correo: se guarda aunque no haya email.
+      if (dto.phone) {
+        this.contactPointsRepo.create(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+          ownerId: person.id,
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: dto.phone,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+          actorUserId: user.id,
+        });
+      }
 
       let emailVerificationToken: string | undefined;
       if (dto.email) {

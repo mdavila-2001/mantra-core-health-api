@@ -44,6 +44,7 @@ function build() {
   };
   const lockoutsRepo = { create: mockFn() };
   const eventsRepo = { record: mockFn() };
+  const contactPointsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new IamUsersService(
@@ -55,9 +56,11 @@ function build() {
     refreshRepo as any,
     lockoutsRepo as any,
     eventsRepo as any,
+    contactPointsRepo as any,
     logger as any,
   );
   return {
+    contactPointsRepo,
     service,
     tx,
     em,

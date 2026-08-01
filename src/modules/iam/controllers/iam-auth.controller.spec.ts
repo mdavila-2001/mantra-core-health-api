@@ -26,16 +26,22 @@ function build() {
     registerPatient: mockFn(),
     verifyEmail: mockFn(),
   };
+  const organizationRegistrationService = { registerOrganization: mockFn() };
+  const practitionerRegistrationService = { registerPractitioner: mockFn() };
   const controller = new IamAuthController(
     authService as any,
     assistedRegistrationService as any,
     selfRegistrationService as any,
+    organizationRegistrationService as any,
+    practitionerRegistrationService as any,
   );
   return {
     controller,
     authService,
     assistedRegistrationService,
     selfRegistrationService,
+    organizationRegistrationService,
+    practitionerRegistrationService,
   };
 }
 
@@ -78,17 +84,33 @@ describe('IamAuthController', () => {
       password: 'password123',
       displayName: 'Ana',
     };
-    await d.controller.registerPatient(dto as any, '1.2.3.4');
+    await d.controller.registerPatient(dto, '1.2.3.4');
     expect(d.selfRegistrationService.registerPatient).toHaveBeenCalledWith(
       dto,
       '1.2.3.4',
     );
   });
 
+  it('delegates organization self-registration with the client ip', async () => {
+    const d = build();
+    const dto = {
+      organization: { code: 'CLINICA_X', legalName: 'Clínica X S.A.' },
+      owner: {
+        email: 'admin@clinicax.bo',
+        password: 'password123',
+        displayName: 'Ana',
+      },
+    };
+    await d.controller.registerOrganization(dto as any, '1.2.3.4');
+    expect(
+      d.organizationRegistrationService.registerOrganization,
+    ).toHaveBeenCalledWith(dto, '1.2.3.4');
+  });
+
   it('delegates email verification', async () => {
     const d = build();
     const dto = { token: 'raw-token' };
-    await d.controller.verifyEmail(dto as any);
+    await d.controller.verifyEmail(dto);
     expect(d.selfRegistrationService.verifyEmail).toHaveBeenCalledWith(dto);
   });
 });
