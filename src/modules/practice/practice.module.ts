@@ -15,6 +15,7 @@ import {
   PracticeSettingsService,
   PracticeWorkforceService,
   PracticeInventoryService,
+  PracticeTenantLookupService,
 } from './services';
 import {
   PracticesRepository,
@@ -64,6 +65,8 @@ import {
     PracticeSettingsService,
     PracticeWorkforceService,
     PracticeInventoryService,
+    PracticeTenantLookupService,
   ],
+  exports: [PracticeTenantLookupService],
 })
 export class PracticeModule {}

@@ -30,6 +30,9 @@ function build() {
   const attemptsRepo = {
     countByCase: mockFn().mockResolvedValue(0),
     existsCompletedForCase: mockFn().mockResolvedValue(true),
+    findLatestCompletedByCase: mockFn().mockResolvedValue({
+      identityAuthorityEndpointId: 'authority-endpoint-1',
+    }),
     findLatestByCase: mockFn().mockResolvedValue(null),
     create: mockFn(),
   };
@@ -40,6 +43,11 @@ function build() {
   };
   const casesRepo = { findById: mockFn().mockResolvedValue(null) };
   const assertionsRepo = { create: mockFn(() => ({ id: 'assert-1' })) };
+  const authorityEndpointsRepo = {
+    findById: mockFn().mockResolvedValue({
+      identityAuthorityId: 'authority-1',
+    }),
+  };
   const effects = { applyVerified: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new IdentityChecksService(
@@ -49,6 +57,7 @@ function build() {
     resultsRepo,
     casesRepo as any,
     assertionsRepo as any,
+    authorityEndpointsRepo as any,
     effects as any,
     logger as any,
   );
@@ -60,6 +69,7 @@ function build() {
     resultsRepo,
     casesRepo,
     assertionsRepo,
+    authorityEndpointsRepo,
     effects,
   };
 }
@@ -199,6 +209,12 @@ describe('IdentityChecksService', () => {
       // habilitaría nada, que era justo el vacío que este flujo cierra.
       expect(kase.statusConceptId).toBe(IDA.CASE_ASSERTED);
       expect(d.assertionsRepo.create).toHaveBeenCalled();
+      expect(d.assertionsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          issuerIdentityAuthorityId: 'authority-1',
+        }),
+      );
       expect(d.effects.applyVerified).toHaveBeenCalledWith(
         d.tx,
         kase,

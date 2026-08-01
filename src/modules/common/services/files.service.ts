@@ -6,7 +6,6 @@ import { resolveSecret } from '../../../common/crypto/dev-secret';
 import {
   AuthenticatedUser,
   CONCEPTS,
-  ConceptName,
   PreconditionFailedException,
   ResourceNotFoundException,
   SEED,
@@ -24,7 +23,6 @@ import {
   CreateFileLinkDto,
   CreateFileVersionDto,
   DeleteFileResponseDto,
-  DerivativeType,
   DownloadUrlResponseDto,
   FileCategory,
   FileDerivativeResponseDto,
@@ -32,7 +30,6 @@ import {
   FileResponseDto,
   FileSensitivity,
   FileVersionResponseDto,
-  OwnerType,
   ScanResult,
   ScanResultDto,
 } from '../dto';

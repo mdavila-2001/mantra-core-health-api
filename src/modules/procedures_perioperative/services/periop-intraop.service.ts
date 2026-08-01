@@ -177,7 +177,7 @@ export class PeriopIntraopService {
   async recordFinding(
     caseId: string,
     dto: RecordFindingDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<FindingResponseDto> {
     this.logger.info(
       { operation: 'periop.intraop.finding', caseId },
@@ -323,7 +323,7 @@ export class PeriopIntraopService {
   async recordMedicationUse(
     caseId: string,
     dto: RecordMedicationUseDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<SuppliesResponseDto> {
     this.logger.info(
       { operation: 'periop.intraop.medication', caseId, useRole: dto.useRole },
@@ -365,7 +365,7 @@ export class PeriopIntraopService {
   async recordSpecimen(
     caseId: string,
     dto: RecordSpecimenDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<SuppliesResponseDto> {
     this.logger.info(
       {
@@ -418,7 +418,7 @@ export class PeriopIntraopService {
   async draftReport(
     caseId: string,
     dto: DraftOperativeReportDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<OperativeReportResponseDto> {
     this.logger.info(
       { operation: 'periop.report.draft', caseId },
@@ -632,7 +632,7 @@ export class PeriopIntraopService {
   async recordPacuAssessment(
     stayId: string,
     dto: RecordPacuAssessmentDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<PacuAssessmentResponseDto> {
     this.logger.info(
       { operation: 'periop.pacu.assess', stayId },

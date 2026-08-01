@@ -54,6 +54,14 @@ export class RedisRuntimeService {
     this.logger.setContext(RedisRuntimeService.name);
   }
 
+  /** Verifica la conexión usada por readiness sin crear ni modificar claves. */
+  async ping(): Promise<void> {
+    const response = await this.redis.ping();
+    if (response !== 'PONG') {
+      throw new Error('Redis no respondió PONG');
+    }
+  }
+
   /**
    * ComponE la clave física namespaced por tenant. Rechaza tenant/clave vacíos
    * para que jamás se emita una clave sin prefijo (que sería cross-tenant).

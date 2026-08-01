@@ -117,6 +117,11 @@ export class DocumentStoreRepository {
    */
   constructor(private readonly mongo: MongoConnection) {}
 
+  /** Delega el ping de readiness al pool Mongo compartido. */
+  ping(): Promise<void> {
+    return this.mongo.ping();
+  }
+
   /**
    * Ejecuta la operación collection.
    *

@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsUUID, IsDateString } from 'class-validator';
 
 const ROLES = ['STAFF', 'SECRETARY', 'ASSISTANT', 'NURSE', 'BILLING'] as const;

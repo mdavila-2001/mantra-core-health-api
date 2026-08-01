@@ -25,13 +25,12 @@ import { CONCEPTS } from '../../../src/common';
 // practice_site_id SÍ es FK a practice.practice_sites → usar el sitio sembrado por
 // el smoke de practice (ctx.vars.pracSiteId), que corre antes en el registro.
 // Estos *_concept_id SÍ son FK a terminology.catalog_concepts → usar un concepto
-// realmente sembrado. PRACTITIONER_ROLE no es FK forzada (uuid libre por corrida).
+// realmente sembrado. El rol profesional usa la asignación creada por Practice.
 const STUDY_CONCEPT = CONCEPTS.STATE_ACTIVE;
 const SPECIALTY_CONCEPT = CONCEPTS.STATE_ACTIVE;
 const ACCREDITATION_CONCEPT = CONCEPTS.STATE_ACTIVE;
 const EQUIPMENT_TYPE = CONCEPTS.STATE_ACTIVE;
 const MODALITY_CONCEPT = CONCEPTS.STATE_ACTIVE;
-const PRACTITIONER_ROLE = '88888888-8888-4888-8888-888888888888';
 
 export const DIAGNOSTIC_UNITS_SMOKE: SmokeCase[] = [
   // ---- UC-23-01: alta de unidad con sitio ----------------------------------
@@ -330,7 +329,7 @@ export const DIAGNOSTIC_UNITS_SMOKE: SmokeCase[] = [
     path: (c) =>
       `/diagnostic-units/${c.vars.duUnitId}/practitioner-assignments`,
     body: (c) => ({
-      practitionerRoleAssignmentId: PRACTITIONER_ROLE,
+      practitionerRoleAssignmentId: c.vars.pracRoleId,
       diagnosticUnitSiteId: c.vars.duSiteId,
       maySignReports: true,
     }),
@@ -342,7 +341,7 @@ export const DIAGNOSTIC_UNITS_SMOKE: SmokeCase[] = [
     name: 'límite: unidad inexistente',
     method: 'post',
     path: () => `/diagnostic-units/${UUID_ABSENT}/practitioner-assignments`,
-    body: () => ({ practitionerRoleAssignmentId: PRACTITIONER_ROLE }),
+    body: (c) => ({ practitionerRoleAssignmentId: c.vars.pracRoleId }),
     expectedStatus: 404,
   },
 

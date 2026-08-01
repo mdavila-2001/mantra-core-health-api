@@ -24,7 +24,10 @@ name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
 # servicio DENTRO de la red de compose (no los `*_PORT` expuestos al host, que
 # son solo para conectarse desde fuera de Docker).
 x-app-env: &app-env
-  NODE_ENV: production
+  # Este compose es exclusivamente local. Producción usa manifiestos separados;
+  # etiquetarlo como production activaría restricciones de secretos/proveedores
+  # que un entorno de desarrollo deliberadamente no satisface.
+  NODE_ENV: ${NODE_ENV:-development}
   PORT: "3000"
   DB_HOST: postgres
   DB_PORT: "5432"

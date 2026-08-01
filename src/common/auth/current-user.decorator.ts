@@ -3,8 +3,10 @@ import {
   ExecutionContext,
   InternalServerErrorException,
 } from '@nestjs/common';
-import type { Request } from 'express';
-import type { AuthenticatedUser } from './authenticated-user.interface';
+import type {
+  AuthenticatedRequest,
+  AuthenticatedUser,
+} from './authenticated-user.interface';
 
 /**
  * Inyecta el `AuthenticatedUser` que `JwtStrategy` adjuntó a `request.user`.
@@ -15,14 +17,7 @@ import type { AuthenticatedUser } from './authenticated-user.interface';
  */
 export const CurrentUser = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): AuthenticatedUser => {
-    const request = ctx.switchToHttp().getRequest<
-      Request & {
-        /**
-         * Valor de user mantenido por la instancia.
-         */
-        user?: AuthenticatedUser;
-      }
-    >();
+    const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!request.user) {
       throw new InternalServerErrorException(
         'CurrentUser usado en un handler sin autenticación aplicada',

@@ -1,8 +1,9 @@
 # Aislamiento de tenant
 
 > Fase 13. Ver [ADR-0006](../adr/ADR-0006-multi-tenancy-rls.md) para la decisión completa. Esta
-> página es el procedimiento de verificación operativa que ese ADR exige y que esta auditoría
-> **no pudo ejecutar** por ser estática, no una prueba contra infraestructura real.
+> página es el procedimiento de verificación operativa que ese ADR exige. La
+> prueba se ejecutó contra la base local desechable; cada ambiente real continúa
+> necesitando su propia evidencia.
 
 ## El mecanismo (verificado en código)
 
@@ -11,6 +12,9 @@
 2. Con `RLS_ENFORCE=true`, fija `app.current_tenant_id` como variable de sesión de PostgreSQL.
 3. Las políticas RLS de PostgreSQL (declaradas en el DDL, `database/SQL/99_migrations`) filtran
    filas por esa variable de sesión de forma transparente al ORM.
+4. Solo una llamada interna autenticada con el rol no asignable `SYSTEM` puede activar
+   `app.system_context=true`; el interceptor lo hace de forma local a la misma transacción y las
+   políticas lo interpretan como elevación cross-tenant explícita.
 
 ## Por qué esto no basta sin verificación operativa
 
@@ -35,9 +39,9 @@ Copiado de `ESTADO-Y-PENDIENTES.md` (ya identificado como prioridad P0 antes de 
 4. Ejecutar **pruebas negativas**: con dos tenants reales, intentar leer y mutar filas del tenant
    ajeno y confirmar que PostgreSQL las rechaza (0 filas, no un error que se pueda ignorar).
 
-## Hallazgo importante: ya existe una prueba real que verifica exactamente esto
+## Prueba real del mecanismo
 
-`test/integration/rls.int-spec.ts` — **no ejecutada en esta auditoría, pero revisada** — aplica la
+`test/integration/rls.int-spec.ts` aplica la
 migración real de RLS (`database/SQL/99_rls/01_tenant_rls.sql`, ~284 tablas con `tenant_id`) y
 demuestra, conectado como el rol de aplicación real (`mantra_app`, sin `BYPASSRLS`):
 
@@ -45,29 +49,37 @@ demuestra, conectado como el rol de aplicación real (`mantra_app`, sin `BYPASSR
    `pg_roles`).
 2. Con `app.current_tenant_id` fijado, solo se ven las filas de ese tenant.
 3. Insertar una fila de otro tenant se rechaza (`WITH CHECK`).
-4. RLS quedó activado (`relrowsecurity` + `relforcerowsecurity`) en más de 200 tablas reales.
+4. Sin GUC no se ve ninguna fila: la política falla cerrada.
+5. Con `app.system_context=true`, una operación interna `SYSTEM` puede recorrer todos los tenants
+   de manera explícita sin otorgar `BYPASSRLS` al rol de aplicación.
+6. RLS quedó activado (`relrowsecurity` + `relforcerowsecurity`) en más de 200 tablas reales.
 
-**Es opt-in por diseño, no por descuido**: `RLS_TEST=1 yarn test:integration` — porque aplica una
+**Es opt-in por diseño, no por descuido**: use credenciales reales mediante
+`DB_APP_USER`/`DB_APP_PASSWORD`, o, exclusivamente para una base local
+desechable, ejecute
+`RLS_TEST=1 RLS_TEST_BOOTSTRAP_LOCAL_ROLE=1 yarn test:integration`. La prueba
+revoca `LOGIN` del rol local al terminar. Es opt-in porque aplica una
 mutación de esquema irreversible (crea el rol `mantra_app`, fuerza RLS en ~284 tablas). No se
-ejecutó en esta auditoría por esa misma razón: no es una decisión que un análisis documental deba
-tomar por el equipo contra una base compartida sin autorización explícita.
+debe apuntar a una base compartida sin autorización explícita.
 
-## Hallazgo crítico dentro de la propia prueba: la política es permisiva sin GUC fijado
+## Comportamiento fail-closed
 
-La prueba #3 (*"sin GUC fijado la política es permisiva"*) confirma un comportamiento real y
-importante: **si una consulta llega a la base sin que `app.current_tenant_id` esté fijado, la
-política RLS deja ver filas de todos los tenants** — no falla cerrado. Esto es coherente con
-permitir contexto de sistema (migraciones, jobs administrativos), pero significa que
-`TenantContextInterceptor` fijando el GUC en **cada** conexión de la API es la única barrera real
-— un bug que abra una conexión sin pasar por el interceptor (p. ej. un script administrativo mal
-escrito, una conexión directa fuera del flujo HTTP normal) vería todos los tenants sin ningún
-error. RLS aquí es *aislamiento por configuración correcta*, no *aislamiento a prueba de fallos
-por defecto*.
+La política compara `tenant_id` contra
+`NULLIF(current_setting('app.current_tenant_id', true), '')::uuid`. Cuando el
+GUC falta o está vacío, la expresión no autoriza ninguna fila ni ningún insert.
+Los procesos administrativos cross-tenant usan un token interno firmado con el
+rol no asignable `SYSTEM`; el interceptor fija `app.system_context=true` solo
+dentro de la transacción de esa llamada. Una llamada `SYSTEM` dirigida a un
+tenant concreto vuelve a fijar `app.system_context=false` y
+`app.current_tenant_id`, por lo que permanece aislada. `mantra_app` nunca obtiene
+`BYPASSRLS` ni un bypass implícito. El SQL versionado crea el rol como `NOLOGIN`
+si no existe y no contiene contraseñas conocidas: IaC habilita `LOGIN` con un
+secreto del ambiente.
 
 ## Estado real de esta verificación
 
-**El mecanismo está implementado y tiene una prueba real que lo demuestra.** Lo que esta
-auditoría no verificó es: (a) que `RLS_TEST=1 yarn test:integration` se haya ejecutado y pasado
+**El mecanismo está implementado y pasó 6/6 pruebas en la base local
+desechable.** Lo que esta auditoría no verificó es: (a) que la misma prueba pase
 contra cada entorno real, y (b) que `RLS_ENFORCE=true` esté efectivamente activo en staging/
 producción (el default en `docker-compose.yml` es `false`). Ver `SEC-001` en
 [matriz de trazabilidad](../governance/traceability-matrix.md), clasificado `CRITICAL`, **abierto**

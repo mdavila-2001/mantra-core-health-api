@@ -8,7 +8,7 @@ import {
 } from '../../../common';
 import { SCHED } from '../scheduling.concepts';
 import { SchedulingConfirmationRepository } from '../repositories';
-import type { BookingConfirmationRules, RuleCondition } from '../entities';
+import type { BookingConfirmationRules } from '../entities';
 import {
   CreateConfirmationRuleDto,
   ConfirmationRuleResponseDto,
@@ -305,10 +305,7 @@ export class SchedulingConfirmationService {
    * reconocida se considera NO satisfecha: una regla que no se puede leer no
    * decide (fail-closed).
    */
-  private evalCondition(
-    cond: RuleCondition | unknown,
-    data: Record<string, unknown>,
-  ): boolean {
+  private evalCondition(cond: unknown, data: Record<string, unknown>): boolean {
     if (cond == null || typeof cond !== 'object') return false;
     const c = cond as Record<string, unknown>;
 

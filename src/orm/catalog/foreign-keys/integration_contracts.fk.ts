@@ -54,5 +54,5 @@ export const integrationContractsForeignKeys: readonly ForeignKeyTuple[] = [
   ['webhook_delivery_evidence', 'integration_exchange_record_id', 'integration_contracts', 'integration_exchange_records', 'id'],
   ['webhook_delivery_evidence', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['webhook_delivery_evidence', 'signature_verification_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['webhook_delivery_evidence', 'webhook_subscription_id', 'integrations', 'webhook_subscriptions', 'id'],
+  ['webhook_delivery_evidence', 'webhook_subscription_id', 'integration_contracts', 'contract_webhook_subscriptions', 'id'],
 ];

@@ -53,7 +53,7 @@ function build() {
     personProfilesRepo as any,
     practitionersRepo,
     authorizationsRepo,
-    credentialsRepo as any,
+    credentialsRepo,
     specialtiesRepo,
     languagesRepo,
     logger as any,

@@ -42,13 +42,10 @@ export const redisClientProvider: Provider = {
       logger.error(`Error de conexión Redis: ${err.message}`);
     });
 
-    // Conexión perezosa: se dispara sin bloquear el arranque del módulo.
-    void client.connect().catch((err: Error) => {
-      logger.error(
-        `No se pudo conectar a Redis (${host}:${port}): ${err.message}`,
-      );
-    });
-
+    // `lazyConnect` ya hace que el primer comando (incluido el PING de
+    // readiness) abra la conexión. No se llama `connect()` en background:
+    // hacerlo crea una carrera entre el bootstrap y `app.close()` en procesos
+    // breves como el generador OpenAPI.
     return client;
   },
 };

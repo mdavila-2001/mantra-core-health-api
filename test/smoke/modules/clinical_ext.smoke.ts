@@ -22,11 +22,25 @@ import { CONCEPTS } from '../../../src/common';
  */
 const CID = CONCEPTS.STATE_ACTIVE;
 const CID2 = CONCEPTS.STATE_REVOKED;
-/** Encuentro clínico sintético válido (uuid) por corrida para la sesión virtual. */
-const encounterUuid = (u: number): string =>
-  `00000000-0000-4000-8000-${String(u).padStart(12, '0')}`;
-
 export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
+  {
+    module: 'ClinicalExt',
+    endpoint: 'POST /profiles/practitioners',
+    name: 'setup: segundo profesional del equipo',
+    method: 'post',
+    path: () => '/profiles/practitioners',
+    body: (c) => ({
+      practitionerCode: `CEXT-${c.u}`,
+      displayName: `Profesional ClinicalExt ${c.u}`,
+      licenseNumber: `CEXT-${c.u}`,
+      credentialNumber: `CEXT-CRED-${c.u}`,
+    }),
+    expectedStatus: 201,
+    capture: (b, c) => {
+      c.vars.cextPractitioner2 = String(b.profileId);
+    },
+  },
+
   // ---- UC-18-01: crear equipo de cuidado con miembros -----------------------
   {
     module: 'ClinicalExt',
@@ -46,7 +60,7 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
           isResponsible: true,
         },
         {
-          practitionerProfileId: c.vars.patientProfileId,
+          practitionerProfileId: c.vars.cextPractitioner2,
           memberRoleConceptId: CID2,
         },
       ],
@@ -126,6 +140,7 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
       code: `CDS-${c.u}`,
       name: 'Regla de alergia',
       messageTemplate: 'Posible alergia',
+      logicJson: { field: 'medications', op: 'exists' },
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -326,7 +341,7 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
     method: 'post',
     path: (c) => `/order-sets/${c.vars.cextOrderSetId}/apply`,
     body: (c) => ({
-      encounterId: encounterUuid(c.u),
+      encounterId: c.vars.clinEncounterId,
       patientProfileId: c.vars.patientProfileId,
     }),
     expectedStatus: 201,
@@ -338,7 +353,7 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
     method: 'post',
     path: (c) => `/order-sets/${UUID_ABSENT}/apply`,
     body: (c) => ({
-      encounterId: encounterUuid(c.u),
+      encounterId: c.vars.clinEncounterId,
       patientProfileId: c.vars.patientProfileId,
     }),
     expectedStatus: 404,
@@ -492,7 +507,7 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
     method: 'post',
     path: () => '/virtual-encounters',
     body: (c) => ({
-      encounterId: encounterUuid(c.u),
+      encounterId: c.vars.clinEncounterId,
       meetingUrl: 'https://meet.example/abc',
       meetingId: 'abc',
     }),

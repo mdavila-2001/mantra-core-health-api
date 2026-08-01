@@ -65,7 +65,7 @@ markdown_extensions:
   - md_in_html
 
 extra:
-  version_documented: "0.0.1 (commit 15c132d3, 2026-07-29)"
+  version_documented: "0.0.1 (contrato reconciliado el 2026-07-31)"
 
 validation:
   omitted_files: warn

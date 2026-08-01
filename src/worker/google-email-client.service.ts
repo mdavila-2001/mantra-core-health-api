@@ -5,8 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { WORKER_ENV, type WorkerEnv } from './worker.tokens';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
-const SEND_URL =
-  'https://gmail.googleapis.com/gmail/v1/users/me/messages/send';
+const SEND_URL = 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send';
 /** Margen de seguridad antes de que expire el access token real de Google. */
 const TOKEN_REFRESH_SKEW_MS = 60_000;
 
@@ -105,7 +104,8 @@ export class GoogleEmailClient {
       );
       this.cachedToken = {
         accessToken: response.data.access_token,
-        expiresAt: now + response.data.expires_in * 1000 - TOKEN_REFRESH_SKEW_MS,
+        expiresAt:
+          now + response.data.expires_in * 1000 - TOKEN_REFRESH_SKEW_MS,
       };
       return this.cachedToken.accessToken;
     } catch (error) {
@@ -115,8 +115,9 @@ export class GoogleEmailClient {
 
   private static toWorkerError(path: string, error: unknown): HttpException {
     if (error instanceof AxiosError) {
-      const status = error.response?.status ?? 0;
-      const body = error.response?.data;
+      const axiosError: AxiosError<unknown> = error;
+      const status = axiosError.response?.status ?? 0;
+      const body = axiosError.response?.data;
       return new HttpException(
         { path, status, body },
         status >= 400 ? status : 500,
@@ -152,9 +153,7 @@ function encodeMimeMessage(input: {
   let message: string;
   if (input.bodyHtml && input.bodyText) {
     const boundary = `mantra-${Date.now()}`;
-    headers.push(
-      `Content-Type: multipart/alternative; boundary="${boundary}"`,
-    );
+    headers.push(`Content-Type: multipart/alternative; boundary="${boundary}"`);
     message =
       headers.join('\r\n') +
       '\r\n\r\n' +
@@ -167,7 +166,9 @@ function encodeMimeMessage(input: {
       `--${boundary}--`;
   } else {
     const isHtml = Boolean(input.bodyHtml);
-    headers.push(`Content-Type: text/${isHtml ? 'html' : 'plain'}; charset="UTF-8"`);
+    headers.push(
+      `Content-Type: text/${isHtml ? 'html' : 'plain'}; charset="UTF-8"`,
+    );
     message =
       headers.join('\r\n') +
       '\r\n\r\n' +

@@ -10,7 +10,6 @@ import {
 } from '../../../common';
 import { IDA } from '../identity_assurance.concepts';
 import {
-  IDA_SEED,
   IDENTITY_CARD_VERTICAL,
   INSTITUTION_DOCUMENT_VERTICAL,
   MEDICAL_LICENSE_VERTICAL,
@@ -21,6 +20,7 @@ import {
   IdentityVerificationAttemptsRepository,
   IdentityCheckResultsRepository,
   IdentityVerificationCasesRepository,
+  IdentityAuthorityEndpointsRepository,
 } from '../repositories';
 import {
   RecordAttemptDto,
@@ -109,6 +109,7 @@ export class IdentityChecksService {
    * @param resultsRepo - Valor de results repo requerido por la operación.
    * @param casesRepo - Valor de cases repo requerido por la operación.
    * @param assertionsRepo - Valor de assertions repo requerido por la operación.
+   * @param authorityEndpointsRepo - Resuelve qué autoridad completó el check.
    * @param effects - Valor de effects requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
@@ -119,6 +120,7 @@ export class IdentityChecksService {
     private readonly resultsRepo: IdentityCheckResultsRepository,
     private readonly casesRepo: IdentityVerificationCasesRepository,
     private readonly assertionsRepo: IdentityAssertionsRepository,
+    private readonly authorityEndpointsRepo: IdentityAuthorityEndpointsRepository,
     private readonly effects: IdentityVerificationEffectsService,
     private readonly logger: PinoLogger,
   ) {
@@ -367,10 +369,25 @@ export class IdentityChecksService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     const now = new Date();
+    const attempt = await this.attemptsRepo.findLatestCompletedByCase(
+      tx,
+      kase.id,
+    );
+    const authorityEndpoint = attempt
+      ? await this.authorityEndpointsRepo.findById(
+          tx,
+          attempt.identityAuthorityEndpointId,
+        )
+      : null;
+    if (!authorityEndpoint) {
+      throw new PreconditionFailedException(
+        'No se pudo determinar la autoridad que verificó el caso',
+        { caseId: kase.id },
+      );
+    }
     this.assertionsRepo.create(tx, {
       identityVerificationCaseId: kase.id,
-      // La emite la misma autoridad sembrada que resolvió los checks.
-      issuerIdentityAuthorityId: IDA_SEED.authorityId,
+      issuerIdentityAuthorityId: authorityEndpoint.identityAuthorityId,
       subjectTypeConceptId: kase.subjectTypeConceptId,
       subjectEntityId: kase.subjectEntityId,
       assertionTypeConceptId: IDA.ASSERTION_IDENTITY,

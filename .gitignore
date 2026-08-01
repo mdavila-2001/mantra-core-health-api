@@ -98,3 +98,7 @@ dist-docs/
 
 # Archivos subidos por el adaptador de almacenamiento local (FILE_STORAGE_LOCAL_DIR)
 /storage/
+
+# Salida del pipeline legacy `yarn openapi:generate`, que duplica el contrato ya
+# versionado en `openapi/`. El contrato bueno lo produce `yarn docs:openapi:generate`.
+docs/endpoints/

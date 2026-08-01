@@ -1,5 +1,9 @@
 # Auditoría de preparación para producción
 
+> **Snapshot histórico del 2026-07-30.** La evaluación integral vigente es
+> [Auditoría de producción 2026-07-31](production-readiness-2026-07-31.md), que
+> incorpora el código y el contrato OpenAPI posteriores.
+
 > Fase 18 — cierre del Plan Maestro de Documentación. Checklist textual del plan maestro §17,
 > evaluado contra evidencia real de este repositorio a fecha 2026-07-30 (commit más reciente
 > incorporado: `e2958fa1`, ver `GOV-006` en la [matriz de trazabilidad](../governance/traceability-matrix.md)

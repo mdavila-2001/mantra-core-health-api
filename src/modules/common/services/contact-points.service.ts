@@ -4,7 +4,6 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   AuthenticatedUser,
   CONCEPTS,
-  ConceptName,
   ResourceNotFoundException,
 } from '../../../common';
 import { ContactPointsRepository } from '../repositories';

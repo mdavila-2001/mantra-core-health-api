@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { randomUUID } from 'node:crypto';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -33,6 +32,7 @@ import {
 } from '../dto';
 import { DUNIT } from '../diagnostic_units.concepts';
 import type { DiagnosticUnits } from '../entities';
+import { PublicProfileProjectionService } from '../../community/services';
 
 /**
  * Casos de uso de ciclo de vida de la unidad diagnóstica: alta con sitios y
@@ -56,6 +56,7 @@ export class DiagnosticUnitsService {
    * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
    * @param accreditationsRepo - Valor de accreditations repo requerido por la operación.
    * @param assignmentsRepo - Valor de assignments repo requerido por la operación.
+   * @param publicProfiles - Proyección pública encapsulada por Community.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -65,6 +66,7 @@ export class DiagnosticUnitsService {
     private readonly specialtiesRepo: DiagnosticUnitSpecialtiesRepository,
     private readonly accreditationsRepo: DiagnosticUnitAccreditationsRepository,
     private readonly assignmentsRepo: DiagnosticUnitPractitionerAssignmentsRepository,
+    private readonly publicProfiles: PublicProfileProjectionService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticUnitsService.name);
@@ -238,7 +240,18 @@ export class DiagnosticUnitsService {
       }
 
       unit.verificationStatusConceptId = DUNIT.VERIFICATION_VERIFIED;
-      if (!unit.publicProfileId) unit.publicProfileId = randomUUID();
+      if (!unit.publicProfileId) {
+        unit.publicProfileId = await this.publicProfiles.projectOrganization(
+          tx,
+          {
+            tenantId: unit.tenantId,
+            targetId: unit.id,
+            slug: `diagnostic-unit-${unit.id}`,
+            displayName: unit.name,
+            actorUserId: actor.id,
+          },
+        );
+      }
       touch(unit, actor.id);
 
       await this.specialtiesRepo.verifyOpenForUnit(tx, unit.id);

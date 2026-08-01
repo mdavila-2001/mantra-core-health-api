@@ -1,7 +1,7 @@
 import * as Joi from 'joi';
 
 /**
- * Esquema de entorno compartido por los 17 procesos worker
+ * Esquema de entorno compartido por los 20 procesos worker
  * (`src/worker-<dominio>.ts`, arrancados vía `bootstrapWorker` en
  * `src/worker/bootstrap.ts`). Se concatena al esquema global de
  * `ConfigModule` en cada uno, igual que `authEnvSchema` en `AppModule`: una
@@ -43,14 +43,19 @@ export const workerEnvSchema = Joi.object({
    *
    * Configurada por defecto (no opt-in, a diferencia de `TS_RETENTION_POLICIES`):
    * apunta a `http://127.0.0.1:4100` porque un adapter que "falla siempre" es
-   * peor que probar contra un doble de prueba honesto en desarrollo. En un
-   * entorno real esto debe apuntar al proveedor real (o quedar vacío para
-   * volver al adapter por defecto, que falla visible en vez de fingir éxito).
+   * peor que probar contra un doble de prueba honesto en desarrollo. En
+   * producción esta variable sólo admite vacío: cada integración real debe
+   * usar su configuración y adapter dedicados. Así un nombre de variable
+   * heredado de desarrollo nunca puede hacer que un mock aparente éxito.
    */
   MOCK_PROVIDER_BASE_URL: Joi.string()
     .uri()
     .allow('')
-    .default('http://127.0.0.1:4100'),
+    .when('NODE_ENV', {
+      is: 'production',
+      then: Joi.string().valid('').default(''),
+      otherwise: Joi.string().default('http://127.0.0.1:4100'),
+    }),
   MOCK_PROVIDER_API_KEY: Joi.string().allow('').default(''),
   /**
    * Proveedor real de envío de email para `NotificationDeliveryJob` (canal
@@ -91,6 +96,8 @@ export interface WorkerEnv {
 
 /** Lee la configuración del worker desde `process.env`. */
 export function loadWorkerEnv(): WorkerEnv {
+  const mockProviderDefault =
+    process.env.NODE_ENV === 'production' ? '' : 'http://127.0.0.1:4100';
   return {
     apiBaseUrl: process.env.WORKER_API_BASE_URL ?? 'http://127.0.0.1:3000',
     httpTimeoutMs: Number(process.env.WORKER_HTTP_TIMEOUT_MS ?? 30_000),
@@ -106,7 +113,7 @@ export function loadWorkerEnv(): WorkerEnv {
       process.env.TS_RETENTION_POLICIES ?? '',
     ),
     mockProviderBaseUrl:
-      process.env.MOCK_PROVIDER_BASE_URL ?? 'http://127.0.0.1:4100',
+      process.env.MOCK_PROVIDER_BASE_URL ?? mockProviderDefault,
     mockProviderApiKey: process.env.MOCK_PROVIDER_API_KEY ?? '',
     googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID ?? '',
     googleOAuthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? '',

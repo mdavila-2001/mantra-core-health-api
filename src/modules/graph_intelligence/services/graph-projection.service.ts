@@ -75,7 +75,7 @@ export class GraphProjectionService {
    */
   async upsertNode(
     dto: UpsertNodeDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<NodeResponseDto> {
     return this.em.transactional(async (tx) => {
       const existing = await this.projectionRepo.findNodeBySourceForUpdate(
@@ -306,7 +306,7 @@ export class GraphProjectionService {
   async startProjectionRun(
     definitionId: string,
     dto: StartProjectionRunDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ProjectionRunResponseDto> {
     return this.em.transactional(async (tx) => {
       const definition = await this.projectionRepo.findDefinitionById(
@@ -571,7 +571,7 @@ export class GraphProjectionService {
    */
   async reconcileSourceVersion(
     dto: ReconcileSourceVersionDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<ReconcileResponseDto> {
     return this.em.transactional(async (tx) => {
       const node = await this.projectionRepo.findNodeBySourceForUpdate(

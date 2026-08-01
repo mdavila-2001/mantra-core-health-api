@@ -30,10 +30,7 @@ const configured =
     beforeAll(async () => {
       const moduleRef = await Test.createTestingModule({
         imports: [HttpModule.register({ timeout: 30_000 })],
-        providers: [
-          { provide: WORKER_ENV, useValue: env },
-          GoogleEmailClient,
-        ],
+        providers: [{ provide: WORKER_ENV, useValue: env }, GoogleEmailClient],
       }).compile();
       client = moduleRef.get(GoogleEmailClient);
     });

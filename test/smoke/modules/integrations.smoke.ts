@@ -1,5 +1,10 @@
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
+import {
+  canonicalJson,
+  deriveWebhookSecret,
+  signPayload,
+} from '../../../src/common';
 
 /**
  * Smoke del módulo integrations (12): registro de proveedor, conexión, endpoint,
@@ -88,11 +93,16 @@ export const INTEGRATIONS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       code: `ep-${c.u}`,
       operation: 'push-result',
+      version: '1.0',
       path: '/v1/results',
       httpMethod: 'POST',
-      direction: 'OUTBOUND',
-      sourcePath: '$.value',
-      targetField: 'value',
+      mappings: [
+        {
+          direction: 'OUTBOUND',
+          sourcePath: '$.value',
+          targetField: 'value',
+        },
+      ],
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -140,7 +150,7 @@ export const INTEGRATIONS_SMOKE: SmokeCase[] = [
     name: 'happy: despacha',
     method: 'post',
     path: (c) => `/integrations/messages/${c.vars.integMessageId}:dispatch`,
-    body: () => ({ httpStatus: 200 }),
+    body: () => ({}),
     expectedStatus: 200,
   },
   // UC-12-03 reintentar (tras simular fallo se reintenta; aquí solo ejercemos la ruta)
@@ -156,20 +166,19 @@ export const INTEGRATIONS_SMOKE: SmokeCase[] = [
   // UC-12-04 dead-letter
   {
     module: 'Integrations',
+    endpoint: 'POST /integrations/messages/:id:dispatch',
+    name: 'setup: segundo despacho fallido',
+    method: 'post',
+    path: (c) => `/integrations/messages/${c.vars.integMessageId}:dispatch`,
+    body: () => ({}),
+    expectedStatus: 200,
+  },
+  {
+    module: 'Integrations',
     endpoint: 'POST /integrations/messages/:id:dead-letter',
     name: 'happy: dead-letter',
     method: 'post',
     path: (c) => `/integrations/messages/${c.vars.integMessageId}:dead-letter`,
-    body: () => ({}),
-    expectedStatus: 200,
-  },
-  // UC-12-05 correlacionar
-  {
-    module: 'Integrations',
-    endpoint: 'POST /integrations/messages/:id:correlate',
-    name: 'happy: correlaciona',
-    method: 'post',
-    path: (c) => `/integrations/messages/${c.vars.integMessageId}:correlate`,
     body: () => ({}),
     expectedStatus: 200,
   },
@@ -180,12 +189,33 @@ export const INTEGRATIONS_SMOKE: SmokeCase[] = [
     name: 'happy: webhook entrante',
     method: 'post',
     path: () => '/integrations/webhooks/inbound',
-    body: (c) => ({
-      connectionId: c.vars.integConnectionId,
-      endpointId: c.vars.integEndpointId,
-      payloadJson: { event: 'x' },
-    }),
+    body: (c) => {
+      const payload = { event: 'x' };
+      return {
+        connectionId: c.vars.integConnectionId,
+        endpointId: c.vars.integEndpointId,
+        correlationId: `idem-${c.u}`,
+        payloadJson: payload,
+        signature: signPayload(
+          deriveWebhookSecret('connection', c.vars.integConnectionId),
+          canonicalJson(payload),
+        ),
+      };
+    },
     expectedStatus: 201,
+    capture: (b, c) => {
+      c.vars.integInboundId = String(b.id);
+    },
+  },
+  // UC-12-05 correlacionar el callback entrante con el mensaje saliente.
+  {
+    module: 'Integrations',
+    endpoint: 'POST /integrations/messages/:id:correlate',
+    name: 'happy: correlaciona',
+    method: 'post',
+    path: (c) => `/integrations/messages/${c.vars.integInboundId}:correlate`,
+    body: () => ({}),
+    expectedStatus: 200,
   },
   // UC-12-11 rotar credencial
   {

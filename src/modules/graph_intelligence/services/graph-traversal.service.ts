@@ -224,7 +224,7 @@ export class GraphTraversalService {
   /** UC-61-05 (recorrido): explorar desde un nodo dentro del alcance. */
   async traverse(
     dto: TraverseDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<TraverseResponseDto> {
     return this.em.transactional(async (tx) => {
       const scope = await this.requireActiveScope(tx, dto);
@@ -274,7 +274,7 @@ export class GraphTraversalService {
    */
   async findPath(
     dto: FindPathDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<PathResponseDto> {
     return this.em.transactional(async (tx) => {
       const scope = await this.requireActiveScope(tx, dto);

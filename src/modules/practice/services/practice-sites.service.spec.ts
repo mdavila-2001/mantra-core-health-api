@@ -24,7 +24,11 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const practicesRepo = { findById: mockFn(), create: mockFn() };
+  const practicesRepo = {
+    findActive: mockFn(),
+    findById: mockFn(),
+    create: mockFn(),
+  };
   const sitesRepo = {
     findById: mockFn(),
     findByPracticeAndCode: mockFn(),

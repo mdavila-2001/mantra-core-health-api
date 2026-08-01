@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,

@@ -337,6 +337,18 @@ export const CLINICAL_SMOKE: SmokeCase[] = [
     expectedStatus: 400,
   },
 
+  // La administración solo acepta recetas ya emitidas (DRAFT -> ISSUED).
+  {
+    module: 'Clinical',
+    endpoint: 'POST /clinical/medication-requests/{id}/issue',
+    name: 'setup: emitir prescripción',
+    method: 'post',
+    path: (c) =>
+      `/clinical/medication-requests/${c.vars.clinMedRequestId}/issue`,
+    body: () => ({}),
+    expectedStatus: 200,
+  },
+
   // ---- UC-08-11: administrar medicación -------------------------------------
   {
     module: 'Clinical',

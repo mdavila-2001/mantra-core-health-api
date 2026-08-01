@@ -181,7 +181,11 @@ describe('TrackingService', () => {
      * @returns Resultado de dto conforme al contrato `any`.
      */
     function dto(milestones: any[]): any {
-      return { subjectType: 'SPECIMEN' as const, milestones, tenantId: 'tenant-a' };
+      return {
+        subjectType: 'SPECIMEN' as const,
+        milestones,
+        tenantId: 'tenant-a',
+      };
     }
 
     it('creates the milestones numbering them in order', async () => {
@@ -228,13 +232,17 @@ describe('TrackingService', () => {
       d.trackingRepo.createMilestoneDefinition.mockReturnValue({ id: 'ms-1' });
 
       await d.service.defineMilestones(
-        dto([{ code: 'PICKED', name: 'Recogido', milestoneStatus: 'IN_TRANSIT' as const }]),
+        dto([
+          {
+            code: 'PICKED',
+            name: 'Recogido',
+            milestoneStatus: 'IN_TRANSIT' as const,
+          },
+        ]),
         actor,
       );
 
-      expect(
-        d.trackingRepo.findMilestonesBySubjectType,
-      ).toHaveBeenCalledWith(
+      expect(d.trackingRepo.findMilestonesBySubjectType).toHaveBeenCalledWith(
         d.tx,
         expect.any(String),
         expect.any(String),

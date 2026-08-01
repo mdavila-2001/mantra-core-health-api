@@ -52,6 +52,15 @@ export class MongoConnection implements OnModuleDestroy {
     return db.collection<T>(name);
   }
 
+  /** Ping sin efectos laterales para la sonda de readiness. */
+  async ping(): Promise<void> {
+    const db = await this.getDb();
+    const result = await db.command({ ping: 1 });
+    if (result.ok !== 1) {
+      throw new Error('MongoDB no confirmó el ping');
+    }
+  }
+
   /**
    * Actualiza connect.
    * @returns Resultado de connect conforme al contrato `Promise<Db>`.

@@ -53,6 +53,9 @@ function build() {
     findActiveOverlap: mockFn().mockResolvedValue(null),
     create: mockFn(),
   };
+  const publicProfiles = {
+    projectOrganization: mockFn().mockResolvedValue('public-profile-1'),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DiagnosticUnitsService(
@@ -62,6 +65,7 @@ function build() {
     specialtiesRepo,
     accreditationsRepo,
     assignmentsRepo as any,
+    publicProfiles as any,
     logger as any,
   );
   return {
@@ -73,6 +77,7 @@ function build() {
     specialtiesRepo,
     accreditationsRepo,
     assignmentsRepo,
+    publicProfiles,
   };
 }
 
@@ -179,6 +184,10 @@ describe('DiagnosticUnitsService', () => {
         DUNIT.VERIFICATION_VERIFIED,
       );
       expect(res.publicProfileId).toBeDefined();
+      expect(d.publicProfiles.projectOrganization).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ targetId: 'u1' }),
+      );
       expect(d.specialtiesRepo.verifyOpenForUnit).toHaveBeenCalled();
       expect(d.accreditationsRepo.verifyOpenForUnit).toHaveBeenCalled();
     });
