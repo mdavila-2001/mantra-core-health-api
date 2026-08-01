@@ -44,6 +44,26 @@ interface ErrorResponseBody {
 }
 
 /**
+ * Normaliza el identificador de la petición a texto, o `undefined` si no hay.
+ *
+ * `x-request-id` puede llegar repetido, y Express entrega esos casos como
+ * array. Se toma el primero en vez de descartar el valor: un correlationId
+ * aproximado sirve para encontrar la línea de log; ninguno, no.
+ */
+function toCorrelationId(value: unknown): string | undefined {
+  const single = Array.isArray(value) ? value[0] : value;
+
+  if (typeof single === 'string') {
+    return single === '' ? undefined : single;
+  }
+  // `Number.isFinite` descarta NaN e Infinity, que como identificador no
+  // ayudarían a nadie a encontrar nada.
+  return typeof single === 'number' && Number.isFinite(single)
+    ? String(single)
+    : undefined;
+}
+
+/**
  * Filtro global de excepciones. Homogeneiza cualquier fallo -excepciones de
  * dominio, excepciones de Nest, errores no controlados- en un cuerpo estable con
  * `code`, `message` y `correlationId`, y decide qué se registra.
@@ -82,17 +102,28 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<
       Request & {
         /**
-         * Identificador único de la instancia.
+         * Identificador de la petición que asigna pino-http.
+         *
+         * Se declara `string | number` porque **es las dos cosas**: con su
+         * generador por defecto pino numera las peticiones y `req.id` llega
+         * como número; cuando el cliente manda `x-request-id`, es texto.
+         * Declararlo sólo `string` era una afirmación falsa que el cast
+         * silenciaba, y por eso el cuerpo salía con un `correlationId`
+         * numérico contra un contrato que promete texto.
          */
-        id?: string;
+        id?: string | number;
       }
     >();
 
     // pino-http asigna `req.id`; se reutiliza como correlationId para hilar el
     // error del cliente con la línea de log del servidor.
-    const correlationId =
-      (request.id as string | undefined) ??
-      (request.headers['x-request-id'] as string | undefined);
+    //
+    // Se normaliza a texto acá y no en cada cliente: `correlationId` es
+    // `string` en el contrato publicado, y un consumidor que lo compare o lo
+    // concatene no debería tener que adivinar de qué tipo le llegó esta vez.
+    const correlationId = toCorrelationId(
+      request.id ?? request.headers['x-request-id'],
+    );
 
     const { status, code, message, details } = this.normalize(exception);
 
