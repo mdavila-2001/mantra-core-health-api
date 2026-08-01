@@ -9,7 +9,11 @@ import { PinoLogger } from 'nestjs-pino';
 import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
-import { APP_ATTR, TracingService, applyTraceHeader } from '../../observability';
+import {
+  APP_ATTR,
+  TracingService,
+  applyTraceHeader,
+} from '../../observability';
 
 /** Forma estable del cuerpo de error que ve el cliente. */
 interface ErrorResponseBody {
@@ -119,9 +123,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         },
         'Unhandled exception',
       );
-      body.message = 'Error interno del servidor';
-      body.code = ErrorCode.INTERNAL;
-      body.details = undefined;
+      if (!this.isDeclaredDependencyUnavailable(exception)) {
+        body.message = 'Error interno del servidor';
+        body.code = ErrorCode.INTERNAL;
+        body.details = undefined;
+      }
     } else {
       this.logger.warn(
         {
@@ -139,6 +145,27 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   /**
+   * Única excepción 5xx cuyo cuerpo es deliberadamente público: la readiness
+   * declara un código estable y detalles ya sanitizados. Un HttpException 503
+   * genérico no entra aquí y continúa ocultándose como INTERNAL.
+   */
+  private isDeclaredDependencyUnavailable(exception: unknown): boolean {
+    if (
+      !(exception instanceof HttpException) ||
+      exception.getStatus() !== Number(HttpStatus.SERVICE_UNAVAILABLE)
+    ) {
+      return false;
+    }
+    const response = exception.getResponse();
+    return (
+      typeof response === 'object' &&
+      response !== null &&
+      (response as Record<string, unknown>).code ===
+        ErrorCode.DEPENDENCY_UNAVAILABLE
+    );
+  }
+
+  /**
    * Aplica la política de errores sobre el span HTTP activo.
    *
    * Un 4xx **no** marca la traza como fallida: un 404 o un 409 de idempotencia
@@ -150,7 +177,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
    * Los 5xx sí marcan el span y adjuntan la excepción. El filtro no crea ni
    * cierra spans: solo anota el que la instrumentación HTTP ya abrió.
    */
-  private markTrace(status: number, code: string, exception: unknown): void {
+  private markTrace(
+    status: HttpStatus,
+    code: string,
+    exception: unknown,
+  ): void {
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       this.tracing.setAttribute(APP_ATTR.ERROR_CODE, code);
       this.tracing.recordException(exception);
@@ -167,7 +198,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     /**
      * Valor de status mantenido por la instancia.
      */
-    status: number;
+    status: HttpStatus;
     /**
      * Valor de code mantenido por la instancia.
      */
@@ -217,6 +248,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
 
+    // Errores de los middlewares HTTP anteriores a Nest —`express.json()` y
+    // `urlencoded()` con su límite de 1 MB, o un JSON mal formado—. No son
+    // `HttpException`, así que sin este caso caían en el 500 genérico: un
+    // cliente que subía un cuerpo de más recibía INTERNAL y no podía distinguir
+    // su propio error de una caída del servidor. Traen el status HTTP correcto
+    // en `status`/`statusCode`, que es lo que se aprovecha aquí.
+    const httpish = this.asHttpishError(exception);
+    if (httpish) {
+      return {
+        status: httpish,
+        code: this.defaultCode(httpish),
+        message: this.messageForHttpish(httpish),
+      };
+    }
+
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       code: ErrorCode.INTERNAL,
@@ -236,6 +282,40 @@ export class AllExceptionsFilter implements ExceptionFilter {
     return undefined;
   }
 
+  /**
+   * Rescata el status HTTP de un error de middleware que no es `HttpException`.
+   *
+   * `body-parser` marca los suyos con `status`/`statusCode` (413 cuando el
+   * cuerpo excede el límite, 400 cuando el JSON está mal formado). Sólo se
+   * aceptan códigos 4xx: un 5xx ajeno no debe suplantar al INTERNAL propio.
+   *
+   * @param exception - Error capturado por el filtro.
+   * @returns El status 4xx del error, o `undefined` si no lo declara.
+   */
+  private asHttpishError(exception: unknown): HttpStatus | undefined {
+    if (typeof exception !== 'object' || exception === null) return undefined;
+    const candidate = exception as { status?: unknown; statusCode?: unknown };
+    const raw =
+      typeof candidate.status === 'number'
+        ? candidate.status
+        : typeof candidate.statusCode === 'number'
+          ? candidate.statusCode
+          : undefined;
+    if (raw === undefined || raw < 400 || raw >= 500) return undefined;
+    return raw;
+  }
+
+  /** Mensaje estable para los errores de middleware, que traen texto interno. */
+  private messageForHttpish(status: HttpStatus): string {
+    if (status === HttpStatus.PAYLOAD_TOO_LARGE) {
+      return 'El cuerpo de la petición excede el tamaño máximo permitido';
+    }
+    if (status === HttpStatus.BAD_REQUEST) {
+      return 'El cuerpo de la petición no es un JSON válido';
+    }
+    return 'La petición no pudo procesarse';
+  }
+
   /** El ValidationPipe de Nest emite `message: string[]`; se preserva como detalle. */
   private extractValidationDetails(obj: Record<string, unknown>): unknown {
     return Array.isArray(obj.message) ? { violations: obj.message } : undefined;
@@ -247,7 +327,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
    * @param status - Valor de status requerido por la operación.
    * @returns Resultado de default code conforme al contrato `string`.
    */
-  private defaultCode(status: number): string {
+  private defaultCode(status: HttpStatus): string {
     switch (status) {
       case HttpStatus.BAD_REQUEST:
         return ErrorCode.VALIDATION_FAILED;
@@ -261,6 +341,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         return ErrorCode.CONFLICT;
       case HttpStatus.UNPROCESSABLE_ENTITY:
         return ErrorCode.PRECONDITION_FAILED;
+      case HttpStatus.PAYLOAD_TOO_LARGE:
+        return ErrorCode.PAYLOAD_TOO_LARGE;
+      case HttpStatus.TOO_MANY_REQUESTS:
+        return ErrorCode.RATE_LIMITED;
+      case HttpStatus.SERVICE_UNAVAILABLE:
+        return ErrorCode.DEPENDENCY_UNAVAILABLE;
       default:
         return ErrorCode.INTERNAL;
     }
