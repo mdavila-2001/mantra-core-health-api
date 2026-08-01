@@ -1,0 +1,17 @@
+# database / NoSQL / 56 redis runtime redis
+
+Agrupa los componentes relacionados con **56 redis runtime redis** y mantiene cohesionada esta responsabilidad del sistema.
+
+## Contenido
+
+### Archivos
+
+| Archivo | Responsabilidad |
+| --- | --- |
+| `redis_runtime.keyspaces.md` | Implementación o recurso de soporte de esta carpeta. |
+
+## Criterios de mantenimiento
+
+- Mantener las reglas de negocio fuera de los adaptadores de transporte.
+- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
+- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
