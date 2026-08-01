@@ -1,3 +1,4 @@
+import { CONCEPTS } from '../../../src/common';
 import type { SmokeCase } from '../smoke-kit';
 import { UUID_ABSENT } from '../smoke-kit';
 
@@ -10,6 +11,9 @@ import { UUID_ABSENT } from '../smoke-kit';
  *
  * `ctx.adminUserId` es un usuario real (FK válida para owner/created_by).
  */
+/** Concepto cualquiera válido para los campos que sólo exigen un uuid del catálogo. */
+const CID = CONCEPTS.STATE_ACTIVE;
+
 export const DIRECTORY_SMOKE: SmokeCase[] = [
   // --- UC-04-01: aprovisionar tenant ---
   {
@@ -22,6 +26,11 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
       code: `DIR-T-${c.u}`,
       legalName: 'Acme Health SA',
       ownerUserId: c.adminUserId,
+      // El tipo es obligatorio y cada uno exige lo suyo: PROVIDER, país y
+      // jurisdicción; PAYER el bloque `payer`; BROKER el bloque `broker`.
+      tenantType: 'PROVIDER',
+      countryConceptId: CID,
+      jurisdictionConceptId: CID,
     }),
     expectedStatus: 201,
     capture: (b, c) => {
@@ -39,6 +48,9 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
       code: `DIR-X-${c.u}`,
       legalName: 'X',
       ownerUserId: c.adminUserId,
+      tenantType: 'PROVIDER',
+      countryConceptId: CID,
+      jurisdictionConceptId: CID,
     }),
     expectedStatus: 401,
   },
@@ -48,7 +60,13 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
     name: 'límite: falta legalName -> 400',
     method: 'post',
     path: () => '/admin/tenants',
-    body: (c) => ({ code: `DIR-Y-${c.u}`, ownerUserId: c.adminUserId }),
+    body: (c) => ({
+      code: `DIR-Y-${c.u}`,
+      ownerUserId: c.adminUserId,
+      tenantType: 'PROVIDER',
+      countryConceptId: CID,
+      jurisdictionConceptId: CID,
+    }),
     expectedStatus: 400,
   },
 
@@ -83,6 +101,9 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
       code: `DIR-C-${c.u}`,
       legalName: 'Acme Child',
       adminUserId: c.adminUserId,
+      tenantType: 'PROVIDER',
+      countryConceptId: CID,
+      jurisdictionConceptId: CID,
     }),
     expectedStatus: 201,
   },
@@ -96,6 +117,11 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
       code: `DIR-C2-${c.u}`,
       legalName: 'X',
       adminUserId: c.adminUserId,
+      // Con el tipo obligatorio, un cuerpo sin él se queda en el 400 de
+      // validación y nunca llega a comprobar si el padre existe.
+      tenantType: 'PROVIDER',
+      countryConceptId: CID,
+      jurisdictionConceptId: CID,
     }),
     expectedStatus: 404,
   },

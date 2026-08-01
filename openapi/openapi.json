@@ -4160,6 +4160,1415 @@
         "description": "Revocar / offboarding de un miembro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/insurance-carriers": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createCarrier",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCarrierDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de aseguradora (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de aseguradora (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-carriers/{id}/products": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createProduct",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsuranceCreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de producto de aseguradora (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de producto de aseguradora (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-products/{id}/plans": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createPlan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de plan (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-plans/{id}/benefits": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createBenefit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanBenefitDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de beneficio de plan (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de beneficio de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/provider-networks": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createProviderNetwork",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProviderNetworkDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de red de prestadores (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de red de prestadores (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/provider-networks/{id}/memberships": {
+      "post": {
+        "operationId": "InsuranceBackboneController_addMembership",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsuranceCreateMembershipDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de membresía de prestador en la red",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de membresía de prestador en la red. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-brokers": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createBroker",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBrokerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de broker (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de broker (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-brokers/{id}/agreements": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createAgreement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBrokerAgreementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de acuerdo broker–aseguradora (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de acuerdo broker–aseguradora (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/employer-groups": {
+      "post": {
+        "operationId": "InsuranceBackboneController_createEmployerGroup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmployerGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de grupo empleador (soporte)",
+        "tags": [
+          "insurance-backbone"
+        ],
+        "description": "Alta de grupo empleador (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/patient-coverages": {
+      "post": {
+        "operationId": "CoverageController_enroll",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCoverageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar cobertura de paciente y dependientes",
+        "tags": [
+          "insurance-coverage"
+        ],
+        "description": "Registrar cobertura de paciente y dependientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/coverage-eligibility-requests": {
+      "post": {
+        "operationId": "CoverageController_requestEligibility",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEligibilityRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Solicitar y resolver elegibilidad (270/271)",
+        "tags": [
+          "insurance-coverage"
+        ],
+        "description": "Solicitar y resolver elegibilidad (270/271). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/coordination-of-benefits": {
+      "post": {
+        "operationId": "CoverageController_determineCob",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCobDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Determinar coordinación de beneficios (COB)",
+        "tags": [
+          "insurance-coverage"
+        ],
+        "description": "Determinar coordinación de beneficios (COB). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/prior-authorization-requests": {
+      "post": {
+        "operationId": "PriorAuthController_submit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePriorAuthRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Solicitar autorización previa con items",
+        "tags": [
+          "insurance-prior-auth"
+        ],
+        "description": "Solicitar autorización previa con items. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/prior-authorization-requests/{id}/determinations": {
+      "post": {
+        "operationId": "PriorAuthController_determine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeterminationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Emitir determinación de autorización previa",
+        "tags": [
+          "insurance-prior-auth"
+        ],
+        "description": "Emitir determinación de autorización previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-claims": {
+      "post": {
+        "operationId": "ClaimsController_submit",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClaimDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enviar reclamo con líneas (837)",
+        "tags": [
+          "insurance-claims"
+        ],
+        "description": "Enviar reclamo con líneas (837). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-claims/{id}/adjudications": {
+      "post": {
+        "operationId": "ClaimsController_adjudicate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdjudicationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adjudicar reclamo por línea (835)",
+        "tags": [
+          "insurance-claims"
+        ],
+        "description": "Adjudicar reclamo por línea (835). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-claims/{id}/eob": {
+      "post": {
+        "operationId": "ClaimsController_publishEob",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishEobDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publicar Explicación de Beneficios (EOB)",
+        "tags": [
+          "insurance-claims"
+        ],
+        "description": "Publicar Explicación de Beneficios (EOB). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-claims/{id}/reversals": {
+      "post": {
+        "operationId": "ClaimsController_reverse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReversalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar reversión de reclamo",
+        "tags": [
+          "insurance-claims"
+        ],
+        "description": "Registrar reversión de reclamo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-claims/{id}/disputes": {
+      "post": {
+        "operationId": "ClaimsController_openDispute",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDisputeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Abrir disputa sobre adjudicación",
+        "tags": [
+          "insurance-claims"
+        ],
+        "description": "Abrir disputa sobre adjudicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/claim-disputes/{id}/appeal-decisions": {
+      "post": {
+        "operationId": "AppealsController_decide",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppealDecisionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Emitir decisión de apelación (inmutable)",
+        "tags": [
+          "insurance-appeals"
+        ],
+        "description": "Emitir decisión de apelación (inmutable). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/reconciliation-batches": {
+      "post": {
+        "operationId": "ReconciliationController_createBatch",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReconciliationBatchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Abrir lote de conciliación",
+        "tags": [
+          "insurance-reconciliation"
+        ],
+        "description": "Abrir lote de conciliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/reconciliation-batches/{id}/items": {
+      "post": {
+        "operationId": "ReconciliationController_addItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReconciliationItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Agregar ítem de conciliación al lote",
+        "tags": [
+          "insurance-reconciliation"
+        ],
+        "description": "Agregar ítem de conciliación al lote. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/broker-commission-statements": {
+      "post": {
+        "operationId": "BrokerCommissionController_generate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommissionStatementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Generar liquidación de comisión de broker",
+        "tags": [
+          "insurance-broker-commission"
+        ],
+        "description": "Generar liquidación de comisión de broker. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/terminology/code-systems": {
       "post": {
         "operationId": "TerminologyCodeSystemsController_createCodeSystem",
@@ -29862,1415 +31271,6 @@
         "description": "Consultar el estado de un caso propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/insurance-carriers": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createCarrier",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCarrierDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de aseguradora (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de aseguradora (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-carriers/{id}/products": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createProduct",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InsuranceCreateProductDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de producto de aseguradora (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de producto de aseguradora (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-products/{id}/plans": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createPlan",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePlanDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de plan (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-plans/{id}/benefits": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createBenefit",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePlanBenefitDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de beneficio de plan (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de beneficio de plan (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/provider-networks": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createProviderNetwork",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateProviderNetworkDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de red de prestadores (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de red de prestadores (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/provider-networks/{id}/memberships": {
-      "post": {
-        "operationId": "InsuranceBackboneController_addMembership",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InsuranceCreateMembershipDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de membresía de prestador en la red",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de membresía de prestador en la red. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-brokers": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createBroker",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBrokerDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de broker (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de broker (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-brokers/{id}/agreements": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createAgreement",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBrokerAgreementDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de acuerdo broker–aseguradora (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de acuerdo broker–aseguradora (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/employer-groups": {
-      "post": {
-        "operationId": "InsuranceBackboneController_createEmployerGroup",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateEmployerGroupDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de grupo empleador (soporte)",
-        "tags": [
-          "insurance-backbone"
-        ],
-        "description": "Alta de grupo empleador (soporte). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/patient-coverages": {
-      "post": {
-        "operationId": "CoverageController_enroll",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCoverageDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Registrar cobertura de paciente y dependientes",
-        "tags": [
-          "insurance-coverage"
-        ],
-        "description": "Registrar cobertura de paciente y dependientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/coverage-eligibility-requests": {
-      "post": {
-        "operationId": "CoverageController_requestEligibility",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateEligibilityRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Solicitar y resolver elegibilidad (270/271)",
-        "tags": [
-          "insurance-coverage"
-        ],
-        "description": "Solicitar y resolver elegibilidad (270/271). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/coordination-of-benefits": {
-      "post": {
-        "operationId": "CoverageController_determineCob",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCobDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Determinar coordinación de beneficios (COB)",
-        "tags": [
-          "insurance-coverage"
-        ],
-        "description": "Determinar coordinación de beneficios (COB). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/prior-authorization-requests": {
-      "post": {
-        "operationId": "PriorAuthController_submit",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePriorAuthRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Solicitar autorización previa con items",
-        "tags": [
-          "insurance-prior-auth"
-        ],
-        "description": "Solicitar autorización previa con items. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/prior-authorization-requests/{id}/determinations": {
-      "post": {
-        "operationId": "PriorAuthController_determine",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateDeterminationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Emitir determinación de autorización previa",
-        "tags": [
-          "insurance-prior-auth"
-        ],
-        "description": "Emitir determinación de autorización previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-claims": {
-      "post": {
-        "operationId": "ClaimsController_submit",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateClaimDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Enviar reclamo con líneas (837)",
-        "tags": [
-          "insurance-claims"
-        ],
-        "description": "Enviar reclamo con líneas (837). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-claims/{id}/adjudications": {
-      "post": {
-        "operationId": "ClaimsController_adjudicate",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAdjudicationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Adjudicar reclamo por línea (835)",
-        "tags": [
-          "insurance-claims"
-        ],
-        "description": "Adjudicar reclamo por línea (835). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-claims/{id}/eob": {
-      "post": {
-        "operationId": "ClaimsController_publishEob",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PublishEobDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Publicar Explicación de Beneficios (EOB)",
-        "tags": [
-          "insurance-claims"
-        ],
-        "description": "Publicar Explicación de Beneficios (EOB). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-claims/{id}/reversals": {
-      "post": {
-        "operationId": "ClaimsController_reverse",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReversalDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Registrar reversión de reclamo",
-        "tags": [
-          "insurance-claims"
-        ],
-        "description": "Registrar reversión de reclamo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/insurance-claims/{id}/disputes": {
-      "post": {
-        "operationId": "ClaimsController_openDispute",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateDisputeDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Abrir disputa sobre adjudicación",
-        "tags": [
-          "insurance-claims"
-        ],
-        "description": "Abrir disputa sobre adjudicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/claim-disputes/{id}/appeal-decisions": {
-      "post": {
-        "operationId": "AppealsController_decide",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAppealDecisionDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Emitir decisión de apelación (inmutable)",
-        "tags": [
-          "insurance-appeals"
-        ],
-        "description": "Emitir decisión de apelación (inmutable). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/reconciliation-batches": {
-      "post": {
-        "operationId": "ReconciliationController_createBatch",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReconciliationBatchDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Abrir lote de conciliación",
-        "tags": [
-          "insurance-reconciliation"
-        ],
-        "description": "Abrir lote de conciliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/reconciliation-batches/{id}/items": {
-      "post": {
-        "operationId": "ReconciliationController_addItem",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReconciliationItemDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Agregar ítem de conciliación al lote",
-        "tags": [
-          "insurance-reconciliation"
-        ],
-        "description": "Agregar ítem de conciliación al lote. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/broker-commission-statements": {
-      "post": {
-        "operationId": "BrokerCommissionController_generate",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCommissionStatementDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Generar liquidación de comisión de broker",
-        "tags": [
-          "insurance-broker-commission"
-        ],
-        "description": "Generar liquidación de comisión de broker. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
     "/integration/contracts": {
       "post": {
         "operationId": "IntegrationContractsController_createContract",
@@ -54407,6 +54407,52 @@
           "displayName"
         ]
       },
+      "PayerProfileDto": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string",
+            "description": "Código de la aseguradora",
+            "maxLength": 60
+          },
+          "regulatorIdentifier": {
+            "type": "string",
+            "description": "Identificador ante el regulador de seguros",
+            "maxLength": 100
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "carrierCode",
+          "regulatorIdentifier"
+        ]
+      },
+      "BrokerProfileDto": {
+        "type": "object",
+        "properties": {
+          "brokerCode": {
+            "type": "string",
+            "description": "Código del corredor",
+            "maxLength": 60
+          },
+          "licenseNumber": {
+            "type": "string",
+            "description": "Número de licencia de intermediación",
+            "maxLength": 100
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "brokerCode",
+          "licenseNumber"
+        ]
+      },
       "RegisterOrganizationDetailsDto": {
         "type": "object",
         "properties": {
@@ -54428,13 +54474,26 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`, PROVIDER país y jurisdicción).",
             "enum": [
               "PROVIDER",
               "PAYER",
               "BROKER"
-            ],
-            "default": "PROVIDER"
+            ]
+          },
+          "payer": {
+            "$ref": "#/components/schemas/PayerProfileDto"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerProfileDto"
+          },
+          "countryConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "format": "uuid"
           },
           "timeZone": {
             "type": "string",
@@ -54445,7 +54504,8 @@
         },
         "required": [
           "code",
-          "legalName"
+          "legalName",
+          "tenantType"
         ]
       },
       "RegisterOrganizationOwnerDto": {
@@ -55684,13 +55744,12 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`, PROVIDER país y jurisdicción).",
             "enum": [
               "PROVIDER",
               "PAYER",
               "BROKER"
-            ],
-            "default": "PROVIDER"
+            ]
           },
           "tenantTypeConceptId": {
             "type": "string",
@@ -55711,12 +55770,27 @@
             "type": "string",
             "description": "Zona horaria IANA",
             "maxLength": 100
+          },
+          "payer": {
+            "$ref": "#/components/schemas/PayerProfileDto"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerProfileDto"
+          },
+          "countryConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
           "code",
           "legalName",
-          "ownerUserId"
+          "ownerUserId",
+          "tenantType"
         ]
       },
       "VerifyTenantDto": {
@@ -55767,7 +55841,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización (por defecto hereda el del padre)",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`, PROVIDER país y jurisdicción).",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -55788,12 +55862,27 @@
             "type": "string",
             "description": "Región de residencia de datos (por defecto hereda la del padre)",
             "format": "uuid"
+          },
+          "payer": {
+            "$ref": "#/components/schemas/PayerProfileDto"
+          },
+          "broker": {
+            "$ref": "#/components/schemas/BrokerProfileDto"
+          },
+          "countryConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
           "code",
           "legalName",
-          "adminUserId"
+          "adminUserId",
+          "tenantType"
         ]
       },
       "CreateBranchDto": {
@@ -55935,6 +56024,741 @@
             ]
           }
         }
+      },
+      "CreateCarrierDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Tenant propietario"
+          },
+          "carrierCode": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "legalName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "regulatorIdentifier": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "tenantId",
+          "carrierCode",
+          "legalName"
+        ]
+      },
+      "InsuranceCreateProductDto": {
+        "type": "object",
+        "properties": {
+          "productCode": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "productCode",
+          "name"
+        ]
+      },
+      "CreatePlanDto": {
+        "type": "object",
+        "properties": {
+          "planCode": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date",
+            "description": "Vigencia desde (ISO date)"
+          }
+        },
+        "required": [
+          "planCode",
+          "name"
+        ]
+      },
+      "CreatePlanBenefitDto": {
+        "type": "object",
+        "properties": {
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "requiresPriorAuthorization": {
+            "type": "boolean",
+            "description": "Requiere autorización previa"
+          },
+          "coveragePercent": {
+            "type": "string",
+            "description": "Porcentaje de cobertura",
+            "example": "80"
+          }
+        }
+      },
+      "CreateProviderNetworkDto": {
+        "type": "object",
+        "properties": {
+          "insuranceCarrierId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Aseguradora dueña de la red"
+          },
+          "networkCode": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "insuranceCarrierId",
+          "networkCode",
+          "name"
+        ]
+      },
+      "InsuranceCreateMembershipDto": {
+        "type": "object",
+        "properties": {
+          "providerEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entidad prestadora (práctica/hospital/etc.)"
+          },
+          "practiceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Referencia a práctica si aplica"
+          },
+          "contractReference": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "providerEntityId"
+        ]
+      },
+      "CreateBrokerDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brokerCode": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "legalName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "licenseNumber": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "tenantId",
+          "brokerCode",
+          "legalName"
+        ]
+      },
+      "CreateBrokerAgreementDto": {
+        "type": "object",
+        "properties": {
+          "insuranceCarrierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agreementCode": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "insuranceCarrierId",
+          "agreementCode"
+        ]
+      },
+      "CreateEmployerGroupDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "groupCode": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "legalName": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "tenantId",
+          "groupCode",
+          "legalName"
+        ]
+      },
+      "CoverageDependentDto": {
+        "type": "object",
+        "properties": {
+          "dependentPatientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "relationship": {
+            "type": "string",
+            "enum": [
+              "SPOUSE",
+              "CHILD"
+            ]
+          }
+        },
+        "required": [
+          "dependentPatientProfileId"
+        ]
+      },
+      "CreateCoverageDto": {
+        "type": "object",
+        "properties": {
+          "insurancePlanId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Plan de seguro afiliado"
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Perfil del paciente/afiliado"
+          },
+          "memberIdentifier": {
+            "type": "string",
+            "maxLength": 80,
+            "description": "Identificador de afiliado (member id)"
+          },
+          "policyIdentifier": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "coverageOrder": {
+            "type": "number",
+            "description": "Orden de coordinación (1=primaria)"
+          },
+          "insuranceBrokerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Broker que intermedia (vincula broker_clients)"
+          },
+          "dependents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoverageDependentDto"
+            }
+          }
+        },
+        "required": [
+          "insurancePlanId",
+          "patientProfileId",
+          "memberIdentifier"
+        ]
+      },
+      "CreateEligibilityRequestDto": {
+        "type": "object",
+        "properties": {
+          "patientCoverageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "benefitSummary": {
+            "type": "object",
+            "description": "Resumen de beneficios recibido del pagador"
+          }
+        },
+        "required": [
+          "patientCoverageId"
+        ]
+      },
+      "CreateCobDto": {
+        "type": "object",
+        "properties": {
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primaryPatientCoverageId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cobertura primaria"
+          },
+          "secondaryPatientCoverageId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cobertura secundaria"
+          },
+          "tertiaryPatientCoverageId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cobertura terciaria"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "patientProfileId",
+          "primaryPatientCoverageId"
+        ]
+      },
+      "PriorAuthItemDto": {
+        "type": "object",
+        "properties": {
+          "serviceConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Servicio solicitado"
+          },
+          "requestedQuantity": {
+            "type": "string",
+            "description": "Cantidad solicitada",
+            "example": "1"
+          },
+          "requestedAmount": {
+            "type": "string",
+            "description": "Monto solicitado",
+            "example": "250.00"
+          }
+        }
+      },
+      "CreatePriorAuthRequestDto": {
+        "type": "object",
+        "properties": {
+          "patientCoverageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestingProviderEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entidad prestadora solicitante"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "items": {
+            "description": "1..N ítems solicitados",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriorAuthItemDto"
+            }
+          }
+        },
+        "required": [
+          "patientCoverageId",
+          "requestingProviderEntityId",
+          "items"
+        ]
+      },
+      "CreateDeterminationDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "DENIED",
+              "PARTIAL"
+            ]
+          },
+          "approvedQuantity": {
+            "type": "string",
+            "description": "Cantidad aprobada"
+          },
+          "approvedAmount": {
+            "type": "string",
+            "description": "Monto aprobado"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "ClaimLineDto": {
+        "type": "object",
+        "properties": {
+          "lineSequence": {
+            "type": "number",
+            "description": "Secuencia única dentro del reclamo",
+            "example": 1
+          },
+          "serviceConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "example": "1"
+          },
+          "billedAmount": {
+            "type": "string",
+            "description": "Monto facturado",
+            "example": "100.00"
+          },
+          "patientResponsibilityAmount": {
+            "type": "string",
+            "description": "Responsabilidad del paciente",
+            "example": "20.00"
+          }
+        },
+        "required": [
+          "lineSequence",
+          "billedAmount"
+        ]
+      },
+      "CreateClaimDto": {
+        "type": "object",
+        "properties": {
+          "insuranceCarrierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientCoverageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "billingProviderEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entidad facturadora"
+          },
+          "claimIdentifier": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "priorAuthorizationRequestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Autorización previa vinculada"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "lines": {
+            "description": "1..N líneas",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClaimLineDto"
+            }
+          }
+        },
+        "required": [
+          "insuranceCarrierId",
+          "patientCoverageId",
+          "billingProviderEntityId",
+          "claimIdentifier",
+          "lines"
+        ]
+      },
+      "LineAdjudicationDto": {
+        "type": "object",
+        "properties": {
+          "insuranceClaimLineId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Línea del reclamo adjudicada"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "DENIED"
+            ]
+          },
+          "approvedAmount": {
+            "type": "string",
+            "example": "80.00"
+          },
+          "patientAmount": {
+            "type": "string",
+            "example": "20.00"
+          },
+          "deniedAmount": {
+            "type": "string",
+            "example": "0.00"
+          }
+        },
+        "required": [
+          "insuranceClaimLineId",
+          "decision"
+        ]
+      },
+      "CreateAdjudicationDto": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "DENIED"
+            ]
+          },
+          "totalApprovedAmount": {
+            "type": "string",
+            "example": "80.00"
+          },
+          "totalPatientAmount": {
+            "type": "string",
+            "example": "20.00"
+          },
+          "totalDeniedAmount": {
+            "type": "string",
+            "example": "0.00"
+          },
+          "lineAdjudications": {
+            "description": "Una por línea del reclamo",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LineAdjudicationDto"
+            }
+          }
+        },
+        "required": [
+          "outcome",
+          "lineAdjudications"
+        ]
+      },
+      "PublishEobDto": {
+        "type": "object",
+        "properties": {
+          "documentRecordId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Documento generado (object storage)"
+          }
+        }
+      },
+      "CreateReversalDto": {
+        "type": "object",
+        "properties": {
+          "reversedAdjudicationVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Versión de adjudicación a revertir"
+          },
+          "reversalAmount": {
+            "type": "string",
+            "example": "80.00"
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "reversedAdjudicationVersionId"
+        ]
+      },
+      "CreateDisputeDto": {
+        "type": "object",
+        "properties": {
+          "claimAdjudicationVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Versión de adjudicación disputada"
+          },
+          "initiatedBy": {
+            "type": "string",
+            "enum": [
+              "PROVIDER",
+              "PATIENT"
+            ],
+            "description": "Parte que inicia"
+          },
+          "initiatedByEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "filingDeadline": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha límite de presentación"
+          }
+        },
+        "required": [
+          "initiatedBy"
+        ]
+      },
+      "CreateAppealDecisionDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "UPHELD",
+              "OVERTURNED"
+            ]
+          },
+          "adjustedAmount": {
+            "type": "string",
+            "description": "Monto ajustado tras la decisión",
+            "example": "15.00"
+          },
+          "rationaleText": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "CreateReconciliationBatchDto": {
+        "type": "object",
+        "properties": {
+          "insuranceCarrierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entidad prestadora conciliada"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "insuranceCarrierId",
+          "providerEntityId",
+          "periodStart",
+          "periodEnd"
+        ]
+      },
+      "CreateReconciliationItemDto": {
+        "type": "object",
+        "properties": {
+          "insuranceClaimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimAdjudicationVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Versión exacta de adjudicación liquidada"
+          },
+          "expectedAmount": {
+            "type": "string",
+            "description": "Monto esperado",
+            "example": "80.00"
+          },
+          "acceptedAmount": {
+            "type": "string",
+            "description": "Monto aceptado",
+            "example": "80.00"
+          }
+        },
+        "required": [
+          "insuranceClaimId",
+          "claimAdjudicationVersionId"
+        ]
+      },
+      "CreateCommissionStatementDto": {
+        "type": "object",
+        "properties": {
+          "insuranceBrokerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brokerCarrierAgreementId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Acuerdo broker–aseguradora"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "grossPremiumAmount": {
+            "type": "string",
+            "description": "Prima bruta del periodo",
+            "example": "10000.00"
+          },
+          "commissionAmount": {
+            "type": "string",
+            "description": "Comisión calculada",
+            "example": "500.00"
+          }
+        },
+        "required": [
+          "insuranceBrokerId",
+          "brokerCarrierAgreementId",
+          "periodStart",
+          "periodEnd"
+        ]
       },
       "CreateCodeSystemDto": {
         "type": "object",
@@ -72258,741 +73082,6 @@
         },
         "required": [
           "evidenceFileId"
-        ]
-      },
-      "CreateCarrierDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Tenant propietario"
-          },
-          "carrierCode": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "legalName": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "regulatorIdentifier": {
-            "type": "string",
-            "maxLength": 80
-          }
-        },
-        "required": [
-          "tenantId",
-          "carrierCode",
-          "legalName"
-        ]
-      },
-      "InsuranceCreateProductDto": {
-        "type": "object",
-        "properties": {
-          "productCode": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 200
-          }
-        },
-        "required": [
-          "productCode",
-          "name"
-        ]
-      },
-      "CreatePlanDto": {
-        "type": "object",
-        "properties": {
-          "planCode": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date",
-            "description": "Vigencia desde (ISO date)"
-          }
-        },
-        "required": [
-          "planCode",
-          "name"
-        ]
-      },
-      "CreatePlanBenefitDto": {
-        "type": "object",
-        "properties": {
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "requiresPriorAuthorization": {
-            "type": "boolean",
-            "description": "Requiere autorización previa"
-          },
-          "coveragePercent": {
-            "type": "string",
-            "description": "Porcentaje de cobertura",
-            "example": "80"
-          }
-        }
-      },
-      "CreateProviderNetworkDto": {
-        "type": "object",
-        "properties": {
-          "insuranceCarrierId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Aseguradora dueña de la red"
-          },
-          "networkCode": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "insuranceCarrierId",
-          "networkCode",
-          "name"
-        ]
-      },
-      "InsuranceCreateMembershipDto": {
-        "type": "object",
-        "properties": {
-          "providerEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Entidad prestadora (práctica/hospital/etc.)"
-          },
-          "practiceId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Referencia a práctica si aplica"
-          },
-          "contractReference": {
-            "type": "string",
-            "maxLength": 120
-          }
-        },
-        "required": [
-          "providerEntityId"
-        ]
-      },
-      "CreateBrokerDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "brokerCode": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "legalName": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "licenseNumber": {
-            "type": "string",
-            "maxLength": 80
-          }
-        },
-        "required": [
-          "tenantId",
-          "brokerCode",
-          "legalName"
-        ]
-      },
-      "CreateBrokerAgreementDto": {
-        "type": "object",
-        "properties": {
-          "insuranceCarrierId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "agreementCode": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "insuranceCarrierId",
-          "agreementCode"
-        ]
-      },
-      "CreateEmployerGroupDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "groupCode": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "legalName": {
-            "type": "string",
-            "maxLength": 200
-          }
-        },
-        "required": [
-          "tenantId",
-          "groupCode",
-          "legalName"
-        ]
-      },
-      "CoverageDependentDto": {
-        "type": "object",
-        "properties": {
-          "dependentPatientProfileId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "relationship": {
-            "type": "string",
-            "enum": [
-              "SPOUSE",
-              "CHILD"
-            ]
-          }
-        },
-        "required": [
-          "dependentPatientProfileId"
-        ]
-      },
-      "CreateCoverageDto": {
-        "type": "object",
-        "properties": {
-          "insurancePlanId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Plan de seguro afiliado"
-          },
-          "patientProfileId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Perfil del paciente/afiliado"
-          },
-          "memberIdentifier": {
-            "type": "string",
-            "maxLength": 80,
-            "description": "Identificador de afiliado (member id)"
-          },
-          "policyIdentifier": {
-            "type": "string",
-            "maxLength": 80
-          },
-          "coverageOrder": {
-            "type": "number",
-            "description": "Orden de coordinación (1=primaria)"
-          },
-          "insuranceBrokerId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Broker que intermedia (vincula broker_clients)"
-          },
-          "dependents": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CoverageDependentDto"
-            }
-          }
-        },
-        "required": [
-          "insurancePlanId",
-          "patientProfileId",
-          "memberIdentifier"
-        ]
-      },
-      "CreateEligibilityRequestDto": {
-        "type": "object",
-        "properties": {
-          "patientCoverageId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "serviceDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "maxLength": 120
-          },
-          "benefitSummary": {
-            "type": "object",
-            "description": "Resumen de beneficios recibido del pagador"
-          }
-        },
-        "required": [
-          "patientCoverageId"
-        ]
-      },
-      "CreateCobDto": {
-        "type": "object",
-        "properties": {
-          "patientProfileId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "primaryPatientCoverageId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Cobertura primaria"
-          },
-          "secondaryPatientCoverageId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Cobertura secundaria"
-          },
-          "tertiaryPatientCoverageId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Cobertura terciaria"
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "patientProfileId",
-          "primaryPatientCoverageId"
-        ]
-      },
-      "PriorAuthItemDto": {
-        "type": "object",
-        "properties": {
-          "serviceConceptId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Servicio solicitado"
-          },
-          "requestedQuantity": {
-            "type": "string",
-            "description": "Cantidad solicitada",
-            "example": "1"
-          },
-          "requestedAmount": {
-            "type": "string",
-            "description": "Monto solicitado",
-            "example": "250.00"
-          }
-        }
-      },
-      "CreatePriorAuthRequestDto": {
-        "type": "object",
-        "properties": {
-          "patientCoverageId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestingProviderEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Entidad prestadora solicitante"
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "maxLength": 120
-          },
-          "items": {
-            "description": "1..N ítems solicitados",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PriorAuthItemDto"
-            }
-          }
-        },
-        "required": [
-          "patientCoverageId",
-          "requestingProviderEntityId",
-          "items"
-        ]
-      },
-      "CreateDeterminationDto": {
-        "type": "object",
-        "properties": {
-          "decision": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "DENIED",
-              "PARTIAL"
-            ]
-          },
-          "approvedQuantity": {
-            "type": "string",
-            "description": "Cantidad aprobada"
-          },
-          "approvedAmount": {
-            "type": "string",
-            "description": "Monto aprobado"
-          },
-          "validFrom": {
-            "type": "string",
-            "format": "date"
-          },
-          "validTo": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "decision"
-        ]
-      },
-      "ClaimLineDto": {
-        "type": "object",
-        "properties": {
-          "lineSequence": {
-            "type": "number",
-            "description": "Secuencia única dentro del reclamo",
-            "example": 1
-          },
-          "serviceConceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "type": "string",
-            "example": "1"
-          },
-          "billedAmount": {
-            "type": "string",
-            "description": "Monto facturado",
-            "example": "100.00"
-          },
-          "patientResponsibilityAmount": {
-            "type": "string",
-            "description": "Responsabilidad del paciente",
-            "example": "20.00"
-          }
-        },
-        "required": [
-          "lineSequence",
-          "billedAmount"
-        ]
-      },
-      "CreateClaimDto": {
-        "type": "object",
-        "properties": {
-          "insuranceCarrierId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "patientCoverageId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "billingProviderEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Entidad facturadora"
-          },
-          "claimIdentifier": {
-            "type": "string",
-            "maxLength": 80
-          },
-          "priorAuthorizationRequestId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Autorización previa vinculada"
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "maxLength": 120
-          },
-          "lines": {
-            "description": "1..N líneas",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClaimLineDto"
-            }
-          }
-        },
-        "required": [
-          "insuranceCarrierId",
-          "patientCoverageId",
-          "billingProviderEntityId",
-          "claimIdentifier",
-          "lines"
-        ]
-      },
-      "LineAdjudicationDto": {
-        "type": "object",
-        "properties": {
-          "insuranceClaimLineId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Línea del reclamo adjudicada"
-          },
-          "decision": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "DENIED"
-            ]
-          },
-          "approvedAmount": {
-            "type": "string",
-            "example": "80.00"
-          },
-          "patientAmount": {
-            "type": "string",
-            "example": "20.00"
-          },
-          "deniedAmount": {
-            "type": "string",
-            "example": "0.00"
-          }
-        },
-        "required": [
-          "insuranceClaimLineId",
-          "decision"
-        ]
-      },
-      "CreateAdjudicationDto": {
-        "type": "object",
-        "properties": {
-          "outcome": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "DENIED"
-            ]
-          },
-          "totalApprovedAmount": {
-            "type": "string",
-            "example": "80.00"
-          },
-          "totalPatientAmount": {
-            "type": "string",
-            "example": "20.00"
-          },
-          "totalDeniedAmount": {
-            "type": "string",
-            "example": "0.00"
-          },
-          "lineAdjudications": {
-            "description": "Una por línea del reclamo",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LineAdjudicationDto"
-            }
-          }
-        },
-        "required": [
-          "outcome",
-          "lineAdjudications"
-        ]
-      },
-      "PublishEobDto": {
-        "type": "object",
-        "properties": {
-          "documentRecordId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Documento generado (object storage)"
-          }
-        }
-      },
-      "CreateReversalDto": {
-        "type": "object",
-        "properties": {
-          "reversedAdjudicationVersionId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Versión de adjudicación a revertir"
-          },
-          "reversalAmount": {
-            "type": "string",
-            "example": "80.00"
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "maxLength": 120
-          }
-        },
-        "required": [
-          "reversedAdjudicationVersionId"
-        ]
-      },
-      "CreateDisputeDto": {
-        "type": "object",
-        "properties": {
-          "claimAdjudicationVersionId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Versión de adjudicación disputada"
-          },
-          "initiatedBy": {
-            "type": "string",
-            "enum": [
-              "PROVIDER",
-              "PATIENT"
-            ],
-            "description": "Parte que inicia"
-          },
-          "initiatedByEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "filingDeadline": {
-            "type": "string",
-            "format": "date",
-            "description": "Fecha límite de presentación"
-          }
-        },
-        "required": [
-          "initiatedBy"
-        ]
-      },
-      "CreateAppealDecisionDto": {
-        "type": "object",
-        "properties": {
-          "decision": {
-            "type": "string",
-            "enum": [
-              "UPHELD",
-              "OVERTURNED"
-            ]
-          },
-          "adjustedAmount": {
-            "type": "string",
-            "description": "Monto ajustado tras la decisión",
-            "example": "15.00"
-          },
-          "rationaleText": {
-            "type": "string",
-            "maxLength": 2000
-          }
-        },
-        "required": [
-          "decision"
-        ]
-      },
-      "CreateReconciliationBatchDto": {
-        "type": "object",
-        "properties": {
-          "insuranceCarrierId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "providerEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Entidad prestadora conciliada"
-          },
-          "periodStart": {
-            "type": "string",
-            "format": "date"
-          },
-          "periodEnd": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "insuranceCarrierId",
-          "providerEntityId",
-          "periodStart",
-          "periodEnd"
-        ]
-      },
-      "CreateReconciliationItemDto": {
-        "type": "object",
-        "properties": {
-          "insuranceClaimId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "claimAdjudicationVersionId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Versión exacta de adjudicación liquidada"
-          },
-          "expectedAmount": {
-            "type": "string",
-            "description": "Monto esperado",
-            "example": "80.00"
-          },
-          "acceptedAmount": {
-            "type": "string",
-            "description": "Monto aceptado",
-            "example": "80.00"
-          }
-        },
-        "required": [
-          "insuranceClaimId",
-          "claimAdjudicationVersionId"
-        ]
-      },
-      "CreateCommissionStatementDto": {
-        "type": "object",
-        "properties": {
-          "insuranceBrokerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "brokerCarrierAgreementId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Acuerdo broker–aseguradora"
-          },
-          "periodStart": {
-            "type": "string",
-            "format": "date"
-          },
-          "periodEnd": {
-            "type": "string",
-            "format": "date"
-          },
-          "grossPremiumAmount": {
-            "type": "string",
-            "description": "Prima bruta del periodo",
-            "example": "10000.00"
-          },
-          "commissionAmount": {
-            "type": "string",
-            "description": "Comisión calculada",
-            "example": "500.00"
-          }
-        },
-        "required": [
-          "insuranceBrokerId",
-          "brokerCarrierAgreementId",
-          "periodStart",
-          "periodEnd"
         ]
       },
       "IntegrationContractsCreateContractDto": {

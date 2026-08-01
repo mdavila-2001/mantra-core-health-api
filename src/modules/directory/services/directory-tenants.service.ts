@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { TenantTypeProfileService } from './tenant-type-profile.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -9,7 +10,11 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { DIR } from '../directory.concepts';
+import {
+  DIR,
+  TENANT_TYPE_CONCEPT_BY_CODE,
+  type TenantTypeCode,
+} from '../directory.concepts';
 import {
   BranchesRepository,
   TenantMembershipsRepository,
@@ -24,6 +29,27 @@ import {
   TenantResponseDto,
   VerifyTenantDto,
 } from '../dto';
+
+/**
+ * Resuelve el tipo de organización a su concept id.
+ *
+ * El código (`tenantType`) manda sobre el UUID crudo (`tenantTypeConceptId`),
+ * que queda como escotilla para tipos que un despliegue haya sembrado por su
+ * cuenta fuera del catálogo interno. Sin ninguno de los dos, el `fallback`.
+ *
+ * @param code - Código de tipo de organización, si el cliente lo declaró.
+ * @param conceptId - Concept id crudo, si el cliente lo declaró.
+ * @param fallback - Concepto a usar cuando el cliente no declara ninguno.
+ * @returns El `tenant_type_concept_id` a persistir.
+ */
+function resolveTenantType(
+  code: TenantTypeCode | undefined,
+  conceptId: string | undefined,
+  fallback: string,
+): string {
+  if (code) return TENANT_TYPE_CONCEPT_BY_CODE[code];
+  return conceptId ?? fallback;
+}
 
 /**
  * Casos de uso de tenants: aprovisionamiento raíz (UC-04-01), verificación /
@@ -50,6 +76,7 @@ export class DirectoryTenantsService {
     private readonly tenantsRepo: TenantsRepository,
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly branchesRepo: BranchesRepository,
+    private readonly typeProfile: TenantTypeProfileService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryTenantsService.name);
@@ -76,12 +103,21 @@ export class DirectoryTenantsService {
         });
       }
 
+      // El tipo y sus datos se validan antes de escribir: un tenant tipado sin
+      // lo que su tipo exige es un alta a medias que alguien tendría que reparar.
+      this.typeProfile.assertProfileMatchesType(dto);
+
       const tenant = this.tenantsRepo.create(tx, {
         code: dto.code,
         legalName: dto.legalName,
         tradeName: dto.tradeName,
-        tenantTypeConceptId:
-          dto.tenantTypeConceptId ?? CONCEPTS.TENANT_TYPE_PROVIDER,
+        countryConceptId: dto.countryConceptId,
+        jurisdictionConceptId: dto.jurisdictionConceptId,
+        tenantTypeConceptId: resolveTenantType(
+          dto.tenantType,
+          dto.tenantTypeConceptId,
+          CONCEPTS.TENANT_TYPE_PROVIDER,
+        ),
         legalEntityTypeConceptId:
           dto.legalEntityTypeConceptId ?? CONCEPTS.LEGAL_ENTITY_COMPANY,
         statusConceptId: DIR.TENANT_PENDING,
@@ -92,6 +128,10 @@ export class DirectoryTenantsService {
       });
       // FK son columnas uuid: persistir el tenant antes de la membership hija.
       await tx.flush();
+
+      // La fila propia del tipo (aseguradora o corredor) va en esta misma
+      // transacción: un PAYER sin su carrier es un tipo que no se sostiene.
+      this.typeProfile.materializeProfile(tx, tenant.id, dto, actor.id);
 
       this.membershipsRepo.create(tx, {
         userId: dto.ownerUserId,
@@ -187,11 +227,18 @@ export class DirectoryTenantsService {
           code: dto.code,
         });
 
+      this.typeProfile.assertProfileMatchesType(dto);
+
       const child = this.tenantsRepo.create(tx, {
         code: dto.code,
         legalName: dto.legalName,
-        tenantTypeConceptId:
-          dto.tenantTypeConceptId ?? parent.tenantTypeConceptId,
+        countryConceptId: dto.countryConceptId,
+        jurisdictionConceptId: dto.jurisdictionConceptId,
+        tenantTypeConceptId: resolveTenantType(
+          dto.tenantType,
+          dto.tenantTypeConceptId,
+          parent.tenantTypeConceptId,
+        ),
         legalEntityTypeConceptId:
           dto.legalEntityTypeConceptId ?? parent.legalEntityTypeConceptId,
         statusConceptId: CONCEPTS.TENANT_ACTIVE,
@@ -203,6 +250,8 @@ export class DirectoryTenantsService {
         actorUserId: actor.id,
       });
       await tx.flush();
+
+      this.typeProfile.materializeProfile(tx, child.id, dto, actor.id);
 
       this.membershipsRepo.create(tx, {
         userId: dto.adminUserId,

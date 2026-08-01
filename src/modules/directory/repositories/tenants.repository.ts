@@ -26,6 +26,15 @@ export interface CreateTenantData {
    */
   legalEntityTypeConceptId: string;
   /**
+   * País de la organización. Obligatorio para los tenants de tipo `PROVIDER`,
+   * que es lo que determina bajo qué regulador prestan atención.
+   */
+  countryConceptId?: string;
+  /**
+   * Jurisdicción de la organización. Obligatoria para `PROVIDER`.
+   */
+  jurisdictionConceptId?: string;
+  /**
    * Identificador asociado a status concept.
    */
   statusConceptId: string;
@@ -77,6 +86,8 @@ export class TenantsRepository {
         tradeName: data.tradeName,
         tenantTypeConceptId: data.tenantTypeConceptId,
         legalEntityTypeConceptId: data.legalEntityTypeConceptId,
+        countryConceptId: data.countryConceptId,
+        jurisdictionConceptId: data.jurisdictionConceptId,
         statusConceptId: data.statusConceptId,
         verificationStatusConceptId: data.verificationStatusConceptId,
         dataResidencyRegionConceptId: data.dataResidencyRegionConceptId,
