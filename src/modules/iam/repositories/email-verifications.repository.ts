@@ -59,4 +59,33 @@ export class EmailVerificationsRepository {
   ): Promise<EmailVerifications | null> {
     return em.findOne(EmailVerifications, { tokenHash });
   }
+
+  /**
+   * Última dirección de correo registrada para el usuario, o `null` si no
+   * declaró ninguna.
+   *
+   * Es la forma de saber a dónde escribirle a alguien que **entra con su
+   * documento**: su `external_subject` es la cédula, no un correo. Esta tabla es
+   * el único sitio que relaciona `user_id` con una dirección de forma directa;
+   * en `common.contact_points` el correo cuelga de la persona o del paciente
+   * según el flujo que creó la cuenta, así que no hay una consulta única.
+   *
+   * Devuelve la más reciente aunque no esté verificada: no poder probar que una
+   * dirección es alcanzable no es motivo para no intentar escribirle a alguien
+   * que pidió recuperar su cuenta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Usuario cuyo correo se busca.
+   * @returns La verificación más reciente, con su dirección; `null` si no hay.
+   */
+  findLatestByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<EmailVerifications | null> {
+    return em.findOne(
+      EmailVerifications,
+      { userId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
 }

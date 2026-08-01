@@ -23,6 +23,7 @@ function build() {
   const conceptsRepo = {
     findExistingCodes: jest.fn(),
     create: jest.fn(),
+    findPromotableByVersion: jest.fn(() => Promise.resolve([])),
   } as any;
   const logger = {
     setContext: jest.fn(),
@@ -134,6 +135,54 @@ describe('CodeSystemVersionsService', () => {
 
       await expect(service.publishVersion('v-1', actor)).rejects.toBeInstanceOf(
         ConflictException,
+      );
+    });
+
+    it('activa también los conceptos de la versión, o toda expansión saldría vacía', async () => {
+      const { service, versionsRepo, conceptsRepo } = build();
+      versionsRepo.findById.mockResolvedValue({
+        id: 'v-1',
+        stateConceptId: CONCEPTS.TERM_DRAFT,
+      });
+      const concepts = [
+        { id: 'c-1', stateConceptId: CONCEPTS.TERM_DRAFT },
+        // Sin estado: importado antes de que el alta fijara TERM_DRAFT.
+        { id: 'c-2', stateConceptId: undefined },
+      ];
+      conceptsRepo.findPromotableByVersion.mockResolvedValue(concepts);
+
+      await service.publishVersion('v-1', actor);
+
+      expect(conceptsRepo.findPromotableByVersion).toHaveBeenCalledWith(
+        expect.anything(),
+        'v-1',
+        CONCEPTS.TERM_DRAFT,
+      );
+      expect(concepts.map((c) => c.stateConceptId)).toEqual([
+        CONCEPTS.TERM_ACTIVE,
+        CONCEPTS.TERM_ACTIVE,
+      ]);
+    });
+  });
+
+  describe('importConcepts', () => {
+    it('crea los conceptos en borrador, no sin estado', async () => {
+      const { service, versionsRepo, conceptsRepo } = build();
+      versionsRepo.findById.mockResolvedValue({
+        id: 'v-1',
+        stateConceptId: CONCEPTS.TERM_DRAFT,
+      });
+      conceptsRepo.findExistingCodes.mockResolvedValue(new Set());
+
+      await service.importConcepts(
+        'v-1',
+        { concepts: [{ code: 'A', display: 'a' }] },
+        actor,
+      );
+
+      expect(conceptsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ stateConceptId: CONCEPTS.TERM_DRAFT }),
       );
     });
   });

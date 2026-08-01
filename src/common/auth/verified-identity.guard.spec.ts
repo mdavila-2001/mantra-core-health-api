@@ -1,7 +1,8 @@
 import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
-import { ForbiddenException } from '@nestjs/common';
+import { ErrorCode } from '../errors/error-codes';
+import { IdentityVerificationRequiredException } from '../errors/domain.exception';
 import { VerifiedIdentityGuard } from './verified-identity.guard';
 
 /** Contexto de ejecución HTTP mínimo con el usuario ya autenticado. */
@@ -53,18 +54,18 @@ describe('VerifiedIdentityGuard', () => {
       .mockResolvedValueOnce({ personId: 'person-1' })
       .mockResolvedValueOnce(null);
 
-    await expect(
-      d.guard.canActivate(contextFor(actor)),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(d.guard.canActivate(contextFor(actor))).rejects.toBeInstanceOf(
+      IdentityVerificationRequiredException,
+    );
   });
 
   it('refuses an account with no linked person', async () => {
     const d = build(true);
     d.forked.findOne.mockResolvedValueOnce(null);
 
-    await expect(
-      d.guard.canActivate(contextFor(actor)),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(d.guard.canActivate(contextFor(actor))).rejects.toBeInstanceOf(
+      IdentityVerificationRequiredException,
+    );
   });
 
   it('refuses when there is no authenticated user at all', async () => {
@@ -72,7 +73,7 @@ describe('VerifiedIdentityGuard', () => {
 
     await expect(
       d.guard.canActivate(contextFor(undefined)),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    ).rejects.toBeInstanceOf(IdentityVerificationRequiredException);
   });
 
   it('only accepts an assertion that is neither revoked nor expired', async () => {
@@ -92,5 +93,34 @@ describe('VerifiedIdentityGuard', () => {
       { expiresAt: null },
       { expiresAt: { $gt: expect.any(Date) } },
     ]);
+  });
+
+  it('rechaza con un código estable, no con el FORBIDDEN genérico de rol', async () => {
+    const d = build(true);
+    d.forked.findOne
+      .mockResolvedValueOnce({ personId: 'person-1' })
+      .mockResolvedValueOnce(null);
+
+    // El cliente ofrece el flujo de verificación en este caso y no en el de rol
+    // insuficiente. Separarlos por el texto del mensaje ata la interfaz a una
+    // redacción que el catálogo de errores declara cambiable.
+    await expect(d.guard.canActivate(contextFor(actor))).rejects.toMatchObject({
+      code: ErrorCode.IDENTITY_VERIFICATION_REQUIRED,
+      details: { reason: 'identity-not-verified' },
+    });
+  });
+
+  it('cada subcaso trae su propio reason, sin leer el mensaje', async () => {
+    const sinPersona = build(true);
+    sinPersona.forked.findOne.mockResolvedValueOnce(null);
+
+    await expect(
+      sinPersona.guard.canActivate(contextFor(actor)),
+    ).rejects.toMatchObject({ details: { reason: 'no-person-linked' } });
+
+    const sinUsuario = build(true);
+    await expect(
+      sinUsuario.guard.canActivate(contextFor(undefined)),
+    ).rejects.toMatchObject({ details: { reason: 'no-authenticated-user' } });
   });
 });

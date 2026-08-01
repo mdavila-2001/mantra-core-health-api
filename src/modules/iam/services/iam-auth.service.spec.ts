@@ -49,6 +49,7 @@ function build() {
     create: mockFn(),
     findById: mockFn(),
     revokeById: mockFn().mockResolvedValue(1),
+    findActiveByTokenId: mockFn().mockResolvedValue(null),
     activeSessionIdsForUser: mockFn().mockResolvedValue([]),
     revokeAllActiveForUser: mockFn().mockResolvedValue(0),
     purgeExpired: mockFn().mockResolvedValue(0),
@@ -246,6 +247,66 @@ describe('IamAuthService', () => {
         d.tx,
         ['s1', 's2'],
       );
+    });
+  });
+
+  describe('logout (sesión actual)', () => {
+    it('revoca la sesión del token y su refresh token', async () => {
+      const d = build();
+      d.sessionsRepo.findActiveByTokenId.mockResolvedValue({
+        id: 's1',
+        userId: 'u1',
+      });
+
+      const res = await d.service.logout({
+        id: 'u1',
+        sessionId: 'sid-1',
+        roles: [],
+      });
+
+      expect(res).toEqual({ revoked: true });
+      expect(d.sessionsRepo.revokeById).toHaveBeenCalledWith(d.tx, 's1');
+      // El refresh token es lo que sobrevive al cierre si no se revoca.
+      expect(d.refreshRepo.revokeBySessionId).toHaveBeenCalledWith(d.tx, 's1');
+    });
+
+    it('no revoca la sesión de otro usuario aunque nombre su sid', async () => {
+      const d = build();
+      d.sessionsRepo.findActiveByTokenId.mockResolvedValue({
+        id: 's1',
+        userId: 'otro',
+      });
+
+      const res = await d.service.logout({
+        id: 'u1',
+        sessionId: 'sid-1',
+        roles: [],
+      });
+
+      expect(res).toEqual({ revoked: false });
+      expect(d.sessionsRepo.revokeById).not.toHaveBeenCalled();
+    });
+
+    it('cerrar una sesión ya cerrada no es un error', async () => {
+      const d = build();
+      d.sessionsRepo.findActiveByTokenId.mockResolvedValue(null);
+
+      const res = await d.service.logout({
+        id: 'u1',
+        sessionId: 'sid-1',
+        roles: [],
+      });
+
+      expect(res).toEqual({ revoked: false });
+    });
+
+    it('un token sin sid no tiene sesión que revocar', async () => {
+      const d = build();
+
+      const res = await d.service.logout({ id: 'u1', roles: [] });
+
+      expect(res).toEqual({ revoked: false });
+      expect(d.sessionsRepo.findActiveByTokenId).not.toHaveBeenCalled();
     });
   });
 

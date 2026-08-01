@@ -9,6 +9,19 @@ export class LogoutAllResultDto {
   revokedSessions!: number;
 }
 
+/** Resultado de `POST /iam/auth/logout`. */
+export class LogoutResultDto {
+  /**
+   * Si la sesión del token quedó revocada en esta llamada.
+   *
+   * `false` significa que ya no estaba activa —doble clic, o sesión cerrada
+   * desde otro dispositivo—, que no es un error: el resultado deseado ya se
+   * cumplía.
+   */
+  @ApiProperty({ description: 'Si la sesión quedó revocada en esta llamada' })
+  revoked!: boolean;
+}
+
 /** Resultado de `POST /iam/auth/sessions/purge` (UC-01-11). */
 export class PurgeResultDto {
   /**

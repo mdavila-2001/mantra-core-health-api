@@ -6,6 +6,7 @@ export * from './authentication_credentials.entity';
 export * from './devices.entity';
 export * from './email_verifications.entity';
 export * from './mfa_factors.entity';
+export * from './password_resets.entity';
 export * from './refresh_tokens.entity';
 export * from './security_events.entity';
 export * from './sessions.entity';

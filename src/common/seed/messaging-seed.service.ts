@@ -1,4 +1,4 @@
-import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MikroORM, type EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -33,7 +33,7 @@ export const MESSAGING_SEED = {
  * declara `adapter_code = 'WORKER_DISPATCHED'` en vez de nombrar a Gmail.
  */
 @Injectable()
-export class MessagingSeedService implements OnApplicationBootstrap {
+export class MessagingSeedService {
   /**
    * Inicializa la instancia y sus dependencias.
    *
@@ -45,19 +45,6 @@ export class MessagingSeedService implements OnApplicationBootstrap {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MessagingSeedService.name);
-  }
-
-  /**
-   * Ejecuta la operación on application bootstrap.
-   */
-  async onApplicationBootstrap(): Promise<void> {
-    try {
-      await this.run();
-    } catch (error) {
-      // Mismo criterio que el resto de seeds: no tumbar el arranque si el
-      // esquema aún no existe.
-      this.logger.warn({ err: error }, 'Seed de mensajería omitido');
-    }
   }
 
   /**
@@ -85,14 +72,19 @@ export class MessagingSeedService implements OnApplicationBootstrap {
     await em.flush();
 
     if (inserted > 0) {
-      this.logger.info({ inserted }, 'Canal de correo por defecto materializado');
+      this.logger.info(
+        { inserted },
+        'Canal de correo por defecto materializado',
+      );
     }
     return { inserted };
   }
 
   /** Canal lógico EMAIL. */
   private async seedChannel(em: EntityManager, now: Date): Promise<number> {
-    if (await em.findOne(MessageChannels, { id: MESSAGING_SEED.emailChannelId }))
+    if (
+      await em.findOne(MessageChannels, { id: MESSAGING_SEED.emailChannelId })
+    )
       return 0;
     em.create(
       MessageChannels,
@@ -114,7 +106,9 @@ export class MessagingSeedService implements OnApplicationBootstrap {
   /** Proveedor genérico cuyo envío efectivo resuelve el worker. */
   private async seedProvider(em: EntityManager, now: Date): Promise<number> {
     if (
-      await em.findOne(MessagingProviders, { id: MESSAGING_SEED.emailProviderId })
+      await em.findOne(MessagingProviders, {
+        id: MESSAGING_SEED.emailProviderId,
+      })
     )
       return 0;
     em.create(

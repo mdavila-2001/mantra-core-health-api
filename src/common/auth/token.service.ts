@@ -27,6 +27,17 @@ export interface IssuedTokens {
  * (firma, hashing del refresh, expiración) del resto de la capa IAM, de modo que
  * los servicios razonen sobre sesiones sin manipular secretos directamente.
  */
+/**
+ * Lo que el token lleva sólo para poder mostrarse. No participa de ninguna
+ * decisión de autorización: si faltara, el token seguiría siendo igual de válido.
+ */
+export interface TokenDisplayData {
+  /** Nombre para mostrar del usuario. */
+  name?: string;
+  /** Nombre de cada tenant, indexado por su id. */
+  tenantNames?: Record<string, string>;
+}
+
 @Injectable()
 export class TokenService {
   /**
@@ -41,18 +52,34 @@ export class TokenService {
    */
   constructor(private readonly jwt: JwtService) {}
 
-  /** Firma un access token para el sujeto y sesión indicados. */
+  /**
+   * Firma un access token para el sujeto y sesión indicados.
+   *
+   * @param userId - Sujeto del token.
+   * @param sessionTokenId - Sesión a la que queda anclado.
+   * @param roles - Roles globales, para no resolverlos por petición.
+   * @param tenants - Ids de los tenants con membresía activa.
+   * @param display - Datos de presentación (nombre, nombres de tenant); opcional
+   *   porque los procesos worker firman su propio token y no muestran nada.
+   */
   signAccessToken(
     userId: string,
     sessionTokenId: string,
     roles: string[],
     tenants: string[] = [],
+    display: TokenDisplayData = {},
   ): string {
     const payload: JwtPayload = {
       sub: userId,
       sid: sessionTokenId,
       roles,
       tenants,
+      // Se omiten si no hay nada que poner: un claim vacío ocupa espacio en cada
+      // cabecera de cada petición y no dice nada.
+      ...(display.name ? { name: display.name } : {}),
+      ...(display.tenantNames && Object.keys(display.tenantNames).length > 0
+        ? { tenantNames: display.tenantNames }
+        : {}),
       typ: 'access',
     };
     // `expiresIn` acepta un string tipo `15m`; el tipo de la librería exige un
@@ -97,6 +124,7 @@ export class TokenService {
     userId: string,
     roles: string[],
     tenants: string[] = [],
+    display: TokenDisplayData = {},
   ): IssuedTokens {
     const sessionTokenId = randomUUID();
     const { raw, hash } = this.issueRefreshToken();
@@ -104,7 +132,13 @@ export class TokenService {
       Date.now() + this.env.refreshTtlDays * 24 * 60 * 60 * 1000,
     );
     return {
-      accessToken: this.signAccessToken(userId, sessionTokenId, roles, tenants),
+      accessToken: this.signAccessToken(
+        userId,
+        sessionTokenId,
+        roles,
+        tenants,
+        display,
+      ),
       refreshToken: raw,
       refreshTokenHash: hash,
       sessionTokenId,

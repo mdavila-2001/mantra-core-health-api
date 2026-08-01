@@ -29,12 +29,14 @@ import {
   RefreshTokenDto,
   TokenResponseDto,
   LogoutAllResultDto,
+  LogoutResultDto,
   PurgeResultDto,
 } from '../dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
 // Lectura cross-dominio acotada al límite de autenticación: al emitir el token
 // se resuelven las membresías de tenant del sujeto para embeberlas como claim.
-import { TenantMemberships } from '../../directory/entities';
+import { TenantMemberships, Tenants } from '../../directory/entities';
+import { DIR } from '../../directory/directory.concepts';
 
 /**
  * Flujos de autenticación de sesión: login (UC-01-04), rotación de tokens con
@@ -85,6 +87,21 @@ export class IamAuthService {
   /**
    * Tenants de los que el usuario es miembro ACTIVO. Se embeben en el token para
    * que el `X-Tenant-Id` del request pueda validarse sin un lookup por petición.
+   *
+   * Se filtra por DOS conceptos a propósito. El correcto es
+   * `DIR.MEMBERSHIP_ACTIVE` (`directory:membership-status:active`), que es lo
+   * que escribe todo `directory` — provisión de tenant, sub-tenant, invitación
+   * de miembro. Este método, en cambio, filtraba sólo por
+   * `CONCEPTS.MEMBERSHIP_ACTIVE`, que pese al nombre es
+   * `promotions:membership-status:active`: la membresía de un programa de
+   * fidelización, otra tabla y otro dominio. El resultado era que el owner de
+   * una organización recién creada no veía su propio tenant en el claim y
+   * `TenantContextInterceptor` le respondía 403 "no pertenece a ningún tenant"
+   * en cada request posterior: la organización nacía inutilizable.
+   *
+   * El concepto de promotions se mantiene en el filtro porque las cuentas de
+   * pacientes auto-registradas antes de este cambio tienen su membresía con ese
+   * status; quitarlo las dejaría fuera de su tenant de un día para otro.
    */
   private async loadActiveTenantIds(
     em: EntityManager,
@@ -93,9 +110,38 @@ export class IamAuthService {
     const memberships =
       (await em.find(TenantMemberships, {
         userId,
-        statusConceptId: CONCEPTS.MEMBERSHIP_ACTIVE,
+        statusConceptId: {
+          $in: [DIR.MEMBERSHIP_ACTIVE, CONCEPTS.MEMBERSHIP_ACTIVE],
+        },
       })) ?? [];
     return [...new Set(memberships.map((m) => m.tenantId))];
+  }
+
+  /**
+   * Nombre de cada tenant, indexado por id, para los que el token va a declarar.
+   *
+   * Sólo sirve para mostrarlos: `tenants` sigue siendo la lista de uuid que
+   * valida el interceptor de tenant. Existe porque quien pertenece a más de una
+   * organización tenía que elegir entre identificadores, y elegir mal significa
+   * mirar los datos de otra institución.
+   *
+   * Prefiere el nombre comercial sobre el legal, que es el que la gente
+   * reconoce; el código queda de último recurso para que la lista nunca tenga
+   * una entrada en blanco.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantIds - Tenants con membresía activa.
+   * @returns Mapa `id -> nombre`.
+   */
+  private async loadTenantNames(
+    em: EntityManager,
+    tenantIds: string[],
+  ): Promise<Record<string, string>> {
+    if (tenantIds.length === 0) return {};
+    const rows = await em.find(Tenants, { id: { $in: tenantIds } });
+    return Object.fromEntries(
+      rows.map((row) => [row.id, row.tradeName || row.legalName || row.code]),
+    );
   }
 
   /**
@@ -191,6 +237,10 @@ export class IamAuthService {
         user.id,
         roles,
         tenants,
+        {
+          name: user.displayName,
+          tenantNames: await this.loadTenantNames(tx, tenants),
+        },
       );
 
       const session = this.sessionsRepo.create(tx, {
@@ -283,11 +333,18 @@ export class IamAuthService {
         activeRoles.map((r) => r.roleConceptId),
       );
       const tenants = await this.loadActiveTenantIds(tx, session.userId);
+      // El refresco tiene que repoblar lo mismo que el login: si no, al rotar el
+      // token la interfaz perdería el nombre y volvería a mostrar el uuid.
+      const holder = await this.usersRepo.findById(tx, session.userId);
       const accessToken = this.tokenService.signAccessToken(
         session.userId,
         session.tokenId,
         roles,
         tenants,
+        {
+          name: holder?.displayName,
+          tenantNames: await this.loadTenantNames(tx, tenants),
+        },
       );
       const { raw, hash } = this.tokenService.issueRefreshToken();
       const expiresAt = new Date(
@@ -342,6 +399,55 @@ export class IamAuthService {
       });
 
       return { revokedSessions };
+    });
+  }
+
+  /**
+   * Cierra **la sesión del token en uso**, no todas.
+   *
+   * Existía `logout-all` y no esto, así que cerrar sesión sólo borraba el estado
+   * del navegador: el refresh token seguía sirviendo hasta caducar —30 días— aun
+   * después de que la persona creyera haber salido. Un token robado sobrevivía
+   * al gesto que justamente busca cortarlo.
+   *
+   * Es idempotente: si la sesión ya no estaba activa devuelve `revoked: false`
+   * en vez de fallar. Cerrar algo ya cerrado no es un error.
+   *
+   * @param actor - Sujeto autenticado; su `sessionId` es el `sid` del token.
+   * @returns Si la sesión quedó revocada en esta llamada.
+   */
+  async logout(actor: AuthenticatedUser): Promise<LogoutResultDto> {
+    this.logger.info(
+      { operation: 'iam.auth.logout', userId: actor.id },
+      'Session logout',
+    );
+    // Un token sin `sid` no ancla ninguna sesión que revocar: es el caso de los
+    // tokens de sistema que firman los workers.
+    if (!actor.sessionId) return { revoked: false };
+
+    return this.em.transactional(async (tx) => {
+      const session = await this.sessionsRepo.findActiveByTokenId(
+        tx,
+        actor.sessionId as string,
+      );
+      // La sesión es de quien la cierra: sin esta comprobación, un token válido
+      // podría cerrar la sesión de otro usuario nombrando su `sid`.
+      if (!session || session.userId !== actor.id) return { revoked: false };
+
+      await this.sessionsRepo.revokeById(tx, session.id);
+      // El refresh token es lo que de verdad sobrevive: revocar la sesión sin
+      // revocarlo dejaría viva la llave que renueva el acceso.
+      await this.refreshRepo.revokeBySessionId(tx, session.id);
+
+      this.eventsRepo.record(tx, {
+        eventTypeConceptId: CONCEPTS.SEC_LOGOUT_ALL,
+        outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+        userId: actor.id,
+        recordedByUserId: actor.id,
+        detailJson: { scope: 'single-session' },
+      });
+
+      return { revoked: true };
     });
   }
 

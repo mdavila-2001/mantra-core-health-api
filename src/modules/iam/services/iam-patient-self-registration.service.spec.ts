@@ -43,7 +43,11 @@ describe('IamPatientSelfRegistrationService', () => {
     };
     const rolesRepo = { create: fn() };
     const eventsRepo = { record: fn() };
-    const emailVerificationsRepo = { create: fn(), findByTokenHash: fn() };
+    const emailVerificationsRepo = {
+      create: fn(),
+      findByTokenHash: fn(),
+      findLatestByUser: fn(),
+    };
     const personsRepo = { create: fn(() => ({ id: 'person-1' })) };
     const personProfilesRepo = { create: fn() };
     const patientProfilesRepo = {

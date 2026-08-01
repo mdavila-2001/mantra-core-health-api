@@ -1,4 +1,5 @@
 import { describe, it, expect, jest } from '@jest/globals';
+import { BadRequestException } from '@nestjs/common';
 import { ValueSetsService } from './value-sets.service';
 import {
   CONCEPTS,
@@ -30,9 +31,13 @@ function build() {
     findRulesByVersion: jest.fn(() => Promise.resolve([])),
     deleteMembersByVersion: jest.fn(() => Promise.resolve(0)),
     createMember: jest.fn(),
+    findDefaultVersion: jest.fn(),
+    findVersionById: jest.fn(),
+    findMembersPage: jest.fn(() => Promise.resolve([])),
   } as any;
   const conceptsRepo = {
     findByVersion: jest.fn(() => Promise.resolve([])),
+    findByIds: jest.fn(() => Promise.resolve(new Map())),
   } as any;
   const versionsRepo = { findDefaultActiveVersion: jest.fn() } as any;
   const relationshipsRepo = {
@@ -484,6 +489,223 @@ describe('ValueSetsService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('readExpansion', () => {
+    /** Miembro materializado, tal como lo devuelve el repositorio. */
+    const member = (conceptId: string, ordinal: number | null) => ({
+      conceptId,
+      ordinal,
+      included: true,
+    });
+
+    /** Concepto de catálogo con lo mínimo que el DTO expone. */
+    const concept = (id: string, code: string) => ({
+      id,
+      code,
+      display: code.toLowerCase(),
+      definition: undefined,
+      selectable: true,
+      codeSystemVersionId: 'csv-1',
+    });
+
+    /** Prepara el harness con un conjunto y una versión vigente resueltos. */
+    function withDefaultVersion() {
+      const harness = build();
+      harness.valueSetsRepo.findById.mockResolvedValue({ id: 'vs-1' });
+      harness.valueSetsRepo.findDefaultVersion.mockResolvedValue({
+        id: 'vsv-1',
+        valueSetId: 'vs-1',
+        version: '1.0.0',
+      });
+      return harness;
+    }
+
+    it('resuelve la versión vigente y devuelve los conceptos de la página', async () => {
+      const harness = withDefaultVersion();
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([
+        member('c-1', 0),
+        member('c-2', 1),
+      ]);
+      harness.conceptsRepo.findByIds.mockResolvedValue(
+        new Map([
+          ['c-1', concept('c-1', 'FEMALE')],
+          ['c-2', concept('c-2', 'MALE')],
+        ]),
+      );
+
+      const result = await harness.service.readExpansion('vs-1', { limit: 50 });
+
+      expect(result.valueSetVersionId).toBe('vsv-1');
+      expect(result.version).toBe('1.0.0');
+      expect(result.items.map((item) => item.code)).toEqual(['FEMALE', 'MALE']);
+      expect(result.count).toBe(2);
+      // Sin página siguiente, no hay cursor que ofrecer.
+      expect(result.nextCursor).toBeNull();
+    });
+
+    it('pide una fila de más y devuelve cursor sólo cuando sobra', async () => {
+      const harness = withDefaultVersion();
+      // Tres filas para un `limit` de 2: la tercera es la sonda de "hay más".
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([
+        member('c-1', 0),
+        member('c-2', 1),
+        member('c-3', 2),
+      ]);
+      harness.conceptsRepo.findByIds.mockResolvedValue(
+        new Map([
+          ['c-1', concept('c-1', 'A')],
+          ['c-2', concept('c-2', 'B')],
+        ]),
+      );
+
+      const result = await harness.service.readExpansion('vs-1', { limit: 2 });
+
+      expect(harness.valueSetsRepo.findMembersPage).toHaveBeenCalledWith(
+        expect.anything(),
+        'vsv-1',
+        undefined,
+        3,
+      );
+      expect(result.count).toBe(2);
+      expect(result.nextCursor).not.toBeNull();
+    });
+
+    it('el cursor emitido reabre la consulta justo después de la última fila', async () => {
+      const harness = withDefaultVersion();
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([
+        member('c-1', 0),
+        member('c-2', 1),
+      ]);
+      harness.conceptsRepo.findByIds.mockResolvedValue(
+        new Map([['c-1', concept('c-1', 'A')]]),
+      );
+
+      const first = await harness.service.readExpansion('vs-1', { limit: 1 });
+      await harness.service.readExpansion('vs-1', {
+        limit: 1,
+        cursor: first.nextCursor as string,
+      });
+
+      expect(harness.valueSetsRepo.findMembersPage).toHaveBeenLastCalledWith(
+        expect.anything(),
+        'vsv-1',
+        { ordinal: 0, conceptId: 'c-1' },
+        2,
+      );
+    });
+
+    it('rechaza un cursor que no decodifica (400, no 500)', async () => {
+      const harness = withDefaultVersion();
+
+      await expect(
+        harness.service.readExpansion('vs-1', {
+          limit: 50,
+          cursor: 'no-es-un-cursor',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rechaza un cursor bien formado pero de otro listado', async () => {
+      const harness = withDefaultVersion();
+      const ajeno = Buffer.from(
+        JSON.stringify({ createdAt: 1, id: 'x' }),
+        'utf8',
+      ).toString('base64url');
+
+      await expect(
+        harness.service.readExpansion('vs-1', { limit: 50, cursor: ajeno }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('omite el miembro cuyo concepto ya no está, sin romper la página', async () => {
+      const harness = withDefaultVersion();
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([
+        member('c-1', 0),
+        member('huerfano', 1),
+      ]);
+      harness.conceptsRepo.findByIds.mockResolvedValue(
+        new Map([['c-1', concept('c-1', 'A')]]),
+      );
+
+      const result = await harness.service.readExpansion('vs-1', { limit: 50 });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.count).toBe(1);
+      expect(harness.logger.warn).toHaveBeenCalled();
+    });
+
+    it('el cursor sigue a la última fila leída aunque se haya omitido', async () => {
+      const harness = withDefaultVersion();
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([
+        member('c-1', 0),
+        member('huerfano', 1),
+      ]);
+      harness.conceptsRepo.findByIds.mockResolvedValue(
+        new Map([['c-1', concept('c-1', 'A')]]),
+      );
+
+      const result = await harness.service.readExpansion('vs-1', { limit: 1 });
+
+      // Con `limit: 1` la página es `c-1` y la sonda es el huérfano: seguir desde
+      // `c-1` es lo correcto; seguir desde el huérfano se saltaría filas.
+      expect(result.nextCursor).toBe(
+        Buffer.from(
+          JSON.stringify({ ordinal: 0, conceptId: 'c-1' }),
+          'utf8',
+        ).toString('base64url'),
+      );
+    });
+
+    it('404 si el conjunto de valores no existe', async () => {
+      const harness = build();
+      harness.valueSetsRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        harness.service.readExpansion('vs-1', { limit: 50 }),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('404 si el conjunto todavía no tiene versión vigente', async () => {
+      const harness = build();
+      harness.valueSetsRepo.findById.mockResolvedValue({ id: 'vs-1' });
+      harness.valueSetsRepo.findDefaultVersion.mockResolvedValue(null);
+
+      await expect(
+        harness.service.readExpansion('vs-1', { limit: 50 }),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('409 si la versión pedida es de otro conjunto', async () => {
+      const harness = build();
+      harness.valueSetsRepo.findById.mockResolvedValue({ id: 'vs-1' });
+      harness.valueSetsRepo.findVersionById.mockResolvedValue({
+        id: 'vsv-9',
+        valueSetId: 'vs-otro',
+        version: '1.0.0',
+      });
+
+      await expect(
+        harness.service.readExpansion('vs-1', {
+          limit: 50,
+          valueSetVersionId: 'vsv-9',
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('no materializa nada: una versión sin expandir devuelve página vacía', async () => {
+      const harness = withDefaultVersion();
+      harness.valueSetsRepo.findMembersPage.mockResolvedValue([]);
+
+      const result = await harness.service.readExpansion('vs-1', { limit: 50 });
+
+      expect(result.items).toEqual([]);
+      expect(result.nextCursor).toBeNull();
+      expect(harness.valueSetsRepo.createMember).not.toHaveBeenCalled();
+      expect(
+        harness.valueSetsRepo.deleteMembersByVersion,
+      ).not.toHaveBeenCalled();
     });
   });
 });

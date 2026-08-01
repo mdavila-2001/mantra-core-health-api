@@ -1,18 +1,13 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { EntityManager } from '@mikro-orm/postgresql';
-import type { Request } from 'express';
 import { PersonAccountLinks } from '../../modules/profiles/entities';
 import { PROF } from '../../modules/profiles/profiles.concepts';
 import { IdentityAssertions } from '../../modules/identity_assurance/entities';
 import { IDA } from '../../modules/identity_assurance/identity_assurance.concepts';
+import { IdentityVerificationRequiredException } from '../errors/domain.exception';
 import { REQUIRES_VERIFIED_IDENTITY_KEY } from './requires-verified-identity.decorator';
-import type { AuthenticatedUser } from './authenticated-user.interface';
+import type { AuthenticatedRequest } from './authenticated-user.interface';
 
 /** Sujetos cuya aserción prueba la identidad de una persona. */
 const PERSON_SUBJECT_TYPES = [
@@ -28,6 +23,14 @@ const PERSON_SUBJECT_TYPES = [
  * La verdad se consulta en cada petición y no se cachea en el JWT: una aserción
  * revocada por fraude debe cerrar el acceso de inmediato, no cuando caduque el
  * token que el usuario ya tiene en la mano.
+ *
+ * Rechaza con `IDENTITY_VERIFICATION_REQUIRED` y no con el `FORBIDDEN` genérico
+ * de `RolesGuard`. Los dos son 403, pero para la persona son estados opuestos:
+ * rol insuficiente es un muro sin salida, e identidad sin verificar es una
+ * puerta —hay algo que puede hacer—. El cliente tiene que poder ofrecer el flujo
+ * de verificación en un caso y no en el otro, y antes sólo podía separarlos
+ * comparando el texto del mensaje. `details.reason` distingue además los tres
+ * subcasos sin que nadie tenga que leer la redacción.
  */
 @Injectable()
 export class VerifiedIdentityGuard implements CanActivate {
@@ -56,17 +59,13 @@ export class VerifiedIdentityGuard implements CanActivate {
     );
     if (!required) return true;
 
-    const request = context.switchToHttp().getRequest<
-      Request & {
-        /**
-         * Valor de user mantenido por la instancia.
-         */
-        user?: AuthenticatedUser;
-      }
-    >();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const userId = request.user?.id;
     if (!userId) {
-      throw new ForbiddenException('Se requiere una identidad verificada');
+      throw new IdentityVerificationRequiredException(
+        'Se requiere una identidad verificada',
+        { reason: 'no-authenticated-user' },
+      );
     }
 
     const em = this.em.fork();
@@ -75,8 +74,9 @@ export class VerifiedIdentityGuard implements CanActivate {
       statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
     });
     if (!link) {
-      throw new ForbiddenException(
+      throw new IdentityVerificationRequiredException(
         'La cuenta no tiene una persona vinculada que verificar',
+        { reason: 'no-person-linked' },
       );
     }
 
@@ -89,8 +89,9 @@ export class VerifiedIdentityGuard implements CanActivate {
       $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
     });
     if (!assertion) {
-      throw new ForbiddenException(
+      throw new IdentityVerificationRequiredException(
         'Verifique su identidad para acceder a esta función',
+        { reason: 'identity-not-verified' },
       );
     }
 
