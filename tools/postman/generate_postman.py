@@ -51,6 +51,11 @@ ENV_DEFAULTS = {
     # `SEED.tenantId` = uuidv5('seed:tenant:default'): determinista, idéntico en cualquier
     # entorno que corra el seed de terminología. Es el tenant que siembra el arranque.
     'tenantId': '1befcfea-44c0-563a-81cd-337ec6acc840',
+    # Conceptos del catálogo, también deterministas (uuidv5). El alta de un
+    # tenant PROVIDER los exige; cualquier otro se descubre con
+    # `GET /terminology/concepts?q=…`.
+    'countryConceptId': '340713a7-4d79-519c-b5e0-f1f40b914ac6',
+    'jurisdictionConceptId': 'ce6ef0fd-0060-575b-a1b7-15a73f75fd56',
 }
 
 
@@ -394,9 +399,15 @@ SIGNUP_FLOW = [
         'note': ('Alta pública desde cero: crea en una transacción el usuario owner con su '
                  'credencial y rol, el tenant, la membresía que los une y el token de verificación '
                  'de email. La organización queda pendiente de verificación por la plataforma, '
-                 'pero el owner puede iniciar sesión de inmediato.'),
+                 'pero el owner puede iniciar sesión de inmediato.\n\n'
+                 '`tenantType` es obligatorio y cada tipo exige lo suyo: PROVIDER país y '
+                 'jurisdicción; PAYER el bloque `payer` (que crea la aseguradora); BROKER el '
+                 'bloque `broker` (que crea el corredor).'),
         'patch': {'organization': {'code': 'ORG-{{$timestamp}}',
-                                   'legalName': 'Organización de prueba {{$timestamp}}'},
+                                   'legalName': 'Organización de prueba {{$timestamp}}',
+                                   'tenantType': 'PROVIDER',
+                                   'countryConceptId': '{{countryConceptId}}',
+                                   'jurisdictionConceptId': '{{jurisdictionConceptId}}'},
                   'owner': {'email': 'owner-{{$timestamp}}@example.test',
                             'password': '{{password}}',
                             'displayName': 'Owner de prueba'}},
@@ -515,7 +526,7 @@ SIGNUP_FLOW = [
 # Variables que solo produce el flujo de alta (las de path las recolecta collect_env_keys).
 EXTRA_ENV_KEYS = ['adminUserId', 'patientUserId', 'patientProfileId', 'practitionerProfileId',
                   'activationToken', 'roleId', 'personId', 'ownerUserId',
-                  'practitionerUserId']
+                  'practitionerUserId', 'countryConceptId', 'jurisdictionConceptId']
 
 
 def starter_folder(index: dict) -> dict | None:

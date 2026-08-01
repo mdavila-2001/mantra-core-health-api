@@ -12,3 +12,4 @@ export * from './branch-response.dto';
 export * from './membership-response.dto';
 export * from './branch-membership-response.dto';
 export * from './status-result.dto';
+export * from './tenant-type-profile.dto';

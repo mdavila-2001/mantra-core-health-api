@@ -61,5 +61,8 @@ import {
     ReconciliationService,
     BrokerCommissionService,
   ],
+  // Lo consume `directory` para materializar la aseguradora o el corredor en la
+  // misma transacción en la que se da de alta el tenant de ese tipo.
+  exports: [CatalogRepository],
 })
 export class InsuranceModule {}

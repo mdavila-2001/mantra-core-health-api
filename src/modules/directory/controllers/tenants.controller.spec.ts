@@ -36,7 +36,14 @@ function build() {
 describe('TenantsController', () => {
   it('delegates createChild (UC-04-03)', async () => {
     const d = build();
-    const dto = { code: 'C', legalName: 'C', adminUserId: 'u1' };
+    const dto = {
+      tenantType: 'PROVIDER' as const,
+      countryConceptId: 'c1',
+      jurisdictionConceptId: 'j1',
+      code: 'C',
+      legalName: 'C',
+      adminUserId: 'u1',
+    };
     await d.controller.createChild('t1', dto, actor);
     expect(d.tenantsService.createChild).toHaveBeenCalledWith('t1', dto, actor);
   });

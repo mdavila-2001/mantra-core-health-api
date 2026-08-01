@@ -38,6 +38,10 @@ function build() {
   const branchesRepo = {
     findByTenantAndStatus: mockFn().mockResolvedValue([]),
   };
+  const typeProfile = {
+    assertProfileMatchesType: mockFn(),
+    materializeProfile: mockFn(() => undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryTenantsService(
@@ -45,6 +49,7 @@ function build() {
     tenantsRepo,
     membershipsRepo as any,
     branchesRepo as any,
+    typeProfile as any,
     logger as any,
   );
   return { service, tx, tenantsRepo, membershipsRepo, branchesRepo };
@@ -66,7 +71,14 @@ describe('DirectoryTenantsService', () => {
       d.tenantsRepo.create.mockReturnValue(tenant);
 
       const res = await d.service.provision(
-        { code: 'ACME', legalName: 'Acme', ownerUserId: 'u1' },
+        {
+          tenantType: 'PROVIDER' as const,
+          countryConceptId: 'c1',
+          jurisdictionConceptId: 'j1',
+          code: 'ACME',
+          legalName: 'Acme',
+          ownerUserId: 'u1',
+        },
         actor,
       );
 
@@ -87,7 +99,14 @@ describe('DirectoryTenantsService', () => {
       d.tenantsRepo.findByCode.mockResolvedValue({ id: 'x' });
       await expect(
         d.service.provision(
-          { code: 'ACME', legalName: 'Acme', ownerUserId: 'u1' } as any,
+          {
+            tenantType: 'PROVIDER' as const,
+            countryConceptId: 'c1',
+            jurisdictionConceptId: 'j1',
+            code: 'ACME',
+            legalName: 'Acme',
+            ownerUserId: 'u1',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -144,7 +163,14 @@ describe('DirectoryTenantsService', () => {
       await expect(
         d.service.createChild(
           'p1',
-          { code: 'C', legalName: 'C', adminUserId: 'u1' } as any,
+          {
+            tenantType: 'PROVIDER' as const,
+            countryConceptId: 'c1',
+            jurisdictionConceptId: 'j1',
+            code: 'C',
+            legalName: 'C',
+            adminUserId: 'u1',
+          } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -173,7 +199,14 @@ describe('DirectoryTenantsService', () => {
 
       const res = await d.service.createChild(
         'p1',
-        { code: 'C', legalName: 'C', adminUserId: 'u1' },
+        {
+          tenantType: 'PROVIDER' as const,
+          countryConceptId: 'c1',
+          jurisdictionConceptId: 'j1',
+          code: 'C',
+          legalName: 'C',
+          adminUserId: 'u1',
+        },
         actor,
       );
 

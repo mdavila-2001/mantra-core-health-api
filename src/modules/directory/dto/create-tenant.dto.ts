@@ -1,11 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  IsIn,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { TENANT_TYPE_CODES, type TenantTypeCode } from '../directory.concepts';
+import { BrokerProfileDto, PayerProfileDto } from './tenant-type-profile.dto';
 
 /** Cuerpo de `POST /admin/tenants` (UC-04-01: aprovisionar tenant raíz). */
 export class CreateTenantDto {
@@ -50,10 +55,25 @@ export class CreateTenantDto {
   tradeName?: string;
 
   /**
+   * Tipo de organización por código. Es la forma normal de tiparla.
+   */
+  @ApiProperty({
+    description:
+      'Tipo de organización. Obligatorio: cada tipo exige sus propios datos ' +
+      '(PAYER el bloque `payer`, BROKER el bloque `broker`, PROVIDER país y ' +
+      'jurisdicción).',
+    enum: TENANT_TYPE_CODES,
+  })
+  @IsIn(TENANT_TYPE_CODES)
+  tenantType!: TenantTypeCode;
+
+  /**
    * Identificador asociado a tenant type concept.
    */
   @ApiPropertyOptional({
-    description: 'Concept id del tipo de tenant',
+    description:
+      'Concept id del tipo de tenant. Escotilla para tipos fuera del ' +
+      'catálogo interno; si viene `tenantType`, este campo se ignora.',
     format: 'uuid',
   })
   @IsOptional()
@@ -90,4 +110,41 @@ export class CreateTenantDto {
   @IsString()
   @MaxLength(100)
   timeZone?: string;
+
+  /**
+   * Datos de aseguradora. Obligatorio cuando `tenantType` es `PAYER`; se
+   * rechaza en cualquier otro tipo.
+   */
+  @ApiPropertyOptional({ type: PayerProfileDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PayerProfileDto)
+  payer?: PayerProfileDto;
+
+  /**
+   * Datos de corredor. Obligatorio cuando `tenantType` es `BROKER`; se rechaza
+   * en cualquier otro tipo.
+   */
+  @ApiPropertyOptional({ type: BrokerProfileDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BrokerProfileDto)
+  broker?: BrokerProfileDto;
+
+  /**
+   * País de la organización. Obligatorio para `PROVIDER`: determina bajo qué
+   * regulador presta atención.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  countryConceptId?: string;
+
+  /**
+   * Jurisdicción de la organización. Obligatoria para `PROVIDER`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  jurisdictionConceptId?: string;
 }

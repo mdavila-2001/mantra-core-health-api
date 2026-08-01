@@ -65,6 +65,7 @@ en el tenant sembrado. Por defecto `admin@redesa.test` / `S3cret-passw0rd`; se p
 | `X-Tenant-Id` | **Habilitada** con el tenant sembrado (`{{tenantId}}`, id determinista). Un actor sin membresía recibe 403 sin ella; con una sola membresía es redundante pero inocua. |
 | Query params | Los requeridos van habilitados; los opcionales, deshabilitados. |
 | Bodies | Ejemplos derivados del schema (enum → primer valor, `format: uuid` → uuid nulo). **Revisa los valores antes de enviar**: los uuid de ejemplo no existen en la base. El folder 01 es la excepción — usa solo campos obligatorios y está verificado contra la API. |
+| `tenantType` | **Obligatorio** en las tres altas de tenant. Cada tipo exige lo suyo: `PROVIDER` país y jurisdicción; `PAYER` el bloque `payer`, que crea su aseguradora; `BROKER` el bloque `broker`, que crea su corredor. Ambas nacen pendientes de verificación. |
 | `*ConceptId` | Casi 300 campos del contrato piden un uuid del catálogo de terminología. Resuélvelos con **`GET /terminology/concepts?q=…`** (folder 00): es la única forma de descubrirlos, porque `$lookup` exige conocer sistema y código exactos. |
 | Tests | `pm.test` del primer status 2xx documentado; login y refresh capturan los tokens; el folder 01 encadena los ids. |
 
