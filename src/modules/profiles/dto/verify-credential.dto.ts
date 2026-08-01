@@ -20,7 +20,13 @@ export class VerifyCredentialDto {
    * Valor de verification source uri mantenido por la instancia.
    */
   @ApiPropertyOptional({
-    description: 'URI de la fuente de verificación consultada',
+    description:
+      'URI de la fuente de verificación consultada (registro del colegio ' +
+      'profesional, resolución de la autoridad). OBLIGATORIA cuando la ' +
+      'decisión es VERIFIED: habilitar a un profesional sin declarar contra ' +
+      'qué se comprobó su matrícula no deja rastro auditable. Para REJECTED ' +
+      'es opcional, porque se puede rechazar por defectos de forma del propio ' +
+      'documento sin consultar a nadie.',
   })
   @IsOptional()
   @IsString()
