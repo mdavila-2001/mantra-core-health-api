@@ -22,7 +22,6 @@ import type {
 
 /** Roles internos que pueden seleccionar cualquier tenant explícitamente. */
 const PRIVILEGED_TENANT_ROLES = new Set(['SUPERADMIN', 'SYSTEM']);
-const SYSTEM_ROLE = 'SYSTEM';
 
 /**
  * Establece y **hace cumplir** el contexto de tenant de cada petición.
@@ -105,11 +104,11 @@ export class TenantContextInterceptor implements NestInterceptor {
     const privilegedTenantId = this.hasPrivilegedTenantRole(user)
       ? this.resolvePrivilegedTenantId(request)
       : undefined;
-    if (user.roles?.includes(SYSTEM_ROLE) && !privilegedTenantId) {
+    const tenantId = privilegedTenantId ?? this.resolveTenantId(request, user);
+    if (!tenantId) {
       return this.runSystemSweep(next);
     }
 
-    const tenantId = privilegedTenantId ?? this.resolveTenantId(request, user);
     this.assertInputStaysInTenant(request.params, 'ruta', tenantId);
     this.assertInputStaysInTenant(request.body, 'cuerpo', tenantId);
     this.assertInputStaysInTenant(request.query, 'query', tenantId);
@@ -168,7 +167,7 @@ export class TenantContextInterceptor implements NestInterceptor {
     // `SUPERADMIN` sin cabecera opera entre tenants: acotarlo a uno rompería los
     // flujos de sistema. Un actor normal, en cambio, tiene que poder resolver su
     // tenant sin ambigüedad, o el `tenantId` del cuerpo volvería a ser su elección.
-    if (isWildcard) {
+    if (isPrivileged) {
       return undefined;
     }
 
