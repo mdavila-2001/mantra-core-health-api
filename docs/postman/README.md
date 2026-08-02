@@ -1,16 +1,36 @@
-# Postman — REDESA Health API (872 endpoints)
+# Postman — REDESA Health API (878 endpoints)
 
 Colección y entorno para ejercer **todos** los endpoints del contrato, generados desde
 `openapi/openapi.json` con `yarn postman:generate`.
 
 ## Archivos
 
-- `Salud-API.postman_collection.json` — 872 requests en 121 dominios (un folder por primer
+- `Salud-API.postman_collection.json` — 878 requests en 121 dominios (un folder por primer
   segmento de ruta; los dominios grandes se parten en subfolders por tag). Cada request trae
   método, URL con variables de path, query params documentados, auth Bearer heredada, body de
   ejemplo derivado del schema y un `pm.test` del status esperado.
 - `Salud-Local.postman_environment.json` — entorno local con `baseUrl`, las variables de sesión
   y las 100+ variables de path que usan las rutas (`userId`, `practiceId`, `versionId`, …).
+
+## Antes de probar: refrescar el contenedor
+
+**Mergear a `dev` no basta.** El contenedor `api` corre la imagen `mantra-redesa-api:local`, que
+se queda con el código del día que se construyó: los endpoints nuevos devuelven **404** en
+`:3000` aunque estén en `dev` y aunque la colección los incluya. Ha pasado tres veces.
+
+```bash
+yarn docker:api:refresh    # docker compose build api && docker compose up -d
+```
+
+Toma unos minutos porque compila dentro de la imagen. Recrea también los 20 workers, que
+comparten esa misma imagen.
+
+Cómo saber si hace falta, sin adivinar — un endpoint que existe responde 400 o 401, nunca 404:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' -X POST -H 'Content-Type: application/json' \
+  -d '{}' http://localhost:3000/iam/auth/resend-verification
+```
 
 ## Importar
 
@@ -20,7 +40,7 @@ Colección y entorno para ejercer **todos** los endpoints del contrato, generado
 
 ## Primero: crear el administrador
 
-Sin esto solo se pueden ejercer los 13 endpoints públicos. `POST /iam/users` exige rol
+Sin esto solo se pueden ejercer los 18 endpoints públicos. `POST /iam/users` exige rol
 `SECURITY_ADMIN` y el seed de arranque no siembra ninguno, así que el primer administrador no se
 puede crear por API:
 

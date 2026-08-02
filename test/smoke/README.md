@@ -33,6 +33,10 @@ workers parados la batería es determinista: 766/766.
 Tras cada corrida la base queda vacía de datos de negocio. Para volver a usar Postman:
 `yarn postman:bootstrap`.
 
+Y si lo que se acaba de mergear no aparece en `:3000`, no es la base: es que el contenedor `api`
+corre una imagen anterior. `yarn docker:api:refresh` la reconstruye y recrea también los workers,
+que comparten esa misma imagen.
+
 ## Criterios de mantenimiento
 
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
