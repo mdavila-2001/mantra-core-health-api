@@ -9,7 +9,7 @@
 # Módulo `iam`
 
 **Fuente:** [`src/modules/iam/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/iam/README.md)
-· 2 controllers · 9 services · 12 repositories · 13 entidades · 19 DTO
+· 2 controllers · 11 services · 13 repositories · 14 entidades · 21 DTO
 
 ---
 
@@ -39,6 +39,31 @@ FK, `TokenService` for JWT/refresh tokens, domain exceptions, and Pino logging.
 | 10 | `POST /iam/users/:id/global-roles` | Grant / revoke a global role | `SECURITY_ADMIN` | 200/201 |
 | 11 | `POST /iam/auth/sessions/purge` | Expire stale sessions/tokens | `SECURITY_ADMIN` | 200 |
 | 12 | `POST /iam/users/:id/anonymize` | DSAR anonymization | `SECURITY_ADMIN` | 200 |
+| 13 | `POST /iam/auth/forgot-password` | Request a password-reset link | `@Public` | 202 |
+| 14 | `POST /iam/auth/reset-password` | Consume the token, set a new password | `@Public` | 200 |
+
+### Password recovery (UC-01-13)
+
+Three properties hold the rest of it up:
+
+- **It never reveals whether an account exists.** `forgot-password` always answers
+  `202` with the same message — same body, same status — whether or not there is a
+  credential behind the identifier. A `404` on an unknown address would turn a
+  public form into an oracle for which emails have an account on a health
+  platform.
+- **The plaintext token only ever exists inside the email.** The database holds its
+  SHA-256, like a refresh token, so reading `iam.password_resets` does not let
+  anyone reset anybody's password. Requesting a new link revokes the outstanding
+  ones.
+- **Resetting closes every session.** Someone recovering an account is doing so
+  because they lost control of the password; leaving the thief's session alive
+  would defeat the whole exercise.
+
+The identifier is the same one used to log in (email or national ID), resolved
+through the same lookup as `login`. When it is a national ID there is no address
+in it, so the destination comes from the last email the user declared; with no
+address on file no token is issued at all — one nobody can receive is only useful
+to whoever intercepts it. The response stays identical in that case too.
 
 ## Identity model
 

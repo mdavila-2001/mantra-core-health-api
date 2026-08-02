@@ -17,6 +17,7 @@ import {
   IamOrganizationSelfRegistrationService,
   IamPractitionerSelfRegistrationService,
   IamPasswordResetService,
+  IamEmailVerificationService,
 } from './services';
 import {
   UsersRepository,
@@ -79,6 +80,7 @@ import {
     IamOrganizationSelfRegistrationService,
     IamPractitionerSelfRegistrationService,
     IamPasswordResetService,
+    IamEmailVerificationService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.

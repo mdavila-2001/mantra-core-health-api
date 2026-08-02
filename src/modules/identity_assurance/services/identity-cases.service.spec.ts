@@ -27,6 +27,7 @@ function build() {
     findById: mockFn(),
     create: mockFn(),
     countLiveForSubject: mockFn().mockResolvedValue(0),
+    findBySubjects: mockFn(),
     findExpirable: mockFn().mockResolvedValue([]),
   };
   const policiesRepo = { findById: mockFn() };

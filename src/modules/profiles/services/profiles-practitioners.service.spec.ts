@@ -32,7 +32,11 @@ function build() {
     findByCode: mockFn(),
     create: mockFn(),
   };
-  const authorizationsRepo = { create: mockFn(), findById: mockFn() };
+  const authorizationsRepo = {
+    create: mockFn(),
+    findById: mockFn(),
+    findByPractitioner: mockFn().mockResolvedValue([]),
+  };
   const credentialsRepo = {
     findById: mockFn(),
     create: mockFn(),

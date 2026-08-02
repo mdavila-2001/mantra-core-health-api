@@ -21,6 +21,7 @@ import {
   IamOrganizationSelfRegistrationService,
   IamPractitionerSelfRegistrationService,
   IamPasswordResetService,
+  IamEmailVerificationService,
 } from '../services';
 import {
   LoginDto,
@@ -43,6 +44,8 @@ import {
   ForgotPasswordResponseDto,
   ResetPasswordDto,
   ResetPasswordResponseDto,
+  ResendVerificationDto,
+  ResendVerificationResponseDto,
 } from '../dto';
 
 /** Endpoints de sesión bajo `/iam/auth`. Capa fina sobre `IamAuthService`. */
@@ -63,6 +66,7 @@ export class IamAuthController {
     private readonly organizationRegistrationService: IamOrganizationSelfRegistrationService,
     private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
     private readonly passwordResetService: IamPasswordResetService,
+    private readonly emailVerificationService: IamEmailVerificationService,
   ) {}
 
   /**
@@ -132,6 +136,30 @@ export class IamAuthController {
    * Consume el token de verificación de correo. No desbloquea nada: sólo deja
    * constancia de que la dirección es alcanzable por su titular.
    */
+  /**
+   * Reemite el enlace de verificación de correo.
+   *
+   * Responde **202 y el mismo mensaje siempre**, exista o no la cuenta, esté o
+   * no verificada: las tres respuestas distinguibles convertirían un formulario
+   * público en un oráculo de qué direcciones tienen cuenta aquí.
+   *
+   * Mismo techo que `forgot-password`: cada solicitud válida dispara un correo,
+   * y sin límite el formulario es un amplificador de spam contra un tercero.
+   */
+  @Post('resend-verification')
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({
+    summary: 'Reenviar el enlace de verificación del correo',
+  })
+  resendVerification(
+    @Body() dto: ResendVerificationDto,
+    @Ip() ip: string,
+  ): Promise<ResendVerificationResponseDto> {
+    return this.emailVerificationService.resend(dto, ip);
+  }
+
   @Post('verify-email')
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })

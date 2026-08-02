@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **872 de 872 endpoints** en **61 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -34,8 +34,8 @@ Se documentan **872 de 872 endpoints** en **61 módulos**. La referencia complet
 | `graph_intelligence` | 15 | [Abrir referencia](endpoints/graph-intelligence.md) |
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
 | `health_data` | 15 | [Abrir referencia](endpoints/health-data.md) |
-| `iam` | 18 | [Abrir referencia](endpoints/iam.md) |
-| `identity_assurance` | 22 | [Abrir referencia](endpoints/identity-assurance.md) |
+| `iam` | 22 | [Abrir referencia](endpoints/iam.md) |
+| `identity_assurance` | 23 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 23 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
@@ -62,7 +62,7 @@ Se documentan **872 de 872 endpoints** en **61 módulos**. La referencia complet
 | `system_context` | 11 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |
 | `telemetry` | 13 | [Abrir referencia](endpoints/telemetry.md) |
-| `terminology` | 14 | [Abrir referencia](endpoints/terminology.md) |
+| `terminology` | 15 | [Abrir referencia](endpoints/terminology.md) |
 | `time_series` | 14 | [Abrir referencia](endpoints/time-series.md) |
 | `tracking` | 11 | [Abrir referencia](endpoints/tracking.md) |
 | `vector_rag` | 16 | [Abrir referencia](endpoints/vector-rag.md) |

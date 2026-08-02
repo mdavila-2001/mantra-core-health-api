@@ -115,6 +115,32 @@ export class IdentityVerificationCasesRepository {
     });
   }
 
+  /**
+   * Casos abiertos por o sobre un sujeto, del más reciente al más antiguo.
+   *
+   * Es lo que permite responder "¿cómo va mi verificación?" sin conocer el id
+   * del caso: consultar por id obliga a que el cliente lo haya guardado, y
+   * quien cambia de dispositivo o reinstala la app se queda sin forma de saber
+   * el estado de su propia cuenta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param subjectEntityIds - Sujetos propios (persona y sus matrículas).
+   * @param limit - Tope de resultados.
+   * @returns Casos ordenados por apertura descendente.
+   */
+  findBySubjects(
+    em: EntityManager,
+    subjectEntityIds: string[],
+    limit = 50,
+  ): Promise<IdentityVerificationCases[]> {
+    if (subjectEntityIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      IdentityVerificationCases,
+      { subjectEntityId: { $in: subjectEntityIds } },
+      { orderBy: { openedAt: 'DESC' }, limit },
+    );
+  }
+
   /** Casos vencidos (expires_at < now) aún no completados (UC-27-12). */
   findExpirable(
     em: EntityManager,

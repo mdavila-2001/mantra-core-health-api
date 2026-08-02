@@ -814,6 +814,51 @@
         "description": "Registrarse como profesional de salud con su matrícula. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/auth/resend-verification": {
+      "post": {
+        "operationId": "IamAuthController_resendVerification",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResendVerificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "summary": "Reenviar el enlace de verificación del correo",
+        "tags": [
+          "iam-auth"
+        ],
+        "security": [],
+        "description": "Reenviar el enlace de verificación del correo. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/iam/auth/verify-email": {
       "post": {
         "operationId": "IamAuthController_verifyEmail",
@@ -949,6 +994,96 @@
         "description": "Iniciar sesión con email o documento de identidad y contraseña. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/auth/forgot-password": {
+      "post": {
+        "operationId": "IamAuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "summary": "Solicitar el restablecimiento de la contraseña",
+        "tags": [
+          "iam-auth"
+        ],
+        "security": [],
+        "description": "Solicitar el restablecimiento de la contraseña. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/iam/auth/reset-password": {
+      "post": {
+        "operationId": "IamAuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "summary": "Fijar una contraseña nueva con el token recibido por correo",
+        "tags": [
+          "iam-auth"
+        ],
+        "security": [],
+        "description": "Fijar una contraseña nueva con el token recibido por correo. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/iam/auth/token/refresh": {
       "post": {
         "operationId": "IamAuthController_refresh",
@@ -992,6 +1127,48 @@
         ],
         "security": [],
         "description": "Rotar el refresh token. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/iam/auth/logout": {
+      "post": {
+        "operationId": "IamAuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cerrar la sesión actual del usuario",
+        "tags": [
+          "iam-auth"
+        ],
+        "description": "Cerrar la sesión actual del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/iam/auth/logout-all": {
@@ -6197,6 +6374,81 @@
           "terminology"
         ],
         "description": "UC-03-07: crea un conjunto de valores con versión y reglas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/terminology/value-sets/{id}/$expand": {
+      "get": {
+        "operationId": "TerminologyValueSetsController_readExpansion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueSetVersionId",
+            "required": false,
+            "in": "query",
+            "description": "Versión concreta a leer; por defecto la vigente",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor opaco devuelto por la página anterior",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Miembros por página (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-03-08: lee la expansión vigente de un conjunto de valores",
+        "tags": [
+          "terminology"
+        ],
+        "description": "UC-03-08: lee la expansión vigente de un conjunto de valores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/terminology/ValueSet/{id}/$expand": {
@@ -31223,6 +31475,42 @@
         "description": "Solicitar la verificación de una institución propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/identity/me/verification-cases": {
+      "get": {
+        "operationId": "IdentitySelfServiceController_listOwnCases",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los casos de verificación propios",
+        "tags": [
+          "identity-self-service"
+        ],
+        "description": "Listar los casos de verificación propios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/identity/me/verification-cases/{caseId}": {
       "get": {
         "operationId": "IdentitySelfServiceController_getOwnCaseStatus",
@@ -54656,6 +54944,19 @@
           "credentialNumber"
         ]
       },
+      "ResendVerificationDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "Correo o documento de identidad con el que la persona inicia sesión",
+            "maxLength": 320
+          }
+        },
+        "required": [
+          "identifier"
+        ]
+      },
       "VerifyEmailDto": {
         "type": "object",
         "properties": {
@@ -54706,6 +55007,39 @@
         },
         "required": [
           "password"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "description": "Correo o documento con el que la persona inicia sesión",
+            "maxLength": 320
+          }
+        },
+        "required": [
+          "identifier"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token recibido por correo",
+            "maxLength": 200
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Contraseña nueva",
+            "minLength": 8,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "token",
+          "newPassword"
         ]
       },
       "RefreshTokenDto": {
@@ -55080,7 +55414,7 @@
           },
           "verificationSourceUri": {
             "type": "string",
-            "description": "URI de la fuente de verificación consultada"
+            "description": "URI de la fuente de verificación consultada (registro del colegio profesional, resolución de la autoridad). OBLIGATORIA cuando la decisión es VERIFIED: habilitar a un profesional sin declarar contra qué se comprobó su matrícula no deja rastro auditable. Para REJECTED es opcional, porque se puede rechazar por defectos de forma del propio documento sin consultar a nadie."
           }
         },
         "required": [

@@ -28,6 +28,7 @@ function build() {
   };
   const organizationRegistrationService = { registerOrganization: mockFn() };
   const practitionerRegistrationService = { registerPractitioner: mockFn() };
+  const emailVerificationService = { resend: mockFn() };
   const passwordResetService = {
     requestReset: mockFn(),
     resetPassword: mockFn(),
@@ -39,6 +40,7 @@ function build() {
     organizationRegistrationService as any,
     practitionerRegistrationService as any,
     passwordResetService as any,
+    emailVerificationService as any,
   );
   return {
     controller,

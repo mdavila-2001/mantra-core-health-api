@@ -469,7 +469,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         return {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           code: ErrorCode.VALIDATION_FAILED,
-          message: 'La petición trae un valor ausente o inválido para el modelo',
+          message:
+            'La petición trae un valor ausente o inválido para el modelo',
           details,
         };
       default:

@@ -89,6 +89,18 @@ export class IdentitySelfServiceController {
   }
 
   /** Estado del caso propio, para esperar el veredicto de la autoridad. */
+  /**
+   * Lista los casos propios. Es lo que permite a la app responder "¿está
+   * verificada mi cuenta?" sin haber guardado el id del caso.
+   */
+  @Get('verification-cases')
+  @ApiOperation({ summary: 'Listar los casos de verificación propios' })
+  listOwnCases(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<VerificationStatusResponseDto[]> {
+    return this.selfService.listOwnCases(actor);
+  }
+
   @Get('verification-cases/:caseId')
   @ApiOperation({ summary: 'Consultar el estado de un caso propio' })
   getOwnCaseStatus(

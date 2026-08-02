@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "REDESA Health API · 872 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 872 requests en 121 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "REDESA Health API · 878 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 878 requests en 121 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -24512,7 +24512,7 @@
       ]
     },
     {
-      "name": "iam (18)",
+      "name": "iam (22)",
       "item": [
         {
           "name": "iam-auth",
@@ -24661,6 +24661,56 @@
                     "exec": [
                       "pm.test('status 201', function () {",
                       "  pm.response.to.have.status(201);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /iam/auth/resend-verification · Reenviar el enlace de verificación del correo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/auth/resend-verification",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "auth",
+                    "resend-verification"
+                  ]
+                },
+                "description": "Reenviar el enlace de verificación del correo. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/resend-verification`\n\nRespuesta esperada: **202**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_resendVerification`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"identifier\": \"identifier-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 202', function () {",
+                      "  pm.response.to.have.status(202);",
                       "});"
                     ]
                   }
@@ -24825,6 +24875,106 @@
               ]
             },
             {
+              "name": "POST /iam/auth/forgot-password · Solicitar el restablecimiento de la contraseña",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/auth/forgot-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "auth",
+                    "forgot-password"
+                  ]
+                },
+                "description": "Solicitar el restablecimiento de la contraseña. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/forgot-password`\n\nRespuesta esperada: **202**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_forgotPassword`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"identifier\": \"identifier-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 202', function () {",
+                      "  pm.response.to.have.status(202);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /iam/auth/reset-password · Fijar una contraseña nueva con el token recibido por correo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/auth/reset-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "auth",
+                    "reset-password"
+                  ]
+                },
+                "description": "Fijar una contraseña nueva con el token recibido por correo. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/reset-password`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_resetPassword`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"token-ejemplo\",\n  \"newPassword\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /iam/auth/token/refresh · Rotar el refresh token",
               "request": {
                 "method": "POST",
@@ -24877,6 +25027,46 @@
                       "  if (body.accessToken) pm.environment.set('accessToken', body.accessToken);",
                       "  if (body.refreshToken) pm.environment.set('refreshToken', body.refreshToken);",
                       "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /iam/auth/logout · Cerrar la sesión actual del usuario",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "auth",
+                    "logout"
+                  ]
+                },
+                "description": "Cerrar la sesión actual del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/logout`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `IamAuthController_logout`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
                     ]
                   }
                 }
@@ -25487,7 +25677,7 @@
       ]
     },
     {
-      "name": "identity (19)",
+      "name": "identity (20)",
       "item": [
         {
           "name": "identity-assertions",
@@ -26143,6 +26333,46 @@
                     "exec": [
                       "pm.test('status 201', function () {",
                       "  pm.response.to.have.status(201);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /identity/me/verification-cases · Listar los casos de verificación propios",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/me/verification-cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "me",
+                    "verification-cases"
+                  ]
+                },
+                "description": "Listar los casos de verificación propios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /identity/me/verification-cases`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `IdentitySelfServiceController_listOwnCases`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
                       "});"
                     ]
                   }
@@ -46738,7 +46968,7 @@
       ]
     },
     {
-      "name": "terminology (14)",
+      "name": "terminology (15)",
       "item": [
         {
           "name": "POST /terminology/code-systems · UC-03-01: crea un sistema de códigos y su fuente",
@@ -47311,6 +47541,74 @@
                 "exec": [
                   "pm.test('status 201', function () {",
                   "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /terminology/value-sets/{id}/$expand · UC-03-08: lee la expansión vigente de un conjunto de valores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/terminology/value-sets/:id/$expand",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "terminology",
+                "value-sets",
+                ":id",
+                "$expand"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{id}}",
+                  "description": "Identificador de ruta"
+                }
+              ],
+              "query": [
+                {
+                  "key": "valueSetVersionId",
+                  "value": "valueSetVersionId-ejemplo",
+                  "description": "Versión concreta a leer; por defecto la vigente",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "Cursor opaco devuelto por la página anterior",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "description": "Miembros por página (por defecto 50)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "UC-03-08: lee la expansión vigente de un conjunto de valores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/value-sets/{id}/$expand`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TerminologyValueSetsController_readExpansion`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }

@@ -243,6 +243,47 @@ export class IdentitySelfServiceService {
     };
   }
 
+  /**
+   * Lista los casos de verificación propios, del más reciente al más antiguo.
+   *
+   * Sin esto, consultar el estado exigía conocer el `caseId`: quien reinstala
+   * la app o cambia de dispositivo no tenía forma de saber si su cuenta —o su
+   * matrícula— está verificada, que es justo lo que la pantalla de perfil
+   * necesita mostrar.
+   *
+   * Reúne los dos tipos de sujeto que puede tener una persona: ella misma en
+   * las verificaciones de identidad, y cada una de sus matrículas en las de
+   * licencia. Una cuenta sin persona vinculada no tiene casos, y eso es una
+   * lista vacía, no un error: es el estado normal de un usuario administrativo.
+   *
+   * @param actor - Titular autenticado.
+   * @returns Sus casos, ordenados por apertura descendente.
+   */
+  async listOwnCases(
+    actor: AuthenticatedUser,
+  ): Promise<VerificationStatusResponseDto[]> {
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) return [];
+
+    const authorizations = await this.authorizationsRepo.findByPractitioner(
+      em,
+      link.personId,
+    );
+    const subjects = [
+      link.personId,
+      ...authorizations.map((authorization) => authorization.id),
+    ];
+
+    const cases = await this.casesRepo.findBySubjects(em, subjects);
+    return cases.map((kase) => ({
+      id: kase.id,
+      status: kase.statusConceptId,
+      openedAt: kase.openedAt,
+      completedAt: kase.completedAt,
+    }));
+  }
+
   // --- Apoyo ---
 
   /**

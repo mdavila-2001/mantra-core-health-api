@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 14 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
 - **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
@@ -22,9 +22,10 @@ Referencia exhaustiva de 14 operación(es) del módulo `terminology`, derivada d
 9. [POST /terminology/concepts/{conceptId}/relationships](#9-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
 10. [PUT /terminology/tenants/{tenantId}/catalog-policies](#10-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
 11. [POST /terminology/value-sets](#11-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-12. [POST /terminology/ValueSet/{id}/$expand](#12-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-13. [POST /terminology/versions/{versionId}/import](#13-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-14. [POST /terminology/versions/{versionId}/publish](#14-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+12. [GET /terminology/value-sets/{id}/$expand](#12-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+13. [POST /terminology/ValueSet/{id}/$expand](#13-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+14. [POST /terminology/versions/{versionId}/import](#14-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+15. [POST /terminology/versions/{versionId}/publish](#15-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -1599,7 +1600,148 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /terminology/ValueSet/{id}/$expand
+## 12. GET /terminology/value-sets/{id}/$expand
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** UC-03-08: lee la expansión vigente de un conjunto de valores
+- **Operation ID:** `TerminologyValueSetsController_readExpansion`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyValueSetsController.readExpansion](../../src/modules/terminology/controllers/terminology-value-sets.controller.ts)
+
+### Descripción de negocio
+
+UC-03-08: lee la expansión vigente de un conjunto de valores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-03-08: lee una página de la expansión vigente del conjunto de valores. Es la contraparte de lectura del `POST ValueSet/:id/$expand`, que **materializa** los miembros y por eso exige `SECURITY_ADMIN`. Ésta sólo los devuelve, así que no pide rol de administración: un campo de formulario necesita la lista de opciones válidas, y exigir rol de seguridad para leerla dejaría el catálogo inutilizable desde el cliente. Pagina por cursor y no por página numerada: la expansión se reemplaza entera cada vez que se re-expande, y con `offset` una re-expansión a mitad de recorrido saltaría o repetiría miembros sin que el cliente se entere.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/value-sets/{id}/$expand` en `TerminologyValueSetsController_readExpansion`. El controlador delega en `ValueSetsService.readExpansion`. No recibe body. El tipo de retorno estático es `Promise<ReadValueSetExpansionResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `valueSetVersionId` | query | No | `string` | Sin restricción adicional declarada | Versión concreta a leer; por defecto la vigente | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Miembros por página (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/value-sets/00000000-0000-4000-8000-000000000001/$expand HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/value-sets/00000000-0000-4000-8000-000000000001/$expand?valueSetVersionId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadValueSetExpansionResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "valueSetId": "00000000-0000-4000-8000-000000000001",
+  "valueSetVersionId": "00000000-0000-4000-8000-000000000001",
+  "version": "1.0.0",
+  "items": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "code": "GENDER_FEMALE",
+      "display": "valor-ejemplo",
+      "definition": "valor-ejemplo",
+      "selectable": true,
+      "codeSystemVersionId": "00000000-0000-4000-8000-000000000001",
+      "ordinal": 1
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `valueSetId` | Sí | `string` | formato `uuid` | Id del conjunto de valores | `00000000-0000-4000-8000-000000000001` |
+| `valueSetVersionId` | Sí | `string` | formato `uuid` | Id de la versión leída | `00000000-0000-4000-8000-000000000001` |
+| `version` | Sí | `string` | Sin restricción adicional declarada | Etiqueta de la versión | `1.0.0` |
+| `items` | Sí | `array<ValueSetExpansionItemDto>` | Sin restricción adicional declarada | Miembros de esta página. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","ordinal":1}]` |
+| `items[].conceptId` | Sí | `string` | formato `uuid` | Valor a enviar en los campos `*ConceptId` del contrato | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código del concepto | `GENDER_FEMALE` |
+| `items[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación principal | `valor-ejemplo` |
+| `items[].definition` | No | `string` | Sin restricción adicional declarada | Definición del concepto | `valor-ejemplo` |
+| `items[].selectable` | No | `boolean` | Sin restricción adicional declarada | Si el concepto puede seleccionarse | `true` |
+| `items[].codeSystemVersionId` | Sí | `string` | formato `uuid` | Versión del sistema de códigos | `00000000-0000-4000-8000-000000000001` |
+| `items[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición del miembro dentro de la expansión | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor opaco para pedir la página siguiente | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Conjunto de valores no encontrado | Excepción explícita en src/modules/terminology/services/value-sets.service.ts |
+| 404 | `NOT_FOUND` | options.valueSetVersionId           ? 'Versión del conjunto de valores no encontrada'           : 'El conjunto de valores no tiene una versión vigente' | Excepción explícita en src/modules/terminology/services/value-sets.service.ts |
+| 409 | `CONFLICT` | La versión no pertenece a ese conjunto de valores | Excepción explícita en src/modules/terminology/services/value-sets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/value-sets/{id}/$expand"
+}
+```
+
+---
+
+## 13. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1741,7 +1883,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /terminology/versions/{versionId}/import
+## 14. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1885,7 +2027,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /terminology/versions/{versionId}/publish
+## 15. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

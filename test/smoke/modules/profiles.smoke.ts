@@ -236,7 +236,13 @@ export const PROFILES_SMOKE: SmokeCase[] = [
     name: 'happy: verificar credencial',
     method: 'post',
     path: (c) => `/profiles/credentials/${c.vars.credentialId}/verify`,
-    body: () => ({ decision: 'VERIFIED' }),
+    // Verificar exige declarar la fuente consultada: una credencial marcada
+    // como verificada sin decir contra qué registro se contrastó no es
+    // auditable, que es justo lo que la verificación pretende dar.
+    body: () => ({
+      decision: 'VERIFIED',
+      verificationSourceUri: 'https://registro.example.test/matriculas/1',
+    }),
     expectedStatus: 200,
   },
   {
@@ -245,7 +251,12 @@ export const PROFILES_SMOKE: SmokeCase[] = [
     name: 'límite: credencial inexistente',
     method: 'post',
     path: () => `/profiles/credentials/${UUID_ABSENT}/verify`,
-    body: () => ({ decision: 'VERIFIED' }),
+    // Con la fuente declarada, el 422 de precondición ya no tapa el 404 que
+    // este caso quiere comprobar.
+    body: () => ({
+      decision: 'VERIFIED',
+      verificationSourceUri: 'https://registro.example.test/matriculas/1',
+    }),
     expectedStatus: 404,
   },
 

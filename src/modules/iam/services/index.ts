@@ -8,4 +8,5 @@ export * from './iam-assisted-registration.service';
 export * from './iam-patient-self-registration.service';
 export * from './iam-organization-self-registration.service';
 export * from './iam-practitioner-self-registration.service';
+export * from './iam-email-verification.service';
 export * from './role-mapping';

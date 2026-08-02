@@ -34,6 +34,7 @@ describe('IdentitySelfServiceService', () => {
       countLiveForSubject: fn().mockResolvedValue(0),
       create: fn(() => ({ id: 'case-1', statusConceptId: IDA.CASE_OPEN })),
       findById: fn().mockResolvedValue(null),
+      findBySubjects: fn().mockResolvedValue([]),
     };
     const evidenceRepo = { create: fn(() => ({ id: 'ev-1' })) };
     const checksRepo = { create: fn(() => ({ id: 'check-1' })) };
@@ -43,7 +44,10 @@ describe('IdentitySelfServiceService', () => {
     const practitionersRepo = {
       findById: fn().mockResolvedValue({ profileId: 'person-1' }),
     };
-    const authorizationsRepo = { findById: fn().mockResolvedValue(null) };
+    const authorizationsRepo = {
+      findById: fn().mockResolvedValue(null),
+      findByPractitioner: fn().mockResolvedValue([]),
+    };
     const membershipsRepo = {
       findActiveByUserTenant: fn().mockResolvedValue(null),
     };
@@ -254,6 +258,48 @@ describe('IdentitySelfServiceService', () => {
       await expect(
         d.service.getOwnCaseStatus('case-1', actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('listOwnCases', () => {
+    it('reúne los casos de la persona y los de sus matrículas', async () => {
+      const d = build();
+      d.authorizationsRepo.findByPractitioner.mockResolvedValue([
+        { id: 'lic-1' },
+        { id: 'lic-2' },
+      ]);
+      d.casesRepo.findBySubjects.mockResolvedValue([
+        {
+          id: 'case-9',
+          statusConceptId: IDA.CASE_OPEN,
+          openedAt: new Date('2026-08-01T00:00:00Z'),
+          completedAt: undefined,
+        },
+      ]);
+
+      const res = await d.service.listOwnCases({ id: 'user-1', roles: [] });
+
+      // Una verificación de matrícula tiene como sujeto la autorización, no la
+      // persona: sin incluirlas, el médico no vería el caso de su matrícula.
+      expect(d.casesRepo.findBySubjects).toHaveBeenCalledWith(
+        expect.anything(),
+        ['person-1', 'lic-1', 'lic-2'],
+      );
+      expect(res).toEqual([
+        expect.objectContaining({ id: 'case-9', status: IDA.CASE_OPEN }),
+      ]);
+    });
+
+    it('una cuenta sin persona vinculada no tiene casos, y eso no es un error', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      // Es el estado normal de un usuario administrativo: devolver 422 le
+      // rompería la pantalla de perfil a quien no hizo nada mal.
+      await expect(
+        d.service.listOwnCases({ id: 'user-1', roles: [] }),
+      ).resolves.toEqual([]);
+      expect(d.casesRepo.findBySubjects).not.toHaveBeenCalled();
     });
   });
 });

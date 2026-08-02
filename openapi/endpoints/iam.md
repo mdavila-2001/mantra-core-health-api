@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 18 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 22 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-users`
 - **Controladores:** `IamAuthController`, `IamUsersController`
@@ -12,23 +12,27 @@ Referencia exhaustiva de 18 operación(es) del módulo `iam`, derivada del contr
 ## Índice del módulo
 
 1. [POST /iam/auth/activate](#1-post-iam-auth-activate) — Activar la cuenta con el token de un solo uso y fijar la contraseña
-2. [POST /iam/auth/login](#2-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
-3. [POST /iam/auth/logout-all](#3-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
-4. [POST /iam/auth/register-organization](#4-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
-5. [POST /iam/auth/register-patient](#5-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
-6. [POST /iam/auth/register-practitioner](#6-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
-7. [POST /iam/auth/sessions/purge](#7-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
-8. [POST /iam/auth/token/refresh](#8-post-iam-auth-token-refresh) — Rotar el refresh token
-9. [POST /iam/auth/verify-email](#9-post-iam-auth-verify-email) — Verificar el correo con el token recibido
-10. [POST /iam/users](#10-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-11. [POST /iam/users/{id}/anonymize](#11-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-12. [POST /iam/users/{id}/credentials/{cid}/revoke](#12-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-13. [POST /iam/users/{id}/credentials/federated](#13-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-14. [POST /iam/users/{id}/devices](#14-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-15. [POST /iam/users/{id}/global-roles](#15-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-16. [POST /iam/users/{id}/lock](#16-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-17. [POST /iam/users/{id}/mfa-factors](#17-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-18. [POST /iam/users/assisted-registration](#18-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+2. [POST /iam/auth/forgot-password](#2-post-iam-auth-forgot-password) — Solicitar el restablecimiento de la contraseña
+3. [POST /iam/auth/login](#3-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
+4. [POST /iam/auth/logout](#4-post-iam-auth-logout) — Cerrar la sesión actual del usuario
+5. [POST /iam/auth/logout-all](#5-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
+6. [POST /iam/auth/register-organization](#6-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
+7. [POST /iam/auth/register-patient](#7-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
+8. [POST /iam/auth/register-practitioner](#8-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
+9. [POST /iam/auth/resend-verification](#9-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
+10. [POST /iam/auth/reset-password](#10-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
+11. [POST /iam/auth/sessions/purge](#11-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
+12. [POST /iam/auth/token/refresh](#12-post-iam-auth-token-refresh) — Rotar el refresh token
+13. [POST /iam/auth/verify-email](#13-post-iam-auth-verify-email) — Verificar el correo con el token recibido
+14. [POST /iam/users](#14-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+15. [POST /iam/users/{id}/anonymize](#15-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+16. [POST /iam/users/{id}/credentials/{cid}/revoke](#16-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+17. [POST /iam/users/{id}/credentials/federated](#17-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+18. [POST /iam/users/{id}/devices](#18-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+19. [POST /iam/users/{id}/global-roles](#19-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+20. [POST /iam/users/{id}/lock](#20-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+21. [POST /iam/users/{id}/mfa-factors](#21-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+22. [POST /iam/users/assisted-registration](#22-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
 
 ---
 
@@ -155,7 +159,128 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /iam/auth/login
+## 2. POST /iam/auth/forgot-password
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Solicitar el restablecimiento de la contraseña
+- **Operation ID:** `IamAuthController_forgotPassword`
+- **Autenticación:** Pública
+- **Implementación:** [IamAuthController.forgotPassword](../../src/modules/iam/controllers/iam-auth.controller.ts)
+
+### Descripción de negocio
+
+Solicitar el restablecimiento de la contraseña. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-01-13: pide el enlace de restablecimiento. Responde **202 y el mismo mensaje siempre**, exista o no la cuenta. Un 404 cuando el correo no está registrado convertiría este formulario, que es público, en un oráculo de qué direcciones tienen cuenta en una plataforma de salud. El límite es más estricto que el del login porque cada solicitud válida dispara un correo: sin techo, el formulario es un amplificador de spam contra la bandeja de un tercero.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/forgot-password` en `IamAuthController_forgotPassword`. El controlador delega en `IamPasswordResetService.requestReset`. Valida el body como `ForgotPasswordDto` y consume `application/json`. El tipo de retorno estático es `Promise<ForgotPasswordResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ForgotPasswordDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/forgot-password HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "identifier": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `identifier` | Sí | `string` | longitud mínima 1; longitud máxima 320 | Correo o documento con el que la persona inicia sesión | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/forgot-password HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "identifier": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 202 | Solicitud aceptada para procesamiento asíncrono. | `Promise<ForgotPasswordResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ForgotPasswordResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "message": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `message` | Sí | `string` | Sin restricción adicional declarada | Mensaje neutro, idéntico exista o no la cuenta, para no confirmar registros | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/forgot-password"
+}
+```
+
+---
+
+## 3. POST /iam/auth/login
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -278,7 +403,110 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /iam/auth/logout-all
+## 4. POST /iam/auth/logout
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Cerrar la sesión actual del usuario
+- **Operation ID:** `IamAuthController_logout`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAuthController.logout](../../src/modules/iam/controllers/iam-auth.controller.ts)
+
+### Descripción de negocio
+
+Cerrar la sesión actual del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cierra la sesión del token en uso. Complementa a `logout-all`, que cierra todas. Sin esta ruta, salir de la aplicación sólo limpiaba el navegador y el refresh token seguía sirviendo hasta caducar.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/logout` en `IamAuthController_logout`. El controlador delega en `IamAuthService.logout`. No recibe body. El tipo de retorno estático es `Promise<LogoutResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /iam/auth/logout HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /iam/auth/logout HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LogoutResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revoked": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revoked` | Sí | `boolean` | Sin restricción adicional declarada | Si la sesión quedó revocada en esta llamada | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/logout"
+}
+```
+
+---
+
+## 5. POST /iam/auth/logout-all
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -380,7 +608,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /iam/auth/register-organization
+## 6. POST /iam/auth/register-organization
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -569,7 +797,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /iam/auth/register-patient
+## 7. POST /iam/auth/register-patient
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -719,7 +947,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /iam/auth/register-practitioner
+## 8. POST /iam/auth/register-practitioner
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -890,7 +1118,249 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /iam/auth/sessions/purge
+## 9. POST /iam/auth/resend-verification
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Reenviar el enlace de verificación del correo
+- **Operation ID:** `IamAuthController_resendVerification`
+- **Autenticación:** Pública
+- **Implementación:** [IamAuthController.resendVerification](../../src/modules/iam/controllers/iam-auth.controller.ts)
+
+### Descripción de negocio
+
+Reenviar el enlace de verificación del correo. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reemite el enlace de verificación de correo. Responde **202 y el mismo mensaje siempre**, exista o no la cuenta, esté o no verificada: las tres respuestas distinguibles convertirían un formulario público en un oráculo de qué direcciones tienen cuenta aquí. Mismo techo que `forgot-password`: cada solicitud válida dispara un correo, y sin límite el formulario es un amplificador de spam contra un tercero.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/resend-verification` en `IamAuthController_resendVerification`. El controlador delega en `IamEmailVerificationService.resend`. Valida el body como `ResendVerificationDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResendVerificationResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ResendVerificationDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/resend-verification HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "identifier": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `identifier` | Sí | `string` | longitud mínima 3; longitud máxima 320 | Correo o documento de identidad con el que la persona inicia sesión | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/resend-verification HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "identifier": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 202 | Solicitud aceptada para procesamiento asíncrono. | `Promise<ResendVerificationResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResendVerificationResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "message": "Si el identificador corresponde a una cuenta con correo pendiente de verificar, enviamos un enlace nuevo."
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `message` | Sí | `string` | Sin restricción adicional declarada | Mensaje neutro, idéntico en todos los casos. | `Si el identificador corresponde a una cuenta con correo pendiente de verificar, enviamos un enlace nuevo.` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/resend-verification"
+}
+```
+
+---
+
+## 10. POST /iam/auth/reset-password
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Fijar una contraseña nueva con el token recibido por correo
+- **Operation ID:** `IamAuthController_resetPassword`
+- **Autenticación:** Pública
+- **Implementación:** [IamAuthController.resetPassword](../../src/modules/iam/controllers/iam-auth.controller.ts)
+
+### Descripción de negocio
+
+Fijar una contraseña nueva con el token recibido por correo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-01-13: consume el token recibido por correo y fija la contraseña nueva. Cierra todas las sesiones abiertas del usuario: quien recupera su cuenta lo hace porque perdió el control de la clave anterior.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/reset-password` en `IamAuthController_resetPassword`. El controlador delega en `IamPasswordResetService.resetPassword`. Valida el body como `ResetPasswordDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResetPasswordResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ResetPasswordDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/reset-password HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "token": "valor-ejemplo",
+  "newPassword": "ClaveSegura2026!"
+}
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `token` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Token recibido por correo | `valor-ejemplo` |
+| `newPassword` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Contraseña nueva | `ClaveSegura2026!` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/reset-password HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+  "token": "valor-ejemplo",
+  "newPassword": "ClaveSegura2026!"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResetPasswordResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "revokedSessions": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `userId` | Sí | `string` | formato `uuid` | Usuario cuya clave cambió | `00000000-0000-4000-8000-000000000001` |
+| `revokedSessions` | Sí | `number` | Sin restricción adicional declarada | Sesiones revocadas: cambiar la clave cierra todas las sesiones abiertas | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | Token de restablecimiento inválido | Excepción explícita en src/modules/iam/services/iam-password-reset.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de restablecimiento ya fue utilizado | Excepción explícita en src/modules/iam/services/iam-password-reset.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de restablecimiento expiró | Excepción explícita en src/modules/iam/services/iam-password-reset.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/reset-password"
+}
+```
+
+---
+
+## 11. POST /iam/auth/sessions/purge
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -995,7 +1465,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /iam/auth/token/refresh
+## 12. POST /iam/auth/token/refresh
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1115,7 +1585,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /iam/auth/verify-email
+## 13. POST /iam/auth/verify-email
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1128,7 +1598,6 @@ Ejemplo de error normalizado:
 
 Verificar el correo con el token recibido. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Consume el token de verificación de correo. No desbloquea nada: sólo deja constancia de que la dirección es alcanzable por su titular.
 
 ### Descripción del sistema
 
@@ -1233,7 +1702,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /iam/users
+## 14. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1371,7 +1840,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /iam/users/{id}/anonymize
+## 15. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1480,7 +1949,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /iam/users/{id}/credentials/{cid}/revoke
+## 16. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1590,7 +2059,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /iam/users/{id}/credentials/federated
+## 17. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1724,7 +2193,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /iam/users/{id}/devices
+## 18. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1857,7 +2326,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /iam/users/{id}/global-roles
+## 19. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1986,7 +2455,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /iam/users/{id}/lock
+## 20. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2108,7 +2577,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /iam/users/{id}/mfa-factors
+## 21. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2253,7 +2722,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /iam/users/assisted-registration
+## 22. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

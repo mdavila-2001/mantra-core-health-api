@@ -67,6 +67,24 @@ export class JurisdictionAuthorizationsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `JurisdictionAuthorizations`.
    */
+  /**
+   * Matrículas de un profesional.
+   *
+   * Las consume el autoservicio de identidad: una verificación de matrícula
+   * tiene como sujeto la autorización, no la persona, así que sin esta lista no
+   * hay forma de reunir los casos propios de quien tiene más de una.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - Perfil profesional dueño de las matrículas.
+   * @returns Sus autorizaciones jurisdiccionales.
+   */
+  findByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<JurisdictionAuthorizations[]> {
+    return em.find(JurisdictionAuthorizations, { practitionerProfileId });
+  }
+
   create(
     em: EntityManager,
     data: CreateJurisdictionAuthorizationData,

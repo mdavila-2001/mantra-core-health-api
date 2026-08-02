@@ -9,7 +9,7 @@
 # Módulo `terminology`
 
 **Fuente:** [`src/modules/terminology/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/terminology/README.md)
-· 6 controllers · 6 services · 9 repositories · 15 entidades · 12 DTO
+· 6 controllers · 6 services · 9 repositories · 15 entidades · 13 DTO
 
 ---
 
@@ -35,10 +35,33 @@ referenciadas por FK (`*_concept_id`), resueltas desde `CONCEPTS` (`src/common`)
 | 03-06 | `POST /terminology/concepts/:conceptId/relationships` | SECURITY_ADMIN | 201 | Crea una relación dirigida entre dos conceptos. Devuelve la relación creada |
 | 03-07 | `POST /terminology/value-sets` | SECURITY_ADMIN | 201 | Crea un conjunto de valores con versión inicial `1.0.0` y reglas. Devuelve `{id, versionId, rulesCount}` |
 | 03-08 | `POST /terminology/ValueSet/:id/$expand` | SECURITY_ADMIN | 200 | Materializa los miembros evaluando las reglas. Devuelve `{rulesEvaluated, includedMembers, replacedMembers, stateConceptId}` |
+| 03-08 | `GET /terminology/value-sets/:id/$expand` | autenticado | 200 | Lee la expansión ya materializada, paginada por cursor. Devuelve `{items[], count, limit, nextCursor, version}` |
 | 03-09 | `POST /terminology/ConceptMap/$translate` | autenticado | 200 | Cura (con `targetConceptId`) o consulta un mapeo entre conceptos. Devuelve `{matched, matches[], curated}` |
 | 03-10 | `POST /terminology/concepts/:conceptId/$deprecate` | SECURITY_ADMIN | 200 | Retira el concepto (soft-retire) y lo excluye de las expansiones. Devuelve `{stateConceptId, replacedByConceptId, excludedMembers, alreadyRetired}` |
 | 03-11 | `GET /terminology/CodeSystem/$lookup?system=&code=` | autenticado | 200 | Resuelve un concepto con sus designaciones y propiedades. Sólo lectura |
 | 03-12 | `PUT /terminology/tenants/:tenantId/catalog-policies` | SECURITY_ADMIN | 200 | Define la política de catálogo del tenant y la configuración de sus conceptos |
+
+### Las dos caras de `$expand`
+
+El `POST` **materializa**: evalúa las reglas y reescribe `value_set_members`. Es
+una escritura, y por eso exige `SECURITY_ADMIN`.
+
+El `GET` sólo **lee** lo ya materializado y **no exige rol de administración**, por
+el mismo motivo que `$lookup` y la búsqueda de conceptos: la expansión es metadato
+compartido, sin datos de paciente, y es lo que necesita cualquier cliente
+autenticado para poder rellenar un campo `*ConceptId` con un valor válido. Exigir
+rol de seguridad para leer la lista de opciones de un desplegable dejaría los ~280
+campos `*ConceptId` del contrato sin forma legítima de completarse.
+
+Pagina por **cursor** y no por número de página porque la expansión se reemplaza
+entera cada vez que se re-expande: con `offset`, una re-expansión a mitad de
+recorrido saltearía o repetiría miembros sin que el cliente se entere. El cursor es
+opaco (`base64url`) y ordena por `(ordinal, concept_id)` — el desempate por
+`concept_id` no es decorativo, `ordinal` no es único y el índice
+`uq_value_set_members_version_concept` garantiza que el par sí lo es.
+
+El `$` de la ruta va **literal**, no como `%24`: Express enruta sobre el path sin
+decodificar y `%24expand` devuelve 404.
 
 ## Entidades implicadas
 
@@ -53,6 +76,12 @@ Registradas en el módulo con `MikroOrmModule.forFeature(Object.values(entities)
 
 - **Unicidad**: `code_systems.internal_code` y `value_sets.internal_code` únicos;
   `(code_system_id, version)` único por sistema → `409 Conflict`.
+- **Publicar una versión activa también sus conceptos** (UC-03-04). Los conceptos
+  se importan en `TERM_DRAFT` y la publicación los pasa a `TERM_ACTIVE`, saltando
+  los que UC-03-10 retiró. Sin este paso la versión quedaba activa con todos sus
+  conceptos en borrador y, como la expansión sólo selecciona conceptos activos,
+  **toda expansión salía vacía sin dar ningún error**: el catálogo parecía
+  publicado y no seleccionaba nada.
 - **Ciclo de vida de versión**: nace `TERM_DRAFT`; solo en borrador admite import
   (`422 Precondition`); publicar la pasa a `TERM_ACTIVE` e inmutable; re-publicar
   → `409 Conflict`.

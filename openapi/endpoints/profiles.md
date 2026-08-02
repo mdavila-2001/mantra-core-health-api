@@ -78,7 +78,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `decision` | Sí | `string` | valores: `VERIFIED`, `REJECTED` | Resultado de la verificación | `VERIFIED` |
-| `verificationSourceUri` | No | `string` | longitud máxima 2000 | URI de la fuente de verificación consultada | `valor-ejemplo` |
+| `verificationSourceUri` | No | `string` | longitud máxima 2000 | URI de la fuente de verificación consultada (registro del colegio profesional, resolución de la autoridad). OBLIGATORIA cuando la decisión es VERIFIED: habilitar a un profesional sin declarar contra qué se comprobó su matrícula no deja rastro auditable. Para REJECTED es opcional, porque se puede rechazar por defectos de forma del propio documento sin consultar a nadie. | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -142,6 +142,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Credencial no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Una credencial verificada debe declarar la fuente consultada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | La credencial no está pendiente de verificación | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
