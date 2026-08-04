@@ -40,6 +40,8 @@ function build() {
   };
   const typeProfile = {
     assertProfileMatchesType: mockFn(),
+    declaredConcepts: mockFn(() => ({})),
+    assertConceptsExist: mockFn().mockResolvedValue(undefined),
     materializeProfile: mockFn(() => undefined),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };

@@ -60,7 +60,8 @@ export class CreateTenantDto {
   @ApiProperty({
     description:
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos ' +
-      '(PAYER el bloque `payer`, BROKER el bloque `broker`, PROVIDER país y ' +
+      '(PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, ' +
+      'UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER— país y ' +
       'jurisdicción).',
     enum: TENANT_TYPE_CODES,
   })
@@ -132,7 +133,7 @@ export class CreateTenantDto {
   broker?: BrokerProfileDto;
 
   /**
-   * País de la organización. Obligatorio para `PROVIDER`: determina bajo qué
+   * País de la organización. Obligatorio para los tipos territoriales: determina bajo qué
    * regulador presta atención.
    */
   @ApiPropertyOptional({ format: 'uuid' })
@@ -141,7 +142,7 @@ export class CreateTenantDto {
   countryConceptId?: string;
 
   /**
-   * Jurisdicción de la organización. Obligatoria para `PROVIDER`.
+   * Jurisdicción de la organización. Obligatoria para los tipos territoriales.
    */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

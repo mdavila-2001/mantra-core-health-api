@@ -203,8 +203,14 @@ export class IamOrganizationSelfRegistrationService {
         actorUserId: user.id,
       });
 
-      // El tipo declarado y sus datos se validan antes de escribir nada.
+      // El tipo declarado y sus datos se validan antes de escribir nada, y con
+      // ellos los conceptos: un `countryConceptId` inexistente sólo lo delataba
+      // la FK, ya dentro del INSERT, y salía como 500 sin decir qué campo era.
       this.typeProfile.assertProfileMatchesType(dto.organization);
+      await this.typeProfile.assertConceptsExist(
+        tx,
+        this.typeProfile.declaredConcepts(dto.organization),
+      );
 
       // 2) La organización, pendiente de verificación por la plataforma.
       const tenant = this.tenantsRepo.create(tx, {

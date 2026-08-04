@@ -100,7 +100,16 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
  * del concepto convierte un campo de negocio en un acertijo cuyo único error
  * posible es un 500 por violación de FK.
  */
-export type TenantTypeCode = 'PROVIDER' | 'PAYER' | 'BROKER';
+export type TenantTypeCode =
+  | 'PROVIDER'
+  | 'PAYER'
+  | 'BROKER'
+  | 'UNIVERSITY'
+  | 'PHARMACY'
+  | 'HOSPITAL'
+  | 'MEDICAL_OFFICE'
+  | 'NURSING'
+  | 'HEALTH_OTHER';
 
 /** Mapea el código de tipo de organización (DTO) a su concept id. */
 export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
@@ -109,12 +118,39 @@ export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
   PROVIDER: CONCEPTS.TENANT_TYPE_PROVIDER,
   PAYER: CONCEPTS.TENANT_TYPE_PAYER,
   BROKER: CONCEPTS.TENANT_TYPE_BROKER,
+  UNIVERSITY: CONCEPTS.TENANT_TYPE_UNIVERSITY,
+  PHARMACY: CONCEPTS.TENANT_TYPE_PHARMACY,
+  // Las cuatro institucionales. Son códigos hermanos y no un subtipo de otro
+  // código porque el tipo ya vive en una sola columna (`tenant_type_concept_id`)
+  // y anidar exigiría una columna más para distinguir cuatro valores.
+  HOSPITAL: CONCEPTS.TENANT_TYPE_HOSPITAL,
+  MEDICAL_OFFICE: CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE,
+  NURSING: CONCEPTS.TENANT_TYPE_NURSING,
+  HEALTH_OTHER: CONCEPTS.TENANT_TYPE_HEALTH_OTHER,
 };
 
 /** Los códigos válidos, para `@IsIn` y para la documentación OpenAPI. */
 export const TENANT_TYPE_CODES = Object.keys(
   TENANT_TYPE_CONCEPT_BY_CODE,
 ) as TenantTypeCode[];
+
+/**
+ * Tipos que operan atendiendo o formando en un territorio, y que por eso deben
+ * declarar país y jurisdicción: es lo que determina bajo qué regulador operan.
+ *
+ * `PAYER` y `BROKER` quedan fuera porque su regulador se declara dentro de su
+ * propio bloque (`regulatorIdentifier`, `licenseNumber`), que además materializa
+ * su fila en `insurance`.
+ */
+export const TERRITORIAL_TENANT_TYPES: readonly TenantTypeCode[] = [
+  'PROVIDER',
+  'UNIVERSITY',
+  'PHARMACY',
+  'HOSPITAL',
+  'MEDICAL_OFFICE',
+  'NURSING',
+  'HEALTH_OTHER',
+];
 
 /** Mapea el código de rol de tenant (DTO) a su concept id. */
 export const TENANT_ROLE_CONCEPT_BY_CODE: Record<
