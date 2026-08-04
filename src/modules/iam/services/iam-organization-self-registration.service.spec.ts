@@ -61,6 +61,8 @@ describe('IamOrganizationSelfRegistrationService', () => {
     };
     const typeProfile = {
       assertProfileMatchesType: fn(),
+      declaredConcepts: fn(() => ({})),
+      assertConceptsExist: fn().mockResolvedValue(undefined),
       materializeProfile: fn(() => undefined),
     };
 

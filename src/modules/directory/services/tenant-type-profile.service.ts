@@ -3,6 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { PreconditionFailedException } from '../../../common';
 import { CatalogRepository } from '../../insurance/repositories';
 import { INS } from '../../insurance/insurance.concepts';
+import { CatalogConceptsRepository } from '../../terminology/repositories';
 import type { TenantTypeCode } from '../directory.concepts';
 import type { BrokerProfileDto, PayerProfileDto } from '../dto';
 
@@ -56,8 +57,12 @@ export class TenantTypeProfileService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param catalogRepo - Repositorio del catálogo de seguros (carriers/brokers).
+   * @param conceptsRepo - Catálogo de terminología, para validar los `*ConceptId` declarados.
    */
-  constructor(private readonly catalogRepo: CatalogRepository) {}
+  constructor(
+    private readonly catalogRepo: CatalogRepository,
+    private readonly conceptsRepo: CatalogConceptsRepository,
+  ) {}
 
   /**
    * Verifica que el bloque aportado corresponda al tipo declarado.
@@ -107,6 +112,74 @@ export class TenantTypeProfileService {
       throw new PreconditionFailedException(
         'El bloque `broker` sólo corresponde a un tenant de tipo BROKER',
         { tenantType },
+      );
+    }
+  }
+
+  /**
+   * Campos `*ConceptId` que el alta declara, con el nombre que usa el cliente.
+   *
+   * Se devuelven etiquetados porque el error tiene que decir **cuál** de los cuatro está mal:
+   * son todos uuid y a simple vista no se distinguen.
+   *
+   * @param input - Tipo declarado y datos que lo acompañan.
+   * @returns Mapa `campo -> id declarado`, incluidos los que no vienen.
+   */
+  declaredConcepts(
+    input: TenantTypeProfileInput,
+  ): Record<string, string | undefined> {
+    return {
+      countryConceptId: input.countryConceptId,
+      jurisdictionConceptId: input.jurisdictionConceptId,
+      'payer.jurisdictionConceptId': input.payer?.jurisdictionConceptId,
+      'broker.jurisdictionConceptId': input.broker?.jurisdictionConceptId,
+    };
+  }
+
+  /**
+   * Verifica que los conceptos declarados existan en el catálogo de terminología.
+   *
+   * Las columnas `*ConceptId` son FK contra `terminology.catalog_concepts`, así que un uuid
+   * inexistente no se descubre hasta el INSERT: Postgres tira la violación de constraint y el
+   * alta muere con un 500 «Error interno del servidor» que no nombra el campo culpable. Es el
+   * mismo criterio que ya se aplicaba al código de tenant y al correo del owner —comprobar
+   * antes de escribir— extendido a la otra familia de FK que el cliente puede equivocar.
+   *
+   * Y equivocarla es lo normal, no la excepción: el catálogo no está publicado en ninguna
+   * parte, los ids se descubren con `GET /terminology/concepts?q=…`, y hay casi 300 campos
+   * así en el contrato.
+   *
+   * Una sola query para todos los ids: pedirlos de a uno sería N+1 sobre la tabla más
+   * consultada del catálogo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param declared - Mapa `campo -> id declarado`; los `undefined` se ignoran.
+   * @throws PreconditionFailedException si alguno no existe, nombrando cuáles.
+   */
+  async assertConceptsExist(
+    em: EntityManager,
+    declared: Record<string, string | undefined>,
+  ): Promise<void> {
+    const present = Object.entries(declared).filter(
+      (entry): entry is [string, string] => Boolean(entry[1]),
+    );
+    if (present.length === 0) return;
+
+    const found = await this.conceptsRepo.findByIds(
+      em,
+      present.map(([, id]) => id),
+    );
+    const unknown = present
+      .filter(([, id]) => !found.has(id))
+      .map(([field, id]) => ({ field, conceptId: id }));
+
+    if (unknown.length > 0) {
+      throw new PreconditionFailedException(
+        'Los conceptos declarados no existen en el catálogo de terminología',
+        {
+          unknown,
+          hint: 'Descubrirlos con GET /terminology/concepts?q=…',
+        },
       );
     }
   }

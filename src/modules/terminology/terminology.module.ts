@@ -64,5 +64,9 @@ import {
     ConceptMapsRepository,
     TenantCatalogRepository,
   ],
+  // `CatalogConceptsRepository` lo necesita directory para comprobar que los
+  // `*ConceptId` de un alta existen antes de escribirlos: son FK contra
+  // `catalog_concepts` y descubrirlas en el INSERT devuelve un 500 opaco.
+  exports: [CatalogConceptsRepository],
 })
 export class TerminologyModule {}

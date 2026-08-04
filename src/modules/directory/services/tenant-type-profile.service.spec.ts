@@ -15,8 +15,19 @@ describe('TenantTypeProfileService', () => {
       createCarrier: fn(() => ({ id: 'carrier-1' })),
       createBroker: fn(() => ({ id: 'broker-1' })),
     };
-    const service = new TenantTypeProfileService(catalogRepo as never);
-    return { service, catalogRepo, tx: {} as never };
+    // Por defecto el catálogo reconoce todo lo que se le pregunta; los tests que
+    // ejercen el rechazo devuelven un mapa vacío.
+    const conceptsRepo = {
+      findByIds: fn(
+        async (_em: unknown, ids: string[]) =>
+          new Map(ids.map((id) => [id, { id }])),
+      ),
+    };
+    const service = new TenantTypeProfileService(
+      catalogRepo as never,
+      conceptsRepo as never,
+    );
+    return { service, catalogRepo, conceptsRepo, tx: {} as never };
   }
 
   describe('assertProfileMatchesType', () => {
@@ -97,6 +108,86 @@ describe('TenantTypeProfileService', () => {
           broker: { brokerCode: 'B1', licenseNumber: 'L1' },
         }),
       ).not.toThrow();
+    });
+  });
+
+  describe('assertConceptsExist', () => {
+    it('rechaza un concepto que no está en el catálogo, nombrando el campo', async () => {
+      const { service, conceptsRepo, tx } = build();
+      // El catálogo solo conoce la jurisdicción: el país que se declaró no existe.
+      conceptsRepo.findByIds.mockResolvedValue(
+        new Map([['jur-1', { id: 'jur-1' }]]),
+      );
+
+      const declared = service.declaredConcepts({
+        tenantType: 'PROVIDER',
+        legalName: 'Clínica Z',
+        countryConceptId: 'no-existe',
+        jurisdictionConceptId: 'jur-1',
+      });
+
+      // Sin esta comprobación el uuid llegaba al INSERT y la violación de FK
+      // salía como 500 «Error interno del servidor», sin decir qué campo era.
+      await expect(service.assertConceptsExist(tx, declared)).rejects.toThrow(
+        PreconditionFailedException,
+      );
+      await expect(
+        service.assertConceptsExist(tx, declared),
+      ).rejects.toMatchObject({
+        details: {
+          unknown: [{ field: 'countryConceptId', conceptId: 'no-existe' }],
+        },
+      });
+    });
+
+    it('acepta cuando todos existen, con una sola consulta', async () => {
+      const { service, conceptsRepo, tx } = build();
+
+      await expect(
+        service.assertConceptsExist(tx, {
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          'payer.jurisdictionConceptId': 'jur-2',
+        }),
+      ).resolves.toBeUndefined();
+
+      // Una query para los tres: de a uno sería N+1 sobre la tabla más consultada.
+      expect(conceptsRepo.findByIds).toHaveBeenCalledTimes(1);
+      expect(conceptsRepo.findByIds).toHaveBeenCalledWith(tx, [
+        'country-1',
+        'jur-1',
+        'jur-2',
+      ]);
+    });
+
+    it('no consulta nada si el alta no declara ningún concepto', async () => {
+      const { service, conceptsRepo, tx } = build();
+
+      await expect(
+        service.assertConceptsExist(tx, {
+          countryConceptId: undefined,
+          jurisdictionConceptId: undefined,
+        }),
+      ).resolves.toBeUndefined();
+      expect(conceptsRepo.findByIds).not.toHaveBeenCalled();
+    });
+
+    it('incluye los conceptos de los bloques payer y broker', () => {
+      const { service } = build();
+
+      // Se recogen etiquetados con la ruta que usa el cliente: `payer.jurisdictionConceptId`
+      // y `jurisdictionConceptId` son campos distintos y el error tiene que distinguirlos.
+      expect(
+        service.declaredConcepts({
+          tenantType: 'PAYER',
+          legalName: 'Aseguradora X',
+          payer: {
+            carrierCode: 'C1',
+            regulatorIdentifier: 'R1',
+            jurisdictionConceptId: 'jur-payer',
+          },
+        }),
+      ).toMatchObject({ 'payer.jurisdictionConceptId': 'jur-payer' });
     });
   });
 

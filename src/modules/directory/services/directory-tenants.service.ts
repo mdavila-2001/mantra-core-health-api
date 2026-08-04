@@ -105,7 +105,14 @@ export class DirectoryTenantsService {
 
       // El tipo y sus datos se validan antes de escribir: un tenant tipado sin
       // lo que su tipo exige es un alta a medias que alguien tendría que reparar.
+      // Los conceptos también: son FK, y descubrirlas en el INSERT da un 500.
       this.typeProfile.assertProfileMatchesType(dto);
+      await this.typeProfile.assertConceptsExist(tx, {
+        ...this.typeProfile.declaredConcepts(dto),
+        tenantTypeConceptId: dto.tenantTypeConceptId,
+        legalEntityTypeConceptId: dto.legalEntityTypeConceptId,
+        dataResidencyRegionConceptId: dto.dataResidencyRegionConceptId,
+      });
 
       const tenant = this.tenantsRepo.create(tx, {
         code: dto.code,
@@ -228,6 +235,11 @@ export class DirectoryTenantsService {
         });
 
       this.typeProfile.assertProfileMatchesType(dto);
+      await this.typeProfile.assertConceptsExist(tx, {
+        ...this.typeProfile.declaredConcepts(dto),
+        tenantTypeConceptId: dto.tenantTypeConceptId,
+        legalEntityTypeConceptId: dto.legalEntityTypeConceptId,
+      });
 
       const child = this.tenantsRepo.create(tx, {
         code: dto.code,
