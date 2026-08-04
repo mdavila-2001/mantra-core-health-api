@@ -61,10 +61,13 @@ export class RegisterOrganizationDetailsDto {
    */
   @ApiProperty({
     description:
-      'Tipo de organización. Obligatorio: cada tipo exige sus propios datos ' +
-      '(PAYER el bloque `payer`, BROKER el bloque `broker`, PROVIDER país y ' +
-      'jurisdicción).',
+      'Tipo de organización. Obligatorio: cada tipo exige sus propios datos. ' +
+      'PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto ' +
+      '—PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales ' +
+      '(HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER)— exigen país y ' +
+      'jurisdicción, que es lo que determina bajo qué regulador operan.',
     enum: TENANT_TYPE_CODES,
+    example: 'HOSPITAL',
   })
   @IsIn(TENANT_TYPE_CODES)
   tenantType!: TenantTypeCode;

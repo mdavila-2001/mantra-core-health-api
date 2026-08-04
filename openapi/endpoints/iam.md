@@ -170,7 +170,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Solicitar el restablecimiento de la contraseña. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Solicitar el restablecimiento de la contraseña. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: UC-01-13: pide el enlace de restablecimiento. Responde **202 y el mismo mensaje siempre**, exista o no la cuenta. Un 404 cuando el correo no está registrado convertiría este formulario, que es público, en un oráculo de qué direcciones tienen cuenta en una plataforma de salud. El límite es más estricto que el del login porque cada solicitud válida dispara un correo: sin techo, el formulario es un amplificador de spam contra la bandeja de un tercero.
 
@@ -227,8 +227,6 @@ Content-Type: application/json
 |---:|---|---|---|
 | 202 | Solicitud aceptada para procesamiento asíncrono. | `Promise<ForgotPasswordResponseDto>` | No |
 | 400 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 | 422 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
@@ -644,7 +642,7 @@ Content-Type: application/json
   "organization": {
     "code": "CLINICA_SAN_RAFAEL",
     "legalName": "Nombre de ejemplo",
-    "tenantType": "PROVIDER"
+    "tenantType": "HOSPITAL"
   },
   "owner": {
     "email": "usuario@example.com",
@@ -663,11 +661,11 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"PROVIDER","payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"brokerCode":"CODIGO_EJEMPLO","licenseNumber":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz"}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"brokerCode":"CODIGO_EJEMPLO","licenseNumber":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz"}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
-| `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`, PROVIDER país y jurisdicción). | `PROVIDER` |
+| `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER)— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. | `HOSPITAL` |
 | `organization.payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
 | `organization.payer.carrierCode` | No | `string` | longitud mínima 1; longitud máxima 60 | Código de la aseguradora | `CODIGO_EJEMPLO` |
 | `organization.payer.regulatorIdentifier` | No | `string` | longitud mínima 1; longitud máxima 100 | Identificador ante el regulador de seguros | `valor-ejemplo` |
@@ -699,7 +697,7 @@ Content-Type: application/json
     "code": "CLINICA_SAN_RAFAEL",
     "legalName": "Nombre de ejemplo",
     "tradeName": "Nombre de ejemplo",
-    "tenantType": "PROVIDER",
+    "tenantType": "HOSPITAL",
     "payer": {
       "carrierCode": "CODIGO_EJEMPLO",
       "regulatorIdentifier": "valor-ejemplo",
@@ -777,9 +775,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un tenant de tipo PAYER exige el bloque `payer` | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un tenant de tipo BROKER exige el bloque `broker` | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un tenant de tipo PROVIDER exige país y jurisdicción | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un tenant de tipo ${tenantType} exige país y jurisdicción | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | El bloque `payer` sólo corresponde a un tenant de tipo PAYER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | El bloque `broker` sólo corresponde a un tenant de tipo BROKER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los conceptos declarados no existen en el catálogo de terminología | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1248,7 +1247,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Fijar una contraseña nueva con el token recibido por correo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Fijar una contraseña nueva con el token recibido por correo. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: UC-01-13: consume el token recibido por correo y fija la contraseña nueva. Cierra todas las sesiones abiertas del usuario: quien recupera su cuenta lo hace porque perdió el control de la clave anterior.
 
@@ -1308,8 +1307,6 @@ Content-Type: application/json
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 400 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 422 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |

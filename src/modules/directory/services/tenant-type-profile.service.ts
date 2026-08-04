@@ -4,7 +4,10 @@ import { PreconditionFailedException } from '../../../common';
 import { CatalogRepository } from '../../insurance/repositories';
 import { INS } from '../../insurance/insurance.concepts';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
-import type { TenantTypeCode } from '../directory.concepts';
+import {
+  TERRITORIAL_TENANT_TYPES,
+  type TenantTypeCode,
+} from '../directory.concepts';
 import type { BrokerProfileDto, PayerProfileDto } from '../dto';
 
 /** Datos por tipo que acompañan al alta de un tenant. */
@@ -89,14 +92,18 @@ export class TenantTypeProfileService {
         { tenantType },
       );
     }
-    if (tenantType === 'PROVIDER') {
+    // Todos los tipos territoriales —prestador, universidad, farmacia y las
+    // cuatro institucionales— deben decir dónde operan: es lo que determina bajo
+    // qué regulador lo hacen. Los de seguros no, porque su regulador viaja en su
+    // propio bloque.
+    if (TERRITORIAL_TENANT_TYPES.includes(tenantType)) {
       const missing = [
         input.countryConceptId ? undefined : 'countryConceptId',
         input.jurisdictionConceptId ? undefined : 'jurisdictionConceptId',
       ].filter(Boolean);
       if (missing.length > 0) {
         throw new PreconditionFailedException(
-          'Un tenant de tipo PROVIDER exige país y jurisdicción',
+          `Un tenant de tipo ${tenantType} exige país y jurisdicción`,
           { tenantType, missing },
         );
       }

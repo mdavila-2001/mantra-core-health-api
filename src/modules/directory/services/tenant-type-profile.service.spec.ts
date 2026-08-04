@@ -4,6 +4,7 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { TenantTypeProfileService } from './tenant-type-profile.service';
 import { PreconditionFailedException } from '../../../common';
 import { INS } from '../../insurance/insurance.concepts';
+import { TERRITORIAL_TENANT_TYPES } from '../directory.concepts';
 
 describe('TenantTypeProfileService', () => {
   /**
@@ -53,16 +54,52 @@ describe('TenantTypeProfileService', () => {
       ).toThrow(PreconditionFailedException);
     });
 
-    it('exige país y jurisdicción cuando el tipo es PROVIDER', () => {
+    it('exige país y jurisdicción en todos los tipos territoriales', () => {
       const { service } = build();
 
-      expect(() =>
-        service.assertProfileMatchesType({
-          tenantType: 'PROVIDER',
-          legalName: 'Clínica Z',
-          countryConceptId: 'country-1',
-        }),
-      ).toThrow(PreconditionFailedException);
+      // No solo PROVIDER: una universidad, una farmacia o un hospital también
+      // operan bajo un regulador, y sin jurisdicción no se sabe cuál.
+      for (const tenantType of TERRITORIAL_TENANT_TYPES) {
+        expect(() =>
+          service.assertProfileMatchesType({
+            tenantType,
+            legalName: 'Institución Z',
+            countryConceptId: 'country-1',
+          }),
+        ).toThrow(PreconditionFailedException);
+      }
+    });
+
+    it('acepta los seis tipos nuevos con país y jurisdicción', () => {
+      const { service } = build();
+
+      // El alta de una universidad, una farmacia o un consultorio no puede
+      // quedar fuera solo porque el enum se quedó en PROVIDER/PAYER/BROKER.
+      for (const tenantType of [
+        'UNIVERSITY',
+        'PHARMACY',
+        'HOSPITAL',
+        'MEDICAL_OFFICE',
+        'NURSING',
+        'HEALTH_OTHER',
+      ] as const) {
+        expect(() =>
+          service.assertProfileMatchesType({
+            tenantType,
+            legalName: 'Institución Z',
+            countryConceptId: 'country-1',
+            jurisdictionConceptId: 'jur-1',
+          }),
+        ).not.toThrow();
+      }
+    });
+
+    it('no exige país ni jurisdicción a los tipos de seguros', () => {
+      const { service } = build();
+
+      // Su regulador viaja dentro de su propio bloque, no en la jurisdicción.
+      expect(TERRITORIAL_TENANT_TYPES).not.toContain('PAYER');
+      expect(TERRITORIAL_TENANT_TYPES).not.toContain('BROKER');
     });
 
     it('rechaza un bloque que no corresponde al tipo declarado', () => {

@@ -389,6 +389,41 @@ def build_folders(spec: dict, resolver: Resolver) -> tuple[list, int, dict]:
 STARTER = [('GET', '/health'), ('POST', '/iam/auth/login'), ('POST', '/iam/auth/token/refresh'),
            ('GET', '/terminology/concepts')]
 
+# Tipos de organización que solo declaran dónde operan: el cuerpo es el mismo y solo cambia
+# `tenantType`. Se emiten uno por uno, y no como una nota que diga «cambiá el tipo», porque
+# `yarn postman:verify` solo prueba lo que existe como request: un tipo sin request es un tipo
+# que nadie comprueba que se pueda registrar.
+TERRITORIAL_ORG_TYPES = [
+    ('UNIVERSITY', 'UNI', 'Universidad', 'universidad'),
+    ('PHARMACY', 'FAR', 'Farmacia', 'farmacia'),
+    ('HOSPITAL', 'HOS', 'Hospital', 'hospital'),
+    ('MEDICAL_OFFICE', 'CON', 'Consultorio', 'consultorio'),
+    ('NURSING', 'ENF', 'Enfermería', 'enfermería'),
+    ('HEALTH_OTHER', 'OTR', 'Otra institución de salud', 'institución de salud'),
+]
+
+
+def territorial_org_step(code: str, prefix: str, label: str, noun: str) -> dict:
+    """Paso de alta para un tipo de organización territorial."""
+    return {
+        'name': f'Organización {code} · {label.lower()}',
+        'key': ('POST', '/iam/auth/register-organization'),
+        'note': (f'Alta de {noun}. Mismo endpoint y mismo cuerpo que el PROVIDER: los tipos '
+                 f'territoriales solo exigen país y jurisdicción, que es lo que determina bajo '
+                 f'qué regulador operan. No materializan fila propia —operan por sus sedes— a '
+                 f'diferencia de PAYER y BROKER.'),
+        'patch': {'organization': {'code': f'{prefix}-{{{{$timestamp}}}}',
+                                   'legalName': f'{label} de prueba {{{{$timestamp}}}}',
+                                   'tenantType': code,
+                                   'countryConceptId': '{{countryConceptId}}',
+                                   'jurisdictionConceptId': '{{jurisdictionConceptId}}'},
+                  'owner': {'email': f'{prefix.lower()}-{{{{$timestamp}}}}@example.test',
+                            'password': '{{password}}',
+                            'displayName': f'Owner de {noun}'}},
+        'capture': [],
+    }
+
+
 # Alta de usuarios por tipo. El contrato solo expone dos roles iniciales (USER y SECURITY_ADMIN);
 # los 120 roles de negocio se conceden después, por tenant, vía authz. Cada entrada clona la
 # operación de su dominio y le fija el cuerpo del caso concreto — sin inventar endpoints.
@@ -400,9 +435,10 @@ SIGNUP_FLOW = [
                  'credencial y rol, el tenant, la membresía que los une y el token de verificación '
                  'de email. La organización queda pendiente de verificación por la plataforma, '
                  'pero el owner puede iniciar sesión de inmediato.\n\n'
-                 '`tenantType` es obligatorio y cada tipo exige lo suyo: PROVIDER país y '
-                 'jurisdicción; PAYER el bloque `payer` (que crea la aseguradora); BROKER el '
-                 'bloque `broker` (que crea el corredor).'),
+                 '`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` '
+                 '(que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); '
+                 'los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, '
+                 'NURSING y HEALTH_OTHER— país y jurisdicción.'),
         'patch': {'organization': {'code': 'ORG-{{$timestamp}}',
                                    'legalName': 'Organización de prueba {{$timestamp}}',
                                    'tenantType': 'PROVIDER',
@@ -447,6 +483,7 @@ SIGNUP_FLOW = [
                             'displayName': 'Owner de corredora'}},
         'capture': [('brokerTenantId', ['tenantId'])],
     },
+    *[territorial_org_step(*args) for args in TERRITORIAL_ORG_TYPES],
     {
         'name': 'Profesional · autoregistro público (matrícula PENDIENTE)',
         'key': ('POST', '/iam/auth/register-practitioner'),

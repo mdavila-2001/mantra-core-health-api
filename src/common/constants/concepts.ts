@@ -433,6 +433,43 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'BROKER',
     'Insurance broker',
   ),
+  // Los seis que faltaban. `PROVIDER` era demasiado grueso: una universidad que
+  // forma clínicos, una farmacia que dispensa y un hospital que interna no se
+  // regulan igual ni aparecen igual en el directorio público, y hasta ahora se
+  // daban de alta los tres como el mismo tipo. Van planos, sin subtipo: el tipo
+  // ya es `tenant_type_concept_id`, y meter una columna de subtipo para cuatro
+  // valores obligaba a una migración que no compra nada que el concepto no dé.
+  // `PROVIDER` se mantiene: hay tenants que ya lo referencian.
+  TENANT_TYPE_UNIVERSITY: def(
+    'directory:tenant-type:university',
+    'UNIVERSITY',
+    'University',
+  ),
+  TENANT_TYPE_PHARMACY: def(
+    'directory:tenant-type:pharmacy',
+    'PHARMACY',
+    'Pharmacy',
+  ),
+  TENANT_TYPE_HOSPITAL: def(
+    'directory:tenant-type:hospital',
+    'HOSPITAL',
+    'Hospital',
+  ),
+  TENANT_TYPE_MEDICAL_OFFICE: def(
+    'directory:tenant-type:medical-office',
+    'MEDICAL_OFFICE',
+    'Medical office',
+  ),
+  TENANT_TYPE_NURSING: def(
+    'directory:tenant-type:nursing',
+    'NURSING',
+    'Nursing facility',
+  ),
+  TENANT_TYPE_HEALTH_OTHER: def(
+    'directory:tenant-type:health-other',
+    'HEALTH_OTHER',
+    'Other health institution',
+  ),
   LEGAL_ENTITY_COMPANY: def(
     'directory:legal-entity:company',
     'COMPANY',
