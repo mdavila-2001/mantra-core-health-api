@@ -283,6 +283,120 @@
           ]
         },
         {
+          "name": "Organización PAYER · aseguradora (bloque `payer`)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/iam/auth/register-organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "iam",
+                "auth",
+                "register-organization"
+              ]
+            },
+            "description": "Mismo endpoint, tipo distinto. `tenantType: PAYER` **exige** el bloque `payer` y rechaza el de `broker`: mandar los dos devuelve 422. `carrierCode` y `regulatorIdentifier` son obligatorios; `country`/`jurisdictionConceptId` de la organización solo los pide PROVIDER.\n\nCuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerOrganization`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organization\": {\n    \"code\": \"PAY-{{$timestamp}}\",\n    \"legalName\": \"Aseguradora de prueba {{$timestamp}}\",\n    \"tenantType\": \"PAYER\",\n    \"payer\": {\n      \"carrierCode\": \"CAR-{{$timestamp}}\",\n      \"regulatorIdentifier\": \"REG-{{$timestamp}}\",\n      \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n    }\n  },\n  \"owner\": {\n    \"email\": \"payer-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de aseguradora\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Encadena el alta: deja los ids en el entorno para los pasos siguientes.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const payerTenantId = body.tenantId;",
+                  "  if (payerTenantId) pm.environment.set('payerTenantId', payerTenantId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Organización BROKER · corredora (bloque `broker`)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/iam/auth/register-organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "iam",
+                "auth",
+                "register-organization"
+              ]
+            },
+            "description": "`tenantType: BROKER` exige el bloque `broker` y rechaza el de `payer`. `brokerCode` y `licenseNumber` son obligatorios.\n\nCuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerOrganization`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organization\": {\n    \"code\": \"BRK-{{$timestamp}}\",\n    \"legalName\": \"Corredora de prueba {{$timestamp}}\",\n    \"tenantType\": \"BROKER\",\n    \"broker\": {\n      \"brokerCode\": \"BRO-{{$timestamp}}\",\n      \"licenseNumber\": \"LIC-{{$timestamp}}\",\n      \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n    }\n  },\n  \"owner\": {\n    \"email\": \"broker-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de corredora\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Encadena el alta: deja los ids en el entorno para los pasos siguientes.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const brokerTenantId = body.tenantId;",
+                  "  if (brokerTenantId) pm.environment.set('brokerTenantId', brokerTenantId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Profesional · autoregistro público (matrícula PENDIENTE)",
           "request": {
             "method": "POST",
@@ -597,7 +711,7 @@
                 "users"
               ]
             },
-            "description": "Mismo endpoint, rol inicial distinto: este usuario ya puede dar de alta a otros.\n\nCrear un usuario con credencial de contraseña y rol inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_createUser`",
+            "description": "Mismo endpoint, rol inicial distinto: este usuario ya puede dar de alta a otros.\n\nCuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nCrear un usuario con credencial de contraseña y rol inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_createUser`",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"displayName\": \"Admin de prueba\",\n  \"email\": \"admin-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"initialRole\": \"SECURITY_ADMIN\"\n}",
@@ -6999,10 +7113,10 @@
                     }
                   ]
                 },
-                "description": "Asignar un rol a un usuario con vigencia y ámbito. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /authz/users/{userId}/role-assignments`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AuthzGrantsController_assignRole`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nAsignar un rol a un usuario con vigencia y ámbito. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /authz/users/{userId}/role-assignments`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AuthzGrantsController_assignRole`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"roleId\": \"00000000-0000-0000-0000-000000000000\",\n  \"tenantId\": \"00000000-0000-0000-0000-000000000000\",\n  \"branchId\": \"00000000-0000-0000-0000-000000000000\",\n  \"practiceId\": \"00000000-0000-0000-0000-000000000000\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"roleId\": \"{{roleId}}\",\n  \"tenantId\": \"{{tenantId}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -7347,10 +7461,10 @@
                     "roles"
                   ]
                 },
-                "description": "Componer un rol (con herencia opcional). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /authz/roles`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AuthzRolesController_createRole`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nComponer un rol (con herencia opcional). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /authz/roles`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AuthzRolesController_createRole`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"code\": \"code-ejemplo\",\n  \"name\": \"name-ejemplo\",\n  \"tenantId\": \"00000000-0000-0000-0000-000000000000\",\n  \"parentRoleId\": \"00000000-0000-0000-0000-000000000000\",\n  \"baseRole\": \"CLINICAL\",\n  \"scope\": \"SELF\",\n  \"isSystem\": true,\n  \"isAssignable\": true,\n  \"priority\": 1\n}",
+                  "raw": "{\n  \"code\": \"ROL-{{$timestamp}}\",\n  \"name\": \"Rol de prueba\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -24538,10 +24652,10 @@
                     "register-patient"
                   ]
                 },
-                "description": "Registrarse como paciente con documento de identidad. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-patient`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPatient`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrarse como paciente con documento de identidad. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-patient`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPatient`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"email\": \"{{email}}\",\n  \"birthDate\": \"2026-01-01\",\n  \"phone\": \"phone-ejemplo\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"administrativeGenderConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"sexAtBirthConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"timeZone\": \"timeZone-ejemplo\"\n}",
+                  "raw": "{\n  \"nationalId\": \"CI-{{$timestamp}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Paciente de prueba\",\n  \"email\": \"paciente-{{$timestamp}}@example.test\",\n  \"phone\": \"+591 70055555\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -24588,10 +24702,10 @@
                     "register-organization"
                   ]
                 },
-                "description": "Registrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerOrganization`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerOrganization`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"organization\": {\n    \"code\": \"CLINICA_SAN_RAFAEL\",\n    \"legalName\": \"legalName-ejemplo\",\n    \"tradeName\": \"tradeName-ejemplo\",\n    \"tenantType\": \"PROVIDER\",\n    \"payer\": {\n      \"carrierCode\": \"carrierCode-ejemplo\",\n      \"regulatorIdentifier\": \"regulatorIdentifier-ejemplo\",\n      \"jurisdictionConceptId\": \"00000000-0000-0000-0000-000000000000\"\n    },\n    \"broker\": {\n      \"brokerCode\": \"brokerCode-ejemplo\",\n      \"licenseNumber\": \"licenseNumber-ejemplo\",\n      \"jurisdictionConceptId\": \"00000000-0000-0000-0000-000000000000\"\n    },\n    \"countryConceptId\": \"00000000-0000-0000-0000-000000000000\",\n    \"jurisdictionConceptId\": \"00000000-0000-0000-0000-000000000000\",\n    \"timeZone\": \"America/La_Paz\"\n  },\n  \"owner\": {\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"displayName-ejemplo\",\n    \"timeZone\": \"timeZone-ejemplo\"\n  }\n}",
+                  "raw": "{\n  \"organization\": {\n    \"code\": \"ORG-{{$timestamp}}\",\n    \"legalName\": \"Organización de prueba {{$timestamp}}\",\n    \"tenantType\": \"PROVIDER\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"owner-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de prueba\"\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -24638,10 +24752,10 @@
                     "register-practitioner"
                   ]
                 },
-                "description": "Registrarse como profesional de salud con su matrícula. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-practitioner`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPractitioner`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrarse como profesional de salud con su matrícula. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-practitioner`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPractitioner`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"regulatoryAuthority\": \"regulatoryAuthority-ejemplo\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"practitionerCategoryConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"jurisdictionConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"credentialTypeConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"languageConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"acceptsNewPatients\": false,\n  \"timeZone\": \"timeZone-ejemplo\"\n}",
+                  "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -24788,10 +24902,10 @@
                     "activate"
                   ]
                 },
-                "description": "Activar la cuenta con el token de un solo uso y fijar la contraseña. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/activate`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_activate`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nActivar la cuenta con el token de un solo uso y fijar la contraseña. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/activate`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_activate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"activationToken\": \"activationToken-ejemplo\",\n  \"newPassword\": \"{{password}}\"\n}",
+                  "raw": "{\n  \"activationToken\": \"{{activationToken}}\",\n  \"newPassword\": \"{{password}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -25185,10 +25299,10 @@
                     "assisted-registration"
                   ]
                 },
-                "description": "Registro asistido de un paciente (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_assistedRegistration`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistro asistido de un paciente (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_assistedRegistration`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"displayName\": \"displayName-ejemplo\",\n  \"email\": \"{{email}}\",\n  \"reason\": \"reason-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"legalRepresentationId\": \"00000000-0000-0000-0000-000000000000\",\n  \"legalRepresentativeUserId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+                  "raw": "{\n  \"displayName\": \"Paciente asistido\",\n  \"email\": \"asistido-{{$timestamp}}@example.test\",\n  \"reason\": \"Alta asistida de prueba\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -25237,10 +25351,10 @@
                     "users"
                   ]
                 },
-                "description": "Crear un usuario con credencial de contraseña y rol inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_createUser`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nCrear un usuario con credencial de contraseña y rol inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_createUser`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"displayName\": \"displayName-ejemplo\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"phone-ejemplo\",\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"initialRole\": \"USER\"\n}",
+                  "raw": "{\n  \"displayName\": \"Usuario de prueba\",\n  \"email\": \"usuario-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"initialRole\": \"USER\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -25598,10 +25712,10 @@
                     }
                   ]
                 },
-                "description": "Conceder o revocar un rol global. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/{id}/global-roles`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_changeGlobalRole`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nConceder o revocar un rol global. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/{id}/global-roles`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_changeGlobalRole`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"role\": \"USER\",\n  \"action\": \"GRANT\"\n}",
+                  "raw": "{\n  \"role\": \"SUPERADMIN\",\n  \"action\": \"GRANT\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -39443,10 +39557,10 @@
                     "patients"
                   ]
                 },
-                "description": "Alta de persona y perfil de paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPatientsController_registerPatient`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nAlta de persona y perfil de paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPatientsController_registerPatient`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"patientCode\": \"patientCode-ejemplo\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"administrativeGenderConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"sexAtBirthConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"masterPatientIndexCode\": \"masterPatientIndexCode-ejemplo\"\n}",
+                  "raw": "{\n  \"patientCode\": \"PAT-{{$timestamp}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -39504,10 +39618,10 @@
                     }
                   ]
                 },
-                "description": "Vincular cuenta de portal a una persona. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/persons/{personId}/account-links`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPatientsController_linkAccount`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nVincular cuenta de portal a una persona. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/persons/{personId}/account-links`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPatientsController_linkAccount`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000000\",\n  \"linkTypeConceptId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+                  "raw": "{\n  \"userId\": \"{{userId}}\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -39920,10 +40034,10 @@
                     "practitioners"
                   ]
                 },
-                "description": "Alta de profesional de salud (workforce generalista). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/practitioners`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_onboardPractitioner`",
+                "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nAlta de profesional de salud (workforce generalista). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/practitioners`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_onboardPractitioner`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"practitionerCode\": \"practitionerCode-ejemplo\",\n  \"personId\": \"00000000-0000-0000-0000-000000000000\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"practitionerCategoryConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"jurisdictionConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"regulatoryAuthority\": \"regulatoryAuthority-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"credentialTypeConceptId\": \"00000000-0000-0000-0000-000000000000\",\n  \"languageConceptId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+                  "raw": "{\n  \"practitionerCode\": \"PRC-{{$timestamp}}\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"

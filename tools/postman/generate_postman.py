@@ -414,6 +414,40 @@ SIGNUP_FLOW = [
         'capture': [('tenantId', ['tenantId']), ('ownerUserId', ['ownerUserId'])],
     },
     {
+        'name': 'Organización PAYER · aseguradora (bloque `payer`)',
+        'key': ('POST', '/iam/auth/register-organization'),
+        'note': ('Mismo endpoint, tipo distinto. `tenantType: PAYER` **exige** el bloque `payer` y '
+                 'rechaza el de `broker`: mandar los dos devuelve 422. `carrierCode` y '
+                 '`regulatorIdentifier` son obligatorios; `country`/`jurisdictionConceptId` de la '
+                 'organización solo los pide PROVIDER.'),
+        'patch': {'organization': {'code': 'PAY-{{$timestamp}}',
+                                   'legalName': 'Aseguradora de prueba {{$timestamp}}',
+                                   'tenantType': 'PAYER',
+                                   'payer': {'carrierCode': 'CAR-{{$timestamp}}',
+                                             'regulatorIdentifier': 'REG-{{$timestamp}}',
+                                             'jurisdictionConceptId': '{{jurisdictionConceptId}}'}},
+                  'owner': {'email': 'payer-{{$timestamp}}@example.test',
+                            'password': '{{password}}',
+                            'displayName': 'Owner de aseguradora'}},
+        'capture': [('payerTenantId', ['tenantId'])],
+    },
+    {
+        'name': 'Organización BROKER · corredora (bloque `broker`)',
+        'key': ('POST', '/iam/auth/register-organization'),
+        'note': ('`tenantType: BROKER` exige el bloque `broker` y rechaza el de `payer`. '
+                 '`brokerCode` y `licenseNumber` son obligatorios.'),
+        'patch': {'organization': {'code': 'BRK-{{$timestamp}}',
+                                   'legalName': 'Corredora de prueba {{$timestamp}}',
+                                   'tenantType': 'BROKER',
+                                   'broker': {'brokerCode': 'BRO-{{$timestamp}}',
+                                              'licenseNumber': 'LIC-{{$timestamp}}',
+                                              'jurisdictionConceptId': '{{jurisdictionConceptId}}'}},
+                  'owner': {'email': 'broker-{{$timestamp}}@example.test',
+                            'password': '{{password}}',
+                            'displayName': 'Owner de corredora'}},
+        'capture': [('brokerTenantId', ['tenantId'])],
+    },
+    {
         'name': 'Profesional · autoregistro público (matrícula PENDIENTE)',
         'key': ('POST', '/iam/auth/register-practitioner'),
         'note': ('Alta pública desde cero, sin admin: crea cuenta + credencial + rol + persona + '
@@ -526,7 +560,8 @@ SIGNUP_FLOW = [
 # Variables que solo produce el flujo de alta (las de path las recolecta collect_env_keys).
 EXTRA_ENV_KEYS = ['adminUserId', 'patientUserId', 'patientProfileId', 'practitionerProfileId',
                   'activationToken', 'roleId', 'personId', 'ownerUserId',
-                  'practitionerUserId', 'countryConceptId', 'jurisdictionConceptId']
+                  'practitionerUserId', 'countryConceptId', 'jurisdictionConceptId',
+                  'payerTenantId', 'brokerTenantId']
 
 
 def starter_folder(index: dict) -> dict | None:
@@ -553,6 +588,7 @@ def starter_folder(index: dict) -> dict | None:
 def signup_folder(spec: dict, resolver: Resolver, index: dict) -> dict | None:
     """Folder de alta de usuarios por tipo, encadenado por variables de entorno."""
     items = []
+    synced: set[tuple] = set()
     for step in SIGNUP_FLOW:
         source = index.get(step['key'])
         if source is None:
@@ -595,6 +631,19 @@ def signup_folder(spec: dict, resolver: Resolver, index: dict) -> dict | None:
                 lines.append(f"  const {var} = {candidates};")
                 lines.append(f"  if ({var}) pm.environment.set('{var}', {var});")
             lines.append('}')
+
+        # El request que vive en su dominio se queda con este mismo cuerpo. El ejemplo derivado
+        # del schema emite **todos** los campos opcionales a la vez, y en las altas eso no es
+        # documentación: es un request roto. `register-organization` lo enseñaba entero —
+        # `payer` y `broker` juntos bajo un `tenantType: PROVIDER` (422), uuid de concepto
+        # inexistentes (500 por FK) y `{{email}}`, que es el admin ya registrado (409).
+        # Los campos opcionales siguen descritos en el contrato; el body sirve para correrlo.
+        if body and step['key'] not in synced:
+            synced.add(step['key'])
+            source['request']['body'] = copy.deepcopy(body)
+            source['request']['description'] = (
+                'Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde '
+                'está el flujo completo y sus variantes.\n\n' + source['request']['description'])
         items.append(request)
     if not items:
         return None
