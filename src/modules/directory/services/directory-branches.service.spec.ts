@@ -27,12 +27,16 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const branchesRepo = { findByTenantAndCode: mockFn(), create: mockFn() };
   const tenantsRepo = { findById: mockFn() };
+  // Autorización por membresía: los tests de este servicio prueban su lógica, no la del
+  // permiso; el doble deja pasar y hay un spec propio para el rechazo.
+  const tenantAdmin = { assertCanAdminister: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryBranchesService(
     em as any,
     branchesRepo as any,
     tenantsRepo as any,
+    tenantAdmin as never,
     logger as any,
   );
   return { service, tx, branchesRepo, tenantsRepo };

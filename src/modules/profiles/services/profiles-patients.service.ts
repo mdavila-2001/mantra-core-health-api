@@ -37,6 +37,7 @@ import {
   DeceaseResponseDto,
   PatientSummaryResponseDto,
 } from '../dto';
+import { ProfileOwnershipService } from './profile-ownership.service';
 
 /**
  * Casos de uso del ciclo de vida de personas y pacientes: alta (UC-05-01),
@@ -74,6 +75,7 @@ export class ProfilesPatientsService {
     private readonly mergeEventsRepo: PatientMergeEventsRepository,
     private readonly relatedPersonsRepo: RelatedPersonsRepository,
     private readonly portalProxiesRepo: PatientPortalProxiesRepository,
+    private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPatientsService.name);
@@ -495,6 +497,9 @@ export class ProfilesPatientsService {
       'Adding related person',
     );
     return this.em.transactional(async (tx) => {
+      // El titular administra lo suyo: sin esto, un profesional auto-registrado no
+      // podía crear la matrícula que su propia verificación exige.
+      await this.ownership.assertOwnsPatientProfile(tx, profileId, actor);
       const patient = await this.patientProfilesRepo.findById(tx, profileId);
       if (!patient)
         throw new ResourceNotFoundException('Paciente no encontrado', {

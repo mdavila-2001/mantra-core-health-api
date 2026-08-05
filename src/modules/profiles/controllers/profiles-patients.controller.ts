@@ -134,7 +134,6 @@ export class ProfilesPatientsController {
 
   /** UC-05-10. */
   @Post('patients/:profileId/related-persons')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar persona relacionada / contacto de emergencia',

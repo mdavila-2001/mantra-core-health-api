@@ -24,6 +24,7 @@ import {
   RelatedPersonsRepository,
   PatientPortalProxiesRepository,
 } from './repositories';
+import { ProfileOwnershipService } from './services';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -36,6 +37,7 @@ import {
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
   controllers: [ProfilesPatientsController, ProfilesPractitionersController],
   providers: [
+    ProfileOwnershipService,
     // Repositorios
     PersonsRepository,
     PersonProfilesRepository,

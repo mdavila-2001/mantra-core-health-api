@@ -949,6 +949,421 @@ def collect_env_keys(spec: dict) -> list:
     return sorted(keys)
 
 
+
+
+# --------------------------------------------------------------------- colecciones por actor
+
+# Un recorrido por tipo de usuario, espejo de los smokes `test/smoke/modules/<actor>.smoke.ts`.
+#
+# La colección completa sirve para explorar los 878 endpoints, pero no para ponerse en la piel de
+# alguien: quien prueba «como paciente» no quiere 121 dominios, quiere los diez requests que un
+# paciente puede ejecutar, en orden, y con las credenciales de un paciente. Cada actor lleva su
+# entorno propio para que las sesiones no se pisen — con un solo entorno, iniciar sesión como
+# médico borra el token del paciente y los siguientes requests fallan sin decir por qué.
+#
+# Los pasos salen de los mismos recorridos que el smoke ejercita contra la API real, así que lo
+# que está aquí es lo que se sabe que funciona.
+ACTOR_COLLECTIONS = [
+    {
+        'slug': 'paciente',
+        'name': 'Paciente',
+        'summary': ('Autoregistro público, sesión con documento de identidad, verificación de '
+                    'identidad y datos propios. Es el único actor que inicia sesión con su '
+                    'documento y no con un correo.'),
+        'env': {'password': 'S3cret-passw0rd', 'nationalId': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/register-patient', 'public': True,
+             'title': '1 · Se registra solo, sin admin ni token',
+             'note': ('Alta pública. El pre-request fija el documento en el entorno para que el '
+                      'login del paso 2 use exactamente el mismo, y para que reejecutar no choque '
+                      'con el 409 de documento en uso.'),
+             'prerequest': ["pm.environment.set('nationalId', 'CI-' + Date.now());"],
+             'body': {'nationalId': '{{nationalId}}', 'password': '{{password}}',
+                      'displayName': 'Paciente de prueba', 'phone': '+591 70055555',
+                      'gender': 'MALE', 'sexAtBirth': 'MALE'},
+             'status': 201,
+             'captures': [('patientUserId', 'userId'), ('personId', 'personId'),
+                          ('patientProfileId', 'patientProfileId')]},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '2 · Inicia sesión con su documento',
+             'note': 'El paciente entra con su documento, no con un correo.',
+             'body': {'nationalId': '{{nationalId}}', 'password': '{{password}}'},
+             'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/common/files',
+             'title': '3 · Sube la foto de su documento',
+             'note': 'La evidencia con la que se abrirá el caso: sin ella no hay qué contrastar.',
+             'body': {'originalName': 'documento.jpg', 'category': 'DOCUMENT',
+                      'sensitivity': 'NORMAL', 'mimeType': 'image/jpeg', 'sizeBytes': 4096,
+                      'contentHash': 'pac-{{$timestamp}}',
+                      'storageUri': 's3://bucket/documento.jpg'},
+             'status': 201, 'captures': [('evidenceFileId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/identity-verification',
+             'title': '4 · Abre su caso de verificación de identidad',
+             'body': {'evidenceFileId': '{{evidenceFileId}}'},
+             'status': 201, 'captures': [('caseId', 'id')]},
+            {'method': 'GET', 'path': '/identity/me/verification-cases',
+             'title': '5 · Lista sus propios casos', 'status': 200},
+            {'method': 'GET', 'path': '/identity/me/verification-cases/{caseId}',
+             'title': '6 · Ve el detalle de su caso',
+             'note': 'Filtra por id **y** titular: el caso de otro paciente responde 404.',
+             'status': 200},
+            {'method': 'POST', 'path': '/profiles/patients/{patientProfileId}/related-persons',
+             'title': '7 · Registra a su familiar responsable',
+             'body': {'personId': '{{personId}}', 'displayName': 'Familiar responsable',
+                      'isEmergencyContact': True},
+             'status': 201},
+            {'method': 'POST', 'path': '/iam/auth/logout',
+             'title': '8 · Cierra su sesión',
+             'body': {'refreshToken': '{{refreshToken}}'}, 'status': 200},
+        ],
+    },
+    {
+        'slug': 'medico',
+        'name': 'Médico',
+        'summary': ('Autoregistro con matrícula, verificación de identidad y de licencia, y perfil '
+                    'profesional. La matrícula nace PENDIENTE: registrarse la declara, no la '
+                    'prueba, así que el perfil no queda habilitado por el solo hecho de darse de '
+                    'alta.'),
+        'env': {'password': 'S3cret-passw0rd', 'email': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/register-practitioner', 'public': True,
+             'title': '1 · Se registra declarando su matrícula',
+             'note': ('Crea cuenta, persona, perfil profesional y licencia en una transacción. '
+                      'La licencia nace PENDIENTE de verificación.'),
+             'prerequest': ["pm.environment.set('email', 'medico-' + Date.now() + '@example.test');"],
+             'body': {'email': '{{email}}', 'password': '{{password}}',
+                      'displayName': 'Dra. de prueba', 'licenseNumber': 'MP-{{$timestamp}}',
+                      'credentialNumber': 'TIT-{{$timestamp}}', 'phone': '+591 70012345',
+                      'gender': 'FEMALE', 'sexAtBirth': 'FEMALE', 'birthDate': '1985-04-12'},
+             'status': 201,
+             'captures': [('practitionerUserId', 'userId'), ('personId', 'personId'),
+                          ('practitionerProfileId', 'practitionerProfileId')]},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '2 · Inicia sesión con su correo',
+             'body': {'email': '{{email}}', 'password': '{{password}}'}, 'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/common/files',
+             'title': '3 · Sube el certificado de su matrícula',
+             'body': {'originalName': 'matricula.pdf', 'category': 'DOCUMENT',
+                      'sensitivity': 'NORMAL', 'mimeType': 'application/pdf', 'sizeBytes': 8192,
+                      'contentHash': 'med-{{$timestamp}}',
+                      'storageUri': 's3://bucket/matricula.pdf'},
+             'status': 201, 'captures': [('evidenceFileId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/practitioner/identity-verification',
+             'title': '4 · Abre su caso de verificación de identidad',
+             'body': {'evidenceFileId': '{{evidenceFileId}}'}, 'status': 201},
+            {'method': 'POST',
+             'path': '/profiles/practitioners/{practitionerProfileId}/jurisdiction-authorizations',
+             'title': '5 · Registra la jurisdicción donde puede ejercer',
+             'note': ('Tiene que existir antes del paso 6: el caso se abre sobre una matrícula '
+                      'concreta, no sobre el profesional en abstracto.'),
+             'body': {'licenseNumber': 'MP-JUR-{{$timestamp}}'},
+             'status': 201, 'captures': [('jurisdictionAuthorizationId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/practitioner/license-verification',
+             'title': '6 · Pide que le verifiquen la matrícula',
+             'note': ('El caso que distingue al profesional del paciente: además de probar quién '
+                      'es, tiene que probar que puede ejercer.'),
+             'body': {'evidenceFileId': '{{evidenceFileId}}',
+                      'jurisdictionAuthorizationId': '{{jurisdictionAuthorizationId}}'},
+             'status': 201},
+            {'method': 'GET', 'path': '/identity/me/verification-cases',
+             'title': '7 · Ve sus dos casos abiertos (identidad y matrícula)', 'status': 200},
+            {'method': 'POST',
+             'path': '/profiles/practitioners/{practitionerProfileId}/specialties',
+             'title': '8 · Declara su especialidad',
+             'body': {'isPrimary': True, 'boardCertified': False}, 'status': 201},
+            {'method': 'POST', 'path': '/iam/auth/logout',
+             'title': '9 · Cierra su sesión',
+             'body': {'refreshToken': '{{refreshToken}}'}, 'status': 200},
+        ],
+    },
+    {
+        'slug': 'organizacion',
+        'name': 'Organización',
+        'summary': ('Autoregistro del tenant con su cuenta owner, petición de verificación y —una '
+                    'vez que la plataforma la activa— sedes y personal. Mientras está PENDIENTE '
+                    'puede prepararse pero no operar; el paso 5 fija ese límite.'),
+        'env': {'password': 'S3cret-passw0rd', 'email': '', 'staffEmail': '',
+                'adminEmail': 'admin@redesa.test', 'adminPassword': 'S3cret-passw0rd',
+                'platformToken': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/register-organization', 'public': True,
+             'title': '1 · Se registra con su cuenta owner',
+             'note': ('Crea tenant, usuario owner, credencial y la membresía OWNER que los une. '
+                      'La organización nace PENDIENTE de verificación.'),
+             'prerequest': ["pm.environment.set('email', 'owner-' + Date.now() + '@example.test');",
+                            "pm.environment.set('orgCode', 'ORG-' + Date.now());"],
+             'body': {'organization': {'code': '{{orgCode}}',
+                                       'legalName': 'Organización de prueba',
+                                       'tenantType': 'HOSPITAL',
+                                       'countryConceptId': '{{countryConceptId}}',
+                                       'jurisdictionConceptId': '{{jurisdictionConceptId}}'},
+                      'owner': {'email': '{{email}}', 'password': '{{password}}',
+                                'displayName': 'Owner de prueba'}},
+             'status': 201,
+             'captures': [('tenantId', 'tenantId'), ('ownerUserId', 'ownerUserId')]},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '2 · El owner inicia sesión de inmediato',
+             'note': 'No espera a la verificación: puede entrar y preparar su organización.',
+             'body': {'email': '{{email}}', 'password': '{{password}}'}, 'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/common/files',
+             'title': '3 · Sube su documentación legal',
+             'body': {'originalName': 'personeria.pdf', 'category': 'DOCUMENT',
+                      'sensitivity': 'NORMAL', 'mimeType': 'application/pdf', 'sizeBytes': 16384,
+                      'contentHash': 'org-{{$timestamp}}',
+                      'storageUri': 's3://bucket/personeria.pdf'},
+             'status': 201, 'captures': [('evidenceFileId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/tenants/{tenantId}/verification',
+             'title': '4 · Pide que la plataforma la verifique',
+             'note': ('Pedirla es lo máximo que puede hacer: quien contrasta licencia y '
+                      'personería es la plataforma. Auto-verificarse sería un agujero '
+                      'regulatorio.'),
+             'body': {'evidenceFileId': '{{evidenceFileId}}'}, 'status': 201},
+            {'method': 'POST', 'path': '/tenants/{tenantId}/branches',
+             'title': '5 · LÍMITE · pendiente de verificación no puede abrir sedes',
+             'note': ('Este paso **debe** dar 422. Preparase sí, operar no: abrir una sede es '
+                      'operar. Se activa en el paso 7.'),
+             'body': {'code': 'SEDE-PREMATURA-{{$timestamp}}', 'name': 'Sede prematura'},
+             'status': 422},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '6 · SETUP · sesión de la plataforma (credenciales de administrador)',
+             'note': ('El único paso que no ejecuta el owner. Está aquí para que el recorrido se '
+                      'pueda correr entero de una vez, y guarda el token en `platformToken` '
+                      'aparte, sin pisar la sesión del owner.'),
+             'body': {'email': '{{adminEmail}}', 'password': '{{adminPassword}}'},
+             'status': 200, 'captures': [('platformToken', 'accessToken')]},
+            {'method': 'POST', 'path': '/admin/tenants/{tenantId}/verification',
+             'as': 'plataforma',
+             'title': '7 · La plataforma la verifica y queda ACTIVA',
+             'status': 200},
+            {'method': 'POST', 'path': '/tenants/{tenantId}/branches',
+             'title': '8 · Ahora sí, abre su primera sede',
+             'note': ('Lo hace el owner con su propio token: su poder viene de la membresía '
+                      'OWNER, no de un rol global de plataforma.'),
+             'body': {'code': 'SEDE-{{$timestamp}}', 'name': 'Sede Central',
+                      'branchType': 'CLINIC'},
+             'status': 201, 'captures': [('branchId', 'id')]},
+            {'method': 'POST', 'path': '/iam/auth/register-practitioner', 'public': True,
+             'title': '9 · SETUP · una persona a quien incorporar',
+             'note': ('Se usa el autoregistro público de profesionales para no depender de un '
+                      'administrador: el owner no puede crear cuentas IAM, pero sí incorporar a '
+                      'quien ya tiene una.'),
+             'prerequest': ["pm.environment.set('staffEmail', 'staff-' + Date.now() + '@example.test');"],
+             'body': {'email': '{{staffEmail}}', 'password': '{{password}}',
+                      'displayName': 'Profesional a incorporar',
+                      'licenseNumber': 'MP-ST-{{$timestamp}}',
+                      'credentialNumber': 'TIT-ST-{{$timestamp}}'},
+             'status': 201, 'captures': [('staffUserId', 'userId')]},
+            {'method': 'POST', 'path': '/tenants/{tenantId}/memberships',
+             'title': '10 · Lo incorpora a la organización',
+             'body': {'userId': '{{staffUserId}}', 'role': 'STAFF',
+                      'accessScope': 'ALL_TENANT'},
+             'status': 201, 'captures': [('membershipId', 'id')]},
+            {'method': 'PATCH', 'path': '/tenants/{tenantId}/memberships/{membershipId}/role',
+             'title': '11 · Lo asciende a ADMIN de la organización',
+             'body': {'role': 'ADMIN'}, 'status': 200},
+            {'method': 'POST',
+             'path': '/tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
+             'title': '12 · Lo asigna a la sede',
+             'body': {'branchId': '{{branchId}}'}, 'status': 201},
+            {'method': 'POST',
+             'path': '/tenants/{tenantId}/memberships/{membershipId}/offboard',
+             'title': '13 · Lo da de baja — la membresía sobrevive',
+             'note': ('Baja lógica: la fila no se borra porque de ella cuelga qué pudo ver esa '
+                      'persona y cuándo, que es lo que se audita.'),
+             'status': 200},
+            {'method': 'POST', 'path': '/iam/auth/logout',
+             'title': '14 · El owner cierra su sesión',
+             'body': {'refreshToken': '{{refreshToken}}'}, 'status': 200},
+        ],
+    },
+    {
+        'slug': 'administrador',
+        'name': 'Administrador',
+        'summary': ('Altas, concesión de roles y las tres bajas lógicas de plataforma: bloquear '
+                    'una cuenta, suspender una organización y anonimizar a una persona. Ninguna '
+                    'borra: lo que se firmó tiene que seguir existiendo.'),
+        'env': {'email': 'admin@redesa.test', 'password': 'S3cret-passw0rd',
+                'managedEmail': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '1 · Inicia sesión como administrador',
+             'note': ('El primer SECURITY_ADMIN no se puede crear por API: lo siembra '
+                      '`yarn postman:bootstrap`.'),
+             'body': {'email': '{{email}}', 'password': '{{password}}'}, 'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/iam/users',
+             'title': '2 · Da de alta una cuenta',
+             'note': 'Sólo `USER` y `SECURITY_ADMIN` son roles de alta.',
+             'prerequest': ["pm.environment.set('managedEmail', 'gestionado-' + Date.now() + '@example.test');"],
+             'body': {'displayName': 'Usuario gestionado', 'email': '{{managedEmail}}',
+                      'password': '{{password}}', 'initialRole': 'USER'},
+             'status': 201, 'captures': [('managedUserId', 'id')]},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/global-roles',
+             'title': '3 · Le concede SECURITY_ADMIN',
+             'body': {'role': 'SECURITY_ADMIN', 'action': 'GRANT'}, 'status': 200},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/global-roles',
+             'title': '4 · Y se lo revoca',
+             'body': {'role': 'SECURITY_ADMIN', 'action': 'REVOKE'}, 'status': 200},
+            {'method': 'POST', 'path': '/admin/tenants',
+             'title': '5 · Aprovisiona una organización con su owner',
+             'prerequest': ["pm.environment.set('admTenantCode', 'ADM-' + Date.now());"],
+             'body': {'code': '{{admTenantCode}}',
+                      'legalName': 'Organización aprovisionada',
+                      'tenantType': 'MEDICAL_OFFICE',
+                      'countryConceptId': '{{countryConceptId}}',
+                      'jurisdictionConceptId': '{{jurisdictionConceptId}}',
+                      'ownerUserId': '{{managedUserId}}'},
+             'status': 201, 'captures': [('admTenantId', 'id')]},
+            {'method': 'POST', 'path': '/admin/tenants/{admTenantId}/verification',
+             'title': '6 · La verifica y la deja ACTIVA',
+             'note': 'Acto de plataforma: el owner no llega a este endpoint.',
+             'status': 200},
+            {'method': 'POST', 'path': '/admin/tenants/{admTenantId}/suspend',
+             'title': '7 · La suspende — baja lógica, sigue existiendo',
+             'note': ('De la organización cuelgan historias clínicas, facturación y '
+                      'consentimientos: un borrado dejaría todo eso apuntando al vacío. El '
+                      'motivo es obligatorio porque estas decisiones se revisan.'),
+             'body': {'reason': 'Motivo de la suspensión'}, 'status': 200},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/lock',
+             'title': '8 · Bloquea la cuenta — baja lógica',
+             'note': ('Le corta el acceso; la cuenta sigue existiendo porque de ella cuelgan sus '
+                      'actos. Después de esto su login devuelve 401.'),
+             'body': {'reason': 'Motivo del bloqueo'}, 'status': 200},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '9 · LÍMITE · la cuenta bloqueada ya no entra',
+             'note': 'Este paso **debe** dar 401: es la prueba de que el bloqueo sirve.',
+             'body': {'email': '{{managedEmail}}', 'password': '{{password}}'},
+             'status': 401},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/anonymize',
+             'title': '10 · Derecho al olvido — vacía sin borrar',
+             'note': ('No es una baja más: se vacían los datos personales pero la fila queda, '
+                      'porque los actos que esa persona firmó son parte de la historia de otros '
+                      'pacientes.'),
+             'status': 200},
+        ],
+    },
+]
+
+
+def actor_request(step: dict, index: dict) -> dict:
+    """Un paso del recorrido de un actor.
+
+    Dos detalles que hacen la diferencia entre una colección que se lee y una que corre:
+
+    - **La identidad se fija antes de registrarse, no después.** Si el alta usa
+      `medico-{{$timestamp}}@…` y el login usa `{{email}}`, son dos valores distintos y el login
+      da 401. Aquí un script de pre-request escribe el correo (o el documento) en el entorno y
+      tanto el alta como el login leen esa misma variable.
+    - **Las variables de ruta se llaman como la variable que las llena.** El contrato llama `id`
+      a la variable de 350 rutas; en un recorrido eso obliga a adivinar cuál `id` es. Los pasos
+      declaran su placeholder con el nombre real (`{userId}`, `{caseId}`), que es el que la
+      captura del paso anterior dejó en el entorno.
+    """
+    method, path, title = step['method'], step['path'], step['title']
+    request = {'name': title,
+               'request': {'method': method, 'header': [], 'url': {}},
+               'response': [], 'event': []}
+    raw = '{{baseUrl}}' + re.sub(r'\{(\w+)\}', r':\1', path)
+    request['request']['url'] = {
+        'raw': raw, 'host': ['{{baseUrl}}'],
+        'path': [s for s in re.sub(r'\{(\w+)\}', r':\1', path).strip('/').split('/') if s],
+        'variable': [{'key': m, 'value': '{{' + m + '}}',
+                      'description': f'Lo deja en el entorno un paso anterior'}
+                     for m in re.findall(r'\{(\w+)\}', path)],
+    }
+    headers = []
+    if step.get('body') is not None:
+        headers.append({'key': 'Content-Type', 'value': 'application/json'})
+        request['request']['body'] = {
+            'mode': 'raw',
+            'raw': json.dumps(step['body'], indent=2, ensure_ascii=False),
+            'options': {'raw': {'language': 'json'}}}
+    if step.get('as') == 'plataforma':
+        # Este paso lo ejecuta la plataforma, no el actor: se declara explícito para que se vea
+        # en el request de quién es el poder que hace falta.
+        headers.append({'key': 'Authorization', 'value': 'Bearer {{platformToken}}'})
+        request['request']['auth'] = {'type': 'noauth'}
+    if step.get('public'):
+        request['request']['auth'] = {'type': 'noauth'}
+    request['request']['header'] = headers
+    request['request']['description'] = step.get('note', '')
+
+    status = step.get('status', 201)
+    lines = [f"pm.test('status {status}', function () {{",
+             f"  pm.response.to.have.status({status});", '});']
+    if step.get('captures'):
+        lines += ['', '// Encadena el recorrido: lo que deja este paso lo consume el siguiente.',
+                  'if (pm.response.code < 300) {', '  const b = pm.response.json();']
+        for var, field in step['captures']:
+            lines.append(f"  if (b.{field}) pm.environment.set('{var}', b.{field});")
+        lines.append('}')
+    events = [{'listen': 'test', 'script': {'type': 'text/javascript', 'exec': lines}}]
+    if step.get('prerequest'):
+        events.insert(0, {'listen': 'prerequest',
+                          'script': {'type': 'text/javascript', 'exec': step['prerequest']}})
+    request['event'] = events
+    return request
+
+
+def build_actor_collections(spec: dict, index: dict, base_url: str) -> list:
+    """Emite colección + entorno por actor. Devuelve lo escrito."""
+    written = []
+    actors_dir = os.path.join(OUT_DIR, 'actores')
+    os.makedirs(actors_dir, exist_ok=True)
+    for actor in ACTOR_COLLECTIONS:
+        items = [actor_request(step, index) for step in actor['steps']]
+        collection = {
+            'info': {
+                'name': f"SALUD · {actor['name']}",
+                'description': (
+                    f"Recorrido de un usuario **{actor['name'].lower()}**, en orden y encadenado "
+                    f"por el entorno.\n\n{actor['summary']}\n\n"
+                    f"Importar junto a `Salud-{actor['slug'].capitalize()}."
+                    f"postman_environment.json` y correr los pasos de arriba abajo. Cada actor "
+                    f"tiene su propio entorno: con uno solo, iniciar sesión como otro borraría "
+                    f"este token.\n\n"
+                    f"Los pasos son los mismos que ejercita "
+                    f"`test/smoke/modules/{actor['slug']}.smoke.ts` contra la API real, y "
+                    f"`yarn postman:verify:actores` los vuelve a correr sobre esta colección."),
+                'schema': 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+            },
+            'item': items,
+            'auth': {'type': 'bearer',
+                     'bearer': [{'key': 'token', 'value': '{{accessToken}}', 'type': 'string'}]},
+            'variable': [{'key': 'baseUrl', 'value': base_url, 'type': 'string'}],
+        }
+        env_values = {'baseUrl': base_url, 'accessToken': '', 'refreshToken': ''}
+        env_values.update({k: ENV_DEFAULTS.get(k, '') for k in
+                           ('countryConceptId', 'jurisdictionConceptId')})
+        env_values.update(actor.get('env', {}))
+        for step in actor['steps']:
+            for var, _f in step.get('captures', []):
+                env_values.setdefault(var, '')
+            for m in re.findall(r'\{(\w+)\}', step['path']):
+                env_values.setdefault(m, '')
+        environment = {
+            'name': f"SALUD {actor['name']}",
+            'values': [{'key': k, 'value': v,
+                        'type': 'secret' if k in ('accessToken', 'refreshToken', 'password',
+                                                  'platformToken') else 'default',
+                        'enabled': True}
+                       for k, v in env_values.items()],
+            '_postman_variable_scope': 'environment',
+        }
+        cap = actor['slug'].capitalize()
+        coll_path = os.path.join(actors_dir, f'Salud-{cap}.postman_collection.json')
+        env_path = os.path.join(actors_dir, f'Salud-{cap}.postman_environment.json')
+        for target, payload in ((coll_path, collection), (env_path, environment)):
+            with open(target, 'w', encoding='utf-8') as f:
+                json.dump(payload, f, indent=2, ensure_ascii=False)
+                f.write('\n')
+        written.append((actor['name'], len(items), coll_path, env_path))
+    return written
+
+
 # --------------------------------------------------------------------- salida
 
 def main():
@@ -1025,6 +1440,11 @@ def main():
           f'· {len(env_keys)} variables')
     print(f'  {coll_path}')
     print(f'  {env_path}')
+
+    for name, steps, cpath, epath in build_actor_collections(spec, index, base_url):
+        print(f'Colección por actor · {name}: {steps} pasos')
+        print(f'  {cpath}')
+        print(f'  {epath}')
 
 
 if __name__ == '__main__':

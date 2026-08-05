@@ -95,6 +95,7 @@
     "docs:build": "python3 -m mkdocs build --strict",
     "postman:generate": "python3 tools/postman/generate_postman.py",
     "postman:verify": "python3 tools/postman/verify.py",
+    "postman:verify:actores": "python3 tools/postman/verify.py --actores",
     "postman:bootstrap": "node tools/postman/bootstrap-admin.mjs"
   },
   "dependencies": {

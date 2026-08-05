@@ -49,6 +49,9 @@ function build() {
     demotePrimary: mockFn().mockResolvedValue(0),
   };
   const languagesRepo = { create: mockFn() };
+  // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
+  // doble deja pasar para no mezclar el permiso con la lógica del servicio.
+  const ownership = { assertOwnsPractitionerProfile: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesPractitionersService(
@@ -60,6 +63,7 @@ function build() {
     credentialsRepo,
     specialtiesRepo,
     languagesRepo,
+    ownership as never,
     logger as any,
   );
   return {

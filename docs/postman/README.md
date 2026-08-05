@@ -5,6 +5,12 @@ Colección y entorno para ejercer **todos** los endpoints del contrato, generado
 
 ## Archivos
 
+- `actores/` — **una colección y un entorno por tipo de usuario**: paciente, médico,
+  organización y administrador. Cada uno es el recorrido de ese actor en orden, encadenado por su
+  propio entorno, y con sus credenciales. Es lo que conviene abrir para probar «como cliente»: la
+  colección completa sirve para explorar los 878 endpoints, no para ponerse en la piel de nadie.
+  Cada actor lleva entorno propio porque con uno solo, iniciar sesión como médico borraría el
+  token del paciente y los pasos siguientes fallarían sin decir por qué.
 - `Salud-API.postman_collection.json` — 878 requests en 121 dominios (un folder por primer
   segmento de ruta; los dominios grandes se parten en subfolders por tag). Cada request trae
   método, URL con variables de path, query params documentados, auth Bearer heredada, body de
@@ -79,6 +85,26 @@ en el tenant sembrado. Por defecto `admin@redesa.test` / `S3cret-passw0rd`; se p
 > `SURGEON`…) no son roles de alta: se componen en `POST /authz/roles` y se asignan por tenant en
 > `POST /authz/users/{userId}/role-assignments`.
 
+## Quién puede qué (y por qué)
+
+Los recorridos por actor dejaron a la vista tres endpoints que exigían el rol **global**
+`SECURITY_ADMIN` para operar sobre datos del propio titular. Corregido: ahora el dueño administra
+lo suyo y la plataforma conserva su llave maestra.
+
+| Operación | Antes | Ahora |
+| --- | --- | --- |
+| Sedes y personal de una organización (`/tenants/{id}/…`) | Sólo `SECURITY_ADMIN` global | El `OWNER`/`ADMIN` de **esa** organización, o plataforma |
+| Jurisdicción y especialidad de un profesional | Sólo `SECURITY_ADMIN` global | El titular del perfil, o plataforma |
+| Familiar responsable de un paciente | Sólo `SECURITY_ADMIN` global | El titular del perfil, o plataforma |
+
+El caso del profesional era un callejón sin salida comprobable: pedir la verificación de la
+matrícula exige un `jurisdictionAuthorizationId`, pero crear esa autorización pedía rol de
+plataforma. Un médico auto-registrado no podía verificarse nunca por su cuenta.
+
+Lo que **no** cambió: el aislamiento entre organizaciones. Un owner sigue sin poder tocar el tenant
+de al lado, y nadie toca el perfil de otro — la propiedad se resuelve desde el vínculo activo de la
+cuenta, no desde un parámetro que el cliente pueda declarar.
+
 ## Convenciones de la colección
 
 | Elemento | Comportamiento |
@@ -101,9 +127,23 @@ La colección **no se edita a mano**. Tras cualquier cambio de contrato:
 
 ```bash
 yarn docs:openapi:generate   # regenera openapi/openapi.json desde los controllers
-yarn postman:generate        # regenera colección + entorno desde ese contrato
+yarn postman:generate        # regenera colección completa + entorno + las 4 por actor
 yarn postman:verify          # corre los folders 00 y 01 contra la API y falla si alguno no da su status
+yarn postman:verify:actores  # corre los 4 recorridos por tipo de usuario
 ```
+
+## Recorridos por actor
+
+| Actor | Colección | Qué recorre | Smoke equivalente |
+| --- | --- | --- | --- |
+| Paciente | `actores/Salud-Paciente.*` | Autoregistro, sesión con documento, verificación de identidad, familiar responsable | `test/smoke/modules/paciente.smoke.ts` |
+| Médico | `actores/Salud-Medico.*` | Autoregistro con matrícula, verificación de identidad y de licencia, jurisdicción, especialidad | `medico.smoke.ts` |
+| Organización | `actores/Salud-Organizacion.*` | Alta del tenant con su owner, petición de verificación, activación por plataforma, sede, personal y baja lógica | `organizacion.smoke.ts` |
+| Administrador | `actores/Salud-Administrador.*` | Altas, roles globales, aprovisionamiento y las tres bajas lógicas | `administrador.smoke.ts` |
+
+Cada recorrido incluye pasos de **límite** marcados en el nombre: son los que *deben* fallar
+—`422` al abrir una sede con la organización aún pendiente, `401` al entrar con una cuenta
+bloqueada— porque ahí está la regla que el sistema tiene que sostener.
 
 El generador falla en vez de emitir un request roto si un cuerpo fijado a mano (login, folder 01)
 nombra un campo que el DTO ya no declara. Eso cubre los renombres de campo, pero no que el cuerpo

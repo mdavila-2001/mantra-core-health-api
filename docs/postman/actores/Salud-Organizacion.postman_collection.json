@@ -1,0 +1,824 @@
+{
+  "info": {
+    "name": "SALUD · Organización",
+    "description": "Recorrido de un usuario **organización**, en orden y encadenado por el entorno.\n\nAutoregistro del tenant con su cuenta owner, petición de verificación y —una vez que la plataforma la activa— sedes y personal. Mientras está PENDIENTE puede prepararse pero no operar; el paso 5 fija ese límite.\n\nImportar junto a `Salud-Organizacion.postman_environment.json` y correr los pasos de arriba abajo. Cada actor tiene su propio entorno: con uno solo, iniciar sesión como otro borraría este token.\n\nLos pasos son los mismos que ejercita `test/smoke/modules/organizacion.smoke.ts` contra la API real, y `yarn postman:verify:actores` los vuelve a correr sobre esta colección.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 · Se registra con su cuenta owner",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/register-organization",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "register-organization"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"organization\": {\n    \"code\": \"{{orgCode}}\",\n    \"legalName\": \"Organización de prueba\",\n    \"tenantType\": \"HOSPITAL\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de prueba\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Crea tenant, usuario owner, credencial y la membresía OWNER que los une. La organización nace PENDIENTE de verificación."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('email', 'owner-' + Date.now() + '@example.test');",
+              "pm.environment.set('orgCode', 'ORG-' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.tenantId) pm.environment.set('tenantId', b.tenantId);",
+              "  if (b.ownerUserId) pm.environment.set('ownerUserId', b.ownerUserId);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · El owner inicia sesión de inmediato",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "login"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "No espera a la verificación: puede entrar y preparar su organización."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.accessToken) pm.environment.set('accessToken', b.accessToken);",
+              "  if (b.refreshToken) pm.environment.set('refreshToken', b.refreshToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · Sube su documentación legal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/common/files",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "common",
+            "files"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"originalName\": \"personeria.pdf\",\n  \"category\": \"DOCUMENT\",\n  \"sensitivity\": \"NORMAL\",\n  \"mimeType\": \"application/pdf\",\n  \"sizeBytes\": 16384,\n  \"contentHash\": \"org-{{$timestamp}}\",\n  \"storageUri\": \"s3://bucket/personeria.pdf\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('evidenceFileId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 · Pide que la plataforma la verifique",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/identity/me/tenants/:tenantId/verification",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "identity",
+            "me",
+            "tenants",
+            ":tenantId",
+            "verification"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"evidenceFileId\": \"{{evidenceFileId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Pedirla es lo máximo que puede hacer: quien contrasta licencia y personería es la plataforma. Auto-verificarse sería un agujero regulatorio."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 · LÍMITE · pendiente de verificación no puede abrir sedes",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tenants/:tenantId/branches",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tenants",
+            ":tenantId",
+            "branches"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"SEDE-PREMATURA-{{$timestamp}}\",\n  \"name\": \"Sede prematura\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Este paso **debe** dar 422. Preparase sí, operar no: abrir una sede es operar. Se activa en el paso 7."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 422', function () {",
+              "  pm.response.to.have.status(422);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 · SETUP · sesión de la plataforma (credenciales de administrador)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "login"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "El único paso que no ejecuta el owner. Está aquí para que el recorrido se pueda correr entero de una vez, y guarda el token en `platformToken` aparte, sin pisar la sesión del owner."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.accessToken) pm.environment.set('platformToken', b.accessToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 · La plataforma la verifica y queda ACTIVA",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{platformToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/tenants/:tenantId/verification",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "tenants",
+            ":tenantId",
+            "verification"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8 · Ahora sí, abre su primera sede",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tenants/:tenantId/branches",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tenants",
+            ":tenantId",
+            "branches"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"SEDE-{{$timestamp}}\",\n  \"name\": \"Sede Central\",\n  \"branchType\": \"CLINIC\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Lo hace el owner con su propio token: su poder viene de la membresía OWNER, no de un rol global de plataforma."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('branchId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9 · SETUP · una persona a quien incorporar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/register-practitioner",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "register-practitioner"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{staffEmail}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Profesional a incorporar\",\n  \"licenseNumber\": \"MP-ST-{{$timestamp}}\",\n  \"credentialNumber\": \"TIT-ST-{{$timestamp}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Se usa el autoregistro público de profesionales para no depender de un administrador: el owner no puede crear cuentas IAM, pero sí incorporar a quien ya tiene una."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('staffEmail', 'staff-' + Date.now() + '@example.test');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.userId) pm.environment.set('staffUserId', b.userId);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 · Lo incorpora a la organización",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tenants/:tenantId/memberships",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tenants",
+            ":tenantId",
+            "memberships"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{staffUserId}}\",\n  \"role\": \"STAFF\",\n  \"accessScope\": \"ALL_TENANT\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('membershipId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 · Lo asciende a ADMIN de la organización",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tenants/:tenantId/memberships/:membershipId/role",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tenants",
+            ":tenantId",
+            "memberships",
+            ":membershipId",
+            "role"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            },
+            {
+              "key": "membershipId",
+              "value": "{{membershipId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"ADMIN\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 · Lo asigna a la sede",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/tenants/:tenantId/memberships/:membershipId/branch-assignments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tenants",
+            ":tenantId",
+            "memberships",
+            ":membershipId",
+            "branch-assignments"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            },
+            {
+              "key": "membershipId",
+              "value": "{{membershipId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"branchId\": \"{{branchId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 · Lo da de baja — la membresía sobrevive",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/tenants/:tenantId/memberships/:membershipId/offboard",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tenants",
+            ":tenantId",
+            "memberships",
+            ":membershipId",
+            "offboard"
+          ],
+          "variable": [
+            {
+              "key": "tenantId",
+              "value": "{{tenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            },
+            {
+              "key": "membershipId",
+              "value": "{{membershipId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "description": "Baja lógica: la fila no se borra porque de ella cuelga qué pudo ver esa persona y cuándo, que es lo que se audita."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 · El owner cierra su sesión",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "logout"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
