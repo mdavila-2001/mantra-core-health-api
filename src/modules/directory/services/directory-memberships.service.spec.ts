@@ -37,7 +37,9 @@ function build() {
   const branchesRepo = { findById: mockFn() };
   // Autorización por membresía: los tests de este servicio prueban su lógica, no la del
   // permiso; el doble deja pasar y hay un spec propio para el rechazo.
-  const tenantAdmin = { assertCanAdminister: mockFn().mockResolvedValue(undefined) };
+  const tenantAdmin = {
+    assertCanAdminister: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryMembershipsService(

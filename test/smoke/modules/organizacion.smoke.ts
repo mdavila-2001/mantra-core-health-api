@@ -277,7 +277,8 @@ export const ORGANIZACION_SMOKE: SmokeCase[] = [
   },
   {
     module: 'Organización',
-    endpoint: 'POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
+    endpoint:
+      'POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
     name: 'happy: lo asigna a la sede',
     method: 'post',
     token: asOwner,
@@ -286,7 +287,6 @@ export const ORGANIZACION_SMOKE: SmokeCase[] = [
     body: (c) => ({ branchId: c.vars.orgBranchId }),
     expectedStatus: 201,
   },
-
 
   // --- 5. Baja lógica de una persona: offboard, no borrado ----------------
   {

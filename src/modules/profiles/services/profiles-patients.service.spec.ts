@@ -66,7 +66,9 @@ function build() {
   };
   // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
   // doble deja pasar para no mezclar el permiso con la lógica del servicio.
-  const ownership = { assertOwnsPatientProfile: mockFn().mockResolvedValue(undefined) };
+  const ownership = {
+    assertOwnsPatientProfile: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesPatientsService(

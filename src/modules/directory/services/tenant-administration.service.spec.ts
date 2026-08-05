@@ -25,7 +25,10 @@ describe('TenantAdministrationService', () => {
     const { service, tx } = build({ tenantRoleConceptId: DIR.ROLE_OWNER });
 
     await expect(
-      service.assertCanAdminister(tx, 'tenant-1', { id: 'u1', roles: ['USER'] }),
+      service.assertCanAdminister(tx, 'tenant-1', {
+        id: 'u1',
+        roles: ['USER'],
+      }),
     ).resolves.toBeUndefined();
   });
 
@@ -61,7 +64,10 @@ describe('TenantAdministrationService', () => {
 
     for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
       await expect(
-        service.assertCanAdminister(tx, 'tenant-1', { id: 'admin', roles: [role] }),
+        service.assertCanAdminister(tx, 'tenant-1', {
+          id: 'admin',
+          roles: [role],
+        }),
       ).resolves.toBeUndefined();
     }
     // Ni siquiera pregunta: el rol de plataforma no depende de pertenecer al tenant, y

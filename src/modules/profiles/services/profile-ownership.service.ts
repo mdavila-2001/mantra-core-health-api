@@ -94,7 +94,8 @@ export class ProfileOwnershipService {
   ): Promise<void> {
     if (this.isPlatform(actor)) return;
     const profile = await this.practitionersRepo.findById(em, profileId);
-    if (profile && (await this.belongsToActor(em, profile.profileId, actor))) return;
+    if (profile && (await this.belongsToActor(em, profile.profileId, actor)))
+      return;
     throw new ForbiddenException(
       'Sólo el titular del perfil profesional o la plataforma pueden modificarlo',
     );
@@ -115,7 +116,8 @@ export class ProfileOwnershipService {
   ): Promise<void> {
     if (this.isPlatform(actor)) return;
     const profile = await this.patientsRepo.findById(em, profileId);
-    if (profile && (await this.belongsToActor(em, profile.profileId, actor))) return;
+    if (profile && (await this.belongsToActor(em, profile.profileId, actor)))
+      return;
     throw new ForbiddenException(
       'Sólo el titular del perfil o la plataforma pueden modificarlo',
     );

@@ -40,9 +40,7 @@ export class TenantAdministrationService {
    *
    * @param membershipsRepo - Membresías, de donde sale el rol del actor en el tenant.
    */
-  constructor(
-    private readonly membershipsRepo: TenantMembershipsRepository,
-  ) {}
+  constructor(private readonly membershipsRepo: TenantMembershipsRepository) {}
 
   /**
    * Exige que el actor pueda administrar el tenant indicado.

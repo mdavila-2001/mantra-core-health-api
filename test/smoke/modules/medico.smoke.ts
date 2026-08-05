@@ -147,7 +147,8 @@ export const MEDICO_SMOKE: SmokeCase[] = [
   },
   {
     module: 'Médico',
-    endpoint: 'POST /profiles/practitioners/{profileId}/jurisdiction-authorizations',
+    endpoint:
+      'POST /profiles/practitioners/{profileId}/jurisdiction-authorizations',
     name: 'happy: registra la jurisdicción donde puede ejercer',
     method: 'post',
     path: (c) =>
