@@ -205,8 +205,12 @@ describe('Smoke test — 30 endpoints', () => {
       path = c.path(smokeCtx);
       let req = request(server)[c.method](path);
       req = req.timeout({ response: 10_000, deadline: 15_000 });
-      if (c.auth !== false)
-        req = req.set('Authorization', `Bearer ${smokeCtx.adminToken}`);
+      if (c.auth !== false) {
+        // `c.token` deja que el caso actúe como el titular (paciente, profesional) en vez del
+        // admin: los endpoints `/me` resuelven de quién son los datos leyendo el JWT.
+        const token = c.token?.(smokeCtx) ?? smokeCtx.adminToken;
+        req = req.set('Authorization', `Bearer ${token}`);
+      }
       if (c.body) req = req.send(c.body(smokeCtx) as object);
       const res = await req;
       const durationMs = Date.now() - started;

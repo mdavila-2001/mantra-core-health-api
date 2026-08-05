@@ -23,6 +23,8 @@ import { IDENTITY_ASSURANCE_SMOKE } from './modules/identity_assurance.smoke';
 import { DELEGATED_ACCESS_SMOKE } from './modules/delegated_access.smoke';
 import { READ_MODELS_SMOKE } from './modules/read_models.smoke';
 import { INTEGRATION_CONTRACTS_SMOKE } from './modules/integration_contracts.smoke';
+// Agrupado por actor, no por módulo: el recorrido completo de un paciente con su propio token.
+import { PACIENTE_SMOKE } from './modules/paciente.smoke';
 
 /**
  * Registro de casos de smoke por módulo. El orquestador añade aquí una línea por
@@ -61,4 +63,7 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...DELEGATED_ACCESS_SMOKE,
   ...READ_MODELS_SMOKE,
   ...INTEGRATION_CONTRACTS_SMOKE,
+  // Va al final: cierra sesión del paciente y su recorrido no debe alterar el estado que
+  // esperan los casos por módulo.
+  ...PACIENTE_SMOKE,
 ];
