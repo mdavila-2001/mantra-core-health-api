@@ -58,7 +58,8 @@ export class CreateChildTenantDto {
     description:
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos ' +
       '(PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, ' +
-      'UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER— país y ' +
+      'UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, ' +
+      'HEALTH_BUSINESS— país y ' +
       'jurisdicción).',
     enum: TENANT_TYPE_CODES,
   })

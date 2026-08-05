@@ -70,7 +70,7 @@ describe('TenantTypeProfileService', () => {
       }
     });
 
-    it('acepta los seis tipos nuevos con país y jurisdicción', () => {
+    it('acepta los siete tipos nuevos con país y jurisdicción', () => {
       const { service } = build();
 
       // El alta de una universidad, una farmacia o un consultorio no puede
@@ -82,6 +82,7 @@ describe('TenantTypeProfileService', () => {
         'MEDICAL_OFFICE',
         'NURSING',
         'HEALTH_OTHER',
+        'HEALTH_BUSINESS',
       ] as const) {
         expect(() =>
           service.assertProfileMatchesType({

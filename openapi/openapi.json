@@ -54762,7 +54762,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER)— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -54772,7 +54772,8 @@
               "HOSPITAL",
               "MEDICAL_OFFICE",
               "NURSING",
-              "HEALTH_OTHER"
+              "HEALTH_OTHER",
+              "HEALTH_BUSINESS"
             ],
             "example": "HOSPITAL"
           },
@@ -56085,7 +56086,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER— país y jurisdicción).",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS— país y jurisdicción).",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -56095,7 +56096,8 @@
               "HOSPITAL",
               "MEDICAL_OFFICE",
               "NURSING",
-              "HEALTH_OTHER"
+              "HEALTH_OTHER",
+              "HEALTH_BUSINESS"
             ]
           },
           "tenantTypeConceptId": {
@@ -56188,7 +56190,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER— país y jurisdicción).",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS— país y jurisdicción).",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -56198,7 +56200,8 @@
               "HOSPITAL",
               "MEDICAL_OFFICE",
               "NURSING",
-              "HEALTH_OTHER"
+              "HEALTH_OTHER",
+              "HEALTH_BUSINESS"
             ]
           },
           "tenantTypeConceptId": {

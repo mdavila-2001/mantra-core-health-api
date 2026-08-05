@@ -244,7 +244,7 @@
                 "register-organization"
               ]
             },
-            "description": "Alta pública desde cero: crea en una transacción el usuario owner con su credencial y rol, el tenant, la membresía que los une y el token de verificación de email. La organización queda pendiente de verificación por la plataforma, pero el owner puede iniciar sesión de inmediato.\n\n`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` (que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING y HEALTH_OTHER— país y jurisdicción.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerOrganization`",
+            "description": "Alta pública desde cero: crea en una transacción el usuario owner con su credencial y rol, el tenant, la membresía que los une y el token de verificación de email. La organización queda pendiente de verificación por la plataforma, pero el owner puede iniciar sesión de inmediato.\n\n`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` (que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerOrganization`",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"organization\": {\n    \"code\": \"ORG-{{$timestamp}}\",\n    \"legalName\": \"Organización de prueba {{$timestamp}}\",\n    \"tenantType\": \"PROVIDER\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"owner-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de prueba\"\n  }\n}",
@@ -671,6 +671,56 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"organization\": {\n    \"code\": \"OTR-{{$timestamp}}\",\n    \"legalName\": \"Otra institución de salud de prueba {{$timestamp}}\",\n    \"tenantType\": \"HEALTH_OTHER\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"otr-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de institución de salud\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Organización HEALTH_BUSINESS · negocio de salud",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/iam/auth/register-organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "iam",
+                "auth",
+                "register-organization"
+              ]
+            },
+            "description": "Alta de negocio de salud. Mismo endpoint y mismo cuerpo que el PROVIDER: los tipos territoriales solo exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. No materializan fila propia —operan por sus sedes— a diferencia de PAYER y BROKER.\n\nCuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerOrganization`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organization\": {\n    \"code\": \"NEG-{{$timestamp}}\",\n    \"legalName\": \"Negocio de salud de prueba {{$timestamp}}\",\n    \"tenantType\": \"HEALTH_BUSINESS\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"neg-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de negocio de salud\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"

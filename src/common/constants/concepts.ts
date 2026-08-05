@@ -470,6 +470,16 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'HEALTH_OTHER',
     'Other health institution',
   ),
+  // Negocio de salud: la organización que vende productos o servicios de salud
+  // sin ser institución asistencial ni farmacia —ópticas, ortopedias,
+  // laboratorios de prótesis, distribuidoras de insumos—. No se regula como un
+  // prestador porque no presta atención clínica, pero tampoco es `HEALTH_OTHER`,
+  // que es el cajón de las instituciones asistenciales que no encajan arriba.
+  TENANT_TYPE_HEALTH_BUSINESS: def(
+    'directory:tenant-type:health-business',
+    'HEALTH_BUSINESS',
+    'Health business',
+  ),
   LEGAL_ENTITY_COMPANY: def(
     'directory:legal-entity:company',
     'COMPANY',
