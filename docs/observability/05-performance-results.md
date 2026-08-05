@@ -7,7 +7,7 @@
 
 | Elemento | Valor |
 | --- | --- |
-| Script | [`scripts/bench-telemetry.mjs`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/scripts/bench-telemetry.mjs) |
+| Script | [`scripts/bench-telemetry.mjs`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/scripts/bench-telemetry.mjs) |
 | Endpoint | `POST /iam/auth/login` con credenciales inválidas |
 | Por qué ese endpoint | Recorre el camino completo —controller, guard, `ValidationPipe`, span de negocio `iam.authenticate`, 4 consultas a PostgreSQL, filtro global de excepciones— sin crear datos ni depender de un usuario sembrado |
 | Spans por petición | 12 (verificado en Jaeger) |

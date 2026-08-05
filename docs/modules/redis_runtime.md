@@ -8,7 +8,7 @@
 
 # Módulo `redis_runtime`
 
-**Fuente:** [`src/modules/redis_runtime/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/redis_runtime/README.md)
+**Fuente:** [`src/modules/redis_runtime/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/redis_runtime/README.md)
 · 1 controllers · 1 services · 0 repositories · 0 entidades · 3 DTO
 
 ---

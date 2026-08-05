@@ -108,6 +108,9 @@ jobs:
       - name: Auditoría de dependencias runtime — sin vulnerabilidades conocidas
         run: yarn npm audit --all --recursive --environment production
 
+      - name: Guardrails REDESA — antipatrones prohibidos por las reglas canónicas
+        run: yarn redesa:guardrails
+
       - name: Pruebas unitarias
         run: yarn test
 
@@ -164,6 +167,9 @@ jobs:
           yarn docs:modules:sync
           yarn docs:data:sync
 
+      - name: Regenerar la colección Postman desde el contrato
+        run: yarn postman:generate
+
       - name: Verificar que los artefactos generados están versionados y al día
         run: |
           git diff --exit-code -- \
@@ -172,7 +178,8 @@ jobs:
             openapi/ENDPOINTS.md \
             openapi/endpoints \
             docs/modules \
-            docs/data
+            docs/data \
+            docs/postman
 
       - name: Cobertura documental — sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar
         run: yarn docs:coverage

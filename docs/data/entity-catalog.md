@@ -1,18 +1,18 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1185 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1186 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../mantra_core_technologies_health_docs/SALUD/Entidades`, la misma fuente que usa
 > `yarn orm:catalog`) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1185/1185** entidades tienen descripción de negocio
+> repositorio. **1185/1186** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
 > Este es el catálogo de lo **implementado**. La bóveda describe 1329 entidades en total
-> — la diferencia (144) son entidades diseñadas pero no materializadas aún en
+> — la diferencia (143) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (57 schemas · 1185 entidades)
+## Por schema (57 schemas · 1186 entidades)
 
 ### `accounting` (42 entidades, módulo `accounting`)
 
@@ -287,11 +287,11 @@
 |---|---|---:|---|:---:|---|
 | `access_policies` | `AccessPolicies` | 13 | `id` | ✅ | access_policies guarda reglas y configuración de gobierno del módulo 06 · authz (dominio Identidad y Seguridad): parametriza el comportamiento del negocio sin tocar código. |
 | `break_glass_sessions` | `BreakGlassSessions` | 20 | `id` | ✅ | break_glass_sessions es un registro central de negocio del módulo 06 · authz (autorización, propósito de uso y enmascaramiento de campos), dominio Identidad y Seguridad. |
-| `care_relationships` | `CareRelationships` | 15 | `id` | ✅ | care_relationships registra la relación asistencial vigente entre un practicante y un paciente — es una de las dos bases legítimas (junto a clinical_access_grants) que el PDP clínico evalúa antes de conceder acceso a PHI… |
+| `care_relationships` | `CareRelationships` | 15 | `id` | ✅ | care_relationships registra el vínculo asistencial vigente entre un profesional y un paciente. |
 | `clinical_access_grants` | `ClinicalAccessGrants` | 17 | `id` | ✅ | clinical_access_grants es un registro central de negocio del módulo 06 · authz (autorización, propósito de uso y enmascaramiento de campos), dominio Identidad y Seguridad. |
 | `field_permissions` | `FieldPermissions` | 13 | `id` | ✅ | field_permissions es un registro central de negocio del módulo 06 · authz (autorización, propósito de uso y enmascaramiento de campos), dominio Identidad y Seguridad. |
 | `ip_access_rules` | `IpAccessRules` | 17 | `id` | ✅ | ip_access_rules guarda reglas y configuración de gobierno del módulo 06 · authz (dominio Identidad y Seguridad): parametriza el comportamiento del negocio sin tocar código. |
-| `patient_legal_representations` | `PatientLegalRepresentations` | 14 | `id` | ✅ | patient_legal_representations documenta quién está legalmente autorizado a actuar sobre los datos de un paciente que no puede hacerlo por sí mismo (tutor, progenitor de un menor, apoderado, curador). El PDP la trata como… |
+| `patient_legal_representations` | `PatientLegalRepresentations` | 14 | `id` | ✅ | patient_legal_representations registra quién puede actuar legalmente en nombre de un paciente. |
 | `permission_categories` | `PermissionCategories` | 10 | `id` | ✅ | permission_categories es un registro central de negocio del módulo 06 · authz (autorización, propósito de uso y enmascaramiento de campos), dominio Identidad y Seguridad. |
 | `permissions` | `Permissions` | 18 | `id` | ✅ | permissions es un registro central de negocio del módulo 06 · authz (autorización, propósito de uso y enmascaramiento de campos), dominio Identidad y Seguridad. |
 | `resource_scope_grants` | `ResourceScopeGrants` | 15 | `id` | ✅ | resource_scope_grants es un registro central de negocio del módulo 06 · authz (autorización, propósito de uso y enmascaramiento de campos), dominio Identidad y Seguridad. |
@@ -385,7 +385,7 @@
 | `observation_performers` | `ObservationPerformers` | 8 | `id` | — | observation_performers es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `observation_reference_ranges` | `ObservationReferenceRanges` | 13 | `id` | — | observation_reference_ranges es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `observations` | `Observations` | 44 | `id` | ✅ | observations es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
-| `prescription_signature_policies` | `PrescriptionSignaturePolicies` | 13 | `id` | ✅ | prescription_signature_policies es una política PARAMETRIZABLE (REDESA D-05) que decide, por tenant, si firmar una receta es obligatorio según jurisdicción, tipo de medicamento y canal de emisión. Las dimensiones nulas a… |
+| `prescription_signature_policies` | `PrescriptionSignaturePolicies` | 13 | `id` | ✅ | prescription_signature_policies registra cuándo una receta exige firma, de forma configurable por tenant. |
 | `procedures` | `Procedures` | 28 | `id` | ✅ | procedures es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `service_requests` | `ServiceRequests` | 16 | `id` | ✅ | service_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
 | `social_history` | `SocialHistory` | 16 | `id` | ✅ | social_history es el historial auditable de `social` dentro del módulo 08 · clinical (dominio Clínico y Diagnóstico). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
@@ -799,11 +799,11 @@
 | `patient_match_decisions` | `PatientMatchDecisions` | 9 | `id` | — | patient_match_decisions es un registro central de negocio del módulo 52 · health_data_platform (plataforma internacional de datos de salud, interoperabilidad y registro longitudinal), dominio Datos y NoSQL. |
 | `patient_timeline_entries` | `PatientTimelineEntries` | 15 | `id` | — | patient_timeline_entries es un ledger inmutable (append-only) del módulo 52 · health_data_platform (dominio Datos y NoSQL): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 
-### `iam` (13 entidades, módulo `iam`)
+### `iam` (14 entidades, módulo `iam`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `account_activations` | `AccountActivations` | 14 | `id` | ✅ | account_activations es el token de activación de un solo uso del registro asistido (C-18): cuando un clínico u organización crea la cuenta de un paciente que no puede hacerlo por sí mismo, NO se fija una contraseña defin… |
+| `account_activations` | `AccountActivations` | 14 | `id` | ✅ | account_activations registra el token de un solo uso con que un paciente activa la cuenta que le crearon. |
 | `account_lockouts` | `AccountLockouts` | 16 | `id` | ✅ | account_lockouts es un registro central de negocio del módulo 01 · iam (identidad y acceso — cuentas de usuario y seguridad), dominio Identidad y Seguridad. |
 | `api_key_scopes` | `ApiKeyScopes` | 7 | `id` | ✅ | api_key_scopes es un registro central de negocio del módulo 01 · iam (identidad y acceso — cuentas de usuario y seguridad), dominio Identidad y Seguridad. |
 | `api_keys` | `ApiKeys` | 21 | `id` | ✅ | api_keys es un registro central de negocio del módulo 01 · iam (identidad y acceso — cuentas de usuario y seguridad), dominio Identidad y Seguridad. |
@@ -811,6 +811,7 @@
 | `devices` | `Devices` | 13 | `id` | ✅ | devices es un registro central de negocio del módulo 01 · iam (identidad y acceso — cuentas de usuario y seguridad), dominio Identidad y Seguridad. |
 | `email_verifications` | `EmailVerifications` | 12 | `id` | ✅ | Registra verificaciones de correo de un solo uso: persiste sólo el hash SHA-256 del token, su expiración y consumo para confirmar que la dirección es alcanzable sin condicionar el acceso del paciente. |
 | `mfa_factors` | `MfaFactors` | 12 | `id` | ✅ | mfa_factors es un registro central de negocio del módulo 01 · iam (identidad y acceso — cuentas de usuario y seguridad), dominio Identidad y Seguridad. |
+| `password_resets` | `PasswordResets` | 13 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `refresh_tokens` | `RefreshTokens` | 11 | `id` | ✅ | refresh_tokens es un registro central de negocio del módulo 01 · iam (identidad y acceso — cuentas de usuario y seguridad), dominio Identidad y Seguridad. |
 | `security_events` | `SecurityEvents` | 8 | `id` | — | security_events es un ledger inmutable (append-only) del módulo 01 · iam (dominio Identidad y Seguridad): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `sessions` | `Sessions` | 13 | `id` | ✅ | sessions es un registro central de negocio del módulo 01 · iam (identidad y acceso — cuentas de usuario y seguridad), dominio Identidad y Seguridad. |
@@ -1323,7 +1324,7 @@
 | `availability_slots` | `AvailabilitySlots` | 13 | `id` | ✅ | availability_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `bookable_slots` | `BookableSlots` | 14 | `id` | ✅ | bookable_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `booking_cancellations` | `BookingCancellations` | 15 | `id` | ✅ | booking_cancellations es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
-| `booking_confirmation_rules` | `BookingConfirmationRules` | 16 | `id` | ✅ | booking_confirmation_rules es la regla determinista del motor de confirmación automática de reservas (C-11): decide si una reserva se auto-confirma, se auto-rechaza o pasa a revisión manual, evaluando una gramática mínim… |
+| `booking_confirmation_rules` | `BookingConfirmationRules` | 16 | `id` | ✅ | booking_confirmation_rules registra las reglas que deciden si una reserva se confirma sola. |
 | `booking_policies` | `BookingPolicies` | 19 | `id` | ✅ | booking_policies guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `booking_reschedules` | `BookingReschedules` | 9 | `id` | — | booking_reschedules es un ledger inmutable (append-only) del módulo 41 · scheduling (dominio Práctica y Agenda): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `calendar_absences` | `CalendarAbsences` | 24 | `id` | ✅ | calendar_absences es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |

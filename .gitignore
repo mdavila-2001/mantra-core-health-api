@@ -102,3 +102,4 @@ dist-docs/
 # Salida del pipeline legacy `yarn openapi:generate`, que duplica el contrato ya
 # versionado en `openapi/`. El contrato bueno lo produce `yarn docs:openapi:generate`.
 docs/endpoints/
+.yarn/install-state.gz

@@ -1,7 +1,7 @@
 # REDESA Health API
 
 Backend del ecosistema de salud REDESA (Mantra Core Technologies): una API NestJS modular de
-**60 módulos de negocio documentados** (más el grupo raíz `app`), **869 operaciones HTTP**
+**60 módulos de negocio documentados** (más el grupo raíz `app`), **878 operaciones HTTP**
 documentadas en OpenAPI, sobre PostgreSQL con aislamiento por tenant, complementada por MongoDB,
 Redis, OpenSearch, MinIO y **20 procesos
 worker** independientes.
@@ -9,7 +9,7 @@ worker** independientes.
 Esta documentación se genera y verifica junto al código: cada afirmación técnica aquí es
 rastreable a un archivo, un comando o una prueba real — no hay contenido genérico ni
 funcionalidad documentada que no exista. Ver el mandato completo en
-[`PLAN_MAESTRO_DOCUMENTACION_BACKEND_PRODUCCION.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/PLAN_MAESTRO_DOCUMENTACION_BACKEND_PRODUCCION.md).
+[`PLAN_MAESTRO_DOCUMENTACION_BACKEND_PRODUCCION.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/PLAN_MAESTRO_DOCUMENTACION_BACKEND_PRODUCCION.md).
 
 **Última reconciliación del contrato:** `0.0.1`, 2026-07-31. Ver
 [reportes de auditoría](reports/baseline.md) para el detalle de cómo se verificó.
@@ -53,7 +53,7 @@ uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad 
 | Quiero...                                      | Ir a                                                                                                                                                                                            |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Ejecutar el backend en local                   | [Arranque local](getting-started/local-setup.md)                                                                                                                                                |
-| Ver el contrato de la API                      | `/reference` (Scalar) o `/docs` (Swagger UI) con el servidor arriba, o [`openapi/openapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/openapi/openapi.yaml) |
+| Ver el contrato de la API                      | `/reference` (Scalar) o `/docs` (Swagger UI) con el servidor arriba, o [`openapi/openapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/openapi/openapi.yaml) |
 | Entender la autenticación/autorización         | [Autenticación](api/authentication.md) · [Autorización](api/authorization.md)                                                                                                                   |
 | Entender el modelo de error                    | [Modelo de error](api/error-model.md)                                                                                                                                                           |
 | Ver un módulo de negocio concreto              | [Catálogo de módulos](modules/index.md)                                                                                                                                                         |

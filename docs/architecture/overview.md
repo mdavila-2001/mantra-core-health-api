@@ -2,7 +2,7 @@
 
 > Fase 10. Modelo C4 (Simon Brown) aplicado a lo verificado en Fases 0-1
 > ([graphify-audit.md](../reports/graphify-audit.md), [system-inventory.md](../reports/system-inventory.md)).
-> Fuente de arquitectura versionable: [`structurizr/workspace.dsl`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/structurizr/workspace.dsl).
+> Fuente de arquitectura versionable: [`structurizr/workspace.dsl`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/structurizr/workspace.dsl).
 
 ## Estilo arquitectónico
 

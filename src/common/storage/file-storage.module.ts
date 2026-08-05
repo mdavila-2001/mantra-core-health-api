@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { FILE_STORAGE_ADAPTER } from './file-storage.adapter';
 import { LocalDiskFileStorageAdapter } from './local-disk-file-storage.adapter';
+import { S3FileStorageAdapter } from './s3-file-storage.adapter';
 import { loadStorageEnv } from './storage.env';
 
 /**
@@ -20,20 +21,26 @@ import { loadStorageEnv } from './storage.env';
 @Module({
   providers: [
     LocalDiskFileStorageAdapter,
+    S3FileStorageAdapter,
     {
       provide: FILE_STORAGE_ADAPTER,
-      useFactory: (local: LocalDiskFileStorageAdapter) => {
+      useFactory: (
+        local: LocalDiskFileStorageAdapter,
+        s3: S3FileStorageAdapter,
+      ) => {
         const { adapter } = loadStorageEnv();
         switch (adapter) {
           case 'local':
             return local;
+          case 's3':
+            return s3;
           default:
             throw new Error(
               `FILE_STORAGE_ADAPTER="${String(adapter)}" no tiene implementación cableada`,
             );
         }
       },
-      inject: [LocalDiskFileStorageAdapter],
+      inject: [LocalDiskFileStorageAdapter, S3FileStorageAdapter],
     },
   ],
   exports: [FILE_STORAGE_ADAPTER],

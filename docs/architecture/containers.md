@@ -9,7 +9,7 @@ flowchart TB
   Client[Cliente HTTP] -->|HTTPS + JWT Bearer| API
 
   subgraph Aplicación
-    API["api<br/>(NestJS · Node 24 · TypeScript)<br/>60 módulos · 841 operaciones"]
+    API["api<br/>(NestJS · Node 24 · TypeScript)<br/>60 módulos · 878 operaciones"]
     W1["worker-messaging"]
     W2["worker-billing"]
     W3["... 15 workers más<br/>(1 proceso por dominio)"]
