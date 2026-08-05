@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { DirectoryMembershipsService } from './directory-memberships.service';
 import { DIR } from '../directory.concepts';
 import {
@@ -27,6 +28,7 @@ function build() {
   const membershipsRepo = {
     findActiveByUserTenant: mockFn(),
     findByIdInTenant: mockFn(),
+    countActiveByTenantRole: mockFn(),
     create: mockFn(),
   };
   const branchMembershipsRepo = {
@@ -39,6 +41,7 @@ function build() {
   // permiso; el doble deja pasar y hay un spec propio para el rechazo.
   const tenantAdmin = {
     assertCanAdminister: mockFn().mockResolvedValue(undefined),
+    assertCanChangeOwnership: mockFn().mockResolvedValue(undefined),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -50,7 +53,14 @@ function build() {
     tenantAdmin as never,
     logger as any,
   );
-  return { service, tx, membershipsRepo, branchMembershipsRepo, branchesRepo };
+  return {
+    service,
+    tx,
+    membershipsRepo,
+    branchMembershipsRepo,
+    branchesRepo,
+    tenantAdmin,
+  };
 }
 
 /**
@@ -263,6 +273,136 @@ describe('DirectoryMembershipsService', () => {
       await expect(
         d.service.offboard('t1', 'm1', actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('jerarquía del OWNER (invite / changeRole / offboard)', () => {
+    // El poder sobre la propiedad lo decide TenantAdministrationService (spec propio);
+    // acá se prueba que cada operación consulte la barrera correcta y que el 403 corte
+    // la transacción antes de escribir nada.
+
+    it('invitar como OWNER exige la barrera de propiedad', async () => {
+      const d = build();
+      d.tenantAdmin.assertCanChangeOwnership.mockRejectedValue(
+        new ForbiddenException(),
+      );
+      await expect(
+        d.service.invite('t1', { userId: 'u2', role: 'OWNER' } as any, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.membershipsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('invitar como STAFF no consulta la barrera de propiedad', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      d.membershipsRepo.create.mockReturnValue(activeMembership());
+
+      await d.service.invite('t1', { userId: 'u2', role: 'STAFF' }, actor);
+
+      expect(d.tenantAdmin.assertCanChangeOwnership).not.toHaveBeenCalled();
+    });
+
+    it('promover a OWNER exige la barrera de propiedad', async () => {
+      const d = build();
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(activeMembership());
+      d.tenantAdmin.assertCanChangeOwnership.mockRejectedValue(
+        new ForbiddenException(),
+      );
+      await expect(
+        d.service.changeRole('t1', 'm1', { role: 'OWNER' } as any, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('tocar la membresía de un OWNER —aunque sea sólo el scope— exige la barrera', async () => {
+      const d = build();
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(
+        activeMembership({ tenantRoleConceptId: DIR.ROLE_OWNER }),
+      );
+      d.tenantAdmin.assertCanChangeOwnership.mockRejectedValue(
+        new ForbiddenException(),
+      );
+      await expect(
+        d.service.changeRole(
+          't1',
+          'm1',
+          { accessScope: 'BRANCH' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('degrada a un OWNER cuando queda otro (dos activos)', async () => {
+      const d = build();
+      const membership = activeMembership({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+      });
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(membership);
+      d.membershipsRepo.countActiveByTenantRole.mockResolvedValue(2);
+
+      const res = await d.service.changeRole(
+        't1',
+        'm1',
+        { role: 'ADMIN' } as any,
+        actor,
+      );
+
+      expect(membership.tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
+      expect(res.tenantRole).toBe(DIR.ROLE_ADMIN);
+    });
+
+    it('no degrada al último OWNER (precondition, también para la plataforma)', async () => {
+      const d = build();
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(
+        activeMembership({ tenantRoleConceptId: DIR.ROLE_OWNER }),
+      );
+      d.membershipsRepo.countActiveByTenantRole.mockResolvedValue(1);
+
+      await expect(
+        d.service.changeRole('t1', 'm1', { role: 'ADMIN' } as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('no da de baja al último OWNER (precondition)', async () => {
+      const d = build();
+      const membership = activeMembership({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+      });
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(membership);
+      d.membershipsRepo.countActiveByTenantRole.mockResolvedValue(1);
+
+      await expect(
+        d.service.offboard('t1', 'm1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(membership.statusConceptId).toBe(DIR.MEMBERSHIP_ACTIVE);
+    });
+
+    it('da de baja a un OWNER cuando queda otro, pasando por la barrera', async () => {
+      const d = build();
+      const membership = activeMembership({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+      });
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(membership);
+      d.membershipsRepo.countActiveByTenantRole.mockResolvedValue(2);
+
+      const res = await d.service.offboard('t1', 'm1', actor);
+
+      expect(res).toEqual({ ok: true });
+      expect(d.tenantAdmin.assertCanChangeOwnership).toHaveBeenCalledWith(
+        d.tx,
+        't1',
+        actor,
+      );
+      expect(membership.statusConceptId).toBe(DIR.MEMBERSHIP_ENDED);
+    });
+
+    it('dar de baja a un STAFF no consulta la barrera de propiedad ni cuenta OWNERs', async () => {
+      const d = build();
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(activeMembership());
+
+      await d.service.offboard('t1', 'm1', actor);
+
+      expect(d.tenantAdmin.assertCanChangeOwnership).not.toHaveBeenCalled();
+      expect(d.membershipsRepo.countActiveByTenantRole).not.toHaveBeenCalled();
     });
   });
 });

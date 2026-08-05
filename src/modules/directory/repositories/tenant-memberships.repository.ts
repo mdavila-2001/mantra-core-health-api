@@ -74,6 +74,20 @@ export class TenantMembershipsRepository {
     });
   }
 
+  /** Cuenta las membresías activas del tenant con un rol dado (protección del último OWNER). */
+  countActiveByTenantRole(
+    em: EntityManager,
+    tenantId: string,
+    tenantRoleConceptId: string,
+    activeStatusConceptId: string,
+  ): Promise<number> {
+    return em.count(TenantMemberships, {
+      tenantId,
+      tenantRoleConceptId,
+      statusConceptId: activeStatusConceptId,
+    });
+  }
+
   /** Devuelve las membresías del tenant en un estado dado (cascada de suspensión). */
   findByTenantAndStatus(
     em: EntityManager,

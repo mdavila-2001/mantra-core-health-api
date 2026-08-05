@@ -30,6 +30,11 @@ const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
  * - pasa quien tiene membresía **activa** con rol `OWNER` o `ADMIN` **en ese tenant**;
  * - el resto recibe 403, incluido el `STAFF` del propio tenant.
  *
+ * La administración tiene además un segundo escalón: **cambiar quién es dueño**. Conceder el rol
+ * `OWNER`, degradar a un OWNER o darlo de baja lo decide un OWNER (o la plataforma), nunca un
+ * ADMIN — si administrar alcanzara, cualquier ADMIN podría auto-promoverse a OWNER o descabezar
+ * a quien lo nombró, y la jerarquía que este servicio establece se invertiría sola.
+ *
  * Lo que no cambia: el aislamiento entre organizaciones. Un owner sigue sin poder tocar el tenant
  * de al lado, porque su membresía es la de su tenant y esta comprobación es por tenant.
  */
@@ -55,21 +60,62 @@ export class TenantAdministrationService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    const roles = actor.roles ?? [];
-    if (PLATFORM_ROLES.some((role) => roles.includes(role))) return;
+    if (this.isPlatform(actor)) return;
 
-    const membership = await this.membershipsRepo.findActiveByUserTenant(
-      em,
-      actor.id,
-      tenantId,
-      DIR.MEMBERSHIP_ACTIVE,
-    );
+    const membership = await this.activeMembershipOf(em, tenantId, actor);
     if (membership && ADMIN_TENANT_ROLES.has(membership.tenantRoleConceptId)) {
       return;
     }
 
     throw new ForbiddenException(
       'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma',
+    );
+  }
+
+  /**
+   * Exige que el actor pueda cambiar quién es dueño del tenant.
+   *
+   * Es el escalón por encima de administrar: cubre conceder `OWNER` (por invitación o
+   * cambio de rol), degradar a un OWNER y darlo de baja. El rol del actor se resuelve
+   * por su propia membresía en **ese** tenant, nunca por nada que venga en la petición.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant cuya propiedad se quiere cambiar.
+   * @param actor - Quien pide la operación.
+   * @throws ForbiddenException si no es plataforma ni OWNER del tenant.
+   */
+  async assertCanChangeOwnership(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (this.isPlatform(actor)) return;
+
+    const membership = await this.activeMembershipOf(em, tenantId, actor);
+    if (membership?.tenantRoleConceptId === DIR.ROLE_OWNER) return;
+
+    throw new ForbiddenException(
+      'Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee',
+    );
+  }
+
+  /** `true` si el actor tiene un rol global de plataforma. */
+  private isPlatform(actor: AuthenticatedUser): boolean {
+    const roles = actor.roles ?? [];
+    return PLATFORM_ROLES.some((role) => roles.includes(role));
+  }
+
+  /** Membresía activa del actor en el tenant, o `null` si no pertenece. */
+  private activeMembershipOf(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ) {
+    return this.membershipsRepo.findActiveByUserTenant(
+      em,
+      actor.id,
+      tenantId,
+      DIR.MEMBERSHIP_ACTIVE,
     );
   }
 }
