@@ -59,6 +59,37 @@ ENV_DEFAULTS = {
 }
 
 
+# Variables del entorno que el flujo de alta (folder 01) deja pobladas. Un campo de body que se
+# llame igual las referencia en vez de inventar un uuid.
+SEEDED_VARS = {
+    'tenantId', 'userId', 'ownerUserId', 'adminUserId', 'patientUserId', 'practitionerUserId',
+    'personId', 'roleId', 'patientProfileId', 'practitionerProfileId',
+    'countryConceptId', 'jurisdictionConceptId', 'payerTenantId', 'brokerTenantId',
+}
+
+# Variables que el propio recorrido de la colección captura (ver `capture_script`): cualquier
+# `xxxId` de un body puede resolverse contra ellas si algún endpoint devolvió ese recurso.
+DISCOVERED_VARS: set[str] = set()
+
+
+def uuid_placeholder(name: str) -> str:
+    """Valor de un campo uuid del body.
+
+    Antes todos salían como `00000000-…`, un uuid con forma válida que **no existe en la base**:
+    pasa la validación del DTO, llega al INSERT y revienta contra la FK como 500. Peor aún, ese
+    500 no dice qué campo estaba mal.
+
+    Ahora, si el campo se llama como una variable que la colección puebla —`tenantId`,
+    `practiceId`, `checkId`—, se emite la referencia y el request se encadena solo. Si no, se
+    emite un marcador que **no** parece un uuid: así el 400 del pipe de validación te lo señala
+    antes de tocar la base, en vez de dejarte un 500 opaco.
+    """
+    if name in SEEDED_VARS or name in DISCOVERED_VARS:
+        return '{{' + name + '}}'
+    return f'<{name}: uuid del catálogo, ver GET /terminology/concepts>' \
+        if name.endswith('ConceptId') else f'<{name}: uuid existente>'
+
+
 # --------------------------------------------------------------------- schemas → ejemplos
 
 class Resolver:
@@ -135,7 +166,7 @@ class Resolver:
             return '{{email}}'
         fmt = schema.get('format', '')
         if fmt == 'uuid':
-            return '00000000-0000-0000-0000-000000000000'
+            return uuid_placeholder(name)
         if fmt == 'email':
             return 'usuario@example.test'
         if fmt == 'date-time':
@@ -150,8 +181,12 @@ class Resolver:
         # Solo los ids que el contrato declara uuid (1700 de 1766) o los refs de terminología:
         # `nationalId`, `externalAdAccountId`, `samlEntityId`… no son uuid y no deben fingirlo.
         if name == 'id' or name.endswith('ConceptId'):
-            return '00000000-0000-0000-0000-000000000000'
-        if low.endswith('at') or 'date' in low or 'fecha' in low:
+            return uuid_placeholder(name)
+        # Rangos de vigencia. `validFrom`, `effectiveTo`, `startsAt`… los valida `@IsDateString`,
+        # pero el contrato no siempre declara `format: date`, así que por nombre no caían aquí y
+        # salían como `validFrom-ejemplo`: un 400 en un campo que sí se podía rellenar solo.
+        if (low.endswith('at') or 'date' in low or 'fecha' in low
+                or re.search(r'(from|to|since|until|start|end|expir)', low)):
             return '2026-01-01T00:00:00.000Z'
         pattern = schema.get('pattern')
         if pattern:
@@ -169,6 +204,60 @@ def success_status(op: dict, method: str) -> int:
     return 201 if method == 'POST' else 200
 
 
+# Recursos cuyo singular no sale de quitar la `s`, o cuyo nombre natural ya está tomado.
+IRREGULAR_SINGULAR = {
+    'people': 'person', 'persons': 'person', 'addresses': 'address',
+    'batches': 'batch', 'analyses': 'analysis', 'diagnoses': 'diagnosis',
+    'policies': 'policy', 'categories': 'category', 'entries': 'entry',
+    'queries': 'query', 'series': 'series', 'statuses': 'status',
+}
+
+
+def singularize(segment: str) -> str:
+    """Singular aproximado de un segmento de ruta (`accreditations` → `accreditation`)."""
+    low = segment.lower()
+    if low in IRREGULAR_SINGULAR:
+        return IRREGULAR_SINGULAR[low]
+    for suffix, replacement in (('ies', 'y'), ('sses', 'ss'), ('xes', 'x'), ('ches', 'ch'),
+                                ('shes', 'sh')):
+        if low.endswith(suffix):
+            return low[: -len(suffix)] + replacement
+    if low.endswith('s') and not low.endswith('ss'):
+        return low[:-1]
+    return low
+
+
+def camel(text: str) -> str:
+    """`diagnostic-unit` → `diagnosticUnit`."""
+    head, *rest = re.split(r'[-_]', text)
+    return head + ''.join(part.capitalize() for part in rest)
+
+
+def path_var_name(path: str, raw_name: str) -> str:
+    """Nombre de la variable de entorno que respalda una variable de ruta.
+
+    El contrato llama `id` a la variable de 350 rutas distintas. Si todas comparten `{{id}}`,
+    el entorno solo puede tener un valor a la vez: pegás el id de una práctica y el request de
+    acreditaciones lo manda igual, con lo que la API responde «no encontrado» sin que se vea por
+    qué. Cada `{id}` pasa a llamarse por su recurso —`/accreditations/{id}` → `accreditationId`,
+    `/identity/checks/{id}` → `checkId`—, así que dos dominios ya no se pisan.
+
+    Las variables que el contrato ya nombra (`practiceId`, `caseId`) se respetan tal cual.
+    """
+    if raw_name != 'id':
+        return raw_name
+    # Último segmento estático antes de `{id}`: es el recurso al que pertenece.
+    resource = ''
+    for segment in path.strip('/').split('/'):
+        if segment == '{id}':
+            break
+        if not re.fullmatch(r'\{\w+\}', segment):
+            resource = segment
+    if not resource:
+        return 'id'
+    return camel(singularize(resource)) + 'Id'
+
+
 def path_var_value(name: str) -> str:
     return '{{' + name + '}}'
 
@@ -182,9 +271,10 @@ def build_url(path: str, query_params: list, resolver: Resolver) -> dict:
             continue
         m = re.fullmatch(r'\{(\w+)\}', seg)
         if m:
+            var = path_var_name(path, m.group(1))
             segments.append(':' + m.group(1))
-            variables.append({'key': m.group(1), 'value': path_var_value(m.group(1)),
-                              'description': 'Identificador de ruta'})
+            variables.append({'key': m.group(1), 'value': path_var_value(var),
+                              'description': f'Identificador de ruta · variable `{{{{{var}}}}}`'})
         else:
             segments.append(seg)
 
@@ -247,17 +337,130 @@ def only_required(schema: dict, resolver: Resolver) -> dict:
             'required': required}
 
 
+def is_placeholder(value) -> bool:
+    """Marcador que el usuario tiene que rellenar a mano (`<algoId: uuid existente>`)."""
+    return isinstance(value, str) and value.startswith('<') and value.endswith('>')
+
+
+def prune_placeholders(schema: dict, example, resolver: Resolver):
+    """Quita del ejemplo los campos **opcionales** que quedaron en marcador.
+
+    Un opcional que no se puede rellenar no documenta: rompe. `POST /practices` declara
+    `typeConceptId` opcional, y mandarlo con un marcador hace que el request falle entero por un
+    campo que el DTO no pedía. Omitirlo deja el alta ejecutable tal cual viene, que es lo que se
+    espera de una colección: abrir el request y darle Send.
+
+    Los **obligatorios** se conservan aunque sean marcador: ahí el hueco es real y hay que
+    rellenarlo, y el nombre del campo en el 400 dice cuál.
+    """
+    if not isinstance(example, dict):
+        return example
+    schema = resolver.deref(schema)
+    if 'allOf' in schema:
+        merged = {'type': 'object', 'properties': {}, 'required': []}
+        for part in schema['allOf']:
+            part = resolver.deref(part)
+            merged['properties'].update(part.get('properties', {}))
+            merged['required'] += part.get('required', [])
+        schema = merged
+    required = set(schema.get('required') or [])
+    props = schema.get('properties') or {}
+    pruned = {}
+    for key, value in example.items():
+        if is_placeholder(value) and key not in required:
+            continue
+        if isinstance(value, dict) and key in props:
+            value = prune_placeholders(props[key], value, resolver)
+        pruned[key] = value
+    return pruned
+
+
 def build_body(op: dict, resolver: Resolver, required_only: bool = False):
     """Body raw JSON de ejemplo desde `requestBody`, o None si la operación no lleva cuerpo."""
     schema = request_schema(op)
     if schema is None:
         return None
     example = resolver.example(only_required(schema, resolver) if required_only else schema)
+    example = prune_placeholders(schema, example, resolver)
     if example in ({}, None):
         return None
     return {'mode': 'raw',
             'raw': json.dumps(example, indent=2, ensure_ascii=False),
             'options': {'raw': {'language': 'json'}}}
+
+
+def resource_var_for_path(path: str) -> str | None:
+    """Variable donde guardar el id que devuelve una operación sobre esta ruta.
+
+    `/practices` → `practiceId`; `/identity/checks/{id}/attempts` → `attemptId`. Es la misma
+    convención que `path_var_name`, así que lo que crea un recurso puebla exactamente la variable
+    que después consumen su `GET`, `PATCH` y `DELETE`: registrar algo deja listo el modificarlo.
+    """
+    segments = [s.split(':')[0] for s in path.strip('/').split('/')
+                if not re.fullmatch(r'\{\w+\}', s)]
+    segments = [s for s in segments if s and s != 'internal']
+    if not segments:
+        return None
+    # El último segmento no siempre es el recurso: `/checks/dispatchable`,
+    # `/deletion-targets/pending` y `/contexts/resolve` terminan en una acción o un filtro.
+    # Se toma el último que esté en plural, que es como el contrato nombra las colecciones.
+    tail = next((s for s in reversed(segments) if s.endswith('s')), segments[-1])
+    var = camel(singularize(tail)) + 'Id'
+    return var if var not in ('idId', 'Id') else None
+
+
+def list_keys_for_path(path: str) -> list:
+    """Claves donde un listado puede traer sus elementos.
+
+    Además de las genéricas, el nombre del recurso: `GET /internal/identity/checks/dispatchable`
+    responde `{"checks": [...]}`, y sin esto la captura no encontraba nada que guardar.
+    """
+    keys = ['items', 'data', 'results']
+    segments = [s.split(':')[0] for s in path.strip('/').split('/')
+                if not re.fullmatch(r'\{\w+\}', s) and s != 'internal']
+    plural = next((s for s in reversed(segments) if s.endswith('s')), None)
+    if plural:
+        keys.insert(0, camel(plural))
+    return keys
+
+
+def capture_script(method: str, path: str) -> list:
+    """Guarda en el entorno el id que devolvió la respuesta.
+
+    Sin esto, cada `PATCH /recurso/{id}` obliga a copiar a mano el id de la creación anterior —y
+    como todas las rutas llamaban `id` a su variable, pegar uno pisaba el de los otros 349
+    endpoints. Con la captura, el recorrido queda encadenado: se crea, y lo que sigue ya tiene
+    contra qué apuntar.
+
+    Los `GET` de listado capturan el primer elemento: sirve para ejercer las modificaciones sobre
+    datos que ya existen, sin tener que crear nada antes.
+    """
+    var = resource_var_for_path(path)
+    if not var:
+        return []
+    if method == 'POST':
+        return [
+            '',
+            f"// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{{{{var}}}}}.",
+            'if (pm.response.code < 300) {',
+            '  const body = pm.response.json();',
+            '  const id = body && (body.id || body.' + var + ');',
+            f"  if (id) pm.environment.set('{var}', id);",
+            '}',
+        ]
+    if method == 'GET':
+        candidates = ' || '.join(f'body.{k}' for k in list_keys_for_path(path))
+        return [
+            '',
+            '// Toma el primero de la lista para poder ejercer el resto sin crear nada.',
+            'if (pm.response.code === 200) {',
+            '  const body = pm.response.json();',
+            f'  const list = Array.isArray(body) ? body : ({candidates});',
+            '  const first = Array.isArray(list) && list.length ? list[0] : null;',
+            f"  if (first && first.id) pm.environment.set('{var}', first.id);",
+            '}',
+        ]
+    return []
 
 
 def test_script(method: str, path: str, status: int) -> list:
@@ -267,6 +470,7 @@ def test_script(method: str, path: str, status: int) -> list:
         f"  pm.response.to.have.status({status});",
         "});",
     ]
+    lines += capture_script(method, path)
     if (method, path) in TOKEN_CAPTURE:
         lines += [
             "",
@@ -359,6 +563,34 @@ def tag_of(op: dict) -> str:
     return tags[0] if tags else 'sin-tag'
 
 
+def run_order(method: str, path: str) -> tuple:
+    """Clave de orden dentro de un folder, para que correrlo entero tenga sentido.
+
+    El orden del contrato es alfabético por ruta, así que un `PATCH /recurso/{id}` podía quedar
+    antes del `POST /recurso` que lo crea: al correr el folder, el `PATCH` no tenía qué modificar
+    y fallaba por un id vacío. Con las capturas ya en su sitio, lo único que faltaba era ordenar:
+
+      1. listados sin parámetros — pueblan las variables con lo que ya existe en la base
+      2. altas sin parámetros    — crean y capturan su id
+      3. sub-altas               — cuelgan de algo creado arriba
+      4. lecturas por id
+      5. modificaciones
+      6. bajas                   — al final, para no borrar lo que el resto todavía usa
+
+    Es el recorrido de un cliente: descubrir, registrar, consultar, modificar y recién ahí borrar.
+    """
+    has_param = '{' in path
+    if method == 'DELETE':
+        return (6, path)
+    if method in ('PATCH', 'PUT'):
+        return (5, path)
+    if method == 'GET':
+        return (4, path) if has_param else (1, path)
+    if method == 'POST':
+        return (3, path) if has_param else (2, path)
+    return (7, path)
+
+
 def build_folders(spec: dict, resolver: Resolver) -> tuple[list, int, dict]:
     """Un folder por dominio; los dominios grandes se parten en subfolders por tag."""
     domains: dict[str, list] = {}
@@ -370,17 +602,18 @@ def build_folders(spec: dict, resolver: Resolver) -> tuple[list, int, dict]:
                 continue
             request = to_request(method.upper(), path, op, resolver)
             index[(method.upper(), path)] = request
-            domains.setdefault(domain_of(path), []).append((tag_of(op), request))
+            order = run_order(method.upper(), path)
+            domains.setdefault(domain_of(path), []).append((tag_of(op), order, request))
             total += 1
 
     folders = []
     for domain in sorted(domains):
-        entries = domains[domain]
-        tags = sorted({t for t, _ in entries})
+        entries = sorted(domains[domain], key=lambda e: e[1])
+        tags = sorted({t for t, _, _ in entries})
         if len(entries) >= SUBFOLDER_MIN and len(tags) > 1:
-            items = [{'name': tag, 'item': [r for t, r in entries if t == tag]} for tag in tags]
+            items = [{'name': tag, 'item': [r for t, _, r in entries if t == tag]} for tag in tags]
         else:
-            items = [r for _, r in entries]
+            items = [r for _, _, r in entries]
         folders.append({'name': f'{domain} ({len(entries)})', 'item': items})
     return folders, total, index
 
@@ -702,9 +935,10 @@ def signup_folder(spec: dict, resolver: Resolver, index: dict) -> dict | None:
 
 def collect_env_keys(spec: dict) -> list:
     """Variables de path y de cabecera que la colección referencia."""
-    keys = set()
+    keys = set(DISCOVERED_VARS)
     for path in spec['paths']:
-        keys.update(re.findall(r'\{(\w+)\}', path))
+        for raw in re.findall(r'\{(\w+)\}', path):
+            keys.add(path_var_name(path, raw))
     for methods in spec['paths'].values():
         for method, op in methods.items():
             if method not in METHODS:
@@ -724,6 +958,17 @@ def main():
         spec = json.load(f)
 
     resolver = Resolver(spec)
+
+    # Pasada previa: qué variables va a poblar el recorrido. Tiene que correr ANTES de generar
+    # los cuerpos, porque `uuid_placeholder` decide con esto si un campo `practiceId` se emite
+    # como `{{practiceId}}` —encadenado— o como marcador a rellenar a mano.
+    for path in spec['paths']:
+        for raw in re.findall(r'\{(\w+)\}', path):
+            DISCOVERED_VARS.add(path_var_name(path, raw))
+        var = resource_var_for_path(path)
+        if var:
+            DISCOVERED_VARS.add(var)
+
     folders, total, index = build_folders(spec, resolver)
     extras = [f for f in (signup_folder(spec, resolver, index), starter_folder(index)) if f]
     for folder in extras:                       # se insertan al frente en orden 00, 01
