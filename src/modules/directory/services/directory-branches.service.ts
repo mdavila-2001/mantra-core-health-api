@@ -11,6 +11,7 @@ import {
 import { BRANCH_TYPE_CONCEPT_BY_CODE, DIR } from '../directory.concepts';
 import { BranchesRepository, TenantsRepository } from '../repositories';
 import { BranchResponseDto, CreateBranchDto } from '../dto';
+import { TenantAdministrationService } from './tenant-administration.service';
 
 /** Caso de uso UC-04-04: crear una branch / sede física con geolocalización. */
 @Injectable()
@@ -27,6 +28,7 @@ export class DirectoryBranchesService {
     private readonly em: EntityManager,
     private readonly branchesRepo: BranchesRepository,
     private readonly tenantsRepo: TenantsRepository,
+    private readonly tenantAdmin: TenantAdministrationService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryBranchesService.name);
@@ -43,6 +45,9 @@ export class DirectoryBranchesService {
       'Creating branch',
     );
     return this.em.transactional(async (tx) => {
+      // El owner de la organización administra la suya: su poder viene de la membresía
+      // OWNER, no de un rol global de plataforma.
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       const tenant = await this.tenantsRepo.findById(tx, tenantId);
       if (!tenant)
         throw new ResourceNotFoundException('Tenant no encontrado', {

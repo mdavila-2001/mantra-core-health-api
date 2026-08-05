@@ -65,7 +65,6 @@ export class TenantsController {
 
   /** UC-04-04. */
   @Post(':tenantId/branches')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear una branch / sede física con geolocalización',
@@ -80,7 +79,6 @@ export class TenantsController {
 
   /** UC-04-05. */
   @Post(':tenantId/memberships')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Incorporar un usuario al tenant (membership)' })
   invite(
@@ -93,7 +91,6 @@ export class TenantsController {
 
   /** UC-04-06. */
   @Post(':tenantId/memberships/:membershipId/branch-assignments')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Asignar la membresía a una branch' })
   assignBranch(
@@ -112,7 +109,6 @@ export class TenantsController {
 
   /** UC-04-07. */
   @Post(':tenantId/memberships/:membershipId/transfer')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Transferir la membresía entre branches' })
   transfer(
@@ -126,7 +122,6 @@ export class TenantsController {
 
   /** UC-04-08. */
   @Patch(':tenantId/memberships/:membershipId/role')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cambiar rol / scope de la membresía' })
   changeRole(
@@ -145,7 +140,6 @@ export class TenantsController {
 
   /** UC-04-09. */
   @Post(':tenantId/memberships/:membershipId/offboard')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revocar / offboarding de un miembro' })
   offboard(

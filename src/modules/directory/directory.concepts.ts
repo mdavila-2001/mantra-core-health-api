@@ -109,7 +109,8 @@ export type TenantTypeCode =
   | 'HOSPITAL'
   | 'MEDICAL_OFFICE'
   | 'NURSING'
-  | 'HEALTH_OTHER';
+  | 'HEALTH_OTHER'
+  | 'HEALTH_BUSINESS';
 
 /** Mapea el código de tipo de organización (DTO) a su concept id. */
 export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
@@ -127,6 +128,10 @@ export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
   MEDICAL_OFFICE: CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE,
   NURSING: CONCEPTS.TENANT_TYPE_NURSING,
   HEALTH_OTHER: CONCEPTS.TENANT_TYPE_HEALTH_OTHER,
+  // Negocio de salud: vende productos o servicios de salud sin prestar atención
+  // clínica (óptica, ortopedia, distribuidora de insumos). No es institución
+  // asistencial, así que no cabe en `HEALTH_OTHER`.
+  HEALTH_BUSINESS: CONCEPTS.TENANT_TYPE_HEALTH_BUSINESS,
 };
 
 /** Los códigos válidos, para `@IsIn` y para la documentación OpenAPI. */
@@ -150,6 +155,7 @@ export const TERRITORIAL_TENANT_TYPES: readonly TenantTypeCode[] = [
   'MEDICAL_OFFICE',
   'NURSING',
   'HEALTH_OTHER',
+  'HEALTH_BUSINESS',
 ];
 
 /** Mapea el código de rol de tenant (DTO) a su concept id. */

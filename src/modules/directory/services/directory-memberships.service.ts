@@ -28,6 +28,7 @@ import {
   StatusResultDto,
   TransferMembershipDto,
 } from '../dto';
+import { TenantAdministrationService } from './tenant-administration.service';
 
 /**
  * Casos de uso sobre membresías: incorporación (UC-04-05), asignación a branch
@@ -50,6 +51,7 @@ export class DirectoryMembershipsService {
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly branchMembershipsRepo: BranchMembershipsRepository,
     private readonly branchesRepo: BranchesRepository,
+    private readonly tenantAdmin: TenantAdministrationService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryMembershipsService.name);
@@ -66,6 +68,10 @@ export class DirectoryMembershipsService {
       'Inviting member',
     );
     return this.em.transactional(async (tx) => {
+      // Administra quien es OWNER/ADMIN de la organización, o plataforma. Antes esto
+      // sólo lo podía hacer un SECURITY_ADMIN global, así que una organización recién
+      // registrada no podía gestionar a su propia gente.
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       const existing = await this.membershipsRepo.findActiveByUserTenant(
         tx,
         dto.userId,
@@ -124,6 +130,10 @@ export class DirectoryMembershipsService {
       'Assigning membership to branch',
     );
     return this.em.transactional(async (tx) => {
+      // Administra quien es OWNER/ADMIN de la organización, o plataforma. Antes esto
+      // sólo lo podía hacer un SECURITY_ADMIN global, así que una organización recién
+      // registrada no podía gestionar a su propia gente.
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       const membership = await this.requireActiveMembership(
         tx,
         tenantId,
@@ -197,6 +207,10 @@ export class DirectoryMembershipsService {
       'Transferring membership between branches',
     );
     return this.em.transactional(async (tx) => {
+      // Administra quien es OWNER/ADMIN de la organización, o plataforma. Antes esto
+      // sólo lo podía hacer un SECURITY_ADMIN global, así que una organización recién
+      // registrada no podía gestionar a su propia gente.
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       const membership = await this.requireActiveMembership(
         tx,
         tenantId,
@@ -268,6 +282,10 @@ export class DirectoryMembershipsService {
       );
     }
     return this.em.transactional(async (tx) => {
+      // Administra quien es OWNER/ADMIN de la organización, o plataforma. Antes esto
+      // sólo lo podía hacer un SECURITY_ADMIN global, así que una organización recién
+      // registrada no podía gestionar a su propia gente.
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       const membership = await this.requireActiveMembership(
         tx,
         tenantId,
@@ -306,6 +324,10 @@ export class DirectoryMembershipsService {
       'Offboarding member',
     );
     return this.em.transactional(async (tx) => {
+      // Administra quien es OWNER/ADMIN de la organización, o plataforma. Antes esto
+      // sólo lo podía hacer un SECURITY_ADMIN global, así que una organización recién
+      // registrada no podía gestionar a su propia gente.
+      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       const membership = await this.requireActiveMembership(
         tx,
         tenantId,

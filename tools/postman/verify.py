@@ -13,8 +13,9 @@ Es un newman mínimo, sin dependencias: sustituye `{{variables}}` desde el entor
 capturas que el generador escribe en cada test (`const X = body.a || body.b;`) y compara el
 status con el que declara el `pm.test`.
 
-Uso:  yarn postman:verify                 (folders 00 y 01)
+Uso:  yarn postman:verify                 (folders 00 y 01 de la colección completa)
       yarn postman:verify 01              (un folder por prefijo de nombre)
+      yarn postman:verify --actores       (los recorridos por tipo de usuario)
 Requiere la API arriba y el administrador sembrado (`yarn postman:bootstrap`).
 Sale con código 1 si algún request no devuelve el status esperado.
 """
@@ -34,6 +35,7 @@ COLLECTION = os.path.join(POSTMAN_DIR, 'Salud-API.postman_collection.json')
 ENVIRONMENT = os.path.join(POSTMAN_DIR, 'Salud-Local.postman_environment.json')
 
 DEFAULT_FOLDERS = ('00', '01')
+ACTORS_DIR = os.path.join(POSTMAN_DIR, 'actores')
 TIMEOUT = 30
 RATE_LIMIT_RETRIES = 3     # el throttler de las altas públicas admite 10 por ventana
 
@@ -110,6 +112,11 @@ def captures(item: dict) -> list:
             elif 'body.accessToken' in line:          # el bloque de sesión de login/refresh
                 found.append(('accessToken', ['accessToken']))
                 found.append(('refreshToken', ['refreshToken']))
+            else:
+                # Forma corta que usan los recorridos por actor: `if (b.x) pm.environment.set(…)`.
+                short = re.search(r"pm\.environment\.set\('(\w+)', b\.(\w+)\)", line)
+                if short:
+                    found.append((short.group(1), [short.group(2)]))
     return found
 
 
@@ -122,7 +129,27 @@ def expected_status(item: dict) -> int:
     return 200
 
 
+def apply_prerequest(item: dict, env: dict) -> None:
+    """Emula los pre-request de los recorridos por actor.
+
+    Son de una sola forma —`pm.environment.set('x', 'prefijo-' + Date.now())`— y existen para que
+    el alta y el login usen la misma identidad: si el alta inventa un correo con `{{$timestamp}}`
+    y el login lee `{{email}}`, son dos valores distintos y el login devuelve 401.
+    """
+    for script in item.get('event', []):
+        if script.get('listen') != 'prerequest':
+            continue
+        for line in script.get('script', {}).get('exec', []):
+            match = re.search(r"pm\.environment\.set\('(\w+)',\s*'([^']*)'\s*\+\s*Date\.now\(\)"
+                              r"(?:\s*\+\s*'([^']*)')?\s*\)", line)
+            if match:
+                _counter[0] += 1
+                prefix, suffix = match.group(2), match.group(3) or ''
+                env[match.group(1)] = f'{prefix}{_counter[0]}{suffix}'
+
+
 def run_request(item: dict, env: dict) -> tuple[bool, str]:
+    apply_prerequest(item, env)
     spec = item['request']
     url = substitute(spec['url']['raw'], env)
     for variable in spec['url'].get('variable', []):
@@ -162,7 +189,36 @@ def walk(items: list):
             yield item
 
 
+def run_actor(slug: str) -> tuple:
+    """Corre el recorrido completo de un actor con su propio entorno.
+
+    Cada actor va con su entorno para que las sesiones no se pisen: con uno solo, iniciar sesión
+    como médico borraría el token del paciente y los pasos siguientes fallarían sin decir por qué.
+    Por eso aquí tampoco se reutiliza el entorno entre actores.
+    """
+    coll = load(os.path.join(ACTORS_DIR, f'Salud-{slug}.postman_collection.json'))
+    env = {v['key']: v['value']
+           for v in load(os.path.join(ACTORS_DIR, f'Salud-{slug}.postman_environment.json'))['values']}
+    env.setdefault('baseUrl', 'http://localhost:3000')
+    print(f"\n== {coll['info']['name']} ==")
+    ok = 0
+    for item in coll['item']:
+        passed, detail = run_request(item, env)
+        print(f'{"  ok " if passed else "FALLA"} {detail:<46.46} {item["name"][:60]}')
+        ok += 1 if passed else 0
+    return ok, len(coll['item'])
+
+
 def main() -> int:
+    if '--actores' in sys.argv:
+        total = passed = 0
+        for slug in ('Paciente', 'Medico', 'Organizacion', 'Administrador'):
+            ok, n = run_actor(slug)
+            passed += ok
+            total += n
+        print(f'\n{passed}/{total} pasos de los recorridos por actor')
+        return 0 if passed == total else 1
+
     prefixes = tuple(sys.argv[1:]) or DEFAULT_FOLDERS
     collection = load(COLLECTION)
     env = {v['key']: v['value'] for v in load(ENVIRONMENT)['values']}

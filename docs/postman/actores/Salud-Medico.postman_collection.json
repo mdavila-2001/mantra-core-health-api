@@ -1,0 +1,501 @@
+{
+  "info": {
+    "name": "SALUD · Médico",
+    "description": "Recorrido de un usuario **médico**, en orden y encadenado por el entorno.\n\nAutoregistro con matrícula, verificación de identidad y de licencia, y perfil profesional. La matrícula nace PENDIENTE: registrarse la declara, no la prueba, así que el perfil no queda habilitado por el solo hecho de darse de alta.\n\nImportar junto a `Salud-Medico.postman_environment.json` y correr los pasos de arriba abajo. Cada actor tiene su propio entorno: con uno solo, iniciar sesión como otro borraría este token.\n\nLos pasos son los mismos que ejercita `test/smoke/modules/medico.smoke.ts` contra la API real, y `yarn postman:verify:actores` los vuelve a correr sobre esta colección.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 · Se registra declarando su matrícula",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/register-practitioner",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "register-practitioner"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Crea cuenta, persona, perfil profesional y licencia en una transacción. La licencia nace PENDIENTE de verificación."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('email', 'medico-' + Date.now() + '@example.test');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.userId) pm.environment.set('practitionerUserId', b.userId);",
+              "  if (b.personId) pm.environment.set('personId', b.personId);",
+              "  if (b.practitionerProfileId) pm.environment.set('practitionerProfileId', b.practitionerProfileId);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · Inicia sesión con su correo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "login"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.accessToken) pm.environment.set('accessToken', b.accessToken);",
+              "  if (b.refreshToken) pm.environment.set('refreshToken', b.refreshToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · Sube el certificado de su matrícula",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/common/files",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "common",
+            "files"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"originalName\": \"matricula.pdf\",\n  \"category\": \"DOCUMENT\",\n  \"sensitivity\": \"NORMAL\",\n  \"mimeType\": \"application/pdf\",\n  \"sizeBytes\": 8192,\n  \"contentHash\": \"med-{{$timestamp}}\",\n  \"storageUri\": \"s3://bucket/matricula.pdf\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('evidenceFileId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 · Abre su caso de verificación de identidad",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/identity/me/practitioner/identity-verification",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "identity",
+            "me",
+            "practitioner",
+            "identity-verification"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"evidenceFileId\": \"{{evidenceFileId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 · Registra la jurisdicción donde puede ejercer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/profiles/practitioners/:practitionerProfileId/jurisdiction-authorizations",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "profiles",
+            "practitioners",
+            ":practitionerProfileId",
+            "jurisdiction-authorizations"
+          ],
+          "variable": [
+            {
+              "key": "practitionerProfileId",
+              "value": "{{practitionerProfileId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"licenseNumber\": \"MP-JUR-{{$timestamp}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Tiene que existir antes del paso 6: el caso se abre sobre una matrícula concreta, no sobre el profesional en abstracto."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('jurisdictionAuthorizationId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 · Pide que le verifiquen la matrícula",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/identity/me/practitioner/license-verification",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "identity",
+            "me",
+            "practitioner",
+            "license-verification"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"evidenceFileId\": \"{{evidenceFileId}}\",\n  \"jurisdictionAuthorizationId\": \"{{jurisdictionAuthorizationId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "El caso que distingue al profesional del paciente: además de probar quién es, tiene que probar que puede ejercer."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 · Ve sus dos casos abiertos (identidad y matrícula)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/identity/me/verification-cases",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "identity",
+            "me",
+            "verification-cases"
+          ],
+          "variable": []
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8 · Declara su especialidad",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/profiles/practitioners/:practitionerProfileId/specialties",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "profiles",
+            "practitioners",
+            ":practitionerProfileId",
+            "specialties"
+          ],
+          "variable": [
+            {
+              "key": "practitionerProfileId",
+              "value": "{{practitionerProfileId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isPrimary\": true,\n  \"boardCertified\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9 · Cierra su sesión",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "logout"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

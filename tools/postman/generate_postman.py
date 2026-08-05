@@ -59,6 +59,37 @@ ENV_DEFAULTS = {
 }
 
 
+# Variables del entorno que el flujo de alta (folder 01) deja pobladas. Un campo de body que se
+# llame igual las referencia en vez de inventar un uuid.
+SEEDED_VARS = {
+    'tenantId', 'userId', 'ownerUserId', 'adminUserId', 'patientUserId', 'practitionerUserId',
+    'personId', 'roleId', 'patientProfileId', 'practitionerProfileId',
+    'countryConceptId', 'jurisdictionConceptId', 'payerTenantId', 'brokerTenantId',
+}
+
+# Variables que el propio recorrido de la colección captura (ver `capture_script`): cualquier
+# `xxxId` de un body puede resolverse contra ellas si algún endpoint devolvió ese recurso.
+DISCOVERED_VARS: set[str] = set()
+
+
+def uuid_placeholder(name: str) -> str:
+    """Valor de un campo uuid del body.
+
+    Antes todos salían como `00000000-…`, un uuid con forma válida que **no existe en la base**:
+    pasa la validación del DTO, llega al INSERT y revienta contra la FK como 500. Peor aún, ese
+    500 no dice qué campo estaba mal.
+
+    Ahora, si el campo se llama como una variable que la colección puebla —`tenantId`,
+    `practiceId`, `checkId`—, se emite la referencia y el request se encadena solo. Si no, se
+    emite un marcador que **no** parece un uuid: así el 400 del pipe de validación te lo señala
+    antes de tocar la base, en vez de dejarte un 500 opaco.
+    """
+    if name in SEEDED_VARS or name in DISCOVERED_VARS:
+        return '{{' + name + '}}'
+    return f'<{name}: uuid del catálogo, ver GET /terminology/concepts>' \
+        if name.endswith('ConceptId') else f'<{name}: uuid existente>'
+
+
 # --------------------------------------------------------------------- schemas → ejemplos
 
 class Resolver:
@@ -135,7 +166,7 @@ class Resolver:
             return '{{email}}'
         fmt = schema.get('format', '')
         if fmt == 'uuid':
-            return '00000000-0000-0000-0000-000000000000'
+            return uuid_placeholder(name)
         if fmt == 'email':
             return 'usuario@example.test'
         if fmt == 'date-time':
@@ -150,8 +181,12 @@ class Resolver:
         # Solo los ids que el contrato declara uuid (1700 de 1766) o los refs de terminología:
         # `nationalId`, `externalAdAccountId`, `samlEntityId`… no son uuid y no deben fingirlo.
         if name == 'id' or name.endswith('ConceptId'):
-            return '00000000-0000-0000-0000-000000000000'
-        if low.endswith('at') or 'date' in low or 'fecha' in low:
+            return uuid_placeholder(name)
+        # Rangos de vigencia. `validFrom`, `effectiveTo`, `startsAt`… los valida `@IsDateString`,
+        # pero el contrato no siempre declara `format: date`, así que por nombre no caían aquí y
+        # salían como `validFrom-ejemplo`: un 400 en un campo que sí se podía rellenar solo.
+        if (low.endswith('at') or 'date' in low or 'fecha' in low
+                or re.search(r'(from|to|since|until|start|end|expir)', low)):
             return '2026-01-01T00:00:00.000Z'
         pattern = schema.get('pattern')
         if pattern:
@@ -169,6 +204,60 @@ def success_status(op: dict, method: str) -> int:
     return 201 if method == 'POST' else 200
 
 
+# Recursos cuyo singular no sale de quitar la `s`, o cuyo nombre natural ya está tomado.
+IRREGULAR_SINGULAR = {
+    'people': 'person', 'persons': 'person', 'addresses': 'address',
+    'batches': 'batch', 'analyses': 'analysis', 'diagnoses': 'diagnosis',
+    'policies': 'policy', 'categories': 'category', 'entries': 'entry',
+    'queries': 'query', 'series': 'series', 'statuses': 'status',
+}
+
+
+def singularize(segment: str) -> str:
+    """Singular aproximado de un segmento de ruta (`accreditations` → `accreditation`)."""
+    low = segment.lower()
+    if low in IRREGULAR_SINGULAR:
+        return IRREGULAR_SINGULAR[low]
+    for suffix, replacement in (('ies', 'y'), ('sses', 'ss'), ('xes', 'x'), ('ches', 'ch'),
+                                ('shes', 'sh')):
+        if low.endswith(suffix):
+            return low[: -len(suffix)] + replacement
+    if low.endswith('s') and not low.endswith('ss'):
+        return low[:-1]
+    return low
+
+
+def camel(text: str) -> str:
+    """`diagnostic-unit` → `diagnosticUnit`."""
+    head, *rest = re.split(r'[-_]', text)
+    return head + ''.join(part.capitalize() for part in rest)
+
+
+def path_var_name(path: str, raw_name: str) -> str:
+    """Nombre de la variable de entorno que respalda una variable de ruta.
+
+    El contrato llama `id` a la variable de 350 rutas distintas. Si todas comparten `{{id}}`,
+    el entorno solo puede tener un valor a la vez: pegás el id de una práctica y el request de
+    acreditaciones lo manda igual, con lo que la API responde «no encontrado» sin que se vea por
+    qué. Cada `{id}` pasa a llamarse por su recurso —`/accreditations/{id}` → `accreditationId`,
+    `/identity/checks/{id}` → `checkId`—, así que dos dominios ya no se pisan.
+
+    Las variables que el contrato ya nombra (`practiceId`, `caseId`) se respetan tal cual.
+    """
+    if raw_name != 'id':
+        return raw_name
+    # Último segmento estático antes de `{id}`: es el recurso al que pertenece.
+    resource = ''
+    for segment in path.strip('/').split('/'):
+        if segment == '{id}':
+            break
+        if not re.fullmatch(r'\{\w+\}', segment):
+            resource = segment
+    if not resource:
+        return 'id'
+    return camel(singularize(resource)) + 'Id'
+
+
 def path_var_value(name: str) -> str:
     return '{{' + name + '}}'
 
@@ -182,9 +271,10 @@ def build_url(path: str, query_params: list, resolver: Resolver) -> dict:
             continue
         m = re.fullmatch(r'\{(\w+)\}', seg)
         if m:
+            var = path_var_name(path, m.group(1))
             segments.append(':' + m.group(1))
-            variables.append({'key': m.group(1), 'value': path_var_value(m.group(1)),
-                              'description': 'Identificador de ruta'})
+            variables.append({'key': m.group(1), 'value': path_var_value(var),
+                              'description': f'Identificador de ruta · variable `{{{{{var}}}}}`'})
         else:
             segments.append(seg)
 
@@ -247,17 +337,130 @@ def only_required(schema: dict, resolver: Resolver) -> dict:
             'required': required}
 
 
+def is_placeholder(value) -> bool:
+    """Marcador que el usuario tiene que rellenar a mano (`<algoId: uuid existente>`)."""
+    return isinstance(value, str) and value.startswith('<') and value.endswith('>')
+
+
+def prune_placeholders(schema: dict, example, resolver: Resolver):
+    """Quita del ejemplo los campos **opcionales** que quedaron en marcador.
+
+    Un opcional que no se puede rellenar no documenta: rompe. `POST /practices` declara
+    `typeConceptId` opcional, y mandarlo con un marcador hace que el request falle entero por un
+    campo que el DTO no pedía. Omitirlo deja el alta ejecutable tal cual viene, que es lo que se
+    espera de una colección: abrir el request y darle Send.
+
+    Los **obligatorios** se conservan aunque sean marcador: ahí el hueco es real y hay que
+    rellenarlo, y el nombre del campo en el 400 dice cuál.
+    """
+    if not isinstance(example, dict):
+        return example
+    schema = resolver.deref(schema)
+    if 'allOf' in schema:
+        merged = {'type': 'object', 'properties': {}, 'required': []}
+        for part in schema['allOf']:
+            part = resolver.deref(part)
+            merged['properties'].update(part.get('properties', {}))
+            merged['required'] += part.get('required', [])
+        schema = merged
+    required = set(schema.get('required') or [])
+    props = schema.get('properties') or {}
+    pruned = {}
+    for key, value in example.items():
+        if is_placeholder(value) and key not in required:
+            continue
+        if isinstance(value, dict) and key in props:
+            value = prune_placeholders(props[key], value, resolver)
+        pruned[key] = value
+    return pruned
+
+
 def build_body(op: dict, resolver: Resolver, required_only: bool = False):
     """Body raw JSON de ejemplo desde `requestBody`, o None si la operación no lleva cuerpo."""
     schema = request_schema(op)
     if schema is None:
         return None
     example = resolver.example(only_required(schema, resolver) if required_only else schema)
+    example = prune_placeholders(schema, example, resolver)
     if example in ({}, None):
         return None
     return {'mode': 'raw',
             'raw': json.dumps(example, indent=2, ensure_ascii=False),
             'options': {'raw': {'language': 'json'}}}
+
+
+def resource_var_for_path(path: str) -> str | None:
+    """Variable donde guardar el id que devuelve una operación sobre esta ruta.
+
+    `/practices` → `practiceId`; `/identity/checks/{id}/attempts` → `attemptId`. Es la misma
+    convención que `path_var_name`, así que lo que crea un recurso puebla exactamente la variable
+    que después consumen su `GET`, `PATCH` y `DELETE`: registrar algo deja listo el modificarlo.
+    """
+    segments = [s.split(':')[0] for s in path.strip('/').split('/')
+                if not re.fullmatch(r'\{\w+\}', s)]
+    segments = [s for s in segments if s and s != 'internal']
+    if not segments:
+        return None
+    # El último segmento no siempre es el recurso: `/checks/dispatchable`,
+    # `/deletion-targets/pending` y `/contexts/resolve` terminan en una acción o un filtro.
+    # Se toma el último que esté en plural, que es como el contrato nombra las colecciones.
+    tail = next((s for s in reversed(segments) if s.endswith('s')), segments[-1])
+    var = camel(singularize(tail)) + 'Id'
+    return var if var not in ('idId', 'Id') else None
+
+
+def list_keys_for_path(path: str) -> list:
+    """Claves donde un listado puede traer sus elementos.
+
+    Además de las genéricas, el nombre del recurso: `GET /internal/identity/checks/dispatchable`
+    responde `{"checks": [...]}`, y sin esto la captura no encontraba nada que guardar.
+    """
+    keys = ['items', 'data', 'results']
+    segments = [s.split(':')[0] for s in path.strip('/').split('/')
+                if not re.fullmatch(r'\{\w+\}', s) and s != 'internal']
+    plural = next((s for s in reversed(segments) if s.endswith('s')), None)
+    if plural:
+        keys.insert(0, camel(plural))
+    return keys
+
+
+def capture_script(method: str, path: str) -> list:
+    """Guarda en el entorno el id que devolvió la respuesta.
+
+    Sin esto, cada `PATCH /recurso/{id}` obliga a copiar a mano el id de la creación anterior —y
+    como todas las rutas llamaban `id` a su variable, pegar uno pisaba el de los otros 349
+    endpoints. Con la captura, el recorrido queda encadenado: se crea, y lo que sigue ya tiene
+    contra qué apuntar.
+
+    Los `GET` de listado capturan el primer elemento: sirve para ejercer las modificaciones sobre
+    datos que ya existen, sin tener que crear nada antes.
+    """
+    var = resource_var_for_path(path)
+    if not var:
+        return []
+    if method == 'POST':
+        return [
+            '',
+            f"// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{{{{var}}}}}.",
+            'if (pm.response.code < 300) {',
+            '  const body = pm.response.json();',
+            '  const id = body && (body.id || body.' + var + ');',
+            f"  if (id) pm.environment.set('{var}', id);",
+            '}',
+        ]
+    if method == 'GET':
+        candidates = ' || '.join(f'body.{k}' for k in list_keys_for_path(path))
+        return [
+            '',
+            '// Toma el primero de la lista para poder ejercer el resto sin crear nada.',
+            'if (pm.response.code === 200) {',
+            '  const body = pm.response.json();',
+            f'  const list = Array.isArray(body) ? body : ({candidates});',
+            '  const first = Array.isArray(list) && list.length ? list[0] : null;',
+            f"  if (first && first.id) pm.environment.set('{var}', first.id);",
+            '}',
+        ]
+    return []
 
 
 def test_script(method: str, path: str, status: int) -> list:
@@ -267,6 +470,7 @@ def test_script(method: str, path: str, status: int) -> list:
         f"  pm.response.to.have.status({status});",
         "});",
     ]
+    lines += capture_script(method, path)
     if (method, path) in TOKEN_CAPTURE:
         lines += [
             "",
@@ -359,6 +563,34 @@ def tag_of(op: dict) -> str:
     return tags[0] if tags else 'sin-tag'
 
 
+def run_order(method: str, path: str) -> tuple:
+    """Clave de orden dentro de un folder, para que correrlo entero tenga sentido.
+
+    El orden del contrato es alfabético por ruta, así que un `PATCH /recurso/{id}` podía quedar
+    antes del `POST /recurso` que lo crea: al correr el folder, el `PATCH` no tenía qué modificar
+    y fallaba por un id vacío. Con las capturas ya en su sitio, lo único que faltaba era ordenar:
+
+      1. listados sin parámetros — pueblan las variables con lo que ya existe en la base
+      2. altas sin parámetros    — crean y capturan su id
+      3. sub-altas               — cuelgan de algo creado arriba
+      4. lecturas por id
+      5. modificaciones
+      6. bajas                   — al final, para no borrar lo que el resto todavía usa
+
+    Es el recorrido de un cliente: descubrir, registrar, consultar, modificar y recién ahí borrar.
+    """
+    has_param = '{' in path
+    if method == 'DELETE':
+        return (6, path)
+    if method in ('PATCH', 'PUT'):
+        return (5, path)
+    if method == 'GET':
+        return (4, path) if has_param else (1, path)
+    if method == 'POST':
+        return (3, path) if has_param else (2, path)
+    return (7, path)
+
+
 def build_folders(spec: dict, resolver: Resolver) -> tuple[list, int, dict]:
     """Un folder por dominio; los dominios grandes se parten en subfolders por tag."""
     domains: dict[str, list] = {}
@@ -370,17 +602,18 @@ def build_folders(spec: dict, resolver: Resolver) -> tuple[list, int, dict]:
                 continue
             request = to_request(method.upper(), path, op, resolver)
             index[(method.upper(), path)] = request
-            domains.setdefault(domain_of(path), []).append((tag_of(op), request))
+            order = run_order(method.upper(), path)
+            domains.setdefault(domain_of(path), []).append((tag_of(op), order, request))
             total += 1
 
     folders = []
     for domain in sorted(domains):
-        entries = domains[domain]
-        tags = sorted({t for t, _ in entries})
+        entries = sorted(domains[domain], key=lambda e: e[1])
+        tags = sorted({t for t, _, _ in entries})
         if len(entries) >= SUBFOLDER_MIN and len(tags) > 1:
-            items = [{'name': tag, 'item': [r for t, r in entries if t == tag]} for tag in tags]
+            items = [{'name': tag, 'item': [r for t, _, r in entries if t == tag]} for tag in tags]
         else:
-            items = [r for _, r in entries]
+            items = [r for _, _, r in entries]
         folders.append({'name': f'{domain} ({len(entries)})', 'item': items})
     return folders, total, index
 
@@ -400,6 +633,7 @@ TERRITORIAL_ORG_TYPES = [
     ('MEDICAL_OFFICE', 'CON', 'Consultorio', 'consultorio'),
     ('NURSING', 'ENF', 'Enfermería', 'enfermería'),
     ('HEALTH_OTHER', 'OTR', 'Otra institución de salud', 'institución de salud'),
+    ('HEALTH_BUSINESS', 'NEG', 'Negocio de salud', 'negocio de salud'),
 ]
 
 
@@ -438,7 +672,7 @@ SIGNUP_FLOW = [
                  '`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` '
                  '(que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); '
                  'los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, '
-                 'NURSING y HEALTH_OTHER— país y jurisdicción.'),
+                 'NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.'),
         'patch': {'organization': {'code': 'ORG-{{$timestamp}}',
                                    'legalName': 'Organización de prueba {{$timestamp}}',
                                    'tenantType': 'PROVIDER',
@@ -701,9 +935,10 @@ def signup_folder(spec: dict, resolver: Resolver, index: dict) -> dict | None:
 
 def collect_env_keys(spec: dict) -> list:
     """Variables de path y de cabecera que la colección referencia."""
-    keys = set()
+    keys = set(DISCOVERED_VARS)
     for path in spec['paths']:
-        keys.update(re.findall(r'\{(\w+)\}', path))
+        for raw in re.findall(r'\{(\w+)\}', path):
+            keys.add(path_var_name(path, raw))
     for methods in spec['paths'].values():
         for method, op in methods.items():
             if method not in METHODS:
@@ -712,6 +947,421 @@ def collect_env_keys(spec: dict) -> list:
                 if p.get('in') == 'header':
                     keys.add(p['name'].replace('-', '_'))
     return sorted(keys)
+
+
+
+
+# --------------------------------------------------------------------- colecciones por actor
+
+# Un recorrido por tipo de usuario, espejo de los smokes `test/smoke/modules/<actor>.smoke.ts`.
+#
+# La colección completa sirve para explorar los 878 endpoints, pero no para ponerse en la piel de
+# alguien: quien prueba «como paciente» no quiere 121 dominios, quiere los diez requests que un
+# paciente puede ejecutar, en orden, y con las credenciales de un paciente. Cada actor lleva su
+# entorno propio para que las sesiones no se pisen — con un solo entorno, iniciar sesión como
+# médico borra el token del paciente y los siguientes requests fallan sin decir por qué.
+#
+# Los pasos salen de los mismos recorridos que el smoke ejercita contra la API real, así que lo
+# que está aquí es lo que se sabe que funciona.
+ACTOR_COLLECTIONS = [
+    {
+        'slug': 'paciente',
+        'name': 'Paciente',
+        'summary': ('Autoregistro público, sesión con documento de identidad, verificación de '
+                    'identidad y datos propios. Es el único actor que inicia sesión con su '
+                    'documento y no con un correo.'),
+        'env': {'password': 'S3cret-passw0rd', 'nationalId': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/register-patient', 'public': True,
+             'title': '1 · Se registra solo, sin admin ni token',
+             'note': ('Alta pública. El pre-request fija el documento en el entorno para que el '
+                      'login del paso 2 use exactamente el mismo, y para que reejecutar no choque '
+                      'con el 409 de documento en uso.'),
+             'prerequest': ["pm.environment.set('nationalId', 'CI-' + Date.now());"],
+             'body': {'nationalId': '{{nationalId}}', 'password': '{{password}}',
+                      'displayName': 'Paciente de prueba', 'phone': '+591 70055555',
+                      'gender': 'MALE', 'sexAtBirth': 'MALE'},
+             'status': 201,
+             'captures': [('patientUserId', 'userId'), ('personId', 'personId'),
+                          ('patientProfileId', 'patientProfileId')]},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '2 · Inicia sesión con su documento',
+             'note': 'El paciente entra con su documento, no con un correo.',
+             'body': {'nationalId': '{{nationalId}}', 'password': '{{password}}'},
+             'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/common/files',
+             'title': '3 · Sube la foto de su documento',
+             'note': 'La evidencia con la que se abrirá el caso: sin ella no hay qué contrastar.',
+             'body': {'originalName': 'documento.jpg', 'category': 'DOCUMENT',
+                      'sensitivity': 'NORMAL', 'mimeType': 'image/jpeg', 'sizeBytes': 4096,
+                      'contentHash': 'pac-{{$timestamp}}',
+                      'storageUri': 's3://bucket/documento.jpg'},
+             'status': 201, 'captures': [('evidenceFileId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/identity-verification',
+             'title': '4 · Abre su caso de verificación de identidad',
+             'body': {'evidenceFileId': '{{evidenceFileId}}'},
+             'status': 201, 'captures': [('caseId', 'id')]},
+            {'method': 'GET', 'path': '/identity/me/verification-cases',
+             'title': '5 · Lista sus propios casos', 'status': 200},
+            {'method': 'GET', 'path': '/identity/me/verification-cases/{caseId}',
+             'title': '6 · Ve el detalle de su caso',
+             'note': 'Filtra por id **y** titular: el caso de otro paciente responde 404.',
+             'status': 200},
+            {'method': 'POST', 'path': '/profiles/patients/{patientProfileId}/related-persons',
+             'title': '7 · Registra a su familiar responsable',
+             'body': {'personId': '{{personId}}', 'displayName': 'Familiar responsable',
+                      'isEmergencyContact': True},
+             'status': 201},
+            {'method': 'POST', 'path': '/iam/auth/logout',
+             'title': '8 · Cierra su sesión',
+             'body': {'refreshToken': '{{refreshToken}}'}, 'status': 200},
+        ],
+    },
+    {
+        'slug': 'medico',
+        'name': 'Médico',
+        'summary': ('Autoregistro con matrícula, verificación de identidad y de licencia, y perfil '
+                    'profesional. La matrícula nace PENDIENTE: registrarse la declara, no la '
+                    'prueba, así que el perfil no queda habilitado por el solo hecho de darse de '
+                    'alta.'),
+        'env': {'password': 'S3cret-passw0rd', 'email': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/register-practitioner', 'public': True,
+             'title': '1 · Se registra declarando su matrícula',
+             'note': ('Crea cuenta, persona, perfil profesional y licencia en una transacción. '
+                      'La licencia nace PENDIENTE de verificación.'),
+             'prerequest': ["pm.environment.set('email', 'medico-' + Date.now() + '@example.test');"],
+             'body': {'email': '{{email}}', 'password': '{{password}}',
+                      'displayName': 'Dra. de prueba', 'licenseNumber': 'MP-{{$timestamp}}',
+                      'credentialNumber': 'TIT-{{$timestamp}}', 'phone': '+591 70012345',
+                      'gender': 'FEMALE', 'sexAtBirth': 'FEMALE', 'birthDate': '1985-04-12'},
+             'status': 201,
+             'captures': [('practitionerUserId', 'userId'), ('personId', 'personId'),
+                          ('practitionerProfileId', 'practitionerProfileId')]},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '2 · Inicia sesión con su correo',
+             'body': {'email': '{{email}}', 'password': '{{password}}'}, 'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/common/files',
+             'title': '3 · Sube el certificado de su matrícula',
+             'body': {'originalName': 'matricula.pdf', 'category': 'DOCUMENT',
+                      'sensitivity': 'NORMAL', 'mimeType': 'application/pdf', 'sizeBytes': 8192,
+                      'contentHash': 'med-{{$timestamp}}',
+                      'storageUri': 's3://bucket/matricula.pdf'},
+             'status': 201, 'captures': [('evidenceFileId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/practitioner/identity-verification',
+             'title': '4 · Abre su caso de verificación de identidad',
+             'body': {'evidenceFileId': '{{evidenceFileId}}'}, 'status': 201},
+            {'method': 'POST',
+             'path': '/profiles/practitioners/{practitionerProfileId}/jurisdiction-authorizations',
+             'title': '5 · Registra la jurisdicción donde puede ejercer',
+             'note': ('Tiene que existir antes del paso 6: el caso se abre sobre una matrícula '
+                      'concreta, no sobre el profesional en abstracto.'),
+             'body': {'licenseNumber': 'MP-JUR-{{$timestamp}}'},
+             'status': 201, 'captures': [('jurisdictionAuthorizationId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/practitioner/license-verification',
+             'title': '6 · Pide que le verifiquen la matrícula',
+             'note': ('El caso que distingue al profesional del paciente: además de probar quién '
+                      'es, tiene que probar que puede ejercer.'),
+             'body': {'evidenceFileId': '{{evidenceFileId}}',
+                      'jurisdictionAuthorizationId': '{{jurisdictionAuthorizationId}}'},
+             'status': 201},
+            {'method': 'GET', 'path': '/identity/me/verification-cases',
+             'title': '7 · Ve sus dos casos abiertos (identidad y matrícula)', 'status': 200},
+            {'method': 'POST',
+             'path': '/profiles/practitioners/{practitionerProfileId}/specialties',
+             'title': '8 · Declara su especialidad',
+             'body': {'isPrimary': True, 'boardCertified': False}, 'status': 201},
+            {'method': 'POST', 'path': '/iam/auth/logout',
+             'title': '9 · Cierra su sesión',
+             'body': {'refreshToken': '{{refreshToken}}'}, 'status': 200},
+        ],
+    },
+    {
+        'slug': 'organizacion',
+        'name': 'Organización',
+        'summary': ('Autoregistro del tenant con su cuenta owner, petición de verificación y —una '
+                    'vez que la plataforma la activa— sedes y personal. Mientras está PENDIENTE '
+                    'puede prepararse pero no operar; el paso 5 fija ese límite.'),
+        'env': {'password': 'S3cret-passw0rd', 'email': '', 'staffEmail': '',
+                'adminEmail': 'admin@redesa.test', 'adminPassword': 'S3cret-passw0rd',
+                'platformToken': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/register-organization', 'public': True,
+             'title': '1 · Se registra con su cuenta owner',
+             'note': ('Crea tenant, usuario owner, credencial y la membresía OWNER que los une. '
+                      'La organización nace PENDIENTE de verificación.'),
+             'prerequest': ["pm.environment.set('email', 'owner-' + Date.now() + '@example.test');",
+                            "pm.environment.set('orgCode', 'ORG-' + Date.now());"],
+             'body': {'organization': {'code': '{{orgCode}}',
+                                       'legalName': 'Organización de prueba',
+                                       'tenantType': 'HOSPITAL',
+                                       'countryConceptId': '{{countryConceptId}}',
+                                       'jurisdictionConceptId': '{{jurisdictionConceptId}}'},
+                      'owner': {'email': '{{email}}', 'password': '{{password}}',
+                                'displayName': 'Owner de prueba'}},
+             'status': 201,
+             'captures': [('tenantId', 'tenantId'), ('ownerUserId', 'ownerUserId')]},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '2 · El owner inicia sesión de inmediato',
+             'note': 'No espera a la verificación: puede entrar y preparar su organización.',
+             'body': {'email': '{{email}}', 'password': '{{password}}'}, 'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/common/files',
+             'title': '3 · Sube su documentación legal',
+             'body': {'originalName': 'personeria.pdf', 'category': 'DOCUMENT',
+                      'sensitivity': 'NORMAL', 'mimeType': 'application/pdf', 'sizeBytes': 16384,
+                      'contentHash': 'org-{{$timestamp}}',
+                      'storageUri': 's3://bucket/personeria.pdf'},
+             'status': 201, 'captures': [('evidenceFileId', 'id')]},
+            {'method': 'POST', 'path': '/identity/me/tenants/{tenantId}/verification',
+             'title': '4 · Pide que la plataforma la verifique',
+             'note': ('Pedirla es lo máximo que puede hacer: quien contrasta licencia y '
+                      'personería es la plataforma. Auto-verificarse sería un agujero '
+                      'regulatorio.'),
+             'body': {'evidenceFileId': '{{evidenceFileId}}'}, 'status': 201},
+            {'method': 'POST', 'path': '/tenants/{tenantId}/branches',
+             'title': '5 · LÍMITE · pendiente de verificación no puede abrir sedes',
+             'note': ('Este paso **debe** dar 422. Preparase sí, operar no: abrir una sede es '
+                      'operar. Se activa en el paso 7.'),
+             'body': {'code': 'SEDE-PREMATURA-{{$timestamp}}', 'name': 'Sede prematura'},
+             'status': 422},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '6 · SETUP · sesión de la plataforma (credenciales de administrador)',
+             'note': ('El único paso que no ejecuta el owner. Está aquí para que el recorrido se '
+                      'pueda correr entero de una vez, y guarda el token en `platformToken` '
+                      'aparte, sin pisar la sesión del owner.'),
+             'body': {'email': '{{adminEmail}}', 'password': '{{adminPassword}}'},
+             'status': 200, 'captures': [('platformToken', 'accessToken')]},
+            {'method': 'POST', 'path': '/admin/tenants/{tenantId}/verification',
+             'as': 'plataforma',
+             'title': '7 · La plataforma la verifica y queda ACTIVA',
+             'status': 200},
+            {'method': 'POST', 'path': '/tenants/{tenantId}/branches',
+             'title': '8 · Ahora sí, abre su primera sede',
+             'note': ('Lo hace el owner con su propio token: su poder viene de la membresía '
+                      'OWNER, no de un rol global de plataforma.'),
+             'body': {'code': 'SEDE-{{$timestamp}}', 'name': 'Sede Central',
+                      'branchType': 'CLINIC'},
+             'status': 201, 'captures': [('branchId', 'id')]},
+            {'method': 'POST', 'path': '/iam/auth/register-practitioner', 'public': True,
+             'title': '9 · SETUP · una persona a quien incorporar',
+             'note': ('Se usa el autoregistro público de profesionales para no depender de un '
+                      'administrador: el owner no puede crear cuentas IAM, pero sí incorporar a '
+                      'quien ya tiene una.'),
+             'prerequest': ["pm.environment.set('staffEmail', 'staff-' + Date.now() + '@example.test');"],
+             'body': {'email': '{{staffEmail}}', 'password': '{{password}}',
+                      'displayName': 'Profesional a incorporar',
+                      'licenseNumber': 'MP-ST-{{$timestamp}}',
+                      'credentialNumber': 'TIT-ST-{{$timestamp}}'},
+             'status': 201, 'captures': [('staffUserId', 'userId')]},
+            {'method': 'POST', 'path': '/tenants/{tenantId}/memberships',
+             'title': '10 · Lo incorpora a la organización',
+             'body': {'userId': '{{staffUserId}}', 'role': 'STAFF',
+                      'accessScope': 'ALL_TENANT'},
+             'status': 201, 'captures': [('membershipId', 'id')]},
+            {'method': 'PATCH', 'path': '/tenants/{tenantId}/memberships/{membershipId}/role',
+             'title': '11 · Lo asciende a ADMIN de la organización',
+             'body': {'role': 'ADMIN'}, 'status': 200},
+            {'method': 'POST',
+             'path': '/tenants/{tenantId}/memberships/{membershipId}/branch-assignments',
+             'title': '12 · Lo asigna a la sede',
+             'body': {'branchId': '{{branchId}}'}, 'status': 201},
+            {'method': 'POST',
+             'path': '/tenants/{tenantId}/memberships/{membershipId}/offboard',
+             'title': '13 · Lo da de baja — la membresía sobrevive',
+             'note': ('Baja lógica: la fila no se borra porque de ella cuelga qué pudo ver esa '
+                      'persona y cuándo, que es lo que se audita.'),
+             'status': 200},
+            {'method': 'POST', 'path': '/iam/auth/logout',
+             'title': '14 · El owner cierra su sesión',
+             'body': {'refreshToken': '{{refreshToken}}'}, 'status': 200},
+        ],
+    },
+    {
+        'slug': 'administrador',
+        'name': 'Administrador',
+        'summary': ('Altas, concesión de roles y las tres bajas lógicas de plataforma: bloquear '
+                    'una cuenta, suspender una organización y anonimizar a una persona. Ninguna '
+                    'borra: lo que se firmó tiene que seguir existiendo.'),
+        'env': {'email': 'admin@redesa.test', 'password': 'S3cret-passw0rd',
+                'managedEmail': ''},
+        'steps': [
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '1 · Inicia sesión como administrador',
+             'note': ('El primer SECURITY_ADMIN no se puede crear por API: lo siembra '
+                      '`yarn postman:bootstrap`.'),
+             'body': {'email': '{{email}}', 'password': '{{password}}'}, 'status': 200,
+             'captures': [('accessToken', 'accessToken'), ('refreshToken', 'refreshToken')]},
+            {'method': 'POST', 'path': '/iam/users',
+             'title': '2 · Da de alta una cuenta',
+             'note': 'Sólo `USER` y `SECURITY_ADMIN` son roles de alta.',
+             'prerequest': ["pm.environment.set('managedEmail', 'gestionado-' + Date.now() + '@example.test');"],
+             'body': {'displayName': 'Usuario gestionado', 'email': '{{managedEmail}}',
+                      'password': '{{password}}', 'initialRole': 'USER'},
+             'status': 201, 'captures': [('managedUserId', 'id')]},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/global-roles',
+             'title': '3 · Le concede SECURITY_ADMIN',
+             'body': {'role': 'SECURITY_ADMIN', 'action': 'GRANT'}, 'status': 200},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/global-roles',
+             'title': '4 · Y se lo revoca',
+             'body': {'role': 'SECURITY_ADMIN', 'action': 'REVOKE'}, 'status': 200},
+            {'method': 'POST', 'path': '/admin/tenants',
+             'title': '5 · Aprovisiona una organización con su owner',
+             'prerequest': ["pm.environment.set('admTenantCode', 'ADM-' + Date.now());"],
+             'body': {'code': '{{admTenantCode}}',
+                      'legalName': 'Organización aprovisionada',
+                      'tenantType': 'MEDICAL_OFFICE',
+                      'countryConceptId': '{{countryConceptId}}',
+                      'jurisdictionConceptId': '{{jurisdictionConceptId}}',
+                      'ownerUserId': '{{managedUserId}}'},
+             'status': 201, 'captures': [('admTenantId', 'id')]},
+            {'method': 'POST', 'path': '/admin/tenants/{admTenantId}/verification',
+             'title': '6 · La verifica y la deja ACTIVA',
+             'note': 'Acto de plataforma: el owner no llega a este endpoint.',
+             'status': 200},
+            {'method': 'POST', 'path': '/admin/tenants/{admTenantId}/suspend',
+             'title': '7 · La suspende — baja lógica, sigue existiendo',
+             'note': ('De la organización cuelgan historias clínicas, facturación y '
+                      'consentimientos: un borrado dejaría todo eso apuntando al vacío. El '
+                      'motivo es obligatorio porque estas decisiones se revisan.'),
+             'body': {'reason': 'Motivo de la suspensión'}, 'status': 200},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/lock',
+             'title': '8 · Bloquea la cuenta — baja lógica',
+             'note': ('Le corta el acceso; la cuenta sigue existiendo porque de ella cuelgan sus '
+                      'actos. Después de esto su login devuelve 401.'),
+             'body': {'reason': 'Motivo del bloqueo'}, 'status': 200},
+            {'method': 'POST', 'path': '/iam/auth/login', 'public': True,
+             'title': '9 · LÍMITE · la cuenta bloqueada ya no entra',
+             'note': 'Este paso **debe** dar 401: es la prueba de que el bloqueo sirve.',
+             'body': {'email': '{{managedEmail}}', 'password': '{{password}}'},
+             'status': 401},
+            {'method': 'POST', 'path': '/iam/users/{managedUserId}/anonymize',
+             'title': '10 · Derecho al olvido — vacía sin borrar',
+             'note': ('No es una baja más: se vacían los datos personales pero la fila queda, '
+                      'porque los actos que esa persona firmó son parte de la historia de otros '
+                      'pacientes.'),
+             'status': 200},
+        ],
+    },
+]
+
+
+def actor_request(step: dict, index: dict) -> dict:
+    """Un paso del recorrido de un actor.
+
+    Dos detalles que hacen la diferencia entre una colección que se lee y una que corre:
+
+    - **La identidad se fija antes de registrarse, no después.** Si el alta usa
+      `medico-{{$timestamp}}@…` y el login usa `{{email}}`, son dos valores distintos y el login
+      da 401. Aquí un script de pre-request escribe el correo (o el documento) en el entorno y
+      tanto el alta como el login leen esa misma variable.
+    - **Las variables de ruta se llaman como la variable que las llena.** El contrato llama `id`
+      a la variable de 350 rutas; en un recorrido eso obliga a adivinar cuál `id` es. Los pasos
+      declaran su placeholder con el nombre real (`{userId}`, `{caseId}`), que es el que la
+      captura del paso anterior dejó en el entorno.
+    """
+    method, path, title = step['method'], step['path'], step['title']
+    request = {'name': title,
+               'request': {'method': method, 'header': [], 'url': {}},
+               'response': [], 'event': []}
+    raw = '{{baseUrl}}' + re.sub(r'\{(\w+)\}', r':\1', path)
+    request['request']['url'] = {
+        'raw': raw, 'host': ['{{baseUrl}}'],
+        'path': [s for s in re.sub(r'\{(\w+)\}', r':\1', path).strip('/').split('/') if s],
+        'variable': [{'key': m, 'value': '{{' + m + '}}',
+                      'description': f'Lo deja en el entorno un paso anterior'}
+                     for m in re.findall(r'\{(\w+)\}', path)],
+    }
+    headers = []
+    if step.get('body') is not None:
+        headers.append({'key': 'Content-Type', 'value': 'application/json'})
+        request['request']['body'] = {
+            'mode': 'raw',
+            'raw': json.dumps(step['body'], indent=2, ensure_ascii=False),
+            'options': {'raw': {'language': 'json'}}}
+    if step.get('as') == 'plataforma':
+        # Este paso lo ejecuta la plataforma, no el actor: se declara explícito para que se vea
+        # en el request de quién es el poder que hace falta.
+        headers.append({'key': 'Authorization', 'value': 'Bearer {{platformToken}}'})
+        request['request']['auth'] = {'type': 'noauth'}
+    if step.get('public'):
+        request['request']['auth'] = {'type': 'noauth'}
+    request['request']['header'] = headers
+    request['request']['description'] = step.get('note', '')
+
+    status = step.get('status', 201)
+    lines = [f"pm.test('status {status}', function () {{",
+             f"  pm.response.to.have.status({status});", '});']
+    if step.get('captures'):
+        lines += ['', '// Encadena el recorrido: lo que deja este paso lo consume el siguiente.',
+                  'if (pm.response.code < 300) {', '  const b = pm.response.json();']
+        for var, field in step['captures']:
+            lines.append(f"  if (b.{field}) pm.environment.set('{var}', b.{field});")
+        lines.append('}')
+    events = [{'listen': 'test', 'script': {'type': 'text/javascript', 'exec': lines}}]
+    if step.get('prerequest'):
+        events.insert(0, {'listen': 'prerequest',
+                          'script': {'type': 'text/javascript', 'exec': step['prerequest']}})
+    request['event'] = events
+    return request
+
+
+def build_actor_collections(spec: dict, index: dict, base_url: str) -> list:
+    """Emite colección + entorno por actor. Devuelve lo escrito."""
+    written = []
+    actors_dir = os.path.join(OUT_DIR, 'actores')
+    os.makedirs(actors_dir, exist_ok=True)
+    for actor in ACTOR_COLLECTIONS:
+        items = [actor_request(step, index) for step in actor['steps']]
+        collection = {
+            'info': {
+                'name': f"SALUD · {actor['name']}",
+                'description': (
+                    f"Recorrido de un usuario **{actor['name'].lower()}**, en orden y encadenado "
+                    f"por el entorno.\n\n{actor['summary']}\n\n"
+                    f"Importar junto a `Salud-{actor['slug'].capitalize()}."
+                    f"postman_environment.json` y correr los pasos de arriba abajo. Cada actor "
+                    f"tiene su propio entorno: con uno solo, iniciar sesión como otro borraría "
+                    f"este token.\n\n"
+                    f"Los pasos son los mismos que ejercita "
+                    f"`test/smoke/modules/{actor['slug']}.smoke.ts` contra la API real, y "
+                    f"`yarn postman:verify:actores` los vuelve a correr sobre esta colección."),
+                'schema': 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+            },
+            'item': items,
+            'auth': {'type': 'bearer',
+                     'bearer': [{'key': 'token', 'value': '{{accessToken}}', 'type': 'string'}]},
+            'variable': [{'key': 'baseUrl', 'value': base_url, 'type': 'string'}],
+        }
+        env_values = {'baseUrl': base_url, 'accessToken': '', 'refreshToken': ''}
+        env_values.update({k: ENV_DEFAULTS.get(k, '') for k in
+                           ('countryConceptId', 'jurisdictionConceptId')})
+        env_values.update(actor.get('env', {}))
+        for step in actor['steps']:
+            for var, _f in step.get('captures', []):
+                env_values.setdefault(var, '')
+            for m in re.findall(r'\{(\w+)\}', step['path']):
+                env_values.setdefault(m, '')
+        environment = {
+            'name': f"SALUD {actor['name']}",
+            'values': [{'key': k, 'value': v,
+                        'type': 'secret' if k in ('accessToken', 'refreshToken', 'password',
+                                                  'platformToken') else 'default',
+                        'enabled': True}
+                       for k, v in env_values.items()],
+            '_postman_variable_scope': 'environment',
+        }
+        cap = actor['slug'].capitalize()
+        coll_path = os.path.join(actors_dir, f'Salud-{cap}.postman_collection.json')
+        env_path = os.path.join(actors_dir, f'Salud-{cap}.postman_environment.json')
+        for target, payload in ((coll_path, collection), (env_path, environment)):
+            with open(target, 'w', encoding='utf-8') as f:
+                json.dump(payload, f, indent=2, ensure_ascii=False)
+                f.write('\n')
+        written.append((actor['name'], len(items), coll_path, env_path))
+    return written
 
 
 # --------------------------------------------------------------------- salida
@@ -723,6 +1373,17 @@ def main():
         spec = json.load(f)
 
     resolver = Resolver(spec)
+
+    # Pasada previa: qué variables va a poblar el recorrido. Tiene que correr ANTES de generar
+    # los cuerpos, porque `uuid_placeholder` decide con esto si un campo `practiceId` se emite
+    # como `{{practiceId}}` —encadenado— o como marcador a rellenar a mano.
+    for path in spec['paths']:
+        for raw in re.findall(r'\{(\w+)\}', path):
+            DISCOVERED_VARS.add(path_var_name(path, raw))
+        var = resource_var_for_path(path)
+        if var:
+            DISCOVERED_VARS.add(var)
+
     folders, total, index = build_folders(spec, resolver)
     extras = [f for f in (signup_folder(spec, resolver, index), starter_folder(index)) if f]
     for folder in extras:                       # se insertan al frente en orden 00, 01
@@ -779,6 +1440,11 @@ def main():
           f'· {len(env_keys)} variables')
     print(f'  {coll_path}')
     print(f'  {env_path}')
+
+    for name, steps, cpath, epath in build_actor_collections(spec, index, base_url):
+        print(f'Colección por actor · {name}: {steps} pasos')
+        print(f'  {cpath}')
+        print(f'  {epath}')
 
 
 if __name__ == '__main__':

@@ -59,6 +59,15 @@ export interface SmokeCase {
   /** `true` (por defecto) envía el token de admin; `false` no manda auth. */
   auth?: boolean;
   /**
+   * Token con el que actuar, si no es el de admin.
+   *
+   * El recorrido de un paciente no se puede ejercer con el token de administrador: los endpoints
+   * `/me` resuelven el titular desde el JWT, así que con el de admin devolverían los datos del
+   * admin y el caso pasaría sin haber probado nada. Devolver aquí el token del propio paciente
+   * —capturado en su login— es lo que convierte al caso en la prueba de un cliente real.
+   */
+  token?: (c: SmokeCtx) => string | undefined;
+  /**
    * Valor de expected status mantenido por la instancia.
    */
   expectedStatus: number;

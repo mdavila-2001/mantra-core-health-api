@@ -57,14 +57,16 @@ export class RegisterOrganizationDetailsDto {
   tradeName?: string;
 
   /**
-   * Tipo de organización: prestador, aseguradora o corredor.
+   * Tipo de organización: prestador, aseguradora, corredor, universidad,
+   * farmacia, institución de salud o negocio de salud.
    */
   @ApiProperty({
     description:
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos. ' +
       'PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto ' +
       '—PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales ' +
-      '(HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER)— exigen país y ' +
+      '(HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— ' +
+      'exigen país y ' +
       'jurisdicción, que es lo que determina bajo qué regulador operan.',
     enum: TENANT_TYPE_CODES,
     example: 'HOSPITAL',

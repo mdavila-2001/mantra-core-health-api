@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { InsuranceModule } from '../insurance/insurance.module';
 import { TerminologyModule } from '../terminology/terminology.module';
-import { TenantTypeProfileService } from './services';
+import {
+  TenantAdministrationService,
+  TenantTypeProfileService,
+} from './services';
 import * as entities from './entities';
 import { AdminTenantsController, TenantsController } from './controllers';
 import {
@@ -36,6 +39,7 @@ import {
   controllers: [AdminTenantsController, TenantsController],
   providers: [
     TenantTypeProfileService,
+    TenantAdministrationService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,

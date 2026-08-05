@@ -5,6 +5,12 @@ Colección y entorno para ejercer **todos** los endpoints del contrato, generado
 
 ## Archivos
 
+- `actores/` — **una colección y un entorno por tipo de usuario**: paciente, médico,
+  organización y administrador. Cada uno es el recorrido de ese actor en orden, encadenado por su
+  propio entorno, y con sus credenciales. Es lo que conviene abrir para probar «como cliente»: la
+  colección completa sirve para explorar los 878 endpoints, no para ponerse en la piel de nadie.
+  Cada actor lleva entorno propio porque con uno solo, iniciar sesión como médico borraría el
+  token del paciente y los pasos siguientes fallarían sin decir por qué.
 - `Salud-API.postman_collection.json` — 878 requests en 121 dominios (un folder por primer
   segmento de ruta; los dominios grandes se parten en subfolders por tag). Cada request trae
   método, URL con variables de path, query params documentados, auth Bearer heredada, body de
@@ -59,12 +65,12 @@ en el tenant sembrado. Por defecto `admin@redesa.test` / `S3cret-passw0rd`; se p
 3. `POST /iam/auth/login` con `{{email}}` / `{{password}}` — su test guarda `accessToken` y
    `refreshToken` en el entorno automáticamente; el resto de la colección los hereda.
 4. **01 · Alta de usuarios (por tipo)** crea, en orden y encadenando ids por el entorno:
-   organización en sus nueve tipos (`PROVIDER`, `PAYER` con su aseguradora, `BROKER` con su
-   corredora, `UNIVERSITY`, `PHARMACY` y las cuatro institucionales `HOSPITAL`,
-   `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`), profesional de salud con su matrícula,
+   organización en sus diez tipos (`PROVIDER`, `PAYER` con su aseguradora, `BROKER` con su
+   corredora, `UNIVERSITY`, `PHARMACY`, `HEALTH_BUSINESS` y las cuatro institucionales
+   `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`), profesional de salud con su matrícula,
    paciente público, paciente asistido con su activación, usuario estándar, administrador de
    seguridad, elevación a `SUPERADMIN`, perfil de paciente con la vinculación de su cuenta,
-   perfil de profesional, y un rol de negocio con su asignación por tenant. Los 21 pasos se
+   perfil de profesional, y un rol de negocio con su asignación por tenant. Los 22 pasos se
    verifican contra la API real con `yarn postman:verify`.
 
    Autoregistro **público desde cero** (sin token) hay tres: organización, profesional de salud
@@ -79,6 +85,26 @@ en el tenant sembrado. Por defecto `admin@redesa.test` / `S3cret-passw0rd`; se p
 > `SURGEON`…) no son roles de alta: se componen en `POST /authz/roles` y se asignan por tenant en
 > `POST /authz/users/{userId}/role-assignments`.
 
+## Quién puede qué (y por qué)
+
+Los recorridos por actor dejaron a la vista tres endpoints que exigían el rol **global**
+`SECURITY_ADMIN` para operar sobre datos del propio titular. Corregido: ahora el dueño administra
+lo suyo y la plataforma conserva su llave maestra.
+
+| Operación | Antes | Ahora |
+| --- | --- | --- |
+| Sedes y personal de una organización (`/tenants/{id}/…`) | Sólo `SECURITY_ADMIN` global | El `OWNER`/`ADMIN` de **esa** organización, o plataforma |
+| Jurisdicción y especialidad de un profesional | Sólo `SECURITY_ADMIN` global | El titular del perfil, o plataforma |
+| Familiar responsable de un paciente | Sólo `SECURITY_ADMIN` global | El titular del perfil, o plataforma |
+
+El caso del profesional era un callejón sin salida comprobable: pedir la verificación de la
+matrícula exige un `jurisdictionAuthorizationId`, pero crear esa autorización pedía rol de
+plataforma. Un médico auto-registrado no podía verificarse nunca por su cuenta.
+
+Lo que **no** cambió: el aislamiento entre organizaciones. Un owner sigue sin poder tocar el tenant
+de al lado, y nadie toca el perfil de otro — la propiedad se resuelve desde el vínculo activo de la
+cuenta, no desde un parámetro que el cliente pueda declarar.
+
 ## Convenciones de la colección
 
 | Elemento | Comportamiento |
@@ -86,9 +112,12 @@ en el tenant sembrado. Por defecto `admin@redesa.test` / `S3cret-passw0rd`; se p
 | Auth | Bearer `{{accessToken}}` heredado de la colección; los 13 endpoints públicos van con `noauth`. |
 | `X-Tenant-Id` | **Habilitada** con el tenant sembrado (`{{tenantId}}`, id determinista). Un actor sin membresía recibe 403 sin ella; con una sola membresía es redundante pero inocua. |
 | Query params | Los requeridos van habilitados; los opcionales, deshabilitados. |
-| Bodies | Ejemplos derivados del schema (enum → primer valor, `format: uuid` → uuid nulo). **Revisa los valores antes de enviar**: los uuid de ejemplo no existen en la base. Las altas son la excepción — llevan cuerpo curado y verificado contra la API, tanto en el folder 01 como en su folder de dominio. |
+| Variables de ruta | Una por recurso, no una global: `/accreditations/{id}` usa `{{accreditationId}}` y `/identity/checks/{id}` usa `{{checkId}}`. Antes las 350 rutas con `{id}` compartían `{{id}}`, así que pegar un id pisaba el de todos los demás dominios y la API respondía «no encontrado» sin que se viera por qué. |
+| Captura de ids | 847 requests guardan en el entorno el id que devuelven: un `POST` deja `{{recursoId}}` listo para el `PATCH`/`DELETE` del mismo recurso, y un `GET` de listado toma el primero para poder modificar sin crear nada antes. |
+| Orden dentro del folder | Recorrido de cliente: listados → altas → sub-altas → lecturas por id → modificaciones → bajas. Correr el folder entero encadena solo; el borrado va último para no llevarse lo que el resto todavía usa. |
+| Bodies | Ejemplos derivados del schema. Los campos uuid resuelven contra la variable del recurso (`{{practiceId}}`) cuando el nombre coincide; si no hay variable, el campo **opcional se omite** y el **obligatorio** queda como marcador `<campo: uuid existente>`, que falla con un 400 nombrando el campo en vez de un 500 opaco. Las altas llevan cuerpo curado y verificado contra la API. |
 | Requisitos condicionales | El cuerpo derivado del schema emite **todos** los campos opcionales a la vez, y eso rompe cualquier endpoint que exija unos u otros según un discriminador: `register-organization` mandaba `payer` y `broker` juntos bajo un `tenantType: PROVIDER`. OpenAPI no expresa «PAYER exige `payer`» — eso vive en el servicio. Por eso esos flujos llevan cuerpo curado y `yarn postman:verify` los ejerce. |
-| `tenantType` | **Obligatorio** en las tres altas de tenant. Nueve códigos: `PAYER` exige el bloque `payer`, que crea su aseguradora, y `BROKER` el bloque `broker`, que crea su corredor —ambas nacen pendientes de verificación—. Los siete territoriales (`PROVIDER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`) exigen país y jurisdicción, que es lo que determina bajo qué regulador operan, y no materializan fila propia: operan por sus sedes. |
+| `tenantType` | **Obligatorio** en las tres altas de tenant. Diez códigos: `PAYER` exige el bloque `payer`, que crea su aseguradora, y `BROKER` el bloque `broker`, que crea su corredor —ambas nacen pendientes de verificación—. Los ocho territoriales (`PROVIDER`, `UNIVERSITY`, `PHARMACY`, `HEALTH_BUSINESS`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`) exigen país y jurisdicción, que es lo que determina bajo qué regulador operan, y no materializan fila propia: operan por sus sedes. |
 | `*ConceptId` | Casi 300 campos del contrato piden un uuid del catálogo de terminología. Resuélvelos con **`GET /terminology/concepts?q=…`** (folder 00): es la única forma de descubrirlos, porque `$lookup` exige conocer sistema y código exactos. En las tres altas de tenant, un concepto inexistente responde **422 nombrando el campo**; en el resto de endpoints todavía sale como 500, porque la FK se descubre en el `INSERT`. |
 | Tests | `pm.test` del primer status 2xx documentado; login y refresh capturan los tokens; el folder 01 encadena los ids. |
 
@@ -98,9 +127,23 @@ La colección **no se edita a mano**. Tras cualquier cambio de contrato:
 
 ```bash
 yarn docs:openapi:generate   # regenera openapi/openapi.json desde los controllers
-yarn postman:generate        # regenera colección + entorno desde ese contrato
+yarn postman:generate        # regenera colección completa + entorno + las 4 por actor
 yarn postman:verify          # corre los folders 00 y 01 contra la API y falla si alguno no da su status
+yarn postman:verify:actores  # corre los 4 recorridos por tipo de usuario
 ```
+
+## Recorridos por actor
+
+| Actor | Colección | Qué recorre | Smoke equivalente |
+| --- | --- | --- | --- |
+| Paciente | `actores/Salud-Paciente.*` | Autoregistro, sesión con documento, verificación de identidad, familiar responsable | `test/smoke/modules/paciente.smoke.ts` |
+| Médico | `actores/Salud-Medico.*` | Autoregistro con matrícula, verificación de identidad y de licencia, jurisdicción, especialidad | `medico.smoke.ts` |
+| Organización | `actores/Salud-Organizacion.*` | Alta del tenant con su owner, petición de verificación, activación por plataforma, sede, personal y baja lógica | `organizacion.smoke.ts` |
+| Administrador | `actores/Salud-Administrador.*` | Altas, roles globales, aprovisionamiento y las tres bajas lógicas | `administrador.smoke.ts` |
+
+Cada recorrido incluye pasos de **límite** marcados en el nombre: son los que *deben* fallar
+—`422` al abrir una sede con la organización aún pendiente, `401` al entrar con una cuenta
+bloqueada— porque ahí está la regla que el sistema tiene que sostener.
 
 El generador falla en vez de emitir un request roto si un cuerpo fijado a mano (login, folder 01)
 nombra un campo que el DTO ya no declara. Eso cubre los renombres de campo, pero no que el cuerpo

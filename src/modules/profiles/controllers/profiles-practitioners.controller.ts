@@ -54,7 +54,6 @@ export class ProfilesPractitionersController {
 
   /** UC-05-04. */
   @Post('practitioners/:profileId/jurisdiction-authorizations')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar/renovar autorización jurisdiccional (licencia)',
@@ -73,7 +72,6 @@ export class ProfilesPractitionersController {
 
   /** UC-05-06. */
   @Post('practitioners/:profileId/specialties')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Agregar especialidad con credencial de soporte' })
   addSpecialty(

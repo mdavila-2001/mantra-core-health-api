@@ -28,6 +28,7 @@ import {
   AddSpecialtyDto,
   SpecialtyResponseDto,
 } from '../dto';
+import { ProfileOwnershipService } from './profile-ownership.service';
 
 /**
  * Casos de uso de la fuerza laboral de salud (regla GENERALIST): onboarding
@@ -61,6 +62,7 @@ export class ProfilesPractitionersService {
     private readonly credentialsRepo: ProfessionalCredentialsRepository,
     private readonly specialtiesRepo: PractitionerSpecialtiesRepository,
     private readonly languagesRepo: PractitionerLanguagesRepository,
+    private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -184,6 +186,9 @@ export class ProfilesPractitionersService {
       'Adding jurisdiction authorization',
     );
     return this.em.transactional(async (tx) => {
+      // El titular administra lo suyo: sin esto, un profesional auto-registrado no
+      // podía crear la matrícula que su propia verificación exige.
+      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
         throw new ResourceNotFoundException('Profesional no encontrado', {
@@ -315,6 +320,9 @@ export class ProfilesPractitionersService {
       'Adding specialty',
     );
     return this.em.transactional(async (tx) => {
+      // El titular administra lo suyo: sin esto, un profesional auto-registrado no
+      // podía crear la matrícula que su propia verificación exige.
+      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
         throw new ResourceNotFoundException('Profesional no encontrado', {

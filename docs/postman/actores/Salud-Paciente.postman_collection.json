@@ -1,0 +1,437 @@
+{
+  "info": {
+    "name": "SALUD · Paciente",
+    "description": "Recorrido de un usuario **paciente**, en orden y encadenado por el entorno.\n\nAutoregistro público, sesión con documento de identidad, verificación de identidad y datos propios. Es el único actor que inicia sesión con su documento y no con un correo.\n\nImportar junto a `Salud-Paciente.postman_environment.json` y correr los pasos de arriba abajo. Cada actor tiene su propio entorno: con uno solo, iniciar sesión como otro borraría este token.\n\nLos pasos son los mismos que ejercita `test/smoke/modules/paciente.smoke.ts` contra la API real, y `yarn postman:verify:actores` los vuelve a correr sobre esta colección.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 · Se registra solo, sin admin ni token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/register-patient",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "register-patient"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nationalId\": \"{{nationalId}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Paciente de prueba\",\n  \"phone\": \"+591 70055555\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Alta pública. El pre-request fija el documento en el entorno para que el login del paso 2 use exactamente el mismo, y para que reejecutar no choque con el 409 de documento en uso."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('nationalId', 'CI-' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.userId) pm.environment.set('patientUserId', b.userId);",
+              "  if (b.personId) pm.environment.set('personId', b.personId);",
+              "  if (b.patientProfileId) pm.environment.set('patientProfileId', b.patientProfileId);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · Inicia sesión con su documento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "login"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nationalId\": \"{{nationalId}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "El paciente entra con su documento, no con un correo."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.accessToken) pm.environment.set('accessToken', b.accessToken);",
+              "  if (b.refreshToken) pm.environment.set('refreshToken', b.refreshToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · Sube la foto de su documento",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/common/files",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "common",
+            "files"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"originalName\": \"documento.jpg\",\n  \"category\": \"DOCUMENT\",\n  \"sensitivity\": \"NORMAL\",\n  \"mimeType\": \"image/jpeg\",\n  \"sizeBytes\": 4096,\n  \"contentHash\": \"pac-{{$timestamp}}\",\n  \"storageUri\": \"s3://bucket/documento.jpg\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "La evidencia con la que se abrirá el caso: sin ella no hay qué contrastar."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('evidenceFileId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 · Abre su caso de verificación de identidad",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/identity/me/identity-verification",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "identity",
+            "me",
+            "identity-verification"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"evidenceFileId\": \"{{evidenceFileId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('caseId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 · Lista sus propios casos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/identity/me/verification-cases",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "identity",
+            "me",
+            "verification-cases"
+          ],
+          "variable": []
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 · Ve el detalle de su caso",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/identity/me/verification-cases/:caseId",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "identity",
+            "me",
+            "verification-cases",
+            ":caseId"
+          ],
+          "variable": [
+            {
+              "key": "caseId",
+              "value": "{{caseId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "description": "Filtra por id **y** titular: el caso de otro paciente responde 404."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 · Registra a su familiar responsable",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/profiles/patients/:patientProfileId/related-persons",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "profiles",
+            "patients",
+            ":patientProfileId",
+            "related-persons"
+          ],
+          "variable": [
+            {
+              "key": "patientProfileId",
+              "value": "{{patientProfileId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"personId\": \"{{personId}}\",\n  \"displayName\": \"Familiar responsable\",\n  \"isEmergencyContact\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8 · Cierra su sesión",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "logout"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
