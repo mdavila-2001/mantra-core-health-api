@@ -1,12 +1,23 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { QaLabController } from './qa_lab.controller';
-import { QaLabService } from './qa_lab.service';
 import * as entities from './entities';
+import { QaLabController, QaLabInternalController } from './controllers';
+import { QaCatalogService, QaRunsService } from './services';
+import { QaCatalogRepository, QaRunsRepository } from './repositories';
 
+/**
+ * Módulo de laboratorio de pruebas: entornos gobernados, suites con casos y
+ * aserciones, corridas con evidencia inmutable, defectos deduplicados y enlace
+ * de evidencia a release (UC-36-01 … 12).
+ */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [QaLabController],
-  providers: [QaLabService],
+  controllers: [QaLabController, QaLabInternalController],
+  providers: [
+    QaCatalogRepository,
+    QaRunsRepository,
+    QaCatalogService,
+    QaRunsService,
+  ],
 })
 export class QaLabModule {}

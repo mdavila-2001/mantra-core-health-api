@@ -1,0 +1,83 @@
+import { Module } from '@nestjs/common';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import {
+  CatalogConcepts,
+  CodeSystemVersions,
+  CodeSystems,
+  TerminologySources,
+} from '../../modules/terminology/entities';
+import { Tenants } from '../../modules/directory/entities';
+import { ProcessingPurposes } from '../../modules/consent/entities';
+import { Users } from '../../modules/iam/entities';
+import {
+  ExternalProviders,
+  IntegrationEndpoints,
+} from '../../modules/integrations/entities';
+import {
+  IdentityAuthorities,
+  IdentityAuthorityEndpoints,
+  IdentityVerificationPolicies,
+} from '../../modules/identity_assurance/entities';
+import {
+  MessageChannels,
+  MessagingProviders,
+  ProviderChannelConfigs,
+} from '../../modules/messaging/entities';
+import { IamModule } from '../../modules/iam/iam.module';
+import { TenantMemberships } from '../../modules/directory/entities';
+import { TerminologySeedService } from './terminology-seed.service';
+import { IdentityVerificationSeedService } from './identity-verification-seed.service';
+import { MessagingSeedService } from './messaging-seed.service';
+import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { SeedBootstrapService } from './seed-bootstrap.service';
+
+/**
+ * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
+ * conceptos internos, canal de correo por defecto y datos de referencia de
+ * verificación de identidad) y los exporta para que las pruebas de integración
+ * puedan invocarlos tras materializar el esquema. Se importa una sola vez en
+ * `AppModule`.
+ *
+ * `SeedBootstrapService` impone el orden: primero catálogo/tenant, después los
+ * dominios que dependen de esas filas.
+ */
+@Module({
+  imports: [
+    MikroOrmModule.forFeature([
+      TerminologySources,
+      CodeSystems,
+      CodeSystemVersions,
+      CatalogConcepts,
+      Tenants,
+      ProcessingPurposes,
+      Users,
+      ExternalProviders,
+      IntegrationEndpoints,
+      IdentityAuthorities,
+      IdentityAuthorityEndpoints,
+      IdentityVerificationPolicies,
+      MessageChannels,
+      MessagingProviders,
+      ProviderChannelConfigs,
+      TenantMemberships,
+    ]),
+    // El seed del administrador reutiliza `IamUsersService.createUser` para que
+    // la credencial se hashee con argon2id igual que por API, en vez de duplicar
+    // aquí los parámetros del hash.
+    IamModule,
+  ],
+  providers: [
+    TerminologySeedService,
+    MessagingSeedService,
+    IdentityVerificationSeedService,
+    BootstrapAdminSeedService,
+    SeedBootstrapService,
+  ],
+  exports: [
+    TerminologySeedService,
+    MessagingSeedService,
+    IdentityVerificationSeedService,
+    BootstrapAdminSeedService,
+  ],
+})
+export class SeedModule {}

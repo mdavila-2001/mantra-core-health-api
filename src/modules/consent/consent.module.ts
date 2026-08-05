@@ -1,12 +1,81 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { ConsentController } from './consent.controller';
-import { ConsentService } from './consent.service';
 import * as entities from './entities';
+import {
+  ConsentsController,
+  HipaaAuthorizationsController,
+  PatientObjectionsController,
+  PrivacyRestrictionsController,
+  ProcessingLegalBasesController,
+  TreatmentInformedConsentsController,
+  ConsentEvidenceController,
+  ConsentSweepController,
+} from './controllers';
+import {
+  ConsentsService,
+  HipaaAuthorizationsService,
+  PatientObjectionsService,
+  PrivacyRestrictionsService,
+  ProcessingLegalBasesService,
+  TreatmentInformedConsentsService,
+  ConsentEvidenceService,
+  ConsentSweepService,
+} from './services';
+import {
+  ConsentsRepository,
+  ConsentProvisionsRepository,
+  ConsentEventsRepository,
+  ConsentEvidenceRepository,
+  HipaaAuthorizationsRepository,
+  PatientObjectionsRepository,
+  PrivacyRestrictionsRepository,
+  ProcessingLegalBasesRepository,
+  TreatmentInformedConsentsRepository,
+} from './repositories';
+import { ClinicalAccessGrantsRepository } from '../authz/repositories';
+import { AuditModule } from '../audit/audit.module';
 
+/**
+ * Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence):
+ * captura/retiro de consentimientos, autorizaciones HIPAA, objeciones y
+ * restricciones de privacidad, bases legales versionadas, consentimiento informado
+ * de tratamiento, evidencia inmutable y barrido de expiraciones.
+ */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [ConsentController],
-  providers: [ConsentService],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuditModule],
+  controllers: [
+    ConsentsController,
+    HipaaAuthorizationsController,
+    PatientObjectionsController,
+    PrivacyRestrictionsController,
+    ProcessingLegalBasesController,
+    TreatmentInformedConsentsController,
+    ConsentEvidenceController,
+    ConsentSweepController,
+  ],
+  providers: [
+    // Repositorios
+    ConsentsRepository,
+    ConsentProvisionsRepository,
+    ConsentEventsRepository,
+    ConsentEvidenceRepository,
+    HipaaAuthorizationsRepository,
+    PatientObjectionsRepository,
+    PrivacyRestrictionsRepository,
+    ProcessingLegalBasesRepository,
+    TreatmentInformedConsentsRepository,
+    // Repositorio de authz reutilizado para propagar la revocación de consent a
+    // los accesos clínicos que se apoyaban en él (C-20).
+    ClinicalAccessGrantsRepository,
+    // Servicios
+    ConsentsService,
+    HipaaAuthorizationsService,
+    PatientObjectionsService,
+    PrivacyRestrictionsService,
+    ProcessingLegalBasesService,
+    TreatmentInformedConsentsService,
+    ConsentEvidenceService,
+    ConsentSweepService,
+  ],
 })
 export class ConsentModule {}

@@ -1,0 +1,283 @@
+import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
+import type { EntityManager } from '@mikro-orm/postgresql';
+import {
+  OperationalReadinessReviews,
+  ReadinessReviewFindings,
+  Runbooks,
+  RunbookVersions,
+  RunbookExecutions,
+  ResilienceExercises,
+  RecoveryObjectives,
+} from '../entities';
+/**
+ * Acceso a las prácticas operativas de `platform_ops.*`: revisiones de
+ * preparación con sus hallazgos, runbooks con sus versiones y ejecuciones, y
+ * ejercicios de resiliencia contra los objetivos de recuperación.
+ */
+@Injectable()
+export class OpsPracticesRepository {
+  // --- Revisión de preparación (UC-46-12) ---
+
+  /**
+   * Obtiene find review for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find review for update conforme al contrato `Promise<OperationalReadinessReviews | null>`.
+   */
+  findReviewForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<OperationalReadinessReviews | null> {
+    return em.findOne(
+      OperationalReadinessReviews,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Revisión completada con decisión "go" del componente en el entorno dado.
+   * Es la precondición del despliegue a producción.
+   */
+  findGoReview(
+    em: EntityManager,
+    serviceComponentId: string,
+    completedStateConceptId: string,
+    goDecisionConceptId: string,
+  ): Promise<OperationalReadinessReviews | null> {
+    return em.findOne(
+      OperationalReadinessReviews,
+      {
+        serviceComponentId,
+        statusConceptId: completedStateConceptId,
+        decisionConceptId: goDecisionConceptId,
+      },
+      { orderBy: { completedAt: 'DESC' } },
+    );
+  }
+
+  /** Hallazgos de la revisión, bloqueados: cerrarlos es una operación en bloque. */
+  findFindingsForUpdate(
+    em: EntityManager,
+    operationalReadinessReviewId: string,
+  ): Promise<ReadinessReviewFindings[]> {
+    return em.find(
+      ReadinessReviewFindings,
+      { operationalReadinessReviewId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  // --- Runbooks (UC-46-13) ---
+
+  /**
+   * Obtiene find runbook for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find runbook for update conforme al contrato `Promise<Runbooks | null>`.
+   */
+  findRunbookForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<Runbooks | null> {
+    return em.findOne(
+      Runbooks,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /** Versión inmutable: el checksum fija el contenido publicado. */
+  createRunbookVersion(
+    em: EntityManager,
+    data: {
+      /**
+       * Identificador asociado a runbook.
+       */
+      runbookId: string;
+      /**
+       * Valor de version number mantenido por la instancia.
+       */
+      versionNumber: number;
+      /**
+       * Valor de content markdown mantenido por la instancia.
+       */
+      contentMarkdown: string;
+      /**
+       * Valor de automation definition json mantenido por la instancia.
+       */
+      automationDefinitionJson?: unknown;
+      /**
+       * Identificador asociado a approved by user.
+       */
+      approvedByUserId: string;
+    },
+  ): RunbookVersions {
+    return em.create(
+      RunbookVersions,
+      {
+        runbookId: data.runbookId,
+        versionNumber: data.versionNumber,
+        contentMarkdown: data.contentMarkdown,
+        automationDefinitionJson: data.automationDefinitionJson,
+        approvedByUserId: data.approvedByUserId,
+        approvedAt: new Date(),
+      },
+      { partial: true },
+    );
+  }
+
+  /**
+   * Obtiene find runbook version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runbookId - Identificador de runbook.
+   * @param versionNumber - Valor de version number requerido por la operación.
+   * @returns Resultado de find runbook version conforme al contrato `Promise<RunbookVersions | null>`.
+   */
+  findRunbookVersion(
+    em: EntityManager,
+    runbookId: string,
+    versionNumber: number,
+  ): Promise<RunbookVersions | null> {
+    return em.findOne(RunbookVersions, { runbookId, versionNumber });
+  }
+
+  /**
+   * Obtiene find runbook version by id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find runbook version by id conforme al contrato `Promise<RunbookVersions | null>`.
+   */
+  findRunbookVersionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<RunbookVersions | null> {
+    return em.findOne(RunbookVersions, { id });
+  }
+
+  /**
+   * Obtiene find latest runbook version.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param runbookId - Identificador de runbook.
+   * @returns Resultado de find latest runbook version conforme al contrato `Promise<RunbookVersions | null>`.
+   */
+  findLatestRunbookVersion(
+    em: EntityManager,
+    runbookId: string,
+  ): Promise<RunbookVersions | null> {
+    return em.findOne(
+      RunbookVersions,
+      { runbookId },
+      { orderBy: { versionNumber: 'DESC' } },
+    );
+  }
+
+  /** Log append-only de ejecuciones: lo ejecutado queda como ocurrió. */
+  createRunbookExecution(
+    em: EntityManager,
+    data: {
+      /**
+       * Identificador asociado a runbook version.
+       */
+      runbookVersionId: string;
+      /**
+       * Identificador asociado a health incident.
+       */
+      healthIncidentId?: string;
+      /**
+       * Identificador asociado a change request.
+       */
+      changeRequestId?: string;
+      /**
+       * Identificador asociado a execution mode concept.
+       */
+      executionModeConceptId: string;
+      /**
+       * Valor de started at mantenido por la instancia.
+       */
+      startedAt: Date;
+      /**
+       * Valor de ended at mantenido por la instancia.
+       */
+      endedAt?: Date;
+      /**
+       * Identificador asociado a result concept.
+       */
+      resultConceptId: string;
+      /**
+       * Identificador asociado a initiated by user.
+       */
+      initiatedByUserId: string;
+      /**
+       * Valor de execution log uri mantenido por la instancia.
+       */
+      executionLogUri?: string;
+      /**
+       * Valor de output json mantenido por la instancia.
+       */
+      outputJson?: unknown;
+    },
+  ): RunbookExecutions {
+    return em.create(
+      RunbookExecutions,
+      {
+        runbookVersionId: data.runbookVersionId,
+        healthIncidentId: data.healthIncidentId,
+        changeRequestId: data.changeRequestId,
+        executionModeConceptId: data.executionModeConceptId,
+        startedAt: data.startedAt,
+        endedAt: data.endedAt,
+        resultConceptId: data.resultConceptId,
+        initiatedByUserId: data.initiatedByUserId,
+        executionLogUri: data.executionLogUri,
+        outputJson: data.outputJson,
+      },
+      { partial: true },
+    );
+  }
+
+  // --- Resiliencia (UC-46-14) ---
+
+  /**
+   * Obtiene find exercise for update.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de id.
+   * @returns Resultado de find exercise for update conforme al contrato `Promise<ResilienceExercises | null>`.
+   */
+  findExerciseForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<ResilienceExercises | null> {
+    return em.findOne(
+      ResilienceExercises,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Objetivo de recuperación vigente del componente, bloqueado: el ejercicio se
+   * mide contra él y no debe cambiar mientras se compara.
+   */
+  findRecoveryObjectiveForUpdate(
+    em: EntityManager,
+    serviceComponentId: string,
+    activeStateConceptId: string,
+  ): Promise<RecoveryObjectives | null> {
+    return em.findOne(
+      RecoveryObjectives,
+      { serviceComponentId, stateConceptId: activeStateConceptId },
+      {
+        lockMode: LockMode.PESSIMISTIC_WRITE,
+        orderBy: { effectiveFrom: 'DESC' },
+      },
+    );
+  }
+}

@@ -1,14 +1,26 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
+/**
+ * Mapea la entidad persistente asociada a `restore_test_runs`.
+ */
 @Entity({ schema: 'system_ops', tableName: 'restore_test_runs' })
 export class RestoreTestRuns {
+  /**
+   * Identificador único de la instancia.
+   */
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /**
+   * Identificador asociado a backup policy.
+   */
   @Property({ fieldName: 'backup_policy_id', type: 'uuid' }) // FK → system_ops.backup_policies
   backupPolicyId!: string;
 
+  /**
+   * Valor de backup reference mantenido por la instancia.
+   */
   @Property({
     fieldName: 'backup_reference',
     columnType: 'varchar',
@@ -16,9 +28,15 @@ export class RestoreTestRuns {
   })
   backupReference?: string;
 
+  /**
+   * Identificador asociado a outcome concept.
+   */
   @Property({ fieldName: 'outcome_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   outcomeConceptId!: string;
 
+  /**
+   * Valor de measured rpo seconds mantenido por la instancia.
+   */
   @Property({
     fieldName: 'measured_rpo_seconds',
     columnType: 'int',
@@ -26,6 +44,9 @@ export class RestoreTestRuns {
   })
   measuredRpoSeconds?: number;
 
+  /**
+   * Valor de measured rto seconds mantenido por la instancia.
+   */
   @Property({
     fieldName: 'measured_rto_seconds',
     columnType: 'int',
@@ -33,6 +54,9 @@ export class RestoreTestRuns {
   })
   measuredRtoSeconds?: number;
 
+  /**
+   * Valor de integrity check passed mantenido por la instancia.
+   */
   @Property({
     fieldName: 'integrity_check_passed',
     type: 'boolean',
@@ -40,12 +64,21 @@ export class RestoreTestRuns {
   })
   integrityCheckPassed?: boolean;
 
+  /**
+   * Identificador asociado a evidence file.
+   */
   @Property({ fieldName: 'evidence_file_id', type: 'uuid', nullable: true }) // FK → common.files
   evidenceFileId?: string;
 
+  /**
+   * Valor de started at mantenido por la instancia.
+   */
   @Property({ fieldName: 'started_at', columnType: 'timestamptz' })
   startedAt!: Date;
 
+  /**
+   * Valor de finished at mantenido por la instancia.
+   */
   @Property({
     fieldName: 'finished_at',
     columnType: 'timestamptz',
@@ -53,6 +86,9 @@ export class RestoreTestRuns {
   })
   finishedAt?: Date;
 
+  /**
+   * Identificador asociado a recorded by user.
+   */
   @Property({ fieldName: 'recorded_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
   recordedByUserId?: string;
 }

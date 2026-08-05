@@ -1,0 +1,12 @@
+{
+  "rootDir": "..",
+  "testMatch": ["<rootDir>/test/smoke/**/*.int-spec.ts"],
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "extensionsToTreatAsEsm": [".ts"],
+  "transform": {
+    "^.+\\.(t|j)s$": "@swc/jest"
+  },
+  "testEnvironment": "node",
+  "testTimeout": 180000,
+  "maxWorkers": 1
+}

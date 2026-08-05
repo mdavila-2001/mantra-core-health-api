@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+/.claude
 
 # Logs
 logs
@@ -54,3 +55,50 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# graphify — grafo generado (artefacto local, se regenera con `graphify update .`).
+# No se versiona. Anclado a la raíz; el de src se ignora aparte.
+/graphify-out/
+src/graphify-out/
+
+# Claude Code — configuración y skills locales por usuario. Cada desarrollador usa
+# las suyas; no se versionan para no chocar con las de otros devs.
+.claude/
+CLAUDE.md
+
+# Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
+/temp
+
+# database/ de la RAÍZ — modelo canónico (.puml), DDL y mappings NoSQL. SÍ se
+# versiona: `docker-compose.yml` monta `./database/SQL` en `postgres-init` y
+# `./database/NoSQL` en `mongo-init`, así que un clon sin esta carpeta levanta
+# los contenedores de inicialización sin nada que aplicar. Mientras vivió solo
+# en local, cualquiera que clonara el repo se quedaba sin el esquema y sin los
+# índices de búsqueda, que es exactamente el bloqueo que reportó el equipo.
+# (Son 6,6 MB de texto: DDL, mappings y modelo. Sin dumps ni datos de paciente.)
+
+# docs/ SÍ se versiona: es el portal de documentación técnica que construye
+# mkdocs (`yarn docs:build`) y que valida el workflow de CI `docs.yml`. Un
+# portal cuyas páginas solo existen en la máquina de quien las escribió no
+# puede ser un gate de CI ni servir a nadie más. El único artefacto generado a
+# partir de él, `site/`, sigue ignorado más abajo.
+
+# Cachés de Python (toolkit de generación).
+*.pyc
+
+# prompt
+CLAUDE.md
+/coverage-integration
+
+# Salidas del smoke test (artefactos generados)
+/output.smoke.test.json
+/output.smoke.test.csv
+site/
+dist-docs/
+
+# Archivos subidos por el adaptador de almacenamiento local (FILE_STORAGE_LOCAL_DIR)
+/storage/
+
+# Salida del pipeline legacy `yarn openapi:generate`, que duplica el contrato ya
+# versionado en `openapi/`. El contrato bueno lo produce `yarn docs:openapi:generate`.
+docs/endpoints/

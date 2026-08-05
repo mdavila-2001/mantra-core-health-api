@@ -1,0 +1,561 @@
+{
+  "info": {
+    "name": "SALUD · Administrador",
+    "description": "Recorrido de un usuario **administrador**, en orden y encadenado por el entorno.\n\nAltas, concesión de roles y las tres bajas lógicas de plataforma: bloquear una cuenta, suspender una organización y anonimizar a una persona. Ninguna borra: lo que se firmó tiene que seguir existiendo.\n\nImportar junto a `Salud-Administrador.postman_environment.json` y correr los pasos de arriba abajo. Cada actor tiene su propio entorno: con uno solo, iniciar sesión como otro borraría este token.\n\nLos pasos son los mismos que ejercita `test/smoke/modules/administrador.smoke.ts` contra la API real, y `yarn postman:verify:actores` los vuelve a correr sobre esta colección.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 · Inicia sesión como administrador",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "login"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "El primer SECURITY_ADMIN no se puede crear por API: lo siembra `yarn postman:bootstrap`."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.accessToken) pm.environment.set('accessToken', b.accessToken);",
+              "  if (b.refreshToken) pm.environment.set('refreshToken', b.refreshToken);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · Da de alta una cuenta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "users"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"displayName\": \"Usuario gestionado\",\n  \"email\": \"{{managedEmail}}\",\n  \"password\": \"{{password}}\",\n  \"initialRole\": \"USER\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Sólo `USER` y `SECURITY_ADMIN` son roles de alta."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('managedEmail', 'gestionado-' + Date.now() + '@example.test');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('managedUserId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · Le concede SECURITY_ADMIN",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/users/:managedUserId/global-roles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "users",
+            ":managedUserId",
+            "global-roles"
+          ],
+          "variable": [
+            {
+              "key": "managedUserId",
+              "value": "{{managedUserId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"SECURITY_ADMIN\",\n  \"action\": \"GRANT\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 · Y se lo revoca",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/users/:managedUserId/global-roles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "users",
+            ":managedUserId",
+            "global-roles"
+          ],
+          "variable": [
+            {
+              "key": "managedUserId",
+              "value": "{{managedUserId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"role\": \"SECURITY_ADMIN\",\n  \"action\": \"REVOKE\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 · Aprovisiona una organización con su owner",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/tenants",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "tenants"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"{{admTenantCode}}\",\n  \"legalName\": \"Organización aprovisionada\",\n  \"tenantType\": \"MEDICAL_OFFICE\",\n  \"countryConceptId\": \"{{countryConceptId}}\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"ownerUserId\": \"{{managedUserId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": ""
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('admTenantCode', 'ADM-' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "// Encadena el recorrido: lo que deja este paso lo consume el siguiente.",
+              "if (pm.response.code < 300) {",
+              "  const b = pm.response.json();",
+              "  if (b.id) pm.environment.set('admTenantId', b.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 · La verifica y la deja ACTIVA",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/tenants/:admTenantId/verification",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "tenants",
+            ":admTenantId",
+            "verification"
+          ],
+          "variable": [
+            {
+              "key": "admTenantId",
+              "value": "{{admTenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "description": "Acto de plataforma: el owner no llega a este endpoint."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 · La suspende — baja lógica, sigue existiendo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/tenants/:admTenantId/suspend",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "tenants",
+            ":admTenantId",
+            "suspend"
+          ],
+          "variable": [
+            {
+              "key": "admTenantId",
+              "value": "{{admTenantId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Motivo de la suspensión\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "De la organización cuelgan historias clínicas, facturación y consentimientos: un borrado dejaría todo eso apuntando al vacío. El motivo es obligatorio porque estas decisiones se revisan."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8 · Bloquea la cuenta — baja lógica",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/users/:managedUserId/lock",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "users",
+            ":managedUserId",
+            "lock"
+          ],
+          "variable": [
+            {
+              "key": "managedUserId",
+              "value": "{{managedUserId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reason\": \"Motivo del bloqueo\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Le corta el acceso; la cuenta sigue existiendo porque de ella cuelgan sus actos. Después de esto su login devuelve 401."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9 · LÍMITE · la cuenta bloqueada ya no entra",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/iam/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "auth",
+            "login"
+          ],
+          "variable": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{managedEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Este paso **debe** dar 401: es la prueba de que el bloqueo sirve."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 401', function () {",
+              "  pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 · Derecho al olvido — vacía sin borrar",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/iam/users/:managedUserId/anonymize",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "iam",
+            "users",
+            ":managedUserId",
+            "anonymize"
+          ],
+          "variable": [
+            {
+              "key": "managedUserId",
+              "value": "{{managedUserId}}",
+              "description": "Lo deja en el entorno un paso anterior"
+            }
+          ]
+        },
+        "description": "No es una baja más: se vacían los datos personales pero la fila queda, porque los actos que esa persona firmó son parte de la historia de otros pacientes."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

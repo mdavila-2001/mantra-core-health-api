@@ -1,21 +1,144 @@
 # =========================================================================
 # Mantra Core Technologies
 # Product: REDESA Health Ecosystem
-# Footprint: Infrastructure Configuration
+# Footprint: Infrastructure Configuration (desarrollo local)
+# -------------------------------------------------------------------------
+# Portabilidad (Mac / Windows / Linux):
+#   - Todas las credenciales y puertos salen de .env (copiar de .env.example).
+#     Postgres se siembra con las MISMAS variables que usa la app (DB_*), así
+#     no hay dos juegos de credenciales que mantener sincronizados.
+#   - La persistencia usa VOLÚMENES NOMBRADOS gestionados por Docker: funcionan
+#     igual en cualquier SO y evitan los problemas de permisos/rutas de los
+#     bind-mounts de base de datos en Windows/macOS. Los datos sobreviven a
+#     `docker compose down` y a reinicios. Para borrarlos: `docker compose down -v`.
+#     Para relocalizar a una carpeta del host, ver el bloque comentado al final.
+#   - Los scripts de docker/db-init/*.sh DEBEN quedar con fin de línea LF; eso lo
+#     garantiza .gitattributes (`*.sh text eol=lf`) para los que trabajan en Windows.
 # =========================================================================
-name: mantra-redesa
+name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
+
+# Entorno compartido por la API y los 20 procesos worker (un dominio cada
+# uno — ver `PLAN-CORRECCION-WORKERS-2026-07-28.md`). `x-app-env` es una
+# extension field (Compose la ignora como servicio; solo sirve de ancla YAML)
+# para no repetir 20 veces el mismo bloque. Los host/puerto son los nombres de
+# servicio DENTRO de la red de compose (no los `*_PORT` expuestos al host, que
+# son solo para conectarse desde fuera de Docker).
+x-app-env: &app-env
+  # Este compose es el de DESARROLLO LOCAL (ver la cabecera del archivo): monta
+  # el emulador de proveedores, publica puertos en el host y siembra la base con
+  # credenciales de ejemplo. Declararlo como `production` era una contradicción
+  # con lo que el archivo realmente levanta, y además activa las restricciones
+  # pensadas para un despliegue real —`JWT_SECRET` obligatorio, prohibición del
+  # emulador de proveedores— que este entorno deliberadamente no satisface.
+  # Producción usa manifiestos propios, no este archivo.
+  NODE_ENV: ${NODE_ENV:-development}
+  PORT: "3000"
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  DB_NAME: ${POSTGRES_DB}
+  MONGODB_URI: mongodb://mongodb:27017/${MONGO_DB:-mantra_redesa_health_document_store}
+  MONGO_DB: ${MONGO_DB:-mantra_redesa_health_document_store}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  OPENSEARCH_NODE: http://opensearch:9200
+  MINIO_ENDPOINT: minio
+  MINIO_PORT: "9000"
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+  MINIO_BUCKET: ${MINIO_BUCKET:-mantra-redesa-health-files}
+  JWT_SECRET: ${JWT_SECRET}
+  JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+  JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
+  ACCOUNT_LOCK_THRESHOLD: ${ACCOUNT_LOCK_THRESHOLD:-5}
+  MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+  RLS_ENFORCE: ${RLS_ENFORCE:-false}
+  MIKRO_ORM_DEBUG: ${MIKRO_ORM_DEBUG:-false}
+  # Materialización del esquema. ESTA VARIABLE TIENE QUE ESTAR AQUÍ.
+  #
+  # Compose usa el `.env` solo para sustituir `${VARIABLE}` dentro de este YAML;
+  # NO lo inyecta dentro de los contenedores. Una variable que no figure en este
+  # bloque, el contenedor no la ve por más que esté en el `.env`. Mientras
+  # `ORM_SCHEMA_SYNC` no estuvo listada, la API dockerizada caía al default del
+  # código (`'safe'` en `src/orm/config/orm.env.ts`) y aplicaba DDL aditivo por
+  # su cuenta al arrancar: exactamente la dirección de cambio que el protocolo
+  # de 4 capas (.puml -> SQL/ -> BD -> ORM) prohíbe, y el mecanismo por el que
+  # llegaron a la base tablas que el modelo canónico no declara. Fijar
+  # `ORM_SCHEMA_SYNC=off` en el `.env` local NO cubría este camino: solo protege
+  # a quien corre la API en el host con `yarn start:dev`.
+  #
+  # El default del contenedor es `dry-run` y no `off` a propósito: con `off`,
+  # `onApplicationBootstrap` retorna antes de llamar a `run()` y el chequeo de
+  # fidelidad tampoco corre, así que se pierde la red de seguridad. `dry-run` no
+  # toca la base -registra el DDL que habría aplicado y sigue- y sí verifica
+  # fidelidad. Quien quiera otro modo lo declara en su `.env`, que gana sobre
+  # este default.
+  ORM_SCHEMA_SYNC: ${ORM_SCHEMA_SYNC:-dry-run}
+  # La verificación de fidelidad solo compara y registra advertencias; nunca
+  # lanza ni aborta el arranque (`SchemaFidelityService.verifyAndReport`).
+  ORM_VERIFY_FIDELITY: ${ORM_VERIFY_FIDELITY:-true}
+  # Los 20 workers llaman la API por el nombre del servicio, no localhost.
+  WORKER_API_BASE_URL: http://api:3000
+  WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
+  MESSAGING_QUEUE_CODES: ${MESSAGING_QUEUE_CODES:-}
+  TS_COMPRESSION_OLDER_THAN: ${TS_COMPRESSION_OLDER_THAN:-7 days}
+  TS_ROLLUP_REFRESH_WINDOW_HOURS: ${TS_ROLLUP_REFRESH_WINDOW_HOURS:-2}
+  # Vacío por defecto a propósito: retención de time_series es opt-in por
+  # tabla (ver `apply-retention.job.ts`). Formato: "tabla=intervalo,..."
+  TS_RETENTION_POLICIES: ${TS_RETENTION_POLICIES:-}
+  # Emulador standalone (`../mock-provider-server`) de los proveedores
+  # externos que el backend no conecta de verdad todavía: mensajería,
+  # borrado cross-store y embeddings. Configurado por DEFECTO (no opt-in):
+  # el adapter real de cada job cae solo al stub "PROVIDER_NOT_CONFIGURED"
+  # si esta URL queda vacía. Ver `worker/worker.env.ts` y
+  # `mock-provider-server/README.md`.
+  MOCK_PROVIDER_BASE_URL: ${MOCK_PROVIDER_BASE_URL:-http://mock-provider-server:4100}
+  MOCK_PROVIDER_API_KEY: ${MOCK_PROVIDER_API_KEY:-}
+  # Trazas distribuidas. Apagadas por defecto; se activan con OTEL_ENABLED=true
+  # en el `.env` DESPUÉS de levantar Jaeger (`yarn jaeger:up`), que se une a
+  # esta misma red y por eso se alcanza por su nombre de servicio y no por
+  # localhost. `OTEL_SERVICE_NAME` NO se declara aquí a propósito: cada
+  # contenedor deriva el suyo del entrypoint que ejecuta
+  # (`redesa-api`, `redesa-worker-messaging`, …); fijarlo aquí haría que los 21
+  # procesos exportaran bajo el mismo nombre. Ver `docs/observability/`.
+  OTEL_ENABLED: ${OTEL_ENABLED:-false}
+  OTEL_SERVICE_NAMESPACE: ${OTEL_SERVICE_NAMESPACE:-redesa}
+  OTEL_SERVICE_VERSION: ${OTEL_SERVICE_VERSION:-}
+  OTEL_DEPLOYMENT_ENVIRONMENT: ${OTEL_DEPLOYMENT_ENVIRONMENT:-}
+  OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT_DOCKER:-http://jaeger:4318/v1/traces}
+  OTEL_EXPORT_TIMEOUT_MS: ${OTEL_EXPORT_TIMEOUT_MS:-10000}
+  OTEL_TRACES_SAMPLER: ${OTEL_TRACES_SAMPLER:-parentbased_traceidratio}
+  OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-1.0}
+  OTEL_PROPAGATORS: ${OTEL_PROPAGATORS:-tracecontext,baggage}
+  OTEL_DIAG_LOG_LEVEL: ${OTEL_DIAG_LOG_LEVEL:-ERROR}
+  OTEL_TRACE_RESPONSE_HEADER: ${OTEL_TRACE_RESPONSE_HEADER:-true}
+
+# Límites de recursos: sin esto, un proceso Node con un memory leak o un tick
+# de worker atascado puede consumir toda la RAM del host sin que nada lo
+# frene. Son defaults conservadores para desarrollo/staging, no una medición
+# de carga real de producción — ajustar con datos reales antes de operar así.
+x-api-resources: &api-resources
+  limits:
+    cpus: "2.0"
+    memory: 1536M
+x-worker-resources: &worker-resources
+  limits:
+    cpus: "0.5"
+    memory: 512M
 
 services:
   postgres:
     image: timescale/timescaledb-ha:pg18
-    container_name: postgres
     restart: always
     environment:
+      # Variables nativas del contenedor. Deben coincidir con DB_* que usa la app.
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,12 +149,31 @@ services:
     networks:
       - mantra-redesa-network
 
+  # One-shot: aplica SQL/ (apply_all → apply_deferred) y los stores PG de
+  # NoSQL/ (58 TimescaleDB, 59 pgvector) solo si las tablas no existen.
+  postgres-init:
+    image: timescale/timescaledb-ha:pg18
+    restart: "no"
+    entrypoint: ["bash", "/init/bin/init-postgres.sh"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./database/SQL:/init/SQL:ro
+      - ./database/NoSQL:/init/NoSQL:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   mongodb:
-    image: mongo:7.0
-    container_name: mongodb
+    image: mongo:8.0
     restart: always
     ports:
-      - "27018:27017"
+      - "${MONGO_PORT:-27018}:27017"
     volumes:
       - mongodb_data:/data/db
     healthcheck:
@@ -42,13 +184,29 @@ services:
     networks:
       - mantra-redesa-network
 
+  # One-shot: crea las colecciones del módulo 55 document_store
+  # (validadores $jsonSchema + índices) solo si no existen.
+  mongo-init:
+    image: mongo:8.0
+    restart: "no"
+    entrypoint: ["bash", "/init/bin/init-mongo.sh"]
+    environment:
+      MONGO_DB: ${MONGO_DB:-salud_document_store}
+    volumes:
+      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   redis:
-    image: redis:7.4-alpine
-    container_name: redis
+    image: redis:8.8-alpine
     restart: always
     command: redis-server --save 60 1 --loglevel notice
     ports:
-      - "6380:6379"
+      - "${REDIS_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -60,8 +218,7 @@ services:
       - mantra-redesa-network
 
   opensearch:
-    image: opensearchproject/opensearch:2.18.0
-    container_name: opensearch
+    image: opensearchproject/opensearch:3.7.0
     restart: always
     environment:
       - cluster.name=mantra-redesa-cluster
@@ -79,8 +236,8 @@ services:
         soft: 65536
         hard: 65536
     ports:
-      - "9201:9200"
-      - "9601:9600"
+      - "${OPENSEARCH_PORT:-9201}:9200"
+      - "${OPENSEARCH_MONITOR_PORT:-9601}:9600"
     volumes:
       - opensearch_data:/usr/share/opensearch/data
     healthcheck:
@@ -91,17 +248,34 @@ services:
     networks:
       - mantra-redesa-network
 
+  # One-shot: crea los índices del módulo 57 search_platform desde los
+  # *.mapping.json solo si no existen.
+  opensearch-init:
+    image: curlimages/curl:8.11.1
+    restart: "no"
+    entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
+    volumes:
+      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ./docker/db-init:/init/bin:ro
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
   minio:
-    image: minio/minio:RELEASE.2024-11-07T00-52-20Z
-    container_name: minio
+    # Última release de MinIO community con consola de administración completa.
+    # RELEASE.2025-05-24 en adelante reduce la consola a un navegador de objetos
+    # y el proyecto fue archivado en 2026 — no actualizar más allá de esta versión.
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
     restart: always
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: mantra
-      MINIO_ROOT_PASSWORD: DArkSide
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     ports:
-      - "9002:9000"
-      - "9003:9001"
+      - "${MINIO_PORT:-9002}:9000"
+      - "${MINIO_CONSOLE_PORT:-9003}:9001"
     volumes:
       - minio_data:/data
     healthcheck:
@@ -112,18 +286,487 @@ services:
     networks:
       - mantra-redesa-network
 
+  # -----------------------------------------------------------------------
+  # Emulador standalone de proveedores externos (proyecto NestJS
+  # independiente en `../mock-provider-server`, sin código ni dependencias
+  # compartidas con el backend principal). `messaging`, `cross_store_consistency`
+  # y `vector_rag` le apuntan por defecto vía `MOCK_PROVIDER_BASE_URL` (arriba)
+  # para poder ejercitar sus workers de punta a punta sin credenciales reales
+  # de vendor. Se puede levantar también suelto (`yarn start:dev` dentro de
+  # esa carpeta) sin este compose — ver su README.
+  # -----------------------------------------------------------------------
+  mock-provider-server:
+    image: mantra-redesa-mock-provider-server:local
+    build:
+      context: ./mock-provider-server
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      PORT: "4100"
+      MOCK_API_KEY: ${MOCK_PROVIDER_API_KEY:-}
+      NOTIFICATIONS_FAILURE_RATE: ${MOCK_NOTIFICATIONS_FAILURE_RATE:-0.1}
+      DELETIONS_FAILURE_RATE: ${MOCK_DELETIONS_FAILURE_RATE:-0.05}
+      SIMULATED_LATENCY_MS: ${MOCK_SIMULATED_LATENCY_MS:-50}
+      # Verificación de identidad. Estas dos NO estaban declaradas y por eso el
+      # comportamiento por defecto -aceptar TODA verificación- solo se podía
+      # descubrir leyendo el código del emulador. Con la tasa en 0, el documento
+      # de identidad de un paciente y la matrícula de un médico salen ACCEPTED
+      # por igual; subirla es cómo se prueba el camino de rechazo.
+      IDENTITY_VERIFICATION_REJECTION_RATE: ${MOCK_IDENTITY_REJECTION_RATE:-0}
+      # Retardo del veredicto: la autoridad acepta la solicitud al instante y
+      # tarda en resolverla. Es lo que ejercita el bucle de espera del worker.
+      IDENTITY_VERIFICATION_DELAY_MS: ${MOCK_IDENTITY_DELAY_MS:-10000}
+    ports:
+      - "${MOCK_PROVIDER_PORT:-4100}:4100"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4100/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mantra-redesa-network
+
+  # -----------------------------------------------------------------------
+  # API + workers. Misma imagen para los 20 (build una sola vez; el
+  # `command` es lo único que cambia). Cada worker es SU PROPIO proceso/
+  # contenedor — no un único monolito con los 20 dominios adentro — para que
+  # un fallo o un pico de carga en uno no toque a los demás, y cada uno
+  # escale por separado. Ver `PLAN-CORRECCION-WORKERS-2026-07-28.md`.
+  # -----------------------------------------------------------------------
+  api:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/main.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *api-resources
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - api_storage:/app/storage
+    healthcheck:
+      # Sin curl/wget en `node:24-bookworm-slim`: se usa el `fetch` nativo de
+      # Node en vez de instalar un paquete extra sólo para el healthcheck.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      # No basta con que Postgres esté healthy: `TerminologySeedService`
+      # corre en `onApplicationBootstrap` y necesita el esquema ya aplicado
+      # (`postgres-init`), o la API arranca contra una base sin tablas en un
+      # `docker compose up` desde cero. Mismo razonamiento para Mongo/OpenSearch:
+      # document_store/search_platform asumen sus colecciones/índices creados.
+      postgres:
+        condition: service_healthy
+      postgres-init:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
+      opensearch:
+        condition: service_healthy
+      opensearch-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-billing:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-billing.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-automation:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-automation.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-consent:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-consent.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-cross_store_consistency:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-cross_store_consistency.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+      mock-provider-server:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-delegated_access:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-delegated_access.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-health_context:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-health_context.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-identity_assurance:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-identity_assurance.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-integrations:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-integrations.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-messaging:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-messaging.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+      mock-provider-server:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-pharmacy_inventory:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-pharmacy_inventory.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-promotions:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-promotions.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-qa_lab:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-qa_lab.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-read_models:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-read_models.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-reporting:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-reporting.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-scheduling:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-scheduling.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-tracking:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-tracking.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-workflow:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-workflow.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-vector_rag:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-vector_rag.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+      mock-provider-server:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-lakehouse:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-lakehouse.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-time_series:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-time_series.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+# -------------------------------------------------------------------------
+# Volúmenes de datos (persistentes, gestionados por Docker).
+# Los nombres llevan el prefijo del proyecto para no colisionar con otros
+# stacks en la misma máquina. Para inspeccionar: `docker volume ls`.
+#
+# ¿Quieres los datos en una carpeta concreta del host en lugar del área de
+# Docker? Descomenta driver/driver_opts en el volumen deseado y crea la carpeta
+# (en Windows usa una ruta tipo //c/Users/tu-usuario/redesa-data/postgres):
+#
+#   postgres_data:
+#     name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_postgres_data
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ${POSTGRES_DATA_DIR:-./data/postgres}
+# -------------------------------------------------------------------------
 volumes:
+  # `FileStorageModule` sólo tiene el adaptador local en disco hoy (MinIO está
+  # provisionado pero sin un `S3FileStorageAdapter` que lo use — ver
+  # `src/common/storage/README.md`); hasta que exista ese adaptador, sin este
+  # volumen cada `docker compose up`/redeploy recrea el contenedor `api` con
+  # `storage/uploads` vacío y los archivos subidos se pierden.
+  api_storage:
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_api_storage
   postgres_data:
-    name: postgres_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_postgres_data
   mongodb_data:
-    name: mongodb_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_mongodb_data
   redis_data:
-    name: redis_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_redis_data
   opensearch_data:
-    name: opensearch_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_opensearch_data
   minio_data:
-    name: minio_data
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}_minio_data
 
 networks:
   mantra-redesa-network:
-    name: mantra-redesa-network
+    name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}-network

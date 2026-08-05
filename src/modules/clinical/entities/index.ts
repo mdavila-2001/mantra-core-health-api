@@ -16,6 +16,7 @@ export * from './observation_notes.entity';
 export * from './observation_performers.entity';
 export * from './observation_reference_ranges.entity';
 export * from './observations.entity';
+export * from './prescription_signature_policies.entity';
 export * from './procedures.entity';
 export * from './service_requests.entity';
 export * from './social_history.entity';

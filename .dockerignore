@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+.git
+.github
+*.log
+npm-debug.log*
+.env
+.env.*
+!.env.example
+graphify-out
+.claude
+.vscode
+.idea
+database/SQL
+database/NoSQL

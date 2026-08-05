@@ -1,0 +1,76 @@
+# =========================================================================
+# Mantra Core Technologies · REDESA Health Ecosystem
+# Jaeger para DESARROLLO LOCAL. Archivo aparte del `docker-compose.yml`
+# principal a propósito: la observabilidad es opcional y no debe alargar el
+# arranque ni el consumo de memoria de quien solo quiere levantar el backend.
+#
+#   yarn jaeger:up      levanta Jaeger
+#   yarn jaeger:logs    sigue sus logs
+#   yarn jaeger:down    lo apaga
+#
+# Se une a la MISMA red que el compose principal (`mantra-redesa-network`),
+# declarada aquí como `external`, para que la API y los 20 workers dentro de
+# Docker puedan exportar a `http://jaeger:4318/v1/traces`. Si el stack
+# principal no está levantado, la red no existe todavía: levantarlo primero,
+# o crearla con
+#   docker network create mantra-redesa-network
+# Si el proyecto principal usa un COMPOSE_PROJECT_NAME propio, declarar aquí
+# REDESA_NETWORK_NAME=<proyecto>-network.
+#
+# ADVERTENCIA: esta configuración es SOLO para desarrollo. Almacena las trazas
+# en memoria (se pierden al reiniciar), no tiene autenticación y no tiene
+# retención. La topología de producción -Collector, Query, almacenamiento
+# persistente, TLS y autenticación- está en
+# `docs/observability/03-production-topology.md`.
+# =========================================================================
+name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}-jaeger
+
+services:
+  jaeger:
+    # Versión explícita, nunca `latest`: un cambio de imagen no debe entrar por
+    # sorpresa en la máquina de nadie. Jaeger v2 está construido sobre el
+    # OpenTelemetry Collector y acepta OTLP de forma nativa, que es exactamente
+    # lo que exporta el backend (no se usa ningún protocolo propietario).
+    image: jaegertracing/jaeger:2.11.0
+    restart: unless-stopped
+    environment:
+      # Almacenamiento en memoria acotado: sin límite, una sesión larga de
+      # desarrollo con muestreo al 100% acaba comiéndose la RAM del host.
+      JAEGER_MEMORY_MAX_TRACES: "50000"
+    ports:
+      # Enlazados a 127.0.0.1 y no a 0.0.0.0: en una red compartida (una
+      # cafetería, una oficina), publicar la UI en todas las interfaces expone
+      # las trazas -que incluyen rutas, tenants e identificadores de entidad-
+      # a cualquiera del segmento. Dentro de Docker los servicios se siguen
+      # alcanzando por el nombre `jaeger`, que no depende de esta publicación.
+      - "127.0.0.1:${JAEGER_UI_PORT:-16686}:16686" # UI web
+      - "127.0.0.1:${JAEGER_OTLP_HTTP_PORT:-4318}:4318" # OTLP http/protobuf
+      - "127.0.0.1:${JAEGER_OTLP_GRPC_PORT:-4317}:4317" # OTLP gRPC (sin uso hoy)
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:16686/",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - mantra-redesa-network
+
+networks:
+  # `external: true` reutiliza la red que crea `docker-compose.yml`, en vez de
+  # crear una segunda red aislada en la que la API no vería a Jaeger.
+  #
+  # El nombre NO se deriva de `COMPOSE_PROJECT_NAME`: Compose exporta esa
+  # variable a partir del `name:` de arriba (`...-jaeger`), así que
+  # interpolarla aquí buscaría una red `mantra-redesa-jaeger-network` que no
+  # existe. Se usa una variable propia con el valor por defecto correcto.
+  mantra-redesa-network:
+    external: true
+    name: ${REDESA_NETWORK_NAME:-mantra-redesa-network}

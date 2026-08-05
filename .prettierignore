@@ -1,0 +1,16 @@
+# Catálogo generado desde la bóveda SALUD (yarn orm:catalog).
+#
+# Se excluye del formateo a propósito: son ~13 300 declaraciones en forma de
+# tupla, una por línea. Prettier las reparte en cuatro o cinco líneas cada una
+# porque superan su ancho de impresión, con lo que archivos de 190 líneas pasan
+# a 1290 y se rompe el límite de 300 líneas por archivo del proyecto. El formato
+# compacto es el que hace legible y diffable un catálogo de este tamaño.
+src/orm/catalog/indexes/
+src/orm/catalog/foreign-keys/
+src/orm/catalog/schemas.catalog.ts
+
+# Artefactos de compilación y dependencias
+dist/
+node_modules/
+coverage/
+graphify-out/

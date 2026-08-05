@@ -1,0 +1,34 @@
+# Áreas críticas — Fase 16 del plan de documentación.
+# Sin propietarios técnicos individuales asignados en esta auditoría (GOV-002,
+# sin registro previo de ownership por equipo/persona) — placeholders por área
+# a completar por el equipo real antes de que este archivo tenga efecto en
+# GitHub (una entrada sin usuario/equipo válido no bloquea revisiones, pero
+# tampoco las asigna).
+#
+# Formato real de GitHub: cada línea necesita un @usuario o @org/equipo real.
+# Reemplazar los marcadores <equipo-...> por equipos reales de GitHub cuando
+# existan.
+
+# Contrato de API y documentación — cualquier cambio a superficie pública
+/openapi/                          <equipo-plataforma-api>
+/asyncapi/                         <equipo-plataforma-api>
+/src/main.ts                       <equipo-plataforma-api>
+/redocly.yaml                      <equipo-plataforma-api>
+
+# Autorización y seguridad — el área de mayor impacto de todo el sistema
+/src/modules/authz/                <equipo-seguridad>
+/src/common/auth/                  <equipo-seguridad>
+/docs/security/                    <equipo-seguridad>
+
+# Datos y esquema — cambios de alto riesgo (1184 entidades, RLS)
+/database/                         <equipo-datos>
+/src/orm/                          <equipo-datos>
+/docs/data/                        <equipo-datos>
+
+# Infraestructura y despliegue
+/docker-compose.yml                <equipo-plataforma>
+/Dockerfile                        <equipo-plataforma>
+/.github/workflows/                <equipo-plataforma>
+
+# Documentación general — cualquier cambio bajo docs/
+/docs/                              <equipo-plataforma-api>

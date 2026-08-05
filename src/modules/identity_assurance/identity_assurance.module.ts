@@ -1,12 +1,89 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { IdentityAssuranceController } from './identity_assurance.controller';
-import { IdentityAssuranceService } from './identity_assurance.service';
 import * as entities from './entities';
+import { ProfilesModule } from '../profiles/profiles.module';
+import { DirectoryModule } from '../directory/directory.module';
+import {
+  IdentityAuthoritiesController,
+  IdentityPoliciesController,
+  IdentityCasesController,
+  IdentityChecksController,
+  IdentityManualReviewController,
+  IdentityAssertionsController,
+  IdentityWorkerController,
+  IdentitySelfServiceController,
+} from './controllers';
+import {
+  IdentityAuthoritiesService,
+  IdentityPoliciesService,
+  IdentityCasesService,
+  IdentityChecksService,
+  IdentityManualReviewService,
+  IdentityAssertionsService,
+  IdentityVerificationEffectsService,
+  IdentitySelfServiceService,
+} from './services';
+import {
+  IdentityAuthoritiesRepository,
+  IdentityAuthorityEndpointsRepository,
+  IdentityVerificationPoliciesRepository,
+  IdentityVerificationCasesRepository,
+  IdentityEvidenceRecordsRepository,
+  IdentityChecksRepository,
+  IdentityVerificationAttemptsRepository,
+  IdentityCheckResultsRepository,
+  IdentityFraudSignalsRepository,
+  IdentityManualReviewCasesRepository,
+  IdentityAssertionsRepository,
+} from './repositories';
 
+/**
+ * Módulo Identity Assurance (27): proofing de identidad NIST 800-63, aserciones
+ * IAL/AAL y controles de fraude. Autoridades, políticas, casos de verificación,
+ * evidencia, checks/intentos/resultados, señales de fraude, revisión manual y
+ * aserciones. Autenticación vía guard global (`AuthModule`).
+ */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [IdentityAssuranceController],
-  providers: [IdentityAssuranceService],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // Verificar una matrícula o una institución cambia el estado de esos
+    // dominios, no del propio caso: el efecto lo aplica
+    // `IdentityVerificationEffectsService` con sus repositorios.
+    ProfilesModule,
+    DirectoryModule,
+  ],
+  controllers: [
+    IdentityAuthoritiesController,
+    IdentityPoliciesController,
+    IdentityCasesController,
+    IdentityChecksController,
+    IdentityManualReviewController,
+    IdentityAssertionsController,
+    IdentityWorkerController,
+    IdentitySelfServiceController,
+  ],
+  providers: [
+    // Repositorios
+    IdentityAuthoritiesRepository,
+    IdentityAuthorityEndpointsRepository,
+    IdentityVerificationPoliciesRepository,
+    IdentityVerificationCasesRepository,
+    IdentityEvidenceRecordsRepository,
+    IdentityChecksRepository,
+    IdentityVerificationAttemptsRepository,
+    IdentityCheckResultsRepository,
+    IdentityFraudSignalsRepository,
+    IdentityManualReviewCasesRepository,
+    IdentityAssertionsRepository,
+    // Servicios
+    IdentityAuthoritiesService,
+    IdentityPoliciesService,
+    IdentityCasesService,
+    IdentityChecksService,
+    IdentityManualReviewService,
+    IdentityAssertionsService,
+    IdentityVerificationEffectsService,
+    IdentitySelfServiceService,
+  ],
 })
 export class IdentityAssuranceModule {}
