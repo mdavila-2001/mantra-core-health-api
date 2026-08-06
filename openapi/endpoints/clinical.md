@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 23 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-records`
-- **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalRecordsController`
+- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records`
+- **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalReadController`, `ClinicalRecordsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -29,11 +29,12 @@ Referencia exhaustiva de 23 operación(es) del módulo `clinical`, derivada del 
 16. [POST /clinical/medication-requests/{id}/sign](#16-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
 17. [POST /clinical/observations](#17-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
 18. [PATCH /clinical/observations/{id}/amend](#18-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-19. [GET /clinical/prescription-signature-policies](#19-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-20. [POST /clinical/prescription-signature-policies](#20-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-21. [POST /clinical/prescription-signature-policies/{id}/deactivate](#21-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-22. [POST /clinical/procedures](#22-post-clinical-procedures) — Registrar un procedimiento
-23. [POST /clinical/service-requests](#23-post-clinical-service-requests) — Crear una orden de servicio
+19. [GET /clinical/patients/{patientProfileId}/summary](#19-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+20. [GET /clinical/prescription-signature-policies](#20-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+21. [POST /clinical/prescription-signature-policies](#21-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+22. [POST /clinical/prescription-signature-policies/{id}/deactivate](#22-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+23. [POST /clinical/procedures](#23-post-clinical-procedures) — Registrar un procedimiento
+24. [POST /clinical/service-requests](#24-post-clinical-service-requests) — Crear una orden de servicio
 
 ---
 
@@ -2740,7 +2741,242 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /clinical/prescription-signature-policies
+## 19. GET /clinical/patients/{patientProfileId}/summary
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-read`
+- **Nombre:** UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+- **Operation ID:** `ClinicalReadController_getPatientSummary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalReadController.getPatientSummary](../../src/modules/clinical/controllers/clinical-read.controller.ts)
+
+### Descripción de negocio
+
+UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-39-20: historial clínico del paciente en una sola llamada.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/patients/{patientProfileId}/summary` en `ClinicalReadController_getPatientSummary`. El controlador delega en `ClinicalReadService.getPatientSummary`. No recibe body. El tipo de retorno estático es `Promise<PatientClinicalSummaryResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope aplicado a cada bloque (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/summary?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientClinicalSummaryResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "conditions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "severityConceptId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "onsetAt": "2026-07-31T12:00:00.000Z",
+      "resolvedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "allergies": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "substanceConceptId": "00000000-0000-4000-8000-000000000001",
+      "typeConceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "criticalityConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "medicationRequests": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "prescriberProfileId": "00000000-0000-4000-8000-000000000001",
+      "doseText": "valor-ejemplo",
+      "frequencyText": "valor-ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "issuedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "observations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "interpretationConceptId": "00000000-0000-4000-8000-000000000001",
+      "valueDecimal": "valor-ejemplo",
+      "valueText": "valor-ejemplo",
+      "valueBoolean": true,
+      "valueConceptId": "00000000-0000-4000-8000-000000000001",
+      "quantityValue": "valor-ejemplo",
+      "quantityUnitConceptId": "00000000-0000-4000-8000-000000000001",
+      "effectiveStartAt": "2026-07-31T12:00:00.000Z",
+      "encounterId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "encounters": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "episodeId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "classConceptId": "00000000-0000-4000-8000-000000000001",
+      "primaryPractitionerId": "00000000-0000-4000-8000-000000000001",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "limit": 1,
+  "truncated": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `conditions` | Sí | `array<ConditionItemDto>` | Sin restricción adicional declarada | Valor de conditions mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","onsetAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `conditions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].codeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a code concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].categoryConceptId` | No | `string` | formato `uuid` | Identificador asociado a category concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].clinicalStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a clinical status concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].verificationStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a verification status concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].severityConceptId` | No | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].encounterId` | No | `string` | formato `uuid` | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].onsetAt` | No | `string` | formato `date-time` | Valor de onset at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `conditions[].resolvedAt` | No | `string` | formato `date-time` | Valor de resolved at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `conditions[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `allergies` | Sí | `array<AllergyItemDto>` | Sin restricción adicional declarada | Valor de allergies mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","substanceConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","criticalityConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `allergies[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].substanceConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a substance concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].typeConceptId` | No | `string` | formato `uuid` | Identificador asociado a type concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].categoryConceptId` | No | `string` | formato `uuid` | Identificador asociado a category concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].criticalityConceptId` | No | `string` | formato `uuid` | Identificador asociado a criticality concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].clinicalStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a clinical status concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `medicationRequests` | Sí | `array<MedicationRequestItemDto>` | Sin restricción adicional declarada | Valor de medication requests mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","signedAt":"2026-07-31T12:00:00.000Z","issuedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `medicationRequests[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `medicationRequests[].medicationConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a medication concept. | `00000000-0000-4000-8000-000000000001` |
+| `medicationRequests[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `medicationRequests[].prescriberProfileId` | No | `string` | formato `uuid` | Identificador asociado a prescriber profile. | `00000000-0000-4000-8000-000000000001` |
+| `medicationRequests[].doseText` | No | `string` | Sin restricción adicional declarada | Valor de dose text mantenido por la instancia. | `valor-ejemplo` |
+| `medicationRequests[].frequencyText` | No | `string` | Sin restricción adicional declarada | Valor de frequency text mantenido por la instancia. | `valor-ejemplo` |
+| `medicationRequests[].validFrom` | No | `string` | formato `date-time` | Valor de valid from mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `medicationRequests[].validTo` | No | `string` | formato `date-time` | Valor de valid to mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `medicationRequests[].signedAt` | No | `string` | formato `date-time` | Valor de signed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `medicationRequests[].issuedAt` | No | `string` | formato `date-time` | Valor de issued at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `medicationRequests[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `observations` | Sí | `array<ObservationItemDto>` | Sin restricción adicional declarada | Valor de observations mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","interpretationConceptId":"00000000-0000-4000-8000-000000000001","valueDecimal":"valor-ejemplo","valueText":"valor-ejemplo","valueBoolean":true,"valueConceptId":"00000000-0000-4000-8000-000000000001","quantityValue":"valor-ejemplo","quantityUnitConceptId":"00000000-0000-4000-8000-000000000001","effectiveStartAt":"2026-07-31T12:00:00.000Z","encounterId":"00000000-0000-4000-8000-000000000001"}]` |
+| `observations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `observations[].codeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a code concept. | `00000000-0000-4000-8000-000000000001` |
+| `observations[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `observations[].interpretationConceptId` | No | `string` | formato `uuid` | Identificador asociado a interpretation concept. | `00000000-0000-4000-8000-000000000001` |
+| `observations[].valueDecimal` | No | `string` | Sin restricción adicional declarada | Valor de value decimal mantenido por la instancia. | `valor-ejemplo` |
+| `observations[].valueText` | No | `string` | Sin restricción adicional declarada | Valor de value text mantenido por la instancia. | `valor-ejemplo` |
+| `observations[].valueBoolean` | No | `boolean` | Sin restricción adicional declarada | Valor de value boolean mantenido por la instancia. | `true` |
+| `observations[].valueConceptId` | No | `string` | formato `uuid` | Identificador asociado a value concept. | `00000000-0000-4000-8000-000000000001` |
+| `observations[].quantityValue` | No | `string` | Sin restricción adicional declarada | Valor de quantity value mantenido por la instancia. | `valor-ejemplo` |
+| `observations[].quantityUnitConceptId` | No | `string` | formato `uuid` | Identificador asociado a quantity unit concept. | `00000000-0000-4000-8000-000000000001` |
+| `observations[].effectiveStartAt` | No | `string` | formato `date-time` | Valor de effective start at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `observations[].encounterId` | No | `string` | formato `uuid` | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
+| `encounters` | Sí | `array<EncounterItemDto>` | Sin restricción adicional declarada | Valor de encounters mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","episodeId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","classConceptId":"00000000-0000-4000-8000-000000000001","primaryPractitionerId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z"}]` |
+| `encounters[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `encounters[].episodeId` | No | `string` | formato `uuid` | Identificador asociado a episode. | `00000000-0000-4000-8000-000000000001` |
+| `encounters[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `encounters[].classConceptId` | No | `string` | formato `uuid` | Identificador asociado a class concept. | `00000000-0000-4000-8000-000000000001` |
+| `encounters[].primaryPractitionerId` | No | `string` | formato `uuid` | Identificador asociado a primary practitioner. | `00000000-0000-4000-8000-000000000001` |
+| `encounters[].reasonText` | No | `string` | Sin restricción adicional declarada | Valor de reason text mantenido por la instancia. | `Texto descriptivo de ejemplo` |
+| `encounters[].startAt` | No | `string` | formato `date-time` | Valor de start at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `encounters[].endAt` | No | `string` | formato `date-time` | Valor de end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a cada bloque | `1` |
+| `truncated` | Sí | `array<string>` | Sin restricción adicional declarada | Qué bloques quedaron recortados por el tope | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/patients/{patientProfileId}/summary"
+}
+```
+
+---
+
+## 20. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -2852,7 +3088,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /clinical/prescription-signature-policies
+## 21. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -2999,7 +3235,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 22. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3123,7 +3359,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /clinical/procedures
+## 23. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3282,7 +3518,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /clinical/service-requests
+## 24. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`

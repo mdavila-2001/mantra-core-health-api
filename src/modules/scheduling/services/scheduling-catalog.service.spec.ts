@@ -41,6 +41,7 @@ function buildCatalog() {
     createException: mockFn(),
     createSlot: mockFn(),
     findSlotsByTemplateInRange: mockFn(),
+    findSlotsByResourceInRange: mockFn().mockResolvedValue([]),
     findOpenSlotsInWindow: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };

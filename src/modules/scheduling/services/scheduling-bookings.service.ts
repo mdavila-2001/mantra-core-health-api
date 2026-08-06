@@ -32,6 +32,8 @@ import {
   CancelBookingResponseDto,
   CheckInResponseDto,
   WorkerBatchResultDto,
+  BookingItemDto,
+  SearchBookingsResponseDto,
   type BookingChannel,
 } from '../dto';
 
@@ -254,6 +256,12 @@ export class SchedulingBookingsService {
         reasonText: dto.reasonText,
         actorUserId: actor.id,
       });
+      // Mismo caso que la plantilla y sus franjas: `booking_id` es una columna
+      // uuid suelta en `appointment_reminders`, así que persistir la cita antes
+      // de crear los recordatorios es lo único que garantiza el orden. Sólo se
+      // manifiesta cuando la confirmación pide recordatorios, que es el camino
+      // normal desde el portal.
+      await tx.flush();
 
       hold.statusConceptId = CONCEPTS.HOLD_CONSUMED;
       touch(hold, actor.id);
@@ -627,6 +635,131 @@ export class SchedulingBookingsService {
       },
       changedByUserId: actor.id,
     });
+  }
+
+  /**
+   * UC-41-15: listado de citas por paciente, recurso y/o ventana temporal.
+   *
+   * Es la lectura complementaria de la agenda: sin ella una pantalla podía
+   * crear una cita pero no volver a encontrarla, y el paciente no tenía forma
+   * de ver "mis próximas citas".
+   *
+   * Exige al menos un filtro a propósito: una consulta sin acotar devolvería
+   * las citas de todos los pacientes de todos los tenants, que es justo lo que
+   * un listado de PHI no debe hacer por descuido.
+   *
+   * @param filters - Paciente, recurso, ventana y si se incluyen las canceladas.
+   * @param limit - Tope de filas.
+   * @returns Citas que casan, con el instante resuelto desde su slot.
+   * @throws PreconditionFailedException si no se acota o la ventana es inválida.
+   */
+  async searchBookings(
+    filters: {
+      /** Paciente titular. */
+      patientProfileId?: string;
+      /** Recurso (agenda). */
+      resourceId?: string;
+      /** Inicio de la ventana. */
+      from?: Date;
+      /** Fin de la ventana. */
+      to?: Date;
+      /** Incluir también las canceladas; por defecto no. */
+      includeCancelled: boolean;
+    },
+    limit: number,
+  ): Promise<SearchBookingsResponseDto> {
+    if (!filters.patientProfileId && !filters.resourceId) {
+      throw new PreconditionFailedException(
+        'Indique al menos patientProfileId o resourceId para listar citas',
+      );
+    }
+    if (filters.from && filters.to && !(filters.from < filters.to)) {
+      throw new PreconditionFailedException(
+        'La ventana debe empezar antes de terminar',
+        {
+          from: filters.from.toISOString(),
+          to: filters.to.toISOString(),
+        },
+      );
+    }
+
+    const em = this.em.fork();
+    const { rows, fetchCapReached } = await this.bookingsRepo.findBookings(
+      em,
+      {
+        patientProfileId: filters.patientProfileId,
+        resourceId: filters.resourceId,
+        from: filters.from,
+        to: filters.to,
+        // Sin esto una agenda mostraría como ocupados los huecos de citas que
+        // ya se cancelaron.
+        statusConceptIds: filters.includeCancelled
+          ? undefined
+          : [...ACTIVE_BOOKING_STATES],
+      },
+      limit + 1,
+    );
+    // Dos formas de quedarse corto, y las dos se declaran: sobrar filas para
+    // esta página, o que la lectura previa al filtro por ventana agotara su
+    // tope. La segunda no se ve en `rows.length` —el filtro pudo dejar menos de
+    // `limit`— y callarla devolvería una agenda incompleta como si fuera toda.
+    const truncated = rows.length > limit || fetchCapReached;
+    const page = rows.length > limit ? rows.slice(0, limit) : rows;
+
+    return {
+      items: page.map(({ booking, slot }) => ({
+        id: booking.id,
+        patientProfileId: booking.patientProfileId,
+        resourceId: booking.resourceId,
+        bookableSlotId: booking.bookableSlotId,
+        startAt: slot?.startAt ?? null,
+        endAt: slot?.endAt ?? null,
+        statusConceptId: booking.statusConceptId,
+        serviceConceptId: booking.serviceConceptId,
+        bookingChannelConceptId: booking.bookingChannelConceptId,
+        confirmedAt: booking.confirmedAt,
+        checkedInAt: booking.checkedInAt,
+        reasonText: booking.reasonText,
+        createdAt: booking.createdAt,
+      })),
+      count: page.length,
+      limit,
+      truncated,
+    };
+  }
+
+  /**
+   * UC-41-15: una cita concreta.
+   *
+   * @param bookingId - Cita a leer.
+   * @returns La cita con su instante resuelto desde el slot.
+   * @throws ResourceNotFoundException si no existe.
+   */
+  async getBookingById(bookingId: string): Promise<BookingItemDto> {
+    const em = this.em.fork();
+    const booking = await this.bookingsRepo.findBookingById(em, bookingId);
+    if (!booking) {
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
+    }
+    const slot = booking.bookableSlotId
+      ? await this.bookingsRepo.findSlotById(em, booking.bookableSlotId)
+      : null;
+
+    return {
+      id: booking.id,
+      patientProfileId: booking.patientProfileId,
+      resourceId: booking.resourceId,
+      bookableSlotId: booking.bookableSlotId,
+      startAt: slot?.startAt ?? null,
+      endAt: slot?.endAt ?? null,
+      statusConceptId: booking.statusConceptId,
+      serviceConceptId: booking.serviceConceptId,
+      bookingChannelConceptId: booking.bookingChannelConceptId,
+      confirmedAt: booking.confirmedAt,
+      checkedInAt: booking.checkedInAt,
+      reasonText: booking.reasonText,
+      createdAt: booking.createdAt,
+    };
   }
 
   /** Política efectiva del slot, heredada de su plantilla. */

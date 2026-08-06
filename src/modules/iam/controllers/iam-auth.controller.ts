@@ -5,14 +5,24 @@ import {
   HttpStatus,
   Ip,
   Post,
+  Req,
+  Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import type { Request, Response } from 'express';
 import {
   CurrentUser,
   Public,
   Roles,
+  TenantAgnostic,
+  clearRefreshCookie,
+  loadRefreshCookieEnv,
+  readRefreshCookie,
+  setRefreshCookie,
   type AuthenticatedUser,
+  type RefreshCookieEnv,
 } from '../../../common';
 import {
   IamAuthService,
@@ -68,6 +78,14 @@ export class IamAuthController {
     private readonly passwordResetService: IamPasswordResetService,
     private readonly emailVerificationService: IamEmailVerificationService,
   ) {}
+
+  /**
+   * Modo de entrega del refresh token, resuelto una sola vez al construir el
+   * controlador. Es configuración de arranque: releerla por petición sólo
+   * añadiría la posibilidad de que dos peticiones de la misma sesión usaran
+   * modos distintos.
+   */
+  private readonly cookieEnv: RefreshCookieEnv = loadRefreshCookieEnv();
 
   /**
    * Auto-registro de un paciente con su documento de identidad. El correo es
@@ -199,8 +217,12 @@ export class IamAuthController {
   @ApiOperation({
     summary: 'Iniciar sesión con email o documento de identidad y contraseña',
   })
-  login(@Body() dto: LoginDto, @Ip() ip: string): Promise<TokenResponseDto> {
-    return this.authService.login(dto, ip);
+  async login(
+    @Body() dto: LoginDto,
+    @Ip() ip: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<TokenResponseDto> {
+    return this.deliverTokens(await this.authService.login(dto, ip), res);
   }
 
   /**
@@ -255,8 +277,45 @@ export class IamAuthController {
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rotar el refresh token' })
-  refresh(@Body() dto: RefreshTokenDto): Promise<TokenResponseDto> {
-    return this.authService.refresh(dto);
+  async refresh(
+    @Body() dto: RefreshTokenDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<TokenResponseDto> {
+    const presented = this.cookieEnv.enabled
+      ? readRefreshCookie(req)
+      : dto.refreshToken;
+    if (!presented) {
+      // Con la cookie encendida el DTO ya no exige el campo, así que la
+      // ausencia del token deja de ser un 400 de validación y tiene que
+      // rechazarse aquí. Es 401 y no 400 a propósito: para el cliente es "no
+      // tengo sesión que rotar", el mismo caso que una cookie caducada.
+      throw new UnauthorizedException('No se presentó un refresh token');
+    }
+    return this.deliverTokens(await this.authService.refresh(presented), res);
+  }
+
+  /**
+   * Entrega el par de tokens según el modo configurado.
+   *
+   * Con la cookie apagada —el default— devuelve la respuesta tal cual y el
+   * contrato no cambia en absoluto. Con la cookie encendida escribe el refresh
+   * token en una cookie httpOnly y **lo quita del cuerpo**: dejarlo en los dos
+   * sitios no protegería de nada, porque el objetivo del ejercicio es que el
+   * token deje de estar al alcance de JavaScript.
+   *
+   * @param tokens - Par emitido por el dominio.
+   * @param res - Respuesta de Express en curso.
+   * @returns La respuesta que ve el cliente.
+   */
+  private deliverTokens(
+    tokens: TokenResponseDto,
+    res: Response,
+  ): TokenResponseDto {
+    if (!this.cookieEnv.enabled) return tokens;
+
+    setRefreshCookie(res, tokens.refreshToken, this.cookieEnv);
+    return { ...tokens, refreshToken: '' };
   }
 
   /**
@@ -268,15 +327,27 @@ export class IamAuthController {
    */
   @Post('logout')
   @ApiBearerAuth()
+  // Cerrar la sesión propia no toca datos de ningún tenant: exigir contexto de
+  // tenant dejaba a las cuentas sin membresía sin forma de revocar su sesión.
+  @TenantAgnostic()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar la sesión actual del usuario' })
-  logout(@CurrentUser() actor: AuthenticatedUser): Promise<LogoutResultDto> {
-    return this.authService.logout(actor);
+  async logout(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LogoutResultDto> {
+    const result = await this.authService.logout(actor);
+    // Sin esto la cookie sobreviviría al cierre de sesión: el token de dentro ya
+    // no serviría, pero el navegador seguiría mandándola en cada refresco y el
+    // cliente vería un 401 en vez de un estado limpio de "sin sesión".
+    if (this.cookieEnv.enabled) clearRefreshCookie(res, this.cookieEnv);
+    return result;
   }
 
   /** UC-01-08. */
   @Post('logout-all')
   @ApiBearerAuth()
+  @TenantAgnostic()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar todas las sesiones del usuario actual' })
   logoutAll(

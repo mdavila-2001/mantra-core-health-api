@@ -12,6 +12,54 @@ export const workerEnvSchema = Joi.object({
   WORKER_API_BASE_URL: Joi.string().uri().default('http://127.0.0.1:3000'),
   WORKER_HTTP_TIMEOUT_MS: Joi.number().integer().min(1000).default(30_000),
   /**
+   * Puerto de la sonda HTTP del worker (`/health`, `/readiness`, `/status`).
+   * `0` la deshabilita. Es lo que permite a Docker/Kubernetes distinguir un
+   * worker sano de uno con el tick colgado, que hasta ahora eran indistinguibles
+   * desde fuera. Cada worker corre en su propio contenedor, así que el mismo
+   * puerto en los 20 no colisiona; fuera de Docker, el que lo encuentre ocupado
+   * arranca sin sonda y lo avisa (ver `worker-health.server.ts`).
+   */
+  WORKER_HEALTH_PORT: Joi.number().integer().min(0).max(65535).default(9100),
+  /**
+   * Plazo de un tick programado. No es el plazo de una llamada (eso es
+   * `WORKER_HTTP_TIMEOUT_MS`) sino el techo tras el cual la ejecución se aborta
+   * y se declara perdida. Generoso porque los ticks van desde subsegundo
+   * (relevo del outbox) hasta minutos (compresión de chunks de `time_series`).
+   */
+  WORKER_TICK_TIMEOUT_MS: Joi.number()
+    .integer()
+    .min(1000)
+    .default(5 * 60_000),
+  /**
+   * Tiempo que un tick puede llevar en vuelo antes de que la liveness lo
+   * declare atascado y el orquestador reinicie el proceso. Por encima del plazo
+   * del tick a propósito: si el plazo funciona, el tick ya se abortó solo; que
+   * se supere este umbral significa que ni siquiera el aborto surtió efecto,
+   * que es la definición operativa de worker zombi.
+   */
+  WORKER_STUCK_TICK_MS: Joi.number()
+    .integer()
+    .min(1000)
+    .default(10 * 60_000),
+  /** Espera máxima a que terminen los ticks en vuelo durante el apagado. */
+  WORKER_DRAIN_TIMEOUT_MS: Joi.number().integer().min(0).default(20_000),
+  /**
+   * Plazo total del apagado. Al agotarse, el proceso sale con código 1 dejando
+   * en el log qué seguía pendiente. Debe quedar **por debajo** del plazo de
+   * gracia del orquestador (10 s en `docker stop` por defecto,
+   * `terminationGracePeriodSeconds` en Kubernetes): si no, quien fuerza la
+   * salida es un `SIGKILL` mudo y se pierde justo el diagnóstico.
+   */
+  WORKER_SHUTDOWN_TIMEOUT_MS: Joi.number().integer().min(1000).default(30_000),
+  /** Intentos totales de una llamada a la API, incluido el primero. */
+  WORKER_HTTP_RETRY_ATTEMPTS: Joi.number().integer().min(1).max(10).default(3),
+  /** Llamadas simultáneas a la API permitidas por proceso worker. */
+  WORKER_HTTP_MAX_CONCURRENT: Joi.number()
+    .integer()
+    .min(1)
+    .max(256)
+    .default(16),
+  /**
    * Códigos de `messaging.message_queues` que este worker debe drenar.
    * `message_queues` es catálogo de solo lectura para los 13 casos de uso del
    * módulo (no hay endpoint para listarlas activas); se configura aquí en vez
@@ -87,6 +135,13 @@ export const workerEnvSchema = Joi.object({
 export interface WorkerEnv {
   apiBaseUrl: string;
   httpTimeoutMs: number;
+  healthPort: number;
+  tickTimeoutMs: number;
+  stuckTickMs: number;
+  drainTimeoutMs: number;
+  shutdownTimeoutMs: number;
+  httpRetryAttempts: number;
+  httpMaxConcurrent: number;
   messagingQueueCodes: string[];
   tsCompressionOlderThan: string;
   tsRollupRefreshWindowHours: number;
@@ -138,7 +193,14 @@ export function loadWorkerEnv(): WorkerEnv {
   assertMockProviderNotInProduction();
   return {
     apiBaseUrl: process.env.WORKER_API_BASE_URL ?? 'http://127.0.0.1:3000',
-    httpTimeoutMs: Number(process.env.WORKER_HTTP_TIMEOUT_MS ?? 30_000),
+    httpTimeoutMs: numberFromEnv('WORKER_HTTP_TIMEOUT_MS', 30_000),
+    healthPort: numberFromEnv('WORKER_HEALTH_PORT', 9100),
+    tickTimeoutMs: numberFromEnv('WORKER_TICK_TIMEOUT_MS', 5 * 60_000),
+    stuckTickMs: numberFromEnv('WORKER_STUCK_TICK_MS', 10 * 60_000),
+    drainTimeoutMs: numberFromEnv('WORKER_DRAIN_TIMEOUT_MS', 20_000),
+    shutdownTimeoutMs: numberFromEnv('WORKER_SHUTDOWN_TIMEOUT_MS', 30_000),
+    httpRetryAttempts: numberFromEnv('WORKER_HTTP_RETRY_ATTEMPTS', 3),
+    httpMaxConcurrent: numberFromEnv('WORKER_HTTP_MAX_CONCURRENT', 16),
     messagingQueueCodes: (process.env.MESSAGING_QUEUE_CODES ?? '')
       .split(',')
       .map((code) => code.trim())
@@ -158,6 +220,17 @@ export function loadWorkerEnv(): WorkerEnv {
     googleOAuthRefreshToken: process.env.GOOGLE_OAUTH_REFRESH_TOKEN ?? '',
     googleSenderEmail: process.env.GOOGLE_SENDER_EMAIL ?? '',
   };
+}
+
+/**
+ * Lee un número del entorno cayendo al valor por defecto si falta o no es
+ * numérico. `Number(undefined)` es `NaN`, y un `NaN` propagado a un plazo
+ * significa "sin plazo": el fallo más silencioso posible en una pieza cuyo
+ * único trabajo es acotar el tiempo.
+ */
+function numberFromEnv(name: string, fallback: number): number {
+  const parsed = Number(process.env[name]);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 /** `"a=1 day,b=30 days"` -> `{a: '1 day', b: '30 days'}`. Entradas mal formadas se ignoran. */

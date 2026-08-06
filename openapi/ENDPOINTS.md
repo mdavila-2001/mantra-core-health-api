@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **885 de 885 endpoints** en **61 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -14,8 +14,8 @@ Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia complet
 | `authz` | 20 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 13 | [Abrir referencia](endpoints/billing.md) |
-| `chart` | 12 | [Abrir referencia](endpoints/chart.md) |
-| `clinical` | 23 | [Abrir referencia](endpoints/clinical.md) |
+| `chart` | 13 | [Abrir referencia](endpoints/chart.md) |
+| `clinical` | 24 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 21 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 13 | [Abrir referencia](endpoints/common.md) |
 | `community` | 19 | [Abrir referencia](endpoints/community.md) |
@@ -51,13 +51,13 @@ Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia complet
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 13 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 23 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 13 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 15 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
 | `reporting` | 12 | [Abrir referencia](endpoints/reporting.md) |
-| `scheduling` | 21 | [Abrir referencia](endpoints/scheduling.md) |
+| `scheduling` | 24 | [Abrir referencia](endpoints/scheduling.md) |
 | `search_platform` | 3 | [Abrir referencia](endpoints/search-platform.md) |
 | `system_context` | 11 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |

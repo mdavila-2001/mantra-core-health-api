@@ -73,6 +73,28 @@ export class RelatedPersonsRepository {
     );
   }
 
+  /**
+   * Contactos activos del paciente, para la ficha de filiación.
+   *
+   * Filtra por estado activo a propósito: los dados de baja se conservan por
+   * trazabilidad, pero pintarlos en la ficha como si siguieran vigentes es lo
+   * que hace que alguien llame al contacto de emergencia equivocado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Perfil de paciente cuyos contactos se listan.
+   * @returns Contactos activos, primero los de emergencia.
+   */
+  findActiveByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<RelatedPersons[]> {
+    return em.find(
+      RelatedPersons,
+      { patientProfileId, statusConceptId: PROF.RELATED_ACTIVE },
+      { orderBy: { isEmergencyContact: 'DESC', createdAt: 'ASC' } },
+    );
+  }
+
   /** Tutor legal activo del paciente (regla: un solo tutor legal activo). */
   findActiveGuardian(
     em: EntityManager,

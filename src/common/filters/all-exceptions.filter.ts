@@ -6,7 +6,14 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { UniqueConstraintViolationException } from '@mikro-orm/core';
+import {
+  CheckConstraintViolationException,
+  ConnectionException,
+  DeadlockException,
+  ForeignKeyConstraintViolationException,
+  NotNullConstraintViolationException,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 import {
@@ -14,6 +21,27 @@ import {
   TracingService,
   applyTraceHeader,
 } from '../../observability';
+
+/**
+ * Códigos 5xx cuyo cuerpo **sí** se le devuelve al cliente tal cual.
+ *
+ * La regla general para los 5xx es ocultarlo todo: son fallos no anticipados y
+ * su mensaje puede llevar SQL, rutas o nombres de host. Estos cuatro son la
+ * excepción porque no son "algo se rompió" sino estados operativos que el
+ * filtro ha reconocido y cuyo texto está escrito para ser leído por un cliente:
+ * dependencia caída, plazo agotado, cortacircuitos abierto y mamparo saturado.
+ *
+ * La diferencia es práctica, no estética. Los cuatro significan "reintenta", y
+ * un `INTERNAL` opaco significa lo contrario: sin distinguirlos, un cliente
+ * bien programado deja de reintentar justo cuando reintentar era la respuesta
+ * correcta.
+ */
+const EXPOSABLE_5XX_CODES: ReadonlySet<string> = new Set<string>([
+  ErrorCode.DEPENDENCY_UNAVAILABLE,
+  ErrorCode.TIMEOUT,
+  ErrorCode.CIRCUIT_OPEN,
+  ErrorCode.CONCURRENCY_LIMIT,
+]);
 
 /** Forma estable del cuerpo de error que ve el cliente. */
 interface ErrorResponseBody {
@@ -159,7 +187,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         },
         'Unhandled exception',
       );
-      if (!this.isDeclaredDependencyUnavailable(exception)) {
+      if (!EXPOSABLE_5XX_CODES.has(code)) {
         body.message = 'Error interno del servidor';
         body.code = ErrorCode.INTERNAL;
         body.details = undefined;
@@ -178,27 +206,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     response.status(status).json(body);
-  }
-
-  /**
-   * Única excepción 5xx cuyo cuerpo es deliberadamente público: la readiness
-   * declara un código estable y detalles ya sanitizados. Un HttpException 503
-   * genérico no entra aquí y continúa ocultándose como INTERNAL.
-   */
-  private isDeclaredDependencyUnavailable(exception: unknown): boolean {
-    if (
-      !(exception instanceof HttpException) ||
-      exception.getStatus() !== Number(HttpStatus.SERVICE_UNAVAILABLE)
-    ) {
-      return false;
-    }
-    const response = exception.getResponse();
-    return (
-      typeof response === 'object' &&
-      response !== null &&
-      (response as Record<string, unknown>).code ===
-        ErrorCode.DEPENDENCY_UNAVAILABLE
-    );
   }
 
   /**
@@ -281,7 +288,26 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus.CONFLICT,
         code: ErrorCode.CONFLICT,
         message: 'El valor ya está en uso por otro registro',
+        details: this.constraintDetails(exception),
       };
+    }
+
+    // El resto de excepciones tipadas del driver que MikroORM ya distingue.
+    // Sin este bloque, un interbloqueo de PostgreSQL —que se resuelve solo
+    // reintentando— y una clave foránea inexistente —que no se resuelve
+    // reintentando nunca— llegaban al cliente como el mismo 500 opaco, y no
+    // había forma de que supiera cuál de las dos cosas le había pasado.
+    const driverFailure = this.driverException(exception);
+    if (driverFailure) {
+      return driverFailure;
+    }
+
+    // Errores del driver que no pasaron por el mapeo de MikroORM: los produce
+    // el SQL crudo (`em.getConnection().execute(...)`), que el ORM no envuelve.
+    // Se clasifican por SQLSTATE, recorriendo la cadena de causas.
+    const integrity = this.integrityViolation(exception);
+    if (integrity) {
+      return integrity;
     }
 
     // Errores de los middlewares HTTP anteriores a Nest —`express.json()` y
@@ -383,6 +409,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         return ErrorCode.RATE_LIMITED;
       case HttpStatus.SERVICE_UNAVAILABLE:
         return ErrorCode.DEPENDENCY_UNAVAILABLE;
+      case HttpStatus.GATEWAY_TIMEOUT:
+      case HttpStatus.REQUEST_TIMEOUT:
+        return ErrorCode.TIMEOUT;
       default:
         return ErrorCode.INTERNAL;
     }
@@ -402,18 +431,91 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   /**
-   * Traduce una violación de integridad de PostgreSQL al 4xx que le corresponde.
+   * Mapeo de las excepciones **tipadas** que MikroORM ya distingue por driver.
    *
-   * Solo se mapean los `SQLSTATE` cuya causa es el contenido de la petición:
-   *   - `23503` clave foránea: referencia a algo que no existe → 422.
-   *   - `23505` clave única: el recurso ya existe → 409.
-   *   - `23502` NOT NULL y `22P02` sintaxis de entrada (p. ej. un valor que no
-   *     pertenece a un enum) → 422.
-   * El resto sigue cayendo a 500, que es donde deben quedar los fallos reales del
-   * servidor. `details` lleva la columna y la tabla que Postgres reporta, para que
-   * el cliente sepa qué corregir sin tener que pedir el log.
+   * Es el camino preferente sobre el SQLSTATE crudo porque no depende de que el
+   * ORM conserve el código del driver al envolver el error, cosa que no está
+   * garantizada entre versiones.
    *
-   * @returns el mapeo, o `undefined` si la excepción no es una violación mapeable.
+   * La distinción que más importa es la del interbloqueo: `40P01`/`40001` son
+   * fallos **transitorios**, la operación es válida y volver a intentarla
+   * funciona. Devolverlos como 500 —lo que pasaba hasta ahora— le decía al
+   * cliente exactamente lo contrario de lo que debía hacer.
+   */
+  private driverException(exception: unknown):
+    | {
+        status: HttpStatus;
+        code: string;
+        message: string;
+        details?: unknown;
+      }
+    | undefined {
+    if (exception instanceof ForeignKeyConstraintViolationException) {
+      return {
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        code: ErrorCode.VALIDATION_FAILED,
+        message:
+          'La petición referencia un recurso que no existe: ' +
+          'verifique los identificadores enviados',
+        details: this.constraintDetails(exception),
+      };
+    }
+
+    if (
+      exception instanceof NotNullConstraintViolationException ||
+      exception instanceof CheckConstraintViolationException
+    ) {
+      return {
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        code: ErrorCode.VALIDATION_FAILED,
+        message: 'La petición trae un valor ausente o inválido para el modelo',
+        details: this.constraintDetails(exception),
+      };
+    }
+
+    // Interbloqueo: dos transacciones se esperan mutuamente y PostgreSQL aborta
+    // una. No es culpa de la petición ni un fallo del servidor: es contención,
+    // y se resuelve reintentando. Comparte código con la colisión optimista
+    // porque para el cliente la acción es idéntica.
+    if (exception instanceof DeadlockException) {
+      return {
+        status: HttpStatus.CONFLICT,
+        code: ErrorCode.CONCURRENCY_CONFLICT,
+        message:
+          'La operación entró en conflicto con otra concurrente; reintente',
+      };
+    }
+
+    // La base no está accesible. Un 503 con `DEPENDENCY_UNAVAILABLE` le dice al
+    // cliente —y al balanceador— que reintente; un 500 le dice que la petición
+    // es irrecuperable, que es falso y además impide el failover.
+    if (exception instanceof ConnectionException) {
+      return {
+        status: HttpStatus.SERVICE_UNAVAILABLE,
+        code: ErrorCode.DEPENDENCY_UNAVAILABLE,
+        message:
+          'La base de datos no está disponible; reintente en unos segundos',
+      };
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Traduce una violación de PostgreSQL al estado que le corresponde, a partir
+   * del `SQLSTATE` crudo.
+   *
+   * Complementa a `driverException` para los errores que **no** pasan por el
+   * mapeo de MikroORM: el SQL crudo (`em.getConnection().execute(...)`), que el
+   * ORM entrega sin envolver. Antes de esta versión el método existía pero
+   * `normalize` nunca lo llamaba, así que todos ellos —incluida una clave
+   * foránea inexistente, que es un error del cliente— terminaban como
+   * `500 INTERNAL`.
+   *
+   * Se recorre la cadena de causas porque el driver anida el error original
+   * bajo `cause` cuando lo reenvuelve.
+   *
+   * @returns el mapeo, o `undefined` si el SQLSTATE no es uno de los tratados.
    */
   private integrityViolation(exception: unknown):
     | {
@@ -427,16 +529,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         details?: unknown;
       }
     | undefined {
-    // El driver adjunta el SQLSTATE en `code`; MikroORM lo envuelve conservándolo.
-    const causa = exception as {
-      code?: unknown;
-      column?: unknown;
-      table?: unknown;
-      constraint?: unknown;
-      detail?: unknown;
-    };
-    const sqlstate = typeof causa?.code === 'string' ? causa.code : undefined;
-    if (!sqlstate) {
+    const causa = this.findSqlState(exception);
+    if (!causa) {
       return undefined;
     }
 
@@ -447,7 +541,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       detail: causa.detail,
     };
 
-    switch (sqlstate) {
+    switch (causa.sqlstate) {
       case '23503':
         return {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -465,6 +559,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           details,
         };
       case '23502':
+      case '23514':
       case '22P02':
         return {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -473,8 +568,103 @@ export class AllExceptionsFilter implements ExceptionFilter {
             'La petición trae un valor ausente o inválido para el modelo',
           details,
         };
+      // Contención: la operación es válida y reintentarla funciona.
+      // `40001` fallo de serialización, `40P01` interbloqueo,
+      // `55P03` fila bloqueada por otra transacción.
+      case '40001':
+      case '40P01':
+      case '55P03':
+        return {
+          status: HttpStatus.CONFLICT,
+          code: ErrorCode.CONCURRENCY_CONFLICT,
+          message:
+            'La operación entró en conflicto con otra concurrente; reintente',
+        };
+      // `57014` consulta cancelada por `statement_timeout`. Es un plazo
+      // agotado, no un error de la petición ni un fallo del servidor: el
+      // cliente puede reintentar, idealmente acotando más la consulta.
+      case '57014':
+        return {
+          status: HttpStatus.GATEWAY_TIMEOUT,
+          code: ErrorCode.TIMEOUT,
+          message: 'La consulta excedió el tiempo máximo de ejecución',
+        };
+      // `53300` sin conexiones libres, `53200` sin memoria, `57P03` arrancando.
+      // La base está viva pero saturada: 503 y reintento, nunca 500.
+      case '53300':
+      case '53200':
+      case '57P03':
+        return {
+          status: HttpStatus.SERVICE_UNAVAILABLE,
+          code: ErrorCode.DEPENDENCY_UNAVAILABLE,
+          message:
+            'La base de datos no admite más trabajo ahora mismo; reintente',
+        };
       default:
         return undefined;
     }
+  }
+
+  /**
+   * Busca el primer `SQLSTATE` de la cadena de causas.
+   *
+   * El límite de profundidad no es paranoia gratuita: una cadena de causas
+   * cíclica —que un `cause` mal construido puede producir— colgaría el hilo
+   * dentro del filtro de errores, es decir, en el único sitio del que ya no se
+   * puede informar de nada.
+   */
+  private findSqlState(exception: unknown):
+    | {
+        sqlstate: string;
+        constraint?: unknown;
+        table?: unknown;
+        column?: unknown;
+        detail?: unknown;
+      }
+    | undefined {
+    let current: unknown = exception;
+
+    for (let depth = 0; depth < 5 && current; depth += 1) {
+      const candidate = current as {
+        code?: unknown;
+        constraint?: unknown;
+        table?: unknown;
+        column?: unknown;
+        detail?: unknown;
+        cause?: unknown;
+      };
+
+      // Un SQLSTATE de PostgreSQL son exactamente 5 caracteres alfanuméricos.
+      // Comprobarlo evita confundirlo con los códigos de error de Node
+      // (`ECONNRESET`), que viajan en el mismo campo `code`.
+      if (
+        typeof candidate.code === 'string' &&
+        /^[0-9A-Z]{5}$/.test(candidate.code)
+      ) {
+        return {
+          sqlstate: candidate.code,
+          constraint: candidate.constraint,
+          table: candidate.table,
+          column: candidate.column,
+          detail: candidate.detail,
+        };
+      }
+
+      current = candidate.cause;
+    }
+
+    return undefined;
+  }
+
+  /** Columna, tabla y restricción que reporta el driver, si las trae. */
+  private constraintDetails(exception: unknown): unknown {
+    const found = this.findSqlState(exception);
+    if (!found) return undefined;
+    return {
+      constraint: found.constraint,
+      table: found.table,
+      column: found.column,
+      detail: found.detail,
+    };
   }
 }

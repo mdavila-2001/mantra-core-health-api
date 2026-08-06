@@ -27,6 +27,8 @@ function build() {
     findPlanById: mockFn(),
     findActivityById: mockFn(),
     findActivitiesForPlan: mockFn().mockResolvedValue([]),
+    findPlansByPatient: mockFn().mockResolvedValue([]),
+    findActivitiesForPlans: mockFn().mockResolvedValue([]),
     createPlan: mockFn(),
     createActivity: mockFn(),
   };

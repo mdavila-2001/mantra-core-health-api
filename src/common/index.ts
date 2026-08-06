@@ -20,9 +20,22 @@ export { RequiresVerifiedIdentity } from './auth/requires-verified-identity.deco
 export { VerifiedIdentityGuard } from './auth/verified-identity.guard';
 export { authEnvSchema, loadAuthEnv } from './auth/auth.env';
 export type { AuthEnv } from './auth/auth.env';
+export {
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_PATH,
+  loadRefreshCookieEnv,
+  setRefreshCookie,
+  clearRefreshCookie,
+  readRefreshCookie,
+} from './auth/refresh-cookie';
+export type { RefreshCookieEnv } from './auth/refresh-cookie';
 export { runWithTenant, getCurrentTenantId } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
+export {
+  TenantAgnostic,
+  IS_TENANT_AGNOSTIC_KEY,
+} from './tenant/tenant-agnostic.decorator';
 export type { AuthenticatedUser } from './auth/authenticated-user.interface';
 export type { JwtPayload } from './auth/jwt-payload.interface';
 
@@ -38,6 +51,50 @@ export {
   IdentityVerificationRequiredException,
 } from './errors/domain.exception';
 export { AllExceptionsFilter } from './filters/all-exceptions.filter';
+
+// Ciclo de vida del proceso (fallo terminal observable, apagado acotado)
+export {
+  installProcessGuards,
+  installShutdownWatchdog,
+  resetProcessGuardsForTests,
+  resetShutdownWatchdogForTests,
+} from './runtime';
+export type {
+  FatalLogger,
+  ProcessGuardOptions,
+  ShutdownWatchdogOptions,
+} from './runtime';
+
+// Resiliencia (plazos, reintentos, cortacircuitos, mamparos, exclusión mutua)
+export {
+  OperationTimeoutError,
+  CircuitOpenError,
+  BulkheadFullError,
+  isTransientError,
+  retryAfterFromError,
+  httpStatusOf,
+  networkCodeOf,
+  withTimeout,
+  delay,
+  retry,
+  DEFAULT_RETRY_POLICY,
+  CircuitBreaker,
+  Bulkhead,
+  MutexRegistry,
+} from './resilience';
+export type {
+  RetryPolicy,
+  RetryAttemptInfo,
+  RetryClock,
+  CircuitState,
+  CircuitBreakerOptions,
+  CircuitStateChange,
+  CircuitSnapshot,
+  BulkheadOptions,
+  BulkheadSnapshot,
+  ExclusiveOutcome,
+  MutexSnapshot,
+} from './resilience';
 
 // Paginación
 export { PaginationQueryDto } from './dto/pagination-query.dto';
@@ -73,6 +130,8 @@ export type {
 } from './http/http-dispatcher.service';
 export { assertOutboundUrlAllowed } from './http/ssrf-guard';
 export { ParseOptionalLimitPipe } from './http/parse-optional-limit.pipe';
+export { ParseUuidListPipe } from './http/parse-uuid-list.pipe';
+export { ParseOptionalDatePipe } from './http/parse-optional-date.pipe';
 
 // Almacenamiento de archivos (adaptador seleccionado por entorno)
 export { FileStorageModule } from './storage/file-storage.module';

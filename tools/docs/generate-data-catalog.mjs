@@ -7,13 +7,31 @@
 //
 // No inventa descripciones: si una entidad implementada no tiene entrada en la bóveda, se marca
 // explícitamente como "sin descripción de negocio en la bóveda" en vez de fabricar una frase.
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { readTsEntities } from '../catalog/lib/tsentities.mjs';
-import { readVault } from '../catalog/lib/vault.mjs';
+import { readVault, VAULT } from '../catalog/lib/vault.mjs';
 
 const OUT_DIR = join(process.cwd(), 'docs', 'data');
 mkdirSync(OUT_DIR, { recursive: true });
+
+// La bóveda SALUD es un repositorio HERMANO y opcional: no está en el runner de
+// CI ni en el clon de quien no la tenga. Sin ella este generador no puede
+// producir el mismo archivo —el propósito de negocio de cada entidad sale de
+// ahí—, así que se sale sin escribir en vez de reventar con un ENOENT o, peor,
+// de sobrescribir el catálogo commiteado con descripciones degradadas.
+//
+// Salir con éxito es deliberado: el paso de CI que sincroniza documentación no
+// debe fallar por una fuente que ese entorno no puede tener, y el chequeo de
+// frescura que viene después compara un archivo que quedó intacto. Quien SÍ
+// tenga la bóveda regenera y el chequeo sigue siendo real para él.
+if (!existsSync(join(VAULT, 'Entidades'))) {
+  console.warn(
+    `Bóveda SALUD no encontrada en ${VAULT} — se conserva docs/data/entity-catalog.md tal como está.\n` +
+      'Para regenerarlo, clone la bóveda como hermana del repositorio o apunte SALUD_VAULT a su ruta.',
+  );
+  process.exit(0);
+}
 
 const ts = readTsEntities(); // schema.table -> {schema, table, className, props, module, ...}
 const { entities: vault, indexSets, foreignKeys } = readVault(); // schema.table -> {...}

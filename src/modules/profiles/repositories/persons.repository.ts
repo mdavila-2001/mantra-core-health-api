@@ -53,6 +53,26 @@ export class PersonsRepository {
     return em.findOne(Persons, { id });
   }
 
+  /**
+   * Resuelve un lote de personas por id, indexadas por id.
+   *
+   * El listado de pacientes trae los datos de filiación (nombre, fecha de
+   * nacimiento) desde `persons`, y la página ya conoce todos los ids: pedirlos
+   * de a uno sería N+1 sobre la tabla raíz del módulo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ids de persona a resolver.
+   * @returns Mapa `id -> persona`; los ids inexistentes no aparecen.
+   */
+  async findByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<Map<string, Persons>> {
+    if (ids.length === 0) return new Map();
+    const rows = await em.find(Persons, { id: { $in: ids } });
+    return new Map(rows.map((row) => [row.id, row]));
+  }
+
   /** Crea la persona en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreatePersonData): Persons {
     return em.create(

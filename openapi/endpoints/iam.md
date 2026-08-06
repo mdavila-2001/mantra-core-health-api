@@ -1493,9 +1493,7 @@ POST /iam/auth/token/refresh HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
-{
-  "refreshToken": "valor-ejemplo"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -1507,7 +1505,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `refreshToken` | Sí | `string` | longitud mínima 1 | Refresh token en crudo emitido previamente | `valor-ejemplo` |
+| `refreshToken` | No | `string` | longitud mínima 1 | Refresh token en crudo emitido previamente. Obligatorio salvo que la API entregue el token como cookie httpOnly (AUTH_REFRESH_COOKIE_ENABLED), en cuyo caso se ignora y se lee de la cookie | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 

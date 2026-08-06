@@ -5,6 +5,8 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -36,6 +38,8 @@ import {
   DeceasePersonDto,
   DeceaseResponseDto,
   PatientSummaryResponseDto,
+  SearchPatientsResponseDto,
+  PatientDetailResponseDto,
 } from '../dto';
 import { ProfileOwnershipService } from './profile-ownership.service';
 
@@ -193,6 +197,157 @@ export class ProfilesPatientsService {
       displayName: person.displayName,
       birthDate: person.birthDate,
       personStatus: person.personStatusConceptId,
+    };
+  }
+
+  /**
+   * UC-05-13: listado paginado de pacientes para el personal administrativo.
+   *
+   * Es la cara de lectura que faltaba del módulo: hasta ahora sólo se podían
+   * dar de alta pacientes y consultarse a sí mismo el titular, así que ninguna
+   * pantalla podía mostrar "los pacientes" ni encontrar el `profileId` que el
+   * resto del contrato exige. Sin esto, dar de alta un paciente y después
+   * agendarle una cita eran dos operaciones que sólo se podían encadenar si
+   * quien las hacía se guardaba el id devuelto en el momento del alta.
+   *
+   * Devuelve datos de filiación, nunca clínicos.
+   *
+   * @param options - Texto de búsqueda, cursor de continuación y tope de página.
+   * @returns Página de pacientes con el cursor de la siguiente.
+   */
+  async searchPatients(options: {
+    /** Texto libre sobre código de paciente y nombre. */
+    query?: string;
+    /** Cursor opaco devuelto por la página anterior. */
+    cursor?: string;
+    /** Tope de filas de la página. */
+    limit: number;
+  }): Promise<SearchPatientsResponseDto> {
+    const em = this.em.fork();
+
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterPatientCode =
+      typeof after?.patientCode === 'string' ? after.patientCode : undefined;
+
+    // Se pide una fila de más para saber si hay página siguiente sin pagar un
+    // COUNT sobre toda la tabla en cada página.
+    const rows = await this.patientProfilesRepo.searchPage(
+      em,
+      { query: options.query, afterPatientCode },
+      options.limit + 1,
+    );
+    const hasMore = rows.length > options.limit;
+    const page = hasMore ? rows.slice(0, options.limit) : rows;
+
+    const persons = await this.personsRepo.findByIds(
+      em,
+      page.map((row) => row.profileId),
+    );
+
+    const items = page.map((row) => {
+      const person = persons.get(row.profileId);
+      return {
+        profileId: row.profileId,
+        personId: row.profileId,
+        patientCode: row.patientCode,
+        displayName: person?.displayName,
+        birthDate: person?.birthDate,
+        personStatusConceptId: person?.personStatusConceptId,
+        deceased: Boolean(person?.deceasedAt),
+      };
+    });
+
+    const last = page.at(-1);
+    return {
+      items,
+      count: items.length,
+      limit: options.limit,
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({ patientCode: last.patientCode })
+          : null,
+    };
+  }
+
+  /**
+   * UC-05-14: ficha de filiación de un paciente (F-01).
+   *
+   * Reúne `persons` + `patient_profiles` + contactos activos, que es lo que la
+   * pantalla de filiación necesita para pintarse completa. No trae nada
+   * clínico: eso se lee de `clinical` y `chart`, que responden a otro rol.
+   *
+   * @param profileId - Perfil de paciente a leer.
+   * @returns Ficha completa de filiación.
+   * @throws ResourceNotFoundException si el perfil no existe.
+   */
+  async getPatientById(profileId: string): Promise<PatientDetailResponseDto> {
+    const em = this.em.fork();
+
+    const patient = await this.patientProfilesRepo.findById(em, profileId);
+    if (!patient) {
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        profileId,
+      });
+    }
+    // `person_profiles.id` es el mismo uuid que `patient_profiles.profile_id`
+    // (1:1), y ese id es a su vez el de la persona: por eso se busca la persona
+    // por el propio `profileId` y no hace falta un salto más.
+    const person = await this.personsRepo.findById(em, patient.profileId);
+    if (!person) {
+      // Un perfil sin persona es una FK rota, no un "no encontrado" del
+      // cliente: se registra para que no pase inadvertido.
+      this.logger.error(
+        { operation: 'profiles.patient.read', profileId },
+        'Perfil de paciente sin persona en el catálogo',
+      );
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        profileId,
+      });
+    }
+
+    const related = await this.relatedPersonsRepo.findActiveByPatient(
+      em,
+      profileId,
+    );
+    // El nombre del contacto vive en `persons`, no en el vínculo: se resuelve
+    // en bloque. Un contacto de emergencia sin nombre no sirve de nada, que es
+    // justo lo que quedaría si esto se dejara sin resolver.
+    const relatedPersons = await this.personsRepo.findByIds(
+      em,
+      related.map((row) => row.personId),
+    );
+
+    return {
+      profileId: patient.profileId,
+      personId: person.id,
+      patientCode: patient.patientCode,
+      masterPatientIndexCode: patient.masterPatientIndexCode,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      administrativeGenderConceptId: person.administrativeGenderConceptId,
+      sexAtBirthConceptId: person.sexAtBirthConceptId,
+      genderIdentityConceptId: person.genderIdentityConceptId,
+      nationalityConceptId: person.nationalityConceptId,
+      preferredLanguageConceptId: person.preferredLanguageConceptId,
+      personStatusConceptId: person.personStatusConceptId,
+      vitalStatusConceptId: person.vitalStatusConceptId,
+      deceasedAt: person.deceasedAt,
+      aboGroupConceptId: patient.aboGroupConceptId,
+      rhFactorConceptId: patient.rhFactorConceptId,
+      insuranceStatusConceptId: patient.insuranceStatusConceptId,
+      clinicalLanguageConceptId: patient.clinicalLanguageConceptId,
+      recordLinkageStatusConceptId: patient.recordLinkageStatusConceptId,
+      relatedPersons: related.map((row) => ({
+        id: row.id,
+        displayName: relatedPersons.get(row.personId)?.displayName,
+        relationshipConceptId: row.relationshipConceptId,
+        isEmergencyContact: row.isEmergencyContact,
+        isLegalGuardian: row.isLegalGuardian,
+      })),
+      createdAt: patient.createdAt,
+      updatedAt: patient.updatedAt,
     };
   }
 

@@ -14,6 +14,8 @@ Agrupa los componentes relacionados con **common** y mantiene cohesionada esta r
 - [`filters/`](./filters/README.md): Traducción centralizada de errores a respuestas de transporte.
 - [`http/`](./http/README.md): componentes de http.
 - [`persistence/`](./persistence/README.md): componentes de persistence.
+- [`resilience/`](./resilience/README.md): plazos con cancelación real, reintento con jitter, cortacircuitos, mamparos y exclusión mutua.
+- [`runtime/`](./runtime/README.md): ciclo de vida del proceso — fallo terminal observable y apagado acotado.
 - [`seed/`](./seed/README.md): componentes de seed.
 - [`tenant/`](./tenant/README.md): componentes de tenant.
 

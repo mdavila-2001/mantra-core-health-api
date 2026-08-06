@@ -18,6 +18,7 @@ import {
 import {
   CurrentUser,
   ParseOptionalLimitPipe,
+  ParseUuidListPipe,
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
@@ -58,20 +59,32 @@ export class TerminologyConceptsController {
    * metadato compartido, sin datos de paciente, y cualquier cliente
    * autenticado necesita resolver estos ids para poder crear recursos.
    *
+   * Con `ids` hace el camino inverso —de id a etiqueta—, que es el que necesita
+   * cualquier pantalla que muestre lo que el contrato devuelve: los estados,
+   * ciclos de vida y clasificaciones viajan siempre como `*ConceptId` en UUID.
+   *
    * @param query - Texto a buscar en el código o la denominación.
    * @param codeSystemVersionId - Versión del sistema de códigos a la que acotar.
    * @param limit - Tope de resultados.
+   * @param ids - Ids de concepto a resolver, separados por coma.
    * @returns Conceptos que casan con el filtro.
    */
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'UC-03-13: busca conceptos del catálogo por código o denominación',
+    summary:
+      'UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta',
   })
   @ApiQuery({
     name: 'q',
     required: false,
     description: 'Texto a buscar en el código o la denominación',
+  })
+  @ApiQuery({
+    name: 'ids',
+    required: false,
+    description:
+      'Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato',
   })
   @ApiQuery({
     name: 'codeSystemVersionId',
@@ -87,11 +100,18 @@ export class TerminologyConceptsController {
     @Query('q') query?: string,
     @Query('codeSystemVersionId') codeSystemVersionId?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('ids', new ParseUuidListPipe()) ids?: string[],
   ): Promise<SearchConceptsResponseDto> {
+    // Resolver por id no debe quedar recortado por el tope de la búsqueda por
+    // texto: quien manda 120 ids espera los 120 de vuelta.
+    const effectiveLimit = ids
+      ? Math.max(limit ?? 50, ids.length)
+      : (limit ?? 50);
     return this.conceptsService.searchConcepts(
       query,
       codeSystemVersionId,
-      limit ?? 50,
+      effectiveLimit,
+      ids,
     );
   }
 

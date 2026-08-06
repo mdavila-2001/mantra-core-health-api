@@ -26,6 +26,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const requestsRepo = {
     findById: mockFn(),
+    findByPatient: mockFn().mockResolvedValue([]),
     create: mockFn(),
     findByIssueIdempotencyKey: mockFn().mockResolvedValue(null),
   };
