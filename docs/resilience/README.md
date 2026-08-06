@@ -22,9 +22,10 @@ opera el sistema cuando algo falla.
 
 Documentación relacionada que **no** se duplica aquí:
 
-- Trazas, métricas y SLO: [`docs/observability/`](../observability/).
-- Despliegue, escalado y rollback: [`docs/operations/`](../operations/).
-- El kernel de resiliencia en código: [`src/common/resilience/`](../../src/common/resilience/).
+- Trazas, métricas y SLO: [`docs/observability/`](../observability/README.md).
+- Despliegue, escalado y rollback: [despliegue](../operations/deployment.md) ·
+  [escalado](../operations/scaling.md) · [rollback](../operations/rollback.md).
+- El kernel de resiliencia en código: [`src/common/resilience/`](../../src/common/resilience/README.md).
 
 ## Qué cambió, en una página
 
@@ -72,7 +73,7 @@ los 21 procesos, y ningún plazo sobre el apagado. Un contenedor podía reinicia
 en bucle sin dejar una línea indexable de por qué, y un `SIGTERM` cuyo drenaje se
 atascaba terminaba en un `SIGKILL` mudo a los 10 s.
 
-Ver [`src/common/runtime/`](../../src/common/runtime/) y el drenaje de ticks en
+Ver [`src/common/runtime/`](../../src/common/runtime/README.md) y el drenaje de ticks en
 `WorkerLifecycleService`.
 
 ### 5. Todo error de base de datos era un `500 INTERNAL`
