@@ -20,6 +20,7 @@ import {
   SchedulingAbsencesRepository,
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
+import { schedulingPersistenceProviders } from './scheduling.persistence';
 
 /**
  * Módulo de agenda: recursos, políticas, plantillas, slots, reservas con
@@ -34,6 +35,10 @@ import { AuditModule } from '../audit/audit.module';
     SchedulingConfirmationController,
   ],
   providers: [
+    // Piloto de la migración a puertos (§47, Fase 5): sesión del módulo,
+    // adaptador PostgreSQL y los dos puertos de la lista de espera. Ver
+    // scheduling.persistence.ts y docs/data/read-write-routing.md.
+    ...schedulingPersistenceProviders,
     SchedulingCatalogRepository,
     SchedulingBookingsRepository,
     SchedulingConfirmationRepository,

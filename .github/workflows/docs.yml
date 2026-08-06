@@ -160,6 +160,39 @@ jobs:
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
         run: node tools/openapi/generate-openapi.mjs
 
+      # Va DESPUÉS de generar el contrato, y el orden no es estético: ese paso
+      # arranca AppModule completo, que es lo que materializa los 58 esquemas y
+      # las 1212 tablas en la base efímera. Ejecutado antes, el aprovisionamiento
+      # no encontraría ningún esquema de negocio sobre el que otorgar nada y
+      # abortaría.
+      #
+      # Las contraseñas son literales contra una base efímera que muere con el
+      # runner. No son secretos, y guardarlas como tales daría a entender que
+      # protegen algo.
+      - name: Aprovisionar roles de aplicación PostgreSQL
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: mantra
+          DB_PASSWORD: mantra
+          DB_NAME: mantra_redesa_health
+          POSTGRES_WRITER_PASSWORD: ci-writer-ephemeral
+          POSTGRES_READER_PASSWORD: ci-reader-ephemeral
+        run: yarn db:provision:dev
+
+      # Verificación real del mínimo privilegio (§54): no inspecciona los GRANT
+      # del catálogo, ejecuta las operaciones y exige 42501.
+      - name: Pruebas de privilegios — el lector no puede escribir
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: mantra
+          DB_PASSWORD: mantra
+          DB_NAME: mantra_redesa_health
+          POSTGRES_WRITER_PASSWORD: ci-writer-ephemeral
+          POSTGRES_READER_PASSWORD: ci-reader-ephemeral
+        run: yarn test:integration --testPathPatterns=postgres-privileges
+
       - name: Generar documentación detallada de endpoints
         run: yarn docs:endpoints:generate
 
