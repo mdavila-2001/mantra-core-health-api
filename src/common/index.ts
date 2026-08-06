@@ -19,6 +19,14 @@ export { Roles } from './auth/roles.decorator';
 export { RequiresVerifiedIdentity } from './auth/requires-verified-identity.decorator';
 export { VerifiedIdentityGuard } from './auth/verified-identity.guard';
 export { authEnvSchema, loadAuthEnv } from './auth/auth.env';
+export {
+  loadRefreshCookieConfig,
+  readCookie,
+  setRefreshCookie,
+  clearRefreshCookie,
+} from './auth/refresh-cookie';
+export type { RefreshCookieConfig } from './auth/refresh-cookie';
+export { RefreshCookieMiddleware } from './auth/refresh-cookie.middleware';
 export type { AuthEnv } from './auth/auth.env';
 export { runWithTenant, getCurrentTenantId } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';

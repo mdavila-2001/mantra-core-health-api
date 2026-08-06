@@ -1,4 +1,8 @@
-import { Module } from '@nestjs/common';
+import {
+  Module,
+  type MiddlewareConsumer,
+  type NestModule,
+} from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ProfilesModule } from '../profiles/profiles.module';
@@ -6,6 +10,7 @@ import { CommonModule } from '../common/common.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { DirectoryModule } from '../directory/directory.module';
 import { IamUsersController, IamAuthController } from './controllers';
+import { RefreshCookieMiddleware } from '../../common';
 import {
   IamUsersService,
   IamCredentialsService,
@@ -86,4 +91,15 @@ import {
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
   exports: [IamUsersService],
 })
-export class IamModule {}
+export class IamModule implements NestModule {
+  /**
+   * Registra el middleware que copia el refresh token de la cookie al cuerpo.
+   *
+   * Sólo actúa sobre el endpoint de refresco, y sólo cuando
+   * `AUTH_REFRESH_COOKIE_ENABLED=true`; con el flag apagado deja la petición
+   * intacta y el contrato actual no cambia.
+   */
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RefreshCookieMiddleware).forRoutes('iam/auth/token/refresh');
+  }
+}

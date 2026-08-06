@@ -5,14 +5,20 @@ import {
   HttpStatus,
   Ip,
   Post,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
   CurrentUser,
   Public,
   Roles,
+  clearRefreshCookie,
+  loadRefreshCookieConfig,
+  setRefreshCookie,
   type AuthenticatedUser,
+  type RefreshCookieConfig,
 } from '../../../common';
 import {
   IamAuthService,
@@ -67,7 +73,34 @@ export class IamAuthController {
     private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
     private readonly passwordResetService: IamPasswordResetService,
     private readonly emailVerificationService: IamEmailVerificationService,
-  ) {}
+  ) {
+    this.refreshCookie = loadRefreshCookieConfig();
+  }
+
+  /**
+   * Configuración de la cookie de refresco. Se lee una vez al construir el
+   * controlador: el flag es una decisión de despliegue, no de petición.
+   */
+  private readonly refreshCookie: RefreshCookieConfig;
+
+  /**
+   * Entrega los tokens al cliente.
+   *
+   * Con el flag apagado —el estado por defecto— devuelve la respuesta tal cual,
+   * con el refresh token en el cuerpo. Con el flag encendido lo mueve a una
+   * cookie `httpOnly` y lo **quita** del cuerpo: dejarlo en los dos sitios
+   * conservaría la superficie XSS que la cookie viene a cerrar.
+   */
+  private deliverTokens(
+    tokens: TokenResponseDto,
+    res: Response,
+  ): TokenResponseDto {
+    if (!this.refreshCookie.enabled) return tokens;
+
+    setRefreshCookie(res, tokens.refreshToken, this.refreshCookie);
+    const { refreshToken: _moved, ...rest } = tokens;
+    return rest as TokenResponseDto;
+  }
 
   /**
    * Auto-registro de un paciente con su documento de identidad. El correo es
@@ -199,8 +232,12 @@ export class IamAuthController {
   @ApiOperation({
     summary: 'Iniciar sesión con email o documento de identidad y contraseña',
   })
-  login(@Body() dto: LoginDto, @Ip() ip: string): Promise<TokenResponseDto> {
-    return this.authService.login(dto, ip);
+  async login(
+    @Body() dto: LoginDto,
+    @Ip() ip: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<TokenResponseDto> {
+    return this.deliverTokens(await this.authService.login(dto, ip), res);
   }
 
   /**
@@ -255,8 +292,13 @@ export class IamAuthController {
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rotar el refresh token' })
-  refresh(@Body() dto: RefreshTokenDto): Promise<TokenResponseDto> {
-    return this.authService.refresh(dto);
+  async refresh(
+    @Body() dto: RefreshTokenDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<TokenResponseDto> {
+    // Con el flag encendido, `RefreshCookieMiddleware` ya copió el token de la
+    // cookie al cuerpo antes de la validación; aquí el flujo es el mismo.
+    return this.deliverTokens(await this.authService.refresh(dto), res);
   }
 
   /**
@@ -270,8 +312,17 @@ export class IamAuthController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar la sesión actual del usuario' })
-  logout(@CurrentUser() actor: AuthenticatedUser): Promise<LogoutResultDto> {
-    return this.authService.logout(actor);
+  async logout(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LogoutResultDto> {
+    const result = await this.authService.logout(actor);
+    // Cerrar sesión sin borrar la cookie dejaría la sesión renovable desde el
+    // navegador aunque el servidor ya la haya revocado.
+    if (this.refreshCookie.enabled) {
+      clearRefreshCookie(res, this.refreshCookie);
+    }
+    return result;
   }
 
   /** UC-01-08. */
@@ -279,10 +330,15 @@ export class IamAuthController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar todas las sesiones del usuario actual' })
-  logoutAll(
+  async logoutAll(
     @CurrentUser() actor: AuthenticatedUser,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<LogoutAllResultDto> {
-    return this.authService.logoutAll(actor);
+    const result = await this.authService.logoutAll(actor);
+    if (this.refreshCookie.enabled) {
+      clearRefreshCookie(res, this.refreshCookie);
+    }
+    return result;
   }
 
   /** UC-01-11. */

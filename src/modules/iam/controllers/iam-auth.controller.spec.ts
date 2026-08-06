@@ -53,29 +53,47 @@ function build() {
   };
 }
 
+/**
+ * Respuesta Express mínima para los handlers que ahora reciben `@Res`.
+ * Con la cookie de refresco apagada —el estado por defecto— no se llama a
+ * ninguno de sus métodos; se espían para poder afirmarlo.
+ */
+function fakeResponse() {
+  return { cookie: (jest.fn as any)(), clearCookie: (jest.fn as any)() } as any;
+}
+
 describe('IamAuthController', () => {
   it('delegates login with the client ip (UC-01-04)', async () => {
     const d = build();
     const dto = { email: 'a@x.io', password: 'password123' };
     d.authService.login.mockResolvedValue({ accessToken: 'at' });
-    await expect(d.controller.login(dto as any, '1.2.3.4')).resolves.toEqual({
+    const res = fakeResponse();
+    await expect(
+      d.controller.login(dto as any, '1.2.3.4', res),
+    ).resolves.toEqual({
       accessToken: 'at',
     });
     expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4');
+    // Flag apagado: no se emite cookie y el cuerpo llega intacto.
+    expect(res.cookie).not.toHaveBeenCalled();
   });
 
   it('delegates refresh (UC-01-06)', async () => {
     const d = build();
     const dto = { refreshToken: 'r' };
-    await d.controller.refresh(dto);
+    const res = fakeResponse();
+    await d.controller.refresh(dto as any, res);
     expect(d.authService.refresh).toHaveBeenCalledWith(dto);
+    expect(res.cookie).not.toHaveBeenCalled();
   });
 
   it('delegates logoutAll for the current user (UC-01-08)', async () => {
     const d = build();
     const actor = { id: 'u1', roles: [] } as any;
-    await d.controller.logoutAll(actor);
+    const res = fakeResponse();
+    await d.controller.logoutAll(actor, res);
     expect(d.authService.logoutAll).toHaveBeenCalledWith(actor);
+    expect(res.clearCookie).not.toHaveBeenCalled();
   });
 
   it('delegates purge (UC-01-11)', async () => {
