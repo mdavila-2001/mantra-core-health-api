@@ -28,7 +28,7 @@
 | [0018](ADR-0018-consistencia-transaccional.md) | Consistencia transaccional — transacción local + outbox, sin sagas | Aceptado |
 | [0019](ADR-0019-patron-outbox.md) | Patrón outbox transaccional propio | Aceptado |
 | [0020](ADR-0020-trazas-opentelemetry-jaeger.md) | Trazas distribuidas — OpenTelemetry + OTLP + Jaeger | Aceptado |
-| [0021](ADR-0021-puertos-persistencia-read-write.md) | Puertos de persistencia con rutas de lectura y escritura separadas | Aceptado |
+| [0021](ADR-0022-puertos-persistencia-read-write.md) | Puertos de persistencia con rutas de lectura y escritura separadas | Aceptado |
 
 ## Cómo añadir un ADR nuevo
 

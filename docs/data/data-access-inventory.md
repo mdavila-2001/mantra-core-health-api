@@ -1,6 +1,6 @@
 # Inventario de accesos a datos
 
-> Auditoría previa a [ADR-0021](../adr/ADR-0021-puertos-persistencia-read-write.md). Es una
+> Auditoría previa a [ADR-0022](../adr/ADR-0022-puertos-persistencia-read-write.md). Es una
 > fotografía del punto de partida, no del estado objetivo.
 
 ## Método

@@ -5,7 +5,7 @@ Ningún tipo de esta carpeta procede de MikroORM: el servicio no manipula entida
 por tanto no puede provocar una escritura asignando un campo.
 
 Son el módulo piloto de la migración descrita en
-[ADR-0021](../../../../docs/adr/ADR-0021-puertos-persistencia-read-write.md).
+[ADR-0022](../../../../docs/adr/ADR-0022-puertos-persistencia-read-write.md).
 
 | Puerto | Ruta | Por qué |
 |---|---|---|

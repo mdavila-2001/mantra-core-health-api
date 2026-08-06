@@ -1,6 +1,6 @@
 # Roles y privilegios de PostgreSQL
 
-> Ver [ADR-0021](../adr/ADR-0021-puertos-persistencia-read-write.md) y
+> Ver [ADR-0022](../adr/ADR-0022-puertos-persistencia-read-write.md) y
 > [ADR-0006](../adr/ADR-0006-multi-tenancy-rls.md).
 
 ## Punto de partida
