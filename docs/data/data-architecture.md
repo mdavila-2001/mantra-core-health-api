@@ -49,7 +49,7 @@ Conviven dos caminos, a propósito y de forma temporal:
    del módulo; el enrutado decide la conexión. Lo usa el módulo piloto.
 
 La migración es módulo a módulo y reversible por configuración. Ver
-[ADR-0022](../adr/ADR-0022-puertos-persistencia-read-write.md) y
+[ADR-0023](../adr/ADR-0023-puertos-persistencia-read-write.md) y
 [rutas de lectura y escritura](read-write-routing.md).
 
 ## Ver también

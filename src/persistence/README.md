@@ -4,7 +4,7 @@ Añade una superficie estable de acceso a datos **junto a** `src/orm`, sin susti
 sigue siendo el dueño de la conexión primaria y del arranque del esquema; esto añade quién decide
 la conexión, cómo se separan lectura y escritura y qué tipos cruzan la frontera hacia el dominio.
 
-Ver [ADR-0022](../../docs/adr/ADR-0022-puertos-persistencia-read-write.md) y
+Ver [ADR-0023](../../docs/adr/ADR-0023-puertos-persistencia-read-write.md) y
 [docs/data/read-write-routing.md](../../docs/data/read-write-routing.md).
 
 ## Mapa

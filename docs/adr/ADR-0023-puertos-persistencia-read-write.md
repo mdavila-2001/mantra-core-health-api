@@ -1,4 +1,4 @@
-# ADR-0022: Puertos de persistencia con rutas de lectura y escritura separadas
+# ADR-0023: Puertos de persistencia con rutas de lectura y escritura separadas
 
 ## Estado
 Aceptado.

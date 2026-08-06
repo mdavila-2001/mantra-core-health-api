@@ -1,6 +1,6 @@
 # Rutas de lectura y escritura
 
-> Ver [ADR-0022](../adr/ADR-0022-puertos-persistencia-read-write.md) para la decisión que explica
+> Ver [ADR-0023](../adr/ADR-0023-puertos-persistencia-read-write.md) para la decisión que explica
 > esta capa, y [configuración de conexiones](connection-configuration.md) para las variables.
 
 ## Qué problema resuelve
