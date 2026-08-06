@@ -4,14 +4,16 @@
 // tarde y no se emite ni un span. Ver `src/observability/telemetry.bootstrap.ts`.
 import './observability/telemetry.bootstrap';
 
+import type { Server } from 'node:http';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
-import { Logger } from 'nestjs-pino';
+import { Logger, PinoLogger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
+import { installProcessGuards, installShutdownWatchdog } from './common';
 
 /**
  * Splash de arranque. Se escribe directo a stdout, no por el logger: es un
@@ -55,6 +57,33 @@ async function bootstrap() {
   // servicios) queda enrutado a pino.
   app.useLogger(app.get(Logger));
   app.flushLogs();
+
+  const logger = await app.resolve(PinoLogger);
+  logger.setContext('bootstrap');
+
+  // Red de seguridad del proceso: una excepción no capturada o una promesa
+  // rechazada sin manejador matan el proceso igual, pero sin esto lo hacen
+  // escribiendo texto suelto en `stderr` —sin `trace_id`, sin servicio, sin
+  // indexar— y perdiendo los spans que quedaban en el búfer del exportador.
+  // Un contenedor que se reinicia en bucle sin dejar rastro de por qué es el
+  // peor punto de partida posible para un incidente. Ver `common/runtime`.
+  installProcessGuards({
+    logger,
+    processName: 'api',
+    onFatal: async () => {
+      await app.close().catch(() => undefined);
+    },
+  });
+
+  // Y el otro extremo: un `SIGTERM` cuyo drenaje se atasca. Sin plazo, el
+  // proceso se queda a medio apagar hasta que Docker lo mata con `SIGKILL` a
+  // los 10 s, sin decir qué lo bloqueaba. El vigilante fuerza la salida
+  // **dejando escrito** qué seguía pendiente.
+  installShutdownWatchdog({
+    logger,
+    processName: 'api',
+    timeoutMs: Number(process.env.API_SHUTDOWN_TIMEOUT_MS ?? 30_000),
+  });
 
   // Cabeceras de seguridad HTTP (HSTS, X-Content-Type-Options, X-Frame-Options,
   // Referrer-Policy, etc.). Imprescindible en un backend de salud expuesto.
@@ -118,7 +147,35 @@ async function bootstrap() {
     );
   }
 
-  await app.listen(process.env.PORT ?? 3000);
+  // `app.listen` está tipado como `Promise<any>` en Nest porque el servidor
+  // depende del adaptador. Se acota al `Server` de Node, que es lo que devuelve
+  // el adaptador de Express que usa esta aplicación, para poder tocar sus
+  // plazos con el tipo puesto.
+  const server = (await app.listen(process.env.PORT ?? 3000)) as Server;
+
+  // Plazos del servidor HTTP. Son la defensa contra el agotamiento de
+  // descriptores de fichero por conexiones que no progresan (el patrón
+  // "slowloris": abrir muchas conexiones y mandar las cabeceras de una en una).
+  //
+  // `keepAliveTimeout` debe quedar **por encima** del idle timeout del
+  // balanceador que tenga delante. Es una condición de carrera clásica y muy
+  // difícil de diagnosticar: si el servidor cierra la conexión primero, el
+  // balanceador puede haber enviado ya una petición por ella y el cliente
+  // recibe un 502 esporádico sin nada anómalo en los logs de la aplicación.
+  // 65 s cubre el default de 60 s de ALB/nginx.
+  server.keepAliveTimeout = Number(
+    process.env.HTTP_KEEPALIVE_TIMEOUT_MS ?? 65_000,
+  );
+  // Siempre mayor que `keepAliveTimeout`, o Node cerraría la conexión antes de
+  // considerar completas las cabeceras.
+  server.headersTimeout = Number(process.env.HTTP_HEADERS_TIMEOUT_MS ?? 70_000);
+  // Techo absoluto de una petición completa. Deliberadamente generoso: hay
+  // endpoints legítimamente largos (generación de informes, expansión de
+  // conjuntos de valores) y recortarlo a ciegas rompería funcionalidad real.
+  // Acota el abuso, no el uso.
+  server.requestTimeout = Number(
+    process.env.HTTP_REQUEST_TIMEOUT_MS ?? 120_000,
+  );
 }
 
 void bootstrap();

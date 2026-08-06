@@ -52,6 +52,50 @@ export {
 } from './errors/domain.exception';
 export { AllExceptionsFilter } from './filters/all-exceptions.filter';
 
+// Ciclo de vida del proceso (fallo terminal observable, apagado acotado)
+export {
+  installProcessGuards,
+  installShutdownWatchdog,
+  resetProcessGuardsForTests,
+  resetShutdownWatchdogForTests,
+} from './runtime';
+export type {
+  FatalLogger,
+  ProcessGuardOptions,
+  ShutdownWatchdogOptions,
+} from './runtime';
+
+// Resiliencia (plazos, reintentos, cortacircuitos, mamparos, exclusión mutua)
+export {
+  OperationTimeoutError,
+  CircuitOpenError,
+  BulkheadFullError,
+  isTransientError,
+  retryAfterFromError,
+  httpStatusOf,
+  networkCodeOf,
+  withTimeout,
+  delay,
+  retry,
+  DEFAULT_RETRY_POLICY,
+  CircuitBreaker,
+  Bulkhead,
+  MutexRegistry,
+} from './resilience';
+export type {
+  RetryPolicy,
+  RetryAttemptInfo,
+  RetryClock,
+  CircuitState,
+  CircuitBreakerOptions,
+  CircuitStateChange,
+  CircuitSnapshot,
+  BulkheadOptions,
+  BulkheadSnapshot,
+  ExclusiveOutcome,
+  MutexSnapshot,
+} from './resilience';
+
 // Paginación
 export { PaginationQueryDto } from './dto/pagination-query.dto';
 export { PageResponseDto, PageMetaDto } from './dto/page-response.dto';
