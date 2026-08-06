@@ -8,11 +8,17 @@ name: Documentación
 # productivo es type-aware; los fixtures de prueba conservan una política
 # específica para dobles parciales sin relajar ningún archivo de runtime.
 
+# `dev` va incluida además de `master`: es la rama protegida contra la que
+# trabaja todo el equipo y por la que entra cada PR, así que era la que más
+# falta hacía verificar. Mientras sólo se disparaba en `master`, un PR a `dev`
+# no reportaba ni un solo check —el equipo mergeaba a ciegas— y el trabajo
+# llegaba a `master` ya integrado, donde el fallo aparece tarde y mezclado con
+# el de otros.
 on:
   pull_request:
-    branches: [master]
+    branches: [master, dev]
   push:
-    branches: [master]
+    branches: [master, dev]
 
 jobs:
   docs:
