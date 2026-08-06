@@ -6,18 +6,21 @@ import {
   SchedulingBookingsController,
   SchedulingInternalController,
   SchedulingConfirmationController,
+  SchedulingAgendaController,
 } from './controllers';
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
   SchedulingWaitlistService,
   SchedulingConfirmationService,
+  SchedulingAgendaService,
 } from './services';
 import {
   SchedulingCatalogRepository,
   SchedulingBookingsRepository,
   SchedulingConfirmationRepository,
   SchedulingAbsencesRepository,
+  SchedulingAgendaRepository,
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
 
@@ -32,16 +35,19 @@ import { AuditModule } from '../audit/audit.module';
     SchedulingBookingsController,
     SchedulingInternalController,
     SchedulingConfirmationController,
+    SchedulingAgendaController,
   ],
   providers: [
     SchedulingCatalogRepository,
     SchedulingBookingsRepository,
     SchedulingConfirmationRepository,
     SchedulingAbsencesRepository,
+    SchedulingAgendaRepository,
     SchedulingCatalogService,
     SchedulingBookingsService,
     SchedulingWaitlistService,
     SchedulingConfirmationService,
+    SchedulingAgendaService,
   ],
 })
 export class SchedulingModule {}

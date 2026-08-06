@@ -29903,6 +29903,61 @@ paths:
       description: >-
         Dar de alta un recurso agendable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: SchedulingAgendaController_listResources
+      parameters:
+        - name: tenantId
+          required: true
+          in: query
+          description: Tenant dueño de la agenda
+          schema:
+            format: uuid
+            type: string
+        - name: practiceId
+          required: false
+          in: query
+          description: Filtrar por práctica
+          schema:
+            format: uuid
+            type: string
+        - name: resourceType
+          required: false
+          in: query
+          description: Filtrar por tipo de recurso
+          schema:
+            type: string
+            enum:
+              - PRACTITIONER
+              - ROOM
+              - EQUIPMENT
+        - name: includeInactive
+          required: false
+          in: query
+          description: Incluir los recursos dados de baja
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los recursos agendables de un tenant
+      tags:
+        - scheduling-agenda
+      description: >-
+        Listar los recursos agendables de un tenant. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /scheduling/booking-policies:
     post:
       operationId: SchedulingController_createPolicy
@@ -30778,6 +30833,71 @@ paths:
       description: >-
         Evaluar una solicitud de reserva contra las reglas vigentes. Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /scheduling/slots:
+    get:
+      description: El `id` de cada cupo es el que se envía a `POST /scheduling/slots/{id}/holds`.
+      operationId: SchedulingAgendaController_listSlots
+      parameters:
+        - name: resourceId
+          required: false
+          in: query
+          description: Recurso cuya agenda se consulta
+          schema:
+            format: uuid
+            type: string
+        - name: scheduleTemplateId
+          required: false
+          in: query
+          description: Plantilla que materializó los cupos
+          schema:
+            format: uuid
+            type: string
+        - name: from
+          required: true
+          in: query
+          description: Inicio de la ventana consultada
+          schema:
+            format: date-time
+            type: string
+        - name: to
+          required: true
+          in: query
+          description: Fin de la ventana (exclusivo)
+          schema:
+            format: date-time
+            type: string
+        - name: onlyAvailable
+          required: false
+          in: query
+          description: 'Sólo cupos con capacidad libre y abiertos: lo que el portal ofrece para reservar'
+          schema:
+            default: false
+            type: boolean
+        - name: limit
+          required: false
+          in: query
+          schema:
+            maximum: 500
+            default: 200
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Consultar los cupos de una ventana
+      tags:
+        - scheduling-agenda
   /system-context/dynamic-enums/definitions:
     post:
       description: 'Sin tipos ENUM nativos de PostgreSQL: el conjunto vive en filas versionadas.'
@@ -36020,6 +36140,10 @@ tags:
     description: >-
       Operaciones del dominio funcional scheduling. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: scheduling-agenda
+    description: >-
+      Operaciones del dominio funcional scheduling agenda. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: scheduling-bookings
     description: >-
       Operaciones del dominio funcional scheduling bookings. Consulte el catálogo Markdown de endpoints para payloads

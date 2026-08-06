@@ -52,3 +52,13 @@ export {
   BookingItemDto,
   SearchBookingsResponseDto,
 } from './scheduling-read.dto';
+
+export {
+  AGENDA_MAX_LIMIT,
+  ListResourcesQueryDto,
+  ResourceListItemDto,
+  ListResourcesResponseDto,
+  ListSlotsQueryDto,
+  SlotListItemDto,
+  ListSlotsResponseDto,
+} from './scheduling-agenda.dto';
