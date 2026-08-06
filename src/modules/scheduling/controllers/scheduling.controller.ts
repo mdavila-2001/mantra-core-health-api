@@ -1,14 +1,28 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalDatePipe,
+  ParseOptionalLimitPipe,
+  PreconditionFailedException,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
@@ -31,6 +45,7 @@ import {
   BookingResponseDto,
   CreateWaitlistEntryDto,
   WaitlistEntryResponseDto,
+  ResourceAgendaResponseDto,
 } from '../dto';
 
 /**
@@ -53,6 +68,63 @@ export class SchedulingController {
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
   ) {}
+
+  /**
+   * UC-41-14: agenda publicada del recurso en una ventana de tiempo.
+   *
+   * Es lo que permite pintar un calendario y elegir un hueco: devuelve el
+   * `slotId` que después consume `POST /scheduling/slots/:id/holds`.
+   *
+   * @param id - Recurso cuya agenda se consulta.
+   * @param from - Inicio de la ventana (ISO 8601, obligatorio).
+   * @param to - Fin de la ventana (ISO 8601, obligatorio).
+   * @param onlyAvailable - `false` para incluir también los slots sin cupo.
+   * @param limit - Tope de slots (por defecto 200).
+   * @returns Slots de la ventana, ordenados cronológicamente.
+   */
+  @Get('resources/:id/slots')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({
+    summary: 'UC-41-14: agenda publicada del recurso en una ventana',
+  })
+  @ApiQuery({
+    name: 'from',
+    required: true,
+    description: 'Inicio de la ventana (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'to',
+    required: true,
+    description: 'Fin de la ventana (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'onlyAvailable',
+    required: false,
+    description:
+      'Por defecto `true`: sólo los slots con cupo. `false` devuelve la agenda completa, ocupados incluidos',
+  })
+  @ApiQuery({ name: 'limit', required: false })
+  getResourceAgenda(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('from', new ParseOptionalDatePipe()) from?: Date,
+    @Query('to', new ParseOptionalDatePipe()) to?: Date,
+    @Query('onlyAvailable') onlyAvailable?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ResourceAgendaResponseDto> {
+    // La ventana es obligatoria: sin ella la consulta devolvería la agenda
+    // completa del recurso, que crece sin techo con cada generación de slots.
+    if (!from || !to) {
+      throw new PreconditionFailedException(
+        'Indique la ventana con from y to (ISO 8601)',
+      );
+    }
+    return this.catalogService.getResourceAgenda(id, {
+      from,
+      to,
+      onlyAvailable: onlyAvailable !== 'false',
+      limit: limit ?? 200,
+    });
+  }
 
   /** UC-41-01. */
   @Post('resources')

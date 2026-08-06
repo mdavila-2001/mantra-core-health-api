@@ -9,3 +9,4 @@ export * from './medication.dto';
 export * from './prescription-signature-policy.dto';
 export * from './procedure.dto';
 export * from './immunization.dto';
+export * from './clinical-read.dto';

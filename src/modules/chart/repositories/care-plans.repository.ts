@@ -93,6 +93,44 @@ export class CarePlansRepository {
   }
 
   /**
+   * Planes de cuidados del paciente, del más reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente cuyo expediente se lee.
+   * @param limit - Tope de planes.
+   * @returns Planes ordenados por fecha de alta descendente.
+   */
+  findPlansByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<CarePlans[]> {
+    return em.find(
+      CarePlans,
+      { patientProfileId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Actividades de varios planes a la vez.
+   *
+   * El expediente pinta las actividades de cada plan: resolverlas plan a plan
+   * sería N+1 sobre una lectura que ya conoce todos los ids.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param carePlanIds - Planes cuyas actividades se piden.
+   * @returns Actividades de todos los planes indicados.
+   */
+  findActivitiesForPlans(
+    em: EntityManager,
+    carePlanIds: string[],
+  ): Promise<CarePlanActivities[]> {
+    if (carePlanIds.length === 0) return Promise.resolve([]);
+    return em.find(CarePlanActivities, { carePlanId: { $in: carePlanIds } });
+  }
+
+  /**
    * Obtiene find activity by id.
    *
    * @param em - Contexto de persistencia o transacción activa.

@@ -15,7 +15,7 @@ Referencia exhaustiva de 15 operación(es) del módulo `terminology`, derivada d
 2. [POST /terminology/code-systems/{id}/versions](#2-post-terminology-code-systems-id-versions) — UC-03-02: crea una versión (borrador) de un sistema de códigos
 3. [GET /terminology/CodeSystem/$lookup](#3-get-terminology-codesystem-lookup) — UC-03-11: resuelve un concepto por sistema y código
 4. [POST /terminology/ConceptMap/$translate](#4-post-terminology-conceptmap-translate) — UC-03-09: cura o consulta un mapeo entre conceptos
-5. [GET /terminology/concepts](#5-get-terminology-concepts) — UC-03-13: busca conceptos del catálogo por código o denominación
+5. [GET /terminology/concepts](#5-get-terminology-concepts) — UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
 6. [POST /terminology/concepts/{conceptId}/$deprecate](#6-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
 7. [POST /terminology/concepts/{conceptId}/designations](#7-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
 8. [POST /terminology/concepts/{conceptId}/properties](#8-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
@@ -594,16 +594,16 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
-- **Nombre:** UC-03-13: busca conceptos del catálogo por código o denominación
+- **Nombre:** UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
 - **Operation ID:** `TerminologyConceptsController_searchConcepts`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [TerminologyConceptsController.searchConcepts](../../src/modules/terminology/controllers/terminology-concepts.controller.ts)
 
 ### Descripción de negocio
 
-UC-03-13: busca conceptos del catálogo por código o denominación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-03-13: busca conceptos por texto para poder rellenar cualquier campo `*ConceptId` del contrato. Es de sólo lectura y no exige rol de administración: el catálogo es metadato compartido, sin datos de paciente, y cualquier cliente autenticado necesita resolver estos ids para poder crear recursos.
+Contexto declarado en el controlador: UC-03-13: busca conceptos por texto para poder rellenar cualquier campo `*ConceptId` del contrato. Es de sólo lectura y no exige rol de administración: el catálogo es metadato compartido, sin datos de paciente, y cualquier cliente autenticado necesita resolver estos ids para poder crear recursos. Con `ids` hace el camino inverso —de id a etiqueta—, que es el que necesita cualquier pantalla que muestre lo que el contrato devuelve: los estados, ciclos de vida y clasificaciones viajan siempre como `*ConceptId` en UUID.
 
 ### Descripción del sistema
 
@@ -616,6 +616,7 @@ NestJS resuelve `GET /terminology/concepts` en `TerminologyConceptsController_se
 | `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en el código o la denominación | `valor-ejemplo` |
 | `codeSystemVersionId` | query | No | `string` | Sin restricción adicional declarada | Acota la búsqueda a una versión de sistema de códigos | `00000000-0000-4000-8000-000000000001` |
 | `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de resultados (por defecto 50) | `1` |
+| `ids` | query | No | `array<string>` | Sin restricción adicional declarada | Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato | `["valor-ejemplo"]` |
 
 ### Payload mínimo aceptable
 
@@ -640,7 +641,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /terminology/concepts?q=valor-ejemplo&codeSystemVersionId=00000000-0000-4000-8000-000000000001&limit=1 HTTP/1.1
+GET /terminology/concepts?q=valor-ejemplo&codeSystemVersionId=00000000-0000-4000-8000-000000000001&limit=1&ids=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```

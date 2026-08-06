@@ -1,14 +1,27 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  ParseOptionalDatePipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   SchedulingBookingsService,
   SchedulingWaitlistService,
@@ -21,6 +34,8 @@ import {
   CheckInResponseDto,
   ScheduleRemindersDto,
   ScheduleRemindersResponseDto,
+  BookingItemDto,
+  SearchBookingsResponseDto,
 } from '../dto';
 
 /** Operaciones sobre una cita ya confirmada. */
@@ -38,6 +53,69 @@ export class SchedulingBookingsController {
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
   ) {}
+
+  /**
+   * UC-41-15: listado de citas.
+   *
+   * Va declarado antes que las rutas `:id/...` porque Nest resuelve por orden
+   * de declaración; `bookings/:id` no colisiona con ellas, pero mantener la
+   * lectura arriba deja el orden explícito.
+   *
+   * @param patientProfileId - Paciente titular.
+   * @param resourceId - Recurso (agenda).
+   * @param from - Inicio de la ventana sobre el instante de la cita.
+   * @param to - Fin de la ventana.
+   * @param includeCancelled - `true` para incluir también las canceladas.
+   * @param limit - Tope de filas (por defecto 100).
+   * @returns Citas que casan con los filtros.
+   */
+  @Get()
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({
+    summary: 'UC-41-15: lista citas por paciente, recurso y/o ventana',
+  })
+  @ApiQuery({ name: 'patientProfileId', required: false, format: 'uuid' })
+  @ApiQuery({ name: 'resourceId', required: false, format: 'uuid' })
+  @ApiQuery({ name: 'from', required: false, description: 'Instante ISO 8601' })
+  @ApiQuery({ name: 'to', required: false, description: 'Instante ISO 8601' })
+  @ApiQuery({
+    name: 'includeCancelled',
+    required: false,
+    description: 'Incluye las canceladas y no-show (por defecto, no)',
+  })
+  @ApiQuery({ name: 'limit', required: false })
+  searchBookings(
+    @Query('patientProfileId') patientProfileId?: string,
+    @Query('resourceId') resourceId?: string,
+    @Query('from', new ParseOptionalDatePipe()) from?: Date,
+    @Query('to', new ParseOptionalDatePipe()) to?: Date,
+    @Query('includeCancelled') includeCancelled?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<SearchBookingsResponseDto> {
+    return this.bookingsService.searchBookings(
+      {
+        patientProfileId,
+        resourceId,
+        from,
+        to,
+        includeCancelled: includeCancelled === 'true',
+      },
+      limit ?? 100,
+    );
+  }
+
+  /**
+   * UC-41-15: una cita concreta.
+   *
+   * @param id - Cita a leer.
+   * @returns La cita con su instante resuelto desde el slot.
+   */
+  @Get(':id')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
+  getBooking(@Param('id', ParseUUIDPipe) id: string): Promise<BookingItemDto> {
+    return this.bookingsService.getBookingById(id);
+  }
 
   /** UC-41-08. */
   @Post(':id/reschedule')

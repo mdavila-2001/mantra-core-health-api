@@ -227,6 +227,45 @@ export class ClinicalNotesRepository {
     return em.findOne(ClinicalNoteVersions, { id });
   }
 
+  /**
+   * Notas del paciente, de la más reciente a la más antigua (UC-40-14).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente cuyo expediente se lee.
+   * @param limit - Tope de notas.
+   * @returns Cabeceras de nota ordenadas por fecha de alta descendente.
+   */
+  findHeadersByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<ClinicalNoteHeaders[]> {
+    return em.find(
+      ClinicalNoteHeaders,
+      { patientProfileId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Resuelve un lote de versiones por id, indexadas por id.
+   *
+   * El expediente muestra el texto de la versión vigente de cada nota: pedirlas
+   * de a una sería N+1 sobre la tabla con más filas del módulo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ids de versión a resolver.
+   * @returns Mapa `id -> versión`.
+   */
+  async findVersionsByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<Map<string, ClinicalNoteVersions>> {
+    if (ids.length === 0) return new Map();
+    const rows = await em.find(ClinicalNoteVersions, { id: { $in: ids } });
+    return new Map(rows.map((row) => [row.id, row]));
+  }
+
   /** Mayor `version_number` existente para una nota (0 si no hay versiones). */
   async maxVersionNumber(
     em: EntityManager,

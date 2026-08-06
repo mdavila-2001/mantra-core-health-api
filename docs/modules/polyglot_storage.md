@@ -8,7 +8,7 @@
 
 # Módulo `polyglot_storage`
 
-**Fuente:** [`src/modules/polyglot_storage/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/polyglot_storage/README.md)
+**Fuente:** [`src/modules/polyglot_storage/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/polyglot_storage/README.md)
 · 3 controllers · 3 services · 4 repositories · 20 entidades · 1 DTO
 
 ---

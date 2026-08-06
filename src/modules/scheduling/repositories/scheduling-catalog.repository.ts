@@ -513,6 +513,44 @@ export class SchedulingCatalogRepository {
     });
   }
 
+  /**
+   * Agenda publicada de un recurso en una ventana de tiempo (UC-41-14).
+   *
+   * Es la consulta que hace posible reservar desde una pantalla: hasta ahora los
+   * slots se generaban pero no se podían listar, así que el único modo de
+   * conseguir un `slotId` para tomar un hold era mirar la base de datos.
+   *
+   * `onlyAvailable` filtra por capacidad restante y no por estado: un slot puede
+   * seguir marcado como abierto y tener el cupo tomado por un hold vivo, y
+   * ofrecerlo llevaría al paciente a un 409 al intentar reservarlo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceId - Recurso cuya agenda se consulta.
+   * @param from - Inicio de la ventana (inclusive).
+   * @param to - Fin de la ventana (exclusive).
+   * @param options - `onlyAvailable` y tope de filas.
+   * @returns Slots ordenados cronológicamente.
+   */
+  findSlotsByResourceInRange(
+    em: EntityManager,
+    resourceId: string,
+    from: Date,
+    to: Date,
+    options: { onlyAvailable: boolean; limit: number },
+  ): Promise<BookableSlots[]> {
+    const where: Record<string, unknown> = {
+      resourceId,
+      startAt: { $gte: from, $lt: to },
+    };
+    if (options.onlyAvailable) {
+      where.remainingCapacity = { $gt: 0 };
+    }
+    return em.find(BookableSlots, where, {
+      orderBy: { startAt: 'ASC' },
+      limit: options.limit,
+    });
+  }
+
   /** Slots del recurso que se solapan con una excepción de no disponibilidad. */
   findOpenSlotsInWindow(
     em: EntityManager,

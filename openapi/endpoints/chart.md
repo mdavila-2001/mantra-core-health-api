@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `chart`
 
-Referencia exhaustiva de 12 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 13 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-templates`
-- **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartNotesController`, `ChartTemplatesController`
+- **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates`
+- **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartNotesController`, `ChartReadController`, `ChartTemplatesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -22,7 +22,8 @@ Referencia exhaustiva de 12 operación(es) del módulo `chart`, derivada del con
 9. [POST /charts/notes/versions/{versionId}/exam-findings](#9-post-charts-notes-versions-versionid-exam-findings) — Registrar hallazgos de examen físico
 10. [POST /charts/notes/versions/{versionId}/release](#10-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
 11. [POST /charts/notes/versions/{versionId}/withhold](#11-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
-12. [POST /charts/templates/{templateId}/assignments](#12-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
+12. [GET /charts/patients/{patientProfileId}/chart](#12-get-charts-patients-patientprofileid-chart) — UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)
+13. [POST /charts/templates/{templateId}/assignments](#13-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
 
 ---
 
@@ -1590,7 +1591,209 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /charts/templates/{templateId}/assignments
+## 12. GET /charts/patients/{patientProfileId}/chart
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `chart-read`
+- **Nombre:** UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)
+- **Operation ID:** `ChartReadController_getPatientChart`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartReadController.getPatientChart](../../src/modules/chart/controllers/chart-read.controller.ts)
+
+### Descripción de negocio
+
+UC-40-14: expediente del paciente (notas, planes de cuidados y documentos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-40-14: expediente del paciente en una sola llamada.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /charts/patients/{patientProfileId}/chart` en `ChartReadController_getPatientChart`. El controlador delega en `ChartReadService.getPatientChart`. No recibe body. El tipo de retorno estático es `Promise<PatientChartResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope aplicado a cada bloque (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /charts/patients/00000000-0000-4000-8000-000000000001/chart HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /charts/patients/00000000-0000-4000-8000-000000000001/chart?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientChartResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "notes": [
+    {
+      "noteId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "noteTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "currentVersionId": "00000000-0000-4000-8000-000000000001",
+      "versionNumber": 1,
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "chiefComplaintText": "valor-ejemplo",
+      "subjectiveText": "valor-ejemplo",
+      "objectiveText": "valor-ejemplo",
+      "assessmentText": "valor-ejemplo",
+      "planText": "valor-ejemplo",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "releasedToPatient": true,
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "carePlans": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "intentConceptId": "00000000-0000-4000-8000-000000000001",
+      "goalText": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "activities": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "statusConceptId": "00000000-0000-4000-8000-000000000001",
+          "detailText": "valor-ejemplo",
+          "scheduledAt": "2026-07-31T12:00:00.000Z"
+        }
+      ],
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "title": "valor-ejemplo",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "authorText": "valor-ejemplo",
+      "isExternal": true,
+      "documentDate": "2026-07-31",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "limit": 1,
+  "truncated": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `notes` | Sí | `array<ChartNoteItemDto>` | Sin restricción adicional declarada | Valor de notes mantenido por la instancia. | `[{"noteId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","releasedToPatient":true,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `notes[].noteId` | Sí | `string` | formato `uuid` | Identificador asociado a note. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].encounterId` | No | `string` | formato `uuid` | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].noteTypeConceptId` | No | `string` | formato `uuid` | Identificador asociado a note type concept. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].lifecycleStatusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a lifecycle status concept. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].versionNumber` | No | `number` | Sin restricción adicional declarada | Número de la versión vigente | `1` |
+| `notes[].authorProfileId` | No | `string` | formato `uuid` | Identificador asociado a author profile. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].chiefComplaintText` | No | `string` | Sin restricción adicional declarada | Valor de chief complaint text mantenido por la instancia. | `valor-ejemplo` |
+| `notes[].subjectiveText` | No | `string` | Sin restricción adicional declarada | Valor de subjective text mantenido por la instancia. | `valor-ejemplo` |
+| `notes[].objectiveText` | No | `string` | Sin restricción adicional declarada | Valor de objective text mantenido por la instancia. | `valor-ejemplo` |
+| `notes[].assessmentText` | No | `string` | Sin restricción adicional declarada | Valor de assessment text mantenido por la instancia. | `valor-ejemplo` |
+| `notes[].planText` | No | `string` | Sin restricción adicional declarada | Valor de plan text mantenido por la instancia. | `valor-ejemplo` |
+| `notes[].signedAt` | No | `string` | formato `date-time` | Valor de signed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `notes[].releasedToPatient` | Sí | `boolean` | Sin restricción adicional declarada | Si la nota tiene una versión liberada al portal del paciente. Derivado, para no obligar a resolver terminología antes de decidir si se muestra | `true` |
+| `notes[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `carePlans` | Sí | `array<ChartCarePlanItemDto>` | Sin restricción adicional declarada | Valor de care plans mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","intentConceptId":"00000000-0000-4000-8000-000000000001","goalText":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31","activities":[{"id":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","detailText":"valor-ejemplo","scheduledAt":"2026-07-31T12:00:00.000Z"}],"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `carePlans[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `carePlans[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `carePlans[].intentConceptId` | No | `string` | formato `uuid` | Identificador asociado a intent concept. | `00000000-0000-4000-8000-000000000001` |
+| `carePlans[].goalText` | No | `string` | Sin restricción adicional declarada | Valor de goal text mantenido por la instancia. | `valor-ejemplo` |
+| `carePlans[].startDate` | No | `string` | formato `date` | Valor de start date mantenido por la instancia. | `2026-07-31` |
+| `carePlans[].endDate` | No | `string` | formato `date` | Valor de end date mantenido por la instancia. | `2026-07-31` |
+| `carePlans[].activities` | Sí | `array<CarePlanActivityItemDto>` | Sin restricción adicional declarada | Valor de activities mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","detailText":"valor-ejemplo","scheduledAt":"2026-07-31T12:00:00.000Z"}]` |
+| `carePlans[].activities[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `carePlans[].activities[].statusConceptId` | No | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `carePlans[].activities[].detailText` | No | `string` | Sin restricción adicional declarada | Valor de detail text mantenido por la instancia. | `valor-ejemplo` |
+| `carePlans[].activities[].scheduledAt` | No | `string` | formato `date-time` | Valor de scheduled at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `carePlans[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `documents` | Sí | `array<ChartDocumentItemDto>` | Sin restricción adicional declarada | Valor de documents mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","title":"valor-ejemplo","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","authorText":"valor-ejemplo","isExternal":true,"documentDate":"2026-07-31","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `documents[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].title` | No | `string` | Sin restricción adicional declarada | Valor de title mantenido por la instancia. | `valor-ejemplo` |
+| `documents[].categoryConceptId` | No | `string` | formato `uuid` | Identificador asociado a category concept. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `documents[].authorText` | No | `string` | Sin restricción adicional declarada | Valor de author text mantenido por la instancia. | `valor-ejemplo` |
+| `documents[].isExternal` | No | `boolean` | Sin restricción adicional declarada | Valor de is external mantenido por la instancia. | `true` |
+| `documents[].documentDate` | No | `string` | formato `date` | Valor de document date mantenido por la instancia. | `2026-07-31` |
+| `documents[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a cada bloque | `1` |
+| `truncated` | Sí | `array<string>` | Sin restricción adicional declarada | Qué bloques quedaron recortados por el tope. Vacío si el expediente cabe entero | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/patients/{patientProfileId}/chart"
+}
+```
+
+---
+
+## 13. POST /charts/templates/{templateId}/assignments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`

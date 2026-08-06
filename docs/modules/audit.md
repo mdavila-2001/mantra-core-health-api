@@ -8,7 +8,7 @@
 
 # Módulo `audit`
 
-**Fuente:** [`src/modules/audit/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/audit/README.md)
+**Fuente:** [`src/modules/audit/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/audit/README.md)
 · 4 controllers · 6 services · 7 repositories · 123 entidades · 9 DTO
 
 ---

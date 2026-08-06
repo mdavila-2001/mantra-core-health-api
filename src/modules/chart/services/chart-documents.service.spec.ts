@@ -19,7 +19,11 @@ const actor = { id: 'clin-1', roles: [] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const documentsRepo = { createRecord: mockFn(), createFile: mockFn() };
+  const documentsRepo = {
+    createRecord: mockFn(),
+    findRecordsByPatient: mockFn().mockResolvedValue([]),
+    createFile: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new ChartDocumentsService(
     em as any,

@@ -518,24 +518,50 @@ export class ConceptsService {
    * No expone datos de paciente: el catálogo de terminología es metadato
    * compartido, idéntico para todos los tenants.
    *
+   * El filtro `ids` cubre el camino inverso, que es el que necesita cualquier
+   * pantalla: **toda** respuesta del contrato devuelve `*ConceptId` en UUID
+   * -estado de una cita, ciclo de vida de una nota, género administrativo- y no
+   * había forma de traducir esos ids a una etiqueta. `$lookup` exige sistema y
+   * código, que el cliente no tiene, y la búsqueda por texto tampoco resuelve un
+   * id. Sin esto el front sólo puede pintar UUIDs, o mantener su propio
+   * diccionario en duro y quedar desincronizado del catálogo en la primera alta.
+   *
+   * Se resuelve en lote a propósito: una tabla de citas trae decenas de estados
+   * distintos y pedirlos de a uno sería N+1 desde el navegador.
+   *
    * @param query - Texto a buscar en código o denominación.
    * @param codeSystemVersionId - Versión a la que acotar, si se indica.
    * @param limit - Tope de resultados.
+   * @param ids - Ids concretos a resolver; excluyente con la búsqueda por texto
+   *   en la práctica, aunque se pueden combinar.
    * @returns Conceptos que casan, con el id que espera el resto del contrato.
    */
   async searchConcepts(
     query: string | undefined,
     codeSystemVersionId: string | undefined,
     limit: number,
+    ids?: string[],
   ): Promise<SearchConceptsResponseDto> {
     this.logger.info(
-      { operation: 'terminology.concept.search', query, limit },
+      {
+        operation: 'terminology.concept.search',
+        query,
+        limit,
+        idCount: ids?.length,
+      },
       'Buscando conceptos',
     );
 
+    // Una lista de ids vacía es una petición de "ninguno", no de "todos": sin
+    // este corte, `?ids=` (o una lista que quedó vacía tras validar) devolvería
+    // el catálogo entero bajo la apariencia de una resolución puntual.
+    if (ids && ids.length === 0) {
+      return { items: [], count: 0, limit };
+    }
+
     const concepts = await this.conceptsRepo.search(
       this.em,
-      { query, codeSystemVersionId },
+      { query, codeSystemVersionId, ids },
       limit,
     );
 

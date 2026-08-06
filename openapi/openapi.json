@@ -1364,6 +1364,68 @@
       }
     },
     "/profiles/patients": {
+      "get": {
+        "operationId": "ProfilesPatientsController_searchPatients",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Texto a buscar en el código de paciente o el nombre",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Cursor opaco devuelto por la página anterior",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope de resultados (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-05-13: listado paginado de pacientes",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "UC-05-13: listado paginado de pacientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "post": {
         "operationId": "ProfilesPatientsController_registerPatient",
         "parameters": [],
@@ -1416,6 +1478,54 @@
           "profiles-patients"
         ],
         "description": "Alta de persona y perfil de paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/{profileId}": {
+      "get": {
+        "operationId": "ProfilesPatientsController_getPatient",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-05-14: ficha de filiación de un paciente (F-01)",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "UC-05-14: ficha de filiación de un paciente (F-01). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/profiles/persons/{personId}/account-links": {
@@ -6091,6 +6201,18 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "ids",
+            "required": false,
+            "in": "query",
+            "description": "Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -6118,11 +6240,11 @@
             "bearer": []
           }
         ],
-        "summary": "UC-03-13: busca conceptos del catálogo por código o denominación",
+        "summary": "UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta",
         "tags": [
           "terminology"
         ],
-        "description": "UC-03-13: busca conceptos del catálogo por código o denominación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/terminology/concepts/{conceptId}/designations": {
@@ -15848,6 +15970,63 @@
         "description": "Asignar una plantilla de chart por especialidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/charts/patients/{patientProfileId}/chart": {
+      "get": {
+        "operationId": "ChartReadController_getPatientChart",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope aplicado a cada bloque (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)",
+        "tags": [
+          "chart-read"
+        ],
+        "description": "UC-40-14: expediente del paciente (notas, planes de cuidados y documentos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/clinical/care-episodes": {
       "post": {
         "operationId": "ClinicalEncountersController_openEpisode",
@@ -17188,6 +17367,63 @@
           "clinical-records"
         ],
         "description": "Registrar una inmunización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/clinical/patients/{patientProfileId}/summary": {
+      "get": {
+        "operationId": "ClinicalReadController_getPatientSummary",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope aplicado a cada bloque (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)",
+        "tags": [
+          "clinical-read"
+        ],
+        "description": "UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/care-teams": {
@@ -45423,6 +45659,91 @@
         ]
       }
     },
+    "/scheduling/resources/{id}/slots": {
+      "get": {
+        "operationId": "SchedulingController_getResourceAgenda",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "description": "Inicio de la ventana (ISO 8601)",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "description": "Fin de la ventana (ISO 8601)",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyAvailable",
+            "required": false,
+            "in": "query",
+            "description": "Por defecto `true`: sólo los slots con cupo. `false` devuelve la agenda completa, ocupados incluidos",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-41-14: agenda publicada del recurso en una ventana",
+        "tags": [
+          "scheduling"
+        ],
+        "description": "UC-41-14: agenda publicada del recurso en una ventana. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/scheduling/resources": {
       "post": {
         "operationId": "SchedulingController_createResource",
@@ -45921,6 +46242,146 @@
           "scheduling"
         ],
         "description": "Inscribir a un paciente en la lista de espera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/scheduling/bookings": {
+      "get": {
+        "operationId": "SchedulingBookingsController_searchBookings",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Instante ISO 8601",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Instante ISO 8601",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeCancelled",
+            "required": false,
+            "in": "query",
+            "description": "Incluye las canceladas y no-show (por defecto, no)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-41-15: lista citas por paciente, recurso y/o ventana",
+        "tags": [
+          "scheduling-bookings"
+        ],
+        "description": "UC-41-15: lista citas por paciente, recurso y/o ventana. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/scheduling/bookings/{id}": {
+      "get": {
+        "operationId": "SchedulingBookingsController_getBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "UC-41-15: consulta una cita",
+        "tags": [
+          "scheduling-bookings"
+        ],
+        "description": "UC-41-15: consulta una cita. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/scheduling/bookings/{id}/reschedule": {
@@ -53907,6 +54368,10 @@
       "description": "Operaciones del dominio funcional chart notes. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "chart-read",
+      "description": "Operaciones del dominio funcional chart read. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "chart-templates",
       "description": "Operaciones del dominio funcional chart templates. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -53953,6 +54418,10 @@
     {
       "name": "clinical-prescription-policies",
       "description": "Operaciones del dominio funcional clinical prescription policies. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "clinical-read",
+      "description": "Operaciones del dominio funcional clinical read. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "clinical-records",
@@ -55127,12 +55596,9 @@
         "properties": {
           "refreshToken": {
             "type": "string",
-            "description": "Refresh token en crudo emitido previamente"
+            "description": "Refresh token en crudo emitido previamente. Obligatorio salvo que la API entregue el token como cookie httpOnly (AUTH_REFRESH_COOKIE_ENABLED), en cuyo caso se ignora y se lee de la cookie"
           }
-        },
-        "required": [
-          "refreshToken"
-        ]
+        }
       },
       "CreatePatientDto": {
         "type": "object",

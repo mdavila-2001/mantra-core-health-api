@@ -15,6 +15,7 @@ import {
   listTenantScopeDeclarations,
 } from './tenant-scope';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
+import { IS_TENANT_AGNOSTIC_KEY } from './tenant-agnostic.decorator';
 import type {
   AuthenticatedRequest,
   AuthenticatedUser,
@@ -89,6 +90,17 @@ export class TenantContextInterceptor implements NestInterceptor {
       context.getClass(),
     ]);
     if (isPublic) {
+      return next.handle();
+    }
+
+    // Operaciones autenticadas cuyo alcance es el propio sujeto del token y que
+    // no tocan datos de negocio (ver `@TenantAgnostic`). Sin esto, una cuenta
+    // sin membresía podía iniciar sesión pero no cerrarla.
+    const isTenantAgnostic = this.reflector.getAllAndOverride<boolean>(
+      IS_TENANT_AGNOSTIC_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isTenantAgnostic) {
       return next.handle();
     }
 
