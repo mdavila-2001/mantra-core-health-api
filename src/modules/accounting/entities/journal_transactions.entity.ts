@@ -109,22 +109,6 @@ export class JournalTransactions {
   postedByUserId?: string;
 
   /**
-   * Valor de approved at mantenido por la instancia.
-   */
-  @Property({
-    fieldName: 'approved_at',
-    columnType: 'timestamptz',
-    nullable: true,
-  })
-  approvedAt?: Date;
-
-  /**
-   * Identificador asociado a approved by user.
-   */
-  @Property({ fieldName: 'approved_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
-  approvedByUserId?: string;
-
-  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -153,4 +137,20 @@ export class JournalTransactions {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Valor de approved at mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'approved_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  approvedAt?: Date;
+
+  /**
+   * Identificador asociado a approved by user.
+   */
+  @Property({ fieldName: 'approved_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
+  approvedByUserId?: string;
 }

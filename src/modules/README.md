@@ -21,8 +21,12 @@ inyectable en su módulo.
 
 ## Las entidades se generan, no se escriben
 
-Se producen por introspección de la base (`yarn orm:gen`). La regla del proyecto es **no
-editarlas a mano**: si algo no cuadra, se corrige el DDL y se regenera.
+El cuerpo lo produce `python salud-db/gen_entities.py` desde los `.puml` del modelo
+canónico (la misma fuente que el DDL), y la documentación la rellena `yarn docs:tsdoc`
+en una pasada aparte que respeta la prosa escrita a mano — ver
+[ADR-0022](../../docs/adr/ADR-0022-generacion-de-entidades.md). La regla del proyecto
+es **no editar el cuerpo a mano**: si algo no cuadra, se corrige el `.puml` y se
+regenera. El JSDoc a medida sí es bienvenido: la regeneración lo preserva.
 
 Dos consecuencias que explican cómo están escritas:
 

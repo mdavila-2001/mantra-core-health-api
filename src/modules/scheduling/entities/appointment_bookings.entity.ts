@@ -2,34 +2,6 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Snapshot congelado de la política de cancelación vigente al confirmar la reserva
- * (CAN-APT-001). Se guarda para que un cambio posterior de `booking_policies` NO
- * altere las condiciones que el paciente ya aceptó: la cancelación/cargo se evalúan
- * con estos valores, nunca con la política actual.
- */
-export interface CancellationPolicySnapshot {
-  /** Política de origen; ausente si se aplicó el default del sistema. */
-  policyId?: string;
-  /** `row_version` de la política congelada: traza qué versión aceptó el paciente. */
-  policyRowVersion?: number;
-  /** Ventana de cancelación congelada, en minutos. Default 24h (1440) si no había política. */
-  cancellationWindowMinutes: number;
-  /** Cargo por inasistencia/cancelación tardía congelado. */
-  noShowFeeAmount?: string;
-  /**
-   * Identificador asociado a currency concept.
-   */
-  currencyConceptId?: string;
-  /**
-   * Zona horaria del recurso congelada (CAN-TIME-001). Es informativa: el plazo se
-   * evalúa sobre instantes absolutos UTC (`timestamptz`), así que no altera el cálculo.
-   */
-  timeZone?: string;
-  /** Instante de captura del snapshot (ISO-8601). */
-  capturedAt: string;
-}
-
-/**
  * Mapea la entidad persistente asociada a `appointment_bookings`.
  */
 @Entity({ schema: 'scheduling', tableName: 'appointment_bookings' })
@@ -127,19 +99,6 @@ export class AppointmentBookings {
   bookingPolicyId?: string;
 
   /**
-   * Snapshot de la política de cancelación aceptada al confirmar (CAN-APT-001).
-   * Columna aditiva: la referencia `booking_policy_id` puede seguir mutando de
-   * versión, pero este JSON preserva las condiciones exactas que rigen la cita.
-   */
-  @Property({
-    fieldName: 'cancellation_policy_snapshot',
-    type: 'json',
-    columnType: 'jsonb',
-    nullable: true,
-  })
-  cancellationPolicySnapshot?: CancellationPolicySnapshot;
-
-  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -168,4 +127,17 @@ export class AppointmentBookings {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Snapshot de la política de cancelación aceptada al confirmar (CAN-APT-001).
+   * Columna aditiva: la referencia `booking_policy_id` puede seguir mutando de
+   * versión, pero este JSON preserva las condiciones exactas que rigen la cita.
+   */
+  @Property({
+    fieldName: 'cancellation_policy_snapshot',
+    type: 'json',
+    columnType: 'jsonb',
+    nullable: true,
+  })
+  cancellationPolicySnapshot?: unknown;
 }
