@@ -7,10 +7,17 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   CurrentUser,
+  ParseOptionalLimitPipe,
   RequiresVerifiedIdentity,
   Roles,
   type AuthenticatedUser,
@@ -33,6 +40,8 @@ import {
   DeceasePersonDto,
   DeceaseResponseDto,
   PatientSummaryResponseDto,
+  SearchPatientsResponseDto,
+  PatientDetailResponseDto,
 } from '../dto';
 
 /**
@@ -67,6 +76,65 @@ export class ProfilesPatientsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientSummaryResponseDto> {
     return this.patientsService.getOwnSummary(actor);
+  }
+
+  /**
+   * UC-05-13: listado de pacientes para el personal administrativo.
+   *
+   * Va declarado **después** de `patients/me/summary` a propósito: Nest resuelve
+   * las rutas por orden de declaración y `patients/:profileId` capturaría
+   * `patients/me` si fuera antes.
+   *
+   * @param query - Texto libre sobre código de paciente y nombre.
+   * @param cursor - Cursor opaco de la página anterior.
+   * @param limit - Tope de filas (por defecto 50).
+   * @returns Página de pacientes.
+   */
+  @Get('patients')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'UC-05-13: listado paginado de pacientes' })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    description: 'Texto a buscar en el código de paciente o el nombre',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope de resultados (por defecto 50)',
+  })
+  searchPatients(
+    @Query('q') query?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<SearchPatientsResponseDto> {
+    return this.patientsService.searchPatients({
+      query,
+      cursor,
+      limit: limit ?? 50,
+    });
+  }
+
+  /**
+   * UC-05-14: ficha de filiación del paciente (F-01).
+   *
+   * @param profileId - Perfil de paciente a leer.
+   * @returns Ficha de filiación, sin datos clínicos.
+   */
+  @Get('patients/:profileId')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'UC-05-14: ficha de filiación de un paciente (F-01)',
+  })
+  getPatient(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+  ): Promise<PatientDetailResponseDto> {
+    return this.patientsService.getPatientById(profileId);
   }
 
   /** UC-05-01. */

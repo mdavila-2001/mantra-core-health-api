@@ -8,7 +8,7 @@
 
 # Módulo `health_data`
 
-**Fuente:** [`src/modules/health_data/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/health_data/README.md)
+**Fuente:** [`src/modules/health_data/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/health_data/README.md)
 · 2 controllers · 5 services · 7 repositories · 34 entidades · 1 DTO
 
 ---

@@ -8,7 +8,7 @@
 
 # Módulo `geo`
 
-**Fuente:** [`src/modules/geo/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/geo/README.md)
+**Fuente:** [`src/modules/geo/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/geo/README.md)
 · 4 controllers · 4 services · 6 repositories · 6 entidades · 14 DTO
 
 ---

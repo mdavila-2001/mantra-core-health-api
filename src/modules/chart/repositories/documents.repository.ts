@@ -90,6 +90,26 @@ export interface CreateDocumentFileData {
 @Injectable()
 export class DocumentsRepository {
   /**
+   * Documentos del paciente, del más reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente cuyo expediente se lee.
+   * @param limit - Tope de documentos.
+   * @returns Documentos ordenados por fecha de alta descendente.
+   */
+  findRecordsByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<DocumentRecords[]> {
+    return em.find(
+      DocumentRecords,
+      { patientProfileId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
    * Crea create record.
    *
    * @param em - Contexto de persistencia o transacción activa.

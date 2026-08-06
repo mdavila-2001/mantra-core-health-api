@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 13 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-patients`, `profiles-practitioners`
 - **Controladores:** `ProfilesPatientsController`, `ProfilesPractitionersController`
@@ -12,18 +12,20 @@ Referencia exhaustiva de 13 operación(es) del módulo `profiles`, derivada del 
 ## Índice del módulo
 
 1. [POST /profiles/credentials/{credentialId}/verify](#1-post-profiles-credentials-credentialid-verify) — Verificar credencial profesional
-2. [POST /profiles/patients](#2-post-profiles-patients) — Alta de persona y perfil de paciente
-3. [POST /profiles/patients/{profileId}/identity-links](#3-post-profiles-patients-profileid-identity-links) — Vincular identidad externa de paciente (MPI)
-4. [POST /profiles/patients/{profileId}/portal-proxies](#4-post-profiles-patients-profileid-portal-proxies) — Otorgar proxy de portal a un representante
-5. [POST /profiles/patients/{profileId}/related-persons](#5-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
-6. [GET /profiles/patients/me/summary](#6-get-profiles-patients-me-summary) — Consultar el resumen propio (requiere identidad verificada)
-7. [POST /profiles/patients/merge](#7-post-profiles-patients-merge) — Fusionar pacientes duplicados
-8. [POST /profiles/patients/merge/{eventId}/reverse](#8-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
-9. [POST /profiles/persons/{personId}/account-links](#9-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
-10. [POST /profiles/persons/{personId}/decease](#10-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-11. [POST /profiles/practitioners](#11-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-12. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#12-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-13. [POST /profiles/practitioners/{profileId}/specialties](#13-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+2. [GET /profiles/patients](#2-get-profiles-patients) — UC-05-13: listado paginado de pacientes
+3. [POST /profiles/patients](#3-post-profiles-patients) — Alta de persona y perfil de paciente
+4. [GET /profiles/patients/{profileId}](#4-get-profiles-patients-profileid) — UC-05-14: ficha de filiación de un paciente (F-01)
+5. [POST /profiles/patients/{profileId}/identity-links](#5-post-profiles-patients-profileid-identity-links) — Vincular identidad externa de paciente (MPI)
+6. [POST /profiles/patients/{profileId}/portal-proxies](#6-post-profiles-patients-profileid-portal-proxies) — Otorgar proxy de portal a un representante
+7. [POST /profiles/patients/{profileId}/related-persons](#7-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
+8. [GET /profiles/patients/me/summary](#8-get-profiles-patients-me-summary) — Consultar el resumen propio (requiere identidad verificada)
+9. [POST /profiles/patients/merge](#9-post-profiles-patients-merge) — Fusionar pacientes duplicados
+10. [POST /profiles/patients/merge/{eventId}/reverse](#10-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
+11. [POST /profiles/persons/{personId}/account-links](#11-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
+12. [POST /profiles/persons/{personId}/decease](#12-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
+13. [POST /profiles/practitioners](#13-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+14. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#14-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+15. [POST /profiles/practitioners/{profileId}/specialties](#15-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
 
 ---
 
@@ -161,7 +163,137 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /profiles/patients
+## 2. GET /profiles/patients
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** UC-05-13: listado paginado de pacientes
+- **Operation ID:** `ProfilesPatientsController_searchPatients`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.searchPatients](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+UC-05-13: listado paginado de pacientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-05-13: listado de pacientes para el personal administrativo. Va declarado **después** de `patients/me/summary` a propósito: Nest resuelve las rutas por orden de declaración y `patients/:profileId` capturaría `patients/me` si fuera antes.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients` en `ProfilesPatientsController_searchPatients`. El controlador delega en `ProfilesPatientsService.searchPatients`. No recibe body. El tipo de retorno estático es `Promise<SearchPatientsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en el código de paciente o el nombre | `valor-ejemplo` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de resultados (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients?q=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchPatientsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "personId": "00000000-0000-4000-8000-000000000001",
+      "patientCode": "CODIGO_EJEMPLO",
+      "displayName": "Nombre de ejemplo",
+      "birthDate": "2026-07-31",
+      "personStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "deceased": true
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Identificador asociado a profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].personId` | Sí | `string` | formato `uuid` | Identificador asociado a person. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientCode` | Sí | `string` | Sin restricción adicional declarada | Código único de paciente | `CODIGO_EJEMPLO` |
+| `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible de la persona | `Nombre de ejemplo` |
+| `items[].birthDate` | No | `string` | formato `date` | Valor de birth date mantenido por la instancia. | `2026-07-31` |
+| `items[].personStatusConceptId` | No | `string` | formato `uuid` | Concept id del estado de la persona | `00000000-0000-4000-8000-000000000001` |
+| `items[].deceased` | Sí | `boolean` | Sin restricción adicional declarada | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `true` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor opaco para la página siguiente; `null` cuando no hay más | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients"
+}
+```
+
+---
+
+## 3. POST /profiles/patients
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -299,7 +431,170 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /profiles/patients/{profileId}/identity-links
+## 4. GET /profiles/patients/{profileId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** UC-05-14: ficha de filiación de un paciente (F-01)
+- **Operation ID:** `ProfilesPatientsController_getPatient`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.getPatient](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+UC-05-14: ficha de filiación de un paciente (F-01). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-05-14: ficha de filiación del paciente (F-01).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/{profileId}` en `ProfilesPatientsController_getPatient`. El controlador delega en `ProfilesPatientsService.getPatientById`. No recibe body. El tipo de retorno estático es `Promise<PatientDetailResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `profileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientDetailResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientDetailResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "patientCode": "CODIGO_EJEMPLO",
+  "masterPatientIndexCode": "CODIGO_EJEMPLO",
+  "displayName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "administrativeGenderConceptId": "00000000-0000-4000-8000-000000000001",
+  "sexAtBirthConceptId": "00000000-0000-4000-8000-000000000001",
+  "genderIdentityConceptId": "00000000-0000-4000-8000-000000000001",
+  "nationalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "preferredLanguageConceptId": "00000000-0000-4000-8000-000000000001",
+  "personStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "vitalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "deceasedAt": "2026-07-31T12:00:00.000Z",
+  "aboGroupConceptId": "00000000-0000-4000-8000-000000000001",
+  "rhFactorConceptId": "00000000-0000-4000-8000-000000000001",
+  "insuranceStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "clinicalLanguageConceptId": "00000000-0000-4000-8000-000000000001",
+  "recordLinkageStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "relatedPersons": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "isEmergencyContact": true,
+      "isLegalGuardian": true
+    }
+  ],
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `profileId` | Sí | `string` | formato `uuid` | Identificador asociado a profile. | `00000000-0000-4000-8000-000000000001` |
+| `personId` | Sí | `string` | formato `uuid` | Identificador asociado a person. | `00000000-0000-4000-8000-000000000001` |
+| `patientCode` | Sí | `string` | Sin restricción adicional declarada | Valor de patient code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `masterPatientIndexCode` | No | `string` | Sin restricción adicional declarada | Valor de master patient index code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `displayName` | No | `string` | Sin restricción adicional declarada | Valor de display name mantenido por la instancia. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Valor de birth date mantenido por la instancia. | `2026-07-31` |
+| `administrativeGenderConceptId` | No | `string` | formato `uuid` | Identificador asociado a administrative gender concept. | `00000000-0000-4000-8000-000000000001` |
+| `sexAtBirthConceptId` | No | `string` | formato `uuid` | Identificador asociado a sex at birth concept. | `00000000-0000-4000-8000-000000000001` |
+| `genderIdentityConceptId` | No | `string` | formato `uuid` | Identificador asociado a gender identity concept. | `00000000-0000-4000-8000-000000000001` |
+| `nationalityConceptId` | No | `string` | formato `uuid` | Identificador asociado a nationality concept. | `00000000-0000-4000-8000-000000000001` |
+| `preferredLanguageConceptId` | No | `string` | formato `uuid` | Identificador asociado a preferred language concept. | `00000000-0000-4000-8000-000000000001` |
+| `personStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a person status concept. | `00000000-0000-4000-8000-000000000001` |
+| `vitalStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a vital status concept. | `00000000-0000-4000-8000-000000000001` |
+| `deceasedAt` | No | `string` | formato `date-time` | Valor de deceased at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `aboGroupConceptId` | No | `string` | formato `uuid` | Identificador asociado a abo group concept. | `00000000-0000-4000-8000-000000000001` |
+| `rhFactorConceptId` | No | `string` | formato `uuid` | Identificador asociado a rh factor concept. | `00000000-0000-4000-8000-000000000001` |
+| `insuranceStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a insurance status concept. | `00000000-0000-4000-8000-000000000001` |
+| `clinicalLanguageConceptId` | No | `string` | formato `uuid` | Identificador asociado a clinical language concept. | `00000000-0000-4000-8000-000000000001` |
+| `recordLinkageStatusConceptId` | No | `string` | formato `uuid` | Identificador asociado a record linkage status concept. | `00000000-0000-4000-8000-000000000001` |
+| `relatedPersons` | Sí | `array<RelatedPersonItemDto>` | Sin restricción adicional declarada | Contactos y representantes registrados (UC-05-10) | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true}]` |
+| `relatedPersons[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `relatedPersons[].displayName` | No | `string` | Sin restricción adicional declarada | Valor de display name mantenido por la instancia. | `Nombre de ejemplo` |
+| `relatedPersons[].relationshipConceptId` | No | `string` | formato `uuid` | Identificador asociado a relationship concept. | `00000000-0000-4000-8000-000000000001` |
+| `relatedPersons[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Valor de is emergency contact mantenido por la instancia. | `true` |
+| `relatedPersons[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Valor de is legal guardian mantenido por la instancia. | `true` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Fecha y hora de la última actualización. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/{profileId}"
+}
+```
+
+---
+
+## 5. POST /profiles/patients/{profileId}/identity-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -441,7 +736,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /profiles/patients/{profileId}/portal-proxies
+## 6. POST /profiles/patients/{profileId}/portal-proxies
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -586,7 +881,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /profiles/patients/{profileId}/related-persons
+## 7. POST /profiles/patients/{profileId}/related-persons
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -728,7 +1023,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /profiles/patients/me/summary
+## 8. GET /profiles/patients/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -841,7 +1136,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /profiles/patients/merge
+## 9. POST /profiles/patients/merge
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -979,7 +1274,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /profiles/patients/merge/{eventId}/reverse
+## 10. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1113,7 +1408,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /profiles/persons/{personId}/account-links
+## 11. POST /profiles/persons/{personId}/account-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1248,7 +1543,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /profiles/persons/{personId}/decease
+## 12. POST /profiles/persons/{personId}/decease
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1383,7 +1678,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /profiles/practitioners
+## 13. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -1540,7 +1835,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 14. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -1682,7 +1977,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /profiles/practitioners/{profileId}/specialties
+## 15. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`

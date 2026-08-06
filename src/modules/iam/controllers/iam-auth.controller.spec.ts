@@ -53,12 +53,24 @@ function build() {
   };
 }
 
+/** Respuesta mínima de Express: sólo lo que usa la entrega por cookie. */
+function resStub() {
+  return { cookie: mockFn(), clearCookie: mockFn() };
+}
+
+/** Petición sin cabecera `Cookie`: el modo por defecto no la mira. */
+function reqStub() {
+  return { headers: {} };
+}
+
 describe('IamAuthController', () => {
   it('delegates login with the client ip (UC-01-04)', async () => {
     const d = build();
     const dto = { email: 'a@x.io', password: 'password123' };
     d.authService.login.mockResolvedValue({ accessToken: 'at' });
-    await expect(d.controller.login(dto as any, '1.2.3.4')).resolves.toEqual({
+    await expect(
+      d.controller.login(dto as any, '1.2.3.4', resStub() as any),
+    ).resolves.toEqual({
       accessToken: 'at',
     });
     expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4');
@@ -67,8 +79,11 @@ describe('IamAuthController', () => {
   it('delegates refresh (UC-01-06)', async () => {
     const d = build();
     const dto = { refreshToken: 'r' };
-    await d.controller.refresh(dto);
-    expect(d.authService.refresh).toHaveBeenCalledWith(dto);
+    d.authService.refresh.mockResolvedValue({ accessToken: 'at' });
+    await d.controller.refresh(dto, reqStub() as any, resStub() as any);
+    // Con la cookie apagada -el default- el token sale del cuerpo y llega al
+    // dominio en crudo.
+    expect(d.authService.refresh).toHaveBeenCalledWith('r');
   });
 
   it('delegates logoutAll for the current user (UC-01-08)', async () => {

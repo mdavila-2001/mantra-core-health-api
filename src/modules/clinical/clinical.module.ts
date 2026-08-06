@@ -8,6 +8,7 @@ import {
   ClinicalOrdersController,
   ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
+  ClinicalReadController,
 } from './controllers';
 import {
   CareEpisodesService,
@@ -21,6 +22,7 @@ import {
   PrescriptionSignaturePoliciesService,
   ProceduresService,
   ImmunizationsService,
+  ClinicalReadService,
 } from './services';
 import {
   CareEpisodesRepository,
@@ -51,6 +53,7 @@ import {
     ClinicalOrdersController,
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
+    ClinicalReadController,
   ],
   providers: [
     // Repositorios
@@ -78,6 +81,7 @@ import {
     PrescriptionSignaturePoliciesService,
     ProceduresService,
     ImmunizationsService,
+    ClinicalReadService,
   ],
 })
 export class ClinicalModule {}

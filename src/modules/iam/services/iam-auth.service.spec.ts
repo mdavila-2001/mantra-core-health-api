@@ -193,7 +193,7 @@ describe('IamAuthService', () => {
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
 
-      const res = await d.service.refresh({ refreshToken: 'raw' });
+      const res = await d.service.refresh('raw');
 
       expect(res).toMatchObject({
         accessToken: 'new-access',
@@ -212,9 +212,9 @@ describe('IamAuthService', () => {
         expiresAt: new Date('2030-01-01'),
       });
 
-      await expect(
-        d.service.refresh({ refreshToken: 'raw' }),
-      ).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(d.service.refresh('raw')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
       expect(d.refreshRepo.revokeBySessionId).toHaveBeenCalledWith(d.tx, 's1');
       expect(d.sessionsRepo.revokeById).toHaveBeenCalledWith(d.tx, 's1');
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
@@ -228,9 +228,9 @@ describe('IamAuthService', () => {
     it('rejects an unknown refresh token', async () => {
       const d = build();
       d.refreshRepo.findByHash.mockResolvedValue(null);
-      await expect(
-        d.service.refresh({ refreshToken: 'raw' }),
-      ).rejects.toBeInstanceOf(UnauthorizedException);
+      await expect(d.service.refresh('raw')).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
     });
   });
 

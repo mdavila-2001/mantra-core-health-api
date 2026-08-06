@@ -53,6 +53,26 @@ x-app-env: &app-env
   JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
   ACCOUNT_LOCK_THRESHOLD: ${ACCOUNT_LOCK_THRESHOLD:-5}
   MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+  # Primer administrador del arranque en frío. Mismo caso que `ORM_SCHEMA_SYNC`
+  # más abajo: Compose usa el `.env` para sustituir `${VARIABLE}` en este YAML,
+  # pero NO lo inyecta dentro de los contenedores. Mientras estas tres no
+  # figuraran aquí, descomentarlas en el `.env` no tenía ningún efecto sobre la
+  # API dockerizada: arrancaba sin ninguna cuenta con SECURITY_ADMIN y `POST
+  # /iam/users` -que exige ese rol- quedaba inalcanzable, así que no había forma
+  # de crear el primer administrador por API. Sólo funcionaba para quien corría
+  # la API en el host con `yarn start:dev`.
+  #
+  # El default vacío conserva el opt-in: sin ambas variables el seed no hace
+  # nada (`BootstrapAdminSeedService.checkGate` -> 'not-configured'), que es el
+  # comportamiento que debe tener un compose que alguien copie sin leer.
+  BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+  BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+  BOOTSTRAP_ADMIN_ALLOW_PRODUCTION: ${BOOTSTRAP_ADMIN_ALLOW_PRODUCTION:-false}
+  # Entrega del refresh token como cookie httpOnly. Apagado por defecto: cambia
+  # el contrato del cliente (deja de venir en el cuerpo) y exige la allowlist de
+  # CORS con `credentials: true`. Ver `src/common/auth/README.md`.
+  AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
+  AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   MIKRO_ORM_DEBUG: ${MIKRO_ORM_DEBUG:-false}
   # Materialización del esquema. ESTA VARIABLE TIENE QUE ESTAR AQUÍ.

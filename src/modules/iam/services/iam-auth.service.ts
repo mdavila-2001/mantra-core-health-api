@@ -26,7 +26,6 @@ import {
 } from '../repositories';
 import {
   LoginDto,
-  RefreshTokenDto,
   TokenResponseDto,
   LogoutAllResultDto,
   LogoutResultDto,
@@ -285,9 +284,20 @@ export class IamAuthService {
     });
   }
 
-  /** UC-01-06: rota el refresh token; detecta y castiga el reuso. */
-  async refresh(dto: RefreshTokenDto): Promise<TokenResponseDto> {
-    const tokenHash = this.tokenService.hashRefreshToken(dto.refreshToken);
+  /**
+   * UC-01-06: rota el refresh token; detecta y castiga el reuso.
+   *
+   * Recibe el token en crudo y no el DTO porque desde que existe la entrega por
+   * cookie httpOnly el token puede venir del cuerpo o de la cabecera `Cookie`:
+   * de dónde se saca es asunto del transporte, y el dominio no tiene por qué
+   * enterarse.
+   *
+   * @param refreshToken - Token en crudo presentado por el cliente.
+   * @returns Par de tokens nuevo.
+   * @throws UnauthorizedException si el token es inválido, reusado o expirado.
+   */
+  async refresh(refreshToken: string): Promise<TokenResponseDto> {
+    const tokenHash = this.tokenService.hashRefreshToken(refreshToken);
     const readEm = this.em.fork();
     const rt = await this.refreshRepo.findByHash(readEm, tokenHash);
     if (!rt) throw new UnauthorizedException('Refresh token inválido');

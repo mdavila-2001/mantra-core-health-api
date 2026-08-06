@@ -8,7 +8,7 @@
 
 # Módulo `platform_ops`
 
-**Fuente:** [`src/modules/platform_ops/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/platform_ops/README.md)
+**Fuente:** [`src/modules/platform_ops/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/platform_ops/README.md)
 · 1 controllers · 4 services · 5 repositories · 38 entidades · 1 DTO
 
 ---

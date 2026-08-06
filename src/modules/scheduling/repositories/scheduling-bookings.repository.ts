@@ -308,6 +308,113 @@ export class SchedulingBookingsRepository {
     );
   }
 
+  /** Cita concreta, sin bloquear: es la cara de lectura de UC-41-15. */
+  findBookingById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AppointmentBookings | null> {
+    return em.findOne(AppointmentBookings, { id });
+  }
+
+  /**
+   * Citas que casan con los filtros del listado (UC-41-15).
+   *
+   * Ordena por el instante del slot y no por `created_at`: una agenda se lee
+   * cronológicamente, y el orden de alta no dice nada al que la mira. Como el
+   * instante vive en `bookable_slots` y no en la cita, se resuelve en dos pasos
+   * -primero los slots de la ventana, después las citas de esos slots- para no
+   * salir del `em.find` a SQL crudo.
+   *
+   * Sin ventana de tiempo no se toca `bookable_slots` y se ordena por fecha de
+   * alta: es el caso "las citas de este paciente", donde el cliente no acota.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Paciente, recurso y ventana temporal.
+   * @param limit - Tope de filas.
+   * @returns Citas que casan, con sus slots ya resueltos.
+   */
+  async findBookings(
+    em: EntityManager,
+    filters: {
+      /** Paciente titular de la cita. */
+      patientProfileId?: string;
+      /** Recurso (agenda) al que pertenece. */
+      resourceId?: string;
+      /** Inicio de la ventana sobre el instante del slot. */
+      from?: Date;
+      /** Fin de la ventana sobre el instante del slot. */
+      to?: Date;
+      /** Estados a incluir; sin esto entran también las canceladas. */
+      statusConceptIds?: string[];
+    },
+    limit: number,
+  ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
+    const where: Record<string, unknown> = {};
+    if (filters.patientProfileId) {
+      where.patientProfileId = filters.patientProfileId;
+    }
+    if (filters.resourceId) where.resourceId = filters.resourceId;
+    if (filters.statusConceptIds && filters.statusConceptIds.length > 0) {
+      where.statusConceptId = { $in: filters.statusConceptIds };
+    }
+
+    const hasWindow = Boolean(filters.from || filters.to);
+    if (hasWindow) {
+      const slotWhere: Record<string, unknown> = {};
+      const startAt: Record<string, Date> = {};
+      if (filters.from) startAt.$gte = filters.from;
+      if (filters.to) startAt.$lt = filters.to;
+      slotWhere.startAt = startAt;
+      if (filters.resourceId) slotWhere.resourceId = filters.resourceId;
+
+      const slots = await em.find(BookableSlots, slotWhere, {
+        orderBy: { startAt: 'ASC' },
+        limit: 5000,
+      });
+      // Ventana sin slots: no hay ninguna cita posible. Devolver aquí evita
+      // emitir un `$in` vacío, que MikroORM traduce a `in (null)` y haría que
+      // el filtro de ventana se comportara como si no existiera.
+      if (slots.length === 0) return [];
+
+      const slotById = new Map(slots.map((slot) => [slot.id, slot]));
+      where.bookableSlotId = { $in: [...slotById.keys()] };
+
+      const bookings = await em.find(AppointmentBookings, where, {
+        limit,
+      });
+      return bookings
+        .map((booking) => ({
+          booking,
+          slot: booking.bookableSlotId
+            ? (slotById.get(booking.bookableSlotId) ?? null)
+            : null,
+        }))
+        .sort(
+          (a, b) =>
+            (a.slot?.startAt.getTime() ?? 0) - (b.slot?.startAt.getTime() ?? 0),
+        );
+    }
+
+    const bookings = await em.find(AppointmentBookings, where, {
+      orderBy: { createdAt: 'DESC' },
+      limit,
+    });
+    const slotIds = bookings
+      .map((booking) => booking.bookableSlotId)
+      .filter((id): id is string => Boolean(id));
+    const slots =
+      slotIds.length > 0
+        ? await em.find(BookableSlots, { id: { $in: slotIds } })
+        : [];
+    const slotById = new Map(slots.map((slot) => [slot.id, slot]));
+    return bookings.map((booking) => ({
+      booking,
+      slot: booking.bookableSlotId
+        ? (slotById.get(booking.bookableSlotId) ?? null)
+        : null,
+    }));
+  }
+
   /** Citas vigentes del paciente: la política limita cuántas puede tener a la vez. */
   countActiveBookingsForPatient(
     em: EntityManager,

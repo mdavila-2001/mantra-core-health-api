@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Delete,
   HttpCode,
   HttpStatus,
@@ -8,11 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  PreconditionFailedException,
-  Roles,
-  getCurrentTenantId,
-} from '../../../common';
+import { Roles, getCurrentTenantId } from '../../../common';
 import { SearchIndexService } from '../services';
 import {
   DeleteDocumentResponseDto,
@@ -105,7 +102,12 @@ export class SearchPlatformController {
   private requireTenant(): string {
     const tenantId = getCurrentTenantId();
     if (!tenantId) {
-      throw new PreconditionFailedException(
+      // 403 y no 422: negar por falta de tenant es una decisión de
+      // autorización, la misma que toma `TenantContextInterceptor` cuando el
+      // actor no pertenece a ninguno. Devolver 422 la disfrazaba de problema de
+      // forma de la petición, e invitaba al cliente a reintentar con otro
+      // cuerpo cuando lo que falta es contexto de tenant.
+      throw new ForbiddenException(
         'La operación de búsqueda exige un tenant de contexto (X-Tenant-Id)',
       );
     }
