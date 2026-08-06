@@ -1,10 +1,11 @@
 /**
  * Tipos del catálogo declarativo del modelo canónico SALUD v4.0.x.
  *
- * Contexto: las entidades MikroORM de `src/modules/**\/entities` se generan por
- * introspección de la base y, por convención del repositorio, no se editan a
- * mano. Eso deja fuera del código dos piezas del modelo físico que MikroORM no
- * puede inferir de una entidad escalar:
+ * Contexto: las entidades MikroORM de `src/modules/**\/entities` se generan desde
+ * los `.puml` del modelo canónico (`salud-db/gen_entities.py`, ver ADR-0022) y,
+ * por convención del repositorio, su cuerpo no se edita a mano. Eso deja fuera
+ * del código dos piezas del modelo físico que MikroORM no puede inferir de una
+ * entidad escalar:
  *
  *   1. los índices secundarios (los `<<INDEX_SET>>` del modelo), y
  *   2. las claves foráneas (las columnas FK están mapeadas como `uuid` planos,

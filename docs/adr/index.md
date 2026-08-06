@@ -29,6 +29,7 @@
 | [0019](ADR-0019-patron-outbox.md) | Patrón outbox transaccional propio | Aceptado |
 | [0020](ADR-0020-trazas-opentelemetry-jaeger.md) | Trazas distribuidas — OpenTelemetry + OTLP + Jaeger | Aceptado |
 | [0021](ADR-0021-fuente-unica-de-ddl.md) | El esquema se declara en el modelo canónico, no en este repositorio | Aceptado |
+| [0022](ADR-0022-generacion-de-entidades.md) | Generación de entidades — cuerpo desde el modelo, documentación aparte | Aceptado |
 
 ## Cómo añadir un ADR nuevo
 

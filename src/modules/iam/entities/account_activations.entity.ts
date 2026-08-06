@@ -25,7 +25,7 @@ export class AccountActivations {
   /**
    * Identificador asociado a user.
    */
-  @Property({ fieldName: 'user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'user_id', type: 'uuid' }) // FK → iam.users (inferida)
   userId!: string;
 
   /** SHA-256 (hex) del token de activación. El token en claro nunca se persiste. */
@@ -35,13 +35,13 @@ export class AccountActivations {
   /**
    * Identificador asociado a state concept.
    */
-  @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   stateConceptId!: string;
 
   /**
    * Valor de reason mantenido por la instancia.
    */
-  @Property({ fieldName: 'reason', columnType: 'varchar', nullable: true })
+  @Property({ columnType: 'varchar', nullable: true })
   reason?: string;
 
   /**
@@ -61,7 +61,7 @@ export class AccountActivations {
     fieldName: 'legal_representative_user_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → iam.users
+  }) // FK → iam.users (inferida)
   legalRepresentativeUserId?: string;
 
   /**
@@ -95,13 +95,13 @@ export class AccountActivations {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

@@ -19,13 +19,13 @@ export class PrescriptionSignaturePolicies {
   /**
    * Identificador asociado a tenant.
    */
-  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
   tenantId!: string;
 
   /** Código de jurisdicción (comodín si nulo). */
   @Property({
     fieldName: 'jurisdiction_code',
-    columnType: 'varchar',
+    columnType: 'varchar(16)',
     nullable: true,
   })
   jurisdictionCode?: string;
@@ -35,16 +35,16 @@ export class PrescriptionSignaturePolicies {
     fieldName: 'medication_type_concept_id',
     type: 'uuid',
     nullable: true,
-  })
+  }) // FK → terminology.catalog_concepts (inferida)
   medicationTypeConceptId?: string;
 
   /** Canal de emisión (concept id); comodín si nulo. FK → terminology.catalog_concepts */
-  @Property({ fieldName: 'channel_concept_id', type: 'uuid', nullable: true })
+  @Property({ fieldName: 'channel_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   channelConceptId?: string;
 
   /** Si la firma es obligatoria cuando esta política aplica. Default FAIL-SAFE. */
-  @Property({ fieldName: 'signature_required', columnType: 'boolean' })
-  signatureRequired: boolean = false;
+  @Property({ fieldName: 'signature_required', type: 'boolean' })
+  signatureRequired!: boolean;
 
   /**
    * Valor de effective from mantenido por la instancia.
@@ -75,13 +75,13 @@ export class PrescriptionSignaturePolicies {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**
