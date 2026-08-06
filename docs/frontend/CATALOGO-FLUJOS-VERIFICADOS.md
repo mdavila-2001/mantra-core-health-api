@@ -34,7 +34,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 ```json
 {
   "email": "admin@redesa.test",
-  "password": "S3cret-passw0rd"
+  "password": "<password — omitido en el catálogo>"
 }
 ```
 
@@ -42,9 +42,9 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyYWI4MzUxOC1lN2FhLTQwZDctYTcwZC05YTBiYjVmMzMzODAiLCJzaWQiOiJmMmU3MTZhMS1jNTgwLTQ5NzYtODNlNy0yOTQ3OTQzM2MxNDMiLCJyb2xlcyI6WyJTRUNVUklUWV9BRE1JTiIsIlNVUEVSQURNSU4iXSwidGVuYW50cyI6WyIxYmVmY2ZlYS00NGMwLTU2M2EtODFjZC0zMzdlYzZhY2M4NDAiXSwibmFtZSI6IkFkbWluaXN0cmFkb3IgZGUgYXJyYW5xdWUiLCJ0ZW5hbnROYW1lcyI6eyIxYmVmY2ZlYS00NGMwLTU2M2EtODFjZC0zMzdlYzZhY2M4NDAiOiJNYW50cmEgQ29yZSBEZWZhdWx0IFRlbmFudCJ9LCJ0eXAiOiJhY2Nlc3MiLCJpYXQiOjE3ODU5ODY0OTcsImV4cCI6MTc4NTk4NzM5N30.39c43ttjh_gy0GDOZYNgUCyiMqNpaLf0xjVhunx-Jss",
-  "refreshToken": "-yDM8b0WM3g17lFmV_LhyRK17ldhL1nmCVVPx27csIRok5dIvTM0kSVyMjtCBFGJ",
-  "expiresAt": "2026-09-05T03:21:37.128Z"
+  "accessToken": "<accessToken — omitido en el catálogo>",
+  "refreshToken": "<refreshToken — omitido en el catálogo>",
+  "expiresAt": "2026-09-05T06:49:02.784Z"
 }
 ```
 
@@ -60,7 +60,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientCode": "PAC-6497033",
+  "patientCode": "PAC-8942680",
   "displayName": "María Fernández Quiroga",
   "birthDate": "1990-05-14"
 }
@@ -70,11 +70,11 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "profileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "personId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "patientCode": "PAC-6497033",
+  "profileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "personId": "53e30166-af53-460b-a513-4058b05393f5",
+  "patientCode": "PAC-8942680",
   "recordLinkageStatus": "bd3c490e-b866-5ff8-8699-3c0510fbefe1",
-  "createdAt": "2026-08-06T03:21:37.181Z"
+  "createdAt": "2026-08-06T06:49:02.838Z"
 }
 ```
 
@@ -88,10 +88,10 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "practitionerCode": "MED-6497033",
+  "practitionerCode": "MED-8942680",
   "displayName": "Dr. Carlos Rojas",
-  "licenseNumber": "LIC-6497033",
-  "credentialNumber": "CRED-6497033",
+  "licenseNumber": "LIC-8942680",
+  "credentialNumber": "CRED-8942680",
   "professionalTitle": "Medicina General"
 }
 ```
@@ -100,20 +100,20 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "profileId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
-  "personId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
-  "practitionerCode": "MED-6497033",
+  "profileId": "310694e9-8169-4b39-afc2-82b1df306ac5",
+  "personId": "310694e9-8169-4b39-afc2-82b1df306ac5",
+  "practitionerCode": "MED-8942680",
   "verificationStatus": "ed8371fb-89a7-5bb4-af21-a83710587a20",
   "practiceStatus": "8ccfe178-eaf5-5373-9fa0-de0dcadff8d5",
-  "licenseId": "bb1dd7ae-fceb-44af-ad75-9525263acc92",
-  "credentialId": "44e2cde6-e238-41d4-b24c-caa97d9be13e",
-  "createdAt": "2026-08-06T03:21:37.252Z"
+  "licenseId": "dce9a828-37a6-4b28-9292-39e900171904",
+  "credentialId": "80291a3a-268f-4e6b-93e9-4f9bb17da695",
+  "createdAt": "2026-08-06T06:49:02.854Z"
 }
 ```
 
 ### Registrar contacto de emergencia
 
-`POST /profiles/patients/899900ff-bce8-4810-8cac-209bcf80d957/related-persons` → **201**
+`POST /profiles/patients/53e30166-af53-460b-a513-4058b05393f5/related-persons` → **201**
 
 **Petición**
 
@@ -128,17 +128,17 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "ede2faea-6049-4f98-99bb-d1e5226a7036",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "personId": "9cf8b05d-7709-43b4-a914-e9a530595f63",
+  "id": "341dc72b-27ee-404f-b4d9-f33c1bc092e6",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "personId": "da1d635d-427a-474b-b6ac-11fadb44207b",
   "status": "3a9405a3-736b-5355-8bd0-8b9a5989f522",
-  "createdAt": "2026-08-06T03:21:37.285Z"
+  "createdAt": "2026-08-06T06:49:02.883Z"
 }
 ```
 
 ### Listado paginado de pacientes
 
-`GET /profiles/patients?q=PAC-6497033&limit=10` → **200**
+`GET /profiles/patients?q=PAC-8942680&limit=10` → **200**
 
 > Paginación por cursor keyset (`nextCursor`), no por offset: el listado se recorre mientras se dan de alta pacientes.
 
@@ -148,9 +148,9 @@ reales, no con mocks. Lo que no aparece, no lo está.
 {
   "items": [
     {
-      "profileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-      "personId": "899900ff-bce8-4810-8cac-209bcf80d957",
-      "patientCode": "PAC-6497033",
+      "profileId": "53e30166-af53-460b-a513-4058b05393f5",
+      "personId": "53e30166-af53-460b-a513-4058b05393f5",
+      "patientCode": "PAC-8942680",
       "displayName": "María Fernández Quiroga",
       "birthDate": "1990-05-14T00:00:00.000Z",
       "personStatusConceptId": "d4939b72-ea54-524d-9021-bdca59efa37a",
@@ -165,7 +165,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Ficha completa del paciente
 
-`GET /profiles/patients/899900ff-bce8-4810-8cac-209bcf80d957` → **200**
+`GET /profiles/patients/53e30166-af53-460b-a513-4058b05393f5` → **200**
 
 > Es la lectura que rellena F-01. No trae datos clínicos: esos viven en `clinical` y `chart`, que responden a otro rol.
 
@@ -173,9 +173,9 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "profileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "personId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "patientCode": "PAC-6497033",
+  "profileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "personId": "53e30166-af53-460b-a513-4058b05393f5",
+  "patientCode": "PAC-8942680",
   "masterPatientIndexCode": null,
   "displayName": "María Fernández Quiroga",
   "birthDate": "1990-05-14T00:00:00.000Z",
@@ -194,15 +194,15 @@ reales, no con mocks. Lo que no aparece, no lo está.
   "recordLinkageStatusConceptId": "bd3c490e-b866-5ff8-8699-3c0510fbefe1",
   "relatedPersons": [
     {
-      "id": "ede2faea-6049-4f98-99bb-d1e5226a7036",
+      "id": "341dc72b-27ee-404f-b4d9-f33c1bc092e6",
       "displayName": "Ana Fernández",
       "relationshipConceptId": "2828aee1-ea38-5be8-9d2d-110f29459782",
       "isEmergencyContact": true,
       "isLegalGuardian": false
     }
   ],
-  "createdAt": "2026-08-06T03:21:37.181Z",
-  "updatedAt": "2026-08-06T03:21:37.181Z"
+  "createdAt": "2026-08-06T06:49:02.838Z",
+  "updatedAt": "2026-08-06T06:49:02.838Z"
 }
 ```
 
@@ -221,8 +221,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
   "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
   "resourceType": "PRACTITIONER",
   "resourceRefType": "practitioner_profiles",
-  "resourceRefId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
-  "name": "Consultorio 6497033",
+  "resourceRefId": "310694e9-8169-4b39-afc2-82b1df306ac5",
+  "name": "Consultorio 8942680",
   "timeZone": "America/La_Paz",
   "capacity": 1
 }
@@ -232,15 +232,15 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "4a1f7911-b59a-4737-949b-3d776f94e98a",
-  "name": "Consultorio 6497033",
+  "id": "5ed67467-e698-4ccb-9777-5af09813f64d",
+  "name": "Consultorio 8942680",
   "stateConceptId": "38a1d301-f40d-5b17-a695-5e6d605f8b19"
 }
 ```
 
 ### Publicar la plantilla semanal
 
-`POST /scheduling/resources/4a1f7911-b59a-4737-949b-3d776f94e98a/templates` → **201**
+`POST /scheduling/resources/5ed67467-e698-4ccb-9777-5af09813f64d/templates` → **201**
 
 **Petición**
 
@@ -292,7 +292,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "009af078-1f4f-471a-aa57-c833262a09c0",
+  "id": "a483702f-a459-4b7c-83d2-5a85052f9859",
   "name": "Mañanas L-D",
   "ruleCount": 7,
   "statusConceptId": "b96b14a3-6a0d-5478-b70f-46b89c715dfe"
@@ -301,7 +301,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Materializar los slots de la ventana
 
-`POST /scheduling/templates/009af078-1f4f-471a-aa57-c833262a09c0/generate-slots` → **201**
+`POST /scheduling/templates/a483702f-a459-4b7c-83d2-5a85052f9859/generate-slots` → **201**
 
 > Idempotente: los slots que ya existen se cuentan como `skipped` en vez de duplicarse.
 
@@ -318,7 +318,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "templateId": "009af078-1f4f-471a-aa57-c833262a09c0",
+  "templateId": "a483702f-a459-4b7c-83d2-5a85052f9859",
   "created": 32,
   "skipped": 0
 }
@@ -326,7 +326,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Leer la agenda publicada
 
-`GET /scheduling/resources/4a1f7911-b59a-4737-949b-3d776f94e98a/slots?from=2026-08-07T00:00:00.000Z&to=2026-08-15T00:00:00.000Z&limit=3` → **200**
+`GET /scheduling/resources/5ed67467-e698-4ccb-9777-5af09813f64d/slots?from=2026-08-07T00:00:00.000Z&to=2026-08-15T00:00:00.000Z&limit=3` → **200**
 
 > `onlyAvailable` es `true` por defecto y filtra por cupo restante, no por estado: un slot abierto con el cupo tomado por un hold vivo no se ofrece.
 
@@ -334,14 +334,14 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "resourceId": "4a1f7911-b59a-4737-949b-3d776f94e98a",
+  "resourceId": "5ed67467-e698-4ccb-9777-5af09813f64d",
   "from": "2026-08-07T00:00:00.000Z",
   "to": "2026-08-15T00:00:00.000Z",
   "items": [
     {
-      "id": "68902738-dfa3-4261-89ea-80ae03f7459f",
-      "resourceId": "4a1f7911-b59a-4737-949b-3d776f94e98a",
-      "scheduleTemplateId": "009af078-1f4f-471a-aa57-c833262a09c0",
+      "id": "8e51ee89-8dff-4dca-9d00-87f06dd523b1",
+      "resourceId": "5ed67467-e698-4ccb-9777-5af09813f64d",
+      "scheduleTemplateId": "a483702f-a459-4b7c-83d2-5a85052f9859",
       "serviceConceptId": null,
       "startAt": "2026-08-07T08:00:00.000Z",
       "endAt": "2026-08-07T08:30:00.000Z",
@@ -351,9 +351,9 @@ reales, no con mocks. Lo que no aparece, no lo está.
       "statusConceptId": "10960d55-a26d-51ab-98ef-48b1d64b306b"
     },
     {
-      "id": "deae022f-2449-445a-b531-bc96c7a30548",
-      "resourceId": "4a1f7911-b59a-4737-949b-3d776f94e98a",
-      "scheduleTemplateId": "009af078-1f4f-471a-aa57-c833262a09c0",
+      "id": "df41aeb2-eb78-49de-99ca-026f8feec26a",
+      "resourceId": "5ed67467-e698-4ccb-9777-5af09813f64d",
+      "scheduleTemplateId": "a483702f-a459-4b7c-83d2-5a85052f9859",
       "serviceConceptId": null,
       "startAt": "2026-08-07T08:30:00.000Z",
       "endAt": "2026-08-07T09:00:00.000Z",
@@ -363,9 +363,9 @@ reales, no con mocks. Lo que no aparece, no lo está.
       "statusConceptId": "10960d55-a26d-51ab-98ef-48b1d64b306b"
     },
     {
-      "id": "36811c09-3723-4201-b48a-4851426d6187",
-      "resourceId": "4a1f7911-b59a-4737-949b-3d776f94e98a",
-      "scheduleTemplateId": "009af078-1f4f-471a-aa57-c833262a09c0",
+      "id": "4d278689-08d9-40a1-a1db-44624a6c7407",
+      "resourceId": "5ed67467-e698-4ccb-9777-5af09813f64d",
+      "scheduleTemplateId": "a483702f-a459-4b7c-83d2-5a85052f9859",
       "serviceConceptId": null,
       "startAt": "2026-08-07T09:00:00.000Z",
       "endAt": "2026-08-07T09:30:00.000Z",
@@ -383,13 +383,13 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Tomar el cupo (anti doble reserva)
 
-`POST /scheduling/slots/68902738-dfa3-4261-89ea-80ae03f7459f/holds` → **201**
+`POST /scheduling/slots/8e51ee89-8dff-4dca-9d00-87f06dd523b1/holds` → **201**
 
 **Petición**
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957"
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5"
 }
 ```
 
@@ -397,16 +397,16 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "26cd9979-a914-43de-95c4-04bbea70f98a",
-  "holdToken": "3a8aae3b-b5e6-4a5f-9976-92a1150782d9",
-  "expiresAt": "2026-08-06T03:26:37.387Z",
+  "id": "783c475f-7f4d-4ad4-9ddc-e00c3715d5d7",
+  "holdToken": "<holdToken — omitido en el catálogo>",
+  "expiresAt": "2026-08-06T06:54:02.981Z",
   "remainingCapacity": 0
 }
 ```
 
 ### Un segundo hold sobre el mismo slot se rechaza
 
-`POST /scheduling/slots/68902738-dfa3-4261-89ea-80ae03f7459f/holds` → **409**
+`POST /scheduling/slots/8e51ee89-8dff-4dca-9d00-87f06dd523b1/holds` → **409**
 
 > Éste es el punto donde se evita el doble booking. El front debe tratar el 409 como "otro paciente se adelantó" y refrescar la agenda.
 
@@ -414,7 +414,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957"
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5"
 }
 ```
 
@@ -426,23 +426,23 @@ reales, no con mocks. Lo que no aparece, no lo está.
   "message": "El slot no tiene cupos disponibles",
   "correlationId": "13",
   "details": {
-    "slotId": "68902738-dfa3-4261-89ea-80ae03f7459f"
+    "slotId": "8e51ee89-8dff-4dca-9d00-87f06dd523b1"
   },
-  "timestamp": "2026-08-06T03:21:37.397Z",
-  "path": "/scheduling/slots/68902738-dfa3-4261-89ea-80ae03f7459f/holds"
+  "timestamp": "2026-08-06T06:49:02.992Z",
+  "path": "/scheduling/slots/8e51ee89-8dff-4dca-9d00-87f06dd523b1/holds"
 }
 ```
 
 ### Confirmar la reserva
 
-`POST /scheduling/holds/3a8aae3b-b5e6-4a5f-9976-92a1150782d9/confirm` → **201**
+`POST /scheduling/holds/d4d3bfee-7577-430d-bdb0-d79c8ebce4d7/confirm` → **201**
 
 **Petición**
 
 ```json
 {
   "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "channel": "PORTAL",
   "reminderOffsetsMinutes": [
     1440,
@@ -455,8 +455,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "48f8d84f-fccd-45ef-b959-d32e6833addd",
-  "bookableSlotId": "68902738-dfa3-4261-89ea-80ae03f7459f",
+  "id": "acb1c601-a9f0-4b30-ba95-b9af94df5b0a",
+  "bookableSlotId": "8e51ee89-8dff-4dca-9d00-87f06dd523b1",
   "statusConceptId": "bf910452-1485-58ca-88dc-184b8b4b2935",
   "remindersScheduled": 2
 }
@@ -464,7 +464,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Listar las citas del paciente
 
-`GET /scheduling/bookings?patientProfileId=899900ff-bce8-4810-8cac-209bcf80d957` → **200**
+`GET /scheduling/bookings?patientProfileId=53e30166-af53-460b-a513-4058b05393f5` → **200**
 
 > Exige al menos `patientProfileId` o `resourceId`. `startAt`/`endAt` vienen resueltos desde el slot. Las canceladas se excluyen salvo `includeCancelled=true`.
 
@@ -474,19 +474,19 @@ reales, no con mocks. Lo que no aparece, no lo está.
 {
   "items": [
     {
-      "id": "48f8d84f-fccd-45ef-b959-d32e6833addd",
-      "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-      "resourceId": "4a1f7911-b59a-4737-949b-3d776f94e98a",
-      "bookableSlotId": "68902738-dfa3-4261-89ea-80ae03f7459f",
+      "id": "acb1c601-a9f0-4b30-ba95-b9af94df5b0a",
+      "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+      "resourceId": "5ed67467-e698-4ccb-9777-5af09813f64d",
+      "bookableSlotId": "8e51ee89-8dff-4dca-9d00-87f06dd523b1",
       "startAt": "2026-08-07T08:00:00.000Z",
       "endAt": "2026-08-07T08:30:00.000Z",
       "statusConceptId": "bf910452-1485-58ca-88dc-184b8b4b2935",
       "serviceConceptId": null,
       "bookingChannelConceptId": "9fc57505-f817-555f-a165-dd1b81db04b3",
-      "confirmedAt": "2026-08-06T03:21:37.405Z",
+      "confirmedAt": "2026-08-06T06:49:02.999Z",
       "checkedInAt": null,
       "reasonText": null,
-      "createdAt": "2026-08-06T03:21:37.405Z"
+      "createdAt": "2026-08-06T06:49:02.999Z"
     }
   ],
   "count": 1,
@@ -497,7 +497,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Check-in del paciente
 
-`POST /scheduling/bookings/48f8d84f-fccd-45ef-b959-d32e6833addd/check-in` → **200**
+`POST /scheduling/bookings/acb1c601-a9f0-4b30-ba95-b9af94df5b0a/check-in` → **200**
 
 **Petición**
 
@@ -509,20 +509,20 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "bookingId": "48f8d84f-fccd-45ef-b959-d32e6833addd",
-  "checkedInAt": "2026-08-06T03:21:37.426Z"
+  "bookingId": "acb1c601-a9f0-4b30-ba95-b9af94df5b0a",
+  "checkedInAt": "2026-08-06T06:49:03.018Z"
 }
 ```
 
 ### Reprogramar a otro hueco
 
-`POST /scheduling/bookings/48f8d84f-fccd-45ef-b959-d32e6833addd/reschedule` → **200**
+`POST /scheduling/bookings/acb1c601-a9f0-4b30-ba95-b9af94df5b0a/reschedule` → **200**
 
 **Petición**
 
 ```json
 {
-  "toSlotId": "deae022f-2449-445a-b531-bc96c7a30548",
+  "toSlotId": "df41aeb2-eb78-49de-99ca-026f8feec26a",
   "reasonText": "El paciente pidió más tarde"
 }
 ```
@@ -531,15 +531,15 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "bookingId": "48f8d84f-fccd-45ef-b959-d32e6833addd",
-  "fromSlotId": "68902738-dfa3-4261-89ea-80ae03f7459f",
-  "toSlotId": "deae022f-2449-445a-b531-bc96c7a30548"
+  "bookingId": "acb1c601-a9f0-4b30-ba95-b9af94df5b0a",
+  "fromSlotId": "8e51ee89-8dff-4dca-9d00-87f06dd523b1",
+  "toSlotId": "df41aeb2-eb78-49de-99ca-026f8feec26a"
 }
 ```
 
 ### Cancelar la cita
 
-`POST /scheduling/bookings/48f8d84f-fccd-45ef-b959-d32e6833addd/cancel` → **200**
+`POST /scheduling/bookings/acb1c601-a9f0-4b30-ba95-b9af94df5b0a/cancel` → **200**
 
 **Petición**
 
@@ -554,14 +554,14 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "bookingId": "48f8d84f-fccd-45ef-b959-d32e6833addd",
+  "bookingId": "acb1c601-a9f0-4b30-ba95-b9af94df5b0a",
   "capacityReleased": true
 }
 ```
 
 ### Cancelar dos veces se rechaza
 
-`POST /scheduling/bookings/48f8d84f-fccd-45ef-b959-d32e6833addd/cancel` → **409**
+`POST /scheduling/bookings/acb1c601-a9f0-4b30-ba95-b9af94df5b0a/cancel` → **409**
 
 > La cancelación no es idempotente: repetirla da 409. El front debe tratarlo como "ya estaba cancelada" y refrescar, no como un fallo a reintentar.
 
@@ -581,10 +581,10 @@ reales, no con mocks. Lo que no aparece, no lo está.
   "message": "La cita ya está cancelada",
   "correlationId": "19",
   "details": {
-    "bookingId": "48f8d84f-fccd-45ef-b959-d32e6833addd"
+    "bookingId": "acb1c601-a9f0-4b30-ba95-b9af94df5b0a"
   },
-  "timestamp": "2026-08-06T03:21:37.466Z",
-  "path": "/scheduling/bookings/48f8d84f-fccd-45ef-b959-d32e6833addd/cancel"
+  "timestamp": "2026-08-06T06:49:03.059Z",
+  "path": "/scheduling/bookings/acb1c601-a9f0-4b30-ba95-b9af94df5b0a/cancel"
 }
 ```
 
@@ -678,9 +678,9 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
-  "responsiblePractitionerId": "9d6f0a1e-3678-44da-a70d-3614fb936959"
+  "responsiblePractitionerId": "310694e9-8169-4b39-afc2-82b1df306ac5"
 }
 ```
 
@@ -688,12 +688,12 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "215dead4-3005-4044-8031-2d058058cefe",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "id": "082d6425-2595-4351-bfe2-ab502bf03ef6",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
   "status": "902abacd-a440-52e8-b370-6b5a7618f685",
-  "startAt": "2026-08-06T03:21:37.476Z",
-  "createdAt": "2026-08-06T03:21:37.476Z"
+  "startAt": "2026-08-06T06:49:03.068Z",
+  "createdAt": "2026-08-06T06:49:03.068Z"
 }
 ```
 
@@ -705,10 +705,10 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
-  "episodeId": "215dead4-3005-4044-8031-2d058058cefe",
-  "primaryPractitionerId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
+  "episodeId": "082d6425-2595-4351-bfe2-ab502bf03ef6",
+  "primaryPractitionerId": "310694e9-8169-4b39-afc2-82b1df306ac5",
   "reasonText": "Dolor abdominal"
 }
 ```
@@ -717,15 +717,15 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "episodeId": "215dead4-3005-4044-8031-2d058058cefe",
+  "id": "625fabe2-0235-4778-9344-016bc6628538",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "episodeId": "082d6425-2595-4351-bfe2-ab502bf03ef6",
   "status": "281daa85-6561-5e8b-9802-de6ac76114fa",
   "participantIds": [],
   "locationIds": [],
-  "startAt": "2026-08-06T03:21:37.484Z",
+  "startAt": "2026-08-06T06:49:03.076Z",
   "endAt": null,
-  "createdAt": "2026-08-06T03:21:37.484Z"
+  "createdAt": "2026-08-06T06:49:03.076Z"
 }
 ```
 
@@ -738,8 +738,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
 ```json
 {
   "custodianTenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "encounterId": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "encounterId": "625fabe2-0235-4778-9344-016bc6628538",
   "codeConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679"
 }
 ```
@@ -748,11 +748,11 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "2228f270-779f-4eaf-845a-94584cb8a12c",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "id": "1b1bf7c1-b26e-475c-996c-652899a43be2",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "clinicalStatus": "14d3c106-df9c-5c35-a8a0-30490dc3bb46",
   "verificationStatus": "04bfacc6-b432-5cf2-a066-0539c5d26adb",
-  "createdAt": "2026-08-06T03:21:37.495Z"
+  "createdAt": "2026-08-06T06:49:03.085Z"
 }
 ```
 
@@ -765,7 +765,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 ```json
 {
   "custodianTenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "substanceConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679",
   "reactions": [
     {
@@ -780,13 +780,13 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "008bfe24-d46a-4a4b-9e9c-75cd3ba7e915",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "id": "4a394d4d-f3c6-40ac-9459-b4258e18c513",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "clinicalStatus": "0f7460b1-8d25-5212-a412-6d523a8d4ed5",
   "reactionIds": [
-    "231d4b28-a298-4091-922f-c26a800888b6"
+    "a528838e-6ca8-47fb-885f-5436b5f322a4"
   ],
-  "createdAt": "2026-08-06T03:21:37.507Z"
+  "createdAt": "2026-08-06T06:49:03.095Z"
 }
 ```
 
@@ -799,8 +799,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
 ```json
 {
   "custodianTenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "encounterId": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "encounterId": "625fabe2-0235-4778-9344-016bc6628538",
   "codeConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679",
   "valueDecimal": 37.8
 }
@@ -810,12 +810,12 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "45fa98b0-fcd4-4b9d-817b-4a49117209f1",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "id": "6197260a-f3e4-47dd-b53a-eeb159f06e5d",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "status": "ecaf731a-1f81-5cb1-967a-ef5f888ba053",
   "componentIds": [],
   "rowVersion": 1,
-  "createdAt": "2026-08-06T03:21:37.520Z"
+  "createdAt": "2026-08-06T06:49:03.113Z"
 }
 ```
 
@@ -828,10 +828,10 @@ reales, no con mocks. Lo que no aparece, no lo está.
 ```json
 {
   "custodianTenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "encounterId": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "encounterId": "625fabe2-0235-4778-9344-016bc6628538",
   "medicationConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679",
-  "prescriberProfileId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
+  "prescriberProfileId": "310694e9-8169-4b39-afc2-82b1df306ac5",
   "doseText": "500 mg",
   "frequencyText": "cada 8 horas",
   "quantityDecimal": 21
@@ -842,20 +842,20 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "5cda6a35-3c76-4e43-bc41-026773d93c9a",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "id": "0b1d361d-b02d-4f43-853a-8b41899e6c60",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "status": "e21a9c9a-ffd2-5bb4-8e60-beb7a10a8d8c",
   "replacesRequestId": null,
   "replacedByRequestId": null,
   "renewedFromRequestId": null,
   "signedAt": null,
-  "createdAt": "2026-08-06T03:21:37.531Z"
+  "createdAt": "2026-08-06T06:49:03.123Z"
 }
 ```
 
 ### Firmar la receta
 
-`POST /clinical/medication-requests/5cda6a35-3c76-4e43-bc41-026773d93c9a/sign` → **200**
+`POST /clinical/medication-requests/0b1d361d-b02d-4f43-853a-8b41899e6c60/sign` → **200**
 
 **Petición**
 
@@ -867,20 +867,20 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "5cda6a35-3c76-4e43-bc41-026773d93c9a",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "id": "0b1d361d-b02d-4f43-853a-8b41899e6c60",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "status": "e21a9c9a-ffd2-5bb4-8e60-beb7a10a8d8c",
   "replacesRequestId": null,
   "replacedByRequestId": null,
   "renewedFromRequestId": null,
-  "signedAt": "2026-08-06T03:21:37.541Z",
-  "createdAt": "2026-08-06T03:21:37.531Z"
+  "signedAt": "2026-08-06T06:49:03.135Z",
+  "createdAt": "2026-08-06T06:49:03.123Z"
 }
 ```
 
 ### Emitir la receta
 
-`POST /clinical/medication-requests/5cda6a35-3c76-4e43-bc41-026773d93c9a/issue` → **200**
+`POST /clinical/medication-requests/0b1d361d-b02d-4f43-853a-8b41899e6c60/issue` → **200**
 
 **Petición**
 
@@ -892,20 +892,20 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "5cda6a35-3c76-4e43-bc41-026773d93c9a",
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "id": "0b1d361d-b02d-4f43-853a-8b41899e6c60",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "status": "cce628c0-3334-50cb-9176-652c14f6f10c",
   "replacesRequestId": null,
   "replacedByRequestId": null,
   "renewedFromRequestId": null,
-  "signedAt": "2026-08-06T03:21:37.541Z",
-  "createdAt": "2026-08-06T03:21:37.531Z"
+  "signedAt": "2026-08-06T06:49:03.135Z",
+  "createdAt": "2026-08-06T06:49:03.123Z"
 }
 ```
 
 ### Emitirla de nuevo se rechaza
 
-`POST /clinical/medication-requests/5cda6a35-3c76-4e43-bc41-026773d93c9a/issue` → **422**
+`POST /clinical/medication-requests/0b1d361d-b02d-4f43-853a-8b41899e6c60/issue` → **422**
 
 > Sólo un borrador puede emitirse. El front debe tratar el 422 como "ya emitida", no como un fallo a reintentar.
 
@@ -923,17 +923,17 @@ reales, no con mocks. Lo que no aparece, no lo está.
   "message": "Solo un borrador (DRAFT) puede emitirse",
   "correlationId": "29",
   "details": {
-    "requestId": "5cda6a35-3c76-4e43-bc41-026773d93c9a",
+    "requestId": "0b1d361d-b02d-4f43-853a-8b41899e6c60",
     "status": "cce628c0-3334-50cb-9176-652c14f6f10c"
   },
-  "timestamp": "2026-08-06T03:21:37.565Z",
-  "path": "/clinical/medication-requests/5cda6a35-3c76-4e43-bc41-026773d93c9a/issue"
+  "timestamp": "2026-08-06T06:49:03.160Z",
+  "path": "/clinical/medication-requests/0b1d361d-b02d-4f43-853a-8b41899e6c60/issue"
 }
 ```
 
 ### Leer el historial clínico del paciente
 
-`GET /clinical/patients/899900ff-bce8-4810-8cac-209bcf80d957/summary` → **200**
+`GET /clinical/patients/53e30166-af53-460b-a513-4058b05393f5/summary` → **200**
 
 > Los cinco bloques en una llamada. `truncated` declara cuáles quedaron recortados por `limit`: un historial incompleto no debe leerse como completo.
 
@@ -941,50 +941,50 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "conditions": [
     {
-      "id": "2228f270-779f-4eaf-845a-94584cb8a12c",
+      "id": "1b1bf7c1-b26e-475c-996c-652899a43be2",
       "codeConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679",
       "categoryConceptId": null,
       "clinicalStatusConceptId": "14d3c106-df9c-5c35-a8a0-30490dc3bb46",
       "verificationStatusConceptId": "04bfacc6-b432-5cf2-a066-0539c5d26adb",
       "severityConceptId": null,
-      "encounterId": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
+      "encounterId": "625fabe2-0235-4778-9344-016bc6628538",
       "onsetAt": null,
       "resolvedAt": null,
-      "createdAt": "2026-08-06T03:21:37.495Z"
+      "createdAt": "2026-08-06T06:49:03.085Z"
     }
   ],
   "allergies": [
     {
-      "id": "008bfe24-d46a-4a4b-9e9c-75cd3ba7e915",
+      "id": "4a394d4d-f3c6-40ac-9459-b4258e18c513",
       "substanceConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679",
       "typeConceptId": null,
       "categoryConceptId": null,
       "criticalityConceptId": null,
       "clinicalStatusConceptId": "0f7460b1-8d25-5212-a412-6d523a8d4ed5",
-      "createdAt": "2026-08-06T03:21:37.507Z"
+      "createdAt": "2026-08-06T06:49:03.095Z"
     }
   ],
   "medicationRequests": [
     {
-      "id": "5cda6a35-3c76-4e43-bc41-026773d93c9a",
+      "id": "0b1d361d-b02d-4f43-853a-8b41899e6c60",
       "medicationConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679",
       "statusConceptId": "cce628c0-3334-50cb-9176-652c14f6f10c",
-      "prescriberProfileId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
+      "prescriberProfileId": "310694e9-8169-4b39-afc2-82b1df306ac5",
       "doseText": "500 mg",
       "frequencyText": "cada 8 horas",
       "validFrom": null,
       "validTo": null,
-      "signedAt": "2026-08-06T03:21:37.541Z",
-      "issuedAt": "2026-08-06T03:21:37.553Z",
-      "createdAt": "2026-08-06T03:21:37.531Z"
+      "signedAt": "2026-08-06T06:49:03.135Z",
+      "issuedAt": "2026-08-06T06:49:03.147Z",
+      "createdAt": "2026-08-06T06:49:03.123Z"
     }
   ],
   "observations": [
     {
-      "id": "45fa98b0-fcd4-4b9d-817b-4a49117209f1",
+      "id": "6197260a-f3e4-47dd-b53a-eeb159f06e5d",
       "codeConceptId": "cefc3500-f5f2-49b5-94dd-89c6bd816679",
       "statusConceptId": "ecaf731a-1f81-5cb1-967a-ef5f888ba053",
       "interpretationConceptId": null,
@@ -995,18 +995,18 @@ reales, no con mocks. Lo que no aparece, no lo está.
       "quantityValue": null,
       "quantityUnitConceptId": null,
       "effectiveStartAt": null,
-      "encounterId": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad"
+      "encounterId": "625fabe2-0235-4778-9344-016bc6628538"
     }
   ],
   "encounters": [
     {
-      "id": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
-      "episodeId": "215dead4-3005-4044-8031-2d058058cefe",
+      "id": "625fabe2-0235-4778-9344-016bc6628538",
+      "episodeId": "082d6425-2595-4351-bfe2-ab502bf03ef6",
       "statusConceptId": "281daa85-6561-5e8b-9802-de6ac76114fa",
       "classConceptId": "0c28fd2d-9b44-5546-92de-f5046d166725",
-      "primaryPractitionerId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
+      "primaryPractitionerId": "310694e9-8169-4b39-afc2-82b1df306ac5",
       "reasonText": "Dolor abdominal",
-      "startAt": "2026-08-06T03:21:37.484Z",
+      "startAt": "2026-08-06T06:49:03.076Z",
       "endAt": null
     }
   ],
@@ -1027,9 +1027,9 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "authorProfileId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
-  "encounterId": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "authorProfileId": "310694e9-8169-4b39-afc2-82b1df306ac5",
+  "encounterId": "625fabe2-0235-4778-9344-016bc6628538",
   "chiefComplaintText": "Dolor abdominal",
   "subjectiveText": "Refiere dolor de tres días",
   "objectiveText": "Abdomen blando, sin defensa",
@@ -1042,8 +1042,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "noteId": "e9e5f729-8296-481a-9ff9-2fa0e432b396",
-  "versionId": "cfe4cb85-7aaa-4d4b-a480-dd166f1e74c9",
+  "noteId": "a6665e75-903a-4ee6-8de4-c1c32b59fe01",
+  "versionId": "529b8bc8-cce4-4478-8b38-8b99a50d1541",
   "versionNumber": 1,
   "lifecycleStatusConceptId": "1208a600-fa68-5864-bf45-0fa6908c0394",
   "versionStatusConceptId": "51f96bfa-d490-53c1-9f8b-e2ba4ae964bb"
@@ -1052,13 +1052,13 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Firmar la versión
 
-`POST /charts/notes/e9e5f729-8296-481a-9ff9-2fa0e432b396/versions/cfe4cb85-7aaa-4d4b-a480-dd166f1e74c9/sign` → **201**
+`POST /charts/notes/a6665e75-903a-4ee6-8de4-c1c32b59fe01/versions/529b8bc8-cce4-4478-8b38-8b99a50d1541/sign` → **201**
 
 **Petición**
 
 ```json
 {
-  "signerProfileId": "9d6f0a1e-3678-44da-a70d-3614fb936959"
+  "signerProfileId": "310694e9-8169-4b39-afc2-82b1df306ac5"
 }
 ```
 
@@ -1066,8 +1066,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "noteId": "e9e5f729-8296-481a-9ff9-2fa0e432b396",
-  "versionId": "cfe4cb85-7aaa-4d4b-a480-dd166f1e74c9",
+  "noteId": "a6665e75-903a-4ee6-8de4-c1c32b59fe01",
+  "versionId": "529b8bc8-cce4-4478-8b38-8b99a50d1541",
   "versionNumber": 1,
   "lifecycleStatusConceptId": "861fa574-1d70-5762-9622-62740773a0ea",
   "versionStatusConceptId": "87fc5b05-f5ad-5e83-8f35-2b72d50a5cef"
@@ -1076,7 +1076,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ### Liberar la versión al portal del paciente
 
-`POST /charts/notes/versions/cfe4cb85-7aaa-4d4b-a480-dd166f1e74c9/release` → **201**
+`POST /charts/notes/versions/529b8bc8-cce4-4478-8b38-8b99a50d1541/release` → **201**
 
 **Petición**
 
@@ -1090,8 +1090,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "versionId": "cfe4cb85-7aaa-4d4b-a480-dd166f1e74c9",
-  "releaseEventId": "84e6b864-dc33-485a-a105-9eadfa53b4e0",
+  "versionId": "529b8bc8-cce4-4478-8b38-8b99a50d1541",
+  "releaseEventId": "4ca42de5-42ba-4891-8ca6-5c5017cc4af4",
   "patientReleaseStatusConceptId": "5b42233a-7dbe-5558-9c57-47d9fcef4ccb"
 }
 ```
@@ -1104,8 +1104,8 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
-  "authorProfileId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
+  "authorProfileId": "310694e9-8169-4b39-afc2-82b1df306ac5",
   "goalText": "Recuperar hidratación",
   "activities": [
     {
@@ -1119,10 +1119,10 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "35ce863e-6c43-4376-ab50-8aa440cc0903",
+  "id": "3e0fbf59-3ebf-4a17-8243-db6781139e5e",
   "statusConceptId": "1d5da3aa-9426-5410-a484-404d0a038069",
   "activityCount": 1,
-  "createdAt": "2026-08-06T03:21:37.624Z"
+  "createdAt": "2026-08-06T06:49:03.228Z"
 }
 ```
 
@@ -1134,7 +1134,7 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
   "title": "Informe de laboratorio",
   "authorText": "Laboratorio Central",
@@ -1146,16 +1146,16 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "id": "b7d3b680-d709-41d1-814b-018bea0088b5",
+  "id": "dc4371c0-702a-4872-9dbd-121c52e7da6c",
   "statusConceptId": "54c90a18-3102-5587-a84e-74200652f4b0",
   "fileCount": 0,
-  "createdAt": "2026-08-06T03:21:37.635Z"
+  "createdAt": "2026-08-06T06:49:03.246Z"
 }
 ```
 
 ### Leer el expediente completo
 
-`GET /charts/patients/899900ff-bce8-4810-8cac-209bcf80d957/chart` → **200**
+`GET /charts/patients/53e30166-af53-460b-a513-4058b05393f5/chart` → **200**
 
 > Notas (con el texto de su versión vigente), planes con sus actividades y documentos, en una llamada. `releasedToPatient` viene derivado.
 
@@ -1163,29 +1163,29 @@ reales, no con mocks. Lo que no aparece, no lo está.
 
 ```json
 {
-  "patientProfileId": "899900ff-bce8-4810-8cac-209bcf80d957",
+  "patientProfileId": "53e30166-af53-460b-a513-4058b05393f5",
   "notes": [
     {
-      "noteId": "e9e5f729-8296-481a-9ff9-2fa0e432b396",
-      "encounterId": "5ab5cd1a-c0ca-4bad-abd0-b375ce6d3aad",
+      "noteId": "a6665e75-903a-4ee6-8de4-c1c32b59fe01",
+      "encounterId": "625fabe2-0235-4778-9344-016bc6628538",
       "noteTypeConceptId": "06b3e6b3-5154-5061-9620-9ae4a49bcc90",
       "lifecycleStatusConceptId": "861fa574-1d70-5762-9622-62740773a0ea",
-      "currentVersionId": "cfe4cb85-7aaa-4d4b-a480-dd166f1e74c9",
+      "currentVersionId": "529b8bc8-cce4-4478-8b38-8b99a50d1541",
       "versionNumber": 1,
-      "authorProfileId": "9d6f0a1e-3678-44da-a70d-3614fb936959",
+      "authorProfileId": "310694e9-8169-4b39-afc2-82b1df306ac5",
       "chiefComplaintText": "Dolor abdominal",
       "subjectiveText": "Refiere dolor de tres días",
       "objectiveText": "Abdomen blando, sin defensa",
       "assessmentText": "Gastroenteritis probable",
       "planText": "Hidratación y control en 48 h",
-      "signedAt": "2026-08-06T03:21:37.606Z",
+      "signedAt": "2026-08-06T06:49:03.204Z",
       "releasedToPatient": true,
-      "createdAt": "2026-08-06T03:21:37.585Z"
+      "createdAt": "2026-08-06T06:49:03.182Z"
     }
   ],
   "carePlans": [
     {
-      "id": "35ce863e-6c43-4376-ab50-8aa440cc0903",
+      "id": "3e0fbf59-3ebf-4a17-8243-db6781139e5e",
       "statusConceptId": "1d5da3aa-9426-5410-a484-404d0a038069",
       "intentConceptId": "afcb5210-52da-5e5b-b781-869c399da9c6",
       "goalText": "Recuperar hidratación",
@@ -1193,25 +1193,25 @@ reales, no con mocks. Lo que no aparece, no lo está.
       "endDate": null,
       "activities": [
         {
-          "id": "011d8a74-7992-4ee0-93e7-09118223fa85",
+          "id": "04b92828-f8c0-4d75-ad18-60819d3f735d",
           "statusConceptId": "4dd65d40-e8b4-56f1-b001-dac4bcf9169b",
           "detailText": "Control en 48 h",
           "scheduledAt": null
         }
       ],
-      "createdAt": "2026-08-06T03:21:37.624Z"
+      "createdAt": "2026-08-06T06:49:03.228Z"
     }
   ],
   "documents": [
     {
-      "id": "b7d3b680-d709-41d1-814b-018bea0088b5",
+      "id": "dc4371c0-702a-4872-9dbd-121c52e7da6c",
       "title": "Informe de laboratorio",
       "categoryConceptId": "b53e6248-fab7-5dc3-b1e6-2f7d0051ac78",
       "statusConceptId": "54c90a18-3102-5587-a84e-74200652f4b0",
       "authorText": "Laboratorio Central",
       "isExternal": true,
       "documentDate": null,
-      "createdAt": "2026-08-06T03:21:37.635Z"
+      "createdAt": "2026-08-06T06:49:03.246Z"
     }
   ],
   "limit": 50,

@@ -42,6 +42,44 @@ const log = [];
 let token = '';
 
 /**
+ * Campos cuyo valor no se vuelca al catálogo.
+ *
+ * El catálogo se commitea, así que un token real dentro de él es una credencial
+ * en el repositorio. Se sustituye por un marcador en vez de omitir el campo:
+ * el frontend necesita saber que el campo VIENE y con qué forma, que es
+ * justamente lo que se perdería al borrarlo.
+ */
+const SECRET_FIELDS = new Set([
+  'accessToken',
+  'refreshToken',
+  'password',
+  'newPassword',
+  'activationToken',
+  'token',
+  'holdToken',
+  'signatureValueEncrypted',
+]);
+
+/**
+ * Copia el valor sustituyendo los campos sensibles por un marcador.
+ *
+ * @param value - Valor a redactar; se recorre en profundidad.
+ * @returns Una copia sin secretos.
+ */
+function redact(value) {
+  if (Array.isArray(value)) return value.map(redact);
+  if (value === null || typeof value !== 'object') return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, inner]) => [
+      key,
+      SECRET_FIELDS.has(key) && typeof inner === 'string' && inner.length > 0
+        ? `<${key} — omitido en el catálogo>`
+        : redact(inner),
+    ]),
+  );
+}
+
+/**
  * Ejecuta una petición y la registra.
  *
  * @param section - Bloque del catálogo al que pertenece.
@@ -73,11 +111,15 @@ async function call(section, title, method, path, options = {}) {
     title,
     method,
     path,
-    request: options.body,
+    // Se redacta al registrar, no al escribir: así ningún camino de salida
+    // puede olvidarse de hacerlo.
+    request: options.body === undefined ? undefined : redact(options.body),
     status: res.status,
-    response: body,
+    response: redact(body),
     note: options.note,
   });
+  // Se devuelve el cuerpo SIN redactar: los pasos siguientes necesitan los
+  // valores reales para encadenarse.
   return body;
 }
 

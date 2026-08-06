@@ -77,6 +77,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Corepack ANTES de `setup-node`, y no después: `cache: yarn` hace que la
+      # acción invoque `yarn cache dir` durante su propio paso, y el yarn global
+      # del runner es el 1.22. Como el `package.json` declara
+      # `packageManager: yarn@4.14.1`, ese yarn 1.22 aborta y el job muere en el
+      # setup, antes de compilar nada. Usa el Node preinstalado del runner, que
+      # es suficiente para activar los shims.
+      - name: Habilitar Corepack
+        run: corepack enable
+
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
