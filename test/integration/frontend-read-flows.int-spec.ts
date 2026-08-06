@@ -352,6 +352,59 @@ describe('Flujos de lectura del frontend (integración)', () => {
       expect(all.body.items[0].id).toBe(booking.body.id);
     });
 
+    it('la ventana filtra por el instante del slot, no por la fecha de alta', async () => {
+      const { resourceId, from, to } = await seedAgenda('ventana-filtra');
+      const patientProfileId = await createPatient('ventana-filtra');
+
+      const agenda = await http()
+        .get(
+          `/scheduling/resources/${resourceId}/slots?from=${from}&to=${to}&limit=50`,
+        )
+        .set(auth())
+        .expect(200);
+
+      // Se reserva el ÚLTIMO hueco de la ventana, que es el primero en caerse
+      // si el filtro por ventana se resuelve recortando slots por orden
+      // cronológico. Con los ~112 slots que siembra esta prueba no se llega a
+      // ningún tope, así que este caso NO reproduce ese recorte: lo que fija es
+      // que el filtro se evalúa contra el instante del slot y no contra la
+      // fecha de alta de la cita, que es la propiedad de la que depende el
+      // arreglo.
+      const lastSlot = agenda.body.items[agenda.body.items.length - 1];
+      const hold = await http()
+        .post(`/scheduling/slots/${lastSlot.id}/holds`)
+        .set(auth())
+        .send({ patientProfileId })
+        .expect(201);
+      const booking = await http()
+        .post(`/scheduling/holds/${hold.body.holdToken}/confirm`)
+        .set(auth())
+        .send({ tenantId: SEED.tenantId, patientProfileId, channel: 'PORTAL' })
+        .expect(201);
+
+      const inWindow = await http()
+        .get(
+          `/scheduling/bookings?patientProfileId=${patientProfileId}&from=${from}&to=${to}`,
+        )
+        .set(auth())
+        .expect(200);
+      expect(inWindow.body.items.map((i: { id: string }) => i.id)).toContain(
+        booking.body.id,
+      );
+
+      // Y fuera de la ventana no aparece: el filtro filtra de verdad.
+      const before = new Date(lastSlot.startAt);
+      const outOfWindow = await http()
+        .get(
+          `/scheduling/bookings?patientProfileId=${patientProfileId}&from=${from}&to=${before.toISOString()}`,
+        )
+        .set(auth())
+        .expect(200);
+      expect(
+        outOfWindow.body.items.map((i: { id: string }) => i.id),
+      ).not.toContain(booking.body.id);
+    });
+
     it('listar citas sin acotar por paciente ni recurso se rechaza', async () => {
       // Sin este corte la consulta devolvería las citas de todos los pacientes
       // de todos los tenants.

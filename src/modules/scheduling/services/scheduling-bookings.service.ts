@@ -680,7 +680,7 @@ export class SchedulingBookingsService {
     }
 
     const em = this.em.fork();
-    const rows = await this.bookingsRepo.findBookings(
+    const { rows, fetchCapReached } = await this.bookingsRepo.findBookings(
       em,
       {
         patientProfileId: filters.patientProfileId,
@@ -695,8 +695,12 @@ export class SchedulingBookingsService {
       },
       limit + 1,
     );
-    const truncated = rows.length > limit;
-    const page = truncated ? rows.slice(0, limit) : rows;
+    // Dos formas de quedarse corto, y las dos se declaran: sobrar filas para
+    // esta página, o que la lectura previa al filtro por ventana agotara su
+    // tope. La segunda no se ve en `rows.length` —el filtro pudo dejar menos de
+    // `limit`— y callarla devolvería una agenda incompleta como si fuera toda.
+    const truncated = rows.length > limit || fetchCapReached;
+    const page = rows.length > limit ? rows.slice(0, limit) : rows;
 
     return {
       items: page.map(({ booking, slot }) => ({

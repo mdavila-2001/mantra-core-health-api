@@ -319,19 +319,29 @@ export class SchedulingBookingsRepository {
   /**
    * Citas que casan con los filtros del listado (UC-41-15).
    *
-   * Ordena por el instante del slot y no por `created_at`: una agenda se lee
-   * cronológicamente, y el orden de alta no dice nada al que la mira. Como el
-   * instante vive en `bookable_slots` y no en la cita, se resuelve en dos pasos
-   * -primero los slots de la ventana, después las citas de esos slots- para no
-   * salir del `em.find` a SQL crudo.
+   * **Siempre se consulta desde `appointment_bookings`**, que es el lado
+   * selectivo: el servicio garantiza que viene `patientProfileId` o
+   * `resourceId`, y ambos acotan la consulta a un índice. La ventana temporal se
+   * aplica después, sobre los slots ya resueltos.
    *
-   * Sin ventana de tiempo no se toca `bookable_slots` y se ordena por fecha de
-   * alta: es el caso "las citas de este paciente", donde el cliente no acota.
+   * Se hizo así tras descartar lo contrario. Resolver primero los slots de la
+   * ventana y buscar las citas de esos slots parece más directo, pero con una
+   * ventana amplia y sin `resourceId` —«mis citas de este año»— esa consulta
+   * barre los slots de TODOS los recursos del tenant. Acotarla con un tope
+   * dejaba fuera, en silencio, las citas de los slots que no entraran: el
+   * paciente recibía una lista incompleta que se declaraba completa. Un listado
+   * de citas que se calla las que faltan es peor que uno que no existe.
+   *
+   * El orden cronológico se aplica en memoria porque el instante vive en
+   * `bookable_slots` y no en la cita; sobre una página acotada es irrelevante y
+   * evita salir del `em.find` a SQL crudo.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param filters - Paciente, recurso y ventana temporal.
-   * @param limit - Tope de filas.
-   * @returns Citas que casan, con sus slots ya resueltos.
+   * @param limit - Tope de filas a devolver.
+   * @returns Las citas que casan y si la lectura previa al filtro tocó su tope
+   *   —lo segundo es lo que permite al servicio declarar el recorte en vez de
+   *   devolver una lista incompleta con aspecto de completa.
    */
   async findBookings(
     em: EntityManager,
@@ -348,7 +358,12 @@ export class SchedulingBookingsRepository {
       statusConceptIds?: string[];
     },
     limit: number,
-  ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
+  ): Promise<{
+    /** Citas que casan, con su slot resuelto. */
+    rows: { booking: AppointmentBookings; slot: BookableSlots | null }[];
+    /** `true` si la lectura previa al filtro por ventana agotó su tope. */
+    fetchCapReached: boolean;
+  }> {
     const where: Record<string, unknown> = {};
     if (filters.patientProfileId) {
       where.patientProfileId = filters.patientProfileId;
@@ -359,46 +374,18 @@ export class SchedulingBookingsRepository {
     }
 
     const hasWindow = Boolean(filters.from || filters.to);
-    if (hasWindow) {
-      const slotWhere: Record<string, unknown> = {};
-      const startAt: Record<string, Date> = {};
-      if (filters.from) startAt.$gte = filters.from;
-      if (filters.to) startAt.$lt = filters.to;
-      slotWhere.startAt = startAt;
-      if (filters.resourceId) slotWhere.resourceId = filters.resourceId;
 
-      const slots = await em.find(BookableSlots, slotWhere, {
-        orderBy: { startAt: 'ASC' },
-        limit: 5000,
-      });
-      // Ventana sin slots: no hay ninguna cita posible. Devolver aquí evita
-      // emitir un `$in` vacío, que MikroORM traduce a `in (null)` y haría que
-      // el filtro de ventana se comportara como si no existiera.
-      if (slots.length === 0) return [];
-
-      const slotById = new Map(slots.map((slot) => [slot.id, slot]));
-      where.bookableSlotId = { $in: [...slotById.keys()] };
-
-      const bookings = await em.find(AppointmentBookings, where, {
-        limit,
-      });
-      return bookings
-        .map((booking) => ({
-          booking,
-          slot: booking.bookableSlotId
-            ? (slotById.get(booking.bookableSlotId) ?? null)
-            : null,
-        }))
-        .sort(
-          (a, b) =>
-            (a.slot?.startAt.getTime() ?? 0) - (b.slot?.startAt.getTime() ?? 0),
-        );
-    }
+    // Con ventana hay que traer más de `limit` antes de filtrar, porque no se
+    // sabe cuántas de las citas del paciente o del recurso caen dentro. El
+    // margen es amplio y, si aun así se agota, el recorte se DECLARA con el
+    // elemento sobrante que el servicio usa para marcar `truncated`.
+    const fetchLimit = hasWindow ? Math.max(limit * 20, 500) : limit;
 
     const bookings = await em.find(AppointmentBookings, where, {
       orderBy: { createdAt: 'DESC' },
-      limit,
+      limit: fetchLimit,
     });
+
     const slotIds = bookings
       .map((booking) => booking.bookableSlotId)
       .filter((id): id is string => Boolean(id));
@@ -407,12 +394,30 @@ export class SchedulingBookingsRepository {
         ? await em.find(BookableSlots, { id: { $in: slotIds } })
         : [];
     const slotById = new Map(slots.map((slot) => [slot.id, slot]));
-    return bookings.map((booking) => ({
+
+    const rows = bookings.map((booking) => ({
       booking,
       slot: booking.bookableSlotId
         ? (slotById.get(booking.bookableSlotId) ?? null)
         : null,
     }));
+
+    const fetchCapReached = bookings.length >= fetchLimit;
+
+    if (!hasWindow) return { rows, fetchCapReached };
+
+    // Una cita sin slot no tiene instante contra el que comparar: queda fuera
+    // de una consulta por ventana en vez de colarse con fecha desconocida.
+    const inWindow = rows
+      .filter(({ slot }) => {
+        if (!slot) return false;
+        if (filters.from && slot.startAt < filters.from) return false;
+        if (filters.to && slot.startAt >= filters.to) return false;
+        return true;
+      })
+      .sort((a, b) => a.slot!.startAt.getTime() - b.slot!.startAt.getTime());
+
+    return { rows: inWindow, fetchCapReached };
   }
 
   /** Citas vigentes del paciente: la política limita cuántas puede tener a la vez. */
