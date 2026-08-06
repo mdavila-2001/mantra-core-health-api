@@ -23,6 +23,14 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
+    env:
+      # El heap por defecto de Node (~2 GB) no alcanza en este repositorio. El
+      # lint type-aware sobre 60 módulos y ~1185 entidades muere con "JavaScript
+      # heap out of memory" (exit 129) antes de emitir un solo diagnóstico, y la
+      # generación del contrato arranca AppModule entero, que es aún más pesado.
+      # Se declara a nivel de job y no en un paso para que build, lint, pruebas y
+      # generación compartan el mismo techo y no haya que descubrirlo dos veces.
+      NODE_OPTIONS: --max-old-space-size=6144
     # Réplica de los almacenes reales de docker-compose.yml — necesarios porque
     # generar el contrato OpenAPI arranca AppModule completo (los 60 módulos,
     # incluidos document_store/redis_runtime/search_platform/object_storage).
