@@ -96,7 +96,8 @@
     "postman:generate": "python3 tools/postman/generate_postman.py",
     "postman:verify": "python3 tools/postman/verify.py",
     "postman:verify:actores": "python3 tools/postman/verify.py --actores",
-    "postman:bootstrap": "node tools/postman/bootstrap-admin.mjs"
+    "postman:bootstrap": "node tools/postman/bootstrap-admin.mjs",
+    "db:provision:dev": "node scripts/postgres/provision-development-roles.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",
