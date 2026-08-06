@@ -337,14 +337,65 @@ export const CLINICAL_SMOKE: SmokeCase[] = [
     expectedStatus: 400,
   },
 
+  // ---- REDESA D-05: política de firma de recetas ----------------------------
+  // El harness trunca los datos de negocio, así que la política sembrada por el
+  // paquete no existe en este contexto: se crea una comodín propia para ejercitar
+  // la regla y se desactiva al terminar (los smokes posteriores emiten sin firmar).
+  {
+    module: 'Clinical',
+    endpoint: 'POST /clinical/prescription-signature-policies',
+    name: 'setup: política de firma comodín (D-05)',
+    method: 'post',
+    path: () => '/clinical/prescription-signature-policies',
+    body: (c) => ({
+      tenantId: c.tenantId,
+      signatureRequired: true,
+    }),
+    expectedStatus: 201,
+    capture: (b, c) => {
+      c.vars.clinSignaturePolicyId = String(b.id);
+    },
+  },
+  {
+    module: 'Clinical',
+    endpoint: 'POST /clinical/medication-requests/{id}/issue',
+    name: 'límite: emitir sin firma con política vigente (D-05)',
+    method: 'post',
+    path: (c) =>
+      `/clinical/medication-requests/${c.vars.clinMedRequestId}/issue`,
+    body: () => ({}),
+    // PreconditionFailedException del proyecto = 422 (no la 412 de Nest).
+    expectedStatus: 422,
+  },
+  {
+    module: 'Clinical',
+    endpoint: 'POST /clinical/medication-requests/{id}/sign',
+    name: 'happy: firmar la receta (D-05)',
+    method: 'post',
+    path: (c) =>
+      `/clinical/medication-requests/${c.vars.clinMedRequestId}/sign`,
+    body: () => ({}),
+    expectedStatus: 200,
+  },
+
   // La administración solo acepta recetas ya emitidas (DRAFT -> ISSUED).
   {
     module: 'Clinical',
     endpoint: 'POST /clinical/medication-requests/{id}/issue',
-    name: 'setup: emitir prescripción',
+    name: 'setup: emitir prescripción (firmada, bajo política vigente)',
     method: 'post',
     path: (c) =>
       `/clinical/medication-requests/${c.vars.clinMedRequestId}/issue`,
+    body: () => ({}),
+    expectedStatus: 200,
+  },
+  {
+    module: 'Clinical',
+    endpoint: 'POST /clinical/prescription-signature-policies/{id}/deactivate',
+    name: 'teardown: desactivar la política de firma (D-05)',
+    method: 'post',
+    path: (c) =>
+      `/clinical/prescription-signature-policies/${c.vars.clinSignaturePolicyId}/deactivate`,
     body: () => ({}),
     expectedStatus: 200,
   },

@@ -1,45 +1,54 @@
 # ADR-0016: Migraciones — DDL SQL plano fuera de MikroORM
 
 ## Estado
-Aceptado, con riesgo residual documentado.
 
-## Contexto
-El modelo tiene 1184 entidades generadas por introspección (`yarn orm:gen`) — el DDL es la fuente
-de verdad, las entidades TypeScript son un derivado, no al revés.
+**Superado por [ADR-0021](ADR-0021-fuente-unica-de-ddl.md) (2026-08-05).**
 
-## Fuerzas y restricciones
-- La regla del proyecto es "no editar entidades a mano; si algo no cuadra, corregir el DDL y
-  regenerar" (`src/modules/README.md`) — el DDL manda.
-- El DDL real vive en `database/SQL/99_migrations` (SQL plano), no en el sistema de migraciones
-  de MikroORM.
+La decisión de gestionar el esquema con SQL plano fuera de MikroORM **sigue vigente**.
+Lo que queda superado es *dónde* vive ese SQL: `database/SQL/99_migrations` ya no
+existe. El esquema se declara en los `.puml` del modelo canónico y se materializa en
+`SQL/`, en la raíz del workspace.
 
-## Opciones consideradas
-Migraciones versionadas por el ORM (`mikro-orm migration:create`) vs. DDL SQL plano gestionado
-aparte: el código usa la segunda opción.
+El riesgo que este ADR documentaba como residual —«mayor riesgo de deriva entre
+entornos si el SQL no se aplica de forma idéntica en todos»— **se materializó dos
+veces**, en v4.0.8 y v4.0.9. El detalle y la política que lo reemplaza están en
+`Mantra Core Health Context/docs/architecture/ddl-sources.md`.
 
-## Decisión
-El esquema de base de datos se gestiona con SQL plano en `database/SQL/99_migrations`, fuera del
-sistema de migraciones de MikroORM. Las entidades se regeneran desde ese DDL con `yarn orm:gen`.
+## Contexto (histórico)
 
-## Consecuencias positivas
-- Control total y explícito del DDL, sin depender de que el generador de migraciones del ORM
-  produzca el SQL óptimo para cada cambio.
-- Coherente con la decisión de no modelar FK como relaciones ORM (ADR-0002) — el modelo de datos
-  es, en esencia, gobernado fuera del ORM.
+El modelo tiene ~1 184 entidades y el DDL es la fuente de verdad; las entidades
+TypeScript son un derivado, no al revés. Eso no cambió.
 
-## Consecuencias negativas
-- **Sin el historial de migraciones versionado que da el ORM**, reproducir el esquema exacto de
-  un punto en el tiempo depende de disciplina externa sobre el SQL plano, no de una herramienta
-  que lo garantice.
-- Mayor riesgo de deriva entre entornos si el SQL no se aplica de forma idéntica en todos.
+## Decisión (histórica)
+
+El esquema se gestionaba con SQL plano en `database/SQL/99_migrations`, fuera del
+sistema de migraciones de MikroORM.
+
+## Por qué se superó
+
+`database/SQL/99_migrations` era una **segunda** fuente de DDL, paralela al `SQL/`
+canónico de la raíz, sin nada que contrastara una contra otra. En la práctica:
+
+- **Nadie la aplicaba.** `docker/db-init/init-postgres.sh` recorre lo que monta el
+  compose, y el compose monta `../SQL`. Las 11 migraciones acumuladas nunca corrieron
+  en un arranque limpio.
+- El efecto se consumó en v4.0.9: `iam.email_verifications` no existía en base limpia
+  y los 27 casos de registro del smoke respondían 500.
+- El `database/README.md` afirmaba, además, que la fuente autoritativa era el
+  bootstrap del ORM con `ORM_SCHEMA_SYNC=safe` — es decir, la aplicación creando en la
+  base lo que el modelo no declara, que es la dirección de cambio que el protocolo de
+  las cuatro capas prohíbe.
+
+## Qué hacer ahora
+
+Ver [ADR-0021](ADR-0021-fuente-unica-de-ddl.md) y
+`Mantra Core Health Context/docs/architecture/ddl-sources.md`. En resumen: el cambio
+de esquema empieza en el `.puml` y baja por `gen_ddl.py`; los ALTERs sobre bases ya
+pobladas y el DDL que no se deriva del modelo viven en `SQL/patches/`, fuera de
+`apply_all.sql`.
 
 ## Riesgos
-`DATA-001` en la [matriz de trazabilidad](../governance/traceability-matrix.md) — clasificado
-`HIGH`, abierto. Este ADR documenta la decisión, no resuelve el riesgo operativo que conlleva.
 
-## Evidencia
-`database/SQL/99_migrations/`, `src/modules/README.md`, `package.json` (`orm:gen`).
-
-## Plan de revisión
-Evaluar en Fase 11 (catálogo de datos) si se requiere adoptar migraciones versionadas por
-herramienta para reducir el riesgo de deriva entre entornos.
+`DATA-001` en la [matriz de trazabilidad](../governance/traceability-matrix.md) se
+atiende ahora con el chequeo `salud-db/check_ddl_sources.py` (`yarn ddl:sources`), que
+falla si reaparece una segunda fuente de DDL.

@@ -2,11 +2,46 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `community` (parte 2/2).
- * 18 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 53 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const communityForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['review_responses', 'moderation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['review_responses', 'responder_public_profile_id', 'community', 'public_profiles', 'id'],
+  ['review_responses', 'review_id', 'community', 'service_reviews', 'id'],
+  ['review_responses', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['service_reviews', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['service_reviews', 'moderation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_reviews', 'publication_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_reviews', 'reviewer_display_mode_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_reviews', 'reviewer_patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['service_reviews', 'target_public_profile_id', 'community', 'public_profiles', 'id'],
+  ['service_reviews', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['service_reviews', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_reviews', 'verified_encounter_id', 'clinical', 'encounters', 'id'],
+  ['social_follows', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['social_follows', 'followable_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_follows', 'follower_profile_id', 'community', 'public_profiles', 'id'],
+  ['social_follows', 'notification_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_follows', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_follows', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['social_notifications', 'actor_profile_id', 'community', 'public_profiles', 'id'],
+  ['social_notifications', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['social_notifications', 'notification_request_id', 'messaging', 'notification_requests', 'id'],
+  ['social_notifications', 'notification_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_notifications', 'recipient_profile_id', 'community', 'public_profiles', 'id'],
+  ['social_notifications', 'source_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_notifications', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_notifications', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['social_posts', 'author_public_profile_id', 'community', 'public_profiles', 'id'],
+  ['social_posts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['social_posts', 'health_data_screening_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_posts', 'moderation_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_posts', 'post_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_posts', 'publication_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['social_posts', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['social_posts', 'visibility_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['topics', 'created_by_user_id', 'iam', 'users', 'id'],
   ['topics', 'parent_topic_id', 'community', 'topics', 'id'],
   ['topics', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],

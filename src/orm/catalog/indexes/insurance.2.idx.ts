@@ -2,11 +2,14 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `insurance` (parte 2/2).
- * 22 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 25 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const insuranceIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['prior_authorization_determinations', 'ix_prior_authorization_determinations_prior_authorizat_9b22376b', ['prior_authorization_request_id'], false, 'btree'],
+  ['prior_authorization_determinations', 'ix_prior_authorization_determinations_prior_authorizat_3c8c8cdf', ['prior_authorization_item_id'], false, 'btree'],
+  ['prior_authorization_determinations', 'ix_prior_authorization_determinations_decision_concept_id', ['decision_concept_id'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_denial_reason_concept_id', ['denial_reason_concept_id'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_supporting_file_id', ['supporting_file_id'], false, 'btree'],
   ['prior_authorization_determinations', 'ix_prior_authorization_determinations_decided_by_user_id', ['decided_by_user_id'], false, 'btree'],

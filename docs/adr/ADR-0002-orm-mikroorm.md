@@ -37,7 +37,7 @@ persistencia sobre PostgreSQL, con generación de entidades por introspección y
 
 ## Riesgos
 Ver `DATA-001` en la [matriz de trazabilidad](../governance/traceability-matrix.md): el DDL vive
-en SQL plano (`database/SQL/99_migrations`), no en migraciones versionadas por MikroORM — ver
+en SQL plano (los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](ADR-0021-fuente-unica-de-ddl.md))), no en migraciones versionadas por MikroORM — ver
 [ADR-0016](ADR-0016-migraciones-sql-plano.md).
 
 ## Evidencia

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `organization_extensions`.
- * 59 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 60 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const organizationExtensionsIndexes: readonly IndexTuple[] = [
@@ -11,6 +11,7 @@ export const organizationExtensionsIndexes: readonly IndexTuple[] = [
   ['data_use_agreements', 'ix_data_use_agreements_counterparty_org_id', ['counterparty_org_id'], false, 'btree'],
   ['data_use_agreements', 'ix_data_use_agreements_purpose_concept_id', ['purpose_concept_id'], false, 'btree'],
   ['data_use_agreements', 'ix_data_use_agreements_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['data_use_agreements', 'brin_data_use_agreements_created_at', ['created_at'], false, 'brin'],
   ['facility_licenses', 'ix_facility_licenses_tenant_id', ['tenant_id'], false, 'btree'],
   ['facility_licenses', 'ix_facility_licenses_practice_site_id', ['practice_site_id'], false, 'btree'],
   ['facility_licenses', 'ix_facility_licenses_facility_type_concept_id', ['facility_type_concept_id'], false, 'btree'],
@@ -22,15 +23,6 @@ export const organizationExtensionsIndexes: readonly IndexTuple[] = [
   ['facility_licenses', 'ix_facility_licenses_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['facility_licenses', 'ix_facility_licenses_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['facility_licenses', 'ix_facility_licenses_tenant_id_updated_at', ['tenant_id', 'updated_at desc'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_hospital_id', ['hospital_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_clinical_unit_id', ['clinical_unit_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_healthcare_service_id', ['healthcare_service_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_service_line_concept_id', ['service_line_concept_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_specialty_concept_id', ['specialty_concept_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_acuity_level_concept_id', ['acuity_level_concept_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['hospital_service_lines', 'ix_hospital_service_lines_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['hospitals', 'uq_hospitals_tenant_id', ['tenant_id'], true, 'btree'],
   ['hospitals', 'uq_hospitals_practice_id', ['practice_id'], true, 'btree'],
   ['hospitals', 'ix_hospitals_tenant_id', ['tenant_id'], false, 'btree'],
@@ -46,6 +38,15 @@ export const organizationExtensionsIndexes: readonly IndexTuple[] = [
   ['hospitals', 'ix_hospitals_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['hospitals', 'ix_hospitals_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['hospitals', 'ix_hospitals_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_hospital_id', ['hospital_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_clinical_unit_id', ['clinical_unit_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_healthcare_service_id', ['healthcare_service_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_service_line_concept_id', ['service_line_concept_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_specialty_concept_id', ['specialty_concept_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_acuity_level_concept_id', ['acuity_level_concept_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['hospital_service_lines', 'ix_hospital_service_lines_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['organization_affiliations', 'ix_organization_affiliations_primary_tenant_id', ['primary_tenant_id'], false, 'btree'],
   ['organization_affiliations', 'ix_organization_affiliations_participating_tenant_id', ['participating_tenant_id'], false, 'btree'],
   ['organization_affiliations', 'ix_organization_affiliations_affiliation_type_concept_id', ['affiliation_type_concept_id'], false, 'btree'],

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `telemetry`.
- * 81 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 83 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const telemetryIndexes: readonly IndexTuple[] = [
@@ -65,10 +65,6 @@ export const telemetryIndexes: readonly IndexTuple[] = [
   ['tracking_purpose_definitions', 'ix_tracking_purpose_definitions_legal_basis_concept_id', ['legal_basis_concept_id'], false, 'btree'],
   ['tracking_purpose_definitions', 'ix_tracking_purpose_definitions_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['tracking_purpose_definitions', 'ix_tracking_purpose_definitions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_user_activity_event_id', ['user_activity_event_id'], false, 'btree'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_type_concept_id', ['value_type_concept_id'], false, 'btree'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_concept_id', ['value_concept_id'], false, 'btree'],
-  ['user_activity_event_properties', 'ix_user_activity_event_properties_data_classification__18c7c7cf', ['data_classification_concept_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_event_schema_definition_id', ['event_schema_definition_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_analytics_subject_id', ['analytics_subject_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_user_id', ['user_id'], false, 'btree'],
@@ -80,6 +76,11 @@ export const telemetryIndexes: readonly IndexTuple[] = [
   ['user_activity_events', 'ix_user_activity_events_consent_snapshot_id', ['consent_snapshot_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_security_audit_event_id', ['security_audit_event_id'], false, 'btree'],
   ['user_activity_events', 'ix_user_activity_events_tenant_id_created_at', ['tenant_id', 'created_at desc'], false, 'btree'],
+  ['user_activity_events', 'brin_user_activity_events_created_at', ['created_at'], false, 'brin'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_user_activity_event_id', ['user_activity_event_id'], false, 'btree'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_type_concept_id', ['value_type_concept_id'], false, 'btree'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_value_concept_id', ['value_concept_id'], false, 'btree'],
+  ['user_activity_event_properties', 'ix_user_activity_event_properties_data_classification__18c7c7cf', ['data_classification_concept_id'], false, 'btree'],
   ['web_vitals', 'ix_web_vitals_user_activity_event_id', ['user_activity_event_id'], false, 'btree'],
   ['web_vitals', 'ix_web_vitals_session_journey_id', ['session_journey_id'], false, 'btree'],
   ['web_vitals', 'ix_web_vitals_analytics_subject_id', ['analytics_subject_id'], false, 'btree'],
@@ -88,4 +89,5 @@ export const telemetryIndexes: readonly IndexTuple[] = [
   ['web_vitals', 'ix_web_vitals_metric_concept_id', ['metric_concept_id'], false, 'btree'],
   ['web_vitals', 'ix_web_vitals_rating_concept_id', ['rating_concept_id'], false, 'btree'],
   ['web_vitals', 'ix_web_vitals_navigation_type_concept_id', ['navigation_type_concept_id'], false, 'btree'],
+  ['web_vitals', 'brin_web_vitals_created_at', ['created_at'], false, 'brin'],
 ];

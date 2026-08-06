@@ -85,16 +85,35 @@ for (const [key, defs] of indexSets) {
       idxSkipped++;
       continue;
     }
+    // Predicado que invoca una función sin argumentos (`active_status()`): el
+    // modelo las usa como marcador de un valor que todavía no decidió, y esa
+    // función no existe en la base. `gen_ddl.py` emite esos índices comentados en
+    // `SQL/`; acá se descartan por el mismo motivo y con el mismo criterio, para
+    // que el catálogo no declare un índice que el DDL canónico se niega a crear.
+    if (d.where && /[a-z_][a-z0-9_]*\(\s*\)/i.test(d.where)) {
+      idxSkipped++;
+      continue;
+    }
     const list = idxBySchema.get(schema) ?? [];
-    list.push([table, d.name, d.cols, d.unique, d.method]);
+    // El predicado solo se emite cuando existe: son un puñado de índices parciales
+    // frente a ~9 000 tuplas, y un sexto elemento vacío en todas sería ruido.
+    list.push(
+      d.where
+        ? [table, d.name, d.cols, d.unique, d.method, d.where]
+        : [table, d.name, d.cols, d.unique, d.method],
+    );
     idxBySchema.set(schema, list);
   }
 }
 
 // ------------------------------------------------------------- emisión -----
+// Las cadenas se escapan porque desde los índices parciales hay valores que sí
+// llevan comillas: el predicado de `ux_authentication_credentials_live_password_
+// subject` compara contra UUID entrecomillados. Sin escapar, el archivo generado
+// es TypeScript inválido y el fallo aparece al compilar, lejos de acá.
 const lit = (v) =>
   typeof v === 'string'
-    ? `'${v}'`
+    ? `'${v.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
     : Array.isArray(v)
       ? `[${v.map(lit).join(', ')}]`
       : String(v);

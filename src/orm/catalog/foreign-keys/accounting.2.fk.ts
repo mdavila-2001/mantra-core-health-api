@@ -2,11 +2,12 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `accounting` (parte 2/2).
- * 119 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 123 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['internal_orders', 'project_id', 'erp', 'projects', 'id'],
   ['internal_orders', 'responsible_cost_center_id', 'accounting', 'cost_centers', 'id'],
   ['internal_orders', 'responsible_profit_center_id', 'accounting', 'profit_centers', 'id'],
   ['internal_orders', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -20,6 +21,7 @@ export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
   ['journal_entry_assignments', 'branch_id', 'directory', 'branches', 'id'],
   ['journal_entry_assignments', 'business_partner_id', 'erp', 'business_partners', 'id'],
   ['journal_entry_assignments', 'company_bank_account_id', 'accounting', 'company_bank_accounts', 'id'],
+  ['journal_entry_assignments', 'contract_id', 'erp', 'contracts', 'id'],
   ['journal_entry_assignments', 'cost_center_id', 'accounting', 'cost_centers', 'id'],
   ['journal_entry_assignments', 'created_by_user_id', 'iam', 'users', 'id'],
   ['journal_entry_assignments', 'department_id', 'erp', 'departments', 'id'],
@@ -76,6 +78,7 @@ export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
   ['liability_schedules', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['liability_schedules', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['open_items', 'bill_id', 'billing', 'bills', 'id'],
+  ['open_items', 'contract_id', 'erp', 'contracts', 'id'],
   ['open_items', 'created_by_user_id', 'iam', 'users', 'id'],
   ['open_items', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['open_items', 'document_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -99,6 +102,7 @@ export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
   ['purchases', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['purchases', 'transaction_id', 'accounting', 'journal_transactions', 'id'],
   ['purchases', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['purchases', 'vendor_id', 'billing', 'vendors', 'id'],
   ['sales', 'created_by_user_id', 'iam', 'users', 'id'],
   ['sales', 'customer_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['sales', 'invoice_id', 'billing', 'invoices', 'id'],

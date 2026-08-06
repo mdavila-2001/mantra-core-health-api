@@ -23,7 +23,7 @@
 
 ## Por qué la prueba de RLS es opt-in y no corrió por defecto
 
-`test/integration/rls.int-spec.ts` aplica `database/SQL/99_rls/01_tenant_rls.sql` (crea un rol de
+`test/integration/rls.int-spec.ts` aplica `SQL/patches/2026-08-05_tenant_rls.sql` (crea un rol de
 base de datos, fuerza RLS en ~284 tablas reales) — una mutación de esquema **irreversible** contra
 la base de integración. Ejecutarla es una decisión operativa deliberada (`RLS_TEST=1 yarn
 test:integration`), no algo que deba correr por accidente en cada CI run sin que el equipo decida

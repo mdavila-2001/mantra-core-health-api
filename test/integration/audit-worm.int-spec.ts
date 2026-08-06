@@ -4,8 +4,8 @@ import { CONCEPTS, SEED } from '../../src/common';
 
 /**
  * Verificación REAL de tamper-RESISTANCE (CAN-AUDIT-001 / C-19) contra la base
- * de datos: `database/SQL/99_migrations/2026-07-28_audit_worm_guard.sql`
- * instala triggers que rechazan UPDATE/DELETE sobre `audit.audit_log` (las dos
+ * de datos: `SQL/patches/2026-08-05_audit_worm_guard.sql` (en la raíz del
+ * workspace) instala triggers que rechazan UPDATE/DELETE sobre `audit.audit_log` (las dos
  * operaciones) y UPDATE sobre `audit.data_access_log` (DELETE se reserva para
  * la purga de retención, UC-10-09), sea cual sea el rol — incluido el
  * propietario del esquema.

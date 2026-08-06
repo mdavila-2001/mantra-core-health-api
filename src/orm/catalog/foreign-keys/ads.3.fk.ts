@@ -7,11 +7,11 @@ import type { ForeignKeyTuple } from '../catalog.types';
  */
 export const adsForeignKeys3: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
-  ['product_set_members', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['product_sets', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['product_sets', 'product_catalog_id', 'ads', 'product_catalogs', 'id'],
-  ['product_sets', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['product_sets', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['product_set_members', 'catalog_product_id', 'ads', 'catalog_products', 'id'],
+  ['product_set_members', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['product_set_members', 'product_set_id', 'ads', 'product_sets', 'id'],
+  ['product_set_members', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['rule_executions', 'automated_rule_id', 'ads', 'automated_rules', 'id'],
   ['rule_executions', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['rule_executions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],

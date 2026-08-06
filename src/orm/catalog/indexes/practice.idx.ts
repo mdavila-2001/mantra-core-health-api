@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `practice`.
- * 81 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 82 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const practiceIndexes: readonly IndexTuple[] = [
@@ -40,6 +40,15 @@ export const practiceIndexes: readonly IndexTuple[] = [
   ['inventory_movements', 'ix_inventory_movements_inventory_item_id', ['inventory_item_id'], false, 'btree'],
   ['inventory_movements', 'ix_inventory_movements_movement_type_concept_id', ['movement_type_concept_id'], false, 'btree'],
   ['inventory_movements', 'ix_inventory_movements_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['inventory_movements', 'brin_inventory_movements_recorded_at', ['recorded_at'], false, 'brin'],
+  ['practices', 'ix_practices_tenant_id', ['tenant_id'], false, 'btree'],
+  ['practices', 'ix_practices_type_concept_id', ['type_concept_id'], false, 'btree'],
+  ['practices', 'ix_practices_admin_user_id', ['admin_user_id'], false, 'btree'],
+  ['practices', 'ix_practices_currency_concept_id', ['currency_concept_id'], false, 'btree'],
+  ['practices', 'ix_practices_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['practices', 'ix_practices_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['practices', 'ix_practices_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['practices', 'ix_practices_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['practice_accreditations', 'ix_practice_accreditations_practice_id', ['practice_id'], false, 'btree'],
   ['practice_accreditations', 'ix_practice_accreditations_practice_site_id', ['practice_site_id'], false, 'btree'],
   ['practice_accreditations', 'ix_practice_accreditations_accreditation_type_concept_id', ['accreditation_type_concept_id'], false, 'btree'],
@@ -62,14 +71,6 @@ export const practiceIndexes: readonly IndexTuple[] = [
   ['practice_sites', 'ix_practice_sites_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['practice_sites', 'ix_practice_sites_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['practice_sites', 'ix_practice_sites_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['practices', 'ix_practices_tenant_id', ['tenant_id'], false, 'btree'],
-  ['practices', 'ix_practices_type_concept_id', ['type_concept_id'], false, 'btree'],
-  ['practices', 'ix_practices_admin_user_id', ['admin_user_id'], false, 'btree'],
-  ['practices', 'ix_practices_currency_concept_id', ['currency_concept_id'], false, 'btree'],
-  ['practices', 'ix_practices_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['practices', 'ix_practices_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['practices', 'ix_practices_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['practices', 'ix_practices_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['practitioner_role_assignments', 'ix_practitioner_role_assignments_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
   ['practitioner_role_assignments', 'ix_practitioner_role_assignments_practice_id', ['practice_id'], false, 'btree'],
   ['practitioner_role_assignments', 'ix_practitioner_role_assignments_practice_site_id', ['practice_site_id'], false, 'btree'],

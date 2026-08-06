@@ -2,11 +2,23 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `health_data` (parte 2/2).
- * 58 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 74 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const healthDataIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['health_source_systems', 'uk_health_source_systems_tenant_code', ['tenant_id', 'code'], true, 'btree'],
+  ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_health_terminology_f5718527', ['health_terminology_mapping_set_id'], false, 'btree'],
+  ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_target_concept_id', ['target_concept_id'], false, 'btree'],
+  ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_equivalence_concept_id', ['equivalence_concept_id'], false, 'btree'],
+  ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['health_terminology_mapping_rules', 'ix_health_terminology_mapping_rules_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['health_terminology_mapping_rules', 'uk_health_terminology_mapping_rules_set_source_context', ['health_terminology_mapping_set_id', 'source_code', 'context_expression'], true, 'btree'],
+  ['health_terminology_mapping_sets', 'ix_health_terminology_mapping_sets_tenant_id', ['tenant_id'], false, 'btree'],
+  ['health_terminology_mapping_sets', 'ix_health_terminology_mapping_sets_source_code_system_id', ['source_code_system_id'], false, 'btree'],
+  ['health_terminology_mapping_sets', 'ix_health_terminology_mapping_sets_target_code_system_id', ['target_code_system_id'], false, 'btree'],
+  ['health_terminology_mapping_sets', 'ix_health_terminology_mapping_sets_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['health_terminology_mapping_sets', 'ix_health_terminology_mapping_sets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['health_terminology_mapping_sets', 'ix_health_terminology_mapping_sets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['health_terminology_mapping_sets', 'ix_health_terminology_mapping_sets_tenant_created', ['tenant_id', 'created_at desc'], false, 'btree'],
@@ -30,6 +42,7 @@ export const healthDataIndexes2: readonly IndexTuple[] = [
   ['omop_transformation_runs', 'ix_omop_transformation_runs_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['omop_transformation_runs', 'ix_omop_transformation_runs_lineage_job_run_id', ['lineage_job_run_id'], false, 'btree'],
   ['omop_transformation_runs', 'ix_omop_transformation_runs_tenant_status', ['tenant_id', 'status_concept_id', 'created_at desc'], false, 'btree'],
+  ['omop_transformation_runs', 'brin_omop_transformation_runs_created_at', ['created_at'], false, 'brin'],
   ['patient_identity_clusters', 'ix_patient_identity_clusters_tenant_id', ['tenant_id'], false, 'btree'],
   ['patient_identity_clusters', 'ix_patient_identity_clusters_master_patient_profile_id', ['master_patient_profile_id'], false, 'btree'],
   ['patient_identity_clusters', 'ix_patient_identity_clusters_status_concept_id', ['status_concept_id'], false, 'btree'],
@@ -48,11 +61,13 @@ export const healthDataIndexes2: readonly IndexTuple[] = [
   ['patient_match_candidates', 'ix_patient_match_candidates_right_patient_profile_id', ['right_patient_profile_id'], false, 'btree'],
   ['patient_match_candidates', 'ix_patient_match_candidates_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['patient_match_candidates', 'ix_patient_match_candidates_tenant_status', ['tenant_id', 'status_concept_id', 'created_at desc'], false, 'btree'],
+  ['patient_match_candidates', 'brin_patient_match_candidates_created_at', ['created_at'], false, 'brin'],
   ['patient_match_candidates', 'uk_patient_match_candidates_pair_algorithm', ['tenant_id', 'left_patient_profile_id', 'right_patient_profile_id', 'algorithm_version'], true, 'btree'],
   ['patient_match_decisions', 'ix_patient_match_decisions_patient_match_candidate_id', ['patient_match_candidate_id'], false, 'btree'],
   ['patient_match_decisions', 'ix_patient_match_decisions_decision_concept_id', ['decision_concept_id'], false, 'btree'],
   ['patient_match_decisions', 'ix_patient_match_decisions_decided_by_user_id', ['decided_by_user_id'], false, 'btree'],
   ['patient_match_decisions', 'ix_patient_match_decisions_resulting_cluster_id', ['resulting_cluster_id'], false, 'btree'],
+  ['patient_match_decisions', 'brin_patient_match_decisions_created_at', ['created_at'], false, 'brin'],
   ['patient_match_decisions', 'uk_patient_match_decisions_candidate', ['patient_match_candidate_id'], true, 'btree'],
   ['patient_timeline_entries', 'ix_patient_timeline_entries_custodian_tenant_id', ['custodian_tenant_id'], false, 'btree'],
   ['patient_timeline_entries', 'ix_patient_timeline_entries_patient_profile_id', ['patient_profile_id'], false, 'btree'],
@@ -63,6 +78,7 @@ export const healthDataIndexes2: readonly IndexTuple[] = [
   ['patient_timeline_entries', 'ix_patient_timeline_entries_organization_id', ['organization_id'], false, 'btree'],
   ['patient_timeline_entries', 'ix_patient_timeline_entries_clinical_priority_concept_id', ['clinical_priority_concept_id'], false, 'btree'],
   ['patient_timeline_entries', 'ix_patient_timeline_entries_patient_visibility_concept_id', ['patient_visibility_concept_id'], false, 'btree'],
+  ['patient_timeline_entries', 'brin_patient_timeline_entries_created_at', ['created_at'], false, 'brin'],
   ['patient_timeline_entries', 'uk_patient_timeline_entries_source', ['source_entity_type_concept_id', 'source_entity_id', 'event_type_concept_id'], true, 'btree'],
   ['patient_timeline_entries', 'ix_patient_timeline_entries_patient_time', ['custodian_tenant_id', 'patient_profile_id', 'event_time desc'], false, 'btree'],
 ];

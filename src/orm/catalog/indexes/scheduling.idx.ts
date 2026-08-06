@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `scheduling`.
- * 106 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 109 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingIndexes: readonly IndexTuple[] = [
@@ -52,6 +52,8 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['booking_cancellations', 'ix_booking_cancellations_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['booking_cancellations', 'ix_booking_cancellations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['booking_cancellations', 'ix_booking_cancellations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['booking_confirmation_rules', 'ix_booking_confirmation_rules_tenant_id', ['tenant_id'], false, 'btree'],
+  ['booking_confirmation_rules', 'ix_booking_confirmation_rules_scope', ['scope_type_concept_id', 'scope_id'], false, 'btree'],
   ['booking_policies', 'ix_booking_policies_tenant_id', ['tenant_id'], false, 'btree'],
   ['booking_policies', 'ix_booking_policies_practice_id', ['practice_id'], false, 'btree'],
   ['booking_policies', 'ix_booking_policies_currency_concept_id', ['currency_concept_id'], false, 'btree'],
@@ -65,6 +67,7 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['booking_reschedules', 'ix_booking_reschedules_reason_concept_id', ['reason_concept_id'], false, 'btree'],
   ['booking_reschedules', 'ix_booking_reschedules_rescheduled_by_user_id', ['rescheduled_by_user_id'], false, 'btree'],
   ['booking_reschedules', 'ix_booking_reschedules_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['booking_reschedules', 'brin_booking_reschedules_recorded_at', ['recorded_at'], false, 'brin'],
   ['calendar_absences', 'ix_calendar_absences_subject', ['tenant_id', 'subject_type_concept_id', 'subject_ref_id'], false, 'btree'],
   ['calendar_absences', 'ix_calendar_absences_resource_id', ['resource_id'], false, 'btree'],
   ['calendar_absences', 'ix_calendar_absences_person_id', ['person_id'], false, 'btree'],

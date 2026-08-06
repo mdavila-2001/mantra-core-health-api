@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `qa_lab`.
- * 89 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 92 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const qaLabIndexes: readonly IndexTuple[] = [
@@ -10,13 +10,16 @@ export const qaLabIndexes: readonly IndexTuple[] = [
   ['assertion_results', 'ix_assertion_results_test_case_result_id', ['test_case_result_id'], false, 'btree'],
   ['assertion_results', 'ix_assertion_results_test_assertion_id', ['test_assertion_id'], false, 'btree'],
   ['assertion_results', 'ix_assertion_results_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['assertion_results', 'brin_assertion_results_recorded_at', ['recorded_at'], false, 'brin'],
   ['request_payloads', 'ix_request_payloads_test_case_result_id', ['test_case_result_id'], false, 'btree'],
   ['request_payloads', 'ix_request_payloads_direction_concept_id', ['direction_concept_id'], false, 'btree'],
   ['request_payloads', 'ix_request_payloads_http_method_concept_id', ['http_method_concept_id'], false, 'btree'],
   ['request_payloads', 'ix_request_payloads_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['request_payloads', 'brin_request_payloads_recorded_at', ['recorded_at'], false, 'brin'],
   ['response_payloads', 'ix_response_payloads_test_case_result_id', ['test_case_result_id'], false, 'btree'],
   ['response_payloads', 'ix_response_payloads_request_payload_id', ['request_payload_id'], false, 'btree'],
   ['response_payloads', 'ix_response_payloads_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['response_payloads', 'brin_response_payloads_recorded_at', ['recorded_at'], false, 'brin'],
   ['run_artifacts', 'ix_run_artifacts_test_run_id', ['test_run_id'], false, 'btree'],
   ['run_artifacts', 'ix_run_artifacts_test_case_result_id', ['test_case_result_id'], false, 'btree'],
   ['run_artifacts', 'ix_run_artifacts_artifact_type_concept_id', ['artifact_type_concept_id'], false, 'btree'],
@@ -28,12 +31,6 @@ export const qaLabIndexes: readonly IndexTuple[] = [
   ['test_assertions', 'ix_test_assertions_operator_concept_id', ['operator_concept_id'], false, 'btree'],
   ['test_assertions', 'ix_test_assertions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['test_assertions', 'ix_test_assertions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['test_case_results', 'ix_test_case_results_test_run_id', ['test_run_id'], false, 'btree'],
-  ['test_case_results', 'ix_test_case_results_test_case_id', ['test_case_id'], false, 'btree'],
-  ['test_case_results', 'ix_test_case_results_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['test_case_results', 'ix_test_case_results_error_type_concept_id', ['error_type_concept_id'], false, 'btree'],
-  ['test_case_results', 'ix_test_case_results_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['test_case_results', 'ix_test_case_results_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['test_cases', 'ix_test_cases_suite_id', ['suite_id'], false, 'btree'],
   ['test_cases', 'ix_test_cases_case_type_concept_id', ['case_type_concept_id'], false, 'btree'],
   ['test_cases', 'ix_test_cases_endpoint_id', ['endpoint_id'], false, 'btree'],
@@ -41,6 +38,12 @@ export const qaLabIndexes: readonly IndexTuple[] = [
   ['test_cases', 'ix_test_cases_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['test_cases', 'ix_test_cases_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['test_cases', 'ix_test_cases_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['test_case_results', 'ix_test_case_results_test_run_id', ['test_run_id'], false, 'btree'],
+  ['test_case_results', 'ix_test_case_results_test_case_id', ['test_case_id'], false, 'btree'],
+  ['test_case_results', 'ix_test_case_results_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['test_case_results', 'ix_test_case_results_error_type_concept_id', ['error_type_concept_id'], false, 'btree'],
+  ['test_case_results', 'ix_test_case_results_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['test_case_results', 'ix_test_case_results_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['test_defects', 'uq_test_defects_defect_number', ['defect_number'], true, 'btree'],
   ['test_defects', 'ix_test_defects_tenant_id', ['tenant_id'], false, 'btree'],
   ['test_defects', 'ix_test_defects_test_case_id', ['test_case_id'], false, 'btree'],

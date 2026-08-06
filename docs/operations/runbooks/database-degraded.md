@@ -27,7 +27,7 @@ Latencia elevada o errores de conexión hacia PostgreSQL; consultas lentas repor
   contenedor `postgres` si aplica, o escalar a infraestructura si es un servicio gestionado.
 - Degradación de latencia: identificar la consulta lenta específica (log), evaluar si falta un
   índice (ver [restricciones e índices](../../data/constraints-and-indexes.md)) — un índice nuevo
-  requiere pasar por el flujo de cambio de esquema (`database/SQL/99_migrations` → `yarn
+  requiere pasar por el flujo de cambio de esquema (los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../../adr/ADR-0021-fuente-unica-de-ddl.md)) → `yarn
   orm:catalog`).
 
 ## Escalación

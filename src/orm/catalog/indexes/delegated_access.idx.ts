@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `delegated_access`.
- * 54 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const delegatedAccessIndexes: readonly IndexTuple[] = [
@@ -26,19 +26,20 @@ export const delegatedAccessIndexes: readonly IndexTuple[] = [
   ['delegated_access_grants', 'ix_delegated_access_grants_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['delegated_access_grants', 'ix_delegated_access_grants_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['delegated_access_grants', 'ix_delegated_access_grants_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
-  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_delegated_permission_set_id', ['delegated_permission_set_id'], false, 'btree'],
-  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_permission_id', ['permission_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_tenant_id', ['tenant_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_delegate_type_concept_id', ['delegate_type_concept_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['delegated_permission_sets', 'ix_delegated_permission_sets_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_delegated_permission_set_id', ['delegated_permission_set_id'], false, 'btree'],
+  ['delegated_permission_set_items', 'ix_delegated_permission_set_items_permission_id', ['permission_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_practitioner_delegate_assignment_id', ['practitioner_delegate_assignment_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_event_type_concept_id', ['event_type_concept_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_actor_user_id', ['actor_user_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_target_user_id', ['target_user_id'], false, 'btree'],
   ['delegation_events', 'ix_delegation_events_reason_concept_id', ['reason_concept_id'], false, 'btree'],
+  ['delegation_events', 'brin_delegation_events_created_at', ['created_at'], false, 'brin'],
   ['organization_user_assignments', 'ix_organization_user_assignments_tenant_membership_id', ['tenant_membership_id'], false, 'btree'],
   ['organization_user_assignments', 'ix_organization_user_assignments_practice_id', ['practice_id'], false, 'btree'],
   ['organization_user_assignments', 'ix_organization_user_assignments_practice_site_id', ['practice_site_id'], false, 'btree'],

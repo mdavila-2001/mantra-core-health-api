@@ -10,7 +10,7 @@ automatizada verificada en esta fase (candidato para CI, Fase 16).
 
 ## Mantenimiento del catálogo ORM
 
-Cuando cambia el modelo de datos (`database/SQL/99_migrations`), el flujo real es:
+Cuando cambia el modelo de datos (los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md))), el flujo real es:
 
 ```bash
 yarn orm:catalog   # regenera índices/FK desde la bóveda de diseño

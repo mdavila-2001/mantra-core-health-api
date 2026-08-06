@@ -74,4 +74,55 @@ describe('TenantAdministrationService', () => {
     // consultarlo sería una query por request que nunca cambia la decisión.
     expect(membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
   });
+
+  describe('assertCanChangeOwnership (escalón de dueños)', () => {
+    it('deja pasar al OWNER del tenant', async () => {
+      const { service, tx } = build({ tenantRoleConceptId: DIR.ROLE_OWNER });
+
+      await expect(
+        service.assertCanChangeOwnership(tx, 'tenant-1', {
+          id: 'u1',
+          roles: ['USER'],
+        }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('rechaza al ADMIN: administrar no es poseer', async () => {
+      // La escalación que la regla existe para impedir: sin esto, un ADMIN podía
+      // auto-promoverse a OWNER o dar de baja a quien lo nombró.
+      const { service, tx } = build({ tenantRoleConceptId: DIR.ROLE_ADMIN });
+
+      await expect(
+        service.assertCanChangeOwnership(tx, 'tenant-1', {
+          id: 'u1',
+          roles: [],
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('rechaza a quien no tiene membresía activa en ese tenant', async () => {
+      const { service, tx } = build(null);
+
+      await expect(
+        service.assertCanChangeOwnership(tx, 'tenant-ajeno', {
+          id: 'u1',
+          roles: [],
+        }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('deja pasar a la plataforma sin consultar membresías', async () => {
+      const { service, membershipsRepo, tx } = build(null);
+
+      for (const role of ['SECURITY_ADMIN', 'SUPERADMIN']) {
+        await expect(
+          service.assertCanChangeOwnership(tx, 'tenant-1', {
+            id: 'admin',
+            roles: [role],
+          }),
+        ).resolves.toBeUndefined();
+      }
+      expect(membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+    });
+  });
 });
