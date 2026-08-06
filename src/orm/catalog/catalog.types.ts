@@ -54,6 +54,12 @@ export type ForeignKeyTuple = readonly [
  *   [3] único — true emite UNIQUE INDEX (restricción de negocio, no solo acceso)
  *   [4] método — btree por defecto; gin/gist para jsonb, texto y rangos;
  *       hnsw/ivfflat para similitud vectorial (pgvector)
+ *   [5] predicado del índice PARCIAL, sin la palabra WHERE; ausente si el índice
+ *       cubre toda la tabla. No es un detalle de afinado: en un índice único, el
+ *       predicado es parte de la regla. `ux_authentication_credentials_live_
+ *       password_subject` prohíbe dos credenciales de contraseña VIVAS para el
+ *       mismo sujeto; sin su predicado sería un UNIQUE total que además rechaza
+ *       un alta legítima cuando ese sujeto tuvo antes una credencial revocada.
  */
 export type IndexTuple = readonly [
   table: string,
@@ -61,6 +67,7 @@ export type IndexTuple = readonly [
   columns: readonly string[],
   unique: boolean,
   method: string,
+  where?: string,
 ];
 
 /**

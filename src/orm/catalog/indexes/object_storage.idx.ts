@@ -2,13 +2,16 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `object_storage`.
- * 40 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 41 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const objectStorageIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
   ['archive_manifests', 'uq_archive_manifest_hash', ['tenant_id', 'manifest_hash'], false, 'btree'],
   ['archive_manifests', 'ix_archive_manifest_created', ['tenant_id', 'archive_type', 'created_at desc'], false, 'btree'],
+  ['dicomweb_access_logs', 'ix_dicomweb_principal_time', ['tenant_id', 'principal_id', 'occurred_at desc'], false, 'btree'],
+  ['dicomweb_access_logs', 'ix_dicomweb_study_time', ['tenant_id', 'study_instance_uid', 'occurred_at desc'], false, 'btree'],
+  ['dicomweb_access_logs', 'brin_dicomweb_occurred', ['occurred_at'], false, 'btree'],
   ['dicom_instance_manifests', 'uq_dicom_instance_uid', ['dicom_series_manifest_id', 'sop_instance_uid'], false, 'btree'],
   ['dicom_instance_manifests', 'ix_dicom_instance_number', ['dicom_series_manifest_id', 'instance_number'], false, 'btree'],
   ['dicom_instance_manifests', 'gin_dicom_instance_metadata', ['metadata_json'], false, 'btree'],
@@ -17,8 +20,6 @@ export const objectStorageIndexes: readonly IndexTuple[] = [
   ['dicom_study_manifests', 'uq_dicom_study_uid', ['tenant_id', 'study_instance_uid'], false, 'btree'],
   ['dicom_study_manifests', 'ix_dicom_study_patient_date', ['tenant_id', 'patient_profile_id', 'study_date desc'], false, 'btree'],
   ['dicom_study_manifests', 'ix_dicom_study_accession', ['tenant_id', 'accession_number'], false, 'btree'],
-  ['dicomweb_access_logs', 'ix_dicomweb_principal_time', ['tenant_id', 'principal_id', 'occurred_at desc'], false, 'btree'],
-  ['dicomweb_access_logs', 'ix_dicomweb_study_time', ['tenant_id', 'study_instance_uid', 'occurred_at desc'], false, 'btree'],
   ['large_payload_manifests', 'uq_large_payload_source', ['tenant_id', 'source_entity_type', 'source_entity_id', 'payload_type'], false, 'btree'],
   ['large_payload_manifests', 'ix_large_payload_object', ['object_manifest_id'], false, 'btree'],
   ['multipart_uploads', 'uq_multipart_provider_upload', ['namespace_id', 'provider_upload_id'], false, 'btree'],

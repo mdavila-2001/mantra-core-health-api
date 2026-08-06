@@ -7,6 +7,7 @@ import { adsIndexes3 } from './ads.3.idx';
 import { auditIndexes1 } from './audit.1.idx';
 import { auditIndexes2 } from './audit.2.idx';
 import { auditIndexes3 } from './audit.3.idx';
+import { auditIndexes4 } from './audit.4.idx';
 import { authProvidersIndexes } from './auth_providers.idx';
 import { authzIndexes } from './authz.idx';
 import { automationIndexes } from './automation.idx';
@@ -65,7 +66,8 @@ import { readModelsIndexes } from './read_models.idx';
 import { reportingIndexes } from './reporting.idx';
 import { schedulingIndexes } from './scheduling.idx';
 import { systemContextIndexes } from './system_context.idx';
-import { systemOpsIndexes } from './system_ops.idx';
+import { systemOpsIndexes1 } from './system_ops.1.idx';
+import { systemOpsIndexes2 } from './system_ops.2.idx';
 import { telemetryIndexes } from './telemetry.idx';
 import { terminologyIndexes } from './terminology.idx';
 import { trackingIndexes } from './tracking.idx';
@@ -79,7 +81,7 @@ import { workflowIndexes } from './workflow.idx';
 export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple[])[]>> = {
   accounting: [accountingIndexes1, accountingIndexes2],
   ads: [adsIndexes1, adsIndexes2, adsIndexes3],
-  audit: [auditIndexes1, auditIndexes2, auditIndexes3],
+  audit: [auditIndexes1, auditIndexes2, auditIndexes3, auditIndexes4],
   auth_providers: [authProvidersIndexes],
   authz: [authzIndexes],
   automation: [automationIndexes],
@@ -126,7 +128,7 @@ export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple
   reporting: [reportingIndexes],
   scheduling: [schedulingIndexes],
   system_context: [systemContextIndexes],
-  system_ops: [systemOpsIndexes],
+  system_ops: [systemOpsIndexes1, systemOpsIndexes2],
   telemetry: [telemetryIndexes],
   terminology: [terminologyIndexes],
   tracking: [trackingIndexes],

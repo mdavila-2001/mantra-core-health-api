@@ -7,16 +7,16 @@ import type { ForeignKeyTuple } from '../catalog.types';
  */
 export const geoForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
-  ['geofence_events', 'event_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['geofence_events', 'geofence_id', 'geo', 'geofences', 'id'],
-  ['geofence_events', 'location_ping_id', 'geo', 'location_pings', 'id'],
-  ['geofence_events', 'recorded_by_user_id', 'iam', 'users', 'id'],
-  ['geofence_events', 'tracked_subject_id', 'geo', 'tracked_subjects', 'id'],
   ['geofences', 'created_by_user_id', 'iam', 'users', 'id'],
   ['geofences', 'shape_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['geofences', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['geofences', 'tenant_id', 'directory', 'tenants', 'id'],
   ['geofences', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['geofence_events', 'event_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['geofence_events', 'geofence_id', 'geo', 'geofences', 'id'],
+  ['geofence_events', 'location_ping_id', 'geo', 'location_pings', 'id'],
+  ['geofence_events', 'recorded_by_user_id', 'iam', 'users', 'id'],
+  ['geofence_events', 'tracked_subject_id', 'geo', 'tracked_subjects', 'id'],
   ['location_pings', 'device_id', 'iam', 'devices', 'id'],
   ['location_pings', 'network_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['location_pings', 'recorded_by_user_id', 'iam', 'users', 'id'],

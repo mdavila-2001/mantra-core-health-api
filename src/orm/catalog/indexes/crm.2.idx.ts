@@ -2,11 +2,13 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `crm` (parte 2/2).
- * 76 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 79 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const crmIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['crm_tasks', 'ix_crm_tasks_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['crm_tasks', 'ix_crm_tasks_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['crm_tasks', 'ix_crm_tasks_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['crm_tasks', 'ix_crm_tasks_status_due', ['status_concept_id', 'due_date'], false, 'btree'],
   ['leads', 'ix_leads_tenant_id', ['tenant_id'], false, 'btree'],
@@ -54,14 +56,7 @@ export const crmIndexes2: readonly IndexTuple[] = [
   ['opportunity_stage_history', 'ix_opportunity_stage_history_changed_by_user_id', ['changed_by_user_id'], false, 'btree'],
   ['opportunity_stage_history', 'ix_opportunity_stage_history_reason_concept_id', ['reason_concept_id'], false, 'btree'],
   ['opportunity_stage_history', 'ix_opportunity_stage_history_opportunity_changed', ['opportunity_id', 'changed_at desc'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_partnership_id', ['partnership_id'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_agreement_type_concept_id', ['agreement_type_concept_id'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_contract_id', ['contract_id'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_currency_concept_id', ['currency_concept_id'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_document_file_id', ['document_file_id'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['partnership_agreements', 'ix_partnership_agreements_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['opportunity_stage_history', 'brin_opportunity_stage_history_created_at', ['created_at'], false, 'brin'],
   ['partnerships', 'ix_partnerships_tenant_id', ['tenant_id'], false, 'btree'],
   ['partnerships', 'ix_partnerships_partnership_type_concept_id', ['partnership_type_concept_id'], false, 'btree'],
   ['partnerships', 'ix_partnerships_crm_account_id', ['crm_account_id'], false, 'btree'],
@@ -73,9 +68,14 @@ export const crmIndexes2: readonly IndexTuple[] = [
   ['partnerships', 'ix_partnerships_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['partnerships', 'ix_partnerships_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['partnerships', 'ix_partnerships_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
-  ['pipeline_stages', 'ix_pipeline_stages_pipeline_id', ['pipeline_id'], false, 'btree'],
-  ['pipeline_stages', 'ix_pipeline_stages_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['pipeline_stages', 'ix_pipeline_stages_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_partnership_id', ['partnership_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_agreement_type_concept_id', ['agreement_type_concept_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_contract_id', ['contract_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_currency_concept_id', ['currency_concept_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_document_file_id', ['document_file_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['partnership_agreements', 'ix_partnership_agreements_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['pipelines', 'uq_pipelines_code', ['code'], true, 'btree'],
   ['pipelines', 'ix_pipelines_tenant_id', ['tenant_id'], false, 'btree'],
   ['pipelines', 'ix_pipelines_pipeline_type_concept_id', ['pipeline_type_concept_id'], false, 'btree'],
@@ -83,4 +83,7 @@ export const crmIndexes2: readonly IndexTuple[] = [
   ['pipelines', 'ix_pipelines_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['pipelines', 'ix_pipelines_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['pipelines', 'ix_pipelines_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
+  ['pipeline_stages', 'ix_pipeline_stages_pipeline_id', ['pipeline_id'], false, 'btree'],
+  ['pipeline_stages', 'ix_pipeline_stages_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['pipeline_stages', 'ix_pipeline_stages_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];

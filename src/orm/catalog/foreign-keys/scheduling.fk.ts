@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `scheduling`.
- * 91 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 104 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -62,6 +62,19 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['booking_reschedules', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['booking_reschedules', 'rescheduled_by_user_id', 'iam', 'users', 'id'],
   ['booking_reschedules', 'to_slot_id', 'scheduling', 'bookable_slots', 'id'],
+  ['calendar_absences', 'absence_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['calendar_absences', 'approval_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['calendar_absences', 'approved_by_user_id', 'iam', 'users', 'id'],
+  ['calendar_absences', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['calendar_absences', 'person_id', 'profiles', 'persons', 'id'],
+  ['calendar_absences', 'practice_id', 'practice', 'practices', 'id'],
+  ['calendar_absences', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],
+  ['calendar_absences', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['calendar_absences', 'subject_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['calendar_absences', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['calendar_absences', 'time_off_request_id', 'erp', 'time_off_requests', 'id'],
+  ['calendar_absences', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['calendar_absences', 'user_id', 'iam', 'users', 'id'],
   ['practitioner_schedules', 'care_space_id', 'practice', 'care_spaces', 'id'],
   ['practitioner_schedules', 'created_by_user_id', 'iam', 'users', 'id'],
   ['practitioner_schedules', 'practice_id', 'practice', 'practices', 'id'],

@@ -1,42 +1,70 @@
 # Migraciones
 
-> Fase 11. Ver [ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md) para la decisión completa y
-> sus consecuencias.
+> Ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md) para la decisión vigente, y
+> [ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md) para la que quedó superada.
+> La política completa vive en el workspace:
+> `Mantra Core Health Context/docs/architecture/ddl-sources.md`.
 
 ## Cómo cambia el esquema realmente
 
-**No hay migraciones versionadas gestionadas por MikroORM.** El DDL real vive como SQL plano en
-`database/SQL/99_migrations`. El flujo real de cambio de esquema:
+**No hay migraciones versionadas gestionadas por MikroORM, y este repositorio no
+declara esquema.** El esquema se declara en los 64 diagramas `.puml` del modelo
+canónico y se materializa en `SQL/`, en la raíz del workspace, que es lo que
+`docker-compose.yml` monta en `postgres-init`.
 
-1. Modificar el DDL en `database/SQL/99_migrations` (o el origen que alimenta esa carpeta).
-2. Aplicar el DDL a la base.
-3. Regenerar el catálogo declarativo: `yarn orm:catalog` (índices y FK desde la bóveda de diseño).
-4. Regenerar entidades MikroORM por introspección: `yarn orm:gen`.
-5. Verificar fidelidad: `yarn orm:audit` contra `graphify-out/fidelity-audit.json`.
+El flujo real de cambio de esquema, de arriba hacia abajo:
+
+1. **Modelo:** editar `Mantra Core Health Context/modules/diagram_NN_*.puml` y la nota
+   de entidad correspondiente en el vault (`SALUD/Entidades/E <schema>.<tabla>.md`).
+2. **DDL:** `python salud-db/gen_ddl.py NN` (y `gen_integrity.py` / `gen_apply.py` si
+   cambió el conjunto de archivos). Nunca editar `SQL/` a mano.
+3. **Base:** reconstruir con `python salud-db/rebuild_stack.py`, o —si la base ya está
+   poblada y no se puede reconstruir— escribir un ALTER idempotente y fechado en
+   `SQL/patches/` y aplicarlo con `psql`. `SQL/patches/` está fuera de `apply_all.sql`.
+4. **Entidades:** `python salud-db/gen_entities.py NN`.
+5. **Catálogo declarativo:** `yarn orm:catalog` (índices y FK desde la bóveda; requiere
+   `SALUD_VAULT` apuntando a `<workspace>/Mantra Core Health Vault/SALUD`).
+6. **Verificar las cuatro capas:** `yarn build` y arrancar con
+   `ORM_SCHEMA_SYNC=dry-run ORM_VERIFY_FIDELITY=true` (`yarn orm:schema:dump`), leyendo
+   la línea de `SchemaFidelityService`. Con `off` el chequeo **no** corre.
+
+Lo que **no** se deriva de los `.puml` —la política de RLS, los seeds de desarrollo—
+también vive en `SQL/patches/`, fechado y aplicado a mano.
+
+> [!warning] No crear una carpeta de migraciones en este repositorio
+> `database/SQL/99_migrations` existió y se eliminó dos veces (v4.0.8 y v4.0.9). Nadie
+> la aplicaba: el compose monta `../SQL`, así que su DDL solo corría a mano contra bases
+> de desarrollo y cada arranque limpio producía un esquema distinto del que el código
+> daba por hecho. `yarn ddl:sources` falla si reaparece.
 
 ## `ORM_SCHEMA_SYNC` — lo que MikroORM sí controla en el arranque
 
-No son migraciones versionadas, pero sí hay un control de sincronización en el arranque de la
-aplicación (`src/orm/bootstrap/schema-bootstrap.service.ts`):
+Control de sincronización en el arranque (`src/orm/bootstrap/schema-bootstrap.service.ts`):
 
 | Modo | Comportamiento |
 |---|---|
-| `off` | No toca la estructura de la base en el arranque. Modo esperado cuando manda un DBA externo, o en pruebas de integración/generación de documentación (para no mutar una base compartida). |
-| `dry-run` | Solo registra en log el DDL que aplicaría, sin ejecutarlo. |
-| `safe` | Aplica DDL **aditivo** en el arranque (nunca destructivo) — seguro incluso con varias réplicas gracias a un advisory lock. |
+| `off` | No toca la estructura de la base. **Ojo:** el chequeo de fidelidad tampoco corre — `onApplicationBootstrap` retorna antes. |
+| `dry-run` | Registra en log el DDL que aplicaría, sin ejecutarlo, y **sí** verifica fidelidad. Es el modo para auditar deriva. |
+| `safe` | Aplica DDL **aditivo** en el arranque (nunca destructivo), con advisory lock. |
 
-Default: `safe` (`src/orm/config/orm.env.ts`).
+El default del **código** sigue siendo `safe` (`src/orm/config/orm.env.ts`), pero `.env`
+y `.env.example` fijan **`off`** desde 2026-07-30 y no debe volver a `safe`: con `safe`
+la aplicación crea en la base lo que el modelo no declara, que es la dirección de cambio
+que el protocolo de las cuatro capas prohíbe.
 
-## Por qué no es un problema resuelto
+## Riesgo residual
 
-Sin migraciones versionadas por herramienta, reproducir el esquema exacto de un punto en el
-tiempo depende de disciplina externa sobre el SQL plano — no hay una tabla `migrations` que
-registre qué se aplicó y cuándo, a diferencia de un flujo estándar de Rails/TypeORM/Prisma
-Migrate. Riesgo clasificado `HIGH`, abierto (`DATA-001` en
-[matriz de trazabilidad](../governance/traceability-matrix.md)).
+Sin una tabla `migrations` que registre qué se aplicó y cuándo, reproducir el esquema de
+un punto en el tiempo depende del modelo y de los patches fechados, no de una
+herramienta que lo garantice. Lo que sí está garantizado ahora es que **hay una sola
+fuente**: `rebuild_stack.py` verifica la igualdad `tablas en la base == CREATE TABLE en
+SQL/` y `FKs en la base == FKs en SQL/` en cada reconstrucción, y `yarn ddl:sources`
+falla si aparece una segunda. `DATA-001` en la
+[matriz de trazabilidad](../governance/traceability-matrix.md) se atiende por esa vía.
 
 ## Evidencia
 
-`database/SQL/99_migrations/`, `src/orm/bootstrap/schema-bootstrap.service.ts`,
-`src/orm/config/orm.env.ts` (`ORM_SCHEMA_SYNC`), `package.json` (`orm:gen`, `orm:catalog`,
-`orm:audit`, `orm:schema:dump`).
+`Mantra Core Health Context/docs/architecture/ddl-sources.md`,
+`salud-db/check_ddl_sources.py`, `salud-db/rebuild_stack.py`, `SQL/patches/`,
+`src/orm/bootstrap/schema-bootstrap.service.ts`, `src/orm/config/orm.env.ts`,
+`package.json` (`orm:catalog`, `orm:audit`, `orm:schema:dump`, `ddl:sources`).

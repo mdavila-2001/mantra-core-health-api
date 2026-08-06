@@ -59,9 +59,11 @@ describeRls('RLS de aislamiento por tenant (DB real)', () => {
     admin = new pg.Client(ADMIN);
     await admin.connect();
 
-    // Aplica la migración de RLS (idempotente).
+    // Aplica la política de RLS (idempotente). Vive en `SQL/patches/` de la raíz
+    // del workspace —fuera de `apply_all.sql`— porque no se deriva de los
+    // `.puml`. Ver `docs/architecture/ddl-sources.md`.
     const sql = readFileSync(
-      join(process.cwd(), 'database', 'SQL', '99_rls', '01_tenant_rls.sql'),
+      join(process.cwd(), '..', 'SQL', 'patches', '2026-08-05_tenant_rls.sql'),
       'utf8',
     );
     await admin.query(sql);

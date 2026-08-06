@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `promotions`.
- * 80 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 81 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const promotionsIndexes: readonly IndexTuple[] = [
@@ -60,6 +60,7 @@ export const promotionsIndexes: readonly IndexTuple[] = [
   ['points_ledger_entries', 'ix_points_ledger_entries_reason_concept_id', ['reason_concept_id'], false, 'btree'],
   ['points_ledger_entries', 'ix_points_ledger_entries_earning_rule_id', ['earning_rule_id'], false, 'btree'],
   ['points_ledger_entries', 'ix_points_ledger_entries_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['points_ledger_entries', 'brin_points_ledger_entries_recorded_at', ['recorded_at'], false, 'brin'],
   ['promotions', 'uq_promotions_code', ['code'], true, 'btree'],
   ['promotions', 'ix_promotions_tenant_id', ['tenant_id'], false, 'btree'],
   ['promotions', 'ix_promotions_promotion_type_concept_id', ['promotion_type_concept_id'], false, 'btree'],
