@@ -467,8 +467,7 @@ export class SchedulingBookingsService {
       // La columna es jsonb (`unknown` en la entidad generada); el contrato vive
       // en appointment_bookings.types.ts y quien escribió el snapshot lo honró.
       const snapshot = booking.cancellationPolicySnapshot as
-        | CancellationPolicySnapshot
-        | undefined;
+        CancellationPolicySnapshot | undefined;
       const windowMinutes =
         snapshot?.cancellationWindowMinutes ??
         DEFAULT_CANCELLATION_WINDOW_MINUTES;
