@@ -254,6 +254,10 @@ export class SchedulingBookingsService {
         reasonText: dto.reasonText,
         actorUserId: actor.id,
       });
+      // FK planas: persistir la cita antes de crear los recordatorios que la
+      // referencian; la unidad de trabajo no puede ordenar sola lo que no
+      // declara como relación.
+      await tx.flush();
 
       hold.statusConceptId = CONCEPTS.HOLD_CONSUMED;
       touch(hold, actor.id);

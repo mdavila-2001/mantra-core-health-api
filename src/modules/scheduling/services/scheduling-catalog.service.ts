@@ -188,6 +188,11 @@ export class SchedulingCatalogService {
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
         actorUserId: actor.id,
       });
+      // FK planas: persistir la plantilla antes de crear las franjas que la
+      // referencian. `schedule_template_id` es una columna suelta, no una
+      // relación, así que la unidad de trabajo no conoce la dependencia y puede
+      // insertar las franjas primero, violando la FK.
+      await tx.flush();
 
       for (const rule of dto.rules) {
         this.catalogRepo.createRule(tx, {

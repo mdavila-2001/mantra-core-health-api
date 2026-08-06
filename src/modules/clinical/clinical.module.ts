@@ -8,6 +8,7 @@ import {
   ClinicalOrdersController,
   ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
+  ClinicalSummaryController,
 } from './controllers';
 import {
   CareEpisodesService,
@@ -21,6 +22,7 @@ import {
   PrescriptionSignaturePoliciesService,
   ProceduresService,
   ImmunizationsService,
+  ClinicalSummaryService,
 } from './services';
 import {
   CareEpisodesRepository,
@@ -35,6 +37,7 @@ import {
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
   ImmunizationsRepository,
+  ClinicalSummaryRepository,
 } from './repositories';
 
 /**
@@ -51,8 +54,11 @@ import {
     ClinicalOrdersController,
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
+    ClinicalSummaryController,
   ],
   providers: [
+    ClinicalSummaryRepository,
+    ClinicalSummaryService,
     // Repositorios
     CareEpisodesRepository,
     EncountersRepository,

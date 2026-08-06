@@ -4,10 +4,12 @@ import * as entities from './entities';
 import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
+  ProfilesPatientReadController,
 } from './controllers';
 import {
   ProfilesPatientsService,
   ProfilesPractitionersService,
+  ProfilesPatientReadService,
 } from './services';
 import {
   PersonsRepository,
@@ -23,6 +25,7 @@ import {
   PatientMergeEventsRepository,
   RelatedPersonsRepository,
   PatientPortalProxiesRepository,
+  PatientReadRepository,
 } from './repositories';
 import { ProfileOwnershipService } from './services';
 
@@ -35,7 +38,11 @@ import { ProfileOwnershipService } from './services';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [ProfilesPatientsController, ProfilesPractitionersController],
+  controllers: [
+    ProfilesPatientsController,
+    ProfilesPractitionersController,
+    ProfilesPatientReadController,
+  ],
   providers: [
     ProfileOwnershipService,
     // Repositorios
@@ -52,9 +59,11 @@ import { ProfileOwnershipService } from './services';
     PatientMergeEventsRepository,
     RelatedPersonsRepository,
     PatientPortalProxiesRepository,
+    PatientReadRepository,
     // Servicios
     ProfilesPatientsService,
     ProfilesPractitionersService,
+    ProfilesPatientReadService,
   ],
   // Los repositorios que necesita el auto-registro de pacientes (IAM crea en la
   // misma transacción la cuenta y su persona/perfil). Se exportan los

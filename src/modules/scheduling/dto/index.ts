@@ -45,3 +45,18 @@ export {
   RULE_DECISIONS,
 } from './scheduling-confirmation.dto';
 export type { RuleScope, RuleDecision } from './scheduling-confirmation.dto';
+
+export {
+  AGENDA_MAX_LIMIT,
+  ListResourcesQueryDto,
+  ResourceListItemDto,
+  ListResourcesResponseDto,
+  ListSlotsQueryDto,
+  SlotListItemDto,
+  ListSlotsResponseDto,
+  ListBookingsQueryDto,
+  BookingListItemDto,
+  ListBookingsResponseDto,
+  BookingDetailDto,
+  BookingReminderDto,
+} from './scheduling-agenda.dto';

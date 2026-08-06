@@ -10,3 +10,4 @@ export * from './medication-records.repository';
 export * from './prescription-signature-policies.repository';
 export * from './procedures.repository';
 export * from './immunizations.repository';
+export * from './clinical-summary.repository';

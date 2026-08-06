@@ -2,36 +2,40 @@
 
 # Endpoints del módulo `scheduling`
 
-Referencia exhaustiva de 21 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 25 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `scheduling`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`
-- **Controladores:** `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`
+- **Etiquetas OpenAPI:** `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`
+- **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /scheduling/booking-policies](#1-post-scheduling-booking-policies) — Definir una política de reserva
-2. [POST /scheduling/bookings/{id}/cancel](#2-post-scheduling-bookings-id-cancel) — Cancelar la cita y liberar el cupo
-3. [POST /scheduling/bookings/{id}/check-in](#3-post-scheduling-bookings-id-check-in) — Registrar la llegada del paciente
-4. [POST /scheduling/bookings/{id}/reminders](#4-post-scheduling-bookings-id-reminders) — Programar recordatorios para la cita
-5. [POST /scheduling/bookings/{id}/reschedule](#5-post-scheduling-bookings-id-reschedule) — Reprogramar la cita a otro slot
-6. [GET /scheduling/confirmation-rules](#6-get-scheduling-confirmation-rules) — Listar las reglas de un tenant
-7. [POST /scheduling/confirmation-rules](#7-post-scheduling-confirmation-rules) — Crear una regla de confirmación
-8. [POST /scheduling/confirmation-rules/{id}/activate](#8-post-scheduling-confirmation-rules-id-activate) — Reactivar una regla desactivada
-9. [POST /scheduling/confirmation-rules/{id}/deactivate](#9-post-scheduling-confirmation-rules-id-deactivate) — Desactivar una regla (sin borrado duro)
-10. [POST /scheduling/confirmation-rules/evaluate](#10-post-scheduling-confirmation-rules-evaluate) — Evaluar una solicitud de reserva contra las reglas vigentes
-11. [POST /scheduling/holds/{holdToken}/confirm](#11-post-scheduling-holds-holdtoken-confirm) — Confirmar la cita a partir de la reserva temporal
-12. [POST /scheduling/internal/dispatch-reminders](#12-post-scheduling-internal-dispatch-reminders) — Despachar los recordatorios cuya hora ya llegó
-13. [POST /scheduling/internal/expire-holds](#13-post-scheduling-internal-expire-holds) — Liberar las reservas temporales vencidas
-14. [POST /scheduling/internal/promote-waitlist/{slotId}](#14-post-scheduling-internal-promote-waitlist-slotid) — Promover candidatos de la lista de espera a un slot con cupo
-15. [GET /scheduling/internal/waitlist-candidates](#15-get-scheduling-internal-waitlist-candidates) — Listar slots con cupo libre y candidatos activos en espera
-16. [POST /scheduling/resources](#16-post-scheduling-resources) — Dar de alta un recurso agendable
-17. [POST /scheduling/resources/{id}/exceptions](#17-post-scheduling-resources-id-exceptions) — Registrar una excepción de disponibilidad
-18. [POST /scheduling/resources/{id}/templates](#18-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
-19. [POST /scheduling/slots/{id}/holds](#19-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
-20. [POST /scheduling/templates/{id}/generate-slots](#20-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
-21. [POST /scheduling/waitlist](#21-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
+2. [GET /scheduling/bookings](#2-get-scheduling-bookings) — Listar citas por paciente, recurso, estado o ventana
+3. [GET /scheduling/bookings/{id}](#3-get-scheduling-bookings-id) — Consultar una cita
+4. [POST /scheduling/bookings/{id}/cancel](#4-post-scheduling-bookings-id-cancel) — Cancelar la cita y liberar el cupo
+5. [POST /scheduling/bookings/{id}/check-in](#5-post-scheduling-bookings-id-check-in) — Registrar la llegada del paciente
+6. [POST /scheduling/bookings/{id}/reminders](#6-post-scheduling-bookings-id-reminders) — Programar recordatorios para la cita
+7. [POST /scheduling/bookings/{id}/reschedule](#7-post-scheduling-bookings-id-reschedule) — Reprogramar la cita a otro slot
+8. [GET /scheduling/confirmation-rules](#8-get-scheduling-confirmation-rules) — Listar las reglas de un tenant
+9. [POST /scheduling/confirmation-rules](#9-post-scheduling-confirmation-rules) — Crear una regla de confirmación
+10. [POST /scheduling/confirmation-rules/{id}/activate](#10-post-scheduling-confirmation-rules-id-activate) — Reactivar una regla desactivada
+11. [POST /scheduling/confirmation-rules/{id}/deactivate](#11-post-scheduling-confirmation-rules-id-deactivate) — Desactivar una regla (sin borrado duro)
+12. [POST /scheduling/confirmation-rules/evaluate](#12-post-scheduling-confirmation-rules-evaluate) — Evaluar una solicitud de reserva contra las reglas vigentes
+13. [POST /scheduling/holds/{holdToken}/confirm](#13-post-scheduling-holds-holdtoken-confirm) — Confirmar la cita a partir de la reserva temporal
+14. [POST /scheduling/internal/dispatch-reminders](#14-post-scheduling-internal-dispatch-reminders) — Despachar los recordatorios cuya hora ya llegó
+15. [POST /scheduling/internal/expire-holds](#15-post-scheduling-internal-expire-holds) — Liberar las reservas temporales vencidas
+16. [POST /scheduling/internal/promote-waitlist/{slotId}](#16-post-scheduling-internal-promote-waitlist-slotid) — Promover candidatos de la lista de espera a un slot con cupo
+17. [GET /scheduling/internal/waitlist-candidates](#17-get-scheduling-internal-waitlist-candidates) — Listar slots con cupo libre y candidatos activos en espera
+18. [GET /scheduling/resources](#18-get-scheduling-resources) — Listar los recursos agendables de un tenant
+19. [POST /scheduling/resources](#19-post-scheduling-resources) — Dar de alta un recurso agendable
+20. [POST /scheduling/resources/{id}/exceptions](#20-post-scheduling-resources-id-exceptions) — Registrar una excepción de disponibilidad
+21. [POST /scheduling/resources/{id}/templates](#21-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
+22. [GET /scheduling/slots](#22-get-scheduling-slots) — Consultar los cupos de una ventana
+23. [POST /scheduling/slots/{id}/holds](#23-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
+24. [POST /scheduling/templates/{id}/generate-slots](#24-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
+25. [POST /scheduling/waitlist](#25-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
 
 ---
 
@@ -179,7 +183,278 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /scheduling/bookings/{id}/cancel
+## 2. GET /scheduling/bookings
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-agenda`
+- **Nombre:** Listar citas por paciente, recurso, estado o ventana
+- **Operation ID:** `SchedulingAgendaController_listBookings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingAgendaController.listBookings](../../src/modules/scheduling/controllers/scheduling-agenda.controller.ts)
+
+### Descripción de negocio
+
+Listar citas por paciente, recurso, estado o ventana. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Citas que cumplen el filtro, ordenadas por el instante del cupo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/bookings` en `SchedulingAgendaController_listBookings`. El controlador delega en `SchedulingAgendaService.listBookings`. No recibe body. El tipo de retorno estático es `Promise<ListBookingsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Citas de un paciente concreto | `00000000-0000-4000-8000-000000000001` |
+| `resourceId` | query | No | `string` | formato `uuid` | Citas de un recurso concreto (la agenda del profesional) | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Filtrar por estado de la cita | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | No | `string` | formato `date-time` | Inicio de la ventana, sobre el instante del cupo | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Fin de la ventana | `2026-07-31T12:00:00.000Z` |
+| `limit` | query | No | `number` | máximo 500 | Sin descripción específica en OpenAPI. | `200` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/bookings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `PRACTITIONER`, `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/bookings?tenantId=00000000-0000-4000-8000-000000000001&patientProfileId=00000000-0000-4000-8000-000000000001&resourceId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001&from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&limit=200 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListBookingsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListBookingsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListBookingsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListBookingsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListBookingsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListBookingsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListBookingsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "bookableSlotId": "00000000-0000-4000-8000-000000000001",
+      "resourceId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "bookingChannelConceptId": "00000000-0000-4000-8000-000000000001",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "confirmedAt": "2026-07-31T12:00:00.000Z",
+      "checkedInAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<BookingListItemDto>` | Sin restricción adicional declarada | Citas de esta página, de la más próxima a la más lejana. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Identificador asociado a tenant. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].bookableSlotId` | Sí | `string` | formato `uuid` | Identificador asociado a bookable slot. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resourceId` | No | `string` | formato `uuid`; admite null | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
+| `items[].startAt` | No | `string` | formato `date-time`; admite null | Instante de inicio, tomado del cupo. | `2026-07-31T12:00:00.000Z` |
+| `items[].endAt` | No | `string` | formato `date-time`; admite null | Instante de fin, tomado del cupo. | `2026-07-31T12:00:00.000Z` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].bookingChannelConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a booking channel concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reasonText` | No | `string` | admite null | Valor de reason text mantenido por la instancia. | `Texto descriptivo de ejemplo` |
+| `items[].confirmedAt` | No | `string` | formato `date-time`; admite null | Valor de confirmed at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `items[].checkedInAt` | No | `string` | formato `date-time`; admite null | Valor de checked in at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Si el filtro devolvía más citas de las que entran en el tope. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana no puede superar ${MAX_WINDOW_DAYS} días | Excepción explícita en src/modules/scheduling/services/scheduling-agenda.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/bookings"
+}
+```
+
+---
+
+## 3. GET /scheduling/bookings/{id}
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-agenda`
+- **Nombre:** Consultar una cita
+- **Operation ID:** `SchedulingAgendaController_getBooking`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingAgendaController.getBooking](../../src/modules/scheduling/controllers/scheduling-agenda.controller.ts)
+
+### Descripción de negocio
+
+Incluye el snapshot de cancelación aceptado al confirmar: es lo que gobierna si cancelar genera cargo.
+
+Contexto declarado en el controlador: Detalle de una cita, con su snapshot de cancelación y recordatorios.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/bookings/{id}` en `SchedulingAgendaController_getBooking`. El controlador delega en `SchedulingAgendaService.getBooking`. No recibe body. El tipo de retorno estático es `Promise<BookingDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/bookings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `PRACTITIONER`, `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/bookings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BookingDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<BookingDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<BookingDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<BookingDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<BookingDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<BookingDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<BookingDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "bookingPolicyId": "00000000-0000-4000-8000-000000000001",
+  "cancellationPolicySnapshot": {},
+  "reminders": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "offsetMinutes": 1,
+      "scheduledAt": "2026-07-31T12:00:00.000Z",
+      "channelConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `bookingPolicyId` | No | `string` | formato `uuid`; admite null | Identificador asociado a booking policy. | `00000000-0000-4000-8000-000000000001` |
+| `cancellationPolicySnapshot` | No | `object` | admite null | Snapshot de la política de cancelación aceptada | `{}` |
+| `reminders` | Sí | `array<BookingReminderDto>` | Sin restricción adicional declarada | Recordatorios programados para la cita. | `[{"id":"00000000-0000-4000-8000-000000000001","offsetMinutes":1,"scheduledAt":"2026-07-31T12:00:00.000Z","channelConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `reminders[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `reminders[].offsetMinutes` | Sí | `number` | Sin restricción adicional declarada | Minutos de antelación. | `1` |
+| `reminders[].scheduledAt` | Sí | `string` | formato `date-time` | Instante en que se enviará. | `2026-07-31T12:00:00.000Z` |
+| `reminders[].channelConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a channel concept. | `00000000-0000-4000-8000-000000000001` |
+| `reminders[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-agenda.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/bookings/{id}"
+}
+```
+
+---
+
+## 4. POST /scheduling/bookings/{id}/cancel
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -311,7 +586,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /scheduling/bookings/{id}/check-in
+## 5. POST /scheduling/bookings/{id}/check-in
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -423,7 +698,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /scheduling/bookings/{id}/reminders
+## 6. POST /scheduling/bookings/{id}/reminders
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -558,7 +833,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /scheduling/bookings/{id}/reschedule
+## 7. POST /scheduling/bookings/{id}/reschedule
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-bookings`
@@ -692,7 +967,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /scheduling/confirmation-rules
+## 8. GET /scheduling/confirmation-rules
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -804,7 +1079,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /scheduling/confirmation-rules
+## 9. POST /scheduling/confirmation-rules
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -954,7 +1229,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /scheduling/confirmation-rules/{id}/activate
+## 10. POST /scheduling/confirmation-rules/{id}/activate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -1076,7 +1351,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /scheduling/confirmation-rules/{id}/deactivate
+## 11. POST /scheduling/confirmation-rules/{id}/deactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -1198,7 +1473,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /scheduling/confirmation-rules/evaluate
+## 12. POST /scheduling/confirmation-rules/evaluate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-confirmation`
@@ -1346,7 +1621,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /scheduling/holds/{holdToken}/confirm
+## 13. POST /scheduling/holds/{holdToken}/confirm
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -1492,7 +1767,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /scheduling/internal/dispatch-reminders
+## 14. POST /scheduling/internal/dispatch-reminders
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -1611,7 +1886,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /scheduling/internal/expire-holds
+## 15. POST /scheduling/internal/expire-holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -1730,7 +2005,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /scheduling/internal/promote-waitlist/{slotId}
+## 16. POST /scheduling/internal/promote-waitlist/{slotId}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -1854,7 +2129,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /scheduling/internal/waitlist-candidates
+## 17. GET /scheduling/internal/waitlist-candidates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-internal`
@@ -1961,7 +2236,138 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /scheduling/resources
+## 18. GET /scheduling/resources
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-agenda`
+- **Nombre:** Listar los recursos agendables de un tenant
+- **Operation ID:** `SchedulingAgendaController_listResources`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingAgendaController.listResources](../../src/modules/scheduling/controllers/scheduling-agenda.controller.ts)
+
+### Descripción de negocio
+
+Listar los recursos agendables de un tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Recursos agendables del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/resources` en `SchedulingAgendaController_listResources`. El controlador delega en `SchedulingAgendaService.listResources`. No recibe body. El tipo de retorno estático es `Promise<ListResourcesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | query | Sí | `string` | formato `uuid` | Tenant dueño de la agenda | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | query | No | `string` | formato `uuid` | Filtrar por práctica | `00000000-0000-4000-8000-000000000001` |
+| `resourceType` | query | No | `string` | valores: `PRACTITIONER`, `ROOM`, `EQUIPMENT` | Filtrar por tipo de recurso | `PRACTITIONER` |
+| `includeInactive` | query | No | `boolean` | Sin restricción adicional declarada | Incluir los recursos dados de baja | `false` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/resources?tenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `PRACTITIONER`, `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/resources?tenantId=00000000-0000-4000-8000-000000000001&practiceId=00000000-0000-4000-8000-000000000001&resourceType=PRACTITIONER&includeInactive=false HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListResourcesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "resourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "resourceRefType": "health_practitioner_profiles",
+      "resourceRefId": "00000000-0000-4000-8000-000000000001",
+      "practiceId": "00000000-0000-4000-8000-000000000001",
+      "timeZone": "America/La_Paz",
+      "capacity": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ResourceListItemDto>` | Sin restricción adicional declarada | Recursos de esta página. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","resourceTypeConceptId":"00000000-0000-4000-8000-000000000001","resourceRefType":"health_practitioner_profiles","resourceRefId":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","capacity":1,"stateConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
+| `items[].resourceTypeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a resource type concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resourceRefType` | Sí | `string` | Sin restricción adicional declarada | Tipo de la entidad referenciada por el recurso. | `health_practitioner_profiles` |
+| `items[].resourceRefId` | Sí | `string` | formato `uuid` | Identificador asociado a resource ref. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceId` | No | `string` | formato `uuid`; admite null | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `items[].timeZone` | No | `string` | admite null | Zona horaria IANA del recurso. | `America/La_Paz` |
+| `items[].capacity` | Sí | `number` | Sin restricción adicional declarada | Atenciones simultáneas que admite. 1 cuando el recurso no lo declara. | `1` |
+| `items[].stateConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a state concept. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/resources"
+}
+```
+
+---
+
+## 19. POST /scheduling/resources
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -2102,7 +2508,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /scheduling/resources/{id}/exceptions
+## 20. POST /scheduling/resources/{id}/exceptions
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -2245,7 +2651,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /scheduling/resources/{id}/templates
+## 21. POST /scheduling/resources/{id}/templates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -2406,7 +2812,146 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /scheduling/slots/{id}/holds
+## 22. GET /scheduling/slots
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling-agenda`
+- **Nombre:** Consultar los cupos de una ventana
+- **Operation ID:** `SchedulingAgendaController_listSlots`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingAgendaController.listSlots](../../src/modules/scheduling/controllers/scheduling-agenda.controller.ts)
+
+### Descripción de negocio
+
+El `id` de cada cupo es el que se envía a `POST /scheduling/slots/{id}/holds`.
+
+Contexto declarado en el controlador: Cupos de una ventana. Con `onlyAvailable=true` devuelve los que el portal puede ofrecer: abiertos y con capacidad libre.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/slots` en `SchedulingAgendaController_listSlots`. El controlador delega en `SchedulingAgendaService.listSlots`. No recibe body. El tipo de retorno estático es `Promise<ListSlotsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `resourceId` | query | No | `string` | formato `uuid` | Recurso cuya agenda se consulta | `00000000-0000-4000-8000-000000000001` |
+| `scheduleTemplateId` | query | No | `string` | formato `uuid` | Plantilla que materializó los cupos | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | Sí | `string` | formato `date-time` | Inicio de la ventana consultada | `2026-07-31T12:00:00.000Z` |
+| `to` | query | Sí | `string` | formato `date-time` | Fin de la ventana (exclusivo) | `2026-07-31T12:00:00.000Z` |
+| `onlyAvailable` | query | No | `boolean` | Sin restricción adicional declarada | Sólo cupos con capacidad libre y abiertos: lo que el portal ofrece para reservar | `false` |
+| `limit` | query | No | `number` | máximo 500 | Sin descripción específica en OpenAPI. | `200` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/slots?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `PRACTITIONER`, `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/slots?resourceId=00000000-0000-4000-8000-000000000001&scheduleTemplateId=00000000-0000-4000-8000-000000000001&from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&onlyAvailable=false&limit=200 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSlotsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "resourceId": "00000000-0000-4000-8000-000000000001",
+      "scheduleTemplateId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z",
+      "capacity": 1,
+      "remainingCapacity": 1,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "serviceConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SlotListItemDto>` | Sin restricción adicional declarada | Cupos de esta página, del más próximo al más lejano. | `[{"id":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","scheduleTemplateId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","capacity":1,"remainingCapacity":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id a enviar para reservar el cupo | `00000000-0000-4000-8000-000000000001` |
+| `items[].resourceId` | Sí | `string` | formato `uuid` | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
+| `items[].scheduleTemplateId` | No | `string` | formato `uuid`; admite null | Identificador asociado a schedule template. | `00000000-0000-4000-8000-000000000001` |
+| `items[].startAt` | Sí | `string` | formato `date-time` | Valor de start at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `items[].endAt` | Sí | `string` | formato `date-time` | Valor de end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `items[].capacity` | Sí | `number` | Sin restricción adicional declarada | Cupos totales del slot. | `1` |
+| `items[].remainingCapacity` | Sí | `number` | Sin restricción adicional declarada | Cupos que quedan libres. | `1` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].serviceConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a service concept. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Si la ventana excede el tope y hay que estrecharla | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-agenda.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana no puede superar ${MAX_WINDOW_DAYS} días | Excepción explícita en src/modules/scheduling/services/scheduling-agenda.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/slots"
+}
+```
+
+---
+
+## 23. POST /scheduling/slots/{id}/holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -2537,7 +3082,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /scheduling/templates/{id}/generate-slots
+## 24. POST /scheduling/templates/{id}/generate-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -2669,7 +3214,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /scheduling/waitlist
+## 25. POST /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`

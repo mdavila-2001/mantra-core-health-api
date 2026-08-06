@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 23 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-records`
-- **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalRecordsController`
+- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-records`, `clinical-summary`
+- **Controladores:** `ClinicalEncountersController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalRecordsController`, `ClinicalSummaryController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -29,11 +29,12 @@ Referencia exhaustiva de 23 operación(es) del módulo `clinical`, derivada del 
 16. [POST /clinical/medication-requests/{id}/sign](#16-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
 17. [POST /clinical/observations](#17-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
 18. [PATCH /clinical/observations/{id}/amend](#18-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-19. [GET /clinical/prescription-signature-policies](#19-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-20. [POST /clinical/prescription-signature-policies](#20-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-21. [POST /clinical/prescription-signature-policies/{id}/deactivate](#21-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-22. [POST /clinical/procedures](#22-post-clinical-procedures) — Registrar un procedimiento
-23. [POST /clinical/service-requests](#23-post-clinical-service-requests) — Crear una orden de servicio
+19. [GET /clinical/patients/{patientProfileId}/summary](#19-get-clinical-patients-patientprofileid-summary) — Consultar el resumen clínico de un paciente
+20. [GET /clinical/prescription-signature-policies](#20-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+21. [POST /clinical/prescription-signature-policies](#21-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+22. [POST /clinical/prescription-signature-policies/{id}/deactivate](#22-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+23. [POST /clinical/procedures](#23-post-clinical-procedures) — Registrar un procedimiento
+24. [POST /clinical/service-requests](#24-post-clinical-service-requests) — Crear una orden de servicio
 
 ---
 
@@ -2740,7 +2741,180 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /clinical/prescription-signature-policies
+## 19. GET /clinical/patients/{patientProfileId}/summary
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-summary`
+- **Nombre:** Consultar el resumen clínico de un paciente
+- **Operation ID:** `ClinicalSummaryController_getSummary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalSummaryController.getSummary](../../src/modules/clinical/controllers/clinical-summary.controller.ts)
+
+### Descripción de negocio
+
+Problemas, alergias y medicación vigentes. Con `includeInactive=true` añade lo resuelto.
+
+Contexto declarado en el controlador: Problemas, alergias y medicación del paciente.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/patients/{patientProfileId}/summary` en `ClinicalSummaryController_getSummary`. El controlador delega en `ClinicalSummaryService.getSummary`. No recibe body. El tipo de retorno estático es `Promise<ClinicalSummaryResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `includeInactive` | query | No | `boolean` | Sin restricción adicional declarada | Incluir problemas resueltos y medicación no vigente | `false` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/summary?includeInactive=false HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ClinicalSummaryResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ClinicalSummaryResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ClinicalSummaryResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ClinicalSummaryResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ClinicalSummaryResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ClinicalSummaryResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ClinicalSummaryResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClinicalSummaryResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "conditions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "severityConceptId": "00000000-0000-4000-8000-000000000001",
+      "onsetAt": "2026-07-31T12:00:00.000Z",
+      "resolvedAt": "2026-07-31T12:00:00.000Z",
+      "encounterId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "allergies": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "substanceConceptId": "00000000-0000-4000-8000-000000000001",
+      "typeConceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "criticalityConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "medications": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "medicationConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "prescriberProfileId": "00000000-0000-4000-8000-000000000001",
+      "doseText": "valor-ejemplo",
+      "frequencyText": "valor-ejemplo",
+      "routeConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `conditions` | Sí | `array<ConditionSummaryDto>` | Sin restricción adicional declarada | Problemas del paciente. | `[{"id":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","onsetAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","encounterId":"00000000-0000-4000-8000-000000000001"}]` |
+| `conditions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].codeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a code concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].categoryConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a category concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].clinicalStatusConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a clinical status concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].verificationStatusConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a verification status concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].severityConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
+| `conditions[].onsetAt` | No | `string` | formato `date-time`; admite null | Inicio del problema. | `2026-07-31T12:00:00.000Z` |
+| `conditions[].resolvedAt` | No | `string` | formato `date-time`; admite null | Resolución del problema. | `2026-07-31T12:00:00.000Z` |
+| `conditions[].encounterId` | No | `string` | formato `uuid`; admite null | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
+| `allergies` | Sí | `array<AllergySummaryDto>` | Sin restricción adicional declarada | Alergias e intolerancias. | `[{"id":"00000000-0000-4000-8000-000000000001","substanceConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","criticalityConceptId":"00000000-0000-4000-8000-000000000001","clinicalStatusConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `allergies[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].substanceConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a substance concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].typeConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a type concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].categoryConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a category concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].criticalityConceptId` | No | `string` | formato `uuid`; admite null | Criticidad: es el dato de seguridad clínica del resumen. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].clinicalStatusConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a clinical status concept. | `00000000-0000-4000-8000-000000000001` |
+| `allergies[].verificationStatusConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a verification status concept. | `00000000-0000-4000-8000-000000000001` |
+| `medications` | Sí | `array<MedicationSummaryDto>` | Sin restricción adicional declarada | Prescripciones. | `[{"id":"00000000-0000-4000-8000-000000000001","medicationConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","prescriberProfileId":"00000000-0000-4000-8000-000000000001","doseText":"valor-ejemplo","frequencyText":"valor-ejemplo","routeConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z"}]` |
+| `medications[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `medications[].medicationConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a medication concept. | `00000000-0000-4000-8000-000000000001` |
+| `medications[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `medications[].prescriberProfileId` | No | `string` | formato `uuid`; admite null | Identificador asociado a prescriber profile. | `00000000-0000-4000-8000-000000000001` |
+| `medications[].doseText` | No | `string` | admite null | Dosis, en texto. | `valor-ejemplo` |
+| `medications[].frequencyText` | No | `string` | admite null | Frecuencia, en texto. | `valor-ejemplo` |
+| `medications[].routeConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a route concept. | `00000000-0000-4000-8000-000000000001` |
+| `medications[].validFrom` | No | `string` | formato `date-time`; admite null | Inicio de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Si alguna lista alcanzó el tope y quedó recortada | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/patients/{patientProfileId}/summary"
+}
+```
+
+---
+
+## 20. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -2852,7 +3026,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /clinical/prescription-signature-policies
+## 21. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -2999,7 +3173,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 22. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -3123,7 +3297,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /clinical/procedures
+## 23. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3282,7 +3456,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /clinical/service-requests
+## 24. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`

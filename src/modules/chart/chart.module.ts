@@ -6,18 +6,21 @@ import {
   ChartDocumentsController,
   ChartCarePlansController,
   ChartTemplatesController,
+  ChartReadController,
 } from './controllers';
 import {
   ChartNotesService,
   ChartDocumentsService,
   ChartCarePlansService,
   ChartTemplatesService,
+  ChartReadService,
 } from './services';
 import {
   ClinicalNotesRepository,
   CarePlansRepository,
   DocumentsRepository,
   ChartTemplatesRepository,
+  ChartReadRepository,
 } from './repositories';
 
 /**
@@ -32,6 +35,7 @@ import {
     ChartDocumentsController,
     ChartCarePlansController,
     ChartTemplatesController,
+    ChartReadController,
   ],
   providers: [
     // Repositorios
@@ -39,11 +43,13 @@ import {
     CarePlansRepository,
     DocumentsRepository,
     ChartTemplatesRepository,
+    ChartReadRepository,
     // Servicios
     ChartNotesService,
     ChartDocumentsService,
     ChartCarePlansService,
     ChartTemplatesService,
+    ChartReadService,
   ],
 })
 export class ChartModule {}

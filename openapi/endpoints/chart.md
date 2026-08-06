@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `chart`
 
-Referencia exhaustiva de 12 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 14 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-templates`
-- **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartNotesController`, `ChartTemplatesController`
+- **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-templates`, `charts-read`
+- **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartNotesController`, `ChartReadController`, `ChartTemplatesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -15,14 +15,16 @@ Referencia exhaustiva de 12 operación(es) del módulo `chart`, derivada del con
 2. [PATCH /charts/care-plans/{planId}/activities/{activityId}](#2-patch-charts-care-plans-planid-activities-activityid) — Actualizar una actividad del plan de cuidado
 3. [POST /charts/documents](#3-post-charts-documents) — Adjuntar un documento con archivos gobernados
 4. [POST /charts/notes](#4-post-charts-notes) — Crear una nota clínica versionada (borrador SOAP)
-5. [POST /charts/notes/{noteId}/amendments](#5-post-charts-notes-noteid-amendments) — Enmendar una nota firmada (addendum versionado)
-6. [PUT /charts/notes/{noteId}/versions](#6-put-charts-notes-noteid-versions) — Editar borrador creando una nueva versión inmutable
-7. [POST /charts/notes/{noteId}/versions/{versionId}/cosign](#7-post-charts-notes-noteid-versions-versionid-cosign) — Cofirmar una versión firmada (cadena de firmas)
-8. [POST /charts/notes/{noteId}/versions/{versionId}/sign](#8-post-charts-notes-noteid-versions-versionid-sign) — Firmar una versión y sellar su contenido
-9. [POST /charts/notes/versions/{versionId}/exam-findings](#9-post-charts-notes-versions-versionid-exam-findings) — Registrar hallazgos de examen físico
-10. [POST /charts/notes/versions/{versionId}/release](#10-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
-11. [POST /charts/notes/versions/{versionId}/withhold](#11-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
-12. [POST /charts/templates/{templateId}/assignments](#12-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
+5. [GET /charts/notes/{noteId}](#5-get-charts-notes-noteid) — Consultar una nota clínica
+6. [POST /charts/notes/{noteId}/amendments](#6-post-charts-notes-noteid-amendments) — Enmendar una nota firmada (addendum versionado)
+7. [PUT /charts/notes/{noteId}/versions](#7-put-charts-notes-noteid-versions) — Editar borrador creando una nueva versión inmutable
+8. [POST /charts/notes/{noteId}/versions/{versionId}/cosign](#8-post-charts-notes-noteid-versions-versionid-cosign) — Cofirmar una versión firmada (cadena de firmas)
+9. [POST /charts/notes/{noteId}/versions/{versionId}/sign](#9-post-charts-notes-noteid-versions-versionid-sign) — Firmar una versión y sellar su contenido
+10. [POST /charts/notes/versions/{versionId}/exam-findings](#10-post-charts-notes-versions-versionid-exam-findings) — Registrar hallazgos de examen físico
+11. [POST /charts/notes/versions/{versionId}/release](#11-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
+12. [POST /charts/notes/versions/{versionId}/withhold](#12-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
+13. [GET /charts/patients/{patientProfileId}/notes](#13-get-charts-patients-patientprofileid-notes) — Listar las notas clínicas de un paciente
+14. [POST /charts/templates/{templateId}/assignments](#14-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
 
 ---
 
@@ -621,7 +623,173 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /charts/notes/{noteId}/amendments
+## 5. GET /charts/notes/{noteId}
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `charts-read`
+- **Nombre:** Consultar una nota clínica
+- **Operation ID:** `ChartReadController_getNote`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartReadController.getNote](../../src/modules/chart/controllers/chart-read.controller.ts)
+
+### Descripción de negocio
+
+Devuelve el cuerpo de la versión vigente y el índice de todas las versiones.
+
+Contexto declarado en el controlador: Una nota con su versión vigente y el índice de versiones.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /charts/notes/{noteId}` en `ChartReadController_getNote`. El controlador delega en `ChartReadService.getNote`. No recibe body. El tipo de retorno estático es `Promise<ChartNoteDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `noteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /charts/notes/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `noteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /charts/notes/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChartNoteDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ChartNoteDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ChartNoteDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ChartNoteDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ChartNoteDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ChartNoteDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ChartNoteDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartNoteDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "currentVersion": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "versionNumber": 1,
+    "authorProfileId": "00000000-0000-4000-8000-000000000001",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "chiefComplaintText": "valor-ejemplo",
+    "subjectiveText": "valor-ejemplo",
+    "objectiveText": "valor-ejemplo",
+    "assessmentText": "valor-ejemplo",
+    "planText": "valor-ejemplo",
+    "supersedesVersionId": "00000000-0000-4000-8000-000000000001",
+    "signedByProfileId": "00000000-0000-4000-8000-000000000001",
+    "signedAt": "2026-07-31T12:00:00.000Z",
+    "recordedAt": "2026-07-31T12:00:00.000Z"
+  },
+  "versions": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "versionNumber": 1,
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "chiefComplaintText": "valor-ejemplo",
+      "subjectiveText": "valor-ejemplo",
+      "objectiveText": "valor-ejemplo",
+      "assessmentText": "valor-ejemplo",
+      "planText": "valor-ejemplo",
+      "supersedesVersionId": "00000000-0000-4000-8000-000000000001",
+      "signedByProfileId": "00000000-0000-4000-8000-000000000001",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `currentVersion` | No | `ChartNoteVersionDto` | Sin restricción adicional declarada | Versión vigente, con su cuerpo completo. | `{"id":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","supersedesVersionId":"00000000-0000-4000-8000-000000000001","signedByProfileId":"00000000-0000-4000-8000-000000000001","signedAt":"2026-07-31T12:00:00.000Z","recordedAt":"2026-07-31T12:00:00.000Z"}` |
+| `currentVersion.id` | No | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `currentVersion.versionNumber` | No | `number` | Sin restricción adicional declarada | Número de versión. | `1` |
+| `currentVersion.authorProfileId` | No | `string` | formato `uuid` | Identificador asociado a author profile. | `00000000-0000-4000-8000-000000000001` |
+| `currentVersion.statusConceptId` | No | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `currentVersion.chiefComplaintText` | No | `string` | admite null | Motivo de consulta. | `valor-ejemplo` |
+| `currentVersion.subjectiveText` | No | `string` | admite null | Subjetivo. | `valor-ejemplo` |
+| `currentVersion.objectiveText` | No | `string` | admite null | Objetivo. | `valor-ejemplo` |
+| `currentVersion.assessmentText` | No | `string` | admite null | Valoración. | `valor-ejemplo` |
+| `currentVersion.planText` | No | `string` | admite null | Plan. | `valor-ejemplo` |
+| `currentVersion.supersedesVersionId` | No | `string` | formato `uuid`; admite null | Versión a la que reemplaza. | `00000000-0000-4000-8000-000000000001` |
+| `currentVersion.signedByProfileId` | No | `string` | formato `uuid`; admite null | Identificador asociado a signed by profile. | `00000000-0000-4000-8000-000000000001` |
+| `currentVersion.signedAt` | No | `string` | formato `date-time`; admite null | Instante de la firma. | `2026-07-31T12:00:00.000Z` |
+| `currentVersion.recordedAt` | No | `string` | formato `date-time` | Instante en que se registró. | `2026-07-31T12:00:00.000Z` |
+| `versions` | Sí | `array<ChartNoteVersionDto>` | Sin restricción adicional declarada | Índice de todas las versiones, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","versionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","subjectiveText":"valor-ejemplo","objectiveText":"valor-ejemplo","assessmentText":"valor-ejemplo","planText":"valor-ejemplo","supersedesVersionId":"00000000-0000-4000-8000-000000000001","signedByProfileId":"00000000-0000-4000-8000-000000000001","signedAt":"2026-07-31T12:00:00.000Z","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `versions[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `versions[].versionNumber` | Sí | `number` | Sin restricción adicional declarada | Número de versión. | `1` |
+| `versions[].authorProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a author profile. | `00000000-0000-4000-8000-000000000001` |
+| `versions[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `versions[].chiefComplaintText` | No | `string` | admite null | Motivo de consulta. | `valor-ejemplo` |
+| `versions[].subjectiveText` | No | `string` | admite null | Subjetivo. | `valor-ejemplo` |
+| `versions[].objectiveText` | No | `string` | admite null | Objetivo. | `valor-ejemplo` |
+| `versions[].assessmentText` | No | `string` | admite null | Valoración. | `valor-ejemplo` |
+| `versions[].planText` | No | `string` | admite null | Plan. | `valor-ejemplo` |
+| `versions[].supersedesVersionId` | No | `string` | formato `uuid`; admite null | Versión a la que reemplaza. | `00000000-0000-4000-8000-000000000001` |
+| `versions[].signedByProfileId` | No | `string` | formato `uuid`; admite null | Identificador asociado a signed by profile. | `00000000-0000-4000-8000-000000000001` |
+| `versions[].signedAt` | No | `string` | formato `date-time`; admite null | Instante de la firma. | `2026-07-31T12:00:00.000Z` |
+| `versions[].recordedAt` | Sí | `string` | formato `date-time` | Instante en que se registró. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Nota no encontrada | Excepción explícita en src/modules/chart/services/chart-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/notes/{noteId}"
+}
+```
+
+---
+
+## 6. POST /charts/notes/{noteId}/amendments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -767,7 +935,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. PUT /charts/notes/{noteId}/versions
+## 7. PUT /charts/notes/{noteId}/versions
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -910,7 +1078,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /charts/notes/{noteId}/versions/{versionId}/cosign
+## 8. POST /charts/notes/{noteId}/versions/{versionId}/cosign
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1051,7 +1219,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /charts/notes/{noteId}/versions/{versionId}/sign
+## 9. POST /charts/notes/{noteId}/versions/{versionId}/sign
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1190,7 +1358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /charts/notes/versions/{versionId}/exam-findings
+## 10. POST /charts/notes/versions/{versionId}/exam-findings
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1332,7 +1500,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /charts/notes/versions/{versionId}/release
+## 11. POST /charts/notes/versions/{versionId}/release
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1461,7 +1629,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /charts/notes/versions/{versionId}/withhold
+## 12. POST /charts/notes/versions/{versionId}/withhold
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-notes`
@@ -1590,7 +1758,152 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /charts/templates/{templateId}/assignments
+## 13. GET /charts/patients/{patientProfileId}/notes
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `charts-read`
+- **Nombre:** Listar las notas clínicas de un paciente
+- **Operation ID:** `ChartReadController_listPatientNotes`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartReadController.listPatientNotes](../../src/modules/chart/controllers/chart-read.controller.ts)
+
+### Descripción de negocio
+
+Listar las notas clínicas de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Notas del paciente, de la más reciente a la más antigua.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /charts/patients/{patientProfileId}/notes` en `ChartReadController_listPatientNotes`. El controlador delega en `ChartReadService.listPatientNotes`. No recibe body. El tipo de retorno estático es `Promise<ListPatientNotesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | query | No | `string` | formato `uuid` | Restringir a las notas de un encuentro | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | máximo 100 | Sin descripción específica en OpenAPI. | `25` |
+| `offset` | query | No | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `0` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /charts/patients/00000000-0000-4000-8000-000000000001/notes HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /charts/patients/00000000-0000-4000-8000-000000000001/notes?encounterId=00000000-0000-4000-8000-000000000001&limit=25&offset=0 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListPatientNotesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListPatientNotesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListPatientNotesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListPatientNotesResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListPatientNotesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListPatientNotesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListPatientNotesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPatientNotesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "noteId": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "noteTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "confidentialityConceptId": "00000000-0000-4000-8000-000000000001",
+      "currentVersionId": "00000000-0000-4000-8000-000000000001",
+      "currentVersionNumber": 1,
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "chiefComplaintText": "valor-ejemplo",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "currentReleasedVersionId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "offset": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ChartNoteListItemDto>` | Sin restricción adicional declarada | Notas de esta página, de la más reciente a la más antigua. | `[{"noteId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteTypeConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","confidentialityConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","currentVersionNumber":1,"authorProfileId":"00000000-0000-4000-8000-000000000001","chiefComplaintText":"valor-ejemplo","signedAt":"2026-07-31T12:00:00.000Z","currentReleasedVersionId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].noteId` | Sí | `string` | formato `uuid` | Identificador de la nota (cabecera). | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].encounterId` | No | `string` | formato `uuid`; admite null | Identificador asociado a encounter. | `00000000-0000-4000-8000-000000000001` |
+| `items[].noteTypeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a note type concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lifecycleStatusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a lifecycle status concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].confidentialityConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a confidentiality concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].currentVersionId` | No | `string` | formato `uuid`; admite null | Identificador de la versión vigente. | `00000000-0000-4000-8000-000000000001` |
+| `items[].currentVersionNumber` | No | `number` | admite null | Número de la versión vigente. | `1` |
+| `items[].authorProfileId` | No | `string` | formato `uuid`; admite null | Autor de la versión vigente. | `00000000-0000-4000-8000-000000000001` |
+| `items[].chiefComplaintText` | No | `string` | admite null | Motivo de consulta de la versión vigente. | `valor-ejemplo` |
+| `items[].signedAt` | No | `string` | formato `date-time`; admite null | Instante de la firma, si la versión vigente está firmada. | `2026-07-31T12:00:00.000Z` |
+| `items[].currentReleasedVersionId` | No | `string` | formato `uuid`; admite null | Identificador de la versión liberada al paciente, si la hay. | `00000000-0000-4000-8000-000000000001` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Instante de creación de la nota. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
+| `offset` | Sí | `number` | Sin restricción adicional declarada | Desplazamiento aplicado. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/patients/{patientProfileId}/notes"
+}
+```
+
+---
+
+## 14. POST /charts/templates/{templateId}/assignments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`

@@ -19,3 +19,10 @@ export { SchedulingConfirmationRepository } from './scheduling-confirmation.repo
 export type { CreateConfirmationRuleData } from './scheduling-confirmation.repository';
 
 export { SchedulingAbsencesRepository } from './scheduling-absences.repository';
+
+export { SchedulingAgendaRepository } from './scheduling-agenda.repository';
+export type {
+  ListResourcesFilter,
+  ListSlotsFilter,
+  ListBookingsFilter,
+} from './scheduling-agenda.repository';
