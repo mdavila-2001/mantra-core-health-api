@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `read_models`.
- * 85 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 86 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const readModelsIndexes: readonly IndexTuple[] = [
@@ -84,6 +84,7 @@ export const readModelsIndexes: readonly IndexTuple[] = [
   ['read_model_refresh_runs', 'ix_read_model_refresh_runs_read_model_definition_id', ['read_model_definition_id'], false, 'btree'],
   ['read_model_refresh_runs', 'ix_read_model_refresh_runs_refresh_type_concept_id', ['refresh_type_concept_id'], false, 'btree'],
   ['read_model_refresh_runs', 'ix_read_model_refresh_runs_result_concept_id', ['result_concept_id'], false, 'btree'],
+  ['read_model_refresh_runs', 'brin_read_model_refresh_runs_created_at', ['created_at'], false, 'brin'],
   ['user_view_preferences', 'ix_user_view_preferences_user_id', ['user_id'], false, 'btree'],
   ['user_view_preferences', 'ix_user_view_preferences_frontend_page_view_id', ['frontend_page_view_id'], false, 'btree'],
   ['user_view_preferences', 'ix_user_view_preferences_tenant_id', ['tenant_id'], false, 'btree'],

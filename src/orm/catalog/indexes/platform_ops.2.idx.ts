@@ -2,11 +2,17 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `platform_ops` (parte 2/2).
- * 74 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 83 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const platformOpsIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['readiness_review_findings', 'uk_readiness_review_findings_review_code', ['operational_readiness_review_id', 'finding_code'], true, 'btree'],
+  ['recovery_objectives', 'ix_recovery_objectives_service_component_id', ['service_component_id'], false, 'btree'],
+  ['recovery_objectives', 'ix_recovery_objectives_objective_type_concept_id', ['objective_type_concept_id'], false, 'btree'],
+  ['recovery_objectives', 'ix_recovery_objectives_recovery_tier_concept_id', ['recovery_tier_concept_id'], false, 'btree'],
+  ['recovery_objectives', 'ix_recovery_objectives_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['recovery_objectives', 'ix_recovery_objectives_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['recovery_objectives', 'ix_recovery_objectives_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['resilience_exercises', 'ix_resilience_exercises_tenant_id', ['tenant_id'], false, 'btree'],
   ['resilience_exercises', 'ix_resilience_exercises_service_component_id', ['service_component_id'], false, 'btree'],
@@ -15,15 +21,6 @@ export const platformOpsIndexes2: readonly IndexTuple[] = [
   ['resilience_exercises', 'ix_resilience_exercises_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['resilience_exercises', 'ix_resilience_exercises_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['resilience_exercises', 'ix_resilience_exercises_tenant_created', ['tenant_id', 'created_at desc'], false, 'btree'],
-  ['runbook_executions', 'ix_runbook_executions_runbook_version_id', ['runbook_version_id'], false, 'btree'],
-  ['runbook_executions', 'ix_runbook_executions_health_incident_id', ['health_incident_id'], false, 'btree'],
-  ['runbook_executions', 'ix_runbook_executions_change_request_id', ['change_request_id'], false, 'btree'],
-  ['runbook_executions', 'ix_runbook_executions_execution_mode_concept_id', ['execution_mode_concept_id'], false, 'btree'],
-  ['runbook_executions', 'ix_runbook_executions_result_concept_id', ['result_concept_id'], false, 'btree'],
-  ['runbook_executions', 'ix_runbook_executions_initiated_by_user_id', ['initiated_by_user_id'], false, 'btree'],
-  ['runbook_versions', 'ix_runbook_versions_runbook_id', ['runbook_id'], false, 'btree'],
-  ['runbook_versions', 'ix_runbook_versions_approved_by_user_id', ['approved_by_user_id'], false, 'btree'],
-  ['runbook_versions', 'uk_runbook_versions_runbook_version', ['runbook_id', 'version_number'], true, 'btree'],
   ['runbooks', 'ix_runbooks_tenant_id', ['tenant_id'], false, 'btree'],
   ['runbooks', 'ix_runbooks_service_component_id', ['service_component_id'], false, 'btree'],
   ['runbooks', 'ix_runbooks_runbook_type_concept_id', ['runbook_type_concept_id'], false, 'btree'],
@@ -34,6 +31,17 @@ export const platformOpsIndexes2: readonly IndexTuple[] = [
   ['runbooks', 'ix_runbooks_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['runbooks', 'ix_runbooks_tenant_created', ['tenant_id', 'created_at desc'], false, 'btree'],
   ['runbooks', 'uk_runbooks_service_code', ['service_component_id', 'code'], true, 'btree'],
+  ['runbook_executions', 'ix_runbook_executions_runbook_version_id', ['runbook_version_id'], false, 'btree'],
+  ['runbook_executions', 'ix_runbook_executions_health_incident_id', ['health_incident_id'], false, 'btree'],
+  ['runbook_executions', 'ix_runbook_executions_change_request_id', ['change_request_id'], false, 'btree'],
+  ['runbook_executions', 'ix_runbook_executions_execution_mode_concept_id', ['execution_mode_concept_id'], false, 'btree'],
+  ['runbook_executions', 'ix_runbook_executions_result_concept_id', ['result_concept_id'], false, 'btree'],
+  ['runbook_executions', 'ix_runbook_executions_initiated_by_user_id', ['initiated_by_user_id'], false, 'btree'],
+  ['runbook_executions', 'brin_runbook_executions_created_at', ['created_at'], false, 'brin'],
+  ['runbook_versions', 'ix_runbook_versions_runbook_id', ['runbook_id'], false, 'btree'],
+  ['runbook_versions', 'ix_runbook_versions_approved_by_user_id', ['approved_by_user_id'], false, 'btree'],
+  ['runbook_versions', 'brin_runbook_versions_created_at', ['created_at'], false, 'brin'],
+  ['runbook_versions', 'uk_runbook_versions_runbook_version', ['runbook_id', 'version_number'], true, 'btree'],
   ['service_components', 'uq_service_components_code', ['code'], true, 'btree'],
   ['service_components', 'ix_service_components_tenant_id', ['tenant_id'], false, 'btree'],
   ['service_components', 'ix_service_components_component_type_concept_id', ['component_type_concept_id'], false, 'btree'],
@@ -72,6 +80,7 @@ export const platformOpsIndexes2: readonly IndexTuple[] = [
   ['service_ownerships', 'ix_service_ownerships_active', ['service_component_id', 'ownership_role_concept_id', 'effective_to'], false, 'btree'],
   ['slo_measurements', 'ix_slo_measurements_service_level_objective_id', ['service_level_objective_id'], false, 'btree'],
   ['slo_measurements', 'ix_slo_measurements_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['slo_measurements', 'brin_slo_measurements_created_at', ['created_at'], false, 'brin'],
   ['slo_measurements', 'ix_slo_measurements_objective_window', ['service_level_objective_id', 'window_end desc'], false, 'btree'],
   ['tool_registry', 'uq_tool_registry_code', ['code'], true, 'btree'],
   ['tool_registry', 'ix_tool_registry_tenant_id', ['tenant_id'], false, 'btree'],

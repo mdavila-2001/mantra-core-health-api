@@ -6,7 +6,7 @@
 
 ## Síntoma
 
-DDL aplicado a `database/SQL/99_migrations` falla, o la aplicación falla al arrancar tras un
+DDL aplicado a los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../../adr/ADR-0021-fuente-unica-de-ddl.md)) falla, o la aplicación falla al arrancar tras un
 cambio de esquema (`SchemaBootstrapService` con `ORM_SCHEMA_SYNC=safe`/`dry-run` reporta error).
 
 ## Diagnóstico

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `terminology`.
- * 83 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 84 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const terminologyIndexes: readonly IndexTuple[] = [
@@ -19,12 +19,7 @@ export const terminologyIndexes: readonly IndexTuple[] = [
   ['catalog_import_batches', 'ix_catalog_import_batches_file_id', ['file_id'], false, 'btree'],
   ['catalog_import_batches', 'ix_catalog_import_batches_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['catalog_import_batches', 'ix_catalog_import_batches_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
-  ['code_system_versions', 'ix_code_system_versions_code_system_id', ['code_system_id'], false, 'btree'],
-  ['code_system_versions', 'ix_code_system_versions_state_concept_id', ['state_concept_id'], false, 'btree'],
-  ['code_system_versions', 'ix_code_system_versions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['code_system_versions', 'ix_code_system_versions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['code_system_versions', 'uq_code_system_versions_code_system_id_version', ['code_system_id', 'version'], true, 'btree'],
-  ['code_system_versions', 'uq_code_system_versions_system_version', ['code_system_id', 'version'], true, 'btree'],
+  ['catalog_import_batches', 'brin_catalog_import_batches_recorded_at', ['recorded_at'], false, 'brin'],
   ['code_systems', 'uq_code_systems_internal_code', ['internal_code'], true, 'btree'],
   ['code_systems', 'uq_code_systems_canonical_url', ['canonical_url'], true, 'btree'],
   ['code_systems', 'ix_code_systems_source_id', ['source_id'], false, 'btree'],
@@ -32,6 +27,12 @@ export const terminologyIndexes: readonly IndexTuple[] = [
   ['code_systems', 'ix_code_systems_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['code_systems', 'ix_code_systems_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['code_systems', 'ix_code_systems_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['code_system_versions', 'ix_code_system_versions_code_system_id', ['code_system_id'], false, 'btree'],
+  ['code_system_versions', 'ix_code_system_versions_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['code_system_versions', 'ix_code_system_versions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['code_system_versions', 'ix_code_system_versions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['code_system_versions', 'uq_code_system_versions_code_system_id_version', ['code_system_id', 'version'], true, 'btree'],
+  ['code_system_versions', 'uq_code_system_versions_system_version', ['code_system_id', 'version'], true, 'btree'],
   ['concept_designations', 'ix_concept_designations_concept_id', ['concept_id'], false, 'btree'],
   ['concept_designations', 'ix_concept_designations_language_concept_id', ['language_concept_id'], false, 'btree'],
   ['concept_designations', 'ix_concept_designations_designation_type_concept_id', ['designation_type_concept_id'], false, 'btree'],
@@ -68,6 +69,12 @@ export const terminologyIndexes: readonly IndexTuple[] = [
   ['terminology_sources', 'ix_terminology_sources_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['terminology_sources', 'ix_terminology_sources_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['terminology_sources', 'ix_terminology_sources_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['value_sets', 'uq_value_sets_internal_code', ['internal_code'], true, 'btree'],
+  ['value_sets', 'uq_value_sets_canonical_url', ['canonical_url'], true, 'btree'],
+  ['value_sets', 'ix_value_sets_jurisdiction_concept_id', ['jurisdiction_concept_id'], false, 'btree'],
+  ['value_sets', 'ix_value_sets_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['value_sets', 'ix_value_sets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['value_sets', 'ix_value_sets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['value_set_members', 'ix_value_set_members_value_set_version_id', ['value_set_version_id'], false, 'btree'],
   ['value_set_members', 'ix_value_set_members_concept_id', ['concept_id'], false, 'btree'],
   ['value_set_members', 'ix_value_set_members_created_by_user_id', ['created_by_user_id'], false, 'btree'],
@@ -84,10 +91,4 @@ export const terminologyIndexes: readonly IndexTuple[] = [
   ['value_set_versions', 'ix_value_set_versions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['value_set_versions', 'uq_value_set_versions_value_set_id_version', ['value_set_id', 'version'], true, 'btree'],
   ['value_set_versions', 'uq_value_set_versions_set_version', ['value_set_id', 'version'], true, 'btree'],
-  ['value_sets', 'uq_value_sets_internal_code', ['internal_code'], true, 'btree'],
-  ['value_sets', 'uq_value_sets_canonical_url', ['canonical_url'], true, 'btree'],
-  ['value_sets', 'ix_value_sets_jurisdiction_concept_id', ['jurisdiction_concept_id'], false, 'btree'],
-  ['value_sets', 'ix_value_sets_state_concept_id', ['state_concept_id'], false, 'btree'],
-  ['value_sets', 'ix_value_sets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['value_sets', 'ix_value_sets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];

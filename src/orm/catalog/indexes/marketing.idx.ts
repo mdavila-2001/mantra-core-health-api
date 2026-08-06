@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `marketing`.
- * 83 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 84 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const marketingIndexes: readonly IndexTuple[] = [
@@ -27,6 +27,15 @@ export const marketingIndexes: readonly IndexTuple[] = [
   ['content_templates', 'ix_content_templates_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['content_templates', 'ix_content_templates_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['content_templates', 'uq_content_templates_messaging_template_id_version', ['messaging_template_id', 'version'], true, 'btree'],
+  ['journeys', 'uq_journeys_code', ['code'], true, 'btree'],
+  ['journeys', 'ix_journeys_tenant_id', ['tenant_id'], false, 'btree'],
+  ['journeys', 'ix_journeys_entry_trigger_concept_id', ['entry_trigger_concept_id'], false, 'btree'],
+  ['journeys', 'ix_journeys_entry_segment_id', ['entry_segment_id'], false, 'btree'],
+  ['journeys', 'ix_journeys_goal_metric_concept_id', ['goal_metric_concept_id'], false, 'btree'],
+  ['journeys', 'ix_journeys_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['journeys', 'ix_journeys_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['journeys', 'ix_journeys_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['journeys', 'ix_journeys_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
   ['journey_enrollments', 'ix_journey_enrollments_journey_id', ['journey_id'], false, 'btree'],
   ['journey_enrollments', 'ix_journey_enrollments_member_type_concept_id', ['member_type_concept_id'], false, 'btree'],
   ['journey_enrollments', 'ix_journey_enrollments_current_step_id', ['current_step_id'], false, 'btree'],
@@ -42,15 +51,6 @@ export const marketingIndexes: readonly IndexTuple[] = [
   ['journey_steps', 'ix_journey_steps_branch_step_id', ['branch_step_id'], false, 'btree'],
   ['journey_steps', 'ix_journey_steps_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['journey_steps', 'ix_journey_steps_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['journeys', 'uq_journeys_code', ['code'], true, 'btree'],
-  ['journeys', 'ix_journeys_tenant_id', ['tenant_id'], false, 'btree'],
-  ['journeys', 'ix_journeys_entry_trigger_concept_id', ['entry_trigger_concept_id'], false, 'btree'],
-  ['journeys', 'ix_journeys_entry_segment_id', ['entry_segment_id'], false, 'btree'],
-  ['journeys', 'ix_journeys_goal_metric_concept_id', ['goal_metric_concept_id'], false, 'btree'],
-  ['journeys', 'ix_journeys_state_concept_id', ['state_concept_id'], false, 'btree'],
-  ['journeys', 'ix_journeys_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['journeys', 'ix_journeys_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['journeys', 'ix_journeys_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
   ['marketing_campaigns', 'uq_marketing_campaigns_code', ['code'], true, 'btree'],
   ['marketing_campaigns', 'ix_marketing_campaigns_tenant_id', ['tenant_id'], false, 'btree'],
   ['marketing_campaigns', 'ix_marketing_campaigns_campaign_type_concept_id', ['campaign_type_concept_id'], false, 'btree'],
@@ -72,11 +72,7 @@ export const marketingIndexes: readonly IndexTuple[] = [
   ['marketing_touchpoints', 'ix_marketing_touchpoints_channel_concept_id', ['channel_concept_id'], false, 'btree'],
   ['marketing_touchpoints', 'ix_marketing_touchpoints_content_template_id', ['content_template_id'], false, 'btree'],
   ['marketing_touchpoints', 'ix_marketing_touchpoints_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
-  ['segment_members', 'ix_segment_members_segment_id', ['segment_id'], false, 'btree'],
-  ['segment_members', 'ix_segment_members_member_type_concept_id', ['member_type_concept_id'], false, 'btree'],
-  ['segment_members', 'ix_segment_members_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['segment_members', 'ix_segment_members_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['segment_members', 'ix_segment_members_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['marketing_touchpoints', 'brin_marketing_touchpoints_recorded_at', ['recorded_at'], false, 'brin'],
   ['segments', 'uq_segments_code', ['code'], true, 'btree'],
   ['segments', 'ix_segments_tenant_id', ['tenant_id'], false, 'btree'],
   ['segments', 'ix_segments_segment_type_concept_id', ['segment_type_concept_id'], false, 'btree'],
@@ -85,6 +81,11 @@ export const marketingIndexes: readonly IndexTuple[] = [
   ['segments', 'ix_segments_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['segments', 'ix_segments_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['segments', 'ix_segments_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
+  ['segment_members', 'ix_segment_members_segment_id', ['segment_id'], false, 'btree'],
+  ['segment_members', 'ix_segment_members_member_type_concept_id', ['member_type_concept_id'], false, 'btree'],
+  ['segment_members', 'ix_segment_members_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['segment_members', 'ix_segment_members_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['segment_members', 'ix_segment_members_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['tracked_links', 'uq_tracked_links_code', ['code'], true, 'btree'],
   ['tracked_links', 'ix_tracked_links_campaign_id', ['campaign_id'], false, 'btree'],
   ['tracked_links', 'ix_tracked_links_state_concept_id', ['state_concept_id'], false, 'btree'],

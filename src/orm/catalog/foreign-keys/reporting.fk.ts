@@ -7,17 +7,17 @@ import type { ForeignKeyTuple } from '../catalog.types';
  */
 export const reportingForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['dashboards', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['dashboards', 'required_permission_id', 'authz', 'permissions', 'id'],
+  ['dashboards', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['dashboards', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['dashboards', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['dashboard_widgets', 'created_by_user_id', 'iam', 'users', 'id'],
   ['dashboard_widgets', 'dashboard_id', 'reporting', 'dashboards', 'id'],
   ['dashboard_widgets', 'report_definition_id', 'reporting', 'report_definitions', 'id'],
   ['dashboard_widgets', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['dashboard_widgets', 'visualization_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['dashboard_widgets', 'widget_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['dashboards', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['dashboards', 'required_permission_id', 'authz', 'permissions', 'id'],
-  ['dashboards', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['dashboards', 'tenant_id', 'directory', 'tenants', 'id'],
-  ['dashboards', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['report_columns', 'aggregation_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['report_columns', 'created_by_user_id', 'iam', 'users', 'id'],
   ['report_columns', 'report_definition_id', 'reporting', 'report_definitions', 'id'],

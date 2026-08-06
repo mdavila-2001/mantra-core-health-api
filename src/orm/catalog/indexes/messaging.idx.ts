@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `messaging`.
- * 102 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 106 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const messagingIndexes: readonly IndexTuple[] = [
@@ -10,18 +10,22 @@ export const messagingIndexes: readonly IndexTuple[] = [
   ['dead_letter_jobs', 'ix_dead_letter_jobs_queue_id', ['queue_id'], false, 'btree'],
   ['dead_letter_jobs', 'ix_dead_letter_jobs_original_job_id', ['original_job_id'], false, 'btree'],
   ['dead_letter_jobs', 'ix_dead_letter_jobs_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['dead_letter_jobs', 'brin_dead_letter_jobs_recorded_at', ['recorded_at'], false, 'brin'],
   ['delivery_receipts', 'ix_delivery_receipts_delivery_id', ['delivery_id'], false, 'btree'],
   ['delivery_receipts', 'ix_delivery_receipts_receipt_type_concept_id', ['receipt_type_concept_id'], false, 'btree'],
   ['delivery_receipts', 'ix_delivery_receipts_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['delivery_receipts', 'brin_delivery_receipts_recorded_at', ['recorded_at'], false, 'brin'],
   ['domain_events', 'ix_domain_events_tenant_id', ['tenant_id'], false, 'btree'],
   ['domain_events', 'ix_domain_events_causation_id', ['causation_id'], false, 'btree'],
   ['domain_events', 'ix_domain_events_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['domain_events', 'ix_domain_events_tenant_id_recorded_at', ['tenant_id', 'recorded_at desc'], false, 'btree'],
+  ['domain_events', 'brin_domain_events_recorded_at', ['recorded_at'], false, 'brin'],
   ['event_deliveries', 'ix_event_deliveries_domain_event_id', ['domain_event_id'], false, 'btree'],
   ['event_deliveries', 'ix_event_deliveries_subscription_id', ['subscription_id'], false, 'btree'],
   ['event_deliveries', 'ix_event_deliveries_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['event_deliveries', 'ix_event_deliveries_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['event_deliveries', 'uq_event_deliveries_domain_event_id_attempt_number', ['domain_event_id', 'attempt_number'], true, 'btree'],
+  ['event_deliveries', 'brin_event_deliveries_recorded_at', ['recorded_at'], false, 'brin'],
   ['event_subscriptions', 'ix_event_subscriptions_tenant_id', ['tenant_id'], false, 'btree'],
   ['event_subscriptions', 'ix_event_subscriptions_delivery_mode_concept_id', ['delivery_mode_concept_id'], false, 'btree'],
   ['event_subscriptions', 'ix_event_subscriptions_state_concept_id', ['state_concept_id'], false, 'btree'],

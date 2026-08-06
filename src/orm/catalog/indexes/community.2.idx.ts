@@ -2,11 +2,12 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `community` (parte 2/2).
- * 56 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 57 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const communityIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['review_responses', 'ix_review_responses_responder_public_profile_id', ['responder_public_profile_id'], false, 'btree'],
   ['review_responses', 'ix_review_responses_moderation_status_concept_id', ['moderation_status_concept_id'], false, 'btree'],
   ['review_responses', 'ix_review_responses_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['review_responses', 'ix_review_responses_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
@@ -19,7 +20,7 @@ export const communityIndexes2: readonly IndexTuple[] = [
   ['service_reviews', 'ix_service_reviews_publication_status_concept_id', ['publication_status_concept_id'], false, 'btree'],
   ['service_reviews', 'ix_service_reviews_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['service_reviews', 'ix_service_reviews_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['service_reviews', 'uq_service_reviews_verified_encounter', ['reviewer_patient_profile_id', 'target_public_profile_id', 'verified_encounter_id'], true, 'btree'],
+  ['service_reviews', 'uq_service_reviews_verified_encounter', ['reviewer_patient_profile_id', 'target_public_profile_id', 'verified_encounter_id'], true, 'btree', 'verified_encounter_id IS NOT NULL'],
   ['social_follows', 'ix_social_follows_follower_profile_id', ['follower_profile_id'], false, 'btree'],
   ['social_follows', 'ix_social_follows_followable_type_concept_id', ['followable_type_concept_id'], false, 'btree'],
   ['social_follows', 'ix_social_follows_status_concept_id', ['status_concept_id'], false, 'btree'],

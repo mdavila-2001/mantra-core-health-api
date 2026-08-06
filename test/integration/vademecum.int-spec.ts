@@ -30,14 +30,16 @@ describe('Seed de Vademécum de medicamentos (DB real)', () => {
     db = new pg.Client(ADMIN);
     await db.connect();
 
-    // Aplica el seed (idempotente).
+    // Aplica el seed (idempotente). Vive en `SQL/patches/` de la raíz del
+    // workspace —fuera de `apply_all.sql`— porque no se deriva de los `.puml` ni
+    // lo consume `load_seeds.py`. Ver `docs/architecture/ddl-sources.md`.
     const sql = readFileSync(
       join(
         process.cwd(),
-        'database',
+        '..',
         'SQL',
-        '98_seeds',
-        'vademecum_medications.sql',
+        'patches',
+        '2026-07-30_vademecum_dev_seed.sql',
       ),
       'utf8',
     );

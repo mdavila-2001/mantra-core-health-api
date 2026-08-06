@@ -2,11 +2,13 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `accounting` (parte 2/2).
- * 164 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 167 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const accountingIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['fiscal_periods', 'ix_fiscal_periods_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['fiscal_periods', 'ix_fiscal_periods_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['fiscal_periods', 'ix_fiscal_periods_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['fiscal_years', 'ix_fiscal_years_practice_id', ['practice_id'], false, 'btree'],
   ['fiscal_years', 'ix_fiscal_years_status_concept_id', ['status_concept_id'], false, 'btree'],
@@ -105,6 +107,7 @@ export const accountingIndexes2: readonly IndexTuple[] = [
   ['liability_postings', 'ix_liability_postings_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['liability_postings', 'ix_liability_postings_liability_effective', ['liability_id', 'effective_date'], false, 'btree'],
   ['liability_postings', 'ix_liability_postings_ledger_liability', ['ledger_entry_id', 'liability_id'], false, 'btree'],
+  ['liability_postings', 'brin_liability_postings_created_at', ['created_at'], false, 'brin'],
   ['liability_schedules', 'uq_liability_schedules_liability_id_installment_number', ['liability_id', 'installment_number'], true, 'btree'],
   ['liability_schedules', 'ix_liability_schedules_liability_id', ['liability_id'], false, 'btree'],
   ['liability_schedules', 'ix_liability_schedules_currency_concept_id', ['currency_concept_id'], false, 'btree'],

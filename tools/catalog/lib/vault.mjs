@@ -10,9 +10,60 @@ export const VAULT =
 const ENT = join(VAULT, 'Entidades');
 const FKDIR = join(VAULT, 'FK');
 
+/**
+ * Lee una nota normalizando los finales de línea.
+ *
+ * La bóveda se edita en Windows y sus 2 547 notas están guardadas con CRLF,
+ * mientras que todos los patrones de este módulo se escribieron con `\n`:
+ * ```` /```puml\n/ ````, `/## Apunta a →\n- \[\[E/` y `/^  - tipo\/(\S+)$/`
+ * (donde `\S+` llegaba a capturar el `\r`, con lo que ningún `tipo/index_set`
+ * casaba nunca). El resultado no era un fallo ruidoso sino una bóveda que parecía
+ * vacía: el generador escribía un catálogo con casi nada y borraba el resto.
+ * Normalizar al leer es lo que mantiene ese detalle de plataforma fuera de cada
+ * expresión regular del archivo.
+ */
+const read = (path) => readFileSync(path, 'utf8').replaceAll('\r\n', '\n');
+
 const puml = (t) => {
   const m = t.match(/```puml\n([\s\S]*?)```/);
   return m ? m[1].split('\n') : [];
+};
+
+/**
+ * Separa `SPEC … WHERE predicado` respetando paréntesis y comillas.
+ *
+ * Es el mismo algoritmo que `_split_where` en `salud-db/gen_ddl.py`, a propósito:
+ * las dos capas leen el MISMO `<<INDEX_SET>>` y tienen que entenderlo igual, o el
+ * DDL de `SQL/` y el catálogo del ORM describen índices distintos con el mismo
+ * nombre. Un `IN ('a','b')` dentro del predicado no debe partir la cadena.
+ *
+ * Devuelve `[spec, predicado|null]`.
+ */
+const splitWhere = (s) => {
+  const isWordChar = (c) => /[a-z0-9_]/i.test(c ?? '');
+  const up = s.toUpperCase();
+  let depth = 0;
+  let inQuote = false;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (inQuote) {
+      if (ch === "'") inQuote = false;
+    } else if (ch === "'") {
+      inQuote = true;
+    } else if (ch === '(') {
+      depth++;
+    } else if (ch === ')') {
+      depth--;
+    } else if (
+      depth === 0 &&
+      up.startsWith('WHERE', i) &&
+      !isWordChar(s[i - 1]) &&
+      !isWordChar(s[i + 5])
+    ) {
+      return [s.slice(0, i).trimEnd(), s.slice(i + 5).trim()];
+    }
+  }
+  return [s, null];
 };
 
 export function readVault() {
@@ -25,17 +76,24 @@ export function readVault() {
     const dot = base.indexOf('.');
     const schema = base.slice(0, dot);
     const table = base.slice(dot + 1);
-    const text = readFileSync(join(ENT, file), 'utf8');
+    const text = read(join(ENT, file));
     const tipo = (text.match(/^  - tipo\/(\S+)$/m) || [, 'plain'])[1];
     const module = (text.match(/^  - modulo\/(\d+)$/m) || [, null])[1];
 
     if (tipo === 'index_set') {
       const list = [];
       for (const raw of puml(text)) {
+        // Los tipos son los que acepta `IDX_HEAD_RE` de gen_ddl.py. `UX` faltaba
+        // aquí: un índice declarado con esa etiqueta se descartaba en silencio, y
+        // por eso `ux_account_activations_token_hash` (v4.0.8) nunca llegó al
+        // catálogo. `FT` se conserva por compatibilidad con notas antiguas.
         const m = raw.match(
-          /^\s*(PK|IX|UK|FT|GIN|GIST)\s+(\S+)\s*:\s*\(([^)]*)\)\s*(.*)$/,
+          /^\s*(PK|IX|UK|UX|FT|BRIN|GIN|GIST|HASH)\s+(\S+)\s*:\s*\(([^)]*)\)\s*(.*)$/,
         );
         if (!m) continue;
+        // El predicado se separa ANTES de buscar UNIQUE y el método, para que una
+        // palabra dentro del WHERE no se lea como parte de la especificación.
+        const [spec, where] = splitWhere(m[4]);
         list.push({
           kind: m[1],
           name: m[2],
@@ -46,11 +104,15 @@ export function readVault() {
             .split(',')
             .map((c) => c.trim().toLowerCase())
             .filter(Boolean),
-          unique: /UNIQUE/i.test(m[4]),
-          method: (m[4].match(/(BTREE|GIN|GIST|HASH|BRIN|IVFFLAT|HNSW)/i) || [
+          unique: /UNIQUE/i.test(spec),
+          method: (spec.match(/(BTREE|GIN|GIST|HASH|BRIN|IVFFLAT|HNSW)/i) || [
             ,
             'BTREE',
           ])[1].toLowerCase(),
+          // Índice parcial. Perder el predicado no degrada el índice: lo convierte
+          // en otro. Un UNIQUE total sobre `external_subject` rechazaría un alta
+          // legítima cuyo sujeto ya tuvo una credencial revocada.
+          ...(where ? { where } : {}),
         });
       }
       indexSets.set(`${schema}.${table.replace(/^idxset_/, '')}`, list);
@@ -111,7 +173,7 @@ export function readVault() {
       const base = f.replace(/^Ext /, '').replace(/\.md$/, '');
       const target = entities.get(base);
       if (!target) continue;
-      const text = readFileSync(join(dir, f), 'utf8');
+      const text = read(join(dir, f));
       const tb = text.match(/```text\n([\s\S]*?)```/);
       for (const raw of tb ? tb[1].split('\n') : []) {
         const m = raw.match(
@@ -141,7 +203,7 @@ export function readVault() {
     if (parts.length < 3) continue;
     const [schema, table] = parts;
     const column = parts.slice(2).join('.');
-    const text = readFileSync(join(FKDIR, file), 'utf8');
+    const text = read(join(FKDIR, file));
     const t = text.match(
       /## Apunta a →\n- \[\[E ([a-z_0-9]+)\.([a-z_0-9]+)[|\]]/,
     );
@@ -156,7 +218,40 @@ export function readVault() {
     });
   }
 
+  assertVaultLooksRead({ entities, indexSets, foreignKeys });
   return { entities, indexSets, foreignKeys };
+}
+
+/**
+ * Aborta si la bóveda se leyó pero casi nada se entendió.
+ *
+ * El generador reescribe el catálogo completo: escribe lo que encontró y borra el
+ * resto. Cuando el parseo falla en masa —una bóveda a medio clonar, un cambio de
+ * formato de las notas, o los CRLF que rompían todos los patrones de este
+ * archivo— el resultado no es un error sino un catálogo vacío que pisa a uno
+ * bueno, y el daño solo se nota al arrancar la aplicación.
+ *
+ * Los umbrales son deliberadamente bajos: no verifican que el catálogo esté
+ * completo, solo que el parseo no se haya derrumbado. Son un fusible, no un test.
+ */
+function assertVaultLooksRead({ entities, indexSets, foreignKeys }) {
+  const MIN = { entities: 500, indexSets: 200, foreignKeys: 500 };
+  const observed = {
+    entities: entities.size,
+    indexSets: indexSets.size,
+    foreignKeys: foreignKeys.length,
+  };
+  const short = Object.keys(MIN).filter((k) => observed[k] < MIN[k]);
+  if (short.length === 0) return;
+  const detail = short
+    .map((k) => `${k}: ${observed[k]} (se esperaban >= ${MIN[k]})`)
+    .join(', ');
+  throw new Error(
+    `La bóveda de ${VAULT} se leyó pero casi nada se pudo interpretar — ${detail}.\n` +
+      'Generar el catálogo ahora lo dejaría vacío y borraría el actual, así que se aborta.\n' +
+      'Revisá que SALUD_VAULT apunte a la bóveda correcta y que las notas conserven ' +
+      'su formato (bloque ```puml, tag `tipo/index_set`, sección "## Apunta a →").',
+  );
 }
 
 // Primary key declarada por la bóveda (por defecto `id`).

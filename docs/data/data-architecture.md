@@ -20,7 +20,7 @@
 ## Por qué el DDL manda sobre el código
 
 `src/modules/README.md`: "las entidades se generan, no se escriben". Si algo no cuadra entre el
-modelo de negocio y el código, se corrige el DDL (`database/SQL/99_migrations`) y se regenera con
+modelo de negocio y el código, se corrige el DDL (los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md))) y se regenera con
 `yarn orm:gen` — nunca se parchea la entidad TypeScript directamente. Ver
 [ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md).
 

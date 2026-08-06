@@ -119,7 +119,7 @@ const INDEX_BATCH_SIZE = 50;
  */
 function buildCreateIndex(
   schema: string,
-  [table, name, columns, unique, method]: IndexTuple,
+  [table, name, columns, unique, method, where]: IndexTuple,
 ): string {
   // Mismo motivo que en las claves foráneas: por encima de 63 bytes PostgreSQL
   // guarda un nombre distinto del que se le pidió y la comprobación de
@@ -141,8 +141,12 @@ function buildCreateIndex(
   // garantizar unicidad. Si el modelo declara ambas cosas, manda la unicidad,
   // que es una restricción de negocio, sobre el método, que es una optimización.
   const effectiveMethod = unique ? 'btree' : method;
+  // Índice parcial: el predicado se emite tal como lo declara el modelo. En un
+  // índice único forma parte de la regla, no del afinado — omitirlo produciría un
+  // UNIQUE sobre toda la tabla, que es una restricción distinta y más estricta.
+  const whereClause = where ? ` WHERE ${where}` : '';
   return (
     `CREATE ${uniqueKeyword}INDEX IF NOT EXISTS "${safeName}" ` +
-    `ON "${schema}"."${table}" USING ${effectiveMethod} (${columnList})`
+    `ON "${schema}"."${table}" USING ${effectiveMethod} (${columnList})${whereClause}`
   );
 }

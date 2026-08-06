@@ -2,16 +2,11 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `chart`.
- * 78 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 80 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const chartIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
-  ['care_plan_activities', 'ix_care_plan_activities_care_plan_id', ['care_plan_id'], false, 'btree'],
-  ['care_plan_activities', 'ix_care_plan_activities_activity_concept_id', ['activity_concept_id'], false, 'btree'],
-  ['care_plan_activities', 'ix_care_plan_activities_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['care_plan_activities', 'ix_care_plan_activities_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['care_plan_activities', 'ix_care_plan_activities_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['care_plans', 'ix_care_plans_patient_profile_id', ['patient_profile_id'], false, 'btree'],
   ['care_plans', 'ix_care_plans_condition_id', ['condition_id'], false, 'btree'],
   ['care_plans', 'ix_care_plans_encounter_id', ['encounter_id'], false, 'btree'],
@@ -21,6 +16,11 @@ export const chartIndexes: readonly IndexTuple[] = [
   ['care_plans', 'ix_care_plans_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['care_plans', 'ix_care_plans_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['care_plans', 'ix_care_plans_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['care_plan_activities', 'ix_care_plan_activities_care_plan_id', ['care_plan_id'], false, 'btree'],
+  ['care_plan_activities', 'ix_care_plan_activities_activity_concept_id', ['activity_concept_id'], false, 'btree'],
+  ['care_plan_activities', 'ix_care_plan_activities_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['care_plan_activities', 'ix_care_plan_activities_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['care_plan_activities', 'ix_care_plan_activities_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['chart_template_assignments', 'ix_chart_template_assignments_template_id', ['template_id'], false, 'btree'],
   ['chart_template_assignments', 'ix_chart_template_assignments_practice_id', ['practice_id'], false, 'btree'],
   ['chart_template_assignments', 'ix_chart_template_assignments_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
@@ -50,10 +50,7 @@ export const chartIndexes: readonly IndexTuple[] = [
   ['clinical_note_versions', 'ix_clinical_note_versions_release_eligibility_concept_id', ['release_eligibility_concept_id'], false, 'btree'],
   ['clinical_note_versions', 'ix_clinical_note_versions_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['clinical_note_versions', 'uq_clinical_note_versions_clinical_note_id_version_number', ['clinical_note_id', 'version_number'], true, 'btree'],
-  ['document_record_files', 'ix_document_record_files_document_record_id', ['document_record_id'], false, 'btree'],
-  ['document_record_files', 'ix_document_record_files_file_id', ['file_id'], false, 'btree'],
-  ['document_record_files', 'ix_document_record_files_content_role_concept_id', ['content_role_concept_id'], false, 'btree'],
-  ['document_record_files', 'ix_document_record_files_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['clinical_note_versions', 'brin_clinical_note_versions_recorded_at', ['recorded_at'], false, 'brin'],
   ['document_records', 'ix_document_records_patient_profile_id', ['patient_profile_id'], false, 'btree'],
   ['document_records', 'ix_document_records_tenant_id', ['tenant_id'], false, 'btree'],
   ['document_records', 'ix_document_records_encounter_id', ['encounter_id'], false, 'btree'],
@@ -66,6 +63,10 @@ export const chartIndexes: readonly IndexTuple[] = [
   ['document_records', 'ix_document_records_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['document_records', 'ix_document_records_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
   ['document_records', 'ix_document_records_patient_profile_id_updated_at', ['tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['document_record_files', 'ix_document_record_files_document_record_id', ['document_record_id'], false, 'btree'],
+  ['document_record_files', 'ix_document_record_files_file_id', ['file_id'], false, 'btree'],
+  ['document_record_files', 'ix_document_record_files_content_role_concept_id', ['content_role_concept_id'], false, 'btree'],
+  ['document_record_files', 'ix_document_record_files_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['note_release_events', 'ix_note_release_events_clinical_note_version_id', ['clinical_note_version_id'], false, 'btree'],
   ['note_release_events', 'ix_note_release_events_action_concept_id', ['action_concept_id'], false, 'btree'],
   ['note_release_events', 'ix_note_release_events_patient_profile_id', ['patient_profile_id'], false, 'btree'],
@@ -73,6 +74,7 @@ export const chartIndexes: readonly IndexTuple[] = [
   ['note_release_events', 'ix_note_release_events_reason_concept_id', ['reason_concept_id'], false, 'btree'],
   ['note_release_events', 'ix_note_release_events_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['note_release_events', 'ix_note_release_events_patient_profile_id_recorded_at', ['patient_profile_id', 'recorded_at desc'], false, 'btree'],
+  ['note_release_events', 'brin_note_release_events_recorded_at', ['recorded_at'], false, 'brin'],
   ['physical_exam_findings', 'ix_physical_exam_findings_clinical_note_version_id', ['clinical_note_version_id'], false, 'btree'],
   ['physical_exam_findings', 'ix_physical_exam_findings_body_system_concept_id', ['body_system_concept_id'], false, 'btree'],
   ['physical_exam_findings', 'ix_physical_exam_findings_finding_concept_id', ['finding_concept_id'], false, 'btree'],
