@@ -33,7 +33,9 @@ import type {
  * lectura. El servicio deja de recibir entidades gestionadas por MikroORM.
  */
 @Injectable()
-export class PostgresWaitlistAdapter implements WaitlistReadPort, WaitlistWritePort {
+export class PostgresWaitlistAdapter
+  implements WaitlistReadPort, WaitlistWritePort
+{
   constructor(
     @Inject(persistenceSessionToken(SCHEDULING_MODULE))
     private readonly session: PersistenceSession,
@@ -165,9 +167,15 @@ export class PostgresWaitlistAdapter implements WaitlistReadPort, WaitlistWriteP
     return this.session.write(
       'waitlist.findBookingScheduleForUpdate',
       async (em) => {
-        const booking = await this.repository.findBookingByIdForUpdate(em, bookingId);
+        const booking = await this.repository.findBookingByIdForUpdate(
+          em,
+          bookingId,
+        );
         if (!booking) return null;
-        const slot = await this.repository.findSlotById(em, booking.bookableSlotId);
+        const slot = await this.repository.findSlotById(
+          em,
+          booking.bookableSlotId,
+        );
         if (!slot) return null;
         return { bookingId: booking.id, slotStartAt: slot.startAt };
       },
@@ -187,7 +195,9 @@ export class PostgresWaitlistAdapter implements WaitlistReadPort, WaitlistWriteP
             bookingId: input.bookingId,
             channelConceptId: input.channelConceptId,
             offsetMinutes: offset,
-            scheduledAt: new Date(input.slotStartAt.getTime() - offset * 60_000),
+            scheduledAt: new Date(
+              input.slotStartAt.getTime() - offset * 60_000,
+            ),
             statusConceptId: input.statusConceptId,
             actorUserId: input.actorUserId,
           });
@@ -230,7 +240,9 @@ export class PostgresWaitlistAdapter implements WaitlistReadPort, WaitlistWriteP
     return this.session.write(
       'waitlist.markRemindersSent',
       async (em) => {
-        const reminders = await em.find(AppointmentReminders, { id: { $in: [...ids] } });
+        const reminders = await em.find(AppointmentReminders, {
+          id: { $in: [...ids] },
+        });
         for (const reminder of reminders) {
           reminder.statusConceptId = statusConceptId;
           reminder.sentAt = sentAt;

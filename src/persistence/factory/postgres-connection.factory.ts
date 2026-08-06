@@ -64,7 +64,10 @@ async function createAdditionalOrm(
     // competiría por el advisory lock del bootstrap. Además, la conexión de
     // lectura se autentica con un rol que -si el mínimo privilegio se aplicó
     // bien- ni siquiera puede crear una tabla.
-    schemaGenerator: { createForeignKeyConstraints: false, disableForeignKeys: false },
+    schemaGenerator: {
+      createForeignKeyConstraints: false,
+      disableForeignKeys: false,
+    },
   });
 }
 
@@ -111,8 +114,7 @@ export async function registerPostgresConnections(
   // la separación es únicamente de credencial -mismo host, rol lector-, no hay
   // réplica y declararla llevaría al enrutado a asumir un retraso que no existe
   // y, peor, a permitir rutas de consistencia eventual que aquí no aplican.
-  const differentServer =
-    read.host !== write.host || read.port !== write.port;
+  const differentServer = read.host !== write.host || read.port !== write.port;
   readConnection.withCapabilities({
     ...POSTGRES_CAPABILITIES,
     readReplica: differentServer,

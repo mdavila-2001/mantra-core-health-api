@@ -57,6 +57,10 @@ export function createPersistenceSessionProvider(module: string): Provider {
       isModuleRouted(module)
         ? new RoutedPersistenceSession(module, sessions, transactions)
         : new DirectPersistenceSession(em),
-    inject: [EntityManager, PersistenceSessionFactory, PostgresTransactionManager],
+    inject: [
+      EntityManager,
+      PersistenceSessionFactory,
+      PostgresTransactionManager,
+    ],
   };
 }

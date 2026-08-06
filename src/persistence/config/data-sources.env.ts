@@ -129,9 +129,13 @@ const DEFAULT_POOL_MAX = 10;
 
 /** Lee la configuración heredada sin volver a validarla. */
 function readLegacy(source: NodeJS.ProcessEnv): LegacyDbEnv {
-  const missing = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'].filter(
-    (key) => !source[key],
-  );
+  const missing = [
+    'DB_HOST',
+    'DB_PORT',
+    'DB_USER',
+    'DB_PASSWORD',
+    'DB_NAME',
+  ].filter((key) => !source[key]);
   if (missing.length > 0) {
     throw new DataSourceConfigurationError(
       `Faltan variables de conexión obligatorias: ${missing.join(', ')}.`,

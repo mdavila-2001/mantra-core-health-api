@@ -94,7 +94,10 @@ export interface WaitlistReadPort {
  */
 export interface WaitlistWritePort {
   /** Da de alta a un paciente en la lista de espera. */
-  enroll(input: EnrollWaitlistInput, context: WriteContext): Promise<{ id: string }>;
+  enroll(
+    input: EnrollWaitlistInput,
+    context: WriteContext,
+  ): Promise<{ id: string }>;
 
   /** Cupo del slot, leído dentro de la transacción de escritura. */
   findSlotCapacity(

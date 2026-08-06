@@ -62,11 +62,12 @@ export class PersistenceSessionFactory {
   ): Promise<T> {
     const inTransaction = unwrapTransaction(context.transaction);
     if (inTransaction) {
-      return this.run(
-        work,
-        inTransaction,
-        { connectionName: 'transaction', engine: 'postgresql', operation, kind: 'read' },
-      );
+      return this.run(work, inTransaction, {
+        connectionName: 'transaction',
+        engine: 'postgresql',
+        operation,
+        kind: 'read',
+      });
     }
 
     const resolved = this.router.resolve({
@@ -75,7 +76,10 @@ export class PersistenceSessionFactory {
       consistency: context.consistency,
       tenantId: context.tenantId,
     });
-    const em = this.entityManagerOf(resolved.connection, resolved.connectionName);
+    const em = this.entityManagerOf(
+      resolved.connection,
+      resolved.connectionName,
+    );
 
     try {
       return await this.run(work, em, {
@@ -127,7 +131,10 @@ export class PersistenceSessionFactory {
       engine: resolved.connection.engine,
       requestedBy: `${module}.${operation}`,
     });
-    const em = this.entityManagerOf(resolved.connection, resolved.connectionName);
+    const em = this.entityManagerOf(
+      resolved.connection,
+      resolved.connectionName,
+    );
 
     return this.run(work, em, {
       connectionName: resolved.connectionName,
@@ -167,7 +174,8 @@ export class PersistenceSessionFactory {
     // respuesta. La comparación es por huella y no por nombre, porque los dos
     // nombres lógicos pueden apuntar a la misma instancia.
     const primary = this.router.resolve({ module, operation: 'write' });
-    if (primary.connection.fingerprint === original.fingerprint) throw normalized;
+    if (primary.connection.fingerprint === original.fingerprint)
+      throw normalized;
 
     const startedAt = process.hrtime.bigint();
     const em = this.entityManagerOf(primary.connection, primary.connectionName);

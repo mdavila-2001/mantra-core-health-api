@@ -70,7 +70,9 @@ export const POSTGRES_CAPABILITIES: AdapterCapabilities = {
  * replica set: declararlas disponibles sería exactamente la falsa atomicidad
  * que el §15 quiere evitar.
  */
-export const ENGINE_CAPABILITIES: Readonly<Record<string, AdapterCapabilities>> = {
+export const ENGINE_CAPABILITIES: Readonly<
+  Record<string, AdapterCapabilities>
+> = {
   postgresql: POSTGRES_CAPABILITIES,
   mongodb: {
     transactions: false,

@@ -95,7 +95,8 @@ export class DataSourceRouter {
     }
 
     const needsPrimary =
-      route.consistency === 'strong' || route.consistency === 'read-after-write';
+      route.consistency === 'strong' ||
+      route.consistency === 'read-after-write';
     const target = needsPrimary ? rule.write : rule.read;
     const connection = this.registry.get(target);
     // El desvío se decide comparando huellas, no nombres. Cuando lectura y

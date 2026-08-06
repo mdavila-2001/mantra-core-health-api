@@ -69,10 +69,14 @@ export function validateRoutingRules(
     const writeRole = roleOf(rule.write);
 
     if (readRole === undefined) {
-      problems.push(`«${scope}.read» apunta a «${rule.read}», que no está registrada.`);
+      problems.push(
+        `«${scope}.read» apunta a «${rule.read}», que no está registrada.`,
+      );
     }
     if (writeRole === undefined) {
-      problems.push(`«${scope}.write» apunta a «${rule.write}», que no está registrada.`);
+      problems.push(
+        `«${scope}.write» apunta a «${rule.write}», que no está registrada.`,
+      );
     }
     if (writeRole === 'read') {
       problems.push(

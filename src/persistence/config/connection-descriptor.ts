@@ -54,7 +54,9 @@ export const POSTGRES_ENGINE = 'postgresql';
  * servidor y la misma base son conexiones distintas, porque tienen privilegios
  * distintos. Compartir pool entre ambos anularía el mínimo privilegio entero.
  */
-export function connectionFingerprint(config: PostgresConnectionConfig): string {
+export function connectionFingerprint(
+  config: PostgresConnectionConfig,
+): string {
   return (
     `${POSTGRES_ENGINE}://${config.user}@${config.host}:${config.port}` +
     `/${config.database}?ssl=${config.ssl ? 'on' : 'off'}`

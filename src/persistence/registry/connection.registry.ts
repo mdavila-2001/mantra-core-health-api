@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DataSourceConfigurationError } from '../errors/persistence.errors';
 import type { ConnectionRole } from '../config/connection-descriptor';
-import type { ConnectionHealth, DataConnection } from './data-connection.contract';
+import type {
+  ConnectionHealth,
+  DataConnection,
+} from './data-connection.contract';
 
 /**
  * Registro central de conexiones.

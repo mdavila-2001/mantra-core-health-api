@@ -1,5 +1,9 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
-import type { ReadContext, TransactionContext, WriteContext } from './persistence-context';
+import type {
+  ReadContext,
+  TransactionContext,
+  WriteContext,
+} from './persistence-context';
 import type { TransactionOptions } from './transaction.port';
 
 /**

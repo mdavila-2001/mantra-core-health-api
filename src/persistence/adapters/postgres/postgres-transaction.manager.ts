@@ -95,10 +95,14 @@ export class PostgresTransactionManager implements TransactionManager {
 
     const startedAt = process.hrtime.bigint();
     try {
-      const result = await connection.entityManager().transactional(
-        (em) => operation(new PostgresTransactionContext(em as EntityManager)),
-        options.isolationLevel ? { isolationLevel: options.isolationLevel } : {},
-      );
+      const result = await connection
+        .entityManager()
+        .transactional(
+          (em) => operation(new PostgresTransactionContext(em)),
+          options.isolationLevel
+            ? { isolationLevel: options.isolationLevel }
+            : {},
+        );
       this.metrics.record({
         connectionName: resolved.connectionName,
         engine: connection.engine,

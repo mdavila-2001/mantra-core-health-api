@@ -74,7 +74,7 @@ export class PostgresDataConnection implements DataConnection {
    * directorio, nunca un servicio de dominio.
    */
   entityManager(): EntityManager {
-    return this.orm.em as EntityManager;
+    return this.orm.em;
   }
 
   /** Capacidades efectivas, con `readReplica` resuelto por la fábrica. */

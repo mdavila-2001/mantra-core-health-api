@@ -41,7 +41,14 @@ interface DriverErrorShape {
  * envejece mal cada vez que PostgreSQL añade una.
  */
 const EXACT: Readonly<
-  Record<string, new (m: string, c: PersistenceErrorContext, o?: { cause?: unknown }) => PersistenceError>
+  Record<
+    string,
+    new (
+      m: string,
+      c: PersistenceErrorContext,
+      o?: { cause?: unknown },
+    ) => PersistenceError
+  >
 > = {
   '23505': DuplicateEntityError,
   '23503': ForeignKeyConflictError,
@@ -61,13 +68,28 @@ const EXACT: Readonly<
  */
 const MESSAGES = new Map<unknown, string>([
   [DuplicateEntityError, 'Ya existe un registro con esos valores únicos.'],
-  [ForeignKeyConflictError, 'La operación referencia un registro que no existe o que aún tiene dependientes.'],
+  [
+    ForeignKeyConflictError,
+    'La operación referencia un registro que no existe o que aún tiene dependientes.',
+  ],
   [RequiredFieldError, 'Falta un campo obligatorio.'],
-  [DeadlockDetectedError, 'Interbloqueo detectado; la transacción fue abortada.'],
-  [ConcurrencyConflictError, 'Conflicto de concurrencia; la transacción debe reintentarse.'],
-  [InsufficientPrivilegeError, 'El rol de base de datos no tiene privilegios para esta operación.'],
+  [
+    DeadlockDetectedError,
+    'Interbloqueo detectado; la transacción fue abortada.',
+  ],
+  [
+    ConcurrencyConflictError,
+    'Conflicto de concurrencia; la transacción debe reintentarse.',
+  ],
+  [
+    InsufficientPrivilegeError,
+    'El rol de base de datos no tiene privilegios para esta operación.',
+  ],
   [QueryTimeoutError, 'La consulta excedió el tiempo máximo permitido.'],
-  [ConnectionUnavailableError, 'La conexión con la base de datos no está disponible.'],
+  [
+    ConnectionUnavailableError,
+    'La conexión con la base de datos no está disponible.',
+  ],
 ]);
 
 /** Extrae el SQLSTATE, descendiendo por la cadena de envoltorios de MikroORM. */
@@ -75,7 +97,8 @@ function extractSqlState(error: unknown, depth = 0): string | undefined {
   // El límite de profundidad evita un bucle infinito si un envoltorio se
   // referencia a sí mismo como causa, que es barato de provocar y caro de
   // depurar si ocurre en producción.
-  if (depth > 5 || typeof error !== 'object' || error === null) return undefined;
+  if (depth > 5 || typeof error !== 'object' || error === null)
+    return undefined;
   const shape = error as DriverErrorShape;
   if (typeof shape.code === 'string' && /^[0-9A-Z]{5}$/.test(shape.code)) {
     return shape.code;
@@ -88,7 +111,8 @@ function extractSqlState(error: unknown, depth = 0): string | undefined {
 
 /** Extrae el nombre de la restricción implicada, si el motor lo aporta. */
 function extractConstraint(error: unknown, depth = 0): string | undefined {
-  if (depth > 5 || typeof error !== 'object' || error === null) return undefined;
+  if (depth > 5 || typeof error !== 'object' || error === null)
+    return undefined;
   const shape = error as DriverErrorShape;
   if (typeof shape.constraint === 'string') return shape.constraint;
   return (
@@ -125,14 +149,22 @@ export function mapPostgresError(
   if (code) {
     const Exact = EXACT[code];
     if (Exact) {
-      return new Exact(MESSAGES.get(Exact) ?? 'Error de persistencia.', fullContext, {
-        cause: error,
-      });
+      return new Exact(
+        MESSAGES.get(Exact) ?? 'Error de persistencia.',
+        fullContext,
+        {
+          cause: error,
+        },
+      );
     }
     // Clases completas por prefijo: `08` conexión, `53` recursos agotados
     // (incluye `53300 too_many_connections`, el síntoma clásico de un pool mal
     // dimensionado), `57P01/57P02/57P03` apagado o reinicio del servidor.
-    if (code.startsWith('08') || code.startsWith('53') || code.startsWith('57P')) {
+    if (
+      code.startsWith('08') ||
+      code.startsWith('53') ||
+      code.startsWith('57P')
+    ) {
       return new ConnectionUnavailableError(
         MESSAGES.get(ConnectionUnavailableError) ?? 'Error de persistencia.',
         fullContext,
@@ -146,7 +178,13 @@ export function mapPostgresError(
   const errno = (error as { code?: unknown } | null)?.code;
   if (
     typeof errno === 'string' &&
-    ['ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT', 'EHOSTUNREACH', 'ENOTFOUND'].includes(errno)
+    [
+      'ECONNREFUSED',
+      'ECONNRESET',
+      'ETIMEDOUT',
+      'EHOSTUNREACH',
+      'ENOTFOUND',
+    ].includes(errno)
   ) {
     return new ConnectionUnavailableError(
       MESSAGES.get(ConnectionUnavailableError) ?? 'Error de persistencia.',
@@ -155,7 +193,11 @@ export function mapPostgresError(
     );
   }
 
-  return new PersistenceError('Error de persistencia no clasificado.', fullContext, {
-    cause: error,
-  });
+  return new PersistenceError(
+    'Error de persistencia no clasificado.',
+    fullContext,
+    {
+      cause: error,
+    },
+  );
 }

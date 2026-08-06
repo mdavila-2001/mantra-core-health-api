@@ -98,44 +98,47 @@ export class SchedulingWaitlistService {
     slotId: string,
     limit = DEFAULT_WORKER_BATCH,
   ): Promise<WorkerBatchResultDto> {
-    return this.session.transaction('promoteWaitlist', async (_em, transaction) => {
-      const context = { transaction };
-      const slot = await this.writer.findSlotCapacity(slotId, context);
-      if (!slot) {
-        throw new ResourceNotFoundException('Slot no encontrado', { slotId });
-      }
-      if (slot.remainingCapacity <= 0) {
-        return {
-          processed: 0,
-          detail: 'El slot no tiene cupo libre para promover',
-        };
-      }
+    return this.session.transaction(
+      'promoteWaitlist',
+      async (_em, transaction) => {
+        const context = { transaction };
+        const slot = await this.writer.findSlotCapacity(slotId, context);
+        if (!slot) {
+          throw new ResourceNotFoundException('Slot no encontrado', { slotId });
+        }
+        if (slot.remainingCapacity <= 0) {
+          return {
+            processed: 0,
+            detail: 'El slot no tiene cupo libre para promover',
+          };
+        }
 
-      const candidates = await this.writer.findActiveCandidates(
-        slot.resourceId,
-        CONCEPTS.WAITLIST_ACTIVE,
-        Math.min(limit, slot.remainingCapacity),
-        context,
-      );
-
-      const promoted = await this.writer.markCandidatesFulfilled(
-        candidates.map((candidate) => candidate.id),
-        CONCEPTS.WAITLIST_FULFILLED,
-        context,
-      );
-
-      if (promoted > 0) {
-        this.logger.info(
-          { operation: 'scheduling.waitlist.promote', slotId, promoted },
-          'Promoted waitlist candidates',
+        const candidates = await this.writer.findActiveCandidates(
+          slot.resourceId,
+          CONCEPTS.WAITLIST_ACTIVE,
+          Math.min(limit, slot.remainingCapacity),
+          context,
         );
-      }
 
-      return {
-        processed: promoted,
-        detail: 'Candidatos notificados; la reserva la confirma el paciente',
-      };
-    });
+        const promoted = await this.writer.markCandidatesFulfilled(
+          candidates.map((candidate) => candidate.id),
+          CONCEPTS.WAITLIST_FULFILLED,
+          context,
+        );
+
+        if (promoted > 0) {
+          this.logger.info(
+            { operation: 'scheduling.waitlist.promote', slotId, promoted },
+            'Promoted waitlist candidates',
+          );
+        }
+
+        return {
+          processed: promoted,
+          detail: 'Candidatos notificados; la reserva la confirma el paciente',
+        };
+      },
+    );
   }
 
   /**
@@ -174,39 +177,44 @@ export class SchedulingWaitlistService {
       'Scheduling appointment reminders',
     );
 
-    return this.session.transaction('scheduleReminders', async (_em, transaction) => {
-      const context = { transaction, actorUserId: actor.id };
-      const schedule = await this.writer.findBookingScheduleForUpdate(
-        bookingId,
-        context,
-      );
-      if (!schedule) {
-        // El puerto devuelve `null` tanto si la cita no existe como si su slot
-        // no existe. Se conserva el mensaje de la cita porque es el caso que un
-        // cliente puede provocar; un slot ausente es una inconsistencia interna
-        // que no debe describirse en una respuesta de la API.
-        throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
-      }
-
-      const channelConceptId =
-        dto.channel === 'EMAIL'
-          ? CONCEPTS.REMINDER_CH_EMAIL
-          : CONCEPTS.REMINDER_CH_SMS;
-
-      const scheduled = await this.writer.scheduleReminders(
-        {
+    return this.session.transaction(
+      'scheduleReminders',
+      async (_em, transaction) => {
+        const context = { transaction, actorUserId: actor.id };
+        const schedule = await this.writer.findBookingScheduleForUpdate(
           bookingId,
-          channelConceptId,
-          offsetsMinutes: dto.offsetsMinutes,
-          slotStartAt: schedule.slotStartAt,
-          statusConceptId: CONCEPTS.REMINDER_SCHEDULED,
-          actorUserId: actor.id,
-        },
-        context,
-      );
+          context,
+        );
+        if (!schedule) {
+          // El puerto devuelve `null` tanto si la cita no existe como si su slot
+          // no existe. Se conserva el mensaje de la cita porque es el caso que un
+          // cliente puede provocar; un slot ausente es una inconsistencia interna
+          // que no debe describirse en una respuesta de la API.
+          throw new ResourceNotFoundException('Cita no encontrada', {
+            bookingId,
+          });
+        }
 
-      return { bookingId, scheduled };
-    });
+        const channelConceptId =
+          dto.channel === 'EMAIL'
+            ? CONCEPTS.REMINDER_CH_EMAIL
+            : CONCEPTS.REMINDER_CH_SMS;
+
+        const scheduled = await this.writer.scheduleReminders(
+          {
+            bookingId,
+            channelConceptId,
+            offsetsMinutes: dto.offsetsMinutes,
+            slotStartAt: schedule.slotStartAt,
+            statusConceptId: CONCEPTS.REMINDER_SCHEDULED,
+            actorUserId: actor.id,
+          },
+          context,
+        );
+
+        return { bookingId, scheduled };
+      },
+    );
   }
 
   /**
@@ -218,34 +226,37 @@ export class SchedulingWaitlistService {
   async dispatchReminders(
     limit = DEFAULT_WORKER_BATCH,
   ): Promise<WorkerBatchResultDto> {
-    return this.session.transaction('dispatchReminders', async (_em, transaction) => {
-      const context = { transaction };
-      const due = await this.writer.findDueReminders(
-        CONCEPTS.REMINDER_SCHEDULED,
-        new Date(),
-        limit,
-        context,
-      );
-
-      const dispatched = await this.writer.markRemindersSent(
-        due.map((reminder) => reminder.id),
-        CONCEPTS.REMINDER_SENT,
-        new Date(),
-        context,
-      );
-
-      if (dispatched > 0) {
-        this.logger.info(
-          { operation: 'scheduling.reminder.dispatch', dispatched },
-          'Marked reminders as dispatched',
+    return this.session.transaction(
+      'dispatchReminders',
+      async (_em, transaction) => {
+        const context = { transaction };
+        const due = await this.writer.findDueReminders(
+          CONCEPTS.REMINDER_SCHEDULED,
+          new Date(),
+          limit,
+          context,
         );
-      }
 
-      return {
-        processed: dispatched,
-        detail:
-          'Recordatorios marcados como enviados; la entrega la ejecuta messaging (35)',
-      };
-    });
+        const dispatched = await this.writer.markRemindersSent(
+          due.map((reminder) => reminder.id),
+          CONCEPTS.REMINDER_SENT,
+          new Date(),
+          context,
+        );
+
+        if (dispatched > 0) {
+          this.logger.info(
+            { operation: 'scheduling.reminder.dispatch', dispatched },
+            'Marked reminders as dispatched',
+          );
+        }
+
+        return {
+          processed: dispatched,
+          detail:
+            'Recordatorios marcados como enviados; la entrega la ejecuta messaging (35)',
+        };
+      },
+    );
   }
 }

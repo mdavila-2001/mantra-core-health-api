@@ -39,7 +39,10 @@ export type {
   ReadFallbackStrategy,
   ResolvedDataSources,
 } from './config/data-sources.env';
-export { resolveDataSources, dataSourcesEnvSchema } from './config/data-sources.env';
+export {
+  resolveDataSources,
+  dataSourcesEnvSchema,
+} from './config/data-sources.env';
 
 export * from './registry/data-connection.contract';
 export { ConnectionRegistry } from './registry/connection.registry';

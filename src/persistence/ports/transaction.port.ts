@@ -33,9 +33,7 @@ export interface TransactionOptions {
    * manejar `40001`, así que debe ser una decisión consciente del caso de uso.
    */
   readonly isolationLevel?:
-    | 'read committed'
-    | 'repeatable read'
-    | 'serializable';
+    'read committed' | 'repeatable read' | 'serializable';
   /** Nombre lógico de la operación, para las métricas y las trazas. */
   readonly operation?: string;
 }

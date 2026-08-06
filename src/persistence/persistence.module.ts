@@ -11,11 +11,17 @@ import { PersistenceSessionFactory } from './factory/persistence-session.factory
 import { PostgresTransactionManager } from './adapters/postgres/postgres-transaction.manager';
 import { ConnectionRegistry } from './registry/connection.registry';
 import { DataSourceRouter } from './routing/data-source.router';
-import { defaultRoutingRules, type RoutingRules } from './routing/routing.config';
+import {
+  defaultRoutingRules,
+  type RoutingRules,
+} from './routing/routing.config';
 import { PersistenceMetrics } from './observability/persistence.metrics';
 import { DataSourcesHealthService } from './health/data-sources.health';
 import { DataSourcesController } from './health/data-sources.controller';
-import { resolveDataSources, type ResolvedDataSources } from './config/data-sources.env';
+import {
+  resolveDataSources,
+  type ResolvedDataSources,
+} from './config/data-sources.env';
 import { TRANSACTION_MANAGER } from './ports/transaction.port';
 import {
   OWNED_ORM_INSTANCES,

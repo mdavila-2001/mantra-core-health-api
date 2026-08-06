@@ -54,7 +54,10 @@ export class RoutedPersistenceSession implements PersistenceSession {
         const em = (transaction as PostgresTransactionContext).em;
         return work(em, transaction);
       },
-      { ...options, operation: options.operation ?? `${this.module}.${operation}` },
+      {
+        ...options,
+        operation: options.operation ?? `${this.module}.${operation}`,
+      },
     );
   }
 }

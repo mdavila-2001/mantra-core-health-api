@@ -25,7 +25,8 @@ export class DataSourcesController {
   @Get('data-sources')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Estado y enrutado de las fuentes de datos (requiere autenticación)',
+    summary:
+      'Estado y enrutado de las fuentes de datos (requiere autenticación)',
   })
   dataSources(): Promise<DataSourcesReport> {
     return this.health.report();

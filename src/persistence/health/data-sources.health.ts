@@ -21,7 +21,9 @@ export interface DataSourcesReport {
   /** Enrutado vigente por operación. */
   readonly routing: {
     readonly default: { readonly read: string; readonly write: string };
-    readonly overrides: Readonly<Record<string, { read: string; write: string }>>;
+    readonly overrides: Readonly<
+      Record<string, { read: string; write: string }>
+    >;
   };
 }
 

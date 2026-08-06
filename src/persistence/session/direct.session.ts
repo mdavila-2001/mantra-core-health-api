@@ -19,11 +19,17 @@ import { PostgresTransactionContext } from '../adapters/postgres/postgres-transa
 export class DirectPersistenceSession implements PersistenceSession {
   constructor(private readonly em: EntityManager) {}
 
-  read<T>(_operation: string, work: (em: EntityManager) => Promise<T>): Promise<T> {
+  read<T>(
+    _operation: string,
+    work: (em: EntityManager) => Promise<T>,
+  ): Promise<T> {
     return work(this.em);
   }
 
-  write<T>(_operation: string, work: (em: EntityManager) => Promise<T>): Promise<T> {
+  write<T>(
+    _operation: string,
+    work: (em: EntityManager) => Promise<T>,
+  ): Promise<T> {
     return work(this.em);
   }
 
@@ -33,7 +39,7 @@ export class DirectPersistenceSession implements PersistenceSession {
     _options: TransactionOptions = {},
   ): Promise<T> {
     return this.em.transactional((tx) =>
-      work(tx as EntityManager, new PostgresTransactionContext(tx as EntityManager)),
+      work(tx, new PostgresTransactionContext(tx)),
     );
   }
 }
