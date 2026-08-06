@@ -17,37 +17,37 @@ export class CareRelationships {
   /**
    * Identificador asociado a tenant.
    */
-  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
   tenantId!: string;
 
   /**
    * Identificador asociado a patient profile.
    */
-  @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles
+  @Property({ fieldName: 'patient_profile_id', type: 'uuid' }) // FK → profiles.patient_profiles (inferida)
   patientProfileId!: string;
 
   /**
    * Identificador asociado a practitioner profile.
    */
-  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK → profiles.practitioner_profiles
+  @Property({ fieldName: 'practitioner_profile_id', type: 'uuid' }) // FK → profiles.health_practitioner_profiles
   practitionerProfileId!: string;
 
   /**
    * Identificador asociado a relationship type concept.
    */
-  @Property({ fieldName: 'relationship_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'relationship_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   relationshipTypeConceptId!: string;
 
   /**
    * Identificador asociado a status concept.
    */
-  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   statusConceptId!: string;
 
   /**
    * Identificador asociado a purpose concept.
    */
-  @Property({ fieldName: 'purpose_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'purpose_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts (inferida)
   purposeConceptId?: string;
 
   /**
@@ -73,7 +73,7 @@ export class CareRelationships {
     fieldName: 'established_by_user_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → iam.users
+  }) // FK → iam.users (inferida)
   establishedByUserId?: string;
 
   /**
@@ -91,13 +91,13 @@ export class CareRelationships {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

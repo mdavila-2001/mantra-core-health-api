@@ -18,7 +18,7 @@ export class WebhookDeliveryEvidence {
   /**
    * Identificador asociado a webhook subscription.
    */
-  @Property({ fieldName: 'webhook_subscription_id', type: 'uuid' }) // FK → integration_contracts.contract_webhook_subscriptions
+  @Property({ fieldName: 'webhook_subscription_id', type: 'uuid' }) // FK → integrations.webhook_subscriptions
   webhookSubscriptionId!: string;
 
   /**

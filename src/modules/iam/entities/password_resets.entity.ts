@@ -26,7 +26,7 @@ export class PasswordResets {
   /**
    * Identificador asociado a user.
    */
-  @Property({ fieldName: 'user_id', type: 'uuid' }) // FK → iam.users
+  @Property({ fieldName: 'user_id', type: 'uuid' }) // FK → iam.users (inferida)
   userId!: string;
 
   /**
@@ -42,7 +42,7 @@ export class PasswordResets {
   /**
    * Identificador asociado a state concept.
    */
-  @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
+  @Property({ fieldName: 'state_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   stateConceptId!: string;
 
   /**
@@ -86,13 +86,13 @@ export class PasswordResets {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

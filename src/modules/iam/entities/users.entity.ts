@@ -133,16 +133,6 @@ export class Users {
   lastLoginAt?: Date;
 
   /**
-   * Valor de must change password mantenido por la instancia.
-   */
-  @Property({
-    fieldName: 'must_change_password',
-    type: 'boolean',
-    nullable: true,
-  })
-  mustChangePassword?: boolean;
-
-  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -171,4 +161,14 @@ export class Users {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Valor de must change password mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'must_change_password',
+    type: 'boolean',
+    nullable: true,
+  })
+  mustChangePassword?: boolean;
 }

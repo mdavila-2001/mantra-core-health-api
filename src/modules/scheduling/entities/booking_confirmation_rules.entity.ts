@@ -2,44 +2,6 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
 /**
- * Nodo de la gramática mínima de condiciones (fail-closed). Una condición es o
- * bien una comparación hoja `{ field, op, value }`, o bien un combinador lógico
- * `{ all|any: Condition[] }` / `{ not: Condition }`. Cualquier forma que no encaje
- * se considera NO satisfecha (la regla no aplica).
- */
-export type RuleCondition =
-  | {
-      /**
-       * Valor de field mantenido por la instancia.
-       */
-      field: string; /**
-       * Valor de op mantenido por la instancia.
-       */
-      op: string; /**
-       * Valor de value mantenido por la instancia.
-       */
-      value?: unknown;
-    }
-  | {
-      /**
-       * Valor de all mantenido por la instancia.
-       */
-      all: RuleCondition[];
-    }
-  | {
-      /**
-       * Valor de any mantenido por la instancia.
-       */
-      any: RuleCondition[];
-    }
-  | {
-      /**
-       * Valor de not mantenido por la instancia.
-       */
-      not: RuleCondition;
-    };
-
-/**
  * Regla determinista del motor de confirmación automática de reservas (C-11).
  *
  * Las reglas no se borran en duro: se desactivan (`enabled=false`) y versionan
@@ -58,13 +20,13 @@ export class BookingConfirmationRules {
   /**
    * Identificador asociado a tenant.
    */
-  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
   tenantId!: string;
 
   /**
    * Identificador asociado a scope type concept.
    */
-  @Property({ fieldName: 'scope_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (RULE_SCOPE_*)
+  @Property({ fieldName: 'scope_type_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   scopeTypeConceptId!: string;
 
   /** Alcance concreto (practice/resource/service). `undefined` = todo el tipo de alcance. */
@@ -72,8 +34,8 @@ export class BookingConfirmationRules {
   scopeId?: string;
 
   /** Menor número = mayor prioridad al resolver empates de especificidad. */
-  @Property({ fieldName: 'priority', columnType: 'int' })
-  priority: number = 100;
+  @Property({ columnType: 'int' })
+  priority!: number;
 
   /**
    * Valor de effective from mantenido por la instancia.
@@ -95,25 +57,25 @@ export class BookingConfirmationRules {
    * Valor de condition json mantenido por la instancia.
    */
   @Property({ fieldName: 'condition_json', type: 'json', columnType: 'jsonb' })
-  conditionJson!: RuleCondition;
+  conditionJson!: unknown;
 
   /**
    * Identificador asociado a decision concept.
    */
-  @Property({ fieldName: 'decision_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (AUTO_CONFIRM|AUTO_REJECT|MANUAL_REVIEW)
+  @Property({ fieldName: 'decision_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts (inferida)
   decisionConceptId!: string;
 
   /**
    * Valor de enabled mantenido por la instancia.
    */
-  @Property({ fieldName: 'enabled', type: 'boolean' })
-  enabled: boolean = true;
+  @Property({ type: 'boolean' })
+  enabled!: boolean;
 
   /**
    * Valor de version mantenido por la instancia.
    */
-  @Property({ fieldName: 'version', columnType: 'int' })
-  version: number = 1;
+  @Property({ columnType: 'int' })
+  version!: number;
 
   /**
    * Fecha y hora en que se creó el registro.
@@ -130,13 +92,13 @@ export class BookingConfirmationRules {
   /**
    * Identificador asociado a created by user.
    */
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
   /**
    * Identificador asociado a updated by user.
    */
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   /**

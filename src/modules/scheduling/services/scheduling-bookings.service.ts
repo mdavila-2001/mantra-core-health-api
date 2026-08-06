@@ -464,7 +464,11 @@ export class SchedulingBookingsService {
 
       // CAN-APT-001: la ventana y el cargo salen del snapshot congelado de la
       // reserva, NUNCA de la política actual (que pudo cambiar tras la aceptación).
-      const snapshot = booking.cancellationPolicySnapshot;
+      // La columna es jsonb (`unknown` en la entidad generada); el contrato vive
+      // en appointment_bookings.types.ts y quien escribió el snapshot lo honró.
+      const snapshot = booking.cancellationPolicySnapshot as
+        | CancellationPolicySnapshot
+        | undefined;
       const windowMinutes =
         snapshot?.cancellationWindowMinutes ??
         DEFAULT_CANCELLATION_WINDOW_MINUTES;

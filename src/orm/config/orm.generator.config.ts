@@ -4,15 +4,21 @@ import { defineConfig } from '@mikro-orm/postgresql';
 import { buildOrmConfig } from './orm.config';
 
 /**
- * Configuración exclusiva del generador de entidades por introspección.
+ * Configuración del generador de entidades por introspección — RETIRADA del
+ * pipeline (ADR-0022, v4.0.10).
  *
- * El flujo del proyecto es de doble sentido y conviene tenerlo claro:
+ * El flujo «la base genera las entidades» que este archivo describía nunca fue
+ * el que produjo las entidades del repo, y no puede reproducirlas: escribe en
+ * `generated-entities/` (no en `src/modules/**`), con archivos PascalCase,
+ * importando de `@mikro-orm/core` en vez de `@mikro-orm/decorators/legacy`, y
+ * sin los comentarios `// FK → schema.tabla`. Además su premisa exige una base
+ * garantizada en sincronía con el modelo, y `ORM_SCHEMA_SYNC=off` es obligatorio.
  *
- *   modelo oficial (bóveda)  ->  DDL  ->  base de datos  ->  entidades
- *
- * Es decir: el modelo genera el DDL, y la base genera las entidades. Esta
- * configuración cubre el último tramo. Nunca se editan las entidades a mano;
- * si algo no cuadra, se corrige el DDL y se regenera.
+ * El camino vigente es `salud-db/gen_entities.py` (cuerpo, desde los `.puml`) +
+ * prettier + `yarn docs:tsdoc` (documentación). El script `orm:gen` se eliminó de
+ * package.json; este archivo se conserva por si algún día se decide el camino de
+ * introspección de verdad — lo que exigiría fijar `entityGenerator.path`,
+ * `fileName`, el import, y emitir `COMMENT ON` desde `gen_ddl.py`.
  *
  * Vive separada del runtime porque `@mikro-orm/entity-generator` es una
  * dependencia de desarrollo: importarla desde la configuración de producción
