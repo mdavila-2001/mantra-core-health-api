@@ -6,7 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppReadinessService } from './app-readiness.service';
 import { OrmModule, ormEnvSchema } from './orm';
-import { PersistenceModule, dataSourcesEnvSchema } from './persistence';
+import { dataSourcesEnvSchema } from './persistence';
+import { PersistenceModule } from './persistence/persistence.module';
 import { LoggingModule, loggingEnvSchema } from './logging';
 import {
   ObservabilityModule,

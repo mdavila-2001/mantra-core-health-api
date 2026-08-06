@@ -55,7 +55,13 @@ export {
 } from './routing/data-source.router';
 
 export { PersistenceSessionFactory } from './factory/persistence-session.factory';
-export { describeEquivalence } from './factory/postgres-connection.factory';
+// `describeEquivalence` NO se reexporta aquí, por el mismo motivo que
+// `PostgresDataConnection`: vive en `postgres-connection.factory`, que importa
+// `orm/config/orm.config`, y ese módulo llama a `buildOrmConfig()` en el nivel
+// superior (es el default que resuelve la CLI de MikroORM). Reexportarlo hacía
+// que importar un *tipo de puerto* desde este barril validara DB_HOST/PORT/
+// USER/PASSWORD/NAME en tiempo de carga, y reventaba cualquier prueba unitaria
+// sin entorno de base de datos. Quien la necesite la importa de la factoría.
 
 export {
   PostgresTransactionManager,
@@ -74,5 +80,9 @@ export {
   type DataSourcesReport,
 } from './health/data-sources.health';
 
-export { PersistenceModule } from './persistence.module';
+// `PersistenceModule` tampoco se reexporta, por lo mismo: arrastra
+// `persistence.module` → `postgres-connection.factory` → `orm/config/orm.config`.
+// Y no hace falta: un módulo de dominio importa puertos y tokens, nunca el
+// módulo de Nest. Lo cablea la raíz de composición (`app.module`), que sí tiene
+// entorno, importándolo de `./persistence/persistence.module`.
 export * from './persistence.tokens';
