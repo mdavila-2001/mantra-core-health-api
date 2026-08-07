@@ -32,6 +32,7 @@ function build() {
     create: mockFn(),
   };
   const branchMembershipsRepo = {
+    findByMembership: mockFn(() => Promise.resolve([])),
     findByMembershipBranchStatus: mockFn(),
     findByMembershipAndStatus: mockFn().mockResolvedValue([]),
     create: mockFn(),

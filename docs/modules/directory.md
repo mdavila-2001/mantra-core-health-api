@@ -9,7 +9,7 @@
 # Módulo `directory`
 
 **Fuente:** [`src/modules/directory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/directory/README.md)
-· 2 controllers · 5 services · 5 repositories · 7 entidades · 15 DTO
+· 2 controllers · 6 services · 5 repositories · 7 entidades · 16 DTO
 
 ---
 

@@ -541,6 +541,62 @@ export class SystemContextRepository {
     });
   }
 
+  /**
+   * Amarres activos, opcionalmente acotados a un esquema o a una tabla.
+   *
+   * Es la cara de lectura del amarre: un cliente que va a pintar un formulario
+   * pregunta "qué campos de esta tabla son de catálogo" y recibe la lista, sin
+   * conocer de antemano ningún identificador.
+   *
+   * @param em - Contexto de persistencia.
+   * @param activeStatusConceptId - Estado que cuenta como vigente.
+   * @param filter - Acotación opcional por esquema y tabla.
+   * @returns Amarres ordenados por `(esquema, tabla, columna)`.
+   */
+  findActiveEnumBindings(
+    em: EntityManager,
+    activeStatusConceptId: string,
+    filter: {
+      /** Esquema al que acotar, si se pide. */
+      targetSchemaName?: string;
+      /** Tabla a la que acotar, si se pide. */
+      targetEntityName?: string;
+    } = {},
+  ): Promise<DynamicEnumBindings[]> {
+    const where: Record<string, unknown> = {
+      statusConceptId: activeStatusConceptId,
+    };
+    if (filter.targetSchemaName) {
+      where.targetSchemaName = filter.targetSchemaName;
+    }
+    if (filter.targetEntityName) {
+      where.targetEntityName = filter.targetEntityName;
+    }
+    return em.find(DynamicEnumBindings, where, {
+      orderBy: [
+        { targetSchemaName: 'ASC' },
+        { targetEntityName: 'ASC' },
+        { targetFieldName: 'ASC' },
+      ],
+    });
+  }
+
+  /**
+   * Definiciones por identificador, en una sola consulta.
+   *
+   * El listado de amarres necesita el código de cada definición para que la
+   * respuesta sea utilizable; pedirlas una a una sería un N+1 sobre una tabla que
+   * se consulta al pintar cada formulario.
+   */
+  async findEnumDefinitionsByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<Map<string, DynamicEnumDefinitions>> {
+    if (ids.length === 0) return new Map();
+    const rows = await em.find(DynamicEnumDefinitions, { id: { $in: ids } });
+    return new Map(rows.map((row) => [row.id, row]));
+  }
+
   /** Bindings activos de la definición, bloqueados: retirarla los deshabilita. */
   findEnumBindingsForUpdate(
     em: EntityManager,

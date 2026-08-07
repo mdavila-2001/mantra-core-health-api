@@ -17,9 +17,11 @@ const actor: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
  */
 function build() {
   const tx = { flush: jest.fn(() => Promise.resolve()) };
-  const em = {
+  const em: any = {
     transactional: jest.fn((cb: (t: typeof tx) => unknown) => cb(tx)),
-  } as any;
+  };
+  // Las lecturas no abren transacción: usan un fork del contexto.
+  em.fork = jest.fn(() => em);
   const valueSetsRepo = {
     findById: jest.fn(),
     findByInternalCode: jest.fn(),
@@ -34,6 +36,8 @@ function build() {
     findDefaultVersion: jest.fn(),
     findVersionById: jest.fn(),
     findMembersPage: jest.fn(() => Promise.resolve([])),
+    searchPage: jest.fn(() => Promise.resolve([])),
+    findDefaultVersionsByValueSetIds: jest.fn(() => Promise.resolve(new Map())),
   } as any;
   const conceptsRepo = {
     findByVersion: jest.fn(() => Promise.resolve([])),
@@ -707,5 +711,112 @@ describe('ValueSetsService', () => {
         harness.valueSetsRepo.deleteMembersByVersion,
       ).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('ValueSetsService.searchValueSets', () => {
+  const row = (internalCode: string, id: string) => ({
+    id,
+    internalCode,
+    name: internalCode,
+    canonicalUrl: `https://mantracore.health/fhir/ValueSet/${internalCode}`,
+    description: undefined,
+    stateConceptId: CONCEPTS.TERM_ACTIVE,
+  });
+
+  it('resuelve el conjunto por su código interno, sin exigir el uuid', async () => {
+    const d = build();
+    d.valueSetsRepo.searchPage.mockResolvedValue([
+      row('administrative-gender', 'vs-1'),
+    ]);
+    d.valueSetsRepo.findDefaultVersionsByValueSetIds.mockResolvedValue(
+      new Map([['vs-1', { id: 'ver-1' }]]),
+    );
+
+    const result = await d.service.searchValueSets({
+      code: 'administrative-gender',
+      limit: 50,
+    });
+
+    expect(d.valueSetsRepo.searchPage).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        internalCode: 'administrative-gender',
+        query: undefined,
+        afterInternalCode: undefined,
+      },
+      51,
+    );
+    expect(result.items).toEqual([
+      {
+        id: 'vs-1',
+        internalCode: 'administrative-gender',
+        name: 'administrative-gender',
+        canonicalUrl:
+          'https://mantracore.health/fhir/ValueSet/administrative-gender',
+        description: undefined,
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+        defaultVersionId: 'ver-1',
+      },
+    ]);
+    expect(result.nextCursor).toBeNull();
+  });
+
+  it('devuelve `null` como versión vigente cuando el conjunto no tiene ninguna', async () => {
+    const d = build();
+    d.valueSetsRepo.searchPage.mockResolvedValue([row('sin-version', 'vs-2')]);
+
+    const result = await d.service.searchValueSets({ limit: 50 });
+
+    expect(result.items[0].defaultVersionId).toBeNull();
+  });
+
+  it('pide una fila de más y la recorta para saber si hay página siguiente', async () => {
+    const d = build();
+    d.valueSetsRepo.searchPage.mockResolvedValue([
+      row('a', 'vs-a'),
+      row('b', 'vs-b'),
+      row('c', 'vs-c'),
+    ]);
+
+    const result = await d.service.searchValueSets({ limit: 2 });
+
+    expect(result.count).toBe(2);
+    expect(result.items.map((item: any) => item.internalCode)).toEqual([
+      'a',
+      'b',
+    ]);
+    expect(result.nextCursor).toEqual(expect.any(String));
+  });
+
+  it('no emite cursor cuando la página no está llena', async () => {
+    const d = build();
+    d.valueSetsRepo.searchPage.mockResolvedValue([row('a', 'vs-a')]);
+
+    const result = await d.service.searchValueSets({ limit: 50 });
+
+    expect(result.nextCursor).toBeNull();
+  });
+
+  it('continúa desde el cursor de la página anterior', async () => {
+    const d = build();
+    d.valueSetsRepo.searchPage.mockResolvedValue([
+      row('a', 'vs-a'),
+      row('b', 'vs-b'),
+    ]);
+    const primera = await d.service.searchValueSets({ limit: 1 });
+
+    d.valueSetsRepo.searchPage.mockClear();
+    d.valueSetsRepo.searchPage.mockResolvedValue([]);
+    await d.service.searchValueSets({
+      cursor: primera.nextCursor!,
+      limit: 1,
+    });
+
+    expect(d.valueSetsRepo.searchPage).toHaveBeenCalledWith(
+      expect.anything(),
+      { internalCode: undefined, query: undefined, afterInternalCode: 'a' },
+      2,
+    );
   });
 });

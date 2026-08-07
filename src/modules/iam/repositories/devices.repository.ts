@@ -49,4 +49,8 @@ export class DevicesRepository {
       { partial: true },
     );
   }
+  /** Dispositivos registrados por el usuario, del más reciente al más antiguo. */
+  findByUser(em: EntityManager, userId: string): Promise<Devices[]> {
+    return em.find(Devices, { userId }, { orderBy: { createdAt: 'DESC' } });
+  }
 }

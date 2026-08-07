@@ -23,6 +23,15 @@ function build() {
     changeGlobalRole: mockFn(),
     anonymize: mockFn(),
   };
+  const usersReadService = {
+    searchUsers: mockFn(),
+    getUserById: mockFn(),
+    listCredentials: mockFn(),
+    listDevices: mockFn(),
+    listMfaFactors: mockFn(),
+    listSessions: mockFn(),
+    listGlobalRoles: mockFn(),
+  };
   const credentialsService = {
     linkFederated: mockFn(),
     revokeCredential: mockFn(),
@@ -33,6 +42,7 @@ function build() {
 
   const controller = new IamUsersController(
     usersService as any,
+    usersReadService as any,
     credentialsService as any,
     mfaService as any,
     devicesService as any,
@@ -41,6 +51,7 @@ function build() {
   return {
     controller,
     usersService,
+    usersReadService,
     credentialsService,
     mfaService,
     devicesService,
@@ -119,5 +130,51 @@ describe('IamUsersController', () => {
     const d = build();
     await d.controller.anonymize('u1', actor);
     expect(d.usersService.anonymize).toHaveBeenCalledWith('u1', actor);
+  });
+});
+
+describe('IamUsersController — lecturas', () => {
+  it('searchUsers aplica el tope por defecto cuando el cliente no pide uno', async () => {
+    const d = build();
+    d.usersReadService.searchUsers.mockResolvedValue({ items: [] });
+
+    await d.controller.searchUsers();
+
+    expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+      query: undefined,
+      statusConceptId: undefined,
+      cursor: undefined,
+      limit: 50,
+    });
+  });
+
+  it('searchUsers propaga texto, estado, cursor y tope tal como llegan', async () => {
+    const d = build();
+    d.usersReadService.searchUsers.mockResolvedValue({ items: [] });
+
+    await d.controller.searchUsers('ana', 'status-1', 'cursor-opaco', 10);
+
+    expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+      query: 'ana',
+      statusConceptId: 'status-1',
+      cursor: 'cursor-opaco',
+      limit: 10,
+    });
+  });
+
+  it.each([
+    ['getUser', 'getUserById'],
+    ['listCredentials', 'listCredentials'],
+    ['listDevices', 'listDevices'],
+    ['listMfaFactors', 'listMfaFactors'],
+    ['listSessions', 'listSessions'],
+    ['listGlobalRoles', 'listGlobalRoles'],
+  ])('%s delega en el servicio de lectura', async (metodo, delegado) => {
+    const d = build();
+    (d.usersReadService as any)[delegado].mockResolvedValue({ items: [] });
+
+    await (d.controller as any)[metodo]('u1');
+
+    expect((d.usersReadService as any)[delegado]).toHaveBeenCalledWith('u1');
   });
 });

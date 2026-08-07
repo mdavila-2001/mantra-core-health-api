@@ -33,7 +33,11 @@ function build() {
     fork: mockFn(() => auditEm),
   };
   const usersRepo = { findById: mockFn() };
-  const mfaRepo = { create: mockFn(), findByIdAndUser: mockFn() };
+  const mfaRepo = {
+    create: mockFn(),
+    findByIdAndUser: mockFn(),
+    findByUser: mockFn(),
+  };
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 

@@ -25,11 +25,15 @@ import { ValueSetsService } from '../services';
 import {
   CreateValueSetDto,
   ReadValueSetExpansionResponseDto,
+  SearchValueSetsResponseDto,
   ValueSetResponseDto,
 } from '../dto';
 
 /** Tope de miembros por página cuando el cliente no pide uno. */
 const DEFAULT_EXPANSION_PAGE_SIZE = 50;
+
+/** Tope de conjuntos por página cuando el cliente no pide uno. */
+const DEFAULT_VALUE_SET_PAGE_SIZE = 50;
 
 /**
  * Alta de conjuntos de valores (UC-03-07), reservada a `SECURITY_ADMIN`, y
@@ -65,6 +69,63 @@ export class TerminologyValueSetsController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<ValueSetResponseDto> {
     return this.valueSetsService.createValueSet(dto, user);
+  }
+
+  /**
+   * Listado de conjuntos de valores, buscable por código interno o texto libre.
+   *
+   * Va declarado **antes** que `:id/$expand` sólo por legibilidad; no compiten,
+   * porque aquél tiene dos segmentos.
+   *
+   * No pide rol, por el mismo motivo que la lectura de la expansión: un campo de
+   * formulario necesita resolver su conjunto de valores, y exigir rol de
+   * administración para eso deja el catálogo inutilizable desde el cliente.
+   *
+   * @param code - Código interno exacto, como `administrative-gender`.
+   * @param query - Texto libre sobre el código interno y el nombre.
+   * @param cursor - Cursor opaco devuelto por la página anterior.
+   * @param limit - Tope de conjuntos por página.
+   * @returns Página de conjuntos con su versión vigente.
+   */
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar conjuntos de valores por código interno o texto',
+    description:
+      'Permite resolver el uuid de un conjunto desde un código estable, sin hardcodear identificadores por entorno.',
+  })
+  @ApiQuery({
+    name: 'code',
+    required: false,
+    description: 'Código interno exacto del conjunto',
+  })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    description: 'Texto a buscar en el código interno o el nombre',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: `Conjuntos por página (por defecto ${DEFAULT_VALUE_SET_PAGE_SIZE})`,
+  })
+  searchValueSets(
+    @Query('code') code?: string,
+    @Query('q') query?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<SearchValueSetsResponseDto> {
+    return this.valueSetsService.searchValueSets({
+      code,
+      query,
+      cursor,
+      limit: limit ?? DEFAULT_VALUE_SET_PAGE_SIZE,
+    });
   }
 
   /**

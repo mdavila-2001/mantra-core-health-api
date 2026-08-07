@@ -30,7 +30,9 @@ const FALLBACK = '66666666-6666-6666-6666-666666666666';
  */
 function build() {
   const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  // Las lecturas no abren transacción: usan un fork del contexto.
+  em.fork = mockFn(() => em);
   let optionSeq = 0;
   const contextRepo = {
     createEnumDefinition: mockFn(() => ({ id: DEFINITION })),
@@ -49,6 +51,8 @@ function build() {
     createEnumBinding: mockFn(() => ({ id: 'binding-1' })),
     findEnumBindingByTarget: mockFn(() => Promise.resolve(null)),
     findEnumBindingsForUpdate: mockFn(() => Promise.resolve([])),
+    findActiveEnumBindings: mockFn(() => Promise.resolve([])),
+    findEnumDefinitionsByIds: mockFn(() => Promise.resolve(new Map())),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new DynamicEnumsService(
@@ -659,5 +663,215 @@ describe('DynamicEnumsService', () => {
         d.service.retireDefinition(DEFINITION, dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
+  });
+});
+
+describe('DynamicEnumsService.readEnum', () => {
+  const publishedVersion = {
+    id: VERSION,
+    dynamicEnumDefinitionId: DEFINITION,
+    cacheToken: 'token-1',
+  };
+  const activeDefinition = {
+    id: DEFINITION,
+    code: 'administrative-gender',
+    name: 'Género administrativo',
+    description: 'Género administrativo de la persona',
+    valueSetId: VALUE_SET,
+    allowCustomValue: false,
+    statusConceptId: CONCEPTS.ENUM_DEF_ACTIVE,
+  };
+
+  it('resolves the enumeration from the target field, without any uuid', async () => {
+    const d = build();
+    d.contextRepo.findEnumBindingByTarget.mockResolvedValue({
+      dynamicEnumDefinitionId: DEFINITION,
+    });
+    d.contextRepo.findEnumDefinitionById.mockResolvedValue(activeDefinition);
+    d.contextRepo.findPublishedEnumVersion.mockResolvedValue(publishedVersion);
+    d.contextRepo.findEnumOptions.mockResolvedValue([
+      {
+        conceptId: CONCEPT_A,
+        code: 'GENDER_MALE',
+        display: 'Masculino',
+        ordinal: 0,
+        isDefault: true,
+        enabled: true,
+      },
+      {
+        conceptId: CONCEPT_B,
+        code: 'GENDER_FEMALE',
+        display: 'Femenino',
+        ordinal: 1,
+        enabled: true,
+      },
+    ]);
+
+    const result = await d.service.readEnum({
+      target: 'profiles.persons.administrative_gender_concept_id',
+    });
+
+    expect(d.contextRepo.findEnumBindingByTarget).toHaveBeenCalledWith(
+      expect.anything(),
+      'profiles',
+      'persons',
+      'administrative_gender_concept_id',
+      CONCEPTS.ENUM_BINDING_ACTIVE,
+    );
+    expect(result.code).toBe('administrative-gender');
+    expect(result.valueSetId).toBe(VALUE_SET);
+    expect(result.cacheToken).toBe('token-1');
+    expect(result.options).toEqual([
+      {
+        conceptId: CONCEPT_A,
+        code: 'GENDER_MALE',
+        display: 'Masculino',
+        ordinal: 0,
+        isDefault: true,
+      },
+      {
+        conceptId: CONCEPT_B,
+        code: 'GENDER_FEMALE',
+        display: 'Femenino',
+        ordinal: 1,
+        isDefault: false,
+      },
+    ]);
+  });
+
+  it('resolves the enumeration from its stable code', async () => {
+    const d = build();
+    d.contextRepo.findEnumDefinitionByCode.mockResolvedValue(activeDefinition);
+    d.contextRepo.findPublishedEnumVersion.mockResolvedValue(publishedVersion);
+    d.contextRepo.findEnumOptions.mockResolvedValue([]);
+
+    const result = await d.service.readEnum({ code: 'administrative-gender' });
+
+    expect(result.definitionId).toBe(DEFINITION);
+    expect(d.contextRepo.findEnumBindingByTarget).not.toHaveBeenCalled();
+  });
+
+  it('hides disabled options: offering them would reintroduce a retired value', async () => {
+    const d = build();
+    d.contextRepo.findEnumDefinitionByCode.mockResolvedValue(activeDefinition);
+    d.contextRepo.findPublishedEnumVersion.mockResolvedValue(publishedVersion);
+    d.contextRepo.findEnumOptions.mockResolvedValue([
+      { conceptId: CONCEPT_A, code: 'A', display: 'A', enabled: true },
+      { conceptId: CONCEPT_B, code: 'B', display: 'B', enabled: false },
+    ]);
+
+    const result = await d.service.readEnum({ code: 'administrative-gender' });
+
+    expect(result.options.map((option) => option.conceptId)).toEqual([
+      CONCEPT_A,
+    ]);
+  });
+
+  it('rejects a target that is not written as schema.table.column', async () => {
+    const d = build();
+
+    await expect(
+      d.service.readEnum({ target: 'persons.gender' }),
+    ).rejects.toThrow();
+  });
+
+  it('requires either a target or a code', async () => {
+    const d = build();
+
+    await expect(d.service.readEnum({})).rejects.toThrow();
+  });
+
+  it('fails when the field has no enumeration bound to it', async () => {
+    const d = build();
+    d.contextRepo.findEnumBindingByTarget.mockResolvedValue(null);
+
+    await expect(
+      d.service.readEnum({ target: 'profiles.persons.unbound_concept_id' }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('does not serve a retired enumeration', async () => {
+    const d = build();
+    d.contextRepo.findEnumDefinitionByCode.mockResolvedValue({
+      ...activeDefinition,
+      statusConceptId: CONCEPTS.ENUM_DEF_RETIRED,
+    });
+
+    await expect(
+      d.service.readEnum({ code: 'administrative-gender' }),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  it('fails when the enumeration has no published version', async () => {
+    const d = build();
+    d.contextRepo.findEnumDefinitionByCode.mockResolvedValue(activeDefinition);
+    d.contextRepo.findPublishedEnumVersion.mockResolvedValue(null);
+
+    await expect(
+      d.service.readEnum({ code: 'administrative-gender' }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+});
+
+describe('DynamicEnumsService.listBindings', () => {
+  it('returns the target path already composed, with its enumeration code', async () => {
+    const d = build();
+    d.contextRepo.findActiveEnumBindings.mockResolvedValue([
+      {
+        dynamicEnumDefinitionId: DEFINITION,
+        targetSchemaName: 'profiles',
+        targetEntityName: 'persons',
+        targetFieldName: 'administrative_gender_concept_id',
+        required: true,
+        fallbackConceptId: FALLBACK,
+        validationModeConceptId: CONCEPTS.VALIDATION_MODE_STRICT,
+      },
+    ]);
+    d.contextRepo.findEnumDefinitionsByIds.mockResolvedValue(
+      new Map([
+        [
+          DEFINITION,
+          {
+            id: DEFINITION,
+            code: 'administrative-gender',
+            valueSetId: VALUE_SET,
+          },
+        ],
+      ]),
+    );
+
+    const result = await d.service.listBindings({ schemaName: 'profiles' });
+
+    expect(result.count).toBe(1);
+    expect(result.items[0]).toEqual({
+      target: 'profiles.persons.administrative_gender_concept_id',
+      targetSchemaName: 'profiles',
+      targetEntityName: 'persons',
+      targetFieldName: 'administrative_gender_concept_id',
+      enumCode: 'administrative-gender',
+      definitionId: DEFINITION,
+      valueSetId: VALUE_SET,
+      required: true,
+      fallbackConceptId: FALLBACK,
+      validationModeConceptId: CONCEPTS.VALIDATION_MODE_STRICT,
+    });
+  });
+
+  it('drops a binding whose definition no longer exists instead of naming a catalog that is not there', async () => {
+    const d = build();
+    d.contextRepo.findActiveEnumBindings.mockResolvedValue([
+      {
+        dynamicEnumDefinitionId: DEFINITION,
+        targetSchemaName: 'profiles',
+        targetEntityName: 'persons',
+        targetFieldName: 'administrative_gender_concept_id',
+      },
+    ]);
+    d.contextRepo.findEnumDefinitionsByIds.mockResolvedValue(new Map());
+
+    const result = await d.service.listBindings();
+
+    expect(result.items).toEqual([]);
+    expect(result.count).toBe(0);
   });
 });

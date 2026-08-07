@@ -1157,3 +1157,191 @@ export class RollbackContextResponseDto {
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 }
+
+// --- Lectura del catálogo de enumeraciones (cara de consulta de UC-45-04/05) ---
+
+/**
+ * Una opción ofrecible en un selector, ya resuelta.
+ *
+ * Lleva a la vez el `conceptId` -que es lo que se persiste- y el `code`/`display`
+ * -que es lo que se pinta-, de modo que el formulario no necesita una segunda
+ * llamada a terminología para rotular lo que ya tiene.
+ */
+export class DynamicEnumOptionItemDto {
+  /**
+   * Concepto que respalda la opción; es el valor que se envía al escribir.
+   */
+  @ApiProperty({ format: 'uuid' })
+  conceptId!: string;
+
+  /**
+   * Código estable del concepto.
+   */
+  @ApiProperty()
+  code!: string;
+
+  /**
+   * Rótulo legible de la opción.
+   */
+  @ApiProperty()
+  display!: string;
+
+  /**
+   * Posición en la que se ofrece, empezando en cero.
+   */
+  @ApiPropertyOptional()
+  ordinal?: number;
+
+  /**
+   * Si la opción viene preseleccionada.
+   */
+  @ApiProperty()
+  isDefault!: boolean;
+}
+
+/**
+ * Enumeración publicada, lista para poblar un selector.
+ *
+ * El `cacheToken` es el de la versión publicada: mientras no cambie, el cliente
+ * puede reutilizar lo que ya tiene sin volver a pedirlo.
+ */
+export class ReadDynamicEnumResponseDto {
+  /**
+   * Código estable de la enumeración.
+   */
+  @ApiProperty()
+  code!: string;
+
+  /**
+   * Nombre legible de la enumeración.
+   */
+  @ApiProperty()
+  name!: string;
+
+  /**
+   * Qué gobierna la enumeración.
+   */
+  @ApiPropertyOptional()
+  description?: string;
+
+  /**
+   * Identificador de la definición.
+   */
+  @ApiProperty({ format: 'uuid' })
+  definitionId!: string;
+
+  /**
+   * Conjunto de valores de terminología del que sale la enumeración.
+   */
+  @ApiProperty({ format: 'uuid' })
+  valueSetId!: string;
+
+  /**
+   * Versión publicada de la que salen las opciones.
+   */
+  @ApiProperty({ format: 'uuid' })
+  versionId!: string;
+
+  /**
+   * Testigo de caché de la versión publicada.
+   */
+  @ApiPropertyOptional()
+  cacheToken?: string;
+
+  /**
+   * Si el campo admite un valor fuera del conjunto.
+   */
+  @ApiProperty()
+  allowCustomValue!: boolean;
+
+  /**
+   * Opciones habilitadas, en el orden en que se ofrecen.
+   */
+  @ApiProperty({ type: [DynamicEnumOptionItemDto] })
+  options!: DynamicEnumOptionItemDto[];
+}
+
+/**
+ * Un amarre `esquema.tabla.columna` -> enumeración.
+ *
+ * Es lo que permite que un formulario sepa qué campos suyos son de catálogo sin
+ * conocer ningún identificador de antemano.
+ */
+export class DynamicEnumBindingItemDto {
+  /**
+   * Campo gobernado, en la forma `esquema.tabla.columna`.
+   */
+  @ApiProperty({ example: 'profiles.persons.administrative_gender_concept_id' })
+  target!: string;
+
+  /**
+   * Esquema de la tabla destino.
+   */
+  @ApiProperty()
+  targetSchemaName!: string;
+
+  /**
+   * Tabla destino.
+   */
+  @ApiProperty()
+  targetEntityName!: string;
+
+  /**
+   * Columna destino.
+   */
+  @ApiProperty()
+  targetFieldName!: string;
+
+  /**
+   * Código estable de la enumeración que lo gobierna.
+   */
+  @ApiProperty()
+  enumCode!: string;
+
+  /**
+   * Identificador de la definición.
+   */
+  @ApiProperty({ format: 'uuid' })
+  definitionId!: string;
+
+  /**
+   * Conjunto de valores del que sale la enumeración.
+   */
+  @ApiProperty({ format: 'uuid' })
+  valueSetId!: string;
+
+  /**
+   * Si el amarre declara el campo obligatorio.
+   */
+  @ApiProperty()
+  required!: boolean;
+
+  /**
+   * Concepto de reserva cuando la validación es permisiva.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  fallbackConceptId?: string;
+
+  /**
+   * Modo de validación con el que se resuelve el valor propuesto.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  validationModeConceptId?: string;
+}
+
+/**
+ * Tabla de amarres campo -> enumeración.
+ */
+export class ListDynamicEnumBindingsResponseDto {
+  /**
+   * Amarres activos, ordenados por campo.
+   */
+  @ApiProperty({ type: [DynamicEnumBindingItemDto] })
+  items!: DynamicEnumBindingItemDto[];
+
+  /**
+   * Cuántos amarres trae la respuesta.
+   */
+  @ApiProperty()
+  count!: number;
+}
