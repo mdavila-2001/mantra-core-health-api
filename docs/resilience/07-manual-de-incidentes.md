@@ -263,5 +263,5 @@ HTTP_KEEPALIVE_TIMEOUT_MS (65 s)
 ```
 
 Todas están documentadas con su porqué en
-[`.env.example`](../../.env.example) y en
-[`docker-compose.yml`](../../docker-compose.yml).
+[`.env.example`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/.env.example) y en
+[`docker-compose.yml`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/docker-compose.yml).

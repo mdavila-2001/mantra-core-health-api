@@ -6,18 +6,21 @@ import {
   SchedulingBookingsController,
   SchedulingInternalController,
   SchedulingConfirmationController,
+  SchedulingAgendaController,
 } from './controllers';
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
   SchedulingWaitlistService,
   SchedulingConfirmationService,
+  SchedulingAgendaService,
 } from './services';
 import {
   SchedulingCatalogRepository,
   SchedulingBookingsRepository,
   SchedulingConfirmationRepository,
   SchedulingAbsencesRepository,
+  SchedulingAgendaRepository,
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
 import { schedulingPersistenceProviders } from './scheduling.persistence';
@@ -33,6 +36,7 @@ import { schedulingPersistenceProviders } from './scheduling.persistence';
     SchedulingBookingsController,
     SchedulingInternalController,
     SchedulingConfirmationController,
+    SchedulingAgendaController,
   ],
   providers: [
     // Piloto de la migración a puertos (§47, Fase 5): sesión del módulo,
@@ -43,10 +47,12 @@ import { schedulingPersistenceProviders } from './scheduling.persistence';
     SchedulingBookingsRepository,
     SchedulingConfirmationRepository,
     SchedulingAbsencesRepository,
+    SchedulingAgendaRepository,
     SchedulingCatalogService,
     SchedulingBookingsService,
     SchedulingWaitlistService,
     SchedulingConfirmationService,
+    SchedulingAgendaService,
   ],
 })
 export class SchedulingModule {}

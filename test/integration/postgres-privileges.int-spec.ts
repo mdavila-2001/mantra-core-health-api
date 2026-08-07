@@ -46,6 +46,10 @@ const OPTED_IN = Boolean(WRITER_PASSWORD && READER_PASSWORD);
 let probeTable: string | null = null;
 /** Esquema en el que se intenta el DDL. */
 let probeSchema: string | null = null;
+/** Nombre de la tabla sintética que se usa cuando la base aún está vacía. */
+const SYNTHETIC_PROBE = '__privilege_probe_fixture';
+/** Cualificada, si esta ejecución tuvo que fabricarla; se borra en `afterAll`. */
+let syntheticProbe: string | null = null;
 
 /** Abre una conexión, ejecuta y cierra. */
 async function withClient<T>(
@@ -146,7 +150,33 @@ beforeAll(async () => {
     );
     probeTable = table.rows[0]?.qualified ?? null;
     probeSchema = table.rows[0]?.schema ?? null;
+
+    // El esquema de este producto no vive en el repositorio (ADR-0021), así que
+    // en CI —y en cualquier base recién creada— no hay ni una tabla de negocio
+    // cuando corre esta suite. Sin ella `probeTable` quedaba en `null`, cada
+    // sentencia se convertía en `select 1 from null limit 1` y los doce casos
+    // fallaban por error de sintaxis, no por un privilegio mal puesto.
+    //
+    // Se fabrica una como propietario. Una tabla creada tras el
+    // `ALTER DEFAULT PRIVILEGES` recibe exactamente los grants por defecto que
+    // esta suite verifica, así que el sondeo sintético comprueba lo mismo que
+    // uno real. La columna `id` es obligatoria: los casos de UPDATE la usan.
+    if (!probeTable) {
+      probeSchema = 'public';
+      syntheticProbe = `${probeSchema}.${SYNTHETIC_PROBE}`;
+      await client.query(`drop table if exists ${syntheticProbe}`);
+      await client.query(`create table ${syntheticProbe} (id int)`);
+      await client.query(`insert into ${syntheticProbe} (id) values (1)`);
+      probeTable = syntheticProbe;
+    }
   });
+});
+
+afterAll(async () => {
+  if (!OPTED_IN || !syntheticProbe) return;
+  await withClient(ADMIN, (client) =>
+    client.query(`drop table if exists ${syntheticProbe}`),
+  );
 });
 
 const describeRoles = () => (OPTED_IN ? describe : describe.skip);

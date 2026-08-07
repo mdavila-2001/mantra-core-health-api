@@ -23,13 +23,13 @@
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 4 | 10 | 10 | 10 |
 | [`forms`](forms.md) | 5 | 5 | 6 | 16 | 13 |
 | [`practice`](practice.md) | 5 | 7 | 11 | 11 | 13 |
+| [`scheduling`](scheduling.md) | 5 | 5 | 5 | 16 | 5 |
 | [`audit`](audit.md) | 4 | 6 | 7 | 123 | 9 |
 | [`diagnostics`](diagnostics.md) | 4 | 5 | 5 | 36 | 6 |
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
 | [`integrations`](integrations.md) | 4 | 4 | 9 | 10 | 9 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 5 | 6 | 8 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 4 | 8 | 13 | 20 | 14 |
-| [`scheduling`](scheduling.md) | 4 | 4 | 4 | 16 | 4 |
 | [`billing`](billing.md) | 3 | 10 | 9 | 20 | 11 |
 | [`messaging`](messaging.md) | 3 | 3 | 4 | 22 | 1 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
@@ -67,4 +67,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **195** | **267** | **353** | **1186** | **377** |
+| **Total** | **196** | **268** | **354** | **1186** | **378** |

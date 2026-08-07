@@ -5,7 +5,7 @@ error. Son **parte del contrato**: un cliente puede ramificar sobre `code` sin
 parsear mensajes, que están pensados para humanos y pueden cambiar de redacción o
 de idioma.
 
-Fuente de verdad: [`src/common/errors/error-codes.ts`](../../src/common/errors/error-codes.ts).
+Fuente de verdad: [`src/common/errors/error-codes.ts`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/common/errors/error-codes.ts).
 Este documento no puede divergir de ese enum; si lo hace, manda el código.
 
 ## Forma del cuerpo de error

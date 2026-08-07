@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **887 de 887 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **61 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **889 de 889 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **61 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -95,7 +95,7 @@ Esta referencia documenta **887 de 887 operaciones HTTP** registradas en `openap
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
-| [scheduling](scheduling.md) | 24 | `scheduling`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal` | 4 |
+| [scheduling](scheduling.md) | 26 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal` | 5 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [system_context](system-context.md) | 11 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
@@ -112,4 +112,4 @@ Esta referencia documenta **887 de 887 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 887 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 889 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
