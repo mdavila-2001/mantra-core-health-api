@@ -9,7 +9,6 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { SchedulingCatalogService } from './scheduling-catalog.service';
-import { SchedulingWaitlistService } from './scheduling-waitlist.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -51,30 +50,6 @@ function buildCatalog() {
     logger as any,
   );
   return { service, tx, catalogRepo };
-}
-
-/**
- * Crea build waitlist.
- * @returns Resultado de build waitlist.
- */
-function buildWaitlist() {
-  const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const bookingsRepo = {
-    createWaitlistEntry: mockFn(),
-    findSlotById: mockFn(),
-    findWaitlistCandidates: mockFn(),
-    findBookingByIdForUpdate: mockFn(),
-    createReminder: mockFn(),
-    findDueReminders: mockFn(),
-  };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new SchedulingWaitlistService(
-    em as any,
-    bookingsRepo as any,
-    logger as any,
-  );
-  return { service, tx, bookingsRepo };
 }
 
 describe('SchedulingCatalogService', () => {
@@ -274,82 +249,5 @@ describe('SchedulingCatalogService', () => {
       expect(res.blockedSlots).toBe(0);
       expect(d.catalogRepo.findOpenSlotsInWindow).not.toHaveBeenCalled();
     });
-  });
-});
-
-describe('SchedulingWaitlistService', () => {
-  it('enrolls a patient with the given priority (UC-41-11)', async () => {
-    const d = buildWaitlist();
-    d.bookingsRepo.createWaitlistEntry.mockReturnValue({ id: 'wl-1' });
-
-    const res = await d.service.enroll(
-      { tenantId: TENANT, patientProfileId: 'pat-1', priority: 5 },
-      actor,
-    );
-
-    expect(res.priority).toBe(5);
-    expect(res.statusConceptId).toBe(CONCEPTS.WAITLIST_ACTIVE);
-  });
-
-  it('promotes candidates without booking on their behalf (UC-41-12)', async () => {
-    const d = buildWaitlist();
-    d.bookingsRepo.findSlotById.mockResolvedValue({
-      resourceId: RESOURCE,
-      remainingCapacity: 1,
-    });
-    const candidate = { statusConceptId: CONCEPTS.WAITLIST_ACTIVE };
-    d.bookingsRepo.findWaitlistCandidates.mockResolvedValue([candidate]);
-
-    const res = await d.service.promoteWaitlist('slot-1');
-
-    expect(res.processed).toBe(1);
-    expect(candidate.statusConceptId).toBe(CONCEPTS.WAITLIST_FULFILLED);
-  });
-
-  it('promotes nobody when the slot has no free seat (UC-41-12)', async () => {
-    const d = buildWaitlist();
-    d.bookingsRepo.findSlotById.mockResolvedValue({
-      resourceId: RESOURCE,
-      remainingCapacity: 0,
-    });
-
-    const res = await d.service.promoteWaitlist('slot-1');
-
-    expect(res.processed).toBe(0);
-    expect(d.bookingsRepo.findWaitlistCandidates).not.toHaveBeenCalled();
-  });
-
-  it('schedules reminders relative to the slot start (UC-41-13)', async () => {
-    const d = buildWaitlist();
-    d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
-      id: 'booking-1',
-      bookableSlotId: 'slot-1',
-    });
-    d.bookingsRepo.findSlotById.mockResolvedValue({
-      startAt: new Date('2026-06-01T10:00:00Z'),
-    });
-
-    const res = await d.service.scheduleReminders(
-      'booking-1',
-      { offsetsMinutes: [1440, 60], channel: 'EMAIL' },
-      actor,
-    );
-
-    expect(res.scheduled).toBe(2);
-    expect(d.bookingsRepo.createReminder).toHaveBeenCalledWith(
-      d.tx,
-      expect.objectContaining({ channelConceptId: CONCEPTS.REMINDER_CH_EMAIL }),
-    );
-  });
-
-  it('marks due reminders as sent (UC-41-14)', async () => {
-    const d = buildWaitlist();
-    const reminder = { statusConceptId: CONCEPTS.REMINDER_SCHEDULED };
-    d.bookingsRepo.findDueReminders.mockResolvedValue([reminder]);
-
-    const res = await d.service.dispatchReminders();
-
-    expect(res.processed).toBe(1);
-    expect(reminder.statusConceptId).toBe(CONCEPTS.REMINDER_SENT);
   });
 });

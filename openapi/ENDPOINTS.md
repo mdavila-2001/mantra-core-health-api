@@ -8,7 +8,7 @@ Se documentan **887 de 887 endpoints** en **61 módulos**. La referencia complet
 |---|---:|---|
 | `accounting` | 20 | [Abrir referencia](endpoints/accounting.md) |
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
-| `app` | 4 | [Abrir referencia](endpoints/app.md) |
+| `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audit` | 11 | [Abrir referencia](endpoints/audit.md) |
 | `auth_providers` | 12 | [Abrir referencia](endpoints/auth-providers.md) |
 | `authz` | 20 | [Abrir referencia](endpoints/authz.md) |

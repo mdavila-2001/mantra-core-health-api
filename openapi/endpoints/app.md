@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `app`
 
-Referencia exhaustiva de 4 operación(es) del módulo `app`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 6 operación(es) del módulo `app`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `app`
-- **Controladores:** `AppController`
+- **Controladores:** `AppController`, `DataSourcesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -13,8 +13,10 @@ Referencia exhaustiva de 4 operación(es) del módulo `app`, derivada del contra
 
 1. [GET /](#1-get) — Saludo raíz de verificación de despliegue
 2. [GET /health](#2-get-health) — Sonda de liveness (sin autenticación)
-3. [GET /liveness](#3-get-liveness) — Sonda de liveness sin dependencias externas
-4. [GET /readiness](#4-get-readiness) — Sonda de readiness de dependencias obligatorias
+3. [GET /health/data-sources](#3-get-health-data-sources) — Estado y enrutado de las fuentes de datos (requiere autenticación)
+4. [GET /health/data-sources/metrics](#4-get-health-data-sources-metrics) — Contadores de operaciones por conexión y por ruta read/write
+5. [GET /liveness](#5-get-liveness) — Sonda de liveness sin dependencias externas
+6. [GET /readiness](#6-get-readiness) — Sonda de readiness de dependencias obligatorias
 
 ---
 
@@ -209,7 +211,183 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /liveness
+## 3. GET /health/data-sources
+
+- **Módulo:** `app`
+- **Etiqueta OpenAPI:** `app`
+- **Nombre:** Estado y enrutado de las fuentes de datos (requiere autenticación)
+- **Operation ID:** `DataSourcesController_dataSources`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DataSourcesController.dataSources](../../src/persistence/health/data-sources.controller.ts)
+
+### Descripción de negocio
+
+Estado y enrutado de las fuentes de datos (requiere autenticación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Estado y enrutado de todas las fuentes de datos registradas.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /health/data-sources` en `DataSourcesController_dataSources`. El controlador delega en `DataSourcesHealthService.report`. No recibe body. El tipo de retorno estático es `Promise<DataSourcesReport>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /health/data-sources HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /health/data-sources HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DataSourcesReport>` | No |
+| 400 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
+
+El controlador declara `DataSourcesReport`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/health/data-sources"
+}
+```
+
+---
+
+## 4. GET /health/data-sources/metrics
+
+- **Módulo:** `app`
+- **Etiqueta OpenAPI:** `app`
+- **Nombre:** Contadores de operaciones por conexión y por ruta read/write
+- **Operation ID:** `DataSourcesController_metrics`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DataSourcesController.metrics](../../src/persistence/health/data-sources.controller.ts)
+
+### Descripción de negocio
+
+Contadores de operaciones por conexión y por ruta read/write. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Contadores por conexión de la capa de puertos y adaptadores.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /health/data-sources/metrics` en `DataSourcesController_metrics`. El controlador delega en `DataSourcesHealthService.metricsSnapshot`. No recibe body. El tipo de retorno estático es `PersistenceMetricsSnapshot`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /health/data-sources/metrics HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /health/data-sources/metrics HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `PersistenceMetricsSnapshot` | No |
+| 400 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
+| 401 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
+| 403 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
+| 429 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
+| 500 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
+
+El controlador declara `PersistenceMetricsSnapshot`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/health/data-sources/metrics"
+}
+```
+
+---
+
+## 5. GET /liveness
 
 - **Módulo:** `app`
 - **Etiqueta OpenAPI:** `app`
@@ -304,7 +482,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /readiness
+## 6. GET /readiness
 
 - **Módulo:** `app`
 - **Etiqueta OpenAPI:** `app`

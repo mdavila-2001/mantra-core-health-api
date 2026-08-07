@@ -39,9 +39,26 @@ repositorio, versionada aparte. `tools/catalog/generate-catalog.mjs` y este mism
 (`src/orm/catalog/`) como la documentación (`docs/data/entity-catalog.md`) — dos derivados de la
 misma fuente, no dos fuentes independientes que puedan divergir entre sí.
 
+## Cómo llega el código a los datos
+
+Conviven dos caminos, a propósito y de forma temporal:
+
+1. **El heredado**: el servicio inyecta `EntityManager` y se lo pasa al repositorio. Lo usan 59 de
+   los 60 módulos.
+2. **El de puertos**: el servicio depende de puertos de dominio y abre transacciones por la sesión
+   del módulo; el enrutado decide la conexión. Lo usa el módulo piloto.
+
+La migración es módulo a módulo y reversible por configuración. Ver
+[ADR-0023](../adr/ADR-0023-puertos-persistencia-read-write.md) y
+[rutas de lectura y escritura](read-write-routing.md).
+
 ## Ver también
 
 - [Catálogo de entidades](entity-catalog.md) — las 1184 entidades reales, por schema.
+- [Inventario de accesos a datos](data-access-inventory.md) — la auditoría del punto de partida.
+- [Rutas de lectura y escritura](read-write-routing.md) — puertos, adaptadores y enrutado.
+- [Configuración de conexiones](connection-configuration.md) — variables de entorno de la capa.
+- [Roles y privilegios de PostgreSQL](postgres-roles-and-privileges.md) — mínimo privilegio.
 - [Restricciones e índices](constraints-and-indexes.md)
 - [Migraciones](migrations.md)
 - [Seeds](seeds.md)

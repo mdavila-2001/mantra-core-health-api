@@ -46,7 +46,7 @@ Esta referencia documenta **887 de 887 operaciones HTTP** registradas en `openap
 |---|---:|---|---:|
 | [accounting](accounting.md) | 20 | `accounting-accruals`, `accounting-assets`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-subledger` | 7 |
 | [ads](ads.md) | 18 | `ads` | 1 |
-| [app](app.md) | 4 | `app` | 1 |
+| [app](app.md) | 6 | `app` | 2 |
 | [audit](audit.md) | 11 | `audit`, `audit-compliance`, `audit-moderation`, `audit-privacy` | 4 |
 | [auth_providers](auth-providers.md) | 12 | `auth-providers` | 1 |
 | [authz](authz.md) | 20 | `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles` | 7 |
