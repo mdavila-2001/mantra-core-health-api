@@ -269,6 +269,31 @@ async function pickProbeTable(client, schemas) {
   return rows[0]?.qualified ?? null;
 }
 
+/** Nombre de la tabla sintética que se usa cuando la base aún está vacía. */
+const SYNTHETIC_PROBE = '__provision_probe_verify';
+
+/**
+ * Crea, como propietario, una tabla efímera sobre la que ejercer la
+ * verificación cuando los esquemas gestionados todavía no tienen ninguna.
+ *
+ * Por qué existe: el esquema de este producto no vive en el repositorio
+ * (ver ADR-0021), así que al aprovisionar en un entorno limpio —CI, una base
+ * recién creada— no hay ni una tabla de negocio. Antes eso se reportaba como
+ * comprobación fallida, de modo que el paso no podía pasar *nunca* en CI.
+ *
+ * No se rebaja a aviso a propósito: una tabla creada por el propietario tras
+ * el `ALTER DEFAULT PRIVILEGES` recibe exactamente los grants por defecto que
+ * interesa verificar, así que el sondeo sintético comprueba lo mismo que uno
+ * real. Renunciar a verificar sería peor que verificar sobre esta.
+ */
+async function createSyntheticProbe(client, schema) {
+  const qualified = `${schema}.${SYNTHETIC_PROBE}`;
+  await client.query(`drop table if exists ${qualified}`);
+  await client.query(`create table ${qualified} (id int)`);
+  await client.query(`insert into ${qualified} (id) values (1)`);
+  return qualified;
+}
+
 /**
  * Verifica el mínimo privilegio ejecutando operaciones reales (§54).
  *
@@ -276,17 +301,44 @@ async function pickProbeTable(client, schemas) {
  */
 async function verify(config, schemas) {
   const probe = [];
-  const table = await withClient(config.admin, (client) =>
+  const existing = await withClient(config.admin, (client) =>
     pickProbeTable(client, schemas),
   );
-  if (!table) {
-    probe.push({
-      check: 'tabla de sondeo',
-      ok: false,
-      detail: 'No hay ninguna tabla en los esquemas gestionados; nada que verificar.',
-    });
-    return probe;
+
+  // Sin tabla de negocio se fabrica una: ver `createSyntheticProbe`. Se anota
+  // para poder borrarla al final pase lo que pase.
+  const synthetic = existing
+    ? null
+    : await withClient(config.admin, (client) =>
+        createSyntheticProbe(client, schemas[0]),
+      );
+  const table = existing ?? synthetic;
+
+  probe.push({
+    check: 'tabla de sondeo',
+    ok: true,
+    detail: existing
+      ? `Se verifica sobre ${table}.`
+      : `Esquemas sin tablas; se verifica sobre ${table}, creada y destruida por esta ejecución.`,
+  });
+
+  try {
+    return await runChecks(config, schemas, table, probe);
+  } finally {
+    if (synthetic) {
+      await withClient(config.admin, (client) =>
+        client.query(`drop table if exists ${synthetic}`),
+      );
+    }
   }
+}
+
+/**
+ * Ejerce las operaciones reales contra la tabla de sondeo.
+ *
+ * @returns la lista de comprobaciones, con las de este paso añadidas.
+ */
+async function runChecks(config, schemas, table, probe) {
 
   // Atributos de los roles: se leen del catálogo porque son atributos, no
   // privilegios, y no hay operación que los "ejerza".
