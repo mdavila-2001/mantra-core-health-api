@@ -110,6 +110,77 @@ export class ValueSetsRepository {
     return em.findOne(ValueSets, { internalCode });
   }
 
+  /**
+   * Una página del listado de conjuntos de valores, por cursor keyset sobre
+   * `internal_code`.
+   *
+   * El orden es por código interno y no por `created_at` porque el código es
+   * único y estable: paginar por fecha repetiría o saltaría filas cuando dos
+   * conjuntos comparten instante de creación, que es justo lo que pasa cuando los
+   * siembra la misma corrida.
+   *
+   * @param em - Contexto de persistencia.
+   * @param filters - Código exacto, texto libre y cursor.
+   * @param limit - Tope de filas a devolver.
+   * @returns Conjuntos ordenados por código interno ascendente.
+   */
+  searchPage(
+    em: EntityManager,
+    filters: {
+      /** Código interno exacto. */
+      internalCode?: string;
+      /** Texto libre sobre código interno y nombre. */
+      query?: string;
+      /** Último código interno de la página anterior. */
+      afterInternalCode?: string;
+    },
+    limit: number,
+  ): Promise<ValueSets[]> {
+    const where: Record<string, unknown> = {};
+
+    if (filters.internalCode !== undefined) {
+      where.internalCode = filters.internalCode;
+    }
+    if (filters.afterInternalCode !== undefined) {
+      // Se combina con el filtro exacto en vez de sustituirlo: pedir un código
+      // concreto y además pasar cursor debe dar cero filas, no todas.
+      where.internalCode =
+        filters.internalCode !== undefined
+          ? { $eq: filters.internalCode, $gt: filters.afterInternalCode }
+          : { $gt: filters.afterInternalCode };
+    }
+    if (filters.query) {
+      const pattern = `%${filters.query}%`;
+      where.$or = [
+        { internalCode: { $ilike: pattern } },
+        { name: { $ilike: pattern } },
+      ];
+    }
+
+    return em.find(ValueSets, where, {
+      orderBy: { internalCode: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
+   * Versiones por defecto de varios conjuntos, en una sola consulta.
+   *
+   * El listado necesita la versión vigente de cada fila para que el cliente pueda
+   * expandirla sin una segunda vuelta; pedirlas de una en una sería un N+1.
+   */
+  async findDefaultVersionsByValueSetIds(
+    em: EntityManager,
+    valueSetIds: string[],
+  ): Promise<Map<string, ValueSetVersions>> {
+    if (valueSetIds.length === 0) return new Map();
+    const rows = await em.find(ValueSetVersions, {
+      valueSetId: { $in: valueSetIds },
+      isDefault: true,
+    });
+    return new Map(rows.map((row) => [row.valueSetId, row]));
+  }
+
   /** Crea el conjunto de valores en la unidad de trabajo (sin flush). */
   createValueSet(em: EntityManager, data: CreateValueSetData): ValueSets {
     return em.create(

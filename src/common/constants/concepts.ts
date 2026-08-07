@@ -4919,6 +4919,34 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'Lenient validation',
   ),
 
+  // Ámbito y modo de selección de una enumeración. El comentario de arriba dice
+  // que estos catálogos son abiertos y que el cliente entrega su `*ConceptId`:
+  // sigue siendo cierto. Lo que se define aquí son los dos valores que usa la
+  // **propia plataforma** al sembrar sus enumeraciones bien conocidas
+  // (`DynamicEnumSeedService`), porque `scope_type_concept_id` y
+  // `selection_mode_concept_id` son NOT NULL y el seed no puede inventarlos ni
+  // pedírselos a nadie. No restringen lo que el cliente puede mandar.
+  ENUM_SCOPE_GLOBAL: def(
+    'system-context:enum-scope:global',
+    'ENUM_SCOPE_GLOBAL',
+    'Enum scope global',
+  ),
+  ENUM_SCOPE_TENANT: def(
+    'system-context:enum-scope:tenant',
+    'ENUM_SCOPE_TENANT',
+    'Enum scope tenant',
+  ),
+  ENUM_SELECTION_SINGLE: def(
+    'system-context:enum-selection-mode:single',
+    'ENUM_SEL_SINGLE',
+    'Single selection',
+  ),
+  ENUM_SELECTION_MULTIPLE: def(
+    'system-context:enum-selection-mode:multiple',
+    'ENUM_SEL_MULTIPLE',
+    'Multiple selection',
+  ),
+
   // --- Contexto de sistema: contextos y versiones ---
   SYSCTX_ACTIVE: def(
     'system-context:context-status:active',

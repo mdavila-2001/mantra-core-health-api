@@ -87,4 +87,14 @@ export class BranchesRepository {
       { partial: true },
     );
   }
+  /**
+   * Sucursales de la organización, ordenadas por código.
+   *
+   * No pagina: el número de sucursales de una organización lo acota la realidad,
+   * no el volumen de la tabla, y un cursor aquí complicaría el contrato sin
+   * resolver nada.
+   */
+  findByTenant(em: EntityManager, tenantId: string): Promise<Branches[]> {
+    return em.find(Branches, { tenantId }, { orderBy: { code: 'ASC' } });
+  }
 }

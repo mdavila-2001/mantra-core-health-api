@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `system_context`
 
-Referencia exhaustiva de 11 operación(es) del módulo `system_context`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 13 operación(es) del módulo `system_context`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `system-context`
 - **Controladores:** `SystemContextController`
@@ -16,12 +16,14 @@ Referencia exhaustiva de 11 operación(es) del módulo `system_context`, derivad
 3. [POST /system-context/contexts/{id}/refresh](#3-post-system-context-contexts-id-refresh) — Refrescar el contexto y snapshotear su procedencia
 4. [POST /system-context/contexts/{id}/rollback](#4-post-system-context-contexts-id-rollback) — Volver a una versión anterior del contexto
 5. [POST /system-context/contexts/{id}/versions/{version}/activate](#5-post-system-context-contexts-id-versions-version-activate) — Promover la versión a vigente
-6. [POST /system-context/dynamic-enums/definitions](#6-post-system-context-dynamic-enums-definitions) — Definir una enumeración dinámica ligada a un value set
-7. [POST /system-context/dynamic-enums/definitions/{defId}/bindings](#7-post-system-context-dynamic-enums-definitions-defid-bindings) — Vincular la enumeración a un campo destino
-8. [POST /system-context/dynamic-enums/definitions/{defId}/retire](#8-post-system-context-dynamic-enums-definitions-defid-retire) — Retirar la definición (borrado lógico gobernado)
-9. [POST /system-context/dynamic-enums/definitions/{defId}/versions](#9-post-system-context-dynamic-enums-definitions-defid-versions) — Redactar una versión con su snapshot de opciones
-10. [POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish](#10-post-system-context-dynamic-enums-definitions-defid-versions-version-publish) — Publicar la versión e invalidar la caché
-11. [POST /system-context/dynamic-enums/resolve](#11-post-system-context-dynamic-enums-resolve) — Resolver y validar un valor de enumeración antes de escribirlo
+6. [GET /system-context/dynamic-enums](#6-get-system-context-dynamic-enums) — Leer las opciones publicadas de una enumeración
+7. [GET /system-context/dynamic-enums/bindings](#7-get-system-context-dynamic-enums-bindings) — Listar los amarres campo -> enumeración
+8. [POST /system-context/dynamic-enums/definitions](#8-post-system-context-dynamic-enums-definitions) — Definir una enumeración dinámica ligada a un value set
+9. [POST /system-context/dynamic-enums/definitions/{defId}/bindings](#9-post-system-context-dynamic-enums-definitions-defid-bindings) — Vincular la enumeración a un campo destino
+10. [POST /system-context/dynamic-enums/definitions/{defId}/retire](#10-post-system-context-dynamic-enums-definitions-defid-retire) — Retirar la definición (borrado lógico gobernado)
+11. [POST /system-context/dynamic-enums/definitions/{defId}/versions](#11-post-system-context-dynamic-enums-definitions-defid-versions) — Redactar una versión con su snapshot de opciones
+12. [POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish](#12-post-system-context-dynamic-enums-definitions-defid-versions-version-publish) — Publicar la versión e invalidar la caché
+13. [POST /system-context/dynamic-enums/resolve](#13-post-system-context-dynamic-enums-resolve) — Resolver y validar un valor de enumeración antes de escribirlo
 
 ---
 
@@ -773,7 +775,276 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /system-context/dynamic-enums/definitions
+## 6. GET /system-context/dynamic-enums
+
+- **Módulo:** `system_context`
+- **Etiqueta OpenAPI:** `system-context`
+- **Nombre:** Leer las opciones publicadas de una enumeración
+- **Operation ID:** `SystemContextController_readEnum`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemContextController.readEnum](../../src/modules/system_context/controllers/system-context.controller.ts)
+
+### Descripción de negocio
+
+Por campo destino o por código; devuelve `conceptId` para escribir y `display` para pintar.
+
+Contexto declarado en el controlador: Cara de lectura de UC-45-05: las opciones válidas de un campo de catálogo. Se pide por la ruta del campo (`target=profiles.persons.administrative_gender_concept_id`) o por el código de la enumeración (`code=administrative-gender`). Los dos son constantes del código fuente; ninguno es un uuid sembrado por entorno, que es lo que impedía poblar un selector.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /system-context/dynamic-enums` en `SystemContextController_readEnum`. El controlador delega en `DynamicEnumsService.readEnum`. No recibe body. El tipo de retorno estático es `Promise<ReadDynamicEnumResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `target` | query | No | `string` | Sin restricción adicional declarada | Campo destino, como `profiles.persons.sex_at_birth_concept_id` | `valor-ejemplo` |
+| `code` | query | No | `string` | Sin restricción adicional declarada | Código estable de la enumeración, como `sex-at-birth` | `CODIGO_EJEMPLO` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /system-context/dynamic-enums HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /system-context/dynamic-enums?target=valor-ejemplo&code=CODIGO_EJEMPLO HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReadDynamicEnumResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadDynamicEnumResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "definitionId": "00000000-0000-4000-8000-000000000001",
+  "valueSetId": "00000000-0000-4000-8000-000000000001",
+  "versionId": "00000000-0000-4000-8000-000000000001",
+  "cacheToken": "valor-ejemplo",
+  "allowCustomValue": true,
+  "options": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo",
+      "ordinal": 1,
+      "isDefault": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código estable de la enumeración. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la enumeración. | `Nombre de ejemplo` |
+| `description` | No | `string` | Sin restricción adicional declarada | Qué gobierna la enumeración. | `Texto descriptivo de ejemplo` |
+| `definitionId` | Sí | `string` | formato `uuid` | Identificador de la definición. | `00000000-0000-4000-8000-000000000001` |
+| `valueSetId` | Sí | `string` | formato `uuid` | Conjunto de valores de terminología del que sale la enumeración. | `00000000-0000-4000-8000-000000000001` |
+| `versionId` | Sí | `string` | formato `uuid` | Versión publicada de la que salen las opciones. | `00000000-0000-4000-8000-000000000001` |
+| `cacheToken` | No | `string` | Sin restricción adicional declarada | Testigo de caché de la versión publicada. | `valor-ejemplo` |
+| `allowCustomValue` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo admite un valor fuera del conjunto. | `true` |
+| `options` | Sí | `array<DynamicEnumOptionItemDto>` | Sin restricción adicional declarada | Opciones habilitadas, en el orden en que se ofrecen. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","ordinal":1,"isDefault":true}]` |
+| `options[].conceptId` | Sí | `string` | formato `uuid` | Concepto que respalda la opción; es el valor que se envía al escribir. | `00000000-0000-4000-8000-000000000001` |
+| `options[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `options[].display` | Sí | `string` | Sin restricción adicional declarada | Rótulo legible de la opción. | `valor-ejemplo` |
+| `options[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición en la que se ofrece, empezando en cero. | `1` |
+| `options[].isDefault` | Sí | `boolean` | Sin restricción adicional declarada | Si la opción viene preseleccionada. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Indique el campo destino (`target`) o el código de la enumeración (`code`) | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
+| 400 | `VALIDATION_FAILED` | El campo destino se escribe como `esquema.tabla.columna` | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Enumeración no encontrada | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
+| 404 | `NOT_FOUND` | La enumeración está retirada | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
+| 422 | `PRECONDITION_FAILED` | La enumeración no tiene versión publicada | Excepción explícita en src/modules/system_context/services/dynamic-enums.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/system-context/dynamic-enums"
+}
+```
+
+---
+
+## 7. GET /system-context/dynamic-enums/bindings
+
+- **Módulo:** `system_context`
+- **Etiqueta OpenAPI:** `system-context`
+- **Nombre:** Listar los amarres campo -> enumeración
+- **Operation ID:** `SystemContextController_listEnumBindings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemContextController.listEnumBindings](../../src/modules/system_context/controllers/system-context.controller.ts)
+
+### Descripción de negocio
+
+Permite descubrir qué campos `*_concept_id` son de catálogo sin conocer ningún uuid.
+
+Contexto declarado en el controlador: Cara de lectura de UC-45-04: qué campos de una tabla salen de catálogo. Va declarada antes que cualquier ruta con parámetro para que `bindings` no sea capturado como identificador. No exige rol de administración, y es deliberado: escribir la enumeración gobierna el sistema y por eso pide `PLATFORM_ADMIN`, pero **leer** la lista de opciones válidas es lo que necesita cualquier formulario para pintarse. Pedir rol de plataforma para eso dejaría el catálogo inutilizable desde el cliente, que es exactamente la situación que este endpoint viene a corregir. No revela dato personal alguno: son vocabularios de plataforma.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /system-context/dynamic-enums/bindings` en `SystemContextController_listEnumBindings`. El controlador delega en `DynamicEnumsService.listBindings`. No recibe body. El tipo de retorno estático es `Promise<ListDynamicEnumBindingsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `schema` | query | No | `string` | Sin restricción adicional declarada | Esquema al que acotar (por ejemplo, `profiles`) | `valor-ejemplo` |
+| `entity` | query | No | `string` | Sin restricción adicional declarada | Tabla a la que acotar (por ejemplo, `persons`) | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /system-context/dynamic-enums/bindings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /system-context/dynamic-enums/bindings?schema=valor-ejemplo&entity=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListDynamicEnumBindingsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListDynamicEnumBindingsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "target": "profiles.persons.administrative_gender_concept_id",
+      "targetSchemaName": "Nombre de ejemplo",
+      "targetEntityName": "Nombre de ejemplo",
+      "targetFieldName": "Nombre de ejemplo",
+      "enumCode": "CODIGO_EJEMPLO",
+      "definitionId": "00000000-0000-4000-8000-000000000001",
+      "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "required": true,
+      "fallbackConceptId": "00000000-0000-4000-8000-000000000001",
+      "validationModeConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<DynamicEnumBindingItemDto>` | Sin restricción adicional declarada | Amarres activos, ordenados por campo. | `[{"target":"profiles.persons.administrative_gender_concept_id","targetSchemaName":"Nombre de ejemplo","targetEntityName":"Nombre de ejemplo","targetFieldName":"Nombre de ejemplo","enumCode":"CODIGO_EJEMPLO","definitionId":"00000000-0000-4000-8000-000000000001","valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"fallbackConceptId":"00000000-0000-4000-8000-000000000001","validationModeConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].target` | Sí | `string` | Sin restricción adicional declarada | Campo gobernado, en la forma `esquema.tabla.columna`. | `profiles.persons.administrative_gender_concept_id` |
+| `items[].targetSchemaName` | Sí | `string` | Sin restricción adicional declarada | Esquema de la tabla destino. | `Nombre de ejemplo` |
+| `items[].targetEntityName` | Sí | `string` | Sin restricción adicional declarada | Tabla destino. | `Nombre de ejemplo` |
+| `items[].targetFieldName` | Sí | `string` | Sin restricción adicional declarada | Columna destino. | `Nombre de ejemplo` |
+| `items[].enumCode` | Sí | `string` | Sin restricción adicional declarada | Código estable de la enumeración que lo gobierna. | `CODIGO_EJEMPLO` |
+| `items[].definitionId` | Sí | `string` | formato `uuid` | Identificador de la definición. | `00000000-0000-4000-8000-000000000001` |
+| `items[].valueSetId` | Sí | `string` | formato `uuid` | Conjunto de valores del que sale la enumeración. | `00000000-0000-4000-8000-000000000001` |
+| `items[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el amarre declara el campo obligatorio. | `true` |
+| `items[].fallbackConceptId` | No | `string` | formato `uuid` | Concepto de reserva cuando la validación es permisiva. | `00000000-0000-4000-8000-000000000001` |
+| `items[].validationModeConceptId` | No | `string` | formato `uuid` | Modo de validación con el que se resuelve el valor propuesto. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos amarres trae la respuesta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/system-context/dynamic-enums/bindings"
+}
+```
+
+---
+
+## 8. POST /system-context/dynamic-enums/definitions
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -919,7 +1190,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /system-context/dynamic-enums/definitions/{defId}/bindings
+## 9. POST /system-context/dynamic-enums/definitions/{defId}/bindings
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1065,7 +1336,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /system-context/dynamic-enums/definitions/{defId}/retire
+## 10. POST /system-context/dynamic-enums/definitions/{defId}/retire
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1195,7 +1466,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /system-context/dynamic-enums/definitions/{defId}/versions
+## 11. POST /system-context/dynamic-enums/definitions/{defId}/versions
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1359,7 +1630,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish
+## 12. POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1481,7 +1752,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /system-context/dynamic-enums/resolve
+## 13. POST /system-context/dynamic-enums/resolve
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`

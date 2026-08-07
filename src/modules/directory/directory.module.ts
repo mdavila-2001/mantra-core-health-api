@@ -12,6 +12,7 @@ import {
   DirectoryTenantsService,
   DirectoryBranchesService,
   DirectoryMembershipsService,
+  DirectoryReadService,
 } from './services';
 import {
   TenantsRepository,
@@ -50,6 +51,7 @@ import {
     DirectoryTenantsService,
     DirectoryBranchesService,
     DirectoryMembershipsService,
+    DirectoryReadService,
   ],
   // `TenantsRepository` lo necesita identity_assurance para marcar verificada la
   // institución cuando la autoridad externa la aprueba; `TenantMembershipsRepository`

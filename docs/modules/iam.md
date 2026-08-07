@@ -9,7 +9,7 @@
 # Módulo `iam`
 
 **Fuente:** [`src/modules/iam/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/iam/README.md)
-· 2 controllers · 11 services · 13 repositories · 14 entidades · 21 DTO
+· 2 controllers · 12 services · 13 repositories · 14 entidades · 22 DTO
 
 ---
 

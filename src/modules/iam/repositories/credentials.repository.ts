@@ -64,6 +64,31 @@ export class CredentialsRepository {
   }
 
   /**
+   * Credenciales cuyo sujeto contiene el texto dado, para buscar usuarios por
+   * correo o documento desde el listado de administración.
+   *
+   * Devuelve sólo el `user_id` porque es lo único que el listado necesita: traer
+   * la fila entera arrastraría el hash de la contraseña a memoria en cada
+   * búsqueda, sin motivo.
+   *
+   * @param em - Contexto de persistencia.
+   * @param text - Texto a buscar dentro del sujeto.
+   * @param limit - Tope de coincidencias a resolver.
+   * @returns Identificadores de usuario de las credenciales que casan.
+   */
+  findBySubjectMatch(
+    em: EntityManager,
+    text: string,
+    limit: number,
+  ): Promise<{ userId: string }[]> {
+    return em.find(
+      AuthenticationCredentials,
+      { externalSubject: { $ilike: `%${text}%` } },
+      { fields: ['userId'], limit },
+    );
+  }
+
+  /**
    * Credencial de contraseña VIVA (ACTIVA o PENDIENTE de activación) para el
    * identificador dado. Sustenta la detección de duplicados del registro asistido
    * (C-18): si ya existe una cuenta con el identificador verificado no se crea otra.
@@ -195,6 +220,23 @@ export class CredentialsRepository {
       AuthenticationCredentials,
       { userId },
       { stateConceptId: CONCEPTS.STATE_REVOKED, updatedAt: new Date() },
+    );
+  }
+
+  /**
+   * Credenciales del usuario, para la vista de administración.
+   *
+   * Devuelve la entidad completa; el servicio decide qué se publica. El hash y la
+   * clave pública nunca salen de aquí hacia el contrato.
+   */
+  findByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<AuthenticationCredentials[]> {
+    return em.find(
+      AuthenticationCredentials,
+      { userId },
+      { orderBy: { createdAt: 'DESC' } },
     );
   }
 }

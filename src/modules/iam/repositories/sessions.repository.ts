@@ -116,4 +116,14 @@ export class SessionsRepository {
       { stateConceptId: CONCEPTS.STATE_EXPIRED, updatedAt: now },
     );
   }
+  /**
+   * Sesiones del usuario, de la más reciente a la más antigua.
+   *
+   * Trae también las cerradas: la vista de sesiones sirve para auditar desde
+   * dónde se entró, y ocultar las cerradas dejaría fuera justo lo que se revisa
+   * tras un incidente.
+   */
+  findByUser(em: EntityManager, userId: string): Promise<Sessions[]> {
+    return em.find(Sessions, { userId }, { orderBy: { createdAt: 'DESC' } });
+  }
 }

@@ -62,6 +62,77 @@ export class UsersRepository {
     );
   }
 
+  /**
+   * Una página del listado de usuarios, por cursor keyset sobre `(display_name, id)`.
+   *
+   * El desempate por `id` no es decorativo: `display_name` no es único —dos
+   * personas pueden llamarse igual— y sin él dos páginas consecutivas repetirían u
+   * omitirían filas. `id` sí es total dentro de la tabla.
+   *
+   * @param em - Contexto de persistencia.
+   * @param filters - Estado, identificadores ya acotados y cursor.
+   * @param limit - Tope de filas a devolver.
+   * @returns Usuarios ordenados por `(display_name, id)`.
+   */
+  searchPage(
+    em: EntityManager,
+    filters: {
+      /** Estado al que acotar. */
+      statusConceptId?: string;
+      /** Identificadores a los que acotar (resultado de la búsqueda por texto). */
+      ids?: string[];
+      /** Texto libre sobre el nombre visible. */
+      query?: string;
+      /** Última fila de la página anterior. */
+      after?: {
+        /** Nombre visible de la última fila. */
+        displayName: string;
+        /** Identificador de la última fila. */
+        id: string;
+      };
+    },
+    limit: number,
+  ): Promise<Users[]> {
+    const where: Record<string, unknown> = {};
+
+    if (filters.statusConceptId) {
+      where.statusConceptId = filters.statusConceptId;
+    }
+
+    if (filters.query) {
+      const pattern = `%${filters.query}%`;
+      // El texto casa contra el nombre visible o contra los identificadores que
+      // ya resolvió el servicio (los sujetos de las credenciales). Un `$in` vacío
+      // se traduce a `in (null)` y anularía también la rama del nombre, así que
+      // sólo se añade cuando hay algo dentro.
+      where.$or =
+        filters.ids && filters.ids.length > 0
+          ? [{ displayName: { $ilike: pattern } }, { id: { $in: filters.ids } }]
+          : [{ displayName: { $ilike: pattern } }];
+    } else if (filters.ids) {
+      where.id = { $in: filters.ids };
+    }
+
+    if (filters.after) {
+      const keyset = [
+        { displayName: { $gt: filters.after.displayName } },
+        {
+          displayName: filters.after.displayName,
+          id: { $gt: filters.after.id },
+        },
+      ];
+      // El keyset se combina con `$and` para no pisar el `$or` de la búsqueda por
+      // texto: dos `$or` en el mismo objeto se sobrescriben y el cursor dejaría
+      // de aplicarse en silencio.
+      where.$and = [{ $or: keyset }];
+    }
+
+    return em.find(Users, where, {
+      orderBy: [{ displayName: 'ASC' }, { id: 'ASC' }],
+      limit,
+    });
+  }
+
   /** Cuenta usuarios activos; utilidad para métricas/pruebas. */
   countActive(em: EntityManager): Promise<number> {
     return em.count(Users, { statusConceptId: CONCEPTS.USER_ACTIVE });

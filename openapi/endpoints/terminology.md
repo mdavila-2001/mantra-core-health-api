@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 15 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 16 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
 - **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
@@ -21,11 +21,12 @@ Referencia exhaustiva de 15 operación(es) del módulo `terminology`, derivada d
 8. [POST /terminology/concepts/{conceptId}/properties](#8-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
 9. [POST /terminology/concepts/{conceptId}/relationships](#9-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
 10. [PUT /terminology/tenants/{tenantId}/catalog-policies](#10-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-11. [POST /terminology/value-sets](#11-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-12. [GET /terminology/value-sets/{id}/$expand](#12-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-13. [POST /terminology/ValueSet/{id}/$expand](#13-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-14. [POST /terminology/versions/{versionId}/import](#14-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-15. [POST /terminology/versions/{versionId}/publish](#15-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+11. [GET /terminology/value-sets](#11-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+12. [POST /terminology/value-sets](#12-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+13. [GET /terminology/value-sets/{id}/$expand](#13-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+14. [POST /terminology/ValueSet/{id}/$expand](#14-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+15. [POST /terminology/versions/{versionId}/import](#15-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+16. [POST /terminology/versions/{versionId}/publish](#16-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -1455,7 +1456,137 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /terminology/value-sets
+## 11. GET /terminology/value-sets
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Listar conjuntos de valores por código interno o texto
+- **Operation ID:** `TerminologyValueSetsController_searchValueSets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyValueSetsController.searchValueSets](../../src/modules/terminology/controllers/terminology-value-sets.controller.ts)
+
+### Descripción de negocio
+
+Permite resolver el uuid de un conjunto desde un código estable, sin hardcodear identificadores por entorno.
+
+Contexto declarado en el controlador: Listado de conjuntos de valores, buscable por código interno o texto libre. Va declarado **antes** que `:id/$expand` sólo por legibilidad; no compiten, porque aquél tiene dos segmentos. No pide rol, por el mismo motivo que la lectura de la expansión: un campo de formulario necesita resolver su conjunto de valores, y exigir rol de administración para eso deja el catálogo inutilizable desde el cliente.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/value-sets` en `TerminologyValueSetsController_searchValueSets`. El controlador delega en `ValueSetsService.searchValueSets`. No recibe body. El tipo de retorno estático es `Promise<SearchValueSetsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `code` | query | No | `string` | Sin restricción adicional declarada | Código interno exacto del conjunto | `CODIGO_EJEMPLO` |
+| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en el código interno o el nombre | `valor-ejemplo` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Conjuntos por página (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/value-sets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/value-sets?code=CODIGO_EJEMPLO&q=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchValueSetsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "internalCode": "administrative-gender",
+      "name": "Nombre de ejemplo",
+      "canonicalUrl": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "defaultVersionId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ValueSetListItemDto>` | Sin restricción adicional declarada | Conjuntos de esta página, ordenados por código interno. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"administrative-gender","name":"Nombre de ejemplo","canonicalUrl":"valor-ejemplo","description":"Texto descriptivo de ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","defaultVersionId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del conjunto de valores. | `00000000-0000-4000-8000-000000000001` |
+| `items[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable. Es la clave por la que se busca sin conocer el uuid. | `administrative-gender` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `items[].canonicalUrl` | Sí | `string` | Sin restricción adicional declarada | URL canónica FHIR del conjunto. | `valor-ejemplo` |
+| `items[].description` | No | `string` | Sin restricción adicional declarada | Descripción de qué agrupa. | `Texto descriptivo de ejemplo` |
+| `items[].stateConceptId` | No | `string` | formato `uuid` | Estado del conjunto en el ciclo de vida de terminología. | `00000000-0000-4000-8000-000000000001` |
+| `items[].defaultVersionId` | No | `string` | formato `uuid`; admite null | Versión marcada por defecto, o `null` si todavía no hay ninguna. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/value-sets"
+}
+```
+
+---
+
+## 12. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1601,7 +1732,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /terminology/value-sets/{id}/$expand
+## 13. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1742,7 +1873,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /terminology/ValueSet/{id}/$expand
+## 14. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1884,7 +2015,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /terminology/versions/{versionId}/import
+## 15. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2028,7 +2159,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /terminology/versions/{versionId}/publish
+## 16. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

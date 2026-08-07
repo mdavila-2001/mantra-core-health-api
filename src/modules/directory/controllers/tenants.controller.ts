@@ -1,18 +1,31 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DirectoryBranchesService,
   DirectoryMembershipsService,
+  DirectoryReadService,
   DirectoryTenantsService,
 } from '../services';
 import {
@@ -27,7 +40,15 @@ import {
   StatusResultDto,
   TenantResponseDto,
   TransferMembershipDto,
+  ListBranchAssignmentsResponseDto,
+  ListBranchesResponseDto,
+  SearchMembershipsResponseDto,
+  SearchTenantsResponseDto,
+  TenantDetailResponseDto,
 } from '../dto';
+
+/** Tope de filas por página cuando el cliente no pide uno. */
+const DEFAULT_PAGE_SIZE = 50;
 
 /**
  * Endpoints con scope de tenant sobre `/tenants/{tenantId}`: sub-tenants, branches
@@ -43,12 +64,103 @@ export class TenantsController {
    * @param tenantsService - Valor de tenants service requerido por la operación.
    * @param branchesService - Valor de branches service requerido por la operación.
    * @param membershipsService - Valor de memberships service requerido por la operación.
+   * @param readService - Cara de lectura del directorio, con el alcance por organización.
    */
   constructor(
     private readonly tenantsService: DirectoryTenantsService,
     private readonly branchesService: DirectoryBranchesService,
     private readonly membershipsService: DirectoryMembershipsService,
+    private readonly readService: DirectoryReadService,
   ) {}
+
+  /**
+   * Ficha de una organización.
+   *
+   * Estas lecturas no exigen rol global: el alcance lo decide la membresía activa
+   * en la propia organización (`assertCanRead`). Pedir `SECURITY_ADMIN` para leer
+   * dejaría a la organización sin poder consultarse a sí misma, que es el mismo
+   * problema que `TenantAdministrationService` corrigió para las escrituras.
+   *
+   * @param tenantId - Organización a leer.
+   * @param actor - Quien pide la lectura.
+   * @returns Ficha de la organización.
+   */
+  @Get(':tenantId')
+  @ApiOperation({ summary: 'Ficha de una organización' })
+  getTenant(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TenantDetailResponseDto> {
+    return this.readService.getTenantById(tenantId, actor);
+  }
+
+  /** UC-04-03 (cara de lectura). */
+  @Get(':tenantId/child-tenants')
+  @ApiOperation({ summary: 'Sub-organizaciones de una organización' })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  listChildTenants(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<SearchTenantsResponseDto> {
+    return this.readService.listChildTenants(
+      tenantId,
+      { cursor, limit: limit ?? DEFAULT_PAGE_SIZE },
+      actor,
+    );
+  }
+
+  /** UC-04-02 (cara de lectura). */
+  @Get(':tenantId/branches')
+  @ApiOperation({ summary: 'Sucursales de la organización' })
+  listBranches(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ListBranchesResponseDto> {
+    return this.readService.listBranches(tenantId, actor);
+  }
+
+  /** UC-04-04 (cara de lectura). */
+  @Get(':tenantId/memberships')
+  @ApiOperation({ summary: 'Plantilla de la organización' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Concepto de estado al que acotar',
+  })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  listMemberships(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('status', new ParseUUIDPipe({ optional: true }))
+    statusConceptId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<SearchMembershipsResponseDto> {
+    return this.readService.listMemberships(
+      tenantId,
+      { statusConceptId, cursor, limit: limit ?? DEFAULT_PAGE_SIZE },
+      actor,
+    );
+  }
+
+  /** UC-04-05 (cara de lectura). */
+  @Get(':tenantId/memberships/:membershipId/branch-assignments')
+  @ApiOperation({ summary: 'Sucursales asignadas a una membresía' })
+  listBranchAssignments(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('membershipId', ParseUUIDPipe) membershipId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ListBranchAssignmentsResponseDto> {
+    return this.readService.listBranchAssignments(
+      tenantId,
+      membershipId,
+      actor,
+    );
+  }
 
   /** UC-04-03. */
   @Post(':tenantId/child-tenants')

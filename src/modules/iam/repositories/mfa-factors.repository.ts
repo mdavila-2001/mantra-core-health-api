@@ -49,4 +49,8 @@ export class MfaFactorsRepository {
   ): Promise<MfaFactors | null> {
     return em.findOne(MfaFactors, { id, userId });
   }
+  /** Factores de MFA dados de alta por el usuario. */
+  findByUser(em: EntityManager, userId: string): Promise<MfaFactors[]> {
+    return em.find(MfaFactors, { userId }, { orderBy: { createdAt: 'DESC' } });
+  }
 }
