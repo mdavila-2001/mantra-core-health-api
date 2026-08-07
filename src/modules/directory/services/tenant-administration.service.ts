@@ -73,6 +73,37 @@ export class TenantAdministrationService {
   }
 
   /**
+   * Exige que el actor pueda **leer** el tenant indicado.
+   *
+   * Es el escalón por debajo de administrar: para consultar la ficha de la
+   * organización, sus sedes o su plantilla basta con pertenecer a ella, sin ser
+   * `OWNER` ni `ADMIN`. Exigir rol de administración para leer dejaría al `STAFF`
+   * sin poder ver la organización en la que trabaja.
+   *
+   * Lo que no se relaja es el aislamiento: quien no es plataforma y no tiene
+   * membresía activa **en ese tenant** recibe 403, que es lo que impide que un
+   * listado se convierta en una fuga entre organizaciones.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant que se quiere leer.
+   * @param actor - Quien pide la operación.
+   * @throws ForbiddenException si no es plataforma ni miembro activo del tenant.
+   */
+  async assertCanRead(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (this.isPlatform(actor)) return;
+
+    if (await this.activeMembershipOf(em, tenantId, actor)) return;
+
+    throw new ForbiddenException(
+      'Se requiere pertenecer a la organización, o ser administrador de la plataforma',
+    );
+  }
+
+  /**
    * Exige que el actor pueda cambiar quién es dueño del tenant.
    *
    * Es el escalón por encima de administrar: cubre conceder `OWNER` (por invitación o

@@ -70,4 +70,15 @@ export class BranchMembershipsRepository {
       { partial: true },
     );
   }
+  /** Asignaciones de sucursal de una membresía, vigentes y cerradas. */
+  findByMembership(
+    em: EntityManager,
+    tenantMembershipId: string,
+  ): Promise<BranchMemberships[]> {
+    return em.find(
+      BranchMemberships,
+      { tenantMembershipId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
 }

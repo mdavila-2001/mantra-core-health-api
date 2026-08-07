@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { DynamicEnumsService, SystemContextsService } from '../services';
 import {
@@ -33,6 +40,8 @@ import {
   ContextBindingResponseDto,
   RollbackContextDto,
   RollbackContextResponseDto,
+  ListDynamicEnumBindingsResponseDto,
+  ReadDynamicEnumResponseDto,
 } from '../dto';
 
 /**
@@ -57,6 +66,84 @@ export class SystemContextController {
     private readonly enumsService: DynamicEnumsService,
     private readonly contextsService: SystemContextsService,
   ) {}
+
+  /**
+   * Cara de lectura de UC-45-04: qué campos de una tabla salen de catálogo.
+   *
+   * Va declarada antes que cualquier ruta con parámetro para que `bindings` no
+   * sea capturado como identificador.
+   *
+   * No exige rol de administración, y es deliberado: escribir la enumeración
+   * gobierna el sistema y por eso pide `PLATFORM_ADMIN`, pero **leer** la lista
+   * de opciones válidas es lo que necesita cualquier formulario para pintarse.
+   * Pedir rol de plataforma para eso dejaría el catálogo inutilizable desde el
+   * cliente, que es exactamente la situación que este endpoint viene a corregir.
+   * No revela dato personal alguno: son vocabularios de plataforma.
+   *
+   * @param schemaName - Esquema al que acotar la respuesta.
+   * @param entityName - Tabla a la que acotar la respuesta.
+   * @returns Amarres activos `campo -> enumeración`.
+   */
+  @Get('dynamic-enums/bindings')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar los amarres campo -> enumeración',
+    description:
+      'Permite descubrir qué campos `*_concept_id` son de catálogo sin conocer ningún uuid.',
+  })
+  @ApiQuery({
+    name: 'schema',
+    required: false,
+    description: 'Esquema al que acotar (por ejemplo, `profiles`)',
+  })
+  @ApiQuery({
+    name: 'entity',
+    required: false,
+    description: 'Tabla a la que acotar (por ejemplo, `persons`)',
+  })
+  listEnumBindings(
+    @Query('schema') schemaName?: string,
+    @Query('entity') entityName?: string,
+  ): Promise<ListDynamicEnumBindingsResponseDto> {
+    return this.enumsService.listBindings({ schemaName, entityName });
+  }
+
+  /**
+   * Cara de lectura de UC-45-05: las opciones válidas de un campo de catálogo.
+   *
+   * Se pide por la ruta del campo (`target=profiles.persons.administrative_gender_concept_id`)
+   * o por el código de la enumeración (`code=administrative-gender`). Los dos son
+   * constantes del código fuente; ninguno es un uuid sembrado por entorno, que es
+   * lo que impedía poblar un selector.
+   *
+   * @param target - Campo `esquema.tabla.columna` cuyo catálogo se pide.
+   * @param code - Código estable de la enumeración.
+   * @returns Enumeración publicada con sus opciones habilitadas.
+   */
+  @Get('dynamic-enums')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Leer las opciones publicadas de una enumeración',
+    description:
+      'Por campo destino o por código; devuelve `conceptId` para escribir y `display` para pintar.',
+  })
+  @ApiQuery({
+    name: 'target',
+    required: false,
+    description:
+      'Campo destino, como `profiles.persons.sex_at_birth_concept_id`',
+  })
+  @ApiQuery({
+    name: 'code',
+    required: false,
+    description: 'Código estable de la enumeración, como `sex-at-birth`',
+  })
+  readEnum(
+    @Query('target') target?: string,
+    @Query('code') code?: string,
+  ): Promise<ReadDynamicEnumResponseDto> {
+    return this.enumsService.readEnum({ target, code });
+  }
 
   /** UC-45-01. */
   @Post('dynamic-enums/definitions')

@@ -25,6 +25,8 @@ function build() {
     createBinding: mockFn(),
     resolveValue: mockFn(),
     retireDefinition: mockFn(),
+    readEnum: mockFn(),
+    listBindings: mockFn(),
   };
   const contextsService = {
     createContext: mockFn(),
@@ -172,5 +174,57 @@ describe('SystemContextController', () => {
       dto,
       actor,
     );
+  });
+});
+
+describe('SystemContextController — lectura del catálogo', () => {
+  it('readEnum propaga el campo destino tal como llega', async () => {
+    const d = build();
+    d.enumsService.readEnum.mockResolvedValue({ options: [] });
+
+    await d.controller.readEnum(
+      'profiles.persons.administrative_gender_concept_id',
+    );
+
+    expect(d.enumsService.readEnum).toHaveBeenCalledWith({
+      target: 'profiles.persons.administrative_gender_concept_id',
+      code: undefined,
+    });
+  });
+
+  it('readEnum admite pedir la enumeración por su código estable', async () => {
+    const d = build();
+    d.enumsService.readEnum.mockResolvedValue({ options: [] });
+
+    await d.controller.readEnum(undefined, 'sex-at-birth');
+
+    expect(d.enumsService.readEnum).toHaveBeenCalledWith({
+      target: undefined,
+      code: 'sex-at-birth',
+    });
+  });
+
+  it('listEnumBindings devuelve toda la tabla cuando no se acota', async () => {
+    const d = build();
+    d.enumsService.listBindings.mockResolvedValue({ items: [], count: 0 });
+
+    await d.controller.listEnumBindings();
+
+    expect(d.enumsService.listBindings).toHaveBeenCalledWith({
+      schemaName: undefined,
+      entityName: undefined,
+    });
+  });
+
+  it('listEnumBindings acota por esquema y tabla', async () => {
+    const d = build();
+    d.enumsService.listBindings.mockResolvedValue({ items: [], count: 0 });
+
+    await d.controller.listEnumBindings('profiles', 'persons');
+
+    expect(d.enumsService.listBindings).toHaveBeenCalledWith({
+      schemaName: 'profiles',
+      entityName: 'persons',
+    });
   });
 });

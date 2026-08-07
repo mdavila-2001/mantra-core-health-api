@@ -25,6 +25,7 @@ import {
   type ExpandValueSetDto,
   type ExpandValueSetResponseDto,
   type ReadValueSetExpansionResponseDto,
+  type SearchValueSetsResponseDto,
 } from '../dto';
 
 /** Versión inicial que recibe todo conjunto de valores recién creado. */
@@ -165,6 +166,72 @@ export class ValueSetsService {
         rulesCount: rules.length,
       };
     });
+  }
+
+  /**
+   * Listado de conjuntos de valores, buscable por código interno o texto libre.
+   *
+   * Existe para poder **resolver el uuid de un conjunto sin conocerlo**. Hasta
+   * ahora el único `GET` era `:id/$expand`, que exige el uuid; y los uuid los
+   * siembra cada entorno, así que un cliente no tenía forma legítima de llegar a
+   * uno: ni buscándolo ni hardcodeándolo. Con `?code=` el código fuente del
+   * cliente referencia una constante estable y el backend devuelve el id vigente.
+   *
+   * @param options - Código exacto, texto libre, cursor y tope.
+   * @returns Página de conjuntos con su versión por defecto resuelta.
+   */
+  async searchValueSets(options: {
+    /** Código interno exacto. */
+    code?: string;
+    /** Texto libre sobre código interno y nombre. */
+    query?: string;
+    /** Cursor opaco devuelto por la página anterior. */
+    cursor?: string;
+    /** Tope de filas de la página. */
+    limit: number;
+  }): Promise<SearchValueSetsResponseDto> {
+    const em = this.em.fork();
+
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterInternalCode =
+      typeof after?.internalCode === 'string' ? after.internalCode : undefined;
+
+    // Se pide una fila de más para saber si hay página siguiente sin pagar un
+    // COUNT sobre toda la tabla en cada página.
+    const rows = await this.valueSetsRepo.searchPage(
+      em,
+      { internalCode: options.code, query: options.query, afterInternalCode },
+      options.limit + 1,
+    );
+    const hasMore = rows.length > options.limit;
+    const page = hasMore ? rows.slice(0, options.limit) : rows;
+
+    const defaultVersions =
+      await this.valueSetsRepo.findDefaultVersionsByValueSetIds(
+        em,
+        page.map((row) => row.id),
+      );
+
+    const last = page.at(-1);
+    return {
+      items: page.map((row) => ({
+        id: row.id,
+        internalCode: row.internalCode,
+        name: row.name,
+        canonicalUrl: row.canonicalUrl,
+        description: row.description,
+        stateConceptId: row.stateConceptId,
+        defaultVersionId: defaultVersions.get(row.id)?.id ?? null,
+      })),
+      count: page.length,
+      limit: options.limit,
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({ internalCode: last.internalCode })
+          : null,
+    };
   }
 
   /**

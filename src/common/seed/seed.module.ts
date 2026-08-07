@@ -5,7 +5,16 @@ import {
   CodeSystemVersions,
   CodeSystems,
   TerminologySources,
+  ValueSetMembers,
+  ValueSetVersions,
+  ValueSets,
 } from '../../modules/terminology/entities';
+import {
+  DynamicEnumBindings,
+  DynamicEnumDefinitions,
+  DynamicEnumOptions,
+  DynamicEnumVersions,
+} from '../../modules/system_context/entities';
 import { Tenants } from '../../modules/directory/entities';
 import { ProcessingPurposes } from '../../modules/consent/entities';
 import { Users } from '../../modules/iam/entities';
@@ -29,6 +38,7 @@ import { TerminologySeedService } from './terminology-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 
 /**
@@ -60,6 +70,13 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
       MessagingProviders,
       ProviderChannelConfigs,
       TenantMemberships,
+      ValueSets,
+      ValueSetVersions,
+      ValueSetMembers,
+      DynamicEnumDefinitions,
+      DynamicEnumVersions,
+      DynamicEnumOptions,
+      DynamicEnumBindings,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
@@ -68,6 +85,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
   ],
   providers: [
     TerminologySeedService,
+    DynamicEnumSeedService,
     MessagingSeedService,
     IdentityVerificationSeedService,
     BootstrapAdminSeedService,
@@ -75,6 +93,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
   ],
   exports: [
     TerminologySeedService,
+    DynamicEnumSeedService,
     MessagingSeedService,
     IdentityVerificationSeedService,
     BootstrapAdminSeedService,

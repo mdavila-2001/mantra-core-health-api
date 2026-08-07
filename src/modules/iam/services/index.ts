@@ -1,4 +1,5 @@
 export * from './iam-users.service';
+export * from './iam-users-read.service';
 export * from './iam-credentials.service';
 export * from './iam-mfa.service';
 export * from './iam-password-reset.service';

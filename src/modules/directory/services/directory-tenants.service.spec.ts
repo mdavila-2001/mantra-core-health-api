@@ -28,6 +28,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const tenantsRepo = {
     findById: mockFn(),
+    searchPage: mockFn(() => Promise.resolve([])),
     findByCode: mockFn(),
     create: mockFn(),
   };

@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **889 de 889 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **61 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **905 de 905 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **61 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -63,7 +63,7 @@ Esta referencia documenta **889 de 889 operaciones HTTP** registradas en `openap
 | [delegated_access](delegated-access.md) | 11 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 16 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
 | [diagnostics](diagnostics.md) | 18 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-reports`, `diagnostics-specimens` | 4 |
-| [directory](directory.md) | 10 | `directory-admin-tenants`, `directory-tenants` | 2 |
+| [directory](directory.md) | 16 | `directory-admin-tenants`, `directory-tenants` | 2 |
 | [document_store](document-store.md) | 5 | `document-store` | 1 |
 | [education](education.md) | 14 | `education` | 1 |
 | [erp](erp.md) | 17 | `erp` | 1 |
@@ -72,7 +72,7 @@ Esta referencia documenta **889 de 889 operaciones HTTP** registradas en `openap
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 15 | `fhir-r5`, `health-data` | 2 |
-| [iam](iam.md) | 22 | `iam-auth`, `iam-users` | 2 |
+| [iam](iam.md) | 29 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 23 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 23 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-claims`, `insurance-coverage`, `insurance-prior-auth`, `insurance-reconciliation` | 7 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
@@ -97,10 +97,10 @@ Esta referencia documenta **889 de 889 operaciones HTTP** registradas en `openap
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
 | [scheduling](scheduling.md) | 26 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal` | 5 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
-| [system_context](system-context.md) | 11 | `system-context` | 1 |
+| [system_context](system-context.md) | 13 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
 | [telemetry](telemetry.md) | 13 | `telemetry-consent`, `telemetry-events`, `telemetry-governance` | 3 |
-| [terminology](terminology.md) | 15 | `terminology` | 6 |
+| [terminology](terminology.md) | 16 | `terminology` | 6 |
 | [time_series](time-series.md) | 14 | `time_series` | 2 |
 | [tracking](tracking.md) | 11 | `tracking` | 1 |
 | [vector_rag](vector-rag.md) | 16 | `vector_rag` | 2 |
@@ -112,4 +112,4 @@ Esta referencia documenta **889 de 889 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 889 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 905 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

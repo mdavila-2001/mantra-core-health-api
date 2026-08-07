@@ -16,7 +16,7 @@
 | [`community`](community.md) | 7 | 8 | 15 | 38 | 16 |
 | [`insurance`](insurance.md) | 7 | 7 | 6 | 29 | 8 |
 | [`clinical`](clinical.md) | 6 | 12 | 12 | 22 | 12 |
-| [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 13 |
+| [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
 | [`chart`](chart.md) | 5 | 5 | 4 | 11 | 5 |
 | [`common`](common.md) | 5 | 5 | 7 | 7 | 4 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
@@ -39,10 +39,10 @@
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 4 | 3 | 20 | 1 |
-| [`directory`](directory.md) | 2 | 5 | 5 | 7 | 15 |
+| [`directory`](directory.md) | 2 | 6 | 5 | 7 | 16 |
 | [`graph_intelligence`](graph_intelligence.md) | 2 | 3 | 2 | 13 | 1 |
 | [`health_data`](health_data.md) | 2 | 5 | 7 | 34 | 1 |
-| [`iam`](iam.md) | 2 | 11 | 13 | 14 | 21 |
+| [`iam`](iam.md) | 2 | 12 | 13 | 14 | 22 |
 | [`integration_contracts`](integration_contracts.md) | 2 | 4 | 9 | 9 | 13 |
 | [`lakehouse`](lakehouse.md) | 2 | 3 | 3 | 18 | 1 |
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
@@ -67,4 +67,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **196** | **268** | **354** | **1186** | **378** |
+| **Total** | **196** | **270** | **354** | **1186** | **381** |
