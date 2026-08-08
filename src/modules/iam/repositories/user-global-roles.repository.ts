@@ -68,4 +68,12 @@ export class UserGlobalRolesRepository {
       { stateConceptId: CONCEPTS.STATE_REVOKED, updatedAt: new Date() },
     );
   }
+  /** Roles globales del usuario, vigentes y revocados. */
+  findByUser(em: EntityManager, userId: string): Promise<UserGlobalRoles[]> {
+    return em.find(
+      UserGlobalRoles,
+      { userId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
 }

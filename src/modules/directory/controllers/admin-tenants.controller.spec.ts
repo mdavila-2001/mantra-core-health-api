@@ -21,8 +21,12 @@ function build() {
     verify: mockFn(),
     suspend: mockFn(),
   };
-  const controller = new AdminTenantsController(tenantsService as any);
-  return { controller, tenantsService };
+  const readService = { searchTenants: mockFn() };
+  const controller = new AdminTenantsController(
+    tenantsService as any,
+    readService as any,
+  );
+  return { controller, tenantsService, readService };
 }
 
 describe('AdminTenantsController', () => {
@@ -47,5 +51,35 @@ describe('AdminTenantsController', () => {
     const dto = { reason: 'fraud' };
     await d.controller.suspend('t1', dto, actor);
     expect(d.tenantsService.suspend).toHaveBeenCalledWith('t1', dto, actor);
+  });
+});
+
+describe('AdminTenantsController.searchTenants', () => {
+  it('aplica el tope por defecto cuando el cliente no pide uno', async () => {
+    const d = build();
+    d.readService.searchTenants.mockResolvedValue({ items: [] });
+
+    await d.controller.searchTenants();
+
+    expect(d.readService.searchTenants).toHaveBeenCalledWith({
+      query: undefined,
+      statusConceptId: undefined,
+      cursor: undefined,
+      limit: 50,
+    });
+  });
+
+  it('propaga texto, estado, cursor y tope tal como llegan', async () => {
+    const d = build();
+    d.readService.searchTenants.mockResolvedValue({ items: [] });
+
+    await d.controller.searchTenants('acme', 'status-1', 'cursor-opaco', 10);
+
+    expect(d.readService.searchTenants).toHaveBeenCalledWith({
+      query: 'acme',
+      statusConceptId: 'status-1',
+      cursor: 'cursor-opaco',
+      limit: 10,
+    });
   });
 });

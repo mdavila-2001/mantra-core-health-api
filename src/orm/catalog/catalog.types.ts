@@ -1,10 +1,11 @@
 /**
  * Tipos del catálogo declarativo del modelo canónico SALUD v4.0.x.
  *
- * Contexto: las entidades MikroORM de `src/modules/**\/entities` se generan por
- * introspección de la base y, por convención del repositorio, no se editan a
- * mano. Eso deja fuera del código dos piezas del modelo físico que MikroORM no
- * puede inferir de una entidad escalar:
+ * Contexto: las entidades MikroORM de `src/modules/**\/entities` se generan desde
+ * los `.puml` del modelo canónico (`salud-db/gen_entities.py`, ver ADR-0022) y,
+ * por convención del repositorio, su cuerpo no se edita a mano. Eso deja fuera
+ * del código dos piezas del modelo físico que MikroORM no puede inferir de una
+ * entidad escalar:
  *
  *   1. los índices secundarios (los `<<INDEX_SET>>` del modelo), y
  *   2. las claves foráneas (las columnas FK están mapeadas como `uuid` planos,
@@ -54,6 +55,12 @@ export type ForeignKeyTuple = readonly [
  *   [3] único — true emite UNIQUE INDEX (restricción de negocio, no solo acceso)
  *   [4] método — btree por defecto; gin/gist para jsonb, texto y rangos;
  *       hnsw/ivfflat para similitud vectorial (pgvector)
+ *   [5] predicado del índice PARCIAL, sin la palabra WHERE; ausente si el índice
+ *       cubre toda la tabla. No es un detalle de afinado: en un índice único, el
+ *       predicado es parte de la regla. `ux_authentication_credentials_live_
+ *       password_subject` prohíbe dos credenciales de contraseña VIVAS para el
+ *       mismo sujeto; sin su predicado sería un UNIQUE total que además rechaza
+ *       un alta legítima cuando ese sujeto tuvo antes una credencial revocada.
  */
 export type IndexTuple = readonly [
   table: string,
@@ -61,6 +68,7 @@ export type IndexTuple = readonly [
   columns: readonly string[],
   unique: boolean,
   method: string,
+  where?: string,
 ];
 
 /**

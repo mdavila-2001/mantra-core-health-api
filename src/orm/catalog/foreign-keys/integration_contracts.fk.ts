@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `integration_contracts`.
- * 48 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 47 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const integrationContractsForeignKeys: readonly ForeignKeyTuple[] = [
@@ -18,6 +18,14 @@ export const integrationContractsForeignKeys: readonly ForeignKeyTuple[] = [
   ['integration_auth_profiles', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['integration_auth_profiles', 'token_binding_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['integration_auth_profiles', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['integration_contracts', 'allowed_purpose_value_set_id', 'terminology', 'value_sets', 'id'],
+  ['integration_contracts', 'capability_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['integration_contracts', 'data_classification_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'external_provider_id', 'integrations', 'external_providers', 'id'],
+  ['integration_contracts', 'legal_basis_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['integration_contracts', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['integration_contract_versions', 'created_by_user_id', 'iam', 'users', 'id'],
   ['integration_contract_versions', 'integration_contract_id', 'integration_contracts', 'integration_contracts', 'id'],
   ['integration_contract_versions', 'mapping_profile_id', 'integration_contracts', 'integration_auth_profiles', 'id'],
@@ -25,15 +33,6 @@ export const integrationContractsForeignKeys: readonly ForeignKeyTuple[] = [
   ['integration_contract_versions', 'request_schema_file_id', 'common', 'files', 'id'],
   ['integration_contract_versions', 'response_schema_file_id', 'common', 'files', 'id'],
   ['integration_contract_versions', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['integration_contracts', 'allowed_purpose_value_set_id', 'terminology', 'value_sets', 'id'],
-  ['integration_contracts', 'capability_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['integration_contracts', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['integration_contracts', 'data_classification_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['integration_contracts', 'data_use_agreement_id', 'organization_extensions', 'data_use_agreements', 'id'],
-  ['integration_contracts', 'external_provider_id', 'integrations', 'external_providers', 'id'],
-  ['integration_contracts', 'legal_basis_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['integration_contracts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['integration_contracts', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['integration_exchange_attempts', 'endpoint_id', 'integrations', 'integration_endpoints', 'id'],
   ['integration_exchange_attempts', 'integration_exchange_record_id', 'integration_contracts', 'integration_exchange_records', 'id'],
   ['integration_exchange_attempts', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -54,5 +53,5 @@ export const integrationContractsForeignKeys: readonly ForeignKeyTuple[] = [
   ['webhook_delivery_evidence', 'integration_exchange_record_id', 'integration_contracts', 'integration_exchange_records', 'id'],
   ['webhook_delivery_evidence', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['webhook_delivery_evidence', 'signature_verification_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['webhook_delivery_evidence', 'webhook_subscription_id', 'integration_contracts', 'contract_webhook_subscriptions', 'id'],
+  ['webhook_delivery_evidence', 'webhook_subscription_id', 'integrations', 'webhook_subscriptions', 'id'],
 ];

@@ -2,20 +2,20 @@
 
 # Documentación de endpoints
 
-Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **905 de 905 endpoints** en **61 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
 | `accounting` | 20 | [Abrir referencia](endpoints/accounting.md) |
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
-| `app` | 4 | [Abrir referencia](endpoints/app.md) |
+| `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audit` | 11 | [Abrir referencia](endpoints/audit.md) |
 | `auth_providers` | 12 | [Abrir referencia](endpoints/auth-providers.md) |
 | `authz` | 20 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 13 | [Abrir referencia](endpoints/billing.md) |
-| `chart` | 12 | [Abrir referencia](endpoints/chart.md) |
-| `clinical` | 23 | [Abrir referencia](endpoints/clinical.md) |
+| `chart` | 13 | [Abrir referencia](endpoints/chart.md) |
+| `clinical` | 24 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 21 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 13 | [Abrir referencia](endpoints/common.md) |
 | `community` | 19 | [Abrir referencia](endpoints/community.md) |
@@ -25,7 +25,7 @@ Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia complet
 | `delegated_access` | 11 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 16 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 18 | [Abrir referencia](endpoints/diagnostics.md) |
-| `directory` | 10 | [Abrir referencia](endpoints/directory.md) |
+| `directory` | 16 | [Abrir referencia](endpoints/directory.md) |
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
 | `erp` | 17 | [Abrir referencia](endpoints/erp.md) |
@@ -34,7 +34,7 @@ Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia complet
 | `graph_intelligence` | 15 | [Abrir referencia](endpoints/graph-intelligence.md) |
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
 | `health_data` | 15 | [Abrir referencia](endpoints/health-data.md) |
-| `iam` | 22 | [Abrir referencia](endpoints/iam.md) |
+| `iam` | 29 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 23 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 23 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
@@ -51,18 +51,18 @@ Se documentan **878 de 878 endpoints** en **61 módulos**. La referencia complet
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 13 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 23 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 13 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 15 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
 | `reporting` | 12 | [Abrir referencia](endpoints/reporting.md) |
-| `scheduling` | 21 | [Abrir referencia](endpoints/scheduling.md) |
+| `scheduling` | 26 | [Abrir referencia](endpoints/scheduling.md) |
 | `search_platform` | 3 | [Abrir referencia](endpoints/search-platform.md) |
-| `system_context` | 11 | [Abrir referencia](endpoints/system-context.md) |
+| `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |
 | `telemetry` | 13 | [Abrir referencia](endpoints/telemetry.md) |
-| `terminology` | 15 | [Abrir referencia](endpoints/terminology.md) |
+| `terminology` | 16 | [Abrir referencia](endpoints/terminology.md) |
 | `time_series` | 14 | [Abrir referencia](endpoints/time-series.md) |
 | `tracking` | 11 | [Abrir referencia](endpoints/tracking.md) |
 | `vector_rag` | 16 | [Abrir referencia](endpoints/vector-rag.md) |

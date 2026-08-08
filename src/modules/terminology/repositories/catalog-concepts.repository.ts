@@ -189,10 +189,13 @@ export class CatalogConceptsRepository {
    */
   search(
     em: EntityManager,
-    filters: { query?: string; codeSystemVersionId?: string },
+    filters: { query?: string; codeSystemVersionId?: string; ids?: string[] },
     limit: number,
   ): Promise<CatalogConcepts[]> {
     const where: Record<string, unknown> = {};
+    if (filters.ids && filters.ids.length > 0) {
+      where.id = { $in: filters.ids };
+    }
     if (filters.codeSystemVersionId) {
       where.codeSystemVersionId = filters.codeSystemVersionId;
     }

@@ -10,7 +10,7 @@
 1. `TenantContextInterceptor` (único interceptor global del sistema) valida `X-Tenant-Id` contra
    la membresía real del actor autenticado.
 2. Con `RLS_ENFORCE=true`, fija `app.current_tenant_id` como variable de sesión de PostgreSQL.
-3. Las políticas RLS de PostgreSQL (declaradas en el DDL, `database/SQL/99_migrations`) filtran
+3. Las políticas RLS de PostgreSQL (declaradas en el DDL, los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md))) filtran
    filas por esa variable de sesión de forma transparente al ORM.
 4. Solo una llamada interna autenticada con el rol no asignable `SYSTEM` puede activar
    `app.system_context=true`; el interceptor lo hace de forma local a la misma transacción y las
@@ -42,7 +42,7 @@ Copiado de `ESTADO-Y-PENDIENTES.md` (ya identificado como prioridad P0 antes de 
 ## Prueba real del mecanismo
 
 `test/integration/rls.int-spec.ts` aplica la
-migración real de RLS (`database/SQL/99_rls/01_tenant_rls.sql`, ~284 tablas con `tenant_id`) y
+migración real de RLS (`SQL/patches/2026-08-05_tenant_rls.sql`, ~284 tablas con `tenant_id`) y
 demuestra, conectado como el rol de aplicación real (`mantra_app`, sin `BYPASSRLS`):
 
 1. El rol de aplicación **no** es superusuario ni tiene `BYPASSRLS` (verificado contra

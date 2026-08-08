@@ -46,3 +46,40 @@ describe('TerminologyValueSetsController', () => {
     });
   });
 });
+
+describe('TerminologyValueSetsController.searchValueSets', () => {
+  it('aplica el tope por defecto cuando el cliente no pide uno', async () => {
+    const service = { searchValueSets: jest.fn() } as any;
+    const controller = new TerminologyValueSetsController(service);
+    service.searchValueSets.mockResolvedValue({ items: [] });
+
+    await controller.searchValueSets();
+
+    expect(service.searchValueSets).toHaveBeenCalledWith({
+      code: undefined,
+      query: undefined,
+      cursor: undefined,
+      limit: 50,
+    });
+  });
+
+  it('propaga código, texto, cursor y tope tal como llegan', async () => {
+    const service = { searchValueSets: jest.fn() } as any;
+    const controller = new TerminologyValueSetsController(service);
+    service.searchValueSets.mockResolvedValue({ items: [] });
+
+    await controller.searchValueSets(
+      'administrative-gender',
+      'género',
+      'cursor-opaco',
+      10,
+    );
+
+    expect(service.searchValueSets).toHaveBeenCalledWith({
+      code: 'administrative-gender',
+      query: 'género',
+      cursor: 'cursor-opaco',
+      limit: 10,
+    });
+  });
+});

@@ -2,18 +2,26 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `payments` (parte 3/3).
- * 38 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 47 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const paymentsIndexes3: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
-  ['subscriptions', 'ix_subscriptions_subscriber_type_concept_id', ['subscriber_type_concept_id'], false, 'btree'],
-  ['subscriptions', 'ix_subscriptions_payment_method_id', ['payment_method_id'], false, 'btree'],
-  ['subscriptions', 'ix_subscriptions_status_concept_id', ['status_concept_id'], false, 'btree'],
-  ['subscriptions', 'ix_subscriptions_mandate_id', ['mandate_id'], false, 'btree'],
-  ['subscriptions', 'ix_subscriptions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['subscriptions', 'ix_subscriptions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['subscriptions', 'ix_subscriptions_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['subscription_plans', 'uq_subscription_plans_code', ['code'], true, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_tenant_id', ['tenant_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_practice_id', ['practice_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_billing_interval_concept_id', ['billing_interval_concept_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_currency_concept_id', ['currency_concept_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_usage_type_concept_id', ['usage_type_concept_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['subscription_plans', 'ix_subscription_plans_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
+  ['subscription_usage_counters', 'ix_subscription_usage_counters_subscription_id', ['subscription_id'], false, 'btree'],
+  ['subscription_usage_counters', 'ix_subscription_usage_counters_metric_concept_id', ['metric_concept_id'], false, 'btree'],
+  ['subscription_usage_counters', 'uk_subscription_usage_counters_period', ['subscription_id', 'metric_concept_id', 'period_start'], true, 'btree'],
   ['tips', 'ix_tips_payment_intent_id', ['payment_intent_id'], false, 'btree'],
   ['tips', 'ix_tips_beneficiary_type_concept_id', ['beneficiary_type_concept_id'], false, 'btree'],
   ['tips', 'ix_tips_currency_concept_id', ['currency_concept_id'], false, 'btree'],
@@ -28,14 +36,6 @@ export const paymentsIndexes3: readonly IndexTuple[] = [
   ['transaction_fees', 'ix_transaction_fees_bearer_type_concept_id', ['bearer_type_concept_id'], false, 'btree'],
   ['transaction_fees', 'ix_transaction_fees_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['transaction_fees', 'ix_transaction_fees_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['wallet_ledger_entries', 'uq_wallet_ledger_entries_idempotency_key', ['idempotency_key'], true, 'btree'],
-  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_wallet_id', ['wallet_id'], false, 'btree'],
-  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_direction_concept_id', ['direction_concept_id'], false, 'btree'],
-  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_currency_concept_id', ['currency_concept_id'], false, 'btree'],
-  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_entry_type_concept_id', ['entry_type_concept_id'], false, 'btree'],
-  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_payment_transaction_id', ['payment_transaction_id'], false, 'btree'],
-  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_journal_transaction_id', ['journal_transaction_id'], false, 'btree'],
-  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['wallets', 'ix_wallets_tenant_id', ['tenant_id'], false, 'btree'],
   ['wallets', 'ix_wallets_owner_type_concept_id', ['owner_type_concept_id'], false, 'btree'],
   ['wallets', 'ix_wallets_wallet_type_concept_id', ['wallet_type_concept_id'], false, 'btree'],
@@ -45,4 +45,13 @@ export const paymentsIndexes3: readonly IndexTuple[] = [
   ['wallets', 'ix_wallets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['wallets', 'ix_wallets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['wallets', 'ix_wallets_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['wallet_ledger_entries', 'uq_wallet_ledger_entries_idempotency_key', ['idempotency_key'], true, 'btree'],
+  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_wallet_id', ['wallet_id'], false, 'btree'],
+  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_direction_concept_id', ['direction_concept_id'], false, 'btree'],
+  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_currency_concept_id', ['currency_concept_id'], false, 'btree'],
+  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_entry_type_concept_id', ['entry_type_concept_id'], false, 'btree'],
+  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_payment_transaction_id', ['payment_transaction_id'], false, 'btree'],
+  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_journal_transaction_id', ['journal_transaction_id'], false, 'btree'],
+  ['wallet_ledger_entries', 'ix_wallet_ledger_entries_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['wallet_ledger_entries', 'brin_wallet_ledger_entries_recorded_at', ['recorded_at'], false, 'brin'],
 ];

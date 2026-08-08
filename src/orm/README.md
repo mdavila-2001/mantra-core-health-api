@@ -42,8 +42,8 @@ Es la decisión estructural del diseño y conviene tenerla presente antes de toc
 - **La metadata de las entidades manda sobre tablas y columnas.** Lo sincroniza MikroORM.
 - **El catálogo manda sobre índices y restricciones.** Lo aplican las capas 05 y 06.
 
-El motivo es que las entidades se generan por introspección y mapean las columnas de
-clave foránea como `uuid` escalares, sin relaciones `@ManyToOne`. Con 5993 referencias
+El motivo es que las entidades se generan desde los `.puml` del modelo (ADR-0022) y
+mapean las columnas de clave foránea como `uuid` escalares, sin relaciones `@ManyToOne`. Con 5993 referencias
 entre 57 módulos, modelarlas como relaciones obligaría a que casi todos los módulos se
 importasen entre sí. El precio de esa decisión es que MikroORM no puede emitir ni una
 clave foránea; el catálogo paga ese precio.
@@ -69,8 +69,9 @@ lo que las capas siguientes acaban de crear. Está explicado en
 - **`ORM_SCHEMA_SYNC=safe` en producción con varias réplicas** es seguro: el advisory lock
   serializa. Lo que no es seguro es tenerlo activo mientras otro proceso aplica migraciones
   sin usar el mismo cerrojo (`SCHEMA_BOOTSTRAP_LOCK_KEY`).
-- **Regenerar entidades** (`yarn orm:gen`) cambia tablas y columnas, no índices ni FKs. Si
-  el modelo añade un índice, hay que regenerar el catálogo (`yarn orm:catalog`).
+- **Regenerar entidades** (`python salud-db/gen_entities.py` + prettier + `yarn docs:tsdoc`,
+  ver ADR-0022) cambia tablas y columnas, no índices ni FKs. Si el modelo añade un índice,
+  hay que regenerar el catálogo (`yarn orm:catalog`).
 - **Nombres de más de 63 bytes**: PostgreSQL los trunca en silencio. Todo nombre de índice
   o restricción pasa por `bootstrap/identifier.ts`; saltarse ese paso produce un bucle en
   el que el arranque cree que faltan objetos que en realidad existen.

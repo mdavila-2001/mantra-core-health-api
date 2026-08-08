@@ -25,12 +25,26 @@ function build() {
     changeRole: mockFn(),
     offboard: mockFn(),
   };
+  const readService = {
+    getTenantById: mockFn(),
+    listChildTenants: mockFn(),
+    listBranches: mockFn(),
+    listMemberships: mockFn(),
+    listBranchAssignments: mockFn(),
+  };
   const controller = new TenantsController(
     tenantsService as any,
     branchesService as any,
     membershipsService as any,
+    readService as any,
   );
-  return { controller, tenantsService, branchesService, membershipsService };
+  return {
+    controller,
+    tenantsService,
+    branchesService,
+    membershipsService,
+    readService,
+  };
 }
 
 describe('TenantsController', () => {
@@ -102,6 +116,65 @@ describe('TenantsController', () => {
     const d = build();
     await d.controller.offboard('t1', 'm1', actor);
     expect(d.membershipsService.offboard).toHaveBeenCalledWith(
+      't1',
+      'm1',
+      actor,
+    );
+  });
+});
+
+describe('TenantsController — lecturas con alcance de organización', () => {
+  it('getTenant pasa el actor, que es lo que decide el alcance', async () => {
+    const d = build();
+    d.readService.getTenantById.mockResolvedValue({ id: 't1' });
+
+    await d.controller.getTenant('t1', actor);
+
+    expect(d.readService.getTenantById).toHaveBeenCalledWith('t1', actor);
+  });
+
+  it('listBranches pasa el actor', async () => {
+    const d = build();
+    d.readService.listBranches.mockResolvedValue({ items: [] });
+
+    await d.controller.listBranches('t1', actor);
+
+    expect(d.readService.listBranches).toHaveBeenCalledWith('t1', actor);
+  });
+
+  it('listMemberships aplica el tope por defecto y propaga el estado', async () => {
+    const d = build();
+    d.readService.listMemberships.mockResolvedValue({ items: [] });
+
+    await d.controller.listMemberships('t1', actor, 'status-1');
+
+    expect(d.readService.listMemberships).toHaveBeenCalledWith(
+      't1',
+      { statusConceptId: 'status-1', cursor: undefined, limit: 50 },
+      actor,
+    );
+  });
+
+  it('listChildTenants propaga cursor y tope', async () => {
+    const d = build();
+    d.readService.listChildTenants.mockResolvedValue({ items: [] });
+
+    await d.controller.listChildTenants('t1', actor, 'cursor-opaco', 10);
+
+    expect(d.readService.listChildTenants).toHaveBeenCalledWith(
+      't1',
+      { cursor: 'cursor-opaco', limit: 10 },
+      actor,
+    );
+  });
+
+  it('listBranchAssignments acota la membresía a su organización', async () => {
+    const d = build();
+    d.readService.listBranchAssignments.mockResolvedValue({ items: [] });
+
+    await d.controller.listBranchAssignments('t1', 'm1', actor);
+
+    expect(d.readService.listBranchAssignments).toHaveBeenCalledWith(
       't1',
       'm1',
       actor,

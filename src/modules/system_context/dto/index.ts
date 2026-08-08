@@ -22,5 +22,9 @@ export {
   ContextBindingResponseDto,
   RollbackContextDto,
   RollbackContextResponseDto,
+  DynamicEnumOptionItemDto,
+  ReadDynamicEnumResponseDto,
+  DynamicEnumBindingItemDto,
+  ListDynamicEnumBindingsResponseDto,
 } from './system-context.dto';
 export type { ValidationMode, RefreshTrigger } from './system-context.dto';

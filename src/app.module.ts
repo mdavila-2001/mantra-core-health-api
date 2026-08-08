@@ -6,6 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppReadinessService } from './app-readiness.service';
 import { OrmModule, ormEnvSchema } from './orm';
+import { dataSourcesEnvSchema } from './persistence';
+import { PersistenceModule } from './persistence/persistence.module';
 import { LoggingModule, loggingEnvSchema } from './logging';
 import {
   ObservabilityModule,
@@ -96,6 +98,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: ormEnvSchema
+        .concat(dataSourcesEnvSchema)
         .concat(loggingEnvSchema)
         .concat(authEnvSchema)
         .concat(appSecurityEnvSchema)
@@ -131,6 +134,12 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
     // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
     OrmModule,
+    // Puertos, adaptadores y enrutado read/write sobre la conexión anterior. Va
+    // DESPUÉS de OrmModule porque necesita su instancia de MikroORM ya
+    // construida para publicarla en el registro. No la sustituye: los módulos
+    // que aún inyectan `EntityManager` siguen funcionando igual. Ver
+    // src/persistence y docs/data/read-write-routing.md.
+    PersistenceModule,
     // Datos estructurales iniciales (catálogo de conceptos internos). Va tras
     // OrmModule para que el esquema esté materializado cuando corre el seed.
     SeedModule,

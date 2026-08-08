@@ -2,11 +2,31 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `iam`.
- * 42 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 62 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const iamForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['account_activations', 'legal_representation_id', 'authz', 'patient_legal_representations', 'id'],
+  ['account_lockouts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['account_lockouts', 'reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['account_lockouts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['account_lockouts', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['account_lockouts', 'unlocked_by_user_id', 'iam', 'users', 'id'],
+  ['account_lockouts', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['account_lockouts', 'user_id', 'iam', 'users', 'id'],
+  ['api_keys', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['api_keys', 'hash_algorithm_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['api_keys', 'ip_access_rule_id', 'authz', 'ip_access_rules', 'id'],
+  ['api_keys', 'owner_user_id', 'iam', 'users', 'id'],
+  ['api_keys', 'revoked_by_user_id', 'iam', 'users', 'id'],
+  ['api_keys', 'service_principal_id', 'authz', 'service_principals', 'id'],
+  ['api_keys', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['api_keys', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['api_keys', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['api_key_scopes', 'api_key_id', 'iam', 'api_keys', 'id'],
+  ['api_key_scopes', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['api_key_scopes', 'scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['authentication_credentials', 'created_by_user_id', 'iam', 'users', 'id'],
   ['authentication_credentials', 'hash_algorithm_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['authentication_credentials', 'method_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -36,11 +56,6 @@ export const iamForeignKeys: readonly ForeignKeyTuple[] = [
   ['sessions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['sessions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['sessions', 'user_id', 'iam', 'users', 'id'],
-  ['user_global_roles', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['user_global_roles', 'role_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['user_global_roles', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['user_global_roles', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['user_global_roles', 'user_id', 'iam', 'users', 'id'],
   ['users', 'created_by_user_id', 'iam', 'users', 'id'],
   ['users', 'data_residency_region_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['users', 'legal_basis_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -49,4 +64,9 @@ export const iamForeignKeys: readonly ForeignKeyTuple[] = [
   ['users', 'residence_country_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['users', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['users', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['user_global_roles', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['user_global_roles', 'role_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['user_global_roles', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['user_global_roles', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['user_global_roles', 'user_id', 'iam', 'users', 'id'],
 ];

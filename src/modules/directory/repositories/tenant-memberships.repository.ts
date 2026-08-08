@@ -74,6 +74,20 @@ export class TenantMembershipsRepository {
     });
   }
 
+  /** Cuenta las membresías activas del tenant con un rol dado (protección del último OWNER). */
+  countActiveByTenantRole(
+    em: EntityManager,
+    tenantId: string,
+    tenantRoleConceptId: string,
+    activeStatusConceptId: string,
+  ): Promise<number> {
+    return em.count(TenantMemberships, {
+      tenantId,
+      tenantRoleConceptId,
+      statusConceptId: activeStatusConceptId,
+    });
+  }
+
   /** Devuelve las membresías del tenant en un estado dado (cascada de suspensión). */
   findByTenantAndStatus(
     em: EntityManager,
@@ -100,5 +114,52 @@ export class TenantMembershipsRepository {
       },
       { partial: true },
     );
+  }
+  /**
+   * Una página de las membresías de la organización, por cursor keyset sobre
+   * `(created_at, id)`.
+   *
+   * El desempate por `id` no es decorativo: varias membresías se crean en la
+   * misma transacción -y por tanto con el mismo `created_at`-, y sin él dos
+   * páginas consecutivas repetirían u omitirían filas.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantId - Organización cuyas membresías se listan.
+   * @param filters - Estado y cursor.
+   * @param limit - Tope de filas a devolver.
+   * @returns Membresías ordenadas por antigüedad.
+   */
+  findPageByTenant(
+    em: EntityManager,
+    tenantId: string,
+    filters: {
+      /** Estado al que acotar. */
+      statusConceptId?: string;
+      /** Última fila de la página anterior. */
+      after?: {
+        /** Fecha de alta de la última fila. */
+        createdAt: Date;
+        /** Identificador de la última fila. */
+        id: string;
+      };
+    },
+    limit: number,
+  ): Promise<TenantMemberships[]> {
+    const where: Record<string, unknown> = { tenantId };
+
+    if (filters.statusConceptId) {
+      where.statusConceptId = filters.statusConceptId;
+    }
+    if (filters.after) {
+      where.$or = [
+        { createdAt: { $gt: filters.after.createdAt } },
+        { createdAt: filters.after.createdAt, id: { $gt: filters.after.id } },
+      ];
+    }
+
+    return em.find(TenantMemberships, where, {
+      orderBy: [{ createdAt: 'ASC' }, { id: 'ASC' }],
+      limit,
+    });
   }
 }

@@ -53,6 +53,26 @@ x-app-env: &app-env
   JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
   ACCOUNT_LOCK_THRESHOLD: ${ACCOUNT_LOCK_THRESHOLD:-5}
   MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY}
+  # Primer administrador del arranque en frío. Mismo caso que `ORM_SCHEMA_SYNC`
+  # más abajo: Compose usa el `.env` para sustituir `${VARIABLE}` en este YAML,
+  # pero NO lo inyecta dentro de los contenedores. Mientras estas tres no
+  # figuraran aquí, descomentarlas en el `.env` no tenía ningún efecto sobre la
+  # API dockerizada: arrancaba sin ninguna cuenta con SECURITY_ADMIN y `POST
+  # /iam/users` -que exige ese rol- quedaba inalcanzable, así que no había forma
+  # de crear el primer administrador por API. Sólo funcionaba para quien corría
+  # la API en el host con `yarn start:dev`.
+  #
+  # El default vacío conserva el opt-in: sin ambas variables el seed no hace
+  # nada (`BootstrapAdminSeedService.checkGate` -> 'not-configured'), que es el
+  # comportamiento que debe tener un compose que alguien copie sin leer.
+  BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+  BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+  BOOTSTRAP_ADMIN_ALLOW_PRODUCTION: ${BOOTSTRAP_ADMIN_ALLOW_PRODUCTION:-false}
+  # Entrega del refresh token como cookie httpOnly. Apagado por defecto: cambia
+  # el contrato del cliente (deja de venir en el cuerpo) y exige la allowlist de
+  # CORS con `credentials: true`. Ver `src/common/auth/README.md`.
+  AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
+  AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   MIKRO_ORM_DEBUG: ${MIKRO_ORM_DEBUG:-false}
   # Materialización del esquema. ESTA VARIABLE TIENE QUE ESTAR AQUÍ.
@@ -81,6 +101,33 @@ x-app-env: &app-env
   # Los 20 workers llaman la API por el nombre del servicio, no localhost.
   WORKER_API_BASE_URL: http://api:3000
   WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
+  # Sonda HTTP de cada worker (`/health`, `/readiness`, `/status`). El mismo
+  # puerto en los 20 no colisiona: cada uno corre en su propio contenedor.
+  # `0` la deshabilita. Ver `src/worker/worker-health.server.ts`.
+  WORKER_HEALTH_PORT: ${WORKER_HEALTH_PORT:-9100}
+  # Plazo de un tick, y umbral a partir del cual un tick en vuelo se declara
+  # atascado y la liveness falla para que Docker reinicie el contenedor. El
+  # segundo es mayor que el primero a propósito: superarlo significa que ni
+  # siquiera el aborto del plazo surtió efecto.
+  WORKER_TICK_TIMEOUT_MS: ${WORKER_TICK_TIMEOUT_MS:-300000}
+  WORKER_STUCK_TICK_MS: ${WORKER_STUCK_TICK_MS:-600000}
+  # Drenaje y apagado. `WORKER_SHUTDOWN_TIMEOUT_MS` debe quedar por DEBAJO del
+  # `stop_grace_period` de cada servicio worker, o quien fuerza la salida es un
+  # SIGKILL mudo y se pierde el diagnóstico de qué seguía pendiente.
+  WORKER_DRAIN_TIMEOUT_MS: ${WORKER_DRAIN_TIMEOUT_MS:-20000}
+  WORKER_SHUTDOWN_TIMEOUT_MS: ${WORKER_SHUTDOWN_TIMEOUT_MS:-30000}
+  # Protección del cliente HTTP del worker contra la API: reintento de
+  # lecturas y techo de llamadas en vuelo por proceso.
+  WORKER_HTTP_RETRY_ATTEMPTS: ${WORKER_HTTP_RETRY_ATTEMPTS:-3}
+  WORKER_HTTP_MAX_CONCURRENT: ${WORKER_HTTP_MAX_CONCURRENT:-16}
+  # Plazo total del apagado de la API, por debajo de su `stop_grace_period`.
+  API_SHUTDOWN_TIMEOUT_MS: ${API_SHUTDOWN_TIMEOUT_MS:-30000}
+  # Plazos del servidor HTTP. `keepAlive` debe superar el idle timeout del
+  # balanceador que haya delante, o aparecen 502 esporádicos sin causa visible
+  # en los logs de la aplicación.
+  HTTP_KEEPALIVE_TIMEOUT_MS: ${HTTP_KEEPALIVE_TIMEOUT_MS:-65000}
+  HTTP_HEADERS_TIMEOUT_MS: ${HTTP_HEADERS_TIMEOUT_MS:-70000}
+  HTTP_REQUEST_TIMEOUT_MS: ${HTTP_REQUEST_TIMEOUT_MS:-120000}
   MESSAGING_QUEUE_CODES: ${MESSAGING_QUEUE_CODES:-}
   TS_COMPRESSION_OLDER_THAN: ${TS_COMPRESSION_OLDER_THAN:-7 days}
   TS_ROLLUP_REFRESH_WINDOW_HOURS: ${TS_ROLLUP_REFRESH_WINDOW_HOURS:-2}
@@ -128,6 +175,32 @@ x-worker-resources: &worker-resources
     cpus: "0.5"
     memory: 512M
 
+# Healthcheck de los 20 workers. Hasta ahora no tenían ninguno, y eso dejaba a
+# Docker con una sola señal: si el PID existe. Un worker con el tick colgado
+# pasa esa comprobación indefinidamente —`docker ps` dice `Up 6 hours` con cero
+# trabajo hecho—, que es exactamente el modo de fallo "worker zombi".
+#
+# `/health` responde 503 cuando un tick lleva más de `WORKER_STUCK_TICK_MS` en
+# vuelo. Con `restart: always`, el contenedor se reinicia solo: el único remedio
+# real a un bloqueo que el proceso no puede cancelar desde dentro.
+#
+# Deliberadamente NO se usa `/readiness` aquí: un cortacircuitos abierto lo
+# pone en 503 y reiniciar por eso perdería el estado del circuito y volvería a
+# castigar a la dependencia que se está recuperando — el bucle de reinicios
+# clásico durante un incidente. Ver `worker-health.registry.ts`.
+x-worker-healthcheck: &worker-healthcheck
+  test:
+    [
+      "CMD",
+      "node",
+      "-e",
+      "fetch('http://localhost:9100/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+    ]
+  interval: 15s
+  timeout: 5s
+  retries: 3
+  start_period: 30s
+
 services:
   postgres:
     image: timescale/timescaledb-ha:pg18
@@ -160,8 +233,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ./database/SQL:/init/SQL:ro
-      - ./database/NoSQL:/init/NoSQL:ro
+      # DDL canónico de la raíz del workspace (SQL/ y NoSQL/ generados desde los
+      # .puml). El database/ interno del repo NO es fuente de esquema.
+      - ../SQL:/init/SQL:ro
+      - ../NoSQL:/init/NoSQL:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
@@ -193,7 +268,7 @@ services:
     environment:
       MONGO_DB: ${MONGO_DB:-salud_document_store}
     volumes:
-      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
+      - ../NoSQL/55_document_store_mongodb:/init/mongo:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
@@ -255,7 +330,7 @@ services:
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
-      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
+      - ../NoSQL/57_search_platform_opensearch:/init/os:ro
       - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:
@@ -348,6 +423,9 @@ services:
       - "${PORT:-3000}:3000"
     volumes:
       - api_storage:/app/storage
+    # Por encima de API_SHUTDOWN_TIMEOUT_MS (30 s): el drenaje de las peticiones
+    # en vuelo debe poder terminar antes del SIGKILL.
+    stop_grace_period: 45s
     healthcheck:
       # Sin curl/wget en `node:24-bookworm-slim`: se usa el `fetch` nativo de
       # Node en vez de instalar un paquete extra sólo para el healthcheck.
@@ -396,6 +474,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -413,6 +496,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -430,6 +518,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -447,6 +540,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -466,6 +564,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -483,6 +586,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -500,6 +608,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -517,6 +630,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -534,6 +652,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -553,6 +676,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -570,6 +698,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -587,6 +720,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -604,6 +742,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -621,6 +764,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -638,6 +786,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -655,6 +808,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -672,6 +830,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -689,6 +852,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -708,6 +876,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy
@@ -725,6 +898,11 @@ services:
       <<: *app-env
     deploy:
       resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
+    # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
+    # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
     depends_on:
       api:
         condition: service_healthy

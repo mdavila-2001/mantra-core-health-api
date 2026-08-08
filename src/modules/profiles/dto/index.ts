@@ -9,3 +9,4 @@ export * from './merge-patients.dto';
 export * from './add-related-person.dto';
 export * from './grant-portal-proxy.dto';
 export * from './decease-person.dto';
+export * from './read-patients.dto';

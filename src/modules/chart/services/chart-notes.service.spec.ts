@@ -27,6 +27,8 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const notesRepo = {
     findHeaderById: mockFn(),
+    findHeadersByPatient: mockFn().mockResolvedValue([]),
+    findVersionsByIds: mockFn().mockResolvedValue(new Map()),
     findVersionById: mockFn(),
     maxVersionNumber: mockFn().mockResolvedValue(0),
     findSignatures: mockFn().mockResolvedValue([]),

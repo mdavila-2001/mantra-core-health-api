@@ -4,6 +4,34 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
 
 ## Estado actual
 
+- **Hardening de resiliencia (2026-08-06).** Se auditaron la API y los 20 workers
+  buscando específicamente modos de fallo bajo estrés, y se corrigieron nueve
+  hallazgos. Los tres de más impacto: (1) `AllExceptionsFilter.integrityViolation`
+  estaba escrito pero `normalize()` **nunca lo llamaba** —código muerto—, así que
+  todo error del driver salía como `500 INTERNAL`, incluidos el interbloqueo
+  (transitorio: se cura reintentando) y la clave foránea inexistente (error del
+  cliente); (2) los 30 jobs usan `@Interval`, que es `setInterval` y **no espera**
+  a la ejecución anterior, de modo que con la API lenta se apilaban copias del
+  mismo tick sobre las mismas filas; (3) ninguno de los 21 procesos registraba
+  `uncaughtException`/`unhandledRejection` ni acotaba su apagado, así que una
+  caída no dejaba rastro indexable y un `SIGTERM` atascado terminaba en `SIGKILL`
+  mudo a los 10 s. Se añadió un kernel de resiliencia sin dependencias nuevas
+  (`src/common/resilience/`: plazo con cancelación real vía `AbortSignal`,
+  reintento con jitter completo, cortacircuitos, mamparo, exclusión mutua),
+  garantías de ciclo de vida (`src/common/runtime/`), sonda HTTP por worker
+  (`/health`, `/readiness`, `/status`) cableada al `healthcheck` de los 20
+  servicios del compose, y drenaje de ticks en el apagado. 163 pruebas nuevas;
+  suite completa en 4 251. **Cuidado con un detalle no obvio**: cinco jobs anidan
+  `runTick` dentro de otro `runTick` con el mismo nombre de operación, así que la
+  exclusión mutua distingue modo raíz y modo anidado — un mutex plano por nombre
+  los habría silenciado por completo y en silencio. Auditoría completa, matriz de
+  riesgos, catálogo de errores, FMEA, árbol de fallos, DR/BCP, plan de caos y
+  runbooks en `docs/resilience/`. Lo que **no** está hecho y bloquea declarar
+  "listo para producción": copias de seguridad y ensayo de restauración, campaña
+  de caos end-to-end, métricas Prometheus (sin ellas no hay alerta sobre el tick
+  que falla siempre), dimensionado del pool de Postgres y rate limiting
+  compartido para multi-réplica. Ver `docs/resilience/06-checklists.md`.
+
 - La API está organizada en 57 módulos NestJS y expone 852 endpoints detectados por el analizador
   REDESA.
 - La trazabilidad canónica y las remediaciones verificadas viven en `REDESA-TRAZABILIDAD.md`.

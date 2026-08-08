@@ -23,11 +23,14 @@
 | [0013](ADR-0013-idempotencia-por-dominio.md) | Idempotencia — por dominio, no transversal | Aceptado |
 | [0014](ADR-0014-despliegue-docker-compose.md) | Despliegue — Docker Compose multiproceso | Aceptado |
 | [0015](ADR-0015-secretos-variables-entorno.md) | Gestión de secretos — variables de entorno | Aceptado (riesgo residual) |
-| [0016](ADR-0016-migraciones-sql-plano.md) | Migraciones — DDL SQL plano fuera del ORM | Aceptado (riesgo residual) |
+| [0016](ADR-0016-migraciones-sql-plano.md) | Migraciones — DDL SQL plano fuera del ORM | Superado por [0021](ADR-0021-fuente-unica-de-ddl.md) |
 | [0017](ADR-0017-seeds-idempotentes-arranque.md) | Seeds — idempotentes en cada arranque | Aceptado |
 | [0018](ADR-0018-consistencia-transaccional.md) | Consistencia transaccional — transacción local + outbox, sin sagas | Aceptado |
 | [0019](ADR-0019-patron-outbox.md) | Patrón outbox transaccional propio | Aceptado |
 | [0020](ADR-0020-trazas-opentelemetry-jaeger.md) | Trazas distribuidas — OpenTelemetry + OTLP + Jaeger | Aceptado |
+| [0021](ADR-0021-fuente-unica-de-ddl.md) | El esquema se declara en el modelo canónico, no en este repositorio | Aceptado |
+| [0022](ADR-0022-generacion-de-entidades.md) | Generación de entidades — cuerpo desde el modelo, documentación aparte | Aceptado |
+| [0023](ADR-0023-puertos-persistencia-read-write.md) | Puertos de persistencia con rutas de lectura y escritura separadas | Aceptado |
 
 ## Cómo añadir un ADR nuevo
 

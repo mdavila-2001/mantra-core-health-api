@@ -30,6 +30,11 @@ const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
  * - pasa quien tiene membresía **activa** con rol `OWNER` o `ADMIN` **en ese tenant**;
  * - el resto recibe 403, incluido el `STAFF` del propio tenant.
  *
+ * La administración tiene además un segundo escalón: **cambiar quién es dueño**. Conceder el rol
+ * `OWNER`, degradar a un OWNER o darlo de baja lo decide un OWNER (o la plataforma), nunca un
+ * ADMIN — si administrar alcanzara, cualquier ADMIN podría auto-promoverse a OWNER o descabezar
+ * a quien lo nombró, y la jerarquía que este servicio establece se invertiría sola.
+ *
  * Lo que no cambia: el aislamiento entre organizaciones. Un owner sigue sin poder tocar el tenant
  * de al lado, porque su membresía es la de su tenant y esta comprobación es por tenant.
  */
@@ -55,21 +60,93 @@ export class TenantAdministrationService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    const roles = actor.roles ?? [];
-    if (PLATFORM_ROLES.some((role) => roles.includes(role))) return;
+    if (this.isPlatform(actor)) return;
 
-    const membership = await this.membershipsRepo.findActiveByUserTenant(
-      em,
-      actor.id,
-      tenantId,
-      DIR.MEMBERSHIP_ACTIVE,
-    );
+    const membership = await this.activeMembershipOf(em, tenantId, actor);
     if (membership && ADMIN_TENANT_ROLES.has(membership.tenantRoleConceptId)) {
       return;
     }
 
     throw new ForbiddenException(
       'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma',
+    );
+  }
+
+  /**
+   * Exige que el actor pueda **leer** el tenant indicado.
+   *
+   * Es el escalón por debajo de administrar: para consultar la ficha de la
+   * organización, sus sedes o su plantilla basta con pertenecer a ella, sin ser
+   * `OWNER` ni `ADMIN`. Exigir rol de administración para leer dejaría al `STAFF`
+   * sin poder ver la organización en la que trabaja.
+   *
+   * Lo que no se relaja es el aislamiento: quien no es plataforma y no tiene
+   * membresía activa **en ese tenant** recibe 403, que es lo que impide que un
+   * listado se convierta en una fuga entre organizaciones.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant que se quiere leer.
+   * @param actor - Quien pide la operación.
+   * @throws ForbiddenException si no es plataforma ni miembro activo del tenant.
+   */
+  async assertCanRead(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (this.isPlatform(actor)) return;
+
+    if (await this.activeMembershipOf(em, tenantId, actor)) return;
+
+    throw new ForbiddenException(
+      'Se requiere pertenecer a la organización, o ser administrador de la plataforma',
+    );
+  }
+
+  /**
+   * Exige que el actor pueda cambiar quién es dueño del tenant.
+   *
+   * Es el escalón por encima de administrar: cubre conceder `OWNER` (por invitación o
+   * cambio de rol), degradar a un OWNER y darlo de baja. El rol del actor se resuelve
+   * por su propia membresía en **ese** tenant, nunca por nada que venga en la petición.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant cuya propiedad se quiere cambiar.
+   * @param actor - Quien pide la operación.
+   * @throws ForbiddenException si no es plataforma ni OWNER del tenant.
+   */
+  async assertCanChangeOwnership(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (this.isPlatform(actor)) return;
+
+    const membership = await this.activeMembershipOf(em, tenantId, actor);
+    if (membership?.tenantRoleConceptId === DIR.ROLE_OWNER) return;
+
+    throw new ForbiddenException(
+      'Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee',
+    );
+  }
+
+  /** `true` si el actor tiene un rol global de plataforma. */
+  private isPlatform(actor: AuthenticatedUser): boolean {
+    const roles = actor.roles ?? [];
+    return PLATFORM_ROLES.some((role) => roles.includes(role));
+  }
+
+  /** Membresía activa del actor en el tenant, o `null` si no pertenece. */
+  private activeMembershipOf(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ) {
+    return this.membershipsRepo.findActiveByUserTenant(
+      em,
+      actor.id,
+      tenantId,
+      DIR.MEMBERSHIP_ACTIVE,
     );
   }
 }

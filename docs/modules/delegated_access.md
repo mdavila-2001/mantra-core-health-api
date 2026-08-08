@@ -8,7 +8,7 @@
 
 # Módulo `delegated_access`
 
-**Fuente:** [`src/modules/delegated_access/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/delegated_access/README.md)
+**Fuente:** [`src/modules/delegated_access/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/delegated_access/README.md)
 · 5 controllers · 5 services · 7 repositories · 7 entidades · 12 DTO
 
 ---

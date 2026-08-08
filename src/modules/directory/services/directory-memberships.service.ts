@@ -72,6 +72,11 @@ export class DirectoryMembershipsService {
       // sólo lo podía hacer un SECURITY_ADMIN global, así que una organización recién
       // registrada no podía gestionar a su propia gente.
       await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
+      // Incorporar a alguien como OWNER es cambiar quién es dueño: lo decide un
+      // OWNER o la plataforma, nunca un ADMIN.
+      if (dto.role === 'OWNER') {
+        await this.tenantAdmin.assertCanChangeOwnership(tx, tenantId, actor);
+      }
       const existing = await this.membershipsRepo.findActiveByUserTenant(
         tx,
         dto.userId,
@@ -292,6 +297,17 @@ export class DirectoryMembershipsService {
         membershipId,
       );
 
+      // Tocar la propiedad —conceder OWNER o tocar la membresía de un OWNER— es el
+      // escalón por encima de administrar: lo decide un OWNER o la plataforma.
+      const grantsOwner = dto.role === 'OWNER';
+      const targetIsOwner = membership.tenantRoleConceptId === DIR.ROLE_OWNER;
+      if (grantsOwner || targetIsOwner) {
+        await this.tenantAdmin.assertCanChangeOwnership(tx, tenantId, actor);
+      }
+      if (targetIsOwner && dto.role && !grantsOwner) {
+        await this.assertNotLastOwner(tx, membership);
+      }
+
       if (dto.role)
         membership.tenantRoleConceptId = TENANT_ROLE_CONCEPT_BY_CODE[dto.role];
       if (dto.accessScope) {
@@ -334,6 +350,13 @@ export class DirectoryMembershipsService {
         membershipId,
       );
 
+      // Dar de baja a un OWNER es cambiar quién es dueño, y además no puede dejar a
+      // la organización sin ninguno.
+      if (membership.tenantRoleConceptId === DIR.ROLE_OWNER) {
+        await this.tenantAdmin.assertCanChangeOwnership(tx, tenantId, actor);
+        await this.assertNotLastOwner(tx, membership);
+      }
+
       membership.statusConceptId = DIR.MEMBERSHIP_ENDED;
       membership.endDate = new Date();
       touch(membership, actor.id);
@@ -359,6 +382,30 @@ export class DirectoryMembershipsService {
       );
       return { ok: true };
     });
+  }
+
+  /**
+   * Exige que quitarle el rol OWNER a esta membresía no deje a la organización sin dueño.
+   *
+   * Es una invariante del tenant, no un permiso: aplica también a la plataforma. Para
+   * remover al último OWNER primero se nombra a otro; así el tenant nunca queda acéfalo.
+   */
+  private async assertNotLastOwner(
+    em: EntityManager,
+    membership: TenantMemberships,
+  ): Promise<void> {
+    const activeOwners = await this.membershipsRepo.countActiveByTenantRole(
+      em,
+      membership.tenantId,
+      DIR.ROLE_OWNER,
+      DIR.MEMBERSHIP_ACTIVE,
+    );
+    if (activeOwners <= 1) {
+      throw new PreconditionFailedException(
+        'No se puede quitar al último OWNER de la organización: designe otro OWNER primero',
+        { tenantId: membership.tenantId, membershipId: membership.id },
+      );
+    }
   }
 
   /** Carga una membresía del tenant y exige que esté activa. */

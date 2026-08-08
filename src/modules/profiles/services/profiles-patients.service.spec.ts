@@ -25,7 +25,11 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const personsRepo = { findById: mockFn(), create: mockFn() };
+  const personsRepo = {
+    findById: mockFn(),
+    findByIds: mockFn().mockResolvedValue(new Map()),
+    create: mockFn(),
+  };
   const personProfilesRepo = {
     findById: mockFn(),
     findByPersonAndType: mockFn(),
@@ -34,6 +38,7 @@ function build() {
   const patientProfilesRepo = {
     findById: mockFn(),
     findByPatientCode: mockFn(),
+    searchPage: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const accountLinksRepo = {
@@ -56,6 +61,7 @@ function build() {
     findById: mockFn(),
     create: mockFn(),
     findActiveGuardian: mockFn(),
+    findActiveByPatient: mockFn().mockResolvedValue([]),
     reassignPatientProfile: mockFn().mockResolvedValue(0),
   };
   const portalProxiesRepo = {

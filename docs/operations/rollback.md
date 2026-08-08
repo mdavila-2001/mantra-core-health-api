@@ -36,7 +36,7 @@ esquema más nuevo, incompatible.
 1. Publicar imágenes versionadas a un registro, no reconstruir desde git en cada rollback.
 2. Adoptar migraciones versionadas con `down` explícito (ver
    [ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md) §"Plan de revisión"), o al menos
-   mantener el DDL inverso junto a cada cambio de esquema en `database/SQL/99_migrations`.
+   mantener el DDL inverso junto a cada cambio de esquema en los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md)).
 3. Practicar (no solo documentar) un rollback real antes de depender de este procedimiento en un
    incidente.
 

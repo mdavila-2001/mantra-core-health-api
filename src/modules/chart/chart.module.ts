@@ -6,12 +6,14 @@ import {
   ChartDocumentsController,
   ChartCarePlansController,
   ChartTemplatesController,
+  ChartReadController,
 } from './controllers';
 import {
   ChartNotesService,
   ChartDocumentsService,
   ChartCarePlansService,
   ChartTemplatesService,
+  ChartReadService,
 } from './services';
 import {
   ClinicalNotesRepository,
@@ -32,6 +34,7 @@ import {
     ChartDocumentsController,
     ChartCarePlansController,
     ChartTemplatesController,
+    ChartReadController,
   ],
   providers: [
     // Repositorios
@@ -44,6 +47,7 @@ import {
     ChartDocumentsService,
     ChartCarePlansService,
     ChartTemplatesService,
+    ChartReadService,
   ],
 })
 export class ChartModule {}

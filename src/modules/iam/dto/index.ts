@@ -1,5 +1,6 @@
 export * from './create-user.dto';
 export * from './user-response.dto';
+export * from './iam-user-read.dto';
 export * from './link-federated-credential.dto';
 export * from './credential-response.dto';
 export * from './mfa-factor.dto';

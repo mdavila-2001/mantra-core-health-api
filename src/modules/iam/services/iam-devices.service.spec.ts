@@ -21,7 +21,7 @@ function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const usersRepo = { findById: mockFn() };
-  const devicesRepo = { create: mockFn() };
+  const devicesRepo = { create: mockFn(), findByUser: mockFn() };
   const eventsRepo = { record: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 

@@ -5,3 +5,5 @@ export {
   SchedulingConfirmationService,
   type ScopeValues,
 } from './scheduling-confirmation.service';
+
+export { SchedulingAgendaService } from './scheduling-agenda.service';

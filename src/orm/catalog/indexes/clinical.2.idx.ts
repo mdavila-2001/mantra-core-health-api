@@ -2,22 +2,24 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 2/2).
- * 51 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 53 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
-  ['observations', 'ix_observations_method_concept_id', ['method_concept_id'], false, 'btree'],
-  ['observations', 'ix_observations_body_site_concept_id', ['body_site_concept_id'], false, 'btree'],
-  ['observations', 'ix_observations_specimen_id', ['specimen_id'], false, 'btree'],
-  ['observations', 'ix_observations_source_device_id', ['source_device_id'], false, 'btree'],
-  ['observations', 'ix_observations_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
-  ['observations', 'ix_observations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['observations', 'ix_observations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['observations', 'ix_observations_custodian_tenant_id_status_concept_id', ['custodian_tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
-  ['observations', 'ix_observations_patient_profile_id_updated_at', ['custodian_tenant_id', 'patient_profile_id', 'updated_at desc'], false, 'btree'],
-  ['observations', 'ix_observations_patient_code_effective', ['custodian_tenant_id', 'patient_profile_id', 'code_concept_id', 'effective_start_at desc'], false, 'btree'],
-  ['observations', 'ix_observations_encounter_code', ['encounter_id', 'code_concept_id'], false, 'btree'],
+  ['observation_notes', 'ix_observation_notes_observation_id', ['observation_id'], false, 'btree'],
+  ['observation_notes', 'ix_observation_notes_author_user_id', ['author_user_id'], false, 'btree'],
+  ['observation_performers', 'ix_observation_performers_observation_id', ['observation_id'], false, 'btree'],
+  ['observation_performers', 'ix_observation_performers_performer_type_concept_id', ['performer_type_concept_id'], false, 'btree'],
+  ['observation_performers', 'ix_observation_performers_performer_role_concept_id', ['performer_role_concept_id'], false, 'btree'],
+  ['observation_performers', 'ix_observation_performers_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['observation_reference_ranges', 'ix_observation_reference_ranges_observation_id', ['observation_id'], false, 'btree'],
+  ['observation_reference_ranges', 'ix_observation_reference_ranges_observation_component_id', ['observation_component_id'], false, 'btree'],
+  ['observation_reference_ranges', 'ix_observation_reference_ranges_unit_concept_id', ['unit_concept_id'], false, 'btree'],
+  ['observation_reference_ranges', 'ix_observation_reference_ranges_type_concept_id', ['type_concept_id'], false, 'btree'],
+  ['observation_reference_ranges', 'ix_observation_reference_ranges_applies_to_concept_id', ['applies_to_concept_id'], false, 'btree'],
+  ['observation_reference_ranges', 'ix_observation_reference_ranges_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['prescription_signature_policies', 'ix_prescription_signature_policies_tenant_id', ['tenant_id'], false, 'btree'],
   ['procedures', 'ix_procedures_custodian_tenant_id', ['custodian_tenant_id'], false, 'btree'],
   ['procedures', 'ix_procedures_patient_profile_id', ['patient_profile_id'], false, 'btree'],
   ['procedures', 'ix_procedures_encounter_id', ['encounter_id'], false, 'btree'],

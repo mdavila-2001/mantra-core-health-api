@@ -8,6 +8,7 @@ import { DirectoryModule } from '../directory/directory.module';
 import { IamUsersController, IamAuthController } from './controllers';
 import {
   IamUsersService,
+  IamUsersReadService,
   IamCredentialsService,
   IamMfaService,
   IamDevicesService,
@@ -71,6 +72,7 @@ import {
     PasswordResetsRepository,
     // Servicios
     IamUsersService,
+    IamUsersReadService,
     IamCredentialsService,
     IamMfaService,
     IamDevicesService,

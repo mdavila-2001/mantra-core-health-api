@@ -4,8 +4,9 @@ import { CONCEPTS, SEED } from '../../src/common';
 
 /**
  * Verificación REAL de tamper-RESISTANCE (CAN-AUDIT-001 / C-19) contra la base
- * de datos: `database/SQL/99_migrations/2026-07-28_audit_worm_guard.sql`
- * instala triggers que rechazan UPDATE/DELETE sobre `audit.audit_log` (las dos
+ * de datos: `SQL/10_audit/05_constraints.sql` (generado por `gen_integrity.py`
+ * desde el módulo 33 — promovido al modelo en v4.0.10, antes era un patch
+ * suelto) instala triggers que rechazan UPDATE/DELETE sobre `audit.audit_log` (las dos
  * operaciones) y UPDATE sobre `audit.data_access_log` (DELETE se reserva para
  * la purga de retención, UC-10-09), sea cual sea el rol — incluido el
  * propietario del esquema.
@@ -49,15 +50,19 @@ describe('WORM de audit.audit_log / audit.data_access_log (DB real)', () => {
     );
     const id = rows[0].id;
 
+    // El mensaje viene de `integrity.forbid_mutation()` (generada por
+    // gen_integrity.py desde el módulo 33): dice "append-only/immutable", no
+    // "WORM" — la palabra WORM era del guard artesanal que este trigger
+    // reemplazó en v4.0.10. El ERRCODE es el mismo: restrict_violation.
     await expect(
       client.query("UPDATE audit.audit_log SET action='HACKED' WHERE id=$1", [
         id,
       ]),
-    ).rejects.toThrow(/WORM/);
+    ).rejects.toThrow(/append-only|immutable/);
 
     await expect(
       client.query('DELETE FROM audit.audit_log WHERE id=$1', [id]),
-    ).rejects.toThrow(/WORM/);
+    ).rejects.toThrow(/append-only|immutable/);
 
     // La fila sigue intacta y sin poder borrarse — es el comportamiento
     // esperado, no un residuo de la prueba: audit_log es append-only por

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `identity_assurance`.
- * 74 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 76 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const identityAssuranceIndexes: readonly IndexTuple[] = [
@@ -13,6 +13,7 @@ export const identityAssuranceIndexes: readonly IndexTuple[] = [
   ['identity_assertions', 'ix_identity_assertions_assertion_type_concept_id', ['assertion_type_concept_id'], false, 'btree'],
   ['identity_assertions', 'ix_identity_assertions_assurance_level_concept_id', ['assurance_level_concept_id'], false, 'btree'],
   ['identity_assertions', 'ix_identity_assertions_revocation_reason_concept_id', ['revocation_reason_concept_id'], false, 'btree'],
+  ['identity_assertions', 'brin_identity_assertions_created_at', ['created_at'], false, 'brin'],
   ['identity_authorities', 'uq_identity_authorities_authority_code', ['authority_code'], true, 'btree'],
   ['identity_authorities', 'ix_identity_authorities_tenant_id', ['tenant_id'], false, 'btree'],
   ['identity_authorities', 'ix_identity_authorities_authority_type_concept_id', ['authority_type_concept_id'], false, 'btree'],
@@ -30,16 +31,16 @@ export const identityAssuranceIndexes: readonly IndexTuple[] = [
   ['identity_authority_endpoints', 'ix_identity_authority_endpoints_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['identity_authority_endpoints', 'ix_identity_authority_endpoints_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['identity_authority_endpoints', 'ix_identity_authority_endpoints_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
-  ['identity_check_results', 'ix_identity_check_results_identity_check_id', ['identity_check_id'], false, 'btree'],
-  ['identity_check_results', 'ix_identity_check_results_result_concept_id', ['result_concept_id'], false, 'btree'],
-  ['identity_check_results', 'ix_identity_check_results_supersedes_result_id', ['supersedes_result_id'], false, 'btree'],
-  ['identity_check_results', 'ix_identity_check_results_checked_by_actor_type_concept_id', ['checked_by_actor_type_concept_id'], false, 'btree'],
   ['identity_checks', 'ix_identity_checks_identity_verification_case_id', ['identity_verification_case_id'], false, 'btree'],
   ['identity_checks', 'ix_identity_checks_check_type_concept_id', ['check_type_concept_id'], false, 'btree'],
   ['identity_checks', 'ix_identity_checks_authority_id', ['authority_id'], false, 'btree'],
   ['identity_checks', 'ix_identity_checks_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['identity_checks', 'ix_identity_checks_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['identity_checks', 'ix_identity_checks_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['identity_check_results', 'ix_identity_check_results_identity_check_id', ['identity_check_id'], false, 'btree'],
+  ['identity_check_results', 'ix_identity_check_results_result_concept_id', ['result_concept_id'], false, 'btree'],
+  ['identity_check_results', 'ix_identity_check_results_supersedes_result_id', ['supersedes_result_id'], false, 'btree'],
+  ['identity_check_results', 'ix_identity_check_results_checked_by_actor_type_concept_id', ['checked_by_actor_type_concept_id'], false, 'btree'],
   ['identity_evidence_records', 'ix_identity_evidence_records_identity_verification_case_id', ['identity_verification_case_id'], false, 'btree'],
   ['identity_evidence_records', 'ix_identity_evidence_records_evidence_type_concept_id', ['evidence_type_concept_id'], false, 'btree'],
   ['identity_evidence_records', 'ix_identity_evidence_records_issuer_authority_id', ['issuer_authority_id'], false, 'btree'],
@@ -53,6 +54,7 @@ export const identityAssuranceIndexes: readonly IndexTuple[] = [
   ['identity_fraud_signals', 'ix_identity_fraud_signals_severity_concept_id', ['severity_concept_id'], false, 'btree'],
   ['identity_fraud_signals', 'ix_identity_fraud_signals_source_concept_id', ['source_concept_id'], false, 'btree'],
   ['identity_fraud_signals', 'ix_identity_fraud_signals_resolution_concept_id', ['resolution_concept_id'], false, 'btree'],
+  ['identity_fraud_signals', 'brin_identity_fraud_signals_created_at', ['created_at'], false, 'brin'],
   ['identity_manual_review_cases', 'ix_identity_manual_review_cases_identity_verification_case_id', ['identity_verification_case_id'], false, 'btree'],
   ['identity_manual_review_cases', 'ix_identity_manual_review_cases_review_reason_concept_id', ['review_reason_concept_id'], false, 'btree'],
   ['identity_manual_review_cases', 'ix_identity_manual_review_cases_assigned_to_user_id', ['assigned_to_user_id'], false, 'btree'],

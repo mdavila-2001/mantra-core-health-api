@@ -2,11 +2,12 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `procedures_perioperative` (parte 2/2).
- * 41 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 40 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const proceduresPerioperativeForeignKeys2: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
+  ['procedure_implants', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['procedure_implants', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['procedure_medication_uses', 'medication_administration_id', 'clinical', 'medication_records', 'id'],
   ['procedure_medication_uses', 'operative_step_id', 'procedures_perioperative', 'operative_steps', 'id'],
@@ -27,12 +28,10 @@ export const proceduresPerioperativeForeignKeys2: readonly ForeignKeyTuple[] = [
   ['procedure_specimens', 'procedure_id', 'clinical', 'procedures', 'id'],
   ['procedure_specimens', 'specimen_id', 'diagnostics', 'specimens', 'id'],
   ['procedure_specimens', 'specimen_role_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['sterility_verification_checks', 'check_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['sterility_verification_checks', 'checked_by_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
-  ['sterility_verification_checks', 'instrument_set_id', 'procedures_perioperative', 'instrument_sets', 'id'],
+  ['sterility_verification_checks', 'check_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['sterility_verification_checks', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],
   ['sterility_verification_checks', 'result_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['sterility_verification_checks', 'sterilization_load_id', 'procedures_perioperative', 'sterilization_loads', 'id'],
   ['surgical_safety_checklists', 'checklist_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['surgical_safety_checklists', 'coordinator_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['surgical_safety_checklists', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],

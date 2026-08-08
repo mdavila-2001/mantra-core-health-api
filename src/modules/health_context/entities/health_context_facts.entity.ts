@@ -35,7 +35,7 @@ export class HealthContextFacts {
    */
   @Property({
     fieldName: 'value_type',
-    columnType: 'terminology.technical_data_type',
+    columnType: '"terminology"."technical_data_type"',
   })
   valueType!: string;
 

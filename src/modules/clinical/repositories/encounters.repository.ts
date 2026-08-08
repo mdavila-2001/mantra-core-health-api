@@ -133,6 +133,30 @@ export interface CreateLocationData {
 @Injectable()
 export class EncountersRepository {
   /**
+   * Encuentros del paciente, del más reciente al más antiguo.
+   *
+   * Es parte de la cara de lectura del módulo (UC-39-20): sin ella se podían
+   * registrar datos clínicos pero no volver a leerlos, así que ninguna pantalla
+   * podía mostrar el historial del paciente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente cuyo historial se lee.
+   * @param limit - Tope de filas.
+   * @returns Filas del paciente, ordenadas de la más reciente a la más antigua.
+   */
+  findByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<Encounters[]> {
+    return em.find(
+      Encounters,
+      { patientProfileId },
+      { orderBy: { startAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
    * Obtiene find by id.
    *
    * @param em - Contexto de persistencia o transacción activa.

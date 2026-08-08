@@ -10,13 +10,18 @@ automatizada verificada en esta fase (candidato para CI, Fase 16).
 
 ## Mantenimiento del catálogo ORM
 
-Cuando cambia el modelo de datos (`database/SQL/99_migrations`), el flujo real es:
+Cuando cambia el modelo de datos (los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md))), el flujo real es:
 
 ```bash
-yarn orm:catalog   # regenera índices/FK desde la bóveda de diseño
-yarn orm:gen        # regenera entidades por introspección
-yarn orm:audit       # verifica fidelidad contra graphify-out/fidelity-audit.json
+yarn orm:catalog                    # regenera índices/FK desde la bóveda de diseño
+python ../salud-db/gen_entities.py all  # regenera entidades desde los .puml (ADR-0022)
+yarn format                         # prettier sobre lo generado
+yarn docs:tsdoc                     # rellena el JSDoc respetando la prosa escrita a mano
+yarn orm:audit                      # verifica fidelidad bóveda ↔ entidades ↔ catálogo
 ```
+
+`orm:gen` **ya no existe**: declaraba un flujo por introspección que nunca produjo las
+entidades de este repo — ver [ADR-0022](../adr/ADR-0022-generacion-de-entidades.md).
 
 Ver [migraciones](../data/migrations.md) para el flujo completo.
 

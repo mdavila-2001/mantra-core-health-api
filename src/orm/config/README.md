@@ -6,7 +6,7 @@ Tres archivos, con una separación que no es arbitraria.
 |---|---|---|
 | `orm.env.ts` | NestJS (`ConfigModule`) y la CLI de MikroORM | La CLI carga la configuración fuera del contenedor de dependencias, así que la validación tiene que ser una función pura, no un proveedor inyectable |
 | `orm.config.ts` | `OrmModule` y la CLI | Configuración de runtime |
-| `orm.generator.config.ts` | Solo `yarn orm:gen` | Importa `@mikro-orm/entity-generator`, que es devDependency. Mezclarlo con el runtime haría que producción exigiera un paquete que no está instalado |
+| `orm.generator.config.ts` | **Nadie hoy** — su único consumidor era `orm:gen`, retirado en v4.0.10 (ADR-0022). Se conserva por si algún día se adopta la introspección de verdad | Importa `@mikro-orm/entity-generator`, que es devDependency. Mezclarlo con el runtime haría que producción exigiera un paquete que no está instalado |
 
 ## orm.env.ts
 

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `workflow`.
- * 54 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 55 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const workflowIndexes: readonly IndexTuple[] = [
@@ -34,7 +34,8 @@ export const workflowIndexes: readonly IndexTuple[] = [
   ['state_transition_events', 'ix_state_transition_events_actor_tenant_id', ['actor_tenant_id'], false, 'btree'],
   ['state_transition_events', 'ix_state_transition_events_reason_concept_id', ['reason_concept_id'], false, 'btree'],
   ['state_transition_events', 'uq_state_transition_events_idempotency', ['idempotency_key'], true, 'btree'],
-  ['state_transition_events', 'uq_state_transition_idempotency', ['state_machine_definition_id', 'aggregate_id', 'idempotency_key'], true, 'btree'],
+  ['state_transition_events', 'brin_state_transition_events_occurred_at', ['occurred_at'], false, 'brin'],
+  ['state_transition_events', 'uq_state_transition_idempotency', ['state_machine_definition_id', 'aggregate_id', 'idempotency_key'], true, 'btree', 'idempotency_key IS NOT NULL'],
   ['transition_guards', 'ix_transition_guards_state_transition_definition_id', ['state_transition_definition_id'], false, 'btree'],
   ['transition_guards', 'ix_transition_guards_guard_type_concept_id', ['guard_type_concept_id'], false, 'btree'],
   ['transition_guards', 'ix_transition_guards_status_concept_id', ['status_concept_id'], false, 'btree'],

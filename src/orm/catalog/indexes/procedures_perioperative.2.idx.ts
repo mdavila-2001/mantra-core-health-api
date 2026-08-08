@@ -2,11 +2,23 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `procedures_perioperative` (parte 2/2).
- * 72 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 89 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
+  ['procedure_case_team_members', 'ix_procedure_case_team_members_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['procedure_case_team_members', 'uk_procedure_case_team_member_role', ['procedure_case_id', 'practitioner_profile_id', 'team_role_concept_id'], true, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_procedure_case_id', ['procedure_case_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_procedure_id', ['procedure_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_charge_item_type_concept_id', ['charge_item_type_concept_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_billable_item_id', ['billable_item_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_billing_claim_line_id', ['billing_claim_line_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_invoice_line_id', ['invoice_line_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['procedure_charge_items', 'ix_procedure_charge_items_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['procedure_complications', 'ix_procedure_complications_procedure_case_id', ['procedure_case_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_procedure_id', ['procedure_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_complication_code_concept_id', ['complication_code_concept_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_severity_concept_id', ['severity_concept_id'], false, 'btree'],
@@ -14,6 +26,7 @@ export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   ['procedure_complications', 'ix_procedure_complications_condition_id', ['condition_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
   ['procedure_complications', 'ix_procedure_complications_reported_by_profile_id', ['reported_by_profile_id'], false, 'btree'],
+  ['procedure_complications', 'brin_procedure_complications_created_at', ['created_at'], false, 'brin'],
   ['procedure_devices', 'ix_procedure_devices_procedure_id', ['procedure_id'], false, 'btree'],
   ['procedure_devices', 'ix_procedure_devices_device_id', ['device_id'], false, 'btree'],
   ['procedure_devices', 'ix_procedure_devices_use_role_concept_id', ['use_role_concept_id'], false, 'btree'],
@@ -40,6 +53,7 @@ export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   ['procedure_outcomes', 'ix_procedure_outcomes_observation_id', ['observation_id'], false, 'btree'],
   ['procedure_outcomes', 'ix_procedure_outcomes_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
   ['procedure_outcomes', 'ix_procedure_outcomes_unit_concept_id', ['unit_concept_id'], false, 'btree'],
+  ['procedure_outcomes', 'brin_procedure_outcomes_created_at', ['created_at'], false, 'brin'],
   ['procedure_performers', 'ix_procedure_performers_procedure_id', ['procedure_id'], false, 'btree'],
   ['procedure_performers', 'ix_procedure_performers_practitioner_profile_id', ['practitioner_profile_id'], false, 'btree'],
   ['procedure_performers', 'ix_procedure_performers_performer_role_concept_id', ['performer_role_concept_id'], false, 'btree'],
@@ -58,9 +72,11 @@ export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   ['sterility_verification_checks', 'ix_sterility_verification_checks_result_concept_id', ['result_concept_id'], false, 'btree'],
   ['sterility_verification_checks', 'ix_sterility_verification_checks_sterilization_load_id', ['sterilization_load_id'], false, 'btree'],
   ['sterility_verification_checks', 'ix_sterility_verification_checks_instrument_set_id', ['instrument_set_id'], false, 'btree'],
+  ['sterility_verification_checks', 'brin_sterility_verification_checks_created_at', ['created_at'], false, 'brin'],
   ['sterilization_loads', 'ix_sterilization_loads_tenant_id', ['tenant_id'], false, 'btree'],
   ['sterilization_loads', 'ix_sterilization_loads_method_concept_id', ['method_concept_id'], false, 'btree'],
   ['sterilization_loads', 'ix_sterilization_loads_result_concept_id', ['result_concept_id'], false, 'btree'],
+  ['sterilization_loads', 'brin_sterilization_loads_created_at', ['created_at'], false, 'brin'],
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_procedure_case_id', ['procedure_case_id'], false, 'btree'],
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_checklist_type_concept_id', ['checklist_type_concept_id'], false, 'btree'],
   ['surgical_safety_checklists', 'ix_surgical_safety_checklists_status_concept_id', ['status_concept_id'], false, 'btree'],
@@ -78,5 +94,6 @@ export const proceduresPerioperativeIndexes2: readonly IndexTuple[] = [
   ['surgical_safety_responses', 'ix_surgical_safety_responses_response_status_concept_id', ['response_status_concept_id'], false, 'btree'],
   ['surgical_safety_responses', 'ix_surgical_safety_responses_response_concept_id', ['response_concept_id'], false, 'btree'],
   ['surgical_safety_responses', 'ix_surgical_safety_responses_responded_by_profile_id', ['responded_by_profile_id'], false, 'btree'],
+  ['surgical_safety_responses', 'brin_surgical_safety_responses_created_at', ['created_at'], false, 'brin'],
   ['surgical_safety_responses', 'uk_surgical_safety_responses_checklist_item', ['surgical_safety_checklist_id', 'surgical_safety_item_id'], true, 'btree'],
 ];

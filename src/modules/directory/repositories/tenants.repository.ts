@@ -76,6 +76,56 @@ export class TenantsRepository {
     return em.findOne(Tenants, { code });
   }
 
+  /**
+   * Una página del listado de organizaciones, por cursor keyset sobre `code`.
+   *
+   * Se pagina por el código y no por la fecha de alta porque el código es único:
+   * con `created_at` dos organizaciones aprovisionadas en el mismo instante
+   * -que es lo que pasa cuando las crea la misma corrida- se repetirían o se
+   * saltarían entre páginas.
+   *
+   * @param em - Contexto de persistencia.
+   * @param filters - Texto, estado, organización madre y cursor.
+   * @param limit - Tope de filas a devolver.
+   * @returns Organizaciones ordenadas por código ascendente.
+   */
+  searchPage(
+    em: EntityManager,
+    filters: {
+      /** Texto libre sobre código, razón social y nombre comercial. */
+      query?: string;
+      /** Estado al que acotar. */
+      statusConceptId?: string;
+      /** Organización madre; `null` acota a las raíz. */
+      parentTenantId?: string | null;
+      /** Último código de la página anterior. */
+      afterCode?: string;
+    },
+    limit: number,
+  ): Promise<Tenants[]> {
+    const where: Record<string, unknown> = {};
+
+    if (filters.statusConceptId) {
+      where.statusConceptId = filters.statusConceptId;
+    }
+    if (filters.parentTenantId !== undefined) {
+      where.parentTenantId = filters.parentTenantId;
+    }
+    if (filters.afterCode !== undefined) {
+      where.code = { $gt: filters.afterCode };
+    }
+    if (filters.query) {
+      const pattern = `%${filters.query}%`;
+      where.$or = [
+        { code: { $ilike: pattern } },
+        { legalName: { $ilike: pattern } },
+        { tradeName: { $ilike: pattern } },
+      ];
+    }
+
+    return em.find(Tenants, where, { orderBy: { code: 'ASC' }, limit });
+  }
+
   /** Crea la entidad tenant en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateTenantData): Tenants {
     return em.create(

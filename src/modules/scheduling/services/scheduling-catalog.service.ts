@@ -21,6 +21,7 @@ import {
   GenerateSlotsResponseDto,
   CreateExceptionDto,
   ExceptionResponseDto,
+  ResourceAgendaResponseDto,
   type ResourceType,
   type ExceptionType,
 } from '../dto';
@@ -188,6 +189,18 @@ export class SchedulingCatalogService {
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
         actorUserId: actor.id,
       });
+      // FK planas: persistir la plantilla ANTES de crear las franjas que la
+      // referencian. `schedule_template_id` es una columna uuid suelta y no una
+      // relación declarada, así que la unidad de trabajo no conoce la
+      // dependencia y ordena los inserts por el orden en que descubrió las
+      // entidades —donde `ScheduleRules` va antes que `ScheduleTemplates`—,
+      // insertando las franjas primero y violando la FK.
+      //
+      // No es teórico: `POST /scheduling/resources/:id/templates` respondía 500
+      // a toda petición, de modo que no se podía publicar una agenda ni, por
+      // tanto, generar slots ni reservar. Cubierto por
+      // `test/integration/frontend-read-flows.int-spec.ts`.
+      await tx.flush();
 
       for (const rule of dto.rules) {
         this.catalogRepo.createRule(tx, {
@@ -387,6 +400,85 @@ export class SchedulingCatalogService {
 
       return { id: exception.id, blockedSlots };
     });
+  }
+
+  /**
+   * UC-41-14: agenda publicada de un recurso en una ventana de tiempo.
+   *
+   * Es la lectura que le faltaba al módulo. Los slots se generaban con
+   * `POST /scheduling/templates/:id/generate-slots` pero no había forma de
+   * listarlos, así que el `slotId` que exige `POST /scheduling/slots/:id/holds`
+   * sólo se podía obtener mirando la base: una agenda que no se puede leer no
+   * se puede reservar desde ninguna pantalla.
+   *
+   * @param resourceId - Recurso cuya agenda se consulta.
+   * @param options - Ventana, si se limita a lo disponible y tope de filas.
+   * @returns Slots de la ventana, ordenados cronológicamente.
+   * @throws ResourceNotFoundException si el recurso no existe.
+   * @throws PreconditionFailedException si la ventana no empieza antes de terminar.
+   */
+  async getResourceAgenda(
+    resourceId: string,
+    options: {
+      /** Inicio de la ventana (inclusive). */
+      from: Date;
+      /** Fin de la ventana (exclusive). */
+      to: Date;
+      /** Sólo los slots con cupo libre. */
+      onlyAvailable: boolean;
+      /** Tope de filas. */
+      limit: number;
+    },
+  ): Promise<ResourceAgendaResponseDto> {
+    if (!(options.from < options.to)) {
+      throw new PreconditionFailedException(
+        'La ventana debe empezar antes de terminar',
+        { from: options.from.toISOString(), to: options.to.toISOString() },
+      );
+    }
+
+    const em = this.em.fork();
+    // Un recurso inexistente devuelve 404 y no una agenda vacía: son cosas
+    // distintas y el cliente tiene que poder distinguirlas —"este médico no
+    // existe" no es "este médico no tiene huecos".
+    const resource = await this.catalogRepo.findResourceById(em, resourceId);
+    if (!resource) {
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
+    }
+
+    // Se pide una fila de más sólo para poder declarar el recorte.
+    const rows = await this.catalogRepo.findSlotsByResourceInRange(
+      em,
+      resourceId,
+      options.from,
+      options.to,
+      { onlyAvailable: options.onlyAvailable, limit: options.limit + 1 },
+    );
+    const truncated = rows.length > options.limit;
+    const page = truncated ? rows.slice(0, options.limit) : rows;
+
+    return {
+      resourceId,
+      from: options.from,
+      to: options.to,
+      items: page.map((slot) => ({
+        id: slot.id,
+        resourceId: slot.resourceId,
+        scheduleTemplateId: slot.scheduleTemplateId,
+        serviceConceptId: slot.serviceConceptId,
+        startAt: slot.startAt,
+        endAt: slot.endAt,
+        capacity: slot.capacity,
+        remainingCapacity: slot.remainingCapacity,
+        available: slot.remainingCapacity > 0,
+        statusConceptId: slot.statusConceptId,
+      })),
+      count: page.length,
+      limit: options.limit,
+      truncated,
+    };
   }
 
   /** Días del rango que caen en el día de la semana de la regla. */

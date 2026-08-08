@@ -9,3 +9,4 @@ export * from './medications.service';
 export * from './prescription-signature-policies.service';
 export * from './procedures.service';
 export * from './immunizations.service';
+export * from './clinical-read.service';

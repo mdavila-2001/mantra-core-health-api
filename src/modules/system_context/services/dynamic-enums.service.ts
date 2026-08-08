@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -23,6 +23,8 @@ import {
   ResolveEnumValueResponseDto,
   RetireEnumDefinitionDto,
   RetireEnumDefinitionResponseDto,
+  ListDynamicEnumBindingsResponseDto,
+  ReadDynamicEnumResponseDto,
   type ValidationMode,
 } from '../dto';
 
@@ -55,6 +57,179 @@ export class DynamicEnumsService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DynamicEnumsService.name);
+  }
+
+  /**
+   * Lee la enumeración publicada que gobierna un campo, o la que tiene un código
+   * dado, con sus opciones habilitadas.
+   *
+   * Es la contraparte de lectura de `resolveValue`: aquélla valida un valor que
+   * ya se eligió; ésta entrega los valores entre los que elegir. Sin ella un
+   * formulario no puede ofrecer ningún campo `*_concept_id`, porque sabe que el
+   * campo sale de terminología pero no de qué conjunto, y el `$expand` exige un
+   * uuid que no se publica en ninguna parte.
+   *
+   * Se busca por **ruta del campo** o por **código de enumeración**, nunca por
+   * uuid: los dos son constantes del código fuente, así que un cliente puede
+   * escribirlos sin que un re-seed se los invalide.
+   *
+   * @param selector - Campo destino o código de la enumeración.
+   * @returns Enumeración con sus opciones, lista para poblar un selector.
+   */
+  async readEnum(selector: {
+    /** Campo `esquema.tabla.columna` cuyo catálogo se pide. */
+    target?: string;
+    /** Código estable de la enumeración. */
+    code?: string;
+  }): Promise<ReadDynamicEnumResponseDto> {
+    if (!selector.target && !selector.code) {
+      throw new BadRequestException(
+        'Indique el campo destino (`target`) o el código de la enumeración (`code`)',
+      );
+    }
+
+    const em = this.em.fork();
+
+    const definition = selector.target
+      ? await this.definitionForTarget(em, selector.target)
+      : await this.contextRepo.findEnumDefinitionByCode(em, selector.code!);
+
+    if (!definition) {
+      throw new ResourceNotFoundException('Enumeración no encontrada', {
+        target: selector.target,
+        code: selector.code,
+      });
+    }
+    if (definition.statusConceptId === CONCEPTS.ENUM_DEF_RETIRED) {
+      throw new ResourceNotFoundException('La enumeración está retirada', {
+        code: definition.code,
+      });
+    }
+
+    const version = await this.contextRepo.findPublishedEnumVersion(
+      em,
+      definition.id,
+      CONCEPTS.ENUM_VERSION_PUBLISHED,
+    );
+    if (!version) {
+      throw new PreconditionFailedException(
+        'La enumeración no tiene versión publicada',
+        { code: definition.code },
+      );
+    }
+
+    // Sólo las habilitadas: una opción deshabilitada sigue siendo válida para lo
+    // ya escrito, pero ofrecerla en un alta nueva reintroduciría un valor que la
+    // administración retiró a propósito.
+    const options = (
+      await this.contextRepo.findEnumOptions(em, version.id)
+    ).filter((option) => option.enabled);
+
+    return {
+      code: definition.code,
+      name: definition.name,
+      description: definition.description,
+      definitionId: definition.id,
+      valueSetId: definition.valueSetId,
+      versionId: version.id,
+      cacheToken: version.cacheToken,
+      allowCustomValue: definition.allowCustomValue ?? false,
+      options: options.map((option) => ({
+        conceptId: option.conceptId,
+        code: option.code,
+        display: option.display,
+        ordinal: option.ordinal,
+        isDefault: option.isDefault ?? false,
+      })),
+    };
+  }
+
+  /**
+   * Tabla de amarres `campo -> enumeración`, opcionalmente acotada.
+   *
+   * Permite descubrir qué campos de una tabla son de catálogo antes de pintar el
+   * formulario, en una sola llamada, en vez de tantear campo por campo.
+   *
+   * @param filter - Acotación por esquema y tabla.
+   * @returns Amarres activos con el código de su enumeración.
+   */
+  async listBindings(
+    filter: {
+      /** Esquema al que acotar. */
+      schemaName?: string;
+      /** Tabla a la que acotar. */
+      entityName?: string;
+    } = {},
+  ): Promise<ListDynamicEnumBindingsResponseDto> {
+    const em = this.em.fork();
+    const bindings = await this.contextRepo.findActiveEnumBindings(
+      em,
+      CONCEPTS.ENUM_BINDING_ACTIVE,
+      {
+        targetSchemaName: filter.schemaName,
+        targetEntityName: filter.entityName,
+      },
+    );
+
+    const definitions = await this.contextRepo.findEnumDefinitionsByIds(em, [
+      ...new Set(bindings.map((binding) => binding.dynamicEnumDefinitionId)),
+    ]);
+
+    const items = bindings.flatMap((binding) => {
+      const definition = definitions.get(binding.dynamicEnumDefinitionId);
+      // Un amarre cuya definición no existe es una fila huérfana: devolverlo con
+      // el código en blanco haría que el cliente pidiera un catálogo inexistente.
+      if (!definition) return [];
+      return [
+        {
+          target: `${binding.targetSchemaName}.${binding.targetEntityName}.${binding.targetFieldName}`,
+          targetSchemaName: binding.targetSchemaName,
+          targetEntityName: binding.targetEntityName,
+          targetFieldName: binding.targetFieldName,
+          enumCode: definition.code,
+          definitionId: definition.id,
+          valueSetId: definition.valueSetId,
+          required: binding.required ?? false,
+          fallbackConceptId: binding.fallbackConceptId,
+          validationModeConceptId: binding.validationModeConceptId,
+        },
+      ];
+    });
+
+    return { items, count: items.length };
+  }
+
+  /**
+   * Definición que gobierna un campo `esquema.tabla.columna`.
+   *
+   * @param em - Contexto de persistencia.
+   * @param target - Campo destino en notación de tres partes.
+   * @returns La definición amarrada, o `null` si el campo no tiene ninguna.
+   */
+  private async definitionForTarget(
+    em: EntityManager,
+    target: string,
+  ): Promise<Awaited<
+    ReturnType<SystemContextRepository['findEnumDefinitionById']>
+  > | null> {
+    const parts = target.split('.');
+    if (parts.length !== 3 || parts.some((part) => part.length === 0)) {
+      throw new BadRequestException(
+        'El campo destino se escribe como `esquema.tabla.columna`',
+      );
+    }
+    const binding = await this.contextRepo.findEnumBindingByTarget(
+      em,
+      parts[0],
+      parts[1],
+      parts[2],
+      CONCEPTS.ENUM_BINDING_ACTIVE,
+    );
+    if (!binding) return null;
+    return this.contextRepo.findEnumDefinitionById(
+      em,
+      binding.dynamicEnumDefinitionId,
+    );
   }
 
   /** UC-45-01: definir la enumeración. Nace en borrador, sin versión todavía. */

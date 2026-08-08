@@ -22,7 +22,7 @@ merge, no para prevenirlo automáticamente.
 
 ## Cambios al modelo de datos
 
-Todo cambio de esquema pasa por `database/SQL/99_migrations` (ver
+Todo cambio de esquema pasa por los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md)) (ver
 [migraciones](../data/migrations.md)) — sin rollback automático
 ([ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md)), por lo que un cambio de esquema debe
 evaluarse como potencialmente irreversible en producción hasta que se adopten migraciones

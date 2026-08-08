@@ -7,12 +7,6 @@ import type { IndexTuple } from '../catalog.types';
  */
 export const reportingIndexes: readonly IndexTuple[] = [
   // [tabla, nombre, columnas, único, método]
-  ['dashboard_widgets', 'ix_dashboard_widgets_dashboard_id', ['dashboard_id'], false, 'btree'],
-  ['dashboard_widgets', 'ix_dashboard_widgets_report_definition_id', ['report_definition_id'], false, 'btree'],
-  ['dashboard_widgets', 'ix_dashboard_widgets_widget_type_concept_id', ['widget_type_concept_id'], false, 'btree'],
-  ['dashboard_widgets', 'ix_dashboard_widgets_visualization_concept_id', ['visualization_concept_id'], false, 'btree'],
-  ['dashboard_widgets', 'ix_dashboard_widgets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['dashboard_widgets', 'ix_dashboard_widgets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['dashboards', 'uq_dashboards_code', ['code'], true, 'btree'],
   ['dashboards', 'ix_dashboards_tenant_id', ['tenant_id'], false, 'btree'],
   ['dashboards', 'ix_dashboards_required_permission_id', ['required_permission_id'], false, 'btree'],
@@ -20,6 +14,12 @@ export const reportingIndexes: readonly IndexTuple[] = [
   ['dashboards', 'ix_dashboards_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['dashboards', 'ix_dashboards_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['dashboards', 'ix_dashboards_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
+  ['dashboard_widgets', 'ix_dashboard_widgets_dashboard_id', ['dashboard_id'], false, 'btree'],
+  ['dashboard_widgets', 'ix_dashboard_widgets_report_definition_id', ['report_definition_id'], false, 'btree'],
+  ['dashboard_widgets', 'ix_dashboard_widgets_widget_type_concept_id', ['widget_type_concept_id'], false, 'btree'],
+  ['dashboard_widgets', 'ix_dashboard_widgets_visualization_concept_id', ['visualization_concept_id'], false, 'btree'],
+  ['dashboard_widgets', 'ix_dashboard_widgets_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['dashboard_widgets', 'ix_dashboard_widgets_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['report_columns', 'ix_report_columns_report_definition_id', ['report_definition_id'], false, 'btree'],
   ['report_columns', 'ix_report_columns_aggregation_concept_id', ['aggregation_concept_id'], false, 'btree'],
   ['report_columns', 'ix_report_columns_created_by_user_id', ['created_by_user_id'], false, 'btree'],

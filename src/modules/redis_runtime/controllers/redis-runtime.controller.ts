@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Delete,
   Get,
   HttpCode,
@@ -10,11 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  getCurrentTenantId,
-  PreconditionFailedException,
-  Roles,
-} from '../../../common';
+import { getCurrentTenantId, Roles } from '../../../common';
 import { RedisRuntimeService } from '../services';
 import {
   AcquireLockDto,
@@ -47,7 +44,9 @@ export class RedisRuntimeController {
   private requireTenant(): string {
     const tenant = getCurrentTenantId();
     if (!tenant) {
-      throw new PreconditionFailedException(
+      // 403 y no 422, por el mismo motivo que en `search_platform`: es una
+      // negativa de autorización fail-closed, no un defecto de la petición.
+      throw new ForbiddenException(
         'Se requiere X-Tenant-Id para operar sobre el runtime',
       );
     }

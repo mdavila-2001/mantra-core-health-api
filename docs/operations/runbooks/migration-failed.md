@@ -6,7 +6,7 @@
 
 ## Síntoma
 
-DDL aplicado a `database/SQL/99_migrations` falla, o la aplicación falla al arrancar tras un
+DDL aplicado a los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../../adr/ADR-0021-fuente-unica-de-ddl.md)) falla, o la aplicación falla al arrancar tras un
 cambio de esquema (`SchemaBootstrapService` con `ORM_SCHEMA_SYNC=safe`/`dry-run` reporta error).
 
 ## Diagnóstico
@@ -25,7 +25,9 @@ cambio de esquema (`SchemaBootstrapService` con `ORM_SCHEMA_SYNC=safe`/`dry-run`
   el DDL inverso manualmente si el cambio ya se aplicó parcialmente.
 - Si falló antes de aplicarse (validación previa): corregir el DDL y reintentar.
 - Regenerar el catálogo y las entidades después de cualquier corrección:
-  `yarn orm:catalog && yarn orm:gen && yarn orm:audit`.
+  `yarn orm:catalog && python ../salud-db/gen_entities.py all && yarn format && yarn docs:tsdoc && yarn orm:audit`
+  (`orm:gen` se retiró en v4.0.10 — ver
+  [ADR-0022](../../adr/ADR-0022-generacion-de-entidades.md)).
 
 ## Prevención
 

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 22 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 29 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-users`
 - **Controladores:** `IamAuthController`, `IamUsersController`
@@ -24,15 +24,22 @@ Referencia exhaustiva de 22 operación(es) del módulo `iam`, derivada del contr
 11. [POST /iam/auth/sessions/purge](#11-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
 12. [POST /iam/auth/token/refresh](#12-post-iam-auth-token-refresh) — Rotar el refresh token
 13. [POST /iam/auth/verify-email](#13-post-iam-auth-verify-email) — Verificar el correo con el token recibido
-14. [POST /iam/users](#14-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-15. [POST /iam/users/{id}/anonymize](#15-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-16. [POST /iam/users/{id}/credentials/{cid}/revoke](#16-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-17. [POST /iam/users/{id}/credentials/federated](#17-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-18. [POST /iam/users/{id}/devices](#18-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-19. [POST /iam/users/{id}/global-roles](#19-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-20. [POST /iam/users/{id}/lock](#20-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-21. [POST /iam/users/{id}/mfa-factors](#21-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-22. [POST /iam/users/assisted-registration](#22-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+14. [GET /iam/users](#14-get-iam-users) — Listado paginado de usuarios
+15. [POST /iam/users](#15-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+16. [GET /iam/users/{id}](#16-get-iam-users-id) — Ficha de un usuario
+17. [POST /iam/users/{id}/anonymize](#17-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+18. [GET /iam/users/{id}/credentials](#18-get-iam-users-id-credentials) — Credenciales del usuario
+19. [POST /iam/users/{id}/credentials/{cid}/revoke](#19-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+20. [POST /iam/users/{id}/credentials/federated](#20-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+21. [GET /iam/users/{id}/devices](#21-get-iam-users-id-devices) — Dispositivos del usuario
+22. [POST /iam/users/{id}/devices](#22-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+23. [GET /iam/users/{id}/global-roles](#23-get-iam-users-id-global-roles) — Roles globales del usuario
+24. [POST /iam/users/{id}/global-roles](#24-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+25. [POST /iam/users/{id}/lock](#25-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+26. [GET /iam/users/{id}/mfa-factors](#26-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+27. [POST /iam/users/{id}/mfa-factors](#27-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+28. [GET /iam/users/{id}/sessions](#28-get-iam-users-id-sessions) — Sesiones del usuario
+29. [POST /iam/users/assisted-registration](#29-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
 
 ---
 
@@ -1493,9 +1500,7 @@ POST /iam/auth/token/refresh HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
-{
-  "refreshToken": "valor-ejemplo"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -1507,7 +1512,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `refreshToken` | Sí | `string` | longitud mínima 1 | Refresh token en crudo emitido previamente | `valor-ejemplo` |
+| `refreshToken` | No | `string` | longitud mínima 1 | Refresh token en crudo emitido previamente. Obligatorio salvo que la API entregue el token como cookie httpOnly (AUTH_REFRESH_COOKIE_ENABLED), en cuyo caso se ignora y se lee de la cookie | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1699,7 +1704,140 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /iam/users
+## 14. GET /iam/users
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Listado paginado de usuarios
+- **Operation ID:** `IamUsersController_searchUsers`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.searchUsers](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Listado paginado de usuarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-01-01 (cara de lectura): listado paginado de usuarios. Se declara antes que las rutas con parámetro para que ninguna de ellas capture un segmento fijo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users` en `IamUsersController_searchUsers`. El controlador delega en `IamUsersReadService.searchUsers`. No recibe body. El tipo de retorno estático es `Promise<SearchUsersResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en el nombre visible o en el correo de acceso | `valor-ejemplo` |
+| `status` | query | No | `string` | Sin restricción adicional declarada | Concepto de estado al que acotar | `ok` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de resultados (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users?q=valor-ejemplo&status=ok&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchUsersResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "mfaStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "emailVerified": true,
+      "phoneVerified": true,
+      "lastLoginAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<UserListItemDto>` | Sin restricción adicional declarada | Usuarios de esta página, ordenados por nombre visible. | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","mfaStatusConceptId":"00000000-0000-4000-8000-000000000001","emailVerified":true,"phoneVerified":true,"lastLoginAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del usuario. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la cuenta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].mfaStatusConceptId` | No | `string` | formato `uuid` | Estado del segundo factor. | `00000000-0000-4000-8000-000000000001` |
+| `items[].emailVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el correo consta verificado. | `true` |
+| `items[].phoneVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el teléfono consta verificado. | `true` |
+| `items[].lastLoginAt` | No | `string` | formato `date-time`; admite null | Último ingreso registrado. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Alta de la cuenta. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users"
+}
+```
+
+---
+
+## 15. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1837,7 +1975,133 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /iam/users/{id}/anonymize
+## 16. GET /iam/users/{id}
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Ficha de un usuario
+- **Operation ID:** `IamUsersController_getUser`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.getUser](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Ficha de un usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha de un usuario.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users/{id}` en `IamUsersController_getUser`. El controlador delega en `IamUsersReadService.getUserById`. No recibe body. El tipo de retorno estático es `Promise<UserDetailResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserDetailResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "timeZone": "America/La_Paz",
+  "preferredLanguageConceptId": "00000000-0000-4000-8000-000000000001",
+  "residenceCountryConceptId": "00000000-0000-4000-8000-000000000001",
+  "dataResidencyRegionConceptId": "00000000-0000-4000-8000-000000000001",
+  "legalBasisConceptId": "00000000-0000-4000-8000-000000000001",
+  "privacyAcceptedAt": "2026-07-31T12:00:00.000Z",
+  "privacyPolicyVersion": "valor-ejemplo",
+  "mustChangePassword": true,
+  "anonymizedAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `timeZone` | No | `string` | Sin restricción adicional declarada | Zona horaria declarada. | `America/La_Paz` |
+| `preferredLanguageConceptId` | No | `string` | formato `uuid` | Idioma preferido. | `00000000-0000-4000-8000-000000000001` |
+| `residenceCountryConceptId` | No | `string` | formato `uuid` | País de residencia declarado. | `00000000-0000-4000-8000-000000000001` |
+| `dataResidencyRegionConceptId` | No | `string` | formato `uuid` | Región de residencia del dato. | `00000000-0000-4000-8000-000000000001` |
+| `legalBasisConceptId` | No | `string` | formato `uuid` | Base legal del tratamiento. | `00000000-0000-4000-8000-000000000001` |
+| `privacyAcceptedAt` | No | `string` | formato `date-time`; admite null | Cuándo se aceptó la política de privacidad. | `2026-07-31T12:00:00.000Z` |
+| `privacyPolicyVersion` | No | `string` | Sin restricción adicional declarada | Versión de la política aceptada. | `valor-ejemplo` |
+| `mustChangePassword` | Sí | `boolean` | Sin restricción adicional declarada | Si la cuenta exige cambiar la credencial en el próximo ingreso. | `true` |
+| `anonymizedAt` | No | `string` | formato `date-time`; admite null | Cuándo se anonimizó la cuenta, si se anonimizó. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Última modificación del registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}"
+}
+```
+
+---
+
+## 17. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1946,7 +2210,136 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /iam/users/{id}/credentials/{cid}/revoke
+## 18. GET /iam/users/{id}/credentials
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Credenciales del usuario
+- **Operation ID:** `IamUsersController_listCredentials`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.listCredentials](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Nunca devuelve el hash de la contraseña ni la clave pública.
+
+Contexto declarado en el controlador: UC-01-02 / UC-01-11 (cara de lectura).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users/{id}/credentials` en `IamUsersController_listCredentials`. El controlador delega en `IamUsersReadService.listCredentials`. No recibe body. El tipo de retorno estático es `Promise<ListCredentialsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/credentials HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/credentials HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCredentialsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "methodConceptId": "00000000-0000-4000-8000-000000000001",
+      "externalSubject": "valor-ejemplo",
+      "identityProvider": "valor-ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "lastUsedAt": "2026-07-31T12:00:00.000Z",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<CredentialListItemDto>` | Sin restricción adicional declarada | Credenciales, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","methodConceptId":"00000000-0000-4000-8000-000000000001","externalSubject":"valor-ejemplo","identityProvider":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","lastUsedAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la credencial. | `00000000-0000-4000-8000-000000000001` |
+| `items[].methodConceptId` | Sí | `string` | formato `uuid` | Método de autenticación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].externalSubject` | No | `string` | Sin restricción adicional declarada | Sujeto con el que se autentica (correo o documento). | `valor-ejemplo` |
+| `items[].identityProvider` | No | `string` | Sin restricción adicional declarada | Proveedor de identidad, en las credenciales federadas. | `valor-ejemplo` |
+| `items[].stateConceptId` | Sí | `string` | formato `uuid` | Estado de la credencial. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lastUsedAt` | No | `string` | formato `date-time`; admite null | Último uso registrado. | `2026-07-31T12:00:00.000Z` |
+| `items[].expiresAt` | No | `string` | formato `date-time`; admite null | Caducidad, si la tiene. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Alta de la credencial. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas credenciales trae la respuesta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/credentials"
+}
+```
+
+---
+
+## 19. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2056,7 +2449,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /iam/users/{id}/credentials/federated
+## 20. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2190,7 +2583,132 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /iam/users/{id}/devices
+## 21. GET /iam/users/{id}/devices
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Dispositivos del usuario
+- **Operation ID:** `IamUsersController_listDevices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.listDevices](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Nunca devuelve el token de notificaciones.
+
+Contexto declarado en el controlador: UC-01-05 (cara de lectura).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users/{id}/devices` en `IamUsersController_listDevices`. El controlador delega en `IamUsersReadService.listDevices`. No recibe body. El tipo de retorno estático es `Promise<ListDevicesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/devices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/devices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListDevicesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "deviceFingerprint": "valor-ejemplo",
+      "platformConceptId": "00000000-0000-4000-8000-000000000001",
+      "hasPushToken": true,
+      "lastSeenAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<DeviceListItemDto>` | Sin restricción adicional declarada | Dispositivos, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","deviceFingerprint":"valor-ejemplo","platformConceptId":"00000000-0000-4000-8000-000000000001","hasPushToken":true,"lastSeenAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del dispositivo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].deviceFingerprint` | No | `string` | Sin restricción adicional declarada | Huella con la que el dispositivo se identifica. | `valor-ejemplo` |
+| `items[].platformConceptId` | No | `string` | formato `uuid` | Plataforma del dispositivo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].hasPushToken` | Sí | `boolean` | Sin restricción adicional declarada | Si tiene token de notificaciones registrado. Se publica la existencia, no el token. | `true` |
+| `items[].lastSeenAt` | No | `string` | formato `date-time`; admite null | Última vez que se vio el dispositivo. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Alta del dispositivo. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos dispositivos trae la respuesta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/devices"
+}
+```
+
+---
+
+## 22. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2323,7 +2841,128 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /iam/users/{id}/global-roles
+## 23. GET /iam/users/{id}/global-roles
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Roles globales del usuario
+- **Operation ID:** `IamUsersController_listGlobalRoles`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.listGlobalRoles](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Roles globales del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-01-10 (cara de lectura).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users/{id}/global-roles` en `IamUsersController_listGlobalRoles`. El controlador delega en `IamUsersReadService.listGlobalRoles`. No recibe body. El tipo de retorno estático es `Promise<ListGlobalRolesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/global-roles HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/global-roles HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListGlobalRolesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "roleConceptId": "00000000-0000-4000-8000-000000000001",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<GlobalRoleListItemDto>` | Sin restricción adicional declarada | Asignaciones, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","roleConceptId":"00000000-0000-4000-8000-000000000001","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la asignación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].roleConceptId` | Sí | `string` | formato `uuid` | Rol global asignado. | `00000000-0000-4000-8000-000000000001` |
+| `items[].stateConceptId` | Sí | `string` | formato `uuid` | Estado de la asignación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se asignó. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas asignaciones trae la respuesta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/global-roles"
+}
+```
+
+---
+
+## 24. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2452,7 +3091,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /iam/users/{id}/lock
+## 25. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2574,7 +3213,130 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /iam/users/{id}/mfa-factors
+## 26. GET /iam/users/{id}/mfa-factors
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Factores de MFA del usuario
+- **Operation ID:** `IamUsersController_listMfaFactors`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.listMfaFactors](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Nunca devuelve el secreto del factor.
+
+Contexto declarado en el controlador: UC-01-03 (cara de lectura).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users/{id}/mfa-factors` en `IamUsersController_listMfaFactors`. El controlador delega en `IamUsersReadService.listMfaFactors`. No recibe body. El tipo de retorno estático es `Promise<ListMfaFactorsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/mfa-factors HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/mfa-factors HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListMfaFactorsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "factorTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MfaFactorListItemDto>` | Sin restricción adicional declarada | Factores, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","factorTypeConceptId":"00000000-0000-4000-8000-000000000001","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del factor. | `00000000-0000-4000-8000-000000000001` |
+| `items[].factorTypeConceptId` | Sí | `string` | formato `uuid` | Mecanismo del segundo factor. | `00000000-0000-4000-8000-000000000001` |
+| `items[].stateConceptId` | Sí | `string` | formato `uuid` | Estado del factor. | `00000000-0000-4000-8000-000000000001` |
+| `items[].verifiedAt` | No | `string` | formato `date-time`; admite null | Cuándo se verificó, si se verificó. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Alta del factor. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos factores trae la respuesta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/mfa-factors"
+}
+```
+
+---
+
+## 27. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2719,7 +3481,132 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /iam/users/assisted-registration
+## 28. GET /iam/users/{id}/sessions
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Sesiones del usuario
+- **Operation ID:** `IamUsersController_listSessions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.listSessions](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Nunca devuelve el identificador del token de sesión.
+
+Contexto declarado en el controlador: UC-01-06 (cara de lectura).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/users/{id}/sessions` en `IamUsersController_listSessions`. El controlador delega en `IamUsersReadService.listSessions`. No recibe body. El tipo de retorno estático es `Promise<ListSessionsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/users/00000000-0000-4000-8000-000000000001/sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSessionsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "deviceId": "00000000-0000-4000-8000-000000000001",
+      "geoLocation": "valor-ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SessionListItemDto>` | Sin restricción adicional declarada | Sesiones, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","deviceId":"00000000-0000-4000-8000-000000000001","geoLocation":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","expiresAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la sesión; es lo que se usa para revocarla. | `00000000-0000-4000-8000-000000000001` |
+| `items[].deviceId` | No | `string` | formato `uuid`; admite null | Dispositivo desde el que se abrió, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `items[].geoLocation` | No | `string` | Sin restricción adicional declarada | Ubicación aproximada registrada al abrirla. | `valor-ejemplo` |
+| `items[].stateConceptId` | Sí | `string` | formato `uuid` | Estado de la sesión. | `00000000-0000-4000-8000-000000000001` |
+| `items[].expiresAt` | No | `string` | formato `date-time`; admite null | Caducidad de la sesión. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Apertura de la sesión. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas sesiones trae la respuesta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/{id}/sessions"
+}
+```
+
+---
+
+## 29. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

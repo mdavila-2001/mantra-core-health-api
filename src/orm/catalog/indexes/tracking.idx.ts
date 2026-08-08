@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `tracking`.
- * 58 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 61 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const trackingIndexes: readonly IndexTuple[] = [
@@ -18,6 +18,7 @@ export const trackingIndexes: readonly IndexTuple[] = [
   ['eta_estimates', 'ix_eta_estimates_shipment_id', ['shipment_id'], false, 'btree'],
   ['eta_estimates', 'ix_eta_estimates_method_concept_id', ['method_concept_id'], false, 'btree'],
   ['eta_estimates', 'ix_eta_estimates_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['eta_estimates', 'brin_eta_estimates_recorded_at', ['recorded_at'], false, 'brin'],
   ['milestone_definitions', 'ix_milestone_definitions_tenant_id', ['tenant_id'], false, 'btree'],
   ['milestone_definitions', 'ix_milestone_definitions_subject_type_concept_id', ['subject_type_concept_id'], false, 'btree'],
   ['milestone_definitions', 'ix_milestone_definitions_milestone_status_concept_id', ['milestone_status_concept_id'], false, 'btree'],
@@ -25,9 +26,6 @@ export const trackingIndexes: readonly IndexTuple[] = [
   ['milestone_definitions', 'ix_milestone_definitions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['milestone_definitions', 'ix_milestone_definitions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['milestone_definitions', 'ix_milestone_definitions_tenant_id_state_concept_id', ['tenant_id', 'state_concept_id', 'updated_at desc'], false, 'btree'],
-  ['shipment_handoffs', 'ix_shipment_handoffs_shipment_id', ['shipment_id'], false, 'btree'],
-  ['shipment_handoffs', 'ix_shipment_handoffs_handoff_type_concept_id', ['handoff_type_concept_id'], false, 'btree'],
-  ['shipment_handoffs', 'ix_shipment_handoffs_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['shipments', 'uq_shipments_shipment_number', ['shipment_number'], true, 'btree'],
   ['shipments', 'ix_shipments_trackable_subject_id', ['trackable_subject_id'], false, 'btree'],
   ['shipments', 'ix_shipments_carrier_id', ['carrier_id'], false, 'btree'],
@@ -40,6 +38,10 @@ export const trackingIndexes: readonly IndexTuple[] = [
   ['shipments', 'ix_shipments_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['shipments', 'ix_shipments_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['shipments', 'ix_shipments_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['shipment_handoffs', 'ix_shipment_handoffs_shipment_id', ['shipment_id'], false, 'btree'],
+  ['shipment_handoffs', 'ix_shipment_handoffs_handoff_type_concept_id', ['handoff_type_concept_id'], false, 'btree'],
+  ['shipment_handoffs', 'ix_shipment_handoffs_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['shipment_handoffs', 'brin_shipment_handoffs_recorded_at', ['recorded_at'], false, 'brin'],
   ['trackable_subjects', 'uq_trackable_subjects_tracking_number', ['tracking_number'], true, 'btree'],
   ['trackable_subjects', 'ix_trackable_subjects_tenant_id', ['tenant_id'], false, 'btree'],
   ['trackable_subjects', 'ix_trackable_subjects_subject_type_concept_id', ['subject_type_concept_id'], false, 'btree'],
@@ -65,4 +67,5 @@ export const trackingIndexes: readonly IndexTuple[] = [
   ['tracking_events', 'ix_tracking_events_actor_user_id', ['actor_user_id'], false, 'btree'],
   ['tracking_events', 'ix_tracking_events_source_concept_id', ['source_concept_id'], false, 'btree'],
   ['tracking_events', 'ix_tracking_events_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['tracking_events', 'brin_tracking_events_recorded_at', ['recorded_at'], false, 'brin'],
 ];

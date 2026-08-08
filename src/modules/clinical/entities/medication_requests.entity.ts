@@ -126,76 +126,6 @@ export class MedicationRequests {
   })
   validTo?: Date;
 
-  // --- Inmutabilidad / máquina de estados de receta (REDESA CAN-RX-001..004) ---
-  // El modelo no traía columnas de relación entre recetas; se añaden aquí (self-FK
-  // lógicas → clinical.medication_requests.id, mismo patrón que
-  // procedures.parent_procedure_id) para encadenar corrección/renovación.
-
-  /** Instante en que la receta se selló (DRAFT → ISSUED); a partir de aquí es inmutable. */
-  @Property({
-    fieldName: 'issued_at',
-    columnType: 'timestamptz',
-    nullable: true,
-  })
-  issuedAt?: Date;
-
-  /**
-   * Clave de idempotencia de la EMISIÓN (CAN §6). Un reintento de `issue` con la
-   * misma clave devuelve la receta ya emitida (replay) sin re-emitir. Nula si se
-   * emitió sin clave. UNIQUE parcial (donde no es nula) en la migración.
-   */
-  @Property({
-    fieldName: 'issue_idempotency_key',
-    columnType: 'varchar',
-    nullable: true,
-  })
-  issueIdempotencyKey?: string;
-
-  // --- Firma de receta (REDESA D-05 / CAN-RX, aditivo, fail-safe) -------------
-  // La receta no traía columnas de firma; se añaden nullable. Una receta sin
-  // firmar tiene ambas en NULL. La emisión solo las exige cuando una política
-  // parametrizable vigente (clinical.prescription_signature_policies) lo requiere.
-
-  /** Instante de la firma de la receta (nulo = sin firmar). */
-  @Property({
-    fieldName: 'signed_at',
-    columnType: 'timestamptz',
-    nullable: true,
-  })
-  signedAt?: Date;
-
-  /** Usuario que firmó la receta. FK → iam.users */
-  @Property({ fieldName: 'signed_by_user_id', type: 'uuid', nullable: true })
-  signedByUserId?: string;
-
-  /** Motivo de INVALIDATED/REPLACED (obligatorio al invalidar/reemplazar). */
-  @Property({
-    fieldName: 'status_reason_text',
-    columnType: 'varchar',
-    nullable: true,
-  })
-  statusReasonText?: string;
-
-  /** Receta a la que ESTA sustituye (esta es la corrección). FK → medication_requests.id */
-  @Property({ fieldName: 'replaces_request_id', type: 'uuid', nullable: true })
-  replacesRequestId?: string;
-
-  /** Receta que sustituye a ESTA (esta quedó REPLACED). FK → medication_requests.id */
-  @Property({
-    fieldName: 'replaced_by_request_id',
-    type: 'uuid',
-    nullable: true,
-  })
-  replacedByRequestId?: string;
-
-  /** Receta de la que ESTA es renovación (copia). FK → medication_requests.id */
-  @Property({
-    fieldName: 'renewed_from_request_id',
-    type: 'uuid',
-    nullable: true,
-  })
-  renewedFromRequestId?: string;
-
   /**
    * Fecha y hora en que se creó el registro.
    */
@@ -225,4 +155,64 @@ export class MedicationRequests {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /** Instante de la firma de la receta (nulo = sin firmar). */
+  @Property({
+    fieldName: 'signed_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  signedAt?: Date;
+
+  /** Usuario que firmó la receta. FK → iam.users */
+  @Property({ fieldName: 'signed_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
+  signedByUserId?: string;
+
+  /** Instante en que la receta se selló (DRAFT → ISSUED); a partir de aquí es inmutable. */
+  @Property({
+    fieldName: 'issued_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  issuedAt?: Date;
+
+  /** Motivo de INVALIDATED/REPLACED (obligatorio al invalidar/reemplazar). */
+  @Property({
+    fieldName: 'status_reason_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  statusReasonText?: string;
+
+  /** Receta a la que ESTA sustituye (esta es la corrección). FK → medication_requests.id */
+  @Property({ fieldName: 'replaces_request_id', type: 'uuid', nullable: true }) // FK → clinical.medication_requests
+  replacesRequestId?: string;
+
+  /** Receta que sustituye a ESTA (esta quedó REPLACED). FK → medication_requests.id */
+  @Property({
+    fieldName: 'replaced_by_request_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.medication_requests
+  replacedByRequestId?: string;
+
+  /** Receta de la que ESTA es renovación (copia). FK → medication_requests.id */
+  @Property({
+    fieldName: 'renewed_from_request_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.medication_requests
+  renewedFromRequestId?: string;
+
+  /**
+   * Clave de idempotencia de la EMISIÓN (CAN §6). Un reintento de `issue` con la
+   * misma clave devuelve la receta ya emitida (replay) sin re-emitir. Nula si se
+   * emitió sin clave. UNIQUE parcial (donde no es nula) en la migración.
+   */
+  @Property({
+    fieldName: 'issue_idempotency_key',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  issueIdempotencyKey?: string;
 }

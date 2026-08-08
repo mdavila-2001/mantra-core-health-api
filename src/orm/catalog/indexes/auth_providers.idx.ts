@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `auth_providers`.
- * 57 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 58 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const authProvidersIndexes: readonly IndexTuple[] = [
@@ -26,6 +26,7 @@ export const authProvidersIndexes: readonly IndexTuple[] = [
   ['federated_login_attempts', 'ix_federated_login_attempts_failure_reason_concept_id', ['failure_reason_concept_id'], false, 'btree'],
   ['federated_login_attempts', 'ix_federated_login_attempts_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['federated_login_attempts', 'ix_federated_login_attempts_tenant_id_recorded_at', ['tenant_id', 'recorded_at desc'], false, 'btree'],
+  ['federated_login_attempts', 'brin_federated_login_attempts_recorded_at', ['recorded_at'], false, 'brin'],
   ['identity_providers', 'uq_identity_providers_code', ['code'], true, 'btree'],
   ['identity_providers', 'ix_identity_providers_tenant_id', ['tenant_id'], false, 'btree'],
   ['identity_providers', 'ix_identity_providers_protocol_concept_id', ['protocol_concept_id'], false, 'btree'],
