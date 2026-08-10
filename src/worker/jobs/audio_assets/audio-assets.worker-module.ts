@@ -7,18 +7,20 @@ import { AudioGenerationJob } from './audio-generation.job';
 import { DisabledTtsAdapter } from './disabled-tts.adapter';
 import { ElevenLabsHttpClient } from './elevenlabs/elevenlabs-http.client';
 import { ElevenLabsTtsAdapter } from './elevenlabs/elevenlabs-tts.adapter';
+import { FakeTtsAdapter } from './fake-tts.adapter';
 
 @Module({
   imports: [FileStorageModule],
   providers: [
-    QueueJob, AudioGenerationJob, DisabledTtsAdapter, ElevenLabsHttpClient, ElevenLabsTtsAdapter,
+    QueueJob, AudioGenerationJob, DisabledTtsAdapter, FakeTtsAdapter, ElevenLabsHttpClient, ElevenLabsTtsAdapter,
     {
       provide: TTS_PROVIDER,
-      inject: [DisabledTtsAdapter, ElevenLabsTtsAdapter],
-      useFactory: (disabled: DisabledTtsAdapter, elevenLabs: ElevenLabsTtsAdapter) => {
+      inject: [DisabledTtsAdapter, ElevenLabsTtsAdapter, FakeTtsAdapter],
+      useFactory: (disabled: DisabledTtsAdapter, elevenLabs: ElevenLabsTtsAdapter, fake: FakeTtsAdapter) => {
         switch (loadAudioEnv().provider) {
           case 'disabled': return disabled;
           case 'elevenlabs': return elevenLabs;
+          case 'fake': return fake;
           default: throw new Error('AUDIO_TTS_PROVIDER no soportado');
         }
       },

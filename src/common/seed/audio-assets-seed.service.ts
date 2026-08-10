@@ -23,6 +23,15 @@ interface AudioTemplateSeed {
 
 const AUDIO_TEMPLATES: readonly AudioTemplateSeed[] = [
   {
+    templateKey: 'onboarding.fallback.generic',
+    version: 1,
+    strategy: 'STATIC',
+    language: 'es-419',
+    textTemplate: 'Hola. Qué bueno tenerte aquí.',
+    voiceProfile: 'brand_es_latam_v1',
+    dynamicFieldsJson: [],
+  },
+  {
     templateKey: 'onboarding.welcome',
     version: 1,
     strategy: 'CACHED_DYNAMIC',
