@@ -73,11 +73,13 @@ export class AudioAssetsInternalController {
   }
 
   @Post(':assetId/prepare-generation')
+  @ApiOperation({ summary: 'Prepara un asset de audio para generación' })
   prepare(@Param('assetId', new ParseUUIDPipe()) assetId: string) {
     return this.generation.prepare(assetId);
   }
 
   @Post(':assetId/generated')
+  @ApiOperation({ summary: 'Registra un asset de audio generado' })
   async generated(
     @Param('assetId', new ParseUUIDPipe()) assetId: string,
     @Body() dto: GeneratedAudioAssetDto,
@@ -87,6 +89,7 @@ export class AudioAssetsInternalController {
   }
 
   @Post(':assetId/generation-failed')
+  @ApiOperation({ summary: 'Registra un fallo de generación de audio' })
   async failed(
     @Param('assetId', new ParseUUIDPipe()) assetId: string,
     @Body() dto: FailedAudioAssetDto,
