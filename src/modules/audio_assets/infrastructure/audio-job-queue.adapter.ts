@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../common';
 import { QueuesService } from '../../messaging/services/queues.service';
 import { loadAudioEnv } from '../audio.env';
-
-export const AUDIO_GENERATION_QUEUE = 'audio-generation';
-export const AUDIO_GENERATION_JOB_TYPE = 'audio.generate';
+import { AUDIO_GENERATION_JOB_TYPE, AUDIO_GENERATION_QUEUE } from '../domain/audio-queue.constants';
 
 @Injectable()
 export class AudioJobQueueAdapter {

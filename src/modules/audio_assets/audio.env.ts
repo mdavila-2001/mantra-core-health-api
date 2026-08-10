@@ -17,6 +17,7 @@ export const audioEnvSchema = Joi.object({
   AUDIO_TTS_SAFETY_RESERVE_UNITS: Joi.number().integer().min(0).default(1000),
   AUDIO_TTS_REQUEST_TIMEOUT_MS: Joi.number().integer().min(1000).max(120000).default(10000),
   AUDIO_TTS_MAX_RETRIES: Joi.number().integer().min(0).max(10).default(3),
+  AUDIO_TTS_RETRY_BASE_MS: Joi.number().integer().min(100).max(10000).default(500),
   AUDIO_TTS_PROD_LICENSE_CONFIRMED: Joi.boolean().default(false),
   AUDIO_TTS_DATA_KEY: Joi.string().allow('').default(() =>
     process.env.NODE_ENV === 'production' ? '' : 'dev-only-audio-data-key-change-before-production',
@@ -43,6 +44,7 @@ export interface AudioEnv {
   safetyReserveUnits: number;
   requestTimeoutMs: number;
   maxRetries: number;
+  retryBaseMs: number;
   prodLicenseConfirmed: boolean;
   dataKey: string;
   elevenLabsApiKey: string;
@@ -79,6 +81,7 @@ export function loadAudioEnv(): AudioEnv {
     safetyReserveUnits: Number(process.env.AUDIO_TTS_SAFETY_RESERVE_UNITS ?? 1000),
     requestTimeoutMs: Number(process.env.AUDIO_TTS_REQUEST_TIMEOUT_MS ?? 10000),
     maxRetries: Number(process.env.AUDIO_TTS_MAX_RETRIES ?? 3),
+    retryBaseMs: Number(process.env.AUDIO_TTS_RETRY_BASE_MS ?? 500),
     prodLicenseConfirmed: process.env.AUDIO_TTS_PROD_LICENSE_CONFIRMED === 'true',
     dataKey,
     elevenLabsApiKey: process.env.ELEVENLABS_API_KEY ?? '',
