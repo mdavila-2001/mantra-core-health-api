@@ -8,11 +8,12 @@ import { DisabledTtsAdapter } from './disabled-tts.adapter';
 import { ElevenLabsHttpClient } from './elevenlabs/elevenlabs-http.client';
 import { ElevenLabsTtsAdapter } from './elevenlabs/elevenlabs-tts.adapter';
 import { FakeTtsAdapter } from './fake-tts.adapter';
+import { AudioMetricsService } from '../../../modules/audio_assets/infrastructure/audio-metrics.service';
 
 @Module({
   imports: [FileStorageModule],
   providers: [
-    QueueJob, AudioGenerationJob, DisabledTtsAdapter, FakeTtsAdapter, ElevenLabsHttpClient, ElevenLabsTtsAdapter,
+    QueueJob, AudioGenerationJob, AudioMetricsService, DisabledTtsAdapter, FakeTtsAdapter, ElevenLabsHttpClient, ElevenLabsTtsAdapter,
     {
       provide: TTS_PROVIDER,
       inject: [DisabledTtsAdapter, ElevenLabsTtsAdapter, FakeTtsAdapter],

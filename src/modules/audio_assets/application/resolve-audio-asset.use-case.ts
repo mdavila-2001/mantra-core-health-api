@@ -8,6 +8,8 @@ import type { AudioAssetView, AudioGenerationMode, AudioSynthesisProfile } from 
 import type { AudioAssets, AudioTemplates } from '../entities';
 import { AudioValueCipherService } from '../infrastructure/audio-value-cipher.service';
 import { AudioJobQueueAdapter } from '../infrastructure/audio-job-queue.adapter';
+import { AudioMetricsService } from '../infrastructure/audio-metrics.service';
+import { TracingService } from '../../../observability/tracing.service';
 import { AudioAssetsRepository, type CreateAudioAssetInput } from '../repositories/audio-assets.repository';
 import { AudioBudgetPolicy } from './audio-budget.policy';
 
@@ -22,18 +24,22 @@ export class ResolveAudioAssetUseCase {
     private readonly budget: AudioBudgetPolicy,
     private readonly cipher: AudioValueCipherService,
     private readonly queue: AudioJobQueueAdapter,
+    private readonly metrics: AudioMetricsService,
+    private readonly tracing: TracingService,
   ) {}
 
   async execute(input: ResolveAudioAssetInput, actor: AuthenticatedUser, mode: AudioGenerationMode = 'RUNTIME'): Promise<ResolveAudioAssetResult> {
-    const template = await this.repository.findTemplate(input.templateKey, input.requestedVersion);
-    if (!template) throw new ResourceNotFoundException('Plantilla de audio no encontrada', { templateKey: input.templateKey });
-    try {
-      const rendered = renderAudioTemplate({ textTemplate: template.textTemplate, fields: this.repository.dynamicFields(template), variables: input.variables ?? {} });
-      return this.resolveRendered(template, rendered.renderedText, rendered.normalizedValues, actor, mode, false, input.correlationId);
-    } catch (error) {
-      if (!(error instanceof InvalidDynamicAudioValueError)) throw error;
-      return this.runtimeFallback(template, 'INVALID_DYNAMIC_VALUE');
-    }
+    return this.tracing.runInSpan('audio.resolve', { 'audio.template': input.templateKey, 'audio.mode': mode }, async () => {
+      const template = await this.repository.findTemplate(input.templateKey, input.requestedVersion);
+      if (!template) throw new ResourceNotFoundException('Plantilla de audio no encontrada', { templateKey: input.templateKey });
+      try {
+        const rendered = renderAudioTemplate({ textTemplate: template.textTemplate, fields: this.repository.dynamicFields(template), variables: input.variables ?? {} });
+        return this.resolveRendered(template, rendered.renderedText, rendered.normalizedValues, actor, mode, false, input.correlationId);
+      } catch (error) {
+        if (!(error instanceof InvalidDynamicAudioValueError)) throw error;
+        return this.runtimeFallback(template, 'INVALID_DYNAMIC_VALUE');
+      }
+    });
   }
 
   async resolveFallbackByTemplateKey(templateKey: string, actor: AuthenticatedUser, mode: AudioGenerationMode = 'PREGENERATE'): Promise<ResolveAudioAssetResult> {
@@ -50,7 +56,7 @@ export class ResolveAudioAssetUseCase {
     const assetKey = buildAudioAssetKey({ ...profile, templateId: template.templateKey, templateVersion: template.version, normalizedText, variant: fallback ? 'FALLBACK' : 'PRIMARY' });
     const existing = await this.repository.findAssetByKey(assetKey);
     if (existing?.generationStatus === 'READY') {
-      await this.repository.touchUsage(existing.id); await this.event(existing, 'CACHE_HIT', 'READY', correlationId);
+      await this.repository.touchUsage(existing.id); this.metrics.cacheHit('asset'); this.tracing.addEvent('audio.cache.hit'); await this.event(existing, 'CACHE_HIT', 'READY', correlationId);
       return { status: 'READY', asset: this.toView(existing) };
     }
 
@@ -60,7 +66,7 @@ export class ResolveAudioAssetUseCase {
       if (reusable && reusable.assetKey !== assetKey) {
         const asset = existing ?? await this.repository.createPendingOrGet(this.createInput(template, assetKey, renderedText, renderedTextHash, normalizedValues, profile, mode, fallback));
         const ready = await this.repository.markReusedReady(asset.id, reusable);
-        await this.event(ready, 'BINARY_REUSED', 'READY', correlationId);
+        this.metrics.cacheHit('binary-reuse'); this.tracing.addEvent('audio.binary.reused'); await this.event(ready, 'BINARY_REUSED', 'READY', correlationId);
         return { status: 'READY', asset: this.toView(ready) };
       }
     }
@@ -73,7 +79,7 @@ export class ResolveAudioAssetUseCase {
     const actorHash = mode === 'RUNTIME' ? sha256Text(actor.id) : undefined;
     const estimatedUnits = Array.from(renderedText).length;
     const decision = await this.budget.canGenerate(mode, estimatedUnits, actorHash);
-    if (!decision.allowed) return fallback ? { status: 'FALLBACK', reason: decision.reason } : this.runtimeFallback(template, decision.reason);
+    if (!decision.allowed) { this.metrics.budgetDenied(decision.reason); this.tracing.addEvent('audio.budget.denied', { reason: decision.reason }); return fallback ? { status: 'FALLBACK', reason: decision.reason } : this.runtimeFallback(template, decision.reason); }
 
     const asset = await this.repository.createPendingOrGet(this.createInput(template, assetKey, renderedText, renderedTextHash, normalizedValues, profile, mode, fallback));
     if (asset.generationStatus === 'READY') return { status: 'READY', asset: this.toView(asset) };
@@ -91,6 +97,7 @@ export class ResolveAudioAssetUseCase {
   }
 
   private async runtimeFallback(template: AudioTemplates, reason: string): Promise<ResolveAudioAssetResult> {
+    this.metrics.fallback(reason); this.tracing.addEvent('audio.fallback', { reason });
     return { status: 'FALLBACK', fallbackAsset: await this.readyFallbackView(template), reason };
   }
   private async readyFallbackView(template: AudioTemplates): Promise<AudioAssetView | undefined> {

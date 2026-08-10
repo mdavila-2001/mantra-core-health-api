@@ -46,6 +46,10 @@ export interface FileStorageAdapter {
   store(input: StoredFileInput): Promise<StoredFile>;
   /** Recupera el contenido previamente almacenado bajo esa URI. */
   retrieve(storageUri: string): Promise<Buffer>;
+  /** Comprueba existencia sin exponer detalles del proveedor. */
+  exists(storageUri: string): Promise<boolean>;
+  /** Elimina de forma idempotente un objeto cuya URI pertenece al adaptador. */
+  delete(storageUri: string): Promise<void>;
 }
 
 /** Token de inyección del adaptador activo. */

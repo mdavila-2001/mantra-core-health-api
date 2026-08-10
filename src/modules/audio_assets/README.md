@@ -35,3 +35,14 @@ No se incluye un audio fallback binario inventado: debe ser sintetizado con una 
 ## Extensión de proveedor
 
 Un proveedor nuevo implementa `TtsProviderPort` y se registra en el factory del worker. No debe modificar casos de uso, cache key ni controladores.
+
+
+## Resiliencia y mantenimiento
+
+- `POST /internal/audio-assets/verify` verifica objeto + SHA-256 y reporta fallbacks corruptos como bloqueantes.
+- `POST /internal/audio-assets/:assetId/deprecate` nunca permite deprecar un asset de estrategia `FALLBACK`.
+- `POST /internal/audio-assets/garbage-collect` sólo considera `DEPRECATED`/`FAILED_PERMANENT`, respeta retención y no borra el objeto físico mientras otra fila lo referencie.
+- `GET /internal/audio-assets/status` expone estado operativo sin secretos. ElevenLabs **no** participa del readiness de la API principal.
+- La reutilización entre plantillas compara texto renderizado + idioma + proveedor/modelo + perfil/voz/version + formato/sample rate/normalizer. El `asset_key` de cada plantilla sigue siendo independiente.
+- El cortacircuitos, bulkhead y rate gate viven sólo en el adaptador ElevenLabs. `AUDIO_TTS_HTTP_MAX_RETRIES=0` por defecto evita multiplicar reintentos HTTP con los reintentos durables de la cola; `AUDIO_TTS_MAX_RETRIES` pertenece al job durable.
+- Un rebuild real requiere subir versión de plantilla, voz, modelo, normalizador o formato. No se sobrescribe silenciosamente un asset READY con la misma identidad.

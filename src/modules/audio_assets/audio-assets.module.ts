@@ -13,6 +13,9 @@ import { AudioValueCipherService } from './infrastructure/audio-value-cipher.ser
 import { AudioJobQueueAdapter } from './infrastructure/audio-job-queue.adapter';
 import { AudioAssetsFacade } from './audio-assets.facade';
 import { AudioContentService } from './audio-content.service';
+import { AudioMaintenanceRepository } from './repositories/audio-maintenance.repository';
+import { AudioMaintenanceService } from './application/audio-maintenance.service';
+import { AudioMetricsService } from './infrastructure/audio-metrics.service';
 
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities)), MessagingModule],
@@ -20,7 +23,7 @@ import { AudioContentService } from './audio-content.service';
   providers: [
     AudioAssetsRepository, AudioBudgetPolicy, AudioValueCipherService, AudioJobQueueAdapter,
     ResolveAudioAssetUseCase, AudioGenerationUseCase, PregenerateAudioAssetsUseCase,
-    AudioAssetsFacade, AudioContentService,
+    AudioAssetsFacade, AudioContentService, AudioMaintenanceRepository, AudioMaintenanceService, AudioMetricsService,
   ],
   exports: [AudioAssetsFacade],
 })
