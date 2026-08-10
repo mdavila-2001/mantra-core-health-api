@@ -38,9 +38,8 @@ export interface StoredFile {
  * guardan la metadata y una `storageUri` opaca, y este adaptador es el único
  * que sabe qué significa esa URI.
  *
- * Se elige por `FILE_STORAGE_ADAPTER` en `FileStorageModule`. Hoy sólo existe
- * el adaptador local en disco; un `S3FileStorageAdapter` entraría aquí sin
- * tocar servicios ni controladores.
+ * Se elige por `FILE_STORAGE_ADAPTER` en `FileStorageModule`. Las implementaciones actuales son disco local y S3 compatible; los llamadores
+ * sólo persisten la URI opaca y nunca conocen el proveedor concreto.
  */
 export interface FileStorageAdapter {
   /** Persiste el contenido y describe lo que quedó almacenado. */
