@@ -4,6 +4,7 @@ import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
+import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 
 /** Ejecuta los seeds estructurales en un orden explícito y determinista. */
@@ -23,6 +24,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly terminology: TerminologySeedService,
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly messaging: MessagingSeedService,
+    private readonly audioAssets: AudioAssetsSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly logger: PinoLogger,
@@ -52,6 +54,10 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     await this.runDependent(
       'mensajería',
       this.messaging.run.bind(this.messaging),
+    );
+    await this.runDependent(
+      'audio assets',
+      this.audioAssets.run.bind(this.audioAssets),
     );
     await this.runDependent(
       'verificación de identidad',
