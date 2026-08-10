@@ -200,14 +200,12 @@ export class AudioAssetsRepository {
     usableLimit: number,
   ): Promise<boolean> {
     return this.em.transactional(async (tx) => {
-      const rows = await tx
-        .getConnection()
-        .execute<
-          Array<{
-            generation_status: string;
-            budget_reserved_units: number | null;
-          }>
-        >(`select generation_status, budget_reserved_units from audio_assets.audio_assets where id=? for update`, [assetId], 'all', tx.getTransactionContext());
+      const rows = await tx.getConnection().execute<
+        Array<{
+          generation_status: string;
+          budget_reserved_units: number | null;
+        }>
+      >(`select generation_status, budget_reserved_units from audio_assets.audio_assets where id=? for update`, [assetId], 'all', tx.getTransactionContext());
       const asset = rows[0];
       if (!asset) return false;
       if (asset.generation_status === 'READY') return true;
@@ -257,15 +255,13 @@ export class AudioAssetsRepository {
     consumedCredits?: number;
   }): Promise<AudioAssets> {
     await this.em.transactional(async (tx) => {
-      const rows = await tx
-        .getConnection()
-        .execute<
-          Array<{
-            generation_status: string;
-            budget_reserved_units: number | null;
-            provider: string;
-          }>
-        >(`select generation_status, budget_reserved_units, provider from audio_assets.audio_assets where id=? for update`, [input.assetId], 'all', tx.getTransactionContext());
+      const rows = await tx.getConnection().execute<
+        Array<{
+          generation_status: string;
+          budget_reserved_units: number | null;
+          provider: string;
+        }>
+      >(`select generation_status, budget_reserved_units, provider from audio_assets.audio_assets where id=? for update`, [input.assetId], 'all', tx.getTransactionContext());
       const asset = rows[0];
       if (!asset || asset.generation_status === 'READY') return;
       await tx

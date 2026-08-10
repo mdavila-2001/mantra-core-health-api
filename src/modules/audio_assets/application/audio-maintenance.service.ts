@@ -71,9 +71,7 @@ export class AudioMaintenanceService {
     return { deprecated };
   }
 
-  async garbageCollect(
-    limit: number,
-  ): Promise<{
+  async garbageCollect(limit: number): Promise<{
     candidates: number;
     rowsCleared: number;
     objectsDeleted: number;

@@ -41,9 +41,11 @@ export class AudioMaintenanceRepository {
   ): Promise<number> {
     const rows = await this.em
       .getConnection()
-      .execute<
-        Array<{ count: number }>
-      >(`select count(*)::int as count from audio_assets.audio_assets where storage_key=? and id<>?`, [storageKey, excludingId], 'all');
+      .execute<Array<{ count: number }>>(
+        `select count(*)::int as count from audio_assets.audio_assets where storage_key=? and id<>?`,
+        [storageKey, excludingId],
+        'all',
+      );
     return rows[0]?.count ?? 0;
   }
   async clearStorageReference(assetId: string): Promise<void> {
@@ -58,9 +60,11 @@ export class AudioMaintenanceRepository {
   async statusCounts(): Promise<Record<string, number>> {
     const rows = await this.em
       .getConnection()
-      .execute<
-        Array<{ generation_status: string; count: number }>
-      >(`select generation_status, count(*)::int as count from audio_assets.audio_assets group by generation_status`, [], 'all');
+      .execute<Array<{ generation_status: string; count: number }>>(
+        `select generation_status, count(*)::int as count from audio_assets.audio_assets group by generation_status`,
+        [],
+        'all',
+      );
     return Object.fromEntries(
       rows.map((row) => [row.generation_status, row.count]),
     );

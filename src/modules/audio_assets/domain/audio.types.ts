@@ -1,8 +1,5 @@
 export type AudioStrategy =
-  | 'STATIC'
-  | 'ENUMERATED'
-  | 'CACHED_DYNAMIC'
-  | 'FALLBACK';
+  'STATIC' | 'ENUMERATED' | 'CACHED_DYNAMIC' | 'FALLBACK';
 export type AudioAssetStatus =
   | 'PENDING'
   | 'GENERATING'

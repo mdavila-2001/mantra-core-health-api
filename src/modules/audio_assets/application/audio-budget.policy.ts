@@ -12,8 +12,7 @@ export type AudioBudgetDenialReason =
   | 'RUNTIME_GENERATION_DISABLED'
   | 'ACTOR_DAILY_LIMIT_REACHED';
 export type AudioBudgetDecision =
-  | { allowed: true }
-  | { allowed: false; reason: AudioBudgetDenialReason };
+  { allowed: true } | { allowed: false; reason: AudioBudgetDenialReason };
 
 @Injectable()
 export class AudioBudgetPolicy {
