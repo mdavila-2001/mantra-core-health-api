@@ -202,6 +202,15 @@ export class IamPatientSelfRegistrationService {
         roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
         actorUserId: user.id,
       });
+      // `PATIENT` es lo que exigen los endpoints de autoservicio del portal
+      // (reserva de turnos, entre otros). `USER` sigue siendo el rol base de
+      // toda cuenta; este se suma porque quien se auto-registra por esta vía es,
+      // por definición, el titular de su propio perfil de paciente.
+      this.rolesRepo.create(tx, {
+        userId: user.id,
+        roleConceptId: ROLE_CONCEPT_BY_CODE.PATIENT,
+        actorUserId: user.id,
+      });
 
       // 2) Persona + clasificación + perfil de paciente.
       const person = this.personsRepo.create(tx, {

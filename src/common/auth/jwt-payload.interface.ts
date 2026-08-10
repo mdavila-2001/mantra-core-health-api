@@ -40,6 +40,22 @@ export interface JwtPayload {
    * y elegir mal significa mirar los datos de otra institución.
    */
   tenantNames?: Record<string, string>;
+  /**
+   * Perfil de paciente del titular de la cuenta, si tiene uno.
+   *
+   * Existe porque el autoservicio del portal lo NECESITA para operar -
+   * `POST /scheduling/holds/:token/confirm` exige `patientProfileId`- y la única
+   * lectura que lo devolvía (`GET /profiles/patients/me/summary`) está detrás de
+   * `@RequiresVerifiedIdentity`. O sea: para reservar un turno había que estar
+   * verificado, cuando la verificación es un trámite posterior e independiente.
+   * El paciente quedaba encerrado en un círculo.
+   *
+   * **No es una credencial ni participa de ninguna decisión de autorización:**
+   * quién puede confirmar una cita lo siguen decidiendo `roles` y el tenant del
+   * request. Es el mismo dato que el registro ya devuelve en su respuesta, puesto
+   * donde sobreviva a un refresco de sesión.
+   */
+  pid?: string;
   /** Marca de tipo para distinguir access de otros usos futuros del secreto. */
   typ: 'access';
 }

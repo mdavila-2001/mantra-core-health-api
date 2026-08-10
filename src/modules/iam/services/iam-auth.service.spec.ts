@@ -68,6 +68,13 @@ function build() {
     record: mockFn(),
     countFailedLoginsSince: mockFn().mockResolvedValue(0),
   };
+  // Por defecto, una cuenta sin persona vinculada: el claim `pid` se omite y el
+  // token queda igual que antes de que existiera. Los casos que lo necesitan
+  // sobrescriben estos dos dobles.
+  const accountLinksRepo = {
+    findActiveByUser: mockFn().mockResolvedValue(null),
+  };
+  const patientProfilesRepo = { findById: mockFn().mockResolvedValue(null) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new IamAuthService(
@@ -80,6 +87,8 @@ function build() {
     rolesRepo as any,
     lockoutsRepo,
     eventsRepo,
+    accountLinksRepo as any,
+    patientProfilesRepo as any,
     logger as any,
     new TracingService(),
   );
@@ -94,6 +103,8 @@ function build() {
     rolesRepo,
     lockoutsRepo,
     eventsRepo,
+    accountLinksRepo,
+    patientProfilesRepo,
   };
 }
 
@@ -127,6 +138,64 @@ describe('IamAuthService', () => {
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_LOGIN }),
+      );
+    });
+
+    it('embeds the patient profile of the account holder as the `pid` claim', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      // `patient_profiles.profile_id` ES `persons.id`: el vínculo lleva la persona
+      // y el perfil se busca por ese mismo id.
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue({ profileId: 'per-1' });
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ patientProfileId: 'per-1' }),
+      );
+    });
+
+    it('omits the patient profile for an account that is not a patient', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      // Personal de salud o administración: hay persona vinculada, pero no perfil
+      // de paciente. El claim tiene que quedar afuera, no venir vacío.
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-2',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue(null);
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ patientProfileId: undefined }),
       );
     });
 

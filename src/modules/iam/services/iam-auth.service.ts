@@ -36,6 +36,10 @@ import { conceptIdsToRoleCodes } from './role-mapping';
 // se resuelven las membresías de tenant del sujeto para embeberlas como claim.
 import { TenantMemberships, Tenants } from '../../directory/entities';
 import { DIR } from '../../directory/directory.concepts';
+import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+} from '../../profiles/repositories';
 
 /**
  * Flujos de autenticación de sesión: login (UC-01-04), rotación de tokens con
@@ -65,6 +69,8 @@ export class IamAuthService {
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param lockoutsRepo - Valor de lockouts repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param accountLinksRepo - Vínculo cuenta-persona del titular.
+   * @param patientProfilesRepo - Perfil de paciente del titular.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -77,6 +83,8 @@ export class IamAuthService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly lockoutsRepo: AccountLockoutsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
   ) {
@@ -132,6 +140,35 @@ export class IamAuthService {
    * @param tenantIds - Tenants con membresía activa.
    * @returns Mapa `id -> nombre`.
    */
+  /**
+   * Perfil de paciente del titular de la cuenta, para el claim `pid`.
+   *
+   * Recorre la misma cadena que `ProfilesPatientsService.getOwnSummary` -vínculo
+   * activo cuenta-persona y de ahí el perfil, porque `patient_profiles.profile_id`
+   * ES `persons.id`-, así que las dos vías responden siempre lo mismo.
+   *
+   * Va en el token porque el autoservicio del portal necesita el dato para
+   * confirmar una cita, y la lectura de `profiles` exige identidad verificada:
+   * sin esto, reservar un turno dependía de un trámite que ocurre después.
+   * No es una credencial; ver `JwtPayload.pid`.
+   *
+   * Devuelve `undefined` -y el claim se omite- para toda cuenta que no sea la de
+   * un paciente: personal de salud, administradores, cuentas de sistema.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Titular de la sesión que se está abriendo.
+   * @returns El `patientProfileId`, o `undefined` si la cuenta no es de un paciente.
+   */
+  private async loadPatientProfileId(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string | undefined> {
+    const link = await this.accountLinksRepo.findActiveByUser(em, userId);
+    if (!link) return undefined;
+    const patient = await this.patientProfilesRepo.findById(em, link.personId);
+    return patient?.profileId;
+  }
+
   private async loadTenantNames(
     em: EntityManager,
     tenantIds: string[],
@@ -239,6 +276,7 @@ export class IamAuthService {
         {
           name: user.displayName,
           tenantNames: await this.loadTenantNames(tx, tenants),
+          patientProfileId: await this.loadPatientProfileId(tx, user.id),
         },
       );
 
@@ -354,6 +392,7 @@ export class IamAuthService {
         {
           name: holder?.displayName,
           tenantNames: await this.loadTenantNames(tx, tenants),
+          patientProfileId: await this.loadPatientProfileId(tx, session.userId),
         },
       );
       const { raw, hash } = this.tokenService.issueRefreshToken();
