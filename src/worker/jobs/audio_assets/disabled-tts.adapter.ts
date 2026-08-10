@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import type { TtsProviderPort, TtsSynthesisInput, TtsSynthesisResult } from '../../../modules/audio_assets/domain/tts-provider.port';
+import type {
+  TtsProviderPort,
+  TtsSynthesisInput,
+  TtsSynthesisResult,
+} from '../../../modules/audio_assets/domain/tts-provider.port';
 import { TtsProviderNotConfiguredError } from '../../../modules/audio_assets/domain/tts-provider.errors';
 
 @Injectable()

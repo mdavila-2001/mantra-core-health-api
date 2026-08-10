@@ -18,12 +18,24 @@ import { AudioMaintenanceService } from './application/audio-maintenance.service
 import { AudioMetricsService } from './infrastructure/audio-metrics.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), MessagingModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    MessagingModule,
+  ],
   controllers: [AudioAssetsController, AudioAssetsInternalController],
   providers: [
-    AudioAssetsRepository, AudioBudgetPolicy, AudioValueCipherService, AudioJobQueueAdapter,
-    ResolveAudioAssetUseCase, AudioGenerationUseCase, PregenerateAudioAssetsUseCase,
-    AudioAssetsFacade, AudioContentService, AudioMaintenanceRepository, AudioMaintenanceService, AudioMetricsService,
+    AudioAssetsRepository,
+    AudioBudgetPolicy,
+    AudioValueCipherService,
+    AudioJobQueueAdapter,
+    ResolveAudioAssetUseCase,
+    AudioGenerationUseCase,
+    PregenerateAudioAssetsUseCase,
+    AudioAssetsFacade,
+    AudioContentService,
+    AudioMaintenanceRepository,
+    AudioMaintenanceService,
+    AudioMetricsService,
   ],
   exports: [AudioAssetsFacade],
 })

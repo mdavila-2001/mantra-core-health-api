@@ -74,7 +74,7 @@ export async function bootstrapWorker(
     imports: [
       ConfigModule.forRoot({
         isGlobal: true,
-        validationSchema: (additionalEnvSchema
+        validationSchema: additionalEnvSchema
           ? authEnvSchema
               .concat(loggingEnvSchema)
               .concat(workerEnvSchema)
@@ -83,7 +83,7 @@ export async function bootstrapWorker(
           : authEnvSchema
               .concat(loggingEnvSchema)
               .concat(workerEnvSchema)
-              .concat(telemetryEnvSchema)),
+              .concat(telemetryEnvSchema),
       }),
       LoggingModule,
       ObservabilityModule,

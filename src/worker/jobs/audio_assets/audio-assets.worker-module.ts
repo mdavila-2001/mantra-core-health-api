@@ -13,16 +13,30 @@ import { AudioMetricsService } from '../../../modules/audio_assets/infrastructur
 @Module({
   imports: [FileStorageModule],
   providers: [
-    QueueJob, AudioGenerationJob, AudioMetricsService, DisabledTtsAdapter, FakeTtsAdapter, ElevenLabsHttpClient, ElevenLabsTtsAdapter,
+    QueueJob,
+    AudioGenerationJob,
+    AudioMetricsService,
+    DisabledTtsAdapter,
+    FakeTtsAdapter,
+    ElevenLabsHttpClient,
+    ElevenLabsTtsAdapter,
     {
       provide: TTS_PROVIDER,
       inject: [DisabledTtsAdapter, ElevenLabsTtsAdapter, FakeTtsAdapter],
-      useFactory: (disabled: DisabledTtsAdapter, elevenLabs: ElevenLabsTtsAdapter, fake: FakeTtsAdapter) => {
+      useFactory: (
+        disabled: DisabledTtsAdapter,
+        elevenLabs: ElevenLabsTtsAdapter,
+        fake: FakeTtsAdapter,
+      ) => {
         switch (loadAudioEnv().provider) {
-          case 'disabled': return disabled;
-          case 'elevenlabs': return elevenLabs;
-          case 'fake': return fake;
-          default: throw new Error('AUDIO_TTS_PROVIDER no soportado');
+          case 'disabled':
+            return disabled;
+          case 'elevenlabs':
+            return elevenLabs;
+          case 'fake':
+            return fake;
+          default:
+            throw new Error('AUDIO_TTS_PROVIDER no soportado');
         }
       },
     },

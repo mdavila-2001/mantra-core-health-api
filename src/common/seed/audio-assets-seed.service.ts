@@ -63,7 +63,10 @@ const AUDIO_TEMPLATES: readonly AudioTemplateSeed[] = [
 /** Boot seed idempotente del contrato mínimo de audio y sus colas durables. */
 @Injectable()
 export class AudioAssetsSeedService {
-  constructor(private readonly orm: MikroORM, private readonly logger: PinoLogger) {
+  constructor(
+    private readonly orm: MikroORM,
+    private readonly logger: PinoLogger,
+  ) {
     this.logger.setContext(AudioAssetsSeedService.name);
   }
 
@@ -71,11 +74,27 @@ export class AudioAssetsSeedService {
     const em = this.orm.em.fork();
     const now = new Date();
     let inserted = 0;
-    inserted += await this.seedQueue(em, AUDIO_DLQ_ID, AUDIO_DLQ_CODE, 'Audio generation dead letter', undefined, now);
-    inserted += await this.seedQueue(em, AUDIO_QUEUE_ID, AUDIO_GENERATION_QUEUE, 'Audio asset generation', AUDIO_DLQ_ID, now);
-    for (const template of AUDIO_TEMPLATES) inserted += await this.seedTemplate(em, template, now);
+    inserted += await this.seedQueue(
+      em,
+      AUDIO_DLQ_ID,
+      AUDIO_DLQ_CODE,
+      'Audio generation dead letter',
+      undefined,
+      now,
+    );
+    inserted += await this.seedQueue(
+      em,
+      AUDIO_QUEUE_ID,
+      AUDIO_GENERATION_QUEUE,
+      'Audio asset generation',
+      AUDIO_DLQ_ID,
+      now,
+    );
+    for (const template of AUDIO_TEMPLATES)
+      inserted += await this.seedTemplate(em, template, now);
     await em.flush();
-    if (inserted > 0) this.logger.info({ inserted }, 'Audio asset boot seed materialized');
+    if (inserted > 0)
+      this.logger.info({ inserted }, 'Audio asset boot seed materialized');
     return { inserted };
   }
 
@@ -89,18 +108,22 @@ export class AudioAssetsSeedService {
   ): Promise<number> {
     const existing = await em.findOne(MessageQueues, { id });
     if (existing) return 0;
-    em.create(MessageQueues, {
-      id,
-      code,
-      name,
-      stateConceptId: CONCEPTS.STATE_ACTIVE,
-      defaultPriority: 5,
-      defaultMaxAttempts: 4,
-      visibilityTimeoutS: 120,
-      deadLetterQueueId,
-      createdAt: now,
-      updatedAt: now,
-    }, { partial: true });
+    em.create(
+      MessageQueues,
+      {
+        id,
+        code,
+        name,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        defaultPriority: 5,
+        defaultMaxAttempts: 4,
+        visibilityTimeoutS: 120,
+        deadLetterQueueId,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
     return 1;
   }
 
@@ -114,14 +137,20 @@ export class AudioAssetsSeedService {
       version: seed.version,
     });
     if (existing) return 0;
-    em.create(AudioTemplates, {
-      id: deterministicId(`seed:audio-template:${seed.templateKey}:v${seed.version}`),
-      ...seed,
-      enabled: true,
-      metadata: { source: 'boot-seed' },
-      createdAt: now,
-      updatedAt: now,
-    }, { partial: true });
+    em.create(
+      AudioTemplates,
+      {
+        id: deterministicId(
+          `seed:audio-template:${seed.templateKey}:v${seed.version}`,
+        ),
+        ...seed,
+        enabled: true,
+        metadata: { source: 'boot-seed' },
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
     return 1;
   }
 }

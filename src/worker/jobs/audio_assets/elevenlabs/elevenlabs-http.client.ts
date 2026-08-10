@@ -9,9 +9,13 @@ import { mapElevenLabsError } from './elevenlabs.mapper';
 export class ElevenLabsHttpClient {
   private readonly config = loadElevenLabsConfig();
 
-  async synthesize(input: TtsSynthesisInput): Promise<{ audio: Buffer; requestId?: string }> {
+  async synthesize(
+    input: TtsSynthesisInput,
+  ): Promise<{ audio: Buffer; requestId?: string }> {
     if (!this.config.apiKey || !input.providerVoiceRef) {
-      throw new TtsProviderNotConfiguredError('ElevenLabs API key/voice id not configured');
+      throw new TtsProviderNotConfiguredError(
+        'ElevenLabs API key/voice id not configured',
+      );
     }
     try {
       const response = await axios.post<ArrayBuffer>(
@@ -32,7 +36,9 @@ export class ElevenLabsHttpClient {
           timeout: this.config.timeoutMs,
         },
       );
-      const requestId = stringHeader(response.headers['request-id'] ?? response.headers['x-request-id']);
+      const requestId = stringHeader(
+        response.headers['request-id'] ?? response.headers['x-request-id'],
+      );
       return { audio: Buffer.from(response.data), requestId };
     } catch (error) {
       throw mapElevenLabsError(error);

@@ -1,7 +1,10 @@
 export abstract class TtsProviderError extends Error {
   abstract readonly code: string;
   abstract readonly retryable: boolean;
-  constructor(message: string, readonly retryAfterMs?: number) {
+  constructor(
+    message: string,
+    readonly retryAfterMs?: number,
+  ) {
     super(message);
   }
 }

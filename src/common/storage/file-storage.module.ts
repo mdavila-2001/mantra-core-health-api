@@ -22,7 +22,9 @@ import { loadStorageEnv } from './storage.env';
           case 's3':
             return s3;
           default:
-            throw new Error('FILE_STORAGE_ADAPTER no tiene implementación cableada');
+            throw new Error(
+              'FILE_STORAGE_ADAPTER no tiene implementación cableada',
+            );
         }
       },
       inject: [LocalDiskFileStorageAdapter, S3FileStorageAdapter],

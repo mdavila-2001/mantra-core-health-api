@@ -1,14 +1,47 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsInt, IsObject, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class ResolveAudioAssetDto {
-  @ApiProperty({ maxLength: 160 }) @IsString() @MaxLength(160) templateKey!: string;
-  @ApiPropertyOptional({ type: 'object', additionalProperties: { type: 'string' } }) @IsOptional() @IsObject() variables?: Record<string, string>;
-  @ApiPropertyOptional({ minimum: 1 }) @IsOptional() @IsInt() @Min(1) requestedVersion?: number;
-  @ApiPropertyOptional({ maxLength: 128 }) @IsOptional() @IsString() @MaxLength(128) correlationId?: string;
+  @ApiProperty({ maxLength: 160 })
+  @IsString()
+  @MaxLength(160)
+  templateKey!: string;
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+  })
+  @IsOptional()
+  @IsObject()
+  variables?: Record<string, string>;
+  @ApiPropertyOptional({ minimum: 1 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  requestedVersion?: number;
+  @ApiPropertyOptional({ maxLength: 128 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  correlationId?: string;
 }
 export class PregenerateAudioAssetsDto {
-  @ApiPropertyOptional({ type: [String] }) @IsOptional() @IsArray() @IsString({ each: true }) @MaxLength(160, { each: true }) templateKeys?: string[];
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(160, { each: true })
+  templateKeys?: string[];
 }
 export class GeneratedAudioAssetDto {
   @ApiProperty() @IsString() @MaxLength(1024) storageUri!: string;
@@ -23,6 +56,13 @@ export class FailedAudioAssetDto {
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) durationMs?: number;
 }
 export class AudioMaintenanceDto {
-  @ApiPropertyOptional({ minimum: 1, maximum: 1000, default: 250 }) @IsOptional() @IsInt() @Min(1) @Max(1000) limit?: number;
+  @ApiPropertyOptional({ minimum: 1, maximum: 1000, default: 250 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  limit?: number;
 }
-export class AudioAssetIdDto { @ApiProperty({ format: 'uuid' }) @IsUUID() assetId!: string; }
+export class AudioAssetIdDto {
+  @ApiProperty({ format: 'uuid' }) @IsUUID() assetId!: string;
+}

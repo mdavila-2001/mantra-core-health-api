@@ -12,7 +12,12 @@ describe('renderAudioTemplate', () => {
   });
 
   it('falla si la plantilla contiene un placeholder no declarado', () => {
-    expect(() => renderAudioTemplate({ textTemplate: 'Hola {secret}.', fields: [], variables: {} }))
-      .toThrow('Placeholder no declarado');
+    expect(() =>
+      renderAudioTemplate({
+        textTemplate: 'Hola {secret}.',
+        fields: [],
+        variables: {},
+      }),
+    ).toThrow('Placeholder no declarado');
   });
 });
