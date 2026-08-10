@@ -14,7 +14,25 @@ export interface CreatePersonData {
    */
   vitalStatusConceptId?: string;
   /**
-   * Valor de display name mantenido por la instancia.
+   * Nombre de pila.
+   */
+  name?: string;
+  /**
+   * Segundo nombre.
+   */
+  middleName?: string;
+  /**
+   * Apellido paterno.
+   */
+  lastName?: string;
+  /**
+   * Apellido materno.
+   */
+  motherLastName?: string;
+  /**
+   * Nombre ya compuesto, para mostrar. Se deriva de las partes de arriba; quien
+   * cree una persona con partes debería pasarlo ya compuesto para que las dos
+   * formas no puedan divergir.
    */
   displayName?: string;
   /**
@@ -80,6 +98,10 @@ export class PersonsRepository {
       {
         personStatusConceptId: data.personStatusConceptId,
         vitalStatusConceptId: data.vitalStatusConceptId,
+        name: data.name,
+        middleName: data.middleName,
+        lastName: data.lastName,
+        motherLastName: data.motherLastName,
         displayName: data.displayName,
         birthDate: data.birthDate,
         administrativeGenderConceptId: data.administrativeGenderConceptId,

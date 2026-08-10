@@ -9,6 +9,7 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import {
   ADMIN_GENDER_CODES,
@@ -52,13 +53,64 @@ export class RegisterPatientDto {
   password!: string;
 
   /**
-   * Valor de display name mantenido por la instancia.
+   * Nombre de pila.
+   *
+   * Obligatorio salvo que se envíe `displayName`, que es la forma anterior de
+   * declarar el nombre y se sigue aceptando para no romper a quien ya la usa.
    */
-  @ApiProperty({ maxLength: 200 })
+  @ApiPropertyOptional({ maxLength: 100, example: 'Lucía' })
+  @ValidateIf((dto: RegisterPatientDto) => dto.displayName === undefined)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  name?: string;
+
+  /**
+   * Segundo nombre. Opcional: mucha gente no tiene.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Andrea' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
+
+  /**
+   * Apellido paterno. Mismo criterio que `name`.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Mamani' })
+  @ValidateIf((dto: RegisterPatientDto) => dto.displayName === undefined)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  lastName?: string;
+
+  /**
+   * Apellido materno. Opcional: no todas las jurisdicciones lo emiten.
+   */
+  @ApiPropertyOptional({ maxLength: 100, example: 'Quispe' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  motherLastName?: string;
+
+  /**
+   * Nombre ya compuesto, para mostrar.
+   *
+   * Dejó de ser la forma de declarar el nombre —ahora se envían sus partes— pero
+   * sigue siendo opcional en vez de prohibido: quitarlo de golpe rompería a todo
+   * cliente que ya integró contra este endpoint. Si viene, manda tal cual; si no,
+   * se compone con las partes.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Forma anterior de declarar el nombre. Preferí name/lastName.',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(200)
-  displayName!: string;
+  displayName?: string;
 
   /**
    * Correo opcional. Si viene, se emite un token de verificación.

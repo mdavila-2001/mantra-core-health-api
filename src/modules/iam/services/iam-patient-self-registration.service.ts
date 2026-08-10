@@ -182,8 +182,13 @@ export class IamPatientSelfRegistrationService {
       }
 
       // 1) Cuenta ACTIVA con su contraseña definitiva.
+      // El nombre para mostrar sale de las partes; si el cliente mandó la forma
+      // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
+      // -la cuenta y la persona- para que no puedan divergir.
+      const displayName = composeDisplayName(dto);
+
       const user = this.usersRepo.create(tx, {
-        displayName: dto.displayName,
+        displayName,
         statusConceptId: CONCEPTS.USER_ACTIVE,
         mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
         timeZone: dto.timeZone,
@@ -216,7 +221,11 @@ export class IamPatientSelfRegistrationService {
       const person = this.personsRepo.create(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
-        displayName: dto.displayName,
+        name: dto.name,
+        middleName: dto.middleName,
+        lastName: dto.lastName,
+        motherLastName: dto.motherLastName,
+        displayName,
         birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
         // El concepto explícito gana sobre el código: es el escape hatch para
         // clientes que ya manejan el catálogo de terminología.
@@ -484,4 +493,29 @@ export class IamPatientSelfRegistrationService {
       return false;
     }
   }
+}
+
+/**
+ * El nombre para mostrar, a partir de las partes que se declararon.
+ *
+ * `displayName` explícito gana: es la forma anterior de declarar el nombre y
+ * sigue aceptándose, así que quien la use tiene que ver exactamente lo que
+ * mandó. Sin él se componen las partes en el orden en que se dicen —nombre,
+ * segundo nombre, apellido paterno, apellido materno— salteando las ausentes,
+ * que es lo habitual: mucha gente no tiene segundo nombre.
+ *
+ * Nunca devuelve una cadena vacía: el DTO exige `name` y `lastName` cuando no
+ * viene `displayName`, así que siempre hay al menos dos partes.
+ *
+ * @param dto - Cuerpo del alta.
+ * @returns El nombre para mostrar de la cuenta y de la persona.
+ */
+function composeDisplayName(dto: RegisterPatientDto): string {
+  if (dto.displayName !== undefined) {
+    return dto.displayName;
+  }
+  return [dto.name, dto.middleName, dto.lastName, dto.motherLastName]
+    .map((parte) => parte?.trim())
+    .filter((parte): parte is string => parte !== undefined && parte !== '')
+    .join(' ');
 }

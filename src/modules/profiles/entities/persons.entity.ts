@@ -19,6 +19,37 @@ export class Persons {
   personStatusConceptId!: string;
 
   /**
+   * Nombre de pila.
+   *
+   * Las cuatro partes del nombre son opcionales: un recién nacido, una urgencia
+   * sin identificar o un registro importado pueden llegar sin ninguna.
+   */
+  @Property({ columnType: 'varchar', nullable: true })
+  name?: string;
+
+  /**
+   * Segundo nombre.
+   */
+  @Property({ fieldName: 'middle_name', columnType: 'varchar', nullable: true })
+  middleName?: string;
+
+  /**
+   * Apellido paterno.
+   */
+  @Property({ fieldName: 'last_name', columnType: 'varchar', nullable: true })
+  lastName?: string;
+
+  /**
+   * Apellido materno.
+   */
+  @Property({
+    fieldName: 'mother_last_name',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  motherLastName?: string;
+
+  /**
    * Valor de display name mantenido por la instancia.
    */
   @Property({
