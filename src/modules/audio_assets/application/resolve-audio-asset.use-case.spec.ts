@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import type { AuthenticatedUser } from '../../../common';
 import { ResolveAudioAssetUseCase } from './resolve-audio-asset.use-case';
 
