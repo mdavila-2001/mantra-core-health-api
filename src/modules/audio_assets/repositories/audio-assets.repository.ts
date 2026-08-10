@@ -144,12 +144,14 @@ export class AudioAssetsRepository {
     await this.em.nativeUpdate(AudioAssets, { id: assetId }, { generationStatus: 'FALLBACK_ONLY', failureCode: reason, updatedAt: new Date() });
   }
   async appendEvent(input: GenerationEventInput): Promise<void> {
-    await this.em.persistAndFlush(this.em.create(AudioGenerationEvents, {
+    const event = this.em.create(AudioGenerationEvents, {
       id: randomUUID(), assetKey: input.assetKey, eventType: input.eventType, provider: input.provider,
       templateKey: input.templateKey, outcome: input.outcome, errorCode: input.errorCode,
       durationMs: input.durationMs, estimatedCostUnits: input.estimatedCostUnits,
       correlationId: input.correlationId, metadata: input.metadata ?? {}, createdAt: new Date(),
-    }));
+    });
+    this.em.persist(event);
+    await this.em.flush();
   }
   dynamicFields(template: AudioTemplates): AudioDynamicField[] {
     return Array.isArray(template.dynamicFieldsJson) ? template.dynamicFieldsJson as AudioDynamicField[] : [];

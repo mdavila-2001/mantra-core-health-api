@@ -24,7 +24,7 @@ export class ElevenLabsTtsAdapter implements TtsProviderPort {
       minimumThroughput: failures, failureRateThreshold: 1, openDurationMs: this.env.circuitOpenMs,
       maxOpenDurationMs: this.env.circuitOpenMs * 8,
       isFailure: (error) => error instanceof TtsProviderError && error.retryable,
-      onStateChange: (change) => this.logger.warn({ operation: 'tts.elevenlabs.circuit', ...change }, 'ElevenLabs circuit state changed') });
+      onStateChange: (change) => this.logger.warn({ ...change, component: 'tts.elevenlabs.circuit' }, 'ElevenLabs circuit state changed') });
   }
 
   async synthesize(input: TtsSynthesisInput): Promise<TtsSynthesisResult> {
