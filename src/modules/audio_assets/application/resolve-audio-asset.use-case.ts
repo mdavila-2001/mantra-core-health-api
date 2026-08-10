@@ -14,32 +14,29 @@ import { renderAudioTemplate } from '../domain/template-renderer';
 import type {
   AudioAssetView,
   AudioGenerationMode,
-  AudioSynthesisProfile,
 } from '../domain/audio.types';
 import type { AudioAssets, AudioTemplates } from '../entities';
 import { AudioValueCipherService } from '../infrastructure/audio-value-cipher.service';
 import { AudioJobQueueAdapter } from '../infrastructure/audio-job-queue.adapter';
 import { AudioMetricsService } from '../infrastructure/audio-metrics.service';
 import { TracingService } from '../../../observability/tracing.service';
-import {
-  AudioAssetsRepository,
-  type CreateAudioAssetInput,
-} from '../repositories/audio-assets.repository';
+import { AudioAssetsRepository } from '../repositories/audio-assets.repository';
 import { AudioBudgetPolicy } from './audio-budget.policy';
-
-export interface ResolveAudioAssetInput {
-  templateKey: string;
-  variables?: Record<string, string>;
-  requestedVersion?: number;
-  correlationId?: string;
-}
-export interface ResolveAudioAssetResult {
-  status: 'READY' | 'QUEUED' | 'FALLBACK';
-  asset?: AudioAssetView;
-  fallbackAsset?: AudioAssetView;
-  jobId?: string;
-  reason?: string;
-}
+import { recordAudioResolutionEvent } from './audio-resolution-events';
+import {
+  buildAudioSynthesisProfile,
+  buildCreateAudioAssetInput,
+  findReadyFallbackView,
+  toAudioAssetView,
+} from './audio-asset-resolution.mapper';
+import type {
+  ResolveAudioAssetInput,
+  ResolveAudioAssetResult,
+} from './resolve-audio-asset.types';
+export type {
+  ResolveAudioAssetInput,
+  ResolveAudioAssetResult,
+} from './resolve-audio-asset.types';
 
 @Injectable()
 export class ResolveAudioAssetUseCase {
@@ -133,7 +130,7 @@ export class ResolveAudioAssetUseCase {
     fallback: boolean,
     correlationId?: string,
   ): Promise<ResolveAudioAssetResult> {
-    const profile = this.profile(template);
+    const profile = buildAudioSynthesisProfile(template, this.env);
     const normalizedText = normalizeRenderedText(renderedText);
     const assetKey = buildAudioAssetKey({
       ...profile,
@@ -147,8 +144,14 @@ export class ResolveAudioAssetUseCase {
       await this.repository.touchUsage(existing.id);
       this.metrics.cacheHit('asset');
       this.tracing.addEvent('audio.cache.hit');
-      await this.event(existing, 'CACHE_HIT', 'READY', correlationId);
-      return { status: 'READY', asset: this.toView(existing) };
+      await recordAudioResolutionEvent(
+        this.repository,
+        existing,
+        'CACHE_HIT',
+        'READY',
+        correlationId,
+      );
+      return { status: 'READY', asset: toAudioAssetView(existing) };
     }
 
     const renderedTextHash = sha256Text(renderedText);
@@ -161,22 +164,28 @@ export class ResolveAudioAssetUseCase {
         const asset =
           existing ??
           (await this.repository.createPendingOrGet(
-            this.createInput(
+            buildCreateAudioAssetInput({
               template,
               assetKey,
-              renderedText,
               renderedTextHash,
               normalizedValues,
               profile,
               mode,
               fallback,
-            ),
+              encryptedRenderedText: this.cipher.encrypt(renderedText),
+            }),
           ));
         const ready = await this.repository.markReusedReady(asset.id, reusable);
         this.metrics.cacheHit('binary-reuse');
         this.tracing.addEvent('audio.binary.reused');
-        await this.event(ready, 'BINARY_REUSED', 'READY', correlationId);
-        return { status: 'READY', asset: this.toView(ready) };
+        await recordAudioResolutionEvent(
+          this.repository,
+          ready,
+          'BINARY_REUSED',
+          'READY',
+          correlationId,
+        );
+        return { status: 'READY', asset: toAudioAssetView(ready) };
       }
     }
 
@@ -189,11 +198,11 @@ export class ResolveAudioAssetUseCase {
       const jobId = await this.queue.enqueue(existing.id, assetKey, actor);
       return {
         status: 'QUEUED',
-        asset: this.toView(existing),
+        asset: toAudioAssetView(existing),
         jobId,
         fallbackAsset: fallback
           ? undefined
-          : await this.readyFallbackView(template),
+          : await findReadyFallbackView(template, this.repository, this.env),
       };
     }
 
@@ -213,21 +222,22 @@ export class ResolveAudioAssetUseCase {
     }
 
     const asset = await this.repository.createPendingOrGet(
-      this.createInput(
+      buildCreateAudioAssetInput({
         template,
         assetKey,
-        renderedText,
         renderedTextHash,
         normalizedValues,
         profile,
         mode,
         fallback,
-      ),
+        encryptedRenderedText: this.cipher.encrypt(renderedText),
+      }),
     );
     if (asset.generationStatus === 'READY')
-      return { status: 'READY', asset: this.toView(asset) };
+      return { status: 'READY', asset: toAudioAssetView(asset) };
     const jobId = await this.queue.enqueue(asset.id, asset.assetKey, actor);
-    await this.event(
+    await recordAudioResolutionEvent(
+      this.repository,
       asset,
       'GENERATION_QUEUED',
       'QUEUED',
@@ -237,43 +247,11 @@ export class ResolveAudioAssetUseCase {
     );
     return {
       status: 'QUEUED',
-      asset: this.toView(asset),
+      asset: toAudioAssetView(asset),
       jobId,
       fallbackAsset: fallback
         ? undefined
-        : await this.readyFallbackView(template),
-    };
-  }
-
-  private createInput(
-    template: AudioTemplates,
-    assetKey: string,
-    renderedText: string,
-    renderedTextHash: string,
-    normalizedValues: Record<string, string>,
-    profile: AudioSynthesisProfile,
-    mode: AudioGenerationMode,
-    fallback: boolean,
-  ): CreateAudioAssetInput {
-    const normalizedValueHash = Object.keys(normalizedValues).length
-      ? sha256Text(
-          JSON.stringify(
-            Object.keys(normalizedValues)
-              .sort()
-              .map((key) => [key, normalizedValues[key]]),
-          ),
-        )
-      : undefined;
-    return {
-      ...profile,
-      assetKey,
-      templateKey: template.templateKey,
-      templateVersion: template.version,
-      strategy: fallback ? 'FALLBACK' : template.strategy,
-      normalizedValueHash,
-      encryptedRenderedText: this.cipher.encrypt(renderedText),
-      renderedTextHash,
-      generationMode: mode,
+        : await findReadyFallbackView(template, this.repository, this.env),
     };
   }
 
@@ -285,98 +263,12 @@ export class ResolveAudioAssetUseCase {
     this.tracing.addEvent('audio.fallback', { reason });
     return {
       status: 'FALLBACK',
-      fallbackAsset: await this.readyFallbackView(template),
+      fallbackAsset: await findReadyFallbackView(
+        template,
+        this.repository,
+        this.env,
+      ),
       reason,
     };
-  }
-  private async readyFallbackView(
-    template: AudioTemplates,
-  ): Promise<AudioAssetView | undefined> {
-    const inline = template.fallbackText
-      ? await this.readyAssetForText(template, template.fallbackText, true)
-      : null;
-    if (inline) return this.toView(inline);
-    if (
-      !this.env.globalFallbackTemplate ||
-      this.env.globalFallbackTemplate === template.templateKey
-    )
-      return undefined;
-    const global = await this.repository.findTemplate(
-      this.env.globalFallbackTemplate,
-    );
-    if (!global || this.repository.dynamicFields(global).length > 0)
-      return undefined;
-    const asset = await this.readyAssetForText(
-      global,
-      global.textTemplate,
-      false,
-    );
-    return asset ? this.toView(asset) : undefined;
-  }
-  private async readyAssetForText(
-    template: AudioTemplates,
-    text: string,
-    fallback: boolean,
-  ): Promise<AudioAssets | null> {
-    const profile = this.profile(template);
-    const key = buildAudioAssetKey({
-      ...profile,
-      templateId: template.templateKey,
-      templateVersion: template.version,
-      normalizedText: normalizeRenderedText(text),
-      variant: fallback ? 'FALLBACK' : 'PRIMARY',
-    });
-    const asset = await this.repository.findAssetByKey(key);
-    return asset?.generationStatus === 'READY' ? asset : null;
-  }
-
-  private profile(template: AudioTemplates): AudioSynthesisProfile {
-    if (template.voiceProfile !== this.env.voiceProfile)
-      throw new Error(`Voice profile no configurado: ${template.voiceProfile}`);
-    return {
-      provider: this.env.provider,
-      providerModel: this.env.providerModel,
-      language: template.language || this.env.defaultLanguage,
-      voiceProfile: template.voiceProfile,
-      providerVoiceRef: this.env.providerVoiceRef,
-      voiceVersion: this.env.voiceVersion,
-      audioFormat: this.env.outputFormat,
-      sampleRate: this.env.sampleRate,
-      normalizerVersion: 1,
-    };
-  }
-  private toView(asset: AudioAssets): AudioAssetView {
-    return {
-      id: asset.id,
-      templateKey: asset.templateKey,
-      templateVersion: asset.templateVersion,
-      status: asset.generationStatus as AudioAssetView['status'],
-      contentUrl:
-        asset.generationStatus === 'READY'
-          ? `/audio-assets/${asset.id}/content`
-          : undefined,
-      checksumSha256: asset.checksumSha256,
-      bytes: asset.bytes,
-      durationMs: asset.durationMs,
-    };
-  }
-  private async event(
-    asset: AudioAssets,
-    eventType: string,
-    outcome: string,
-    correlationId?: string,
-    estimatedCostUnits?: number,
-    actorHash?: string,
-  ): Promise<void> {
-    await this.repository.appendEvent({
-      assetKey: asset.assetKey,
-      eventType,
-      provider: asset.provider,
-      templateKey: asset.templateKey,
-      outcome,
-      correlationId,
-      estimatedCostUnits,
-      metadata: actorHash ? { actorHash } : {},
-    });
   }
 }

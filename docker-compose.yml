@@ -135,7 +135,7 @@ x-app-env: &app-env
   # La verificación de fidelidad solo compara y registra advertencias; nunca
   # lanza ni aborta el arranque (`SchemaFidelityService.verifyAndReport`).
   ORM_VERIFY_FIDELITY: ${ORM_VERIFY_FIDELITY:-true}
-  # Los 20 workers llaman la API por el nombre del servicio, no localhost.
+  # Los 21 workers llaman la API por el nombre del servicio, no localhost.
   WORKER_API_BASE_URL: http://api:3000
   WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
   # Sonda HTTP de cada worker (`/health`, `/readiness`, `/status`). El mismo
@@ -212,7 +212,7 @@ x-worker-resources: &worker-resources
     cpus: "0.5"
     memory: 512M
 
-# Healthcheck de los 20 workers. Hasta ahora no tenían ninguno, y eso dejaba a
+# Healthcheck de los 21 workers. Hasta ahora no tenían ninguno, y eso dejaba a
 # Docker con una sola señal: si el PID existe. Un worker con el tick colgado
 # pasa esa comprobación indefinidamente —`docker ps` dice `Up 6 hours` con cero
 # trabajo hecho—, que es exactamente el modo de fallo "worker zombi".
@@ -439,9 +439,9 @@ services:
       - mantra-redesa-network
 
   # -----------------------------------------------------------------------
-  # API + workers. Misma imagen para los 20 (build una sola vez; el
+  # API + workers. Misma imagen para los 21 workers (build una sola vez; el
   # `command` es lo único que cambia). Cada worker es SU PROPIO proceso/
-  # contenedor — no un único monolito con los 20 dominios adentro — para que
+  # contenedor — no un único monolito con los 21 dominios adentro — para que
   # un fallo o un pico de carga en uno no toque a los demás, y cada uno
   # escale por separado. Ver `PLAN-CORRECCION-WORKERS-2026-07-28.md`.
   # -----------------------------------------------------------------------
