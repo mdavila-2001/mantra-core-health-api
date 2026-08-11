@@ -26,6 +26,7 @@ import {
 } from './services';
 import {
   CareEpisodesRepository,
+  AppointmentsRepository,
   EncountersRepository,
   ObservationsRepository,
   ServiceRequestsRepository,
@@ -58,6 +59,7 @@ import {
   providers: [
     // Repositorios
     CareEpisodesRepository,
+    AppointmentsRepository,
     EncountersRepository,
     ObservationsRepository,
     ServiceRequestsRepository,

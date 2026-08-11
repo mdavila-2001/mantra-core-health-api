@@ -15,6 +15,13 @@ import {
   SchedulingCatalogRepository,
 } from '../repositories';
 import { HistoryRepository } from '../../audit/repositories';
+// Escritura cross-dominio acotada a la confirmación, como la lectura de
+// `directory` que hace `iam` al emitir un token: al confirmar una reserva nace
+// su cita clínica, porque son la misma cosa vista desde dos módulos. Ver
+// `crearCitaClinica`.
+import type { Appointments } from '../../clinical/entities';
+import { AppointmentsRepository } from '../../clinical/repositories';
+import { CLIN } from '../../clinical/clinical.concepts';
 import type {
   AppointmentBookings,
   CancellationPolicySnapshot,
@@ -59,6 +66,22 @@ const DEFAULT_WORKER_BATCH = 100;
 const DEFAULT_CANCELLATION_WINDOW_MINUTES = 24 * 60;
 
 /**
+ * Cómo nombra un recurso a la tabla de perfiles profesionales.
+ *
+ * **Son dos porque el sistema dice las dos cosas.** El DTO de agenda ejemplifica
+ * `health_practitioner_profiles` —el nombre real de la tabla— y los recursos
+ * sembrados traen `practitioner_profiles`. Aceptar sólo uno dejaría la cita
+ * clínica sin profesional contra la mitad de los datos, y en silencio.
+ *
+ * El fallo es benigno: si ninguno coincide, la cita queda sin profesional, que
+ * es lo correcto para una sala o un equipo.
+ */
+const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+  'practitioner_profiles',
+  'health_practitioner_profiles',
+];
+
+/**
  * Flujo de reserva: holds anti-double-booking, confirmación, reprogramación,
  * cancelación, check-in y el worker de expiración (UC-41-05 … 10).
  */
@@ -70,6 +93,8 @@ export class SchedulingBookingsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param bookingsRepo - Valor de bookings repo requerido por la operación.
    * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param historyRepo - Valor de history repo requerido por la operación.
+   * @param appointmentsRepo - Citas clínicas que respaldan las reservas.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -77,6 +102,7 @@ export class SchedulingBookingsService {
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly historyRepo: HistoryRepository,
+    private readonly appointmentsRepo: AppointmentsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
@@ -241,9 +267,30 @@ export class SchedulingBookingsService {
         capturedAt: new Date().toISOString(),
       };
 
+      // La cita clínica que respalda la reserva. Se crea **antes** para poder
+      // enlazarla: `appointment_id` es una columna uuid suelta, así que el orden
+      // lo garantiza esto y no la unidad de trabajo.
+      const appointment = this.crearCitaClinica(tx, {
+        tenantId: dto.tenantId,
+        patientProfileId: dto.patientProfileId,
+        resourceRefType: resource?.resourceRefType,
+        resourceRefId: resource?.resourceRefId,
+        startAt: slot.startAt,
+        endAt: slot.endAt,
+        reasonText: dto.reasonText,
+        actorUserId: actor.id,
+      });
+      // **Persistir la cita antes de crear la reserva.** `appointment_id` es una
+      // columna uuid plana con clave foránea, no una relación gestionada: sin
+      // este `flush` la cita vive sólo en el mapa de identidad y el INSERT de la
+      // reserva viola `fk_appointment_bookings_appointment_id`. Lo destapó la
+      // verificación contra la base real; ninguna prueba con dobles lo veía.
+      await tx.flush();
+
       const booking = this.bookingsRepo.createBooking(tx, {
         tenantId: dto.tenantId,
         patientProfileId: dto.patientProfileId,
+        appointmentId: appointment.id,
         bookableSlotId: hold.bookableSlotId,
         resourceId: slot.resourceId,
         serviceConceptId: slot.serviceConceptId,
@@ -767,6 +814,72 @@ export class SchedulingBookingsService {
       reasonText: booking.reasonText,
       createdAt: booking.createdAt,
     };
+  }
+
+  /**
+   * Crea la cita clínica que respalda una reserva confirmada.
+   *
+   * ## Por qué existe
+   *
+   * `clinical.appointments` era una tabla **que nadie escribía**: 0 filas, y
+   * ninguna reserva con `appointment_id`. Eso dejaba rota una cadena entera —el
+   * check-in de un encuentro declara `appointmentId` hacia esta tabla— así que
+   * un encuentro nunca podía decir de qué turno venía. La columna existía, el
+   * contrato la pedía, y no había forma de llenarla.
+   *
+   * ## Por qué al confirmar, y no en el check-in
+   *
+   * Porque una cita **es** el turno visto desde lo clínico, no el registro de
+   * que alguien llegó — eso es el encuentro, que es otra tabla. Crearla en el
+   * check-in la haría nacer *después* del encuentro que la referencia, que es el
+   * vínculo al revés. El costo aceptado es que una reserva que nadie atienda
+   * deja su cita en `APPT_BOOKED`, que es exactamente lo que pasó: un turno
+   * agendado al que no se presentaron.
+   *
+   * ## El profesional sale del recurso, si el recurso es de uno
+   *
+   * Un recurso puede ser una sala o un equipo. Sólo se copia el profesional
+   * cuando el recurso declara apuntar a un perfil profesional; si no, la cita
+   * queda sin él en vez de con el uuid de una sala, que sería una clave foránea
+   * rota y un dato falso.
+   *
+   * @param tx - Transacción de la confirmación; la cita nace o no nace con ella.
+   * @param datos - Lo que la reserva sabe del turno.
+   * @returns La cita creada, para enlazarla desde la reserva.
+   */
+  private crearCitaClinica(
+    tx: EntityManager,
+    datos: {
+      tenantId: string;
+      patientProfileId: string;
+      resourceRefType?: string;
+      resourceRefId?: string;
+      startAt: Date;
+      endAt?: Date;
+      reasonText?: string;
+      actorUserId?: string;
+    },
+  ): Appointments {
+    const esDeProfesional =
+      datos.resourceRefType !== undefined &&
+      TABLAS_DE_PERFIL_PROFESIONAL.includes(datos.resourceRefType);
+
+    return this.appointmentsRepo.create(tx, {
+      patientProfileId: datos.patientProfileId,
+      tenantId: datos.tenantId,
+      ...(esDeProfesional && datos.resourceRefId !== undefined
+        ? { practitionerProfileId: datos.resourceRefId }
+        : {}),
+      statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      startAt: datos.startAt,
+      ...(datos.endAt === undefined ? {} : { endAt: datos.endAt }),
+      ...(datos.reasonText === undefined
+        ? {}
+        : { reasonText: datos.reasonText }),
+      ...(datos.actorUserId === undefined
+        ? {}
+        : { actorUserId: datos.actorUserId }),
+    });
   }
 
   /** Política efectiva del slot, heredada de su plantilla. */

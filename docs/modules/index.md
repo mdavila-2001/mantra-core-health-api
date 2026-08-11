@@ -15,7 +15,7 @@
 | [`clinical_ext`](clinical_ext.md) | 7 | 7 | 11 | 12 | 8 |
 | [`community`](community.md) | 7 | 8 | 15 | 38 | 16 |
 | [`insurance`](insurance.md) | 7 | 7 | 6 | 29 | 8 |
-| [`clinical`](clinical.md) | 6 | 12 | 12 | 22 | 12 |
+| [`clinical`](clinical.md) | 6 | 12 | 13 | 22 | 12 |
 | [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
 | [`chart`](chart.md) | 5 | 5 | 4 | 11 | 5 |
 | [`common`](common.md) | 5 | 5 | 7 | 7 | 4 |
@@ -67,4 +67,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **196** | **270** | **354** | **1186** | **381** |
+| **Total** | **196** | **270** | **355** | **1186** | **381** |

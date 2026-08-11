@@ -33,6 +33,8 @@ import {
   MergePatientsDto,
   ReverseMergeDto,
   MergeEventResponseDto,
+  ListMergeEventsQueryDto,
+  ListMergeEventsResponseDto,
   AddRelatedPersonDto,
   RelatedPersonResponseDto,
   GrantPortalProxyDto,
@@ -118,6 +120,25 @@ export class ProfilesPatientsController {
       cursor,
       limit: limit ?? 50,
     });
+  }
+
+  /**
+   * UC-05-09·L. Va **antes** que `patients/:profileId` en el archivo por lo de
+   * siempre con las rutas de Nest: se resuelven por orden de declaración, y
+   * `merge-events` encajaría en el parámetro y devolvería un 400 por uuid mal
+   * formado en vez de la lista.
+   */
+  @Get('patients/merge-events')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Listar eventos de fusión de pacientes',
+    description:
+      'Devuelve el `id` que exige POST /profiles/patients/merge/{eventId}/reverse. Sin esta lectura, una fusión sólo era reversible mientras la respuesta del POST siguiera a la vista.',
+  })
+  listMergeEvents(
+    @Query() query: ListMergeEventsQueryDto,
+  ): Promise<ListMergeEventsResponseDto> {
+    return this.patientsService.listMergeEvents(query);
   }
 
   /**
