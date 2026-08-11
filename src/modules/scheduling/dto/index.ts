@@ -61,9 +61,4 @@ export {
   ListSlotsQueryDto,
   SlotListItemDto,
   ListSlotsResponseDto,
-  ListBookingsQueryDto,
-  BookingListItemDto,
-  ListBookingsResponseDto,
-  BookingDetailDto,
-  BookingReminderDto,
 } from './scheduling-agenda.dto';

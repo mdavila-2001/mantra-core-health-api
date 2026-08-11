@@ -24,5 +24,4 @@ export { SchedulingAgendaRepository } from './scheduling-agenda.repository';
 export type {
   ListResourcesFilter,
   ListSlotsFilter,
-  ListBookingsFilter,
 } from './scheduling-agenda.repository';

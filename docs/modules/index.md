@@ -1,7 +1,7 @@
 # Catálogo de módulos
 
 > Generado por `yarn docs:modules:sync` desde `src/modules/*/README.md` reales — no editar a
-> mano. 60 módulos, de los cuales 57 tienen entidades propias (ver
+> mano. 61 módulos, de los cuales 58 tienen entidades propias (ver
 > [`docs/reports/system-inventory.md`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 
@@ -37,6 +37,7 @@
 | [`read_models`](read_models.md) | 3 | 3 | 8 | 13 | 5 |
 | [`telemetry`](telemetry.md) | 3 | 3 | 14 | 14 | 12 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
+| [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 4 | 3 | 20 | 1 |
 | [`directory`](directory.md) | 2 | 6 | 5 | 7 | 16 |
@@ -67,4 +68,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **196** | **270** | **355** | **1186** | **382** |
+| **Total** | **198** | **274** | **357** | **1190** | **383** |
