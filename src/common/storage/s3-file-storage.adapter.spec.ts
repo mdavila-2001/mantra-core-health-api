@@ -17,8 +17,11 @@ describe('S3FileStorageAdapter', () => {
    * @returns Resultado de build.
    */
   function build(send: (...a: any[]) => any = fn()) {
-    process.env.MINIO_BUCKET = BUCKET;
-    const logger = { setContext: fn(), info: fn(), warn: fn() };
+    process.env.FILE_STORAGE_S3_BUCKET = BUCKET;
+    // Sin prefijo: deja la clave en `<aa>/<hash>` puro, que es lo que estas
+    // aserciones describen. El prefijo por defecto se ejerce aparte.
+    process.env.FILE_STORAGE_S3_PREFIX = '';
+    const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
     const adapter = new S3FileStorageAdapter(logger as never);
     Object.defineProperty(adapter, 'client', {
       value: { send },
@@ -94,12 +97,31 @@ describe('S3FileStorageAdapter', () => {
   });
 
   it('traduce el fallo del bucket a «no encontrado» y no filtra el error del SDK', async () => {
-    const { adapter } = build(
-      fn().mockRejectedValue(new Error('NoSuchKey: …')),
-    );
+    // El SDK v3 señala el caso por `name`, no por el mensaje.
+    const notFound = Object.assign(new Error('The specified key does not exist'), {
+      name: 'NoSuchKey',
+    });
+    const { adapter } = build(fn().mockRejectedValue(notFound));
 
     await expect(
       adapter.retrieve(`s3://${BUCKET}/${hash.slice(0, 2)}/${hash}`),
     ).rejects.toThrow(ResourceNotFoundException);
+  });
+
+  it('aplica el prefijo configurado a la clave del objeto', async () => {
+    process.env.FILE_STORAGE_S3_BUCKET = BUCKET;
+    process.env.FILE_STORAGE_S3_PREFIX = 'uploads';
+    const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
+    const adapter = new S3FileStorageAdapter(logger as never);
+    Object.defineProperty(adapter, 'client', {
+      value: { send: fn().mockResolvedValue({}) },
+      writable: true,
+    });
+
+    const stored = await adapter.store(input);
+
+    expect(stored.storageUri).toBe(
+      `s3://${BUCKET}/uploads/${hash.slice(0, 2)}/${hash}`,
+    );
   });
 });
