@@ -11,7 +11,7 @@ flowchart TB
     Partner[Sistema externo<br/>proveedor de pago, laboratorio, aseguradora]
   end
 
-  API[["REDESA Health API<br/>(NestJS, 60 módulos, 841 operaciones)"]]
+  API[["REDESA Health API<br/>(NestJS, 61 módulos, 915 operaciones)"]]
 
   Patient -->|HTTPS + JWT| API
   Clinician -->|HTTPS + JWT| API
@@ -39,7 +39,7 @@ flowchart TB
 
 ## Frontera del sistema
 
-Todo lo que vive dentro de `docker-compose.yml` (API, 20 workers, 5 almacenes de datos) es
+Todo lo que vive dentro de `docker-compose.yml` (API, 21 workers, 5 almacenes de datos) es
 "el sistema". No hay frontend propio en este repositorio — es un backend puro que sirve
 cualquier cliente HTTP autenticado.
 

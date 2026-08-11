@@ -132,6 +132,10 @@ workers", que ya identifica expiraciones/barridos pendientes en varios de los 20
 worker — el detalle de qué jobs concretos corren en cada uno se documenta en Fase 13
 (`docs/operations/runbooks/`).
 
+### Actualización de inventario — 2026-08-10
+
+La línea base anterior se conserva por trazabilidad. El árbol fuente actual añade `audio_assets` y `worker-audio-assets`: existen **61 directorios de módulo con `*.module.ts`** y **21 entrypoints `src/worker-*.ts`**. `worker-audio-assets` consume la cola durable `audio-generation` y está documentado en `docs/architecture/flows.md`, `docs/architecture/decisions/ADR-2026-08-10-audio-assets-worker.md` y `docs/runbooks/audio-assets-production.md`.
+
 ## 6. Almacenes y componentes de infraestructura
 
 Ver `docs/architecture/integration-map.md` §2-3 (PostgreSQL, MongoDB, Redis, OpenSearch, MinIO;

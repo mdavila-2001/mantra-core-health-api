@@ -1,11 +1,11 @@
-// Refleja los 60 README.md reales de src/modules/<módulo>/ hacia
+// Refleja los README.md reales de src/modules/<módulo>/ hacia
 // docs/modules/<módulo>.md para el portal MkDocs. No genera prosa nueva: cada
 // módulo ya tiene su "contrato por dominio" real (ESTADO-Y-PENDIENTES.md,
 // tabla "Mapa documental") — fuente de verdad = src/modules/<módulo>/README.md,
 // mantenida junto al código. Duplicar esa prosa a mano en docs/ sería
 // contenido genérico o desactualizado; este script la mantiene sincronizada.
 //
-// También genera docs/modules/index.md: catálogo de los 60 módulos con sus
+// También genera docs/modules/index.md: catálogo dinámico de módulos con sus
 // métricas reales (controllers/services/repos/entities/dto), cruzado contra
 // tools/redesa/coverage-report.mjs.
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -21,7 +21,9 @@ mkdirSync(OUT_DIR, { recursive: true });
 // propio repositorio, no se hardcodea un placeholder.
 function resolveGithubBase() {
   try {
-    const url = execSync('git remote get-url origin', { cwd: ROOT }).toString().trim();
+    const url = execSync('git remote get-url origin', { cwd: ROOT })
+      .toString()
+      .trim();
     const m = url.match(/github\.com[:/]([^/]+)\/([^/.]+)(\.git)?$/);
     if (m) return `https://github.com/${m[1]}/${m[2]}/blob/master`;
   } catch {
@@ -62,7 +64,9 @@ for (const name of modules) {
   try {
     readme = readFileSync(readmePath, 'utf-8');
   } catch {
-    console.error(`Sin README.md: ${name} — omitido (todos los módulos deberían tener uno, ver docs/reports/system-inventory.md)`);
+    console.error(
+      `Sin README.md: ${name} — omitido (todos los módulos deberían tener uno, ver docs/reports/system-inventory.md)`,
+    );
     continue;
   }
 
@@ -125,10 +129,12 @@ const totalRow = rows.reduce(
   { controllers: 0, services: 0, repositories: 0, entities: 0, dtos: 0 },
 );
 
+const modulesWithEntities = rows.filter((row) => row.entities > 0).length;
+
 const indexMd = `# Catálogo de módulos
 
 > Generado por \`yarn docs:modules:sync\` desde \`src/modules/*/README.md\` reales — no editar a
-> mano. 60 módulos, de los cuales 57 tienen entidades propias (ver
+> mano. ${rows.length} módulos, de los cuales ${modulesWithEntities} tienen entidades propias (ver
 > [\`docs/reports/system-inventory.md\`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 

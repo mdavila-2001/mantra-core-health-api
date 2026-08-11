@@ -7,7 +7,8 @@
 
 | Proceso | Entrypoint | Rol |
 |---|---|---|
-| `api` | `dist/main.js` (`src/main.ts`) | API HTTP pública (NestJS), 191 controllers / 850 endpoints |
+| `api` | `dist/main.js` (`src/main.ts`) | API HTTP pública (NestJS), 915 operaciones OpenAPI generadas en CI |
+| `worker-audio-assets` | `dist/worker-audio-assets.js` | Consumo durable de `audio-generation`, TTS y persistencia en storage propio |
 | `worker-billing` | `dist/worker-billing.js` | Ticks periódicos de dominio `billing` |
 | `worker-automation` | `dist/worker-automation.js` | Ticks periódicos de dominio `automation` |
 | `worker-consent` | `dist/worker-consent.js` | Ticks periódicos de dominio `consent` |
@@ -25,8 +26,11 @@
 | `worker-scheduling` | `dist/worker-scheduling.js` | Expiración de citas/slots |
 | `worker-tracking` | `dist/worker-tracking.js` | Ticks de dominio `tracking` |
 | `worker-workflow` | `dist/worker-workflow.js` | Ticks de motor de workflow |
+| `worker-time_series` | `dist/worker-time_series.js` | Compresión, rollups y retención de TimescaleDB |
+| `worker-lakehouse` | `dist/worker-lakehouse.js` | Cierre/reconciliación de releases de lakehouse |
+| `worker-vector_rag` | `dist/worker-vector_rag.js` | Drena jobs de embeddings pendientes |
 
-**20 workers**, cada uno un proceso Node independiente y su propio contenedor Docker
+**21 workers**, cada uno un proceso Node independiente y su propio contenedor Docker
 (`docker-compose.yml`), montados sobre `bootstrapWorker()` (`src/worker/bootstrap.ts`). Diseño
 explícito: aislar el fallo de un dominio (`automation`) del tick de otro (`messaging`), y permitir
 escalado/despliegue independiente por dominio (comentario de diseño en el propio código fuente).
@@ -49,7 +53,7 @@ qué colas drenar vía `MESSAGING_QUEUE_CODES`.
 No hay broker de mensajería externo (Kafka/RabbitMQ/NATS/BullMQ no están en `package.json`); la
 mensajería asíncrona es un **outbox transaccional propio sobre Postgres**
 (`OutboxService.publishDomainEvent`, `src/modules/messaging/`), drenado por `worker-messaging` y
-consumido por los 16 workers de dominio restantes según corresponda.
+consumido por los workers de dominio que correspondan según el evento y la cola configurada.
 
 ## 3. Integraciones externas
 
@@ -79,10 +83,10 @@ flowchart LR
   API -->|S3 API| MinIO[(MinIO)]
   API -->|INSERT outbox| PG
 
-  subgraph Workers[20 procesos worker independientes]
+  subgraph Workers[21 procesos worker independientes]
     W1[worker-messaging]
     W2[worker-billing]
-    W3[... 15 workers más]
+    W3[... 19 workers más]
   end
 
   Workers -->|HTTP interno, JWT de servicio| API
@@ -92,7 +96,7 @@ flowchart LR
 - El único punto de entrada externo autenticado es `api` (JWT Bearer, `helmet()`, CORS
   deshabilitado por defecto — `app.enableCors({ origin: false })`).
 - Los workers **no exponen puerto HTTP entrante**: solo salen hacia `api` vía `/internal/*`. Esto
-  reduce la superficie de ataque de los 20 procesos worker a "cliente HTTP saliente", relevante
+  reduce la superficie de ataque de los 21 procesos worker a "cliente HTTP saliente", relevante
   para el modelo de amenazas (Fase 12).
 - `RLS_ENFORCE` (`docker-compose.yml`) controla si Postgres aplica Row-Level Security por tenant;
   su valor real por entorno es una decisión operativa crítica documentada en
@@ -102,5 +106,5 @@ flowchart LR
 ## 5. Brechas para fases posteriores
 
 - Catálogo formal de eventos de dominio (nombre, productor, consumidores, esquema) → Fase 11 (AsyncAPI).
-- Runbook de arranque/apagado ordenado de los 20 workers → Fase 13 (operación).
+- Runbook de arranque/apagado ordenado de los 21 workers → Fase 13 (operación).
 - Inventario de proveedores externos reales desde `gateway_connections` y tablas equivalentes → Fase 10.

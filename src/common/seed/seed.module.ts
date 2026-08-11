@@ -37,6 +37,9 @@ import { TenantMemberships } from '../../modules/directory/entities';
 import { TerminologySeedService } from './terminology-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
+import { AudioAssetsSeedService } from './audio-assets-seed.service';
+import { MessageQueues } from '../../modules/messaging/entities';
+import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
@@ -77,6 +80,8 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
       DynamicEnumVersions,
       DynamicEnumOptions,
       DynamicEnumBindings,
+      MessageQueues,
+      AudioTemplates,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
@@ -87,6 +92,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     TerminologySeedService,
     DynamicEnumSeedService,
     MessagingSeedService,
+    AudioAssetsSeedService,
     IdentityVerificationSeedService,
     BootstrapAdminSeedService,
     SeedBootstrapService,
@@ -95,6 +101,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     TerminologySeedService,
     DynamicEnumSeedService,
     MessagingSeedService,
+    AudioAssetsSeedService,
     IdentityVerificationSeedService,
     BootstrapAdminSeedService,
   ],
