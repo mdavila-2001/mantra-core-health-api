@@ -79,7 +79,7 @@ export class SchedulingCatalogService {
         tenantId: dto.tenantId,
         practiceId: dto.practiceId,
         resourceTypeConceptId: RESOURCE_TYPE_CONCEPT[dto.resourceType],
-        resourceRefType: dto.resourceRefType,
+        resourceRefType: canonicalRefType(dto.resourceRefType),
         resourceRefId: dto.resourceRefId,
         name: dto.name,
         timeZone: dto.timeZone,
@@ -500,4 +500,32 @@ export class SchedulingCatalogService {
     result.setUTCHours(hours, minutes, seconds ?? 0, 0);
     return result;
   }
+}
+
+/**
+ * Alias conocidos de una misma tabla, colapsados a su nombre real.
+ *
+ * `resourceRefType` es texto libre —el recurso puede apuntar a un profesional, a
+ * una sala o a un equipo, y esas tablas viven en módulos distintos— así que
+ * nada impedía que dos clientes escribieran dos nombres para lo mismo. Y pasó:
+ * el ejemplo del contrato dice `health_practitioner_profiles` —el nombre real de
+ * la tabla— y los recursos sembrados traían `practitioner_profiles`.
+ *
+ * La consecuencia no era cosmética. Quien cruza el recurso con un perfil
+ * profesional —el portal, para saber cuál agenda es la del médico que entró; la
+ * confirmación de una reserva, para poner el profesional en la cita clínica—
+ * tiene que comparar **tabla e identificador**, y con dos nombres en circulación
+ * la mitad de los recursos no coincidía con ninguno.
+ *
+ * Se normaliza al escribir en vez de tolerar al leer, que es donde el arreglo
+ * dura: lo que entra queda canónico y los consumidores nuevos no heredan la
+ * ambigüedad. Las filas anteriores se siguen tolerando en lectura hasta que se
+ * regeneren los seeds.
+ */
+const ALIAS_DE_TABLA: Readonly<Record<string, string>> = {
+  practitioner_profiles: 'health_practitioner_profiles',
+};
+
+function canonicalRefType(refType: string): string {
+  return ALIAS_DE_TABLA[refType] ?? refType;
 }

@@ -250,7 +250,10 @@ services:
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # timescaledb-ha usa PGDATA=/home/postgres/pgdata/data, no la ruta de la
+      # imagen oficial de postgres. Montar en /var/lib/postgresql/data dejaba el
+      # volumen vacío y los datos en la capa efímera del contenedor.
+      - postgres_data:/home/postgres/pgdata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -327,7 +330,7 @@ services:
       - mantra-redesa-network
 
   redis:
-    image: redis:8.8-alpine
+    image: redis:8.10-alpine
     restart: always
     command: redis-server --save 60 1 --loglevel notice
     ports:
@@ -343,7 +346,7 @@ services:
       - mantra-redesa-network
 
   opensearch:
-    image: opensearchproject/opensearch:3.7.0
+    image: opensearchproject/opensearch:3.8.0
     restart: always
     environment:
       - cluster.name=mantra-redesa-cluster
@@ -376,7 +379,7 @@ services:
   # One-shot: crea los índices del módulo 57 search_platform desde los
   # *.mapping.json solo si no existen.
   opensearch-init:
-    image: curlimages/curl:8.11.1
+    image: curlimages/curl:8.21.0
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
