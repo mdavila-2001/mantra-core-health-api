@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEmail,
@@ -265,4 +265,64 @@ export class RegisterPractitionerResponseDto {
    */
   @ApiProperty()
   emailVerificationSent!: boolean;
+}
+
+/**
+ * Cuerpo de `POST /iam/users/assisted-practitioner-registration`.
+ *
+ * ## Por qué no se reutiliza el autorregistro
+ *
+ * `RegisterPractitionerDto` declara textualmente que «el profesional se da de
+ * alta **él mismo**, sin que un administrador lo cree», y está detrás de
+ * `@Public()` con un límite de 10 peticiones por minuto — una superficie pensada
+ * para frenar automatización contra un formulario abierto, no para que una
+ * organización cargue su plantel. Construir el alta administrativa encima de él
+ * habría contradicho el contrato en el mismo archivo que lo define.
+ *
+ * ## Las dos diferencias, y las dos importan
+ *
+ * 1. **No lleva `password`.** La contraseña la elige el titular al activar la
+ *    cuenta, igual que en el alta asistida de paciente: un administrador que
+ *    teclea la clave de otro es una credencial compartida desde el minuto cero.
+ * 2. **Exige `reason`.** Es la trazabilidad C-18: quién creó esta cuenta y por
+ *    qué, que es justamente lo que distingue un alta administrativa de un
+ *    autorregistro.
+ */
+export class AssistedPractitionerRegistrationDto extends OmitType(
+  RegisterPractitionerDto,
+  ['password'] as const,
+) {
+  /**
+   * Motivo del alta, para la trazabilidad C-18.
+   */
+  @ApiProperty({
+    description: 'Motivo del alta administrativa (trazabilidad C-18)',
+    maxLength: 500,
+  })
+  @IsString()
+  @MaxLength(500)
+  reason!: string;
+}
+
+/**
+ * Respuesta del alta asistida de un profesional.
+ *
+ * Extiende la del autorregistro con el token de activación de un solo uso —lo
+ * único que el administrador entrega al titular por canal seguro— y su
+ * caducidad. **Nunca una contraseña.**
+ */
+export class AssistedPractitionerRegistrationResponseDto extends RegisterPractitionerResponseDto {
+  /**
+   * Token de activación de un solo uso. Del lado del servidor sólo vive su hash.
+   */
+  @ApiProperty({
+    description: 'Token de un solo uso a entregar al titular por canal seguro',
+  })
+  activationToken!: string;
+
+  /**
+   * Cuándo caduca el token.
+   */
+  @ApiProperty({ type: String, format: 'date-time' })
+  activationExpiresAt!: Date;
 }

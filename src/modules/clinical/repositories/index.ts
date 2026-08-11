@@ -1,3 +1,4 @@
+export * from './appointments.repository';
 export * from './care-episodes.repository';
 export * from './encounters.repository';
 export * from './observations.repository';

@@ -64,6 +64,13 @@ export interface CreateBookingData {
    */
   bookableSlotId: string;
   /**
+   * Cita clínica que respalda la reserva (`clinical.appointments`).
+   *
+   * Es lo que ata el turno con el encuentro que se abra al atenderlo. Opcional
+   * en el tipo porque la columna lo es, pero la confirmación siempre la crea.
+   */
+  appointmentId?: string;
+  /**
    * Identificador asociado a resource.
    */
   resourceId?: string;
@@ -274,6 +281,7 @@ export class SchedulingBookingsRepository {
       {
         tenantId: data.tenantId,
         patientProfileId: data.patientProfileId,
+        appointmentId: data.appointmentId,
         bookableSlotId: data.bookableSlotId,
         resourceId: data.resourceId,
         serviceConceptId: data.serviceConceptId,

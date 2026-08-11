@@ -31,6 +31,9 @@ import {
   MergePatientsDto,
   ReverseMergeDto,
   MergeEventResponseDto,
+  ListMergeEventsQueryDto,
+  ListMergeEventsResponseDto,
+  MERGE_EVENTS_DEFAULT_LIMIT,
   AddRelatedPersonDto,
   RelatedPersonResponseDto,
   GrantPortalProxyDto,
@@ -570,6 +573,47 @@ export class ProfilesPatientsService {
 
       return this.toEventDto(event);
     });
+  }
+
+  /**
+   * UC-05-09·L: los eventos de fusión, para poder revertir uno más tarde.
+   *
+   * `reverseMerge` exige el `eventId`, y hasta ahora ese identificador sólo
+   * existía en la respuesta del `POST` que lo creaba: en cuanto esa respuesta se
+   * perdía de vista, unir dos historias clínicas dejaba de tener vuelta atrás
+   * desde la aplicación. Esta lectura es lo que convierte «revertir» en algo que
+   * se puede hacer al día siguiente.
+   *
+   * @param query - Paciente involucrado y tope, ambos opcionales.
+   * @returns Los eventos, del más reciente al más antiguo.
+   */
+  async listMergeEvents(
+    query: ListMergeEventsQueryDto,
+  ): Promise<ListMergeEventsResponseDto> {
+    const limit = query.limit ?? MERGE_EVENTS_DEFAULT_LIMIT;
+    const em = this.em.fork();
+    const rows = await this.mergeEventsRepo.findEvents(
+      em,
+      query.patientProfileId === undefined
+        ? {}
+        : { patientProfileId: query.patientProfileId },
+      limit,
+    );
+
+    return {
+      items: rows.map((event) => ({
+        id: event.id,
+        survivingPatientProfileId: event.survivingPatientProfileId,
+        mergedPatientProfileId: event.mergedPatientProfileId,
+        decisionStatus: event.decisionStatusConceptId,
+        ...(event.reversalOfEventId === undefined
+          ? {}
+          : { reversalOfEventId: event.reversalOfEventId }),
+        recordedAt: event.recordedAt,
+      })),
+      count: rows.length,
+      limit,
+    };
   }
 
   /** UC-05-09: revierte una fusión previa aprobada (nuevo evento IMMUTABLE de reversión). */

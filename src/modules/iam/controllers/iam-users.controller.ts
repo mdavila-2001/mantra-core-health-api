@@ -28,6 +28,7 @@ import {
   IamMfaService,
   IamDevicesService,
   IamAssistedRegistrationService,
+  IamPractitionerSelfRegistrationService,
 } from '../services';
 import {
   CreateUserDto,
@@ -41,6 +42,8 @@ import {
   LockUserDto,
   GlobalRoleDto,
   StatusResultDto,
+  AssistedPractitionerRegistrationDto,
+  AssistedPractitionerRegistrationResponseDto,
   AssistedRegistrationDto,
   AssistedRegistrationResponseDto,
   SearchUsersResponseDto,
@@ -71,6 +74,7 @@ export class IamUsersController {
    * @param mfaService - Valor de mfa service requerido por la operación.
    * @param devicesService - Valor de devices service requerido por la operación.
    * @param assistedRegistrationService - Valor de assisted registration service requerido por la operación.
+   * @param practitionerRegistrationService - Alta de profesionales (autoservicio y administrativa).
    * @param usersReadService - Cara de lectura de usuarios y sus sub-colecciones.
    */
   constructor(
@@ -80,6 +84,7 @@ export class IamUsersController {
     private readonly mfaService: IamMfaService,
     private readonly devicesService: IamDevicesService,
     private readonly assistedRegistrationService: IamAssistedRegistrationService,
+    private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
   ) {}
 
   /**
@@ -225,6 +230,36 @@ export class IamUsersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AssistedRegistrationResponseDto> {
     return this.assistedRegistrationService.assistedRegistration(dto, actor);
+  }
+
+  /**
+   * P6: alta de un profesional **por un administrador**.
+   *
+   * El equivalente de `assisted-registration` para el otro lado del mostrador.
+   * Faltaba: el único alta de profesional era `POST /iam/auth/register-practitioner`,
+   * que es `@Public()` y está limitado a 10 peticiones por minuto porque su
+   * superficie es un formulario abierto — su propio DTO declara que «el
+   * profesional se da de alta él mismo». Construir la pantalla de administración
+   * encima habría contradicho el contrato.
+   *
+   * Devuelve el token de activación de un solo uso para entregar al titular por
+   * canal seguro — **NUNCA** una contraseña.
+   */
+  @Post('assisted-practitioner-registration')
+  @Roles('SECURITY_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary:
+      'Alta administrativa de un profesional (devuelve token de activación)',
+  })
+  assistedPractitionerRegistration(
+    @Body() dto: AssistedPractitionerRegistrationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AssistedPractitionerRegistrationResponseDto> {
+    return this.practitionerRegistrationService.assistedRegisterPractitioner(
+      dto,
+      actor,
+    );
   }
 
   /** UC-01-01. */
