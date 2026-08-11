@@ -43,6 +43,11 @@ export interface TokenDisplayData {
    * `JwtPayload.pid` para por qué no basta con la lectura de `profiles`.
    */
   patientProfileId?: string;
+  /**
+   * Perfil profesional del titular, si tiene uno. Viaja como claim `hpid`; ver
+   * `JwtPayload.hpid`.
+   */
+  practitionerProfileId?: string;
 }
 
 @Injectable()
@@ -88,6 +93,9 @@ export class TokenService {
         ? { tenantNames: display.tenantNames }
         : {}),
       ...(display.patientProfileId ? { pid: display.patientProfileId } : {}),
+      ...(display.practitionerProfileId
+        ? { hpid: display.practitionerProfileId }
+        : {}),
       typ: 'access',
     };
     // `expiresIn` acepta un string tipo `15m`; el tipo de la librería exige un

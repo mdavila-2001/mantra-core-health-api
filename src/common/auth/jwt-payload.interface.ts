@@ -56,6 +56,29 @@ export interface JwtPayload {
    * donde sobreviva a un refresco de sesión.
    */
   pid?: string;
+  /**
+   * Perfil profesional del titular de la cuenta (`health_practitioner_profiles`).
+   *
+   * El simétrico de `pid` para el otro lado del mostrador, y existe por una razón
+   * parecida: **la agenda de un profesional no se podía identificar.**
+   * `GET /scheduling/resources` devuelve `resourceRefType` y `resourceRefId` —un
+   * consultorio declara de qué profesional es—, pero la sesión no conocía su
+   * propio perfil, así que el portal no podía saber cuál de todas las agendas de
+   * la organización era la suya. Caía en la primera de la lista, que con varios
+   * consultorios sembrados es la de otra persona.
+   *
+   * No hay lectura que lo devuelva: `profiles-practitioners.controller.ts` sólo
+   * expone `POST`, y no hay un `me` como el de paciente. Firmarlo acá lo resuelve
+   * sin agregar una petición a cada arranque de sesión.
+   *
+   * **No es una credencial y no participa de ninguna decisión de autorización**,
+   * igual que `pid`: quién puede ver una agenda lo siguen decidiendo `roles` y el
+   * tenant del request. Es un dato de identificación, no un permiso.
+   *
+   * Se omite en toda cuenta que no tenga perfil profesional: pacientes,
+   * administradores, cuentas de sistema.
+   */
+  hpid?: string;
   /** Marca de tipo para distinguir access de otros usos futuros del secreto. */
   typ: 'access';
 }
