@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsIn,
   IsInt,
@@ -106,7 +107,13 @@ export class ConfirmBookingDto {
     type: Number,
     example: [1440, 120],
   })
+  // Validado elemento a elemento por la misma razón: el servicio calcula
+  // `slot.startAt - offset * 60_000`, así que un elemento no numérico se
+  // persistiría como fecha inválida en vez de rechazarse en la frontera.
   @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
   reminderOffsetsMinutes?: number[];
 }
 
@@ -336,6 +343,14 @@ export class ScheduleRemindersDto {
     type: Number,
     example: [1440, 120],
   })
+  // Sin decorador de class-validator, el `ValidationPipe` global —que corre con
+  // `forbidNonWhitelisted: true`— trataba este campo como propiedad ajena al DTO
+  // y respondía 400 «property offsetsMinutes should not exist». Como además es
+  // obligatorio, no había cuerpo alguno que el endpoint aceptara: UC-41-13
+  // (`POST /scheduling/bookings/{id}/reminders`) era inalcanzable.
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
   offsetsMinutes!: number[];
 
   /**

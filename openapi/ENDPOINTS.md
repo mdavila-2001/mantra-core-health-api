@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **915 de 915 endpoints** en **62 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **918 de 918 endpoints** en **62 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -35,8 +35,8 @@ Se documentan **915 de 915 endpoints** en **62 módulos**. La referencia complet
 | `graph_intelligence` | 15 | [Abrir referencia](endpoints/graph-intelligence.md) |
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
 | `health_data` | 15 | [Abrir referencia](endpoints/health-data.md) |
-| `iam` | 29 | [Abrir referencia](endpoints/iam.md) |
-| `identity_assurance` | 23 | [Abrir referencia](endpoints/identity-assurance.md) |
+| `iam` | 30 | [Abrir referencia](endpoints/iam.md) |
+| `identity_assurance` | 24 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 23 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
@@ -52,7 +52,7 @@ Se documentan **915 de 915 endpoints** en **62 módulos**. La referencia complet
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 13 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 23 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 15 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 16 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |

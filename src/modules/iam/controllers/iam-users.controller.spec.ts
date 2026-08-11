@@ -39,6 +39,11 @@ function build() {
   const mfaService = { enrollOrVerify: mockFn() };
   const devicesService = { register: mockFn() };
   const assistedRegistrationService = { assistedRegistration: mockFn() };
+  // P6: el alta administrativa de un profesional cuelga del mismo servicio que
+  // el autorregistro, porque comparten el registro CTI atómico.
+  const practitionerRegistrationService = {
+    assistedRegisterPractitioner: mockFn(),
+  };
 
   const controller = new IamUsersController(
     usersService as any,
@@ -47,6 +52,7 @@ function build() {
     mfaService as any,
     devicesService as any,
     assistedRegistrationService as any,
+    practitionerRegistrationService as any,
   );
   return {
     controller,

@@ -1,8 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsIn } from 'class-validator';
 
-/** Roles globales gestionables. */
-export type GlobalRole = 'USER' | 'SECURITY_ADMIN' | 'SUPERADMIN';
+/**
+ * Roles globales gestionables.
+ *
+ * Incluye `PATIENT` para poder concederlo a cuentas creadas antes de que el
+ * auto-registro lo otorgara, o a las que un tercero dio de alta (C-18): sin esa
+ * concesión el titular no puede usar el autoservicio del portal.
+ */
+export type GlobalRole = 'USER' | 'SECURITY_ADMIN' | 'SUPERADMIN' | 'PATIENT';
 /** Acción sobre el rol. */
 export type RoleAction = 'GRANT' | 'REVOKE';
 
@@ -11,8 +17,8 @@ export class GlobalRoleDto {
   /**
    * Valor de role mantenido por la instancia.
    */
-  @ApiProperty({ enum: ['USER', 'SECURITY_ADMIN', 'SUPERADMIN'] })
-  @IsIn(['USER', 'SECURITY_ADMIN', 'SUPERADMIN'])
+  @ApiProperty({ enum: ['USER', 'SECURITY_ADMIN', 'SUPERADMIN', 'PATIENT'] })
+  @IsIn(['USER', 'SECURITY_ADMIN', 'SUPERADMIN', 'PATIENT'])
   role!: GlobalRole;
 
   /**

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Persons } from '../entities';
+import { composePersonDisplayName } from '../person-name';
 import { createdBy } from '../../../common';
 
 /** Datos para dar de alta una persona (paciente, profesional o contacto). */
@@ -14,7 +15,27 @@ export interface CreatePersonData {
    */
   vitalStatusConceptId?: string;
   /**
-   * Valor de display name mantenido por la instancia.
+   * Nombre de pila.
+   */
+  name?: string;
+  /**
+   * Segundo nombre.
+   */
+  middleName?: string;
+  /**
+   * Apellido paterno.
+   */
+  lastName?: string;
+  /**
+   * Apellido materno.
+   */
+  motherLastName?: string;
+  /**
+   * Nombre ya compuesto, para mostrar.
+   *
+   * Opcional: si no viene, se deriva de las partes de arriba. Si viene, manda —
+   * es la forma anterior de declarar el nombre y los llamadores que sólo tienen
+   * una cadena suelta la siguen usando.
    */
   displayName?: string;
   /**
@@ -80,7 +101,13 @@ export class PersonsRepository {
       {
         personStatusConceptId: data.personStatusConceptId,
         vitalStatusConceptId: data.vitalStatusConceptId,
-        displayName: data.displayName,
+        name: data.name,
+        middleName: data.middleName,
+        lastName: data.lastName,
+        motherLastName: data.motherLastName,
+        // Único punto de inserción de `persons` en toda la API, así que acá la
+        // derivación la heredan los cinco llamadores sin que ninguno la repita.
+        displayName: data.displayName ?? composePersonDisplayName(data),
         birthDate: data.birthDate,
         administrativeGenderConceptId: data.administrativeGenderConceptId,
         sexAtBirthConceptId: data.sexAtBirthConceptId,

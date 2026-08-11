@@ -3,10 +3,15 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // Raíz de la bóveda SALUD (Obsidian). Se puede reapuntar con SALUD_VAULT sin
-// tocar el código: por defecto se asume que la bóveda es hermana del repositorio.
+// tocar el código; por defecto vive junto a este repo, en la raíz del monorepo.
+//
+// El default apuntaba a `mantra_core_technologies_health_docs/SALUD`, una ruta que
+// dejó de existir cuando la bóveda pasó a `Mantra Core Health Vault/`. No degradaba:
+// `audit-fidelity.mjs` y `generate-catalog.mjs` morían con ENOENT al arrancar, así que
+// los dos verificadores de fidelidad dev-time estuvieron inejecutables (corregido 2026-08-07).
 export const VAULT =
   process.env.SALUD_VAULT ??
-  join(process.cwd(), '..', 'mantra_core_technologies_health_docs', 'SALUD');
+  join(process.cwd(), '..', 'Mantra Core Health Vault', 'SALUD');
 const ENT = join(VAULT, 'Entidades');
 const FKDIR = join(VAULT, 'FK');
 

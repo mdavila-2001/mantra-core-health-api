@@ -28,14 +28,26 @@ export interface IssuedTokens {
  * los servicios razonen sobre sesiones sin manipular secretos directamente.
  */
 /**
- * Lo que el token lleva sólo para poder mostrarse. No participa de ninguna
- * decisión de autorización: si faltara, el token seguiría siendo igual de válido.
+ * Lo que el token lleva para que el cliente no necesite una ruta `/me`. No
+ * participa de ninguna decisión de autorización: si faltara, el token seguiría
+ * siendo igual de válido, y quién puede hacer qué lo siguen diciendo `roles` y
+ * el tenant del request.
  */
 export interface TokenDisplayData {
   /** Nombre para mostrar del usuario. */
   name?: string;
   /** Nombre de cada tenant, indexado por su id. */
   tenantNames?: Record<string, string>;
+  /**
+   * Perfil de paciente del titular, si tiene uno. Viaja como claim `pid`; ver
+   * `JwtPayload.pid` para por qué no basta con la lectura de `profiles`.
+   */
+  patientProfileId?: string;
+  /**
+   * Perfil profesional del titular, si tiene uno. Viaja como claim `hpid`; ver
+   * `JwtPayload.hpid`.
+   */
+  practitionerProfileId?: string;
 }
 
 @Injectable()
@@ -79,6 +91,10 @@ export class TokenService {
       ...(display.name ? { name: display.name } : {}),
       ...(display.tenantNames && Object.keys(display.tenantNames).length > 0
         ? { tenantNames: display.tenantNames }
+        : {}),
+      ...(display.patientProfileId ? { pid: display.patientProfileId } : {}),
+      ...(display.practitionerProfileId
+        ? { hpid: display.practitionerProfileId }
         : {}),
       typ: 'access',
     };

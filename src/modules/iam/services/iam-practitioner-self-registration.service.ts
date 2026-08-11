@@ -38,6 +38,7 @@ import { NotificationsService } from '../../messaging/services';
 import { DIR } from '../../directory/directory.concepts';
 import { TenantMembershipsRepository } from '../../directory/repositories';
 import {
+  AccountActivationsRepository,
   CredentialsRepository,
   EmailVerificationsRepository,
   SecurityEventsRepository,
@@ -45,6 +46,8 @@ import {
   UsersRepository,
 } from '../repositories';
 import {
+  AssistedPractitionerRegistrationDto,
+  AssistedPractitionerRegistrationResponseDto,
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
 } from '../dto';
@@ -52,6 +55,15 @@ import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de verificación de correo (24 h). */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Vida útil del token de activación del alta administrativa (72 h).
+ *
+ * El mismo que el alta asistida de paciente: son el mismo trámite —un tercero
+ * crea la cuenta, el titular la reclama— y dos plazos distintos para lo mismo
+ * sólo se explicarían por descuido.
+ */
+const ACTIVATION_TTL_MS = 72 * 60 * 60 * 1000;
 
 /**
  * Auto-registro público de profesionales de salud.
@@ -102,6 +114,7 @@ export class IamPractitionerSelfRegistrationService {
   constructor(
     private readonly em: EntityManager,
     private readonly tokenService: TokenService,
+    private readonly activationsRepo: AccountActivationsRepository,
     private readonly usersRepo: UsersRepository,
     private readonly credentialsRepo: CredentialsRepository,
     private readonly rolesRepo: UserGlobalRolesRepository,
@@ -145,7 +158,53 @@ export class IamPractitionerSelfRegistrationService {
         [APP_ATTR.OPERATION]: 'practitioner.self-register',
         [APP_ATTR.ENTITY_TYPE]: 'profiles.health_practitioner_profiles',
       },
-      (span) => this.performRegisterPractitioner(dto, span, ip),
+      (span) =>
+        this.performRegisterPractitioner(
+          dto,
+          span,
+          ip,
+        ) as Promise<RegisterPractitionerResponseDto>,
+    );
+  }
+
+  /**
+   * Alta de un profesional **por un administrador** (P6).
+   *
+   * Comparte transacción, invariantes y orden con el autorregistro —el registro
+   * CTI atómico de la regla 11— porque es la misma alta: cuenta, persona, perfil
+   * profesional, matrícula y título, todo o nada. Lo único que cambia es **quién
+   * está delante**, y de ahí salen las dos diferencias:
+   *
+   * - La cuenta nace PENDIENTE con un token de activación de un solo uso, en vez
+   *   de ACTIVA con una contraseña. Un administrador que teclea la clave de otro
+   *   crea una credencial compartida desde el primer día.
+   * - Se exige un `reason`, que es la trazabilidad C-18 del alta administrativa.
+   *
+   * La licencia sigue naciendo `PENDING`: registrar a alguien no lo habilita a
+   * ejercer, y eso no cambia porque lo cargue un tercero.
+   *
+   * @param dto - Datos del profesional, sin contraseña, con motivo.
+   * @param actor - Administrador que da el alta.
+   * @param ip - Origen de la petición, para el evento de seguridad.
+   * @returns El alta, más el token de activación y su caducidad.
+   */
+  async assistedRegisterPractitioner(
+    dto: AssistedPractitionerRegistrationDto,
+    actor: AuthenticatedUser,
+    ip?: string,
+  ): Promise<AssistedPractitionerRegistrationResponseDto> {
+    return this.tracing.runInSpan(
+      'iam.practitioner.assisted-register',
+      {
+        [APP_ATTR.MODULE]: 'iam',
+        [APP_ATTR.OPERATION]: 'practitioner.assisted-register',
+        [APP_ATTR.ENTITY_TYPE]: 'profiles.health_practitioner_profiles',
+      },
+      (span) =>
+        this.performRegisterPractitioner(dto, span, ip, {
+          actor,
+          reason: dto.reason,
+        }) as Promise<AssistedPractitionerRegistrationResponseDto>,
     );
   }
 
@@ -154,10 +213,14 @@ export class IamPractitionerSelfRegistrationService {
    * sólo la declaración del span de negocio.
    */
   private async performRegisterPractitioner(
-    dto: RegisterPractitionerDto,
+    dto: RegisterPractitionerDto | AssistedPractitionerRegistrationDto,
     span: TraceSpan,
     ip?: string,
-  ): Promise<RegisterPractitionerResponseDto> {
+    asistido?: { actor: AuthenticatedUser; reason: string },
+  ): Promise<
+    | RegisterPractitionerResponseDto
+    | AssistedPractitionerRegistrationResponseDto
+  > {
     this.logger.info(
       { operation: 'iam.auth.register-practitioner' },
       'Practitioner self-registration',
@@ -192,23 +255,40 @@ export class IamPractitionerSelfRegistrationService {
         });
       }
 
-      // 1) Cuenta ACTIVA: el titular está presente y fija su propia contraseña,
-      // así que no hay token de activación ni `mustChangePassword`.
+      // 1) La cuenta. En el autorregistro nace ACTIVA porque el titular está
+      // presente y fija su propia contraseña. En el alta administrativa nace
+      // PENDIENTE: quien la crea no puede elegir la clave de otro, así que se
+      // emite un token de activación y el titular la fija al entrar.
       const user = this.usersRepo.create(tx, {
         displayName: dto.displayName,
-        statusConceptId: CONCEPTS.USER_ACTIVE,
+        statusConceptId: asistido
+          ? CONCEPTS.STATE_PENDING
+          : CONCEPTS.USER_ACTIVE,
         mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
         timeZone: dto.timeZone,
+        ...(asistido ? { mustChangePassword: true } : {}),
       });
       // Las FK son columnas uuid planas: persistir el padre antes de los hijos.
       await tx.flush();
 
-      this.credentialsRepo.createPassword(tx, {
-        userId: user.id,
-        externalSubject: dto.email,
-        secretHash: await argon2.hash(dto.password),
-        actorUserId: user.id,
-      });
+      if (asistido) {
+        // Reserva el login sin secreto: nadie puede entrar hasta que el titular
+        // consuma el token y elija su contraseña.
+        this.credentialsRepo.createPendingPassword(tx, {
+          userId: user.id,
+          externalSubject: dto.email,
+          actorUserId: asistido.actor.id,
+        });
+      } else {
+        this.credentialsRepo.createPassword(tx, {
+          userId: user.id,
+          externalSubject: dto.email,
+          secretHash: await argon2.hash(
+            (dto as RegisterPractitionerDto).password,
+          ),
+          actorUserId: user.id,
+        });
+      }
       this.rolesRepo.create(tx, {
         userId: user.id,
         roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
@@ -360,6 +440,24 @@ export class IamPractitionerSelfRegistrationService {
         detailJson: { flow: 'practitioner-self-registration' },
       });
 
+      // Token de activación de un solo uso, sólo en el alta administrativa: es
+      // lo único que el administrador entrega al titular. Del lado del servidor
+      // vive únicamente su hash.
+      const activacion = asistido
+        ? (() => {
+            const par = this.tokenService.issueRefreshToken();
+            const expiresAt = new Date(Date.now() + ACTIVATION_TTL_MS);
+            this.activationsRepo.create(tx, {
+              userId: user.id,
+              tokenHash: par.hash,
+              expiresAt,
+              reason: asistido.reason,
+              actorUserId: asistido.actor.id,
+            });
+            return { token: par.raw, expiresAt };
+          })()
+        : null;
+
       return {
         userId: user.id,
         personId: person.id,
@@ -367,6 +465,7 @@ export class IamPractitionerSelfRegistrationService {
         practitionerCode,
         licenseId: license.id,
         emailVerificationToken: raw,
+        activacion,
       };
     });
 
@@ -395,6 +494,12 @@ export class IamPractitionerSelfRegistrationService {
       licenseId: created.licenseId,
       verificationStatus: 'PENDING',
       emailVerificationSent,
+      ...(created.activacion === null
+        ? {}
+        : {
+            activationToken: created.activacion.token,
+            activationExpiresAt: created.activacion.expiresAt,
+          }),
     };
   }
 

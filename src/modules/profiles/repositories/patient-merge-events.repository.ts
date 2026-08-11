@@ -65,6 +65,44 @@ export class PatientMergeEventsRepository {
   }
 
   /**
+   * Eventos de fusión, del más reciente al más antiguo.
+   *
+   * Existe porque sin esta lectura **una fusión dejaba de ser reversible en
+   * cuanto se cerraba la pantalla**: `reverse` exige el `eventId`, y ese
+   * identificador sólo aparecía en la respuesta del `POST` que lo creó. Quien se
+   * diera cuenta del error al día siguiente no tenía camino de vuelta.
+   *
+   * El filtro por paciente busca en **los dos lados** de la fusión: quien va a
+   * revisar un registro sospechoso lo tiene delante, y no sabe —ni tiene por qué
+   * saber— si el que mira fue el que sobrevivió o el que quedó absorbido.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filtros - Paciente involucrado, opcional.
+   * @param limit - Tope de filas a devolver.
+   * @returns Los eventos, del más reciente al más antiguo.
+   */
+  findEvents(
+    em: EntityManager,
+    filtros: { patientProfileId?: string },
+    limit: number,
+  ): Promise<PatientMergeEvents[]> {
+    const where =
+      filtros.patientProfileId === undefined
+        ? {}
+        : {
+            $or: [
+              { survivingPatientProfileId: filtros.patientProfileId },
+              { mergedPatientProfileId: filtros.patientProfileId },
+            ],
+          };
+
+    return em.find(PatientMergeEvents, where, {
+      orderBy: { recordedAt: 'DESC' },
+      limit,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

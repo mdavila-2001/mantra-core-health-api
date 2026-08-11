@@ -57,12 +57,20 @@ export class EmbeddingModelVersions {
   /**
    * Valor de approved at mantenido por la instancia.
    */
-  @Property({ fieldName: 'approved_at', columnType: 'timestamptz' })
-  approvedAt!: Date;
+  @Property({
+    fieldName: 'approved_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  approvedAt?: Date;
 
   /**
    * Valor de retired at mantenido por la instancia.
    */
-  @Property({ fieldName: 'retired_at', columnType: 'timestamptz' })
-  retiredAt!: Date;
+  @Property({
+    fieldName: 'retired_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  retiredAt?: Date;
 }

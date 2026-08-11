@@ -22,12 +22,17 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const forked = { id: 'forked-em' };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => forked),
+  };
   const casesRepo = {
     findById: mockFn(),
     create: mockFn(),
     countLiveForSubject: mockFn().mockResolvedValue(0),
     findBySubjects: mockFn(),
+    findByStatuses: mockFn().mockResolvedValue([]),
     findExpirable: mockFn().mockResolvedValue([]),
   };
   const policiesRepo = { findById: mockFn() };
@@ -58,6 +63,7 @@ function build() {
   return {
     service,
     tx,
+    forked,
     casesRepo,
     policiesRepo,
     evidenceRepo,
@@ -69,6 +75,71 @@ function build() {
 }
 
 describe('IdentityCasesService', () => {
+  describe('listQueue', () => {
+    it('defaults to the states that are waiting for a reviewer', async () => {
+      const d = build();
+      await d.service.listQueue();
+      expect(d.casesRepo.findByStatuses).toHaveBeenCalledWith(
+        d.forked,
+        [IDA.CASE_IN_VERIFICATION, IDA.CASE_AT_RISK, IDA.CASE_MANUAL_REVIEW],
+        50,
+      );
+    });
+
+    it('leaves CASE_OPEN out of the default queue', async () => {
+      const d = build();
+      await d.service.listQueue();
+      const [, statuses] = d.casesRepo.findByStatuses.mock.calls[0];
+      expect(statuses).not.toContain(IDA.CASE_OPEN);
+    });
+
+    it('narrows to a single state when one is requested', async () => {
+      const d = build();
+      await d.service.listQueue(IDA.CASE_MANUAL_REVIEW, 10);
+      expect(d.casesRepo.findByStatuses).toHaveBeenCalledWith(
+        d.forked,
+        [IDA.CASE_MANUAL_REVIEW],
+        10,
+      );
+    });
+
+    it('exposes the case status as `status`', async () => {
+      const d = build();
+      const openedAt = new Date('2026-08-10T12:00:00.000Z');
+      d.casesRepo.findByStatuses.mockResolvedValue([
+        {
+          id: 'k1',
+          statusConceptId: IDA.CASE_IN_VERIFICATION,
+          subjectTypeConceptId: 's',
+          subjectEntityId: 'e',
+          identityVerificationPolicyId: 'p1',
+          riskScore: '0',
+          openedAt,
+          expiresAt: undefined,
+        },
+      ]);
+      const res = await d.service.listQueue();
+      expect(res.cases).toEqual([
+        {
+          id: 'k1',
+          status: IDA.CASE_IN_VERIFICATION,
+          subjectTypeConceptId: 's',
+          subjectEntityId: 'e',
+          identityVerificationPolicyId: 'p1',
+          riskScore: '0',
+          openedAt,
+          expiresAt: undefined,
+        },
+      ]);
+    });
+
+    it('reads outside the write transaction', async () => {
+      const d = build();
+      await d.service.listQueue();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+  });
+
   describe('openCase (UC-27-02)', () => {
     it('applies the policy assurance level and opens the case', async () => {
       const d = build();

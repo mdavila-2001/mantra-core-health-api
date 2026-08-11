@@ -1,5 +1,43 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
+
+/** Tope de una página de eventos de fusión. */
+const MERGE_EVENTS_MAX_LIMIT = 200;
+const MERGE_EVENTS_DEFAULT_LIMIT = 50;
+
+/**
+ * Query de `GET /profiles/patients/merge-events` (UC-05-09·L).
+ *
+ * Sin filtro devuelve los últimos eventos del tenant. Con `patientProfileId`
+ * devuelve los de esa persona **esté de cualquiera de los dos lados**: quien
+ * revisa un registro sospechoso no sabe si el que mira sobrevivió o fue el
+ * absorbido, y obligarlo a adivinar sería devolverle una lista vacía que se lee
+ * como «esta persona nunca se fusionó».
+ */
+export class ListMergeEventsQueryDto {
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Paciente involucrado, de cualquiera de los dos lados',
+  })
+  @IsOptional()
+  @IsUUID()
+  patientProfileId?: string;
+
+  /**
+   * Valor de limit mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ default: MERGE_EVENTS_DEFAULT_LIMIT, maximum: 200 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(MERGE_EVENTS_MAX_LIMIT)
+  limit?: number;
+}
 
 /** Cuerpo de `POST /profiles/patients/merge` (UC-05-08). */
 export class MergePatientsDto {
@@ -93,3 +131,26 @@ export class MergeEventResponseDto {
   @ApiProperty({ type: String, format: 'date-time' })
   recordedAt!: Date;
 }
+
+/** Respuesta de `GET /profiles/patients/merge-events`. */
+export class ListMergeEventsResponseDto {
+  /**
+   * Eventos de esta página, del más reciente al más antiguo.
+   */
+  @ApiProperty({ type: [MergeEventResponseDto] })
+  items!: MergeEventResponseDto[];
+
+  /**
+   * Cantidad devuelta.
+   */
+  @ApiProperty()
+  count!: number;
+
+  /**
+   * Tope aplicado.
+   */
+  @ApiProperty()
+  limit!: number;
+}
+
+export { MERGE_EVENTS_DEFAULT_LIMIT, MERGE_EVENTS_MAX_LIMIT };

@@ -1,14 +1,26 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IdentityCasesService } from '../services';
 import {
   OpenCaseDto,
@@ -24,6 +36,7 @@ import {
   ManualReviewResponseDto,
   AssertionResponseDto,
   ExpireSweepResponseDto,
+  CaseQueueResponseDto,
 } from '../dto';
 
 /**
@@ -40,6 +53,36 @@ export class IdentityCasesController {
    * @param casesService - Valor de cases service requerido por la operación.
    */
   constructor(private readonly casesService: IdentityCasesService) {}
+
+  /**
+   * La cola de revisión. Es la única lectura de esta superficie: habilita
+   * UC-27-08/09 sobre casos que el revisor descubre acá, en vez de exigirle
+   * que ya conozca el id.
+   *
+   * Restringida a `SECURITY_ADMIN` como el resto del controller. El rol es el
+   * único límite real: la tabla no tiene `tenant_id` y el RLS no la alcanza
+   * (ver `IdentityCasesService.listQueue`).
+   */
+  @Get()
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar los casos que esperan revisión' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description:
+      'Concepto de estado a listar; por defecto, los que esperan revisión',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Casos por página (por defecto 50)',
+  })
+  listQueue(
+    @Query('status', new ParseUUIDPipe({ optional: true })) status?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<CaseQueueResponseDto> {
+    return this.casesService.listQueue(status, limit);
+  }
 
   /** UC-27-12 (barrido programado). Declarado antes que las rutas con `:id`. */
   @Post('expire-sweep')

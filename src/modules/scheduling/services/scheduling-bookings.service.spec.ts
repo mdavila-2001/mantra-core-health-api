@@ -47,6 +47,12 @@ function build() {
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
+  // La confirmación crea la cita clínica que respalda la reserva: sin este doble
+  // no hay nada que enlazar en `appointment_id`.
+  const appointmentsRepo = {
+    create: mockFn(() => ({ id: 'appt-1' })),
+    findById: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new SchedulingBookingsService(
@@ -54,9 +60,17 @@ function build() {
     bookingsRepo as any,
     catalogRepo as any,
     historyRepo as any,
+    appointmentsRepo as any,
     logger as any,
   );
-  return { service, tx, bookingsRepo, catalogRepo, historyRepo };
+  return {
+    service,
+    tx,
+    bookingsRepo,
+    catalogRepo,
+    historyRepo,
+    appointmentsRepo,
+  };
 }
 
 /**
@@ -211,6 +225,75 @@ describe('SchedulingBookingsService', () => {
       expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
       expect(hold.statusConceptId).toBe(CONCEPTS.HOLD_CONSUMED);
       expect(res.remindersScheduled).toBe(0);
+    });
+
+    /**
+     * P13: `clinical.appointments` era una tabla que nadie escribía, así que
+     * `appointment_id` de la reserva estaba siempre vacío y el encuentro que se
+     * abriera al atender nunca podía decir de qué turno venía.
+     */
+    it('crea la cita clínica y la enlaza a la reserva', async () => {
+      const d = build();
+      const slot = openSlot({ remainingCapacity: 1 });
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+
+      await d.service.confirmBooking('token', dto, actor);
+
+      expect(d.appointmentsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          patientProfileId: dto.patientProfileId,
+          tenantId: dto.tenantId,
+          startAt: slot.startAt,
+        }),
+      );
+      expect(d.bookingsRepo.createBooking).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ appointmentId: 'appt-1' }),
+      );
+    });
+
+    /**
+     * El profesional de la cita sale del recurso, pero **sólo si el recurso es
+     * de un profesional**: copiar el id de una sala sería una clave foránea rota
+     * y un dato falso.
+     */
+    it('copia el profesional cuando el recurso es de uno', async () => {
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        resourceRefType: 'practitioner_profiles',
+        resourceRefId: 'hp-1',
+      });
+
+      await d.service.confirmBooking('token', dto, actor);
+
+      expect(d.appointmentsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ practitionerProfileId: 'hp-1' }),
+      );
+    });
+
+    it('una sala no deja profesional en la cita', async () => {
+      const d = build();
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue(activeHold());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        resourceRefType: 'care_spaces',
+        resourceRefId: 'sala-1',
+      });
+
+      await d.service.confirmBooking('token', dto, actor);
+
+      expect(d.appointmentsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.not.objectContaining({ practitionerProfileId: 'sala-1' }),
+      );
     });
 
     it('schedules the requested reminders relative to the slot start', async () => {

@@ -28,6 +28,7 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
 } from '../../profiles/repositories';
+import { composePersonDisplayName } from '../../profiles/person-name';
 import {
   ContactPointsRepository,
   IdentifiersRepository,
@@ -182,8 +183,13 @@ export class IamPatientSelfRegistrationService {
       }
 
       // 1) Cuenta ACTIVA con su contraseña definitiva.
+      // El nombre para mostrar sale de las partes; si el cliente mandó la forma
+      // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
+      // -la cuenta y la persona- para que no puedan divergir.
+      const displayName = composeDisplayName(dto);
+
       const user = this.usersRepo.create(tx, {
-        displayName: dto.displayName,
+        displayName,
         statusConceptId: CONCEPTS.USER_ACTIVE,
         mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
         timeZone: dto.timeZone,
@@ -202,12 +208,25 @@ export class IamPatientSelfRegistrationService {
         roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
         actorUserId: user.id,
       });
+      // `PATIENT` es lo que exigen los endpoints de autoservicio del portal
+      // (reserva de turnos, entre otros). `USER` sigue siendo el rol base de
+      // toda cuenta; este se suma porque quien se auto-registra por esta vía es,
+      // por definición, el titular de su propio perfil de paciente.
+      this.rolesRepo.create(tx, {
+        userId: user.id,
+        roleConceptId: ROLE_CONCEPT_BY_CODE.PATIENT,
+        actorUserId: user.id,
+      });
 
       // 2) Persona + clasificación + perfil de paciente.
       const person = this.personsRepo.create(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
-        displayName: dto.displayName,
+        name: dto.name,
+        middleName: dto.middleName,
+        lastName: dto.lastName,
+        motherLastName: dto.motherLastName,
+        displayName,
         birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
         // El concepto explícito gana sobre el código: es el escape hatch para
         // clientes que ya manejan el catálogo de terminología.
@@ -475,4 +494,23 @@ export class IamPatientSelfRegistrationService {
       return false;
     }
   }
+}
+
+/**
+ * El nombre para mostrar de la CUENTA (`iam.users.display_name`).
+ *
+ * `profiles.persons` lo deriva solo —lo hace `PersonsRepository.create`, que es
+ * el único punto de inserción—, pero la cuenta es otra tabla en otro esquema y
+ * necesita el mismo valor calculado acá para que las dos no puedan divergir.
+ *
+ * `displayName` explícito gana: es la forma anterior de declarar el nombre y
+ * sigue aceptándose, así que quien la use tiene que ver exactamente lo que
+ * mandó. Nunca devuelve vacío: el DTO exige `name` y `lastName` cuando no viene
+ * `displayName`.
+ *
+ * @param dto - Cuerpo del alta.
+ * @returns El nombre para mostrar de la cuenta.
+ */
+function composeDisplayName(dto: RegisterPatientDto): string {
+  return dto.displayName ?? composePersonDisplayName(dto) ?? '';
 }

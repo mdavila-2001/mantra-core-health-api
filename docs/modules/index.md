@@ -8,14 +8,14 @@
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
-| [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 16 |
+| [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 7 | 8 | 30 | 10 |
 | [`accounting`](accounting.md) | 7 | 7 | 9 | 42 | 8 |
 | [`authz`](authz.md) | 7 | 7 | 14 | 15 | 17 |
 | [`clinical_ext`](clinical_ext.md) | 7 | 7 | 11 | 12 | 8 |
 | [`community`](community.md) | 7 | 8 | 15 | 38 | 16 |
 | [`insurance`](insurance.md) | 7 | 7 | 6 | 29 | 8 |
-| [`clinical`](clinical.md) | 6 | 12 | 12 | 22 | 12 |
+| [`clinical`](clinical.md) | 6 | 12 | 13 | 22 | 12 |
 | [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
 | [`chart`](chart.md) | 5 | 5 | 4 | 11 | 5 |
 | [`common`](common.md) | 5 | 5 | 7 | 7 | 4 |
@@ -68,4 +68,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **198** | **274** | **356** | **1190** | **382** |
+| **Total** | **198** | **274** | **357** | **1190** | **383** |

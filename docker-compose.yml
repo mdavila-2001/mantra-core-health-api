@@ -250,7 +250,10 @@ services:
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # timescaledb-ha usa PGDATA=/home/postgres/pgdata/data, no la ruta de la
+      # imagen oficial de postgres. Montar en /var/lib/postgresql/data dejaba el
+      # volumen vacío y los datos en la capa efímera del contenedor.
+      - postgres_data:/home/postgres/pgdata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -289,10 +292,23 @@ services:
     volumes:
       - mongodb_data:/data/db
     healthcheck:
+      # El timeout mide el arranque de `mongosh`, no la salud de mongod.
+      #
+      # `mongosh` es un binario Node: su arranque en frío cuesta ~1s con la
+      # máquina ociosa, pero medimos ~24s con load ~20 (la que deja `yarn smoke`,
+      # que levanta la app entera y trunca las tablas). Con timeout de 5s el
+      # healthcheck expiraba mientras mongod respondía `ping → ok:1` sin
+      # problema, y como los 20 workers dependen de `service_healthy`, un Mongo
+      # perfectamente sano bloqueaba el `docker compose start` de todos ellos.
+      #
+      # Se ensancha el timeout en vez de aligerar la sonda: la imagen no trae
+      # otro cliente, y comprobar solo el puerto TCP daría "healthy" mientras
+      # mongod aún no acepta consultas — justo lo que `depends_on` debe evitar.
       test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 30s
       retries: 5
+      start_period: 30s
     networks:
       - mantra-redesa-network
 
@@ -314,7 +330,7 @@ services:
       - mantra-redesa-network
 
   redis:
-    image: redis:8.8-alpine
+    image: redis:8.10-alpine
     restart: always
     command: redis-server --save 60 1 --loglevel notice
     ports:
@@ -330,7 +346,7 @@ services:
       - mantra-redesa-network
 
   opensearch:
-    image: opensearchproject/opensearch:3.7.0
+    image: opensearchproject/opensearch:3.8.0
     restart: always
     environment:
       - cluster.name=mantra-redesa-cluster
@@ -363,7 +379,7 @@ services:
   # One-shot: crea los índices del módulo 57 search_platform desde los
   # *.mapping.json solo si no existen.
   opensearch-init:
-    image: curlimages/curl:8.11.1
+    image: curlimages/curl:8.21.0
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:

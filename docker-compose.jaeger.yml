@@ -31,7 +31,7 @@ services:
     # sorpresa en la máquina de nadie. Jaeger v2 está construido sobre el
     # OpenTelemetry Collector y acepta OTLP de forma nativa, que es exactamente
     # lo que exporta el backend (no se usa ningún protocolo propietario).
-    image: jaegertracing/jaeger:2.11.0
+    image: jaegertracing/jaeger:2.20.0
     restart: unless-stopped
     environment:
       # Almacenamiento en memoria acotado: sin límite, una sesión larga de

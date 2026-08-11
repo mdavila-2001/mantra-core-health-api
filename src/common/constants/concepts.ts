@@ -182,6 +182,7 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'Security administrator',
   ),
   ROLE_USER: def('iam:role:user', 'USER', 'Standard user'),
+  ROLE_PATIENT: def('iam:role:patient', 'PATIENT', 'Patient'),
 
   // --- Bloqueo de cuenta (iam.account_lockouts.*) ---
   LOCK_REASON_FAILED_ATTEMPTS: def(

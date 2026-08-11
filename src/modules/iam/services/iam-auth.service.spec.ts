@@ -68,6 +68,16 @@ function build() {
     record: mockFn(),
     countFailedLoginsSince: mockFn().mockResolvedValue(0),
   };
+  // Por defecto, una cuenta sin persona vinculada: los claims `pid` y `hpid` se
+  // omiten y el token queda igual que antes de que existieran. Los casos que los
+  // necesitan sobrescriben estos dobles.
+  const accountLinksRepo = {
+    findActiveByUser: mockFn().mockResolvedValue(null),
+  };
+  const patientProfilesRepo = { findById: mockFn().mockResolvedValue(null) };
+  const practitionerProfilesRepo = {
+    findById: mockFn().mockResolvedValue(null),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new IamAuthService(
@@ -80,6 +90,9 @@ function build() {
     rolesRepo as any,
     lockoutsRepo,
     eventsRepo,
+    accountLinksRepo as any,
+    patientProfilesRepo as any,
+    practitionerProfilesRepo as any,
     logger as any,
     new TracingService(),
   );
@@ -94,6 +107,9 @@ function build() {
     rolesRepo,
     lockoutsRepo,
     eventsRepo,
+    accountLinksRepo,
+    patientProfilesRepo,
+    practitionerProfilesRepo,
   };
 }
 
@@ -127,6 +143,160 @@ describe('IamAuthService', () => {
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_LOGIN }),
+      );
+    });
+
+    it('embeds the patient profile of the account holder as the `pid` claim', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      // `patient_profiles.profile_id` ES `persons.id`: el vínculo lleva la persona
+      // y el perfil se busca por ese mismo id.
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue({ profileId: 'per-1' });
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ patientProfileId: 'per-1' }),
+      );
+    });
+
+    it('omits the patient profile for an account that is not a patient', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      // Personal de salud o administración: hay persona vinculada, pero no perfil
+      // de paciente. El claim tiene que quedar afuera, no venir vacío.
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-2',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue(null);
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ patientProfileId: undefined }),
+      );
+    });
+
+    it('embeds the practitioner profile of the account holder as the `hpid` claim', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      // Misma cadena que el perfil de paciente sobre la otra tabla:
+      // `health_practitioner_profiles.profile_id` ES `persons.id`.
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-3',
+      });
+      d.practitionerProfilesRepo.findById.mockResolvedValue({
+        profileId: 'per-3',
+      });
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ practitionerProfileId: 'per-3' }),
+      );
+    });
+
+    it('omits the practitioner profile for an account that is not a practitioner', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.practitionerProfilesRepo.findById.mockResolvedValue(null);
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ practitionerProfileId: undefined }),
+      );
+    });
+
+    /**
+     * Los dos perfiles no se excluyen: nada impide que quien atiende sea además
+     * paciente de la institución. Si un claim tapara al otro, el portal de esa
+     * persona perdería una de sus dos mitades.
+     */
+    it('embeds both profiles when the holder is patient and practitioner', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-4',
+      });
+      d.patientProfilesRepo.findById.mockResolvedValue({ profileId: 'per-4' });
+      d.practitionerProfilesRepo.findById.mockResolvedValue({
+        profileId: 'per-4',
+      });
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD });
+
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          patientProfileId: 'per-4',
+          practitionerProfileId: 'per-4',
+        }),
       );
     });
 

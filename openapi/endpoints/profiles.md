@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 15 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 16 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-patients`, `profiles-practitioners`
 - **Controladores:** `ProfilesPatientsController`, `ProfilesPractitionersController`
@@ -20,12 +20,13 @@ Referencia exhaustiva de 15 operación(es) del módulo `profiles`, derivada del 
 7. [POST /profiles/patients/{profileId}/related-persons](#7-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
 8. [GET /profiles/patients/me/summary](#8-get-profiles-patients-me-summary) — Consultar el resumen propio (requiere identidad verificada)
 9. [POST /profiles/patients/merge](#9-post-profiles-patients-merge) — Fusionar pacientes duplicados
-10. [POST /profiles/patients/merge/{eventId}/reverse](#10-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
-11. [POST /profiles/persons/{personId}/account-links](#11-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
-12. [POST /profiles/persons/{personId}/decease](#12-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-13. [POST /profiles/practitioners](#13-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-14. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#14-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-15. [POST /profiles/practitioners/{profileId}/specialties](#15-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+10. [GET /profiles/patients/merge-events](#10-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
+11. [POST /profiles/patients/merge/{eventId}/reverse](#11-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
+12. [POST /profiles/persons/{personId}/account-links](#12-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
+13. [POST /profiles/persons/{personId}/decease](#13-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
+14. [POST /profiles/practitioners](#14-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+15. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#15-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+16. [POST /profiles/practitioners/{profileId}/specialties](#16-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
 
 ---
 
@@ -1274,7 +1275,132 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /profiles/patients/merge/{eventId}/reverse
+## 10. GET /profiles/patients/merge-events
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Listar eventos de fusión de pacientes
+- **Operation ID:** `ProfilesPatientsController_listMergeEvents`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.listMergeEvents](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+Devuelve el `id` que exige POST /profiles/patients/merge/{eventId}/reverse. Sin esta lectura, una fusión sólo era reversible mientras la respuesta del POST siguiera a la vista.
+
+Contexto declarado en el controlador: UC-05-09·L. Va **antes** que `patients/:profileId` en el archivo por lo de siempre con las rutas de Nest: se resuelven por orden de declaración, y `merge-events` encajaría en el parámetro y devolvería un 400 por uuid mal formado en vez de la lista.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/merge-events` en `ProfilesPatientsController_listMergeEvents`. El controlador delega en `ProfilesPatientsService.listMergeEvents`. No recibe body. El tipo de retorno estático es `Promise<ListMergeEventsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | query | No | `string` | formato `uuid` | Paciente involucrado, de cualquiera de los dos lados | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/merge-events HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/merge-events?patientProfileId=00000000-0000-4000-8000-000000000001&limit=50 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListMergeEventsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListMergeEventsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "survivingPatientProfileId": "00000000-0000-4000-8000-000000000001",
+      "mergedPatientProfileId": "00000000-0000-4000-8000-000000000001",
+      "decisionStatus": "00000000-0000-4000-8000-000000000001",
+      "reversalOfEventId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MergeEventResponseDto>` | Sin restricción adicional declarada | Eventos de esta página, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","survivingPatientProfileId":"00000000-0000-4000-8000-000000000001","mergedPatientProfileId":"00000000-0000-4000-8000-000000000001","decisionStatus":"00000000-0000-4000-8000-000000000001","reversalOfEventId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].survivingPatientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a surviving patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].mergedPatientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a merged patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decisionStatus` | Sí | `string` | formato `uuid` | Concept id del estado de la decisión | `00000000-0000-4000-8000-000000000001` |
+| `items[].reversalOfEventId` | No | `string` | formato `uuid` | Evento original revertido (si aplica) | `00000000-0000-4000-8000-000000000001` |
+| `items[].recordedAt` | Sí | `string` | formato `date-time` | Valor de recorded at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/merge-events"
+}
+```
+
+---
+
+## 11. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1408,7 +1534,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /profiles/persons/{personId}/account-links
+## 12. POST /profiles/persons/{personId}/account-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1543,7 +1669,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /profiles/persons/{personId}/decease
+## 13. POST /profiles/persons/{personId}/decease
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1678,7 +1804,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /profiles/practitioners
+## 14. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -1835,7 +1961,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 15. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -1977,7 +2103,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /profiles/practitioners/{profileId}/specialties
+## 16. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
