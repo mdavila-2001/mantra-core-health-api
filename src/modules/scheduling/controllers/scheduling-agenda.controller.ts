@@ -1,8 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../common';
 import { SchedulingAgendaService } from '../services';
 import {
+  BookingDetailDto,
+  ListBookingsQueryDto,
+  ListBookingsResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -52,5 +55,31 @@ export class SchedulingAgendaController {
   })
   listSlots(@Query() query: ListSlotsQueryDto): Promise<ListSlotsResponseDto> {
     return this.agendaService.listSlots(query);
+  }
+
+  /** Citas que cumplen el filtro, ordenadas por el instante del cupo. */
+  @Get('bookings')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({
+    summary: 'Listar citas por paciente, recurso, estado o ventana',
+  })
+  listBookings(
+    @Query() query: ListBookingsQueryDto,
+  ): Promise<ListBookingsResponseDto> {
+    return this.agendaService.listBookings(query);
+  }
+
+  /** Detalle de una cita, con su snapshot de cancelación y recordatorios. */
+  @Get('bookings/:id')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({
+    summary: 'Consultar una cita',
+    description:
+      'Incluye el snapshot de cancelación aceptado al confirmar: es lo que gobierna si cancelar genera cargo.',
+  })
+  getBooking(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BookingDetailDto> {
+    return this.agendaService.getBooking(id);
   }
 }

@@ -1,11 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { CONCEPTS, PreconditionFailedException } from '../../../common';
+import {
+  CONCEPTS,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
 import { SchedulingAgendaRepository } from '../repositories';
-import type { BookableSlots, SchedulableResources } from '../entities';
+import type {
+  AppointmentBookings,
+  AppointmentReminders,
+  BookableSlots,
+  CancellationPolicySnapshot,
+  SchedulableResources,
+} from '../entities';
 import {
   AGENDA_MAX_LIMIT,
+  BookingDetailDto,
+  BookingListItemDto,
+  BookingReminderDto,
+  ListBookingsQueryDto,
+  ListBookingsResponseDto,
   ListResourcesQueryDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
@@ -109,6 +124,68 @@ export class SchedulingAgendaService {
   }
 
   /** Citas que cumplen el filtro, ordenadas por el instante del cupo. */
+  async listBookings(
+    query: ListBookingsQueryDto,
+  ): Promise<ListBookingsResponseDto> {
+    const from = query.from ? new Date(query.from) : undefined;
+    const to = query.to ? new Date(query.to) : undefined;
+    if (from && to) this.assertWindow(from, to);
+
+    const limit = query.limit ?? DEFAULT_LIMIT;
+    const em = this.em.fork();
+    const rows = await this.agendaRepo.findBookingsWithSlot(
+      em,
+      {
+        tenantId: query.tenantId,
+        patientProfileId: query.patientProfileId,
+        resourceId: query.resourceId,
+        statusConceptId: query.statusConceptId,
+      },
+      { from, to },
+      limit,
+    );
+
+    const truncated = rows.length > limit;
+    const items = rows
+      .slice(0, limit)
+      .map(({ booking, slot }) => this.toBookingItem(booking, slot));
+    return { items, count: items.length, limit, truncated };
+  }
+
+  /**
+   * Detalle de una cita, con el snapshot de cancelación y sus recordatorios.
+   *
+   * El snapshot se devuelve porque es lo que gobierna si cancelar genera cargo:
+   * mostrar la política vigente en su lugar podría anunciar condiciones que el
+   * paciente nunca aceptó.
+   */
+  async getBooking(bookingId: string): Promise<BookingDetailDto> {
+    const em = this.em.fork();
+    const booking = await this.agendaRepo.findBookingById(em, bookingId);
+    if (!booking) {
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
+    }
+
+    const slot = await this.agendaRepo.findSlotById(em, booking.bookableSlotId);
+    const reminders = await this.agendaRepo.findRemindersByBooking(
+      em,
+      bookingId,
+    );
+
+    return {
+      ...this.toBookingItem(booking, slot),
+      bookingPolicyId: booking.bookingPolicyId ?? null,
+      // La columna es jsonb (`unknown` en la entidad generada); el contrato vive
+      // en appointment_bookings.types.ts y quien escribió el snapshot lo honró.
+      cancellationPolicySnapshot:
+        (booking.cancellationPolicySnapshot as
+          | CancellationPolicySnapshot
+          | undefined) ?? null,
+      reminders: reminders.map((reminder) => this.toReminder(reminder)),
+    };
+  }
+
+  /** Rechaza ventanas invertidas o más largas que el tope. */
   private assertWindow(from: Date, to: Date): void {
     if (from >= to) {
       throw new PreconditionFailedException(
@@ -152,6 +229,38 @@ export class SchedulingAgendaService {
       remainingCapacity: slot.remainingCapacity,
       statusConceptId: slot.statusConceptId,
       serviceConceptId: slot.serviceConceptId ?? null,
+    };
+  }
+
+  /** Proyecta la cita, resolviendo el instante desde su cupo. */
+  private toBookingItem(
+    booking: AppointmentBookings,
+    slot: BookableSlots | null,
+  ): BookingListItemDto {
+    return {
+      id: booking.id,
+      tenantId: booking.tenantId,
+      patientProfileId: booking.patientProfileId,
+      bookableSlotId: booking.bookableSlotId,
+      resourceId: booking.resourceId ?? null,
+      startAt: slot?.startAt.toISOString() ?? null,
+      endAt: slot?.endAt.toISOString() ?? null,
+      statusConceptId: booking.statusConceptId,
+      bookingChannelConceptId: booking.bookingChannelConceptId,
+      reasonText: booking.reasonText ?? null,
+      confirmedAt: booking.confirmedAt?.toISOString() ?? null,
+      checkedInAt: booking.checkedInAt?.toISOString() ?? null,
+    };
+  }
+
+  /** Proyecta el recordatorio al contrato de lectura. */
+  private toReminder(reminder: AppointmentReminders): BookingReminderDto {
+    return {
+      id: reminder.id,
+      offsetMinutes: reminder.offsetMinutes,
+      scheduledAt: reminder.scheduledAt.toISOString(),
+      channelConceptId: reminder.channelConceptId,
+      statusConceptId: reminder.statusConceptId,
     };
   }
 }

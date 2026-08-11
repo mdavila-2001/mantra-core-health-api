@@ -166,6 +166,107 @@ describe('Agenda — recorrido del frontend contra la API real (integración)', 
     expect(again.body.skipped).toBeGreaterThan(0);
   });
 
+  it('reserva de punta a punta usando sólo lo que la API expone', async () => {
+    const from = nextMondayUtc();
+    const to = new Date(from.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    // 1. El front descubre el cupo. Sin este GET no hay `slotId` que reservar.
+    const slots = await http()
+      .get('/scheduling/slots')
+      .query({
+        resourceId,
+        from: from.toISOString(),
+        to: to.toISOString(),
+        onlyAvailable: 'true',
+      })
+      .set(bearer(ctx.adminToken))
+      .expect(200);
+    const slotId = slots.body.items[0].id;
+
+    // 2. Lo bloquea temporalmente.
+    const hold = await http()
+      .post(`/scheduling/slots/${slotId}/holds`)
+      .set(bearer(ctx.adminToken))
+      .send({ patientProfileId })
+      .expect(201);
+    expect(hold.body.remainingCapacity).toBe(0);
+
+    // 3. Anti-double-booking: el mismo cupo ya no admite otro hold.
+    await http()
+      .post(`/scheduling/slots/${slotId}/holds`)
+      .set(bearer(ctx.adminToken))
+      .send({ patientProfileId })
+      .expect(409);
+
+    // 4. Confirma con recordatorios. Antes del arreglo, los recordatorios se
+    //    insertaban antes que la cita y esto era un 500.
+    const booking = await http()
+      .post(`/scheduling/holds/${hold.body.holdToken}/confirm`)
+      .set(bearer(ctx.adminToken))
+      .send({
+        tenantId,
+        patientProfileId,
+        channel: 'PORTAL',
+        reasonText: 'Control de integración',
+        reminderOffsetsMinutes: [1440, 120],
+      })
+      .expect(201);
+    expect(booking.body.remindersScheduled).toBe(2);
+
+    // 5. El hold consumido no se puede reutilizar.
+    await http()
+      .post(`/scheduling/holds/${hold.body.holdToken}/confirm`)
+      .set(bearer(ctx.adminToken))
+      .send({ tenantId, patientProfileId, channel: 'PORTAL' })
+      .expect(409);
+
+    // 6. La cita se lee, con el instante resuelto desde su cupo y los
+    //    recordatorios realmente persistidos.
+    const detail = await http()
+      .get(`/scheduling/bookings/${booking.body.id}`)
+      .set(bearer(ctx.adminToken))
+      .expect(200);
+    expect(detail.body.bookableSlotId).toBe(slotId);
+    expect(detail.body.startAt).not.toBeNull();
+    expect(detail.body.reminders).toHaveLength(2);
+    // El snapshot de cancelación se congela al confirmar (CAN-APT-001): es lo
+    // que el front debe mostrar al ofrecer cancelar.
+    expect(detail.body.cancellationPolicySnapshot).toMatchObject({
+      cancellationWindowMinutes: 60,
+    });
+
+    // 7. Y aparece al listar las citas del paciente.
+    const list = await http()
+      .get('/scheduling/bookings')
+      .query({ patientProfileId })
+      .set(bearer(ctx.adminToken))
+      .expect(200);
+    expect(list.body.items.map((b: { id: string }) => b.id)).toContain(
+      booking.body.id,
+    );
+
+    // 8. Cancelar devuelve el cupo, y el cupo vuelve a ofrecerse.
+    await http()
+      .post(`/scheduling/bookings/${booking.body.id}/cancel`)
+      .set(bearer(ctx.adminToken))
+      .send({ cancelledBy: 'PATIENT' })
+      .expect(200);
+
+    const afterCancel = await http()
+      .get('/scheduling/slots')
+      .query({
+        resourceId,
+        from: from.toISOString(),
+        to: to.toISOString(),
+        onlyAvailable: 'true',
+      })
+      .set(bearer(ctx.adminToken))
+      .expect(200);
+    expect(afterCancel.body.items.map((s: { id: string }) => s.id)).toContain(
+      slotId,
+    );
+  });
+
   it('onlyAvailable=false no filtra: `Boolean("false")` es `true` y aquí no puede serlo', async () => {
     const from = nextMondayUtc();
     const to = new Date(from.getTime() + 7 * 24 * 60 * 60 * 1000);
