@@ -66,8 +66,6 @@
     "smoke": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-smoke.json",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest-cli/bin/jest.js --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "openapi:generate": "yarn build && node tools/documentation/generate-openapi.js",
-    "openapi:validate": "node tools/documentation/validate-openapi.js",
     "orm": "mikro-orm",
     "docs:tsdoc": "node tools/documentation/generate-documentation.mjs",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
@@ -93,6 +91,7 @@
     "docs:links": "node tools/docs/check-doc-links.mjs",
     "docs:asyncapi:validate": "node tools/asyncapi/validate.mjs asyncapi/asyncapi.yaml",
     "docs:validate": "yarn docs:openapi:lint && yarn docs:asyncapi:validate && yarn docs:coverage && yarn docs:links",
+    "docs:tsdoc:backfill": "node tools/documentation/generate-documentation.mjs",
     "docs:serve": "python3 -m mkdocs serve",
     "docs:build": "python3 -m mkdocs build --strict",
     "postman:generate": "python3 tools/postman/generate_postman.py",
@@ -105,7 +104,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",
-    "@casl/ability": "^7.0.1",
     "@mikro-orm/core": "^7.1.7",
     "@mikro-orm/decorators": "^7.1.7",
     "@mikro-orm/nestjs": "^7.0.2",
@@ -116,7 +114,6 @@
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
-    "@nestjs/mapped-types": "^2.1.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.1.3",
@@ -151,7 +148,6 @@
     "luxon": "^3.7.2",
     "mongodb": "^7.5.0",
     "nestjs-pino": "^4.6.1",
-    "openid-client": "^6.8.4",
     "otplib": "^13.4.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -161,8 +157,7 @@
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "uuid": "^14.0.1",
-    "wkx": "^0.5.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@asyncapi/parser": "^3.6.1",

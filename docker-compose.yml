@@ -289,10 +289,23 @@ services:
     volumes:
       - mongodb_data:/data/db
     healthcheck:
+      # El timeout mide el arranque de `mongosh`, no la salud de mongod.
+      #
+      # `mongosh` es un binario Node: su arranque en frío cuesta ~1s con la
+      # máquina ociosa, pero medimos ~24s con load ~20 (la que deja `yarn smoke`,
+      # que levanta la app entera y trunca las tablas). Con timeout de 5s el
+      # healthcheck expiraba mientras mongod respondía `ping → ok:1` sin
+      # problema, y como los 20 workers dependen de `service_healthy`, un Mongo
+      # perfectamente sano bloqueaba el `docker compose start` de todos ellos.
+      #
+      # Se ensancha el timeout en vez de aligerar la sonda: la imagen no trae
+      # otro cliente, y comprobar solo el puerto TCP daría "healthy" mientras
+      # mongod aún no acepta consultas — justo lo que `depends_on` debe evitar.
       test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 30s
       retries: 5
+      start_period: 30s
     networks:
       - mantra-redesa-network
 

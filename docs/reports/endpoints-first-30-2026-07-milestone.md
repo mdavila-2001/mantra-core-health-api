@@ -1,6 +1,6 @@
 > **Superado.** Este documento fija un hito histórico (primeros 30 endpoints, julio 2026). El
 > contrato completo y vigente (841 operaciones reales) es
-> [`openapi/openapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/openapi/openapi.yaml),
+> [`openapi/openapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/openapi/openapi.yaml),
 > navegable en `/reference` (Scalar) o
 > `/docs` (Swagger UI) con el servidor local arriba. Ver
 > [`docs/reports/openapi-generation-notes.md`](openapi-generation-notes.md). Se conserva aquí solo

@@ -7,7 +7,7 @@
 
 Ningún cambio a rutas, DTO, entidades, permisos, eventos o configuración se mergea sin actualizar
 la documentación asociada — impuesto por la casilla documental de
-[`.github/PULL_REQUEST_TEMPLATE.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
+[`.github/PULL_REQUEST_TEMPLATE.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
 y verificado por CI (`.github/workflows/docs.yml`).
 
 ## Fuente de verdad por tipo de contenido
