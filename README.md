@@ -59,7 +59,7 @@ $ yarn run test:cov
 
 ## Trazabilidad distribuida (OpenTelemetry → Jaeger)
 
-Los 21 procesos del backend (API + 20 workers) exportan trazas por OTLP. Está **apagada por
+Los 22 procesos del backend (API + 21 workers) exportan trazas por OTLP. Está **apagada por
 defecto**: activarla es una decisión explícita del operador.
 
 ```bash

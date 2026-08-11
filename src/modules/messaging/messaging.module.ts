@@ -43,6 +43,6 @@ import {
   // `NotificationsService` se exporta para que otros dominios puedan pedir un
   // envío (p. ej. IAM al verificar el correo del auto-registro) sin duplicar la
   // lógica de consentimiento, rebote y evidencia que vive aquí.
-  exports: [OutboxService, NotificationsService],
+  exports: [OutboxService, QueuesService, NotificationsService],
 })
 export class MessagingModule {}

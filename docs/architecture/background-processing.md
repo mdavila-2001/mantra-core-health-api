@@ -1,13 +1,13 @@
 # Procesamiento en segundo plano
 
-> Fase 10. 20 procesos worker, cada uno documentado con evidencia de código
+> Fase 10. Inventario actualizado: 21 procesos worker, cada uno documentado con evidencia de código
 > (`src/worker-<dominio>.ts`, `src/worker/jobs/<dominio>/`).
 
 ## Modelo de ejecución
 
 Cada worker es un **`NestFactory.createApplicationContext`** independiente (no HTTP, sin
 `listen()`), arrancado por `bootstrapWorker()` (`src/worker/bootstrap.ts`) con
-`@nestjs/schedule` (`ScheduleModule.forRoot()`) para los ticks periódicos. Comparten:
+un bootstrap común. La mayoría ejecuta ticks periódicos con `@nestjs/schedule`; `worker-audio-assets` consume de forma persistente la cola durable `audio-generation`. Comparten:
 
 - `AuthModule` — autenticación de servicio para llamar a la API.
 - `SystemApiClientModule` — cliente HTTP hacia `WORKER_API_BASE_URL` (`/internal/*`),
@@ -27,10 +27,11 @@ flowchart TB
   API --> DB[(PostgreSQL y demás almacenes)]
 ```
 
-## Los 20 workers
+## Los 21 workers
 
 | Worker | Dominio | Job real (`src/worker/jobs/<dominio>/`) |
 |---|---|---|
+| `worker-audio-assets` | `audio_assets` | Consume `audio-generation`: TTS, storage propio y confirmación idempotente |
 | `worker-automation` | `automation` | Ticks de reglas de automatización |
 | `worker-billing` | `billing` | Dunning (cobranza), facturación periódica |
 | `worker-consent` | `consent` | Barrido de expiración de consentimientos (`UC-07-11`) |
@@ -55,7 +56,7 @@ flowchart TB
 **Añadidos durante esta auditoría** (no presentes en el inventario original de Fase 1-12,
 incorporados en un commit paralelo al trabajo documental — ver
 [nota de reconciliación](../reports/final-validation.md)): `worker-vector_rag`,
-`worker-lakehouse`, `worker-time_series`. Confirma el patrón: cada uno de los tres dominios que
+`worker-lakehouse`, `worker-time_series`. Posteriormente, el 2026-08-10, se añadió `worker-audio-assets` como consumidor persistente de la cola `audio-generation`, con evidencia en `src/worker-audio-assets.ts` y `src/worker/jobs/audio_assets/`. Confirma el patrón: cada uno de los tres dominios que
 más eventos de dominio publican ([catálogo de eventos](../events/event-catalog.md) — `vector_rag`
 16, `lakehouse` 12) terminó necesitando su propio worker, coherente con el resto del sistema.
 
@@ -73,7 +74,7 @@ colas y eventos: Fase 12 (AsyncAPI).
 
 ## Brecha operativa conocida
 
-`ESTADO-Y-PENDIENTES.md` (P0) documenta que la infraestructura base de los 20 workers ya existe,
+`ESTADO-Y-PENDIENTES.md` (P0) documenta que la infraestructura base de los 21 workers ya existe,
 pero varios jobs siguen dependiendo de completar llamadas externas periódicas (planificadores de
 `reporting`, `automation`, `qa_lab`, `health_context`; reconciliación de `cross_store_consistency`,
 `graph_intelligence`, `vector_rag`, `lakehouse`, `time_series`). No se documenta aquí como

@@ -142,6 +142,7 @@ export type {
   StoredFileInput,
 } from './storage/file-storage.adapter';
 export { LocalDiskFileStorageAdapter } from './storage/local-disk-file-storage.adapter';
+export { S3FileStorageAdapter } from './storage/s3-file-storage.adapter';
 export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
 export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
 export { appSecurityEnvSchema } from './security/app-security.env';
