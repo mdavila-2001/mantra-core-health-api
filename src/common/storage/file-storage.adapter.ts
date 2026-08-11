@@ -38,15 +38,18 @@ export interface StoredFile {
  * guardan la metadata y una `storageUri` opaca, y este adaptador es el único
  * que sabe qué significa esa URI.
  *
- * Se elige por `FILE_STORAGE_ADAPTER` en `FileStorageModule`. Hoy sólo existe
- * el adaptador local en disco; un `S3FileStorageAdapter` entraría aquí sin
- * tocar servicios ni controladores.
+ * Se elige por `FILE_STORAGE_ADAPTER` en `FileStorageModule`. Las implementaciones actuales son disco local y S3 compatible; los llamadores
+ * sólo persisten la URI opaca y nunca conocen el proveedor concreto.
  */
 export interface FileStorageAdapter {
   /** Persiste el contenido y describe lo que quedó almacenado. */
   store(input: StoredFileInput): Promise<StoredFile>;
   /** Recupera el contenido previamente almacenado bajo esa URI. */
   retrieve(storageUri: string): Promise<Buffer>;
+  /** Comprueba existencia sin exponer detalles del proveedor. */
+  exists(storageUri: string): Promise<boolean>;
+  /** Elimina de forma idempotente un objeto cuya URI pertenece al adaptador. */
+  delete(storageUri: string): Promise<void>;
 }
 
 /** Token de inyección del adaptador activo. */

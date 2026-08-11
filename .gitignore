@@ -93,6 +93,9 @@ CLAUDE.md
 # Salidas del smoke test (artefactos generados)
 /output.smoke.test.json
 /output.smoke.test.csv
+# Reporte de la siembra de datos de desarrollo (`yarn seed:dev`): es el
+# resultado de una corrida concreta contra una base concreta, no fuente.
+/output.seed-dev.json
 site/
 dist-docs/
 
@@ -102,3 +105,4 @@ dist-docs/
 # Salida del pipeline legacy `yarn openapi:generate`, que duplica el contrato ya
 # versionado en `openapi/`. El contrato bueno lo produce `yarn docs:openapi:generate`.
 docs/endpoints/
+.yarn/install-state.gz

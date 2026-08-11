@@ -766,15 +766,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@casl/ability@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "@casl/ability@npm:7.0.1"
-  dependencies:
-    "@ucast/mongo2js": "npm:^2.0.0"
-  checksum: 10c0/87b7a66b9c5a62a8d413efa858ffb80d103b41eae07f9b62c1c0a61a3641c83bf6374a02fc449b1f958e282205abef95a41738f648447f60415e72ec89d899d6
-  languageName: node
-  linkType: hard
-
 "@colors/colors@npm:1.5.0":
   version: 1.5.0
   resolution: "@colors/colors@npm:1.5.0"
@@ -2180,7 +2171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/mapped-types@npm:2.1.1, @nestjs/mapped-types@npm:^2.1.1":
+"@nestjs/mapped-types@npm:2.1.1":
   version: 2.1.1
   resolution: "@nestjs/mapped-types@npm:2.1.1"
   peerDependencies:
@@ -4324,42 +4315,6 @@ __metadata:
     "@typescript-eslint/types": "npm:8.65.0"
     eslint-visitor-keys: "npm:^5.0.0"
   checksum: 10c0/f50cf2da4077f8eebfd56658ede17dfbf2e39875dc53562f5c1bc6e9835a0b4b00e0e0255e2dc3488234aca1f783d89beb084c417b22027520bf015a7b59ffb8
-  languageName: node
-  linkType: hard
-
-"@ucast/core@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@ucast/core@npm:2.0.0"
-  checksum: 10c0/52f29f94d12f932490524fceab5cfde195d98476246ab56e04922302cf4987c8d32f7e4b02e12a03be582f6a70b7021b90010c3dcb17e94fee42cc1a48730220
-  languageName: node
-  linkType: hard
-
-"@ucast/js@npm:4.0.1":
-  version: 4.0.1
-  resolution: "@ucast/js@npm:4.0.1"
-  dependencies:
-    "@ucast/core": "npm:2.0.0"
-  checksum: 10c0/13e640a877f330e1966ceacb791748bb447ed57a55534861d7549fe35152d9f78894ad82e827905c20aee91472668a961d75609f149bf45dd2f7d61e1a454f25
-  languageName: node
-  linkType: hard
-
-"@ucast/mongo2js@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@ucast/mongo2js@npm:2.0.0"
-  dependencies:
-    "@ucast/core": "npm:2.0.0"
-    "@ucast/js": "npm:4.0.1"
-    "@ucast/mongo": "npm:3.0.0"
-  checksum: 10c0/788548712d0dffbf59509eb8c6fcae9277cbb53db66ce7e642a7d09980fd7ccc03ffbd73a1e472de2be19c07289c4e339dab7199b5dd8f65b6349c577e9c127a
-  languageName: node
-  linkType: hard
-
-"@ucast/mongo@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@ucast/mongo@npm:3.0.0"
-  dependencies:
-    "@ucast/core": "npm:2.0.0"
-  checksum: 10c0/94a677ccda25d2340f89b6b62d7f98c2eeb788039fbac0c3f8beaa77ab7959b2904c696f30d6d56d419a9d60e372deeb13d99e9e2e7859bca20af3bcc3001197
   languageName: node
   linkType: hard
 
@@ -8499,13 +8454,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^6.2.2":
-  version: 6.2.4
-  resolution: "jose@npm:6.2.4"
-  checksum: 10c0/aaba866d71a8cd5bfd7c2c228367318df99f36318d7c6f1e7bca835c3bdd74ea3fe38783277f7bf7c9703ae24338bb3642a6ccdef6aa54c006d29a9711e6f782
-  languageName: node
-  linkType: hard
-
 "js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -8955,7 +8903,6 @@ __metadata:
   dependencies:
     "@asyncapi/parser": "npm:^3.6.1"
     "@aws-sdk/client-s3": "npm:^3.1092.0"
-    "@casl/ability": "npm:^7.0.1"
     "@eslint/eslintrc": "npm:^3.2.0"
     "@eslint/js": "npm:^9.18.0"
     "@mikro-orm/cli": "npm:^7.1.7"
@@ -8971,7 +8918,6 @@ __metadata:
     "@nestjs/config": "npm:^4.0.4"
     "@nestjs/core": "npm:^11.0.1"
     "@nestjs/jwt": "npm:^11.0.2"
-    "@nestjs/mapped-types": "npm:^2.1.1"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.0.1"
     "@nestjs/schedule": "npm:^6.1.3"
@@ -9030,7 +8976,6 @@ __metadata:
     luxon: "npm:^3.7.2"
     mongodb: "npm:^7.5.0"
     nestjs-pino: "npm:^4.6.1"
-    openid-client: "npm:^6.8.4"
     otplib: "npm:^13.4.1"
     passport: "npm:^0.7.0"
     passport-jwt: "npm:^4.0.1"
@@ -9049,7 +8994,6 @@ __metadata:
     typescript: "npm:^5.7.3"
     typescript-eslint: "npm:^8.20.0"
     uuid: "npm:^14.0.1"
-    wkx: "npm:^0.5.0"
   languageName: unknown
   linkType: soft
 
@@ -9522,13 +9466,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oauth4webapi@npm:^3.8.5":
-  version: 3.8.6
-  resolution: "oauth4webapi@npm:3.8.6"
-  checksum: 10c0/479810716702c5616e4a0eb80d4f1c264a6a2b63b04061a62a59375e195d2726e947507ede98e41ee3f9ca800f159621ea371c36f5c4346d015b6ec03e477440
-  languageName: node
-  linkType: hard
-
 "object-assign@npm:^4":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -9595,16 +9532,6 @@ __metadata:
   dependencies:
     mimic-fn: "npm:^2.1.0"
   checksum: 10c0/ffcef6fbb2692c3c40749f31ea2e22677a876daea92959b8a80b521d95cca7a668c884d8b2045d1d8ee7d56796aa405c405462af112a1477594cc63531baeb8f
-  languageName: node
-  linkType: hard
-
-"openid-client@npm:^6.8.4":
-  version: 6.8.4
-  resolution: "openid-client@npm:6.8.4"
-  dependencies:
-    jose: "npm:^6.2.2"
-    oauth4webapi: "npm:^3.8.5"
-  checksum: 10c0/bb062df77d48368f99f776f26d94e11053da80b89d2baeea9f069b7a2b359ef5dc10e0c9b0f9a90fb361eded7ff02dba3f5419b8909ec3f0c379d09807824c49
   languageName: node
   linkType: hard
 
@@ -12128,15 +12055,6 @@ __metadata:
   dependencies:
     string-width: "npm:^4.0.0"
   checksum: 10c0/b1e623adcfb9df35350dd7fc61295d6d4a1eaa65a406ba39c4b8360045b614af95ad10e05abf704936ed022569be438c4bfa02d6d031863c4166a238c301119f
-  languageName: node
-  linkType: hard
-
-"wkx@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "wkx@npm:0.5.0"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10c0/9f787ffd2bc83708000f10165a72f0ca121b2e79b279eb44f2f5274eaa6ef819d9e9a00058a3b59dd211fe140d4b47cb6d49683b3a57a2a42ab3a7ccd52247dd
   languageName: node
   linkType: hard
 

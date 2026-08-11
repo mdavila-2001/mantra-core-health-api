@@ -53,6 +53,76 @@ function buildCatalog() {
 }
 
 describe('SchedulingCatalogService', () => {
+  /**
+   * `resourceRefType` es texto libre, y dos clientes escribieron dos nombres
+   * para la misma tabla. Quien cruza el recurso con un perfil profesional
+   * —saber cuál agenda es la del médico que entró, poner el profesional en la
+   * cita clínica— compara tabla e identificador, y con dos nombres en
+   * circulación la mitad de los recursos no coincidía con ninguno.
+   */
+  describe('createResource · nombre canónico de la tabla', () => {
+    const base = {
+      tenantId: TENANT,
+      resourceType: 'PRACTITIONER' as const,
+      resourceRefId: 'hp-1',
+      name: 'Consultorio 1',
+    };
+
+    it('colapsa el alias `practitioner_profiles` al nombre real de la tabla', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(
+        { ...base, resourceRefType: 'practitioner_profiles' } as never,
+        { id: 'u-1' } as never,
+      );
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          resourceRefType: 'health_practitioner_profiles',
+        }),
+      );
+    });
+
+    it('el nombre canónico pasa tal cual', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(
+        { ...base, resourceRefType: 'health_practitioner_profiles' } as never,
+        { id: 'u-1' } as never,
+      );
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          resourceRefType: 'health_practitioner_profiles',
+        }),
+      );
+    });
+
+    /** Una sala no es un alias de nada: lo que no está en la tabla no se toca. */
+    it('deja intactos los tipos que no son alias', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(
+        {
+          ...base,
+          resourceType: 'ROOM',
+          resourceRefType: 'care_spaces',
+        } as never,
+        { id: 'u-1' } as never,
+      );
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ resourceRefType: 'care_spaces' }),
+      );
+    });
+  });
+
   describe('createPolicy (UC-41-01)', () => {
     const dto = { tenantId: TENANT, code: 'STD', name: 'Estándar' };
 

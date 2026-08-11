@@ -17,10 +17,10 @@
 # =========================================================================
 name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
 
-# Entorno compartido por la API y los 20 procesos worker (un dominio cada
+# Entorno compartido por la API y los 21 procesos worker (un dominio cada
 # uno — ver `PLAN-CORRECCION-WORKERS-2026-07-28.md`). `x-app-env` es una
 # extension field (Compose la ignora como servicio; solo sirve de ancla YAML)
-# para no repetir 20 veces el mismo bloque. Los host/puerto son los nombres de
+# para no repetir 21 veces el mismo bloque. Los host/puerto son los nombres de
 # servicio DENTRO de la red de compose (no los `*_PORT` expuestos al host, que
 # son solo para conectarse desde fuera de Docker).
 x-app-env: &app-env
@@ -48,6 +48,43 @@ x-app-env: &app-env
   MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
   MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
   MINIO_BUCKET: ${MINIO_BUCKET:-mantra-redesa-health-files}
+  FILE_STORAGE_ADAPTER: ${FILE_STORAGE_ADAPTER:-local}
+  FILE_STORAGE_LOCAL_DIR: ${FILE_STORAGE_LOCAL_DIR:-./storage/uploads}
+  FILE_STORAGE_MAX_SIZE_BYTES: ${FILE_STORAGE_MAX_SIZE_BYTES:-10485760}
+  FILE_STORAGE_S3_BUCKET: ${FILE_STORAGE_S3_BUCKET:-mantra-redesa-health-files}
+  FILE_STORAGE_S3_REGION: ${FILE_STORAGE_S3_REGION:-us-east-1}
+  FILE_STORAGE_S3_ENDPOINT: ${FILE_STORAGE_S3_ENDPOINT:-http://minio:9000}
+  FILE_STORAGE_S3_FORCE_PATH_STYLE: ${FILE_STORAGE_S3_FORCE_PATH_STYLE:-true}
+  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-audio-assets}
+  FILE_STORAGE_S3_ACCESS_KEY_ID: ${FILE_STORAGE_S3_ACCESS_KEY_ID:-}
+  FILE_STORAGE_S3_SECRET_ACCESS_KEY: ${FILE_STORAGE_S3_SECRET_ACCESS_KEY:-}
+  AUDIO_TTS_ENABLED: ${AUDIO_TTS_ENABLED:-false}
+  AUDIO_TTS_PROVIDER: ${AUDIO_TTS_PROVIDER:-disabled}
+  AUDIO_TTS_DEFAULT_LANGUAGE: ${AUDIO_TTS_DEFAULT_LANGUAGE:-es-419}
+  AUDIO_TTS_DEFAULT_FORMAT: ${AUDIO_TTS_DEFAULT_FORMAT:-mp3_44100_128}
+  AUDIO_TTS_SAMPLE_RATE: ${AUDIO_TTS_SAMPLE_RATE:-44100}
+  AUDIO_TTS_VOICE_PROFILE: ${AUDIO_TTS_VOICE_PROFILE:-brand_es_latam_v1}
+  AUDIO_TTS_VOICE_VERSION: ${AUDIO_TTS_VOICE_VERSION:-1}
+  AUDIO_TTS_MODEL: ${AUDIO_TTS_MODEL:-eleven_v3}
+  AUDIO_TTS_ALLOW_RUNTIME_GENERATION: ${AUDIO_TTS_ALLOW_RUNTIME_GENERATION:-false}
+  AUDIO_TTS_MONTHLY_BUDGET_UNITS: ${AUDIO_TTS_MONTHLY_BUDGET_UNITS:-10000}
+  AUDIO_TTS_SAFETY_RESERVE_UNITS: ${AUDIO_TTS_SAFETY_RESERVE_UNITS:-1000}
+  AUDIO_TTS_REQUEST_TIMEOUT_MS: ${AUDIO_TTS_REQUEST_TIMEOUT_MS:-10000}
+  AUDIO_TTS_MAX_RETRIES: ${AUDIO_TTS_MAX_RETRIES:-3}
+  AUDIO_TTS_RETRY_BASE_MS: ${AUDIO_TTS_RETRY_BASE_MS:-500}
+  AUDIO_TTS_PROD_LICENSE_CONFIRMED: ${AUDIO_TTS_PROD_LICENSE_CONFIRMED:-false}
+  AUDIO_TTS_DATA_KEY: ${AUDIO_TTS_DATA_KEY:-dev-only-audio-data-key-change-before-production}
+  AUDIO_TTS_CB_FAILURE_THRESHOLD: ${AUDIO_TTS_CB_FAILURE_THRESHOLD:-5}
+  AUDIO_TTS_CB_OPEN_MS: ${AUDIO_TTS_CB_OPEN_MS:-30000}
+  AUDIO_TTS_CB_HALF_OPEN_MAX_CALLS: ${AUDIO_TTS_CB_HALF_OPEN_MAX_CALLS:-1}
+  AUDIO_TTS_MAX_CONCURRENCY: ${AUDIO_TTS_MAX_CONCURRENCY:-2}
+  AUDIO_TTS_MAX_REQUESTS_PER_SECOND: ${AUDIO_TTS_MAX_REQUESTS_PER_SECOND:-2}
+  AUDIO_TTS_CROSS_TEMPLATE_DEDUP: ${AUDIO_TTS_CROSS_TEMPLATE_DEDUP:-true}
+  ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+  ELEVENLABS_BASE_URL: ${ELEVENLABS_BASE_URL:-https://api.elevenlabs.io}
+  ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-}
+  ELEVENLABS_MODEL_ID: ${ELEVENLABS_MODEL_ID:-eleven_v3}
+  ELEVENLABS_OUTPUT_FORMAT: ${ELEVENLABS_OUTPUT_FORMAT:-mp3_44100_128}
   JWT_SECRET: ${JWT_SECRET}
   JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
   JWT_REFRESH_TTL_DAYS: ${JWT_REFRESH_TTL_DAYS:-30}
@@ -98,7 +135,7 @@ x-app-env: &app-env
   # La verificación de fidelidad solo compara y registra advertencias; nunca
   # lanza ni aborta el arranque (`SchemaFidelityService.verifyAndReport`).
   ORM_VERIFY_FIDELITY: ${ORM_VERIFY_FIDELITY:-true}
-  # Los 20 workers llaman la API por el nombre del servicio, no localhost.
+  # Los 21 workers llaman la API por el nombre del servicio, no localhost.
   WORKER_API_BASE_URL: http://api:3000
   WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
   # Sonda HTTP de cada worker (`/health`, `/readiness`, `/status`). El mismo
@@ -175,7 +212,7 @@ x-worker-resources: &worker-resources
     cpus: "0.5"
     memory: 512M
 
-# Healthcheck de los 20 workers. Hasta ahora no tenían ninguno, y eso dejaba a
+# Healthcheck de los 21 workers. Hasta ahora no tenían ninguno, y eso dejaba a
 # Docker con una sola señal: si el PID existe. Un worker con el tick colgado
 # pasa esa comprobación indefinidamente —`docker ps` dice `Up 6 hours` con cero
 # trabajo hecho—, que es exactamente el modo de fallo "worker zombi".
@@ -213,7 +250,10 @@ services:
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # timescaledb-ha usa PGDATA=/home/postgres/pgdata/data, no la ruta de la
+      # imagen oficial de postgres. Montar en /var/lib/postgresql/data dejaba el
+      # volumen vacío y los datos en la capa efímera del contenedor.
+      - postgres_data:/home/postgres/pgdata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -252,10 +292,23 @@ services:
     volumes:
       - mongodb_data:/data/db
     healthcheck:
+      # El timeout mide el arranque de `mongosh`, no la salud de mongod.
+      #
+      # `mongosh` es un binario Node: su arranque en frío cuesta ~1s con la
+      # máquina ociosa, pero medimos ~24s con load ~20 (la que deja `yarn smoke`,
+      # que levanta la app entera y trunca las tablas). Con timeout de 5s el
+      # healthcheck expiraba mientras mongod respondía `ping → ok:1` sin
+      # problema, y como los 20 workers dependen de `service_healthy`, un Mongo
+      # perfectamente sano bloqueaba el `docker compose start` de todos ellos.
+      #
+      # Se ensancha el timeout en vez de aligerar la sonda: la imagen no trae
+      # otro cliente, y comprobar solo el puerto TCP daría "healthy" mientras
+      # mongod aún no acepta consultas — justo lo que `depends_on` debe evitar.
       test: ["CMD-SHELL", "mongosh --eval 'db.runCommand(\"ping\").ok' --quiet"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 30s
       retries: 5
+      start_period: 30s
     networks:
       - mantra-redesa-network
 
@@ -277,7 +330,7 @@ services:
       - mantra-redesa-network
 
   redis:
-    image: redis:8.8-alpine
+    image: redis:8.10-alpine
     restart: always
     command: redis-server --save 60 1 --loglevel notice
     ports:
@@ -293,7 +346,7 @@ services:
       - mantra-redesa-network
 
   opensearch:
-    image: opensearchproject/opensearch:3.7.0
+    image: opensearchproject/opensearch:3.8.0
     restart: always
     environment:
       - cluster.name=mantra-redesa-cluster
@@ -326,7 +379,7 @@ services:
   # One-shot: crea los índices del módulo 57 search_platform desde los
   # *.mapping.json solo si no existen.
   opensearch-init:
-    image: curlimages/curl:8.11.1
+    image: curlimages/curl:8.21.0
     restart: "no"
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
     volumes:
@@ -402,9 +455,9 @@ services:
       - mantra-redesa-network
 
   # -----------------------------------------------------------------------
-  # API + workers. Misma imagen para los 20 (build una sola vez; el
+  # API + workers. Misma imagen para los 21 workers (build una sola vez; el
   # `command` es lo único que cambia). Cada worker es SU PROPIO proceso/
-  # contenedor — no un único monolito con los 20 dominios adentro — para que
+  # contenedor — no un único monolito con los 21 dominios adentro — para que
   # un fallo o un pico de carga en uno no toque a los demás, y cada uno
   # escale por separado. Ver `PLAN-CORRECCION-WORKERS-2026-07-28.md`.
   # -----------------------------------------------------------------------
@@ -634,6 +687,28 @@ services:
     # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
     # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
     # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-audio-assets:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-audio-assets.js"]
+    environment:
+      <<: *app-env
+      MESSAGING_QUEUE_CODES: audio-generation
+    volumes:
+      - api_storage:/app/storage
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
     stop_grace_period: 45s
     depends_on:
       api:

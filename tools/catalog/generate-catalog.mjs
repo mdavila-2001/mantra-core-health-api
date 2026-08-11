@@ -1,7 +1,13 @@
 // Genera los catálogos declarativos de src/orm/catalog a partir de la bóveda.
 // Salida: índices, claves foráneas y registro de esquemas, particionados por
 // schema y troceados para que ningún archivo supere el límite de 300 líneas.
-import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
+import {
+  mkdirSync,
+  writeFileSync,
+  rmSync,
+  existsSync,
+  readdirSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import { readVault, primaryKeyOf } from './lib/vault.mjs';
 import { readTsEntities, camel } from './lib/tsentities.mjs';
@@ -127,8 +133,14 @@ function emitChunks({
   rowComment,
   header,
 }) {
-  rmSync(dir, { recursive: true, force: true });
+  // Se borra SOLO lo generado (`.ts`). Un `rmSync` del directorio entero —que es lo
+  // que hacía acá— se llevaba puesto el `README.md` escrito a mano de cada carpeta:
+  // el mismo defecto que ADR-0022 corrigió para el JSDoc de las entidades, o sea un
+  // generador que destruye prosa que no sabe volver a producir.
   mkdirSync(dir, { recursive: true });
+  for (const stale of readdirSync(dir)) {
+    if (stale.endsWith('.ts')) rmSync(join(dir, stale), { force: true });
+  }
   const barrel = [];
   for (const schema of [...bySchema.keys()].sort()) {
     const rows = bySchema.get(schema);

@@ -4,7 +4,7 @@
 
 ## Revisión de código con impacto documental
 
-1. El autor marca la [casilla documental](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
+1. El autor marca la [casilla documental](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
    correspondiente y ejecuta la sincronización relevante (`yarn docs:modules:sync`,
    `yarn docs:data:sync`, `yarn docs:openapi:generate`, según aplique).
 2. `.github/workflows/docs.yml` verifica mecánicamente: build, pruebas unitarias, contrato

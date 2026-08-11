@@ -34,6 +34,14 @@ export interface SmokeCtx {
    * Identificador asociado a tenant.
    */
   tenantId: string;
+  /** Subtipo de profesional (health_practitioner_profiles.id) sembrado como fixture. */
+  practitionerSubtypeId: string;
+  /** Subtipo de secretaría (secretary_profiles.id) sembrado como fixture. */
+  secretaryProfileId: string;
+  /** Subtipo de paciente (patient_profiles.id) sembrado como fixture. */
+  patientSubtypeId: string;
+  /** Plantilla de chart (specialty_chart_templates.id) sembrada como fixture. */
+  chartTemplateId: string;
   /** Ids capturados por casos previos (p. ej. `vars.fileId`). */
   vars: Record<string, string>;
   /** Sufijo único de la corrida para datos que exigen unicidad. */

@@ -166,4 +166,4 @@ se inventa una lista de consumidores.
 - [Visión general de eventos](overview.md)
 - [Semántica de entrega](delivery-semantics.md)
 - [Reintentos y cola muerta](retries-and-dlq.md)
-- [`asyncapi/asyncapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/asyncapi/asyncapi.yaml)
+- [`asyncapi/asyncapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/asyncapi/asyncapi.yaml)

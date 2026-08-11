@@ -33,6 +33,8 @@ import { ConsentModule } from './modules/consent/consent.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
 import { AdsModule } from './modules/ads/ads.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
+import { audioEnvSchema } from './modules/audio_assets/audio.env';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { BillingModule } from './modules/billing/billing.module';
@@ -103,6 +105,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(authEnvSchema)
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
+        .concat(audioEnvSchema)
         .concat(telemetryEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
@@ -152,6 +155,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AccountingModule,
     AdsModule,
     AuditModule,
+    AudioAssetsModule,
     AuthProvidersModule,
     AutomationModule,
     BillingModule,

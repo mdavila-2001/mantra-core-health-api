@@ -177,7 +177,16 @@ report.resumen = {
  * positivos que enterrarían las divergencias reales.
  */
 function typeCompatible(vaultType, tsType) {
-  const norm = (x) => x.replace(/\(.*\)/, '').trim();
+  // Se quitan las comillas dobles además del `(n)`: la entidad escribe el enum
+  // calificado como `"terminology"."technical_data_type"` y la equivalencia de
+  // abajo lo declara sin comillas, así que sin este `replace` los 6 usos de
+  // `technical_data_type` salían como divergentes siendo el mismo tipo — justo
+  // los falsos positivos que esta tabla existe para evitar.
+  const norm = (x) =>
+    x
+      .replace(/\(.*\)/, '')
+      .replace(/"/g, '')
+      .trim();
   const a = norm(vaultType);
   const b = norm(tsType);
   if (!b) return false;
