@@ -8,7 +8,7 @@
 
 # Módulo `auth_providers`
 
-**Fuente:** [`src/modules/auth_providers/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/auth_providers/README.md)
+**Fuente:** [`src/modules/auth_providers/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/auth_providers/README.md)
 · 1 controllers · 2 services · 1 repositories · 9 entidades · 1 DTO
 
 ---

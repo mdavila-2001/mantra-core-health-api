@@ -8,7 +8,7 @@
 
 # Módulo `lakehouse`
 
-**Fuente:** [`src/modules/lakehouse/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/lakehouse/README.md)
+**Fuente:** [`src/modules/lakehouse/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/lakehouse/README.md)
 · 2 controllers · 3 services · 3 repositories · 18 entidades · 1 DTO
 
 ---

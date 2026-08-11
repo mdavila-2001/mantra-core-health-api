@@ -8,7 +8,7 @@
 
 # Módulo `accounting`
 
-**Fuente:** [`src/modules/accounting/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/accounting/README.md)
+**Fuente:** [`src/modules/accounting/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/accounting/README.md)
 · 7 controllers · 7 services · 9 repositories · 42 entidades · 8 DTO
 
 ---

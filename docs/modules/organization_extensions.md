@@ -8,7 +8,7 @@
 
 # Módulo `organization_extensions`
 
-**Fuente:** [`src/modules/organization_extensions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/organization_extensions/README.md)
+**Fuente:** [`src/modules/organization_extensions/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/organization_extensions/README.md)
 · 4 controllers · 4 services · 5 repositories · 6 entidades · 8 DTO
 
 ---

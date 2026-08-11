@@ -8,7 +8,7 @@
 
 # Módulo `read_models`
 
-**Fuente:** [`src/modules/read_models/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/read_models/README.md)
+**Fuente:** [`src/modules/read_models/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/read_models/README.md)
 · 3 controllers · 3 services · 8 repositories · 13 entidades · 5 DTO
 
 ---

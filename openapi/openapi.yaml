@@ -20657,10 +20657,22 @@ paths:
       description: >-
         Crear una política de verificación de identidad (IAL/AAL). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /identity/verification-cases/expire-sweep:
-    post:
-      operationId: IdentityCasesController_expireSweep
-      parameters: []
+  /identity/verification-cases:
+    get:
+      operationId: IdentityCasesController_listQueue
+      parameters:
+        - name: status
+          required: false
+          in: query
+          description: Concepto de estado a listar; por defecto, los que esperan revisión
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Casos por página (por defecto 50)
+          schema:
+            type: number
       responses:
         '200':
           description: ''
@@ -20670,23 +20682,18 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
       security:
         - bearer: []
-      summary: Expirar por lote los casos vencidos (job programado)
+      summary: Listar los casos que esperan revisión
       tags:
         - identity-verification-cases
       description: >-
-        Expirar por lote los casos vencidos (job programado). Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /identity/verification-cases:
+        Listar los casos que esperan revisión. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
     post:
       operationId: IdentityCasesController_open
       parameters: []
@@ -20723,6 +20730,35 @@ paths:
       description: >-
         Iniciar un caso de verificación de identidad. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /identity/verification-cases/expire-sweep:
+    post:
+      operationId: IdentityCasesController_expireSweep
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Expirar por lote los casos vencidos (job programado)
+      tags:
+        - identity-verification-cases
+      description: >-
+        Expirar por lote los casos vencidos (job programado). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /identity/verification-cases/{id}/evidence:
     post:
       operationId: IdentityCasesController_submitEvidence
@@ -37003,6 +37039,7 @@ components:
             - USER
             - SECURITY_ADMIN
             - SUPERADMIN
+            - PATIENT
         action:
           type: string
           enum:
@@ -37022,9 +37059,27 @@ components:
           type: string
           minLength: 8
           maxLength: 200
+        name:
+          type: string
+          maxLength: 100
+          example: Lucía
+        middleName:
+          type: string
+          maxLength: 100
+          example: Andrea
+        lastName:
+          type: string
+          maxLength: 100
+          example: Mamani
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Quispe
         displayName:
           type: string
           maxLength: 200
+          description: Forma anterior de declarar el nombre. Preferí name/lastName.
+          deprecated: true
         email:
           type: string
           format: email
@@ -37064,7 +37119,6 @@ components:
       required:
         - nationalId
         - password
-        - displayName
     PayerProfileDto:
       type: object
       properties:

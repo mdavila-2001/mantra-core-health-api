@@ -8,7 +8,7 @@
 
 # Módulo `automation`
 
-**Fuente:** [`src/modules/automation/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/automation/README.md)
+**Fuente:** [`src/modules/automation/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/automation/README.md)
 · 2 controllers · 4 services · 4 repositories · 16 entidades · 1 DTO
 
 ---

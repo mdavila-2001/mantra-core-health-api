@@ -8,7 +8,7 @@
 
 # Módulo `promotions`
 
-**Fuente:** [`src/modules/promotions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/promotions/README.md)
+**Fuente:** [`src/modules/promotions/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/promotions/README.md)
 · 2 controllers · 2 services · 2 repositories · 11 entidades · 1 DTO
 
 ---

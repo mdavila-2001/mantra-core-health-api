@@ -8,7 +8,7 @@
 
 # Módulo `time_series`
 
-**Fuente:** [`src/modules/time_series/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/time_series/README.md)
+**Fuente:** [`src/modules/time_series/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/time_series/README.md)
 · 2 controllers · 4 services · 2 repositories · 12 entidades · 1 DTO
 
 ---

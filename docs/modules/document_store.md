@@ -8,7 +8,7 @@
 
 # Módulo `document_store`
 
-**Fuente:** [`src/modules/document_store/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/document_store/README.md)
+**Fuente:** [`src/modules/document_store/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/document_store/README.md)
 · 1 controllers · 1 services · 1 repositories · 0 entidades · 5 DTO
 
 ---

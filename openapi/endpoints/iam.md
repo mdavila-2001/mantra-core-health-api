@@ -837,8 +837,7 @@ Content-Type: application/json
 
 {
   "nationalId": "00000000-0000-4000-8000-000000000001",
-  "password": "ClaveSegura2026!",
-  "displayName": "Nombre de ejemplo"
+  "password": "ClaveSegura2026!"
 }
 ```
 
@@ -853,7 +852,11 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `nationalId` | Sí | `string` | longitud mínima 4; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad con el que se iniciará sesión | `00000000-0000-4000-8000-000000000001` |
 | `password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
-| `displayName` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Andrea` |
+| `lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mamani` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Quispe` |
+| `displayName` | No | `string` | longitud mínima 1; longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `email` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `phone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono de contacto en formato E.164 o nacional | `+59170000000` |
@@ -875,6 +878,10 @@ Content-Type: application/json
 {
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "password": "ClaveSegura2026!",
+  "name": "Lucía",
+  "middleName": "Andrea",
+  "lastName": "Mamani",
+  "motherLastName": "Quispe",
   "displayName": "Nombre de ejemplo",
   "email": "usuario@example.com",
   "birthDate": "2026-07-31",
@@ -3013,7 +3020,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `role` | Sí | `string` | valores: `USER`, `SECURITY_ADMIN`, `SUPERADMIN` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `role` | Sí | `string` | valores: `USER`, `SECURITY_ADMIN`, `SUPERADMIN`, `PATIENT` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `action` | Sí | `string` | valores: `GRANT`, `REVOKE` | Sin descripción específica en el contrato OpenAPI. | `GRANT` |
 
 ### Payload completo de ejemplo

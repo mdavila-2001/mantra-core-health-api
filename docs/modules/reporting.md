@@ -8,7 +8,7 @@
 
 # Módulo `reporting`
 
-**Fuente:** [`src/modules/reporting/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/reporting/README.md)
+**Fuente:** [`src/modules/reporting/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/reporting/README.md)
 · 1 controllers · 2 services · 2 repositories · 12 entidades · 1 DTO
 
 ---

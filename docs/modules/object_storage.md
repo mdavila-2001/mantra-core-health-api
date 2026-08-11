@@ -8,7 +8,7 @@
 
 # Módulo `object_storage`
 
-**Fuente:** [`src/modules/object_storage/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/object_storage/README.md)
+**Fuente:** [`src/modules/object_storage/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/object_storage/README.md)
 · 2 controllers · 3 services · 3 repositories · 17 entidades · 1 DTO
 
 ---

@@ -8,7 +8,7 @@
 
 # Módulo `crm`
 
-**Fuente:** [`src/modules/crm/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/crm/README.md)
+**Fuente:** [`src/modules/crm/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/crm/README.md)
 · 1 controllers · 2 services · 2 repositories · 32 entidades · 1 DTO
 
 ---
