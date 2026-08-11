@@ -8,7 +8,7 @@
 
 # Módulo `telemetry`
 
-**Fuente:** [`src/modules/telemetry/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/telemetry/README.md)
+**Fuente:** [`src/modules/telemetry/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/README.md)
 · 3 controllers · 3 services · 14 repositories · 14 entidades · 12 DTO
 
 ---
@@ -21,11 +21,11 @@ Agrupa los componentes relacionados con **telemetry** y mantiene cohesionada est
 
 ### Subcarpetas
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/telemetry/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/telemetry/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/telemetry/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/telemetry/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/telemetry/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/entities/README.md): Entidades y relaciones que representan el modelo persistente.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/telemetry/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
 ### Archivos
 

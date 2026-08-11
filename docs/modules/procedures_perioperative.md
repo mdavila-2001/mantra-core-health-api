@@ -8,7 +8,7 @@
 
 # Módulo `procedures_perioperative`
 
-**Fuente:** [`src/modules/procedures_perioperative/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/procedures_perioperative/README.md)
+**Fuente:** [`src/modules/procedures_perioperative/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/procedures_perioperative/README.md)
 · 1 controllers · 3 services · 4 repositories · 37 entidades · 1 DTO
 
 ---

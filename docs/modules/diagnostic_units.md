@@ -8,7 +8,7 @@
 
 # Módulo `diagnostic_units`
 
-**Fuente:** [`src/modules/diagnostic_units/README.md`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/src/modules/diagnostic_units/README.md)
+**Fuente:** [`src/modules/diagnostic_units/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/diagnostic_units/README.md)
 · 5 controllers · 4 services · 10 repositories · 10 entidades · 10 DTO
 
 ---
