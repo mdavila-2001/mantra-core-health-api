@@ -67,6 +67,8 @@ tipar. El cliente debe ramificar sobre `code`, nunca sobre el texto de `message`
 
 ## 10. Entidades generadas, nunca editadas a mano
 
-Las 1184 entidades se producen por introspección de la base (`yarn orm:gen`) desde el DDL real.
-Si algo no cuadra, se corrige el DDL y se regenera — no se parchea la entidad TypeScript
-directamente (fuente: `src/modules/README.md`).
+Las 1 186 entidades se producen con `python salud-db/gen_entities.py` desde los `.puml` del
+modelo canónico —la misma fuente que el DDL—, y el JSDoc lo rellena `yarn docs:tsdoc` en una
+pasada aparte que respeta la prosa escrita a mano. Si algo no cuadra, se corrige el modelo y
+se regenera — no se parchea la entidad TypeScript directamente (fuente:
+`src/modules/README.md`, [ADR-0022](../adr/ADR-0022-generacion-de-entidades.md)).
