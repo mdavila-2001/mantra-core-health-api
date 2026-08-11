@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 29 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 30 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-users`
 - **Controladores:** `IamAuthController`, `IamUsersController`
@@ -39,7 +39,8 @@ Referencia exhaustiva de 29 operación(es) del módulo `iam`, derivada del contr
 26. [GET /iam/users/{id}/mfa-factors](#26-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
 27. [POST /iam/users/{id}/mfa-factors](#27-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
 28. [GET /iam/users/{id}/sessions](#28-get-iam-users-id-sessions) — Sesiones del usuario
-29. [POST /iam/users/assisted-registration](#29-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+29. [POST /iam/users/assisted-practitioner-registration](#29-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+30. [POST /iam/users/assisted-registration](#30-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
 
 ---
 
@@ -3613,7 +3614,175 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /iam/users/assisted-registration
+## 29. POST /iam/users/assisted-practitioner-registration
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Alta administrativa de un profesional (devuelve token de activación)
+- **Operation ID:** `IamUsersController_assistedPractitionerRegistration`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.assistedPractitionerRegistration](../../src/modules/iam/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Alta administrativa de un profesional (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P6: alta de un profesional **por un administrador**. El equivalente de `assisted-registration` para el otro lado del mostrador. Faltaba: el único alta de profesional era `POST /iam/auth/register-practitioner`, que es `@Public()` y está limitado a 10 peticiones por minuto porque su superficie es un formulario abierto — su propio DTO declara que «el profesional se da de alta él mismo». Construir la pantalla de administración encima habría contradicho el contrato. Devuelve el token de activación de un solo uso para entregar al titular por canal seguro — **NUNCA** una contraseña.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/users/assisted-practitioner-registration` en `IamUsersController_assistedPractitionerRegistration`. El controlador delega en `IamPractitionerSelfRegistrationService.assistedRegisterPractitioner`. Valida el body como `AssistedPractitionerRegistrationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AssistedPractitionerRegistrationResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AssistedPractitionerRegistrationDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/users/assisted-practitioner-registration HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "email": "usuario@example.com",
+  "displayName": "Nombre de ejemplo",
+  "licenseNumber": "valor-ejemplo",
+  "credentialNumber": "valor-ejemplo",
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo que actúa como identidad de login | `usuario@example.com` |
+| `displayName` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `licenseNumber` | Sí | `string` | longitud máxima 100 | Número de licencia o matrícula profesional | `valor-ejemplo` |
+| `credentialNumber` | Sí | `string` | longitud máxima 100 | Número del título profesional que respalda la licencia | `valor-ejemplo` |
+| `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
+| `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nationalId` | No | `string` | longitud máxima 40 | Documento de identidad (se guarda como identificador oficial) | `00000000-0000-4000-8000-000000000001` |
+| `phone` | No | `string` | longitud máxima 40 | Teléfono de contacto en formato E.164 o nacional | `+59170000000` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `gender` | No | `string` | valores: `MALE`, `FEMALE`, `OTHER`, `UNKNOWN` | Género administrativo (HL7 AdministrativeGender) | `MALE` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `practitionerCategoryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentialTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languageConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/users/assisted-practitioner-registration HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "email": "usuario@example.com",
+  "displayName": "Nombre de ejemplo",
+  "licenseNumber": "valor-ejemplo",
+  "credentialNumber": "valor-ejemplo",
+  "regulatoryAuthority": "valor-ejemplo",
+  "professionalTitle": "valor-ejemplo",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "phone": "+59170000000",
+  "birthDate": "2026-07-31",
+  "gender": "MALE",
+  "sexAtBirth": "MALE",
+  "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
+  "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
+  "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "languageConceptId": "00000000-0000-4000-8000-000000000001",
+  "acceptsNewPatients": false,
+  "timeZone": "America/La_Paz",
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssistedPractitionerRegistrationResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "activationToken": "valor-ejemplo",
+  "activationExpiresAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `activationToken` | Sí | `string` | Sin restricción adicional declarada | Token de un solo uso a entregar al titular por canal seguro | `valor-ejemplo` |
+| `activationExpiresAt` | Sí | `string` | formato `date-time` | Cuándo caduca el token. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/assisted-practitioner-registration"
+}
+```
+
+---
+
+## 30. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

@@ -24,7 +24,12 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  // `fork` además de `transactional`: las lecturas del servicio no abren
+  // transacción —forkean un EM propio— y sin este doble ninguna se puede probar.
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const personsRepo = {
     findById: mockFn(),
     findByIds: mockFn().mockResolvedValue(new Map()),
@@ -55,6 +60,7 @@ function build() {
   const mergeEventsRepo = {
     findById: mockFn(),
     findByReversalOf: mockFn(),
+    findEvents: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const relatedPersonsRepo = {
@@ -270,6 +276,79 @@ describe('ProfilesPatientsService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('listMergeEvents (UC-05-09·L)', () => {
+    /**
+     * La lectura que hace reversible una fusión más allá de la pantalla que la
+     * hizo: `reverse` exige el `eventId`, y antes ese identificador sólo vivía
+     * en la respuesta del `POST`.
+     */
+    it('devuelve los eventos con el id que exige `reverse`', async () => {
+      const d = build();
+      d.mergeEventsRepo.findEvents.mockResolvedValue([
+        {
+          id: 'e1',
+          survivingPatientProfileId: 'a',
+          mergedPatientProfileId: 'b',
+          decisionStatusConceptId: 'st-aprobado',
+          recordedAt: new Date('2026-08-01T10:00:00.000Z'),
+        },
+      ]);
+
+      const res = await d.service.listMergeEvents({});
+
+      expect(res.items[0]?.id).toBe('e1');
+      expect(res.count).toBe(1);
+      expect(res.limit).toBe(50);
+    });
+
+    /**
+     * Quien revisa un registro sospechoso no sabe si el que mira sobrevivió o
+     * fue el absorbido: el filtro tiene que buscar en los dos lados.
+     */
+    it('el filtro por paciente llega al repositorio tal cual', async () => {
+      const d = build();
+
+      await d.service.listMergeEvents({ patientProfileId: 'p-1', limit: 10 });
+
+      expect(d.mergeEventsRepo.findEvents).toHaveBeenCalledWith(
+        expect.anything(),
+        { patientProfileId: 'p-1' },
+        10,
+      );
+    });
+
+    /** Sin filtro no se manda la clave: `undefined` no es «cualquier paciente». */
+    it('sin filtro no manda la clave al repositorio', async () => {
+      const d = build();
+
+      await d.service.listMergeEvents({});
+
+      expect(d.mergeEventsRepo.findEvents).toHaveBeenCalledWith(
+        expect.anything(),
+        {},
+        50,
+      );
+    });
+
+    /** Un evento sin reversión no declara la clave, en vez de traerla vacía. */
+    it('omite `reversalOfEventId` cuando el evento no revierte nada', async () => {
+      const d = build();
+      d.mergeEventsRepo.findEvents.mockResolvedValue([
+        {
+          id: 'e1',
+          survivingPatientProfileId: 'a',
+          mergedPatientProfileId: 'b',
+          decisionStatusConceptId: 'st-aprobado',
+          recordedAt: new Date(),
+        },
+      ]);
+
+      const res = await d.service.listMergeEvents({});
+
+      expect(res.items[0]).not.toHaveProperty('reversalOfEventId');
     });
   });
 

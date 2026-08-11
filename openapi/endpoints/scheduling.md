@@ -264,6 +264,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "patientProfileId": "00000000-0000-4000-8000-000000000001",
       "resourceId": "00000000-0000-4000-8000-000000000001",
       "bookableSlotId": "00000000-0000-4000-8000-000000000001",
+      "appointmentId": "00000000-0000-4000-8000-000000000001",
       "startAt": "2026-07-31T12:00:00.000Z",
       "endAt": "2026-07-31T12:00:00.000Z",
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -285,11 +286,12 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientProfileId` | No | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `items[].resourceId` | No | `string` | formato `uuid` | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
 | `items[].bookableSlotId` | No | `string` | formato `uuid` | Identificador asociado a bookable slot. | `00000000-0000-4000-8000-000000000001` |
+| `items[].appointmentId` | No | `string` | formato `uuid`; admite null | Cita clínica que respalda la reserva. Es el valor que acepta POST /clinical/encounters/check-in en su `appointmentId`. | `00000000-0000-4000-8000-000000000001` |
 | `items[].startAt` | No | `string` | formato `date-time`; admite null | Instante de la cita, tomado del slot. `null` si la cita quedó sin slot | `2026-07-31T12:00:00.000Z` |
 | `items[].endAt` | No | `string` | formato `date-time`; admite null | Valor de end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
@@ -406,6 +408,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
   "resourceId": "00000000-0000-4000-8000-000000000001",
   "bookableSlotId": "00000000-0000-4000-8000-000000000001",
+  "appointmentId": "00000000-0000-4000-8000-000000000001",
   "startAt": "2026-07-31T12:00:00.000Z",
   "endAt": "2026-07-31T12:00:00.000Z",
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -426,6 +429,7 @@ Campos de la respuesta:
 | `patientProfileId` | No | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `resourceId` | No | `string` | formato `uuid` | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
 | `bookableSlotId` | No | `string` | formato `uuid` | Identificador asociado a bookable slot. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentId` | No | `string` | formato `uuid`; admite null | Cita clínica que respalda la reserva. Es el valor que acepta POST /clinical/encounters/check-in en su `appointmentId`. | `00000000-0000-4000-8000-000000000001` |
 | `startAt` | No | `string` | formato `date-time`; admite null | Instante de la cita, tomado del slot. `null` si la cita quedó sin slot | `2026-07-31T12:00:00.000Z` |
 | `endAt` | No | `string` | formato `date-time`; admite null | Valor de end at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
@@ -760,7 +764,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `offsetsMinutes` | Sí | `array<number>` | Sin restricción adicional declarada | Minutos de antelación de cada recordatorio | `[1440,120]` |
+| `offsetsMinutes` | Sí | `array<number>` | mínimo 0 | Minutos de antelación de cada recordatorio | `[1440,120]` |
 | `channel` | No | `string` | valores: `SMS`, `EMAIL` | Canal de envío | `SMS` |
 
 ### Payload completo de ejemplo
@@ -1685,7 +1689,7 @@ Content-Type: application/json
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente titular de la cita | `00000000-0000-4000-8000-000000000001` |
 | `channel` | Sí | `string` | valores: `PORTAL`, `DESK`, `PHONE` | Canal de la reserva | `PORTAL` |
 | `reasonText` | No | `string` | longitud máxima 500 | Motivo de consulta | `Texto descriptivo de ejemplo` |
-| `reminderOffsetsMinutes` | No | `array<number>` | Sin restricción adicional declarada | Minutos de antelación de los recordatorios a programar | `[1440,120]` |
+| `reminderOffsetsMinutes` | No | `array<number>` | mínimo 0 | Minutos de antelación de los recordatorios a programar | `[1440,120]` |
 
 ### Payload completo de ejemplo
 

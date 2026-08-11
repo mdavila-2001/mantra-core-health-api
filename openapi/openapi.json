@@ -854,6 +854,61 @@
         "description": "Registro asistido de un paciente (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/users/assisted-practitioner-registration": {
+      "post": {
+        "operationId": "IamUsersController_assistedPractitionerRegistration",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistedPractitionerRegistrationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta administrativa de un profesional (devuelve token de activación)",
+        "tags": [
+          "iam-users"
+        ],
+        "description": "Alta administrativa de un profesional (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/iam/users/{id}/credentials/federated": {
       "post": {
         "operationId": "IamUsersController_linkFederated",
@@ -1831,6 +1886,63 @@
           "profiles-patients"
         ],
         "description": "Alta de persona y perfil de paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/merge-events": {
+      "get": {
+        "description": "Devuelve el `id` que exige POST /profiles/patients/merge/{eventId}/reverse. Sin esta lectura, una fusión sólo era reversible mientras la respuesta del POST siguiera a la vista.",
+        "operationId": "ProfilesPatientsController_listMergeEvents",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": false,
+            "in": "query",
+            "description": "Paciente involucrado, de cualquiera de los dos lados",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maximum": 200,
+              "default": 50,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar eventos de fusión de pacientes",
+        "tags": [
+          "profiles-patients"
+        ]
       }
     },
     "/profiles/patients/{profileId}": {
@@ -56131,6 +56243,110 @@
         "required": [
           "displayName",
           "email",
+          "reason"
+        ]
+      },
+      "AssistedPractitionerRegistrationDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Correo que actúa como identidad de login",
+            "format": "email",
+            "maxLength": 320
+          },
+          "displayName": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "licenseNumber": {
+            "type": "string",
+            "description": "Número de licencia o matrícula profesional",
+            "maxLength": 100
+          },
+          "credentialNumber": {
+            "type": "string",
+            "description": "Número del título profesional que respalda la licencia",
+            "maxLength": 100
+          },
+          "regulatoryAuthority": {
+            "type": "string",
+            "description": "Autoridad reguladora que emitió la licencia",
+            "maxLength": 200
+          },
+          "professionalTitle": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "Documento de identidad (se guarda como identificador oficial)",
+            "maxLength": 40
+          },
+          "phone": {
+            "type": "string",
+            "description": "Teléfono de contacto en formato E.164 o nacional",
+            "maxLength": 40
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER",
+              "UNKNOWN"
+            ],
+            "description": "Género administrativo (HL7 AdministrativeGender)"
+          },
+          "sexAtBirth": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "INTERSEX",
+              "UNKNOWN"
+            ],
+            "description": "Sexo asignado al nacer"
+          },
+          "practitionerCategoryConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "credentialTypeConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "languageConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "acceptsNewPatients": {
+            "type": "boolean",
+            "default": false
+          },
+          "timeZone": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo del alta administrativa (trazabilidad C-18)",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "email",
+          "displayName",
+          "licenseNumber",
+          "credentialNumber",
           "reason"
         ]
       },

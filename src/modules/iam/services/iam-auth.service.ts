@@ -37,6 +37,7 @@ import { conceptIdsToRoleCodes } from './role-mapping';
 import { TenantMemberships, Tenants } from '../../directory/entities';
 import { DIR } from '../../directory/directory.concepts';
 import {
+  HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/repositories';
@@ -85,6 +86,7 @@ export class IamAuthService {
     private readonly eventsRepo: SecurityEventsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
   ) {
@@ -167,6 +169,38 @@ export class IamAuthService {
     if (!link) return undefined;
     const patient = await this.patientProfilesRepo.findById(em, link.personId);
     return patient?.profileId;
+  }
+
+  /**
+   * Perfil profesional del titular de la cuenta, para el claim `hpid`.
+   *
+   * Misma cadena que el perfil de paciente —vínculo activo cuenta-persona y de
+   * ahí el perfil, porque `health_practitioner_profiles.profile_id` ES
+   * `persons.id`— sobre la otra tabla de perfil. Las dos conviven sin
+   * excluirse: nada impide que quien atiende sea además paciente de la
+   * institución, y en ese caso el token lleva los dos claims, cada uno con su
+   * significado.
+   *
+   * Va en el token porque **no existe lectura que lo devuelva**: el controlador
+   * de profesionales sólo expone `POST`. Sin esto, la agenda no puede saber cuál
+   * de los recursos de la organización es el de quien inició sesión.
+   * No es una credencial; ver `JwtPayload.hpid`.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Titular de la sesión que se está abriendo.
+   * @returns El `profileId` profesional, o `undefined` si la cuenta no es de uno.
+   */
+  private async loadPractitionerProfileId(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string | undefined> {
+    const link = await this.accountLinksRepo.findActiveByUser(em, userId);
+    if (!link) return undefined;
+    const practitioner = await this.practitionerProfilesRepo.findById(
+      em,
+      link.personId,
+    );
+    return practitioner?.profileId;
   }
 
   private async loadTenantNames(
@@ -277,6 +311,10 @@ export class IamAuthService {
           name: user.displayName,
           tenantNames: await this.loadTenantNames(tx, tenants),
           patientProfileId: await this.loadPatientProfileId(tx, user.id),
+          practitionerProfileId: await this.loadPractitionerProfileId(
+            tx,
+            user.id,
+          ),
         },
       );
 
@@ -393,6 +431,13 @@ export class IamAuthService {
           name: holder?.displayName,
           tenantNames: await this.loadTenantNames(tx, tenants),
           patientProfileId: await this.loadPatientProfileId(tx, session.userId),
+          // También en el refresco: un claim que no sobrevive a la renovación
+          // del token desaparece a los quince minutos, y la agenda del médico
+          // se volvería la de otro sin que nadie tocara nada.
+          practitionerProfileId: await this.loadPractitionerProfileId(
+            tx,
+            session.userId,
+          ),
         },
       );
       const { raw, hash } = this.tokenService.issueRefreshToken();

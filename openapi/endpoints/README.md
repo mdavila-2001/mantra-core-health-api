@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **906 de 906 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **61 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **908 de 908 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **61 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -72,7 +72,7 @@ Esta referencia documenta **906 de 906 operaciones HTTP** registradas en `openap
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 15 | `fhir-r5`, `health-data` | 2 |
-| [iam](iam.md) | 29 | `iam-auth`, `iam-users` | 2 |
+| [iam](iam.md) | 30 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 24 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 23 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-claims`, `insurance-coverage`, `insurance-prior-auth`, `insurance-reconciliation` | 7 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
@@ -89,7 +89,7 @@ Esta referencia documenta **906 de 906 operaciones HTTP** registradas en `openap
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 13 | `practice` | 5 |
 | [procedures_perioperative](procedures-perioperative.md) | 23 | `procedure-cases` | 1 |
-| [profiles](profiles.md) | 15 | `profiles-patients`, `profiles-practitioners` | 2 |
+| [profiles](profiles.md) | 16 | `profiles-patients`, `profiles-practitioners` | 2 |
 | [promotions](promotions.md) | 15 | `loyalty`, `promotions` | 2 |
 | [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
@@ -112,4 +112,4 @@ Esta referencia documenta **906 de 906 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 906 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 908 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

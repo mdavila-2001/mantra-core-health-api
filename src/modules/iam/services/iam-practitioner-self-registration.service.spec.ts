@@ -35,6 +35,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const credentialsRepo = {
       findLivePasswordBySubject: fn().mockResolvedValue(null),
       createPassword: fn(),
+      // El alta administrativa reserva el login sin secreto: la contraseña la
+      // fija el titular al consumir el token de activación.
+      createPendingPassword: fn(),
     };
     const rolesRepo = { create: fn() };
     const emailVerificationsRepo = { create: fn() };
@@ -61,9 +64,14 @@ describe('IamPractitionerSelfRegistrationService', () => {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
 
+    // El repositorio de activaciones sólo se usa en el alta administrativa: en
+    // el autorregistro la cuenta nace activa y no hay token que emitir.
+    const activationsRepo = { create: fn() };
+
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
       tokenService as never,
+      activationsRepo as never,
       usersRepo as never,
       credentialsRepo as never,
       rolesRepo as never,
@@ -98,8 +106,72 @@ describe('IamPractitionerSelfRegistrationService', () => {
       contactPointsRepo,
       tenantMembershipsRepo,
       notificationsService,
+      activationsRepo,
     };
   }
+
+  /**
+   * P6: el alta administrativa. Comparte el registro CTI atómico con el
+   * autorregistro —es la misma alta— y se diferencia sólo en quién está
+   * delante: la cuenta nace PENDIENTE con un token en vez de ACTIVA con
+   * contraseña, porque un administrador no puede elegir la clave de otro.
+   */
+  describe('assistedRegisterPractitioner (P6)', () => {
+    const admin = { id: 'admin-1' } as never;
+    const dtoAsistido = { ...dto, reason: 'Alta de plantel' } as never;
+
+    it('no crea contraseña: reserva el login y emite un token de activación', async () => {
+      const d = build();
+
+      const res = await d.service.assistedRegisterPractitioner(
+        dtoAsistido,
+        admin,
+      );
+
+      expect(d.credentialsRepo.createPassword).not.toHaveBeenCalled();
+      expect(d.credentialsRepo.createPendingPassword).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ externalSubject: dto.email }),
+      );
+      expect(res.activationToken).toBeDefined();
+      expect(res.activationExpiresAt).toBeInstanceOf(Date);
+    });
+
+    it('guarda el motivo del alta: es la trazabilidad C-18', async () => {
+      const d = build();
+
+      await d.service.assistedRegisterPractitioner(dtoAsistido, admin);
+
+      expect(d.activationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          reason: 'Alta de plantel',
+          actorUserId: 'admin-1',
+        }),
+      );
+    });
+
+    /** Registrar a alguien no lo habilita a ejercer, lo cargue quien lo cargue. */
+    it('la matrícula sigue naciendo PENDIENTE', async () => {
+      const d = build();
+
+      const res = await d.service.assistedRegisterPractitioner(
+        dtoAsistido,
+        admin,
+      );
+
+      expect(res.verificationStatus).toBe('PENDING');
+    });
+
+    it('el autorregistro no emite token de activación', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(dto);
+
+      expect(d.activationsRepo.create).not.toHaveBeenCalled();
+      expect(d.credentialsRepo.createPassword).toHaveBeenCalled();
+    });
+  });
 
   it('creates the account, the person and the practitioner profile in one call', async () => {
     const d = build();

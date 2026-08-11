@@ -50,6 +50,16 @@ describe('TokenService · claims de presentación', () => {
     expect(signedPayload(jwt)).toMatchObject({ pid: 'per-1' });
   });
 
+  it('incluye el perfil profesional como `hpid` para identificar su agenda', () => {
+    const { service, jwt } = build();
+
+    service.signAccessToken('u-1', 'sid-1', ['USER', 'PRACTITIONER'], ['t-1'], {
+      practitionerProfileId: 'per-3',
+    });
+
+    expect(signedPayload(jwt)).toMatchObject({ hpid: 'per-3' });
+  });
+
   it('omite los claims vacíos: viajan en cada cabecera de cada petición', () => {
     const { service, jwt } = build();
 
@@ -60,6 +70,8 @@ describe('TokenService · claims de presentación', () => {
     expect(payload).not.toHaveProperty('tenantNames');
     // Una cuenta que no es de un paciente no arrastra el claim.
     expect(payload).not.toHaveProperty('pid');
+    // Ni la que no tiene perfil profesional el suyo.
+    expect(payload).not.toHaveProperty('hpid');
   });
 
   it('un mapa de nombres vacío tampoco se firma', () => {

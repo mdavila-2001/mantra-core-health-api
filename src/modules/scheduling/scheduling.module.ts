@@ -23,6 +23,11 @@ import {
   SchedulingAgendaRepository,
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
+// El repositorio de citas clínicas es una clase sin estado que recibe el
+// `EntityManager` por parámetro, así que proveerlo acá no duplica nada ni crea
+// dos fuentes de verdad: evita importar el módulo clínico entero sólo para
+// escribir la cita que respalda una reserva confirmada.
+import { AppointmentsRepository } from '../clinical/repositories';
 import { schedulingPersistenceProviders } from './scheduling.persistence';
 
 /**
@@ -48,6 +53,7 @@ import { schedulingPersistenceProviders } from './scheduling.persistence';
     SchedulingConfirmationRepository,
     SchedulingAbsencesRepository,
     SchedulingAgendaRepository,
+    AppointmentsRepository,
     SchedulingCatalogService,
     SchedulingBookingsService,
     SchedulingWaitlistService,
