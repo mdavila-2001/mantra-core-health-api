@@ -11,11 +11,8 @@ import {
 } from '../domain/audio-asset-key';
 import { InvalidDynamicAudioValueError } from '../domain/dynamic-value-normalizer';
 import { renderAudioTemplate } from '../domain/template-renderer';
-import type {
-  AudioAssetView,
-  AudioGenerationMode,
-} from '../domain/audio.types';
-import type { AudioAssets, AudioTemplates } from '../entities';
+import type { AudioGenerationMode } from '../domain/audio.types';
+import type { AudioTemplates } from '../entities';
 import { AudioValueCipherService } from '../infrastructure/audio-value-cipher.service';
 import { AudioJobQueueAdapter } from '../infrastructure/audio-job-queue.adapter';
 import { AudioMetricsService } from '../infrastructure/audio-metrics.service';
