@@ -33,9 +33,23 @@ import {
   ManualReviewResponseDto,
   AssertionResponseDto,
   ExpireSweepResponseDto,
+  CaseQueueResponseDto,
 } from '../dto';
 
 const MS_PER_HOUR = 3_600_000;
+/** Cuántos casos devuelve la cola de revisión si no se pide otra cosa. */
+const DEFAULT_QUEUE_SIZE = 50;
+/**
+ * Estados en los que un caso está esperando que una persona lo mire.
+ *
+ * `CASE_OPEN` queda afuera a propósito: es el instante entre crear el caso y
+ * planificar sus checks, y un caso ahí todavía no tiene nada que revisar.
+ */
+const AWAITING_REVIEW_STATES = [
+  IDA.CASE_IN_VERIFICATION,
+  IDA.CASE_AT_RISK,
+  IDA.CASE_MANUAL_REVIEW,
+];
 /** Estados abiertos que un barrido puede expirar (UC-27-12). */
 const OPEN_CASE_STATES = [
   IDA.CASE_OPEN,
@@ -82,6 +96,49 @@ export class IdentityCasesService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityCasesService.name);
+  }
+
+  /**
+   * Cola de revisión: los casos que esperan una decisión, el más viejo primero.
+   *
+   * Es la lectura que le faltaba a la superficie administrativa. Sin ella, un
+   * revisor sólo puede actuar sobre un caso cuyo id ya conoce, y el caso que
+   * abre un solicitante por autoservicio no llega por ningún lado.
+   *
+   * > [!warning] El alcance de esta lectura lo da el rol, no el dato.
+   * > `identity_verification_cases` no tiene `tenant_id`, así que el RLS por
+   * > `app.current_tenant_id` no la alcanza: cubre las tablas que sí tienen esa
+   * > columna. Un `SECURITY_ADMIN` ve por acá los casos de todos los tenants.
+   * > Acotarlo de verdad exige `tenant_id` en la tabla —cambio de modelo, con
+   * > sus cuatro capas— o derivar el tenant del sujeto por join. Hasta
+   * > entonces, no ampliar los roles de este endpoint.
+   *
+   * @param status - Estado concreto a listar; por defecto, los que esperan revisión.
+   * @param limit - Tope de resultados.
+   * @returns Los casos en cola, ordenados por antigüedad.
+   */
+  async listQueue(
+    status?: string,
+    limit?: number,
+  ): Promise<CaseQueueResponseDto> {
+    const em = this.em.fork();
+    const cases = await this.casesRepo.findByStatuses(
+      em,
+      status ? [status] : AWAITING_REVIEW_STATES,
+      limit ?? DEFAULT_QUEUE_SIZE,
+    );
+    return {
+      cases: cases.map((kase) => ({
+        id: kase.id,
+        status: kase.statusConceptId,
+        subjectTypeConceptId: kase.subjectTypeConceptId,
+        subjectEntityId: kase.subjectEntityId,
+        identityVerificationPolicyId: kase.identityVerificationPolicyId,
+        riskScore: kase.riskScore,
+        openedAt: kase.openedAt,
+        expiresAt: kase.expiresAt,
+      })),
+    };
   }
 
   /** UC-27-02: abre un caso aplicando el nivel de aseguramiento de la política. */
