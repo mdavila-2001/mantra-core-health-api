@@ -15,6 +15,11 @@ export PGPASSWORD="${POSTGRES_PASSWORD:?POSTGRES_PASSWORD requerida}"
 
 PSQL=(psql -h postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1)
 
+echo ">>> Esperando a que PostgreSQL acepte conexiones..."
+until psql -h postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q' >/dev/null 2>&1; do
+    sleep 1
+done
+
 pg_true() {
     [[ "$("${PSQL[@]}" -qtAc "$1")" == "t" ]]
 }
