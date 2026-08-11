@@ -49,6 +49,12 @@ describe('refresh-cookie', () => {
       expect(loadRefreshCookieEnv({ NODE_ENV: 'development' }).secure).toBe(
         false,
       );
+      expect(
+        loadRefreshCookieEnv({
+          NODE_ENV: 'development',
+          AUTH_REFRESH_COOKIE_SECURE: '',
+        }).secure,
+      ).toBe(false);
     });
 
     it('la declaración explícita gana sobre el entorno', () => {

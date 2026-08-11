@@ -41,6 +41,7 @@ export const authEnvSchema = Joi.object({
   AUTH_REFRESH_COOKIE_ENABLED: Joi.boolean()
     .truthy('true')
     .falsy('false')
+    .empty('')
     .default(false),
   AUTH_REFRESH_COOKIE_NAME: Joi.string().default('mch_refresh'),
   AUTH_REFRESH_COOKIE_PATH: Joi.string().default('/iam/auth/token/refresh'),
@@ -50,7 +51,8 @@ export const authEnvSchema = Joi.object({
   AUTH_REFRESH_COOKIE_SECURE: Joi.boolean()
     .truthy('true')
     .falsy('false')
-    .default(true),
+    .empty('')
+    .optional(),
 }).unknown(true);
 
 /**
