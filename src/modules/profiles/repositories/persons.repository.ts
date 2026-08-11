@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Persons } from '../entities';
+import { composePersonDisplayName } from '../person-name';
 import { createdBy } from '../../../common';
 
 /** Datos para dar de alta una persona (paciente, profesional o contacto). */
@@ -30,9 +31,11 @@ export interface CreatePersonData {
    */
   motherLastName?: string;
   /**
-   * Nombre ya compuesto, para mostrar. Se deriva de las partes de arriba; quien
-   * cree una persona con partes debería pasarlo ya compuesto para que las dos
-   * formas no puedan divergir.
+   * Nombre ya compuesto, para mostrar.
+   *
+   * Opcional: si no viene, se deriva de las partes de arriba. Si viene, manda —
+   * es la forma anterior de declarar el nombre y los llamadores que sólo tienen
+   * una cadena suelta la siguen usando.
    */
   displayName?: string;
   /**
@@ -102,7 +105,9 @@ export class PersonsRepository {
         middleName: data.middleName,
         lastName: data.lastName,
         motherLastName: data.motherLastName,
-        displayName: data.displayName,
+        // Único punto de inserción de `persons` en toda la API, así que acá la
+        // derivación la heredan los cinco llamadores sin que ninguno la repita.
+        displayName: data.displayName ?? composePersonDisplayName(data),
         birthDate: data.birthDate,
         administrativeGenderConceptId: data.administrativeGenderConceptId,
         sexAtBirthConceptId: data.sexAtBirthConceptId,

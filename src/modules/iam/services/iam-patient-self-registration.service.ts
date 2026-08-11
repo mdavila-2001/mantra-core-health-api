@@ -28,6 +28,7 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
 } from '../../profiles/repositories';
+import { composePersonDisplayName } from '../../profiles/person-name';
 import {
   ContactPointsRepository,
   IdentifiersRepository,
@@ -496,26 +497,20 @@ export class IamPatientSelfRegistrationService {
 }
 
 /**
- * El nombre para mostrar, a partir de las partes que se declararon.
+ * El nombre para mostrar de la CUENTA (`iam.users.display_name`).
+ *
+ * `profiles.persons` lo deriva solo —lo hace `PersonsRepository.create`, que es
+ * el único punto de inserción—, pero la cuenta es otra tabla en otro esquema y
+ * necesita el mismo valor calculado acá para que las dos no puedan divergir.
  *
  * `displayName` explícito gana: es la forma anterior de declarar el nombre y
  * sigue aceptándose, así que quien la use tiene que ver exactamente lo que
- * mandó. Sin él se componen las partes en el orden en que se dicen —nombre,
- * segundo nombre, apellido paterno, apellido materno— salteando las ausentes,
- * que es lo habitual: mucha gente no tiene segundo nombre.
- *
- * Nunca devuelve una cadena vacía: el DTO exige `name` y `lastName` cuando no
- * viene `displayName`, así que siempre hay al menos dos partes.
+ * mandó. Nunca devuelve vacío: el DTO exige `name` y `lastName` cuando no viene
+ * `displayName`.
  *
  * @param dto - Cuerpo del alta.
- * @returns El nombre para mostrar de la cuenta y de la persona.
+ * @returns El nombre para mostrar de la cuenta.
  */
 function composeDisplayName(dto: RegisterPatientDto): string {
-  if (dto.displayName !== undefined) {
-    return dto.displayName;
-  }
-  return [dto.name, dto.middleName, dto.lastName, dto.motherLastName]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => parte !== undefined && parte !== '')
-    .join(' ');
+  return dto.displayName ?? composePersonDisplayName(dto) ?? '';
 }
