@@ -108,7 +108,11 @@ describe('SchedulingCatalogService', () => {
       d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
 
       await d.service.createResource(
-        { ...base, resourceType: 'ROOM', resourceRefType: 'care_spaces' } as never,
+        {
+          ...base,
+          resourceType: 'ROOM',
+          resourceRefType: 'care_spaces',
+        } as never,
         { id: 'u-1' } as never,
       );
 

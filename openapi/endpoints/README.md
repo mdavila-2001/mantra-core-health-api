@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **917 de 917 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **918 de 918 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -74,7 +74,7 @@ Esta referencia documenta **917 de 917 operaciones HTTP** registradas en `openap
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 15 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 30 | `iam-auth`, `iam-users` | 2 |
-| [identity_assurance](identity-assurance.md) | 23 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
+| [identity_assurance](identity-assurance.md) | 24 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 23 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-claims`, `insurance-coverage`, `insurance-prior-auth`, `insurance-reconciliation` | 7 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
@@ -113,4 +113,4 @@ Esta referencia documenta **917 de 917 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 917 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 918 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
