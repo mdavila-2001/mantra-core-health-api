@@ -150,6 +150,28 @@ export class BookingItemDto {
   bookableSlotId?: string;
 
   /**
+   * Cita clínica que respalda la reserva (`clinical.appointments`).
+   *
+   * El dato vivía en la entidad y no salía por ninguna lectura, y esa omisión
+   * cortaba una cadena entera: `CheckInEncounterDto.appointmentId` apunta a esta
+   * misma tabla, así que sin exponerlo el portal no tenía forma de decir «este
+   * encuentro corresponde a este turno». Mandar el `id` de la reserva en su
+   * lugar violaría la clave foránea.
+   *
+   * `null` cuando la reserva no tiene cita clínica detrás, que hoy es el caso
+   * corriente: la reserva se crea desde la agenda y la cita clínica es un
+   * registro posterior. Quien lo consuma tiene que tratar la ausencia como
+   * normal, no como error.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    nullable: true,
+    description:
+      'Cita clínica que respalda la reserva. Es el valor que acepta POST /clinical/encounters/check-in en su `appointmentId`.',
+  })
+  appointmentId?: string | null;
+
+  /**
    * Valor de start at mantenido por la instancia.
    */
   @ApiPropertyOptional({

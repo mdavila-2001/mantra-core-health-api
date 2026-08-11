@@ -711,6 +711,11 @@ export class SchedulingBookingsService {
         patientProfileId: booking.patientProfileId,
         resourceId: booking.resourceId,
         bookableSlotId: booking.bookableSlotId,
+        // El puente hacia `clinical`: es lo que el check-in de un encuentro
+        // acepta como `appointmentId`. `?? null` y no la ausencia, porque el
+        // contrato lo declara nullable y omitirlo obligaría a distinguir «no
+        // hay cita» de «no me lo dijeron», que acá son lo mismo.
+        appointmentId: booking.appointmentId ?? null,
         startAt: slot?.startAt ?? null,
         endAt: slot?.endAt ?? null,
         statusConceptId: booking.statusConceptId,
@@ -749,6 +754,9 @@ export class SchedulingBookingsService {
       patientProfileId: booking.patientProfileId,
       resourceId: booking.resourceId,
       bookableSlotId: booking.bookableSlotId,
+      // Mismo puente que en el listado: las dos lecturas de una cita tienen que
+      // decir lo mismo, o el detalle contradiría a la fila que lo abrió.
+      appointmentId: booking.appointmentId ?? null,
       startAt: slot?.startAt ?? null,
       endAt: slot?.endAt ?? null,
       statusConceptId: booking.statusConceptId,
