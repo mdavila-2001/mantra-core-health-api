@@ -9,6 +9,7 @@ import { AUDIT_SMOKE } from './modules/audit.smoke';
 import { SYSTEM_OPS_SMOKE } from './modules/system_ops.smoke';
 import { GEO_SMOKE } from './modules/geo.smoke';
 import { PRACTICE_SMOKE } from './modules/practice.smoke';
+import { SCHEDULING_SMOKE } from './modules/scheduling.smoke';
 import { CHART_SMOKE } from './modules/chart.smoke';
 import { INTEGRATIONS_SMOKE } from './modules/integrations.smoke';
 import { ACCOUNTING_SMOKE } from './modules/accounting.smoke';
@@ -52,6 +53,9 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...SYSTEM_OPS_SMOKE,
   ...GEO_SMOKE,
   ...PRACTICE_SMOKE,
+  // Scheduling después de Profiles: consume el paciente y el profesional reales
+  // que aquél publica en `ctx.vars`.
+  ...SCHEDULING_SMOKE,
   ...CHART_SMOKE,
   ...INTEGRATIONS_SMOKE,
   ...ACCOUNTING_SMOKE,
