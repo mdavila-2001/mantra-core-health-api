@@ -1,18 +1,18 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1186 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1190 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../mantra_core_technologies_health_docs/SALUD/Entidades`, la misma fuente que usa
 > `yarn orm:catalog`) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1186/1186** entidades tienen descripción de negocio
+> repositorio. **1186/1190** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
 > Este es el catálogo de lo **implementado**. La bóveda describe 1331 entidades en total
-> — la diferencia (145) son entidades diseñadas pero no materializadas aún en
+> — la diferencia (141) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (57 schemas · 1186 entidades)
+## Por schema (58 schemas · 1190 entidades)
 
 ### `accounting` (42 entidades, módulo `accounting`)
 
@@ -138,6 +138,15 @@
 | `server_conversion_events` | `ServerConversionEvents` | 18 | `id` | — | server_conversion_events es un ledger inmutable (append-only) del módulo 43 · ads (dominio Marketing y Crecimiento): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `targeting_specs` | `TargetingSpecs` | 20 | `id` | ✅ | targeting_specs es un registro central de negocio del módulo 43 · ads (publicidad, assets, entrega, comercio y optimización), dominio Marketing y Crecimiento. |
 | `tracking_pixels` | `TrackingPixels` | 12 | `id` | ✅ | tracking_pixels es un registro central de negocio del módulo 43 · ads (publicidad, assets, entrega, comercio y optimización), dominio Marketing y Crecimiento. |
+
+### `audio_assets` (4 entidades, módulo `audio_assets`)
+
+| Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
+|---|---|---:|---|:---:|---|
+| `audio_assets` | `AudioAssets` | 31 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `audio_generation_events` | `AudioGenerationEvents` | 13 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `audio_generation_usage` | `AudioGenerationUsage` | 10 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `audio_templates` | `AudioTemplates` | 13 | `id` | — | _sin descripción verificada en la bóveda_ |
 
 ### `audit` (123 entidades, módulo `audit`)
 
