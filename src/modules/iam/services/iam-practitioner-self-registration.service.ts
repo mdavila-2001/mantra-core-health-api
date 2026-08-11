@@ -159,9 +159,11 @@ export class IamPractitionerSelfRegistrationService {
         [APP_ATTR.ENTITY_TYPE]: 'profiles.health_practitioner_profiles',
       },
       (span) =>
-        this.performRegisterPractitioner(dto, span, ip) as Promise<
-          RegisterPractitionerResponseDto
-        >,
+        this.performRegisterPractitioner(
+          dto,
+          span,
+          ip,
+        ) as Promise<RegisterPractitionerResponseDto>,
     );
   }
 
@@ -216,7 +218,8 @@ export class IamPractitionerSelfRegistrationService {
     ip?: string,
     asistido?: { actor: AuthenticatedUser; reason: string },
   ): Promise<
-    RegisterPractitionerResponseDto | AssistedPractitionerRegistrationResponseDto
+    | RegisterPractitionerResponseDto
+    | AssistedPractitionerRegistrationResponseDto
   > {
     this.logger.info(
       { operation: 'iam.auth.register-practitioner' },

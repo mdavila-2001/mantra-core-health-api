@@ -63,7 +63,14 @@ function build() {
     appointmentsRepo as any,
     logger as any,
   );
-  return { service, tx, bookingsRepo, catalogRepo, historyRepo, appointmentsRepo };
+  return {
+    service,
+    tx,
+    bookingsRepo,
+    catalogRepo,
+    historyRepo,
+    appointmentsRepo,
+  };
 }
 
 /**

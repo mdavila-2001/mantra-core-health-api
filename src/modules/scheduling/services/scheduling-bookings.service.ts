@@ -873,7 +873,9 @@ export class SchedulingBookingsService {
       statusConceptId: CLIN.APPOINTMENT_BOOKED,
       startAt: datos.startAt,
       ...(datos.endAt === undefined ? {} : { endAt: datos.endAt }),
-      ...(datos.reasonText === undefined ? {} : { reasonText: datos.reasonText }),
+      ...(datos.reasonText === undefined
+        ? {}
+        : { reasonText: datos.reasonText }),
       ...(datos.actorUserId === undefined
         ? {}
         : { actorUserId: datos.actorUserId }),

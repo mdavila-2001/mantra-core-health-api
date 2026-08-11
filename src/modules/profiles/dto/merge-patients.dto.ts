@@ -153,7 +153,4 @@ export class ListMergeEventsResponseDto {
   limit!: number;
 }
 
-export {
-  MERGE_EVENTS_DEFAULT_LIMIT,
-  MERGE_EVENTS_MAX_LIMIT,
-};
+export { MERGE_EVENTS_DEFAULT_LIMIT, MERGE_EVENTS_MAX_LIMIT };

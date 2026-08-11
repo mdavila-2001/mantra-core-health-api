@@ -38,9 +38,9 @@ describe('composePersonDisplayName', () => {
 
   it('recorta los bordes de cada parte', () => {
     // Un espacio pegado al copiar y pegar no tiene que llegar a la base.
-    expect(
-      composePersonDisplayName({ name: ' Ana ', lastName: ' Paz ' }),
-    ).toBe('Ana Paz');
+    expect(composePersonDisplayName({ name: ' Ana ', lastName: ' Paz ' })).toBe(
+      'Ana Paz',
+    );
   });
 
   it('devuelve undefined cuando no hay ninguna parte', () => {
