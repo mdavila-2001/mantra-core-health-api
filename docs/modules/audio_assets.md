@@ -45,7 +45,7 @@ Módulo de assets TTS **cache-first** para onboarding y otras experiencias acota
 ## API
 
 - `POST /audio-assets/resolve`: devuelve `READY`, `QUEUED` o `FALLBACK`.
-- `GET /audio-assets/:assetId/content`: sirve bytes desde storage propio.
+- `GET /audio-assets/:assetId/content`: sirve bytes desde storage propio. Un asset acotado a otro tenant responde 404 (no 403: un 403 confirmaría que el identificador existe); los compartidos se sirven a cualquiera, y los flujos `SYSTEM` sin tenant en contexto siguen operando entre tenants.
 - `POST /internal/audio-assets/pregenerate`: SYSTEM-only; precalienta STATIC/ENUMERATED/fallbacks.
 - Los endpoints `prepare-generation`, `generated` y `generation-failed` son SYSTEM-only y pertenecen al contrato API ↔ worker.
 
