@@ -52,6 +52,13 @@ describe('Contabilidad del presupuesto de audio (DB real)', () => {
     const connection = orm.em.getConnection();
     if (createdAssetIds.length > 0) {
       const placeholders = createdAssetIds.map(() => '?').join(', ');
+      // Los eventos primero: referencian el asset por `asset_key` y quedarían
+      // huérfanos en la base de desarrollo si la limpieza sólo borrara assets.
+      await connection.execute(
+        `delete from audio_assets.audio_generation_events where template_key = 'test.template'`,
+        [],
+        'run',
+      );
       await connection.execute(
         `delete from audio_assets.audio_assets where id in (${placeholders})`,
         createdAssetIds,
