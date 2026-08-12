@@ -3,13 +3,13 @@
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
 > **1190 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
-> `../mantra_core_technologies_health_docs/SALUD/Entidades`, la misma fuente que usa
-> `yarn orm:catalog`) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1186/1190** entidades tienen descripción de negocio
+> `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
+> `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
+> repositorio. **1190/1190** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
-> Este es el catálogo de lo **implementado**. La bóveda describe 1331 entidades en total
-> — la diferencia (141) son entidades diseñadas pero no materializadas aún en
+> Este es el catálogo de lo **implementado**. La bóveda describe 1335 entidades en total
+> — la diferencia (145) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
 ## Por schema (58 schemas · 1190 entidades)
@@ -143,10 +143,10 @@
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `audio_assets` | `AudioAssets` | 31 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `audio_generation_events` | `AudioGenerationEvents` | 13 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `audio_generation_usage` | `AudioGenerationUsage` | 10 | `id` | — | _sin descripción verificada en la bóveda_ |
-| `audio_templates` | `AudioTemplates` | 13 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `audio_assets` | `AudioAssets` | 33 | `id` | — | audio_assets es la caché de audio ya sintetizado. Una fila = una frase concreta convertida en voz, con dónde están sus bytes y en qué estado quedó la generación. |
+| `audio_generation_events` | `AudioGenerationEvents` | 13 | `id` | — | audio_generation_events es la bitácora de qué pasó en cada intento de generar audio: qué se pidió, contra qué proveedor, cómo salió y cuánto tardó. |
+| `audio_generation_usage` | `AudioGenerationUsage` | 10 | `id` | — | audio_generation_usage es el contador de consumo del proveedor de voz, una fila por mes y por proveedor. Es lo que decide si todavía se puede generar audio nuevo o si hay que degradar a fallback. |
+| `audio_templates` | `AudioTemplates` | 13 | `id` | — | audio_templates es el catálogo de frases que la plataforma tiene permiso de sintetizar. Cada fila es una plantilla registrada con su texto, su versión, su idioma y los campos dinámicos que admite. |
 
 ### `audit` (123 entidades, módulo `audit`)
 
@@ -1246,7 +1246,7 @@
 | `patient_profiles` | `PatientProfiles` | 13 | `profile_id` | ✅ | patient_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `person_account_links` | `PersonAccountLinks` | 13 | `id` | ✅ | person_account_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`persons`) para representar relaciones muchos-a-muchos. |
 | `person_profiles` | `PersonProfiles` | 9 | `id` | ✅ | person_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `persons` | `Persons` | 22 | `id` | ✅ | persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `persons` | `Persons` | 23 | `id` | ✅ | persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `practitioner_languages` | `PractitionerLanguages` | 10 | `id` | ✅ | practitioner_languages es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `practitioner_specialties` | `PractitionerSpecialties` | 16 | `id` | ✅ | practitioner_specialties es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `professional_credentials` | `ProfessionalCredentials` | 19 | `id` | ✅ | professional_credentials es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
