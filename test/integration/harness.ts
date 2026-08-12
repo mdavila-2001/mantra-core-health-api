@@ -7,7 +7,10 @@ import { AppModule } from '../../src/app.module';
 import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
-import { HttpDispatcherService, type OutboundDispatchResult } from '../../src/common';
+import {
+  HttpDispatcherService,
+  type OutboundDispatchResult,
+} from '../../src/common';
 import {
   Persons,
   HealthPractitionerProfiles,
@@ -206,7 +209,9 @@ export async function bootstrapTestApp(
  */
 async function seedFixtures(orm: MikroORM): Promise<void> {
   const em = orm.em.fork();
-  if (await em.findOne(HealthPractitionerProfiles, { profileId: FIX.practPerson })) {
+  if (
+    await em.findOne(HealthPractitionerProfiles, { profileId: FIX.practPerson })
+  ) {
     return;
   }
   const audit = createdBy(TEST_ADMIN_ID);
@@ -214,7 +219,11 @@ async function seedFixtures(orm: MikroORM): Promise<void> {
 
   // Personas base (padres de los subtipos; su id es la PK del subtipo).
   for (const personId of [FIX.practPerson, FIX.secPerson, FIX.patPerson]) {
-    em.create(Persons, { id: personId, personStatusConceptId: active, ...audit }, { partial: true });
+    em.create(
+      Persons,
+      { id: personId, personStatusConceptId: active, ...audit },
+      { partial: true },
+    );
   }
   await em.flush();
 
@@ -230,7 +239,11 @@ async function seedFixtures(orm: MikroORM): Promise<void> {
     },
     { partial: true },
   );
-  em.create(SecretaryProfiles, { profileId: FIX.secPerson, ...audit }, { partial: true });
+  em.create(
+    SecretaryProfiles,
+    { profileId: FIX.secPerson, ...audit },
+    { partial: true },
+  );
   em.create(
     PatientProfiles,
     { profileId: FIX.patPerson, patientCode: 'FIX-PAT-1', ...audit },
