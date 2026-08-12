@@ -18,6 +18,10 @@ import {
 } from '../common';
 import { LoggingModule, loggingEnvSchema } from '../logging';
 import { ObservabilityModule, telemetryEnvSchema } from '../observability';
+// Se importa por su ruta exacta y no desde `modules/audio_tts`: el barril del
+// módulo arrastra entidades, controladores y `AudioTtsModule` al proceso worker,
+// que no los necesita. Este archivo solo depende de Joi.
+import { audioTtsEnvSchema } from '../modules/audio_tts/config/audio-tts.env';
 import {
   assertMockProviderNotInProduction,
   loadWorkerEnv,
@@ -75,7 +79,12 @@ export async function bootstrapWorker(
         validationSchema: authEnvSchema
           .concat(loggingEnvSchema)
           .concat(workerEnvSchema)
-          .concat(telemetryEnvSchema),
+          .concat(telemetryEnvSchema)
+          // Lo concatenan los 21 workers, no solo el de audio: todas sus
+          // variables tienen valor por defecto, y validarlas en todos hace que un
+          // `.env` compartido con una errata aborte el arranque en cualquiera de
+          // ellos en vez de solo en el que la usa.
+          .concat(audioTtsEnvSchema),
       }),
       LoggingModule,
       ObservabilityModule,

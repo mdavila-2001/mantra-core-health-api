@@ -22,6 +22,8 @@
     "start:prod": "node dist/src/main.js",
     "start:worker:billing": "node dist/src/worker-billing",
     "start:worker:billing:dev": "nest start --watch --entryFile worker-billing",
+    "start:worker:audio_tts": "node dist/src/worker-audio_tts",
+    "start:worker:audio_tts:dev": "nest start --watch --entryFile worker-audio_tts",
     "start:worker:automation": "node dist/src/worker-automation",
     "start:worker:automation:dev": "nest start --watch --entryFile worker-automation",
     "start:worker:consent": "node dist/src/worker-consent",
@@ -103,6 +105,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",
+    "@aws-sdk/s3-request-presigner": "3.1094.0",
     "@casl/ability": "^7.0.1",
     "@mikro-orm/core": "^7.1.7",
     "@mikro-orm/decorators": "^7.1.7",

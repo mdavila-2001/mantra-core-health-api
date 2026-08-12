@@ -37,6 +37,7 @@
 | [`read_models`](read_models.md) | 3 | 3 | 8 | 13 | 5 |
 | [`telemetry`](telemetry.md) | 3 | 3 | 14 | 14 | 12 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
+| [`audio_tts`](audio_tts.md) | 2 | 5 | 2 | 5 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 4 | 3 | 20 | 1 |
 | [`directory`](directory.md) | 2 | 6 | 5 | 7 | 16 |
@@ -67,4 +68,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **196** | **270** | **355** | **1186** | **381** |
+| **Total** | **198** | **275** | **357** | **1191** | **382** |

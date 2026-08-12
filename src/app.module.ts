@@ -34,6 +34,7 @@ import { AccountingModule } from './modules/accounting/accounting.module';
 import { AdsModule } from './modules/ads/ads.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
+import { AudioTtsModule, audioTtsEnvSchema } from './modules/audio_tts';
 import { AutomationModule } from './modules/automation/automation.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { ChartModule } from './modules/chart/chart.module';
@@ -103,7 +104,8 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(authEnvSchema)
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
-        .concat(telemetryEnvSchema),
+        .concat(telemetryEnvSchema)
+        .concat(audioTtsEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
     // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
@@ -153,6 +155,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AdsModule,
     AuditModule,
     AuthProvidersModule,
+    AudioTtsModule,
     AutomationModule,
     BillingModule,
     ChartModule,
