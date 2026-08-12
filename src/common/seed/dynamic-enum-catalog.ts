@@ -1,6 +1,7 @@
 import { CONCEPTS, CONCEPT_DEFS, deterministicId } from '../constants/concepts';
 import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
+import { CLIN } from '../../modules/clinical/clinical.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
 /**
@@ -561,6 +562,67 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
     defaultConceptId: CONCEPTS.SCAN_PENDING,
     targets: ['common.file_versions.malware_scan_status_concept_id'],
+  },
+
+  /* --- clinical: la receta ---------------------------------------------------
+     Las tres primeras enumeraciones clínicas del catálogo. Existen porque sin
+     ellas la ficha del paciente **no puede prescribir**: el selector resuelve
+     sus opciones por binding de columna y, sin amarre declarado, queda
+     deshabilitado por diseño —no cae a texto libre, que en un `*_concept_id`
+     sería un dato inválido o, peor, uno válido de otro conjunto—.
+
+     `medication` es un catálogo INICIAL, no un vademécum; ver la nota en
+     `clinical.concepts.ts`. Las otras dos sí son enumeraciones cerradas. */
+  {
+    code: 'medication',
+    name: 'Medicamento',
+    description:
+      'Vademécum inicial para prescribir (ATC). Se reemplaza publicando una versión nueva del conjunto, sin tocar el amarre.',
+    concepts: [
+      CLIN.MEDICATION_PARACETAMOL,
+      CLIN.MEDICATION_IBUPROFENO,
+      CLIN.MEDICATION_AMOXICILINA,
+      CLIN.MEDICATION_AZITROMICINA,
+      CLIN.MEDICATION_CEFALEXINA,
+      CLIN.MEDICATION_OMEPRAZOL,
+      CLIN.MEDICATION_METFORMINA,
+      CLIN.MEDICATION_LOSARTAN,
+      CLIN.MEDICATION_ENALAPRIL,
+      CLIN.MEDICATION_ATORVASTATINA,
+      CLIN.MEDICATION_SALBUTAMOL,
+      CLIN.MEDICATION_LORATADINA,
+    ],
+    // Sin preseleccionado a propósito: un medicamento por omisión es la clase de
+    // ayuda que termina prescrita sin que nadie la haya elegido.
+    targets: ['clinical.medication_requests.medication_concept_id'],
+  },
+  {
+    code: 'medication-route',
+    name: 'Vía de administración',
+    description: 'Por dónde se administra el medicamento prescrito.',
+    concepts: [
+      CLIN.MEDICATION_ROUTE_ORAL,
+      CLIN.MEDICATION_ROUTE_INTRAVENOUS,
+      CLIN.MEDICATION_ROUTE_INTRAMUSCULAR,
+      CLIN.MEDICATION_ROUTE_SUBCUTANEOUS,
+      CLIN.MEDICATION_ROUTE_TOPICAL,
+      CLIN.MEDICATION_ROUTE_INHALATION,
+    ],
+    targets: ['clinical.medication_requests.route_concept_id'],
+  },
+  {
+    code: 'medication-unit',
+    name: 'Unidad de la cantidad',
+    description: 'Unidad UCUM de la cantidad prescrita.',
+    concepts: [
+      CLIN.MEDICATION_UNIT_MILLIGRAM,
+      CLIN.MEDICATION_UNIT_GRAM,
+      CLIN.MEDICATION_UNIT_MILLILITRE,
+      CLIN.MEDICATION_UNIT_TABLET,
+      CLIN.MEDICATION_UNIT_CAPSULE,
+      CLIN.MEDICATION_UNIT_DROP,
+    ],
+    targets: ['clinical.medication_requests.unit_concept_id'],
   },
 ];
 
