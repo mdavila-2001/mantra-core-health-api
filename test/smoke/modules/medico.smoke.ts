@@ -268,6 +268,139 @@ export const MEDICO_SMOKE: SmokeCase[] = [
     expectedStatus: 200,
   },
 
+  // --- 5.bis · Su día de trabajo, con SU token -----------------------------
+  //
+  // Faltaba, y el hueco costó caro: el humo del médico cubría su alta, su
+  // verificación y sus relaciones de cuidado, pero **nunca le pedía abrir su
+  // agenda ni un expediente** — que es literalmente lo que hace todos los días.
+  //
+  // Por eso pasó desapercibido que `PRACTITIONER` y `CLINICIAN` no existían
+  // como concepto de rol: los 57 endpoints que los exigen sólo respondían al
+  // administrador, que es con quien se probaba todo. Un médico real recibía 403
+  // en su agenda y en el expediente de sus pacientes.
+  //
+  // Estos casos son la red que faltaba: si el rol vuelve a desaparecer del
+  // token, fallan acá y no en la demo.
+  {
+    module: 'Médico',
+    endpoint: 'GET /scheduling/resources',
+    name: 'happy: ve los recursos agendables de su organización',
+    method: 'get',
+    token: asDoctor,
+    path: (c) => `/scheduling/resources?tenantId=${c.tenantId}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'GET /scheduling/slots',
+    name: 'happy: consulta los cupos de una ventana',
+    method: 'get',
+    token: asDoctor,
+    // La ventana es obligatoria: sin ella el backend barre la tabla entera.
+    path: () =>
+      `/scheduling/slots?from=${new Date().toISOString()}&to=${new Date(Date.now() + 7 * 86_400_000).toISOString()}&limit=1`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'GET /scheduling/bookings',
+    name: 'contrato: pedir citas sin acotar responde 422, no una tabla entera',
+    method: 'get',
+    token: asDoctor,
+    // Es el 422 que la agenda del portal evita eligiendo siempre un recurso.
+    path: () => '/scheduling/bookings',
+    expectedStatus: 422,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'GET /clinical/patients/{id}/summary',
+    name: 'happy: abre el resumen clínico de su paciente',
+    method: 'get',
+    token: asDoctor,
+    path: (c) => `/clinical/patients/${c.vars.medPatientProfileId}/summary`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'GET /charts/patients/{id}/chart',
+    name: 'happy: abre el expediente narrativo de su paciente',
+    method: 'get',
+    token: asDoctor,
+    path: (c) => `/charts/patients/${c.vars.medPatientProfileId}/chart`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'POST /clinical/encounters/check-in',
+    name: 'happy: deja constancia de que atendió — abre el encuentro',
+    method: 'post',
+    token: asDoctor,
+    path: () => '/clinical/encounters/check-in',
+    body: (c) => ({
+      patientProfileId: c.vars.medPatientProfileId,
+      tenantId: c.tenantId,
+      reasonText: 'Control de humo',
+    }),
+    expectedStatus: 201,
+    capture: (b, c) => {
+      c.vars.medEncounterId = String((b as { id?: string }).id ?? '');
+    },
+  },
+  {
+    module: 'Médico',
+    endpoint: 'POST /clinical/encounters/{id}/close',
+    name: 'happy: cierra el encuentro que abrió',
+    method: 'post',
+    token: asDoctor,
+    path: (c) => `/clinical/encounters/${c.vars.medEncounterId}/close`,
+    body: () => ({}),
+    expectedStatus: 200,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'POST /clinical/encounters/{id}/close',
+    name: 'contrato: cerrar dos veces no es idempotente — responde 422',
+    method: 'post',
+    token: asDoctor,
+    path: (c) => `/clinical/encounters/${c.vars.medEncounterId}/close`,
+    body: () => ({}),
+    expectedStatus: 422,
+  },
+
+  // --- 5.ter · Lo que un médico NO puede hacer -----------------------------
+  //
+  // La otra mitad del contrato, y la que un humo «todo verde» suele olvidar:
+  // tener rol clínico no es tener rol administrativo. Si alguno de estos
+  // empezara a responder 200, el médico habría ganado el padrón de la
+  // institución sin que nadie lo decidiera.
+  {
+    module: 'Médico',
+    endpoint: 'GET /profiles/patients',
+    name: 'restricción: el padrón de pacientes es de administración — 403',
+    method: 'get',
+    token: asDoctor,
+    path: () => '/profiles/patients?limit=1',
+    expectedStatus: 403,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'GET /iam/users',
+    name: 'restricción: el listado de cuentas es de administración — 403',
+    method: 'get',
+    token: asDoctor,
+    path: () => '/iam/users?limit=1',
+    expectedStatus: 403,
+  },
+  {
+    module: 'Médico',
+    endpoint: 'GET /admin/tenants',
+    name: 'restricción: las organizaciones son de administración — 403',
+    method: 'get',
+    token: asDoctor,
+    path: () => '/admin/tenants?limit=1',
+    expectedStatus: 403,
+  },
+
   // --- 6. Cierre de sesión -------------------------------------------------
   {
     module: 'Médico',
