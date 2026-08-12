@@ -98,9 +98,12 @@ describe('S3FileStorageAdapter', () => {
 
   it('traduce el fallo del bucket a «no encontrado» y no filtra el error del SDK', async () => {
     // El SDK v3 señala el caso por `name`, no por el mensaje.
-    const notFound = Object.assign(new Error('The specified key does not exist'), {
-      name: 'NoSuchKey',
-    });
+    const notFound = Object.assign(
+      new Error('The specified key does not exist'),
+      {
+        name: 'NoSuchKey',
+      },
+    );
     const { adapter } = build(fn().mockRejectedValue(notFound));
 
     await expect(
