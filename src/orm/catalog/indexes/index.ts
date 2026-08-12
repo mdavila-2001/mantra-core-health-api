@@ -4,11 +4,11 @@ import { accountingIndexes2 } from './accounting.2.idx';
 import { adsIndexes1 } from './ads.1.idx';
 import { adsIndexes2 } from './ads.2.idx';
 import { adsIndexes3 } from './ads.3.idx';
+import { audioAssetsIndexes } from './audio_assets.idx';
 import { auditIndexes1 } from './audit.1.idx';
 import { auditIndexes2 } from './audit.2.idx';
 import { auditIndexes3 } from './audit.3.idx';
 import { auditIndexes4 } from './audit.4.idx';
-import { audioAssetsIndexes } from './audio_assets.idx';
 import { authProvidersIndexes } from './auth_providers.idx';
 import { authzIndexes } from './authz.idx';
 import { automationIndexes } from './automation.idx';
@@ -82,8 +82,8 @@ import { workflowIndexes } from './workflow.idx';
 export const indexCatalog: Readonly<Record<string, readonly (readonly IndexTuple[])[]>> = {
   accounting: [accountingIndexes1, accountingIndexes2],
   ads: [adsIndexes1, adsIndexes2, adsIndexes3],
-  audit: [auditIndexes1, auditIndexes2, auditIndexes3, auditIndexes4],
   audio_assets: [audioAssetsIndexes],
+  audit: [auditIndexes1, auditIndexes2, auditIndexes3, auditIndexes4],
   auth_providers: [authProvidersIndexes],
   authz: [authzIndexes],
   automation: [automationIndexes],

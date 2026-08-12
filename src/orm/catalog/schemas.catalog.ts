@@ -10,8 +10,8 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   // [schema, número de módulo del modelo, carpeta del módulo NestJS, tablas mapeadas]
   ['accounting', 16, 'accounting', 42],
   ['ads', 43, 'ads', 73],
+  ['audio_assets', 64, 'audio_assets', 4],
   ['audit', 10, 'audit', 123],
-  ['audio_assets', null, 'audio_assets', 4],
   ['auth_providers', 40, 'auth_providers', 9],
   ['authz', 6, 'authz', 15],
   ['automation', 48, 'automation', 16],
