@@ -850,6 +850,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La revisión ya fue decidida | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
 | 422 | `PRECONDITION_FAILED` | La revisión está asignada a otro revisor | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
+| 422 | `PRECONDITION_FAILED` | La revisión quedó obsoleta: el caso ya no admite aprobación | Excepción explícita en src/modules/identity_assurance/services/identity-checks.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo determinar la autoridad que verificó el caso | Excepción explícita en src/modules/identity_assurance/services/identity-checks.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

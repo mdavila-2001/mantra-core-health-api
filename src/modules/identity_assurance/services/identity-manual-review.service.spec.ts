@@ -23,15 +23,24 @@ function build() {
   const reviewRepo = { findById: mockFn() };
   const casesRepo = { findById: mockFn() };
   const fraudRepo = { resolveOpenForCase: mockFn().mockResolvedValue(0) };
+  // Simula el efecto real: cerrar checks y dejar el caso asertado (H-01).
+  const checksService = {
+    settleManualApproval: mockFn(async (_tx: any, kase: any) => {
+      kase.statusConceptId = IDA.CASE_ASSERTED;
+      kase.completedAt = new Date();
+      return kase.statusConceptId;
+    }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new IdentityManualReviewService(
     em as any,
     reviewRepo as any,
     casesRepo as any,
     fraudRepo as any,
+    checksService as any,
     logger as any,
   );
-  return { service, tx, reviewRepo, casesRepo, fraudRepo };
+  return { service, tx, reviewRepo, casesRepo, fraudRepo, checksService };
 }
 
 describe('IdentityManualReviewService', () => {
@@ -56,7 +65,14 @@ describe('IdentityManualReviewService', () => {
       { decision: 'APPROVED' } as any,
       actor,
     );
-    expect(res.caseStatus).toBe(IDA.CASE_VERIFIED);
+    // H-01: aprobar delega el cierre de checks + aserción al camino existente,
+    // y el caso termina ASSERTED, no VERIFIED a mano.
+    expect(d.checksService.settleManualApproval).toHaveBeenCalledWith(
+      d.tx,
+      kase,
+      actor,
+    );
+    expect(res.caseStatus).toBe(IDA.CASE_ASSERTED);
     expect(review.statusConceptId).toBe(IDA.REVIEW_DECIDED);
     expect(d.fraudRepo.resolveOpenForCase).toHaveBeenCalledWith(
       d.tx,
@@ -64,6 +80,32 @@ describe('IdentityManualReviewService', () => {
       IDA.FRAUD_OPEN,
       IDA.FRAUD_RESOLVED,
     );
+  });
+
+  it('rejects the case directly, without closing checks nor issuing an assertion', async () => {
+    const d = build();
+    const review: any = {
+      id: 'rv1',
+      identityVerificationCaseId: 'k1',
+      statusConceptId: IDA.REVIEW_OPEN,
+      assignedToUserId: 'admin-1',
+      updatedAt: new Date(),
+    };
+    const kase: any = {
+      id: 'k1',
+      statusConceptId: IDA.CASE_MANUAL_REVIEW,
+      updatedAt: new Date(),
+    };
+    d.reviewRepo.findById.mockResolvedValue(review);
+    d.casesRepo.findById.mockResolvedValue(kase);
+    const res = await d.service.decide(
+      'rv1',
+      { decision: 'REJECTED' } as any,
+      actor,
+    );
+    expect(res.caseStatus).toBe(IDA.CASE_REJECTED);
+    expect(kase.completedAt).toBeInstanceOf(Date);
+    expect(d.checksService.settleManualApproval).not.toHaveBeenCalled();
   });
 
   it('rejects deciding a review assigned to another reviewer', async () => {
