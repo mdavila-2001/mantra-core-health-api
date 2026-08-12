@@ -132,3 +132,4 @@ generación de cupos exige además regenerar los cupos ya materializados en cada
 correcto. Es una compensación deliberada y documentada en el propio seeder: cuando `generateSlots`
 lea `time_zone`, esa función se borra y las franjas vuelven a declararse en hora local.
 
+
