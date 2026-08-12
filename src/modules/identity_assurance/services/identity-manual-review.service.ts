@@ -14,6 +14,7 @@ import {
   IdentityFraudSignalsRepository,
 } from '../repositories';
 import { ReviewDecisionDto, ReviewDecisionResponseDto } from '../dto';
+import { IdentityChecksService } from './identity-checks.service';
 
 /**
  * UC-27-09: resolución de una revisión manual. La decisión del revisor lleva el
@@ -28,6 +29,7 @@ export class IdentityManualReviewService {
    * @param reviewRepo - Valor de review repo requerido por la operación.
    * @param casesRepo - Valor de cases repo requerido por la operación.
    * @param fraudRepo - Valor de fraud repo requerido por la operación.
+   * @param checksService - Cierra los checks y emite la aserción al aprobar.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -35,6 +37,7 @@ export class IdentityManualReviewService {
     private readonly reviewRepo: IdentityManualReviewCasesRepository,
     private readonly casesRepo: IdentityVerificationCasesRepository,
     private readonly fraudRepo: IdentityFraudSignalsRepository,
+    private readonly checksService: IdentityChecksService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityManualReviewService.name);
@@ -97,9 +100,15 @@ export class IdentityManualReviewService {
       review.decisionReason = dto.decisionReason;
       touch(review, actor.id);
 
-      kase.statusConceptId = approved ? IDA.CASE_VERIFIED : IDA.CASE_REJECTED;
-      kase.completedAt = now;
-      touch(kase, actor.id);
+      if (approved) {
+        // H-01: aprobar tiene que cerrar también los checks obligatorios y
+        // emitir la aserción — por el mismo camino que el veredicto automático.
+        await this.checksService.settleManualApproval(tx, kase, actor);
+      } else {
+        kase.statusConceptId = IDA.CASE_REJECTED;
+        kase.completedAt = now;
+        touch(kase, actor.id);
+      }
 
       await this.fraudRepo.resolveOpenForCase(
         tx,
