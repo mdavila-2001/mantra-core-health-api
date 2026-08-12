@@ -262,6 +262,15 @@ const isEmptyCriteria = (criteria) => /^\{\s*\}$/.test(criteria.trim());
  * tienen algo vencido").
  */
 const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
+  // Mantenimiento del catálogo de audio, `@Roles('SYSTEM')` a nivel de
+  // controlador (`internal/audio-assets`): verificar checksums y recolectar
+  // objetos deprecados no se puede acotar por tenant porque no se sabe de
+  // antemano qué tenants tienen un asset corrupto o deprecado — y el asset
+  // compartido (`tenant_id IS NULL`) no pertenece a ninguno. Aparecieron al
+  // añadir `tenant_id` al módulo (2026-08-11): antes la entidad no tenía
+  // columna de tenant y la regla no aplicaba.
+  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listReady',
+  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listGarbageCandidates',
   'src/modules/automation/repositories/automation-governance.repository.ts#findEnabledCalendarTriggers',
   'src/modules/practice/repositories/practices.repository.ts#findActive',
   'src/modules/consent/repositories/consents.repository.ts#findExpirable',
