@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   ResourceNotFoundException,
+  getCurrentTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { loadAudioEnv } from '../audio.env';
@@ -24,6 +25,7 @@ import {
   buildAudioSynthesisProfile,
   buildCreateAudioAssetInput,
   findReadyFallbackView,
+  requiresTenantScope,
   toAudioAssetView,
 } from './audio-asset-resolution.mapper';
 import type {
@@ -129,12 +131,26 @@ export class ResolveAudioAssetUseCase {
   ): Promise<ResolveAudioAssetResult> {
     const profile = buildAudioSynthesisProfile(template, this.env);
     const normalizedText = normalizeRenderedText(renderedText);
+    // Alcance de la caché. Un audio con el nombre de una persona dentro no puede
+    // compartirse entre tenants: el acierto de caché sería la prueba de que ese
+    // nombre existe en el otro tenant. Los audios sin datos de nadie —estáticos,
+    // fallbacks, enumerados— se siguen compartiendo, que es lo que permite
+    // pre-generarlos una sola vez para toda la plataforma.
+    const tenantId =
+      !fallback &&
+      requiresTenantScope(
+        this.repository.dynamicFields(template),
+        normalizedValues,
+      )
+        ? getCurrentTenantId()
+        : undefined;
     const assetKey = buildAudioAssetKey({
       ...profile,
       templateId: template.templateKey,
       templateVersion: template.version,
       normalizedText,
       variant: fallback ? 'FALLBACK' : 'PRIMARY',
+      tenantId,
     });
     const existing = await this.repository.findAssetByKey(assetKey);
     if (existing?.generationStatus === 'READY') {
@@ -156,6 +172,7 @@ export class ResolveAudioAssetUseCase {
       const reusable = await this.repository.findReusableReady(
         renderedTextHash,
         profile,
+        tenantId,
       );
       if (reusable && reusable.assetKey !== assetKey) {
         const asset =
@@ -169,6 +186,7 @@ export class ResolveAudioAssetUseCase {
               profile,
               mode,
               fallback,
+              tenantId,
               encryptedRenderedText: this.cipher.encrypt(renderedText),
             }),
           ));
@@ -227,6 +245,7 @@ export class ResolveAudioAssetUseCase {
         profile,
         mode,
         fallback,
+        tenantId,
         encryptedRenderedText: this.cipher.encrypt(renderedText),
       }),
     );

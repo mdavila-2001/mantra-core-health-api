@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { MessageQueues, QueuedJobs, DeadLetterJobs } from '../entities';
+import { createdBy } from '../../../common';
 
 /**
  * Describe el contrato estructural de create job data.
@@ -105,6 +106,14 @@ export class QueuesRepository {
         availableAt: data.availableAt,
         attempts: 0,
         maxAttempts: data.maxAttempts,
+        // Sin los campos de auditoría el flush aborta con "Value for
+        // QueuedJobs.createdAt is required": la entidad los declara obligatorios
+        // y esas columnas no tienen default en la base (`row_version` es la única
+        // que lo tiene en todo el modelo). Era el único `create` del módulo que
+        // los omitía, así que **ningún** trabajo llegaba a encolarse y el
+        // productor recibía un 500 — el mismo patrón `...createdBy(...)` que usan
+        // el outbox y las notificaciones.
+        ...createdBy(data.actorUserId),
       },
       { partial: true },
     );

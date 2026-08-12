@@ -6,6 +6,7 @@ import {
 } from '../domain/audio-asset-key';
 import type {
   AudioAssetView,
+  AudioDynamicField,
   AudioGenerationMode,
   AudioSynthesisProfile,
 } from '../domain/audio.types';
@@ -22,6 +23,31 @@ interface BuildCreateAudioAssetInput {
   mode: AudioGenerationMode;
   fallback: boolean;
   encryptedRenderedText: string;
+  tenantId?: string;
+}
+
+/**
+ * ¿Este audio pertenece a un tenant o se comparte con toda la plataforma?
+ *
+ * Se comparte cuando su texto no puede identificar a nadie: los `STATIC`, los
+ * `FALLBACK` y los `ENUMERATED` (conjunto cerrado de valores). Eso es lo que
+ * permite pre-generarlos **una vez** para todos los tenants, que es media razón de
+ * existir de esta caché.
+ *
+ * Se acota por tenant en cuanto el render sustituyó un valor de un campo que puede
+ * llevar datos de una persona (`PERSON_NAME`) o texto libre (`SAFE_TEXT`, que
+ * ninguna lista blanca puede garantizar anónimo). La decisión mira los campos
+ * **declarados** por la plantilla, no lo que el valor de hoy parezca.
+ */
+export function requiresTenantScope(
+  fields: readonly AudioDynamicField[],
+  normalizedValues: Record<string, string>,
+): boolean {
+  return fields.some(
+    (field) =>
+      (field.type === 'PERSON_NAME' || field.type === 'SAFE_TEXT') &&
+      normalizedValues[field.name] !== undefined,
+  );
 }
 
 export function buildCreateAudioAssetInput(
@@ -39,6 +65,7 @@ export function buildCreateAudioAssetInput(
   return {
     ...input.profile,
     assetKey: input.assetKey,
+    tenantId: input.tenantId,
     templateKey: input.template.templateKey,
     templateVersion: input.template.version,
     strategy: input.fallback ? 'FALLBACK' : input.template.strategy,

@@ -50,10 +50,17 @@ const ALLOWED_COMMANDS =
  *     con `actorUserId` en el servicio.
  *   - identity-self-service: el sujeto se deriva del actor autenticado y la
  *     pertenencia de tenant se valida en el servicio, no por rol global.
+ *   - audio_assets: `resolve` es el flujo del propio usuario (pide el audio de su
+ *     onboarding) y no admite texto libre — sólo plantillas registradas. El
+ *     alcance lo pone el tenant del contexto, que entra en la identidad del asset,
+ *     y el cupo diario se imputa al sujeto del token; exigir un rol global
+ *     obligaría a inventar uno que todo usuario tendría. Las operaciones que sí
+ *     gastan cuota o tocan el catálogo viven en `internal/audio-assets` con
+ *     `@Roles('SYSTEM')`.
  * NO exime del requisito de autenticación (el guard global lo garantiza).
  */
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts/;
+  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/controllers\/audio-assets\.controller\.ts/;
 
 /** ¿Existe un JwtAuthGuard registrado como APP_GUARD global? (defensa por defecto) */
 function hasGlobalJwtGuard() {
@@ -218,6 +225,77 @@ const GLOBAL_DOMAIN_MODULES = new Set([
   'time_series',
 ]);
 
+/**
+ * Texto del **segundo argumento** de `em.find(Entity, criterio, opciones)`.
+ *
+ * Hace falta parsear la lista de argumentos en vez de buscar el primer `{`: si el
+ * criterio se pasa en una variable (`em.find(X, where, { orderBy, limit })`), ese
+ * primer `{` es el de las **opciones**, y evaluar `orderBy`/`limit` como si fueran
+ * el criterio produce un falso positivo garantizado —y, al revés, un
+ * `orderBy: { patientProfileId: 'ASC' }` exoneraría una consulta sin acotar—. El
+ * fallo iba en las dos direcciones.
+ *
+ * @param from índice del `(` de la llamada.
+ * @returns el argumento tal cual (literal `{...}` o el nombre de la variable), o
+ *          `''` si no hay segundo argumento.
+ */
+function secondArgumentText(text, from) {
+  const open = text.indexOf('(', from);
+  if (open === -1) return '';
+  let depth = 0;
+  let argStart = -1;
+  for (let i = open; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '(' || ch === '{' || ch === '[') depth++;
+    else if (ch === ')' || ch === '}' || ch === ']') {
+      depth--;
+      // Cierre de la propia llamada. Si ya se vio la coma, el criterio es el
+      // último argumento y acaba aquí; si no, la llamada tenía uno solo.
+      if (depth === 0) {
+        return argStart === -1 ? '' : text.slice(argStart, i).trim();
+      }
+    } else if (ch === ',' && depth === 1) {
+      if (argStart === -1) {
+        argStart = i + 1;
+      } else {
+        return text.slice(argStart, i).trim();
+      }
+    }
+  }
+  return argStart === -1 ? '' : text.slice(argStart).trim();
+}
+
+/**
+ * Claves del criterio, resolviendo la variable cuando el criterio no es literal.
+ *
+ * Un criterio construido por acumulación (`const where = {}; if (…)
+ * where.patientProfileId = …`) es el idioma normal de una búsqueda con filtros
+ * opcionales, y sus claves están en el cuerpo del método, no en la llamada.
+ * Se recogen del inicializador y de las asignaciones `variable.clave = …`.
+ */
+function criteriaKeys(argument, methodBody) {
+  const literalKeys = (source) =>
+    [...source.matchAll(/[{,]\s*([A-Za-z]\w*)\s*[,:}]/g)].map((k) => k[1]);
+
+  if (argument.startsWith('{')) return literalKeys(argument);
+
+  const name = argument.match(/^[A-Za-z_$][\w$]*/)?.[0];
+  if (!name) return [];
+
+  const keys = [];
+  const declaration = methodBody.match(
+    new RegExp(
+      `\\b(?:const|let|var)\\s+${name}\\b[^=]*=\\s*(\\{[\\s\\S]*?\\n\\s*\\}|\\{[^}]*\\})`,
+    ),
+  );
+  if (declaration) keys.push(...literalKeys(declaration[1]));
+  for (const m of methodBody.matchAll(
+    new RegExp(`\\b${name}\\.([A-Za-z]\\w*)\\s*=`, 'g'),
+  ))
+    keys.push(m[1]);
+  return keys;
+}
+
 /** Extrae el objeto `{ ... }` balanceado que arranca en el primer `{` a partir de `from`. */
 function extractBalancedBraces(text, from) {
   const start = text.indexOf('{', from);
@@ -262,6 +340,15 @@ const isEmptyCriteria = (criteria) => /^\{\s*\}$/.test(criteria.trim());
  * tienen algo vencido").
  */
 const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
+  // Mantenimiento del catálogo de audio, `@Roles('SYSTEM')` a nivel de
+  // controlador (`internal/audio-assets`): verificar checksums y recolectar
+  // objetos deprecados no se puede acotar por tenant porque no se sabe de
+  // antemano qué tenants tienen un asset corrupto o deprecado — y el asset
+  // compartido (`tenant_id IS NULL`) no pertenece a ninguno. Aparecieron al
+  // añadir `tenant_id` al módulo (2026-08-11): antes la entidad no tenía
+  // columna de tenant y la regla no aplicaba.
+  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listReady',
+  'src/modules/audio_assets/repositories/audio-maintenance.repository.ts#listGarbageCandidates',
   'src/modules/automation/repositories/automation-governance.repository.ts#findEnabledCalendarTriggers',
   'src/modules/practice/repositories/practices.repository.ts#findActive',
   'src/modules/consent/repositories/consents.repository.ts#findExpirable',
@@ -285,6 +372,33 @@ function enclosingMethodName(lines, atLine) {
   return null;
 }
 
+/** Patrón de la línea que abre un método de clase (dos espacios de indentación). */
+const METHOD_OPENING = /^\s{2}(?:async\s+)?[a-zA-Z_]\w*\s*\(/;
+
+/**
+ * Cuerpo del método que contiene `atLine`, para resolver ahí la variable del
+ * criterio. Se acota entre la línea que abre el método y la que abre el
+ * siguiente: buscar en todo el archivo confundiría una variable homónima de otro
+ * método (`where` se llama igual en media docena de ellos).
+ */
+function enclosingMethodBody(lines, atLine) {
+  let start = 0;
+  for (let i = atLine; i >= 0; i--) {
+    if (METHOD_OPENING.test(lines[i])) {
+      start = i;
+      break;
+    }
+  }
+  let end = lines.length;
+  for (let i = atLine + 1; i < lines.length; i++) {
+    if (METHOD_OPENING.test(lines[i])) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join('\n');
+}
+
 const repoFiles = walk(join(SRC, 'modules')).filter((f) =>
   /\/repositories\//.test(f),
 );
@@ -300,8 +414,9 @@ for (const file of repoFiles) {
 
     const i = text.slice(0, m.index).split(/\r?\n/).length - 1;
 
-    const criteria = extractBalancedBraces(text, m.index + m[0].length - 1);
-    if (verb === 'count' && isEmptyCriteria(criteria)) continue;
+    const criteria = secondArgumentText(text, m.index);
+    if (verb === 'count' && (criteria === '' || isEmptyCriteria(criteria)))
+      continue;
 
     const method = enclosingMethodName(lines, i);
     if (
@@ -321,11 +436,16 @@ for (const file of repoFiles) {
 
     // El criterio ya acota por un id de principal/recurso puntual (patrón PDP:
     // userId, patientProfileId, consentId, resourceId, ...) — no es un listado
-    // abierto de todo el tenant.
-    const keys = [...criteria.matchAll(/[{,]\s*([A-Za-z]\w*)\s*[,:}]/g)].map(
-      (k) => k[1],
-    );
-    if (keys.some((k) => k !== 'tenantId' && SPECIFIC_ID_KEY.test(k))) continue;
+    // abierto de todo el tenant. `id` cuenta como el más puntual de todos: una
+    // consulta por clave primaria devuelve filas concretas ya identificadas, no un
+    // listado del tenant.
+    const keys = criteriaKeys(criteria, enclosingMethodBody(lines, i));
+    if (
+      keys.some(
+        (k) => k !== 'tenantId' && (k === 'id' || SPECIFIC_ID_KEY.test(k)),
+      )
+    )
+      continue;
 
     add(
       'TENANT_SCOPE_MISSING',

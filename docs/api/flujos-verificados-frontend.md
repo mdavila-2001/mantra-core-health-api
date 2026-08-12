@@ -325,7 +325,7 @@ Dos comportamientos que el front debe esperar y tratar como estado, no como fall
 `httpOnly`. **Está apagada**, y con ella apagada nada cambia para el equipo.
 
 Qué tendrá que hacer el front cuando se active, y el ajuste de CORS que exige,
-está en [`src/common/auth/README.md`](../../src/common/auth/README.md).
+está en [`src/common/auth/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/common/auth/README.md).
 
 ---
 
