@@ -31,7 +31,11 @@ import {
   DispatchableChecksResponseDto,
   type AttemptOutcome,
 } from '../dto';
-import { IdentityChecks, type IdentityVerificationCases } from '../entities';
+import {
+  IdentityChecks,
+  type IdentityAuthorityEndpoints,
+  type IdentityVerificationCases,
+} from '../entities';
 import { IdentityVerificationEffectsService } from './identity-verification-effects.service';
 
 const MS_PER_HOUR = 3_600_000;
@@ -49,6 +53,14 @@ const OPEN_CHECK_STATES = [
   IDA.CHECK_PENDING,
   IDA.CHECK_IN_PROGRESS,
   IDA.CHECK_FAILED,
+];
+
+/** Estados vivos del caso en los que una aprobación manual todavía decide. */
+const APPROVABLE_CASE_STATES = [
+  IDA.CASE_OPEN,
+  IDA.CASE_IN_VERIFICATION,
+  IDA.CASE_AT_RISK,
+  IDA.CASE_MANUAL_REVIEW,
 ];
 
 /** Tamaño del lote que el worker atiende por tick. */
@@ -339,16 +351,91 @@ export class IdentityChecksService {
     );
     if (stillOpen > 0) return undefined;
 
-    kase.statusConceptId = IDA.CASE_VERIFIED;
-    touch(kase, actor.id);
-    await this.issueAssertion(tx, kase, actor);
-    await this.effects.applyVerified(tx, kase, actor.id);
+    await this.verifyCase(tx, kase, actor);
 
     this.logger.info(
       { operation: 'ida.case.settle', caseId: kase.id },
       'Case verified and asserted after the last required check',
     );
     return kase.statusConceptId;
+  }
+
+  /**
+   * UC-27-09 (aprobación): la decisión humana cierra los checks obligatorios
+   * que sigan abiertos —con un resultado inmutable positivo, versionado igual
+   * que los de la autoridad— y liquida el caso por el mismo camino que el flujo
+   * automático: verificado, aserción emitida y efecto de dominio aplicado.
+   *
+   * Sin esto, aprobar dejaba el caso VERIFIED con su check abierto y sin
+   * aserción: el titular veía «Aprobado» y su perfil seguía en 403 (H-01).
+   *
+   * Sólo admite casos todavía vivos (espejo del guard de `settleCase`): el
+   * barrido de expiración (UC-27-12) expira el caso y cancela sus checks pero
+   * deja la revisión abierta, y aprobar esa revisión obsoleta no debe
+   * resucitar un caso expirado.
+   *
+   * @param tx - Transacción activa (la de la decisión de la revisión).
+   * @param kase - Caso que la revisión aprobó.
+   * @param actor - Revisor que decidió.
+   * @returns El estado final del caso.
+   */
+  async settleManualApproval(
+    tx: EntityManager,
+    kase: IdentityVerificationCases,
+    actor: AuthenticatedUser,
+  ): Promise<string> {
+    if (!APPROVABLE_CASE_STATES.includes(kase.statusConceptId)) {
+      throw new PreconditionFailedException(
+        'La revisión quedó obsoleta: el caso ya no admite aprobación',
+        { caseId: kase.id, status: kase.statusConceptId },
+      );
+    }
+
+    const requeridos = await this.checksRepo.findRequiredByCase(tx, kase.id);
+    for (const check of requeridos) {
+      if (!OPEN_CHECK_STATES.includes(check.statusConceptId)) continue;
+      const previous = await this.resultsRepo.findLatestByCheck(tx, check.id);
+      const resultVersion =
+        (await this.resultsRepo.countByCheck(tx, check.id)) + 1;
+      this.resultsRepo.create(tx, {
+        identityCheckId: check.id,
+        resultVersion,
+        resultConceptId: IDA.RESULT_MATCH,
+        supersedesResultId: previous?.id,
+        checkedByActorTypeConceptId: IDA.ACTOR_TYPE_SYSTEM,
+        checkedByActorId: actor.id,
+      });
+      check.statusConceptId = IDA.CHECK_COMPLETED;
+      touch(check, actor.id);
+    }
+
+    await this.verifyCase(tx, kase, actor);
+
+    this.logger.info(
+      { operation: 'ida.review.settle', caseId: kase.id },
+      'Case verified and asserted by manual review approval',
+    );
+    return kase.statusConceptId;
+  }
+
+  /**
+   * Transición terminal feliz del caso: verificado, aserción emitida y efecto
+   * de dominio aplicado. La comparten el veredicto automático (`settleCase`) y
+   * la aprobación manual (`settleManualApproval`), para que no puedan divergir.
+   *
+   * @param tx - Transacción activa.
+   * @param kase - Caso cuyo último check obligatorio dio positivo.
+   * @param actor - Quién registró el veredicto.
+   */
+  private async verifyCase(
+    tx: EntityManager,
+    kase: IdentityVerificationCases,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    kase.statusConceptId = IDA.CASE_VERIFIED;
+    touch(kase, actor.id);
+    await this.issueAssertion(tx, kase, actor);
+    await this.effects.applyVerified(tx, kase, actor.id);
   }
 
   /**
@@ -378,7 +465,7 @@ export class IdentityChecksService {
           tx,
           attempt.identityAuthorityEndpointId,
         )
-      : null;
+      : await this.findEndpointByCaseChecks(tx, kase.id);
     if (!authorityEndpoint) {
       throw new PreconditionFailedException(
         'No se pudo determinar la autoridad que verificó el caso',
@@ -404,6 +491,36 @@ export class IdentityChecksService {
     kase.statusConceptId = IDA.CASE_ASSERTED;
     kase.completedAt = now;
     touch(kase, actor.id);
+  }
+
+  /**
+   * Endpoint de autoridad que atendería los checks del caso, para cuando no
+   * hay ningún intento completado del cual tomarlo.
+   *
+   * Pasa en la aprobación manual: el revisor decide antes de que el worker
+   * despache (o sin que la autoridad conteste), así que la aserción se emite a
+   * nombre de la autoridad que atiende ese tipo de check — la misma resolución
+   * por vertical que usa el despacho (`listDispatchable`).
+   *
+   * @param tx - Transacción activa.
+   * @param caseId - Caso cuya aserción se está emitiendo.
+   * @returns El endpoint resuelto, o `null` si ningún check tiene vertical.
+   */
+  private async findEndpointByCaseChecks(
+    tx: EntityManager,
+    caseId: string,
+  ): Promise<IdentityAuthorityEndpoints | null> {
+    const checks = await this.checksRepo.findRequiredByCase(tx, caseId);
+    for (const check of checks) {
+      const vertical = VERTICAL_BY_CHECK_TYPE.get(check.checkTypeConceptId);
+      if (!vertical) continue;
+      const endpoint = await this.authorityEndpointsRepo.findById(
+        tx,
+        vertical.endpointId,
+      );
+      if (endpoint) return endpoint;
+    }
+    return null;
   }
 
   /**

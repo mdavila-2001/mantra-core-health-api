@@ -13,6 +13,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { IDA } from '../identity_assurance.concepts';
+import { IDENTITY_CARD_VERTICAL } from '../identity_assurance.seed';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -26,6 +27,7 @@ function build() {
   const checksRepo = {
     findById: mockFn(),
     countOpenRequiredByCase: mockFn().mockResolvedValue(0),
+    findRequiredByCase: mockFn().mockResolvedValue([]),
   };
   const attemptsRepo = {
     countByCase: mockFn().mockResolvedValue(0),
@@ -289,6 +291,127 @@ describe('IdentityChecksService', () => {
       expect(kase.statusConceptId).toBe(IDA.CASE_EXPIRED);
       expect(d.assertionsRepo.create).not.toHaveBeenCalled();
       expect(res.caseStatus).toBeUndefined();
+    });
+  });
+
+  describe('settleManualApproval (UC-27-09 · H-01)', () => {
+    it('closes the open required checks with a positive immutable result and asserts the case', async () => {
+      const d = build();
+      const kase: any = {
+        id: 'k1',
+        statusConceptId: IDA.CASE_MANUAL_REVIEW,
+        subjectTypeConceptId: IDA.SUBJECT_PATIENT_IDENTITY,
+        subjectEntityId: 'person-1',
+        updatedAt: new Date(),
+      };
+      const check: any = {
+        id: 'ch1',
+        identityVerificationCaseId: 'k1',
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+        required: true,
+        statusConceptId: IDA.CHECK_IN_PROGRESS,
+        updatedAt: new Date(),
+      };
+      d.checksRepo.findRequiredByCase.mockResolvedValue([check]);
+
+      const res = await d.service.settleManualApproval(
+        d.tx as any,
+        kase,
+        actor,
+      );
+
+      expect(d.resultsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          identityCheckId: 'ch1',
+          resultConceptId: IDA.RESULT_MATCH,
+          checkedByActorTypeConceptId: IDA.ACTOR_TYPE_SYSTEM,
+          checkedByActorId: 'admin-1',
+        }),
+      );
+      expect(check.statusConceptId).toBe(IDA.CHECK_COMPLETED);
+      expect(d.assertionsRepo.create).toHaveBeenCalled();
+      expect(d.effects.applyVerified).toHaveBeenCalledWith(
+        d.tx,
+        kase,
+        'admin-1',
+      );
+      expect(kase.statusConceptId).toBe(IDA.CASE_ASSERTED);
+      expect(res).toBe(IDA.CASE_ASSERTED);
+    });
+
+    it('resolves the issuing authority through the check vertical when no attempt completed', async () => {
+      const d = build();
+      // Escenario real de la aprobación manual: el worker nunca despachó.
+      d.attemptsRepo.findLatestCompletedByCase.mockResolvedValue(null);
+      const kase: any = {
+        id: 'k1',
+        statusConceptId: IDA.CASE_IN_VERIFICATION,
+        subjectTypeConceptId: IDA.SUBJECT_PATIENT_IDENTITY,
+        subjectEntityId: 'person-1',
+        updatedAt: new Date(),
+      };
+      const check: any = {
+        id: 'ch1',
+        identityVerificationCaseId: 'k1',
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+        required: true,
+        statusConceptId: IDA.CHECK_PENDING,
+        updatedAt: new Date(),
+      };
+      d.checksRepo.findRequiredByCase.mockResolvedValue([check]);
+
+      await d.service.settleManualApproval(d.tx as any, kase, actor);
+
+      expect(d.authorityEndpointsRepo.findById).toHaveBeenCalledWith(
+        d.tx,
+        IDENTITY_CARD_VERTICAL.authorityEndpointId,
+      );
+      expect(kase.statusConceptId).toBe(IDA.CASE_ASSERTED);
+    });
+
+    it('refuses to resurrect an expired case left behind by the expire sweep', async () => {
+      const d = build();
+      // UC-27-12 expiró el caso y canceló sus checks, pero la revisión quedó
+      // abierta: aprobarla ahora debe morir antes de escribir resultado alguno.
+      const kase: any = {
+        id: 'k1',
+        statusConceptId: IDA.CASE_EXPIRED,
+        subjectTypeConceptId: IDA.SUBJECT_PATIENT_IDENTITY,
+        subjectEntityId: 'person-1',
+        updatedAt: new Date(),
+      };
+      const check: any = {
+        id: 'ch1',
+        identityVerificationCaseId: 'k1',
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+        required: true,
+        statusConceptId: IDA.CHECK_CANCELLED,
+        updatedAt: new Date(),
+      };
+      d.checksRepo.findRequiredByCase.mockResolvedValue([check]);
+
+      await expect(
+        d.service.settleManualApproval(d.tx as any, kase, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.resultsRepo.create).not.toHaveBeenCalled();
+      expect(d.assertionsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('keeps failing when neither an attempt nor a vertical can name the issuer', async () => {
+      const d = build();
+      d.attemptsRepo.findLatestCompletedByCase.mockResolvedValue(null);
+      d.checksRepo.findRequiredByCase.mockResolvedValue([]);
+      const kase: any = {
+        id: 'k1',
+        statusConceptId: IDA.CASE_IN_VERIFICATION,
+        updatedAt: new Date(),
+      };
+
+      await expect(
+        d.service.settleManualApproval(d.tx as any, kase, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 });
