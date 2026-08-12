@@ -101,3 +101,34 @@ La proyección vía `messaging.outbox_events` (disponibilidad en read models, no
 recordatorios) depende del módulo 35, aún no implementado. `dispatchReminders` mueve el estado a
 `sent` pero **no envía**: el envío real será responsabilidad de messaging.
 
+### Defecto conocido · `generateSlots` ignora la zona horaria del recurso
+
+`schedulable_resources.time_zone` se declara en el modelo, se guarda, se expone en
+`GET /scheduling/resources` y se congela en el `cancellation_policy_snapshot` de cada reserva —
+pero **no se usa para materializar cupos**. `SchedulingCatalogService.atTime()` resuelve el
+`startTime` de la franja con `setUTCHours`, así que la hora de una regla se interpreta en UTC sea
+cual sea la sede.
+
+**Consecuencia, medida el 2026-08-11 contra la base viva:** una agenda de La Paz (UTC−4) que
+publica «mañanas de 08:00 a 12:00» materializa sus cupos a las **04:00–08:00 hora local**, y el
+portal del paciente le ofrece turnos de madrugada.
+
+```sql
+-- los 907 cupos futuros del seeder, en hora de la sede
+select distinct to_char(start_at at time zone 'America/La_Paz','HH24:MI')
+  from scheduling.bookable_slots where start_at > now() order by 1;
+--  04:00 04:30 05:00 05:30 06:00 06:30 07:00 07:30
+```
+
+**Por qué no se arregló acá.** No es una línea. Además de la hora hay que evaluar el
+**día de la semana** en la zona de la sede —si no, una regla de lunes puede materializarse en
+domingo local para zonas cuyo desfase cruza la medianoche—, contemplar el horario de verano
+(Bolivia no lo tiene, otras zonas del alcance sí) y actualizar los specs de
+`scheduling-catalog.service.spec.ts`, que hoy fijan el comportamiento UTC. Cambiar la semántica de
+generación de cupos exige además regenerar los cupos ya materializados en cada entorno.
+
+**Mientras tanto**, `tools/redesa/seed-dev-data.mjs` declara sus franjas ya convertidas
+(`horaUtcDeLocal`) para que los datos de desarrollo se vean como se verían si el generador fuera
+correcto. Es una compensación deliberada y documentada en el propio seeder: cuando `generateSlots`
+lea `time_zone`, esa función se borra y las franjas vuelven a declararse en hora local.
+

@@ -291,6 +291,47 @@ function dayUtc(days) {
   return date;
 }
 
+/**
+ * La zona horaria de las sedes que se siembran. Bolivia no tiene horario de
+ * verano, así que su desfase es constante todo el año.
+ */
+const ZONA = 'America/La_Paz';
+
+/**
+ * Cuántas horas hay que sumar a una hora de pared de {@link ZONA} para expresarla
+ * en UTC. Para La Paz (UTC-4) son 4.
+ *
+ * ## Por qué esto existe, y por qué no debería
+ *
+ * `generateSlots` interpreta el `startTime` de una franja **en UTC**
+ * (`scheduling-catalog.service.ts`, `atTime()` usa `setUTCHours`) y **no lee**
+ * `schedulable_resources.time_zone`, aunque el recurso la declare y el modelo la
+ * exija. Consecuencia: una agenda que publica «mañanas de 08:00 a 12:00»
+ * materializa cupos a las **04:00–08:00 hora de La Paz**, y el portal del
+ * paciente ofrece turnos de madrugada.
+ *
+ * Mientras el generador no respete la zona del recurso, el seeder declara la
+ * hora ya convertida para que los datos de desarrollo se vean como se verían si
+ * el generador fuera correcto. Es una compensación deliberada, no un descuido:
+ * cuando el backend lea `time_zone`, esto se borra y las franjas vuelven a
+ * declararse en hora local.
+ */
+function horaUtcDeLocal(horaLocal) {
+  const referencia = new Date();
+  // El desfase sale de la propia base de datos de zonas horarias, no de una
+  // constante: si alguien cambia ZONA por una con horario de verano, esto sigue
+  // dando el desfase vigente en vez de un número escrito a mano que caduca.
+  const enZona = new Date(referencia.toLocaleString('en-US', { timeZone: ZONA }));
+  const enUtc = new Date(referencia.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const desfaseHoras = Math.round((enUtc.getTime() - enZona.getTime()) / 3_600_000);
+
+  const [hh, mm, ss] = horaLocal.split(':').map(Number);
+  const total = (hh + desfaseHoras + 24) % 24;
+  return [total, mm, ss ?? 0]
+    .map((n) => String(n).padStart(2, '0'))
+    .join(':');
+}
+
 /** Imprime una línea de avance (se puede silenciar con --quiet). */
 function step(message) {
   if (!flag('quiet')) console.log(message);
@@ -415,7 +456,7 @@ for (let index = 0; index < DOCTORS; index += 1) {
         resourceRefType: 'practitioner_profiles',
         resourceRefId: profileId,
         name: `Consultorio ${titulo} — ${apellido}`,
-        timeZone: 'America/La_Paz',
+        timeZone: ZONA,
         capacity: 1,
       },
       expect: [200, 201],
@@ -457,10 +498,11 @@ for (let index = 0; index < DOCTORS; index += 1) {
         name: `Mañanas L-V — ${apellido}`,
         slotMinutes: 30,
         bookingPolicyId: policy.ok ? policy.body.id : undefined,
+        // Las horas se declaran locales y se convierten acá: ver `horaUtcDeLocal`.
         rules: [1, 2, 3, 4, 5].map((dayOfWeek) => ({
           dayOfWeek,
-          startTime: '08:00:00',
-          endTime: '12:00:00',
+          startTime: horaUtcDeLocal('08:00:00'),
+          endTime: horaUtcDeLocal('12:00:00'),
         })),
       },
       expect: [200, 201],
