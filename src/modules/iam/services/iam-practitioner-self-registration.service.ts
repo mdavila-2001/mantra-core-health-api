@@ -294,6 +294,20 @@ export class IamPractitionerSelfRegistrationService {
         roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
         actorUserId: user.id,
       });
+      // `PRACTITIONER` en la misma transacción: quien entra por esta vía **es**
+      // un profesional, y sin el rol su propia agenda le responde 403 —
+      // `GET /scheduling/resources` lo exige—. Era el mismo agujero que tenía
+      // `PATIENT`: sin concedérselo, el claim `roles` nunca podía contenerlo.
+      //
+      // `CLINICIAN` **no** se concede acá, y la diferencia importa: abre el
+      // expediente de un paciente, que es PHI. La matrícula nace `PENDING` y
+      // declararla no es probarla, así que ese rol lo concede un administrador
+      // — el acto que sí la verifica.
+      this.rolesRepo.create(tx, {
+        userId: user.id,
+        roleConceptId: ROLE_CONCEPT_BY_CODE.PRACTITIONER,
+        actorUserId: user.id,
+      });
 
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
