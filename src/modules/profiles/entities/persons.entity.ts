@@ -60,6 +60,12 @@ export class Persons {
   displayName?: string;
 
   /**
+   * Identificador asociado a photo file.
+   */
+  @Property({ fieldName: 'photo_file_id', type: 'uuid', nullable: true }) // FK → common.files
+  photoFileId?: string;
+
+  /**
    * Valor de birth date mantenido por la instancia.
    */
   @Property({ fieldName: 'birth_date', columnType: 'date', nullable: true })
