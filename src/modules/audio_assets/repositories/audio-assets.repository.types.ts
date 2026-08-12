@@ -5,6 +5,8 @@ import type {
 
 export interface CreateAudioAssetInput extends AudioSynthesisProfile {
   assetKey: string;
+  /** Tenant propietario, o ausente cuando el audio es compartido por la plataforma. */
+  tenantId?: string;
   templateKey: string;
   templateVersion: number;
   strategy: string;

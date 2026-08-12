@@ -6,6 +6,16 @@ export interface BuildAudioAssetKeyInput extends AudioSynthesisProfile {
   templateVersion: number;
   normalizedText: string;
   variant: 'PRIMARY' | 'FALLBACK';
+  /**
+   * Tenant propietario, o `undefined` cuando el audio es compartido.
+   *
+   * Va en la huella —y no sólo en una columna— para que el aislamiento no dependa
+   * de acordarse de filtrar en cada consulta: dos tenants que saluden a una
+   * persona con el mismo nombre obtienen claves distintas y, por tanto, filas
+   * distintas. Sin esto, un acierto de caché es la prueba de que ese nombre existe
+   * en el otro tenant.
+   */
+  tenantId?: string;
 }
 
 /** Identidad semántica del asset específico de plantilla. */
@@ -15,6 +25,7 @@ export function buildAudioAssetKey(input: BuildAudioAssetKeyInput): string {
       templateId: input.templateId,
       templateVersion: input.templateVersion,
       variant: input.variant,
+      tenantId: input.tenantId ?? null,
       ...synthesisPayload(input),
     }),
   );
@@ -23,11 +34,20 @@ export function buildAudioAssetKey(input: BuildAudioAssetKeyInput): string {
 /**
  * Identidad de síntesis independiente de plantilla. Permite que dos plantillas
  * distintas con exactamente el mismo texto/perfil reutilicen el mismo binario.
+ *
+ * El tenant participa por la misma razón que en `buildAudioAssetKey`: la
+ * reutilización de binario es otro camino por el que la caché puede cruzar
+ * tenants, y cerrar uno dejando el otro abierto no aísla nada.
  */
 export function buildAudioSynthesisFingerprint(
-  input: AudioSynthesisProfile & { normalizedText: string },
+  input: AudioSynthesisProfile & { normalizedText: string; tenantId?: string },
 ): string {
-  return sha256Text(JSON.stringify(synthesisPayload(input)));
+  return sha256Text(
+    JSON.stringify({
+      tenantId: input.tenantId ?? null,
+      ...synthesisPayload(input),
+    }),
+  );
 }
 
 function synthesisPayload(

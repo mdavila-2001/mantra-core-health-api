@@ -18,6 +18,7 @@ import {
   getAudioDynamicFields,
   listEnabledAudioTemplates,
   markAudioAssetReady,
+  releaseAudioGenerationBudget,
   reserveAudioGenerationBudget,
 } from './audio-assets.repository.queries';
 import type {
@@ -51,11 +52,23 @@ export class AudioAssetsRepository {
     return this.em.findOne(AudioAssets, { id: assetId });
   }
 
+  /**
+   * Binario ya generado que sirve para el mismo texto y perfil.
+   *
+   * `tenantId` acota la búsqueda al mismo alcance: reutilizar el binario de otro
+   * tenant sería la misma filtración que compartir la fila, sólo por otra puerta.
+   */
   findReusableReady(
     renderedTextHash: string,
     profile: AudioSynthesisProfile,
+    tenantId?: string,
   ): Promise<AudioAssets | null> {
-    return findReusableReadyAudioAsset(this.em, renderedTextHash, profile);
+    return findReusableReadyAudioAsset(
+      this.em,
+      renderedTextHash,
+      profile,
+      tenantId,
+    );
   }
 
   /** La constraint UNIQUE(asset_key) es la garantía final frente a carreras. */
@@ -63,15 +76,16 @@ export class AudioAssetsRepository {
     const now = new Date();
     await this.em.getConnection().execute(
       `insert into audio_assets.audio_assets (
-        id, asset_key, template_key, template_version, strategy, language, normalized_value_hash,
+        id, asset_key, tenant_id, template_key, template_version, strategy, language, normalized_value_hash,
         display_value_encrypted, rendered_text_hash, provider, provider_model, voice_profile,
         voice_provider_ref, voice_version, normalizer_version, audio_format, sample_rate,
         generation_status, use_count, metadata, created_at, updated_at
-      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 0, ?::jsonb, ?, ?)
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', 0, ?::jsonb, ?, ?)
       on conflict (asset_key) do nothing`,
       [
         randomUUID(),
         input.assetKey,
+        input.tenantId ?? null,
         input.templateKey,
         input.templateVersion,
         input.strategy,
@@ -163,11 +177,21 @@ export class AudioAssetsRepository {
     return markAudioAssetReady(this.em, input);
   }
 
+  /**
+   * Registra el fallo y, si es terminal, **devuelve la reserva al presupuesto**.
+   *
+   * La devolución sólo ocurre en el fallo permanente: uno reintentable conserva su
+   * reserva porque el siguiente intento la va a usar, y devolverla ahí abriría una
+   * ventana en la que otro asset podría quedarse con ese crédito y dejar a este sin
+   * poder terminar.
+   *
+   * @returns unidades devueltas al presupuesto (`0` si no había reserva viva).
+   */
   async markFailed(
     assetId: string,
     failureCode: string,
     retryable: boolean,
-  ): Promise<void> {
+  ): Promise<number> {
     const status: AudioAssetStatus = retryable
       ? 'FAILED_RETRYABLE'
       : 'FAILED_PERMANENT';
@@ -176,8 +200,17 @@ export class AudioAssetsRepository {
       { id: assetId },
       { generationStatus: status, failureCode, updatedAt: new Date() },
     );
+    return retryable ? 0 : this.releaseBudget(assetId);
   }
-  async markFallbackOnly(assetId: string, reason: string): Promise<void> {
+
+  /**
+   * Deja el asset servido sólo por fallback y devuelve su reserva.
+   *
+   * Es un estado terminal igual que el fallo permanente —el asset ya no se va a
+   * generar—, así que retener su crédito estimado tendría el mismo efecto: agotar
+   * el presupuesto del mes con generaciones que no ocurrieron.
+   */
+  async markFallbackOnly(assetId: string, reason: string): Promise<number> {
     await this.em.nativeUpdate(
       AudioAssets,
       { id: assetId },
@@ -187,6 +220,11 @@ export class AudioAssetsRepository {
         updatedAt: new Date(),
       },
     );
+    return this.releaseBudget(assetId);
+  }
+
+  releaseBudget(assetId: string): Promise<number> {
+    return releaseAudioGenerationBudget(this.em, assetId);
   }
   async appendEvent(input: GenerationEventInput): Promise<void> {
     const event = this.em.create(AudioGenerationEvents, {

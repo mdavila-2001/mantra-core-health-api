@@ -6,6 +6,20 @@ export class AudioAssets {
   @PrimaryKey({ type: 'uuid' }) id: string = randomUUID();
   @Property({ fieldName: 'asset_key', columnType: 'char(64)' })
   assetKey!: string;
+  /**
+   * Tenant propietario, o `NULL` cuando el audio es compartido por la plataforma.
+   *
+   * Sólo lo llevan los assets cuyo texto renderizado incluye un valor dinámico
+   * que puede identificar a una persona (`PERSON_NAME`, `SAFE_TEXT`). Los
+   * `STATIC`, los `FALLBACK` y los `ENUMERATED` —conjunto cerrado— siguen siendo
+   * compartidos, que es lo que permite pre-generarlos una sola vez para todos.
+   *
+   * Entra además en `asset_key` y en la búsqueda de binario reutilizable: sin eso,
+   * dos tenants compartirían la fila del audio del nombre de un paciente y un
+   * acierto de caché delataría que ese nombre existe en el otro tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
+  tenantId?: string;
   @Property({ fieldName: 'template_key', columnType: 'varchar' })
   templateKey!: string;
   @Property({ fieldName: 'template_version', columnType: 'int' })
@@ -72,6 +86,21 @@ export class AudioAssets {
     nullable: true,
   })
   budgetReservedUnits?: number;
+  /**
+   * Ventana mensual (`YYYY-MM`) contra la que se apartó la reserva.
+   *
+   * Se persiste porque la liquidación y la devolución ocurren **después**, y
+   * pueden caer en otro mes: un asset que reserva el día 31 y se genera el 1
+   * imputaría su consumo a una ventana sin fila de reserva —el `UPDATE` no
+   * afectaría ninguna fila, el consumo se perdería y el mes anterior se quedaría
+   * con crédito apartado para siempre—.
+   */
+  @Property({
+    fieldName: 'budget_period_key',
+    columnType: 'varchar(7)',
+    nullable: true,
+  })
+  budgetPeriodKey?: string;
   @Property({
     fieldName: 'generated_at',
     columnType: 'timestamptz',
