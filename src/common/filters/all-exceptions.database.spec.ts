@@ -54,7 +54,12 @@ function build() {
     }),
   } as unknown as ArgumentsHost;
 
-  return { filter: new AllExceptionsFilter(logger, tracing), host, response };
+  return {
+    filter: new AllExceptionsFilter(logger, tracing),
+    host,
+    response,
+    logger,
+  };
 }
 
 /** Error tal como lo entrega el driver `pg` en una consulta SQL cruda. */
@@ -74,7 +79,7 @@ function bodyOf(response: { json: { mock: { calls: unknown[][] } } }) {
 }
 
 describe('AllExceptionsFilter · excepciones tipadas de MikroORM', () => {
-  it('clave foránea inexistente → 422, no 500', () => {
+  it('clave foránea inexistente → 422 con el código que corresponde a ese estado', () => {
     const { filter, host, response } = build();
 
     filter.catch(
@@ -87,20 +92,25 @@ describe('AllExceptionsFilter · excepciones tipadas de MikroORM', () => {
     expect(response.status).toHaveBeenCalledWith(
       HttpStatus.UNPROCESSABLE_ENTITY,
     );
-    expect(bodyOf(response).code).toBe(ErrorCode.VALIDATION_FAILED);
+    // `VALIDATION_FAILED` es el código que el contrato publica para 400: un 422
+    // con ese código dejaba al cliente sin poder distinguir un cuerpo mal
+    // formado de un identificador que apunta a algo inexistente.
+    expect(bodyOf(response).code).toBe(ErrorCode.PRECONDITION_FAILED);
+    // Ni el nombre de la restricción ni la tabla salen al cliente.
+    expect(bodyOf(response).details).toBeUndefined();
   });
 
   it.each([
     ['NOT NULL', new NotNullConstraintViolationException(pgError('23502'))],
     ['CHECK', new CheckConstraintViolationException(pgError('23514'))],
-  ])('violación %s → 422', (_name, exception) => {
+  ])('violación %s → 400', (_name, exception) => {
     const { filter, host, response } = build();
 
     filter.catch(exception, host);
 
-    expect(response.status).toHaveBeenCalledWith(
-      HttpStatus.UNPROCESSABLE_ENTITY,
-    );
+    // Un valor ausente o fuera de restricción es un defecto de forma del
+    // cuerpo, igual que si lo hubiera detectado el `ValidationPipe`: 400.
+    expect(response.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
     expect(bodyOf(response).code).toBe(ErrorCode.VALIDATION_FAILED);
   });
 
@@ -132,10 +142,11 @@ describe('AllExceptionsFilter · excepciones tipadas de MikroORM', () => {
 
 describe('AllExceptionsFilter · SQLSTATE del SQL crudo', () => {
   it.each([
-    ['23503', HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.VALIDATION_FAILED],
+    // 422 no puede llevar `VALIDATION_FAILED`: el contrato lo publica como 400.
+    ['23503', HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.PRECONDITION_FAILED],
     ['23505', HttpStatus.CONFLICT, ErrorCode.CONFLICT],
-    ['23502', HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.VALIDATION_FAILED],
-    ['22P02', HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.VALIDATION_FAILED],
+    ['23502', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_FAILED],
+    ['22P02', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_FAILED],
     ['40001', HttpStatus.CONFLICT, ErrorCode.CONCURRENCY_CONFLICT],
     ['40P01', HttpStatus.CONFLICT, ErrorCode.CONCURRENCY_CONFLICT],
     ['55P03', HttpStatus.CONFLICT, ErrorCode.CONCURRENCY_CONFLICT],
@@ -151,8 +162,8 @@ describe('AllExceptionsFilter · SQLSTATE del SQL crudo', () => {
     expect(bodyOf(response).code).toBe(code);
   });
 
-  it('adjunta tabla y restricción para que el cliente sepa qué corregir', () => {
-    const { filter, host, response } = build();
+  it('registra tabla y restricción en el log, pero no en la respuesta', () => {
+    const { filter, host, response, logger } = build();
 
     filter.catch(
       pgError('23505', {
@@ -163,11 +174,20 @@ describe('AllExceptionsFilter · SQLSTATE del SQL crudo', () => {
       host,
     );
 
-    expect(bodyOf(response).details).toMatchObject({
-      table: 'iam.users',
-      constraint: 'users_email_unique',
-      column: 'email',
-    });
+    // El nombre de la restricción y el valor que la violó describen el esquema
+    // y los datos: el cliente ramifica por `code`, no por esto.
+    expect(bodyOf(response).details).toBeUndefined();
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- se inspecciona el doble, no se invoca
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        integrity: expect.objectContaining({
+          table: 'iam.users',
+          constraint: 'users_email_unique',
+          column: 'email',
+        }),
+      }),
+      expect.any(String),
+    );
   });
 
   it('encuentra el SQLSTATE anidado bajo `cause`', () => {

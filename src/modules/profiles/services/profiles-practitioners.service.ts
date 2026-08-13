@@ -5,9 +5,13 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+// Verificar la matrícula es lo que habilita a ejercer; el rol con el que se
+// ejerce lo custodia `authz`.
+import { AuthzEffectiveRolesService } from '../../authz/services';
 import { PROF } from '../profiles.concepts';
 import {
   PersonsRepository,
@@ -17,6 +21,7 @@ import {
   ProfessionalCredentialsRepository,
   PractitionerSpecialtiesRepository,
   PractitionerLanguagesRepository,
+  PersonAccountLinksRepository,
 } from '../repositories';
 import {
   CreatePractitionerDto,
@@ -51,6 +56,8 @@ export class ProfilesPractitionersService {
    * @param credentialsRepo - Valor de credentials repo requerido por la operación.
    * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
    * @param languagesRepo - Valor de languages repo requerido por la operación.
+   * @param accountLinksRepo - Vínculo persona-cuenta del titular del perfil.
+   * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -63,6 +70,8 @@ export class ProfilesPractitionersService {
     private readonly specialtiesRepo: PractitionerSpecialtiesRepository,
     private readonly languagesRepo: PractitionerLanguagesRepository,
     private readonly ownership: ProfileOwnershipService,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -295,6 +304,43 @@ export class ProfilesPractitionersService {
             practitioner.acceptsNewPatients = true;
             touch(practitioner, actor.id);
             practitionerVerified = true;
+
+            // Habilitado para ejercer y sin rol con el que hacerlo es un estado
+            // que no sirve a nadie: hasta aquí, el profesional recién verificado
+            // seguía recibiendo 403 en todo endpoint clínico porque su token
+            // sólo llevaba `USER`. Se le concede `PRACTITIONER`, que es
+            // exactamente lo que la verificación acaba de acreditar; los roles
+            // más específicos (`SURGEON`, `ANESTHESIOLOGIST`…) siguen siendo
+            // decisión explícita de un administrador, porque la matrícula no
+            // dice en qué equipo trabaja.
+            //
+            // Es fail-closed: el rol llega tras una verificación con fuente
+            // declarada, no por el mero hecho de registrarse.
+            const link = await this.accountLinksRepo.findActiveByPerson(
+              tx,
+              credential.practitionerProfileId,
+            );
+            if (link) {
+              const granted = await this.effectiveRoles.ensureRoleByCode(
+                tx,
+                link.userId,
+                'PRACTITIONER',
+                { tenantId: getCurrentTenantId(), actorUserId: actor.id },
+              );
+              if (!granted) {
+                // No se rompe la verificación —que es correcta— pero tampoco se
+                // oculta: sin el catálogo de roles sembrado, el profesional
+                // quedará verificado y sin poder ejercer.
+                this.logger.warn(
+                  {
+                    operation: 'profiles.credential.verify',
+                    practitionerProfileId: credential.practitionerProfileId,
+                    roleCode: 'PRACTITIONER',
+                  },
+                  'Profesional verificado sin rol asistencial: el rol no existe o no es asignable',
+                );
+              }
+            }
           }
         }
       }

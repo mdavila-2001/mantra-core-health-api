@@ -1,10 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { ProfessionalCredentials } from '../entities';
+import { PROF } from '../profiles.concepts';
 import { CONCEPTS, createdBy } from '../../../common';
 
-/** Estados de credencial que la acreditan como VIGENTE (verificada/activa). */
+/**
+ * Estados en los que una credencial profesional acredita que su titular puede
+ * ejercer.
+ *
+ * `PROF.CRED_VERIFIED` es el que escribe `verifyCredential`, el único acto que
+ * verifica una matrícula en todo el sistema. Faltaba de esta lista, que sólo
+ * miraba los estados transversales: las dos mitades del mismo hecho usaban
+ * catálogos distintos, así que **ninguna credencial verificada contaba jamás
+ * como vigente**. Aguas abajo eso bloqueaba el circuito quirúrgico entero
+ * (CAN-INT-002): ningún integrante podía acreditarse y ningún caso podía
+ * confirmarse, por muy en regla que estuviera la matrícula.
+ *
+ * Los dos transversales se conservan porque hay filas antiguas escritas con
+ * ellos y quitarlos las invalidaría de golpe.
+ */
 const CURRENT_CREDENTIAL_STATES: readonly string[] = [
+  PROF.CRED_VERIFIED,
   CONCEPTS.STATE_VERIFIED,
   CONCEPTS.STATE_ACTIVE,
 ];

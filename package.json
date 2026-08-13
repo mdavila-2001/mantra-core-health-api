@@ -80,6 +80,7 @@
     "jaeger:logs": "docker compose -f docker-compose.jaeger.yml logs -f",
     "jaeger:verify": "bash scripts/verify-jaeger.sh",
     "redesa:guardrails": "node tools/redesa/guardrails.mjs",
+    "redesa:personas": "node tools/redesa/exercise-clinical-personas.mjs",
     "redesa:coverage": "node tools/redesa/coverage-report.mjs",
     "google:oauth:get-refresh-token": "node tools/google-oauth/get-refresh-token.mjs",
     "docs:openapi:generate": "yarn build && node tools/openapi/generate-openapi.mjs",

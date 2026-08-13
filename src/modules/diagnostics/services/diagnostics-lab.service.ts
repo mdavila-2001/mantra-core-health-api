@@ -17,6 +17,8 @@ import {
   VerifyResultDto,
   WorkOrderCreatedDto,
   ResourceCreatedDto,
+  ListWorkOrdersQueryDto,
+  WorkOrderSummaryDto,
 } from '../dto';
 
 /**
@@ -45,6 +47,40 @@ export class DiagnosticsLabService {
   }
 
   /** UC-20-04: abre una orden de trabajo y desglosa sus pruebas. */
+  /**
+   * Órdenes de trabajo del laboratorio del tenant.
+   *
+   * El módulo no exponía ninguna lectura: una orden creada sólo era accesible
+   * por el uuid que devolvía su POST, así que el laboratorio no podía consultar
+   * su propia cola de trabajo.
+   *
+   * @param tenantId - Tenant custodio (del contexto de la petición).
+   * @param query - Filtros y paginación.
+   * @returns Las órdenes que cumplen el filtro.
+   */
+  async listWorkOrders(
+    tenantId: string,
+    query: ListWorkOrdersQueryDto,
+  ): Promise<WorkOrderSummaryDto[]> {
+    const orders = await this.repo.findWorkOrders(this.em, tenantId, {
+      laboratoryAccessionId: query.laboratoryAccessionId,
+      statusConceptId: query.statusConceptId,
+      assignedProfileId: query.assignedProfileId,
+      limit: query.limit ?? 50,
+      offset: query.offset ?? 0,
+    });
+    return orders.map((o) => ({
+      id: o.id,
+      workOrderNumber: o.workOrderNumber,
+      laboratoryAccessionId: o.laboratoryAccessionId,
+      statusConceptId: o.statusConceptId,
+      priorityConceptId: o.priorityConceptId,
+      assignedProfileId: o.assignedProfileId,
+      scheduledAt: o.scheduledAt,
+      completedAt: o.completedAt,
+    }));
+  }
+
   async createWorkOrder(
     dto: CreateWorkOrderDto,
     actor: AuthenticatedUser,

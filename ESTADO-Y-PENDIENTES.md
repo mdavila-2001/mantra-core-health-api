@@ -4,6 +4,57 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
 
 ## Estado actual
 
+- **Ningún usuario médico podía ejercer su rol (2026-08-12).** `RolesGuard`
+  autoriza mirando sólo el claim `roles` del token, y ese claim se construía con
+  `conceptIdsToRoleCodes`, que **descarta en silencio** todo código que no sea
+  uno de los cuatro de `iam.user_global_roles` (`USER`, `PATIENT`,
+  `SECURITY_ADMIN`, `SUPERADMIN`). Los otros ~116 códigos que usan los
+  `@Roles(...)` del repositorio —incluidos los diez actores clínicos— eran
+  inalcanzables: un médico que se registraba por el camino público recibía
+  `roles: ["USER"]` y **403 en todo endpoint clínico**, y no existía API alguna
+  para concederle `CLINICIAN`. En la práctica sólo `SUPERADMIN` atravesaba los
+  guards, por comodín, y por eso el catálogo de flujos "verificados" se había
+  generado con el token del administrador. Corregido reutilizando el modelo que
+  ya existía y no se usaba (`authz.roles` + `authz.user_role_assignments`, con
+  tenant, vigencia y `is_assignable`): `AuthzEffectiveRolesService` resuelve los
+  códigos vigentes e `iam` los suma al claim al emitir y al refrescar el token.
+  Se sembraron los diez roles asistenciales de sistema
+  (`AuthzClinicalRolesSeedService`), se añadió `GET /authz/roles` —sin él,
+  asignar un rol exigía conocer un uuid que ninguna operación devolvía—,
+  `POST /authz/users/:id/role-assignments` acepta `roleCode` además de `roleId`,
+  el alta administrativa de profesional acepta `clinicalRoles` y verificar la
+  matrícula concede `PRACTITIONER`. **Nota de vigencia**:
+  `findActiveForUser` filtraba sólo por estado, así que un rol con `valid_to`
+  vencido seguía concediendo acceso —también en el PDP—; ahora respeta la
+  ventana. Verificado con `yarn redesa:personas`, que recorre el flujo de cada
+  actor con **su propio** token.
+
+- **El circuito quirúrgico no funcionaba contra una base real (2026-08-12).**
+  Cuatro fallos encadenados que ninguna prueba veía porque las unitarias simulan
+  el `EntityManager`: (1) `POST /procedure-cases` violaba la FK **siempre** —los
+  hijos del caso se creaban sin flush previo del padre, el mismo patrón que ya
+  se había corregido en `OutboxService.publishDomainEvent`—, y con él la
+  valoración preoperatoria con puntuaciones, el plan anestésico y el registro de
+  implantes; (2) `confirmCase` exigía integrantes `TEAM_ACCEPTED` y **nada
+  escribía ese estado**, así que ningún caso podía confirmarse jamás; (3) una
+  credencial verificada no contaba como vigente porque `verifyCredential`
+  escribe `PROF.CRED_VERIFIED` y `hasCurrentCredential` sólo miraba los estados
+  transversales; (4) `createOrder` de órdenes preoperatorias existía en el
+  repositorio **sin un solo llamador**, así que no había nada que verificar y el
+  caso no alcanzaba `READY_FOR_SURGERY`. Detalle en
+  `src/modules/procedures_perioperative/README.md`.
+
+- **Errores de integridad mal catalogados (2026-08-12).** Una clave foránea
+  inexistente respondía `422` con `code: VALIDATION_FAILED`, que el contrato
+  publica como `400`: el cliente recibía el mismo código para "el cuerpo no
+  cumple el DTO" y para "el identificador apunta a algo que no existe". Ahora
+  `23503` → `422 PRECONDITION_FAILED` y `23502/23514/22P02` → `400
+  VALIDATION_FAILED`, por las dos rutas (SQLSTATE crudo y excepción tipada de
+  MikroORM), que además discrepaban entre sí. El `details` que llevaba
+  `constraint`, `table`, `column` y el `detail` de PostgreSQL —que incluye el
+  **valor** de la clave que falló— dejó de viajar al cliente y se registra en el
+  log junto al `correlationId`.
+
 - **Hardening de resiliencia (2026-08-06).** Se auditaron la API y los 20 workers
   buscando específicamente modos de fallo bajo estrés, y se corrigieron nueve
   hallazgos. Los tres de más impacto: (1) `AllExceptionsFilter.integrityViolation`
@@ -202,6 +253,61 @@ Lo que sigue siendo una decisión de despliegue, no de código:
 3. decidir el rollout (todas las tablas de una vez vs. gradual) y confirmar con el equipo de
    datos que ningún flujo actual depende de que el runtime tenga `BYPASSRLS`.
 
+### P1 · Cerrado — lectura del flujo asistencial y actores restantes (2026-08-12)
+
+Los diez actores clínicos completan su flujo de punta a punta con **su propio
+rol**, verificado con `yarn redesa:personas`. Lo que faltaba y se añadió:
+
+- **Lecturas del circuito quirúrgico.** `procedures_perioperative` no tenía ni
+  un `@Get`: un caso creado sólo era accesible por el uuid que devolvía su
+  propio POST. Ahora expone la agenda (`GET /procedure-cases`, acotada por
+  paciente, quirófano, cirujano, estado y ventana), el detalle agregado
+  (`GET /procedure-cases/:id` con equipo, diagnósticos, hitos, órdenes,
+  valoración, plan anestésico e informes) y el equipo del caso.
+- **Estructura física descubrible.** `practice` no exponía ninguna lectura y
+  todas sus altas eran de `SECURITY_ADMIN`, así que el `operatingRoomId` que
+  exige programar una intervención había que pasarlo por fuera del sistema. Se
+  añadieron `GET /practices`, `GET /practices/:id/sites` y
+  `GET /sites/:id/care-spaces`, abiertos a los actores que programan y operan.
+  El quirófano **no** se crea implícitamente a propósito: es infraestructura
+  real y hacerlo duplicaría salas.
+- **Lecturas de diagnóstico.** `GET /diagnostics/work-orders` (cola del
+  laboratorio) y `GET /diagnostics/patients/:id/imaging-studies`.
+- **El flujo del informático clínico no tenía principio.** No existía forma de
+  crear una conexión de origen (`health_source_connections` y
+  `health_source_systems` sólo podían insertarse a mano), así que no se podía
+  abrir un lote, ni proyectar un recurso canónico, ni llegar a las relaciones y
+  amarres que son su trabajo. Se añadió `POST /health-data/source-connections`,
+  que crea el sistema de origen en la misma llamada, y se le concedió el rol en
+  `POST /health-data/versions/:id/validate`, que lo excluía pese a incluirlo en
+  las otras dos operaciones del mismo recurso.
+- **El flujo del investigador principal tampoco.** Definir una cohorte exige un
+  perfil de de-identificación y no había ninguna operación que lo creara: se
+  añadió `POST /research/deidentification-profiles`.
+
+### P1 · Cerrado — escrituras que fallaban siempre contra una base real (2026-08-12)
+
+Barrido sistemático de la familia de fallos que las pruebas unitarias no pueden
+ver, porque el `EntityManager` simulado acepta cualquier objeto:
+
+- **43 `em.create(...)` sin `createdAt`/`updatedAt`** sobre columnas NOT NULL sin
+  default. Es lo que ya había roto `createOutboxMessage`; entre ellas, abrir un
+  lote de ingesta (500 garantizado).
+- **20 columnas NOT NULL que el repositorio declaraba opcionales** y ningún
+  llamador aportaba (`payloadFormatConceptId`, `roleConceptId` de procedencia,
+  `exclusionExpression` de cohorte, `protocolReference` de proyecto…). Se
+  derivó un valor honesto en cada caso, documentado junto a la línea.
+- **17 columnas NOT NULL que describen algo que aún no ha ocurrido**
+  (`released_at`, `verified_at`, `current_version_id`, campos DICOM
+  opcionales…). Se relajaron por migración aditiva
+  (`database/SQL/99_migrations/2026-08-12_*.sql`): rellenarlas con la fecha del
+  alta habría afirmado que el bloqueo ya está liberado y la copia verificada.
+- **5 hijos insertados antes que su padre** en `health_data` (procedencia,
+  versión canónica) y `procedures_perioperative`, el mismo patrón de FK plana.
+
+Los detectores están en el historial de la sesión y son reproducibles; el
+resultado actual es 0 en las tres familias.
+
 ### P1 · Ampliar integración real
 
 Hechos contra DB real: RLS con dos tenants y roles distintos (`rls.int-spec.ts`, opt-in, 2026-07-29)
@@ -278,6 +384,8 @@ Una corrección se considera terminada cuando:
 | `ESTADO-Y-PENDIENTES.md` | Foto vigente y backlog transversal | Manual; reemplaza planes fechados |
 | `REDESA-TRAZABILIDAD.md` | Reglas, implementación y pruebas | Manual, junto al cambio funcional |
 | `REDESA-COBERTURA.md` | Hallazgos estáticos | Generado con `yarn redesa:coverage` |
+| `docs/frontend/CATALOGO-FLUJOS-VERIFICADOS.md` | Cuerpos reales para el frontend | Generado con `exercise-front-flows.mjs` (token de administrador) |
+| Cobertura por actor clínico (en `REDESA-TRAZABILIDAD.md`) | Qué puede hacer cada rol médico | Verificado con `yarn redesa:personas` (token de cada actor) |
 | `src/modules/*/README.md` | Contrato por dominio | Manual, junto al módulo |
 
 No crear documentos de sesión en la raíz. Si una investigación no se convierte en una decisión

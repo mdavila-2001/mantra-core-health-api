@@ -36,6 +36,7 @@ function build() {
     findAssessmentByCase: mockFn(),
     createRiskScore: mockFn(),
     createOrder: mockFn(),
+    findOrdersByCase: mockFn().mockResolvedValue([]),
     findOrdersByCaseForUpdate: mockFn(),
     createChecklist: mockFn(),
     findChecklistForUpdate: mockFn(),
@@ -57,14 +58,19 @@ function build() {
     createStatusHistory: mockFn(),
     createUtilizationEvent: mockFn(),
   };
+  // El alta de la orden clínica que la orden preoperatoria referencia.
+  const serviceRequests = {
+    create: mockFn().mockResolvedValue({ id: 'sr-1' }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PeriopPreopService(
     em as any,
     preopRepo,
     casesRepo as any,
+    serviceRequests as any,
     logger as any,
   );
-  return { service, tx, preopRepo, casesRepo, logger };
+  return { service, serviceRequests, tx, preopRepo, casesRepo, logger };
 }
 
 /**

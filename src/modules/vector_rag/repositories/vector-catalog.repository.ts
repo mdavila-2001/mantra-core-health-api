@@ -253,7 +253,13 @@ export class VectorCatalogRepository {
     em: EntityManager,
     data: CreateCollectionData,
   ): VectorCollections {
-    return em.create(VectorCollections, data as never, { partial: true });
+    return em.create(
+      VectorCollections,
+      // `created_at` es NOT NULL y sin default en el esquema: sin fijarlo aquí
+      // la escritura falla con 500 contra una base real.
+      { ...data, createdAt: new Date() } as never,
+      { partial: true },
+    );
   }
 
   /**

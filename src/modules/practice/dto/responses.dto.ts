@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** Respuesta de creación de una práctica (bootstrap). */
 export class PracticeResponseDto {
@@ -259,4 +259,57 @@ export class StatusResultDto {
    * Valor de ok mantenido por la instancia.
    */
   @ApiProperty({ description: 'true si la operación se aplicó' }) ok!: boolean;
+}
+
+/**
+ * Práctica tal como la devuelve el listado.
+ *
+ * Lleva `name` además del código porque el listado existe para **elegir** una
+ * práctica, y un código sin nombre no permite reconocerla.
+ */
+export class PracticeSummaryDto {
+  /** Identificador de la práctica. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Código único dentro del tenant. */
+  @ApiProperty() code!: string;
+  /** Nombre legible. */
+  @ApiProperty() name!: string;
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' }) status!: string;
+}
+
+/** Sede tal como la devuelve el listado. */
+export class SiteSummaryDto {
+  /** Identificador de la sede. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Práctica a la que pertenece. */
+  @ApiProperty({ format: 'uuid' }) practiceId!: string;
+  /** Código único dentro de la práctica. */
+  @ApiProperty() code!: string;
+  /** Nombre legible. */
+  @ApiProperty() name!: string;
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' }) status!: string;
+}
+
+/**
+ * Espacio de atención tal como lo devuelve el listado.
+ *
+ * Es el que resuelve el `operatingRoomId` que exige programar un caso
+ * quirúrgico: sin este listado, ese uuid había que pasarlo por fuera del
+ * sistema.
+ */
+export class CareSpaceSummaryDto {
+  /** Identificador del espacio. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Sede a la que pertenece. */
+  @ApiProperty({ format: 'uuid' }) practiceSiteId!: string;
+  /** Código único dentro de la sede. */
+  @ApiProperty() code!: string;
+  /** Nombre legible. */
+  @ApiProperty() name!: string;
+  /** Tipo de espacio (quirófano, consulta, box…). */
+  @ApiPropertyOptional({ format: 'uuid' }) spaceTypeConceptId?: string;
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' }) status!: string;
 }

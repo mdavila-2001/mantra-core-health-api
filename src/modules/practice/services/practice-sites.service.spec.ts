@@ -25,12 +25,14 @@ function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const practicesRepo = {
+    findByTenant: mockFn().mockResolvedValue([]),
     findActive: mockFn(),
     findById: mockFn(),
     create: mockFn(),
   };
   const sitesRepo = {
     findById: mockFn(),
+    findByPractice: mockFn().mockResolvedValue([]),
     findByPracticeAndCode: mockFn(),
     create: mockFn(),
   };

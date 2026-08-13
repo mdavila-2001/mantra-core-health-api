@@ -14,6 +14,9 @@ import {
   PeriopIntraopRepository,
 } from '../repositories';
 import { SEVERITY_CONCEPT } from './periop-preop.service';
+// El procedimiento que el informe describe vive en la historia clínica: se pide
+// a su dueño en vez de escribir `clinical.procedures` desde este módulo.
+import { ProceduresService } from '../../clinical/services';
 import {
   CreateOperativeStepDto,
   OperativeStepResponseDto,
@@ -122,6 +125,7 @@ export class PeriopIntraopService {
     private readonly em: EntityManager,
     private readonly intraopRepo: PeriopIntraopRepository,
     private readonly casesRepo: PeriopCasesRepository,
+    private readonly procedures: ProceduresService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopIntraopService.name);
@@ -281,6 +285,10 @@ export class PeriopIntraopService {
         statusConceptId: CONCEPTS.IMPLANT_IMPLANTED,
         actorUserId: actor.id,
       });
+      // Los identificadores (UDI, lote, serie) cuelgan del implante por una
+      // columna uuid plana y son obligatorios: sin el flush, registrar un
+      // implante fallaba siempre contra una base real.
+      await tx.flush();
 
       const identifierIds = dto.identifiers.map(
         (identifier) =>
@@ -442,9 +450,16 @@ export class PeriopIntraopService {
       // Un reporte firmado no se edita: la corrección es una versión nueva.
       const reportVersion = (last?.reportVersion ?? 0) + 1;
 
+      // El informe describe el acto quirúrgico: si el procedimiento todavía no
+      // está en la historia, se registra aquí en vez de exigir una llamada
+      // previa a `clinical` que el cirujano ni siquiera puede hacer.
+      const procedureId =
+        dto.procedureId ??
+        (await this.ensureProcedure(surgicalCase, dto, _actor));
+
       const report = this.intraopRepo.createReport(tx, {
         procedureCaseId: caseId,
-        procedureId: dto.procedureId,
+        procedureId,
         reportVersion,
         authorProfileId: dto.authorProfileId,
         preoperativeDiagnosisText: dto.preoperativeDiagnosisText,
@@ -470,7 +485,7 @@ export class PeriopIntraopService {
         );
         return this.intraopRepo.createComplication(tx, {
           procedureCaseId: caseId,
-          procedureId: dto.procedureId,
+          procedureId,
           complicationCodeConceptId: complication.complicationCodeConceptId,
           severityConceptId: SEVERITY_CONCEPT[complication.severity],
           relatednessConceptId: RELATEDNESS_CONCEPT[complication.relatedness],
@@ -487,6 +502,48 @@ export class PeriopIntraopService {
         complicationIds,
       };
     });
+  }
+
+  /**
+   * Registra en la historia el procedimiento que el informe describe, cuando el
+   * cuerpo lo declara por código en vez de por id.
+   *
+   * Se delega en el servicio de `clinical` para no escribir su tabla desde este
+   * módulo: el dueño de la historia clínica sigue siendo él.
+   *
+   * @param surgicalCase - Caso del que se toman paciente, tenant y encuentro.
+   * @param dto - Cuerpo del informe.
+   * @param actor - Quien redacta.
+   * @returns El id del procedimiento al que apunta el informe.
+   */
+  private async ensureProcedure(
+    surgicalCase: {
+      patientProfileId: string;
+      custodianTenantId: string;
+      encounterId?: string;
+      primarySurgeonProfileId?: string;
+    },
+    dto: DraftOperativeReportDto,
+    actor: AuthenticatedUser,
+  ): Promise<string> {
+    if (!dto.procedureCodeConceptId) {
+      throw new PreconditionFailedException(
+        'Indique el procedimiento por `procedureId` o por `procedureCodeConceptId`',
+        {},
+      );
+    }
+    const procedure = await this.procedures.create(
+      {
+        custodianTenantId: surgicalCase.custodianTenantId,
+        patientProfileId: surgicalCase.patientProfileId,
+        encounterId: surgicalCase.encounterId,
+        codeConceptId: dto.procedureCodeConceptId,
+        performerProfileId:
+          dto.authorProfileId ?? surgicalCase.primarySurgeonProfileId,
+      },
+      actor,
+    );
+    return procedure.id;
   }
 
   /**

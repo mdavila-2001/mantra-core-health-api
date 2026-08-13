@@ -16,6 +16,7 @@ import {
 import { ProfessionalCredentialsRepository } from '../profiles/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
+import { ClinicalModule } from '../clinical/clinical.module';
 
 /**
  * Módulo perioperatorio: programación del caso quirúrgico, valoración y
@@ -28,6 +29,9 @@ import { MessagingModule } from '../messaging/messaging.module';
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    // El caso quirúrgico registra su diagnóstico y su procedimiento a través de
+    // los servicios de `clinical`, que no importa este módulo (sin ciclo).
+    ClinicalModule,
   ],
   controllers: [PeriopController],
   providers: [

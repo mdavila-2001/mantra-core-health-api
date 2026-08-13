@@ -17,6 +17,8 @@ import {
   DataReleaseService,
 } from '../services';
 import {
+  CreateSourceConnectionDto,
+  SourceConnectionResponseDto,
   OpenIngestionBatchDto,
   IngestionBatchResponseDto,
   RecordIngestionRecordDto,
@@ -74,6 +76,28 @@ export class HealthDataController {
     private readonly identityService: PatientIdentityService,
     private readonly releaseService: DataReleaseService,
   ) {}
+
+  /**
+   * UC-52-01: alta de la conexión de origen.
+   *
+   * Faltaba por completo: sin una conexión no se puede abrir un lote, y sin
+   * lote no hay registros ni recursos canónicos sobre los que el informático
+   * clínico pueda trabajar. Las dos filas —sistema y conexión— se crean en una
+   * sola llamada porque el sistema es sólo el padre del que cuelga la conexión.
+   */
+  @Post('source-connections')
+  @Roles('HEALTH_DATA_ADMIN', 'CLINICAL_INFORMATICIAN', 'DATA_PLATFORM_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary:
+      'Dar de alta una conexión de origen (crea el sistema si no existe)',
+  })
+  createSourceConnection(
+    @Body() dto: CreateSourceConnectionDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SourceConnectionResponseDto> {
+    return this.ingestionService.createSourceConnection(dto, actor);
+  }
 
   /** UC-52-01. */
   @Post('ingestion-batches')
@@ -185,7 +209,11 @@ export class HealthDataController {
 
   /** UC-52-07. */
   @Post('versions/:id/validate')
-  @Roles('INGESTION_WORKER', 'HEALTH_DATA_ADMIN')
+  // Validar una versión contra su perfil FHIR es trabajo de informática
+  // clínica, igual que las relaciones y los amarres del recurso —que sí lo
+  // incluían—: sin el rol aquí, el actor podía describir el recurso y no podía
+  // comprobar que fuera válido.
+  @Roles('INGESTION_WORKER', 'HEALTH_DATA_ADMIN', 'CLINICAL_INFORMATICIAN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Validar la versión contra un perfil FHIR R5',

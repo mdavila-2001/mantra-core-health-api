@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,13 +10,19 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  getCurrentTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzRolesService } from '../services';
 import {
   CreateRoleDto,
   SetRolePermissionsDto,
   SetFieldPermissionsDto,
   RoleResponseDto,
+  AssignableRoleDto,
   AuthzStatusResultDto,
 } from '../dto';
 
@@ -30,6 +37,21 @@ export class AuthzRolesController {
    * @param rolesService - Valor de roles service requerido por la operación.
    */
   constructor(private readonly rolesService: AuthzRolesService) {}
+
+  /**
+   * Catálogo de roles que se pueden asignar a un usuario.
+   *
+   * Es la contraparte de lectura de `POST /authz/users/:userId/role-assignments`:
+   * devuelve el `code` —el que exige `@Roles(...)`— junto al id, de modo que
+   * asignar un rol no obligue a conocer de antemano un uuid que ninguna
+   * operación devolvía.
+   */
+  @Get()
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Listar los roles asignables' })
+  listAssignable(): Promise<AssignableRoleDto[]> {
+    return this.rolesService.listAssignable(getCurrentTenantId());
+  }
 
   /** UC-06-03. */
   @Post()

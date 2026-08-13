@@ -91,6 +91,8 @@ export class PatientIdentityRepository {
         reasonText: data.reasonText,
         resultingClusterId: data.resultingClusterId,
         evidenceJson: data.evidenceJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -262,6 +264,8 @@ export class PatientIdentityRepository {
         matchStatusConceptId: data.matchStatusConceptId,
         confidenceScore: data.confidenceScore,
         effectiveFrom: data.effectiveFrom,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -391,6 +395,8 @@ export class PatientIdentityRepository {
         clinicalPriorityConceptId: data.clinicalPriorityConceptId,
         patientVisibilityConceptId: data.patientVisibilityConceptId,
         securityLabelsJson: data.securityLabelsJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

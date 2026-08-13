@@ -64,6 +64,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const notificationsService = {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
+    // Por defecto concede: el caso interesante es el alta administrativa que sí
+    // pide roles; el autorregistro nunca llega a llamarlo.
+    const effectiveRoles = { ensureRoleByCode: fn().mockResolvedValue(true) };
 
     // El repositorio de activaciones sólo se usa en el alta administrativa: en
     // el autorregistro la cuenta nace activa y no hay token que emitir.
@@ -88,12 +91,14 @@ describe('IamPractitionerSelfRegistrationService', () => {
       identifiersRepo as never,
       contactPointsRepo as never,
       tenantMembershipsRepo as never,
+      effectiveRoles as never,
       notificationsService as never,
       logger as never,
       new TracingService(),
     );
     return {
       service,
+      effectiveRoles,
       tx,
       usersRepo,
       credentialsRepo,

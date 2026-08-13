@@ -19,6 +19,8 @@ import {
 import { ResearchReleaseService } from '../services';
 import {
   DefineCohortDto,
+  CreateDeidentificationProfileDto,
+  DeidentificationProfileResponseDto,
   CohortResponseDto,
   RequestDatasetReleaseDto,
   ReleaseRequestResponseDto,
@@ -49,6 +51,30 @@ export class ResearchController {
   constructor(private readonly releaseService: ResearchReleaseService) {}
 
   /** UC-63-09. */
+  /**
+   * Alta del perfil de de-identificación.
+   *
+   * Va antes que la cohorte porque ésta lo exige; sin esta operación el flujo
+   * de investigación no tenía por dónde empezar.
+   */
+  @Post('deidentification-profiles')
+  @Roles(
+    'RESEARCH_GOVERNANCE',
+    'DPO',
+    'PRINCIPAL_INVESTIGATOR',
+    'PLATFORM_ADMIN',
+  )
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Dar de alta un perfil de de-identificación',
+  })
+  createDeidentificationProfile(
+    @Body() dto: CreateDeidentificationProfileDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DeidentificationProfileResponseDto> {
+    return this.releaseService.createDeidentificationProfile(dto, actor);
+  }
+
   @Post('projects/:id/cohorts')
   @Roles('PRINCIPAL_INVESTIGATOR', 'RESEARCH_GOVERNANCE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)

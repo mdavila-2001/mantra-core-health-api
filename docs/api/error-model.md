@@ -37,7 +37,7 @@ se homogeneiza a través de `AllExceptionsFilter` (`@Catch()` global) en:
 | `FORBIDDEN`              |         403 | (via `RolesGuard`/PDP clínico)       | Rol o alcance clínico insuficiente                                                  |
 | `NOT_FOUND`              |         404 | `ResourceNotFoundException`          | Recurso principal o relacionado inexistente                                         |
 | `CONFLICT`               |         409 | `ConflictException`                  | Violación de unicidad o estado incompatible (duplicado, idempotencia)               |
-| `PRECONDITION_FAILED`    |         422 | `PreconditionFailedException`        | Precondición de negocio no satisfecha (estado del agregado, consentimiento vigente) |
+| `PRECONDITION_FAILED`    |         422 | `PreconditionFailedException`        | Precondición de negocio no satisfecha (estado del agregado, consentimiento vigente) **o un identificador del cuerpo que no corresponde a ninguna fila** (clave foránea inexistente) |
 | `CONCURRENCY_CONFLICT`   |         409 | (optimistic locking, `row_version`)  | Escritura concurrente sobre el mismo agregado                                       |
 | `PAYLOAD_TOO_LARGE`      |         413 | Parser HTTP global                   | El cuerpo excede el límite permitido                                                |
 | `RATE_LIMITED`           |         429 | `ThrottlerGuard` global o específico | Se excedió la cuota de solicitudes                                                  |
@@ -242,6 +242,9 @@ Reglas para un interceptor de errores, en orden de importancia:
    rellena de forma predecible, con `details.violations: string[]` — un mensaje por regla de
    `class-validator` incumplida. Los errores de negocio lo usan para identificar el recurso
    (`{ "userId": "…" }`), así que trátalo como `Record<string, unknown>` y no asumas claves.
+   **Un error de integridad de la base no trae `details`**: la restricción, la tabla y el valor de
+   la clave que falló describen el esquema y los datos, así que se registran en el log —localizables
+   por `correlationId`— y no viajan en la respuesta.
 3. **Un 404 puede no ser de negocio.** Una ruta inexistente devuelve el mismo envelope con
    `code: "NOT_FOUND"` y un mensaje de Express (`Cannot GET /…`). Si el cliente distingue "no
    existe el recurso" de "me equivoqué de URL", el discriminante es que el mensaje de negocio

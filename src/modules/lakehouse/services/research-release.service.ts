@@ -30,6 +30,8 @@ import {
   RevokeReleaseResponseDto,
   ExpiredReleaseSummaryDto,
   PendingExpiredReleasesResponseDto,
+  CreateDeidentificationProfileDto,
+  DeidentificationProfileResponseDto,
 } from '../dto';
 
 const MILLISECONDS_PER_DAY = 86_400_000;
@@ -64,6 +66,50 @@ export class ResearchReleaseService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ResearchReleaseService.name);
+  }
+
+  /**
+   * Alta del perfil de de-identificación con el que se materializan los
+   * releases de investigación.
+   *
+   * Sin él no se puede definir una cohorte —el DTO lo exige— y no existía
+   * ninguna operación que lo creara: el flujo del investigador principal
+   * arrancaba en un identificador imposible de obtener.
+   *
+   * @param dto - Tenant, metodología y reglas del perfil.
+   * @param actor - Quien lo da de alta.
+   * @returns El perfil creado, activo.
+   */
+  async createDeidentificationProfile(
+    dto: CreateDeidentificationProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<DeidentificationProfileResponseDto> {
+    this.logger.info(
+      {
+        operation: 'research.deid-profile.create',
+        code: dto.code,
+        actorUserId: actor.id,
+      },
+      'Creating de-identification profile',
+    );
+    return this.em.transactional(async (tx) => {
+      const profile = this.dataReleaseRepo.createDeidProfile(tx, {
+        tenantId: dto.tenantId,
+        code: dto.code,
+        name: dto.name,
+        methodologyConceptId: dto.methodologyConceptId,
+        directIdentifierRulesJson: dto.directIdentifierRulesJson,
+        quasiIdentifierRulesJson: dto.quasiIdentifierRulesJson,
+        dateShiftPolicyJson: dto.dateShiftPolicyJson,
+        freeTextPolicyJson: dto.freeTextPolicyJson,
+      });
+      await tx.flush();
+      return {
+        id: profile.id,
+        code: profile.code,
+        stateConceptId: profile.stateConceptId,
+      };
+    });
   }
 
   /**

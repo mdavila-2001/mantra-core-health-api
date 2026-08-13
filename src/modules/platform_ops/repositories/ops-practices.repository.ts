@@ -125,6 +125,8 @@ export class OpsPracticesRepository {
         automationDefinitionJson: data.automationDefinitionJson,
         approvedByUserId: data.approvedByUserId,
         approvedAt: new Date(),
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -237,6 +239,8 @@ export class OpsPracticesRepository {
         initiatedByUserId: data.initiatedByUserId,
         executionLogUri: data.executionLogUri,
         outputJson: data.outputJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

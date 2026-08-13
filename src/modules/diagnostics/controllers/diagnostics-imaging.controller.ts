@@ -1,14 +1,23 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DiagnosticsImagingService,
   DiagnosticsMediaQualityService,
@@ -21,6 +30,7 @@ import {
   CreateDataQualityEventDto,
   ResourceCreatedDto,
   ImagingStudyStoredDto,
+  ImagingStudySummaryDto,
 } from '../dto';
 
 /**
@@ -46,6 +56,27 @@ export class DiagnosticsImagingController {
   ) {}
 
   /** Soporte: alta de endpoint DICOM. */
+  /**
+   * Estudios de imagen de un paciente.
+   *
+   * Es la lectura que cierra el circuito: quien pidió la prueba puede
+   * encontrar su resultado sin conocer de antemano el uuid del estudio.
+   */
+  @Get('diagnostics/patients/:patientProfileId/imaging-studies')
+  @ApiOperation({ summary: 'Listar los estudios de imagen del paciente' })
+  listStudies(
+    @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+  ): Promise<ImagingStudySummaryDto[]> {
+    return this.imaging.listStudiesByPatient(
+      requireTenantId(),
+      patientProfileId,
+      limit,
+      offset,
+    );
+  }
+
   @Post('diagnostics/imaging-endpoints')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

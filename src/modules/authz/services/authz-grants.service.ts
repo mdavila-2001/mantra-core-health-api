@@ -76,18 +76,33 @@ export class AuthzGrantsService {
     actor: AuthenticatedUser,
   ): Promise<AuthzIdResponseDto> {
     this.logger.info(
-      { operation: 'authz.role-assignment.create', userId, roleId: dto.roleId },
+      {
+        operation: 'authz.role-assignment.create',
+        userId,
+        roleId: dto.roleId,
+        roleCode: dto.roleCode,
+      },
       'Assigning role to user',
     );
+    if (!dto.roleId && !dto.roleCode) {
+      throw new PreconditionFailedException(
+        'Indique el rol a asignar por `roleId` o por `roleCode`',
+        {},
+      );
+    }
     return this.em.transactional(async (tx) => {
-      const role = await this.rolesRepo.findById(tx, dto.roleId);
+      const role = dto.roleId
+        ? await this.rolesRepo.findById(tx, dto.roleId)
+        : await this.rolesRepo.findByCode(tx, dto.roleCode!);
       if (!role)
         throw new ResourceNotFoundException('Rol no encontrado', {
           roleId: dto.roleId,
+          roleCode: dto.roleCode,
         });
       if (!role.isAssignable) {
         throw new PreconditionFailedException('El rol no es asignable', {
-          roleId: dto.roleId,
+          roleId: role.id,
+          roleCode: role.code,
         });
       }
       if (dto.validFrom && dto.validTo && dto.validFrom >= dto.validTo) {
@@ -100,21 +115,22 @@ export class AuthzGrantsService {
       const existing = await this.assignmentsRepo.findActive(
         tx,
         userId,
-        dto.roleId,
+        role.id,
       );
       if (existing) {
         throw new ConflictException(
           'El usuario ya tiene ese rol asignado y activo',
           {
             userId,
-            roleId: dto.roleId,
+            roleId: role.id,
+            roleCode: role.code,
           },
         );
       }
 
       const assignment = this.assignmentsRepo.create(tx, {
         userId,
-        roleId: dto.roleId,
+        roleId: role.id,
         tenantId: dto.tenantId,
         branchId: dto.branchId,
         practiceId: dto.practiceId,

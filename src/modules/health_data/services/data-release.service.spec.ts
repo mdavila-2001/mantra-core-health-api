@@ -34,6 +34,7 @@ function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const releaseRepo = {
+    createDeidProfile: mockFn(),
     findDeidProfileById: mockFn(),
     createDeidRun: mockFn(() => ({ id: 'deid-run-1' })),
     findDeidRunById: mockFn(),

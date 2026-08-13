@@ -291,6 +291,9 @@ export class SystemContextRepository {
         statusConceptId: data.statusConceptId,
         recordedAt: new Date(),
         recordedByUserId: data.recordedByUserId,
+        // `effective_from` es NOT NULL y ningún llamador la aportaba: la
+        // versión rige desde que se registra.
+        effectiveFrom: new Date(),
       },
       { partial: true },
     );

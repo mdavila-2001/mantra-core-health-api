@@ -51,14 +51,22 @@ export class CollectionDefinitions {
   /**
    * Valor de routing key expression mantenido por la instancia.
    */
-  @Property({ fieldName: 'routing_key_expression', columnType: 'varchar' })
-  routingKeyExpression!: string;
+  @Property({
+    fieldName: 'routing_key_expression',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  routingKeyExpression?: string;
 
   /**
    * Valor de shard key expression mantenido por la instancia.
    */
-  @Property({ fieldName: 'shard_key_expression', columnType: 'varchar' })
-  shardKeyExpression!: string;
+  @Property({
+    fieldName: 'shard_key_expression',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  shardKeyExpression?: string;
 
   /**
    * Valor de lifecycle state mantenido por la instancia.

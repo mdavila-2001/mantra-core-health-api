@@ -191,9 +191,16 @@ export class PlacementsRepository {
         datasetDefinitionId: data.datasetDefinitionId,
         primaryPlacementId: data.primaryPlacementId,
         secondaryPlacementId: data.secondaryPlacementId,
-        tenantPartitionKey: data.tenantPartitionKey,
-        tenantEncryptionKeyRef: data.tenantEncryptionKeyRef,
+        // NOT NULL: sin clave explícita, la partición del tenant es su propio
+        // identificador.
+        tenantPartitionKey: data.tenantPartitionKey ?? data.tenantId,
+        // NOT NULL: sin clave propia declarada, el binding usa la del backend,
+        // que es lo que expresa la referencia vacía.
+        tenantEncryptionKeyRef: data.tenantEncryptionKeyRef ?? '',
         state: data.state,
+        // Columnas NOT NULL sin default en el esquema.
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       { partial: true },
     );
@@ -292,6 +299,8 @@ export class PlacementsRepository {
         egressBytes: data.egressBytes,
         estimatedCost: data.estimatedCost,
         currencyCode: data.currencyCode,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

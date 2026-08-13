@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { CONCEPTS } from '../../../common';
 import {
   HealthDeidentificationProfiles,
   HealthDeidentificationRuns,
@@ -28,6 +29,66 @@ export class DataReleaseRepository {
     id: string,
   ): Promise<HealthDeidentificationProfiles | null> {
     return em.findOne(HealthDeidentificationProfiles, { id });
+  }
+
+  /**
+   * Da de alta un perfil de de-identificación.
+   *
+   * Faltaba: el perfil es obligatorio para definir una cohorte de investigación
+   * —`DefineCohortDto.deidentificationProfileId`— y no existía ninguna forma de
+   * crearlo, así que el investigador principal no podía dar el primer paso de
+   * su flujo. Las reglas son decisión de gobierno, por eso viajan en el cuerpo
+   * en vez de derivarse.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Tenant, metodología y reglas del perfil.
+   * @returns El perfil creado, activo.
+   */
+  createDeidProfile(
+    em: EntityManager,
+    data: {
+      /** Tenant propietario del perfil. */
+      tenantId: string;
+      /** Código único dentro del tenant. */
+      code: string;
+      /** Nombre legible. */
+      name: string;
+      /** Metodología aplicada (concepto de terminología). */
+      methodologyConceptId: string;
+      /** Reglas sobre identificadores directos. */
+      directIdentifierRulesJson?: Record<string, unknown>;
+      /** Reglas sobre cuasi-identificadores. */
+      quasiIdentifierRulesJson?: Record<string, unknown>;
+      /** Política de desplazamiento de fechas. */
+      dateShiftPolicyJson?: Record<string, unknown>;
+      /** Política sobre texto libre. */
+      freeTextPolicyJson?: Record<string, unknown>;
+    },
+  ): HealthDeidentificationProfiles {
+    const now = new Date();
+    return em.create(
+      HealthDeidentificationProfiles,
+      {
+        tenantId: data.tenantId,
+        code: data.code,
+        name: data.name,
+        methodologyConceptId: data.methodologyConceptId,
+        // Un perfil sin reglas declaradas no de-identifica nada; se guarda el
+        // objeto vacío en vez de nulo porque las columnas son NOT NULL y el
+        // significado es "sin reglas", no "sin definir".
+        directIdentifierRulesJson: data.directIdentifierRulesJson ?? {},
+        quasiIdentifierRulesJson: data.quasiIdentifierRulesJson ?? {},
+        dateShiftPolicyJson: data.dateShiftPolicyJson ?? {},
+        freeTextPolicyJson: data.freeTextPolicyJson ?? {},
+        // `version` es NOT NULL: un perfil nuevo es la primera versión de sí
+        // mismo.
+        version: '1',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
   }
 
   /**
@@ -101,6 +162,8 @@ export class DataReleaseRepository {
         recordsProcessed: data.recordsProcessed,
         recordsRejected: data.recordsRejected,
         verificationSummaryJson: data.verificationSummaryJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -194,6 +257,8 @@ export class DataReleaseRepository {
         completedAt: new Date(),
         expiresAt: data.expiresAt,
         deliveryDestinationJson: data.deliveryDestinationJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -266,6 +331,8 @@ export class DataReleaseRepository {
         sizeBytes: data.sizeBytes,
         encryptionProfileId: data.encryptionProfileId,
         retentionPolicyId: data.retentionPolicyId,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
