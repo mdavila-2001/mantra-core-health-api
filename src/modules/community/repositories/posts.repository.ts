@@ -110,6 +110,42 @@ export class PostsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `SocialPosts`.
    */
+  /**
+   * Las publicaciones de un perfil público — su muro.
+   *
+   * **Sólo lo publicado y aprobado por moderación.** Un borrador o algo en cola
+   * de revisión no es contenido público todavía, y devolverlo por una lectura
+   * que cualquiera puede pedir sería publicarlo antes de tiempo — que en una red
+   * social con datos de salud es exactamente el error que no se puede cometer.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param authorPublicProfileId - Perfil autor.
+   * @param estados - Estados de publicación y moderación admitidos.
+   * @param limit - Tope de filas.
+   * @returns Las publicaciones, de la más reciente a la más antigua.
+   */
+  findByAuthor(
+    em: EntityManager,
+    authorPublicProfileId: string,
+    estados: {
+      publicationStatusConceptId?: string;
+      moderationStatusConceptId?: string;
+    },
+    limit: number,
+  ): Promise<SocialPosts[]> {
+    const where: Record<string, unknown> = { authorPublicProfileId };
+    if (estados.publicationStatusConceptId) {
+      where.publicationStatusConceptId = estados.publicationStatusConceptId;
+    }
+    if (estados.moderationStatusConceptId) {
+      where.moderationStatusConceptId = estados.moderationStatusConceptId;
+    }
+    return em.find(SocialPosts, where, {
+      orderBy: { createdAt: 'DESC' },
+      limit,
+    });
+  }
+
   create(em: EntityManager, data: CreatePostData): SocialPosts {
     return em.create(
       SocialPosts,

@@ -26,6 +26,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const orderSetsRepo = {
     findById: mockFn(),
+    findByPatient: mockFn(() => Promise.resolve([])),
     findByCode: mockFn(),
     itemsBySet: mockFn(),
     create: mockFn(),
