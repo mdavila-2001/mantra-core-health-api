@@ -6829,6 +6829,40 @@ paths:
         Expirar consentimientos y autorizaciones vencidas (barrido). Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /accounting/accounts:
+    get:
+      operationId: AccountingLedgerController_chartOfAccounts
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Plan de cuentas de una práctica
+      tags:
+        - accounting-ledger
+      description: >-
+        Plan de cuentas de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
     post:
       operationId: AccountingLedgerController_createAccount
       parameters: []
@@ -6865,7 +6899,120 @@ paths:
       description: >-
         Crear una cuenta del plan contable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /accounting/trial-balance:
+    get:
+      description: >-
+        Agrega sólo los asientos POSTEADOS: un borrador no es un hecho contable. Declara `balanced`, que es la
+        comprobación de la que depende que el resto signifique algo.
+      operationId: AccountingLedgerController_trialBalance
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: fiscalPeriodId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: from
+          required: false
+          in: query
+          schema:
+            format: date
+            type: string
+        - name: to
+          required: false
+          in: query
+          schema:
+            format: date
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Balance de sumas y saldos
+      tags:
+        - accounting-ledger
   /accounting/journal-transactions:
+    get:
+      operationId: AccountingLedgerController_listJournal
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          description: Práctica dueña del libro
+          schema:
+            format: uuid
+            type: string
+        - name: fiscalPeriodId
+          required: false
+          in: query
+          description: Acotar a un período
+          schema:
+            format: uuid
+            type: string
+        - name: statusConceptId
+          required: false
+          in: query
+          description: Acotar a un estado (borrador, posteado, reversado…)
+          schema:
+            format: uuid
+            type: string
+        - name: from
+          required: false
+          in: query
+          schema:
+            format: date
+            type: string
+        - name: to
+          required: false
+          in: query
+          schema:
+            format: date
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            maximum: 500
+            default: 100
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Libro diario de una práctica
+      tags:
+        - accounting-ledger
+      description: >-
+        Libro diario de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
     post:
       operationId: AccountingLedgerController_postJournal
       parameters: []
@@ -6902,6 +7049,38 @@ paths:
       description: >-
         Registrar y postear un asiento balanceado (partida doble). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /accounting/journal-transactions/{id}:
+    get:
+      operationId: AccountingLedgerController_getJournalTransaction
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Un asiento con sus líneas
+      tags:
+        - accounting-ledger
+      description: >-
+        Un asiento con sus líneas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /accounting/journal-transactions/drafts:
     post:
       operationId: AccountingLedgerController_createDraft
