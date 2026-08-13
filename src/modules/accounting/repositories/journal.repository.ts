@@ -232,6 +232,91 @@ export class JournalRepository {
   }
 
   /**
+   * Asientos de una práctica, del más reciente al más antiguo — el **libro
+   * diario**.
+   *
+   * Existe porque el módulo tenía 20 escrituras y ninguna lectura: se podían
+   * postear apuntes y no había forma de verlos. Un motor de asientos que no
+   * enseña el diario no es contabilidad, es un buzón.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filtros - Práctica (obligatoria), ventana y período.
+   * @param limit - Tope de filas.
+   * @returns Los asientos, del más reciente al más antiguo.
+   */
+  findTransactions(
+    em: EntityManager,
+    filtros: {
+      practiceId: string;
+      fiscalPeriodId?: string;
+      statusConceptId?: string;
+      from?: Date;
+      to?: Date;
+    },
+    limit: number,
+  ): Promise<JournalTransactions[]> {
+    const where: Record<string, unknown> = { practiceId: filtros.practiceId };
+    if (filtros.fiscalPeriodId) where.fiscalPeriodId = filtros.fiscalPeriodId;
+    if (filtros.statusConceptId)
+      where.statusConceptId = filtros.statusConceptId;
+    if (filtros.from || filtros.to) {
+      where.transactionDate = {
+        ...(filtros.from ? { $gte: filtros.from } : {}),
+        ...(filtros.to ? { $lte: filtros.to } : {}),
+      };
+    }
+
+    return em.find(JournalTransactions, where, {
+      orderBy: { transactionDate: 'DESC', createdAt: 'DESC' },
+      limit,
+    });
+  }
+
+  /**
+   * Las líneas de un asiento, en su orden de captura.
+   *
+   * Un asiento sin sus líneas no se puede auditar: el total no dice contra qué
+   * cuentas se imputó ni de qué lado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param transactionId - Asiento cuyas líneas se leen.
+   * @returns Las líneas, ordenadas por `line_no`.
+   */
+  findEntriesByTransaction(
+    em: EntityManager,
+    transactionId: string,
+  ): Promise<LedgerEntries[]> {
+    return em.find(
+      LedgerEntries,
+      { transactionId },
+      { orderBy: { lineNo: 'ASC' } },
+    );
+  }
+
+  /**
+   * Todas las líneas de un conjunto de asientos, para armar sumas y saldos.
+   *
+   * Se piden en una sola consulta y no una por asiento: un balance de un
+   * ejercicio recorre miles, y ese patrón es el que convierte un informe en una
+   * tormenta de consultas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param transactionIds - Asientos a agregar.
+   * @returns Todas sus líneas.
+   */
+  findEntriesByTransactions(
+    em: EntityManager,
+    transactionIds: readonly string[],
+  ): Promise<LedgerEntries[]> {
+    if (transactionIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(LedgerEntries, {
+      transactionId: { $in: [...transactionIds] },
+    });
+  }
+
+  /**
    * Crea create transaction.
    *
    * @param em - Contexto de persistencia o transacción activa.

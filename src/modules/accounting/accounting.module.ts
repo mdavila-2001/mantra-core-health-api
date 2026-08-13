@@ -12,6 +12,7 @@ import {
   AccountingExchangeRateController,
 } from './controllers';
 import {
+  LedgerReadService,
   LedgerService,
   FiscalService,
   AccrualService,
@@ -64,6 +65,7 @@ import {
     // Servicios
     PostingHelper,
     LedgerService,
+    LedgerReadService,
     FiscalService,
     AccrualService,
     SubledgerService,
