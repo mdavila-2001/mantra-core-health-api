@@ -1,3 +1,29 @@
+// Carga el `.env` ANTES de que nadie lea `process.env` en este archivo.
+//
+// `loadWorkerEnv()` no se llama desde el ciclo de vida de Nest sino como
+// `useValue` en `system-api-client.module.ts`, y un `useValue` se evalúa **al
+// importar el módulo** — antes de que `ConfigModule.forRoot()` exista, y por
+// tanto antes de que su dotenv haya corrido. El único otro `import
+// 'dotenv/config'` del repo vive en `src/orm/config/orm.config.ts`, que se
+// resuelve más tarde en la cadena. Resultado: sin esta línea, TODO lo que lee
+// `loadWorkerEnv` caía a los defaults del código y el `.env` era decorativo
+// para los 21 workers.
+//
+// El síntoma no era una variable vacía sino un worker que "andaba mal":
+// tomaba `WORKER_API_BASE_URL` por defecto en vez de la del `.env` y el
+// cortacircuitos de `system-api` quedaba abierto en bucle. En Docker no se
+// notaba, porque Compose entrega las variables como entorno real del proceso
+// y `process.env` ya las tiene antes de importar nada — sólo mordía a quien
+// corriera un worker en el host.
+//
+// Va acá y no en `bootstrap.ts` a propósito: quien lee el entorno es este
+// módulo, así que cualquier consumidor de `loadWorkerEnv` lo carga por
+// importarlo, sin depender del orden de imports de cada entrypoint.
+//
+// No pisa nada en Docker: dotenv **no** sobrescribe variables que ya existen
+// en `process.env`, así que lo que declara Compose sigue ganando.
+import 'dotenv/config';
+
 import * as Joi from 'joi';
 
 /**
