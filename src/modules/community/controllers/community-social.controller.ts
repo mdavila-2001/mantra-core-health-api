@@ -208,7 +208,9 @@ export class CommunitySocialController {
 
   /** Resumen de reacciones de una publicación. */
   @Get('posts/:postId/reactions')
-  @ApiOperation({ summary: 'Reacciones de una publicación, agrupadas por tipo' })
+  @ApiOperation({
+    summary: 'Reacciones de una publicación, agrupadas por tipo',
+  })
   getPostReactions(
     @Param('postId', ParseUUIDPipe) postId: string,
     @Query('actorProfileId') actorProfileId?: string,

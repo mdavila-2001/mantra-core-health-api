@@ -36,7 +36,10 @@ function build() {
     listBlocks: mockFn(),
   };
   return {
-    controller: new CommunitySocialController(service as any, readService as any),
+    controller: new CommunitySocialController(
+      service as any,
+      readService as any,
+    ),
     service,
     readService,
   };

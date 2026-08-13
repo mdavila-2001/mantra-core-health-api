@@ -166,7 +166,10 @@ export class CommunityVisibilityService {
    * @returns Los posts visibles, en el mismo orden.
    */
   async filterVisiblePosts<
-    T extends Pick<SocialPosts, 'authorPublicProfileId' | 'visibilityConceptId'>,
+    T extends Pick<
+      SocialPosts,
+      'authorPublicProfileId' | 'visibilityConceptId'
+    >,
   >(em: EntityManager, posts: T[], actorProfileId?: string): Promise<T[]> {
     if (posts.length === 0) return posts;
     if (!actorProfileId)
