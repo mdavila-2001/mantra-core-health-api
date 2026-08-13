@@ -1,16 +1,26 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { CommunitySocialService } from '../services';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
+import {
+  CommunitySocialService,
+  CommunitySocialReadService,
+} from '../services';
 import {
   CreatePublicProfileDto,
   CreatePostDto,
@@ -24,7 +34,18 @@ import {
   CommentResponseDto,
   ReactionResponseDto,
   IdResponseDto,
+  PublicProfileDetailDto,
+  PostPageDto,
+  PostDetailDto,
+  CommentThreadPageDto,
+  ReactionSummaryDto,
+  FollowPageDto,
+  BookmarkPageDto,
+  BlockPageDto,
 } from '../dto';
+
+/** Tope por defecto de filas por página, igual que en el resto de la API. */
+const DEFAULT_PAGE_LIMIT = 50;
 
 /**
  * Endpoints sociales del módulo Community: perfiles públicos, posts, comentarios,
@@ -37,9 +58,13 @@ export class CommunitySocialController {
   /**
    * Inicializa la instancia y sus dependencias.
    *
-   * @param service - Valor de service requerido por la operación.
+   * @param service - Escrituras del grafo social.
+   * @param readService - Lecturas del grafo social.
    */
-  constructor(private readonly service: CommunitySocialService) {}
+  constructor(
+    private readonly service: CommunitySocialService,
+    private readonly readService: CommunitySocialReadService,
+  ) {}
 
   /** Bootstrap: crea el perfil público (nodo raíz social). */
   @Post('public-profiles')
@@ -122,5 +147,118 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.service.block(dto, actor);
+  }
+
+  // --- Lecturas (UC-19-01..07, cara de lectura) ---
+  //
+  // Sin `@Roles`: alcanza con una sesión. Las que exponen contenido privado
+  // —marcadores y bloqueos— comprueban la propiedad del perfil en el servicio,
+  // que es donde hay base para comprobarla.
+
+  /** Ficha del perfil, con sellos de verificación y prestigio. */
+  @Get('profiles/:profileId')
+  @ApiOperation({ summary: 'Ficha de un perfil público' })
+  getProfile(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+  ): Promise<PublicProfileDetailDto> {
+    return this.readService.getProfile(profileId);
+  }
+
+  /** Muro del perfil, filtrado por lo que el lector puede ver. */
+  @Get('profiles/:profileId/posts')
+  @ApiOperation({ summary: 'Publicaciones de un perfil' })
+  listProfilePosts(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Query('actorProfileId') actorProfileId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PostPageDto> {
+    return this.readService.listProfilePosts(profileId, {
+      actorProfileId,
+      cursor,
+      limit: limit ?? DEFAULT_PAGE_LIMIT,
+    });
+  }
+
+  /** Publicación con sus adjuntos, etiquetas y menciones. */
+  @Get('posts/:postId')
+  @ApiOperation({ summary: 'Publicación con media, hashtags y menciones' })
+  getPost(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query('actorProfileId') actorProfileId?: string,
+  ): Promise<PostDetailDto> {
+    return this.readService.getPost(postId, actorProfileId);
+  }
+
+  /** Hilo de comentarios de una publicación. */
+  @Get('posts/:postId/comments')
+  @ApiOperation({ summary: 'Comentarios de una publicación (hilo anidado)' })
+  listPostComments(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query('actorProfileId') actorProfileId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<CommentThreadPageDto> {
+    return this.readService.listPostComments(postId, {
+      actorProfileId,
+      cursor,
+      limit: limit ?? DEFAULT_PAGE_LIMIT,
+    });
+  }
+
+  /** Resumen de reacciones de una publicación. */
+  @Get('posts/:postId/reactions')
+  @ApiOperation({ summary: 'Reacciones de una publicación, agrupadas por tipo' })
+  getPostReactions(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query('actorProfileId') actorProfileId?: string,
+  ): Promise<ReactionSummaryDto> {
+    return this.readService.getPostReactions(postId, actorProfileId);
+  }
+
+  /** Seguimientos emitidos por un perfil. */
+  @Get('follows')
+  @ApiOperation({ summary: 'Seguimientos activos de un perfil' })
+  listFollows(
+    @Query('followerProfileId', ParseUUIDPipe) followerProfileId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<FollowPageDto> {
+    return this.readService.listFollows(followerProfileId, {
+      cursor,
+      limit: limit ?? DEFAULT_PAGE_LIMIT,
+    });
+  }
+
+  /** Marcadores del propio perfil. */
+  @Get('bookmarks')
+  @ApiOperation({ summary: 'Marcadores guardados por un perfil' })
+  listBookmarks(
+    @Query('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('collectionName') collectionName?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<BookmarkPageDto> {
+    return this.readService.listBookmarks(profileId, actor, {
+      collectionName,
+      cursor,
+      limit: limit ?? DEFAULT_PAGE_LIMIT,
+    });
+  }
+
+  /** Bloqueos emitidos por el propio perfil. */
+  @Get('blocks')
+  @ApiOperation({ summary: 'Bloqueos emitidos por un perfil' })
+  listBlocks(
+    @Query('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<BlockPageDto> {
+    return this.readService.listBlocks(profileId, actor, {
+      cursor,
+      limit: limit ?? DEFAULT_PAGE_LIMIT,
+    });
   }
 }

@@ -36,7 +36,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityMessagingService(
     em as any,
-    conversationsRepo,
+    conversationsRepo as any,
     blocksRepo as any,
     logger as any,
   );

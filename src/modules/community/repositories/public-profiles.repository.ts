@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { PublicProfiles } from '../entities';
+import { PublicProfiles, VerifiedBadges } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos para dar de alta un perfil público (anchor social del módulo). */
@@ -67,6 +67,55 @@ export class PublicProfilesRepository {
    */
   findById(em: EntityManager, id: string): Promise<PublicProfiles | null> {
     return em.findOne(PublicProfiles, { id });
+  }
+
+  /**
+   * Varios perfiles por id, para hidratar autores de una página.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Perfiles a traer.
+   * @returns Los perfiles existentes, sin orden garantizado.
+   */
+  listByIds(em: EntityManager, ids: string[]): Promise<PublicProfiles[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PublicProfiles, { id: { $in: ids } });
+  }
+
+  /**
+   * Sellos de verificación vigentes de un sujeto.
+   *
+   * No filtra por tipo de sujeto porque el módulo todavía no declara conceptos
+   * para esa columna; el id del perfil ya es único, así que acotar por él es
+   * exacto sin inventar un concepto que el modelo no tiene.
+   *
+   * Vigencia: se descartan los sellos cuya ventana `valid_from`/`valid_to` no
+   * cubre el momento de la consulta — un sello vencido que se sigue mostrando
+   * es peor que ninguno.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param subjectRefId - Sujeto del sello (aquí, el perfil público).
+   * @param activeStatusConceptId - Estado que cuenta como vigente.
+   * @param now - Momento contra el que se evalúa la ventana.
+   * @returns Sellos vigentes del sujeto.
+   */
+  listBadgesBySubject(
+    em: EntityManager,
+    subjectRefId: string,
+    activeStatusConceptId: string,
+    now: Date,
+  ): Promise<VerifiedBadges[]> {
+    return em.find(
+      VerifiedBadges,
+      {
+        subjectRefId,
+        statusConceptId: activeStatusConceptId,
+        $and: [
+          { $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },
+          { $or: [{ validTo: null }, { validTo: { $gte: now } }] },
+        ],
+      },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' } },
+    );
   }
 
   /**

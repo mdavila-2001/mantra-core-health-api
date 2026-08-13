@@ -90,6 +90,80 @@ export class GroupsRepository {
   }
 
   /**
+   * Grupos de un tenant (UC-19-12, cara de lectura).
+   *
+   * El `tenantId` es obligatorio y no opcional a propósito: `groups` es de las
+   * pocas tablas del módulo con `tenant_id`, y un listado abierto sin acotarlo
+   * mostraría los grupos de una organización a otra.
+   *
+   * Los grupos secretos no se listan acá: los ve quien ya es miembro,
+   * resolviéndolos por id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización cuyos grupos se listan.
+   * @param secretVisibilityConceptId - Visibilidad que no se publica en listado.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de grupos, del más reciente al más antiguo.
+   */
+  searchPage(
+    em: EntityManager,
+    tenantId: string,
+    secretVisibilityConceptId: string,
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<Groups[]> {
+    return em.find(
+      Groups,
+      {
+        tenantId,
+        visibilityConceptId: { $ne: secretVisibilityConceptId },
+        ...(after
+          ? {
+              $or: [
+                { createdAt: { $lt: new Date(after.createdAt) } },
+                { createdAt: new Date(after.createdAt), id: { $lt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Integrantes de un grupo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param groupId - Grupo a leer.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de integrantes, por antigüedad de alta.
+   */
+  listMembers(
+    em: EntityManager,
+    groupId: string,
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<GroupMembers[]> {
+    return em.find(
+      GroupMembers,
+      {
+        groupId,
+        ...(after
+          ? {
+              $or: [
+                { createdAt: { $gt: new Date(after.createdAt) } },
+                { createdAt: new Date(after.createdAt), id: { $gt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

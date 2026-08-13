@@ -46,12 +46,12 @@ function build() {
 
   const service = new CommunitySocialService(
     em as any,
-    profilesRepo,
+    profilesRepo as any,
     postsRepo as any,
-    commentsRepo,
-    reactionsRepo,
-    bookmarksRepo,
-    followsRepo,
+    commentsRepo as any,
+    reactionsRepo as any,
+    bookmarksRepo as any,
+    followsRepo as any,
     blocksRepo as any,
     logger as any,
   );

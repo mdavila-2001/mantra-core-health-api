@@ -64,6 +64,67 @@ export class CommentsRepository {
   }
 
   /**
+   * Comentarios raíz de un contenido (UC-19-04, cara de lectura).
+   *
+   * Pagina sólo las raíces: si la página contara también las respuestas, un
+   * hilo con muchas respuestas se comería el tope y las demás conversaciones
+   * del post no aparecerían nunca.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param commentableTypeConceptId - Tipo del contenido comentado.
+   * @param commentableRefId - Id del contenido comentado.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @param limit - Tope de raíces.
+   * @returns Página de comentarios raíz, del más antiguo al más nuevo.
+   */
+  listRootsPage(
+    em: EntityManager,
+    commentableTypeConceptId: string,
+    commentableRefId: string,
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<Comments[]> {
+    return em.find(
+      Comments,
+      {
+        commentableTypeConceptId,
+        commentableRefId,
+        parentCommentId: null,
+        ...(after
+          ? {
+              $or: [
+                { createdAt: { $gt: new Date(after.createdAt) } },
+                { createdAt: new Date(after.createdAt), id: { $gt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit },
+    );
+  }
+
+  /**
+   * Respuestas de un conjunto de hilos, para anidarlas en memoria.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param rootCommentIds - Raíces cuyos descendientes se quieren.
+   * @param limit - Tope de respuestas del lote.
+   * @returns Respuestas ordenadas cronológicamente.
+   */
+  listRepliesOf(
+    em: EntityManager,
+    rootCommentIds: string[],
+    limit: number,
+  ): Promise<Comments[]> {
+    if (rootCommentIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      Comments,
+      { rootCommentId: { $in: rootCommentIds }, parentCommentId: { $ne: null } },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

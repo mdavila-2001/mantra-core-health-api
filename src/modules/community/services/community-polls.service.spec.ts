@@ -37,7 +37,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityPollsService(
     em as any,
-    pollsRepo,
+    pollsRepo as any,
     postsRepo as any,
     logger as any,
   );
