@@ -29,9 +29,21 @@ function build() {
     reverseJournal: mockFn(),
     attachFile: mockFn(),
   };
-  const controller = new AccountingLedgerController(ledgerService as any);
+  const controller = new AccountingLedgerController(
+    ledgerService as any,
+    ledgerReadDoble as never,
+  );
   return { controller, ledgerService };
 }
+
+const ledgerReadDoble = {
+  chartOfAccounts: (() =>
+    Promise.resolve({ items: [], count: 0, limit: 100 })) as never,
+  listJournal: (() =>
+    Promise.resolve({ items: [], count: 0, limit: 100 })) as never,
+  getJournalTransaction: (() => Promise.resolve({})) as never,
+  trialBalance: (() => Promise.resolve({})) as never,
+};
 
 describe('AccountingLedgerController', () => {
   it('delega createAccount', async () => {

@@ -96,6 +96,30 @@ export class AccountsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `Accounts`.
    */
+  /**
+   * El **plan de cuentas** de una práctica, por código.
+   *
+   * Ordenado por `code` y no por creación: un plan de cuentas se lee por su
+   * numeración —1.1.01 antes que 2.1.01— porque esa numeración *es* la
+   * jerarquía. Ordenarlo por fecha lo vuelve ilegible.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica dueña del plan.
+   * @param limit - Tope de filas.
+   * @returns Las cuentas, ordenadas por código.
+   */
+  findByPractice(
+    em: EntityManager,
+    practiceId: string,
+    limit: number,
+  ): Promise<Accounts[]> {
+    return em.find(
+      Accounts,
+      { practiceId },
+      { orderBy: { code: 'ASC' }, limit },
+    );
+  }
+
   create(em: EntityManager, data: CreateAccountData): Accounts {
     return em.create(
       Accounts,
