@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 13 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 16 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
 - **Controladores:** `AccreditationsController`, `InventoryItemsController`, `PracticesController`, `RoleAssignmentsController`, `SitesController`
@@ -13,17 +13,20 @@ Referencia exhaustiva de 13 operación(es) del módulo `practice`, derivada del 
 
 1. [POST /accreditations/{id}/verify](#1-post-accreditations-id-verify) — Verificar o caducar una acreditación (transición de estado)
 2. [POST /inventory-items/{itemId}/movements](#2-post-inventory-items-itemid-movements) — Registrar un movimiento de inventario (ajuste de stock)
-3. [POST /practices](#3-post-practices) — Dar de alta una práctica (organización raíz)
-4. [POST /practices/{practiceId}/accreditations](#4-post-practices-practiceid-accreditations) — Registrar una acreditación con evidencia
-5. [POST /practices/{practiceId}/healthcare-services](#5-post-practices-practiceid-healthcare-services) — Publicar un servicio de salud
-6. [POST /practices/{practiceId}/inventory-items](#6-post-practices-practiceid-inventory-items) — Dar de alta un insumo de inventario de práctica
-7. [POST /practices/{practiceId}/role-assignments](#7-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
-8. [PUT /practices/{practiceId}/settings/{settingKey}](#8-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
-9. [POST /practices/{practiceId}/sites](#9-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
-10. [DELETE /practices/{practiceId}/sites/{siteId}](#10-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
-11. [POST /role-assignments/{roleId}/support-assignments](#11-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
-12. [POST /sites/{siteId}/care-spaces](#12-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
-13. [POST /sites/{siteId}/clinical-units](#13-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+3. [GET /practices](#3-get-practices) — Listar las prácticas activas del tenant
+4. [POST /practices](#4-post-practices) — Dar de alta una práctica (organización raíz)
+5. [POST /practices/{practiceId}/accreditations](#5-post-practices-practiceid-accreditations) — Registrar una acreditación con evidencia
+6. [POST /practices/{practiceId}/healthcare-services](#6-post-practices-practiceid-healthcare-services) — Publicar un servicio de salud
+7. [POST /practices/{practiceId}/inventory-items](#7-post-practices-practiceid-inventory-items) — Dar de alta un insumo de inventario de práctica
+8. [POST /practices/{practiceId}/role-assignments](#8-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
+9. [PUT /practices/{practiceId}/settings/{settingKey}](#9-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
+10. [GET /practices/{practiceId}/sites](#10-get-practices-practiceid-sites) — Listar las sedes de una práctica
+11. [POST /practices/{practiceId}/sites](#11-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
+12. [DELETE /practices/{practiceId}/sites/{siteId}](#12-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
+13. [POST /role-assignments/{roleId}/support-assignments](#13-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
+14. [GET /sites/{siteId}/care-spaces](#14-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
+15. [POST /sites/{siteId}/care-spaces](#15-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
+16. [POST /sites/{siteId}/clinical-units](#16-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
 
 ---
 
@@ -297,7 +300,112 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /practices
+## 3. GET /practices
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Listar las prácticas activas del tenant
+- **Operation ID:** `PracticesController_listPractices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PracticesController.listPractices](../../src/modules/practice/controllers/practices.controller.ts)
+
+### Descripción de negocio
+
+Listar las prácticas activas del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Prácticas activas del tenant. Abierta a los actores clínicos y de programación, no sólo a `SECURITY_ADMIN`: es el primer paso para resolver el quirófano que exige programar una intervención, y sin él ese uuid había que averiguarlo fuera del sistema. Sólo devuelve identificación y estado, no configuración.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practices` en `PracticesController_listPractices`. El controlador delega en `PracticeSitesService.listPractices`. No recibe body. El tipo de retorno estático es `Promise<PracticeSummaryDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SURGERY_SCHEDULER`, `PERIOP_ADMIN`, `SURGEON`, `ANESTHESIOLOGIST`, `PERIOP_NURSE`, `SCHEDULING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PracticeSummaryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo",
+    "status": "00000000-0000-4000-8000-000000000001"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practices"
+}
+```
+
+---
+
+## 4. POST /practices
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -310,7 +418,6 @@ Ejemplo de error normalizado:
 
 Dar de alta una práctica (organización raíz). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Bootstrap: alta de la práctica (organización raíz).
 
 ### Descripción del sistema
 
@@ -437,7 +544,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /practices/{practiceId}/accreditations
+## 5. POST /practices/{practiceId}/accreditations
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -580,7 +687,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /practices/{practiceId}/healthcare-services
+## 6. POST /practices/{practiceId}/healthcare-services
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -723,7 +830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /practices/{practiceId}/inventory-items
+## 7. POST /practices/{practiceId}/inventory-items
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -866,7 +973,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /practices/{practiceId}/role-assignments
+## 8. POST /practices/{practiceId}/role-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1020,7 +1127,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. PUT /practices/{practiceId}/settings/{settingKey}
+## 9. PUT /practices/{practiceId}/settings/{settingKey}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1153,7 +1260,119 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /practices/{practiceId}/sites
+## 10. GET /practices/{practiceId}/sites
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Listar las sedes de una práctica
+- **Operation ID:** `PracticesController_listSites`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PracticesController.listSites](../../src/modules/practice/controllers/practices.controller.ts)
+
+### Descripción de negocio
+
+Listar las sedes de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Sedes de una práctica.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practices/{practiceId}/sites` en `PracticesController_listSites`. El controlador delega en `PracticeSitesService.listSites`. No recibe body. El tipo de retorno estático es `Promise<SiteSummaryDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/sites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SURGERY_SCHEDULER`, `PERIOP_ADMIN`, `SURGEON`, `ANESTHESIOLOGIST`, `PERIOP_NURSE`, `SCHEDULING_ADMIN`.
+- Deben ser UUID válidos: `practiceId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/sites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+| 404 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SiteSummaryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "practiceId": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo",
+    "status": "00000000-0000-4000-8000-000000000001"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-sites.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practices/{practiceId}/sites"
+}
+```
+
+---
+
+## 11. POST /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1304,7 +1523,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. DELETE /practices/{practiceId}/sites/{siteId}
+## 12. DELETE /practices/{practiceId}/sites/{siteId}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1415,7 +1634,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /role-assignments/{roleId}/support-assignments
+## 13. POST /role-assignments/{roleId}/support-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1554,7 +1773,120 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /sites/{siteId}/care-spaces
+## 14. GET /sites/{siteId}/care-spaces
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Listar los espacios de atención de la sede
+- **Operation ID:** `SitesController_listCareSpaces`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SitesController.listCareSpaces](../../src/modules/practice/controllers/sites.controller.ts)
+
+### Descripción de negocio
+
+Listar los espacios de atención de la sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Espacios de atención de la sede: quirófanos, consultas y boxes. Es el listado que resuelve el `operatingRoomId` de `POST /procedure-cases`. Sin él, programar una intervención exigía conocer de memoria el uuid de una fila que ninguna operación devolvía.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /sites/{siteId}/care-spaces` en `SitesController_listCareSpaces`. El controlador delega en `PracticeSitesService.listCareSpaces`. No recibe body. El tipo de retorno estático es `Promise<CareSpaceSummaryDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/care-spaces HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SURGERY_SCHEDULER`, `PERIOP_ADMIN`, `SURGEON`, `ANESTHESIOLOGIST`, `PERIOP_NURSE`, `SCHEDULING_ADMIN`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /sites/00000000-0000-4000-8000-000000000001/care-spaces HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+| 404 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareSpaceSummaryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo",
+    "spaceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "status": "00000000-0000-4000-8000-000000000001"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Sede no encontrada | Excepción explícita en src/modules/practice/services/practice-sites.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/care-spaces"
+}
+```
+
+---
+
+## 15. POST /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1703,7 +2035,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /sites/{siteId}/clinical-units
+## 16. POST /sites/{siteId}/clinical-units
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`

@@ -1082,6 +1082,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
   "licenseId": "00000000-0000-4000-8000-000000000001",
+  "credentialId": "00000000-0000-4000-8000-000000000001",
   "verificationStatus": "PENDING",
   "emailVerificationSent": true
 }
@@ -1096,6 +1097,7 @@ Campos de la respuesta:
 | `practitionerProfileId` | Sí | `string` | formato `uuid` | Perfil profesional (comparte id con la persona). | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Código interno asignado al profesional. | `CODIGO_EJEMPLO` |
 | `licenseId` | Sí | `string` | formato `uuid` | Licencia registrada, pendiente de verificación por la plataforma. | `00000000-0000-4000-8000-000000000001` |
+| `credentialId` | Sí | `string` | formato `uuid` | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatus` | Sí | `string` | Sin restricción adicional declarada | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `PENDING` |
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación. | `true` |
 
@@ -1111,6 +1113,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -3684,6 +3687,7 @@ Content-Type: application/json
 | `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
 | `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
+| `clinicalRoles` | No | `array<string>` | longitud máxima 100; máximo 10 elemento(s) | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `["CLINICIAN","SURGEON"]` |
 
 ### Payload completo de ejemplo
 
@@ -3713,7 +3717,11 @@ Content-Type: application/json
   "languageConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": false,
   "timeZone": "America/La_Paz",
-  "reason": "Texto descriptivo de ejemplo"
+  "reason": "Texto descriptivo de ejemplo",
+  "clinicalRoles": [
+    "CLINICIAN",
+    "SURGEON"
+  ]
 }
 ```
 
@@ -3736,7 +3744,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "activationToken": "valor-ejemplo",
-  "activationExpiresAt": "2026-07-31T12:00:00.000Z"
+  "activationExpiresAt": "2026-07-31T12:00:00.000Z",
+  "clinicalRoles": [
+    "valor-ejemplo"
+  ]
 }
 ```
 
@@ -3746,6 +3757,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `activationToken` | Sí | `string` | Sin restricción adicional declarada | Token de un solo uso a entregar al titular por canal seguro | `valor-ejemplo` |
 | `activationExpiresAt` | Sí | `string` | formato `date-time` | Cuándo caduca el token. | `2026-07-31T12:00:00.000Z` |
+| `clinicalRoles` | No | `array<string>` | Sin restricción adicional declarada | Roles asistenciales efectivamente concedidos. Se devuelven para que el administrador vea con qué quedó operativo el profesional sin tener que consultarlo aparte. Si alguno de los pedidos no existía, el alta entera falla, así que esta lista coincide siempre con lo solicitado. | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3761,6 +3773,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
