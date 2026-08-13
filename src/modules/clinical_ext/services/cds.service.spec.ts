@@ -26,6 +26,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const rulesRepo = {
     findById: mockFn(),
+    findByPatient: mockFn(() => Promise.resolve([])),
     findByCode: mockFn(),
     findActive: mockFn(),
     create: mockFn(),

@@ -76,6 +76,30 @@ export class ClinicalAlertsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `ClinicalAlerts`.
    */
+  /**
+   * Las alertas clínicas de un paciente.
+   *
+   * Son el dato que cambia una conducta —una interacción, un aviso de riesgo— y
+   * el único de los tres que **se mira antes de atender**, no después. Que no se
+   * pudieran leer es lo más caro de este módulo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente.
+   * @param limit - Tope de filas.
+   * @returns Las alertas, de la más reciente a la más antigua.
+   */
+  findByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<ClinicalAlerts[]> {
+    return em.find(
+      ClinicalAlerts,
+      { patientProfileId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
   create(em: EntityManager, data: CreateClinicalAlertData): ClinicalAlerts {
     return em.create(
       ClinicalAlerts,

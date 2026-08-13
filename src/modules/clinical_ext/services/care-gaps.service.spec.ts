@@ -23,7 +23,12 @@ const actor = { id: 'nur-1', roles: ['USER'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const gapsRepo = { findById: mockFn(), findOpen: mockFn(), create: mockFn() };
+  const gapsRepo = {
+    findById: mockFn(),
+    findByPatient: mockFn(() => Promise.resolve([])),
+    findOpen: mockFn(),
+    create: mockFn(),
+  };
   const schedulesRepo = { findActive: mockFn(), create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new CareGapsService(
