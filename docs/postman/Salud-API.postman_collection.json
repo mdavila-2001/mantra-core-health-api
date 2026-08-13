@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "REDESA Health API · 878 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 878 requests en 121 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "REDESA Health API · 922 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 922 requests en 122 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -181,7 +181,7 @@
           ]
         },
         {
-          "name": "GET /terminology/concepts · UC-03-13: busca conceptos del catálogo por código o denominación",
+          "name": "GET /terminology/concepts · UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta",
           "request": {
             "method": "GET",
             "header": [
@@ -219,10 +219,16 @@
                   "value": "1",
                   "description": "Tope de resultados (por defecto 50)",
                   "disabled": true
+                },
+                {
+                  "key": "ids",
+                  "value": "",
+                  "description": "Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato",
+                  "disabled": true
                 }
               ]
             },
-            "description": "UC-03-13: busca conceptos del catálogo por código o denominación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/concepts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TerminologyConceptsController_searchConcepts`"
+            "description": "UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/concepts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TerminologyConceptsController_searchConcepts`"
           },
           "response": [],
           "event": [
@@ -936,7 +942,7 @@
             "description": "Único alta que no exige token. El paciente inicia sesión con su documento de identidad, no con email.\n\nRegistrarse como paciente con documento de identidad. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-patient`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPatient`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nationalId\": \"CI-{{$timestamp}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Paciente de prueba\",\n  \"email\": \"paciente-{{$timestamp}}@example.test\",\n  \"phone\": \"+591 70055555\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\"\n}",
+              "raw": "{\n  \"nationalId\": \"CI-{{$timestamp}}\",\n  \"password\": \"{{password}}\",\n  \"email\": \"paciente-{{$timestamp}}@example.test\",\n  \"displayName\": \"Paciente de prueba\",\n  \"phone\": \"+591 70055555\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1715,7 +1721,7 @@
       ]
     },
     {
-      "name": "accounting (20)",
+      "name": "accounting (24)",
       "item": [
         {
           "name": "accounting-accruals",
@@ -2165,6 +2171,225 @@
         {
           "name": "accounting-ledger",
           "item": [
+            {
+              "name": "GET /accounting/accounts · Plan de cuentas de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/accounts?practiceId=practiceId-ejemplo&limit=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "accounts"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "practiceId-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Plan de cuentas de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /accounting/accounts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingLedgerController_chartOfAccounts`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.accounts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('accountId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/journal-transactions · Libro diario de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/journal-transactions?practiceId={{practiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "journal-transactions"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "Práctica dueña del libro",
+                      "disabled": false
+                    },
+                    {
+                      "key": "fiscalPeriodId",
+                      "value": "{{fiscalPeriodId}}",
+                      "description": "Acotar a un período",
+                      "disabled": true
+                    },
+                    {
+                      "key": "statusConceptId",
+                      "value": "<statusConceptId: uuid del catálogo, ver GET /terminology/concepts>",
+                      "description": "Acotar a un estado (borrador, posteado, reversado…)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-01-01",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "100",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Libro diario de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /accounting/journal-transactions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingLedgerController_listJournal`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.journalTransactions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('journalTransactionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/trial-balance · Balance de sumas y saldos",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/trial-balance?practiceId={{practiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "trial-balance"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "fiscalPeriodId",
+                      "value": "{{fiscalPeriodId}}",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-01-01",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Agrega sólo los asientos POSTEADOS: un borrador no es un hecho contable. Declara `balanced`, que es la comprobación de la que depende que el resto signifique algo.\n\n`GET /accounting/trial-balance`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AccountingLedgerController_trialBalance`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('trialBalanceId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "POST /accounting/accounts · Crear una cuenta del plan contable",
               "request": {
@@ -2810,6 +3035,61 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "GET /accounting/journal-transactions/{id} · Un asiento con sus líneas",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/journal-transactions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "journal-transactions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{journalTransactionId}}",
+                      "description": "Identificador de ruta · variable `{{journalTransactionId}}`"
+                    }
+                  ]
+                },
+                "description": "Un asiento con sus líneas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /accounting/journal-transactions/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AccountingLedgerController_getJournalTransaction`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.journalTransactions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('journalTransactionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
@@ -3084,7 +3364,7 @@
       ]
     },
     {
-      "name": "admin (33)",
+      "name": "admin (34)",
       "item": [
         {
           "name": "cross_store_consistency",
@@ -3589,6 +3869,79 @@
         {
           "name": "directory-admin-tenants",
           "item": [
+            {
+              "name": "GET /admin/tenants · Listado paginado de organizaciones",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/tenants",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "tenants"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "Texto a buscar en el código, la razón social o el nombre comercial",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "status-ejemplo",
+                      "description": "Concepto de estado al que acotar",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "Cursor opaco devuelto por la página anterior",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope de resultados (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listado paginado de organizaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/tenants`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AdminTenantsController_searchTenants`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.tenants || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('tenantId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "POST /admin/tenants · Aprovisionar un tenant raíz con su membership owner",
               "request": {
@@ -6387,6 +6740,125 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.appealId);",
                   "  if (id) pm.environment.set('appealId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "audio-assets (2)",
+      "item": [
+        {
+          "name": "POST /audio-assets/resolve · Resuelve un asset TTS desde caché o agenda su generación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/audio-assets/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audio-assets",
+                "resolve"
+              ]
+            },
+            "description": "Resuelve un asset TTS desde caché o agenda su generación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audio-assets/resolve`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AudioAssetsController_resolve`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"templateKey\": \"templateKey-ejemplo\",\n  \"variables\": {\n    \"clave\": \"clave-ejemplo\"\n  },\n  \"requestedVersion\": 1,\n  \"correlationId\": \"correlationId-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.audioAssetId);",
+                  "  if (id) pm.environment.set('audioAssetId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /audio-assets/{assetId}/content · Entrega bytes de un asset READY desde storage propio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/audio-assets/:assetId/content",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audio-assets",
+                ":assetId",
+                "content"
+              ],
+              "variable": [
+                {
+                  "key": "assetId",
+                  "value": "{{assetId}}",
+                  "description": "Identificador de ruta · variable `{{assetId}}`"
+                }
+              ]
+            },
+            "description": "Entrega bytes de un asset READY desde storage propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /audio-assets/{assetId}/content`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AudioAssetsController_contentById`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.audioAssets || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('audioAssetId', first.id);",
                   "}"
                 ]
               }
@@ -11458,7 +11930,7 @@
       ]
     },
     {
-      "name": "charts (12)",
+      "name": "charts (13)",
       "item": [
         {
           "name": "chart-care-plans",
@@ -12206,6 +12678,75 @@
           ]
         },
         {
+          "name": "chart-read",
+          "item": [
+            {
+              "name": "GET /charts/patients/{patientProfileId}/chart · UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/charts/patients/:patientProfileId/chart",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "charts",
+                    "patients",
+                    ":patientProfileId",
+                    "chart"
+                  ],
+                  "variable": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "Identificador de ruta · variable `{{patientProfileId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope aplicado a cada bloque (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "UC-40-14: expediente del paciente (notas, planes de cuidados y documentos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /charts/patients/{patientProfileId}/chart`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ChartReadController_getPatientChart`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
           "name": "chart-templates",
           "item": [
             {
@@ -12425,7 +12966,7 @@
       ]
     },
     {
-      "name": "clinical (23)",
+      "name": "clinical (24)",
       "item": [
         {
           "name": "clinical-encounters",
@@ -13101,6 +13642,75 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.prescriptionSignaturePolicyId);",
                       "  if (id) pm.environment.set('prescriptionSignaturePolicyId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "clinical-read",
+          "item": [
+            {
+              "name": "GET /clinical/patients/{patientProfileId}/summary · UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clinical/patients/:patientProfileId/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clinical",
+                    "patients",
+                    ":patientProfileId",
+                    "summary"
+                  ],
+                  "variable": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "Identificador de ruta · variable `{{patientProfileId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope aplicado a cada bloque (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /clinical/patients/{patientProfileId}/summary`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ClinicalReadController_getPatientSummary`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('patientId', first.id);",
                       "}"
                     ]
                   }
@@ -26065,7 +26675,7 @@
       ]
     },
     {
-      "name": "health (1)",
+      "name": "health (3)",
       "item": [
         {
           "name": "GET /health · Sonda de liveness (sin autenticación)",
@@ -26103,6 +26713,101 @@
                   "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('healthId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /health/data-sources · Estado y enrutado de las fuentes de datos (requiere autenticación)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health/data-sources",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "data-sources"
+              ]
+            },
+            "description": "Estado y enrutado de las fuentes de datos (requiere autenticación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /health/data-sources`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DataSourcesController_dataSources`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.dataSources || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('dataSourceId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /health/data-sources/metrics · Contadores de operaciones por conexión y por ruta read/write",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health/data-sources/metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "data-sources",
+                "metrics"
+              ]
+            },
+            "description": "Contadores de operaciones por conexión y por ruta read/write. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /health/data-sources/metrics`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DataSourcesController_metrics`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.metrics || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('metricId', first.id);",
                   "}"
                 ]
               }
@@ -27782,7 +28487,7 @@
       ]
     },
     {
-      "name": "iam (22)",
+      "name": "iam (30)",
       "item": [
         {
           "name": "iam-auth",
@@ -28140,7 +28845,7 @@
                 "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrarse como paciente con documento de identidad. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-patient`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPatient`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"nationalId\": \"CI-{{$timestamp}}\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Paciente de prueba\",\n  \"email\": \"paciente-{{$timestamp}}@example.test\",\n  \"phone\": \"+591 70055555\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\"\n}",
+                  "raw": "{\n  \"nationalId\": \"CI-{{$timestamp}}\",\n  \"password\": \"{{password}}\",\n  \"email\": \"paciente-{{$timestamp}}@example.test\",\n  \"displayName\": \"Paciente de prueba\",\n  \"phone\": \"+591 70055555\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -28520,6 +29225,79 @@
           "name": "iam-users",
           "item": [
             {
+              "name": "GET /iam/users · Listado paginado de usuarios",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "Texto a buscar en el nombre visible o en el correo de acceso",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "status-ejemplo",
+                      "description": "Concepto de estado al que acotar",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "Cursor opaco devuelto por la página anterior",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope de resultados (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listado paginado de usuarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /iam/users`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `IamUsersController_searchUsers`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.users || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('userId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /iam/users · Crear un usuario con credencial de contraseña y rol inicial",
               "request": {
                 "method": "POST",
@@ -28549,6 +29327,66 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"displayName\": \"Usuario de prueba\",\n  \"email\": \"usuario-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"initialRole\": \"USER\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{userId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.userId);",
+                      "  if (id) pm.environment.set('userId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /iam/users/assisted-practitioner-registration · Alta administrativa de un profesional (devuelve token de activación)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/assisted-practitioner-registration",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    "assisted-practitioner-registration"
+                  ]
+                },
+                "description": "Alta administrativa de un profesional (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-practitioner-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_assistedPractitionerRegistration`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"reason\": \"reason-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -29095,13 +29933,348 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "GET /iam/users/{id} · Ficha de un usuario",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    }
+                  ]
+                },
+                "description": "Ficha de un usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /iam/users/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `IamUsersController_getUser`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.users || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('userId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /iam/users/{id}/credentials · Credenciales del usuario",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/:id/credentials",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    ":id",
+                    "credentials"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    }
+                  ]
+                },
+                "description": "Nunca devuelve el hash de la contraseña ni la clave pública.\n\n`GET /iam/users/{id}/credentials`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `IamUsersController_listCredentials`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.credentials || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('credentialId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /iam/users/{id}/devices · Dispositivos del usuario",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/:id/devices",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    ":id",
+                    "devices"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    }
+                  ]
+                },
+                "description": "Nunca devuelve el token de notificaciones.\n\n`GET /iam/users/{id}/devices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `IamUsersController_listDevices`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.devices || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('deviceId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /iam/users/{id}/global-roles · Roles globales del usuario",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/:id/global-roles",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    ":id",
+                    "global-roles"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    }
+                  ]
+                },
+                "description": "Roles globales del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /iam/users/{id}/global-roles`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `IamUsersController_listGlobalRoles`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.globalRoles || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('globalRoleId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /iam/users/{id}/mfa-factors · Factores de MFA del usuario",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/:id/mfa-factors",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    ":id",
+                    "mfa-factors"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    }
+                  ]
+                },
+                "description": "Nunca devuelve el secreto del factor.\n\n`GET /iam/users/{id}/mfa-factors`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `IamUsersController_listMfaFactors`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.mfaFactors || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('mfaFactorId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /iam/users/{id}/sessions · Sesiones del usuario",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/:id/sessions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    ":id",
+                    "sessions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    }
+                  ]
+                },
+                "description": "Nunca devuelve el identificador del token de sesión.\n\n`GET /iam/users/{id}/sessions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `IamUsersController_listSessions`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.sessions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('sessionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
       ]
     },
     {
-      "name": "identity (20)",
+      "name": "identity (21)",
       "item": [
         {
           "name": "identity-assertions",
@@ -29949,6 +31122,67 @@
         {
           "name": "identity-verification-cases",
           "item": [
+            {
+              "name": "GET /identity/verification-cases · Listar los casos que esperan revisión",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/identity/verification-cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "identity",
+                    "verification-cases"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "status-ejemplo",
+                      "description": "Concepto de estado a listar; por defecto, los que esperan revisión",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Casos por página (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listar los casos que esperan revisión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /identity/verification-cases`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `IdentityCasesController_listQueue`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.verificationCases || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('verificationCaseId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "POST /identity/verification-cases · Iniciar un caso de verificación de identidad",
               "request": {
@@ -32918,8 +34152,487 @@
       ]
     },
     {
-      "name": "internal (19)",
+      "name": "internal (27)",
       "item": [
+        {
+          "name": "audio-assets-internal",
+          "item": [
+            {
+              "name": "GET /internal/audio-assets/status · Diagnóstico de audio sin convertir TTS en dependencia de readiness",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    "status"
+                  ]
+                },
+                "description": "Diagnóstico de audio sin convertir TTS en dependencia de readiness. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /internal/audio-assets/status`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AudioAssetsInternalController_status`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.status || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('statuId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/audio-assets/garbage-collect · Elimina conservadoramente objetos de assets deprecados/permanentes",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/garbage-collect",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    "garbage-collect"
+                  ]
+                },
+                "description": "Elimina conservadoramente objetos de assets deprecados/permanentes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/garbage-collect`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_garbageCollect`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"limit\": 250\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.audioAssetId);",
+                      "  if (id) pm.environment.set('audioAssetId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/audio-assets/pregenerate · Pre-genera STATIC, ENUMERATED y fallbacks de forma idempotente",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/pregenerate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    "pregenerate"
+                  ]
+                },
+                "description": "Pre-genera STATIC, ENUMERATED y fallbacks de forma idempotente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/pregenerate`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_pregenerateAssets`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"templateKeys\": [\n    \"templateKeys-ejemplo\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.audioAssetId);",
+                      "  if (id) pm.environment.set('audioAssetId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/audio-assets/verify · Verifica existencia y checksum de assets READY",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    "verify"
+                  ]
+                },
+                "description": "Verifica existencia y checksum de assets READY. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/verify`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_verify`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"limit\": 250\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.audioAssetId);",
+                      "  if (id) pm.environment.set('audioAssetId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/audio-assets/{assetId}/deprecate · Depreca un asset no-fallback sin eliminarlo inmediatamente",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/:assetId/deprecate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    ":assetId",
+                    "deprecate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assetId",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "Depreca un asset no-fallback sin eliminarlo inmediatamente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/{assetId}/deprecate`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_deprecate`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.audioAssetId);",
+                      "  if (id) pm.environment.set('audioAssetId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/audio-assets/{assetId}/generated · Registra un asset de audio generado",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/:assetId/generated",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    ":assetId",
+                    "generated"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assetId",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "Registra un asset de audio generado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/{assetId}/generated`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_generated`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"storageUri\": \"2026-01-01T00:00:00.000Z\",\n  \"checksumSha256\": \"checksumSha256-ejemplo\",\n  \"bytes\": 1,\n  \"durationMs\": 1,\n  \"credits\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.audioAssetId);",
+                      "  if (id) pm.environment.set('audioAssetId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/audio-assets/{assetId}/generation-failed · Registra un fallo de generación de audio",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/:assetId/generation-failed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    ":assetId",
+                    "generation-failed"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assetId",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "Registra un fallo de generación de audio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/{assetId}/generation-failed`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_failed`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"code-ejemplo\",\n  \"retryable\": true,\n  \"durationMs\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.audioAssetId);",
+                      "  if (id) pm.environment.set('audioAssetId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/audio-assets/{assetId}/prepare-generation · Prepara un asset de audio para generación",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/audio-assets/:assetId/prepare-generation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "audio-assets",
+                    ":assetId",
+                    "prepare-generation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assetId",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "Prepara un asset de audio para generación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /internal/audio-assets/{assetId}/prepare-generation`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `AudioAssetsInternalController_prepare`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{audioAssetId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.audioAssetId);",
+                      "  if (id) pm.environment.set('audioAssetId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
         {
           "name": "community-feed",
           "item": [
@@ -44379,11 +46092,78 @@
       ]
     },
     {
-      "name": "profiles (13)",
+      "name": "profiles (16)",
       "item": [
         {
           "name": "profiles-patients",
           "item": [
+            {
+              "name": "GET /profiles/patients · UC-05-13: listado paginado de pacientes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "Texto a buscar en el código de paciente o el nombre",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "Cursor opaco devuelto por la página anterior",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope de resultados (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "UC-05-13: listado paginado de pacientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesPatientsController_searchPatients`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "GET /profiles/patients/me/summary · Consultar el resumen propio (requiere identidad verificada)",
               "request": {
@@ -44427,6 +46207,68 @@
                       "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/merge-events · Listar eventos de fusión de pacientes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/merge-events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "merge-events"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "Paciente involucrado, de cualquiera de los dos lados",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Devuelve el `id` que exige POST /profiles/patients/merge/{eventId}/reverse. Sin esta lectura, una fusión sólo era reversible mientras la respuesta del POST siguiera a la vista.\n\n`GET /profiles/patients/merge-events`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesPatientsController_listMergeEvents`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.mergeEvents || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('mergeEventId', first.id);",
                       "}"
                     ]
                   }
@@ -44946,6 +46788,61 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.personId);",
                       "  if (id) pm.environment.set('personId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/{profileId} · UC-05-14: ficha de filiación de un paciente (F-01)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/:profileId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    ":profileId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "UC-05-14: ficha de filiación de un paciente (F-01). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/{profileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ProfilesPatientsController_getPatient`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('patientId', first.id);",
                       "}"
                     ]
                   }
@@ -49127,7 +51024,7 @@
       ]
     },
     {
-      "name": "scheduling (21)",
+      "name": "scheduling (26)",
       "item": [
         {
           "name": "scheduling",
@@ -49648,12 +51545,342 @@
                   }
                 }
               ]
+            },
+            {
+              "name": "GET /scheduling/resources/{id}/slots · UC-41-14: agenda publicada del recurso en una ventana",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/resources/:id/slots?from=2026-01-01T00:00:00.000Z&to=2026-01-01T00:00:00.000Z",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "resources",
+                    ":id",
+                    "slots"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{resourceId}}",
+                      "description": "Identificador de ruta · variable `{{resourceId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Inicio de la ventana (ISO 8601)",
+                      "disabled": false
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Fin de la ventana (ISO 8601)",
+                      "disabled": false
+                    },
+                    {
+                      "key": "onlyAvailable",
+                      "value": "onlyAvailable-ejemplo",
+                      "description": "Por defecto `true`: sólo los slots con cupo. `false` devuelve la agenda completa, ocupados incluidos",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "UC-41-14: agenda publicada del recurso en una ventana. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /scheduling/resources/{id}/slots`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `SchedulingController_getResourceAgenda`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.slots || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('slotId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "scheduling-agenda",
+          "item": [
+            {
+              "name": "GET /scheduling/resources · Listar los recursos agendables de un tenant",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/resources?tenantId={{tenantId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "resources"
+                  ],
+                  "query": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Tenant dueño de la agenda",
+                      "disabled": false
+                    },
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "Filtrar por práctica",
+                      "disabled": true
+                    },
+                    {
+                      "key": "resourceType",
+                      "value": "PRACTITIONER",
+                      "description": "Filtrar por tipo de recurso",
+                      "disabled": true
+                    },
+                    {
+                      "key": "includeInactive",
+                      "value": "False",
+                      "description": "Incluir los recursos dados de baja",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listar los recursos agendables de un tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /scheduling/resources`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `SchedulingAgendaController_listResources`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.resources || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('resourceId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/slots · Consultar los cupos de una ventana",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/slots?from=2026-01-01T00:00:00.000Z&to=2026-01-01T00:00:00.000Z",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "slots"
+                  ],
+                  "query": [
+                    {
+                      "key": "resourceId",
+                      "value": "{{resourceId}}",
+                      "description": "Recurso cuya agenda se consulta",
+                      "disabled": true
+                    },
+                    {
+                      "key": "scheduleTemplateId",
+                      "value": "<scheduleTemplateId: uuid existente>",
+                      "description": "Plantilla que materializó los cupos",
+                      "disabled": true
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Inicio de la ventana consultada",
+                      "disabled": false
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Fin de la ventana (exclusivo)",
+                      "disabled": false
+                    },
+                    {
+                      "key": "onlyAvailable",
+                      "value": "False",
+                      "description": "Sólo cupos con capacidad libre y abiertos: lo que el portal ofrece para reservar",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "200",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "El `id` de cada cupo es el que se envía a `POST /scheduling/slots/{id}/holds`.\n\n`GET /scheduling/slots`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `SchedulingAgendaController_listSlots`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.slots || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('slotId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
         {
           "name": "scheduling-bookings",
           "item": [
+            {
+              "name": "GET /scheduling/bookings · UC-41-15: lista citas por paciente, recurso y/o ventana",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "resourceId",
+                      "value": "{{resourceId}}",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Instante ISO 8601",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Instante ISO 8601",
+                      "disabled": true
+                    },
+                    {
+                      "key": "includeCancelled",
+                      "value": "includeCancelled-ejemplo",
+                      "description": "Incluye las canceladas y no-show (por defecto, no)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "UC-41-15: lista citas por paciente, recurso y/o ventana. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /scheduling/bookings`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `SchedulingBookingsController_searchBookings`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.bookings || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('bookingId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "POST /scheduling/bookings/{id}/cancel · Cancelar la cita y liberar el cupo",
               "request": {
@@ -49907,6 +52134,61 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.bookingId);",
                       "  if (id) pm.environment.set('bookingId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/bookings/{id} · UC-41-15: consulta una cita",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/bookings/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "bookings",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{bookingId}}",
+                      "description": "Identificador de ruta · variable `{{bookingId}}`"
+                    }
+                  ]
+                },
+                "description": "UC-41-15: consulta una cita. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /scheduling/bookings/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `SchedulingBookingsController_getBooking`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.bookings || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('bookingId', first.id);",
                       "}"
                     ]
                   }
@@ -50852,8 +53134,131 @@
       ]
     },
     {
-      "name": "system-context (11)",
+      "name": "system-context (13)",
       "item": [
+        {
+          "name": "GET /system-context/dynamic-enums · Leer las opciones publicadas de una enumeración",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/system-context/dynamic-enums",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "system-context",
+                "dynamic-enums"
+              ],
+              "query": [
+                {
+                  "key": "target",
+                  "value": "target-ejemplo",
+                  "description": "Campo destino, como `profiles.persons.sex_at_birth_concept_id`",
+                  "disabled": true
+                },
+                {
+                  "key": "code",
+                  "value": "code-ejemplo",
+                  "description": "Código estable de la enumeración, como `sex-at-birth`",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Por campo destino o por código; devuelve `conceptId` para escribir y `display` para pintar.\n\n`GET /system-context/dynamic-enums`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `SystemContextController_readEnum`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.dynamicEnums || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('dynamicEnumId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /system-context/dynamic-enums/bindings · Listar los amarres campo -> enumeración",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/system-context/dynamic-enums/bindings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "system-context",
+                "dynamic-enums",
+                "bindings"
+              ],
+              "query": [
+                {
+                  "key": "schema",
+                  "value": "schema-ejemplo",
+                  "description": "Esquema al que acotar (por ejemplo, `profiles`)",
+                  "disabled": true
+                },
+                {
+                  "key": "entity",
+                  "value": "entity-ejemplo",
+                  "description": "Tabla a la que acotar (por ejemplo, `persons`)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Permite descubrir qué campos `*_concept_id` son de catálogo sin conocer ningún uuid.\n\n`GET /system-context/dynamic-enums/bindings`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `SystemContextController_listEnumBindings`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.bindings || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('bindingId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "POST /system-context/contexts · Definir un contexto de sistema con su versión inicial",
           "request": {
@@ -52377,7 +54782,7 @@
       ]
     },
     {
-      "name": "tenants (7)",
+      "name": "tenants (12)",
       "item": [
         {
           "name": "POST /tenants/{tenantId}/branches · Crear una branch / sede física con geolocalización",
@@ -52790,6 +55195,321 @@
           ]
         },
         {
+          "name": "GET /tenants/{tenantId} · Ficha de una organización",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tenants/:tenantId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tenants",
+                ":tenantId"
+              ],
+              "variable": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}",
+                  "description": "Identificador de ruta · variable `{{tenantId}}`"
+                }
+              ]
+            },
+            "description": "Ficha de una organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /tenants/{tenantId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TenantsController_getTenant`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.tenants || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('tenantId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /tenants/{tenantId}/branches · Sucursales de la organización",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tenants/:tenantId/branches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tenants",
+                ":tenantId",
+                "branches"
+              ],
+              "variable": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}",
+                  "description": "Identificador de ruta · variable `{{tenantId}}`"
+                }
+              ]
+            },
+            "description": "Sucursales de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /tenants/{tenantId}/branches`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TenantsController_listBranches`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.branches || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('branchId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /tenants/{tenantId}/child-tenants · Sub-organizaciones de una organización",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tenants/:tenantId/child-tenants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tenants",
+                ":tenantId",
+                "child-tenants"
+              ],
+              "variable": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}",
+                  "description": "Identificador de ruta · variable `{{tenantId}}`"
+                }
+              ],
+              "query": [
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Sub-organizaciones de una organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /tenants/{tenantId}/child-tenants`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TenantsController_listChildTenants`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.childTenants || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('childTenantId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /tenants/{tenantId}/memberships · Plantilla de la organización",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tenants/:tenantId/memberships",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tenants",
+                ":tenantId",
+                "memberships"
+              ],
+              "variable": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}",
+                  "description": "Identificador de ruta · variable `{{tenantId}}`"
+                }
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "status-ejemplo",
+                  "description": "Concepto de estado al que acotar",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Plantilla de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /tenants/{tenantId}/memberships`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TenantsController_listMemberships`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.memberships || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('membershipId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments · Sucursales asignadas a una membresía",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tenants/:tenantId/memberships/:membershipId/branch-assignments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tenants",
+                ":tenantId",
+                "memberships",
+                ":membershipId",
+                "branch-assignments"
+              ],
+              "variable": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}",
+                  "description": "Identificador de ruta · variable `{{tenantId}}`"
+                },
+                {
+                  "key": "membershipId",
+                  "value": "{{membershipId}}",
+                  "description": "Identificador de ruta · variable `{{membershipId}}`"
+                }
+              ]
+            },
+            "description": "Sucursales asignadas a una membresía. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TenantsController_listBranchAssignments`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.branchAssignments || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('branchAssignmentId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "PATCH /tenants/{tenantId}/memberships/{membershipId}/role · Cambiar rol / scope de la membresía",
           "request": {
             "method": "PATCH",
@@ -52859,7 +55579,7 @@
       ]
     },
     {
-      "name": "terminology (15)",
+      "name": "terminology (16)",
       "item": [
         {
           "name": "GET /terminology/CodeSystem/$lookup · UC-03-11: resuelve un concepto por sistema y código",
@@ -52924,7 +55644,7 @@
           ]
         },
         {
-          "name": "GET /terminology/concepts · UC-03-13: busca conceptos del catálogo por código o denominación",
+          "name": "GET /terminology/concepts · UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta",
           "request": {
             "method": "GET",
             "header": [
@@ -52962,10 +55682,16 @@
                   "value": "1",
                   "description": "Tope de resultados (por defecto 50)",
                   "disabled": true
+                },
+                {
+                  "key": "ids",
+                  "value": "",
+                  "description": "Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato",
+                  "disabled": true
                 }
               ]
             },
-            "description": "UC-03-13: busca conceptos del catálogo por código o denominación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/concepts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TerminologyConceptsController_searchConcepts`"
+            "description": "UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/concepts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TerminologyConceptsController_searchConcepts`"
           },
           "response": [],
           "event": [
@@ -52984,6 +55710,79 @@
                   "  const list = Array.isArray(body) ? body : (body.concepts || body.items || body.data || body.results);",
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('conceptId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /terminology/value-sets · Listar conjuntos de valores por código interno o texto",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/terminology/value-sets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "terminology",
+                "value-sets"
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "code-ejemplo",
+                  "description": "Código interno exacto del conjunto",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "q-ejemplo",
+                  "description": "Texto a buscar en el código interno o el nombre",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "Cursor opaco devuelto por la página anterior",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "description": "Conjuntos por página (por defecto 50)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Permite resolver el uuid de un conjunto desde un código estable, sin hardcodear identificadores por entorno.\n\n`GET /terminology/value-sets`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TerminologyValueSetsController_searchValueSets`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.valueSets || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('valueSetId', first.id);",
                   "}"
                 ]
               }

@@ -114,6 +114,30 @@ export class ImagingRepository {
    * @param id - Identificador de id.
    * @returns Resultado de find study conforme al contrato `Promise<ImagingStudies | null>`.
    */
+  /**
+   * Estudios de imagen de un paciente, acotados al tenant custodio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param custodianTenantId - Tenant custodio, obligatorio.
+   * @param patientProfileId - Paciente.
+   * @param limit - Tamaño de página.
+   * @param offset - Desplazamiento.
+   * @returns Sus estudios, del más reciente al más antiguo.
+   */
+  findStudiesByPatient(
+    em: EntityManager,
+    custodianTenantId: string,
+    patientProfileId: string,
+    limit: number,
+    offset: number,
+  ): Promise<ImagingStudies[]> {
+    return em.find(
+      ImagingStudies,
+      { custodianTenantId, patientProfileId },
+      { orderBy: { createdAt: 'DESC', id: 'ASC' }, limit, offset },
+    );
+  }
+
   findStudy(em: EntityManager, id: string): Promise<ImagingStudies | null> {
     return em.findOne(ImagingStudies, { id });
   }

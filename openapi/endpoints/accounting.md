@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `accounting`
 
-Referencia exhaustiva de 20 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `accounting-accruals`, `accounting-assets`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-subledger`
 - **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingSubledgerController`
@@ -11,30 +11,161 @@ Referencia exhaustiva de 20 operación(es) del módulo `accounting`, derivada de
 
 ## Índice del módulo
 
-1. [POST /accounting/accounts](#1-post-accounting-accounts) — Crear una cuenta del plan contable
-2. [POST /accounting/accrual-objects](#2-post-accounting-accrual-objects) — Crear objeto de devengo y su cronograma
-3. [POST /accounting/accruals/run](#3-post-accounting-accruals-run) — Postear devengo periódico (accrual run)
-4. [POST /accounting/assets/capitalize](#4-post-accounting-assets-capitalize) — Capitalizar activo (alta y asignación)
-5. [POST /accounting/clearing-documents](#5-post-accounting-clearing-documents) — Compensar/clearing de partidas abiertas
-6. [POST /accounting/depreciation/run](#6-post-accounting-depreciation-run) — Ejecutar depreciación de activos (batch)
-7. [POST /accounting/exchange-rates](#7-post-accounting-exchange-rates) — Registrar tipo de cambio para conversión
-8. [POST /accounting/fiscal-periods/{id}/lock](#8-post-accounting-fiscal-periods-id-lock) — Cerrar/bloquear un periodo fiscal
-9. [POST /accounting/fiscal-years](#9-post-accounting-fiscal-years) — Abrir un ejercicio fiscal y sus periodos
-10. [POST /accounting/journal-transactions](#10-post-accounting-journal-transactions) — Registrar y postear un asiento balanceado (partida doble)
-11. [POST /accounting/journal-transactions/{id}/approve](#11-post-accounting-journal-transactions-id-approve) — Aprobar el asiento (rol de aprobación)
-12. [POST /accounting/journal-transactions/{id}/classify](#12-post-accounting-journal-transactions-id-classify) — Clasificar automáticamente el asiento
-13. [POST /accounting/journal-transactions/{id}/files](#13-post-accounting-journal-transactions-id-files) — Adjuntar un documento soporte al asiento
-14. [POST /accounting/journal-transactions/{id}/post](#14-post-accounting-journal-transactions-id-post) — Postear el asiento aprobado (efecto en el mayor)
-15. [POST /accounting/journal-transactions/{id}/reverse](#15-post-accounting-journal-transactions-id-reverse) — Reversar un asiento posteado (líneas espejo)
-16. [POST /accounting/journal-transactions/{id}/submit-review](#16-post-accounting-journal-transactions-id-submit-review) — Enviar el asiento a revisión
-17. [POST /accounting/journal-transactions/drafts](#17-post-accounting-journal-transactions-drafts) — Crear un asiento en borrador (DRAFT, sin postear)
-18. [POST /accounting/liabilities/{id}/payments](#18-post-accounting-liabilities-id-payments) — Liquidar cuota de pasivo (principal + interés)
-19. [POST /accounting/open-items](#19-post-accounting-open-items) — Generar partida abierta en subledger
-20. [POST /accounting/postings/determine-accounts](#20-post-accounting-postings-determine-accounts) — Determinar la cuenta objetivo por reglas vigentes
+1. [GET /accounting/accounts](#1-get-accounting-accounts) — Plan de cuentas de una práctica
+2. [POST /accounting/accounts](#2-post-accounting-accounts) — Crear una cuenta del plan contable
+3. [POST /accounting/accrual-objects](#3-post-accounting-accrual-objects) — Crear objeto de devengo y su cronograma
+4. [POST /accounting/accruals/run](#4-post-accounting-accruals-run) — Postear devengo periódico (accrual run)
+5. [POST /accounting/assets/capitalize](#5-post-accounting-assets-capitalize) — Capitalizar activo (alta y asignación)
+6. [POST /accounting/clearing-documents](#6-post-accounting-clearing-documents) — Compensar/clearing de partidas abiertas
+7. [POST /accounting/depreciation/run](#7-post-accounting-depreciation-run) — Ejecutar depreciación de activos (batch)
+8. [POST /accounting/exchange-rates](#8-post-accounting-exchange-rates) — Registrar tipo de cambio para conversión
+9. [POST /accounting/fiscal-periods/{id}/lock](#9-post-accounting-fiscal-periods-id-lock) — Cerrar/bloquear un periodo fiscal
+10. [POST /accounting/fiscal-years](#10-post-accounting-fiscal-years) — Abrir un ejercicio fiscal y sus periodos
+11. [GET /accounting/journal-transactions](#11-get-accounting-journal-transactions) — Libro diario de una práctica
+12. [POST /accounting/journal-transactions](#12-post-accounting-journal-transactions) — Registrar y postear un asiento balanceado (partida doble)
+13. [GET /accounting/journal-transactions/{id}](#13-get-accounting-journal-transactions-id) — Un asiento con sus líneas
+14. [POST /accounting/journal-transactions/{id}/approve](#14-post-accounting-journal-transactions-id-approve) — Aprobar el asiento (rol de aprobación)
+15. [POST /accounting/journal-transactions/{id}/classify](#15-post-accounting-journal-transactions-id-classify) — Clasificar automáticamente el asiento
+16. [POST /accounting/journal-transactions/{id}/files](#16-post-accounting-journal-transactions-id-files) — Adjuntar un documento soporte al asiento
+17. [POST /accounting/journal-transactions/{id}/post](#17-post-accounting-journal-transactions-id-post) — Postear el asiento aprobado (efecto en el mayor)
+18. [POST /accounting/journal-transactions/{id}/reverse](#18-post-accounting-journal-transactions-id-reverse) — Reversar un asiento posteado (líneas espejo)
+19. [POST /accounting/journal-transactions/{id}/submit-review](#19-post-accounting-journal-transactions-id-submit-review) — Enviar el asiento a revisión
+20. [POST /accounting/journal-transactions/drafts](#20-post-accounting-journal-transactions-drafts) — Crear un asiento en borrador (DRAFT, sin postear)
+21. [POST /accounting/liabilities/{id}/payments](#21-post-accounting-liabilities-id-payments) — Liquidar cuota de pasivo (principal + interés)
+22. [POST /accounting/open-items](#22-post-accounting-open-items) — Generar partida abierta en subledger
+23. [POST /accounting/postings/determine-accounts](#23-post-accounting-postings-determine-accounts) — Determinar la cuenta objetivo por reglas vigentes
+24. [GET /accounting/trial-balance](#24-get-accounting-trial-balance) — Balance de sumas y saldos
 
 ---
 
-## 1. POST /accounting/accounts
+## 1. GET /accounting/accounts
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-ledger`
+- **Nombre:** Plan de cuentas de una práctica
+- **Operation ID:** `AccountingLedgerController_chartOfAccounts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingLedgerController.chartOfAccounts](../../src/modules/accounting/controllers/accounting-ledger.controller.ts)
+
+### Descripción de negocio
+
+Plan de cuentas de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-16-01·L: el plan de cuentas de una práctica.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/accounts` en `AccountingLedgerController_chartOfAccounts`. El controlador delega en `LedgerReadService.chartOfAccounts`. No recibe body. El tipo de retorno estático es `Promise<ChartOfAccountsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/accounts?practiceId=00000000-0000-4000-8000-000000000001&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/accounts?practiceId=00000000-0000-4000-8000-000000000001&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ChartOfAccountsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartOfAccountsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "1.1.01",
+      "name": "Banco",
+      "accountTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "normalBalanceConceptId": "00000000-0000-4000-8000-000000000001",
+      "parentAccountId": "00000000-0000-4000-8000-000000000001",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "count": 1,
+  "limit": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<AccountItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"1.1.01","name":"Banco","accountTypeConceptId":"00000000-0000-4000-8000-000000000001","normalBalanceConceptId":"00000000-0000-4000-8000-000000000001","parentAccountId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1.1.01` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Banco` |
+| `items[].accountTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].normalBalanceConceptId` | Sí | `string` | formato `uuid` | Deudora o acreedora: es lo que da signo al saldo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].parentAccountId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/accounts"
+}
+```
+
+---
+
+## 2. POST /accounting/accounts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -176,7 +307,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /accounting/accrual-objects
+## 3. POST /accounting/accrual-objects
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-accruals`
@@ -342,7 +473,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /accounting/accruals/run
+## 4. POST /accounting/accruals/run
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-accruals`
@@ -478,7 +609,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /accounting/assets/capitalize
+## 5. POST /accounting/assets/capitalize
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-assets`
@@ -637,7 +768,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /accounting/clearing-documents
+## 6. POST /accounting/clearing-documents
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-subledger`
@@ -801,7 +932,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /accounting/depreciation/run
+## 7. POST /accounting/depreciation/run
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-assets`
@@ -940,7 +1071,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /accounting/exchange-rates
+## 8. POST /accounting/exchange-rates
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fx`
@@ -1076,7 +1207,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /accounting/fiscal-periods/{id}/lock
+## 9. POST /accounting/fiscal-periods/{id}/lock
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fiscal`
@@ -1201,7 +1332,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /accounting/fiscal-years
+## 10. POST /accounting/fiscal-years
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fiscal`
@@ -1356,7 +1487,142 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /accounting/journal-transactions
+## 11. GET /accounting/journal-transactions
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-ledger`
+- **Nombre:** Libro diario de una práctica
+- **Operation ID:** `AccountingLedgerController_listJournal`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingLedgerController.listJournal](../../src/modules/accounting/controllers/accounting-ledger.controller.ts)
+
+### Descripción de negocio
+
+Libro diario de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-16-01·L: el libro diario.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/journal-transactions` en `AccountingLedgerController_listJournal`. El controlador delega en `LedgerReadService.listJournal`. No recibe body. El tipo de retorno estático es `Promise<ListJournalResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Práctica dueña del libro | `00000000-0000-4000-8000-000000000001` |
+| `fiscalPeriodId` | query | No | `string` | formato `uuid` | Acotar a un período | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Acotar a un estado (borrador, posteado, reversado…) | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | No | `string` | formato `date` | Sin descripción específica en OpenAPI. | `2026-07-31` |
+| `to` | query | No | `string` | formato `date` | Sin descripción específica en OpenAPI. | `2026-07-31` |
+| `limit` | query | No | `number` | máximo 500 | Sin descripción específica en OpenAPI. | `100` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/journal-transactions?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/journal-transactions?practiceId=00000000-0000-4000-8000-000000000001&fiscalPeriodId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001&from=2026-07-31&to=2026-07-31&limit=100 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListJournalResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListJournalResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListJournalResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "transactionNumber": "valor-ejemplo",
+      "transactionDate": "2026-07-31",
+      "fiscalPeriodId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "totalAmount": "valor-ejemplo",
+      "postedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<JournalTransactionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","transactionNumber":"valor-ejemplo","transactionDate":"2026-07-31","fiscalPeriodId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","totalAmount":"valor-ejemplo","postedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].transactionNumber` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].transactionDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `items[].fiscalPeriodId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].transactionTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].totalAmount` | No | `string` | admite null | Importe total, decimal como texto | `valor-ejemplo` |
+| `items[].postedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/journal-transactions"
+}
+```
+
+---
+
+## 12. POST /accounting/journal-transactions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -1544,7 +1810,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /accounting/journal-transactions/{id}/approve
+## 13. GET /accounting/journal-transactions/{id}
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-ledger`
+- **Nombre:** Un asiento con sus líneas
+- **Operation ID:** `AccountingLedgerController_getJournalTransaction`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingLedgerController.getJournalTransaction](../../src/modules/accounting/controllers/accounting-ledger.controller.ts)
+
+### Descripción de negocio
+
+Un asiento con sus líneas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-16-01·D: el asiento con sus líneas, que es lo que se audita.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/journal-transactions/{id}` en `AccountingLedgerController_getJournalTransaction`. El controlador delega en `LedgerReadService.getJournalTransaction`. No recibe body. El tipo de retorno estático es `Promise<JournalTransactionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/journal-transactions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/journal-transactions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<JournalTransactionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JournalTransactionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "transactionNumber": "valor-ejemplo",
+  "transactionDate": "2026-07-31",
+  "fiscalPeriodId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "totalAmount": "valor-ejemplo",
+  "postedAt": "2026-07-31T12:00:00.000Z",
+  "lines": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "lineNo": 1,
+      "accountId": "00000000-0000-4000-8000-000000000001",
+      "directionConceptId": "00000000-0000-4000-8000-000000000001",
+      "amountBase": "valor-ejemplo",
+      "costCenterId": "00000000-0000-4000-8000-000000000001",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `transactionNumber` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `transactionDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `fiscalPeriodId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `postedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `lines` | Sí | `array<LedgerEntryItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","lineNo":1,"accountId":"00000000-0000-4000-8000-000000000001","directionConceptId":"00000000-0000-4000-8000-000000000001","amountBase":"valor-ejemplo","costCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `lines[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].lineNo` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `lines[].accountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].directionConceptId` | Sí | `string` | formato `uuid` | Debe o haber. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].amountBase` | Sí | `string` | Sin restricción adicional declarada | Importe en moneda base, decimal como texto | `valor-ejemplo` |
+| `lines[].costCenterId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Asiento no encontrado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/journal-transactions/{id}"
+}
+```
+
+---
+
+## 14. POST /accounting/journal-transactions/{id}/approve
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -1678,7 +2087,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /accounting/journal-transactions/{id}/classify
+## 15. POST /accounting/journal-transactions/{id}/classify
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -1812,7 +2221,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /accounting/journal-transactions/{id}/files
+## 16. POST /accounting/journal-transactions/{id}/files
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -1939,7 +2348,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /accounting/journal-transactions/{id}/post
+## 17. POST /accounting/journal-transactions/{id}/post
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2073,7 +2482,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /accounting/journal-transactions/{id}/reverse
+## 18. POST /accounting/journal-transactions/{id}/reverse
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2206,7 +2615,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /accounting/journal-transactions/{id}/submit-review
+## 19. POST /accounting/journal-transactions/{id}/submit-review
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2340,7 +2749,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /accounting/journal-transactions/drafts
+## 20. POST /accounting/journal-transactions/drafts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2529,7 +2938,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /accounting/liabilities/{id}/payments
+## 21. POST /accounting/liabilities/{id}/payments
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-liabilities`
@@ -2684,7 +3093,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /accounting/open-items
+## 22. POST /accounting/open-items
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-subledger`
@@ -2826,7 +3235,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /accounting/postings/determine-accounts
+## 23. POST /accounting/postings/determine-accounts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2949,6 +3358,143 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/accounting/postings/determine-accounts"
+}
+```
+
+---
+
+## 24. GET /accounting/trial-balance
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-ledger`
+- **Nombre:** Balance de sumas y saldos
+- **Operation ID:** `AccountingLedgerController_trialBalance`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingLedgerController.trialBalance](../../src/modules/accounting/controllers/accounting-ledger.controller.ts)
+
+### Descripción de negocio
+
+Agrega sólo los asientos POSTEADOS: un borrador no es un hecho contable. Declara `balanced`, que es la comprobación de la que depende que el resto signifique algo.
+
+Contexto declarado en el controlador: UC-16-06: balance de sumas y saldos.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/trial-balance` en `AccountingLedgerController_trialBalance`. El controlador delega en `LedgerReadService.trialBalance`. No recibe body. El tipo de retorno estático es `Promise<TrialBalanceResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fiscalPeriodId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | No | `string` | formato `date` | Sin descripción específica en OpenAPI. | `2026-07-31` |
+| `to` | query | No | `string` | formato `date` | Sin descripción específica en OpenAPI. | `2026-07-31` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/trial-balance?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/trial-balance?practiceId=00000000-0000-4000-8000-000000000001&fiscalPeriodId=00000000-0000-4000-8000-000000000001&from=2026-07-31&to=2026-07-31 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TrialBalanceResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrialBalanceResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "accountId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "normalBalanceConceptId": "00000000-0000-4000-8000-000000000001",
+      "debit": "valor-ejemplo",
+      "credit": "valor-ejemplo",
+      "balance": "valor-ejemplo"
+    }
+  ],
+  "count": 1,
+  "totalDebit": "valor-ejemplo",
+  "totalCredit": "valor-ejemplo",
+  "balanced": true,
+  "transactionsIncluded": 1,
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<TrialBalanceItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"accountId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","normalBalanceConceptId":"00000000-0000-4000-8000-000000000001","debit":"valor-ejemplo","credit":"valor-ejemplo","balance":"valor-ejemplo"}]` |
+| `items[].accountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].name` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].normalBalanceConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].debit` | Sí | `string` | Sin restricción adicional declarada | Suma del debe | `valor-ejemplo` |
+| `items[].credit` | Sí | `string` | Sin restricción adicional declarada | Suma del haber | `valor-ejemplo` |
+| `items[].balance` | Sí | `string` | Sin restricción adicional declarada | Saldo según la naturaleza de la cuenta | `valor-ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `totalDebit` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `totalCredit` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `balanced` | Sí | `boolean` | Sin restricción adicional declarada | El conjunto cuadra | `true` |
+| `transactionsIncluded` | Sí | `number` | Sin restricción adicional declarada | Asientos POSTEADOS incluidos en la agregación | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Si se alcanzó el tope y el balance está incompleto | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/trial-balance"
 }
 ```
 

@@ -10,9 +10,13 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PeriopCasesRepository, PeriopPreopRepository } from '../repositories';
+// La orden clínica que la orden preoperatoria referencia vive en `clinical`.
+import { ServiceRequestsService } from '../../clinical/services';
 import {
   CreatePreopAssessmentDto,
   PreopAssessmentResponseDto,
+  CreatePreoperativeOrderDto,
+  PreoperativeOrderResponseDto,
   VerifyOrdersDto,
   VerifyOrdersResponseDto,
   SubmitChecklistPhaseDto,
@@ -23,6 +27,7 @@ import {
   RecordAnesthesiaEventDto,
   AnesthesiaEventResponseDto,
   type FitnessStatus,
+  type PreopOrderRole,
   type AsaClass,
   type RiskModel,
   type ChecklistPhase,
@@ -33,6 +38,14 @@ import {
   type AnesthesiaEventType,
   type ClinicalSeverity,
 } from '../dto';
+
+/** Papel de la orden preoperatoria → concepto. */
+const PREOP_ORDER_ROLE_CONCEPT: Readonly<Record<PreopOrderRole, string>> = {
+  LAB: CONCEPTS.ORDER_ROLE_LAB,
+  IMAGING: CONCEPTS.ORDER_ROLE_IMAGING,
+  CONSULT: CONCEPTS.ORDER_ROLE_CONSULT,
+  MEDICATION: CONCEPTS.ORDER_ROLE_MEDICATION,
+};
 
 const FITNESS_CONCEPT: Readonly<Record<FitnessStatus, string>> = {
   FIT: CONCEPTS.FITNESS_FIT,
@@ -128,9 +141,92 @@ export class PeriopPreopService {
     private readonly em: EntityManager,
     private readonly preopRepo: PeriopPreopRepository,
     private readonly casesRepo: PeriopCasesRepository,
+    private readonly serviceRequests: ServiceRequestsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopPreopService.name);
+  }
+
+  /**
+   * UC-53-04: indicar una orden preoperatoria para el caso.
+   *
+   * Faltaba por completo: el repositorio sabía crearlas y nadie lo llamaba, así
+   * que ningún caso llegaba nunca a tener órdenes. Como
+   * `verifyOrders` sólo deja el caso `READY_FOR_SURGERY` cuando hay órdenes y
+   * ninguna queda pendiente, el caso no podía alcanzar ese estado por esta vía
+   * y el circuito preoperatorio quedaba abierto.
+   *
+   * @param caseId - Caso al que se añade la orden.
+   * @param dto - Orden clínica (por id o por código) y su papel.
+   * @param actor - Quien la indica.
+   * @returns La orden creada, pendiente de verificación.
+   */
+  async createOrder(
+    caseId: string,
+    dto: CreatePreoperativeOrderDto,
+    actor: AuthenticatedUser,
+  ): Promise<PreoperativeOrderResponseDto> {
+    this.logger.info(
+      { operation: 'periop.preop.create-order', caseId, role: dto.orderRole },
+      'Placing preoperative order',
+    );
+
+    if (!dto.serviceRequestId && !dto.serviceRequestCodeConceptId) {
+      throw new PreconditionFailedException(
+        'Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`',
+        {},
+      );
+    }
+
+    return this.em.transactional(async (tx) => {
+      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
+      if (!surgicalCase) {
+        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
+          caseId,
+        });
+      }
+      if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
+        throw new PreconditionFailedException('El caso está cancelado', {
+          caseId,
+        });
+      }
+
+      // La orden clínica vive en `clinical`: se le pide a su dueño en vez de
+      // escribir su tabla desde aquí.
+      const serviceRequestId =
+        dto.serviceRequestId ??
+        (
+          await this.serviceRequests.create(
+            {
+              custodianTenantId: surgicalCase.custodianTenantId,
+              patientProfileId: surgicalCase.patientProfileId,
+              encounterId: surgicalCase.encounterId,
+              codeConceptId: dto.serviceRequestCodeConceptId!,
+            },
+            actor,
+          )
+        ).id;
+
+      const order = this.preopRepo.createOrder(tx, {
+        procedureCaseId: caseId,
+        serviceRequestId,
+        orderRoleConceptId: PREOP_ORDER_ROLE_CONCEPT[dto.orderRole],
+        // Una orden no obligatoria no debe impedir que el caso quede listo: se
+        // ancla al hito de fin de caso en vez de al despeje preoperatorio.
+        requiredBeforeMilestoneConceptId:
+          dto.mandatory === false
+            ? CONCEPTS.MILESTONE_CASE_END
+            : CONCEPTS.MILESTONE_PREOP_CLEARED,
+        statusConceptId: CONCEPTS.ORDER_PENDING,
+      });
+      await tx.flush();
+
+      return {
+        id: order.id,
+        serviceRequestId,
+        statusConceptId: CONCEPTS.ORDER_PENDING,
+      };
+    });
   }
 
   /**
@@ -198,6 +294,11 @@ export class PeriopPreopService {
         statusConceptId: CONCEPTS.ASSESSMENT_COMPLETED,
         actorUserId: actor.id,
       });
+      // Las puntuaciones cuelgan de la valoración por una columna uuid plana:
+      // sin este flush, MikroORM podía insertarlas antes que su padre y la FK
+      // rechazaba la operación entera. Sólo fallaba cuando el anestesiólogo
+      // aportaba puntuaciones, que es el caso normal.
+      await tx.flush();
 
       const riskScoreIds = (dto.riskScores ?? []).map(
         (score) =>
@@ -540,6 +641,10 @@ export class PeriopPreopService {
         statusConceptId: CONCEPTS.PLAN_DRAFT,
         actorUserId: actor.id,
       });
+      // Mismo motivo: la valoración de vía aérea referencia el plan por uuid
+      // plano y es obligatoria, así que sin el flush el plan anestésico no se
+      // podía crear NUNCA contra una base real.
+      await tx.flush();
 
       const airway = this.preopRepo.createAirwayAssessment(tx, {
         anesthesiaPlanId: plan.id,

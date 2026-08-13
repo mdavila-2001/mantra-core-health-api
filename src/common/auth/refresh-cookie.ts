@@ -57,7 +57,7 @@ export function loadRefreshCookieEnv(
   return {
     enabled: source.AUTH_REFRESH_COOKIE_ENABLED === 'true',
     secure:
-      explicitSecure === undefined
+      explicitSecure === undefined || explicitSecure === ''
         ? source.NODE_ENV === 'production'
         : explicitSecure === 'true',
     ttlDays: Number(source.JWT_REFRESH_TTL_DAYS ?? 30),

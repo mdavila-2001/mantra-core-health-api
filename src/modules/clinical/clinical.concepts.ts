@@ -120,6 +120,25 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'COND_DIAGNOSIS',
       display: 'Encounter diagnosis',
     },
+    CONDITION_CATEGORY_PROBLEM: {
+      code: 'COND_PROBLEM',
+      display: 'Problem list item',
+    },
+    /* Severidad y lateralidad del diagnóstico: enumeraciones cerradas (HL7
+       condition-severity y lateralidad de body-site). Antes no existía ningún
+       concepto de severidad ni de lateralidad en la plataforma. */
+    CONDITION_SEVERITY_MILD: { code: 'COND_SEV_MILD', display: 'Mild' },
+    CONDITION_SEVERITY_MODERATE: {
+      code: 'COND_SEV_MODERATE',
+      display: 'Moderate',
+    },
+    CONDITION_SEVERITY_SEVERE: { code: 'COND_SEV_SEVERE', display: 'Severe' },
+    CONDITION_LATERALITY_LEFT: { code: 'COND_LAT_LEFT', display: 'Left' },
+    CONDITION_LATERALITY_RIGHT: { code: 'COND_LAT_RIGHT', display: 'Right' },
+    CONDITION_LATERALITY_BILATERAL: {
+      code: 'COND_LAT_BILATERAL',
+      display: 'Bilateral',
+    },
 
     // --- allergy_intolerances --------------------------------------------------
     ALLERGY_ACTIVE: { code: 'ALG_ACTIVE', display: 'Allergy active' },
@@ -203,5 +222,113 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     APPOINTMENT_CHECKED_IN: {
       code: 'APPT_CHECKED_IN',
       display: 'Appointment checked in',
+    },
+
+    /* --- vademécum inicial de la receta ---------------------------------------
+       ⚠️ CATÁLOGO INICIAL, NO UN VADEMÉCUM. Estos doce fármacos existen para que
+       `clinical.medication_requests.medication_concept_id` tenga un conjunto de
+       valores al que amarrarse: sin binding, el selector de la ficha queda
+       deshabilitado y no se puede prescribir. Antes no había NINGÚN concepto de
+       medicamento en la plataforma.
+
+       Un despliegue real reemplaza esto por el vademécum que corresponda —el
+       formulario nacional, o ATC completo cargado por el módulo de terminología—
+       y esa carga es de datos, no de código: se publica una versión nueva del
+       conjunto `medication` y el binding la sigue sin tocar nada de aquí.
+
+       Los códigos son ATC reales (OMS), no inventados, para que la sustitución
+       por un catálogo completo sea un superconjunto y no un renombrado. */
+    MEDICATION_PARACETAMOL: { code: 'N02BE01', display: 'Paracetamol' },
+    MEDICATION_IBUPROFENO: { code: 'M01AE01', display: 'Ibuprofeno' },
+    MEDICATION_AMOXICILINA: { code: 'J01CA04', display: 'Amoxicilina' },
+    MEDICATION_AZITROMICINA: { code: 'J01FA10', display: 'Azitromicina' },
+    MEDICATION_CEFALEXINA: { code: 'J01DB01', display: 'Cefalexina' },
+    MEDICATION_OMEPRAZOL: { code: 'A02BC01', display: 'Omeprazol' },
+    MEDICATION_METFORMINA: { code: 'A10BA02', display: 'Metformina' },
+    MEDICATION_LOSARTAN: { code: 'C09CA01', display: 'Losartán' },
+    MEDICATION_ENALAPRIL: { code: 'C09AA02', display: 'Enalapril' },
+    MEDICATION_ATORVASTATINA: { code: 'C10AA05', display: 'Atorvastatina' },
+    MEDICATION_SALBUTAMOL: { code: 'R03AC02', display: 'Salbutamol' },
+    MEDICATION_LORATADINA: { code: 'R06AX13', display: 'Loratadina' },
+
+    /* --- vía de administración ------------------------------------------------
+       Éstas sí son una enumeración cerrada de verdad, y las seis cubren la
+       práctica ambulatoria. Los códigos siguen la vía de administración de HL7
+       (`route-codes`). */
+    MEDICATION_ROUTE_ORAL: { code: 'ROUTE_ORAL', display: 'Oral route' },
+    MEDICATION_ROUTE_INTRAVENOUS: {
+      code: 'ROUTE_IV',
+      display: 'Intravenous route',
+    },
+    MEDICATION_ROUTE_INTRAMUSCULAR: {
+      code: 'ROUTE_IM',
+      display: 'Intramuscular route',
+    },
+    MEDICATION_ROUTE_SUBCUTANEOUS: {
+      code: 'ROUTE_SC',
+      display: 'Subcutaneous route',
+    },
+    MEDICATION_ROUTE_TOPICAL: { code: 'ROUTE_TOP', display: 'Topical route' },
+    MEDICATION_ROUTE_INHALATION: {
+      code: 'ROUTE_INH',
+      display: 'Inhalation route',
+    },
+
+    /* --- unidad de la cantidad prescrita --------------------------------------
+       Códigos UCUM, que es lo que el contrato de cantidad espera. Las de forma
+       farmacéutica van entre llaves porque UCUM las declara como anotaciones sin
+       dimensión: un comprimido no es una magnitud, es una cuenta. */
+    MEDICATION_UNIT_MILLIGRAM: { code: 'UNIT_mg', display: 'Milligram' },
+    MEDICATION_UNIT_GRAM: { code: 'UNIT_g', display: 'Gram' },
+    MEDICATION_UNIT_MILLILITRE: { code: 'UNIT_mL', display: 'Millilitre' },
+    MEDICATION_UNIT_TABLET: { code: 'UNIT_{tablet}', display: 'Tablet' },
+    MEDICATION_UNIT_CAPSULE: { code: 'UNIT_{capsule}', display: 'Capsule' },
+    MEDICATION_UNIT_DROP: { code: 'UNIT_[drp]', display: 'Drop' },
+
+    /* --- nosología inicial del diagnóstico -------------------------------------
+       ⚠️ CATÁLOGO INICIAL, NO UNA NOSOLOGÍA. Mismo criterio y mismas razones que
+       el vademécum de arriba: estos doce diagnósticos existen para que
+       `clinical.conditions.code_concept_id` tenga un conjunto de valores al que
+       amarrarse — sin binding, el selector de la ficha queda deshabilitado y el
+       médico no puede registrar un diagnóstico. Antes no había NINGÚN concepto de
+       diagnóstico en la plataforma.
+
+       Un despliegue real reemplaza esto por la clasificación que corresponda
+       (CIE-10 completa o SNOMED CT, cargada por el módulo de terminología) y esa
+       carga es de datos, no de código: se publica una versión nueva del conjunto
+       `condition-code` y el binding la sigue sin tocar nada de aquí.
+
+       Los códigos son CIE-10 reales (OMS), no inventados, para que la
+       sustitución por la clasificación completa sea un superconjunto y no un
+       renombrado. Los doce cubren la consulta ambulatoria más frecuente. */
+    CONDITION_HIPERTENSION: { code: 'I10', display: 'Hipertensión esencial' },
+    CONDITION_DIABETES_TIPO_2: {
+      code: 'E11.9',
+      display: 'Diabetes mellitus tipo 2',
+    },
+    CONDITION_IRA_ALTA: {
+      code: 'J06.9',
+      display: 'Infección aguda de las vías respiratorias superiores',
+    },
+    CONDITION_LUMBALGIA: { code: 'M54.5', display: 'Lumbalgia' },
+    CONDITION_MIGRANA: { code: 'G43.9', display: 'Migraña' },
+    CONDITION_GASTRITIS: { code: 'K29.7', display: 'Gastritis' },
+    CONDITION_ASMA: { code: 'J45.9', display: 'Asma' },
+    CONDITION_ANEMIA_FERROPENICA: {
+      code: 'D50.9',
+      display: 'Anemia ferropénica',
+    },
+    CONDITION_INFECCION_URINARIA: {
+      code: 'N39.0',
+      display: 'Infección de las vías urinarias',
+    },
+    CONDITION_DERMATITIS_ATOPICA: {
+      code: 'L20.9',
+      display: 'Dermatitis atópica',
+    },
+    CONDITION_HIPOTIROIDISMO: { code: 'E03.9', display: 'Hipotiroidismo' },
+    CONDITION_ANSIEDAD_GENERALIZADA: {
+      code: 'F41.1',
+      display: 'Trastorno de ansiedad generalizada',
     },
   });

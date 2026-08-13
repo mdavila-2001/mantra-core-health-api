@@ -32,6 +32,9 @@ import {
   PurgeResultDto,
 } from '../dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
+// Los roles de negocio (los diez actores clínicos incluidos) viven en `authz`,
+// no en `iam.user_global_roles`: el emisor del token los pide a su dueño.
+import { AuthzEffectiveRolesService } from '../../authz/services';
 // Lectura cross-dominio acotada al límite de autenticación: al emitir el token
 // se resuelven las membresías de tenant del sujeto para embeberlas como claim.
 import { TenantMemberships, Tenants } from '../../directory/entities';
@@ -70,6 +73,7 @@ export class IamAuthService {
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param lockoutsRepo - Valor de lockouts repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param effectiveRoles - Roles de negocio vigentes del sujeto (`authz`).
    * @param accountLinksRepo - Vínculo cuenta-persona del titular.
    * @param patientProfilesRepo - Perfil de paciente del titular.
    * @param logger - Valor de logger requerido por la operación.
@@ -84,6 +88,7 @@ export class IamAuthService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly lockoutsRepo: AccountLockoutsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
+    private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
@@ -112,6 +117,48 @@ export class IamAuthService {
    * pacientes auto-registradas antes de este cambio tienen su membresía con ese
    * status; quitarlo las dejaría fuera de su tenant de un día para otro.
    */
+  /**
+   * Códigos de rol que viajan en el claim `roles`: los globales de
+   * `iam.user_global_roles` más los de negocio vigentes en `authz`.
+   *
+   * Los dos catálogos son deliberadamente distintos. `iam` sólo conoce cuatro
+   * códigos (`USER`, `PATIENT`, `SECURITY_ADMIN`, `SUPERADMIN`) porque son los
+   * de la plataforma: no dependen de tenant ni caducan. Todo lo demás —los diez
+   * actores clínicos, y cualquier rol que un administrador componga— vive en
+   * `authz.roles` con tenant, vigencia y estado propios. Hasta que ambos se
+   * unieron aquí, `@Roles('SURGEON')` era inalcanzable para cualquier sujeto que
+   * no fuese `SUPERADMIN`, porque `conceptIdsToRoleCodes` descarta en silencio
+   * todo código que no sea uno de los cuatro.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Sujeto para el que se emite el token.
+   * @param globalRoles - Filas activas de `iam.user_global_roles` ya leídas.
+   * @returns Los códigos, sin repetir.
+   */
+  private async mergeRoleCodes(
+    em: EntityManager,
+    userId: string,
+    globalRoles: { roleConceptId: string }[],
+  ): Promise<string[]> {
+    const global = conceptIdsToRoleCodes(
+      globalRoles.map((r) => r.roleConceptId),
+    );
+    // Una asignación de `authz` rota no debe impedir iniciar sesión: sin ella el
+    // sujeto entra con sus roles de plataforma y recibe un 403 explícito al
+    // tocar lo clínico, que es un fallo legible. Fallar el login entero
+    // convertiría un problema de autorización en una caída de autenticación.
+    const business = await this.effectiveRoles
+      .codesForUser(em, userId)
+      .catch((error: unknown) => {
+        this.logger.error(
+          { err: error, userId, operation: 'iam.auth.effective-roles' },
+          'No se pudieron resolver los roles de negocio del sujeto',
+        );
+        return [] as string[];
+      });
+    return [...new Set([...global, ...business])];
+  }
+
   private async loadActiveTenantIds(
     em: EntityManager,
     userId: string,
@@ -299,9 +346,7 @@ export class IamAuthService {
 
     return this.em.transactional(async (tx) => {
       const activeRoles = await this.rolesRepo.findActiveForUser(tx, user.id);
-      const roles = conceptIdsToRoleCodes(
-        activeRoles.map((r) => r.roleConceptId),
-      );
+      const roles = await this.mergeRoleCodes(tx, user.id, activeRoles);
       const tenants = await this.loadActiveTenantIds(tx, user.id);
       const issued = this.tokenService.issueSessionTokens(
         user.id,
@@ -415,9 +460,7 @@ export class IamAuthService {
         tx,
         session.userId,
       );
-      const roles = conceptIdsToRoleCodes(
-        activeRoles.map((r) => r.roleConceptId),
-      );
+      const roles = await this.mergeRoleCodes(tx, session.userId, activeRoles);
       const tenants = await this.loadActiveTenantIds(tx, session.userId);
       // El refresco tiene que repoblar lo mismo que el login: si no, al rotar el
       // token la interfaz perdería el nombre y volvería a mostrar el uuid.

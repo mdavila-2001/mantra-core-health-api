@@ -53,6 +53,9 @@ function build() {
     createCancellation: mockFn(),
     createChargeItem: mockFn(),
     findChargeItemsByCase: mockFn(),
+    findCases: mockFn().mockResolvedValue([]),
+    countCasesMatching: mockFn().mockResolvedValue(0),
+    findMilestonesByCase: mockFn().mockResolvedValue([]),
     findChargeItemsForUpdate: mockFn(),
   };
   const credentialsRepo = {
@@ -64,19 +67,37 @@ function build() {
   const outbox = {
     publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
   };
+  // El alta de la condición cuando el diagnóstico llega por código; los casos
+  // que pasan `conditionId` no lo tocan.
+  const conditions = {
+    create: mockFn().mockResolvedValue({ id: 'cond-nueva' }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // Sólo los usa la lectura agregada del detalle del caso.
+  const preopRepo = {
+    findOrdersByCase: mockFn().mockResolvedValue([]),
+    findAssessmentByCase: mockFn().mockResolvedValue(null),
+    findAnesthesiaPlanByCase: mockFn().mockResolvedValue(null),
+  };
+  const intraopRepo = { findReportsByCase: mockFn().mockResolvedValue([]) };
   const service = new PeriopCasesService(
     em as any,
     casesRepo,
+    preopRepo as any,
+    intraopRepo as any,
     credentialsRepo as any,
     auditTrail as any,
     outbox as any,
+    conditions as any,
     logger as any,
   );
   return {
     service,
     tx,
     casesRepo,
+    preopRepo,
+    intraopRepo,
+    conditions,
     credentialsRepo,
     auditTrail,
     outbox,
@@ -631,6 +652,99 @@ describe('PeriopCasesService', () => {
 
       await expect(
         d.service.confirmCase(CASE, actor as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('acceptTeamMember (C-14 · CAN-INT-002)', () => {
+    /** Caso y equipo con un único integrante asignado. */
+    function conEquipo(statusConceptId = CONCEPTS.TEAM_ASSIGNED) {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+      });
+      const member: any = {
+        id: 'm-1',
+        practitionerProfileId: 'prac-1',
+        teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        statusConceptId,
+      };
+      d.casesRepo.findTeamByCase.mockResolvedValue([member]);
+      return { d, member };
+    }
+
+    it('deja aceptado al propio integrante con credencial vigente', async () => {
+      // Sin este acto, `confirmCase` no podía cumplirse nunca: todo miembro
+      // nace ASSIGNED y nada escribía ACCEPTED.
+      const { d, member } = conEquipo();
+      const titular = {
+        id: 'user-9',
+        roles: ['SURGEON'],
+        practitionerProfileId: 'prac-1',
+      };
+
+      const res = await d.service.acceptTeamMember(CASE, 'm-1', titular as any);
+
+      expect(res.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+    });
+
+    it('rechaza que otro profesional acepte en su nombre', async () => {
+      const { d, member } = conEquipo();
+      const otro = {
+        id: 'user-8',
+        roles: ['SURGEON'],
+        practitionerProfileId: 'prac-2',
+      };
+
+      await expect(
+        d.service.acceptTeamMember(CASE, 'm-1', otro as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+    });
+
+    it('rechaza al integrante sin credencial profesional vigente', async () => {
+      const { d, member } = conEquipo();
+      d.credentialsRepo.hasCurrentCredential.mockResolvedValue(false);
+      const titular = {
+        id: 'user-9',
+        roles: ['SURGEON'],
+        practitionerProfileId: 'prac-1',
+      };
+
+      await expect(
+        d.service.acceptTeamMember(CASE, 'm-1', titular as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+    });
+
+    it('aceptar dos veces no es un error', async () => {
+      const { d } = conEquipo(CONCEPTS.TEAM_ACCEPTED);
+      const titular = {
+        id: 'user-9',
+        roles: ['SURGEON'],
+        practitionerProfileId: 'prac-1',
+      };
+
+      const res = await d.service.acceptTeamMember(CASE, 'm-1', titular as any);
+
+      expect(res.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+    });
+
+    it('la administración perioperatoria puede aceptar por el integrante', async () => {
+      const { d, member } = conEquipo();
+
+      await d.service.acceptTeamMember(CASE, 'm-1', actor as any);
+
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+    });
+
+    it('rechaza al integrante que no pertenece al caso', async () => {
+      const { d } = conEquipo();
+
+      await expect(
+        d.service.acceptTeamMember(CASE, 'otro-id', actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

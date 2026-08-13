@@ -29,7 +29,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityGroupsService(
     em as any,
-    groupsRepo,
+    groupsRepo as any,
     logger as any,
   );
   return { service, tx, groupsRepo };

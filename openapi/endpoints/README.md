@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **918 de 918 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **922 de 922 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -44,7 +44,7 @@ Esta referencia documenta **918 de 918 operaciones HTTP** registradas en `openap
 
 | Módulo | Endpoints | Etiquetas OpenAPI | Controladores |
 |---|---:|---|---:|
-| [accounting](accounting.md) | 20 | `accounting-accruals`, `accounting-assets`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-subledger` | 7 |
+| [accounting](accounting.md) | 24 | `accounting-accruals`, `accounting-assets`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-subledger` | 7 |
 | [ads](ads.md) | 18 | `ads` | 1 |
 | [app](app.md) | 6 | `app` | 2 |
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
@@ -113,4 +113,4 @@ Esta referencia documenta **918 de 918 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 918 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 922 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

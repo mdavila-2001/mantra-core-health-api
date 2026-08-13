@@ -27,20 +27,28 @@ export class DicomInstanceManifests {
   /**
    * Valor de sop class uid mantenido por la instancia.
    */
-  @Property({ fieldName: 'sop_class_uid', columnType: 'varchar' })
-  sopClassUid!: string;
+  @Property({
+    fieldName: 'sop_class_uid',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  sopClassUid?: string;
 
   /**
    * Valor de instance number mantenido por la instancia.
    */
-  @Property({ fieldName: 'instance_number', columnType: 'int' })
-  instanceNumber!: number;
+  @Property({ fieldName: 'instance_number', columnType: 'int', nullable: true })
+  instanceNumber?: number;
 
   /**
    * Valor de transfer syntax uid mantenido por la instancia.
    */
-  @Property({ fieldName: 'transfer_syntax_uid', columnType: 'varchar' })
-  transferSyntaxUid!: string;
+  @Property({
+    fieldName: 'transfer_syntax_uid',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  transferSyntaxUid?: string;
 
   /**
    * Identificador asociado a object manifest.
@@ -51,12 +59,17 @@ export class DicomInstanceManifests {
   /**
    * Valor de frame count mantenido por la instancia.
    */
-  @Property({ fieldName: 'frame_count', columnType: 'int' })
-  frameCount!: number;
+  @Property({ fieldName: 'frame_count', columnType: 'int', nullable: true })
+  frameCount?: number;
 
   /**
    * Valor de metadata json mantenido por la instancia.
    */
-  @Property({ fieldName: 'metadata_json', type: 'json', columnType: 'jsonb' })
-  metadataJson!: unknown;
+  @Property({
+    fieldName: 'metadata_json',
+    type: 'json',
+    columnType: 'jsonb',
+    nullable: true,
+  })
+  metadataJson?: unknown;
 }

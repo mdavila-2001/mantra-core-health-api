@@ -59,6 +59,40 @@ export class ReactionsRepository {
   }
 
   /**
+   * Reacciones de un contenido agrupadas por tipo (UC-19-03, cara de lectura).
+   *
+   * Devuelve el recuento y no las filas: quien dibuja una publicación necesita
+   * «12 me gusta», no doce identificadores de perfil que además serían PHI
+   * innecesaria en un muro.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reactableTypeConceptId - Tipo del contenido reaccionado.
+   * @param reactableRefId - Id del contenido reaccionado.
+   * @returns Pares tipo de reacción → cantidad.
+   */
+  async summarizeByTarget(
+    em: EntityManager,
+    reactableTypeConceptId: string,
+    reactableRefId: string,
+  ): Promise<{ reactionTypeConceptId: string; count: number }[]> {
+    const rows = await em
+      .getConnection()
+      .execute<Array<{ reaction_type_concept_id: string; count: number }>>(
+        `select reaction_type_concept_id, count(*)::int as count
+           from community.reactions
+          where reactable_type_concept_id=? and reactable_ref_id=?
+          group by reaction_type_concept_id`,
+        [reactableTypeConceptId, reactableRefId],
+        'all',
+      );
+
+    return rows.map((row) => ({
+      reactionTypeConceptId: row.reaction_type_concept_id,
+      count: row.count,
+    }));
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

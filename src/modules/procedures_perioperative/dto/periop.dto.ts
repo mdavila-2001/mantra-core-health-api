@@ -313,10 +313,35 @@ const DIAGNOSIS_ROLES = ['PRIMARY', 'SECONDARY', 'POSTOPERATIVE'] as const;
 export class CaseDiagnosisDto {
   /**
    * Identificador asociado a condition.
+   *
+   * Alternativa a `conditionCodeConceptId`: hay que indicar uno de los dos.
    */
-  @ApiProperty({ format: 'uuid', description: 'Condición diagnosticada' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Condición ya registrada en la historia clínica',
+  })
+  @IsOptional()
   @IsUUID()
-  conditionId!: string;
+  conditionId?: string;
+
+  /**
+   * Código de la condición, cuando todavía no está en la historia.
+   *
+   * El diagnóstico postoperatorio se descubre en quirófano: exigir que alguien
+   * lo registre antes como condición clínica obligaba al cirujano a una llamada
+   * previa que además no puede hacer —`POST /clinical/conditions` es de
+   * `CLINICIAN`/`PRACTITIONER`—, así que el paso quedaba fuera de su alcance.
+   * Con este campo, la condición se crea junto al diagnóstico, en la misma
+   * transacción y a través del servicio de `clinical`, que sigue siendo el
+   * dueño de la historia.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Código de la condición a registrar si aún no existe',
+  })
+  @IsOptional()
+  @IsUUID()
+  conditionCodeConceptId?: string;
 
   /**
    * Valor de role mantenido por la instancia.
@@ -495,6 +520,295 @@ export class RiskScoreDto {
   interpretationText?: string;
 }
 
+/** Filtros de `GET /procedure-cases` (agenda quirúrgica). */
+export class ListCasesQueryDto {
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Paciente' })
+  @IsOptional()
+  @IsUUID()
+  patientProfileId?: string;
+
+  /**
+   * Identificador asociado a operating room.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Quirófano reservado' })
+  @IsOptional()
+  @IsUUID()
+  operatingRoomId?: string;
+
+  /**
+   * Identificador asociado a primary surgeon profile.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Cirujano principal' })
+  @IsOptional()
+  @IsUUID()
+  primarySurgeonProfileId?: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Estado del caso' })
+  @IsOptional()
+  @IsUUID()
+  statusConceptId?: string;
+
+  /**
+   * Valor de from mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    format: 'date-time',
+    description: 'Inicio de la ventana (inclusive)',
+  })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  /**
+   * Valor de to mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    format: 'date-time',
+    description: 'Fin de la ventana (exclusivo)',
+  })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
+
+  /**
+   * Valor de limit mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ default: 50, minimum: 1, maximum: 200 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  limit?: number;
+
+  /**
+   * Valor de offset mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ default: 0, minimum: 0 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset?: number;
+}
+
+/** Caso tal como aparece en la agenda quirúrgica. */
+export class CaseSummaryDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Valor de case number mantenido por la instancia.
+   */
+  @ApiProperty()
+  caseNumber!: string;
+
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiProperty({ format: 'uuid' })
+  patientProfileId!: string;
+
+  /**
+   * Identificador asociado a primary surgeon profile.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  primarySurgeonProfileId?: string;
+
+  /**
+   * Identificador asociado a operating room.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  operatingRoomId?: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /**
+   * Valor de scheduled start at mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  scheduledStartAt?: Date;
+
+  /**
+   * Valor de scheduled end at mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  scheduledEndAt?: Date;
+}
+
+/** Página de la agenda quirúrgica. */
+export class CaseListResponseDto {
+  /**
+   * Valor de items mantenido por la instancia.
+   */
+  @ApiProperty({ type: [CaseSummaryDto] })
+  items!: CaseSummaryDto[];
+
+  /**
+   * Valor de total mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Casos que cumplen el filtro, sin paginar' })
+  total!: number;
+}
+
+/** Integrante del equipo tal como lo devuelve la consulta del caso. */
+export class TeamMemberSummaryDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a practitioner profile.
+   */
+  @ApiProperty({ format: 'uuid' })
+  practitionerProfileId!: string;
+
+  /**
+   * Identificador asociado a team role concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  teamRoleConceptId!: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiProperty({ format: 'uuid', description: 'Asignado o aceptado' })
+  statusConceptId!: string;
+}
+
+/**
+ * Detalle completo del caso quirúrgico.
+ *
+ * Va agregado a propósito: quien abre un caso necesita a la vez su equipo, sus
+ * diagnósticos, sus órdenes, la valoración, el plan anestésico y el informe.
+ * Servirlo en una sola respuesta evita que la pantalla encadene ocho llamadas
+ * —y que muestre un caso a medias si una de ellas falla.
+ */
+export class CaseDetailDto {
+  /**
+   * Datos de cabecera del caso.
+   */
+  @ApiProperty({ type: CaseSummaryDto })
+  case!: CaseSummaryDto;
+
+  /**
+   * Valor de diagnoses mantenido por la instancia.
+   */
+  @ApiProperty({
+    isArray: true,
+    description: 'Diagnósticos del caso con su papel y orden',
+  })
+  diagnoses!: {
+    /** Identificador del diagnóstico del caso. */
+    id: string;
+    /** Condición clínica a la que apunta. */
+    conditionId: string;
+    /** Papel del diagnóstico (principal, secundario, postoperatorio). */
+    diagnosisRoleConceptId: string;
+    /** Orden dentro del caso. */
+    sequenceNumber: number;
+  }[];
+
+  /**
+   * Valor de team mantenido por la instancia.
+   */
+  @ApiProperty({ type: [TeamMemberSummaryDto] })
+  team!: TeamMemberSummaryDto[];
+
+  /**
+   * Valor de milestones mantenido por la instancia.
+   */
+  @ApiProperty({ isArray: true, description: 'Hitos del caso' })
+  milestones!: {
+    /** Identificador del hito. */
+    id: string;
+    /** Tipo de hito. */
+    milestoneTypeConceptId: string;
+    /** Estado del hito. */
+    statusConceptId: string;
+    /** Momento planificado, si lo tiene. */
+    plannedAt?: Date;
+    /** Momento en que se alcanzó, si ya ocurrió. */
+    reachedAt?: Date;
+  }[];
+
+  /**
+   * Valor de preoperative orders mantenido por la instancia.
+   */
+  @ApiProperty({ isArray: true, description: 'Órdenes preoperatorias' })
+  preoperativeOrders!: {
+    /** Identificador de la orden. */
+    id: string;
+    /** Orden clínica a la que apunta. */
+    serviceRequestId: string;
+    /** Papel de la orden. */
+    orderRoleConceptId: string;
+    /** Estado: pendiente o verificada. */
+    statusConceptId: string;
+  }[];
+
+  /**
+   * Valor de preoperative assessment mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Valoración preoperatoria, si ya se hizo',
+  })
+  preoperativeAssessment?: {
+    /** Identificador de la valoración. */
+    id: string;
+    /** Aptitud del paciente para la intervención. */
+    fitnessStatusConceptId: string;
+    /** Clase ASA, si se registró. */
+    asaClassConceptId?: string;
+  } | null;
+
+  /**
+   * Valor de anesthesia plan mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ description: 'Plan anestésico, si ya se redactó' })
+  anesthesiaPlan?: {
+    /** Identificador del plan. */
+    id: string;
+    /** Tipo de anestesia previsto. */
+    anesthesiaTypeConceptId: string;
+    /** Estado del plan: borrador o aprobado. */
+    statusConceptId: string;
+  } | null;
+
+  /**
+   * Valor de operative reports mantenido por la instancia.
+   */
+  @ApiProperty({
+    isArray: true,
+    description: 'Versiones del informe operatorio, de la última a la primera',
+  })
+  operativeReports!: {
+    /** Identificador del informe. */
+    id: string;
+    /** Número de versión. */
+    reportVersion: number;
+    /** Estado: borrador o firmado. */
+    statusConceptId: string;
+    /** Cuándo se firmó, si ya ocurrió. */
+    signedAt?: Date;
+  }[];
+}
+
 /** Cuerpo de `POST /procedure-cases/{id}/preoperative-assessments` (UC-53-03). */
 export class CreatePreopAssessmentDto {
   /**
@@ -613,6 +927,87 @@ export class PreopAssessmentResponseDto {
 // ---------------------------------------------------------------------------
 // UC-53-04 · Verificación de órdenes
 // ---------------------------------------------------------------------------
+
+/** Papel de la orden preoperatoria. */
+export type PreopOrderRole = 'LAB' | 'IMAGING' | 'CONSULT' | 'MEDICATION';
+const PREOP_ORDER_ROLES = ['LAB', 'IMAGING', 'CONSULT', 'MEDICATION'] as const;
+
+/**
+ * Cuerpo de `POST /procedure-cases/{id}/preoperative-orders` (UC-53-04).
+ *
+ * El endpoint faltaba: `PeriopPreopRepository.createOrder` existía sin un solo
+ * llamador, así que ningún caso tenía órdenes que verificar y la verificación
+ * —que es lo que deja el caso listo para cirugía— no podía ejecutarse nunca.
+ */
+export class CreatePreoperativeOrderDto {
+  /**
+   * Identificador asociado a service request.
+   *
+   * Alternativa a `serviceRequestCodeConceptId`: hay que indicar uno de los dos.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Orden clínica ya existente',
+  })
+  @IsOptional()
+  @IsUUID()
+  serviceRequestId?: string;
+
+  /**
+   * Código de la orden clínica, cuando todavía no existe.
+   *
+   * Igual que en el diagnóstico del caso: quien indica una prueba preoperatoria
+   * no puede llamar antes a `POST /clinical/service-requests`, que es de
+   * `CLINICIAN`/`PRACTITIONER`.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Código de la orden clínica a registrar si aún no existe',
+  })
+  @IsOptional()
+  @IsUUID()
+  serviceRequestCodeConceptId?: string;
+
+  /**
+   * Valor de order role mantenido por la instancia.
+   */
+  @ApiProperty({ enum: PREOP_ORDER_ROLES })
+  @IsIn(PREOP_ORDER_ROLES)
+  orderRole!: PreopOrderRole;
+
+  /**
+   * Valor de mandatory mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    default: true,
+    description:
+      'Si es obligatoria antes de la cirugía; una pendiente impide que el caso quede listo',
+  })
+  @IsOptional()
+  @IsBoolean()
+  mandatory?: boolean;
+}
+
+/** Respuesta del alta de una orden preoperatoria. */
+export class PreoperativeOrderResponseDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a service request.
+   */
+  @ApiProperty({ format: 'uuid' })
+  serviceRequestId!: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+}
 
 /** Cuerpo de `POST /procedure-cases/{id}/preoperative-orders/verify` (UC-53-04). */
 export class VerifyOrdersDto {
@@ -1615,10 +2010,32 @@ export class ComplicationDto {
 export class DraftOperativeReportDto {
   /**
    * Identificador asociado a procedure.
+   *
+   * Alternativa a `procedureCodeConceptId`: hay que indicar uno de los dos.
    */
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Procedimiento ya registrado en la historia clínica',
+  })
+  @IsOptional()
   @IsUUID()
-  procedureId!: string;
+  procedureId?: string;
+
+  /**
+   * Código del procedimiento, cuando todavía no está en la historia.
+   *
+   * El informe operatorio describe el acto que se acaba de realizar: obligar a
+   * registrarlo antes en `clinical.procedures` —endpoint que el cirujano
+   * tampoco puede invocar— dejaba el informe fuera de su alcance. Con este
+   * campo el procedimiento se crea junto al informe, con el caso como origen.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Código del procedimiento a registrar si aún no existe',
+  })
+  @IsOptional()
+  @IsUUID()
+  procedureCodeConceptId?: string;
 
   /**
    * Identificador asociado a author profile.

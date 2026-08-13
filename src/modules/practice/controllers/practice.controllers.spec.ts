@@ -139,7 +139,11 @@ describe('SitesController', () => {
       createClinicalUnit: mockFn(),
       createCareSpace: mockFn(),
     };
-    const controller = new SitesController(structureService as any);
+    const sitesService = { listCareSpaces: mockFn().mockResolvedValue([]) };
+    const controller = new SitesController(
+      structureService as any,
+      sitesService as any,
+    );
     await controller.createClinicalUnit('s1', { code: 'U', name: 'N' }, actor);
     expect(structureService.createClinicalUnit).toHaveBeenCalledWith(
       's1',

@@ -1,3 +1,4 @@
+import { SEED, getCurrentTenantId } from '../../../common';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -200,6 +201,12 @@ export class DicomCatalogService {
        */
       const deny = (reason: string): DicomInstanceAccessResponseDto => {
         const log = this.dicomRepo.createAccessLog(tx, {
+          // `tenant_id` es NOT NULL: sin él, **denegar** el acceso fallaba con
+          // 500 y el rechazo no quedaba registrado —justo el caso en el que la
+          // traza importa—. Cuando la denegación es porque el estudio no
+          // existe, no hay tenant del que tomarlo: se usa el del contexto de la
+          // petición, que el interceptor ya verificó.
+          tenantId: getCurrentTenantId() ?? SEED.tenantId,
           principalId: actor.id,
           operation: DICOMWEB_OPERATION.WADO_RS,
           studyInstanceUid,

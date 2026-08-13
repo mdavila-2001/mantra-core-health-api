@@ -214,6 +214,127 @@ export class PeriopCasesRepository {
   }
 
   /**
+   * Agenda quirúrgica: casos del tenant acotados por paciente, quirófano y
+   * ventana temporal.
+   *
+   * Es la lectura que sostiene la pantalla de programación. Va acotada por
+   * `custodianTenantId` siempre —el guardrail `TENANT_SCOPE_MISSING` lo exige y
+   * un listado sin acotar sería una fuga entre organizaciones— y ordenada por
+   * hora de inicio, que es el orden en que se lee una agenda.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param custodianTenantId - Tenant custodio, obligatorio.
+   * @param filtros - Acotaciones opcionales y paginación.
+   * @returns Los casos que cumplen el filtro.
+   */
+  async findCases(
+    em: EntityManager,
+    custodianTenantId: string,
+    filtros: {
+      /** Paciente del caso. */
+      patientProfileId?: string;
+      /** Quirófano reservado. */
+      operatingRoomId?: string;
+      /** Cirujano principal. */
+      primarySurgeonProfileId?: string;
+      /** Estado del caso. */
+      statusConceptId?: string;
+      /** Comienzo de la ventana (inclusive). */
+      from?: Date;
+      /** Fin de la ventana (exclusivo). */
+      to?: Date;
+      /** Tamaño de página. */
+      limit: number;
+      /** Desplazamiento. */
+      offset: number;
+    },
+  ): Promise<ProcedureCases[]> {
+    const where: Record<string, unknown> = { custodianTenantId };
+    if (filtros.patientProfileId)
+      where.patientProfileId = filtros.patientProfileId;
+    if (filtros.operatingRoomId)
+      where.operatingRoomId = filtros.operatingRoomId;
+    if (filtros.primarySurgeonProfileId)
+      where.primarySurgeonProfileId = filtros.primarySurgeonProfileId;
+    if (filtros.statusConceptId)
+      where.statusConceptId = filtros.statusConceptId;
+    if (filtros.from || filtros.to) {
+      where.scheduledStartAt = {
+        ...(filtros.from ? { $gte: filtros.from } : {}),
+        ...(filtros.to ? { $lt: filtros.to } : {}),
+      };
+    }
+    return em.find(ProcedureCases, where, {
+      orderBy: { scheduledStartAt: 'ASC', id: 'ASC' },
+      limit: filtros.limit,
+      offset: filtros.offset,
+    });
+  }
+
+  /**
+   * Cuenta los casos que cumplen el mismo filtro que `findCases`, para que el
+   * cliente sepa cuántas páginas quedan.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param custodianTenantId - Tenant custodio, obligatorio.
+   * @param filtros - Las mismas acotaciones, sin paginación.
+   * @returns Cuántos casos cumplen el filtro.
+   */
+  countCasesMatching(
+    em: EntityManager,
+    custodianTenantId: string,
+    filtros: {
+      /** Paciente del caso. */
+      patientProfileId?: string;
+      /** Quirófano reservado. */
+      operatingRoomId?: string;
+      /** Cirujano principal. */
+      primarySurgeonProfileId?: string;
+      /** Estado del caso. */
+      statusConceptId?: string;
+      /** Comienzo de la ventana (inclusive). */
+      from?: Date;
+      /** Fin de la ventana (exclusivo). */
+      to?: Date;
+    },
+  ): Promise<number> {
+    const where: Record<string, unknown> = { custodianTenantId };
+    if (filtros.patientProfileId)
+      where.patientProfileId = filtros.patientProfileId;
+    if (filtros.operatingRoomId)
+      where.operatingRoomId = filtros.operatingRoomId;
+    if (filtros.primarySurgeonProfileId)
+      where.primarySurgeonProfileId = filtros.primarySurgeonProfileId;
+    if (filtros.statusConceptId)
+      where.statusConceptId = filtros.statusConceptId;
+    if (filtros.from || filtros.to) {
+      where.scheduledStartAt = {
+        ...(filtros.from ? { $gte: filtros.from } : {}),
+        ...(filtros.to ? { $lt: filtros.to } : {}),
+      };
+    }
+    return em.count(ProcedureCases, where);
+  }
+
+  /**
+   * Hitos del caso, en orden de planificación.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Caso consultado.
+   * @returns Los hitos registrados.
+   */
+  findMilestonesByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+  ): Promise<ProcedureCaseMilestones[]> {
+    return em.find(
+      ProcedureCaseMilestones,
+      { procedureCaseId },
+      { orderBy: { plannedAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Ejecuta la operación count cases.
    *
    * @param em - Contexto de persistencia o transacción activa.

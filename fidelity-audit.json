@@ -1,24 +1,45 @@
 {
   "resumen": {
-    "entidadesBoveda": 1331,
-    "conjuntosDeIndicesBoveda": 1220,
-    "entidadesMapeadas": 1186,
+    "entidadesBoveda": 1335,
+    "conjuntosDeIndicesBoveda": 1224,
+    "entidadesMapeadas": 1190,
     "entidadesFaltantes": 0,
     "entidadesSobrantes": 0,
     "columnasFaltantes": 0,
-    "columnasSobrantes": 0,
+    "columnasSobrantes": 4,
     "tiposDivergentes": 0,
     "obligatoriedadDivergente": 0,
     "vistasNoMaterializadas": 78,
-    "indicesDeclarados": 7733,
-    "indicesEnCatalogo": 7676,
-    "fkDeclaradas": 6621,
-    "fkEnCatalogo": 6621
+    "indicesDeclarados": 7743,
+    "indicesEnCatalogo": 7686,
+    "fkDeclaradas": 6622,
+    "fkEnCatalogo": 6622
   },
   "entidadesFaltantes": [],
   "entidadesSobrantes": [],
   "columnasFaltantes": [],
-  "columnasSobrantes": [],
+  "columnasSobrantes": [
+    {
+      "key": "profiles.persons",
+      "columna": "name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.persons",
+      "columna": "middle_name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.persons",
+      "columna": "last_name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.persons",
+      "columna": "mother_last_name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    }
+  ],
   "tiposDivergentes": [],
   "obligatoriedadDivergente": [],
   "vistasNoMaterializadas": [

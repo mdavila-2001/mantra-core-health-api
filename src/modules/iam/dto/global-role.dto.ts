@@ -8,7 +8,20 @@ import { IsIn } from 'class-validator';
  * auto-registro lo otorgara, o a las que un tercero dio de alta (C-18): sin esa
  * concesión el titular no puede usar el autoservicio del portal.
  */
-export type GlobalRole = 'USER' | 'SECURITY_ADMIN' | 'SUPERADMIN' | 'PATIENT';
+export type GlobalRole =
+  | 'USER'
+  | 'SECURITY_ADMIN'
+  | 'SUPERADMIN'
+  | 'PATIENT'
+  /** Quién sos: agenda, recursos, tu propio perfil profesional. */
+  | 'PRACTITIONER'
+  /**
+   * Qué podés leer y escribir de un paciente — es PHI.
+   *
+   * No se concede al registrarse: la matrícula nace `PENDING` y declararla no
+   * es probarla. Lo concede un administrador, que es el acto que la verifica.
+   */
+  | 'CLINICIAN';
 /** Acción sobre el rol. */
 export type RoleAction = 'GRANT' | 'REVOKE';
 
@@ -17,8 +30,24 @@ export class GlobalRoleDto {
   /**
    * Valor de role mantenido por la instancia.
    */
-  @ApiProperty({ enum: ['USER', 'SECURITY_ADMIN', 'SUPERADMIN', 'PATIENT'] })
-  @IsIn(['USER', 'SECURITY_ADMIN', 'SUPERADMIN', 'PATIENT'])
+  @ApiProperty({
+    enum: [
+      'USER',
+      'SECURITY_ADMIN',
+      'SUPERADMIN',
+      'PATIENT',
+      'PRACTITIONER',
+      'CLINICIAN',
+    ],
+  })
+  @IsIn([
+    'USER',
+    'SECURITY_ADMIN',
+    'SUPERADMIN',
+    'PATIENT',
+    'PRACTITIONER',
+    'CLINICIAN',
+  ])
   role!: GlobalRole;
 
   /**

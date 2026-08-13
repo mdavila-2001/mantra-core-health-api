@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
+import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { IamPractitionerSelfRegistrationService } from './iam-practitioner-self-registration.service';
 import { TracingService } from '../../../observability';
 import { CONCEPTS, ConflictException, SEED } from '../../../common';
@@ -63,6 +64,9 @@ describe('IamPractitionerSelfRegistrationService', () => {
     const notificationsService = {
       createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
     };
+    // Por defecto concede: el caso interesante es el alta administrativa que sí
+    // pide roles; el autorregistro nunca llega a llamarlo.
+    const effectiveRoles = { ensureRoleByCode: fn().mockResolvedValue(true) };
 
     // El repositorio de activaciones sólo se usa en el alta administrativa: en
     // el autorregistro la cuenta nace activa y no hay token que emitir.
@@ -87,12 +91,14 @@ describe('IamPractitionerSelfRegistrationService', () => {
       identifiersRepo as never,
       contactPointsRepo as never,
       tenantMembershipsRepo as never,
+      effectiveRoles as never,
       notificationsService as never,
       logger as never,
       new TracingService(),
     );
     return {
       service,
+      effectiveRoles,
       tx,
       usersRepo,
       credentialsRepo,
@@ -116,6 +122,39 @@ describe('IamPractitionerSelfRegistrationService', () => {
    * delante: la cuenta nace PENDIENTE con un token en vez de ACTIVA con
    * contraseña, porque un administrador no puede elegir la clave de otro.
    */
+  /**
+   * Sin el rol, el claim `roles` del token sólo trae `USER` y el profesional
+   * recibe 403 en su propia agenda: `GET /scheduling/resources` exige
+   * `PRACTITIONER`. Es el mismo agujero que tuvo `PATIENT`.
+   */
+  it('concede PRACTITIONER: sin él su agenda le responde 403', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    const concedidos = d.rolesRepo.create.mock.calls.map(
+      (c: unknown[]) => (c[1] as { roleConceptId: string }).roleConceptId,
+    );
+    expect(concedidos).toContain(ROLE_CONCEPT_BY_CODE.PRACTITIONER);
+    expect(concedidos).toContain(ROLE_CONCEPT_BY_CODE.USER);
+  });
+
+  /**
+   * `CLINICIAN` abre el expediente de un paciente, que es PHI. La matrícula
+   * nace `PENDING`: declararla no es probarla, así que ese rol lo concede un
+   * administrador y no el propio registro.
+   */
+  it('NO concede CLINICIAN: eso abre PHI y lo decide un administrador', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    const concedidos = d.rolesRepo.create.mock.calls.map(
+      (c: unknown[]) => (c[1] as { roleConceptId: string }).roleConceptId,
+    );
+    expect(concedidos).not.toContain(ROLE_CONCEPT_BY_CODE.CLINICIAN);
+  });
+
   describe('assistedRegisterPractitioner (P6)', () => {
     const admin = { id: 'admin-1' } as never;
     const dtoAsistido = { ...dto, reason: 'Alta de plantel' } as never;

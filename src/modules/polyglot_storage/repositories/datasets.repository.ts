@@ -97,8 +97,13 @@ export class DatasetsRepository {
         owningModuleCode: data.owningModuleCode,
         dataClassificationId: data.dataClassificationId,
         sourceOfTruth: data.sourceOfTruth,
-        canonicalEntityType: data.canonicalEntityType,
+        // NOT NULL: sin tipo canónico declarado, el dataset se describe por su
+        // propio código.
+        canonicalEntityType: data.canonicalEntityType ?? data.code,
         lifecycleState: data.lifecycleState,
+        // Columnas NOT NULL sin default en el esquema.
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       { partial: true },
     );
@@ -196,6 +201,8 @@ export class DatasetsRepository {
         schemaDocumentFileId: data.schemaDocumentFileId,
         effectiveFrom: data.effectiveFrom,
         state: data.state,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -300,12 +307,21 @@ export class DatasetsRepository {
         storageBackendId: data.storageBackendId,
         datasetDefinitionId: data.datasetDefinitionId,
         logicalName: data.logicalName,
-        physicalNamePattern: data.physicalNamePattern,
-        partitioningStrategy: data.partitioningStrategy,
-        tenantIsolationMode: data.tenantIsolationMode,
+        // NOT NULL: sin patrón explícito, la colección se materializa con su
+        // propio nombre lógico.
+        physicalNamePattern: data.physicalNamePattern ?? data.logicalName,
+        // NOT NULL: sin estrategia declarada, la colección no se particiona.
+        partitioningStrategy: data.partitioningStrategy ?? 'none',
+        // NOT NULL y fail-safe: sin declaración explícita se asume el modo
+        // compartido con discriminante por tenant, que es el que aplica el
+        // resto de la plataforma.
+        tenantIsolationMode: data.tenantIsolationMode ?? 'shared',
         routingKeyExpression: data.routingKeyExpression,
         shardKeyExpression: data.shardKeyExpression,
         lifecycleState: data.lifecycleState,
+        // Columnas NOT NULL sin default en el esquema.
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       { partial: true },
     );
@@ -385,8 +401,11 @@ export class DatasetsRepository {
         datasetVersionId: data.datasetVersionId,
         schemaVersion: data.schemaVersion,
         validationMode: data.validationMode,
-        schemaDocumentJson: data.schemaDocumentJson,
-        migrationStrategy: data.migrationStrategy,
+        // NOT NULL: un esquema sin documento es un esquema vacío, no ausente.
+        schemaDocumentJson: data.schemaDocumentJson ?? {},
+        // NOT NULL: una versión de esquema sin estrategia declarada no migra
+        // nada por sí sola.
+        migrationStrategy: data.migrationStrategy ?? 'none',
         effectiveFrom: data.effectiveFrom,
         state: data.state,
       },
@@ -465,6 +484,8 @@ export class DatasetsRepository {
         rowFilterExpression: data.rowFilterExpression,
         maskingProfileCode: data.maskingProfileCode,
         state: data.state,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

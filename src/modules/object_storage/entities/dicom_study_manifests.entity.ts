@@ -45,14 +45,14 @@ export class DicomStudyManifests {
   /**
    * Valor de study date mantenido por la instancia.
    */
-  @Property({ fieldName: 'study_date', columnType: 'date' })
-  studyDate!: Date;
+  @Property({ fieldName: 'study_date', columnType: 'date', nullable: true })
+  studyDate?: Date;
 
   /**
    * Valor de modality codes mantenido por la instancia.
    */
-  @Property({ fieldName: 'modality_codes', type: 'array' })
-  modalityCodes!: string[];
+  @Property({ fieldName: 'modality_codes', type: 'array', nullable: true })
+  modalityCodes?: string[];
 
   /**
    * Valor de series count mantenido por la instancia.

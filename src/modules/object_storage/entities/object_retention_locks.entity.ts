@@ -45,6 +45,10 @@ export class ObjectRetentionLocks {
   /**
    * Valor de released at mantenido por la instancia.
    */
-  @Property({ fieldName: 'released_at', columnType: 'timestamptz' })
-  releasedAt!: Date;
+  @Property({
+    fieldName: 'released_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  releasedAt?: Date;
 }

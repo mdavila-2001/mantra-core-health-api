@@ -299,6 +299,8 @@ export class OpsIncidentsRepository {
         responderRoleConceptId: data.responderRoleConceptId,
         joinedAt: new Date(),
         acknowledgedAt: data.acknowledgedAt,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -366,6 +368,8 @@ export class OpsIncidentsRepository {
         summary: data.summary,
         detailsJson: data.detailsJson,
         sourceReference: data.sourceReference,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -411,6 +415,8 @@ export class OpsIncidentsRepository {
         channelReference: data.channelReference,
         publishedAt: new Date(),
         publishedByUserId: data.publishedByUserId,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

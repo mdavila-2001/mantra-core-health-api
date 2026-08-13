@@ -31,15 +31,21 @@ export async function findReusableReadyAudioAsset(
   em: EntityManager,
   renderedTextHash: string,
   profile: AudioSynthesisProfile,
+  tenantId?: string,
 ): Promise<AudioAssets | null> {
   const rows = await em.getConnection().execute<Array<{ id: string }>>(
-    `select id from audio_assets.audio_assets where rendered_text_hash=? and language=? and provider=?
+    // `is not distinct from` y no `=`: con tenant compartido el valor es NULL, y
+    // `tenant_id = NULL` no es cierto para ninguna fila — la reutilización de los
+    // audios compartidos, que es la que más ahorra, dejaría de funcionar.
+    `select id from audio_assets.audio_assets where rendered_text_hash=? and tenant_id is not distinct from ?
+     and language=? and provider=?
      and provider_model=? and voice_profile=? and voice_provider_ref is not distinct from ? and voice_version=?
      and normalizer_version=? and audio_format=? and sample_rate is not distinct from ?
      and generation_status='READY' and storage_key is not null
      order by generated_at desc nulls last limit 1`,
     [
       renderedTextHash,
+      tenantId ?? null,
       profile.language,
       profile.provider,
       profile.providerModel,
@@ -112,11 +118,16 @@ export async function reserveAudioGenerationBudget(
         tx.getTransactionContext(),
       );
     if (reserved.length === 0) return false;
+    // La ventana se persiste junto a la reserva: la liquidación y la devolución
+    // ocurren después y pueden caer en otro mes. Sin esto, un asset reservado el
+    // día 31 y generado el 1 imputa su consumo a una ventana que no tiene fila de
+    // reserva, el UPDATE no afecta nada y el mes anterior se queda con crédito
+    // apartado que nadie devuelve.
     await tx
       .getConnection()
       .execute(
-        `update audio_assets.audio_assets set budget_reserved_units=?, generation_status='GENERATING', updated_at=now() where id=?`,
-        [units, assetId],
+        `update audio_assets.audio_assets set budget_reserved_units=?, budget_period_key=?, generation_status='GENERATING', updated_at=now() where id=?`,
+        [units, periodKey, assetId],
         'run',
         tx.getTransactionContext(),
       );
@@ -133,40 +144,101 @@ export async function markAudioAssetReady(
       Array<{
         generation_status: string;
         budget_reserved_units: number | null;
+        budget_period_key: string | null;
         provider: string;
       }>
-    >(`select generation_status, budget_reserved_units, provider from audio_assets.audio_assets where id=? for update`, [input.assetId], 'all', tx.getTransactionContext());
+    >(`select generation_status, budget_reserved_units, budget_period_key, provider from audio_assets.audio_assets where id=? for update`, [input.assetId], 'all', tx.getTransactionContext());
     const asset = rows[0];
     if (!asset || asset.generation_status === 'READY') return;
-    await tx
-      .getConnection()
-      .execute(
-        `update audio_assets.audio_assets set storage_provider=?, storage_key=?, bytes=?, duration_ms=?, checksum_sha256=?, generation_status='READY', failure_code=null, generated_at=now(), updated_at=now() where id=?`,
-        [
-          input.storageUri.startsWith('s3://') ? 's3' : 'local',
-          input.storageUri,
-          input.bytes,
-          input.durationMs ?? null,
-          input.checksum,
-          input.assetId,
-        ],
-        'run',
-        tx.getTransactionContext(),
-      );
-    await tx
-      .getConnection()
-      .execute(
-        `update audio_assets.audio_generation_usage set consumed_credits=coalesce(consumed_credits,0)+?, success_count=success_count+1, updated_at=now() where period_key=? and provider=?`,
-        [
-          input.consumedCredits ?? asset.budget_reserved_units ?? 0,
-          new Date().toISOString().slice(0, 7),
-          asset.provider,
-        ],
-        'run',
-        tx.getTransactionContext(),
-      );
+    await tx.getConnection().execute(
+      // `budget_reserved_units` se pone a NULL en el mismo paso: es lo que hace
+      // que la devolución de reserva sea exactamente-una-vez. Un fallo posterior
+      // sobre un asset ya READY leería NULL y no devolvería nada al presupuesto.
+      `update audio_assets.audio_assets set storage_provider=?, storage_key=?, bytes=?, duration_ms=?, checksum_sha256=?, generation_status='READY', failure_code=null, budget_reserved_units=null, generated_at=now(), updated_at=now() where id=?`,
+      [
+        input.storageUri.startsWith('s3://') ? 's3' : 'local',
+        input.storageUri,
+        input.bytes,
+        input.durationMs ?? null,
+        input.checksum,
+        input.assetId,
+      ],
+      'run',
+      tx.getTransactionContext(),
+    );
+    await tx.getConnection().execute(
+      `update audio_assets.audio_generation_usage set consumed_credits=coalesce(consumed_credits,0)+?, success_count=success_count+1, updated_at=now() where period_key=? and provider=?`,
+      [
+        input.consumedCredits ?? asset.budget_reserved_units ?? 0,
+        // La ventana de la reserva, no la del reloj: ver `budget_period_key`.
+        // El `??` cubre las filas creadas antes de que existiera la columna.
+        asset.budget_period_key ?? currentPeriodKey(),
+        asset.provider,
+      ],
+      'run',
+      tx.getTransactionContext(),
+    );
   });
   const result = await em.findOne(AudioAssets, { id: input.assetId });
   if (!result) throw new Error('Asset READY no encontrado');
   return result;
+}
+
+/**
+ * Devuelve al presupuesto una reserva que ya nunca se va a gastar.
+ *
+ * Existe porque `estimated_credits` sólo crecía: un asset que fallaba de forma
+ * permanente dejaba apartado para siempre el crédito que estimó consumir, así que
+ * una racha de fallos del proveedor agotaba el presupuesto del mes **sin haber
+ * generado un solo audio** y todo acababa degradando a `FALLBACK` sin explicación.
+ *
+ * La lectura y la puesta a NULL ocurren en la misma transacción con la fila
+ * bloqueada (`for update`), de modo que dos caminos que intenten devolver la misma
+ * reserva —el marcado de fallo permanente y el de "sólo fallback"— sólo pueden
+ * tener éxito una vez; el segundo lee NULL y no devuelve nada.
+ *
+ * @returns unidades devueltas; `0` si no había reserva viva.
+ */
+export async function releaseAudioGenerationBudget(
+  em: EntityManager,
+  assetId: string,
+): Promise<number> {
+  return em.transactional(async (tx) => {
+    const rows = await tx.getConnection().execute<
+      Array<{
+        budget_reserved_units: number | null;
+        budget_period_key: string | null;
+        provider: string;
+      }>
+    >(`select budget_reserved_units, budget_period_key, provider from audio_assets.audio_assets where id=? for update`, [assetId], 'all', tx.getTransactionContext());
+    const asset = rows[0];
+    const reserved = asset?.budget_reserved_units ?? 0;
+    if (!asset || reserved <= 0) return 0;
+
+    await tx
+      .getConnection()
+      .execute(
+        `update audio_assets.audio_assets set budget_reserved_units=null, updated_at=now() where id=?`,
+        [assetId],
+        'run',
+        tx.getTransactionContext(),
+      );
+    // `greatest(0, …)` protege la invariante de la columna frente a una doble
+    // devolución que el bloqueo no alcanzara: preferimos un contador que no baja
+    // de cero a una transacción abortada en el camino de un fallo.
+    await tx.getConnection().execute(
+      `update audio_assets.audio_generation_usage
+            set estimated_credits=greatest(0, estimated_credits-?), failure_count=failure_count+1, updated_at=now()
+          where period_key=? and provider=?`,
+      [reserved, asset.budget_period_key ?? currentPeriodKey(), asset.provider],
+      'run',
+      tx.getTransactionContext(),
+    );
+    return reserved;
+  });
+}
+
+/** Ventana mensual del reloj, en UTC. Sólo como red para filas sin ventana persistida. */
+function currentPeriodKey(): string {
+  return new Date().toISOString().slice(0, 7);
 }

@@ -32,10 +32,12 @@ import {
   MessagingProviders,
   ProviderChannelConfigs,
 } from '../../modules/messaging/entities';
+import { Roles as AuthzRoles } from '../../modules/authz/entities';
 import { IamModule } from '../../modules/iam/iam.module';
 import { TenantMemberships } from '../../modules/directory/entities';
 import { TerminologySeedService } from './terminology-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
+import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
@@ -82,6 +84,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
       DynamicEnumBindings,
       MessageQueues,
       AudioTemplates,
+      AuthzRoles,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
@@ -94,6 +97,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     MessagingSeedService,
     AudioAssetsSeedService,
     IdentityVerificationSeedService,
+    AuthzClinicalRolesSeedService,
     BootstrapAdminSeedService,
     SeedBootstrapService,
   ],
@@ -103,6 +107,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     MessagingSeedService,
     AudioAssetsSeedService,
     IdentityVerificationSeedService,
+    AuthzClinicalRolesSeedService,
     BootstrapAdminSeedService,
   ],
 })

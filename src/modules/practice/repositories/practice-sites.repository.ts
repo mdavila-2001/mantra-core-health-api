@@ -86,6 +86,21 @@ export class PracticeSitesRepository {
   }
 
   /**
+   * Sedes de una práctica, por código.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica consultada.
+   * @returns Sus sedes.
+   */
+  async findByPractice(
+    em: EntityManager,
+    practiceId: string,
+  ): Promise<PracticeSites[]> {
+    const sites = await em.find(PracticeSites, { practiceId });
+    return sites.sort((a, b) => a.code.localeCompare(b.code));
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

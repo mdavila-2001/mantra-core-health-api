@@ -29,7 +29,11 @@ export {
   readRefreshCookie,
 } from './auth/refresh-cookie';
 export type { RefreshCookieEnv } from './auth/refresh-cookie';
-export { runWithTenant, getCurrentTenantId } from './tenant/tenant-context';
+export {
+  runWithTenant,
+  getCurrentTenantId,
+  requireTenantId,
+} from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
 export {

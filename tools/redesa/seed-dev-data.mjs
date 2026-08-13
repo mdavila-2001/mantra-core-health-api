@@ -291,9 +291,107 @@ function dayUtc(days) {
   return date;
 }
 
+/**
+ * La zona horaria de las sedes que se siembran. Bolivia no tiene horario de
+ * verano, así que su desfase es constante todo el año.
+ */
+const ZONA = 'America/La_Paz';
+
+/**
+ * Cuántas horas hay que sumar a una hora de pared de {@link ZONA} para expresarla
+ * en UTC. Para La Paz (UTC-4) son 4.
+ *
+ * ## Por qué esto existe, y por qué no debería
+ *
+ * `generateSlots` interpreta el `startTime` de una franja **en UTC**
+ * (`scheduling-catalog.service.ts`, `atTime()` usa `setUTCHours`) y **no lee**
+ * `schedulable_resources.time_zone`, aunque el recurso la declare y el modelo la
+ * exija. Consecuencia: una agenda que publica «mañanas de 08:00 a 12:00»
+ * materializa cupos a las **04:00–08:00 hora de La Paz**, y el portal del
+ * paciente ofrece turnos de madrugada.
+ *
+ * Mientras el generador no respete la zona del recurso, el seeder declara la
+ * hora ya convertida para que los datos de desarrollo se vean como se verían si
+ * el generador fuera correcto. Es una compensación deliberada, no un descuido:
+ * cuando el backend lea `time_zone`, esto se borra y las franjas vuelven a
+ * declararse en hora local.
+ */
+function horaUtcDeLocal(horaLocal) {
+  const referencia = new Date();
+  // El desfase sale de la propia base de datos de zonas horarias, no de una
+  // constante: si alguien cambia ZONA por una con horario de verano, esto sigue
+  // dando el desfase vigente en vez de un número escrito a mano que caduca.
+  const enZona = new Date(referencia.toLocaleString('en-US', { timeZone: ZONA }));
+  const enUtc = new Date(referencia.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const desfaseHoras = Math.round((enUtc.getTime() - enZona.getTime()) / 3_600_000);
+
+  const [hh, mm, ss] = horaLocal.split(':').map(Number);
+  const total = (hh + desfaseHoras + 24) % 24;
+  return [total, mm, ss ?? 0]
+    .map((n) => String(n).padStart(2, '0'))
+    .join(':');
+}
+
 /** Imprime una línea de avance (se puede silenciar con --quiet). */
 function step(message) {
   if (!flag('quiet')) console.log(message);
+}
+
+/**
+ * Si la política de firma D-05 exige firmar esta receta antes de emitirla.
+ *
+ * Repite la resolución del backend —una dimensión en `null` es comodín, gana la
+ * política vigente más específica, y sin ninguna aplicable el fail-safe
+ * devuelve `false`— en vez de suponer un resultado. La suposición es
+ * justamente lo que dejaba el paso de emisión sin firma en rojo permanente
+ * sobre las bases con políticas sembradas.
+ *
+ * Es lectura pública del propio contrato (`GET .../prescription-signature-policies`),
+ * así que el seeder no necesita saber cómo se sembró la base para afirmar el
+ * status correcto.
+ */
+async function requiereFirma(tenantId, medicationConceptId) {
+  const vigentes = await call(
+    'Historia clínica',
+    'Políticas de firma de receta del tenant',
+    'GET',
+    `/clinical/prescription-signature-policies?tenantId=${tenantId}`,
+  );
+  if (!vigentes.ok || !Array.isArray(vigentes.body)) return false;
+
+  const ahora = Date.now();
+  // Las dimensiones que la emisión no declara —jurisdicción y canal— sólo las
+  // satisface el comodín: el backend compara contra `undefined`, y nada que no
+  // sea `null` puede igualarlo.
+  const aplicables = vigentes.body.filter(
+    (policy) =>
+      new Date(policy.effectiveFrom).getTime() <= ahora &&
+      (policy.effectiveTo === null ||
+        new Date(policy.effectiveTo).getTime() > ahora) &&
+      policy.jurisdictionCode === null &&
+      policy.channelConceptId === null &&
+      (policy.medicationTypeConceptId === null ||
+        policy.medicationTypeConceptId === medicationConceptId),
+  );
+  if (aplicables.length === 0) return false;
+
+  const especificidad = (policy) =>
+    (policy.jurisdictionCode === null ? 0 : 1) +
+    (policy.medicationTypeConceptId === null ? 0 : 1) +
+    (policy.channelConceptId === null ? 0 : 1);
+
+  const ganadora = aplicables.reduce((mejor, candidata) => {
+    const scoreMejor = especificidad(mejor);
+    const scoreCandidata = especificidad(candidata);
+    if (scoreCandidata > scoreMejor) return candidata;
+    if (scoreCandidata < scoreMejor) return mejor;
+    // Desempate: la vigencia más reciente gana, igual que en el servicio.
+    return new Date(candidata.effectiveFrom) > new Date(mejor.effectiveFrom)
+      ? candidata
+      : mejor;
+  });
+
+  return ganadora.signatureRequired === true;
 }
 
 // --- sesión -------------------------------------------------------------------
@@ -415,7 +513,7 @@ for (let index = 0; index < DOCTORS; index += 1) {
         resourceRefType: 'practitioner_profiles',
         resourceRefId: profileId,
         name: `Consultorio ${titulo} — ${apellido}`,
-        timeZone: 'America/La_Paz',
+        timeZone: ZONA,
         capacity: 1,
       },
       expect: [200, 201],
@@ -457,10 +555,11 @@ for (let index = 0; index < DOCTORS; index += 1) {
         name: `Mañanas L-V — ${apellido}`,
         slotMinutes: 30,
         bookingPolicyId: policy.ok ? policy.body.id : undefined,
+        // Las horas se declaran locales y se convierten acá: ver `horaUtcDeLocal`.
         rules: [1, 2, 3, 4, 5].map((dayOfWeek) => ({
           dayOfWeek,
-          startTime: '08:00:00',
-          endTime: '12:00:00',
+          startTime: horaUtcDeLocal('08:00:00'),
+          endTime: horaUtcDeLocal('12:00:00'),
         })),
       },
       expect: [200, 201],
@@ -1137,6 +1236,7 @@ for (const [n, cita] of conHistoria.entries()) {
     );
   }
 
+  const medicationConceptId = conceptIds[(n + 7) % conceptIds.length];
   const prescription = await call(
     'Historia clínica',
     `Receta de ${patient.apellido}`,
@@ -1147,7 +1247,7 @@ for (const [n, cita] of conHistoria.entries()) {
         custodianTenantId: tenantId,
         patientProfileId: patient.profileId,
         encounterId,
-        medicationConceptId: conceptIds[(n + 7) % conceptIds.length],
+        medicationConceptId,
         prescriberProfileId: doctor.profileId,
         doseText: pick(['500 mg', '1 g', '250 mg', '10 mg']),
         frequencyText: pick([
@@ -1200,17 +1300,27 @@ for (const [n, cita] of conHistoria.entries()) {
         }
       }
     } else if (n === 0) {
-      // Sin política de firma vigente la emisión de un borrador NO exige firma
-      // (REDESA D-05 es fail-safe: sin política aplicable no se endurece). Se
-      // ejercita para dejar el comportamiento fijado por una prueba.
+      // Emitir un borrador SIN firmar tiene dos respuestas correctas, y cuál
+      // toca no lo decide este archivo: lo decide qué políticas D-05 tenga
+      // sembrada la base. Con una política vigente que aplique, el backend
+      // rechaza con 422; sin ninguna, el fail-safe deja emitir.
+      //
+      // La expectativa fija en 200 daba un rojo permanente en cualquier base
+      // con políticas sembradas —el H-10 del informe—, y un paso que siempre
+      // está en rojo deja de avisar de nada. Fijarla en 422 sólo movía el rojo
+      // a la base sin políticas. Así que la expectativa se resuelve igual que
+      // la resuelve el backend, y el paso afirma el status correcto en las dos.
+      const exigeFirma = await requiereFirma(tenantId, medicationConceptId);
       await call(
         'Historia clínica',
-        'Emitir un borrador sin firmar (permitido sin política de firma)',
+        exigeFirma
+          ? 'Emitir un borrador sin firmar con política D-05 vigente (se rechaza)'
+          : 'Emitir un borrador sin firmar sin política D-05 vigente (permitido)',
         'POST',
         `/clinical/medication-requests/${prescriptionId}/issue`,
         {
           body: {},
-          expect: [200, 201],
+          expect: exigeFirma ? [422] : [200, 201],
         },
       );
     }

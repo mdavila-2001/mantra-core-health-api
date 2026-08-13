@@ -83,6 +83,27 @@ export class PersonAccountLinksRepository {
     });
   }
 
+  /**
+   * Vínculo activo de una persona con su cuenta (el titular, `SELF`).
+   *
+   * Es el camino de vuelta que faltaba: dado un perfil de profesional se
+   * necesita saber qué usuario lo encarna para concederle su rol asistencial
+   * cuando se verifica la matrícula.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personId - Persona de la que se busca la cuenta.
+   * @returns El vínculo activo, si lo hay.
+   */
+  findActiveByPerson(
+    em: EntityManager,
+    personId: string,
+  ): Promise<PersonAccountLinks | null> {
+    return em.findOne(PersonAccountLinks, {
+      personId,
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+  }
+
   /** Marca SUPERSEDED el vínculo activo previo del mismo usuario (uq active_user). */
   supersedeActiveForUser(
     em: EntityManager,

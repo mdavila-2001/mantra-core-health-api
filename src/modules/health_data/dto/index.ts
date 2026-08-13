@@ -1,4 +1,6 @@
 export {
+  CreateSourceConnectionDto,
+  SourceConnectionResponseDto,
   OpenIngestionBatchDto,
   IngestionBatchResponseDto,
   RecordIngestionRecordDto,
