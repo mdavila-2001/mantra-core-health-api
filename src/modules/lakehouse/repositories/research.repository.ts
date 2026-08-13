@@ -109,7 +109,17 @@ export class ResearchRepository {
       state: string;
     },
   ): ResearchProjects {
-    return em.create(ResearchProjects, data as never, { partial: true });
+    return em.create(
+      ResearchProjects,
+      {
+        ...data,
+        // `protocol_reference` es NOT NULL: no todo proyecto tiene protocolo
+        // registrado en un repositorio externo, y la cadena vacía expresa eso
+        // sin inventar una referencia que después nadie podría resolver.
+        protocolReference: data.protocolReference ?? '',
+      } as never,
+      { partial: true },
+    );
   }
 
   // --- Cohortes (UC-63-09, 10, 11) ---
@@ -154,7 +164,16 @@ export class ResearchRepository {
       state: string;
     },
   ): CohortDefinitions {
-    return em.create(CohortDefinitions, data as never, { partial: true });
+    return em.create(
+      CohortDefinitions,
+      {
+        ...data,
+        // `exclusion_expression` es NOT NULL: una cohorte sin criterios de
+        // exclusión no excluye a nadie, y eso se expresa con la cadena vacía.
+        exclusionExpression: data.exclusionExpression ?? '',
+      } as never,
+      { partial: true },
+    );
   }
 
   /**

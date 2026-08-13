@@ -22,6 +22,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const repo = {
     findEndpoint: mockFn(),
+    findStudiesByPatient: mockFn().mockResolvedValue([]),
     findStudy: mockFn(),
     findStudyByUid: mockFn(),
     createEndpoint: mockFn(),

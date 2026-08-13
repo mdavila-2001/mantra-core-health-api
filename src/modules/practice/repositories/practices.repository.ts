@@ -49,6 +49,30 @@ export interface CreatePracticeData {
  */
 @Injectable()
 export class PracticesRepository {
+  /**
+   * Prácticas activas del tenant.
+   *
+   * `practice.practices` sí tiene `tenant_id`, así que el listado se acota
+   * siempre: sin esto sería una fuga entre organizaciones y el guardrail
+   * `TENANT_SCOPE_MISSING` lo rechazaría.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant del contexto.
+   * @param activeStatusConceptId - Estado que cuenta como activa.
+   * @returns Las prácticas del tenant, por código.
+   */
+  async findByTenant(
+    em: EntityManager,
+    tenantId: string,
+    activeStatusConceptId: string,
+  ): Promise<Practices[]> {
+    const practices = await em.find(Practices, {
+      tenantId,
+      statusConceptId: activeStatusConceptId,
+    });
+    return practices.sort((a, b) => a.code.localeCompare(b.code));
+  }
+
   /** Prácticas cuyo estado coincide con el indicado. */
   findActive(
     em: EntityManager,

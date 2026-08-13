@@ -85,5 +85,9 @@ import {
     ImmunizationsService,
     ClinicalReadService,
   ],
+  // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
+  // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:
+  // las invariantes de la historia clínica siguen viviendo aquí.
+  exports: [ConditionsService, ProceduresService, ServiceRequestsService],
 })
 export class ClinicalModule {}

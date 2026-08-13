@@ -33,6 +33,9 @@ function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const ingestionRepo = {
+    findSourceSystemByCode: mockFn().mockResolvedValue(null),
+    createSourceSystem: mockFn(),
+    createConnection: mockFn(),
     findConnectionForUpdate: mockFn(),
     createBatch: mockFn(() => ({ id: BATCH })),
     findBatchById: mockFn(),

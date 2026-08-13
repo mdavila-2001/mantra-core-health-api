@@ -24,6 +24,33 @@ export class ConditionsService {
     this.logger.setContext(ConditionsService.name);
   }
 
+  /**
+   * Condición activa del paciente con ese código, si ya está registrada.
+   *
+   * La expone `procedures_perioperative`, que declara el diagnóstico del caso
+   * por código: cuando el clínico ya registró esa misma condición en consulta,
+   * el caso quirúrgico debe apuntar a la que existe en vez de fallar.
+   *
+   * @param custodianTenantId - Tenant custodio de la historia.
+   * @param patientProfileId - Paciente.
+   * @param codeConceptId - Código de la condición.
+   * @returns El id de la condición activa, o `null`.
+   */
+  async findActiveByCode(
+    custodianTenantId: string,
+    patientProfileId: string,
+    codeConceptId: string,
+  ): Promise<{ id: string } | null> {
+    const found = await this.conditionsRepo.findActiveByCode(
+      this.em,
+      custodianTenantId,
+      patientProfileId,
+      codeConceptId,
+      CLIN.CONDITION_ACTIVE,
+    );
+    return found ? { id: found.id } : null;
+  }
+
   /** UC-08-08: registra una condición evitando duplicados activos por código. */
   async create(
     dto: CreateConditionDto,

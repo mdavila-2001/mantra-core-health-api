@@ -395,6 +395,8 @@ export class OpsReleasesRepository {
         decisionConceptId: data.decisionConceptId,
         decisionReason: data.decisionReason,
         decidedAt: new Date(),
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

@@ -61,6 +61,10 @@ export class ArchiveManifests {
   /**
    * Valor de verified at mantenido por la instancia.
    */
-  @Property({ fieldName: 'verified_at', columnType: 'timestamptz' })
-  verifiedAt!: Date;
+  @Property({
+    fieldName: 'verified_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  verifiedAt?: Date;
 }

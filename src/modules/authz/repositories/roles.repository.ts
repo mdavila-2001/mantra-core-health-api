@@ -73,6 +73,26 @@ export class RolesRepository {
   }
 
   /**
+   * Roles asignables y activos, visibles para un tenant.
+   *
+   * Devuelve los de sistema (sin tenant) y los propios del tenant indicado: un
+   * administrador no debe ver —ni poder asignar— un rol compuesto por otra
+   * organización.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant del actor, si lo hay.
+   * @returns Los roles asignables, ordenados por código.
+   */
+  async listAssignable(em: EntityManager, tenantId?: string): Promise<Roles[]> {
+    const roles = await em.find(Roles, {
+      isAssignable: true,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      $or: [{ tenantId: null }, ...(tenantId ? [{ tenantId }] : [])],
+    });
+    return roles.sort((a, b) => a.code.localeCompare(b.code));
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

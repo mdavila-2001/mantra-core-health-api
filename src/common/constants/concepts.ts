@@ -5238,6 +5238,36 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // Las referencias de procedencia y linaje son polimórficas: la fila guarda
   // el par (tipo de entidad, id). Sin un vocabulario de tipos, el `target_id`
   // no diría a qué tabla apunta.
+  /**
+   * Papel por defecto de un objetivo de procedencia: el recurso **resultante**
+   * de la actividad.
+   *
+   * `health_provenance_targets.role_concept_id` es NOT NULL en el esquema y su
+   * contrato lo declaraba opcional; ningún llamador lo pasaba, así que toda
+   * escritura de procedencia fallaba con 500 —y con ella la proyección de un
+   * recurso canónico, que es la puerta de entrada del módulo—.
+   */
+  /**
+   * Formato por defecto del contenido de una versión canónica: JSON FHIR.
+   *
+   * `canonical_health_resource_versions.payload_format_concept_id` es NOT NULL
+   * y su contrato lo declaraba opcional; ningún llamador lo pasaba, así que
+   * proyectar un recurso canónico —la puerta de entrada del módulo— fallaba
+   * siempre con 500. Todo lo que el módulo normaliza hoy es JSON FHIR R5, así
+   * que es el valor honesto por defecto.
+   */
+  HD_PAYLOAD_FORMAT_FHIR_JSON: def(
+    'health-data:payload-format:fhir-json',
+    'HD_FMT_FHIR_JSON',
+    'FHIR R5 JSON payload',
+  ),
+
+  HD_TARGET_ROLE_OUTPUT: def(
+    'health-data:target-role:output',
+    'HD_TARGET_OUTPUT',
+    'Provenance target: resulting resource',
+  ),
+
   HD_ENTITY_INGESTION_RECORD: def(
     'health-data:entity-type:ingestion-record',
     'HD_ENT_RECORD',

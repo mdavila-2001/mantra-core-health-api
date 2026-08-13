@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { PreconditionFailedException } from '../errors/domain.exception';
 
 /** Contexto de tenant activo durante el procesamiento de una petición. */
 export interface TenantContext {
@@ -22,4 +23,28 @@ export function runWithTenant<T>(tenantId: string, fn: () => T): T {
 /** Tenant del contexto actual, o `undefined` si el request no fijó ninguno. */
 export function getCurrentTenantId(): string | undefined {
   return storage.getStore()?.tenantId;
+}
+
+/**
+ * Tenant del contexto, exigiéndolo.
+ *
+ * Lo usan las lecturas que listan filas de una tabla con `tenant_id`: servirlas
+ * sin acotar sería una fuga entre organizaciones, y devolver una lista vacía
+ * sería mentir sobre el motivo. `TenantContextInterceptor` fija el contexto para
+ * todo sujeto que pertenezca a un tenant; queda sin fijar cuando el actor no
+ * pertenece a ninguno o cuando un `SUPERADMIN` no indica `X-Tenant-Id`, y en
+ * ambos casos lo correcto es decirlo.
+ *
+ * @returns El tenant activo.
+ * @throws PreconditionFailedException si no hay tenant en el contexto.
+ */
+export function requireTenantId(): string {
+  const tenantId = getCurrentTenantId();
+  if (!tenantId) {
+    throw new PreconditionFailedException(
+      'La operación requiere un tenant: indique X-Tenant-Id.',
+      {},
+    );
+  }
+  return tenantId;
 }

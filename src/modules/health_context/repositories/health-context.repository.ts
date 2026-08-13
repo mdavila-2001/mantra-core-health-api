@@ -545,9 +545,15 @@ export class HealthContextRepository {
         collectionRunId: data.collectionRunId,
         schemaVersion: data.schemaVersion,
         summary: data.summary,
-        contextPayloadJson: data.contextPayloadJson,
-        observedAt: data.observedAt,
+        // NOT NULL: una versión sin contenido es un contexto vacío, no ausente.
+        contextPayloadJson: data.contextPayloadJson ?? {},
+        // NOT NULL: sin instante de observación declarado, se observa al
+        // registrar.
+        observedAt: data.observedAt ?? new Date(),
         expiresAt: data.expiresAt,
+        // La versión entra en vigor al crearse salvo que se diga otra cosa; la
+        // columna es NOT NULL y ningún llamador la aportaba.
+        effectiveFrom: new Date(),
         confidenceScore: data.confidenceScore,
         contentHash: data.contentHash,
         statusConceptId: data.statusConceptId,

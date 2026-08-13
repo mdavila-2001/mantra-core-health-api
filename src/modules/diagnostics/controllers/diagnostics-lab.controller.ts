@@ -1,14 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DiagnosticsLabService } from '../services';
 import {
   CreateWorkOrderDto,
@@ -17,6 +24,8 @@ import {
   VerifyResultDto,
   WorkOrderCreatedDto,
   ResourceCreatedDto,
+  ListWorkOrdersQueryDto,
+  WorkOrderSummaryDto,
 } from '../dto';
 
 /**
@@ -37,6 +46,24 @@ export class DiagnosticsLabController {
   constructor(private readonly service: DiagnosticsLabService) {}
 
   /** UC-20-04. */
+  /**
+   * Cola de trabajo del laboratorio.
+   *
+   * `diagnostics` no tenía ninguna lectura: la orden creada sólo existía en la
+   * respuesta de su propio POST, así que nadie podía consultar qué quedaba
+   * pendiente.
+   */
+  @Get('work-orders')
+  @ApiOperation({
+    summary: 'Listar las órdenes de trabajo del laboratorio',
+    description: 'Acotado siempre al tenant del contexto.',
+  })
+  listWorkOrders(
+    @Query() query: ListWorkOrdersQueryDto,
+  ): Promise<WorkOrderSummaryDto[]> {
+    return this.service.listWorkOrders(requireTenantId(), query);
+  }
+
   @Post('work-orders')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir orden de trabajo y desglosar pruebas' })

@@ -14,7 +14,7 @@ export interface CreateValueSetData {
   /**
    * Valor de internal code mantenido por la instancia.
    */
-  internalCode: string;
+  internalCode?: string;
   /**
    * Valor de name mantenido por la instancia.
    */

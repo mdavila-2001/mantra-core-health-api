@@ -27,6 +27,7 @@ function build() {
     findByCode: mockFn(),
     findById: mockFn(),
     create: mockFn(),
+    listAssignable: mockFn().mockResolvedValue([]),
   };
   const rolePermsRepo = {
     revokeAllForRole: mockFn().mockResolvedValue(0),
@@ -37,7 +38,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new AuthzRolesService(
     em as any,
-    rolesRepo,
+    rolesRepo as any,
     rolePermsRepo as any,
     permissionsRepo as any,
     fieldPermsRepo as any,

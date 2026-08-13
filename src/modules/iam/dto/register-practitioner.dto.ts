@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsEmail,
   IsIn,
@@ -254,6 +256,18 @@ export class RegisterPractitionerResponseDto {
   licenseId!: string;
 
   /**
+   * Credencial profesional creada, pendiente de verificación.
+   *
+   * Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el
+   * acto que habilita al profesional a ejercer— la exige por id, y no había
+   * ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no
+   * expone ningún listado de credenciales. La verificación quedaba fuera de
+   * alcance salvo consultando la base de datos a mano.
+   */
+  @ApiProperty({ format: 'uuid' })
+  credentialId!: string;
+
+  /**
    * Estado de verificación del perfil al terminar el alta. Siempre PENDING:
    * registrarse no habilita a ejercer.
    */
@@ -302,6 +316,33 @@ export class AssistedPractitionerRegistrationDto extends OmitType(
   @IsString()
   @MaxLength(500)
   reason!: string;
+
+  /**
+   * Roles asistenciales con los que el profesional queda operativo.
+   *
+   * Sin esto, el alta produce una cuenta que puede iniciar sesión y no puede
+   * hacer nada: los endpoints clínicos exigen `@Roles('CLINICIAN')`,
+   * `@Roles('SURGEON')`… y esos códigos sólo llegan al token desde
+   * `authz.user_role_assignments`. Se conceden aquí, en la misma transacción del
+   * alta, porque quien la ejecuta es un `SECURITY_ADMIN` que ya está decidiendo
+   * a quién incorpora y con qué función.
+   *
+   * El autorregistro público **no** admite este campo a propósito: allí no hay
+   * nadie validando quién dice ser el solicitante.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Roles asistenciales a conceder (códigos de `GET /authz/roles`)',
+    isArray: true,
+    type: String,
+    example: ['CLINICIAN', 'SURGEON'],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @MaxLength(100, { each: true })
+  clinicalRoles?: string[];
 }
 
 /**
@@ -325,4 +366,15 @@ export class AssistedPractitionerRegistrationResponseDto extends RegisterPractit
    */
   @ApiProperty({ type: String, format: 'date-time' })
   activationExpiresAt!: Date;
+
+  /**
+   * Roles asistenciales efectivamente concedidos.
+   *
+   * Se devuelven para que el administrador vea con qué quedó operativo el
+   * profesional sin tener que consultarlo aparte. Si alguno de los pedidos no
+   * existía, el alta entera falla, así que esta lista coincide siempre con lo
+   * solicitado.
+   */
+  @ApiPropertyOptional({ isArray: true, type: String })
+  clinicalRoles?: string[];
 }

@@ -39,14 +39,14 @@ export class ObjectManifests {
   /**
    * Identificador asociado a patient profile.
    */
-  @Property({ fieldName: 'patient_profile_id', type: 'uuid' })
-  patientProfileId!: string;
+  @Property({ fieldName: 'patient_profile_id', type: 'uuid', nullable: true })
+  patientProfileId?: string;
 
   /**
    * Identificador asociado a current version.
    */
-  @Property({ fieldName: 'current_version_id', type: 'uuid' })
-  currentVersionId!: string;
+  @Property({ fieldName: 'current_version_id', type: 'uuid', nullable: true })
+  currentVersionId?: string;
 
   /**
    * Valor de lifecycle state mantenido por la instancia.
@@ -57,8 +57,12 @@ export class ObjectManifests {
   /**
    * Valor de retention policy code mantenido por la instancia.
    */
-  @Property({ fieldName: 'retention_policy_code', columnType: 'varchar' })
-  retentionPolicyCode!: string;
+  @Property({
+    fieldName: 'retention_policy_code',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  retentionPolicyCode?: string;
 
   /**
    * Fecha y hora en que se creó el registro.

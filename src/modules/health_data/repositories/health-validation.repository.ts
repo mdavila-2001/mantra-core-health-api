@@ -94,6 +94,8 @@ export class HealthValidationRepository {
         resultConceptId: data.resultConceptId,
         issueCount: data.issueCount,
         summaryJson: data.summaryJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -158,6 +160,8 @@ export class HealthValidationRepository {
         expressionPath: data.expressionPath,
         diagnosticsText: data.diagnosticsText,
         locationJson: data.locationJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -252,6 +256,8 @@ export class HealthValidationRepository {
         recordsEvaluated: data.recordsEvaluated,
         issuesDetected: data.issuesDetected,
         summaryJson: data.summaryJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -304,9 +310,15 @@ export class HealthValidationRepository {
         healthDataQualityRuleId: data.healthDataQualityRuleId,
         canonicalHealthResourceId: data.canonicalHealthResourceId,
         canonicalResourceVersionId: data.canonicalResourceVersionId,
-        fieldPath: data.fieldPath,
-        observedValueHash: data.observedValueHash,
+        // NOT NULL: un problema que no señala un campo concreto afecta al
+        // recurso entero, y así se registra.
+        fieldPath: data.fieldPath ?? '$',
+        // NOT NULL: sin huella del valor observado se guarda vacío; el valor
+        // en claro nunca se registra, que es el motivo de que sea un hash.
+        observedValueHash: data.observedValueHash ?? '',
         statusConceptId: data.statusConceptId,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

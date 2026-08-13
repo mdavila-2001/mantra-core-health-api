@@ -40,6 +40,44 @@ export class AuthzStatusResultDto {
 }
 
 /** Resultado de crear un rol junto a sus bindings de permisos. */
+/**
+ * Rol que un administrador puede asignar a un usuario.
+ *
+ * Sin este listado, asignar un rol exigía conocer de antemano el uuid de una
+ * fila que ninguna operación devolvía.
+ */
+export class AssignableRoleDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Valor de code mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Código que exige `@Roles(...)`' })
+  code!: string;
+
+  /**
+   * Valor de name mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Nombre legible' })
+  name!: string;
+
+  /**
+   * Valor de is system mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Rol de sistema (no ligado a un tenant)' })
+  isSystem!: boolean;
+
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiPropertyOptional({ description: 'Tenant propietario', format: 'uuid' })
+  tenantId?: string;
+}
+
 export class RoleResponseDto {
   /**
    * Identificador único de la instancia.

@@ -1,15 +1,22 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Query,
   Patch,
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   PeriopCasesService,
   PeriopPreopService,
@@ -25,8 +32,14 @@ import {
   DiagnosesResponseDto,
   AssignTeamMemberDto,
   TeamMemberResponseDto,
+  TeamMemberSummaryDto,
+  ListCasesQueryDto,
+  CaseListResponseDto,
+  CaseDetailDto,
   CreatePreopAssessmentDto,
   PreopAssessmentResponseDto,
+  CreatePreoperativeOrderDto,
+  PreoperativeOrderResponseDto,
   VerifyOrdersDto,
   VerifyOrdersResponseDto,
   SubmitChecklistPhaseDto,
@@ -78,6 +91,44 @@ export class PeriopController {
     private readonly preopService: PeriopPreopService,
     private readonly intraopService: PeriopIntraopService,
   ) {}
+
+  /**
+   * Agenda quirúrgica del tenant.
+   *
+   * El módulo no tenía ninguna lectura: un caso creado sólo era accesible por
+   * el uuid que devolvía su propio POST, así que nadie podía consultar la
+   * programación del día ni los casos de un paciente.
+   */
+  @Get('procedure-cases')
+  @Roles(
+    'SURGEON',
+    'ANESTHESIOLOGIST',
+    'PERIOP_NURSE',
+    'SURGERY_SCHEDULER',
+    'PERIOP_ADMIN',
+  )
+  @ApiOperation({
+    summary: 'Listar casos quirúrgicos (agenda)',
+    description:
+      'Acotado siempre al tenant del contexto; admite paciente, quirófano, cirujano, estado y ventana temporal.',
+  })
+  listCases(@Query() query: ListCasesQueryDto): Promise<CaseListResponseDto> {
+    return this.casesService.listCases(requireTenantId(), query);
+  }
+
+  /** Detalle agregado del caso: equipo, diagnósticos, órdenes, plan e informes. */
+  @Get('procedure-cases/:id')
+  @Roles(
+    'SURGEON',
+    'ANESTHESIOLOGIST',
+    'PERIOP_NURSE',
+    'SURGERY_SCHEDULER',
+    'PERIOP_ADMIN',
+  )
+  @ApiOperation({ summary: 'Detalle completo del caso quirúrgico' })
+  getCase(@Param('id', ParseUUIDPipe) id: string): Promise<CaseDetailDto> {
+    return this.casesService.getCaseDetail(id);
+  }
 
   /** UC-53-01. */
   @Post('procedure-cases')
@@ -174,6 +225,82 @@ export class PeriopController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PreopAssessmentResponseDto> {
     return this.preopService.createAssessment(id, dto, actor);
+  }
+
+  /**
+   * UC-53-04: indicar una orden preoperatoria.
+   *
+   * El endpoint no existía: sin él ningún caso tenía órdenes, y como el caso
+   * sólo pasa a `READY_FOR_SURGERY` cuando se verifican las que tiene, el
+   * circuito preoperatorio no podía cerrarse.
+   */
+  @Post('procedure-cases/:id/preoperative-orders')
+  @Roles('ANESTHESIOLOGIST', 'SURGEON', 'PERIOP_ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Indicar una orden preoperatoria para el caso',
+    description:
+      'La orden clínica puede venir por id o declararse por código, en cuyo caso se registra en la historia.',
+  })
+  createPreoperativeOrder(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreatePreoperativeOrderDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PreoperativeOrderResponseDto> {
+    return this.preopService.createOrder(id, dto, actor);
+  }
+
+  /**
+   * Equipo asignado al caso.
+   *
+   * Es la única lectura del módulo, y existe porque sin ella el circuito no
+   * cierra: el cirujano principal se da de alta como integrante dentro de
+   * `POST /procedure-cases` —no hay respuesta que devuelva su id— y aceptar la
+   * participación exige ese id. Sin esta consulta, ese integrante no podía
+   * aceptar nunca y el caso no podía confirmarse.
+   */
+  @Get('procedure-cases/:id/team-members')
+  @Roles(
+    'SURGEON',
+    'ANESTHESIOLOGIST',
+    'PERIOP_NURSE',
+    'SURGERY_SCHEDULER',
+    'PERIOP_ADMIN',
+  )
+  @ApiOperation({ summary: 'Listar el equipo del caso quirúrgico' })
+  listTeamMembers(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<TeamMemberSummaryDto[]> {
+    return this.casesService.listTeamMembers(id);
+  }
+
+  /**
+   * C-14 (CAN-INT-002): el integrante acepta su participación.
+   *
+   * Faltaba el acto entero. `confirmCase` exige que cada miembro esté
+   * `TEAM_ACCEPTED` y nada escribía ese estado —todos nacen `TEAM_ASSIGNED`—,
+   * así que **ningún caso quirúrgico podía confirmarse jamás**.
+   */
+  @Post('procedure-cases/:id/team-members/:memberId/accept')
+  @Roles(
+    'SURGEON',
+    'ANESTHESIOLOGIST',
+    'PERIOP_NURSE',
+    'SURGERY_SCHEDULER',
+    'PERIOP_ADMIN',
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Aceptar la participación en el equipo quirúrgico',
+    description:
+      'Sólo el propio integrante o un PERIOP_ADMIN; se comprueba su credencial profesional vigente.',
+  })
+  acceptTeamMember(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('memberId', ParseUUIDPipe) memberId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TeamMemberResponseDto> {
+    return this.casesService.acceptTeamMember(id, memberId, actor);
   }
 
   /** UC-53-04. */
