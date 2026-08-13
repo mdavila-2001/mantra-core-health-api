@@ -225,6 +225,24 @@ export class IdentityChecksRepository {
   }
 
   /**
+   * Checks obligatorios del caso, en el orden en que se planificaron.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Identificador de case.
+   * @returns Los checks con `required = true` del caso.
+   */
+  findRequiredByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityChecks[]> {
+    return em.find(
+      IdentityChecks,
+      { identityVerificationCaseId: caseId, required: true },
+      { orderBy: { checkSequence: 'ASC' } },
+    );
+  }
+
+  /**
    * Checks listos para despacharse contra la autoridad externa.
    *
    * @param em - Contexto de persistencia o transacción activa.
