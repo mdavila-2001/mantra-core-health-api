@@ -9,7 +9,13 @@ import { CONCEPTS } from '../../../common';
  * `roles` del token nunca podría contenerlo -`conceptIdsToRoleCodes` descarta
  * lo desconocido- y todo el portal del paciente respondería 403.
  */
-export type RoleCode = 'USER' | 'SECURITY_ADMIN' | 'SUPERADMIN' | 'PATIENT';
+export type RoleCode =
+  | 'USER'
+  | 'SECURITY_ADMIN'
+  | 'SUPERADMIN'
+  | 'PATIENT'
+  | 'PRACTITIONER'
+  | 'CLINICIAN';
 
 /** Código de rol → concept id (`role_concept_id`). */
 export const ROLE_CONCEPT_BY_CODE: Readonly<Record<RoleCode, string>> = {
@@ -17,6 +23,8 @@ export const ROLE_CONCEPT_BY_CODE: Readonly<Record<RoleCode, string>> = {
   SECURITY_ADMIN: CONCEPTS.ROLE_SECURITY_ADMIN,
   SUPERADMIN: CONCEPTS.ROLE_SUPERADMIN,
   PATIENT: CONCEPTS.ROLE_PATIENT,
+  PRACTITIONER: CONCEPTS.ROLE_PRACTITIONER,
+  CLINICIAN: CONCEPTS.ROLE_CLINICIAN,
 };
 
 /** Concept id → código de rol (para construir el `roles` del JWT). */
@@ -25,6 +33,8 @@ export const ROLE_CODE_BY_CONCEPT: Readonly<Record<string, RoleCode>> = {
   [CONCEPTS.ROLE_SECURITY_ADMIN]: 'SECURITY_ADMIN',
   [CONCEPTS.ROLE_SUPERADMIN]: 'SUPERADMIN',
   [CONCEPTS.ROLE_PATIENT]: 'PATIENT',
+  [CONCEPTS.ROLE_PRACTITIONER]: 'PRACTITIONER',
+  [CONCEPTS.ROLE_CLINICIAN]: 'CLINICIAN',
 };
 
 /** Traduce una lista de `role_concept_id` a códigos, descartando desconocidos. */

@@ -183,6 +183,30 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   ROLE_USER: def('iam:role:user', 'USER', 'Standard user'),
   ROLE_PATIENT: def('iam:role:patient', 'PATIENT', 'Patient'),
+  /**
+   * Los dos roles del personal de salud.
+   *
+   * Faltaban, y no era un detalle: **57 declaraciones `@Roles(...)` los exigen**
+   * —32 `CLINICIAN` y 25 `PRACTITIONER`— así que esos endpoints sólo eran
+   * alcanzables por `SUPERADMIN`, que el guard trata como comodín. Un médico
+   * real recibía 403 en su agenda y en el expediente de sus pacientes.
+   *
+   * Es el mismo agujero que tenía `PATIENT` antes de sembrarse: sin el concepto,
+   * `conceptIdsToRoleCodes` descarta lo desconocido y el claim `roles` no puede
+   * contenerlo jamás.
+   *
+   * **Se separan a propósito.** `PRACTITIONER` es quién sos —agenda, recursos,
+   * tu propio perfil—; `CLINICIAN` es qué podés leer y escribir de un paciente,
+   * que es PHI. Registrarse otorga el primero; el segundo lo concede un
+   * administrador, porque la matrícula nace `PENDING` y declarar una matrícula
+   * no es probarla.
+   */
+  ROLE_PRACTITIONER: def(
+    'iam:role:practitioner',
+    'PRACTITIONER',
+    'Health practitioner',
+  ),
+  ROLE_CLINICIAN: def('iam:role:clinician', 'CLINICIAN', 'Clinician'),
 
   // --- Bloqueo de cuenta (iam.account_lockouts.*) ---
   LOCK_REASON_FAILED_ATTEMPTS: def(
