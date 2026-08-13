@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
-  getCurrentTenantId,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -21,14 +20,13 @@ import {
 import {
   CreatePracticeDto,
   CreateSiteDto,
-  PracticeListResponseDto,
   PracticeResponseDto,
+  PracticeSummaryDto,
   SiteResponseDto,
+  SiteSummaryDto,
+  CareSpaceSummaryDto,
   StatusResultDto,
 } from '../dto';
-
-/** Tope del listado de prácticas: una organización no tiene cientos. */
-const TOPE_DE_PRACTICAS = 200;
 
 /**
  * Casos de uso de organización y sitios: alta de la práctica raíz (bootstrap),
@@ -63,45 +61,6 @@ export class PracticeSitesService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PracticeSitesService.name);
-  }
-
-  /**
-   * Las prácticas del tenant activo — la lectura que el módulo no tenía.
-   *
-   * Sin esto no hay forma de elegir una práctica en pantalla, y sin
-   * `practiceId` no se puede pedir ni el plan de cuentas ni el diario ni el
-   * balance: el módulo contable quedaba inalcanzable aunque sus lecturas ya
-   * existieran.
-   *
-   * Acota por el tenant del contexto y no por un parámetro: quien pregunta ya
-   * declaró de qué organización habla en `X-Tenant-Id`, y el guard verificó que
-   * pertenece a ella. Aceptarlo por query sería ofrecer el listado de
-   * cualquiera a quien supiera escribir otro uuid.
-   */
-  async listPractices(): Promise<PracticeListResponseDto> {
-    const tenantId = getCurrentTenantId();
-    if (tenantId === undefined) {
-      return { items: [], count: 0 };
-    }
-
-    const practicas = await this.practicesRepo.findByTenant(
-      this.em.fork(),
-      tenantId,
-      TOPE_DE_PRACTICAS,
-    );
-
-    return {
-      items: practicas.map((practica) => ({
-        id: practica.id,
-        code: practica.code,
-        name: practica.name,
-        typeConceptId: practica.typeConceptId,
-        statusConceptId: practica.statusConceptId,
-        currencyConceptId: practica.currencyConceptId ?? null,
-        timeZone: practica.timeZone ?? null,
-      })),
-      count: practicas.length,
-    };
   }
 
   /** Bootstrap: da de alta la organización raíz (práctica). */
@@ -140,6 +99,96 @@ export class PracticeSitesService {
   }
 
   /** UC-14-01: da de alta un sitio de práctica bajo una práctica activa. */
+  /**
+   * Prácticas activas del tenant.
+   *
+   * `practice` no exponía ninguna lectura y todas sus altas son de
+   * `SECURITY_ADMIN`: la estructura física existía y nadie podía consultarla,
+   * de modo que el `operatingRoomId` que exige programar una intervención había
+   * que averiguarlo fuera del sistema.
+   *
+   * @param tenantId - Tenant del contexto.
+   * @returns Las prácticas activas.
+   */
+  async listPractices(tenantId: string): Promise<PracticeSummaryDto[]> {
+    const practices = await this.practicesRepo.findByTenant(
+      this.em,
+      tenantId,
+      PRAC.PRACTICE_ACTIVE,
+    );
+    return practices.map((p) => ({
+      id: p.id,
+      code: p.code,
+      name: p.name,
+      status: p.statusConceptId,
+    }));
+  }
+
+  /**
+   * Sedes de una práctica.
+   *
+   * @param practiceId - Práctica consultada.
+   * @param tenantId - Tenant del contexto, que debe ser el dueño.
+   * @returns Sus sedes.
+   * @throws ResourceNotFoundException si la práctica no existe o es de otro tenant.
+   */
+  async listSites(
+    practiceId: string,
+    tenantId: string,
+  ): Promise<SiteSummaryDto[]> {
+    const practice = await this.practicesRepo.findById(this.em, practiceId);
+    // Comprobar el tenant aquí y no sólo filtrar evita responder una lista
+    // vacía —indistinguible de "no tiene sedes"— cuando la práctica es de otra
+    // organización.
+    if (!practice || practice.tenantId !== tenantId) {
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
+    }
+    const sites = await this.sitesRepo.findByPractice(this.em, practiceId);
+    return sites.map((s) => ({
+      id: s.id,
+      practiceId: s.practiceId,
+      code: s.code,
+      name: s.name,
+      status: s.statusConceptId,
+    }));
+  }
+
+  /**
+   * Espacios de atención de una sede (quirófanos, consultas, boxes).
+   *
+   * @param siteId - Sede consultada.
+   * @param tenantId - Tenant del contexto, que debe ser el dueño.
+   * @returns Sus espacios.
+   * @throws ResourceNotFoundException si la sede no existe o es de otro tenant.
+   */
+  async listCareSpaces(
+    siteId: string,
+    tenantId: string,
+  ): Promise<CareSpaceSummaryDto[]> {
+    const site = await this.sitesRepo.findById(this.em, siteId);
+    if (!site) {
+      throw new ResourceNotFoundException('Sede no encontrada', { siteId });
+    }
+    const practice = await this.practicesRepo.findById(
+      this.em,
+      site.practiceId,
+    );
+    if (!practice || practice.tenantId !== tenantId) {
+      throw new ResourceNotFoundException('Sede no encontrada', { siteId });
+    }
+    const spaces = await this.spacesRepo.findBySite(this.em, siteId);
+    return spaces.map((s) => ({
+      id: s.id,
+      practiceSiteId: s.practiceSiteId,
+      code: s.code,
+      name: s.name,
+      spaceTypeConceptId: s.spaceTypeConceptId,
+      status: s.statusConceptId,
+    }));
+  }
+
   async createSite(
     practiceId: string,
     dto: CreateSiteDto,

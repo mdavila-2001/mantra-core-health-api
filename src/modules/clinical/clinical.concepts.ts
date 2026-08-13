@@ -120,6 +120,25 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'COND_DIAGNOSIS',
       display: 'Encounter diagnosis',
     },
+    CONDITION_CATEGORY_PROBLEM: {
+      code: 'COND_PROBLEM',
+      display: 'Problem list item',
+    },
+    /* Severidad y lateralidad del diagnóstico: enumeraciones cerradas (HL7
+       condition-severity y lateralidad de body-site). Antes no existía ningún
+       concepto de severidad ni de lateralidad en la plataforma. */
+    CONDITION_SEVERITY_MILD: { code: 'COND_SEV_MILD', display: 'Mild' },
+    CONDITION_SEVERITY_MODERATE: {
+      code: 'COND_SEV_MODERATE',
+      display: 'Moderate',
+    },
+    CONDITION_SEVERITY_SEVERE: { code: 'COND_SEV_SEVERE', display: 'Severe' },
+    CONDITION_LATERALITY_LEFT: { code: 'COND_LAT_LEFT', display: 'Left' },
+    CONDITION_LATERALITY_RIGHT: { code: 'COND_LAT_RIGHT', display: 'Right' },
+    CONDITION_LATERALITY_BILATERAL: {
+      code: 'COND_LAT_BILATERAL',
+      display: 'Bilateral',
+    },
 
     // --- allergy_intolerances --------------------------------------------------
     ALLERGY_ACTIVE: { code: 'ALG_ACTIVE', display: 'Allergy active' },
@@ -265,4 +284,51 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     MEDICATION_UNIT_TABLET: { code: 'UNIT_{tablet}', display: 'Tablet' },
     MEDICATION_UNIT_CAPSULE: { code: 'UNIT_{capsule}', display: 'Capsule' },
     MEDICATION_UNIT_DROP: { code: 'UNIT_[drp]', display: 'Drop' },
+
+    /* --- nosología inicial del diagnóstico -------------------------------------
+       ⚠️ CATÁLOGO INICIAL, NO UNA NOSOLOGÍA. Mismo criterio y mismas razones que
+       el vademécum de arriba: estos doce diagnósticos existen para que
+       `clinical.conditions.code_concept_id` tenga un conjunto de valores al que
+       amarrarse — sin binding, el selector de la ficha queda deshabilitado y el
+       médico no puede registrar un diagnóstico. Antes no había NINGÚN concepto de
+       diagnóstico en la plataforma.
+
+       Un despliegue real reemplaza esto por la clasificación que corresponda
+       (CIE-10 completa o SNOMED CT, cargada por el módulo de terminología) y esa
+       carga es de datos, no de código: se publica una versión nueva del conjunto
+       `condition-code` y el binding la sigue sin tocar nada de aquí.
+
+       Los códigos son CIE-10 reales (OMS), no inventados, para que la
+       sustitución por la clasificación completa sea un superconjunto y no un
+       renombrado. Los doce cubren la consulta ambulatoria más frecuente. */
+    CONDITION_HIPERTENSION: { code: 'I10', display: 'Hipertensión esencial' },
+    CONDITION_DIABETES_TIPO_2: {
+      code: 'E11.9',
+      display: 'Diabetes mellitus tipo 2',
+    },
+    CONDITION_IRA_ALTA: {
+      code: 'J06.9',
+      display: 'Infección aguda de las vías respiratorias superiores',
+    },
+    CONDITION_LUMBALGIA: { code: 'M54.5', display: 'Lumbalgia' },
+    CONDITION_MIGRANA: { code: 'G43.9', display: 'Migraña' },
+    CONDITION_GASTRITIS: { code: 'K29.7', display: 'Gastritis' },
+    CONDITION_ASMA: { code: 'J45.9', display: 'Asma' },
+    CONDITION_ANEMIA_FERROPENICA: {
+      code: 'D50.9',
+      display: 'Anemia ferropénica',
+    },
+    CONDITION_INFECCION_URINARIA: {
+      code: 'N39.0',
+      display: 'Infección de las vías urinarias',
+    },
+    CONDITION_DERMATITIS_ATOPICA: {
+      code: 'L20.9',
+      display: 'Dermatitis atópica',
+    },
+    CONDITION_HIPOTIROIDISMO: { code: 'E03.9', display: 'Hipotiroidismo' },
+    CONDITION_ANSIEDAD_GENERALIZADA: {
+      code: 'F41.1',
+      display: 'Trastorno de ansiedad generalizada',
+    },
   });

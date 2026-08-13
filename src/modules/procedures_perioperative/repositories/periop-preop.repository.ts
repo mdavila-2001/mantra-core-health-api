@@ -278,6 +278,28 @@ export class PeriopPreopRepository {
   }
 
   /**
+   * Órdenes del caso, para lectura.
+   *
+   * Sin bloqueo, a diferencia de `findOrdersByCaseForUpdate`: consultar qué
+   * queda pendiente antes de entrar a quirófano no debe frenar a quien esté
+   * verificando otra orden en ese momento.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Caso consultado.
+   * @returns Las órdenes del caso.
+   */
+  findOrdersByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+  ): Promise<PreoperativeOrders[]> {
+    return em.find(
+      PreoperativeOrders,
+      { procedureCaseId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Órdenes del caso, bloqueadas: verificar una y decidir si el caso queda
    * listo para cirugía tiene que ver el conjunto completo sin cambios en medio.
    */

@@ -54,14 +54,34 @@ leído por un cliente. La diferencia es práctica: **los cuatro significan
 
 | | |
 | --- | --- |
-| **HTTP** | 400 · 422 |
-| **Origen** | `ValidationPipe` global; violación de clave foránea (`23503`), `NOT NULL` (`23502`), `CHECK` (`23514`) o valor no perteneciente a un enum (`22P02`) |
-| **Significado técnico** | El cuerpo o los parámetros no satisfacen el contrato, o referencian algo que no existe |
+| **HTTP** | 400 |
+| **Origen** | `ValidationPipe` global; violación de `NOT NULL` (`23502`), `CHECK` (`23514`) o valor no perteneciente a un enum (`22P02`) |
+| **Significado técnico** | El cuerpo o los parámetros no satisfacen el contrato |
 | **Significado para el usuario** | «Revisá los datos del formulario» |
 | **Recuperable** | Sí, corrigiendo la petición |
 | **Automático** | No — reintentar sin cambiar nada nunca funciona |
-| **Acción** | Corregir el cuerpo. `details.violations` lista los campos; `details.column`/`details.constraint` señalan la restricción de base |
-| **Log** | `warn` |
+| **Acción** | Corregir el cuerpo. `details.violations` lista los campos incumplidos |
+| **Log** | `warn` (con la restricción de base bajo `integrity`, que **no** viaja al cliente) |
+
+> **Cambio 2026-08-12.** La clave foránea inexistente (`23503`) salía por aquí
+> con 422 y este mismo código, que el contrato publica como 400: el cliente
+> recibía `VALIDATION_FAILED` tanto para "el cuerpo no cumple el DTO" como para
+> "el identificador apunta a algo que no existe", y no podía distinguirlos. Pasó
+> a `PRECONDITION_FAILED` (422). Además, `constraint`/`table`/`column` y el
+> `detail` de PostgreSQL —que incluye el **valor** de la clave que falló— dejaron
+> de enviarse al cliente: van al log, localizables por `correlationId`.
+
+#### `PRECONDITION_FAILED` · referencia inexistente
+
+| | |
+| --- | --- |
+| **HTTP** | 422 |
+| **Origen** | Violación de clave foránea (`23503`), por SQLSTATE crudo o por `ForeignKeyConstraintViolationException` |
+| **Significado técnico** | El cuerpo es válido en forma, pero uno de sus identificadores no corresponde a ninguna fila |
+| **Significado para el usuario** | «El elemento seleccionado ya no existe» |
+| **Recuperable** | Sí, con otro identificador; reintentar el mismo cuerpo nunca funciona |
+| **Acción** | Volver a resolver el identificador (recargar el listado de origen) |
+| **Log** | `warn`, con `integrity.constraint`/`integrity.table` para soporte |
 
 #### `UNAUTHENTICATED`
 

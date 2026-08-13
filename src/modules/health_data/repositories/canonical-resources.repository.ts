@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { CONCEPTS } from '../../../common';
 import {
   CanonicalHealthResources,
   CanonicalHealthResourceVersions,
@@ -127,6 +128,9 @@ export class CanonicalResourcesRepository {
         lifecycleStatusConceptId: data.lifecycleStatusConceptId,
         securityLabelsJson: data.securityLabelsJson,
         purposeRestrictionsJson: data.purposeRestrictionsJson,
+        // Columnas NOT NULL sin default en el esquema.
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       { partial: true },
     );
@@ -202,12 +206,17 @@ export class CanonicalResourcesRepository {
         recordedAt: new Date(),
         effectiveStartAt: data.effectiveStartAt,
         changeTypeConceptId: data.changeTypeConceptId,
-        payloadFormatConceptId: data.payloadFormatConceptId,
+        // NOT NULL en el esquema y ningún llamador lo aportaba: lo que el
+        // módulo normaliza es JSON FHIR, así que ése es el formato por defecto.
+        payloadFormatConceptId:
+          data.payloadFormatConceptId ?? CONCEPTS.HD_PAYLOAD_FORMAT_FHIR_JSON,
         normalizedPayloadJson: data.normalizedPayloadJson,
         originalPayloadFileId: data.originalPayloadFileId,
         contentHash: data.contentHash,
         provenanceRecordId: data.provenanceRecordId,
         supersedesVersionId: data.supersedesVersionId,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -311,6 +320,8 @@ export class CanonicalResourcesRepository {
         assigningAuthority: data.assigningAuthority,
         isPrimary: data.isPrimary,
         effectiveFrom: data.effectiveFrom,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -406,6 +417,8 @@ export class CanonicalResourcesRepository {
         relationshipRoleConceptId: data.relationshipRoleConceptId,
         effectiveFrom: data.effectiveFrom,
         confidenceScore: data.confidenceScore,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -509,9 +522,14 @@ export class CanonicalResourcesRepository {
         canonicalHealthResourceId: data.canonicalHealthResourceId,
         domainEntityTypeConceptId: data.domainEntityTypeConceptId,
         domainEntityId: data.domainEntityId,
-        bindingRoleConceptId: data.bindingRoleConceptId,
+        // NOT NULL: un amarre sin papel declarado es el amarre principal del
+        // recurso a su entidad de dominio, que es el caso normal.
+        bindingRoleConceptId:
+          data.bindingRoleConceptId ?? CONCEPTS.HD_TARGET_ROLE_OUTPUT,
         bindingStatusConceptId: data.bindingStatusConceptId,
         mappingVersionId: data.mappingVersionId,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

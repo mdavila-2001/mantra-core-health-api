@@ -17,7 +17,12 @@ const actor = { id: 'u1', roles: [] } as any;
  */
 function build() {
   const service = { createGroup: mockFn(), joinGroup: mockFn() };
-  return { controller: new CommunityGroupsController(service as any), service };
+  const readService = { listGroups: mockFn(), listMembers: mockFn() };
+  return {
+    controller: new CommunityGroupsController(service as any, readService as any),
+    service,
+    readService,
+  };
 }
 
 describe('CommunityGroupsController', () => {

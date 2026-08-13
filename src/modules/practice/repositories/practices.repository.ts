@@ -50,22 +50,27 @@ export interface CreatePracticeData {
 @Injectable()
 export class PracticesRepository {
   /**
-   * Prácticas de un tenant, ordenadas por código.
+   * Prácticas activas del tenant.
    *
-   * La lectura que faltaba: el módulo tenía altas y ninguna forma de listar lo
-   * dado de alta, así que ninguna pantalla podía dejar elegir una práctica — y
-   * sin `practiceId` no se puede pedir un solo libro contable.
+   * `practice.practices` sí tiene `tenant_id`, así que el listado se acota
+   * siempre: sin esto sería una fuga entre organizaciones y el guardrail
+   * `TENANT_SCOPE_MISSING` lo rechazaría.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant del contexto.
+   * @param activeStatusConceptId - Estado que cuenta como activa.
+   * @returns Las prácticas del tenant, por código.
    */
-  findByTenant(
+  async findByTenant(
     em: EntityManager,
     tenantId: string,
-    limit: number,
+    activeStatusConceptId: string,
   ): Promise<Practices[]> {
-    return em.find(
-      Practices,
-      { tenantId },
-      { orderBy: { code: 'asc' }, limit },
-    );
+    const practices = await em.find(Practices, {
+      tenantId,
+      statusConceptId: activeStatusConceptId,
+    });
+    return practices.sort((a, b) => a.code.localeCompare(b.code));
   }
 
   /** Prácticas cuyo estado coincide con el indicado. */

@@ -18,6 +18,7 @@ import {
   SetRolePermissionsDto,
   SetFieldPermissionsDto,
   RoleResponseDto,
+  AssignableRoleDto,
   AuthzStatusResultDto,
   type BaseRole,
   type RoleScope,
@@ -67,6 +68,26 @@ export class AuthzRolesService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AuthzRolesService.name);
+  }
+
+  /**
+   * Roles que el actor puede asignar: los de sistema y los de su tenant.
+   *
+   * Es la lectura que faltaba para poder usar `POST /authz/users/:id/role-assignments`
+   * sin conocer de memoria el uuid del rol.
+   *
+   * @param tenantId - Tenant en cuyo ámbito se consulta.
+   * @returns Los roles asignables con su código y nombre.
+   */
+  async listAssignable(tenantId?: string): Promise<AssignableRoleDto[]> {
+    const roles = await this.rolesRepo.listAssignable(this.em, tenantId);
+    return roles.map((role) => ({
+      id: role.id,
+      code: role.code,
+      name: role.name,
+      isSystem: role.isSystem,
+      tenantId: role.tenantId,
+    }));
   }
 
   /** UC-06-03: crea un rol validando unicidad de código y ausencia de ciclos. */

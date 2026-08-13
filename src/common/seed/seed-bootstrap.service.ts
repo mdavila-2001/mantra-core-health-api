@@ -1,5 +1,6 @@
 import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
+import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
@@ -17,6 +18,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
    * @param messaging - Datos estructurales de mensajería.
    * @param identityVerification - Datos estructurales de identidad.
+   * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
    * @param logger - Logger estructurado del arranque.
    */
@@ -26,6 +28,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
+    private readonly clinicalRoles: AuthzClinicalRolesSeedService,
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly logger: PinoLogger,
   ) {
@@ -62,6 +65,11 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     await this.runDependent(
       'verificación de identidad',
       this.identityVerification.run.bind(this.identityVerification),
+    );
+    // Depende de los conceptos de rol base y de ámbito del catálogo `authz`.
+    await this.runDependent(
+      'roles asistenciales',
+      this.clinicalRoles.run.bind(this.clinicalRoles),
     );
     // Va el último a propósito: el alta del administrador referencia conceptos
     // de estado y el tenant por defecto, que los sembra el catálogo.

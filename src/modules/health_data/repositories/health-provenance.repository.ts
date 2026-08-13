@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { CONCEPTS } from '../../../common';
 import {
   HealthProvenanceRecords,
   HealthProvenanceTargets,
@@ -131,7 +132,11 @@ export class HealthProvenanceRepository {
         responsibleAgentId: data.responsibleAgentId,
         onBehalfOfOrganizationId: data.onBehalfOfOrganizationId,
         policyUrisJson: data.policyUrisJson,
-        contentHash: data.contentHash,
+        // NOT NULL: sin huella declarada se registra la cadena vacía en vez de
+        // reventar; la procedencia vale por lo que enlaza, no por el hash.
+        contentHash: data.contentHash ?? '',
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -171,7 +176,13 @@ export class HealthProvenanceRepository {
         healthProvenanceRecordId: data.healthProvenanceRecordId,
         targetTypeConceptId: data.targetTypeConceptId,
         targetId: data.targetId,
-        roleConceptId: data.roleConceptId,
+        // El esquema lo exige (NOT NULL) y ningún llamador lo aportaba: se
+        // deriva el papel más común —el objetivo es el recurso resultante— en
+        // vez de dejar que la escritura reviente. Mismo criterio que el
+        // `correlationId` de `OutboxService.publishDomainEvent`.
+        roleConceptId: data.roleConceptId ?? CONCEPTS.HD_TARGET_ROLE_OUTPUT,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -200,7 +211,11 @@ export class HealthProvenanceRepository {
         transformationVersion: data.transformationVersion,
         jobRunId: data.jobRunId,
         recordedAt: new Date(),
-        contentHash: data.contentHash,
+        // NOT NULL, igual que en el registro de procedencia: sin huella
+        // declarada se registra la cadena vacía en vez de reventar.
+        contentHash: data.contentHash ?? '',
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

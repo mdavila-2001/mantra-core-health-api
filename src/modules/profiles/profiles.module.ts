@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+// Verificar una matrícula concede el rol asistencial: la autoridad sobre los
+// roles es de `authz`, que no importa `profiles` (no cierra ciclo).
+import { AuthzModule } from '../authz/authz.module';
 import * as entities from './entities';
 import {
   ProfilesPatientsController,
@@ -34,7 +37,7 @@ import { ProfileOwnershipService } from './services';
  * relacionadas, proxies de portal y defunción/anonimización.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuthzModule],
   controllers: [ProfilesPatientsController, ProfilesPractitionersController],
   providers: [
     ProfileOwnershipService,

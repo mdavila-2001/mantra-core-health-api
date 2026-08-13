@@ -624,6 +624,72 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
     targets: ['clinical.medication_requests.unit_concept_id'],
   },
+
+  /* --- clinical: el diagnóstico ----------------------------------------------
+     Las enumeraciones de `clinical.conditions`, por la misma razón que las de la
+     receta: sin amarre declarado, el selector del formulario de diagnóstico
+     (V08-08) queda deshabilitado por diseño y el médico no puede registrar.
+
+     `condition-code` es un catálogo INICIAL, no una nosología; ver la nota en
+     `clinical.concepts.ts`. Las otras tres sí son enumeraciones cerradas. */
+  {
+    code: 'condition-code',
+    name: 'Diagnóstico',
+    description:
+      'Nosología inicial para registrar diagnósticos (CIE-10). Se reemplaza publicando una versión nueva del conjunto, sin tocar el amarre.',
+    concepts: [
+      CLIN.CONDITION_HIPERTENSION,
+      CLIN.CONDITION_DIABETES_TIPO_2,
+      CLIN.CONDITION_IRA_ALTA,
+      CLIN.CONDITION_LUMBALGIA,
+      CLIN.CONDITION_MIGRANA,
+      CLIN.CONDITION_GASTRITIS,
+      CLIN.CONDITION_ASMA,
+      CLIN.CONDITION_ANEMIA_FERROPENICA,
+      CLIN.CONDITION_INFECCION_URINARIA,
+      CLIN.CONDITION_DERMATITIS_ATOPICA,
+      CLIN.CONDITION_HIPOTIROIDISMO,
+      CLIN.CONDITION_ANSIEDAD_GENERALIZADA,
+    ],
+    // Sin preseleccionado a propósito, como el medicamento: un diagnóstico por
+    // omisión es la clase de ayuda que termina en la historia sin que nadie lo
+    // haya decidido.
+    targets: ['clinical.conditions.code_concept_id'],
+  },
+  {
+    code: 'condition-category',
+    name: 'Categoría del diagnóstico',
+    description:
+      'Si el registro es un diagnóstico del encuentro o un problema de la lista (HL7 condition-category).',
+    concepts: [
+      CLIN.CONDITION_CATEGORY_DIAGNOSIS,
+      CLIN.CONDITION_CATEGORY_PROBLEM,
+    ],
+    targets: ['clinical.conditions.category_concept_id'],
+  },
+  {
+    code: 'condition-severity',
+    name: 'Severidad',
+    description:
+      'Gravedad subjetiva de la condición según quien la registra (HL7 condition-severity).',
+    concepts: [
+      CLIN.CONDITION_SEVERITY_MILD,
+      CLIN.CONDITION_SEVERITY_MODERATE,
+      CLIN.CONDITION_SEVERITY_SEVERE,
+    ],
+    targets: ['clinical.conditions.severity_concept_id'],
+  },
+  {
+    code: 'condition-laterality',
+    name: 'Lateralidad',
+    description: 'Lado del cuerpo afectado, cuando aplica.',
+    concepts: [
+      CLIN.CONDITION_LATERALITY_LEFT,
+      CLIN.CONDITION_LATERALITY_RIGHT,
+      CLIN.CONDITION_LATERALITY_BILATERAL,
+    ],
+    targets: ['clinical.conditions.laterality_concept_id'],
+  },
 ];
 
 /**

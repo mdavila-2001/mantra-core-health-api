@@ -25,8 +25,14 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const profilesRepo = { findById: mockFn(), create: mockFn() };
+  const profilesRepo = {
+    findById: mockFn(),
+    findByTenant: mockFn(() => Promise.resolve([])),
+    findByTarget: mockFn(() => Promise.resolve(null)),
+    create: mockFn(),
+  };
   const postsRepo = {
+    findByAuthor: mockFn(() => Promise.resolve([])),
     create: mockFn(),
     createMedia: mockFn(),
     upsertHashtag: mockFn(),
@@ -46,12 +52,12 @@ function build() {
 
   const service = new CommunitySocialService(
     em as any,
-    profilesRepo,
+    profilesRepo as any,
     postsRepo as any,
-    commentsRepo,
-    reactionsRepo,
-    bookmarksRepo,
-    followsRepo,
+    commentsRepo as any,
+    reactionsRepo as any,
+    bookmarksRepo as any,
+    followsRepo as any,
     blocksRepo as any,
     logger as any,
   );

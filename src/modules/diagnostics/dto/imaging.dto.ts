@@ -333,3 +333,17 @@ export class RecordDoseEventDto {
   @IsUUID()
   deviceId?: string;
 }
+
+/** Estudio de imagen tal como lo devuelve el listado del paciente. */
+export class ImagingStudySummaryDto {
+  /** Identificador del estudio. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Paciente al que pertenece. */
+  @ApiProperty({ format: 'uuid' }) patientProfileId!: string;
+  /** Orden clínica que lo originó, si la hay. */
+  @ApiPropertyOptional({ format: 'uuid' }) serviceRequestId?: string;
+  /** Estado del estudio. */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+  /** Identificador DICOM del estudio. */
+  @ApiPropertyOptional() studyInstanceUid?: string;
+}

@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Query,
   HttpCode,
   HttpStatus,
   Param,
@@ -55,5 +57,18 @@ export class ReferralsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     return this.referralsService.respond(id, dto, actor);
+  }
+  /**
+   * La lectura que faltaba: derivaciones de un paciente.
+   *
+   * El módulo tenía escrituras y ninguna lectura, así que lo que se registraba
+   * no se podía volver a mirar — y ninguna pantalla podía mostrarlo.
+   */
+  @Get()
+  @ApiOperation({ summary: 'Listar derivaciones de un paciente' })
+  listByPatient(
+    @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+  ) {
+    return this.referralsService.listByPatient(patientProfileId);
   }
 }

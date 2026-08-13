@@ -267,7 +267,8 @@ export class ObjectGovernanceRepository {
       {
         objectManifestId: data.objectManifestId,
         requestedByJobId: data.requestedByJobId,
-        providerDeleteMarker: data.providerDeleteMarker,
+        // NOT NULL: el proveedor puede no devolver marcador de borrado.
+        providerDeleteMarker: data.providerDeleteMarker ?? '',
         requestedAt: new Date(),
         effectiveAt: data.effectiveAt,
         verificationStatus: data.verificationStatus,
@@ -329,6 +330,8 @@ export class ObjectGovernanceRepository {
         objectManifestId: data.objectManifestId,
         recordCount: data.recordCount,
         manifestHash: data.manifestHash,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

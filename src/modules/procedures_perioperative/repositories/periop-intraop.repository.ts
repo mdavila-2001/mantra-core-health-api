@@ -660,6 +660,27 @@ export class PeriopIntraopRepository {
   }
 
   /** Última versión del reporte del caso: de ella sale el número siguiente. */
+  /**
+   * Informes operatorios del caso, del más reciente al más antiguo.
+   *
+   * Un informe firmado no se edita: la corrección es una versión nueva, así que
+   * el histórico completo es parte del registro clínico y no un detalle.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Caso consultado.
+   * @returns Las versiones del informe.
+   */
+  findReportsByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+  ): Promise<OperativeReports[]> {
+    return em.find(
+      OperativeReports,
+      { procedureCaseId },
+      { orderBy: { reportVersion: 'DESC' } },
+    );
+  }
+
   findLastReport(
     em: EntityManager,
     procedureCaseId: string,

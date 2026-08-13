@@ -389,6 +389,10 @@ export class CanonicalResourcesService {
         occurredStartAt: now,
         responsibleAgentId: actor.id,
       });
+      // El objetivo referencia el registro de procedencia por una columna uuid
+      // plana: sin este flush MikroORM puede insertarlo antes y la FK lo
+      // rechaza. Mismo patrón que en `OutboxService.publishDomainEvent`.
+      await tx.flush();
       this.provenanceRepo.createProvenanceTarget(tx, {
         healthProvenanceRecordId: provenance.id,
         targetTypeConceptId: CONCEPTS.HD_ENTITY_CANONICAL_RESOURCE,

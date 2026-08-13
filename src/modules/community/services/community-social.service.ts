@@ -23,6 +23,7 @@ import {
   REACTION_CONCEPT_BY_CODE,
   SOCIAL_OBJECT_CONCEPT_BY_CODE,
   FOLLOWABLE_CONCEPT_BY_CODE,
+  POST_VISIBILITY_CONCEPT_BY_CODE,
 } from '../community.concepts';
 import {
   CreatePublicProfileDto,
@@ -156,6 +157,8 @@ export class CommunitySocialService {
         postTypeConceptId:
           dto.postType === 'POLL' ? COMM.POST_TYPE_POLL : COMM.POST_TYPE_TEXT,
         bodyText: dto.bodyText,
+        visibilityConceptId:
+          POST_VISIBILITY_CONCEPT_BY_CODE[dto.visibility ?? 'PUBLIC'],
         commentsEnabled:
           dto.commentsEnabled ?? author.commentsDefaultEnabled ?? true,
         healthDataScreeningStatusConceptId: COMM.SCREENING_PASSED,

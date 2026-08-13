@@ -596,4 +596,257 @@ export const COMMUNITY_SMOKE: SmokeCase[] = [
     }),
     expectedStatus: 401,
   },
+  {
+    module: 'Community',
+    endpoint: 'GET /internal/community/feed/pending',
+    name: 'happy: lote pendiente de fan-out',
+    method: 'get',
+    path: () => '/internal/community/feed/pending',
+    expectedStatus: 200,
+    capture: (b) => {
+      if (!Array.isArray(b.items))
+        throw new Error('el lote pendiente no trae items');
+    },
+  },
+
+  // ---- Lecturas del grafo social (F1.1) ------------------------------------
+  {
+    module: 'Community',
+    endpoint: 'GET /community/profiles/{profileId}',
+    name: 'happy: ficha del perfil con sellos y prestigio',
+    method: 'get',
+    path: (c) => `/community/profiles/${c.vars.communityProfileA}`,
+    expectedStatus: 200,
+    capture: (b) => {
+      if (!Array.isArray(b.badges))
+        throw new Error('la ficha no trae los sellos embebidos');
+      if (!('prestige' in b))
+        throw new Error('la ficha no trae el prestigio embebido');
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/profiles/{profileId}',
+    name: 'límite: perfil inexistente',
+    method: 'get',
+    path: () => `/community/profiles/${UUID_ABSENT}`,
+    expectedStatus: 404,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/profiles/{profileId}/posts',
+    name: 'happy: muro del perfil autor',
+    method: 'get',
+    path: (c) =>
+      `/community/profiles/${c.vars.communityProfileA}/posts?actorProfileId=${c.vars.communityProfileA}`,
+    expectedStatus: 200,
+    capture: (b, c) => {
+      const items = b.items as Array<{ id: string }>;
+      if (!items.some((post) => post.id === c.vars.communityPostId))
+        throw new Error('el muro no trae el post publicado en este recorrido');
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/profiles/{profileId}/posts',
+    name: 'límite: cursor corrupto',
+    method: 'get',
+    path: (c) =>
+      `/community/profiles/${c.vars.communityProfileA}/posts?cursor=no-es-un-cursor`,
+    expectedStatus: 400,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/posts/{postId}',
+    name: 'happy: detalle del post con media, hashtags y menciones',
+    method: 'get',
+    path: (c) => `/community/posts/${c.vars.communityPostId}`,
+    expectedStatus: 200,
+    capture: (b) => {
+      for (const key of ['media', 'hashtags', 'mentions'])
+        if (!Array.isArray(b[key]))
+          throw new Error(`el detalle del post no trae ${key}`);
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/posts/{postId}',
+    name: 'límite: post inexistente',
+    method: 'get',
+    path: () => `/community/posts/${UUID_ABSENT}`,
+    expectedStatus: 404,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/posts/{postId}',
+    name: 'límite: sin auth',
+    method: 'get',
+    path: (c) => `/community/posts/${c.vars.communityPostId}`,
+    auth: false,
+    expectedStatus: 401,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/posts/{postId}/comments',
+    name: 'happy: hilo de comentarios',
+    method: 'get',
+    path: (c) => `/community/posts/${c.vars.communityPostId}/comments`,
+    expectedStatus: 200,
+    capture: (b) => {
+      if (!Array.isArray(b.items))
+        throw new Error('el hilo no trae comentarios');
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/posts/{postId}/reactions',
+    name: 'happy: resumen de reacciones con la del actor',
+    method: 'get',
+    path: (c) =>
+      `/community/posts/${c.vars.communityPostId}/reactions?actorProfileId=${c.vars.communityProfileB}`,
+    expectedStatus: 200,
+    capture: (b) => {
+      if (typeof b.total !== 'number')
+        throw new Error('el resumen de reacciones no trae total');
+      if (!('actorReactionTypeConceptId' in b))
+        throw new Error('se pidió con actor y no informa la reacción propia');
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/follows',
+    name: 'happy: seguimientos del perfil B',
+    method: 'get',
+    path: (c) =>
+      `/community/follows?followerProfileId=${c.vars.communityProfileB}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/bookmarks',
+    name: 'happy: marcadores del propio perfil',
+    method: 'get',
+    path: (c) => `/community/bookmarks?profileId=${c.vars.communityProfileB}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/blocks',
+    name: 'happy: bloqueos emitidos por el perfil A',
+    method: 'get',
+    path: (c) => `/community/blocks?profileId=${c.vars.communityProfileA}`,
+    expectedStatus: 200,
+  },
+
+  // ---- Lecturas de reviews, grupos, encuestas, feed y notificaciones -------
+  {
+    module: 'Community',
+    endpoint: 'GET /community/profiles/{profileId}/reviews',
+    name: 'happy: reviews publicadas — sin datos del encuentro clínico',
+    method: 'get',
+    path: (c) => `/community/profiles/${c.vars.communityProfileA}/reviews`,
+    expectedStatus: 200,
+    capture: (b) => {
+      // La regla más cara del módulo: publicar el encuentro o el perfil del
+      // paciente convertiría la ficha del profesional en una lista de quién se
+      // atendió con él.
+      const serializado = JSON.stringify(b);
+      for (const prohibido of [
+        'verifiedEncounterId',
+        'reviewerPatientProfileId',
+      ])
+        if (serializado.includes(prohibido))
+          throw new Error(`la review expone ${prohibido}`);
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/groups',
+    name: 'happy: grupos de la organización',
+    method: 'get',
+    path: (c) => `/community/groups?tenantId=${c.tenantId}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/groups',
+    name: 'límite: sin tenantId',
+    method: 'get',
+    path: () => '/community/groups',
+    expectedStatus: 400,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/groups/{groupId}/members',
+    name: 'happy: integrantes del grupo',
+    method: 'get',
+    path: (c) => `/community/groups/${c.vars.communityGroupId}/members`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/polls/{pollId}',
+    name: 'happy: encuesta con recuentos y voto propio',
+    method: 'get',
+    path: (c) =>
+      `/community/polls/${c.vars.communityPollId}?actorProfileId=${c.vars.communityProfileA}`,
+    expectedStatus: 200,
+    capture: (b) => {
+      if (!Array.isArray(b.options))
+        throw new Error('la encuesta no trae opciones');
+      if (!Array.isArray(b.actorVotedOptionIds))
+        throw new Error('se pidió con actor y no informa el voto propio');
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/conversations',
+    name: 'happy: bandeja del propio perfil',
+    method: 'get',
+    path: (c) =>
+      `/community/conversations?profileId=${c.vars.communityProfileA}`,
+    expectedStatus: 200,
+    capture: (b) => {
+      const items = b.items as Array<{ unreadCount: number }>;
+      if (items.length > 0 && typeof items[0].unreadCount !== 'number')
+        throw new Error('la bandeja no trae el conteo de no leídos');
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/conversations/{id}/messages',
+    name: 'happy: mensajes de la conversación',
+    method: 'get',
+    path: (c) =>
+      `/community/conversations/${c.vars.communityConversationId}/messages?profileId=${c.vars.communityProfileA}`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/feed',
+    name: 'happy: el timeline trae el post repartido por el fan-out',
+    method: 'get',
+    path: (c) => `/community/feed?profileId=${c.vars.communityProfileB}`,
+    expectedStatus: 200,
+    capture: (b, c) => {
+      const items = b.items as Array<{ sourceRefId: string }>;
+      if (!items.some((item) => item.sourceRefId === c.vars.communityPostId))
+        throw new Error(
+          'el feed del seguidor no trae el post que el fan-out repartió',
+        );
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /community/notifications',
+    name: 'happy: bandeja de notificaciones con no leídos',
+    method: 'get',
+    path: (c) =>
+      `/community/notifications?profileId=${c.vars.communityProfileA}`,
+    expectedStatus: 200,
+    capture: (b) => {
+      if (typeof b.unreadCount !== 'number')
+        throw new Error('la bandeja no trae unreadCount');
+    },
+  },
 ];

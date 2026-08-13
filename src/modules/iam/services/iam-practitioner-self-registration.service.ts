@@ -11,10 +11,14 @@ import {
 import {
   CONCEPTS,
   ConflictException,
+  PreconditionFailedException,
   SEED,
   TokenService,
   type AuthenticatedUser,
 } from '../../../common';
+// El alta administrativa deja al profesional operativo: los roles asistenciales
+// viven en `authz`, que es quien decide si un código existe y es asignable.
+import { AuthzEffectiveRolesService } from '../../authz/services';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import {
   ADMIN_GENDER_CONCEPT_BY_CODE,
@@ -107,6 +111,7 @@ export class IamPractitionerSelfRegistrationService {
    * @param identifiersRepo - Repositorio de identificadores oficiales.
    * @param contactPointsRepo - Repositorio de puntos de contacto.
    * @param tenantMembershipsRepo - Repositorio de membresías de tenant.
+   * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
    * @param notificationsService - Encolado del correo de verificación.
    * @param logger - Logger estructurado.
    * @param tracing - Trazado del span de negocio.
@@ -130,6 +135,7 @@ export class IamPractitionerSelfRegistrationService {
     private readonly identifiersRepo: IdentifiersRepository,
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly tenantMembershipsRepo: TenantMembershipsRepository,
+    private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly notificationsService: NotificationsService,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
@@ -204,6 +210,7 @@ export class IamPractitionerSelfRegistrationService {
         this.performRegisterPractitioner(dto, span, ip, {
           actor,
           reason: dto.reason,
+          clinicalRoles: dto.clinicalRoles ?? [],
         }) as Promise<AssistedPractitionerRegistrationResponseDto>,
     );
   }
@@ -216,7 +223,11 @@ export class IamPractitionerSelfRegistrationService {
     dto: RegisterPractitionerDto | AssistedPractitionerRegistrationDto,
     span: TraceSpan,
     ip?: string,
-    asistido?: { actor: AuthenticatedUser; reason: string },
+    asistido?: {
+      actor: AuthenticatedUser;
+      reason: string;
+      clinicalRoles: string[];
+    },
   ): Promise<
     | RegisterPractitionerResponseDto
     | AssistedPractitionerRegistrationResponseDto
@@ -360,7 +371,7 @@ export class IamPractitionerSelfRegistrationService {
         stateConceptId: PROF.AUTH_PENDING,
         actorUserId: user.id,
       });
-      this.professionalCredentialsRepo.create(tx, {
+      const credential = this.professionalCredentialsRepo.create(tx, {
         practitionerProfileId: person.id,
         credentialTypeConceptId:
           dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
@@ -445,13 +456,47 @@ export class IamPractitionerSelfRegistrationService {
         actorUserId: user.id,
       });
 
+      // Roles asistenciales del alta administrativa. Van dentro de la misma
+      // transacción que la cuenta: un rol concedido a un alta que después se
+      // deshace sería un privilegio sin sujeto detrás. El autorregistro no pasa
+      // por aquí (`asistido` es nulo) porque nadie ha validado quién solicita.
+      const rolesConcedidos: string[] = [];
+      const rolesRechazados: string[] = [];
+      if (asistido) {
+        for (const code of asistido.clinicalRoles) {
+          const ok = await this.effectiveRoles.ensureRoleByCode(
+            tx,
+            user.id,
+            code,
+            { tenantId: SEED.tenantId, actorUserId: asistido.actor.id },
+          );
+          (ok ? rolesConcedidos : rolesRechazados).push(code);
+        }
+        if (rolesRechazados.length > 0) {
+          // Fallar el alta entera es lo correcto: devolver 201 con la mitad de
+          // los roles deja al administrador creyendo que el profesional quedó
+          // operativo, y el fallo aparecería mucho más tarde como un 403 suelto.
+          throw new PreconditionFailedException(
+            'Alguno de los roles indicados no existe o no es asignable',
+            { roles: rolesRechazados },
+          );
+        }
+      }
+
       this.eventsRepo.record(tx, {
         eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
         outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
         userId: user.id,
         recordedByUserId: user.id,
         ip,
-        detailJson: { flow: 'practitioner-self-registration' },
+        detailJson: {
+          flow: asistido
+            ? 'practitioner-assisted-registration'
+            : 'practitioner-self-registration',
+          ...(rolesConcedidos.length > 0
+            ? { clinicalRoles: rolesConcedidos }
+            : {}),
+        },
       });
 
       // Token de activación de un solo uso, sólo en el alta administrativa: es
@@ -478,8 +523,10 @@ export class IamPractitionerSelfRegistrationService {
         practitionerProfileId: practitioner.profileId,
         practitionerCode,
         licenseId: license.id,
+        credentialId: credential.id,
         emailVerificationToken: raw,
         activacion,
+        clinicalRoles: rolesConcedidos,
       };
     });
 
@@ -506,8 +553,12 @@ export class IamPractitionerSelfRegistrationService {
       practitionerProfileId: created.practitionerProfileId,
       practitionerCode: created.practitionerCode,
       licenseId: created.licenseId,
+      credentialId: created.credentialId,
       verificationStatus: 'PENDING',
       emailVerificationSent,
+      ...(created.clinicalRoles.length > 0
+        ? { clinicalRoles: created.clinicalRoles }
+        : {}),
       ...(created.activacion === null
         ? {}
         : {

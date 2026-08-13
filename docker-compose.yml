@@ -179,6 +179,18 @@ x-app-env: &app-env
   # `mock-provider-server/README.md`.
   MOCK_PROVIDER_BASE_URL: ${MOCK_PROVIDER_BASE_URL:-http://mock-provider-server:4100}
   MOCK_PROVIDER_API_KEY: ${MOCK_PROVIDER_API_KEY:-}
+  # Proveedor REAL de email (Gmail API). `GoogleProviderWiringService` sustituye
+  # el adapter del `NotificationDeliveryJob` sólo si `isConfigured()` da true, o
+  # sea si las CUATRO tienen valor; si falta una, retorna temprano y el worker se
+  # queda con el emulador de arriba SIN emitir ningún error. Vacías por defecto:
+  # este compose es de desarrollo local y no debe exigir credenciales de Google.
+  # Se obtienen con `node tools/google-oauth/get-refresh-token.mjs` (ver
+  # `.env.example`). El remitente tiene que ser la misma cuenta que dio el
+  # consentimiento — lo exige `GoogleEmailClient`.
+  GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
+  GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
+  GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
+  GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
   # Trazas distribuidas. Apagadas por defecto; se activan con OTEL_ENABLED=true
   # en el `.env` DESPUÉS de levantar Jaeger (`yarn jaeger:up`), que se une a
   # esta misma red y por eso se alcanza por su nombre de servicio y no por
@@ -799,6 +811,27 @@ services:
     # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s) para que el drenaje de los
     # ticks en vuelo termine antes de que Docker mande SIGKILL. Con el default
     # de 10 s, cada despliegue cortaría lotes a la mitad.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  worker-community:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-community.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s), igual que el resto: el
+    # fan-out en vuelo tiene que terminar antes de que Docker mande SIGKILL.
     stop_grace_period: 45s
     depends_on:
       api:

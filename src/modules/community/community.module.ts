@@ -9,6 +9,7 @@ import {
   CommunityGroupsController,
   CommunityPollsController,
   CommunityFeedController,
+  CommunityTimelineController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -19,6 +20,13 @@ import {
   CommunityPollsService,
   CommunityFeedService,
   PublicProfileProjectionService,
+  CommunityVisibilityService,
+  CommunitySocialReadService,
+  CommunityTimelineReadService,
+  CommunityMessagingReadService,
+  CommunityGroupsReadService,
+  CommunityPollsReadService,
+  CommunityReviewsReadService,
 } from './services';
 import {
   PublicProfilesRepository,
@@ -34,6 +42,7 @@ import {
   PollsRepository,
   GroupsRepository,
   FeedRepository,
+  NotificationsRepository,
   CommunityFeedbackRepository,
   CommunityPrestigeRepository,
 } from './repositories';
@@ -54,6 +63,7 @@ import {
     CommunityGroupsController,
     CommunityPollsController,
     CommunityFeedController,
+    CommunityTimelineController,
   ],
   providers: [
     // Repositorios
@@ -70,9 +80,10 @@ import {
     PollsRepository,
     GroupsRepository,
     FeedRepository,
+    NotificationsRepository,
     CommunityFeedbackRepository,
     CommunityPrestigeRepository,
-    // Servicios
+    // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
     CommunityModerationService,
@@ -81,6 +92,14 @@ import {
     CommunityPollsService,
     CommunityFeedService,
     PublicProfileProjectionService,
+    // Servicios de lectura (la visibilidad la comparten todos)
+    CommunityVisibilityService,
+    CommunitySocialReadService,
+    CommunityTimelineReadService,
+    CommunityMessagingReadService,
+    CommunityGroupsReadService,
+    CommunityPollsReadService,
+    CommunityReviewsReadService,
   ],
   exports: [PublicProfileProjectionService],
 })

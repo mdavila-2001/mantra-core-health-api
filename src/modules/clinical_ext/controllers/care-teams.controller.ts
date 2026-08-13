@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Query,
   HttpCode,
   HttpStatus,
   Param,
@@ -56,5 +58,18 @@ export class CareTeamsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     return this.careTeamsService.setResponsible(id, memberId, actor);
+  }
+  /**
+   * La lectura que faltaba: equipos de cuidado de un paciente.
+   *
+   * El módulo tenía escrituras y ninguna lectura, así que lo que se registraba
+   * no se podía volver a mirar — y ninguna pantalla podía mostrarlo.
+   */
+  @Get()
+  @ApiOperation({ summary: 'Listar equipos de cuidado de un paciente' })
+  listByPatient(
+    @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+  ) {
+    return this.careTeamsService.listByPatient(patientProfileId);
   }
 }

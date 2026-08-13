@@ -1479,3 +1479,87 @@ export class PendingExpiredReleasesResponseDto {
   @ApiProperty({ type: [ExpiredReleaseSummaryDto] })
   releases!: ExpiredReleaseSummaryDto[];
 }
+
+/**
+ * Cuerpo de `POST /research/deidentification-profiles`.
+ *
+ * El perfil es obligatorio para definir una cohorte de investigación y no había
+ * ninguna forma de crearlo: el flujo del investigador principal empezaba en un
+ * identificador que nadie podía obtener.
+ */
+export class CreateDeidentificationProfileDto {
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  tenantId!: string;
+
+  /**
+   * Valor de code mantenido por la instancia.
+   */
+  @ApiProperty({ maxLength: 100 })
+  @IsString()
+  @MaxLength(100)
+  code!: string;
+
+  /**
+   * Valor de name mantenido por la instancia.
+   */
+  @ApiProperty({ maxLength: 200 })
+  @IsString()
+  @MaxLength(200)
+  name!: string;
+
+  /**
+   * Identificador asociado a methodology concept.
+   */
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Metodología de de-identificación aplicada',
+  })
+  @IsUUID()
+  methodologyConceptId!: string;
+
+  /**
+   * Reglas sobre identificadores directos.
+   */
+  @ApiPropertyOptional({ type: Object })
+  @IsOptional()
+  @IsObject()
+  directIdentifierRulesJson?: Record<string, unknown>;
+
+  /**
+   * Reglas sobre cuasi-identificadores.
+   */
+  @ApiPropertyOptional({ type: Object })
+  @IsOptional()
+  @IsObject()
+  quasiIdentifierRulesJson?: Record<string, unknown>;
+
+  /**
+   * Política de desplazamiento de fechas.
+   */
+  @ApiPropertyOptional({ type: Object })
+  @IsOptional()
+  @IsObject()
+  dateShiftPolicyJson?: Record<string, unknown>;
+
+  /**
+   * Política sobre texto libre.
+   */
+  @ApiPropertyOptional({ type: Object })
+  @IsOptional()
+  @IsObject()
+  freeTextPolicyJson?: Record<string, unknown>;
+}
+
+/** Respuesta del alta de un perfil de de-identificación. */
+export class DeidentificationProfileResponseDto {
+  /** Identificador del perfil. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Código único dentro del tenant. */
+  @ApiProperty() code!: string;
+  /** Concepto de estado: nace activo. */
+  @ApiProperty({ format: 'uuid' }) stateConceptId!: string;
+}

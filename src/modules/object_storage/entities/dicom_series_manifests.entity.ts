@@ -28,7 +28,7 @@ export class DicomSeriesManifests {
    * Valor de modality mantenido por la instancia.
    */
   @Property({ columnType: 'varchar' })
-  modality!: string;
+  modality?: string;
 
   /**
    * Valor de series number mantenido por la instancia.
@@ -39,8 +39,12 @@ export class DicomSeriesManifests {
   /**
    * Valor de body part examined mantenido por la instancia.
    */
-  @Property({ fieldName: 'body_part_examined', columnType: 'varchar' })
-  bodyPartExamined!: string;
+  @Property({
+    fieldName: 'body_part_examined',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  bodyPartExamined?: string;
 
   /**
    * Valor de instance count mantenido por la instancia.
@@ -51,6 +55,10 @@ export class DicomSeriesManifests {
   /**
    * Identificador asociado a thumbnail object manifest.
    */
-  @Property({ fieldName: 'thumbnail_object_manifest_id', type: 'uuid' })
-  thumbnailObjectManifestId!: string;
+  @Property({
+    fieldName: 'thumbnail_object_manifest_id',
+    type: 'uuid',
+    nullable: true,
+  })
+  thumbnailObjectManifestId?: string;
 }

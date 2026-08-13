@@ -5,6 +5,9 @@ import { ProfilesModule } from '../profiles/profiles.module';
 import { CommonModule } from '../common/common.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { DirectoryModule } from '../directory/directory.module';
+// El emisor del token pregunta a `authz` por los roles de negocio vigentes del
+// sujeto; `authz` no importa `iam`, así que la dependencia no cierra ciclo.
+import { AuthzModule } from '../authz/authz.module';
 import { IamUsersController, IamAuthController } from './controllers';
 import {
   IamUsersService,
@@ -53,6 +56,7 @@ import {
     CommonModule,
     MessagingModule,
     DirectoryModule,
+    AuthzModule,
   ],
   controllers: [IamUsersController, IamAuthController],
   providers: [

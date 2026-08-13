@@ -262,24 +262,54 @@ export class StatusResultDto {
 }
 
 /**
- * Una práctica tal como la lista el directorio de la organización.
+ * Práctica tal como la devuelve el listado.
  *
- * Lleva `name` además del `code`, que la respuesta del alta no trae: quien
- * elige una práctica en pantalla necesita leerla, no descifrar un código.
+ * Lleva `name` además del código porque el listado existe para **elegir** una
+ * práctica, y un código sin nombre no permite reconocerla.
  */
-export class PracticeListItemDto {
+export class PracticeSummaryDto {
+  /** Identificador de la práctica. */
   @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ example: 'CLN-001' }) code!: string;
-  @ApiProperty({ example: 'Clínica San Rafael' }) name!: string;
-  @ApiProperty({ format: 'uuid' }) typeConceptId!: string;
-  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
-  currencyConceptId!: string | null;
-  @ApiPropertyOptional({ nullable: true }) timeZone!: string | null;
+  /** Código único dentro del tenant. */
+  @ApiProperty() code!: string;
+  /** Nombre legible. */
+  @ApiProperty() name!: string;
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' }) status!: string;
 }
 
-/** Respuesta del listado de prácticas del tenant activo. */
-export class PracticeListResponseDto {
-  @ApiProperty({ type: [PracticeListItemDto] }) items!: PracticeListItemDto[];
-  @ApiProperty() count!: number;
+/** Sede tal como la devuelve el listado. */
+export class SiteSummaryDto {
+  /** Identificador de la sede. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Práctica a la que pertenece. */
+  @ApiProperty({ format: 'uuid' }) practiceId!: string;
+  /** Código único dentro de la práctica. */
+  @ApiProperty() code!: string;
+  /** Nombre legible. */
+  @ApiProperty() name!: string;
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' }) status!: string;
+}
+
+/**
+ * Espacio de atención tal como lo devuelve el listado.
+ *
+ * Es el que resuelve el `operatingRoomId` que exige programar un caso
+ * quirúrgico: sin este listado, ese uuid había que pasarlo por fuera del
+ * sistema.
+ */
+export class CareSpaceSummaryDto {
+  /** Identificador del espacio. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Sede a la que pertenece. */
+  @ApiProperty({ format: 'uuid' }) practiceSiteId!: string;
+  /** Código único dentro de la sede. */
+  @ApiProperty() code!: string;
+  /** Nombre legible. */
+  @ApiProperty() name!: string;
+  /** Tipo de espacio (quirófano, consulta, box…). */
+  @ApiPropertyOptional({ format: 'uuid' }) spaceTypeConceptId?: string;
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' }) status!: string;
 }

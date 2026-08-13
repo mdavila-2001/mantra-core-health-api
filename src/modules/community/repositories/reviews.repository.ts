@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { ServiceReviews, ReviewDimensionScores } from '../entities';
+import {
+  ServiceReviews,
+  ReviewDimensionScores,
+  ReviewResponses,
+} from '../entities';
 import { createdBy } from '../../../common';
 
 /**
@@ -71,12 +75,101 @@ export class ReviewsRepository {
   }
 
   /**
+   * Reviews publicadas de un perfil (UC-19-11, cara de lectura).
+   *
+   * Sólo lo publicado: una review retirada por moderación no vuelve a la ficha
+   * pública del profesional.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetPublicProfileId - Perfil calificado.
+   * @param publishedStatusConceptId - Estado de publicación visible.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de reviews, de la más reciente a la más antigua.
+   */
+  listByTargetPage(
+    em: EntityManager,
+    targetPublicProfileId: string,
+    publishedStatusConceptId: string,
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<ServiceReviews[]> {
+    return em.find(
+      ServiceReviews,
+      {
+        targetPublicProfileId,
+        publicationStatusConceptId: publishedStatusConceptId,
+        ...(after
+          ? {
+              $or: [
+                { createdAt: { $lt: new Date(after.createdAt) } },
+                { createdAt: new Date(after.createdAt), id: { $lt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
+  /** Puntuaciones por dimensión de un lote de reviews. */
+  listDimensionScores(
+    em: EntityManager,
+    reviewIds: string[],
+  ): Promise<ReviewDimensionScores[]> {
+    if (reviewIds.length === 0) return Promise.resolve([]);
+    return em.find(ReviewDimensionScores, { reviewId: { $in: reviewIds } });
+  }
+
+  /** Respuestas del profesional a un lote de reviews. */
+  listResponses(
+    em: EntityManager,
+    reviewIds: string[],
+  ): Promise<ReviewResponses[]> {
+    if (reviewIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      ReviewResponses,
+      { reviewId: { $in: reviewIds } },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `ServiceReviews`.
    */
+  /**
+   * Las reseñas de un perfil público.
+   *
+   * Filtra por estado de moderación por la misma razón que las publicaciones:
+   * una reseña en cola no es una reseña publicada, y mostrarla adelantaría un
+   * juicio sobre alguien antes de que nadie lo haya revisado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetPublicProfileId - Perfil reseñado.
+   * @param moderationStatusConceptId - Estado de moderación exigido, si se exige.
+   * @param limit - Tope de filas.
+   * @returns Las reseñas, de la más reciente a la más antigua.
+   */
+  findByTarget(
+    em: EntityManager,
+    targetPublicProfileId: string,
+    moderationStatusConceptId: string | undefined,
+    limit: number,
+  ): Promise<ServiceReviews[]> {
+    const where: Record<string, unknown> = { targetPublicProfileId };
+    if (moderationStatusConceptId) {
+      where.moderationStatusConceptId = moderationStatusConceptId;
+    }
+    return em.find(ServiceReviews, where, {
+      orderBy: { createdAt: 'DESC' },
+      limit,
+    });
+  }
+
   create(em: EntityManager, data: CreateReviewData): ServiceReviews {
     return em.create(
       ServiceReviews,

@@ -209,6 +209,115 @@ export class ConversationsRepository {
   }
 
   /**
+   * Participaciones activas de un perfil, del último mensaje al primero.
+   *
+   * Es la primera mitad de la bandeja: da las conversaciones y, de paso, el
+   * `last_read_message_id` con el que se cuentan los no leídos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param participantProfileId - Perfil dueño de la bandeja.
+   * @param activeStatusConceptId - Estado que cuenta como participación viva.
+   * @param limit - Tope de conversaciones.
+   * @returns Participaciones activas del perfil.
+   */
+  listActiveParticipationsOf(
+    em: EntityManager,
+    participantProfileId: string,
+    activeStatusConceptId: string,
+    limit: number,
+  ): Promise<ConversationParticipants[]> {
+    return em.find(
+      ConversationParticipants,
+      { participantProfileId, statusConceptId: activeStatusConceptId },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Conversaciones por id, ordenadas por actividad.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Conversaciones a traer.
+   * @returns Conversaciones, de la más activa a la más quieta.
+   */
+  listConversationsByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<Conversations[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(
+      Conversations,
+      { id: { $in: ids } },
+      { orderBy: { lastMessageAt: 'DESC', id: 'DESC' } },
+    );
+  }
+
+  /**
+   * Mensajes de una conversación (UC-19-14, cara de lectura).
+   *
+   * Descendente porque una conversación se abre por el final; lo borrado no
+   * viaja al cliente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conversationId - Conversación a leer.
+   * @param after - Clave de continuación `(sentAt, id)`.
+   * @param limit - Tope de mensajes.
+   * @returns Página de mensajes, del más reciente al más antiguo.
+   */
+  listMessagesPage(
+    em: EntityManager,
+    conversationId: string,
+    after: { sentAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<DirectMessages[]> {
+    return em.find(
+      DirectMessages,
+      {
+        conversationId,
+        deletedAt: null,
+        ...(after
+          ? {
+              $or: [
+                { sentAt: { $lt: new Date(after.sentAt) } },
+                { sentAt: new Date(after.sentAt), id: { $lt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { sentAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Cuenta los mensajes posteriores al último leído por el participante.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conversationId - Conversación a contar.
+   * @param lastReadMessageId - Último mensaje que el participante marcó leído.
+   * @returns Cantidad de mensajes sin leer.
+   */
+  async countUnread(
+    em: EntityManager,
+    conversationId: string,
+    lastReadMessageId: string | undefined,
+  ): Promise<number> {
+    if (!lastReadMessageId)
+      return em.count(DirectMessages, { conversationId, deletedAt: null });
+
+    const lastRead = await em.findOne(DirectMessages, {
+      id: lastReadMessageId,
+    });
+    if (!lastRead?.sentAt)
+      return em.count(DirectMessages, { conversationId, deletedAt: null });
+
+    return em.count(DirectMessages, {
+      conversationId,
+      deletedAt: null,
+      sentAt: { $gt: lastRead.sentAt },
+    });
+  }
+
+  /**
    * Crea create message.
    *
    * @param em - Contexto de persistencia o transacción activa.

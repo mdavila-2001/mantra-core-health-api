@@ -35,3 +35,35 @@ export class RebuildFeedDto {
   @IsIn(['FOLLOWING', 'GROUP', 'TOPIC', 'SUGGESTED', 'PROMOTED'])
   origin?: 'FOLLOWING' | 'GROUP' | 'TOPIC' | 'SUGGESTED' | 'PROMOTED';
 }
+
+/** Una publicación pendiente de repartir, con sus destinatarios ya resueltos. */
+export class FeedPendingItemDto {
+  /** Publicación a repartir. */
+  @ApiProperty({ description: 'Post publicado sin fan-out', format: 'uuid' })
+  postId!: string;
+
+  /** Perfil autor de la publicación. */
+  @ApiProperty({ description: 'Perfil autor', format: 'uuid' })
+  authorProfileId!: string;
+
+  /**
+   * Seguidores activos del autor.
+   *
+   * Puede venir vacío: el post existe pero nadie sigue a su autor. El worker
+   * igual lo procesa para dejar registro del intento.
+   */
+  @ApiProperty({ description: 'Perfiles destinatarios', type: [String] })
+  followerProfileIds!: string[];
+}
+
+/**
+ * Respuesta de `GET /internal/community/feed/pending`.
+ *
+ * El «descubre lote» del fan-out: `rebuild` reparte un post a una lista dada, y
+ * esta operación es la que arma esa lista para un worker que corre solo.
+ */
+export class FeedPendingResponseDto {
+  /** Publicaciones pendientes del lote. */
+  @ApiProperty({ type: [FeedPendingItemDto] })
+  items!: FeedPendingItemDto[];
+}

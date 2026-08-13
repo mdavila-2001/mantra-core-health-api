@@ -150,7 +150,9 @@ export class StoragePoliciesRepository {
       ResidencyPolicies,
       {
         code: data.code,
-        allowedCountryCodes: data.allowedCountryCodes,
+        // NOT NULL: una política sin países declarados no permite ninguno, que
+        // es el comportamiento cerrado que corresponde a residencia de datos.
+        allowedCountryCodes: data.allowedCountryCodes ?? [],
         forbiddenCountryCodes: data.forbiddenCountryCodes,
         allowedRegionCodes: data.allowedRegionCodes,
         requiresInCountryBackup: data.requiresInCountryBackup,
@@ -471,6 +473,8 @@ export class StoragePoliciesRepository {
         deterministicFieldsJson: data.deterministicFieldsJson,
         rotationPolicyId: data.rotationPolicyId,
         state: data.state,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

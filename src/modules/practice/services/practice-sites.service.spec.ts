@@ -8,7 +8,6 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PracticeSitesService } from './practice-sites.service';
-import { runWithTenant } from '../../../common';
 import { PRAC } from '../practice.concepts';
 import {
   ConflictException,
@@ -24,19 +23,16 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = {
-    transactional: mockFn((cb: any) => cb(tx)),
-    // `listPractices` lee fuera de transacción, con su propio fork.
-    fork: mockFn(() => ({})),
-  };
+  const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const practicesRepo = {
+    findByTenant: mockFn().mockResolvedValue([]),
     findActive: mockFn(),
     findById: mockFn(),
-    findByTenant: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const sitesRepo = {
     findById: mockFn(),
+    findByPractice: mockFn().mockResolvedValue([]),
     findByPracticeAndCode: mockFn(),
     create: mockFn(),
   };
@@ -69,49 +65,6 @@ function build() {
 }
 
 describe('PracticeSitesService', () => {
-  describe('listPractices (la lectura que faltaba)', () => {
-    it('acota al tenant del contexto y mapea nombre y moneda', async () => {
-      const { service, practicesRepo } = build();
-      practicesRepo.findByTenant.mockResolvedValue([
-        {
-          id: 'p-1',
-          code: 'CLN-001',
-          name: 'Clínica San Rafael',
-          typeConceptId: 't-1',
-          statusConceptId: 's-1',
-          currencyConceptId: 'c-1',
-          timeZone: 'America/La_Paz',
-        },
-      ]);
-
-      const res = await runWithTenant('tenant-9', () =>
-        service.listPractices(),
-      );
-
-      expect(practicesRepo.findByTenant).toHaveBeenCalledWith(
-        expect.anything(),
-        'tenant-9',
-        expect.any(Number),
-      );
-      expect(res.count).toBe(1);
-      expect(res.items[0]).toMatchObject({
-        name: 'Clínica San Rafael',
-        currencyConceptId: 'c-1',
-      });
-    });
-
-    it('sin tenant en contexto no consulta y devuelve vacío', async () => {
-      const { service, practicesRepo } = build();
-
-      // Los carriles internos (SYSTEM, workers) no mandan `X-Tenant-Id`. Sin
-      // tenant contra el que acotar, devolver «todas» sería una fuga.
-      const res = await service.listPractices();
-
-      expect(res).toEqual({ items: [], count: 0 });
-      expect(practicesRepo.findByTenant).not.toHaveBeenCalled();
-    });
-  });
-
   describe('createPractice (bootstrap)', () => {
     it('creates and flushes the practice', async () => {
       const d = build();

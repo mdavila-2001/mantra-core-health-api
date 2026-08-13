@@ -58,6 +58,99 @@ export class FollowsRepository {
     });
   }
 
+  /**
+   * De un conjunto de perfiles, cuáles sigue el actor con follow activo.
+   *
+   * En lote y no uno por uno: es lo que resuelve el nivel `FOLLOWERS` de una
+   * página entera de posts sin una consulta por autor.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param followerProfileId - Perfil que sigue.
+   * @param candidateProfileIds - Perfiles a contrastar.
+   * @param followableProfileTypeConceptId - Tipo `PROFILE` de seguible.
+   * @param activeStatusConceptId - Estado que cuenta como follow vigente.
+   * @returns Los perfiles seguidos, de entre los candidatos.
+   */
+  async listFollowedProfileIds(
+    em: EntityManager,
+    followerProfileId: string,
+    candidateProfileIds: string[],
+    followableProfileTypeConceptId: string,
+    activeStatusConceptId: string,
+  ): Promise<string[]> {
+    if (candidateProfileIds.length === 0) return [];
+    const rows = await em.find(SocialFollows, {
+      followerProfileId,
+      followableTypeConceptId: followableProfileTypeConceptId,
+      followableRefId: { $in: candidateProfileIds },
+      statusConceptId: activeStatusConceptId,
+    });
+    return rows.map((row) => row.followableRefId);
+  }
+
+  /**
+   * Seguidores activos de un perfil (fan-out del feed, UC-19-15).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param followedProfileId - Perfil seguido.
+   * @param followableProfileTypeConceptId - Tipo `PROFILE` de seguible.
+   * @param activeStatusConceptId - Estado que cuenta como follow vigente.
+   * @param limit - Tope de seguidores a devolver.
+   * @returns Ids de los perfiles que lo siguen.
+   */
+  async listFollowerIdsOf(
+    em: EntityManager,
+    followedProfileId: string,
+    followableProfileTypeConceptId: string,
+    activeStatusConceptId: string,
+    limit: number,
+  ): Promise<string[]> {
+    const rows = await em.find(
+      SocialFollows,
+      {
+        followableTypeConceptId: followableProfileTypeConceptId,
+        followableRefId: followedProfileId,
+        statusConceptId: activeStatusConceptId,
+      },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit },
+    );
+    return rows.map((row) => row.followerProfileId);
+  }
+
+  /**
+   * Follows emitidos por un perfil (UC-19-05, cara de lectura).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param followerProfileId - Perfil que sigue.
+   * @param after - Clave de continuación `(createdAt, id)` de la página anterior.
+   * @param limit - Tope de filas.
+   * @returns Página de follows activos, del más reciente al más antiguo.
+   */
+  listByFollowerPage(
+    em: EntityManager,
+    followerProfileId: string,
+    activeStatusConceptId: string,
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<SocialFollows[]> {
+    return em.find(
+      SocialFollows,
+      {
+        followerProfileId,
+        statusConceptId: activeStatusConceptId,
+        ...(after
+          ? {
+              $or: [
+                { createdAt: { $lt: new Date(after.createdAt) } },
+                { createdAt: new Date(after.createdAt), id: { $lt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
   /** Follows activos entre dos perfiles (en ambos sentidos), para poda al bloquear. */
   findMutualBetween(
     em: EntityManager,

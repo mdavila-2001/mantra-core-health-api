@@ -17,7 +17,12 @@ const actor = { id: 'u1', roles: [] } as any;
  */
 function build() {
   const service = { createPoll: mockFn(), vote: mockFn() };
-  return { controller: new CommunityPollsController(service as any), service };
+  const readService = { getPoll: mockFn() };
+  return {
+    controller: new CommunityPollsController(service as any, readService as any),
+    service,
+    readService,
+  };
 }
 
 describe('CommunityPollsController', () => {

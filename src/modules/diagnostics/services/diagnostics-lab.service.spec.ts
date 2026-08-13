@@ -25,6 +25,7 @@ function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const repo = {
+    findWorkOrders: mockFn().mockResolvedValue([]),
     findWorkOrder: mockFn(),
     findWorkOrderTest: mockFn(),
     findAnalyzerRun: mockFn(),

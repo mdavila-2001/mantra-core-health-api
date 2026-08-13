@@ -98,6 +98,9 @@ export class StorageBackendsRepository {
         supportsVectorSearch: data.supportsVectorSearch,
         supportsFullText: data.supportsFullText,
         state: data.state,
+        // Columnas NOT NULL sin default en el esquema.
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       { partial: true },
     );
@@ -183,6 +186,8 @@ export class StorageBackendsRepository {
         endpointUri: data.endpointUri,
         isPrimary: data.isPrimary,
         state: data.state,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

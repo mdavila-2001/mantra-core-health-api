@@ -87,6 +87,8 @@ export class OpsReliabilityRepository {
         attainedValue: data.attainedValue,
         statusConceptId: data.statusConceptId,
         sourceReference: data.sourceReference,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -202,6 +204,8 @@ export class OpsReliabilityRepository {
         severityConceptId: data.severityConceptId,
         healthIncidentId: data.healthIncidentId,
         actionTakenJson: data.actionTakenJson,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -304,6 +308,8 @@ export class OpsReliabilityRepository {
         capacityValue: data.capacityValue,
         utilizationPercent: data.utilizationPercent,
         sourceReference: data.sourceReference,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

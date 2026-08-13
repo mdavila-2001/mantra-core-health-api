@@ -71,7 +71,7 @@ export interface CreateCertificateData {
   /**
    * Identificador asociado a learner ref.
    */
-  learnerRefId?: string;
+  learnerRefId: string;
   /**
    * Valor de cme credits awarded mantenido por la instancia.
    */

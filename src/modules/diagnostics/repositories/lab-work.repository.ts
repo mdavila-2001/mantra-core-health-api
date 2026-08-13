@@ -123,6 +123,48 @@ export class LabWorkRepository {
    * @param id - Identificador de id.
    * @returns Resultado de find work order conforme al contrato `Promise<LaboratoryWorkOrders | null>`.
    */
+  /**
+   * Órdenes de trabajo del laboratorio, acotadas al tenant custodio.
+   *
+   * `diagnostics` no tenía ninguna lectura: las órdenes se creaban y nadie
+   * podía consultarlas, así que el laboratorio no tenía forma de saber qué
+   * tenía pendiente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param custodianTenantId - Tenant custodio, obligatorio.
+   * @param filtros - Acotaciones opcionales y paginación.
+   * @returns Las órdenes que cumplen el filtro, de la más reciente a la más antigua.
+   */
+  findWorkOrders(
+    em: EntityManager,
+    custodianTenantId: string,
+    filtros: {
+      /** Accesión de laboratorio a la que pertenece. */
+      laboratoryAccessionId?: string;
+      /** Estado de la orden. */
+      statusConceptId?: string;
+      /** Profesional asignado. */
+      assignedProfileId?: string;
+      /** Tamaño de página. */
+      limit: number;
+      /** Desplazamiento. */
+      offset: number;
+    },
+  ): Promise<LaboratoryWorkOrders[]> {
+    const where: Record<string, unknown> = { custodianTenantId };
+    if (filtros.laboratoryAccessionId)
+      where.laboratoryAccessionId = filtros.laboratoryAccessionId;
+    if (filtros.statusConceptId)
+      where.statusConceptId = filtros.statusConceptId;
+    if (filtros.assignedProfileId)
+      where.assignedProfileId = filtros.assignedProfileId;
+    return em.find(LaboratoryWorkOrders, where, {
+      orderBy: { createdAt: 'DESC', id: 'ASC' },
+      limit: filtros.limit,
+      offset: filtros.offset,
+    });
+  }
+
   findWorkOrder(
     em: EntityManager,
     id: string,

@@ -16,6 +16,8 @@ import {
   HealthProvenanceRepository,
 } from '../repositories';
 import {
+  CreateSourceConnectionDto,
+  SourceConnectionResponseDto,
   OpenIngestionBatchDto,
   IngestionBatchResponseDto,
   RecordIngestionRecordDto,
@@ -50,6 +52,69 @@ export class HealthIngestionService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(HealthIngestionService.name);
+  }
+
+  /**
+   * UC-52-01: dar de alta la conexión de origen, creando su sistema si hace
+   * falta.
+   *
+   * Sin esta operación, `health_source_connections` y `health_source_systems`
+   * sólo podían existir si alguien las insertaba a mano en la base: no había
+   * forma de abrir un lote de ingesta, y con ella se caía todo lo que cuelga
+   * —registros, proyección canónica y el trabajo del informático clínico—.
+   *
+   * El sistema de origen se resuelve por código y se crea si no existe: es el
+   * padre del que cuelga la conexión y no aporta ninguna decisión aparte.
+   *
+   * @param dto - Identificación del origen y su extremo.
+   * @param actor - Quien da el alta.
+   * @returns La conexión creada, activa.
+   */
+  async createSourceConnection(
+    dto: CreateSourceConnectionDto,
+    actor: AuthenticatedUser,
+  ): Promise<SourceConnectionResponseDto> {
+    this.logger.info(
+      {
+        operation: 'health-data.source-connection.create',
+        sourceSystemCode: dto.sourceSystemCode,
+        actorUserId: actor.id,
+      },
+      'Creating health source connection',
+    );
+
+    return this.em.transactional(async (tx) => {
+      let system = await this.ingestionRepo.findSourceSystemByCode(
+        tx,
+        dto.tenantId,
+        dto.sourceSystemCode,
+      );
+      if (!system) {
+        system = this.ingestionRepo.createSourceSystem(tx, {
+          tenantId: dto.tenantId,
+          code: dto.sourceSystemCode,
+          name: dto.sourceSystemName,
+          sourceTypeConceptId: dto.sourceTypeConceptId,
+          trustLevelConceptId: dto.trustLevelConceptId,
+        });
+        // La conexión referencia al sistema por una columna uuid plana: el ORM
+        // no conoce la dependencia y podría insertarla antes.
+        await tx.flush();
+      }
+
+      const connection = this.ingestionRepo.createConnection(tx, {
+        healthSourceSystemId: system.id,
+        connectionTypeConceptId: dto.connectionTypeConceptId,
+        endpointUri: dto.endpointUri,
+      });
+      await tx.flush();
+
+      return {
+        id: connection.id,
+        healthSourceSystemId: system.id,
+        statusConceptId: connection.statusConceptId,
+      };
+    });
   }
 
   /**
@@ -301,6 +366,10 @@ export class HealthIngestionService {
           lifecycleStatusConceptId: CONCEPTS.RESOURCE_ACTIVE,
           securityLabelsJson: dto.securityLabelsJson,
         });
+        // La versión referencia el recurso por una columna uuid plana: sin este
+        // flush MikroORM podía insertarla antes y la FK rechazaba la
+        // proyección entera, que es la puerta de entrada del módulo.
+        await tx.flush();
       } else if (
         resource.lifecycleStatusConceptId === CONCEPTS.RESOURCE_RETIRED
       ) {
@@ -334,6 +403,11 @@ export class HealthIngestionService {
         responsibleAgentId: actor.id,
         contentHash,
       });
+      // El comentario de arriba describía la intención, pero el orden de
+      // inserción no lo garantiza: `provenance_record_id` es una columna uuid
+      // plana y el ORM no conoce la dependencia. Sin este flush, la versión se
+      // insertaba antes que su procedencia y la FK la rechazaba.
+      await tx.flush();
 
       const versionNumber = (previous?.versionNumber ?? 0) + 1;
       const version = this.resourcesRepo.createResourceVersion(tx, {
@@ -354,6 +428,10 @@ export class HealthIngestionService {
         supersedesVersionId: previous?.id,
       });
 
+      // El objetivo referencia el registro de procedencia por una columna uuid
+      // plana: sin este flush MikroORM puede insertarlo antes y la FK lo
+      // rechaza. Mismo patrón que en `OutboxService.publishDomainEvent`.
+      await tx.flush();
       this.provenanceRepo.createProvenanceTarget(tx, {
         healthProvenanceRecordId: provenance.id,
         targetTypeConceptId: CONCEPTS.HD_ENTITY_RESOURCE_VERSION,

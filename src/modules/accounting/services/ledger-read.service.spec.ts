@@ -54,12 +54,36 @@ function cuenta(id: string, code: string, deudora = true) {
   };
 }
 
-function linea(accountId: string, debe: boolean, amountBase: string) {
+/**
+ * Una línea **como la escribe el backend**: el importe en `amount`, y
+ * `amount_base` nulo porque no hubo conversión de moneda — que es el caso
+ * corriente. El doble lo refleja a propósito: mientras llenaba `amountBase`,
+ * escondía el defecto que los datos reales destaparon.
+ */
+function linea(accountId: string, debe: boolean, amount: string) {
+  return {
+    id: `l-${accountId}-${amount}`,
+    transactionId: 't-1',
+    accountId,
+    directionConceptId: debe ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
+    amount,
+    amountBase: null,
+  };
+}
+
+/** Una línea convertida: `amount` en su moneda y `amount_base` ya convertido. */
+function lineaConvertida(
+  accountId: string,
+  debe: boolean,
+  amount: string,
+  amountBase: string,
+) {
   return {
     id: `l-${accountId}-${amountBase}`,
     transactionId: 't-1',
     accountId,
     directionConceptId: debe ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
+    amount,
     amountBase,
   };
 }
@@ -221,6 +245,52 @@ describe('LedgerReadService', () => {
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
 
       expect(res.truncated).toBe(true);
+    });
+  });
+
+  describe('el importe en moneda base', () => {
+    /**
+     * **El defecto que esto fija.** `amount_base` sólo se llena cuando hubo
+     * conversión; sin ella queda nulo y el importe vive en `amount`. Leyendo
+     * sólo `amount_base`, el balance salía **entero en cero y declarando que
+     * cuadraba** — 0 = 0. Un informe contable vacío con el sello de «cuadra» se
+     * firma sin mirarlo.
+     */
+    it('sin conversión toma `amount`, no el `amount_base` nulo', async () => {
+      const d = build();
+      d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
+      d.accountsRepo.findByPractice.mockResolvedValue([
+        cuenta('gasto', '5.1.01', true),
+        cuenta('pagar', '2.1.01', false),
+      ]);
+      d.journalRepo.findEntriesByTransactions.mockResolvedValue([
+        linea('gasto', true, '12000.00'),
+        linea('pagar', false, '12000.00'),
+      ]);
+
+      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+
+      expect(res.totalDebit).toBe('12000.00');
+      expect(res.balanced).toBe(true);
+      // Que cuadre no basta: cero contra cero también cuadra.
+      expect(res.totalDebit).not.toBe('0.00');
+    });
+
+    /** Con conversión manda `amount_base`: es el importe ya en moneda base. */
+    it('con conversión toma `amount_base`, que es el convertido', async () => {
+      const d = build();
+      d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
+      d.accountsRepo.findByPractice.mockResolvedValue([
+        cuenta('gasto', '5.1.01', true),
+      ]);
+      d.journalRepo.findEntriesByTransactions.mockResolvedValue([
+        // 100 dólares a 6.96 → 696 bolivianos.
+        lineaConvertida('gasto', true, '100.00', '696.00'),
+      ]);
+
+      const res = await d.service.trialBalance({ practiceId: PRACTICE });
+
+      expect(res.totalDebit).toBe('696.00');
     });
   });
 

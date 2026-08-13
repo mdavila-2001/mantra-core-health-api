@@ -58,6 +58,12 @@ function build() {
   const ownership = {
     assertOwnsPractitionerProfile: mockFn().mockResolvedValue(undefined),
   };
+  // El titular del perfil y la concesión de su rol asistencial: por defecto no
+  // hay cuenta vinculada, que es el caso de un perfil cargado por un tercero.
+  const accountLinksRepo = {
+    findActiveByPerson: mockFn().mockResolvedValue(null),
+  };
+  const effectiveRoles = { ensureRoleByCode: mockFn().mockResolvedValue(true) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesPractitionersService(
@@ -70,10 +76,14 @@ function build() {
     specialtiesRepo,
     languagesRepo,
     ownership as never,
+    accountLinksRepo as any,
+    effectiveRoles as any,
     logger as any,
   );
   return {
     service,
+    accountLinksRepo,
+    effectiveRoles,
     tx,
     personsRepo,
     personProfilesRepo,
