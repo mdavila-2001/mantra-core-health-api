@@ -34,7 +34,7 @@ function build() {
   const service = new CommunityReviewsService(
     em as any,
     profilesRepo as any,
-    reviewsRepo,
+    reviewsRepo as any,
     logger as any,
   );
   return { service, tx, profilesRepo, reviewsRepo };

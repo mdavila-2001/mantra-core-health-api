@@ -104,6 +104,132 @@ export class PostsRepository {
   }
 
   /**
+   * Publicaciones de un autor (UC-19-02, cara de lectura).
+   *
+   * Sólo lo publicado: los borradores y lo retirado por moderación no son parte
+   * del muro de nadie. La visibilidad por seguidor la resuelve
+   * `CommunityVisibilityService` sobre la página, no esta consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param authorPublicProfileId - Perfil autor.
+   * @param publishedStatusConceptId - Estado de publicación visible.
+   * @param after - Clave de continuación `(publishedAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de posts, del más reciente al más antiguo.
+   */
+  listByAuthorPage(
+    em: EntityManager,
+    authorPublicProfileId: string,
+    publishedStatusConceptId: string,
+    after: { publishedAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<SocialPosts[]> {
+    return em.find(
+      SocialPosts,
+      {
+        authorPublicProfileId,
+        publicationStatusConceptId: publishedStatusConceptId,
+        ...(after
+          ? {
+              $or: [
+                { publishedAt: { $lt: new Date(after.publishedAt) } },
+                {
+                  publishedAt: new Date(after.publishedAt),
+                  id: { $lt: after.id },
+                },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { publishedAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Varios posts por id, para hidratar una página de feed.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Posts a traer.
+   * @returns Los posts existentes, sin orden garantizado.
+   */
+  listByIds(em: EntityManager, ids: string[]): Promise<SocialPosts[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(SocialPosts, { id: { $in: ids } });
+  }
+
+  /**
+   * Posts publicados dentro de una ventana, para el fan-out del feed.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param publishedStatusConceptId - Estado de publicación visible.
+   * @param since - Momento a partir del cual buscar.
+   * @param limit - Tope de filas.
+   * @returns Posts recientes, del más antiguo al más nuevo.
+   */
+  listPublishedSince(
+    em: EntityManager,
+    publishedStatusConceptId: string,
+    since: Date,
+    limit: number,
+  ): Promise<SocialPosts[]> {
+    return em.find(
+      SocialPosts,
+      {
+        publicationStatusConceptId: publishedStatusConceptId,
+        publishedAt: { $gte: since },
+      },
+      { orderBy: { publishedAt: 'ASC', id: 'ASC' }, limit },
+    );
+  }
+
+  /** Adjuntos de un post, en orden de despliegue. */
+  listMedia(em: EntityManager, postId: string): Promise<PostMedia[]> {
+    return em.find(
+      PostMedia,
+      { postId },
+      { orderBy: { ordinal: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
+   * Hashtags de un post, ya resueltos a su etiqueta.
+   *
+   * `content_hashtags` guarda sólo el id: devolver eso obligaría a la interfaz
+   * a una segunda vuelta por cada etiqueta para poder escribirla.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param postId - Post a leer.
+   * @returns Etiquetas del post, con su id.
+   */
+  async listHashtags(
+    em: EntityManager,
+    postId: string,
+  ): Promise<{ id: string; tag: string }[]> {
+    const links = await em.find(ContentHashtags, {
+      contentTypeConceptId: COMM.CONTENT_TYPE_POST,
+      contentRefId: postId,
+    });
+    if (links.length === 0) return [];
+    const tags = await em.find(Hashtags, {
+      id: { $in: links.map((link) => link.hashtagId) },
+    });
+    return tags.map((tag) => ({ id: tag.id, tag: tag.tag }));
+  }
+
+  /** Menciones declaradas en el cuerpo de un post. */
+  listMentions(em: EntityManager, postId: string): Promise<Mentions[]> {
+    return em.find(
+      Mentions,
+      {
+        sourceTypeConceptId: COMM.CONTENT_TYPE_POST,
+        sourceRefId: postId,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      },
+      { orderBy: { offsetStart: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

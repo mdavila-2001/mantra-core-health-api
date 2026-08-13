@@ -4,6 +4,34 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
 
 ## Estado actual
 
+- **El módulo Community (19) era de sólo escritura (2026-08-13).** 19 endpoints de
+  escritura y **cero `@Get`** en toda la API: se podía publicar, comentar,
+  reaccionar, seguir y bloquear, y no había forma de volver a leer nada — ni
+  siquiera el feed, que `POST /internal/community/feed/rebuild` materializaba en
+  `feed_items` para nadie, porque **el «worker interno» que su README declaraba
+  no existía** (no había `src/worker-community.ts`, ni jobs, ni servicio en el
+  compose). Se añadieron las **16 lecturas** (perfil con sellos y prestigio,
+  muro, post, hilo de comentarios, reacciones, follows, marcadores, bloqueos,
+  reviews, bandeja y mensajes, grupos y sus integrantes, encuesta, timeline y
+  notificaciones), todas con el cursor keyset de `common/pagination`, y el
+  **`worker-community`** con el job `feed-fanout`. Dos cosas que el módulo no
+  tenía y el fan-out necesitaba: **`GET /internal/community/feed/pending`**
+  —`rebuild` recibe la lista de seguidores ya resuelta, así que un worker
+  periódico no tenía de dónde sacarla— y el rol `SYSTEM` en `rebuild`, que
+  exigía sólo `SECURITY_ADMIN` y le habría devuelto **403** al worker en cada
+  tick. Las reglas transversales (propiedad del perfil, bloqueo en ambos
+  sentidos, visibilidad `PUBLIC`/`FOLLOWERS`/`PRIVATE`) viven en
+  `CommunityVisibilityService`, no repetidas endpoint por endpoint. **Los
+  conceptos `POST_VISIBILITY_*` no existían y `publishPost` nunca escribía la
+  columna**: se declararon en `community.concepts.ts` y el nulo se lee como
+  público, porque esconder ahora las publicaciones previas las borraría de muros
+  donde ya estaban. Verificado ejecutando: **952 rutas mapeadas** (eran 827) y
+  `test/integration/community-reads.int-spec.ts` **17/17 contra la base real**
+  —incluye el ciclo descubrir → repartir → leer el timeline y la idempotencia
+  del reparto—; es la única prueba que puede demostrar la visibilidad, porque
+  con el `EntityManager` simulado quien decide si un post se ve es el mock.
+  Detalle en `src/modules/community/README.md`.
+
 - **Ningún usuario médico podía ejercer su rol (2026-08-12).** `RolesGuard`
   autoriza mirando sólo el claim `roles` del token, y ese claim se construía con
   `conceptIdsToRoleCodes`, que **descarta en silencio** todo código que no sea
@@ -84,7 +112,8 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
   compartido para multi-réplica. Ver `docs/resilience/06-checklists.md`.
 
 - La API está organizada en 57 módulos NestJS y expone 852 endpoints detectados por el analizador
-  REDESA.
+  REDESA (cifra anterior a las 17 rutas de lectura de Community del 2026-08-13; el
+  arranque real mapea **952**).
 - La trazabilidad canónica y las remediaciones verificadas viven en `REDESA-TRAZABILIDAD.md`.
 - El informe estático actual registra 0 endpoints mutantes sin política explícita y 0 entidades
   huérfanas; queda 1 acceso directo entre repositorios de dominios distintos, justificado
@@ -100,13 +129,14 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
   webhook en `messaging` (un tenant podía recibir eventos de otro), catálogo de hitos de `tracking`
   (podía asignarse el hito terminal de otro tenant a un envío) y el presupuesto de asignaciones de
   `forms` (el consumo de un tenant bloqueaba el alta de otro).
-- Hay 20 procesos worker separados (`src/worker-<dominio>.ts`, uno por dominio, arrancados vía
+- Hay 22 procesos worker separados (`src/worker-<dominio>.ts`, uno por dominio, arrancados vía
   `bootstrapWorker`), cada uno como cliente HTTP autenticado (`SystemApiClient`, rol `SYSTEM`) de
   la propia API — nunca importan servicios de dominio directamente. Cubren scheduling, pharmacy
   inventory, consent, delegated access, identity assurance, promotions, workflow, reporting,
   automation, qa lab, health context, cross-store consistency, messaging, integrations, billing,
-  tracking, read models, **vector RAG** (drena la cola de embedding jobs) y **lakehouse** (cierra
-  releases de investigación vencidos). `graph_intelligence` no tiene worker: sus endpoints de
+  tracking, read models, **vector RAG** (drena la cola de embedding jobs), **lakehouse** (cierra
+  releases de investigación vencidos), **audio assets** y **community** (fan-out del feed social,
+  2026-08-13). `graph_intelligence` no tiene worker: sus endpoints de
   proyección son alimentados por evidencia/eventos externos (no hay nada que "descubrir" en un
   bucle sin fabricar datos de proyección). **time_series** tiene worker de compresión y rollups
   (automáticos) y de retención (`drop_chunks`, irreversible) — la retención es **opt-in por tabla**

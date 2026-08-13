@@ -111,6 +111,67 @@ export class PollsRepository {
     return em.findOne(PollOptions, { id });
   }
 
+  /** Opciones de una encuesta, en orden de presentación. */
+  listOptions(em: EntityManager, pollId: string): Promise<PollOptions[]> {
+    return em.find(
+      PollOptions,
+      { pollId },
+      { orderBy: { ordinal: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
+   * Votos emitidos por un perfil en una encuesta.
+   *
+   * Devuelve las opciones y no un booleano porque una encuesta de opción
+   * múltiple necesita marcar cada casilla que la persona eligió, no sólo saber
+   * que votó.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param pollId - Encuesta consultada.
+   * @param voterProfileId - Perfil votante.
+   * @returns Ids de las opciones que ese perfil votó.
+   */
+  async listVotedOptionIds(
+    em: EntityManager,
+    pollId: string,
+    voterProfileId: string,
+  ): Promise<string[]> {
+    const votes = await em.find(PollVotes, { pollId, voterProfileId });
+    return votes.map((vote) => vote.pollOptionId);
+  }
+
+  /**
+   * Recuento real de votos por opción.
+   *
+   * `poll_options.vote_count` es un contador denormalizado; esta consulta es la
+   * verdad contra la que se lo compara.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param pollId - Encuesta a contar.
+   * @returns Pares opción → cantidad de votos.
+   */
+  async countVotesByOption(
+    em: EntityManager,
+    pollId: string,
+  ): Promise<{ pollOptionId: string; count: number }[]> {
+    const rows = await em
+      .getConnection()
+      .execute<Array<{ poll_option_id: string; count: number }>>(
+        `select poll_option_id, count(*)::int as count
+           from community.poll_votes
+          where poll_id=?
+          group by poll_option_id`,
+        [pollId],
+        'all',
+      );
+
+    return rows.map((row) => ({
+      pollOptionId: row.poll_option_id,
+      count: row.count,
+    }));
+  }
+
   /**
    * Obtiene find vote.
    *

@@ -55,6 +55,41 @@ export class BookmarksRepository {
   }
 
   /**
+   * Marcadores de un perfil (UC-19-06, cara de lectura).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profileId - Perfil dueño de los marcadores.
+   * @param collectionName - Colección a la que acotar, si se pidió una.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de marcadores, del más reciente al más antiguo.
+   */
+  listByProfilePage(
+    em: EntityManager,
+    profileId: string,
+    collectionName: string | undefined,
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<Bookmarks[]> {
+    return em.find(
+      Bookmarks,
+      {
+        profileId,
+        ...(collectionName ? { collectionName } : {}),
+        ...(after
+          ? {
+              $or: [
+                { createdAt: { $lt: new Date(after.createdAt) } },
+                { createdAt: new Date(after.createdAt), id: { $lt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
