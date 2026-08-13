@@ -87,8 +87,14 @@ export class BlocksRepository {
     const rows = await em.find(UserBlocks, {
       statusConceptId: activeStatusConceptId,
       $or: [
-        { blockerProfileId: profileId, blockedProfileId: { $in: peerProfileIds } },
-        { blockerProfileId: { $in: peerProfileIds }, blockedProfileId: profileId },
+        {
+          blockerProfileId: profileId,
+          blockedProfileId: { $in: peerProfileIds },
+        },
+        {
+          blockerProfileId: { $in: peerProfileIds },
+          blockedProfileId: profileId,
+        },
       ],
     });
     return rows.map((row) =>

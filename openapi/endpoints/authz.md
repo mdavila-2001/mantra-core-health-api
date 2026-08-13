@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `authz`
 
-Referencia exhaustiva de 20 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 21 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles`
 - **Controladores:** `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGrantsController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzRolesController`
@@ -25,12 +25,13 @@ Referencia exhaustiva de 20 operación(es) del módulo `authz`, derivada del con
 12. [POST /authz/permission-categories](#12-post-authz-permission-categories) — Definir una categoría de permiso
 13. [POST /authz/permissions](#13-post-authz-permissions) — Definir un permiso del catálogo global
 14. [POST /authz/resource-scope-grants](#14-post-authz-resource-scope-grants) — Otorgar acceso a un recurso específico (grant polimórfico)
-15. [POST /authz/roles](#15-post-authz-roles) — Componer un rol (con herencia opcional)
-16. [PUT /authz/roles/{roleId}/field-permissions](#16-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
-17. [PUT /authz/roles/{roleId}/permissions](#17-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
-18. [POST /authz/tenants/{tenantId}/access-policies](#18-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
-19. [POST /authz/users/{userId}/permission-grants](#19-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
-20. [POST /authz/users/{userId}/role-assignments](#20-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
+15. [GET /authz/roles](#15-get-authz-roles) — Listar los roles asignables
+16. [POST /authz/roles](#16-post-authz-roles) — Componer un rol (con herencia opcional)
+17. [PUT /authz/roles/{roleId}/field-permissions](#17-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
+18. [PUT /authz/roles/{roleId}/permissions](#18-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
+19. [POST /authz/tenants/{tenantId}/access-policies](#19-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
+20. [POST /authz/users/{userId}/permission-grants](#20-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
+21. [POST /authz/users/{userId}/role-assignments](#21-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
 
 ---
 
@@ -1878,7 +1879,113 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /authz/roles
+## 15. GET /authz/roles
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-roles`
+- **Nombre:** Listar los roles asignables
+- **Operation ID:** `AuthzRolesController_listAssignable`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzRolesController.listAssignable](../../src/modules/authz/controllers/authz-roles.controller.ts)
+
+### Descripción de negocio
+
+Listar los roles asignables. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Catálogo de roles que se pueden asignar a un usuario. Es la contraparte de lectura de `POST /authz/users/:userId/role-assignments`: devuelve el `code` —el que exige `@Roles(...)`— junto al id, de modo que asignar un rol no obligue a conocer de antemano un uuid que ninguna operación devolvía.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/roles` en `AuthzRolesController_listAssignable`. El controlador delega en `AuthzRolesService.listAssignable`. No recibe body. El tipo de retorno estático es `Promise<AssignableRoleDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/roles HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/roles HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignableRoleDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo",
+    "isSystem": true,
+    "tenantId": "00000000-0000-4000-8000-000000000001"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/roles"
+}
+```
+
+---
+
+## 16. POST /authz/roles
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2024,7 +2131,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PUT /authz/roles/{roleId}/field-permissions
+## 17. PUT /authz/roles/{roleId}/field-permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2173,7 +2280,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PUT /authz/roles/{roleId}/permissions
+## 18. PUT /authz/roles/{roleId}/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2324,7 +2431,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /authz/tenants/{tenantId}/access-policies
+## 19. POST /authz/tenants/{tenantId}/access-policies
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-policies`
@@ -2461,7 +2568,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /authz/users/{userId}/permission-grants
+## 20. POST /authz/users/{userId}/permission-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -2606,7 +2713,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /authz/users/{userId}/role-assignments
+## 21. POST /authz/users/{userId}/role-assignments
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -2640,9 +2747,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "roleId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -2656,7 +2761,8 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `roleId` | Sí | `string` | formato `uuid` | Rol a asignar (debe ser asignable) | `00000000-0000-4000-8000-000000000001` |
+| `roleId` | No | `string` | formato `uuid` | Rol a asignar por id (debe ser asignable) | `00000000-0000-4000-8000-000000000001` |
+| `roleCode` | No | `string` | longitud máxima 100 | Rol a asignar por código (p. ej. `SURGEON`) | `CODIGO_EJEMPLO` |
 | `tenantId` | No | `string` | formato `uuid` | Tenant del ámbito | `00000000-0000-4000-8000-000000000001` |
 | `branchId` | No | `string` | formato `uuid` | Sede/branch del ámbito | `00000000-0000-4000-8000-000000000001` |
 | `practiceId` | No | `string` | formato `uuid` | Consultorio/practice del ámbito | `00000000-0000-4000-8000-000000000001` |
@@ -2675,6 +2781,7 @@ Content-Type: application/json
 
 {
   "roleId": "00000000-0000-4000-8000-000000000001",
+  "roleCode": "CODIGO_EJEMPLO",
   "tenantId": "00000000-0000-4000-8000-000000000001",
   "branchId": "00000000-0000-4000-8000-000000000001",
   "practiceId": "00000000-0000-4000-8000-000000000001",
@@ -2728,6 +2835,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Rol no encontrado | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 409 | `CONFLICT` | El usuario ya tiene ese rol asignado y activo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

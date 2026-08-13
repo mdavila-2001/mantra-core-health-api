@@ -2,8 +2,10 @@ import { jest } from '@jest/globals';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { ForbiddenException } from '@nestjs/common';
 import { LedgerReadService } from './ledger-read.service';
 import { ACCT } from '../accounting.concepts';
+import { runWithTenant } from '../../../common';
 
 /**
  * Las lecturas del mayor. Lo que estas pruebas fijan, y que un refactor rompería
@@ -20,7 +22,8 @@ import { ACCT } from '../accounting.concepts';
 const PRACTICE = 'prac-1';
 
 function build() {
-  const tx = {};
+  // `findOne` lo usa la comprobación de pertenencia de la práctica al tenant.
+  const tx: any = { findOne: mockFn(() => Promise.resolve(null)) };
   const em = { fork: mockFn(() => tx) };
   const journalRepo = {
     findTransactions: mockFn(() => Promise.resolve([])),
@@ -35,7 +38,7 @@ function build() {
     journalRepo as any,
     accountsRepo as any,
   );
-  return { service, journalRepo, accountsRepo };
+  return { service, journalRepo, accountsRepo, tx };
 }
 
 /** Una cuenta con su naturaleza: es lo que da signo al saldo. */
@@ -86,6 +89,50 @@ function lineaConvertida(
 }
 
 describe('LedgerReadService', () => {
+  /**
+   * El control que hace seguro abrir estas lecturas más allá de
+   * `SECURITY_ADMIN`. Ninguna tabla de `accounting` lleva `tenant_id` —el dueño
+   * es la práctica— y `RLS_ENFORCE` está apagado en desarrollo: sin esto, un
+   * profesional leería los estados financieros de otra organización con sólo
+   * adivinar un `practiceId`.
+   */
+  describe('pertenencia de la práctica al tenant', () => {
+    it('niega la práctica de otra organización', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue({ id: PRACTICE, tenantId: 'otro-tenant' });
+
+      await expect(
+        runWithTenant('mi-tenant', () => d.service.chartOfAccounts(PRACTICE)),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      // Y no llegó a tocar los libros.
+      expect(d.accountsRepo.findByPractice).not.toHaveBeenCalled();
+    });
+
+    it('deja pasar la práctica del propio tenant', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue({ id: PRACTICE, tenantId: 'mi-tenant' });
+      d.accountsRepo.findByPractice.mockResolvedValue([]);
+
+      const res = await runWithTenant('mi-tenant', () =>
+        d.service.chartOfAccounts(PRACTICE),
+      );
+
+      expect(res.count).toBe(0);
+      expect(d.accountsRepo.findByPractice).toHaveBeenCalled();
+    });
+
+    it('sin tenant en contexto no comprueba: son los carriles internos', async () => {
+      const d = build();
+      d.accountsRepo.findByPractice.mockResolvedValue([]);
+
+      await d.service.chartOfAccounts(PRACTICE);
+
+      expect(d.tx.findOne).not.toHaveBeenCalled();
+      expect(d.accountsRepo.findByPractice).toHaveBeenCalled();
+    });
+  });
+
   describe('trialBalance (UC-16-06)', () => {
     it('un asiento balanceado deja el conjunto cuadrado', async () => {
       const d = build();

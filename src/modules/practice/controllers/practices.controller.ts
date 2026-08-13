@@ -91,6 +91,12 @@ export class PracticesController {
     'ANESTHESIOLOGIST',
     'PERIOP_NURSE',
     'SCHEDULING_ADMIN',
+    // Los roles clínicos generales, que faltaban: sin ellos un médico no puede
+    // ni saber en qué práctica trabaja, y las lecturas del mayor —que cuelgan
+    // todas de un `practiceId`— quedan inalcanzables para él.
+    'PRACTITIONER',
+    'CLINICIAN',
+    'ACCOUNTING_APPROVER',
   )
   @ApiOperation({ summary: 'Listar las prácticas activas del tenant' })
   listPractices(): Promise<PracticeSummaryDto[]> {

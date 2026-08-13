@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `health_data`
 
-Referencia exhaustiva de 15 operación(es) del módulo `health_data`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 16 operación(es) del módulo `health_data`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `fhir-r5`, `health-data`
 - **Controladores:** `FhirR5Controller`, `HealthDataController`
@@ -24,8 +24,9 @@ Referencia exhaustiva de 15 operación(es) del módulo `health_data`, derivada d
 11. [POST /health-data/ingestion-batches/{id}/close](#11-post-health-data-ingestion-batches-id-close) — Cerrar el lote conciliando sus contadores
 12. [POST /health-data/ingestion-batches/{id}/records](#12-post-health-data-ingestion-batches-id-records) — Registrar un registro crudo del lote
 13. [POST /health-data/quality-runs](#13-post-health-data-quality-runs) — Ejecutar reglas de calidad y abrir incidencias
-14. [POST /health-data/timeline-entries](#14-post-health-data-timeline-entries) — Proyectar una entrada de la línea de tiempo del paciente
-15. [POST /health-data/versions/{id}/validate](#15-post-health-data-versions-id-validate) — Validar la versión contra un perfil FHIR R5
+14. [POST /health-data/source-connections](#14-post-health-data-source-connections) — Dar de alta una conexión de origen (crea el sistema si no existe)
+15. [POST /health-data/timeline-entries](#15-post-health-data-timeline-entries) — Proyectar una entrada de la línea de tiempo del paciente
+16. [POST /health-data/versions/{id}/validate](#16-post-health-data-versions-id-validate) — Validar la versión contra un perfil FHIR R5
 
 ---
 
@@ -1911,7 +1912,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /health-data/timeline-entries
+## 14. POST /health-data/source-connections
+
+- **Módulo:** `health_data`
+- **Etiqueta OpenAPI:** `health-data`
+- **Nombre:** Dar de alta una conexión de origen (crea el sistema si no existe)
+- **Operation ID:** `HealthDataController_createSourceConnection`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [HealthDataController.createSourceConnection](../../src/modules/health_data/controllers/health-data.controller.ts)
+
+### Descripción de negocio
+
+Dar de alta una conexión de origen (crea el sistema si no existe). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-52-01: alta de la conexión de origen. Faltaba por completo: sin una conexión no se puede abrir un lote, y sin lote no hay registros ni recursos canónicos sobre los que el informático clínico pueda trabajar. Las dos filas —sistema y conexión— se crean en una sola llamada porque el sistema es sólo el padre del que cuelga la conexión.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /health-data/source-connections` en `HealthDataController_createSourceConnection`. El controlador delega en `HealthIngestionService.createSourceConnection`. Valida el body como `CreateSourceConnectionDto` y consume `application/json`. El tipo de retorno estático es `Promise<SourceConnectionResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSourceConnectionDto`; los campos opcionales se omiten.
+
+```http
+POST /health-data/source-connections HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "sourceSystemCode": "CODIGO_EJEMPLO",
+  "sourceSystemName": "Nombre de ejemplo",
+  "sourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "trustLevelConceptId": "00000000-0000-4000-8000-000000000001",
+  "connectionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "endpointUri": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `HEALTH_DATA_ADMIN`, `CLINICAL_INFORMATICIAN`, `DATA_PLATFORM_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario del origen | `00000000-0000-4000-8000-000000000001` |
+| `sourceSystemCode` | Sí | `string` | longitud máxima 100 | Código del sistema de origen; se crea si no existe | `CODIGO_EJEMPLO` |
+| `sourceSystemName` | Sí | `string` | longitud máxima 200 | Nombre del sistema de origen | `Nombre de ejemplo` |
+| `sourceTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de sistema de origen | `00000000-0000-4000-8000-000000000001` |
+| `trustLevelConceptId` | Sí | `string` | formato `uuid` | Nivel de confianza del origen | `00000000-0000-4000-8000-000000000001` |
+| `connectionTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de conexión | `00000000-0000-4000-8000-000000000001` |
+| `endpointUri` | Sí | `string` | longitud máxima 500 | URI del extremo del origen | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /health-data/source-connections HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "sourceSystemCode": "CODIGO_EJEMPLO",
+  "sourceSystemName": "Nombre de ejemplo",
+  "sourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "trustLevelConceptId": "00000000-0000-4000-8000-000000000001",
+  "connectionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "endpointUri": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SourceConnectionResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SourceConnectionResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "healthSourceSystemId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la conexión. | `00000000-0000-4000-8000-000000000001` |
+| `healthSourceSystemId` | Sí | `string` | formato `uuid` | Sistema de origen del que cuelga (creado o reutilizado). | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Concepto de estado: nace activa. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/health-data/source-connections"
+}
+```
+
+---
+
+## 15. POST /health-data/timeline-entries
 
 - **Módulo:** `health_data`
 - **Etiqueta OpenAPI:** `health-data`
@@ -2060,7 +2203,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /health-data/versions/{id}/validate
+## 16. POST /health-data/versions/{id}/validate
 
 - **Módulo:** `health_data`
 - **Etiqueta OpenAPI:** `health-data`
@@ -2104,7 +2247,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `INGESTION_WORKER`, `HEALTH_DATA_ADMIN`.
+- Roles admitidos por `@Roles`: `INGESTION_WORKER`, `HEALTH_DATA_ADMIN`, `CLINICAL_INFORMATICIAN`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -2195,7 +2338,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INGESTION_WORKER, HEALTH_DATA_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INGESTION_WORKER, HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Versión canónica no encontrada | Excepción explícita en src/modules/health_data/services/health-validation.service.ts |
 | 404 | `NOT_FOUND` | Versión del perfil FHIR no encontrada | Excepción explícita en src/modules/health_data/services/health-validation.service.ts |
 | 404 | `NOT_FOUND` | Recurso canónico no encontrado | Excepción explícita en src/modules/health_data/services/health-validation.service.ts |
