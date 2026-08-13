@@ -177,7 +177,7 @@ export class LedgerReadService {
         lineNo: l.lineNo ?? null,
         accountId: l.accountId,
         directionConceptId: l.directionConceptId,
-        amountBase: l.amountBase ?? '0.00',
+        amountBase: importeEnBase(l),
         costCenterId: l.costCenterId ?? null,
         currencyConceptId: l.currencyConceptId ?? null,
       })),
@@ -235,7 +235,7 @@ export class LedgerReadService {
     const sumas = new Map<string, { debe: bigint; haber: bigint }>();
     for (const linea of lineas) {
       const actual = sumas.get(linea.accountId) ?? { debe: 0n, haber: 0n };
-      const importe = aCentimos(linea.amountBase);
+      const importe = aCentimos(importeEnBase(linea));
       if (linea.directionConceptId === ACCT.DIRECTION_DEBIT) {
         actual.debe += importe;
       } else {
@@ -289,6 +289,27 @@ export class LedgerReadService {
  */
 const TRIAL_BALANCE_MAX_TRANSACTIONS = 10_000;
 const TRIAL_BALANCE_MAX_ACCOUNTS = 5_000;
+
+/**
+ * El importe de una línea **en moneda base**.
+ *
+ * `amount_base` sólo se llena cuando hubo conversión: la columna existe para
+ * guardar el resultado de aplicar `fx_rate` a `amount`. Cuando el asiento ya
+ * está en la moneda base —que es el caso corriente— queda **nula**, y el
+ * importe vive en `amount`.
+ *
+ * Leer sólo `amount_base` daba un balance **entero en cero que además decía que
+ * cuadraba**: 0 = 0. Eso es peor que fallar, porque un informe contable vacío
+ * con el sello de «cuadra» se firma sin mirarlo. Lo destapó ejecutarlo contra
+ * datos reales; ninguna prueba con dobles lo habría visto, porque los dobles
+ * llenaban la columna que el código leía.
+ */
+function importeEnBase(linea: {
+  amountBase?: string | null;
+  amount?: string | null;
+}): string {
+  return linea.amountBase ?? linea.amount ?? '0.00';
+}
 
 /**
  * El importe como entero de céntimos.
