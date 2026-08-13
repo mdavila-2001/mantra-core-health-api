@@ -49,6 +49,25 @@ export interface CreatePracticeData {
  */
 @Injectable()
 export class PracticesRepository {
+  /**
+   * Prácticas de un tenant, ordenadas por código.
+   *
+   * La lectura que faltaba: el módulo tenía altas y ninguna forma de listar lo
+   * dado de alta, así que ninguna pantalla podía dejar elegir una práctica — y
+   * sin `practiceId` no se puede pedir un solo libro contable.
+   */
+  findByTenant(
+    em: EntityManager,
+    tenantId: string,
+    limit: number,
+  ): Promise<Practices[]> {
+    return em.find(
+      Practices,
+      { tenantId },
+      { orderBy: { code: 'asc' }, limit },
+    );
+  }
+
   /** Prácticas cuyo estado coincide con el indicado. */
   findActive(
     em: EntityManager,

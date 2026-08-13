@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
+  getCurrentTenantId,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -20,10 +21,14 @@ import {
 import {
   CreatePracticeDto,
   CreateSiteDto,
+  PracticeListResponseDto,
   PracticeResponseDto,
   SiteResponseDto,
   StatusResultDto,
 } from '../dto';
+
+/** Tope del listado de prácticas: una organización no tiene cientos. */
+const TOPE_DE_PRACTICAS = 200;
 
 /**
  * Casos de uso de organización y sitios: alta de la práctica raíz (bootstrap),
@@ -58,6 +63,45 @@ export class PracticeSitesService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PracticeSitesService.name);
+  }
+
+  /**
+   * Las prácticas del tenant activo — la lectura que el módulo no tenía.
+   *
+   * Sin esto no hay forma de elegir una práctica en pantalla, y sin
+   * `practiceId` no se puede pedir ni el plan de cuentas ni el diario ni el
+   * balance: el módulo contable quedaba inalcanzable aunque sus lecturas ya
+   * existieran.
+   *
+   * Acota por el tenant del contexto y no por un parámetro: quien pregunta ya
+   * declaró de qué organización habla en `X-Tenant-Id`, y el guard verificó que
+   * pertenece a ella. Aceptarlo por query sería ofrecer el listado de
+   * cualquiera a quien supiera escribir otro uuid.
+   */
+  async listPractices(): Promise<PracticeListResponseDto> {
+    const tenantId = getCurrentTenantId();
+    if (tenantId === undefined) {
+      return { items: [], count: 0 };
+    }
+
+    const practicas = await this.practicesRepo.findByTenant(
+      this.em.fork(),
+      tenantId,
+      TOPE_DE_PRACTICAS,
+    );
+
+    return {
+      items: practicas.map((practica) => ({
+        id: practica.id,
+        code: practica.code,
+        name: practica.name,
+        typeConceptId: practica.typeConceptId,
+        statusConceptId: practica.statusConceptId,
+        currencyConceptId: practica.currencyConceptId ?? null,
+        timeZone: practica.timeZone ?? null,
+      })),
+      count: practicas.length,
+    };
   }
 
   /** Bootstrap: da de alta la organización raíz (práctica). */

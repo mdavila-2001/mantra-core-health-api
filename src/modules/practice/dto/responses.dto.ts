@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** Respuesta de creación de una práctica (bootstrap). */
 export class PracticeResponseDto {
@@ -259,4 +259,27 @@ export class StatusResultDto {
    * Valor de ok mantenido por la instancia.
    */
   @ApiProperty({ description: 'true si la operación se aplicó' }) ok!: boolean;
+}
+
+/**
+ * Una práctica tal como la lista el directorio de la organización.
+ *
+ * Lleva `name` además del `code`, que la respuesta del alta no trae: quien
+ * elige una práctica en pantalla necesita leerla, no descifrar un código.
+ */
+export class PracticeListItemDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ example: 'CLN-001' }) code!: string;
+  @ApiProperty({ example: 'Clínica San Rafael' }) name!: string;
+  @ApiProperty({ format: 'uuid' }) typeConceptId!: string;
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  currencyConceptId!: string | null;
+  @ApiPropertyOptional({ nullable: true }) timeZone!: string | null;
+}
+
+/** Respuesta del listado de prácticas del tenant activo. */
+export class PracticeListResponseDto {
+  @ApiProperty({ type: [PracticeListItemDto] }) items!: PracticeListItemDto[];
+  @ApiProperty() count!: number;
 }

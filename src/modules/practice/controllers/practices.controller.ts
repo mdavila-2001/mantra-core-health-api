@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -34,6 +35,7 @@ import {
   SettingResponseDto,
   RoleAssignmentResponseDto,
   InventoryItemResponseDto,
+  PracticeListResponseDto,
   StatusResultDto,
 } from '../dto';
 
@@ -64,6 +66,21 @@ export class PracticesController {
     private readonly workforceService: PracticeWorkforceService,
     private readonly inventoryService: PracticeInventoryService,
   ) {}
+
+  /**
+   * La lectura que faltaba: las prácticas del tenant activo.
+   *
+   * Abierta también a `PRACTITIONER` y `CLINICIAN`, no sólo a
+   * `SECURITY_ADMIN`: es el primer paso de cualquier pantalla que necesite un
+   * `practiceId` —la contabilidad, sin ir más lejos— y exigir rol de seguridad
+   * para saber en qué clínica se trabaja no protege nada.
+   */
+  @Get()
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER', 'CLINICIAN')
+  @ApiOperation({ summary: 'Prácticas de la organización activa' })
+  listPractices(): Promise<PracticeListResponseDto> {
+    return this.sitesService.listPractices();
+  }
 
   /** Bootstrap: alta de la práctica (organización raíz). */
   @Post()
