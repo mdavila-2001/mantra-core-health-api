@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **922 de 922 endpoints** en **62 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **954 de 954 endpoints** en **62 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -12,20 +12,20 @@ Se documentan **922 de 922 endpoints** en **62 módulos**. La referencia complet
 | `audio_assets` | 10 | [Abrir referencia](endpoints/audio-assets.md) |
 | `audit` | 11 | [Abrir referencia](endpoints/audit.md) |
 | `auth_providers` | 12 | [Abrir referencia](endpoints/auth-providers.md) |
-| `authz` | 20 | [Abrir referencia](endpoints/authz.md) |
+| `authz` | 21 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 13 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 13 | [Abrir referencia](endpoints/chart.md) |
 | `clinical` | 24 | [Abrir referencia](endpoints/clinical.md) |
-| `clinical_ext` | 21 | [Abrir referencia](endpoints/clinical-ext.md) |
+| `clinical_ext` | 23 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 13 | [Abrir referencia](endpoints/common.md) |
-| `community` | 19 | [Abrir referencia](endpoints/community.md) |
+| `community` | 36 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 12 | [Abrir referencia](endpoints/consent.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
 | `delegated_access` | 11 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 16 | [Abrir referencia](endpoints/diagnostic-units.md) |
-| `diagnostics` | 18 | [Abrir referencia](endpoints/diagnostics.md) |
+| `diagnostics` | 20 | [Abrir referencia](endpoints/diagnostics.md) |
 | `directory` | 16 | [Abrir referencia](endpoints/directory.md) |
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
@@ -34,13 +34,13 @@ Se documentan **922 de 922 endpoints** en **62 módulos**. La referencia complet
 | `geo` | 10 | [Abrir referencia](endpoints/geo.md) |
 | `graph_intelligence` | 15 | [Abrir referencia](endpoints/graph-intelligence.md) |
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
-| `health_data` | 15 | [Abrir referencia](endpoints/health-data.md) |
+| `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
 | `iam` | 30 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 24 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 23 | [Abrir referencia](endpoints/insurance.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
-| `lakehouse` | 12 | [Abrir referencia](endpoints/lakehouse.md) |
+| `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
 | `marketing` | 14 | [Abrir referencia](endpoints/marketing.md) |
 | `messaging` | 13 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 13 | [Abrir referencia](endpoints/object-storage.md) |
@@ -50,8 +50,8 @@ Se documentan **922 de 922 endpoints** en **62 módulos**. La referencia complet
 | `pharmacy_inventory` | 15 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
-| `practice` | 13 | [Abrir referencia](endpoints/practice.md) |
-| `procedures_perioperative` | 23 | [Abrir referencia](endpoints/procedures-perioperative.md) |
+| `practice` | 16 | [Abrir referencia](endpoints/practice.md) |
+| `procedures_perioperative` | 28 | [Abrir referencia](endpoints/procedures-perioperative.md) |
 | `profiles` | 16 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |

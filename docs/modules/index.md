@@ -7,13 +7,13 @@
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
+| [`community`](community.md) | 8 | 15 | 16 | 38 | 22 |
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 7 | 8 | 30 | 10 |
 | [`accounting`](accounting.md) | 7 | 8 | 9 | 42 | 9 |
-| [`authz`](authz.md) | 7 | 7 | 14 | 15 | 17 |
+| [`authz`](authz.md) | 7 | 8 | 14 | 15 | 17 |
 | [`clinical_ext`](clinical_ext.md) | 7 | 7 | 11 | 12 | 8 |
-| [`community`](community.md) | 7 | 8 | 15 | 38 | 16 |
 | [`insurance`](insurance.md) | 7 | 7 | 6 | 29 | 8 |
 | [`clinical`](clinical.md) | 6 | 12 | 13 | 22 | 12 |
 | [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
@@ -68,4 +68,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **198** | **275** | **357** | **1190** | **384** |
+| **Total** | **199** | **283** | **358** | **1190** | **390** |
