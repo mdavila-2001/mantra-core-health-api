@@ -3021,7 +3021,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `role` | Sí | `string` | valores: `USER`, `SECURITY_ADMIN`, `SUPERADMIN`, `PATIENT` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `role` | Sí | `string` | valores: `USER`, `SECURITY_ADMIN`, `SUPERADMIN`, `PATIENT`, `PRACTITIONER`, `CLINICIAN` | Sin descripción específica en el contrato OpenAPI. | `USER` |
 | `action` | Sí | `string` | valores: `GRANT`, `REVOKE` | Sin descripción específica en el contrato OpenAPI. | `GRANT` |
 
 ### Payload completo de ejemplo

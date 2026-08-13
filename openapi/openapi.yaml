@@ -37570,6 +37570,8 @@ components:
             - SECURITY_ADMIN
             - SUPERADMIN
             - PATIENT
+            - PRACTITIONER
+            - CLINICIAN
         action:
           type: string
           enum:

@@ -57040,7 +57040,9 @@
               "USER",
               "SECURITY_ADMIN",
               "SUPERADMIN",
-              "PATIENT"
+              "PATIENT",
+              "PRACTITIONER",
+              "CLINICIAN"
             ]
           },
           "action": {
