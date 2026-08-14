@@ -122,6 +122,23 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       display: 'Specialty verified',
     },
 
+    // Historial laboral: afiliaciones institucionales del profesional.
+    // El estado es del registro, no de la relación laboral: si el vínculo sigue
+    // vigente lo dice `end_date`, y mezclarlo acá obligaría a mirar dos campos
+    // para responder una sola pregunta.
+    AFFILIATION_ACTIVE: {
+      code: 'AFFILIATION_ACTIVE',
+      display: 'Practitioner affiliation active',
+    },
+    AFFILIATION_RETRACTED: {
+      code: 'AFFILIATION_RETRACTED',
+      display: 'Practitioner affiliation retracted',
+    },
+    AFFILIATION_TYPE_EMPLOYMENT: {
+      code: 'AFFILIATION_TYPE_EMPLOYMENT',
+      display: 'Employment affiliation type',
+    },
+
     // Idiomas clínicos
     LANGUAGE_SPANISH: {
       code: 'LANGUAGE_SPANISH',

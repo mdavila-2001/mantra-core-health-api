@@ -95,6 +95,41 @@ export class PractitionerRoleAssignmentsRepository {
   }
 
   /**
+   * Asignaciones vigentes de varios profesionales, con sede declarada.
+   *
+   * «Vigente» es `valid_to IS NULL` **y** el estado activo: una asignación que
+   * alguien dio de baja sigue teniendo la fecha abierta hasta que se cierra, y
+   * ofrecerla como «dónde atiende» mandaría pacientes a un consultorio del que
+   * el profesional ya se fue.
+   *
+   * Se pide por lote y no de a uno porque quien la usa —la agenda— resuelve la
+   * ubicación de todos sus recursos en la misma pantalla.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileIds - Profesionales consultados.
+   * @param activeStatusConceptId - Concepto de asignación activa.
+   * @returns Sus asignaciones vigentes que declaran sede.
+   */
+  async findCurrentWithSite(
+    em: EntityManager,
+    practitionerProfileIds: readonly string[],
+    activeStatusConceptId: string,
+  ): Promise<PractitionerRoleAssignments[]> {
+    if (practitionerProfileIds.length === 0) return [];
+    const rows = await em.find(PractitionerRoleAssignments, {
+      practitionerProfileId: { $in: [...practitionerProfileIds] },
+      practiceSiteId: { $ne: null },
+      validTo: null,
+      statusConceptId: activeStatusConceptId,
+    });
+    // La principal primero: un profesional puede atender en varias sedes, y la
+    // que marcó como principal es la respuesta a «¿dónde lo encuentro?».
+    return rows.sort(
+      (a, b) => Number(b.isPrimary ?? false) - Number(a.isPrimary ?? false),
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

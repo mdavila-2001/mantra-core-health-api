@@ -21,8 +21,10 @@ import {
   ProfessionalCredentialsRepository,
   PractitionerSpecialtiesRepository,
   PractitionerLanguagesRepository,
+  PractitionerAffiliationsRepository,
   PersonAccountLinksRepository,
 } from '../repositories';
+import type { PractitionerAffiliations } from '../entities';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -32,6 +34,9 @@ import {
   CredentialResponseDto,
   AddSpecialtyDto,
   SpecialtyResponseDto,
+  CreateAffiliationDto,
+  AffiliationResponseDto,
+  ListAffiliationsResponseDto,
 } from '../dto';
 import { ProfileOwnershipService } from './profile-ownership.service';
 
@@ -56,6 +61,7 @@ export class ProfilesPractitionersService {
    * @param credentialsRepo - Valor de credentials repo requerido por la operación.
    * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
    * @param languagesRepo - Valor de languages repo requerido por la operación.
+   * @param affiliationsRepo - Historial laboral (afiliaciones institucionales).
    * @param accountLinksRepo - Vínculo persona-cuenta del titular del perfil.
    * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
    * @param logger - Valor de logger requerido por la operación.
@@ -69,6 +75,7 @@ export class ProfilesPractitionersService {
     private readonly credentialsRepo: ProfessionalCredentialsRepository,
     private readonly specialtiesRepo: PractitionerSpecialtiesRepository,
     private readonly languagesRepo: PractitionerLanguagesRepository,
+    private readonly affiliationsRepo: PractitionerAffiliationsRepository,
     private readonly ownership: ProfileOwnershipService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
@@ -441,4 +448,140 @@ export class ProfilesPractitionersService {
       };
     });
   }
+
+  /* -- UC-05-16: historial laboral del profesional -------------------------- */
+
+  /**
+   * El historial laboral propio (UC-05-16·L).
+   *
+   * Autoservicio: el sujeto sale de la sesión. El módulo ya sabía dónde se
+   * **formó** el profesional (`professional_credentials`) y qué puede
+   * **ejercer** (licencias y especialidades), pero no dónde **trabajó**, que es
+   * lo que el cliente pidió por nombre —«hospitales o entidades médicas»—.
+   *
+   * @param actor - Quien consulta su propio historial.
+   * @returns Sus afiliaciones, de la más reciente a la más antigua.
+   */
+  async listOwnAffiliations(
+    actor: AuthenticatedUser,
+  ): Promise<ListAffiliationsResponseDto> {
+    const em = this.em.fork();
+    const profileId = await this.ownership.requireOwnPractitionerProfileId(
+      em,
+      actor,
+    );
+    const rows = await this.affiliationsRepo.findByPractitioner(em, profileId);
+    const items = rows.map((row) => toAffiliation(row));
+    return { items, count: items.length };
+  }
+
+  /**
+   * Agrega una afiliación institucional al historial propio (UC-05-16).
+   *
+   * Dos reglas, y ninguna es de prudencia genérica:
+   *
+   * - **El fin no puede preceder al inicio.** Un período invertido no es un dato
+   *   dudoso, es un dato imposible, y ordenar el currículum por fecha lo
+   *   colocaría en cualquier lado.
+   * - **Misma institución, mismo cargo y mismo inicio responde `409`.** Volver a
+   *   trabajar en el mismo hospital años después es cierto y se registra; lo que
+   *   se rechaza es el doble envío del formulario, que se distingue por empezar
+   *   el mismo día.
+   *
+   * Lo que **no** se valida es que la institución exista en la plataforma: la
+   * mayoría no está, y exigirlo convertiría un dato de currículum en un alta de
+   * organizaciones.
+   *
+   * @param dto - Institución, cargo y período.
+   * @param actor - El profesional titular del historial.
+   * @returns La afiliación registrada.
+   */
+  async addOwnAffiliation(
+    dto: CreateAffiliationDto,
+    actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    const startDate = new Date(dto.startDate);
+    const endDate = dto.endDate ? new Date(dto.endDate) : undefined;
+    if (endDate && endDate < startDate) {
+      throw new PreconditionFailedException(
+        'El fin del vínculo no puede ser anterior a su inicio',
+        { startDate: dto.startDate, endDate: dto.endDate },
+      );
+    }
+
+    this.logger.info(
+      { operation: 'profiles.affiliation.add', actorId: actor.id },
+      'Adding practitioner affiliation',
+    );
+    return this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+
+      const organizationName = dto.organizationName.trim();
+      const roleTitle = dto.roleTitle.trim();
+      const duplicate = await this.affiliationsRepo.findSame(
+        tx,
+        profileId,
+        organizationName,
+        roleTitle,
+        startDate,
+      );
+      if (duplicate) {
+        throw new ConflictException(
+          'Ese vínculo ya está en el historial laboral',
+          { organizationName, roleTitle, startDate: dto.startDate },
+        );
+      }
+
+      const affiliation = this.affiliationsRepo.create(tx, {
+        practitionerProfileId: profileId,
+        organizationName,
+        roleTitle,
+        departmentText: dto.departmentText?.trim() || undefined,
+        practiceSiteId: dto.practiceSiteId,
+        affiliationTypeConceptId:
+          dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
+        startDate,
+        endDate,
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.affiliation.add',
+          affiliationId: affiliation.id,
+        },
+        'Practitioner affiliation added',
+      );
+      return toAffiliation(affiliation);
+    });
+  }
+}
+
+/**
+ * Proyecta la fila al contrato de lectura.
+ *
+ * `current` se deriva acá y no se guarda: una columna «sigue trabajando ahí»
+ * sería un dato que envejece solo y que habría que recalcular cada vez que
+ * alguien cierra un período. La fecha ya lo dice.
+ */
+function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
+  return {
+    id: row.id,
+    practitionerProfileId: row.practitionerProfileId,
+    organizationName: row.organizationName,
+    roleTitle: row.roleTitle,
+    departmentText: row.departmentText ?? null,
+    practiceSiteId: row.practiceSiteId ?? null,
+    affiliationTypeConceptId: row.affiliationTypeConceptId ?? null,
+    startDate: row.startDate,
+    endDate: row.endDate ?? null,
+    current: row.endDate === undefined || row.endDate === null,
+    status: row.statusConceptId,
+    createdAt: row.createdAt,
+  };
 }

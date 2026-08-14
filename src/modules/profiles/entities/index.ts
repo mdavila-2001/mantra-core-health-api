@@ -10,6 +10,7 @@ export * from './patient_profiles.entity';
 export * from './person_account_links.entity';
 export * from './person_profiles.entity';
 export * from './persons.entity';
+export * from './practitioner_affiliations.entity';
 export * from './practitioner_languages.entity';
 export * from './practitioner_specialties.entity';
 export * from './professional_credentials.entity';
