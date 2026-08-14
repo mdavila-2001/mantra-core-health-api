@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule, ThrottlerStorage } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppReadinessService } from './app-readiness.service';
@@ -86,6 +86,8 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
 // Módulos 55/56/57: almacenamiento poliglota sobre motores no-PostgreSQL.
 import { DocumentStoreModule } from './modules/document_store/document_store.module';
 import { RedisRuntimeModule } from './modules/redis_runtime/redis_runtime.module';
+import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
+import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
 
 /**
@@ -112,6 +114,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
     // límite estricto propio con `@Throttle`. Almacenamiento en memoria por
     // instancia; para un despliegue multi-réplica conviene el storage Redis.
+    // El almacenamiento pasa a Redis (ver RedisThrottlerStorage): en memoria,
+    // el límite efectivo es N veces el declarado con N réplicas, y las doce
+    // pantallas públicas son la mayor superficie de ataque del sistema.
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60_000, limit: 300 }],
       // Se desactiva en pruebas de integración/smoke, donde todas las peticiones
@@ -217,6 +222,10 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     // Guard de rate limiting aplicado a todas las rutas HTTP.
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: ThrottlerStorage, useClass: RedisThrottlerStorage },
+    // Sólo actúa sobre manejadores `@Public()`: una respuesta con sesión no
+    // puede llevar `Cache-Control: public` ni de casualidad.
+    { provide: APP_INTERCEPTOR, useClass: PublicCacheInterceptor },
     // Contexto de tenant por request: valida X-Tenant-Id contra la membresía del
     // actor y, con RLS_ENFORCE=true, fija app.current_tenant_id para las políticas.
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },

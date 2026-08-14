@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../../common';
 import {
   CommunityPublicService,
@@ -31,7 +32,19 @@ import type {
  * `community-public.smoke.ts`, que pide `/public/search` y falla si lo que
  * vuelve es una proyección. El comentario explica; la prueba impide.
  */
+/**
+ * Límite por IP de toda la superficie pública (P3).
+ *
+ * 60 por minuto es holgado para una persona —una pantalla de resultados con sus
+ * avatares no llega a diez— y estrecho para un raspador: recorrer un directorio
+ * de diez mil fichas a este ritmo lleva casi tres horas en vez de los pocos
+ * minutos que permite el backstop global de 300. Ese backstop sigue existiendo;
+ * esto lo aprieta donde no hay token que atar a nadie.
+ */
+const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
+
 @ApiTags('community-public')
+@Throttle(PUBLIC_RATE_LIMIT)
 @Controller()
 export class CommunityPublicController {
   /**
