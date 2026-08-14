@@ -19,10 +19,6 @@ import {
 } from '../common';
 import { LoggingModule, loggingEnvSchema } from '../logging';
 import { ObservabilityModule, telemetryEnvSchema } from '../observability';
-// Se importa por su ruta exacta y no desde `modules/audio_tts`: el barril del
-// módulo arrastra entidades, controladores y `AudioTtsModule` al proceso worker,
-// que no los necesita. Este archivo solo depende de Joi.
-import { audioTtsEnvSchema } from '../modules/audio_tts/config/audio-tts.env';
 import {
   assertMockProviderNotInProduction,
   loadWorkerEnv,
