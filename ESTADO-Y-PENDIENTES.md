@@ -4,6 +4,51 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
 
 ## Estado actual
 
+- **🔴 BLOQUEADOR ABIERTO · `profiles.practitioner_affiliations` no existe en la
+  base (2026-08-14).** El carril 5 (puntos 8, 9 y 11 del reclamo) trajo el
+  **historial laboral del profesional**: dónde trabajó, con qué cargo y en qué
+  período. El módulo `profiles` sabía dónde se **formó** alguien
+  (`professional_credentials`), qué puede **ejercer** (`jurisdiction_authorizations`,
+  `practitioner_specialties`) y en qué idiomas atiende, y **no tenía ninguna tabla
+  de empleo o afiliación institucional**: `grep -rli "affiliation|employer|hospital|workplace"
+  src/modules/profiles` daba cero. El código está completo y probado —entidad,
+  repositorio, DTOs, servicio, `GET`/`POST /profiles/practitioners/me/affiliations`
+  y sus pruebas—, pero por ADR-0021 el esquema se declara en los `.puml` del
+  modelo canónico y lo materializa `gen_ddl.py`: **este repositorio no escribe
+  DDL**, y el workspace con `SQL/` y `salud-db/` no está en el checkout. Hasta
+  materializarla, **esos dos endpoints responden 500** y ningún otro camino se ve
+  afectado. Los cinco pasos que faltan están enumerados en el vault:
+  `SALUD/🧩 Patch v4.1.0 — Historial laboral, consultorios e internación.md`, con la
+  tabla y sus dos índices en `SALUD/Entidades/E profiles.practitioner_affiliations.md`.
+  Faltan también los tres conceptos —`AFFILIATION_ACTIVE`, `AFFILIATION_RETRACTED`,
+  `AFFILIATION_TYPE_EMPLOYMENT`— ya declarados en `profiles.concepts.ts` con UUIDv5
+  estable, así que el seed los toma solo cuando corra.
+
+- **La agenda sabía cuándo se atiende y no dónde (2026-08-14).** `GET /scheduling/resources`
+  devolvía el recurso sin ninguna referencia a un sitio, y `booking-new` del portal no
+  mostraba ubicación en ningún punto: un turno sin dirección obliga a averiguarla por
+  fuera del sistema. El dato existía —`practice.practitioner_role_assignments` guarda
+  `practice_site_id` desde siempre— y nadie lo publicaba junto al profesional. Se
+  resolvió **sin columna nueva**: `PractitionerSitesService` (en `practice`, exportado)
+  deriva la sede de lo que el recurso ya declara —la asignación de rol vigente si apunta
+  a un profesional, el espacio de atención si apunta a un box—, la acota al tenant y la
+  resuelve **por lote** para que la agenda no encadene una petición por recurso.
+  `scheduling` la consume vía `PracticeModule` (la dependencia va en un solo sentido: 
+  `practice` no importa `scheduling`) y si esa resolución falla, la agenda **sigue
+  listando horarios sin ubicación** en vez de caerse. Se agregó además
+  `GET /practitioners/:profileId/sites`, con roles más abiertos que el listado
+  administrativo de sedes a propósito: incluye `PATIENT`, porque si no, un paciente ve
+  la hora de su turno y no la dirección.
+
+- **Abrir una internación era un acto sin rastro visible (2026-08-14).**
+  `POST /clinical/care-episodes` existía desde siempre, pero **ninguna lectura devolvía
+  los episodios**: la ficha sólo veía el `episodeId` colgado de un encuentro, y un uuid
+  sin fila detrás no dice ni cuándo empezó ni si sigue abierta. Se agregó
+  `CareEpisodesRepository.findByPatient` y el bloque `careEpisodes` a
+  `GET /clinical/patients/:patientProfileId/summary` —aditivo, con su nombre en
+  `truncated` como el resto—. Es lo que hace que dar de alta una internación tenga
+  consecuencias: aparece como contexto cada vez que se reabre el expediente.
+
 - **El módulo Community (19) era de sólo escritura (2026-08-13).** 19 endpoints de
   escritura y **cero `@Get`** en toda la API: se podía publicar, comentar,
   reaccionar, seguir y bloquear, y no había forma de volver a leer nada — ni

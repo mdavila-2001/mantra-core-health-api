@@ -21,6 +21,9 @@ import {
   CredentialResponseDto,
   AddSpecialtyDto,
   SpecialtyResponseDto,
+  CreateAffiliationDto,
+  AffiliationResponseDto,
+  ListAffiliationsResponseDto,
   PractitionerProfileSummaryDto,
   UpdateOwnPractitionerProfileDto,
 } from '../dto';
@@ -123,6 +126,38 @@ export class ProfilesPractitionersController {
       dto,
       actor,
     );
+  }
+
+  /**
+   * UC-05-16·L: el historial laboral propio.
+   *
+   * Va antes que las rutas con `:profileId` a propósito: `me` no es un uuid y
+   * `ParseUUIDPipe` lo rechazaría, pero el orden de declaración es lo que
+   * garantiza que ni siquiera llegue a intentarlo.
+   */
+  @Get('practitioners/me/affiliations')
+  @ApiOperation({
+    summary: 'Historial laboral propio (instituciones donde trabajó)',
+  })
+  listOwnAffiliations(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ListAffiliationsResponseDto> {
+    return this.practitionersService.listOwnAffiliations(actor);
+  }
+
+  /** UC-05-16. */
+  @Post('practitioners/me/affiliations')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar una afiliación institucional en el historial propio',
+    description:
+      'El sujeto sale de la sesión: no hay forma de escribir el historial de otro.',
+  })
+  addOwnAffiliation(
+    @Body() dto: CreateAffiliationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    return this.practitionersService.addOwnAffiliation(dto, actor);
   }
 
   /** UC-05-06. */

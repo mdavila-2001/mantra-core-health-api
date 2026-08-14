@@ -5,6 +5,7 @@ import {
   PracticesController,
   SitesController,
   AccreditationsController,
+  PractitionerSitesController,
   RoleAssignmentsController,
   InventoryItemsController,
 } from './controllers';
@@ -16,6 +17,7 @@ import {
   PracticeWorkforceService,
   PracticeInventoryService,
   PracticeTenantLookupService,
+  PractitionerSitesService,
 } from './services';
 import {
   PracticesRepository,
@@ -42,6 +44,7 @@ import {
     PracticesController,
     SitesController,
     AccreditationsController,
+    PractitionerSitesController,
     RoleAssignmentsController,
     InventoryItemsController,
   ],
@@ -66,7 +69,11 @@ import {
     PracticeWorkforceService,
     PracticeInventoryService,
     PracticeTenantLookupService,
+    PractitionerSitesService,
   ],
-  exports: [PracticeTenantLookupService],
+  // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
+  // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
+  // la dependencia va en un solo sentido y no cierra ciclo.
+  exports: [PracticeTenantLookupService, PractitionerSitesService],
 })
 export class PracticeModule {}

@@ -66,10 +66,16 @@ function build() {
     create: mockFn(),
     findByPractitioner: mockFn().mockResolvedValue([]),
   };
+  const affiliationsRepo = {
+    findByPractitioner: mockFn().mockResolvedValue([]),
+    findSame: mockFn().mockResolvedValue(null),
+    create: mockFn(),
+  };
   // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
   // doble deja pasar para no mezclar el permiso con la lógica del servicio.
   const ownership = {
     assertOwnsPractitionerProfile: mockFn().mockResolvedValue(undefined),
+    requireOwnPractitionerProfileId: mockFn().mockResolvedValue('pp1'),
   };
   // El titular del perfil y la concesión de su rol asistencial: por defecto no
   // hay cuenta vinculada, que es el caso de un perfil cargado por un tercero.
@@ -91,6 +97,7 @@ function build() {
     credentialsRepo,
     specialtiesRepo,
     languagesRepo,
+    affiliationsRepo as any,
     ownership as never,
     accountLinksRepo as any,
     effectiveRoles as any,
@@ -101,6 +108,8 @@ function build() {
     em,
     accountLinksRepo,
     effectiveRoles,
+    affiliationsRepo,
+    ownership,
     tx,
     personsRepo,
     personProfilesRepo,
@@ -333,6 +342,113 @@ describe('ProfilesPractitionersService', () => {
       expect(res).toMatchObject({ id: 's2', isPrimary: true });
     });
   });
+
+  describe('historial laboral (UC-05-16)', () => {
+    /** Una fila de afiliación con lo mínimo que el proyector necesita. */
+    const fila = (over: Partial<Record<string, unknown>> = {}): any => ({
+      id: 'af-1',
+      practitionerProfileId: 'pp1',
+      organizationName: 'Hospital Obrero N.º 1',
+      roleTitle: 'Médico de planta',
+      startDate: new Date('2020-03-01'),
+      statusConceptId: PROF.AFFILIATION_ACTIVE,
+      createdAt: new Date('2026-08-14T00:00:00Z'),
+      ...over,
+    });
+
+    it('reads the caller own history and never a profileId from the request', async () => {
+      const d = build();
+      d.affiliationsRepo.findByPractitioner.mockResolvedValue([fila()]);
+
+      const res = await d.service.listOwnAffiliations(actor);
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
+        d.em,
+        actor,
+      );
+      expect(d.affiliationsRepo.findByPractitioner).toHaveBeenCalledWith(
+        d.em,
+        'pp1',
+      );
+      expect(res.count).toBe(1);
+      expect(res.items[0]).toMatchObject({
+        organizationName: 'Hospital Obrero N.º 1',
+      });
+    });
+
+    it('derives `current` from the missing end date', async () => {
+      const d = build();
+      d.affiliationsRepo.findByPractitioner.mockResolvedValue([
+        fila(),
+        fila({ id: 'af-2', endDate: new Date('2023-12-31') }),
+      ]);
+
+      const res = await d.service.listOwnAffiliations(actor);
+
+      expect(res.items[0]).toMatchObject({ current: true, endDate: null });
+      expect(res.items[1]).toMatchObject({ current: false });
+    });
+
+    it('rejects a period that ends before it starts', async () => {
+      const d = build();
+      await expect(
+        d.service.addOwnAffiliation(
+          {
+            organizationName: 'Clínica del Sur',
+            roleTitle: 'Jefe de guardia',
+            startDate: '2024-01-01',
+            endDate: '2023-01-01',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects the same institution, role and start date as a duplicate', async () => {
+      const d = build();
+      d.affiliationsRepo.findSame.mockResolvedValue(fila());
+      await expect(
+        d.service.addOwnAffiliation(
+          {
+            organizationName: 'Hospital Obrero N.º 1',
+            roleTitle: 'Médico de planta',
+            startDate: '2020-03-01',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('trims the free text and defaults the affiliation type', async () => {
+      const d = build();
+      d.affiliationsRepo.create.mockReturnValue(fila({ id: 'af-9' }));
+
+      const res = await d.service.addOwnAffiliation(
+        {
+          organizationName: '  Hospital Obrero N.º 1  ',
+          roleTitle: '  Médico de planta ',
+          departmentText: '   ',
+          startDate: '2020-03-01',
+        } as any,
+        actor,
+      );
+
+      expect(d.affiliationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practitionerProfileId: 'pp1',
+          organizationName: 'Hospital Obrero N.º 1',
+          roleTitle: 'Médico de planta',
+          departmentText: undefined,
+          affiliationTypeConceptId: PROF.AFFILIATION_TYPE_EMPLOYMENT,
+          statusConceptId: PROF.AFFILIATION_ACTIVE,
+        }),
+      );
+      expect(res).toMatchObject({ id: 'af-9', current: true });
+    });
+  });
+
   /* ---- el perfil profesional propio ------------------------------------- */
 
   describe('getOwnPractitionerProfile', () => {

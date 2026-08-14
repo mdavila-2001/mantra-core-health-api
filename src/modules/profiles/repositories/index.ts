@@ -6,6 +6,7 @@ export * from './health-practitioner-profiles.repository';
 export * from './jurisdiction-authorizations.repository';
 export * from './professional-credentials.repository';
 export * from './practitioner-specialties.repository';
+export * from './practitioner-affiliations.repository';
 export * from './practitioner-languages.repository';
 export * from './patient-identity-links.repository';
 export * from './patient-merge-events.repository';
