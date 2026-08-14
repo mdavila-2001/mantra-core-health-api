@@ -208,6 +208,15 @@ export class ClinicalFormsSeedService {
       },
       { partial: true },
     );
+    // La sección se flushea ANTES de crear la plantilla, no las dos juntas:
+    // `specialty_chart_templates.section_id` es una columna `uuid` plana con FK,
+    // no una relación del ORM, así que MikroORM no infiere que la sección va
+    // primero — ordena los inserts por tabla, y la plantilla entraba antes. La
+    // base rechazaba el lote con `fk_specialty_chart_templates_section_id`, el
+    // seed quedaba «omitido» en el arranque y el catálogo, vacío. Es el mismo
+    // motivo por el que `TerminologySeedService` flushea por niveles.
+    await em.flush();
+
     em.create(
       SpecialtyChartTemplates,
       {

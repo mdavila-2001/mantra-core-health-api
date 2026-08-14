@@ -36,7 +36,12 @@ function build(existing: Set<string> = new Set()) {
       created.push({ entity: entity.name, data });
       return data;
     }),
-    flush: mockFn(() => Promise.resolve()),
+    // El flush se anota en la misma bitácora que los `create` para poder afirmar
+    // el ORDEN entre ambos, que es una regla de este seed y no un detalle.
+    flush: mockFn(() => {
+      created.push({ entity: '<flush>', data: null });
+      return Promise.resolve();
+    }),
   };
   const orm = { em: { fork: mockFn(() => em) } };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -46,6 +51,8 @@ function build(existing: Set<string> = new Set()) {
     /** Filas creadas para una entidad concreta. */
     rowsOf: (entity: string) =>
       created.filter((row) => row.entity === entity).map((row) => row.data),
+    /** La bitácora completa de `create`/`flush`, en orden. */
+    bitacora: () => created.map((row) => row.entity),
   };
 }
 
@@ -148,6 +155,25 @@ describe('ClinicalFormsSeedService', () => {
     );
     expect(reservadas).toHaveLength(STANDARD_FORMS.length);
     expect(asignaciones.every((row) => row.ordinal >= -1)).toBe(true);
+  });
+
+  it('flushea la sección antes de crear la plantilla que la referencia', async () => {
+    const { service, bitacora } = build();
+
+    await service.run();
+
+    // `specialty_chart_templates.section_id` es una columna `uuid` plana con FK,
+    // no una relación del ORM: MikroORM no ordena los inserts por ella. Sin el
+    // flush intermedio la plantilla entra antes que su sección y la base rechaza
+    // el lote entero — el seed queda «omitido» y el catálogo, vacío. Pasó de
+    // verdad al correrlo contra postgres; esta prueba es la que lo fija.
+    const log = bitacora();
+    const seccion = log.indexOf('DynamicFieldSections');
+    const plantilla = log.indexOf('SpecialtyChartTemplates');
+
+    expect(seccion).toBeGreaterThanOrEqual(0);
+    expect(plantilla).toBeGreaterThan(seccion);
+    expect(log.slice(seccion, plantilla)).toContain('<flush>');
   });
 
   it('corrido dos veces no duplica nada', async () => {
