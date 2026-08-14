@@ -87,6 +87,32 @@ export class PractitionerSpecialtiesRepository {
     });
   }
 
+  /**
+   * Todas las especialidades del profesional, vigentes y pasadas.
+   *
+   * Las pasadas también: el perfil profesional es una **trayectoria**, y una
+   * especialidad que dejó de ejercerse sigue siendo parte de la formación de
+   * quien la ejerció. Filtrar por vigencia acá dejaría a la lectura sin forma de
+   * distinguir «nunca la tuvo» de «ya no la ejerce», que es justamente lo que un
+   * perfil profesional tiene que poder decir.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - Perfil profesional dueño de las especialidades.
+   * @returns Sus especialidades, de la más reciente a la más antigua.
+   */
+  findAllByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<PractitionerSpecialties[]> {
+    return em.find(
+      PractitionerSpecialties,
+      { practitionerProfileId },
+      // La primaria primero, y después por antigüedad: es el orden en que se
+      // presenta un profesional, no el de inserción.
+      { orderBy: { isPrimary: 'desc', validFrom: 'desc', createdAt: 'desc' } },
+    );
+  }
+
   /** Desmarca como primaria la especialidad primaria vigente previa. */
   demotePrimary(
     em: EntityManager,

@@ -4,3 +4,4 @@ export * from './lab.dto';
 export * from './reports.dto';
 export * from './imaging.dto';
 export * from './media-quality.dto';
+export * from './orders.dto';

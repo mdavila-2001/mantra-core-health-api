@@ -37,6 +37,24 @@ export class PractitionerLanguagesRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `PractitionerLanguages`.
    */
+  /**
+   * Los idiomas del profesional.
+   *
+   * En qué idioma atiende no es un adorno del perfil: decide a quién puede
+   * atender sin intérprete, y `clinical_interpretation_allowed` distingue
+   * «lo habla» de «puede interpretar en consulta».
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - Perfil profesional dueño de los idiomas.
+   * @returns Sus idiomas declarados.
+   */
+  findByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<PractitionerLanguages[]> {
+    return em.find(PractitionerLanguages, { practitionerProfileId });
+  }
+
   create(
     em: EntityManager,
     data: CreatePractitionerLanguageData,
