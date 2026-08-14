@@ -188,10 +188,12 @@ export class ChartTemplatesService {
   /** Plantillas por especialidad, con su esquema de campos ya resuelto. */
   async listTemplates(
     specialtyConceptId?: string,
+    tenantId?: string,
   ): Promise<ChartTemplateResponseDto[]> {
     const templates = await this.templatesRepo.findTemplates(
       this.em,
       specialtyConceptId,
+      tenantId,
     );
     return Promise.all(
       templates.map(async (template) => {

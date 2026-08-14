@@ -15,7 +15,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  getCurrentTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ChartTemplatesService } from '../services';
 import {
   AssignmentResponseDto,
@@ -76,7 +81,10 @@ export class ChartTemplatesController {
     @Query('specialtyId', new ParseUUIDPipe({ optional: true }))
     specialtyId?: string,
   ): Promise<ChartTemplateResponseDto[]> {
-    return this.templatesService.listTemplates(specialtyId);
+    return this.templatesService.listTemplates(
+      specialtyId,
+      getCurrentTenantId(),
+    );
   }
 
   /** Carril 2 · punto 1: leer el esquema completo de una plantilla. */
