@@ -44,9 +44,11 @@ function build() {
     createMilestone: mockFn(),
     findMilestone: mockFn(),
     createDiagnosis: mockFn(),
-    findDiagnosesByCase: mockFn(),
+    // Con valor por defecto porque la lectura agregada del detalle los recorre
+    // siempre; los tests que prueban el alta los sobreescriben.
+    findDiagnosesByCase: mockFn().mockResolvedValue([]),
     createTeamMember: mockFn(),
-    findTeamByCase: mockFn(),
+    findTeamByCase: mockFn().mockResolvedValue([]),
     createLocation: mockFn(),
     findOpenLocation: mockFn(),
     createUtilizationEvent: mockFn(),
@@ -79,7 +81,13 @@ function build() {
     findAssessmentByCase: mockFn().mockResolvedValue(null),
     findAnesthesiaPlanByCase: mockFn().mockResolvedValue(null),
   };
-  const intraopRepo = { findReportsByCase: mockFn().mockResolvedValue([]) };
+  const intraopRepo = {
+    findReportsByCase: mockFn().mockResolvedValue([]),
+    findStepsByCase: mockFn().mockResolvedValue([]),
+    findFindingsByCase: mockFn().mockResolvedValue([]),
+    findImplantsByCase: mockFn().mockResolvedValue([]),
+    findIdentifiersByImplants: mockFn().mockResolvedValue([]),
+  };
   const service = new PeriopCasesService(
     em as any,
     casesRepo,
@@ -936,6 +944,145 @@ describe('PeriopCasesService', () => {
       await expect(
         d.service.postCharges(CASE, dto(), actor as any),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  /**
+   * El detalle del caso tenía escrituras sin lectura: pasos, hallazgos e
+   * implantes se registraban por `POST` y no salían por ninguna parte de la API,
+   * así que el histórico de procedimientos del punto 7 era inalcanzable desde el
+   * frontend. Estas pruebas fijan que ahora salen.
+   */
+  describe('getCaseDetail', () => {
+    /** El caso mínimo que la lectura necesita para no abortar. */
+    const casoLeido = {
+      id: CASE,
+      caseNumber: 'CX-1',
+      patientProfileId: PATIENT,
+      statusConceptId: CONCEPTS.CASE_COMPLETED,
+    };
+
+    it('devuelve pasos, hallazgos e implantes del caso', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+      d.intraopRepo.findStepsByCase.mockResolvedValue([
+        {
+          id: 'step-1',
+          stepNumber: 1,
+          stepCodeConceptId: 'code-1',
+          description: 'Abordaje',
+          statusConceptId: 'st-1',
+        },
+      ]);
+      d.intraopRepo.findFindingsByCase.mockResolvedValue([
+        {
+          id: 'find-1',
+          findingCodeConceptId: 'code-2',
+          findingText: 'Adherencias',
+          recordedAt: new Date('2026-08-01T10:00:00.000Z'),
+        },
+      ]);
+      d.intraopRepo.findImplantsByCase.mockResolvedValue([
+        {
+          id: 'imp-1',
+          procedureId: 'proc-1',
+          implantDeviceId: 'dev-1',
+          implantRoleConceptId: 'role-1',
+          implantedAt: new Date('2026-08-01T11:00:00.000Z'),
+        },
+      ]);
+
+      const detalle = await d.service.getCaseDetail(CASE);
+
+      expect(detalle.operativeSteps).toHaveLength(1);
+      expect(detalle.operativeSteps[0].description).toBe('Abordaje');
+      expect(detalle.findings[0].findingText).toBe('Adherencias');
+      expect(detalle.implants[0].implantDeviceId).toBe('dev-1');
+    });
+
+    /**
+     * El lote es lo que hace trazable a un implante: una alerta de retiro del
+     * mercado se resuelve por lote, no por modelo. Va anidado en su implante y
+     * no en una lista suelta que el cliente tenga que volver a cruzar.
+     */
+    it('anida los identificadores dentro de su implante', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+      d.intraopRepo.findImplantsByCase.mockResolvedValue([
+        {
+          id: 'imp-1',
+          procedureId: 'p',
+          implantDeviceId: 'd',
+          implantRoleConceptId: 'r',
+          implantedAt: new Date(),
+        },
+        {
+          id: 'imp-2',
+          procedureId: 'p',
+          implantDeviceId: 'd',
+          implantRoleConceptId: 'r',
+          implantedAt: new Date(),
+        },
+      ]);
+      d.intraopRepo.findIdentifiersByImplants.mockResolvedValue([
+        {
+          id: 'id-1',
+          procedureImplantId: 'imp-1',
+          identifierTypeConceptId: 'udi',
+          identifierValue: '0123456789',
+          lotNumber: 'L-42',
+        },
+        {
+          id: 'id-2',
+          procedureImplantId: 'imp-1',
+          identifierTypeConceptId: 'serial',
+          identifierValue: 'S-7',
+        },
+      ]);
+
+      const detalle = await d.service.getCaseDetail(CASE);
+
+      expect(d.intraopRepo.findIdentifiersByImplants).toHaveBeenCalledWith(
+        expect.anything(),
+        ['imp-1', 'imp-2'],
+      );
+      expect(detalle.implants[0].identifiers).toHaveLength(2);
+      expect(detalle.implants[0].identifiers[0].lotNumber).toBe('L-42');
+      // El implante sin identificadores trae un arreglo vacío, no `undefined`:
+      // el cliente no debería tener que distinguir «sin lote» de «sin dato».
+      expect(detalle.implants[1].identifiers).toEqual([]);
+    });
+
+    it('un caso sin registro intraoperatorio devuelve listas vacías', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+
+      const detalle = await d.service.getCaseDetail(CASE);
+
+      expect(detalle.operativeSteps).toEqual([]);
+      expect(detalle.findings).toEqual([]);
+      expect(detalle.implants).toEqual([]);
+    });
+
+    it('sin implantes no se consulta la tabla de identificadores', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+
+      await d.service.getCaseDetail(CASE);
+
+      expect(d.intraopRepo.findIdentifiersByImplants).toHaveBeenCalledWith(
+        expect.anything(),
+        [],
+      );
+    });
+
+    it('un caso inexistente sigue siendo 404', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(null);
+
+      await expect(d.service.getCaseDetail(CASE)).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
     });
   });
 });
