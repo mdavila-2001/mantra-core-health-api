@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 36 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 38 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-reviews`, `community-social`, `community-timeline`
 - **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityReviewsController`, `CommunitySocialController`, `CommunityTimelineController`
@@ -42,11 +42,13 @@ Referencia exhaustiva de 36 operación(es) del módulo `community`, derivada del
 29. [POST /community/profiles/{profileId}/posts](#29-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
 30. [GET /community/profiles/{profileId}/reviews](#30-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
 31. [POST /community/profiles/{profileId}/reviews](#31-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
-32. [POST /community/public-profiles](#32-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-33. [PUT /community/reactions](#33-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-34. [POST /community/reports](#34-post-community-reports) — Reportar contenido y encolar moderación
-35. [GET /internal/community/feed/pending](#35-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-36. [POST /internal/community/feed/rebuild](#36-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+32. [GET /community/profiles/me](#32-get-community-profiles-me) — Consultar la vitrina pública propia
+33. [PUT /community/profiles/me](#33-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
+34. [POST /community/public-profiles](#34-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+35. [PUT /community/reactions](#35-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+36. [POST /community/reports](#36-post-community-reports) — Reportar contenido y encolar moderación
+37. [GET /internal/community/feed/pending](#37-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+38. [POST /internal/community/feed/rebuild](#38-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
 
 ---
 
@@ -4268,7 +4270,277 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /community/public-profiles
+## 32. GET /community/profiles/me
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Consultar la vitrina pública propia
+- **Operation ID:** `CommunitySocialController_getOwnProfile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.getOwnProfile](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Consultar la vitrina pública propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La vitrina pública propia, o `null` si todavía no creó ninguna. Sin `@Roles`: cualquier sesión autenticada puede pedir la suya, porque el sujeto lo resuelve el servidor y no hay forma de pedir la de otro. Va declarado **antes** que `profiles/:profileId`: Nest resuelve las rutas por orden de declaración y un parámetro capturaría `me`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/profiles/me` en `CommunitySocialController_getOwnProfile`. El controlador delega en `CommunitySocialService.getOwnProfile`. No recibe body. El tipo de retorno estático es `Promise<OwnPublicProfileDto | null>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/profiles/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/profiles/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
+| 400 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OwnPublicProfileDto | null>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPublicProfileDto | null`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "acceptsReviews": true,
+  "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `targetId` | Sí | `string` | formato `uuid` | El sujeto que representa: el perfil profesional, o la cuenta. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `acceptsReviews` | Sí | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verificationStatusConceptId` | Sí | `string` | formato `uuid`; admite null | Lo otorga la plataforma; se muestra, no se declara. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/me"
+}
+```
+
+---
+
+## 33. PUT /community/profiles/me
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Crear o actualizar la vitrina pública propia
+- **Operation ID:** `CommunitySocialController_upsertOwnProfile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.upsertOwnProfile](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Crear o actualizar la vitrina pública propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea o actualiza la vitrina pública propia. Idempotente: la pantalla que la edita no necesita saber si ya existía.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /community/profiles/me` en `CommunitySocialController_upsertOwnProfile`. El controlador delega en `CommunitySocialService.upsertOwnProfile`. Valida el body como `UpsertOwnPublicProfileDto` y consume `application/json`. El tipo de retorno estático es `Promise<OwnPublicProfileDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpsertOwnPublicProfileDto`; los campos opcionales se omiten.
+
+```http
+PUT /community/profiles/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Organización propietaria | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | longitud mínima 3; longitud máxima 120; patrón runtime `/^[a-z0-9]+(?:-[a-z0-9]+)*$/` | Slug único legible | `valor-ejemplo` |
+| `displayName` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre visible | `Nombre de ejemplo` |
+| `headline` | No | `string` | longitud máxima 200 | Titular de una línea | `valor-ejemplo` |
+| `biography` | No | `string` | longitud máxima 2000 | Presentación pública | `valor-ejemplo` |
+| `acceptsReviews` | No | `boolean` | Sin restricción adicional declarada | Acepta reseñas | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /community/profiles/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "acceptsReviews": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnPublicProfileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPublicProfileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "acceptsReviews": true,
+  "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `targetId` | Sí | `string` | formato `uuid` | El sujeto que representa: el perfil profesional, o la cuenta. | `00000000-0000-4000-8000-000000000001` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `acceptsReviews` | Sí | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `verificationStatusConceptId` | Sí | `string` | formato `uuid`; admite null | Lo otorga la plataforma; se muestra, no se declara. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ese enlace ya está en uso | Excepción explícita en src/modules/community/services/community-social.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No se pudo recuperar el perfil público recién guardado | Excepción explícita en src/modules/community/services/community-social.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/me"
+}
+```
+
+---
+
+## 34. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4411,7 +4683,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. PUT /community/reactions
+## 35. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4542,7 +4814,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /community/reports
+## 36. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4671,7 +4943,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /internal/community/feed/pending
+## 37. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -4787,7 +5059,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /internal/community/feed/rebuild
+## 38. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`

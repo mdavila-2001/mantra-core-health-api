@@ -9,7 +9,7 @@
 # Módulo `profiles`
 
 **Fuente:** [`src/modules/profiles/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/profiles/README.md)
-· 2 controllers · 3 services · 13 repositories · 18 entidades · 12 DTO
+· 2 controllers · 3 services · 13 repositories · 18 entidades · 14 DTO
 
 ---
 

@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsBoolean,
+  IsDateString,
   IsOptional,
   IsString,
   IsUUID,
@@ -69,6 +71,47 @@ export class CreatePractitionerDto {
   professionalTitle?: string;
 
   /**
+   * Presentación en prosa del profesional.
+   *
+   * La columna existía desde el principio (`professional_bio`) y **ninguna
+   * escritura la llenaba**: se podía leer y no se podía escribir. Es lo que hace
+   * que un perfil profesional se lea como una persona y no como una fila.
+   */
+  @ApiPropertyOptional({
+    description: 'Biografía profesional en prosa',
+    maxLength: 4000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  professionalBio?: string;
+
+  /**
+   * Si toma pacientes nuevos.
+   *
+   * Nace en `false` cuando no se declara —el alta arranca en onboarding y nadie
+   * debería aparecer como disponible antes de estar habilitado— pero tenía que
+   * poder declararse: sin esto no había forma de dar de alta a alguien que sí
+   * los toma salvo escribiendo en la base.
+   */
+  @ApiPropertyOptional({
+    description: 'Si acepta pacientes nuevos',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  acceptsNewPatients?: boolean;
+
+  /** Si atiende por telemedicina. */
+  @ApiPropertyOptional({
+    description: 'Si atiende por telemedicina',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  telehealthAvailable?: boolean;
+
+  /**
    * Valor de license number mantenido por la instancia.
    */
   @ApiProperty({
@@ -125,6 +168,39 @@ export class CreatePractitionerDto {
   @IsOptional()
   @IsUUID()
   credentialTypeConceptId?: string;
+
+  /**
+   * Dónde se cursó la credencial de soporte.
+   *
+   * Texto libre y no un tenant: la universidad que emitió un título casi nunca
+   * es una organización de esta plataforma. La columna
+   * (`issuing_institution_text`) existía y ninguna escritura la llenaba, así que
+   * la formación se guardaba sin decir dónde se cursó — que es justamente lo que
+   * la hace legible en un perfil.
+   */
+  @ApiPropertyOptional({
+    description: 'Institución que emitió la credencial de soporte',
+    maxLength: 300,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  credentialIssuingInstitutionText?: string;
+
+  /**
+   * Cuándo se emitió la credencial de soporte. ISO `YYYY-MM-DD`.
+   *
+   * Sin fecha, una línea de tiempo de formación no se puede ordenar y se lee
+   * como una lista de títulos sueltos.
+   */
+  @ApiPropertyOptional({
+    description: 'Fecha de emisión de la credencial de soporte (ISO)',
+    type: String,
+    format: 'date',
+  })
+  @IsOptional()
+  @IsDateString()
+  credentialIssueDate?: string;
 
   /**
    * Identificador asociado a language concept.

@@ -42,6 +42,8 @@ import {
   FollowPageDto,
   BookmarkPageDto,
   BlockPageDto,
+  UpsertOwnPublicProfileDto,
+  OwnPublicProfileDto,
 } from '../dto';
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
@@ -78,6 +80,37 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PublicProfileResponseDto> {
     return this.service.createProfile(dto, actor);
+  }
+
+  /**
+   * La vitrina pública propia, o `null` si todavía no creó ninguna.
+   *
+   * Sin `@Roles`: cualquier sesión autenticada puede pedir la suya, porque el
+   * sujeto lo resuelve el servidor y no hay forma de pedir la de otro.
+   *
+   * Va declarado **antes** que `profiles/:profileId`: Nest resuelve las rutas
+   * por orden de declaración y un parámetro capturaría `me`.
+   */
+  @Get('profiles/me')
+  @ApiOperation({ summary: 'Consultar la vitrina pública propia' })
+  getOwnProfile(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnPublicProfileDto | null> {
+    return this.service.getOwnProfile(actor);
+  }
+
+  /**
+   * Crea o actualiza la vitrina pública propia. Idempotente: la pantalla que la
+   * edita no necesita saber si ya existía.
+   */
+  @Put('profiles/me')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Crear o actualizar la vitrina pública propia' })
+  upsertOwnProfile(
+    @Body() dto: UpsertOwnPublicProfileDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OwnPublicProfileDto> {
+    return this.service.upsertOwnProfile(dto, actor);
   }
 
   /** UC-19-01. */
