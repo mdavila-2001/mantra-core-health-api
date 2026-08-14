@@ -119,7 +119,10 @@ export class CommentsRepository {
     if (rootCommentIds.length === 0) return Promise.resolve([]);
     return em.find(
       Comments,
-      { rootCommentId: { $in: rootCommentIds }, parentCommentId: { $ne: null } },
+      {
+        rootCommentId: { $in: rootCommentIds },
+        parentCommentId: { $ne: null },
+      },
       { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit },
     );
   }

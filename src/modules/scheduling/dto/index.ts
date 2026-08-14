@@ -57,6 +57,7 @@ export {
   AGENDA_MAX_LIMIT,
   ListResourcesQueryDto,
   ResourceListItemDto,
+  ResourceSiteDto,
   ListResourcesResponseDto,
   ListSlotsQueryDto,
   SlotListItemDto,

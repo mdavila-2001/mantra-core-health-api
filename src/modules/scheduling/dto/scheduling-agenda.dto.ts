@@ -143,6 +143,50 @@ export class ResourceListItemDto {
    */
   @ApiProperty({ format: 'uuid' })
   stateConceptId!: string;
+
+  /**
+   * Dónde se atiende con este recurso.
+   *
+   * Derivado de lo que el recurso ya declara —la asignación de rol vigente si
+   * apunta a un profesional, el espacio de atención si apunta a un box— y no de
+   * una columna propia: guardarlo dos veces sería tener dos verdades sobre el
+   * mismo hecho.
+   *
+   * `null` es un estado corriente y no un error: un recurso sin asignación
+   * vigente con sede no tiene dónde que mostrar, y la agenda sigue sirviendo
+   * para elegir horario.
+   */
+  @ApiPropertyOptional({ type: () => ResourceSiteDto, nullable: true })
+  site!: ResourceSiteDto | null;
+}
+
+/**
+ * La sede de un recurso agendable, tal como la muestra la agenda.
+ *
+ * Es una copia de contrato de `PractitionerSiteDto` de `practice`, no una
+ * importación: el contrato publicado de `scheduling` no debe cambiar porque
+ * `practice` reordene su DTO interno.
+ */
+export class ResourceSiteDto {
+  /** Identificador de la sede. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Nombre legible de la sede. */
+  @ApiProperty()
+  name!: string;
+
+  /** Código único dentro de la práctica. */
+  @ApiProperty()
+  code!: string;
+
+  /** Dirección en una línea, o `null` si la sede no tiene ninguna cargada. */
+  @ApiPropertyOptional({ nullable: true, example: 'Av. Brasil 1234, La Paz' })
+  addressText!: string | null;
+
+  /** Zona horaria IANA de la sede, si la declara. */
+  @ApiPropertyOptional({ nullable: true, example: 'America/La_Paz' })
+  timeZone!: string | null;
 }
 
 /** Respuesta de `GET /scheduling/resources`. */

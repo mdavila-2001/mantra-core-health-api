@@ -19,7 +19,10 @@ function build() {
   const service = { createGroup: mockFn(), joinGroup: mockFn() };
   const readService = { listGroups: mockFn(), listMembers: mockFn() };
   return {
-    controller: new CommunityGroupsController(service as any, readService as any),
+    controller: new CommunityGroupsController(
+      service as any,
+      readService as any,
+    ),
     service,
     readService,
   };

@@ -78,8 +78,8 @@ Content-Type: application/json
 | `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
 | `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
 | `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | formato `date-time` | Vigente desde (ISO date-time) | `2026-07-31T12:00:00.000Z` |
-| `validTo` | No | `string` | formato `date-time` | Vigente hasta (ISO date-time) | `2026-07-31T12:00:00.000Z` |
+| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
+| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -99,8 +99,8 @@ Content-Type: application/json
   "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
   "contractReference": "valor-ejemplo",
   "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "2026-07-31T12:00:00.000Z",
-  "validTo": "2026-07-31T12:00:00.000Z"
+  "validFrom": "valor-ejemplo",
+  "validTo": "valor-ejemplo"
 }
 ```
 
@@ -123,8 +123,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Nombre de ejemplo",
+  "roleTitle": "valor-ejemplo",
+  "departmentText": "valor-ejemplo",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31",
+  "current": true,
   "status": "00000000-0000-4000-8000-000000000001",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
@@ -135,9 +142,16 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
-| `primaryTenantId` | Sí | `string` | formato `uuid` | Identificador asociado a primary tenant. | `00000000-0000-4000-8000-000000000001` |
-| `participatingTenantId` | Sí | `string` | formato `uuid` | Identificador asociado a participating tenant. | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Estado (concepto) | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
+| `roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
+| `departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
+| `endDate` | No | `string` | formato `date`; admite null | Fin del vínculo, o `null` si sigue vigente. | `2026-07-31` |
+| `current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `status` | Sí | `string` | formato `uuid` | Estado del registro (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.

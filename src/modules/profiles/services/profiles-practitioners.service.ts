@@ -12,6 +12,14 @@ import {
 // Verificar la matrícula es lo que habilita a ejercer; el rol con el que se
 // ejerce lo custodia `authz`.
 import { AuthzEffectiveRolesService } from '../../authz/services';
+// Lectura de SÓLO CONTEO sobre otros módulos, para la actividad del perfil.
+// Se importan las entidades y no sus servicios a propósito: lo único que se
+// hace con ellas es `em.count(...)` filtrando por el usuario que creó la fila,
+// así que no se trae ni una fila y no hay dato clínico de nadie cruzando el
+// límite del módulo. Depender de los servicios de `clinical` y `chart` para
+// contar cuatro números ataría `profiles` a dos módulos enteros.
+import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
+import { Encounters, MedicationRequests } from '../../clinical/entities';
 import { PROF } from '../profiles.concepts';
 import {
   PersonsRepository,
@@ -21,8 +29,10 @@ import {
   ProfessionalCredentialsRepository,
   PractitionerSpecialtiesRepository,
   PractitionerLanguagesRepository,
+  PractitionerAffiliationsRepository,
   PersonAccountLinksRepository,
 } from '../repositories';
+import type { PractitionerAffiliations } from '../entities';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -32,6 +42,12 @@ import {
   CredentialResponseDto,
   AddSpecialtyDto,
   SpecialtyResponseDto,
+  CreateAffiliationDto,
+  AffiliationResponseDto,
+  ListAffiliationsResponseDto,
+  PractitionerProfileSummaryDto,
+  PractitionerActivityDto,
+  UpdateOwnPractitionerProfileDto,
 } from '../dto';
 import { ProfileOwnershipService } from './profile-ownership.service';
 
@@ -56,6 +72,7 @@ export class ProfilesPractitionersService {
    * @param credentialsRepo - Valor de credentials repo requerido por la operación.
    * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
    * @param languagesRepo - Valor de languages repo requerido por la operación.
+   * @param affiliationsRepo - Historial laboral (afiliaciones institucionales).
    * @param accountLinksRepo - Vínculo persona-cuenta del titular del perfil.
    * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
    * @param logger - Valor de logger requerido por la operación.
@@ -69,12 +86,237 @@ export class ProfilesPractitionersService {
     private readonly credentialsRepo: ProfessionalCredentialsRepository,
     private readonly specialtiesRepo: PractitionerSpecialtiesRepository,
     private readonly languagesRepo: PractitionerLanguagesRepository,
+    private readonly affiliationsRepo: PractitionerAffiliationsRepository,
     private readonly ownership: ProfileOwnershipService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
+  }
+
+  /**
+   * El perfil profesional propio — la lectura que le faltaba al módulo.
+   *
+   * ## Qué arregla
+   *
+   * `profiles` tenía cuatro escrituras de fuerza laboral y ninguna lectura, así
+   * que la única pantalla de «mi perfil» que existía llamaba a
+   * `GET /profiles/patients/me/summary`. A un profesional eso le responde 404
+   * —no tiene perfil de paciente— o 403 si además no verificó su identidad: la
+   * pantalla de perfil de un médico no funcionaba, y no por un defecto de la
+   * pantalla sino porque no había endpoint que la sirviera.
+   *
+   * Todo lo que se devuelve acá ya se escribía desde el primer día: la
+   * biografía, las especialidades, los idiomas, las credenciales y las
+   * matrículas estaban en la base sin forma de volver a leerse.
+   *
+   * ## El sujeto sale de la sesión
+   *
+   * No recibe identificador y no hay variante para consultar el de otro: se
+   * resuelve por el vínculo persona-cuenta del actor, igual que el resumen del
+   * paciente. Un profesional no puede pedir el perfil de un colega por esta vía.
+   *
+   * ## Las cuentas de actividad
+   *
+   * Se leen contra `clinical` y `chart` filtrando por el usuario que creó cada
+   * registro. Es una lectura de sólo contar y de sólo lo propio: no sale ni un
+   * dato clínico del expediente de nadie, y por eso puede vivir acá sin abrir un
+   * camino lateral a información de pacientes.
+   *
+   * @param actor - La sesión que consulta, que es también el sujeto.
+   * @returns Su perfil profesional con trayectoria y actividad.
+   */
+  async getOwnPractitionerProfile(
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    const em = this.em.fork();
+
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene una persona vinculada',
+      );
+    }
+
+    const person = await this.personsRepo.findById(em, link.personId);
+    const practitioner = await this.practitionersRepo.findById(
+      em,
+      link.personId,
+    );
+    if (!person || !practitioner) {
+      // 404 y no 403: la cuenta existe y la sesión es válida, lo que no hay es
+      // un perfil profesional a su nombre. Decirlo como «prohibido» mandaría a
+      // pedir permisos a quien lo que necesita es que lo den de alta.
+      throw new ResourceNotFoundException('Perfil profesional no encontrado', {
+        personId: link.personId,
+      });
+    }
+
+    const profileId = practitioner.profileId;
+    const [specialties, credentials, licenses, languages, activity] =
+      await Promise.all([
+        this.specialtiesRepo.findAllByPractitioner(em, profileId),
+        this.credentialsRepo.findByPractitioner(em, profileId),
+        this.authorizationsRepo.findByPractitioner(em, profileId),
+        this.languagesRepo.findByPractitioner(em, profileId),
+        this.countActivity(em, actor.id),
+      ]);
+
+    return {
+      profileId,
+      personId: person.id,
+      practitionerCode: practitioner.practitionerCode,
+      displayName: person.displayName,
+      professionalTitle: practitioner.professionalTitle,
+      professionalBio: practitioner.professionalBio,
+      photoFileId: practitioner.photoFileId,
+      practitionerCategoryConceptId: practitioner.practitionerCategoryConceptId,
+      verificationStatusConceptId: practitioner.verificationStatusConceptId,
+      practiceStatusConceptId: practitioner.practiceStatusConceptId,
+      acceptsNewPatients: practitioner.acceptsNewPatients ?? false,
+      telehealthAvailable: practitioner.telehealthAvailable ?? false,
+      specialties: specialties.map((specialty) => ({
+        id: specialty.id,
+        specialtyConceptId: specialty.specialtyConceptId,
+        isPrimary: specialty.isPrimary ?? false,
+        boardCertified: specialty.boardCertified ?? false,
+        practiceScopeText: specialty.practiceScopeText,
+        verificationStatusConceptId: specialty.verificationStatusConceptId,
+        validFrom: specialty.validFrom,
+        validTo: specialty.validTo,
+      })),
+      credentials: credentials.map((credential) => ({
+        id: credential.id,
+        credentialTypeConceptId: credential.credentialTypeConceptId,
+        number: credential.number,
+        issuingInstitutionText: credential.issuingInstitutionText,
+        issueDate: credential.issueDate,
+        expiryDate: credential.expiryDate,
+        stateConceptId: credential.stateConceptId,
+        verifiedAt: credential.verifiedAt,
+      })),
+      licenses: licenses.map((license) => ({
+        id: license.id,
+        jurisdictionConceptId: license.jurisdictionConceptId,
+        licenseNumber: license.licenseNumber,
+        regulatoryAuthority: license.regulatoryAuthority,
+        stateConceptId: license.stateConceptId,
+        validFrom: license.validFrom,
+        validTo: license.validTo,
+      })),
+      languages: languages.map((language) => ({
+        languageConceptId: language.languageConceptId,
+        proficiencyConceptId: language.proficiencyConceptId,
+        clinicalInterpretationAllowed:
+          language.clinicalInterpretationAllowed ?? false,
+      })),
+      activity,
+      createdAt: practitioner.createdAt,
+    };
+  }
+
+  /**
+   * Edita el propio perfil profesional — lo que faltaba para poder configurarlo.
+   *
+   * El alta escribía estos campos una sola vez y no había forma de volver a
+   * tocarlos: un profesional no podía corregir su título, escribir su
+   * presentación ni declarar que dejó de tomar pacientes sin que alguien
+   * escribiera en la base.
+   *
+   * ## Sólo lo propio, y sólo la presentación
+   *
+   * El sujeto sale de la sesión, así que no hay forma de editar el de otro. Y
+   * los campos editables son deliberadamente los de **presentación**: el estado
+   * de verificación, el de práctica y las credenciales los mueve el trámite que
+   * corresponde. Dejarlos acá convertiría el perfil en una declaración jurada de
+   * uno mismo, que es exactamente lo contrario de lo que una matrícula
+   * verificada significa.
+   *
+   * `PATCH`: lo que no viene no se toca. Un `''` sí borra — es una decisión de
+   * quien edita, distinta de omitir el campo.
+   *
+   * @param dto - Los campos a cambiar.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo, ya actualizado.
+   */
+  async updateOwnPractitionerProfile(
+    dto: UpdateOwnPractitionerProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    this.logger.info(
+      { operation: 'profiles.practitioner.updateOwn', actorId: actor.id },
+      'Updating own practitioner profile',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const link = await this.accountLinksRepo.findActiveByUser(tx, actor.id);
+      if (!link) {
+        throw new PreconditionFailedException(
+          'La cuenta no tiene una persona vinculada',
+        );
+      }
+      const practitioner = await this.practitionersRepo.findById(
+        tx,
+        link.personId,
+      );
+      if (!practitioner) {
+        throw new ResourceNotFoundException(
+          'Perfil profesional no encontrado',
+          {
+            personId: link.personId,
+          },
+        );
+      }
+
+      // Campo por campo y con `!== undefined`: un `??` trataría `''` y `false`
+      // como «no vino», y son justamente los dos valores que alguien manda
+      // cuando quiere borrar su biografía o declarar que ya no toma pacientes.
+      if (dto.professionalTitle !== undefined) {
+        practitioner.professionalTitle = dto.professionalTitle;
+      }
+      if (dto.professionalBio !== undefined) {
+        practitioner.professionalBio = dto.professionalBio;
+      }
+      if (dto.acceptsNewPatients !== undefined) {
+        practitioner.acceptsNewPatients = dto.acceptsNewPatients;
+      }
+      if (dto.telehealthAvailable !== undefined) {
+        practitioner.telehealthAvailable = dto.telehealthAvailable;
+      }
+      touch(practitioner, actor.id);
+      await tx.flush();
+    });
+
+    // Se relee entero en vez de armar la respuesta con lo que se acaba de
+    // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
+    // las colecciones y la actividad, que esta operación no toca.
+    return this.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * Cuenta lo que el profesional dejó asentado, por el usuario que lo creó.
+   *
+   * Cuatro `count` y ni un `find`: no se trae ninguna fila, así que ningún dato
+   * clínico de ningún paciente pasa por acá. Es lo que hace que este conteo sea
+   * seguro de exponer en un perfil.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - La cuenta cuya actividad se cuenta.
+   * @returns Las cuatro cifras de actividad.
+   */
+  private async countActivity(
+    em: EntityManager,
+    userId: string,
+  ): Promise<PractitionerActivityDto> {
+    const [encounters, medicationRequests, clinicalNotes, documents] =
+      await Promise.all([
+        em.count(Encounters, { createdByUserId: userId }),
+        em.count(MedicationRequests, { createdByUserId: userId }),
+        em.count(ClinicalNoteHeaders, { createdByUserId: userId }),
+        em.count(DocumentRecords, { createdByUserId: userId }),
+      ]);
+    return { encounters, medicationRequests, clinicalNotes, documents };
   }
 
   /** UC-05-03: onboarding de profesional con su primera licencia y credencial de soporte. */
@@ -133,9 +375,15 @@ export class ProfilesPractitionersService {
         practitionerCategoryConceptId:
           dto.practitionerCategoryConceptId ?? PROF.PRACT_CATEGORY_GENERAL,
         professionalTitle: dto.professionalTitle,
+        professionalBio: dto.professionalBio,
         verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
         practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
-        acceptsNewPatients: false,
+        // Por defecto `false`: el alta arranca en onboarding y nadie debería
+        // figurar como disponible antes de estar habilitado. Declararlo sí se
+        // puede — sin eso, la única forma de dar de alta a alguien que sí toma
+        // pacientes era escribir en la base a mano.
+        acceptsNewPatients: dto.acceptsNewPatients ?? false,
+        telehealthAvailable: dto.telehealthAvailable ?? false,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -155,6 +403,14 @@ export class ProfilesPractitionersService {
         credentialTypeConceptId:
           dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
         number: dto.credentialNumber,
+        // Dónde y cuándo se cursó. Las dos columnas existían y ninguna
+        // escritura las llenaba: la formación se guardaba sin decir de dónde
+        // salía, que es justamente lo que la hace legible en un perfil.
+        issuingInstitutionText: dto.credentialIssuingInstitutionText,
+        issueDate:
+          dto.credentialIssueDate === undefined
+            ? undefined
+            : new Date(dto.credentialIssueDate),
         stateConceptId: PROF.CRED_PENDING,
         actorUserId: actor.id,
       });
@@ -441,4 +697,140 @@ export class ProfilesPractitionersService {
       };
     });
   }
+
+  /* -- UC-05-16: historial laboral del profesional -------------------------- */
+
+  /**
+   * El historial laboral propio (UC-05-16·L).
+   *
+   * Autoservicio: el sujeto sale de la sesión. El módulo ya sabía dónde se
+   * **formó** el profesional (`professional_credentials`) y qué puede
+   * **ejercer** (licencias y especialidades), pero no dónde **trabajó**, que es
+   * lo que el cliente pidió por nombre —«hospitales o entidades médicas»—.
+   *
+   * @param actor - Quien consulta su propio historial.
+   * @returns Sus afiliaciones, de la más reciente a la más antigua.
+   */
+  async listOwnAffiliations(
+    actor: AuthenticatedUser,
+  ): Promise<ListAffiliationsResponseDto> {
+    const em = this.em.fork();
+    const profileId = await this.ownership.requireOwnPractitionerProfileId(
+      em,
+      actor,
+    );
+    const rows = await this.affiliationsRepo.findByPractitioner(em, profileId);
+    const items = rows.map((row) => toAffiliation(row));
+    return { items, count: items.length };
+  }
+
+  /**
+   * Agrega una afiliación institucional al historial propio (UC-05-16).
+   *
+   * Dos reglas, y ninguna es de prudencia genérica:
+   *
+   * - **El fin no puede preceder al inicio.** Un período invertido no es un dato
+   *   dudoso, es un dato imposible, y ordenar el currículum por fecha lo
+   *   colocaría en cualquier lado.
+   * - **Misma institución, mismo cargo y mismo inicio responde `409`.** Volver a
+   *   trabajar en el mismo hospital años después es cierto y se registra; lo que
+   *   se rechaza es el doble envío del formulario, que se distingue por empezar
+   *   el mismo día.
+   *
+   * Lo que **no** se valida es que la institución exista en la plataforma: la
+   * mayoría no está, y exigirlo convertiría un dato de currículum en un alta de
+   * organizaciones.
+   *
+   * @param dto - Institución, cargo y período.
+   * @param actor - El profesional titular del historial.
+   * @returns La afiliación registrada.
+   */
+  async addOwnAffiliation(
+    dto: CreateAffiliationDto,
+    actor: AuthenticatedUser,
+  ): Promise<AffiliationResponseDto> {
+    const startDate = new Date(dto.startDate);
+    const endDate = dto.endDate ? new Date(dto.endDate) : undefined;
+    if (endDate && endDate < startDate) {
+      throw new PreconditionFailedException(
+        'El fin del vínculo no puede ser anterior a su inicio',
+        { startDate: dto.startDate, endDate: dto.endDate },
+      );
+    }
+
+    this.logger.info(
+      { operation: 'profiles.affiliation.add', actorId: actor.id },
+      'Adding practitioner affiliation',
+    );
+    return this.em.transactional(async (tx) => {
+      const profileId = await this.ownership.requireOwnPractitionerProfileId(
+        tx,
+        actor,
+      );
+
+      const organizationName = dto.organizationName.trim();
+      const roleTitle = dto.roleTitle.trim();
+      const duplicate = await this.affiliationsRepo.findSame(
+        tx,
+        profileId,
+        organizationName,
+        roleTitle,
+        startDate,
+      );
+      if (duplicate) {
+        throw new ConflictException(
+          'Ese vínculo ya está en el historial laboral',
+          { organizationName, roleTitle, startDate: dto.startDate },
+        );
+      }
+
+      const affiliation = this.affiliationsRepo.create(tx, {
+        practitionerProfileId: profileId,
+        organizationName,
+        roleTitle,
+        departmentText: dto.departmentText?.trim() || undefined,
+        practiceSiteId: dto.practiceSiteId,
+        affiliationTypeConceptId:
+          dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
+        startDate,
+        endDate,
+        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.affiliation.add',
+          affiliationId: affiliation.id,
+        },
+        'Practitioner affiliation added',
+      );
+      return toAffiliation(affiliation);
+    });
+  }
+}
+
+/**
+ * Proyecta la fila al contrato de lectura.
+ *
+ * `current` se deriva acá y no se guarda: una columna «sigue trabajando ahí»
+ * sería un dato que envejece solo y que habría que recalcular cada vez que
+ * alguien cierra un período. La fecha ya lo dice.
+ */
+function toAffiliation(row: PractitionerAffiliations): AffiliationResponseDto {
+  return {
+    id: row.id,
+    practitionerProfileId: row.practitionerProfileId,
+    organizationName: row.organizationName,
+    roleTitle: row.roleTitle,
+    departmentText: row.departmentText ?? null,
+    practiceSiteId: row.practiceSiteId ?? null,
+    affiliationTypeConceptId: row.affiliationTypeConceptId ?? null,
+    startDate: row.startDate,
+    endDate: row.endDate ?? null,
+    current: row.endDate === undefined || row.endDate === null,
+    status: row.statusConceptId,
+    createdAt: row.createdAt,
+  };
 }

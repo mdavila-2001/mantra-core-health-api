@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
+// Dónde se atiende lo sabe `practice`: es su dato y no se copia acá. La
+// dependencia va en un solo sentido —`practice` no importa `scheduling`— así
+// que no cierra ciclo.
+import { PractitionerSitesService } from '../../practice/services';
 import { SchedulingAgendaRepository } from '../repositories';
 import type { BookableSlots, SchedulableResources } from '../entities';
 import {
@@ -11,6 +15,7 @@ import {
   ListSlotsQueryDto,
   ListSlotsResponseDto,
   ResourceListItemDto,
+  ResourceSiteDto,
   SlotListItemDto,
   type ResourceType,
 } from '../dto';
@@ -45,11 +50,13 @@ export class SchedulingAgendaService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param agendaRepo - Repositorio de lectura de agenda.
+   * @param sitesService - Resolución de la sede de cada recurso (`practice`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly agendaRepo: SchedulingAgendaRepository,
+    private readonly sitesService: PractitionerSitesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingAgendaService.name);
@@ -69,7 +76,32 @@ export class SchedulingAgendaService {
       stateConceptId: query.includeInactive ? undefined : CONCEPTS.STATE_ACTIVE,
     });
 
-    const items = resources.map((resource) => this.toResourceItem(resource));
+    // La ubicación se resuelve de una pasada para todos los recursos. La agenda
+    // los pinta juntos, así que hacerlo de a uno sería un N+1 que no se nota en
+    // desarrollo y sí en una sala de espera.
+    //
+    // Si `practice` no puede resolverla, la agenda sigue: quedarse sin horarios
+    // porque no se pudo averiguar una dirección sería cambiar una carencia por
+    // una caída.
+    let sites = new Map<string, ResourceSiteDto>();
+    try {
+      sites = await this.sitesService.resolveSitesForResources(
+        resources.map((resource) => ({
+          refType: resource.resourceRefType,
+          refId: resource.resourceRefId,
+        })),
+        query.tenantId,
+      );
+    } catch (error) {
+      this.logger.warn(
+        { operation: 'scheduling.resources.list', err: error },
+        'No se pudo resolver la sede de los recursos; la agenda va sin ubicación',
+      );
+    }
+
+    const items = resources.map((resource) =>
+      this.toResourceItem(resource, sites.get(resource.resourceRefId) ?? null),
+    );
     return { items, count: items.length };
   }
 
@@ -125,8 +157,12 @@ export class SchedulingAgendaService {
   }
 
   /** Proyecta el recurso al contrato de lectura. */
-  private toResourceItem(resource: SchedulableResources): ResourceListItemDto {
+  private toResourceItem(
+    resource: SchedulableResources,
+    site: ResourceSiteDto | null,
+  ): ResourceListItemDto {
     return {
+      site,
       id: resource.id,
       name: resource.name,
       resourceTypeConceptId: resource.resourceTypeConceptId,

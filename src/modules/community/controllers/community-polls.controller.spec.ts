@@ -19,7 +19,10 @@ function build() {
   const service = { createPoll: mockFn(), vote: mockFn() };
   const readService = { getPoll: mockFn() };
   return {
-    controller: new CommunityPollsController(service as any, readService as any),
+    controller: new CommunityPollsController(
+      service as any,
+      readService as any,
+    ),
     service,
     readService,
   };

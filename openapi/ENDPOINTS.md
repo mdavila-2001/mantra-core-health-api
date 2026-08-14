@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **954 de 954 endpoints** en **62 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **969 de 969 endpoints** en **62 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -15,17 +15,17 @@ Se documentan **954 de 954 endpoints** en **62 módulos**. La referencia complet
 | `authz` | 21 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 13 | [Abrir referencia](endpoints/billing.md) |
-| `chart` | 13 | [Abrir referencia](endpoints/chart.md) |
+| `chart` | 16 | [Abrir referencia](endpoints/chart.md) |
 | `clinical` | 24 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 23 | [Abrir referencia](endpoints/clinical-ext.md) |
-| `common` | 13 | [Abrir referencia](endpoints/common.md) |
-| `community` | 36 | [Abrir referencia](endpoints/community.md) |
+| `common` | 14 | [Abrir referencia](endpoints/common.md) |
+| `community` | 38 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 12 | [Abrir referencia](endpoints/consent.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
 | `delegated_access` | 11 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 16 | [Abrir referencia](endpoints/diagnostic-units.md) |
-| `diagnostics` | 20 | [Abrir referencia](endpoints/diagnostics.md) |
+| `diagnostics` | 21 | [Abrir referencia](endpoints/diagnostics.md) |
 | `directory` | 16 | [Abrir referencia](endpoints/directory.md) |
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
@@ -50,9 +50,9 @@ Se documentan **954 de 954 endpoints** en **62 módulos**. La referencia complet
 | `pharmacy_inventory` | 15 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
-| `practice` | 16 | [Abrir referencia](endpoints/practice.md) |
-| `procedures_perioperative` | 28 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 16 | [Abrir referencia](endpoints/profiles.md) |
+| `practice` | 17 | [Abrir referencia](endpoints/practice.md) |
+| `procedures_perioperative` | 31 | [Abrir referencia](endpoints/procedures-perioperative.md) |
+| `profiles` | 20 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |

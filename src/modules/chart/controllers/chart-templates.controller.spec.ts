@@ -23,4 +23,36 @@ describe('ChartTemplatesController', () => {
       actor,
     );
   });
+
+  it('delegates createTemplate', async () => {
+    const templatesService = { createTemplate: mockFn() };
+    const controller = new ChartTemplatesController(templatesService as any);
+    const dto = {
+      specialtyConceptId: 'sp1',
+      code: 'C1',
+      name: 'N1',
+      fields: [],
+    };
+    await controller.createTemplate(dto as any, actor);
+    expect(templatesService.createTemplate).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates listTemplates with the optional specialtyId filter and the current tenant', async () => {
+    const templatesService = { listTemplates: mockFn() };
+    const controller = new ChartTemplatesController(templatesService as any);
+    await controller.listTemplates('sp1');
+    // Sin `runWithTenant` alrededor, `getCurrentTenantId()` resuelve `undefined` —
+    // es el mismo caso que un actor sin tenant activo.
+    expect(templatesService.listTemplates).toHaveBeenCalledWith(
+      'sp1',
+      undefined,
+    );
+  });
+
+  it('delegates getTemplate', async () => {
+    const templatesService = { getTemplate: mockFn() };
+    const controller = new ChartTemplatesController(templatesService as any);
+    await controller.getTemplate('t1');
+    expect(templatesService.getTemplate).toHaveBeenCalledWith('t1');
+  });
 });

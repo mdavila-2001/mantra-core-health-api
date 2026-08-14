@@ -7,7 +7,7 @@
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`community`](community.md) | 8 | 15 | 16 | 38 | 22 |
+| [`community`](community.md) | 8 | 15 | 16 | 38 | 23 |
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 7 | 8 | 30 | 10 |
@@ -16,16 +16,16 @@
 | [`clinical_ext`](clinical_ext.md) | 7 | 7 | 11 | 12 | 8 |
 | [`insurance`](insurance.md) | 7 | 7 | 6 | 29 | 8 |
 | [`clinical`](clinical.md) | 6 | 12 | 13 | 22 | 12 |
+| [`practice`](practice.md) | 6 | 8 | 11 | 11 | 13 |
 | [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
 | [`chart`](chart.md) | 5 | 5 | 4 | 11 | 5 |
 | [`common`](common.md) | 5 | 5 | 7 | 7 | 4 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 4 | 10 | 10 | 10 |
+| [`diagnostics`](diagnostics.md) | 5 | 6 | 6 | 36 | 7 |
 | [`forms`](forms.md) | 5 | 5 | 6 | 16 | 13 |
-| [`practice`](practice.md) | 5 | 7 | 11 | 11 | 13 |
 | [`scheduling`](scheduling.md) | 5 | 5 | 5 | 16 | 5 |
 | [`audit`](audit.md) | 4 | 6 | 7 | 123 | 9 |
-| [`diagnostics`](diagnostics.md) | 4 | 5 | 5 | 36 | 6 |
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
 | [`integrations`](integrations.md) | 4 | 4 | 9 | 10 | 9 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 5 | 6 | 8 |
@@ -48,7 +48,8 @@
 | [`lakehouse`](lakehouse.md) | 2 | 3 | 3 | 18 | 1 |
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
 | [`object_storage`](object_storage.md) | 2 | 3 | 3 | 17 | 1 |
-| [`profiles`](profiles.md) | 2 | 3 | 13 | 18 | 12 |
+| [`procedures_perioperative`](procedures_perioperative.md) | 2 | 4 | 5 | 37 | 2 |
+| [`profiles`](profiles.md) | 2 | 3 | 14 | 19 | 15 |
 | [`promotions`](promotions.md) | 2 | 2 | 2 | 11 | 1 |
 | [`qa_lab`](qa_lab.md) | 2 | 2 | 2 | 13 | 1 |
 | [`time_series`](time_series.md) | 2 | 4 | 2 | 12 | 1 |
@@ -62,10 +63,9 @@
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
 | [`pharmacy`](pharmacy.md) | 1 | 6 | 9 | 9 | 9 |
 | [`platform_ops`](platform_ops.md) | 1 | 4 | 5 | 38 | 1 |
-| [`procedures_perioperative`](procedures_perioperative.md) | 1 | 3 | 4 | 37 | 1 |
 | [`redis_runtime`](redis_runtime.md) | 1 | 1 | 0 | 0 | 3 |
 | [`reporting`](reporting.md) | 1 | 2 | 2 | 12 | 1 |
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **199** | **283** | **358** | **1190** | **390** |
+| **Total** | **202** | **286** | **361** | **1191** | **396** |

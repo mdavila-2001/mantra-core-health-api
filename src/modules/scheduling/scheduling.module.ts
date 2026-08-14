@@ -28,6 +28,12 @@ import { AuditModule } from '../audit/audit.module';
 // dos fuentes de verdad: evita importar el módulo clínico entero sólo para
 // escribir la cita que respalda una reserva confirmada.
 import { AppointmentsRepository } from '../clinical/repositories';
+// Dónde se atiende es un dato de `practice`. Se importa el módulo entero —y no
+// se copia el repositorio, como con `AppointmentsRepository`— porque la
+// resolución tiene reglas propias (asignación vigente, sede del espacio,
+// pertenencia al tenant) que no son de esta agenda. `practice` no importa
+// `scheduling`, así que la dependencia no cierra ciclo.
+import { PracticeModule } from '../practice/practice.module';
 import { schedulingPersistenceProviders } from './scheduling.persistence';
 
 /**
@@ -35,7 +41,11 @@ import { schedulingPersistenceProviders } from './scheduling.persistence';
  * anti-double-booking, lista de espera y recordatorios (UC-41-01 … 14).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuditModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    AuditModule,
+    PracticeModule,
+  ],
   controllers: [
     SchedulingController,
     SchedulingBookingsController,

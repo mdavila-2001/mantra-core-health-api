@@ -51,10 +51,7 @@ export class CommunityPollsReadService {
       throw new ResourceNotFoundException('Encuesta no encontrada', { pollId });
 
     const post = await this.postsRepo.findById(em, poll.postId);
-    if (
-      !post ||
-      !(await this.visibility.canViewPost(em, post, actorProfileId))
-    )
+    if (!post || !(await this.visibility.canViewPost(em, post, actorProfileId)))
       throw new ResourceNotFoundException('Encuesta no encontrada', { pollId });
 
     const [options, tallies, votedOptionIds] = await Promise.all([

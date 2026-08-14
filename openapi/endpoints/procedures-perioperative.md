@@ -2,47 +2,466 @@
 
 # Endpoints del módulo `procedures_perioperative`
 
-Referencia exhaustiva de 28 operación(es) del módulo `procedures_perioperative`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 31 operación(es) del módulo `procedures_perioperative`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `procedure-cases`
-- **Controladores:** `PeriopController`
+- **Etiquetas OpenAPI:** `dental-procedures`, `procedure-cases`
+- **Controladores:** `DentalController`, `PeriopController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /pacu-stays/{stayId}/assessments](#1-post-pacu-stays-stayid-assessments) — Registrar una valoración de recuperación
-2. [POST /pacu-stays/{stayId}/discharge](#2-post-pacu-stays-stayid-discharge) — Dar el alta de recuperación
-3. [GET /procedure-cases](#3-get-procedure-cases) — Listar casos quirúrgicos (agenda)
-4. [POST /procedure-cases](#4-post-procedure-cases) — Programar un caso quirúrgico y reservar el quirófano
-5. [GET /procedure-cases/{id}](#5-get-procedure-cases-id) — Detalle completo del caso quirúrgico
-6. [PATCH /procedure-cases/{id}](#6-patch-procedure-cases-id) — Modificar el caso quirúrgico
-7. [POST /procedure-cases/{id}/anesthesia-events](#7-post-procedure-cases-id-anesthesia-events) — Anotar un evento intraoperatorio de anestesia
-8. [POST /procedure-cases/{id}/anesthesia-plans](#8-post-procedure-cases-id-anesthesia-plans) — Registrar el plan de anestesia y la valoración de vía aérea
-9. [POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve](#9-post-procedure-cases-id-anesthesia-plans-planid-approve) — Aprobar el plan de anestesia
-10. [POST /procedure-cases/{id}/cancel](#10-post-procedure-cases-id-cancel) — Cancelar el caso quirúrgico
-11. [POST /procedure-cases/{id}/charge-items/post](#11-post-procedure-cases-id-charge-items-post) — Generar los cargos y consolidar el uso del quirófano
-12. [POST /procedure-cases/{id}/confirm](#12-post-procedure-cases-id-confirm) — Confirmar la intervención verificando las credenciales del equipo
-13. [POST /procedure-cases/{id}/diagnoses](#13-post-procedure-cases-id-diagnoses) — Registrar los diagnósticos del caso
-14. [POST /procedure-cases/{id}/findings](#14-post-procedure-cases-id-findings) — Registrar un hallazgo operatorio
-15. [POST /procedure-cases/{id}/implants](#15-post-procedure-cases-id-implants) — Registrar un implante con su trazabilidad UDI, lote o serie
-16. [POST /procedure-cases/{id}/medication-uses](#16-post-procedure-cases-id-medication-uses) — Registrar el uso de un medicamento en la intervención
-17. [POST /procedure-cases/{id}/operative-reports](#17-post-procedure-cases-id-operative-reports) — Redactar el reporte operatorio
-18. [POST /procedure-cases/{id}/operative-reports/{reportId}/sign](#18-post-procedure-cases-id-operative-reports-reportid-sign) — Firmar el reporte operatorio
-19. [POST /procedure-cases/{id}/operative-steps](#19-post-procedure-cases-id-operative-steps) — Registrar un paso operatorio
-20. [POST /procedure-cases/{id}/pacu-stays](#20-post-procedure-cases-id-pacu-stays) — Admitir al paciente en recuperación
-21. [POST /procedure-cases/{id}/preoperative-assessments](#21-post-procedure-cases-id-preoperative-assessments) — Registrar la valoración preoperatoria y sus puntuaciones de riesgo
-22. [POST /procedure-cases/{id}/preoperative-orders](#22-post-procedure-cases-id-preoperative-orders) — Indicar una orden preoperatoria para el caso
-23. [POST /procedure-cases/{id}/preoperative-orders/verify](#23-post-procedure-cases-id-preoperative-orders-verify) — Verificar las órdenes preoperatorias
-24. [POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses](#24-post-procedure-cases-id-safety-checklists-checklistid-responses) — Responder una fase del checklist quirúrgico
-25. [POST /procedure-cases/{id}/specimens](#25-post-procedure-cases-id-specimens) — Registrar una muestra tomada en la intervención
-26. [GET /procedure-cases/{id}/team-members](#26-get-procedure-cases-id-team-members) — Listar el equipo del caso quirúrgico
-27. [POST /procedure-cases/{id}/team-members](#27-post-procedure-cases-id-team-members) — Asignar un miembro al equipo quirúrgico
-28. [POST /procedure-cases/{id}/team-members/{memberId}/accept](#28-post-procedure-cases-id-team-members-memberid-accept) — Aceptar la participación en el equipo quirúrgico
+1. [GET /dental-procedures](#1-get-dental-procedures) — Histórico odontológico del paciente
+2. [POST /dental-procedures](#2-post-dental-procedures) — Registrar un procedimiento odontológico
+3. [GET /dental-procedures/catalog](#3-get-dental-procedures-catalog) — Catálogo odontológico: códigos, piezas (FDI) y cuadrantes
+4. [POST /pacu-stays/{stayId}/assessments](#4-post-pacu-stays-stayid-assessments) — Registrar una valoración de recuperación
+5. [POST /pacu-stays/{stayId}/discharge](#5-post-pacu-stays-stayid-discharge) — Dar el alta de recuperación
+6. [GET /procedure-cases](#6-get-procedure-cases) — Listar casos quirúrgicos (agenda)
+7. [POST /procedure-cases](#7-post-procedure-cases) — Programar un caso quirúrgico y reservar el quirófano
+8. [GET /procedure-cases/{id}](#8-get-procedure-cases-id) — Detalle completo del caso quirúrgico
+9. [PATCH /procedure-cases/{id}](#9-patch-procedure-cases-id) — Modificar el caso quirúrgico
+10. [POST /procedure-cases/{id}/anesthesia-events](#10-post-procedure-cases-id-anesthesia-events) — Anotar un evento intraoperatorio de anestesia
+11. [POST /procedure-cases/{id}/anesthesia-plans](#11-post-procedure-cases-id-anesthesia-plans) — Registrar el plan de anestesia y la valoración de vía aérea
+12. [POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve](#12-post-procedure-cases-id-anesthesia-plans-planid-approve) — Aprobar el plan de anestesia
+13. [POST /procedure-cases/{id}/cancel](#13-post-procedure-cases-id-cancel) — Cancelar el caso quirúrgico
+14. [POST /procedure-cases/{id}/charge-items/post](#14-post-procedure-cases-id-charge-items-post) — Generar los cargos y consolidar el uso del quirófano
+15. [POST /procedure-cases/{id}/confirm](#15-post-procedure-cases-id-confirm) — Confirmar la intervención verificando las credenciales del equipo
+16. [POST /procedure-cases/{id}/diagnoses](#16-post-procedure-cases-id-diagnoses) — Registrar los diagnósticos del caso
+17. [POST /procedure-cases/{id}/findings](#17-post-procedure-cases-id-findings) — Registrar un hallazgo operatorio
+18. [POST /procedure-cases/{id}/implants](#18-post-procedure-cases-id-implants) — Registrar un implante con su trazabilidad UDI, lote o serie
+19. [POST /procedure-cases/{id}/medication-uses](#19-post-procedure-cases-id-medication-uses) — Registrar el uso de un medicamento en la intervención
+20. [POST /procedure-cases/{id}/operative-reports](#20-post-procedure-cases-id-operative-reports) — Redactar el reporte operatorio
+21. [POST /procedure-cases/{id}/operative-reports/{reportId}/sign](#21-post-procedure-cases-id-operative-reports-reportid-sign) — Firmar el reporte operatorio
+22. [POST /procedure-cases/{id}/operative-steps](#22-post-procedure-cases-id-operative-steps) — Registrar un paso operatorio
+23. [POST /procedure-cases/{id}/pacu-stays](#23-post-procedure-cases-id-pacu-stays) — Admitir al paciente en recuperación
+24. [POST /procedure-cases/{id}/preoperative-assessments](#24-post-procedure-cases-id-preoperative-assessments) — Registrar la valoración preoperatoria y sus puntuaciones de riesgo
+25. [POST /procedure-cases/{id}/preoperative-orders](#25-post-procedure-cases-id-preoperative-orders) — Indicar una orden preoperatoria para el caso
+26. [POST /procedure-cases/{id}/preoperative-orders/verify](#26-post-procedure-cases-id-preoperative-orders-verify) — Verificar las órdenes preoperatorias
+27. [POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses](#27-post-procedure-cases-id-safety-checklists-checklistid-responses) — Responder una fase del checklist quirúrgico
+28. [POST /procedure-cases/{id}/specimens](#28-post-procedure-cases-id-specimens) — Registrar una muestra tomada en la intervención
+29. [GET /procedure-cases/{id}/team-members](#29-get-procedure-cases-id-team-members) — Listar el equipo del caso quirúrgico
+30. [POST /procedure-cases/{id}/team-members](#30-post-procedure-cases-id-team-members) — Asignar un miembro al equipo quirúrgico
+31. [POST /procedure-cases/{id}/team-members/{memberId}/accept](#31-post-procedure-cases-id-team-members-memberid-accept) — Aceptar la participación en el equipo quirúrgico
 
 ---
 
-## 1. POST /pacu-stays/{stayId}/assessments
+## 1. GET /dental-procedures
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `dental-procedures`
+- **Nombre:** Histórico odontológico del paciente
+- **Operation ID:** `DentalController_listByPatient`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DentalController.listByPatient](../../src/modules/procedures_perioperative/controllers/dental.controller.ts)
+
+### Descripción de negocio
+
+Devuelve además el total sin paginar: un histórico clínico recortado en silencio se lee como «no hay antecedentes».
+
+Contexto declarado en el controlador: Histórico odontológico de una persona, del más reciente al más antiguo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /dental-procedures` en `DentalController_listByPatient`. El controlador delega en `PeriopDentalService.listByPatient`. No recibe body. El tipo de retorno estático es `Promise<DentalProcedureListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | query | Sí | `string` | formato `uuid` | Paciente consultado | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /dental-procedures?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /dental-procedures?patientProfileId=00000000-0000-4000-8000-000000000001&limit=50 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DentalProcedureListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DentalProcedureListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "performerProfileId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "noteText": "valor-ejemplo",
+      "performedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "sites": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+          "description": "Texto descriptivo de ejemplo"
+        }
+      ]
+    }
+  ],
+  "total": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<DentalProcedureDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","procedureCodeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","performerProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","noteText":"valor-ejemplo","performedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","sites":[{"id":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo"}]}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].procedureCodeConceptId` | Sí | `string` | formato `uuid` | Qué se hizo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del registro. | `00000000-0000-4000-8000-000000000001` |
+| `items[].performerProfileId` | No | `string` | formato `uuid` | Odontólogo que lo realizó, si consta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se realizó, si lo hubo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].noteText` | No | `string` | Sin restricción adicional declarada | Nota clínica. | `valor-ejemplo` |
+| `items[].performedAt` | No | `string` | formato `date-time` | Cuándo se realizó. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo quedó registrado. | `2026-07-31T12:00:00.000Z` |
+| `items[].sites` | Sí | `array<DentalSiteDto>` | Sin restricción adicional declarada | Piezas o cuadrantes tratados. | `[{"id":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo"}]` |
+| `items[].sites[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].sites[].bodySiteConceptId` | Sí | `string` | formato `uuid` | Pieza o cuadrante. | `00000000-0000-4000-8000-000000000001` |
+| `items[].sites[].description` | No | `string` | Sin restricción adicional declarada | Cara o superficie, si se precisó. | `Texto descriptivo de ejemplo` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Procedimientos de la persona, sin paginar | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/dental-procedures"
+}
+```
+
+---
+
+## 2. POST /dental-procedures
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `dental-procedures`
+- **Nombre:** Registrar un procedimiento odontológico
+- **Operation ID:** `DentalController_record`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DentalController.record](../../src/modules/procedures_perioperative/controllers/dental.controller.ts)
+
+### Descripción de negocio
+
+Se escribe como procedimiento clínico con categoría odontológica; la pieza o el cuadrante quedan como sitio anatómico.
+
+Contexto declarado en el controlador: Registra un tratamiento odontológico ya realizado.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /dental-procedures` en `DentalController_record`. El controlador delega en `PeriopDentalService.record`. Valida el body como `CreateDentalProcedureDto` y consume `application/json`. El tipo de retorno estático es `Promise<DentalProcedureResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateDentalProcedureDto`; los campos opcionales se omiten.
+
+```http
+POST /dental-procedures HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente tratado | `00000000-0000-4000-8000-000000000001` |
+| `procedureCodeConceptId` | Sí | `string` | formato `uuid` | Qué se hizo. Los códigos sembrados salen de `GET /dental-procedures/catalog`; se admite cualquier concepto válido. | `00000000-0000-4000-8000-000000000001` |
+| `performerProfileId` | No | `string` | formato `uuid` | Odontólogo que lo realizó. Si se omite se toma el profesional de la sesión. | `00000000-0000-4000-8000-000000000001` |
+| `toothSiteConceptId` | No | `string` | formato `uuid` | Pieza dentaria en notación FDI o cuadrante. Tiene que ser uno de los sitios del catálogo. | `00000000-0000-4000-8000-000000000001` |
+| `siteDetail` | No | `string` | longitud máxima 200 | Cara o superficie tratada, si corresponde | `valor-ejemplo` |
+| `noteText` | No | `string` | longitud máxima 4000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `encounterId` | No | `string` | formato `uuid` | Encuentro en el que se realizó, si lo hubo | `00000000-0000-4000-8000-000000000001` |
+| `performedAt` | No | `string` | formato `date-time` | Cuándo se realizó. Si se omite, ahora. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /dental-procedures HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "procedureCodeConceptId": "00000000-0000-4000-8000-000000000001",
+  "performerProfileId": "00000000-0000-4000-8000-000000000001",
+  "toothSiteConceptId": "00000000-0000-4000-8000-000000000001",
+  "siteDetail": "valor-ejemplo",
+  "noteText": "valor-ejemplo",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "performedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DentalProcedureResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Estado del registro. | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Cuándo quedó registrado. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El sitio tiene que ser una pieza dentaria o un cuadrante del catálogo odontológico | Excepción explícita en src/modules/procedures_perioperative/services/periop-dental.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se puede precisar la cara tratada sin decir sobre qué pieza | Excepción explícita en src/modules/procedures_perioperative/services/periop-dental.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/dental-procedures"
+}
+```
+
+---
+
+## 3. GET /dental-procedures/catalog
+
+- **Módulo:** `procedures_perioperative`
+- **Etiqueta OpenAPI:** `dental-procedures`
+- **Nombre:** Catálogo odontológico: códigos, piezas (FDI) y cuadrantes
+- **Operation ID:** `DentalController_catalog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DentalController.catalog](../../src/modules/procedures_perioperative/controllers/dental.controller.ts)
+
+### Descripción de negocio
+
+Sale del seed de conceptos. Existe para que el cliente no tenga que llevar los UUID escritos a mano.
+
+Contexto declarado en el controlador: El catálogo con el que se llena el formulario de alta. Va antes que `GET /dental-procedures` en el archivo por costumbre de lectura, no por ruteo: son rutas distintas y Nest no las confunde.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /dental-procedures/catalog` en `DentalController_catalog`. El controlador delega en `PeriopDentalService.catalog`. No recibe body. El tipo de retorno estático es `DentalCatalogDto`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /dental-procedures/catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /dental-procedures/catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `DentalCatalogDto` | No |
+| 400 | Consulta completada correctamente. | `DentalCatalogDto` | No |
+| 401 | Consulta completada correctamente. | `DentalCatalogDto` | No |
+| 403 | Consulta completada correctamente. | `DentalCatalogDto` | No |
+| 429 | Consulta completada correctamente. | `DentalCatalogDto` | No |
+| 500 | Consulta completada correctamente. | `DentalCatalogDto` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DentalCatalogDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "procedureCodes": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo"
+    }
+  ],
+  "teeth": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo"
+    }
+  ],
+  "quadrants": [
+    {
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `procedureCodes` | Sí | `array<DentalCatalogEntryDto>` | Sin restricción adicional declarada | Códigos de procedimiento sembrados. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}]` |
+| `procedureCodes[].conceptId` | Sí | `string` | formato `uuid` | Identificador del concepto. | `00000000-0000-4000-8000-000000000001` |
+| `procedureCodes[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `procedureCodes[].display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `teeth` | Sí | `array<DentalCatalogEntryDto>` | Sin restricción adicional declarada | Las 32 piezas permanentes, en orden FDI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}]` |
+| `teeth[].conceptId` | Sí | `string` | formato `uuid` | Identificador del concepto. | `00000000-0000-4000-8000-000000000001` |
+| `teeth[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `teeth[].display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `quadrants` | Sí | `array<DentalCatalogEntryDto>` | Sin restricción adicional declarada | Los cuatro cuadrantes. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}]` |
+| `quadrants[].conceptId` | Sí | `string` | formato `uuid` | Identificador del concepto. | `00000000-0000-4000-8000-000000000001` |
+| `quadrants[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `quadrants[].display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/dental-procedures/catalog"
+}
+```
+
+---
+
+## 4. POST /pacu-stays/{stayId}/assessments
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -183,7 +602,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /pacu-stays/{stayId}/discharge
+## 5. POST /pacu-stays/{stayId}/discharge
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -340,7 +759,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /procedure-cases
+## 6. GET /procedure-cases
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -473,7 +892,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /procedure-cases
+## 7. POST /procedure-cases
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -639,7 +1058,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /procedure-cases/{id}
+## 8. GET /procedure-cases/{id}
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -770,6 +1189,57 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
       "signedAt": "2026-07-31T12:00:00.000Z"
     }
+  ],
+  "operativeSteps": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "stepNumber": 1,
+      "stepCodeConceptId": "00000000-0000-4000-8000-000000000001",
+      "description": "Texto descriptivo de ejemplo",
+      "performedByProfileId": "00000000-0000-4000-8000-000000000001",
+      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "endedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "findings": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "operativeStepId": "00000000-0000-4000-8000-000000000001",
+      "findingCodeConceptId": "00000000-0000-4000-8000-000000000001",
+      "findingText": "valor-ejemplo",
+      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+      "severityConceptId": "00000000-0000-4000-8000-000000000001",
+      "recordedByProfileId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "implants": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "procedureId": "00000000-0000-4000-8000-000000000001",
+      "implantDeviceId": "00000000-0000-4000-8000-000000000001",
+      "implantRoleConceptId": "00000000-0000-4000-8000-000000000001",
+      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+      "implantedAt": "2026-07-31T12:00:00.000Z",
+      "explantedAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "identifiers": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "identifierTypeConceptId": "00000000-0000-4000-8000-000000000001",
+          "identifierValue": "valor-ejemplo",
+          "issuingSystem": "valor-ejemplo",
+          "lotNumber": "valor-ejemplo",
+          "serialNumber": "valor-ejemplo",
+          "expirationDate": "2026-07-31T12:00:00.000Z"
+        }
+      ]
+    }
   ]
 }
 ```
@@ -821,6 +1291,45 @@ Campos de la respuesta:
 | `operativeReports[].reportVersion` | Sí | `number` | Sin restricción adicional declarada | Número de versión. | `1` |
 | `operativeReports[].statusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado: borrador o firmado. | `00000000-0000-4000-8000-000000000001` |
 | `operativeReports[].signedAt` | No | `string` | formato `date-time` | Cuándo se firmó, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `operativeSteps` | Sí | `array<object>` | Sin restricción adicional declarada | Pasos de la intervención, en orden | `[{"id":"00000000-0000-4000-8000-000000000001","stepNumber":1,"stepCodeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","performedByProfileId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","startedAt":"2026-07-31T12:00:00.000Z","endedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `operativeSteps[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].stepNumber` | Sí | `number` | Sin restricción adicional declarada | Orden dentro de la intervención. | `1` |
+| `operativeSteps[].stepCodeConceptId` | Sí | `string` | Sin restricción adicional declarada | Código del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].description` | Sí | `string` | Sin restricción adicional declarada | Descripción escrita por quien lo registró. | `Texto descriptivo de ejemplo` |
+| `operativeSteps[].performedByProfileId` | No | `string` | Sin restricción adicional declarada | Profesional que lo ejecutó, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].bodySiteConceptId` | No | `string` | Sin restricción adicional declarada | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].lateralityConceptId` | No | `string` | Sin restricción adicional declarada | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].statusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].startedAt` | No | `string` | formato `date-time` | Cuándo empezó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
+| `operativeSteps[].endedAt` | No | `string` | formato `date-time` | Cuándo terminó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
+| `findings` | Sí | `array<object>` | Sin restricción adicional declarada | Hallazgos registrados durante la intervención | `[{"id":"00000000-0000-4000-8000-000000000001","operativeStepId":"00000000-0000-4000-8000-000000000001","findingCodeConceptId":"00000000-0000-4000-8000-000000000001","findingText":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","recordedByProfileId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `findings[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del hallazgo. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].operativeStepId` | No | `string` | Sin restricción adicional declarada | Paso en el que se halló, si se ató a uno. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].findingCodeConceptId` | Sí | `string` | Sin restricción adicional declarada | Código del hallazgo. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].findingText` | Sí | `string` | Sin restricción adicional declarada | Descripción escrita por quien lo halló. | `valor-ejemplo` |
+| `findings[].bodySiteConceptId` | No | `string` | Sin restricción adicional declarada | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].lateralityConceptId` | No | `string` | Sin restricción adicional declarada | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].severityConceptId` | No | `string` | Sin restricción adicional declarada | Severidad, si se graduó. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].recordedByProfileId` | No | `string` | Sin restricción adicional declarada | Profesional que lo registró, si consta. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `implants` | Sí | `array<object>` | Sin restricción adicional declarada | Implantes colocados, con sus identificadores | `[{"id":"00000000-0000-4000-8000-000000000001","procedureId":"00000000-0000-4000-8000-000000000001","implantDeviceId":"00000000-0000-4000-8000-000000000001","implantRoleConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","implantedAt":"2026-07-31T12:00:00.000Z","explantedAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","identifiers":[{"id":"00000000-0000-4000-8000-000000000001","identifierTypeConceptId":"00000000-0000-4000-8000-000000000001","identifierValue":"valor-ejemplo","issuingSystem":"valor-ejemplo","lotNumber":"valor-ejemplo","serialNumber":"valor-ejemplo","expirationDate":"2026-07-31T12:00:00.000Z"}]}]` |
+| `implants[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del implante en el caso. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].procedureId` | Sí | `string` | Sin restricción adicional declarada | Procedimiento clínico al que se imputa. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].implantDeviceId` | Sí | `string` | Sin restricción adicional declarada | Dispositivo implantado. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].implantRoleConceptId` | Sí | `string` | Sin restricción adicional declarada | Papel del implante en la intervención. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].bodySiteConceptId` | No | `string` | Sin restricción adicional declarada | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].lateralityConceptId` | No | `string` | Sin restricción adicional declarada | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].implantedAt` | Sí | `string` | formato `date-time` | Cuándo se implantó. | `2026-07-31T12:00:00.000Z` |
+| `implants[].explantedAt` | No | `string` | formato `date-time` | Cuándo se explantó, si se explantó. | `2026-07-31T12:00:00.000Z` |
+| `implants[].statusConceptId` | No | `string` | Sin restricción adicional declarada | Estado del implante, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].identifiers` | Sí | `array<object>` | Sin restricción adicional declarada | UDI, lote y serie del implante. | `[{"id":"00000000-0000-4000-8000-000000000001","identifierTypeConceptId":"00000000-0000-4000-8000-000000000001","identifierValue":"valor-ejemplo","issuingSystem":"valor-ejemplo","lotNumber":"valor-ejemplo","serialNumber":"valor-ejemplo","expirationDate":"2026-07-31T12:00:00.000Z"}]` |
+| `implants[].identifiers[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador de la fila. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].identifiers[].identifierTypeConceptId` | Sí | `string` | Sin restricción adicional declarada | Tipo de identificador (UDI-DI, UDI-PI, …). | `00000000-0000-4000-8000-000000000001` |
+| `implants[].identifiers[].identifierValue` | Sí | `string` | Sin restricción adicional declarada | Valor del identificador. | `valor-ejemplo` |
+| `implants[].identifiers[].issuingSystem` | No | `string` | Sin restricción adicional declarada | Sistema emisor, si consta. | `valor-ejemplo` |
+| `implants[].identifiers[].lotNumber` | No | `string` | Sin restricción adicional declarada | Número de lote, si consta. | `valor-ejemplo` |
+| `implants[].identifiers[].serialNumber` | No | `string` | Sin restricción adicional declarada | Número de serie, si consta. | `valor-ejemplo` |
+| `implants[].identifiers[].expirationDate` | No | `string` | formato `date-time` | Vencimiento, si consta. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -849,7 +1358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. PATCH /procedure-cases/{id}
+## 9. PATCH /procedure-cases/{id}
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -990,7 +1499,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /procedure-cases/{id}/anesthesia-events
+## 10. POST /procedure-cases/{id}/anesthesia-events
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1135,7 +1644,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /procedure-cases/{id}/anesthesia-plans
+## 11. POST /procedure-cases/{id}/anesthesia-plans
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1298,7 +1807,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve
+## 12. POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1415,7 +1924,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /procedure-cases/{id}/cancel
+## 13. POST /procedure-cases/{id}/cancel
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1557,7 +2066,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /procedure-cases/{id}/charge-items/post
+## 14. POST /procedure-cases/{id}/charge-items/post
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1714,7 +2223,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /procedure-cases/{id}/confirm
+## 15. POST /procedure-cases/{id}/confirm
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1831,7 +2340,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /procedure-cases/{id}/diagnoses
+## 16. POST /procedure-cases/{id}/diagnoses
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -1980,7 +2489,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /procedure-cases/{id}/findings
+## 17. POST /procedure-cases/{id}/findings
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2124,7 +2633,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /procedure-cases/{id}/implants
+## 18. POST /procedure-cases/{id}/implants
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2292,7 +2801,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /procedure-cases/{id}/medication-uses
+## 19. POST /procedure-cases/{id}/medication-uses
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2427,7 +2936,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /procedure-cases/{id}/operative-reports
+## 20. POST /procedure-cases/{id}/operative-reports
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2600,7 +3109,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /procedure-cases/{id}/operative-reports/{reportId}/sign
+## 21. POST /procedure-cases/{id}/operative-reports/{reportId}/sign
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2734,7 +3243,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /procedure-cases/{id}/operative-steps
+## 22. POST /procedure-cases/{id}/operative-steps
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -2874,7 +3383,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /procedure-cases/{id}/pacu-stays
+## 23. POST /procedure-cases/{id}/pacu-stays
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3006,7 +3515,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /procedure-cases/{id}/preoperative-assessments
+## 24. POST /procedure-cases/{id}/preoperative-assessments
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3176,7 +3685,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /procedure-cases/{id}/preoperative-orders
+## 25. POST /procedure-cases/{id}/preoperative-orders
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3314,7 +3823,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /procedure-cases/{id}/preoperative-orders/verify
+## 26. POST /procedure-cases/{id}/preoperative-orders/verify
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3453,7 +3962,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses
+## 27. POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3616,7 +4125,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /procedure-cases/{id}/specimens
+## 28. POST /procedure-cases/{id}/specimens
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3758,7 +4267,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /procedure-cases/{id}/team-members
+## 29. GET /procedure-cases/{id}/team-members
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -3869,7 +4378,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /procedure-cases/{id}/team-members
+## 30. POST /procedure-cases/{id}/team-members
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
@@ -4004,7 +4513,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /procedure-cases/{id}/team-members/{memberId}/accept
+## 31. POST /procedure-cases/{id}/team-members/{memberId}/accept
 
 - **Módulo:** `procedures_perioperative`
 - **Etiqueta OpenAPI:** `procedure-cases`
