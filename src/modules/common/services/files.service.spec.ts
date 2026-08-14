@@ -327,8 +327,18 @@ describe('FilesService', () => {
       const { service, filesRepo, fileLinksRepo } = build();
       fileLinksRepo.findByOwner.mockResolvedValue([
         { id: 'l-1', fileId: 'f-vivo', ownerId: 'p-1', createdAt: new Date() },
-        { id: 'l-2', fileId: 'f-borrado', ownerId: 'p-1', createdAt: new Date() },
-        { id: 'l-3', fileId: 'f-fantasma', ownerId: 'p-1', createdAt: new Date() },
+        {
+          id: 'l-2',
+          fileId: 'f-borrado',
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        },
+        {
+          id: 'l-3',
+          fileId: 'f-fantasma',
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        },
       ]);
       filesRepo.findById.mockImplementation((_em: unknown, id: string) => {
         if (id === 'f-vivo') {

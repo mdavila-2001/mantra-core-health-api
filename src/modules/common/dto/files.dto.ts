@@ -423,7 +423,10 @@ export class ListFileLinksQueryDto {
  * sólo el vínculo, mostrar diez adjuntos serían once peticiones.
  */
 export class LinkedFileResponseDto {
-  @ApiProperty({ format: 'uuid', description: 'Id del vínculo, no del archivo.' })
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Id del vínculo, no del archivo.',
+  })
   linkId!: string;
 
   @ApiProperty({ format: 'uuid' })
