@@ -1,0 +1,116 @@
+{
+  "code": "ODONTO_ODONTOGRAMA_OMS",
+  "name": "Odontograma y evaluación bucodental (OMS)",
+  "specialty": {
+    "code": "ODONTOLOGIA",
+    "display": "Odontología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Oral health surveys: basic methods — 5th edition (formularios de evaluación bucodental)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241548649",
+    "license": "Publicación OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
+    "sourceVersion": "5.ª edición, 2013",
+    "retrievedAt": "2026-08-14",
+    "note": "Transcripción de los ítems del formulario de evaluación. El estado por pieza dentaria se registra en el campo de texto estructurado `estado_por_pieza` hasta que exista un control de odontograma dedicado."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "dolor_dental",
+      "name": "Dolor dental",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "estado_por_pieza",
+      "name": "Estado por pieza dentaria (notación FDI)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "dientes_cariados",
+      "name": "Dientes cariados (C)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "dientes_perdidos",
+      "name": "Dientes perdidos (P)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "dientes_obturados",
+      "name": "Dientes obturados (O)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "indice_cpod",
+      "name": "Índice CPO-D",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "estado_gingival",
+      "name": "Estado gingival",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "presencia_de_calculo",
+      "name": "Presencia de cálculo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "fluorosis_del_esmalte",
+      "name": "Fluorosis del esmalte",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "erosion_dental",
+      "name": "Erosión dental",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "traumatismo_dental",
+      "name": "Traumatismo dental",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "lesiones_de_mucosa_oral",
+      "name": "Lesiones de la mucosa oral",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "uso_de_protesis",
+      "name": "Uso de prótesis",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "urgencia_de_intervencion",
+      "name": "Urgencia de intervención",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "plan_de_tratamiento",
+      "name": "Plan de tratamiento",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

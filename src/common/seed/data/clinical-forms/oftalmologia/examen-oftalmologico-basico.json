@@ -1,0 +1,116 @@
+{
+  "code": "OFTALMO_EXAMEN_BASE",
+  "name": "Examen oftalmológico — versión general base",
+  "specialty": {
+    "code": "OFTALMOLOGIA",
+    "display": "Oftalmología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, formatos especiales por especialidad",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Estructura del examen oftalmológico básico (agudeza visual, presión intraocular, segmento anterior y posterior)."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "usa_correccion_optica",
+      "name": "Usa corrección óptica",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "agudeza_visual_od",
+      "name": "Agudeza visual sin corrección — ojo derecho",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "agudeza_visual_oi",
+      "name": "Agudeza visual sin corrección — ojo izquierdo",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "agudeza_visual_corregida_od",
+      "name": "Agudeza visual con corrección — ojo derecho",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "agudeza_visual_corregida_oi",
+      "name": "Agudeza visual con corrección — ojo izquierdo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "presion_intraocular_od",
+      "name": "Presión intraocular — ojo derecho (mmHg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "presion_intraocular_oi",
+      "name": "Presión intraocular — ojo izquierdo (mmHg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "reflejos_pupilares",
+      "name": "Reflejos pupilares",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "motilidad_ocular",
+      "name": "Motilidad ocular",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "segmento_anterior_od",
+      "name": "Segmento anterior — ojo derecho",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "segmento_anterior_oi",
+      "name": "Segmento anterior — ojo izquierdo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "fondo_de_ojo_od",
+      "name": "Fondo de ojo — ojo derecho",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "fondo_de_ojo_oi",
+      "name": "Fondo de ojo — ojo izquierdo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

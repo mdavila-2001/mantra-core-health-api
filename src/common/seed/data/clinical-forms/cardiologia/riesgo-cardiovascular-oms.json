@@ -1,0 +1,80 @@
+{
+  "code": "CARDIO_RIESGO_CV_OMS",
+  "name": "Evaluación del riesgo cardiovascular (OMS/OPS)",
+  "specialty": {
+    "code": "CARDIOLOGIA",
+    "display": "Cardiología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Prevención de las enfermedades cardiovasculares: directrices para la evaluación y el manejo del riesgo cardiovascular",
+    "organization": "Organización Panamericana de la Salud / Organización Mundial de la Salud (OPS/OMS)",
+    "url": "https://www.paho.org/sites/default/files/2023-10/directrices-evaluacion-manejo-riesgo-cv-oms.pdf",
+    "license": "CC BY-NC-SA 3.0 IGO (publicación OPS/OMS)",
+    "sourceVersion": "Tablas OMS 2019 · HEARTS en las Américas",
+    "retrievedAt": "2026-08-14",
+    "note": "Captura las variables de entrada de las tablas de predicción. El cálculo del riesgo lo hace la calculadora OPS: https://www.paho.org/en/paho-cardiovascular-risk-calculator"
+  },
+  "fields": [
+    {
+      "code": "edad",
+      "name": "Edad (años)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "sexo",
+      "name": "Sexo",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "fumador_actual",
+      "name": "Fumador actual",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "diabetes",
+      "name": "Diabetes",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "colesterol_total",
+      "name": "Colesterol total (mmol/L)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "indice_masa_corporal",
+      "name": "Índice de masa corporal (kg/m²)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "riesgo_a_10_anios",
+      "name": "Riesgo cardiovascular a 10 años (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "categoria_de_riesgo",
+      "name": "Categoría de riesgo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "recomendaciones",
+      "name": "Recomendaciones",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

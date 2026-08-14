@@ -1,0 +1,128 @@
+{
+  "code": "PSIQ_EVALUACION_BASE",
+  "name": "Evaluación de salud mental — versión general base",
+  "specialty": {
+    "code": "PSIQUIATRIA",
+    "display": "Psiquiatría y salud mental"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, evaluación de salud mental",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Estructura del examen mental y la anamnesis psiquiátrica. Los instrumentos con puntaje (PHQ-9, GAD-7, Beck, MMSE) NO se cargaron: ver los pendientes de licencia en el README."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "enfermedad_actual",
+      "name": "Enfermedad actual",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "antecedentes_psiquiatricos",
+      "name": "Antecedentes psiquiátricos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "tratamientos_previos",
+      "name": "Tratamientos previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "consumo_de_sustancias",
+      "name": "Consumo de sustancias",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "red_de_apoyo",
+      "name": "Red de apoyo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "aspecto_y_actitud",
+      "name": "Aspecto general y actitud",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "conciencia_y_orientacion",
+      "name": "Conciencia y orientación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "atencion_y_memoria",
+      "name": "Atención y memoria",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "lenguaje",
+      "name": "Lenguaje",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "pensamiento_curso_y_contenido",
+      "name": "Pensamiento: curso y contenido",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "sensopercepcion",
+      "name": "Sensopercepción",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "afecto_y_estado_de_animo",
+      "name": "Afecto y estado de ánimo",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "juicio_e_insight",
+      "name": "Juicio de realidad e insight",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "riesgo_suicida",
+      "name": "Riesgo suicida",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "riesgo_de_heteroagresion",
+      "name": "Riesgo de heteroagresión",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "impresion_diagnostica",
+      "name": "Impresión diagnóstica",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "plan_terapeutico",
+      "name": "Plan terapéutico",
+      "dataType": "text",
+      "required": true
+    }
+  ]
+}
