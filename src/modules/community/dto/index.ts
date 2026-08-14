@@ -1,5 +1,6 @@
 export * from './responses.dto';
 export * from './public-profile.dto';
+export * from './own-public-profile.dto';
 export * from './post.dto';
 export * from './comment.dto';
 export * from './reaction.dto';

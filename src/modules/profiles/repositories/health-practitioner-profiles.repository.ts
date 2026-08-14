@@ -30,9 +30,17 @@ export interface CreatePractitionerProfileData {
    */
   practiceStatusConceptId: string;
   /**
+   * Presentación en prosa. La columna existía y ninguna escritura la llenaba.
+   */
+  professionalBio?: string;
+  /**
    * Valor de accepts new patients mantenido por la instancia.
    */
   acceptsNewPatients?: boolean;
+  /**
+   * Si atiende por telemedicina.
+   */
+  telehealthAvailable?: boolean;
   /**
    * Identificador asociado a actor user.
    */
@@ -82,9 +90,11 @@ export class HealthPractitionerProfilesRepository {
         practitionerCode: data.practitionerCode,
         practitionerCategoryConceptId: data.practitionerCategoryConceptId,
         professionalTitle: data.professionalTitle,
+        professionalBio: data.professionalBio,
         verificationStatusConceptId: data.verificationStatusConceptId,
         practiceStatusConceptId: data.practiceStatusConceptId,
         acceptsNewPatients: data.acceptsNewPatients ?? false,
+        telehealthAvailable: data.telehealthAvailable ?? false,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
