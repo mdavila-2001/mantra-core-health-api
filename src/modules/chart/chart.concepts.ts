@@ -153,5 +153,15 @@ export const { seeds: CHART_CONCEPT_SEEDS, ids: CHART } = defineModuleConcepts(
       code: 'TASSIGN_ACTIVE',
       display: 'Template assignment active',
     },
+
+    // --- specialty_chart_templates: ciclo de vida y target de sus campos -------
+    TEMPLATE_ACTIVE: {
+      code: 'CHART_TEMPLATE_ACTIVE',
+      display: 'Chart template active',
+    },
+    TEMPLATE_FIELD_TARGET: {
+      code: 'CHART_TEMPLATE_FIELD_TARGET',
+      display: 'Specialty chart template field target',
+    },
   },
 );
