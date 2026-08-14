@@ -5,6 +5,8 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   getCurrentTenantId,
   touch,
   type AuthenticatedUser,
@@ -48,6 +50,7 @@ import {
   PractitionerProfileSummaryDto,
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
+  ListPractitionersResponseDto,
 } from '../dto';
 import { ProfileOwnershipService } from './profile-ownership.service';
 
@@ -113,9 +116,10 @@ export class ProfilesPractitionersService {
    *
    * ## El sujeto sale de la sesión
    *
-   * No recibe identificador y no hay variante para consultar el de otro: se
-   * resuelve por el vínculo persona-cuenta del actor, igual que el resumen del
-   * paciente. Un profesional no puede pedir el perfil de un colega por esta vía.
+   * No recibe identificador: se resuelve por el vínculo persona-cuenta del
+   * actor, igual que el resumen del paciente. El perfil de un colega se pide
+   * por `getPractitionerSummary` (la ficha de la guía, R2-1) — mismo contrato,
+   * distinto origen del sujeto.
    *
    * ## Las cuentas de actividad
    *
@@ -139,17 +143,175 @@ export class ProfilesPractitionersService {
       );
     }
 
-    const person = await this.personsRepo.findById(em, link.personId);
-    const practitioner = await this.practitionersRepo.findById(
+    return this.buildSummary(em, link.personId, actor.id);
+  }
+
+  /**
+   * La guía de profesionales (carril R2-1): el listado que no existía.
+   *
+   * `profiles` tenía listado de pacientes y ninguna forma de listar
+   * profesionales — la guía telefónica que el cliente pidió no se podía
+   * construir. Devuelve lo que una fila de guía necesita: nombre,
+   * especialidades (para agrupar), disponibilidad y el id con el que se abre
+   * la ficha. Datos profesionales de presentación, nunca PHI.
+   *
+   * ## Paginación y orden
+   *
+   * Keyset por `practitioner_code`, igual que el listado de pacientes: la
+   * pantalla junta las páginas y agrupa por especialidad, así que el orden de
+   * transporte sólo necesita ser estable y sin huecos. El filtro por
+   * especialidad considera únicamente las vigentes: presentar a alguien por
+   * una especialidad que dejó de ejercer es decir algo falso.
+   *
+   * @param options - Filtro por especialidad, cursor y tope de página.
+   * @returns Página de la guía con el cursor de la siguiente.
+   */
+  async listPractitioners(options: {
+    /** Sólo perfiles que ejercen esta especialidad hoy. */
+    specialtyConceptId?: string;
+    /** Cursor opaco devuelto por la página anterior. */
+    cursor?: string;
+    /** Tope de filas de la página. */
+    limit: number;
+  }): Promise<ListPractitionersResponseDto> {
+    const em = this.em.fork();
+
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterCode =
+      typeof after?.practitionerCode === 'string'
+        ? after.practitionerCode
+        : undefined;
+
+    let profileIds: readonly string[] | undefined;
+    if (options.specialtyConceptId !== undefined) {
+      profileIds = await this.specialtiesRepo.findProfileIdsBySpecialty(
+        em,
+        options.specialtyConceptId,
+      );
+      if (profileIds.length === 0) {
+        // Se corta acá: un `$in` vacío se traduce a `in (null)` y devolvería
+        // cero filas igual, pero pagando la consulta y sin decir por qué.
+        return { items: [], count: 0, limit: options.limit, nextCursor: null };
+      }
+    }
+
+    // Una fila de más para saber si hay página siguiente sin pagar un COUNT
+    // sobre toda la tabla en cada página.
+    const rows = await this.practitionersRepo.listPage(
       em,
-      link.personId,
+      { afterCode, profileIds },
+      options.limit + 1,
     );
+    const hasMore = rows.length > options.limit;
+    const page = hasMore ? rows.slice(0, options.limit) : rows;
+
+    const pageIds = page.map((row) => row.profileId);
+    const [persons, specialties] = await Promise.all([
+      this.personsRepo.findByIds(em, pageIds),
+      this.specialtiesRepo.findByPractitioners(em, pageIds),
+    ]);
+
+    const specialtiesByProfile = new Map<
+      string,
+      { specialtyConceptId: string; isPrimary: boolean }[]
+    >();
+    for (const specialty of specialties) {
+      // La guía presenta lo que se ejerce HOY: una especialidad cerrada es
+      // trayectoria (vive en el summary), no un encabezado bajo el que buscar
+      // médico.
+      if (specialty.validTo !== undefined && specialty.validTo !== null) {
+        continue;
+      }
+      const list =
+        specialtiesByProfile.get(specialty.practitionerProfileId) ?? [];
+      list.push({
+        specialtyConceptId: specialty.specialtyConceptId,
+        isPrimary: specialty.isPrimary ?? false,
+      });
+      specialtiesByProfile.set(specialty.practitionerProfileId, list);
+    }
+
+    const items = page.map((row) => {
+      const person = persons.get(row.profileId);
+      return {
+        profileId: row.profileId,
+        practitionerCode: row.practitionerCode,
+        displayName: person?.displayName,
+        professionalTitle: row.professionalTitle,
+        photoFileId: row.photoFileId,
+        verificationStatusConceptId: row.verificationStatusConceptId,
+        acceptsNewPatients: row.acceptsNewPatients ?? false,
+        telehealthAvailable: row.telehealthAvailable ?? false,
+        specialties: specialtiesByProfile.get(row.profileId) ?? [],
+      };
+    });
+
+    const last = page.at(-1);
+    return {
+      items,
+      count: items.length,
+      limit: options.limit,
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({ practitionerCode: last.practitionerCode })
+          : null,
+    };
+  }
+
+  /**
+   * El perfil profesional de un colega — la ficha que abre la guía (R2-1).
+   *
+   * Mismo shape que `me/summary` a propósito: es el mismo contrato, cambia de
+   * dónde sale el sujeto. La guía de profesionales pinta este resultado con la
+   * misma vista con la que el doctor ve el suyo, y dos formas distintas
+   * significarían dos perfiles de doctor en el producto.
+   *
+   * Son datos profesionales de presentación —trayectoria, credenciales,
+   * idiomas—, no PHI: lo que una guía médica publica de cada profesional. La
+   * actividad se cuenta contra la cuenta del titular del perfil consultado
+   * (no la de quien mira), y si el perfil no tiene cuenta vinculada queda en
+   * cero — cero registros ES la actividad de un perfil sin cuenta.
+   *
+   * @param profileId - El profesional consultado.
+   * @returns Su perfil, con el mismo contrato que el propio.
+   */
+  async getPractitionerSummary(
+    profileId: string,
+  ): Promise<PractitionerProfileSummaryDto> {
+    const em = this.em.fork();
+    // La cuenta del TITULAR, para contar su actividad. Puede no existir: un
+    // perfil dado de alta por la organización sin autoregistro no tiene
+    // vínculo, y eso no lo saca de la guía.
+    const link = await this.accountLinksRepo.findActiveByPerson(em, profileId);
+    return this.buildSummary(em, profileId, link?.userId);
+  }
+
+  /**
+   * Arma el summary de un perfil ya identificado.
+   *
+   * Compartido entre la lectura propia y la ajena: el contrato es el mismo y
+   * lo único que cambia es cómo se resolvió `personId` (sesión o parámetro).
+   *
+   * @param em - Contexto de persistencia.
+   * @param personId - El titular del perfil (= profileId del profesional).
+   * @param subjectUserId - La cuenta cuya actividad se cuenta, si hay.
+   * @returns El perfil completo.
+   */
+  private async buildSummary(
+    em: EntityManager,
+    personId: string,
+    subjectUserId: string | undefined,
+  ): Promise<PractitionerProfileSummaryDto> {
+    const person = await this.personsRepo.findById(em, personId);
+    const practitioner = await this.practitionersRepo.findById(em, personId);
     if (!person || !practitioner) {
       // 404 y no 403: la cuenta existe y la sesión es válida, lo que no hay es
       // un perfil profesional a su nombre. Decirlo como «prohibido» mandaría a
       // pedir permisos a quien lo que necesita es que lo den de alta.
       throw new ResourceNotFoundException('Perfil profesional no encontrado', {
-        personId: link.personId,
+        personId,
       });
     }
 
@@ -160,7 +322,14 @@ export class ProfilesPractitionersService {
         this.credentialsRepo.findByPractitioner(em, profileId),
         this.authorizationsRepo.findByPractitioner(em, profileId),
         this.languagesRepo.findByPractitioner(em, profileId),
-        this.countActivity(em, actor.id),
+        subjectUserId === undefined
+          ? Promise.resolve({
+              encounters: 0,
+              medicationRequests: 0,
+              clinicalNotes: 0,
+              documents: 0,
+            })
+          : this.countActivity(em, subjectUserId),
       ]);
 
     return {

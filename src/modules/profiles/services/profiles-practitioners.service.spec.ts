@@ -43,6 +43,7 @@ function build() {
     findById: mockFn(),
     findByCode: mockFn(),
     create: mockFn(),
+    listPage: mockFn().mockResolvedValue([]),
   };
   const authorizationsRepo = {
     create: mockFn(),
@@ -60,6 +61,8 @@ function build() {
     create: mockFn(),
     findActive: mockFn(),
     findAllByPractitioner: mockFn().mockResolvedValue([]),
+    findByPractitioners: mockFn().mockResolvedValue([]),
+    findProfileIdsBySpecialty: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
   };
   const languagesRepo = {
@@ -690,6 +693,149 @@ describe('ProfilesPractitionersService', () => {
         d.service.updateOwnPractitionerProfile({ professionalTitle: 'X' }, {
           id: 'u-1',
         } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+  describe('listPractitioners (guía de profesionales, R2-1)', () => {
+    const fila = {
+      profileId: 'per-1',
+      practitionerCode: 'MED-1',
+      professionalTitle: 'Cardióloga',
+      verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+      acceptsNewPatients: true,
+      telehealthAvailable: false,
+    };
+
+    it('arma la fila de la guía con nombre y especialidades vigentes', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([['per-1', { id: 'per-1', displayName: 'Dra. Lucía Salas' }]]),
+      );
+      d.specialtiesRepo.findByPractitioners.mockResolvedValue([
+        {
+          practitionerProfileId: 'per-1',
+          specialtyConceptId: 'con-cardio',
+          isPrimary: true,
+        },
+        // Cerrada: es trayectoria del perfil, no un encabezado de la guía.
+        {
+          practitionerProfileId: 'per-1',
+          specialtyConceptId: 'con-pediatria',
+          isPrimary: false,
+          validTo: new Date('2020-01-01'),
+        },
+      ]);
+
+      const pagina = await d.service.listPractitioners({ limit: 50 });
+
+      expect(pagina.items).toHaveLength(1);
+      expect(pagina.items[0]).toMatchObject({
+        profileId: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+        specialties: [{ specialtyConceptId: 'con-cardio', isPrimary: true }],
+      });
+      expect(pagina.nextCursor).toBeNull();
+    });
+
+    /** La fila de más existe sólo para saber si hay página siguiente. */
+    it('recorta la fila extra y devuelve cursor de continuación', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([
+        fila,
+        { ...fila, profileId: 'per-2', practitionerCode: 'MED-2' },
+      ]);
+
+      const pagina = await d.service.listPractitioners({ limit: 1 });
+
+      expect(pagina.items).toHaveLength(1);
+      expect(pagina.nextCursor).not.toBeNull();
+      // El repo recibió el tope + 1: así se detecta la página siguiente sin
+      // pagar un COUNT por página.
+      expect(d.practitionersRepo.listPage.mock.calls[0][2]).toBe(2);
+    });
+
+    /**
+     * Filtrar por una especialidad sin profesionales vigentes responde vacío
+     * SIN consultar el listado: un `$in` vacío sería `in (null)`.
+     */
+    it('con la especialidad sin profesionales responde vacío sin listar', async () => {
+      const d = build();
+      d.specialtiesRepo.findProfileIdsBySpecialty.mockResolvedValue([]);
+
+      const pagina = await d.service.listPractitioners({
+        specialtyConceptId: 'con-cardio',
+        limit: 50,
+      });
+
+      expect(pagina).toEqual({ items: [], count: 0, limit: 50, nextCursor: null });
+      expect(d.practitionersRepo.listPage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPractitionerSummary (ficha de la guía, R2-1)', () => {
+    it('devuelve el mismo contrato que el propio, con la actividad del titular', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'u-titular',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+        practiceStatusConceptId: PROF.PRACTICE_ACTIVE,
+        createdAt: new Date(),
+      });
+      d.em.count.mockResolvedValue(3);
+
+      const perfil = await d.service.getPractitionerSummary('per-1');
+
+      expect(perfil.profileId).toBe('per-1');
+      // La actividad es la del TITULAR del perfil consultado, no la de quien
+      // mira: los cuatro conteos filtran por su cuenta.
+      const filtros = d.em.count.mock.calls.map((c: any[]) => c[1]);
+      for (const filtro of filtros) {
+        expect(filtro).toEqual({ createdByUserId: 'u-titular' });
+      }
+    });
+
+    /** Un perfil sin cuenta vinculada existe igual; su actividad es cero. */
+    it('sin cuenta vinculada la actividad queda en cero, no en error', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue(null);
+      d.personsRepo.findById.mockResolvedValue({ id: 'per-1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+
+      const perfil = await d.service.getPractitionerSummary('per-1');
+
+      expect(perfil.activity).toEqual({
+        encounters: 0,
+        medicationRequests: 0,
+        clinicalNotes: 0,
+        documents: 0,
+      });
+      expect(d.em.count).not.toHaveBeenCalled();
+    });
+
+    it('un perfil inexistente responde no encontrado', async () => {
+      const d = build();
+      d.personsRepo.findById.mockResolvedValue(null);
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.getPractitionerSummary('per-x'),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

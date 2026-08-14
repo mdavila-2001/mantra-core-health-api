@@ -73,6 +73,39 @@ export class HealthPractitionerProfilesRepository {
   }
 
   /**
+   * Página de profesionales para la guía (carril R2-1).
+   *
+   * Keyset por `practitioner_code` —el mismo patrón que el listado de
+   * pacientes—: es único, estable y no exige unir `persons` para paginar. El
+   * orden humano (por nombre, agrupado por especialidad) lo arma la pantalla,
+   * que de todos modos junta las páginas para dibujar la guía entera.
+   *
+   * @param em - Contexto de persistencia.
+   * @param filters - Continuación y filtro opcional por perfiles.
+   * @param limit - Filas a traer (el servicio pide una de más).
+   * @returns La página, en orden estable de código.
+   */
+  listPage(
+    em: EntityManager,
+    filters: { afterCode?: string; profileIds?: readonly string[] },
+    limit: number,
+  ): Promise<HealthPractitionerProfiles[]> {
+    const where: Record<string, unknown> = {};
+    if (filters.afterCode !== undefined) {
+      where.practitionerCode = { $gt: filters.afterCode };
+    }
+    if (filters.profileIds !== undefined) {
+      // `$in` vacío se corta antes en el servicio: MikroORM lo traduce a
+      // `in (null)` y la página saldría vacía sin decir por qué.
+      where.profileId = { $in: [...filters.profileIds] };
+    }
+    return em.find(HealthPractitionerProfiles, where, {
+      orderBy: { practitionerCode: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
