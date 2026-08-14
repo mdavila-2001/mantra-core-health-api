@@ -397,6 +397,57 @@ export class FileLinkResponseDto {
 }
 
 /** Resultado del borrado lógico de un archivo. */
+/**
+ * Filtros de `GET /common/files/links`: de qué recurso se listan los adjuntos.
+ *
+ * Los dos son obligatorios y por diseño: `file_links` es una tabla de vínculos
+ * de todo el sistema, y una lectura sin acotar devolvería los adjuntos de
+ * cualquier paciente al primero que pregunte.
+ */
+export class ListFileLinksQueryDto {
+  @ApiProperty({ enum: OwnerType })
+  @IsEnum(OwnerType)
+  ownerType!: OwnerType;
+
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  ownerId!: string;
+}
+
+/**
+ * Un archivo adjunto a un recurso: el vínculo y el archivo, resueltos juntos.
+ *
+ * Se devuelven en la misma fila —y no el vínculo con un `fileId` que la
+ * pantalla tenga que resolver después— porque la lista de adjuntos de una
+ * ficha necesita el nombre, la categoría y la sensibilidad para pintarse. Con
+ * sólo el vínculo, mostrar diez adjuntos serían once peticiones.
+ */
+export class LinkedFileResponseDto {
+  @ApiProperty({ format: 'uuid', description: 'Id del vínculo, no del archivo.' })
+  linkId!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  ownerId!: string;
+
+  @ApiProperty({ enum: OwnerType })
+  ownerType!: OwnerType;
+
+  @ApiProperty({ description: 'Cuándo se adjuntó.' })
+  linkedAt!: Date;
+
+  @ApiProperty({ type: FileResponseDto })
+  file!: FileResponseDto;
+}
+
+/** Los adjuntos de un recurso. */
+export class LinkedFilePageDto {
+  @ApiProperty({ type: [LinkedFileResponseDto] })
+  items!: LinkedFileResponseDto[];
+
+  @ApiProperty({ description: 'Cuántos vinieron en esta página.' })
+  count!: number;
+}
+
 export class DeleteFileResponseDto {
   /**
    * Identificador único de la instancia.

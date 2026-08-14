@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Query,
   Post,
   Res,
   UploadedFile,
@@ -37,6 +38,8 @@ import {
   FileLinkResponseDto,
   FileResponseDto,
   FileVersionResponseDto,
+  LinkedFilePageDto,
+  ListFileLinksQueryDto,
   UploadFileDto,
 } from '../dto';
 
@@ -90,6 +93,24 @@ export class CommonFilesController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<FileResponseDto> {
     return this.uploadService.upload(file, dto, user);
+  }
+
+  /**
+   * UC-02-08 (lectura): los archivos adjuntos a un recurso.
+   *
+   * **Va declarado antes que `:id/content` a propósito.** Express resuelve por
+   * orden de declaración: puesto después, `/common/files/links` entraría por
+   * `:id/content` con `id = "links"` y moriría en el `ParseUUIDPipe` con un 400
+   * que no explica nada.
+   */
+  @Get('links')
+  @ApiOperation({
+    summary: 'Listar los archivos adjuntos a un recurso (UC-02-08)',
+  })
+  listLinks(
+    @Query() query: ListFileLinksQueryDto,
+  ): Promise<LinkedFilePageDto> {
+    return this.filesService.listLinkedFiles(query);
   }
 
   /** Devuelve el contenido de la versión vigente de un archivo. */
