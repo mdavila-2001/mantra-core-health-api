@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `common`
 
-Referencia exhaustiva de 13 operación(es) del módulo `common`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 14 operación(es) del módulo `common`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`
 - **Controladores:** `CommonAddressesController`, `CommonContactPointsController`, `CommonFilesController`, `CommonIdentifiersController`, `InternalFilesController`
@@ -21,9 +21,10 @@ Referencia exhaustiva de 13 operación(es) del módulo `common`, derivada del co
 8. [POST /common/files/{id}/links](#8-post-common-files-id-links) — Vincular un archivo a un propietario (UC-02-08)
 9. [POST /common/files/{id}/versions](#9-post-common-files-id-versions) — Añadir una versión a un archivo (UC-02-06)
 10. [POST /common/files/{id}/versions/{vid}/derivatives](#10-post-common-files-id-versions-vid-derivatives) — Generar un derivado de una versión (UC-02-07)
-11. [POST /common/files/upload](#11-post-common-files-upload) — Subir el contenido de un archivo (multipart)
-12. [POST /common/identifiers](#12-post-common-identifiers) — Registrar un identificador oficial (UC-02-01)
-13. [POST /internal/files/versions/{vid}/scan-result](#13-post-internal-files-versions-vid-scan-result) — Registrar resultado de escaneo antimalware (UC-02-09)
+11. [GET /common/files/links](#11-get-common-files-links) — Listar los archivos adjuntos a un recurso (UC-02-08)
+12. [POST /common/files/upload](#12-post-common-files-upload) — Subir el contenido de un archivo (multipart)
+13. [POST /common/identifiers](#13-post-common-identifiers) — Registrar un identificador oficial (UC-02-01)
+14. [POST /internal/files/versions/{vid}/scan-result](#14-post-internal-files-versions-vid-scan-result) — Registrar resultado de escaneo antimalware (UC-02-09)
 
 ---
 
@@ -1366,7 +1367,142 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /common/files/upload
+## 11. GET /common/files/links
+
+- **Módulo:** `common`
+- **Etiqueta OpenAPI:** `common/files`
+- **Nombre:** Listar los archivos adjuntos a un recurso (UC-02-08)
+- **Operation ID:** `CommonFilesController_listLinks`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommonFilesController.listLinks](../../src/modules/common/controllers/common-files.controller.ts)
+
+### Descripción de negocio
+
+Listar los archivos adjuntos a un recurso (UC-02-08). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-02-08 (lectura): los archivos adjuntos a un recurso. **Va declarado antes que `:id/content` a propósito.** Express resuelve por orden de declaración: puesto después, `/common/files/links` entraría por `:id/content` con `id = "links"` y moriría en el `ParseUUIDPipe` con un 400 que no explica nada.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /common/files/links` en `CommonFilesController_listLinks`. El controlador delega en `FilesService.listLinkedFiles`. No recibe body. El tipo de retorno estático es `Promise<LinkedFilePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `ownerType` | query | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Sin descripción específica en OpenAPI. | `USER` |
+| `ownerId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /common/files/links?ownerType=USER&ownerId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /common/files/links?ownerType=USER&ownerId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinkedFilePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "linkId": "00000000-0000-4000-8000-000000000001",
+      "ownerId": "00000000-0000-4000-8000-000000000001",
+      "ownerType": "USER",
+      "linkedAt": "2026-07-31T12:00:00.000Z",
+      "file": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "currentVersionId": "00000000-0000-4000-8000-000000000001",
+        "originalName": "Nombre de ejemplo",
+        "category": "DOCUMENT",
+        "sensitivity": "NORMAL",
+        "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
+        "createdAt": "2026-07-31T12:00:00.000Z"
+      }
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LinkedFileResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"linkId":"00000000-0000-4000-8000-000000000001","ownerId":"00000000-0000-4000-8000-000000000001","ownerType":"USER","linkedAt":"2026-07-31T12:00:00.000Z","file":{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}}]` |
+| `items[].linkId` | Sí | `string` | formato `uuid` | Id del vínculo, no del archivo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].ownerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].ownerType` | Sí | `string` | valores: `USER`, `PATIENT`, `TENANT` | Sin descripción específica en el contrato OpenAPI. | `USER` |
+| `items[].linkedAt` | Sí | `string` | formato `date-time` | Cuándo se adjuntó. | `2026-07-31T12:00:00.000Z` |
+| `items[].file` | Sí | `FileResponseDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","originalName":"Nombre de ejemplo","category":"DOCUMENT","sensitivity":"NORMAL","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}` |
+| `items[].file.id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].file.currentVersionId` | No | `string` | formato `uuid` | Identificador asociado a current version. | `00000000-0000-4000-8000-000000000001` |
+| `items[].file.originalName` | No | `string` | Sin restricción adicional declarada | Valor de original name mantenido por la instancia. | `Nombre de ejemplo` |
+| `items[].file.category` | Sí | `string` | valores: `DOCUMENT`, `IMAGE` | Valor de category mantenido por la instancia. | `DOCUMENT` |
+| `items[].file.sensitivity` | Sí | `string` | valores: `NORMAL`, `PHI` | Valor de sensitivity mantenido por la instancia. | `NORMAL` |
+| `items[].file.lifecycleStatusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].file.createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos vinieron en esta página. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/common/files/links"
+}
+```
+
+---
+
+## 12. POST /common/files/upload
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `common/files`
@@ -1505,7 +1641,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /common/identifiers
+## 13. POST /common/identifiers
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `common/identifiers`
@@ -1644,7 +1780,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /internal/files/versions/{vid}/scan-result
+## 14. POST /internal/files/versions/{vid}/scan-result
 
 - **Módulo:** `common`
 - **Etiqueta OpenAPI:** `internal/files`

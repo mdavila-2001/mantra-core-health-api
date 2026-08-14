@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `chart`
 
-Referencia exhaustiva de 13 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 16 operación(es) del módulo `chart`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates`
 - **Controladores:** `ChartCarePlansController`, `ChartDocumentsController`, `ChartNotesController`, `ChartReadController`, `ChartTemplatesController`
@@ -23,7 +23,10 @@ Referencia exhaustiva de 13 operación(es) del módulo `chart`, derivada del con
 10. [POST /charts/notes/versions/{versionId}/release](#10-post-charts-notes-versions-versionid-release) — Liberar una versión al paciente
 11. [POST /charts/notes/versions/{versionId}/withhold](#11-post-charts-notes-versions-versionid-withhold) — Retener una versión del paciente (motivo legal)
 12. [GET /charts/patients/{patientProfileId}/chart](#12-get-charts-patients-patientprofileid-chart) — UC-40-14: expediente del paciente (notas, planes de cuidados y documentos)
-13. [POST /charts/templates/{templateId}/assignments](#13-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
+13. [GET /charts/templates](#13-get-charts-templates) — Listar las plantillas de chart por especialidad
+14. [POST /charts/templates](#14-post-charts-templates) — Crear una plantilla de chart con su esquema de campos, por especialidad
+15. [GET /charts/templates/{id}](#15-get-charts-templates-id) — Leer el esquema de una plantilla de chart
+16. [POST /charts/templates/{templateId}/assignments](#16-post-charts-templates-templateid-assignments) — Asignar una plantilla de chart por especialidad
 
 ---
 
@@ -1793,7 +1796,456 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /charts/templates/{templateId}/assignments
+## 13. GET /charts/templates
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `chart-templates`
+- **Nombre:** Listar las plantillas de chart por especialidad
+- **Operation ID:** `ChartTemplatesController_listTemplates`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartTemplatesController.listTemplates](../../src/modules/chart/controllers/chart-templates.controller.ts)
+
+### Descripción de negocio
+
+Listar las plantillas de chart por especialidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Carril 2 · punto 1: listar las plantillas por especialidad.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /charts/templates` en `ChartTemplatesController_listTemplates`. El controlador delega en `ChartTemplatesService.listTemplates`. No recibe body. El tipo de retorno estático es `Promise<ChartTemplateResponseDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `specialtyId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /charts/templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /charts/templates?specialtyId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+    "tenantId": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo",
+    "version": 1,
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "fields": [
+      {
+        "assignmentId": "00000000-0000-4000-8000-000000000001",
+        "fieldId": "00000000-0000-4000-8000-000000000001",
+        "code": "CODIGO_EJEMPLO",
+        "name": "Nombre de ejemplo",
+        "dataType": {},
+        "valueSetId": "00000000-0000-4000-8000-000000000001",
+        "required": true,
+        "ordinal": 1
+      }
+    ]
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/templates"
+}
+```
+
+---
+
+## 14. POST /charts/templates
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `chart-templates`
+- **Nombre:** Crear una plantilla de chart con su esquema de campos, por especialidad
+- **Operation ID:** `ChartTemplatesController_createTemplate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartTemplatesController.createTemplate](../../src/modules/chart/controllers/chart-templates.controller.ts)
+
+### Descripción de negocio
+
+Crear una plantilla de chart con su esquema de campos, por especialidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Carril 2 · punto 1: crear una plantilla con su esquema de campos.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /charts/templates` en `ChartTemplatesController_createTemplate`. El controlador delega en `ChartTemplatesService.createTemplate`. Valida el body como `CreateChartTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<ChartTemplateResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateChartTemplateDto`; los campos opcionales se omiten.
+
+```http
+POST /charts/templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "fields": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "dataType": "string"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `specialtyConceptId` | Sí | `string` | formato `uuid` | Especialidad de la plantilla (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant dueño de la plantilla | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Código único de la plantilla | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible de la plantilla | `Nombre de ejemplo` |
+| `fields` | Sí | `array<TemplateFieldInputDto>` | Sin restricción adicional declarada | Campos del esquema, en el orden en que se presentan | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":"string","valueSetId":"00000000-0000-4000-8000-000000000001","required":false,"ordinal":1}]` |
+| `fields[].code` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Código único del campo | `CODIGO_EJEMPLO` |
+| `fields[].name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible del campo | `Nombre de ejemplo` |
+| `fields[].dataType` | Sí | `string` | valores: `string`, `text`, `integer`, `decimal`, `boolean`, `date`, `datetime`, `time`, `uuid`, `json`, `binary`, `reference`, `code` | Tipo de dato técnico | `string` |
+| `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos (campos de selección) | `00000000-0000-4000-8000-000000000001` |
+| `fields[].required` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /charts/templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "fields": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "dataType": "string",
+      "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "required": false,
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "version": 1,
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "fields": [
+    {
+      "assignmentId": "00000000-0000-4000-8000-000000000001",
+      "fieldId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "dataType": {},
+      "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "required": true,
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la plantilla. | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptId` | Sí | `string` | formato `uuid` | Especialidad a la que pertenece la plantilla. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant dueño de la plantilla, si no es global. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código único de la plantilla. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la plantilla. | `Nombre de ejemplo` |
+| `version` | Sí | `number` | Sin restricción adicional declarada | Versión de la plantilla. | `1` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la plantilla. | `00000000-0000-4000-8000-000000000001` |
+| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1}]` |
+| `fields[].assignmentId` | Sí | `string` | formato `uuid` | Identificador de la asignación (`forms.field_assignments.id`). | `00000000-0000-4000-8000-000000000001` |
+| `fields[].fieldId` | Sí | `string` | formato `uuid` | Identificador del campo (`forms.dynamic_field_definitions.id`). | `00000000-0000-4000-8000-000000000001` |
+| `fields[].code` | Sí | `string` | Sin restricción adicional declarada | Código del campo. | `CODIGO_EJEMPLO` |
+| `fields[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible del campo. | `Nombre de ejemplo` |
+| `fields[].dataType` | Sí | `object` | Sin restricción adicional declarada | Tipo de dato técnico del campo. | `{}` |
+| `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
+| `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
+| `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/templates"
+}
+```
+
+---
+
+## 15. GET /charts/templates/{id}
+
+- **Módulo:** `chart`
+- **Etiqueta OpenAPI:** `chart-templates`
+- **Nombre:** Leer el esquema de una plantilla de chart
+- **Operation ID:** `ChartTemplatesController_getTemplate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ChartTemplatesController.getTemplate](../../src/modules/chart/controllers/chart-templates.controller.ts)
+
+### Descripción de negocio
+
+Leer el esquema de una plantilla de chart. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Carril 2 · punto 1: leer el esquema completo de una plantilla.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /charts/templates/{id}` en `ChartTemplatesController_getTemplate`. El controlador delega en `ChartTemplatesService.getTemplate`. No recibe body. El tipo de retorno estático es `Promise<ChartTemplateResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /charts/templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /charts/templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "version": 1,
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "fields": [
+    {
+      "assignmentId": "00000000-0000-4000-8000-000000000001",
+      "fieldId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "dataType": {},
+      "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "required": true,
+      "ordinal": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la plantilla. | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptId` | Sí | `string` | formato `uuid` | Especialidad a la que pertenece la plantilla. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Tenant dueño de la plantilla, si no es global. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código único de la plantilla. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la plantilla. | `Nombre de ejemplo` |
+| `version` | Sí | `number` | Sin restricción adicional declarada | Versión de la plantilla. | `1` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la plantilla. | `00000000-0000-4000-8000-000000000001` |
+| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1}]` |
+| `fields[].assignmentId` | Sí | `string` | formato `uuid` | Identificador de la asignación (`forms.field_assignments.id`). | `00000000-0000-4000-8000-000000000001` |
+| `fields[].fieldId` | Sí | `string` | formato `uuid` | Identificador del campo (`forms.dynamic_field_definitions.id`). | `00000000-0000-4000-8000-000000000001` |
+| `fields[].code` | Sí | `string` | Sin restricción adicional declarada | Código del campo. | `CODIGO_EJEMPLO` |
+| `fields[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible del campo. | `Nombre de ejemplo` |
+| `fields[].dataType` | Sí | `object` | Sin restricción adicional declarada | Tipo de dato técnico del campo. | `{}` |
+| `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
+| `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
+| `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/charts/templates/{id}"
+}
+```
+
+---
+
+## 16. POST /charts/templates/{templateId}/assignments
 
 - **Módulo:** `chart`
 - **Etiqueta OpenAPI:** `chart-templates`
