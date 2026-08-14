@@ -27,8 +27,19 @@
  * Requiere una API levantada con el administrador de arranque
  * (`BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`).
  *
+ * Además del padrón administrado por el admin, siembra **una práctica** (sin
+ * ella `GET /practices` responde vacío y el selector de contabilidad no tiene
+ * qué ofrecer) y **una cuenta de médico con login real**
+ * (`DOCTOR_EMAIL` / `DOCTOR_PASSWORD`, por defecto `doctora.demo@redesa.test`
+ * / `D3mo-passw0rd!`): es el primer profesional del padrón, así que entra a
+ * la aplicación y ve su propio consultorio con agenda, pacientes e historias
+ * ya cargados — no una pantalla vacía a la espera de un segundo script.
+ *
  * Es acumulativo, no idempotente: cada corrida añade una tanda nueva con sufijo
- * único, así que repetirlo aumenta el volumen en vez de chocar por unicidad.
+ * único, así que repetirlo aumenta el volumen en vez de chocar por unicidad. La
+ * cuenta de prueba es la excepción — un correo sólo puede existir una vez, así
+ * que una segunda corrida la reutiliza (login en vez de alta) y le agrega un
+ * consultorio y una tanda de pacientes y citas más.
  * Para volver a cero, `yarn smoke` trunca la base y vuelve a sembrar el admin.
  */
 import { writeFileSync } from 'node:fs';
@@ -55,6 +66,18 @@ const BASE = arg(
 );
 const EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'admin@redesa.test';
 const PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
+/**
+ * Credenciales fijas del primer médico sembrado, para que el equipo tenga una
+ * cuenta con la que iniciar sesión de verdad y no sólo un perfil administrado
+ * por el admin. Antes esto vivía en `cuenta-doctor-demo.mjs`, un script
+ * aparte que había que correr después: con eso, una corrida sola dejaba una
+ * doctora sin agenda, sin pacientes propios y sin citas, porque el resto de
+ * la siembra corría por otro lado. Con las mismas variables de entorno que
+ * usaba ese script, una migración de credenciales no rompe nada que ya
+ * estuviera anotado en algún lado.
+ */
+const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? 'doctora.demo@redesa.test';
+const DOCTOR_PASSWORD = process.env.DOCTOR_PASSWORD ?? 'D3mo-passw0rd!';
 const DOCTORS = Number(arg('doctors', 8));
 const PATIENTS = Number(arg('patients', 24));
 const WEEKS = Number(arg('weeks', 3));
@@ -166,6 +189,73 @@ const MOTIVOS = [
 ];
 
 const CANALES = ['PORTAL', 'DESK', 'PHONE'];
+
+/* ============================================================================
+    Trayectoria profesional de demostración.
+
+    Existe porque el perfil profesional (`GET /profiles/practitioners/me/summary`)
+    muestra biografía, especialidades, formación, matrículas e idiomas — y la
+    siembra sólo cargaba código, título y una credencial sin institución ni
+    fechas. El resultado era un perfil correcto y vacío, en el que no se podía
+    distinguir «esta pantalla no trae nada» de «esta persona no cargó nada».
+
+    Los textos son ficticios y las instituciones son reales sólo como nombre:
+    ningún dato de acá corresponde a una persona existente.
+    ========================================================================== */
+
+/** Biografías, indexadas por la misma posición que `NOMBRES_MEDICOS`. */
+const BIOGRAFIAS = [
+  'Médica de familia. Trabajo sobre todo en control de enfermedades crónicas y en que la gente entienda su propio tratamiento.',
+  'Cardiólogo clínico. Me dedico a hipertensión, insuficiencia cardíaca y rehabilitación después de un evento coronario.',
+  'Pediatra. Control del niño sano, seguimiento del desarrollo y acompañamiento a familias que consultan por primera vez.',
+  'Traumatólogo. Lesiones deportivas y de trabajo, con foco en recuperar función antes que en operar.',
+  'Ginecóloga y obstetra. Control prenatal, salud reproductiva y acompañamiento en el parto.',
+  'Dermatólogo. Dermatología clínica general y detección temprana de lesiones de piel.',
+  'Endocrinóloga. Diabetes, tiroides y trastornos metabólicos; trabajo en equipo con nutrición.',
+  'Neurólogo. Cefaleas, epilepsia y deterioro cognitivo, con énfasis en el diagnóstico bien hecho.',
+  'Oftalmóloga. Salud visual general, glaucoma y retinopatía diabética.',
+  'Psiquiatra. Trastornos del ánimo y de ansiedad, en articulación con atención primaria.',
+  'Nutricionista clínica. Acompaño planes alimentarios en diabetes, embarazo e infancia.',
+  'Urólogo. Patología prostática, litiasis y salud urinaria del adulto.',
+];
+
+/** Instituciones formadoras. Nombre de fantasía sobre universidades reales. */
+const INSTITUCIONES = [
+  'Universidad Mayor de San Andrés',
+  'Universidad Mayor de San Simón',
+  'Universidad Autónoma Gabriel René Moreno',
+  'Universidad Católica Boliviana',
+  'Universidad Privada del Valle',
+];
+
+/** Sedes. Distinguen dos consultorios que de otro modo se llamarían igual. */
+const SEDES = [
+  'Sede Central Sopocachi',
+  'Sucursal Miraflores',
+  'Sucursal Calacoto',
+  'Sucursal Achumani',
+];
+
+/** Autoridades regulatorias que emiten matrícula. */
+const AUTORIDADES = [
+  'Colegio Médico de La Paz',
+  'Colegio Médico de Cochabamba',
+  'Colegio Médico de Santa Cruz',
+];
+
+/**
+ * Posgrados: la segunda especialidad de quien tiene dos.
+ *
+ * No todos la reciben — la mitad, por índice par — porque un padrón donde
+ * absolutamente todos tienen exactamente dos especialidades no ejercita el caso
+ * de quien tiene una sola, que es el corriente.
+ */
+const POSGRADOS = [
+  ['Medicina interna', 'MEDICINA_INTERNA'],
+  ['Medicina crítica', 'MEDICINA_CRITICA'],
+  ['Salud pública', 'SALUD_PUBLICA'],
+  ['Ecografía clínica', 'ECOGRAFIA'],
+];
 
 // --- transporte --------------------------------------------------------------
 
@@ -453,6 +543,38 @@ const conceptIds = (conceptPage.body?.items ?? []).map(
 );
 const conceptId = need(conceptIds[0], 'al menos un concepto del catálogo');
 
+// --- práctica -------------------------------------------------------------------
+// Sin esto, `GET /practices` responde `{items: []}` y la pantalla de
+// contabilidad no tiene qué ofrecer en su selector: no es que falte plan de
+// cuentas, es que no hay ninguna práctica de la que pedirlo.
+
+step('· Práctica y sus sedes…');
+
+const practice = await call(
+  'Práctica',
+  'Alta de la práctica de la organización sembrada',
+  'POST',
+  '/practices',
+  {
+    body: {
+      tenantId,
+      code: `PRACTICA-${U}`,
+      name: `Clínica Redesa — corrida ${U}`,
+    },
+    expect: [200, 201],
+  },
+);
+const practiceId = practice.ok ? practice.body.id : null;
+
+if (practiceId) {
+  for (const [siteIndex, sede] of SEDES.entries()) {
+    await call('Práctica', `Sede — ${sede}`, 'POST', `/practices/${practiceId}/sites`, {
+      body: { code: `SEDE-${U}-${siteIndex}`, name: sede },
+      expect: [200, 201],
+    });
+  }
+}
+
 // --- profesionales -------------------------------------------------------------
 
 step('· Profesionales y sus agendas…');
@@ -462,44 +584,144 @@ for (let index = 0; index < DOCTORS; index += 1) {
     NOMBRES_MEDICOS[index % NOMBRES_MEDICOS.length];
   const suffix = `${U}-${index}`;
 
-  const created = await call(
-    'Profesionales',
-    `Alta de Dr(a). ${nombre} ${apellido} — ${titulo}`,
-    'POST',
-    '/profiles/practitioners',
-    {
-      body: {
-        practitionerCode: `MED-${suffix}`,
-        displayName: `Dr(a). ${nombre} ${apellido}`,
-        licenseNumber: `LIC-${suffix}`,
-        credentialNumber: `CRED-${suffix}`,
-        professionalTitle: titulo,
-      },
-      expect: [200, 201],
-    },
-  );
-  if (!created.ok) continue;
+  const sede = SEDES[index % SEDES.length];
+  const institucion = INSTITUCIONES[index % INSTITUCIONES.length];
+  const autoridad = AUTORIDADES[index % AUTORIDADES.length];
 
-  const profileId = created.body.profileId;
-  const credentialId = created.body.credentialId;
+  // El primer médico sembrado (índice 0) es la cuenta de prueba: se da de
+  // alta con login real, no con el alta administrativa sin contraseña que
+  // reciben los demás. Antes esa alta vivía en un script aparte
+  // (`cuenta-doctor-demo.mjs`) que había que correr después de éste, y por
+  // eso la doctora de prueba quedaba sin la agenda, los pacientes y las citas
+  // que esta misma corrida siembra: eran dos corridas con dos plantillas de
+  // datos que no se tocaban entre sí. Con esto, `yarn seed:dev` sola deja una
+  // cuenta con la que entrar por la pantalla y ver un consultorio lleno.
+  let profileId;
+  let credentialId;
+
+  if (index === 0) {
+    const alta = await call(
+      'Profesionales',
+      `Alta con login de Dr(a). ${nombre} ${apellido} — cuenta de prueba`,
+      'POST',
+      '/iam/users/assisted-practitioner-registration',
+      {
+        body: {
+          email: DOCTOR_EMAIL,
+          displayName: `Dr(a). ${nombre} ${apellido}`,
+          licenseNumber: `LIC-${suffix}`,
+          credentialNumber: `CRED-${suffix}`,
+          professionalTitle: titulo,
+          reason: 'Cuenta de prueba del recorrido del médico (seed:dev)',
+          clinicalRoles: ['CLINICIAN', 'PRACTITIONER'],
+        },
+        expect: [201, 409],
+      },
+    );
+
+    if (alta.status === 409) {
+      // Ya existe de una corrida anterior — el script es acumulativo, pero la
+      // cuenta de prueba es una sola: se reutiliza en vez de fallar. El
+      // `profileId` no viene en un 409, así que sale del `hpid` del propio
+      // token, igual que lo lee el resto de la aplicación.
+      const login = await call(
+        'Profesionales',
+        'Reutilizar la sesión de la cuenta de prueba',
+        'POST',
+        '/iam/auth/login',
+        {
+          auth: false,
+          body: { email: DOCTOR_EMAIL, password: DOCTOR_PASSWORD },
+          expect: [200, 201],
+        },
+      );
+      const doctorToken = login.body?.accessToken;
+      profileId = doctorToken
+        ? JSON.parse(
+            Buffer.from(doctorToken.split('.')[1], 'base64url').toString('utf8'),
+          ).hpid
+        : undefined;
+      // La credencial ya quedó verificada en la corrida que la creó.
+      credentialId = undefined;
+    } else if (alta.ok) {
+      profileId = alta.body.practitionerProfileId;
+      credentialId = alta.body.credentialId;
+      // La contraseña la elige la titular, no el administrador que la crea
+      // (mismo criterio que el alta asistida de paciente): acá el activador
+      // es el propio script, así que la fija en el mismo paso.
+      await call(
+        'Profesionales',
+        'Activar la cuenta de prueba (elige su propia contraseña)',
+        'POST',
+        '/iam/auth/activate',
+        {
+          auth: false,
+          body: { activationToken: alta.body.activationToken, newPassword: DOCTOR_PASSWORD },
+          expect: [200, 201, 204],
+        },
+      );
+    }
+
+    if (!profileId) continue;
+  } else {
+    const created = await call(
+      'Profesionales',
+      `Alta de Dr(a). ${nombre} ${apellido} — ${titulo}`,
+      'POST',
+      '/profiles/practitioners',
+      {
+        body: {
+          practitionerCode: `MED-${suffix}`,
+          displayName: `Dr(a). ${nombre} ${apellido}`,
+          licenseNumber: `LIC-${suffix}`,
+          credentialNumber: `CRED-${suffix}`,
+          professionalTitle: titulo,
+          // Sin biografía, sin disponibilidad y sin telemedicina, el perfil
+          // profesional se ve correcto y vacío, y no hay forma de distinguir «la
+          // pantalla no trae nada» de «esta persona no cargó nada».
+          professionalBio: BIOGRAFIAS[index % BIOGRAFIAS.length],
+          // No todos toman pacientes ni atienden por telemedicina: un padrón
+          // donde todos dicen que sí no ejercita el caso contrario, que es el que
+          // cambia lo que la interfaz puede ofrecer.
+          acceptsNewPatients: index % 3 !== 0,
+          telehealthAvailable: index % 2 === 0,
+          regulatoryAuthority: autoridad,
+          // Dónde y cuándo se formó. Sin estos dos, la línea de tiempo de
+          // formación queda sin institución y sin orden: una lista de números de
+          // título que no dice nada.
+          credentialIssuingInstitutionText: institucion,
+          credentialIssueDate: `${2004 + (index % 12)}-12-15`,
+        },
+        expect: [200, 201],
+      },
+    );
+    if (!created.ok) continue;
+
+    profileId = created.body.profileId;
+    credentialId = created.body.credentialId;
+  }
 
   // Verificación de la credencial: sin esto el profesional queda "pendiente" y
-  // la agenda se vería publicada por alguien sin matrícula comprobada.
-  await call(
-    'Profesionales',
-    `Verificar la credencial de ${apellido}`,
-    'POST',
-    `/profiles/credentials/${credentialId}/verify`,
-    {
-      body: {
-        decision: 'VERIFIED',
-        // El dominio exige declarar contra qué se comprobó la matrícula: una
-        // credencial "verificada" sin fuente no es verificable por nadie más.
-        verificationSourceUri: `https://registro-profesional.test/matriculas/LIC-${suffix}`,
+  // la agenda se vería publicada por alguien sin matrícula comprobada. Se
+  // salta cuando ya se verificó en una corrida previa (reutilización de la
+  // cuenta de prueba, sin `credentialId` nuevo que verificar).
+  if (credentialId) {
+    await call(
+      'Profesionales',
+      `Verificar la credencial de ${apellido}`,
+      'POST',
+      `/profiles/credentials/${credentialId}/verify`,
+      {
+        body: {
+          decision: 'VERIFIED',
+          // El dominio exige declarar contra qué se comprobó la matrícula: una
+          // credencial "verificada" sin fuente no es verificable por nadie más.
+          verificationSourceUri: `https://registro-profesional.test/matriculas/LIC-${suffix}`,
+        },
+        expect: [200, 201, 204],
       },
-      expect: [200, 201, 204],
-    },
-  );
+    );
+  }
 
   const resource = await call(
     'Agenda',
@@ -512,7 +734,16 @@ for (let index = 0; index < DOCTORS; index += 1) {
         resourceType: 'PRACTITIONER',
         resourceRefType: 'practitioner_profiles',
         resourceRefId: profileId,
-        name: `Consultorio ${titulo} — ${apellido}`,
+        // El nombre lleva la sede y el sufijo de la corrida, y eso arregla un
+        // defecto que se veía en pantalla: como este script es ACUMULATIVO —cada
+        // corrida agrega una tanda nueva— y el nombre era sólo
+        // `Consultorio ${titulo} — ${apellido}`, cinco corridas producían cinco
+        // recursos DISTINTOS con el mismo texto. En el selector de la agenda eso
+        // era la misma línea repetida cinco veces, donde elegir era adivinar.
+        //
+        // El sufijo no es decoración: es lo único que con seguridad distingue
+        // dos tandas del mismo médico en la misma sede.
+        name: `Consultorio ${titulo} — ${apellido} · ${sede} · #${U}`,
         timeZone: ZONA,
         capacity: 1,
       },
@@ -520,6 +751,68 @@ for (let index = 0; index < DOCTORS; index += 1) {
     },
   );
   if (!resource.ok) continue;
+
+  // --- trayectoria: especialidad principal y, a la mitad, un posgrado --------
+  // Sin esto el perfil profesional no tiene ninguna especialidad que mostrar, y
+  // el bloque queda con su texto de vacío en TODOS los médicos sembrados.
+  await call(
+    'Profesionales',
+    `Especialidad principal de ${apellido} — ${titulo}`,
+    'POST',
+    `/profiles/practitioners/${profileId}/specialties`,
+    {
+      body: {
+        isPrimary: true,
+        // Certificada en dos de cada tres: el badge de certificación no dice
+        // nada si lo tienen todos.
+        boardCertified: index % 3 !== 0,
+        supportingCredentialId: credentialId,
+      },
+      // Ninguna de las dos llamadas de esta sección declara
+      // `specialtyConceptId` — el backend le pone un concepto por defecto
+      // cuando falta — así que las dos apuntan al mismo. Sobre un perfil
+      // nuevo eso nunca choca (nace sin ninguna); sobre la cuenta de prueba
+      // reutilizada de una corrida anterior, sí: 409 es "ya la tiene", no un
+      // defecto.
+      expect: [200, 201, 409],
+    },
+  );
+
+  if (index % 2 === 0) {
+    const [posgrado] = POSGRADOS[index % POSGRADOS.length];
+    await call(
+      'Profesionales',
+      `Segunda especialidad de ${apellido} — ${posgrado}`,
+      'POST',
+      `/profiles/practitioners/${profileId}/specialties`,
+      {
+        body: { isPrimary: false, boardCertified: false },
+        // Mismo motivo que arriba: sin concepto propio, choca con el que la
+        // llamada anterior acaba de fijar por defecto.
+        expect: [200, 201, 409],
+      },
+    );
+  }
+
+  // --- una segunda matrícula, en otra jurisdicción --------------------------
+  // Un profesional con una sola matrícula no ejercita la lista; y quien ejerce
+  // en dos ciudades es un caso real, no un rebuscamiento.
+  if (index % 4 === 0) {
+    await call(
+      'Profesionales',
+      `Segunda matrícula de ${apellido}`,
+      'POST',
+      `/profiles/practitioners/${profileId}/jurisdiction-authorizations`,
+      {
+        body: {
+          licenseNumber: `LIC2-${suffix}`,
+          regulatoryAuthority: AUTORIDADES[(index + 1) % AUTORIDADES.length],
+        },
+        expect: [200, 201],
+      },
+    );
+  }
+
 
   // Política de reserva: es lo que hace que la agenda tenga reglas de negocio
   // (antelación mínima, ventana de cancelación) en vez de aceptar cualquier cosa.
@@ -592,6 +885,8 @@ for (let index = 0; index < DOCTORS; index += 1) {
     slotsCreated: slots.body?.created ?? 0,
     from,
     to,
+    // Sólo el índice 0 tiene login propio — ver el alta más arriba.
+    login: index === 0 ? { email: DOCTOR_EMAIL, password: DOCTOR_PASSWORD } : null,
   });
 }
 
@@ -1508,6 +1803,8 @@ function writeReport() {
   const report = {
     generadoContra: BASE,
     sufijoDeCorrida: U,
+    practiceId: practiceId ?? null,
+    cuentaDePrueba: { email: DOCTOR_EMAIL, password: DOCTOR_PASSWORD },
     totales: {
       llamadas: log.length,
       correctas: log.length - failed.length,
@@ -1543,6 +1840,7 @@ function writeReport() {
     `  Llamadas ${log.length} — ${log.length - failed.length} conformes, ${failed.length} fuera de lo esperado.`,
   );
   console.log(`  Detalle completo: ${OUT}`);
+  console.log(`  Cuenta de prueba:  ${DOCTOR_EMAIL} / ${DOCTOR_PASSWORD}`);
 
   if (failed.length > 0) {
     console.log('\n  Fuera de lo esperado:');

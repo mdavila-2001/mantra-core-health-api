@@ -7,7 +7,7 @@
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`community`](community.md) | 8 | 15 | 16 | 38 | 22 |
+| [`community`](community.md) | 8 | 15 | 16 | 38 | 23 |
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 7 | 8 | 30 | 10 |
@@ -48,7 +48,7 @@
 | [`lakehouse`](lakehouse.md) | 2 | 3 | 3 | 18 | 1 |
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
 | [`object_storage`](object_storage.md) | 2 | 3 | 3 | 17 | 1 |
-| [`profiles`](profiles.md) | 2 | 3 | 13 | 18 | 12 |
+| [`profiles`](profiles.md) | 2 | 3 | 13 | 18 | 14 |
 | [`promotions`](promotions.md) | 2 | 2 | 2 | 11 | 1 |
 | [`qa_lab`](qa_lab.md) | 2 | 2 | 2 | 13 | 1 |
 | [`time_series`](time_series.md) | 2 | 4 | 2 | 12 | 1 |
@@ -68,4 +68,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **199** | **283** | **358** | **1190** | **390** |
+| **Total** | **199** | **283** | **358** | **1190** | **393** |

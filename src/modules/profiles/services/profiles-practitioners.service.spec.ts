@@ -24,11 +24,15 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const fork = { id: 'fork' };
-  const em = {
+  // `fork` devuelve el mismo doble: las lecturas usan un contexto propio y las
+  // escrituras una transacción, pero para la prueba es el mismo objeto. `count`
+  // responde 0 salvo que una prueba lo cambie — es lo que consume el conteo de
+  // actividad del perfil profesional.
+  const em: any = {
     transactional: mockFn((cb: any) => cb(tx)),
-    fork: mockFn(() => fork),
+    count: mockFn().mockResolvedValue(0),
   };
+  em.fork = mockFn(() => em);
   const personsRepo = {
     findById: mockFn(),
     findByIds: mockFn().mockResolvedValue(new Map()),
@@ -50,13 +54,18 @@ function build() {
     create: mockFn(),
     countInStateExcept: mockFn().mockResolvedValue(0),
     hasCurrentCredential: mockFn().mockResolvedValue(false),
+    findByPractitioner: mockFn().mockResolvedValue([]),
   };
   const specialtiesRepo = {
     create: mockFn(),
     findActive: mockFn(),
+    findAllByPractitioner: mockFn().mockResolvedValue([]),
     demotePrimary: mockFn().mockResolvedValue(0),
   };
-  const languagesRepo = { create: mockFn() };
+  const languagesRepo = {
+    create: mockFn(),
+    findByPractitioner: mockFn().mockResolvedValue([]),
+  };
   const affiliationsRepo = {
     findByPractitioner: mockFn().mockResolvedValue([]),
     findSame: mockFn().mockResolvedValue(null),
@@ -72,6 +81,9 @@ function build() {
   // hay cuenta vinculada, que es el caso de un perfil cargado por un tercero.
   const accountLinksRepo = {
     findActiveByPerson: mockFn().mockResolvedValue(null),
+    // El camino inverso: de la cuenta a la persona. Es por donde el perfil
+    // profesional propio resuelve a su sujeto.
+    findActiveByUser: mockFn().mockResolvedValue(null),
   };
   const effectiveRoles = { ensureRoleByCode: mockFn().mockResolvedValue(true) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -93,11 +105,11 @@ function build() {
   );
   return {
     service,
+    em,
     accountLinksRepo,
     effectiveRoles,
     affiliationsRepo,
     ownership,
-    fork,
     tx,
     personsRepo,
     personProfilesRepo,
@@ -351,11 +363,11 @@ describe('ProfilesPractitionersService', () => {
       const res = await d.service.listOwnAffiliations(actor);
 
       expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
-        d.fork,
+        d.em,
         actor,
       );
       expect(d.affiliationsRepo.findByPractitioner).toHaveBeenCalledWith(
-        d.fork,
+        d.em,
         'pp1',
       );
       expect(res.count).toBe(1);
@@ -434,6 +446,251 @@ describe('ProfilesPractitionersService', () => {
         }),
       );
       expect(res).toMatchObject({ id: 'af-9', current: true });
+    });
+  });
+
+  /* ---- el perfil profesional propio ------------------------------------- */
+
+  describe('getOwnPractitionerProfile', () => {
+    /**
+     * El caso que dejaba la pantalla de perfil de un médico sin nada que
+     * mostrar: no existía lectura y la única disponible era la de pacientes.
+     */
+    it('devuelve el perfil con trayectoria y actividad', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        professionalTitle: 'Cardióloga',
+        professionalBio: 'Quince años en cardiología clínica.',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        acceptsNewPatients: true,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      });
+      d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
+        {
+          id: 'sp-1',
+          specialtyConceptId: 'con-cardio',
+          isPrimary: true,
+          boardCertified: true,
+          verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+        },
+      ]);
+      d.credentialsRepo.findByPractitioner.mockResolvedValue([
+        {
+          id: 'cr-1',
+          credentialTypeConceptId: PROF.CREDENTIAL_TYPE_DEGREE,
+          number: 'TIT-1',
+          issuingInstitutionText: 'UMSA',
+          stateConceptId: PROF.CRED_PENDING,
+        },
+      ]);
+      d.em.count
+        .mockResolvedValueOnce(12)
+        .mockResolvedValueOnce(30)
+        .mockResolvedValueOnce(4)
+        .mockResolvedValueOnce(2);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+      } as any);
+
+      expect(perfil).toMatchObject({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        displayName: 'Dra. Lucía Salas',
+        professionalTitle: 'Cardióloga',
+        acceptsNewPatients: true,
+      });
+      expect(perfil.specialties).toHaveLength(1);
+      expect(perfil.credentials[0]).toMatchObject({
+        issuingInstitutionText: 'UMSA',
+      });
+      expect(perfil.activity).toEqual({
+        encounters: 12,
+        medicationRequests: 30,
+        clinicalNotes: 4,
+        documents: 2,
+      });
+    });
+
+    /** Los booleanos opcionales de la base no pueden llegar como `undefined`. */
+    it('normaliza los booleanos ausentes a false', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({ id: 'per-1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+      } as any);
+
+      expect(perfil.acceptsNewPatients).toBe(false);
+      expect(perfil.telehealthAvailable).toBe(false);
+    });
+
+    it('sin persona vinculada falla con precondición, no con 404', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(
+        d.service.getOwnPractitionerProfile({ id: 'u-1' } as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    /**
+     * La cuenta existe y la sesión es válida: lo que falta es el perfil. Un 403
+     * mandaría a pedir permisos a quien necesita que lo den de alta.
+     */
+    it('sin perfil profesional responde no encontrado', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({ id: 'per-1' });
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.getOwnPractitionerProfile({ id: 'u-1' } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('updateOwnPractitionerProfile', () => {
+    /** El objeto mutable que representa la fila del practitioner en la base. */
+    function practitionerBase() {
+      return {
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        professionalTitle: 'Médico general',
+        professionalBio: 'Bio vieja.',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        acceptsNewPatients: false,
+        telehealthAvailable: false,
+        createdAt: new Date('2024-02-01T00:00:00.000Z'),
+      };
+    }
+
+    /** Deja el doble listo para editar y para la relectura posterior. */
+    function prepararParaEditar(
+      d: ReturnType<typeof build>,
+      practitioner: any,
+    ) {
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dr. Uno',
+      });
+      d.practitionersRepo.findById.mockResolvedValue(practitioner);
+    }
+
+    /**
+     * El caso que le faltaba al módulo: el alta escribía estos campos una vez y
+     * no había forma de volver a tocarlos.
+     */
+    it('cambia el título, la biografía y la disponibilidad', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+
+      const actualizado = await d.service.updateOwnPractitionerProfile(
+        {
+          professionalTitle: 'Médica cardióloga',
+          professionalBio: 'Bio nueva.',
+          acceptsNewPatients: true,
+          telehealthAvailable: true,
+        },
+        { id: 'u-1' } as any,
+      );
+
+      expect(practitioner.professionalTitle).toBe('Médica cardióloga');
+      expect(practitioner.professionalBio).toBe('Bio nueva.');
+      expect(practitioner.acceptsNewPatients).toBe(true);
+      expect(practitioner.telehealthAvailable).toBe(true);
+      // Se relee entero: la respuesta es la misma forma que `getOwnPractitionerProfile`.
+      expect(actualizado.professionalTitle).toBe('Médica cardióloga');
+    });
+
+    /**
+     * `PATCH`: lo que no viene no se toca. Si el servicio usara `??` en vez de
+     * comparar contra `undefined`, esta prueba fallaría — es la que fija que
+     * omitir un campo no es lo mismo que mandarlo vacío.
+     */
+    it('lo que no viene en el cuerpo no se toca', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+
+      await d.service.updateOwnPractitionerProfile(
+        { professionalTitle: 'Sólo el título' },
+        { id: 'u-1' } as any,
+      );
+
+      expect(practitioner.professionalTitle).toBe('Sólo el título');
+      expect(practitioner.professionalBio).toBe('Bio vieja.');
+      expect(practitioner.acceptsNewPatients).toBe(false);
+    });
+
+    /** Un `''` sí borra: es una decisión de quien edita, distinta de omitir. */
+    it('una cadena vacía borra el campo en vez de ignorarse', async () => {
+      const d = build();
+      const practitioner = practitionerBase();
+      prepararParaEditar(d, practitioner);
+
+      await d.service.updateOwnPractitionerProfile({ professionalBio: '' }, {
+        id: 'u-1',
+      } as any);
+
+      expect(practitioner.professionalBio).toBe('');
+    });
+
+    /** Igual que la lectura: sin persona vinculada no hay nada que editar. */
+    it('sin persona vinculada falla con precondición', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue(null);
+
+      await expect(
+        d.service.updateOwnPractitionerProfile({ professionalTitle: 'X' }, {
+          id: 'u-1',
+        } as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('sin perfil profesional responde no encontrado', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.updateOwnPractitionerProfile({ professionalTitle: 'X' }, {
+          id: 'u-1',
+        } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

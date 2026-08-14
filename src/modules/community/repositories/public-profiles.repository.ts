@@ -176,6 +176,21 @@ export class PublicProfilesRepository {
     return em.findOne(PublicProfiles, { targetId });
   }
 
+  /**
+   * El perfil público por su dirección legible.
+   *
+   * Es lo que hace falta para comprobar que un slug esté libre antes de
+   * asignarlo: dos vitrinas con el mismo texto serían dos enlaces que llevan a
+   * personas distintas según cuál resuelva primero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param slug - La dirección legible.
+   * @returns El perfil, o `null` si el slug está libre.
+   */
+  findBySlug(em: EntityManager, slug: string): Promise<PublicProfiles | null> {
+    return em.findOne(PublicProfiles, { slug });
+  }
+
   create(em: EntityManager, data: CreatePublicProfileData): PublicProfiles {
     return em.create(
       PublicProfiles,

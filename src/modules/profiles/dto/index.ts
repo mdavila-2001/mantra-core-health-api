@@ -11,3 +11,5 @@ export * from './add-related-person.dto';
 export * from './grant-portal-proxy.dto';
 export * from './decease-person.dto';
 export * from './read-patients.dto';
+export * from './read-practitioner-profile.dto';
+export * from './update-practitioner-profile.dto';
