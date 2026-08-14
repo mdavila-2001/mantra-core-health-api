@@ -21,3 +21,4 @@ export * from './read-messaging.dto';
 export * from './read-groups.dto';
 export * from './read-polls.dto';
 export * from './read-reviews.dto';
+export * from './public-search.dto';

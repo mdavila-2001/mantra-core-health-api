@@ -24,6 +24,21 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       code: 'PROFILE_TARGET_ORGANIZATION',
       display: 'Organization public profile',
     },
+    // Los tres de arriba cubrían la red social; el buscador público (V65) tiene
+    // cinco verticales, así que farmacia, laboratorio y aseguradora también
+    // necesitan poder tener vitrina propia.
+    PROFILE_TARGET_PHARMACY: {
+      code: 'PROFILE_TARGET_PHARMACY',
+      display: 'Pharmacy public profile',
+    },
+    PROFILE_TARGET_DIAGNOSTIC_UNIT: {
+      code: 'PROFILE_TARGET_DIAGNOSTIC_UNIT',
+      display: 'Diagnostic unit public profile',
+    },
+    PROFILE_TARGET_INSURER: {
+      code: 'PROFILE_TARGET_INSURER',
+      display: 'Insurer public profile',
+    },
     PROFILE_VISIBILITY_PUBLIC: {
       code: 'PROFILE_VISIBILITY_PUBLIC',
       display: 'Profile listed on the public directory',
