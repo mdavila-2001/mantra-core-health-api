@@ -41,6 +41,21 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
     // --- Prioridad genérica (priority_concept_id) ---
     PRIORITY_ROUTINE: { code: 'PRIORITY_ROUTINE', display: 'Routine priority' },
 
+    // --- Categoría de la orden diagnóstica (service_requests.category_concept_id) ---
+    // `clinical` ya declara la de laboratorio (`SERVICE_REQUEST_CATEGORY_LAB`);
+    // la de imagenología faltaba, y sin ella una radiografía sólo se podía pedir
+    // como orden sin categoría — indistinguible de una derivación.
+    //
+    // Se declara acá y no en `clinical.concepts.ts` porque es exactamente para
+    // lo que `defineModuleConcepts` espacia las claves por módulo: agregar un
+    // concepto sin tocar un archivo compartido. El UUID sale de la clave
+    // `diagnostics:SERVICE_REQUEST_CATEGORY_IMAGING`, así que no colisiona con
+    // ninguno de `clinical`.
+    SERVICE_REQUEST_CATEGORY_IMAGING: {
+      code: 'SR_IMAGING',
+      display: 'Imaging category',
+    },
+
     // --- Cadena de custodia (specimen_chain_of_custody_events.custody_event_type_concept_id) ---
     CUSTODY_RECEPTION: {
       code: 'CUSTODY_RECEPTION',
