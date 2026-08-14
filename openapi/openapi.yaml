@@ -3774,6 +3774,46 @@ paths:
       description: >-
         Subir el contenido de un archivo (multipart). Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /common/files/links:
+    get:
+      operationId: CommonFilesController_listLinks
+      parameters:
+        - name: ownerType
+          required: true
+          in: query
+          schema:
+            type: string
+            enum:
+              - USER
+              - PATIENT
+              - TENANT
+        - name: ownerId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar los archivos adjuntos a un recurso (UC-02-08)
+      tags:
+        - common/files
+      description: >-
+        Listar los archivos adjuntos a un recurso (UC-02-08). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /common/files/{id}/content:
     get:
       operationId: CommonFilesController_downloadContent
@@ -11767,6 +11807,105 @@ paths:
       description: >-
         Asignar una plantilla de chart por especialidad. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /charts/templates:
+    post:
+      operationId: ChartTemplatesController_createTemplate
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChartTemplateDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Crear una plantilla de chart con su esquema de campos, por especialidad
+      tags:
+        - chart-templates
+      description: >-
+        Crear una plantilla de chart con su esquema de campos, por especialidad. Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: ChartTemplatesController_listTemplates
+      parameters:
+        - name: specialtyId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las plantillas de chart por especialidad
+      tags:
+        - chart-templates
+      description: >-
+        Listar las plantillas de chart por especialidad. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /charts/templates/{id}:
+    get:
+      operationId: ChartTemplatesController_getTemplate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Leer el esquema de una plantilla de chart
+      tags:
+        - chart-templates
+      description: >-
+        Leer el esquema de una plantilla de chart. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /charts/patients/{patientProfileId}/chart:
     get:
       operationId: ChartReadController_getPatientChart
@@ -46058,6 +46197,77 @@ components:
           type: boolean
           description: Marca esta asignación como default del scope
           default: false
+    TemplateFieldInputDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Código único del campo
+          maxLength: 100
+        name:
+          type: string
+          description: Nombre legible del campo
+          maxLength: 200
+        dataType:
+          type: string
+          enum:
+            - string
+            - text
+            - integer
+            - decimal
+            - boolean
+            - date
+            - datetime
+            - time
+            - uuid
+            - json
+            - binary
+            - reference
+            - code
+          description: Tipo de dato técnico
+        valueSetId:
+          type: string
+          format: uuid
+          description: Value set de valores permitidos (campos de selección)
+        required:
+          type: boolean
+          default: false
+        ordinal:
+          type: number
+          description: Orden de presentación
+      required:
+        - code
+        - name
+        - dataType
+    CreateChartTemplateDto:
+      type: object
+      properties:
+        specialtyConceptId:
+          type: string
+          format: uuid
+          description: Especialidad de la plantilla (concept id)
+        tenantId:
+          type: string
+          format: uuid
+          description: Tenant dueño de la plantilla
+        code:
+          type: string
+          description: Código único de la plantilla
+          maxLength: 100
+        name:
+          type: string
+          description: Nombre legible de la plantilla
+          maxLength: 200
+        fields:
+          description: Campos del esquema, en el orden en que se presentan
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateFieldInputDto'
+      required:
+        - specialtyConceptId
+        - code
+        - name
+        - fields
     CreateCareEpisodeDto:
       type: object
       properties:
