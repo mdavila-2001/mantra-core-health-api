@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 20 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 22 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-patients`, `profiles-practitioners`
 - **Controladores:** `ProfilesPatientsController`, `ProfilesPractitionersController`
@@ -24,13 +24,15 @@ Referencia exhaustiva de 20 operación(es) del módulo `profiles`, derivada del 
 11. [POST /profiles/patients/merge/{eventId}/reverse](#11-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
 12. [POST /profiles/persons/{personId}/account-links](#12-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
 13. [POST /profiles/persons/{personId}/decease](#13-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-14. [POST /profiles/practitioners](#14-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-15. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#15-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-16. [POST /profiles/practitioners/{profileId}/specialties](#16-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
-17. [PATCH /profiles/practitioners/me](#17-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
-18. [GET /profiles/practitioners/me/affiliations](#18-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-19. [POST /profiles/practitioners/me/affiliations](#19-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-20. [GET /profiles/practitioners/me/summary](#20-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+14. [GET /profiles/practitioners](#14-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
+15. [POST /profiles/practitioners](#15-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+16. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#16-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+17. [POST /profiles/practitioners/{profileId}/specialties](#17-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+18. [GET /profiles/practitioners/{profileId}/summary](#18-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
+19. [PATCH /profiles/practitioners/me](#19-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
+20. [GET /profiles/practitioners/me/affiliations](#20-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+21. [POST /profiles/practitioners/me/affiliations](#21-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+22. [GET /profiles/practitioners/me/summary](#22-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
 
 ---
 
@@ -1808,7 +1810,147 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /profiles/practitioners
+## 14. GET /profiles/practitioners
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Listar profesionales para la guía, con sus especialidades
+- **Operation ID:** `ProfilesPractitionersController_listPractitioners`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.listPractitioners](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Listar profesionales para la guía, con sus especialidades. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La guía de profesionales (carril R2-1). **Sin `@Roles`, siguiendo el criterio del propio módulo**: son datos profesionales de presentación —lo que una guía médica publica—, no PHI, y es el menú del PACIENTE el que la muestra. Exigir un rol dejaría la guía exactamente para quienes no la necesitan.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/practitioners` en `ProfilesPractitionersController_listPractitioners`. El controlador delega en `ProfilesPractitionersService.listPractitioners`. No recibe body. El tipo de retorno estático es `Promise<ListPractitionersResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `specialtyConceptId` | query | No | `string` | Sin restricción adicional declarada | Filtra por especialidad vigente (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de resultados (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/practitioners HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/practitioners?specialtyConceptId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListPractitionersResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPractitionersResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerCode": "CODIGO_EJEMPLO",
+      "displayName": "Nombre de ejemplo",
+      "professionalTitle": "valor-ejemplo",
+      "photoFileId": "00000000-0000-4000-8000-000000000001",
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "acceptsNewPatients": true,
+      "telehealthAvailable": true,
+      "specialties": [
+        {
+          "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+          "isPrimary": true
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PractitionerListItemDto>` | Sin restricción adicional declarada | Las filas de esta página. | `[{"profileId":"00000000-0000-4000-8000-000000000001","practitionerCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","photoFileId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","acceptsNewPatients":true,"telehealthAvailable":true,"specialties":[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}]}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Con este id se abre la ficha (`GET /profiles/practitioners/:id/summary`). | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Código único del profesional | `CODIGO_EJEMPLO` |
+| `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible de la persona | `Nombre de ejemplo` |
+| `items[].professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado. | `valor-ejemplo` |
+| `items[].photoFileId` | No | `string` | formato `uuid` | Archivo de la foto | `00000000-0000-4000-8000-000000000001` |
+| `items[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Estado de verificación de la matrícula. | `00000000-0000-4000-8000-000000000001` |
+| `items[].acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Si declara tomar pacientes nuevos. | `true` |
+| `items[].telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Si atiende por telemedicina. | `true` |
+| `items[].specialties` | Sí | `array<PractitionerListSpecialtyDto>` | Sin restricción adicional declarada | Sus especialidades, la principal primero. | `[{"specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true}]` |
+| `items[].specialties[].specialtyConceptId` | Sí | `string` | formato `uuid` | Concept id de la especialidad | `00000000-0000-4000-8000-000000000001` |
+| `items[].specialties[].isPrimary` | Sí | `boolean` | Sin restricción adicional declarada | Si es la especialidad con la que se presenta. | `true` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor opaco de la página siguiente; null si no hay más | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners"
+}
+```
+
+---
+
+## 15. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -1975,7 +2117,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 16. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2117,7 +2259,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /profiles/practitioners/{profileId}/specialties
+## 17. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2258,7 +2400,221 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PATCH /profiles/practitioners/me
+## 18. GET /profiles/practitioners/{profileId}/summary
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Consultar el perfil profesional de un colega (ficha de la guía)
+- **Operation ID:** `ProfilesPractitionersController_getPractitionerSummary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.getPractitionerSummary](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Consultar el perfil profesional de un colega (ficha de la guía). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El perfil de un colega — la ficha que abre la guía (R2-1). Mismo shape que `me/summary`: mismo contrato, cambia de dónde sale el sujeto. Sin `@Roles` por lo mismo que el listado. Va declarado DESPUÉS de las rutas `practitioners/me/*`: Nest resuelve por orden de declaración y el parámetro capturaría `me` (el pipe lo respondería 400).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/practitioners/{profileId}/summary` en `ProfilesPractitionersController_getPractitionerSummary`. El controlador delega en `ProfilesPractitionersService.getPractitionerSummary`. No recibe body. El tipo de retorno estático es `Promise<PractitionerProfileSummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/practitioners/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `profileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/practitioners/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "practitionerCode": "CODIGO_EJEMPLO",
+  "displayName": "Nombre de ejemplo",
+  "professionalTitle": "valor-ejemplo",
+  "professionalBio": "valor-ejemplo",
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
+  "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "acceptsNewPatients": true,
+  "telehealthAvailable": true,
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+      "isPrimary": true,
+      "boardCertified": true,
+      "practiceScopeText": "valor-ejemplo",
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "issuingInstitutionText": "valor-ejemplo",
+      "issueDate": "2026-07-31T12:00:00.000Z",
+      "expiryDate": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
+      "licenseNumber": "valor-ejemplo",
+      "regulatoryAuthority": "valor-ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "languages": [
+    {
+      "languageConceptId": "00000000-0000-4000-8000-000000000001",
+      "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalInterpretationAllowed": true
+    }
+  ],
+  "activity": {
+    "encounters": 1,
+    "medicationRequests": 1,
+    "clinicalNotes": 1,
+    "documents": 1
+  },
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `displayName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `professionalTitle` | No | `string` | Sin restricción adicional declarada | «Médica cardióloga», «Kinesiólogo». Texto libre del propio profesional. | `valor-ejemplo` |
+| `professionalBio` | No | `string` | Sin restricción adicional declarada | Presentación en prosa. Es lo que hace que un perfil se lea como una persona. | `valor-ejemplo` |
+| `photoFileId` | No | `string` | formato `uuid` | Foto de perfil, si cargó una. Se resuelve por el módulo de archivos. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Si toma pacientes nuevos. Cambia qué se le puede ofrecer a quien busca. | `true` |
+| `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `specialties` | Sí | `array<PractitionerSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true,"boardCertified":true,"practiceScopeText":"valor-ejemplo","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].specialtyConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].isPrimary` | Sí | `boolean` | Sin restricción adicional declarada | Si es la especialidad con la que se presenta. Hay una sola vigente. | `true` |
+| `specialties[].boardCertified` | Sí | `boolean` | Sin restricción adicional declarada | Certificación del colegio o consejo. Es un dato que la gente busca. | `true` |
+| `specialties[].practiceScopeText` | No | `string` | Sin restricción adicional declarada | Alcance de práctica en palabras del propio profesional. | `valor-ejemplo` |
+| `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `specialties[].validTo` | No | `string` | formato `date-time` | Presente sólo si dejó de ejercerla. | `2026-07-31T12:00:00.000Z` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Nº de título o certificado. | `valor-ejemplo` |
+| `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Dónde se cursó, en texto libre: la institución no siempre es un tenant. | `valor-ejemplo` |
+| `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | formato `date-time` | Cuándo se comprobó la credencial contra su fuente. Ausente significa «no verificada todavía», que no es lo mismo que «rechazada» —eso lo dice `stateConceptId`—. | `2026-07-31T12:00:00.000Z` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].regulatoryAuthority` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
+| `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `activity` | Sí | `PractitionerActivityDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}` |
+| `activity.encounters` | Sí | `number` | Sin restricción adicional declarada | Encuentros que abrió. | `1` |
+| `activity.medicationRequests` | Sí | `number` | Sin restricción adicional declarada | Recetas que prescribió. | `1` |
+| `activity.clinicalNotes` | Sí | `number` | Sin restricción adicional declarada | Notas clínicas que redactó. | `1` |
+| `activity.documents` | Sí | `number` | Sin restricción adicional declarada | Documentos que publicó en expedientes. | `1` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/{profileId}/summary"
+}
+```
+
+---
+
+## 19. PATCH /profiles/practitioners/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2490,7 +2846,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /profiles/practitioners/me/affiliations
+## 20. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2621,7 +2977,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /profiles/practitioners/me/affiliations
+## 21. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -2781,7 +3137,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /profiles/practitioners/me/summary
+## 22. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
