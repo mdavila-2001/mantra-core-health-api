@@ -304,6 +304,63 @@ export class EncounterItemDto {
 }
 
 /**
+ * Un episodio de cuidado: la internación o la estancia que agrupa encuentros.
+ *
+ * Es lo que le faltaba a la ficha para que dar de alta una internación tuviera
+ * consecuencias visibles. `endAt` en `null` significa que sigue abierta, que es
+ * la única pregunta que se hace quien reabre el expediente al día siguiente.
+ */
+export class CareEpisodeItemDto {
+  /**
+   * Identificador único de la instancia.
+   */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({ format: 'uuid' })
+  tenantId!: string;
+
+  /**
+   * Identificador asociado a type concept.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  typeConceptId?: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /**
+   * Identificador asociado a responsible practitioner.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  responsiblePractitionerId?: string;
+
+  /**
+   * Valor de start at mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  startAt?: Date;
+
+  /**
+   * Valor de end at mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  endAt?: Date;
+
+  /**
+   * Fecha y hora en que se creó el registro.
+   */
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+}
+
+/**
  * Historial clínico del paciente en una sola respuesta (UC-39-20).
  *
  * Es la contrapartida de lectura del módulo `clinical`, que hasta ahora sólo
@@ -346,6 +403,16 @@ export class PatientClinicalSummaryResponseDto {
    */
   @ApiProperty({ type: [EncounterItemDto] })
   encounters!: EncounterItemDto[];
+
+  /**
+   * Episodios de cuidado (internaciones y estancias) del paciente.
+   *
+   * Va en el mismo `GET` que el resto y no en una llamada aparte por lo mismo
+   * que las alergias: es contexto de la atención, y depender de que el cliente
+   * se acuerde de pedirlo es depender de que nadie se olvide.
+   */
+  @ApiProperty({ type: [CareEpisodeItemDto] })
+  careEpisodes!: CareEpisodeItemDto[];
 
   /**
    * Tope aplicado a la consulta.

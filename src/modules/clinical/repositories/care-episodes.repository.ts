@@ -64,6 +64,32 @@ export class CareEpisodesRepository {
   }
 
   /**
+   * Episodios de un paciente, del más reciente al más antiguo.
+   *
+   * Sin esta lectura, abrir una internación era un acto sin rastro visible: el
+   * episodio quedaba en la base y la ficha no lo mostraba, así que quien
+   * reabría el expediente no tenía forma de saber que la persona estaba
+   * internada. El `episodeId` de los encuentros lo insinuaba, pero un uuid sin
+   * fila detrás no dice ni cuándo empezó ni si sigue abierta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente consultado.
+   * @param limit - Tope de resultados.
+   * @returns Sus episodios de cuidado.
+   */
+  findByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<CareEpisodes[]> {
+    return em.find(
+      CareEpisodes,
+      { patientProfileId },
+      { orderBy: { startAt: 'DESC', createdAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

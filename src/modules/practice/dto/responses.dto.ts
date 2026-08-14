@@ -293,6 +293,48 @@ export class SiteSummaryDto {
 }
 
 /**
+ * Sede como lugar donde se atiende, no como fila administrativa.
+ *
+ * Es {@link SiteSummaryDto} más lo que hace falta para llegar hasta ahí: la
+ * dirección y la zona horaria. El listado administrativo no las traía porque
+ * responde otra pregunta —«¿qué sedes tiene esta práctica?»— y quien la hacía
+ * ya sabía dónde quedaban. Un paciente mirando su turno, no.
+ *
+ * `addressText` viene compuesto en una línea: `common.addresses` guarda la
+ * dirección en piezas, y decidir cómo se juntan es del dato, no de cada
+ * pantalla que la muestre.
+ */
+export class PractitionerSiteDto {
+  /** Identificador de la sede. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Práctica a la que pertenece. */
+  @ApiProperty({ format: 'uuid' }) practiceId!: string;
+  /** Código único dentro de la práctica. */
+  @ApiProperty() code!: string;
+  /** Nombre legible. */
+  @ApiProperty() name!: string;
+  /** Zona horaria IANA de la sede, si la declara. */
+  @ApiPropertyOptional({ nullable: true, example: 'America/La_Paz' })
+  timeZone!: string | null;
+  /** Dirección en una línea, o `null` si la sede no tiene ninguna cargada. */
+  @ApiPropertyOptional({ nullable: true, example: 'Av. Brasil 1234, La Paz' })
+  addressText!: string | null;
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' }) status!: string;
+}
+
+/** Respuesta de `GET /practitioners/:profileId/sites`. */
+export class PractitionerSitesResponseDto {
+  /** Las sedes donde atiende, la principal primero. */
+  @ApiProperty({ type: [PractitionerSiteDto] })
+  items!: PractitionerSiteDto[];
+
+  /** Cantidad devuelta. */
+  @ApiProperty()
+  count!: number;
+}
+
+/**
  * Espacio de atención tal como lo devuelve el listado.
  *
  * Es el que resuelve el `operatingRoomId` que exige programar un caso

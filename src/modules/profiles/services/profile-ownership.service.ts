@@ -102,6 +102,36 @@ export class ProfileOwnershipService {
   }
 
   /**
+   * El perfil profesional del actor, resuelto desde su cuenta.
+   *
+   * Es lo que hace posible el `/me` de las lecturas y escrituras de autoservicio: el sujeto sale
+   * del vínculo activo de la cuenta, no de un parámetro. Un `profileId` en la ruta obligaría a
+   * comprobar después lo que acá directamente no se puede declarar.
+   *
+   * A diferencia de `assertOwns*`, **no hay atajo de plataforma**: `SECURITY_ADMIN` sigue siendo
+   * una persona, y su `/me` es el suyo. Para operar sobre el perfil de otro existen las rutas con
+   * `profileId`, donde la intención queda escrita.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param actor - Quien pide la operación.
+   * @returns El identificador del perfil profesional del actor.
+   * @throws ForbiddenException si la cuenta no tiene perfil profesional.
+   */
+  async requireOwnPractitionerProfileId(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<string> {
+    const personId = await this.personOf(em, actor);
+    if (personId) {
+      const profile = await this.practitionersRepo.findById(em, personId);
+      if (profile) return profile.profileId;
+    }
+    throw new ForbiddenException(
+      'Esta cuenta no tiene un perfil profesional asociado',
+    );
+  }
+
+  /**
    * Exige que el actor sea el paciente dueño del perfil, o plataforma.
    *
    * @param em - Contexto de persistencia o transacción activa.
