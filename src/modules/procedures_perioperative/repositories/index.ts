@@ -14,3 +14,8 @@ export type {
   CreateOperativeReportData,
 } from './periop-intraop.repository';
 export { PeriopInstrumentsRepository } from './periop-instruments.repository';
+export { PeriopDentalRepository } from './periop-dental.repository';
+export type {
+  CreateDentalProcedureData,
+  CreateDentalSiteData,
+} from './periop-dental.repository';

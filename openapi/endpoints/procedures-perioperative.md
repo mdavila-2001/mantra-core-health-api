@@ -770,6 +770,57 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
       "signedAt": "2026-07-31T12:00:00.000Z"
     }
+  ],
+  "operativeSteps": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "stepNumber": 1,
+      "stepCodeConceptId": "00000000-0000-4000-8000-000000000001",
+      "description": "Texto descriptivo de ejemplo",
+      "performedByProfileId": "00000000-0000-4000-8000-000000000001",
+      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "endedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "findings": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "operativeStepId": "00000000-0000-4000-8000-000000000001",
+      "findingCodeConceptId": "00000000-0000-4000-8000-000000000001",
+      "findingText": "valor-ejemplo",
+      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+      "severityConceptId": "00000000-0000-4000-8000-000000000001",
+      "recordedByProfileId": "00000000-0000-4000-8000-000000000001",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "implants": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "procedureId": "00000000-0000-4000-8000-000000000001",
+      "implantDeviceId": "00000000-0000-4000-8000-000000000001",
+      "implantRoleConceptId": "00000000-0000-4000-8000-000000000001",
+      "bodySiteConceptId": "00000000-0000-4000-8000-000000000001",
+      "lateralityConceptId": "00000000-0000-4000-8000-000000000001",
+      "implantedAt": "2026-07-31T12:00:00.000Z",
+      "explantedAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "identifiers": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "identifierTypeConceptId": "00000000-0000-4000-8000-000000000001",
+          "identifierValue": "valor-ejemplo",
+          "issuingSystem": "valor-ejemplo",
+          "lotNumber": "valor-ejemplo",
+          "serialNumber": "valor-ejemplo",
+          "expirationDate": "2026-07-31T12:00:00.000Z"
+        }
+      ]
+    }
   ]
 }
 ```
@@ -821,6 +872,45 @@ Campos de la respuesta:
 | `operativeReports[].reportVersion` | Sí | `number` | Sin restricción adicional declarada | Número de versión. | `1` |
 | `operativeReports[].statusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado: borrador o firmado. | `00000000-0000-4000-8000-000000000001` |
 | `operativeReports[].signedAt` | No | `string` | formato `date-time` | Cuándo se firmó, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `operativeSteps` | Sí | `array<object>` | Sin restricción adicional declarada | Pasos de la intervención, en orden | `[{"id":"00000000-0000-4000-8000-000000000001","stepNumber":1,"stepCodeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","performedByProfileId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","startedAt":"2026-07-31T12:00:00.000Z","endedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `operativeSteps[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].stepNumber` | Sí | `number` | Sin restricción adicional declarada | Orden dentro de la intervención. | `1` |
+| `operativeSteps[].stepCodeConceptId` | Sí | `string` | Sin restricción adicional declarada | Código del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].description` | Sí | `string` | Sin restricción adicional declarada | Descripción escrita por quien lo registró. | `Texto descriptivo de ejemplo` |
+| `operativeSteps[].performedByProfileId` | No | `string` | Sin restricción adicional declarada | Profesional que lo ejecutó, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].bodySiteConceptId` | No | `string` | Sin restricción adicional declarada | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].lateralityConceptId` | No | `string` | Sin restricción adicional declarada | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].statusConceptId` | Sí | `string` | Sin restricción adicional declarada | Estado del paso. | `00000000-0000-4000-8000-000000000001` |
+| `operativeSteps[].startedAt` | No | `string` | formato `date-time` | Cuándo empezó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
+| `operativeSteps[].endedAt` | No | `string` | formato `date-time` | Cuándo terminó, si se cronometró. | `2026-07-31T12:00:00.000Z` |
+| `findings` | Sí | `array<object>` | Sin restricción adicional declarada | Hallazgos registrados durante la intervención | `[{"id":"00000000-0000-4000-8000-000000000001","operativeStepId":"00000000-0000-4000-8000-000000000001","findingCodeConceptId":"00000000-0000-4000-8000-000000000001","findingText":"valor-ejemplo","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","recordedByProfileId":"00000000-0000-4000-8000-000000000001","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `findings[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del hallazgo. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].operativeStepId` | No | `string` | Sin restricción adicional declarada | Paso en el que se halló, si se ató a uno. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].findingCodeConceptId` | Sí | `string` | Sin restricción adicional declarada | Código del hallazgo. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].findingText` | Sí | `string` | Sin restricción adicional declarada | Descripción escrita por quien lo halló. | `valor-ejemplo` |
+| `findings[].bodySiteConceptId` | No | `string` | Sin restricción adicional declarada | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].lateralityConceptId` | No | `string` | Sin restricción adicional declarada | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].severityConceptId` | No | `string` | Sin restricción adicional declarada | Severidad, si se graduó. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].recordedByProfileId` | No | `string` | Sin restricción adicional declarada | Profesional que lo registró, si consta. | `00000000-0000-4000-8000-000000000001` |
+| `findings[].recordedAt` | Sí | `string` | formato `date-time` | Cuándo se registró. | `2026-07-31T12:00:00.000Z` |
+| `implants` | Sí | `array<object>` | Sin restricción adicional declarada | Implantes colocados, con sus identificadores | `[{"id":"00000000-0000-4000-8000-000000000001","procedureId":"00000000-0000-4000-8000-000000000001","implantDeviceId":"00000000-0000-4000-8000-000000000001","implantRoleConceptId":"00000000-0000-4000-8000-000000000001","bodySiteConceptId":"00000000-0000-4000-8000-000000000001","lateralityConceptId":"00000000-0000-4000-8000-000000000001","implantedAt":"2026-07-31T12:00:00.000Z","explantedAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","identifiers":[{"id":"00000000-0000-4000-8000-000000000001","identifierTypeConceptId":"00000000-0000-4000-8000-000000000001","identifierValue":"valor-ejemplo","issuingSystem":"valor-ejemplo","lotNumber":"valor-ejemplo","serialNumber":"valor-ejemplo","expirationDate":"2026-07-31T12:00:00.000Z"}]}]` |
+| `implants[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador del implante en el caso. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].procedureId` | Sí | `string` | Sin restricción adicional declarada | Procedimiento clínico al que se imputa. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].implantDeviceId` | Sí | `string` | Sin restricción adicional declarada | Dispositivo implantado. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].implantRoleConceptId` | Sí | `string` | Sin restricción adicional declarada | Papel del implante en la intervención. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].bodySiteConceptId` | No | `string` | Sin restricción adicional declarada | Sitio anatómico, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].lateralityConceptId` | No | `string` | Sin restricción adicional declarada | Lateralidad, si aplica. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].implantedAt` | Sí | `string` | formato `date-time` | Cuándo se implantó. | `2026-07-31T12:00:00.000Z` |
+| `implants[].explantedAt` | No | `string` | formato `date-time` | Cuándo se explantó, si se explantó. | `2026-07-31T12:00:00.000Z` |
+| `implants[].statusConceptId` | No | `string` | Sin restricción adicional declarada | Estado del implante, si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].identifiers` | Sí | `array<object>` | Sin restricción adicional declarada | UDI, lote y serie del implante. | `[{"id":"00000000-0000-4000-8000-000000000001","identifierTypeConceptId":"00000000-0000-4000-8000-000000000001","identifierValue":"valor-ejemplo","issuingSystem":"valor-ejemplo","lotNumber":"valor-ejemplo","serialNumber":"valor-ejemplo","expirationDate":"2026-07-31T12:00:00.000Z"}]` |
+| `implants[].identifiers[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador de la fila. | `00000000-0000-4000-8000-000000000001` |
+| `implants[].identifiers[].identifierTypeConceptId` | Sí | `string` | Sin restricción adicional declarada | Tipo de identificador (UDI-DI, UDI-PI, …). | `00000000-0000-4000-8000-000000000001` |
+| `implants[].identifiers[].identifierValue` | Sí | `string` | Sin restricción adicional declarada | Valor del identificador. | `valor-ejemplo` |
+| `implants[].identifiers[].issuingSystem` | No | `string` | Sin restricción adicional declarada | Sistema emisor, si consta. | `valor-ejemplo` |
+| `implants[].identifiers[].lotNumber` | No | `string` | Sin restricción adicional declarada | Número de lote, si consta. | `valor-ejemplo` |
+| `implants[].identifiers[].serialNumber` | No | `string` | Sin restricción adicional declarada | Número de serie, si consta. | `valor-ejemplo` |
+| `implants[].identifiers[].expirationDate` | No | `string` | formato `date-time` | Vencimiento, si consta. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

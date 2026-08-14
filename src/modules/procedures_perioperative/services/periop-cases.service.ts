@@ -849,16 +849,58 @@ export class PeriopCasesService {
       });
     }
 
-    const [diagnoses, team, milestones, orders, assessment, plan, reports] =
-      await Promise.all([
-        this.casesRepo.findDiagnosesByCase(this.em, caseId),
-        this.casesRepo.findTeamByCase(this.em, caseId),
-        this.casesRepo.findMilestonesByCase(this.em, caseId),
-        this.preopRepo.findOrdersByCase(this.em, caseId),
-        this.preopRepo.findAssessmentByCase(this.em, caseId),
-        this.preopRepo.findAnesthesiaPlanByCase(this.em, caseId),
-        this.intraopRepo.findReportsByCase(this.em, caseId),
-      ]);
+    const [
+      diagnoses,
+      team,
+      milestones,
+      orders,
+      assessment,
+      plan,
+      reports,
+      steps,
+      findings,
+      implants,
+    ] = await Promise.all([
+      this.casesRepo.findDiagnosesByCase(this.em, caseId),
+      this.casesRepo.findTeamByCase(this.em, caseId),
+      this.casesRepo.findMilestonesByCase(this.em, caseId),
+      this.preopRepo.findOrdersByCase(this.em, caseId),
+      this.preopRepo.findAssessmentByCase(this.em, caseId),
+      this.preopRepo.findAnesthesiaPlanByCase(this.em, caseId),
+      this.intraopRepo.findReportsByCase(this.em, caseId),
+      this.intraopRepo.findStepsByCase(this.em, caseId),
+      this.intraopRepo.findFindingsByCase(this.em, caseId),
+      this.intraopRepo.findImplantsByCase(this.em, caseId),
+    ]);
+
+    // Los identificadores dependen de qué implantes salieron, así que no pueden
+    // ir en el `Promise.all` de arriba. Se agrupan por implante en memoria: son
+    // unas pocas filas por caso y la alternativa es una consulta por implante.
+    const identifiers = await this.intraopRepo.findIdentifiersByImplants(
+      this.em,
+      implants.map((implant) => implant.id),
+    );
+    const identifiersByImplant = new Map<
+      string,
+      CaseDetailDto['implants'][number]['identifiers']
+    >();
+    for (const identifier of identifiers) {
+      const group = identifiersByImplant.get(identifier.procedureImplantId);
+      const row = {
+        id: identifier.id,
+        identifierTypeConceptId: identifier.identifierTypeConceptId,
+        identifierValue: identifier.identifierValue,
+        issuingSystem: identifier.issuingSystem,
+        lotNumber: identifier.lotNumber,
+        serialNumber: identifier.serialNumber,
+        expirationDate: identifier.expirationDate,
+      };
+      if (group) {
+        group.push(row);
+      } else {
+        identifiersByImplant.set(identifier.procedureImplantId, [row]);
+      }
+    }
 
     return {
       case: this.toSummary(surgicalCase),
@@ -906,6 +948,41 @@ export class PeriopCasesService {
         reportVersion: r.reportVersion,
         statusConceptId: r.statusConceptId,
         signedAt: r.signedAt,
+      })),
+      operativeSteps: steps.map((s) => ({
+        id: s.id,
+        stepNumber: s.stepNumber,
+        stepCodeConceptId: s.stepCodeConceptId,
+        description: s.description,
+        performedByProfileId: s.performedByProfileId,
+        bodySiteConceptId: s.bodySiteConceptId,
+        lateralityConceptId: s.lateralityConceptId,
+        statusConceptId: s.statusConceptId,
+        startedAt: s.startedAt,
+        endedAt: s.endedAt,
+      })),
+      findings: findings.map((f) => ({
+        id: f.id,
+        operativeStepId: f.operativeStepId,
+        findingCodeConceptId: f.findingCodeConceptId,
+        findingText: f.findingText,
+        bodySiteConceptId: f.bodySiteConceptId,
+        lateralityConceptId: f.lateralityConceptId,
+        severityConceptId: f.severityConceptId,
+        recordedByProfileId: f.recordedByProfileId,
+        recordedAt: f.recordedAt,
+      })),
+      implants: implants.map((i) => ({
+        id: i.id,
+        procedureId: i.procedureId,
+        implantDeviceId: i.implantDeviceId,
+        implantRoleConceptId: i.implantRoleConceptId,
+        bodySiteConceptId: i.bodySiteConceptId,
+        lateralityConceptId: i.lateralityConceptId,
+        implantedAt: i.implantedAt,
+        explantedAt: i.explantedAt,
+        statusConceptId: i.statusConceptId,
+        identifiers: identifiersByImplant.get(i.id) ?? [],
       })),
     };
   }

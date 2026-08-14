@@ -171,14 +171,25 @@ export class ChartTemplatesRepository {
     );
   }
 
-  /** Plantillas por especialidad, opcionalmente acotadas a una especialidad concreta. */
+  /**
+   * Plantillas por especialidad, opcionalmente acotadas a una especialidad
+   * concreta.
+   *
+   * Devuelve las globales (sin tenant) y las propias del tenant del actor: una
+   * plantilla que otra organización armó para su propia especialidad no debe
+   * aparecer acá.
+   */
   findTemplates(
     em: EntityManager,
     specialtyConceptId?: string,
+    tenantId?: string,
   ): Promise<SpecialtyChartTemplates[]> {
     return em.find(
       SpecialtyChartTemplates,
-      specialtyConceptId ? { specialtyConceptId } : {},
+      {
+        ...(specialtyConceptId ? { specialtyConceptId } : {}),
+        $or: [{ tenantId: null }, ...(tenantId ? [{ tenantId }] : [])],
+      },
       { orderBy: { name: 'ASC' } },
     );
   }

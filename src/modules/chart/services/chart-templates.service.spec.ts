@@ -171,9 +171,13 @@ describe('ChartTemplatesService', () => {
         },
       ]);
 
-      const res = await d.service.listTemplates('sp1');
+      const res = await d.service.listTemplates('sp1', 't1');
 
-      expect(d.templatesRepo.findTemplates).toHaveBeenCalledWith(d.em, 'sp1');
+      expect(d.templatesRepo.findTemplates).toHaveBeenCalledWith(
+        d.em,
+        'sp1',
+        't1',
+      );
       expect(res).toHaveLength(1);
       expect(res[0].fields).toEqual([]);
     });
