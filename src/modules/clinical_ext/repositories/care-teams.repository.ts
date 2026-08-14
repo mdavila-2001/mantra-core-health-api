@@ -63,6 +63,29 @@ export class CareTeamsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `CareTeams`.
    */
+  /**
+   * Los equipos de cuidado de un paciente.
+   *
+   * Quién lo atiende, y desde cuándo. Sin esta lectura el expediente no puede
+   * decir de quién es responsabilidad la persona que se está mirando.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente.
+   * @param limit - Tope de filas.
+   * @returns Los equipos, del más reciente al más antiguo.
+   */
+  findByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<CareTeams[]> {
+    return em.find(
+      CareTeams,
+      { patientProfileId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
   create(em: EntityManager, data: CreateCareTeamData): CareTeams {
     return em.create(
       CareTeams,

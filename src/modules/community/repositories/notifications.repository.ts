@@ -53,10 +53,7 @@ export class NotificationsRepository {
    * @param recipientProfileId - Perfil destinatario.
    * @returns Cantidad de notificaciones sin leer.
    */
-  countUnread(
-    em: EntityManager,
-    recipientProfileId: string,
-  ): Promise<number> {
+  countUnread(em: EntityManager, recipientProfileId: string): Promise<number> {
     return em.count(SocialNotifications, {
       recipientProfileId,
       isRead: { $ne: true },

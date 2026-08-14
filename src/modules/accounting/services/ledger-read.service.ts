@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException } from '../../../common';
+import { getCurrentTenantId, ResourceNotFoundException } from '../../../common';
+import { Practices } from '../../practice/entities';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
 import type {
@@ -59,6 +60,42 @@ export class LedgerReadService {
   ) {}
 
   /**
+   * Comprueba que la práctica consultada pertenece al tenant activo.
+   *
+   * Hace falta explícitamente y no basta con confiar en RLS: `RLS_ENFORCE`
+   * está apagado en desarrollo, y ninguna tabla de `accounting` lleva
+   * `tenant_id` —el dueño es la práctica—. Sin esta comprobación, abrir las
+   * lecturas más allá de `SECURITY_ADMIN` dejaría a cualquier profesional leer
+   * los libros de otra organización con sólo adivinar un `practiceId`. En un
+   * módulo contable eso no es una fuga cualquiera: son los estados financieros.
+   *
+   * Responde 403 y no 404 a propósito: la práctica existe, y fingir lo
+   * contrario para no revelar su existencia complicaría el diagnóstico sin
+   * ganar nada — el id ya lo tenía quien preguntó.
+   */
+  private async verificarPracticaDelTenant(practiceId: string): Promise<void> {
+    const tenantId = getCurrentTenantId();
+    // Sin tenant en contexto son los carriles internos (`SYSTEM`, workers), que
+    // no pasan por la cabecera. No hay nada que acotar contra qué.
+    if (tenantId === undefined) return;
+
+    const practica = await this.em
+      .fork()
+      .findOne(Practices, { id: practiceId }, { fields: ['id', 'tenantId'] });
+
+    if (practica === null) {
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
+    }
+    if (practica.tenantId !== tenantId) {
+      throw new ForbiddenException(
+        'La práctica consultada pertenece a otra organización',
+      );
+    }
+  }
+
+  /**
    * El plan de cuentas de una práctica (UC-16-01·L).
    *
    * @param practiceId - Práctica dueña del plan.
@@ -69,6 +106,8 @@ export class LedgerReadService {
     practiceId: string,
     limit = LEDGER_DEFAULT_LIMIT,
   ): Promise<ChartOfAccountsResponseDto> {
+    await this.verificarPracticaDelTenant(practiceId);
+
     const em = this.em.fork();
     const cuentas = await this.accountsRepo.findByPractice(
       em,
@@ -100,6 +139,8 @@ export class LedgerReadService {
   async listJournal(
     query: ListJournalQueryDto,
   ): Promise<ListJournalResponseDto> {
+    await this.verificarPracticaDelTenant(query.practiceId);
+
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
     const em = this.em.fork();
 
@@ -156,6 +197,9 @@ export class LedgerReadService {
         transactionId,
       });
     }
+    // Acá la práctica se conoce recién al cargar el asiento, así que la
+    // comprobación va después de la carga y antes de devolver nada.
+    await this.verificarPracticaDelTenant(asiento.practiceId);
 
     const lineas = await this.journalRepo.findEntriesByTransaction(
       em,
@@ -202,6 +246,8 @@ export class LedgerReadService {
   async trialBalance(
     query: TrialBalanceQueryDto,
   ): Promise<TrialBalanceResponseDto> {
+    await this.verificarPracticaDelTenant(query.practiceId);
+
     const em = this.em.fork();
 
     // Sólo lo POSTEADO: un borrador no es un hecho contable.

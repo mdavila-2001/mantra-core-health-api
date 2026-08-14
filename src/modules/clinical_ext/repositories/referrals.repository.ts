@@ -94,6 +94,29 @@ export class ReferralsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `Referrals`.
    */
+  /**
+   * Las derivaciones de un paciente.
+   *
+   * Es lo que responde «¿a quién lo mandé y en qué quedó?». Se escribían y no
+   * había forma de listarlas, así que el expediente no podía mostrarlas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Paciente.
+   * @param limit - Tope de filas.
+   * @returns Las derivaciones, de la más reciente a la más antigua.
+   */
+  findByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    limit: number,
+  ): Promise<Referrals[]> {
+    return em.find(
+      Referrals,
+      { patientProfileId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
   create(em: EntityManager, data: CreateReferralData): Referrals {
     return em.create(
       Referrals,

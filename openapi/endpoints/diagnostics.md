@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `diagnostics`
 
-Referencia exhaustiva de 18 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-reports`, `diagnostics-specimens`
 - **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
@@ -21,14 +21,16 @@ Referencia exhaustiva de 18 operación(es) del módulo `diagnostics`, derivada d
 8. [POST /diagnostics/data-quality-events](#8-post-diagnostics-data-quality-events) — Registrar evento de calidad de datos + enlazar provenance
 9. [POST /diagnostics/imaging-endpoints](#9-post-diagnostics-imaging-endpoints) — Registrar un endpoint DICOM (soporte para STOW-RS)
 10. [POST /diagnostics/imaging-studies/{id}/dose-events](#10-post-diagnostics-imaging-studies-id-dose-events) — Registrar evento de dosis de radiación
-11. [POST /diagnostics/reports/{reportId}/versions](#11-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
-12. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#12-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
-13. [POST /diagnostics/results/{observationId}/verifications](#13-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
-14. [POST /diagnostics/specimens](#14-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
-15. [POST /diagnostics/specimens/{id}/containers](#15-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
-16. [POST /diagnostics/specimens/{id}/rejection](#16-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
-17. [POST /diagnostics/work-orders](#17-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
-18. [POST /dicomweb/studies](#18-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
+11. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#11-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
+12. [POST /diagnostics/reports/{reportId}/versions](#12-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
+13. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#13-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
+14. [POST /diagnostics/results/{observationId}/verifications](#14-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
+15. [POST /diagnostics/specimens](#15-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
+16. [POST /diagnostics/specimens/{id}/containers](#16-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
+17. [POST /diagnostics/specimens/{id}/rejection](#17-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
+18. [GET /diagnostics/work-orders](#18-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
+19. [POST /diagnostics/work-orders](#19-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
+20. [POST /dicomweb/studies](#20-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
 
 ---
 
@@ -1159,7 +1161,6 @@ Ejemplo de error normalizado:
 
 Registrar un endpoint DICOM (soporte para STOW-RS). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Soporte: alta de endpoint DICOM.
 
 ### Descripción del sistema
 
@@ -1413,7 +1414,120 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /diagnostics/reports/{reportId}/versions
+## 11. GET /diagnostics/patients/{patientProfileId}/imaging-studies
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-imaging`
+- **Nombre:** Listar los estudios de imagen del paciente
+- **Operation ID:** `DiagnosticsImagingController_listStudies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsImagingController.listStudies](../../src/modules/diagnostics/controllers/diagnostics-imaging.controller.ts)
+
+### Descripción de negocio
+
+Listar los estudios de imagen del paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Estudios de imagen de un paciente. Es la lectura que cierra el circuito: quien pidió la prueba puede encontrar su resultado sin conocer de antemano el uuid del estudio.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/patients/{patientProfileId}/imaging-studies` en `DiagnosticsImagingController_listStudies`. El controlador delega en `DiagnosticsImagingService.listStudiesByPatient`. No recibe body. El tipo de retorno estático es `Promise<ImagingStudySummaryDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+| `offset` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/imaging-studies?limit=1&offset=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/imaging-studies?limit=1&offset=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ImagingStudySummaryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImagingStudySummaryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "studyInstanceUid": "00000000-0000-4000-8000-000000000001"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/patients/{patientProfileId}/imaging-studies"
+}
+```
+
+---
+
+## 12. POST /diagnostics/reports/{reportId}/versions
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1570,7 +1684,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
+## 13. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1701,7 +1815,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /diagnostics/results/{observationId}/verifications
+## 14. POST /diagnostics/results/{observationId}/verifications
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -1838,7 +1952,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /diagnostics/specimens
+## 15. POST /diagnostics/specimens
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -1976,7 +2090,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /diagnostics/specimens/{id}/containers
+## 16. POST /diagnostics/specimens/{id}/containers
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -2110,7 +2224,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /diagnostics/specimens/{id}/rejection
+## 17. POST /diagnostics/specimens/{id}/rejection
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -2245,7 +2359,123 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /diagnostics/work-orders
+## 18. GET /diagnostics/work-orders
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-laboratory`
+- **Nombre:** Listar las órdenes de trabajo del laboratorio
+- **Operation ID:** `DiagnosticsLabController_listWorkOrders`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsLabController.listWorkOrders](../../src/modules/diagnostics/controllers/diagnostics-lab.controller.ts)
+
+### Descripción de negocio
+
+Acotado siempre al tenant del contexto.
+
+Contexto declarado en el controlador: Cola de trabajo del laboratorio. `diagnostics` no tenía ninguna lectura: la orden creada sólo existía en la respuesta de su propio POST, así que nadie podía consultar qué quedaba pendiente.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/work-orders` en `DiagnosticsLabController_listWorkOrders`. El controlador delega en `DiagnosticsLabService.listWorkOrders`. No recibe body. El tipo de retorno estático es `Promise<WorkOrderSummaryDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `laboratoryAccessionId` | query | No | `string` | formato `uuid` | Accesión de laboratorio | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Estado de la orden | `00000000-0000-4000-8000-000000000001` |
+| `assignedProfileId` | query | No | `string` | formato `uuid` | Profesional asignado | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `offset` | query | No | `number` | mínimo 0 | Sin descripción específica en OpenAPI. | `0` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/work-orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/work-orders?laboratoryAccessionId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001&assignedProfileId=00000000-0000-4000-8000-000000000001&limit=50&offset=0 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<WorkOrderSummaryDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkOrderSummaryDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "workOrderNumber": "valor-ejemplo",
+    "laboratoryAccessionId": "00000000-0000-4000-8000-000000000001",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+    "assignedProfileId": "00000000-0000-4000-8000-000000000001",
+    "scheduledAt": "2026-07-31T12:00:00.000Z",
+    "completedAt": "2026-07-31T12:00:00.000Z"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/work-orders"
+}
+```
+
+---
+
+## 19. POST /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -2400,7 +2630,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /dicomweb/studies
+## 20. POST /dicomweb/studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`

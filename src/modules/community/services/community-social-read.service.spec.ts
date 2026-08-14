@@ -132,7 +132,10 @@ describe('CommunitySocialReadService', () => {
   describe('listProfilePosts', () => {
     it('pide una fila de más y devuelve cursor cuando hay siguiente', async () => {
       const d = build();
-      d.postsRepo.listByAuthorPage.mockResolvedValue([post, { ...post, id: 'post-2' }]);
+      d.postsRepo.listByAuthorPage.mockResolvedValue([
+        post,
+        { ...post, id: 'post-2' },
+      ]);
 
       const res = await d.service.listProfilePosts('p-1', { limit: 1 });
 

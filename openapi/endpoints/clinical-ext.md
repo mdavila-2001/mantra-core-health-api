@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `clinical_ext`
 
-Referencia exhaustiva de 21 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 23 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
 - **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `OrderSetsController`, `ReferralsController`, `VirtualEncountersController`
@@ -13,25 +13,27 @@ Referencia exhaustiva de 21 operación(es) del módulo `clinical_ext`, derivada 
 
 1. [PATCH /care-gaps/{id}/close](#1-patch-care-gaps-id-close) — Cerrar una brecha de cuidado por evento clínico
 2. [POST /care-gaps/recompute](#2-post-care-gaps-recompute) — Detectar y abrir brechas de cuidado (batch)
-3. [POST /care-teams](#3-post-care-teams) — Crear un equipo de cuidado con sus miembros
-4. [PATCH /care-teams/{id}/members/{memberId}/set-responsible](#4-patch-care-teams-id-members-memberid-set-responsible) — Designar miembro responsable (transferir liderazgo)
-5. [POST /cds-rules](#5-post-cds-rules) — Crear una regla CDS en borrador
-6. [POST /cds-rules/{id}/versions/publish](#6-post-cds-rules-id-versions-publish) — Publicar una versión de la regla CDS
-7. [POST /cds-rules/{id}/versions/rollback](#7-post-cds-rules-id-versions-rollback) — Rollback de la versión activa de la regla CDS
-8. [POST /cds/check-interactions](#8-post-cds-check-interactions) — Detectar interacciones medicamentosas al prescribir
-9. [POST /cds/evaluate](#9-post-cds-evaluate) — Evaluar reglas CDS y generar alertas
-10. [PATCH /clinical-alerts/{id}/acknowledge](#10-patch-clinical-alerts-id-acknowledge) — Reconocer una alerta clínica
-11. [PATCH /clinical-alerts/{id}/override](#11-patch-clinical-alerts-id-override) — Override (sobreescribir) una alerta clínica
-12. [POST /drug-interactions](#12-post-drug-interactions) — Registrar un par de interacción medicamentosa
-13. [POST /immunization-schedules](#13-post-immunization-schedules) — Registrar una dosis del calendario de inmunización
-14. [POST /order-sets](#14-post-order-sets) — Crear una plantilla de órdenes (order set) con sus ítems
-15. [POST /order-sets/{id}/apply](#15-post-order-sets-id-apply) — Aplicar un order set (fan-out de órdenes)
-16. [POST /patients/{id}/immunization-plan/project](#16-post-patients-id-immunization-plan-project) — Proyectar el plan de inmunización y abrir brechas
-17. [POST /referrals](#17-post-referrals) — Emitir una referencia desde un encuentro
-18. [PATCH /referrals/{id}/respond](#18-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
-19. [POST /virtual-encounters](#19-post-virtual-encounters) — Iniciar una sesión de telesalud
-20. [PATCH /virtual-encounters/{id}/end](#20-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
-21. [PATCH /virtual-encounters/{id}/join](#21-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
+3. [GET /care-teams](#3-get-care-teams) — Listar equipos de cuidado de un paciente
+4. [POST /care-teams](#4-post-care-teams) — Crear un equipo de cuidado con sus miembros
+5. [PATCH /care-teams/{id}/members/{memberId}/set-responsible](#5-patch-care-teams-id-members-memberid-set-responsible) — Designar miembro responsable (transferir liderazgo)
+6. [POST /cds-rules](#6-post-cds-rules) — Crear una regla CDS en borrador
+7. [POST /cds-rules/{id}/versions/publish](#7-post-cds-rules-id-versions-publish) — Publicar una versión de la regla CDS
+8. [POST /cds-rules/{id}/versions/rollback](#8-post-cds-rules-id-versions-rollback) — Rollback de la versión activa de la regla CDS
+9. [POST /cds/check-interactions](#9-post-cds-check-interactions) — Detectar interacciones medicamentosas al prescribir
+10. [POST /cds/evaluate](#10-post-cds-evaluate) — Evaluar reglas CDS y generar alertas
+11. [PATCH /clinical-alerts/{id}/acknowledge](#11-patch-clinical-alerts-id-acknowledge) — Reconocer una alerta clínica
+12. [PATCH /clinical-alerts/{id}/override](#12-patch-clinical-alerts-id-override) — Override (sobreescribir) una alerta clínica
+13. [POST /drug-interactions](#13-post-drug-interactions) — Registrar un par de interacción medicamentosa
+14. [POST /immunization-schedules](#14-post-immunization-schedules) — Registrar una dosis del calendario de inmunización
+15. [POST /order-sets](#15-post-order-sets) — Crear una plantilla de órdenes (order set) con sus ítems
+16. [POST /order-sets/{id}/apply](#16-post-order-sets-id-apply) — Aplicar un order set (fan-out de órdenes)
+17. [POST /patients/{id}/immunization-plan/project](#17-post-patients-id-immunization-plan-project) — Proyectar el plan de inmunización y abrir brechas
+18. [GET /referrals](#18-get-referrals) — Listar derivaciones de un paciente
+19. [POST /referrals](#19-post-referrals) — Emitir una referencia desde un encuentro
+20. [PATCH /referrals/{id}/respond](#20-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
+21. [POST /virtual-encounters](#21-post-virtual-encounters) — Iniciar una sesión de telesalud
+22. [PATCH /virtual-encounters/{id}/end](#22-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
+23. [PATCH /virtual-encounters/{id}/join](#23-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
 
 ---
 
@@ -299,7 +301,100 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /care-teams
+## 3. GET /care-teams
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-care-teams`
+- **Nombre:** Listar equipos de cuidado de un paciente
+- **Operation ID:** `CareTeamsController_listByPatient`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CareTeamsController.listByPatient](../../src/modules/clinical_ext/controllers/care-teams.controller.ts)
+
+### Descripción de negocio
+
+Listar equipos de cuidado de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La lectura que faltaba: equipos de cuidado de un paciente. El módulo tenía escrituras y ninguna lectura, así que lo que se registraba no se podía volver a mirar — y ninguna pantalla podía mostrarlo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /care-teams` en `CareTeamsController_listByPatient`. El controlador delega en `CareTeamsService.listByPatient`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /care-teams?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /care-teams?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/care-teams"
+}
+```
+
+---
+
+## 4. POST /care-teams
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-care-teams`
@@ -465,7 +560,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. PATCH /care-teams/{id}/members/{memberId}/set-responsible
+## 5. PATCH /care-teams/{id}/members/{memberId}/set-responsible
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-care-teams`
@@ -578,7 +673,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /cds-rules
+## 6. POST /cds-rules
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -720,7 +815,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /cds-rules/{id}/versions/publish
+## 7. POST /cds-rules/{id}/versions/publish
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -855,7 +950,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /cds-rules/{id}/versions/rollback
+## 8. POST /cds-rules/{id}/versions/rollback
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -974,7 +1069,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /cds/check-interactions
+## 9. POST /cds/check-interactions
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -1118,7 +1213,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /cds/evaluate
+## 10. POST /cds/evaluate
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -1270,7 +1365,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PATCH /clinical-alerts/{id}/acknowledge
+## 11. PATCH /clinical-alerts/{id}/acknowledge
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-alerts`
@@ -1385,7 +1480,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PATCH /clinical-alerts/{id}/override
+## 12. PATCH /clinical-alerts/{id}/override
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-alerts`
@@ -1514,7 +1609,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /drug-interactions
+## 13. POST /drug-interactions
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -1643,7 +1738,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /immunization-schedules
+## 14. POST /immunization-schedules
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-care-gaps`
@@ -1776,7 +1871,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /order-sets
+## 15. POST /order-sets
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-order-sets`
@@ -1936,7 +2031,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /order-sets/{id}/apply
+## 16. POST /order-sets/{id}/apply
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-order-sets`
@@ -2088,7 +2183,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /patients/{id}/immunization-plan/project
+## 17. POST /patients/{id}/immunization-plan/project
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-care-gaps`
@@ -2220,7 +2315,100 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /referrals
+## 18. GET /referrals
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Listar derivaciones de un paciente
+- **Operation ID:** `ReferralsController_listByPatient`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.listByPatient](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Listar derivaciones de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La lectura que faltaba: derivaciones de un paciente. El módulo tenía escrituras y ninguna lectura, así que lo que se registraba no se podía volver a mirar — y ninguna pantalla podía mostrarlo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /referrals` en `ReferralsController_listByPatient`. El controlador delega en `ReferralsService.listByPatient`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /referrals?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /referrals?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals"
+}
+```
+
+---
+
+## 19. POST /referrals
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2362,7 +2550,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. PATCH /referrals/{id}/respond
+## 20. PATCH /referrals/{id}/respond
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2487,7 +2675,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /virtual-encounters
+## 21. POST /virtual-encounters
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -2618,7 +2806,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PATCH /virtual-encounters/{id}/end
+## 22. PATCH /virtual-encounters/{id}/end
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -2746,7 +2934,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. PATCH /virtual-encounters/{id}/join
+## 23. PATCH /virtual-encounters/{id}/join
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`

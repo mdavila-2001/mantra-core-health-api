@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **922 de 922 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **958 de 958 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -50,20 +50,20 @@ Esta referencia documenta **922 de 922 operaciones HTTP** registradas en `openap
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
 | [audit](audit.md) | 11 | `audit`, `audit-compliance`, `audit-moderation`, `audit-privacy` | 4 |
 | [auth_providers](auth-providers.md) | 12 | `auth-providers` | 1 |
-| [authz](authz.md) | 20 | `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles` | 7 |
+| [authz](authz.md) | 21 | `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles` | 7 |
 | [automation](automation.md) | 17 | `automation` | 2 |
 | [billing](billing.md) | 13 | `billing-operations`, `billing-payables`, `billing-receivables` | 3 |
 | [chart](chart.md) | 13 | `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates` | 5 |
 | [clinical](clinical.md) | 24 | `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records` | 6 |
-| [clinical_ext](clinical-ext.md) | 21 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 7 |
+| [clinical_ext](clinical-ext.md) | 23 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 7 |
 | [common](common.md) | 13 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files` | 5 |
-| [community](community.md) | 19 | `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-reviews`, `community-social` | 7 |
+| [community](community.md) | 38 | `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-reviews`, `community-social`, `community-timeline` | 8 |
 | [consent](consent.md) | 12 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-patient-objections`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 8 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
 | [delegated_access](delegated-access.md) | 11 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 16 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
-| [diagnostics](diagnostics.md) | 18 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-reports`, `diagnostics-specimens` | 4 |
+| [diagnostics](diagnostics.md) | 20 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-reports`, `diagnostics-specimens` | 4 |
 | [directory](directory.md) | 16 | `directory-admin-tenants`, `directory-tenants` | 2 |
 | [document_store](document-store.md) | 5 | `document-store` | 1 |
 | [education](education.md) | 14 | `education` | 1 |
@@ -72,13 +72,13 @@ Esta referencia documenta **922 de 922 operaciones HTTP** registradas en `openap
 | [geo](geo.md) | 10 | `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips` | 4 |
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
-| [health_data](health-data.md) | 15 | `fhir-r5`, `health-data` | 2 |
+| [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 30 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 24 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 23 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-claims`, `insurance-coverage`, `insurance-prior-auth`, `insurance-reconciliation` | 7 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
-| [lakehouse](lakehouse.md) | 12 | `lakehouse` | 2 |
+| [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
 | [marketing](marketing.md) | 14 | `marketing` | 2 |
 | [messaging](messaging.md) | 13 | `messaging`, `messaging-internal`, `messaging-webhooks` | 3 |
 | [object_storage](object-storage.md) | 13 | `dicomweb`, `object-storage` | 2 |
@@ -88,9 +88,9 @@ Esta referencia documenta **922 de 922 operaciones HTTP** registradas en `openap
 | [pharmacy_inventory](pharmacy-inventory.md) | 15 | `pharmacy-inventory`, `pharmacy-inventory-internal` | 4 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
-| [practice](practice.md) | 13 | `practice` | 5 |
-| [procedures_perioperative](procedures-perioperative.md) | 23 | `procedure-cases` | 1 |
-| [profiles](profiles.md) | 16 | `profiles-patients`, `profiles-practitioners` | 2 |
+| [practice](practice.md) | 16 | `practice` | 5 |
+| [procedures_perioperative](procedures-perioperative.md) | 28 | `procedure-cases` | 1 |
+| [profiles](profiles.md) | 18 | `profiles-patients`, `profiles-practitioners` | 2 |
 | [promotions](promotions.md) | 15 | `loyalty`, `promotions` | 2 |
 | [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
@@ -113,4 +113,4 @@ Esta referencia documenta **922 de 922 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 922 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 958 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

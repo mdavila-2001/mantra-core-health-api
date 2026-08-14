@@ -44,6 +44,11 @@ export interface CreateCredentialData {
    */
   issuingInstitutionText?: string;
   /**
+   * Cuándo se emitió. Sin ella, una línea de tiempo de formación no se puede
+   * ordenar y se lee como una lista de títulos sueltos.
+   */
+  issueDate?: Date;
+  /**
    * Valor de verification source uri mantenido por la instancia.
    */
   verificationSourceUri?: string;
@@ -92,6 +97,7 @@ export class ProfessionalCredentialsRepository {
         credentialTypeConceptId: data.credentialTypeConceptId,
         number: data.number,
         issuingInstitutionText: data.issuingInstitutionText,
+        issueDate: data.issueDate,
         verificationSourceUri: data.verificationSourceUri,
         stateConceptId: data.stateConceptId,
         ...createdBy(data.actorUserId),
@@ -118,6 +124,30 @@ export class ProfessionalCredentialsRepository {
       $or: [{ expiryDate: null }, { expiryDate: { $gte: now } }],
     });
     return count > 0;
+  }
+
+  /**
+   * Las credenciales del profesional: títulos, posgrados y certificaciones.
+   *
+   * Es **la trayectoria formativa** — lo que en un perfil profesional se lee
+   * como «estudios»—. Se devuelven todas, incluidas las vencidas y las que no
+   * llegaron a verificarse: una certificación que caducó sigue siendo formación
+   * cursada, y ocultarla dejaría huecos inexplicables en la línea de tiempo.
+   * Qué hacer con cada estado lo decide quien la muestra, no esta consulta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - Perfil profesional dueño de las credenciales.
+   * @returns Sus credenciales, de la más reciente a la más antigua.
+   */
+  findByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<ProfessionalCredentials[]> {
+    return em.find(
+      ProfessionalCredentials,
+      { practitionerProfileId },
+      { orderBy: { issueDate: 'desc', createdAt: 'desc' } },
+    );
   }
 
   /**

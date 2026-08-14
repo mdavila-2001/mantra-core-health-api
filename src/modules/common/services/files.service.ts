@@ -30,12 +30,58 @@ import {
   FileResponseDto,
   FileSensitivity,
   FileVersionResponseDto,
+  LinkedFilePageDto,
+  LinkedFileResponseDto,
+  ListFileLinksQueryDto,
   ScanResult,
   ScanResultDto,
 } from '../dto';
 
 /** Ventana de validez de una URL de descarga firmada. */
 const DOWNLOAD_URL_TTL_MS = 15 * 60 * 1000;
+
+/**
+ * Tope de adjuntos por recurso en una lectura.
+ *
+ * No hay paginación por cursor acá a propósito: una ficha con más de cien
+ * adjuntos es un problema de producto —hay que agruparlos por episodio— y no
+ * uno que se resuelva dando la página siguiente. El día que haga falta, el
+ * contrato ya tiene `count` para notar el recorte.
+ */
+const LINKED_FILES_PAGE_SIZE = 100;
+
+/**
+ * Traduce el concepto de categoría de vuelta al valor del contrato.
+ *
+ * El camino de ida (`CONCEPTS['FILE_CATEGORY_' + categoría]`) ya existía; el de
+ * vuelta no hacía falta porque hasta ahora la categoría siempre venía en el
+ * cuerpo de la petición. Al **listar** archivos ya guardados, lo único que hay
+ * es el uuid del concepto.
+ *
+ * Un concepto que no case cae en `DOCUMENT`: es el valor honesto para «no sé
+ * qué es esto», y ninguna pantalla decide nada grave a partir de la categoría.
+ */
+function categoryFromConcept(conceptId: string): FileCategory {
+  const encontrada = Object.values(FileCategory).find(
+    (valor) => CONCEPTS[`FILE_CATEGORY_${valor}`] === conceptId,
+  );
+  return encontrada ?? FileCategory.DOCUMENT;
+}
+
+/**
+ * Traduce el concepto de sensibilidad de vuelta al valor del contrato.
+ *
+ * **El default es `PHI`, y es deliberado.** Es la dirección segura: si el
+ * concepto no se reconoce, tratar el archivo como dato clínico protegido puede
+ * ocultarlo de más, pero tratarlo como `NORMAL` lo mostraría a quien no debe.
+ * Entre equivocarse de más y equivocarse de menos, acá se elige de más.
+ */
+function sensitivityFromConcept(conceptId: string): FileSensitivity {
+  const encontrada = Object.values(FileSensitivity).find(
+    (valor) => CONCEPTS[`SENSITIVITY_${valor}`] === conceptId,
+  );
+  return encontrada ?? FileSensitivity.PHI;
+}
 
 /**
  * Secreto de firma para las URL de descarga simuladas. En producción la firma la
@@ -468,6 +514,79 @@ export class FilesService {
       'Download URL generated',
     );
     return { url, expiresAt };
+  }
+
+  /**
+   * Los archivos adjuntos a un recurso (UC-02-08, lectura).
+   *
+   * ## Por qué existía el vínculo y no la lista
+   *
+   * `POST /common/files/:id/links` existe desde el principio, pero nada leía
+   * `file_links`: se podía adjuntar y no se podía ver lo adjuntado. La ficha
+   * clínica necesitaba las dos mitades.
+   *
+   * ## El archivo viene resuelto, no sólo su id
+   *
+   * Una lista de adjuntos se pinta con el nombre, la categoría y la
+   * sensibilidad. Devolver el vínculo pelado obligaría a la pantalla a pedir
+   * cada archivo por separado: diez adjuntos, once peticiones.
+   *
+   * ## Los borrados no aparecen
+   *
+   * El borrado de archivos es lógico (`softDelete`), y el vínculo sobrevive al
+   * archivo. Si no se filtrara, la ficha seguiría mostrando adjuntos que ya no
+   * se pueden descargar.
+   *
+   * @param query - De qué recurso son los adjuntos. Los dos campos obligatorios.
+   * @returns Los adjuntos vigentes, del más reciente al más antiguo.
+   */
+  async listLinkedFiles(
+    query: ListFileLinksQueryDto,
+  ): Promise<LinkedFilePageDto> {
+    this.logger.info(
+      {
+        operation: 'common.fileLink.list',
+        ownerType: query.ownerType,
+        ownerId: query.ownerId,
+      },
+      'Listing linked files',
+    );
+
+    const forked = this.em.fork();
+    const ownerTypeConceptId = CONCEPTS[`OWNER_${query.ownerType}`];
+
+    const links = await this.fileLinksRepo.findByOwner(
+      forked,
+      ownerTypeConceptId,
+      query.ownerId,
+      LINKED_FILES_PAGE_SIZE,
+    );
+
+    const items: LinkedFileResponseDto[] = [];
+    for (const link of links) {
+      const file = await this.filesRepo.findById(forked, link.fileId);
+      if (
+        !file ||
+        file.deletedAt ||
+        file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
+      ) {
+        continue;
+      }
+
+      items.push({
+        linkId: link.id,
+        ownerId: link.ownerId,
+        ownerType: query.ownerType,
+        linkedAt: link.createdAt,
+        file: this.fileToResponse(
+          file,
+          categoryFromConcept(file.categoryConceptId),
+          sensitivityFromConcept(file.sensitivityConceptId),
+        ),
+      });
+    }
+
+    return { items, count: items.length };
   }
 
   /**

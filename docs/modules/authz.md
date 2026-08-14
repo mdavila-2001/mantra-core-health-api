@@ -9,7 +9,7 @@
 # Módulo `authz`
 
 **Fuente:** [`src/modules/authz/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/authz/README.md)
-· 7 controllers · 7 services · 14 repositories · 15 entidades · 17 DTO
+· 7 controllers · 8 services · 14 repositories · 15 entidades · 17 DTO
 
 ---
 
@@ -69,6 +69,31 @@ FKs como columnas `uuid` planas.
 - **Masking**: `field_permissions` con check `canWrite ⇒ canRead` (412 si no).
 - **Vigencia**: `valid_from < valid_to`; la revocación distingue `revoked` de
   `expired` según `valid_to`.
+
+## Roles efectivos y el claim `roles` del token
+
+`RolesGuard` autoriza mirando **sólo** el claim `roles` del JWT. Hasta agosto de
+2026 ese claim se construía únicamente con `iam.user_global_roles`, cuyo catálogo
+tiene cuatro códigos (`USER`, `PATIENT`, `SECURITY_ADMIN`, `SUPERADMIN`): todo
+`@Roles('CLINICIAN')`, `@Roles('SURGEON')`… era inalcanzable salvo por el comodín
+`SUPERADMIN`, y los roles compuestos aquí no llegaban al guard.
+
+Ahora `AuthzEffectiveRolesService.codesForUser` resuelve los códigos vigentes de
+`authz.user_role_assignments` e `iam` los suma al claim al emitir y al refrescar
+el token. Consecuencias que conviene tener presentes:
+
+- **La vigencia se respeta.** `findActiveForUser` filtra por `valid_from`/
+  `valid_to` además del estado; antes sólo por estado, así que un rol temporal
+  seguía concediendo acceso indefinidamente.
+- **La revocación tarda como mucho lo que dura el access token** (15 min): el
+  claim se recalcula al refrescar. Para cortar antes hay que revocar la sesión.
+- **`ensureRoleByCode`** concede un rol dentro de la transacción del llamador.
+  Lo usan el alta administrativa de profesional (`clinicalRoles`) y la
+  verificación de matrícula (concede `PRACTITIONER`).
+- Los diez roles asistenciales de sistema los siembra
+  `AuthzClinicalRolesSeedService` (`src/common/seed/`) desde `authz.seed.ts`;
+  `GET /authz/roles` los lista con su código para poder asignarlos sin conocer
+  el uuid de memoria.
 
 ## Conceptos
 

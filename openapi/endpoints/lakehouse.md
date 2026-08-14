@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `lakehouse`
 
-Referencia exhaustiva de 12 operación(es) del módulo `lakehouse`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 13 operación(es) del módulo `lakehouse`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `lakehouse`
 - **Controladores:** `LakehouseController`, `ResearchController`
@@ -22,7 +22,8 @@ Referencia exhaustiva de 12 operación(es) del módulo `lakehouse`, derivada del
 9. [POST /research/dataset-releases/{id}/approve](#9-post-research-dataset-releases-id-approve) — Aprobar y materializar el manifiesto de-identificado
 10. [POST /research/dataset-releases/{id}/revoke](#10-post-research-dataset-releases-id-revoke) — Expirar o revocar el release
 11. [GET /research/dataset-releases/expired](#11-get-research-dataset-releases-expired) — Listar releases con manifiesto vencido sin cerrar
-12. [POST /research/projects/{id}/cohorts](#12-post-research-projects-id-cohorts) — Definir el proyecto de investigación y su cohorte
+12. [POST /research/deidentification-profiles](#12-post-research-deidentification-profiles) — Dar de alta un perfil de de-identificación
+13. [POST /research/projects/{id}/cohorts](#13-post-research-projects-id-cohorts) — Definir el proyecto de investigación y su cohorte
 
 ---
 
@@ -1727,7 +1728,148 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /research/projects/{id}/cohorts
+## 12. POST /research/deidentification-profiles
+
+- **Módulo:** `lakehouse`
+- **Etiqueta OpenAPI:** `lakehouse`
+- **Nombre:** Dar de alta un perfil de de-identificación
+- **Operation ID:** `ResearchController_createDeidentificationProfile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ResearchController.createDeidentificationProfile](../../src/modules/lakehouse/controllers/research.controller.ts)
+
+### Descripción de negocio
+
+Dar de alta un perfil de de-identificación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Alta del perfil de de-identificación. Va antes que la cohorte porque ésta lo exige; sin esta operación el flujo de investigación no tenía por dónde empezar.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /research/deidentification-profiles` en `ResearchController_createDeidentificationProfile`. El controlador delega en `ResearchReleaseService.createDeidentificationProfile`. Valida el body como `CreateDeidentificationProfileDto` y consume `application/json`. El tipo de retorno estático es `Promise<DeidentificationProfileResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateDeidentificationProfileDto`; los campos opcionales se omiten.
+
+```http
+POST /research/deidentification-profiles HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "methodologyConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `RESEARCH_GOVERNANCE`, `DPO`, `PRINCIPAL_INVESTIGATOR`, `PLATFORM_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `methodologyConceptId` | Sí | `string` | formato `uuid` | Metodología de de-identificación aplicada | `00000000-0000-4000-8000-000000000001` |
+| `directIdentifierRulesJson` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `quasiIdentifierRulesJson` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `dateShiftPolicyJson` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `freeTextPolicyJson` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /research/deidentification-profiles HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "methodologyConceptId": "00000000-0000-4000-8000-000000000001",
+  "directIdentifierRulesJson": {},
+  "quasiIdentifierRulesJson": {},
+  "dateShiftPolicyJson": {},
+  "freeTextPolicyJson": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeidentificationProfileResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "stateConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador del perfil. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro del tenant. | `CODIGO_EJEMPLO` |
+| `stateConceptId` | Sí | `string` | formato `uuid` | Concepto de estado: nace activo. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RESEARCH_GOVERNANCE, DPO, PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/research/deidentification-profiles"
+}
+```
+
+---
+
+## 13. POST /research/projects/{id}/cohorts
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`

@@ -14,6 +14,7 @@ import {
   DerivativeType,
   FileCategory,
   FileSensitivity,
+  OwnerType,
   ScanResult,
 } from '../dto';
 import type { AuthenticatedUser } from '../../../common';
@@ -51,7 +52,7 @@ describe('FilesService', () => {
       create: fn(),
     };
     const fileDerivativesRepo = { create: fn() };
-    const fileLinksRepo = { create: fn() };
+    const fileLinksRepo = { create: fn(), findByOwner: fn() };
     const service = new FilesService(
       em as never,
       filesRepo,
@@ -313,6 +314,133 @@ describe('FilesService', () => {
       await expect(
         service.generateDownloadUrl('missing'),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+  describe('listLinkedFiles', () => {
+    /**
+     * El vínculo sobrevive al archivo: `softDelete` es lógico y no toca
+     * `file_links`. Sin este filtro la ficha seguiría ofreciendo adjuntos que
+     * ya no se pueden descargar — un enlace que lleva a un 404 es peor que no
+     * mostrarlo.
+     */
+    it('omite los archivos borrados lógicamente y los que ya no existen', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-vivo', ownerId: 'p-1', createdAt: new Date() },
+        {
+          id: 'l-2',
+          fileId: 'f-borrado',
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        },
+        {
+          id: 'l-3',
+          fileId: 'f-fantasma',
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        },
+      ]);
+      filesRepo.findById.mockImplementation((_em: unknown, id: string) => {
+        if (id === 'f-vivo') {
+          return Promise.resolve({
+            id: 'f-vivo',
+            originalName: 'radiografia.jpg',
+            categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+            sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+            lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+            createdAt: new Date(),
+          });
+        }
+        if (id === 'f-borrado') {
+          return Promise.resolve({
+            id: 'f-borrado',
+            deletedAt: new Date(),
+            categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+            sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+            lifecycleStatusConceptId: CONCEPTS.FILE_DELETED,
+            createdAt: new Date(),
+          });
+        }
+        return Promise.resolve(null);
+      });
+
+      const pagina = await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      expect(pagina.count).toBe(1);
+      expect(pagina.items[0]!.file.id).toBe('f-vivo');
+      expect(pagina.items[0]!.linkId).toBe('l-1');
+    });
+
+    /**
+     * La categoría y la sensibilidad se guardan como uuid de concepto; el
+     * camino de vuelta no existía porque hasta ahora siempre venían en el
+     * cuerpo de la petición.
+     */
+    it('traduce los conceptos de vuelta a los valores del contrato', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      const pagina = await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      expect(pagina.items[0]!.file.category).toBe(FileCategory.IMAGE);
+      expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
+      expect(pagina.items[0]!.ownerType).toBe(OwnerType.PATIENT);
+    });
+
+    /**
+     * Un concepto que no case cae en PHI, no en NORMAL. Entre ocultar de más y
+     * mostrar de menos, acá se elige ocultar: es dato clínico.
+     */
+    it('un concepto de sensibilidad desconocido se trata como PHI', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        categoryConceptId: 'concepto-que-nadie-declaro',
+        sensitivityConceptId: 'concepto-que-nadie-declaro',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      const pagina = await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-1',
+      });
+
+      expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
+      expect(pagina.items[0]!.file.category).toBe(FileCategory.DOCUMENT);
+    });
+
+    it('acota siempre por propietario y con tope', async () => {
+      const { service, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([]);
+
+      await service.listLinkedFiles({
+        ownerType: OwnerType.PATIENT,
+        ownerId: 'p-7',
+      });
+
+      const [, tipo, owner, tope] = fileLinksRepo.findByOwner.mock.calls[0];
+      expect(tipo).toBe(CONCEPTS.OWNER_PATIENT);
+      expect(owner).toBe('p-7');
+      expect(typeof tope).toBe('number');
     });
   });
 });

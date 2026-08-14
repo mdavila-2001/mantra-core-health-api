@@ -25,6 +25,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const profilesRepo = { findById: mockFn() };
   const reviewsRepo = {
+    findByTarget: mockFn(() => Promise.resolve([])),
     findByReviewerEncounter: mockFn(),
     create: mockFn(),
     createDimensionScore: mockFn(),

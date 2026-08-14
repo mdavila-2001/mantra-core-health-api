@@ -24,9 +24,20 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const profilesRepo = { findById: mockFn(), create: mockFn() };
+  // `fork` devuelve el mismo doble: `getOwnProfile` lee con un contexto propio
+  // y `upsertOwnProfile` escribe en una transacción, pero para la prueba es el
+  // mismo objeto.
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
+  const profilesRepo = {
+    findById: mockFn(),
+    findByTenant: mockFn(() => Promise.resolve([])),
+    findByTarget: mockFn(() => Promise.resolve(null)),
+    findBySlug: mockFn(() => Promise.resolve(null)),
+    create: mockFn(),
+  };
   const postsRepo = {
+    findByAuthor: mockFn(() => Promise.resolve([])),
     create: mockFn(),
     createMedia: mockFn(),
     upsertHashtag: mockFn(),
@@ -57,6 +68,7 @@ function build() {
   );
   return {
     service,
+    em,
     tx,
     profilesRepo,
     postsRepo,
@@ -89,6 +101,125 @@ describe('CommunitySocialService', () => {
         status: CONCEPTS.STATE_ACTIVE,
       });
       expect(d.tx.flush).toHaveBeenCalled();
+    });
+  });
+
+  describe('getOwnProfile', () => {
+    /**
+     * No tener vitrina es el estado normal de todo el mundo hasta que decide
+     * publicar algo: no puede salir como un fallo.
+     */
+    it('devuelve null cuando el sujeto todavía no tiene vitrina', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget.mockResolvedValue(null);
+
+      const perfil = await d.service.getOwnProfile({
+        id: 'u-1',
+        roles: [],
+      } as any);
+
+      expect(perfil).toBeNull();
+    });
+
+    /** Un profesional se representa por su perfil profesional, no por la cuenta. */
+    it('resuelve por el perfil profesional cuando la sesión es de un practitioner', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget.mockResolvedValue({
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'hp-1',
+        slug: 'dra-salas',
+        displayName: 'Dra. Salas',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      await d.service.getOwnProfile({
+        id: 'u-1',
+        roles: [],
+        practitionerProfileId: 'hp-1',
+      } as any);
+
+      expect(d.profilesRepo.findByTarget).toHaveBeenCalledWith(d.em, 'hp-1');
+    });
+
+    it('una cuenta sin perfil profesional se representa a sí misma', async () => {
+      const d = build();
+      await d.service.getOwnProfile({ id: 'u-1', roles: [] } as any);
+
+      expect(d.profilesRepo.findByTarget).toHaveBeenCalledWith(d.em, 'u-1');
+    });
+  });
+
+  describe('upsertOwnProfile', () => {
+    /** Sin vitrina previa: crea. */
+    it('crea la vitrina cuando el sujeto no tenía ninguna', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget
+        .mockResolvedValueOnce(null) // dentro de la transacción, antes de crear
+        .mockResolvedValueOnce({
+          id: 'pp-1',
+          tenantId: 't-1',
+          targetId: 'u-1',
+          slug: 'nuevo-slug',
+          displayName: 'Nombre',
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        }); // la relectura posterior
+
+      const resultado = await d.service.upsertOwnProfile(
+        { tenantId: 't-1', slug: 'nuevo-slug', displayName: 'Nombre' },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(d.profilesRepo.create).toHaveBeenCalled();
+      expect(resultado.slug).toBe('nuevo-slug');
+    });
+
+    /** Con vitrina previa: actualiza el objeto existente, no crea uno nuevo. */
+    it('actualiza la vitrina existente en vez de duplicarla', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'slug-viejo',
+        displayName: 'Nombre viejo',
+        headline: undefined,
+        biography: undefined,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      // El `findBySlug` dentro de la transacción encuentra la MISMA fila que se
+      // está editando: no es un choque, es la vitrina propia.
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+
+      await d.service.upsertOwnProfile(
+        { tenantId: 't-1', slug: 'slug-nuevo', displayName: 'Nombre nuevo' },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(d.profilesRepo.create).not.toHaveBeenCalled();
+      expect(existente.slug).toBe('slug-nuevo');
+      expect(existente.displayName).toBe('Nombre nuevo');
+    });
+
+    /**
+     * Dos vitrinas con el mismo slug serían dos enlaces que llevan a personas
+     * distintas según cuál resuelva primero.
+     */
+    it('rechaza un slug que ya usa otro sujeto', async () => {
+      const d = build();
+      d.profilesRepo.findBySlug.mockResolvedValue({
+        id: 'pp-de-otro',
+        targetId: 'otro-sujeto',
+      });
+
+      await expect(
+        d.service.upsertOwnProfile(
+          { tenantId: 't-1', slug: 'ocupado', displayName: 'Nombre' },
+          { id: 'u-1', roles: [] } as any,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.profilesRepo.create).not.toHaveBeenCalled();
     });
   });
 
