@@ -24,6 +24,14 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       code: 'PROFILE_TARGET_ORGANIZATION',
       display: 'Organization public profile',
     },
+    PROFILE_VISIBILITY_PUBLIC: {
+      code: 'PROFILE_VISIBILITY_PUBLIC',
+      display: 'Profile listed on the public directory',
+    },
+    PROFILE_VISIBILITY_PRIVATE: {
+      code: 'PROFILE_VISIBILITY_PRIVATE',
+      display: 'Profile visible only to authenticated sessions',
+    },
 
     // --- Posts ---
     POST_TYPE_TEXT: { code: 'POST_TYPE_TEXT', display: 'Text post' },
@@ -405,6 +413,28 @@ export const POST_VISIBILITY_CONCEPT_BY_CODE: Record<string, string> = {
   PUBLIC: COMM.POST_VISIBILITY_PUBLIC,
   FOLLOWERS: COMM.POST_VISIBILITY_FOLLOWERS,
   PRIVATE: COMM.POST_VISIBILITY_PRIVATE,
+};
+
+/**
+ * Visibilidad declarada de un perfil público → concept id.
+ *
+ * **La regla es la inversa que en los posts, y a propósito.** Un post con
+ * `visibility_concept_id` nulo se lee como público porque ya se publicó en un
+ * muro y esconderlo ahora rompería lo que sus lectores ya vieron. Un perfil con
+ * la columna nula se lee como **privado**.
+ *
+ * El motivo es la superficie donde cae cada default. Lo de los posts se decide
+ * dentro de la sesión, entre gente que ya se ve. El directorio público de P2 es
+ * anónimo y **atraviesa todos los tenants**: `@Public()` levanta la exigencia de
+ * contexto de tenant. Si el nulo contara como público, cada perfil creado antes
+ * de que existiera este concepto —todos los de hoy— quedaría publicado en
+ * internet sin que su titular lo pidiera nunca.
+ *
+ * Aparecer en el directorio es opt-in explícito. No se hereda de un nulo.
+ */
+export const PROFILE_VISIBILITY_CONCEPT_BY_CODE: Record<string, string> = {
+  PUBLIC: COMM.PROFILE_VISIBILITY_PUBLIC,
+  PRIVATE: COMM.PROFILE_VISIBILITY_PRIVATE,
 };
 
 /** Followable object type enum → concept id (UC-19-05). */

@@ -13,6 +13,8 @@ import { CommunityPollsReadService } from './community-polls-read.service';
 import { ResourceNotFoundException } from '../../../common';
 import { COMM } from '../community.concepts';
 
+const actor = { id: 'user-1', roles: ['USER'] } as any;
+
 /**
  * Construye el servicio de grupos con dependencias controladas.
  * @returns Resultado de build.
@@ -25,13 +27,19 @@ function buildGroups() {
     findById: mockFn(),
     findMember: mockFn().mockResolvedValue(null),
   };
+  const visibility = {
+    resolveActorProfileId: mockFn((_em: any, _actor: any, pedido?: string) =>
+      Promise.resolve(pedido),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityGroupsReadService(
     em as any,
     groupsRepo as any,
+    visibility as any,
     logger as any,
   );
-  return { service, groupsRepo };
+  return { service, groupsRepo, visibility };
 }
 
 /**
@@ -47,7 +55,12 @@ function buildPolls() {
     listVotedOptionIds: mockFn().mockResolvedValue([]),
   };
   const postsRepo = { findById: mockFn().mockResolvedValue({ id: 'post-1' }) };
-  const visibility = { canViewPost: mockFn().mockResolvedValue(true) };
+  const visibility = {
+    canViewPost: mockFn().mockResolvedValue(true),
+    resolveActorProfileId: mockFn((_em: any, _actor: any, pedido?: string) =>
+      Promise.resolve(pedido),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityPollsReadService(
     em as any,
@@ -77,7 +90,7 @@ describe('CommunityGroupsReadService', () => {
     const d = buildGroups();
     d.groupsRepo.findById.mockResolvedValue(null);
     await expect(
-      d.service.listMembers('g-x', undefined, { limit: 10 }),
+      d.service.listMembers('g-x', actor, undefined, { limit: 10 }),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
@@ -89,7 +102,7 @@ describe('CommunityGroupsReadService', () => {
     });
 
     await expect(
-      d.service.listMembers('g-1', 'p-ajeno', { limit: 10 }),
+      d.service.listMembers('g-1', actor, 'p-ajeno', { limit: 10 }),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
@@ -111,7 +124,7 @@ describe('CommunityGroupsReadService', () => {
       },
     ]);
 
-    const res = await d.service.listMembers('g-1', 'p-1', { limit: 10 });
+    const res = await d.service.listMembers('g-1', actor, 'p-1', { limit: 10 });
 
     expect(res.items).toHaveLength(1);
   });
@@ -127,7 +140,7 @@ describe('CommunityGroupsReadService', () => {
     });
 
     await expect(
-      d.service.listMembers('g-1', 'p-1', { limit: 10 }),
+      d.service.listMembers('g-1', actor, 'p-1', { limit: 10 }),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 });
@@ -146,7 +159,7 @@ describe('CommunityPollsReadService', () => {
     d.pollsRepo.findPollById.mockResolvedValue(poll);
     d.visibility.canViewPost.mockResolvedValue(false);
 
-    await expect(d.service.getPoll('poll-1', 'p-9')).rejects.toBeInstanceOf(
+    await expect(d.service.getPoll('poll-1', actor, 'p-9')).rejects.toBeInstanceOf(
       ResourceNotFoundException,
     );
   });
@@ -162,7 +175,7 @@ describe('CommunityPollsReadService', () => {
       { pollOptionId: 'o-1', count: 2 },
     ]);
 
-    const res = await d.service.getPoll('poll-1');
+    const res = await d.service.getPoll('poll-1', actor);
 
     expect(res.options[0].voteCount).toBe(2);
     expect(res.options[1].voteCount).toBe(0);
@@ -174,7 +187,7 @@ describe('CommunityPollsReadService', () => {
     d.pollsRepo.findPollById.mockResolvedValue(poll);
     d.pollsRepo.listVotedOptionIds.mockResolvedValue(['o-1', 'o-2']);
 
-    const res = await d.service.getPoll('poll-1', 'p-1');
+    const res = await d.service.getPoll('poll-1', actor, 'p-1');
 
     expect(res.actorVotedOptionIds).toEqual(['o-1', 'o-2']);
   });
@@ -183,7 +196,7 @@ describe('CommunityPollsReadService', () => {
     const d = buildPolls();
     d.pollsRepo.findPollById.mockResolvedValue(poll);
 
-    const res = await d.service.getPoll('poll-1');
+    const res = await d.service.getPoll('poll-1', actor);
 
     expect(res.actorVotedOptionIds).toBeUndefined();
     expect(d.pollsRepo.listVotedOptionIds).not.toHaveBeenCalled();

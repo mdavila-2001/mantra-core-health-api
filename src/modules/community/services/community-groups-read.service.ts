@@ -5,8 +5,10 @@ import {
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
+  type AuthenticatedUser,
 } from '../../../common';
 import { GroupsRepository } from '../repositories';
+import { CommunityVisibilityService } from './community-visibility.service';
 import { COMM } from '../community.concepts';
 import type { GroupPageDto, GroupMemberPageDto } from '../dto';
 
@@ -24,11 +26,13 @@ export class CommunityGroupsReadService {
    *
    * @param em - Contexto de persistencia.
    * @param groupsRepo - Acceso a `community.groups` y `group_members`.
+   * @param visibility - Resuelve el perfil del lector contra la sesión.
    * @param logger - Logger estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly groupsRepo: GroupsRepository,
+    private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityGroupsReadService.name);
@@ -95,14 +99,16 @@ export class CommunityGroupsReadService {
    * resto responde 404, igual que si no existiera.
    *
    * @param groupId - Grupo a leer.
-   * @param actorProfileId - Perfil del lector, si declaró uno.
+   * @param actor - Quien pide la lectura.
+   * @param requestedProfileId - Perfil del lector **propuesto**; se verifica.
    * @param options - Cursor y tope.
    * @returns Página de integrantes.
    * @throws ResourceNotFoundException si el grupo no existe o es secreto y ajeno.
    */
   async listMembers(
     groupId: string,
-    actorProfileId: string | undefined,
+    actor: AuthenticatedUser,
+    requestedProfileId: string | undefined,
     options: {
       /** Cursor opaco de la página anterior. */
       cursor?: string;
@@ -111,6 +117,14 @@ export class CommunityGroupsReadService {
     },
   ): Promise<GroupMemberPageDto> {
     const em = this.em.fork();
+    // La pertenencia a un grupo secreto se prueba contra la sesión: con el
+    // perfil declarado en la consulta, bastaba con nombrar a un integrante para
+    // listar los miembros de un grupo del que uno no forma parte.
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+      requestedProfileId,
+    );
     const group = await this.groupsRepo.findById(em, groupId);
     if (!group)
       throw new ResourceNotFoundException('Grupo no encontrado', { groupId });

@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PollsRepository, PostsRepository } from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
 import type { PollDetailDto } from '../dto';
@@ -37,15 +40,22 @@ export class CommunityPollsReadService {
    * Encuesta con sus opciones, recuentos y el voto del actor.
    *
    * @param pollId - Encuesta a leer.
-   * @param actorProfileId - Perfil del lector, para marcar lo que votó.
+   * @param actor - Quien pide la lectura.
+   * @param requestedProfileId - Perfil del lector **propuesto**; se verifica.
    * @returns Detalle de la encuesta.
    * @throws ResourceNotFoundException si no existe o su publicación no es visible.
    */
   async getPoll(
     pollId: string,
-    actorProfileId?: string,
+    actor: AuthenticatedUser,
+    requestedProfileId?: string,
   ): Promise<PollDetailDto> {
     const em = this.em.fork();
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+      requestedProfileId,
+    );
     const poll = await this.pollsRepo.findPollById(em, pollId);
     if (!poll)
       throw new ResourceNotFoundException('Encuesta no encontrada', { pollId });
