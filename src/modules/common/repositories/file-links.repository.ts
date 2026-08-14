@@ -55,4 +55,30 @@ export class FileLinksRepository {
       { partial: true },
     );
   }
+
+  /**
+   * Los vínculos de un recurso, del más reciente al más antiguo.
+   *
+   * Acotado **siempre** por propietario: `file_links` es la tabla de vínculos de
+   * todo el sistema, y una lectura sin filtro devolvería los adjuntos de
+   * cualquier paciente.
+   *
+   * @param em - El `EntityManager` activo.
+   * @param ownerTypeConceptId - Tipo de propietario, ya resuelto a concepto.
+   * @param ownerId - El recurso concreto.
+   * @param limit - Tope de filas.
+   * @returns Los vínculos, sin el archivo resuelto — eso lo hace el servicio.
+   */
+  findByOwner(
+    em: EntityManager,
+    ownerTypeConceptId: string,
+    ownerId: string,
+    limit: number,
+  ): Promise<FileLinks[]> {
+    return em.find(
+      FileLinks,
+      { ownerTypeConceptId, ownerId },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
 }
