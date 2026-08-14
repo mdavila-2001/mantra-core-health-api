@@ -2450,6 +2450,97 @@
         "description": "Registrar defunción y anonimización de una persona. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/profiles/practitioners/me/summary": {
+      "get": {
+        "operationId": "ProfilesPractitionersController_getOwnPractitionerProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar el perfil profesional propio (trayectoria y actividad)",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Consultar el perfil profesional propio (trayectoria y actividad). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/practitioners/me": {
+      "patch": {
+        "operationId": "ProfilesPractitionersController_updateOwnPractitionerProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnPractitionerProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar la presentación del propio perfil profesional",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/profiles/practitioners": {
       "post": {
         "operationId": "ProfilesPractitionersController_onboardPractitioner",
@@ -20667,6 +20758,95 @@
           "community-social"
         ],
         "description": "Crear un perfil público (bootstrap del grafo social). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/community/profiles/me": {
+      "get": {
+        "operationId": "CommunitySocialController_getOwnProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar la vitrina pública propia",
+        "tags": [
+          "community-social"
+        ],
+        "description": "Consultar la vitrina pública propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "put": {
+        "operationId": "CommunitySocialController_upsertOwnProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertOwnPublicProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear o actualizar la vitrina pública propia",
+        "tags": [
+          "community-social"
+        ],
+        "description": "Crear o actualizar la vitrina pública propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/community/profiles/{profileId}/posts": {
@@ -59875,6 +60055,29 @@
           }
         }
       },
+      "UpdateOwnPractitionerProfileDto": {
+        "type": "object",
+        "properties": {
+          "professionalTitle": {
+            "type": "string",
+            "description": "Título profesional",
+            "maxLength": 200
+          },
+          "professionalBio": {
+            "type": "string",
+            "description": "Biografía profesional",
+            "maxLength": 4000
+          },
+          "acceptsNewPatients": {
+            "type": "boolean",
+            "description": "Si acepta pacientes nuevos"
+          },
+          "telehealthAvailable": {
+            "type": "boolean",
+            "description": "Si atiende por telemedicina"
+          }
+        }
+      },
       "CreatePractitionerDto": {
         "type": "object",
         "properties": {
@@ -59902,6 +60105,21 @@
             "description": "Título profesional",
             "maxLength": 200
           },
+          "professionalBio": {
+            "type": "string",
+            "description": "Biografía profesional en prosa",
+            "maxLength": 4000
+          },
+          "acceptsNewPatients": {
+            "type": "boolean",
+            "description": "Si acepta pacientes nuevos",
+            "default": false
+          },
+          "telehealthAvailable": {
+            "type": "boolean",
+            "description": "Si atiende por telemedicina",
+            "default": false
+          },
           "licenseNumber": {
             "type": "string",
             "description": "Nº de licencia de la autorización jurisdiccional inicial",
@@ -59926,6 +60144,16 @@
             "type": "string",
             "description": "Concept id del tipo de credencial",
             "format": "uuid"
+          },
+          "credentialIssuingInstitutionText": {
+            "type": "string",
+            "description": "Institución que emitió la credencial de soporte",
+            "maxLength": 300
+          },
+          "credentialIssueDate": {
+            "type": "string",
+            "description": "Fecha de emisión de la credencial de soporte (ISO)",
+            "format": "date"
           },
           "languageConceptId": {
             "type": "string",
@@ -70317,6 +70545,45 @@
         "required": [
           "tenantId",
           "targetId",
+          "slug",
+          "displayName"
+        ]
+      },
+      "UpsertOwnPublicProfileDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": "Organización propietaria",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug único legible",
+            "maxLength": 120
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Nombre visible",
+            "maxLength": 200
+          },
+          "headline": {
+            "type": "string",
+            "description": "Titular de una línea",
+            "maxLength": 200
+          },
+          "biography": {
+            "type": "string",
+            "description": "Presentación pública",
+            "maxLength": 2000
+          },
+          "acceptsReviews": {
+            "type": "boolean",
+            "description": "Acepta reseñas"
+          }
+        },
+        "required": [
+          "tenantId",
           "slug",
           "displayName"
         ]
