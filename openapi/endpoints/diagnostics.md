@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `diagnostics`
 
-Referencia exhaustiva de 20 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 21 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-reports`, `diagnostics-specimens`
-- **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
+- **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-reports`, `diagnostics-specimens`
+- **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsOrdersController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -22,15 +22,16 @@ Referencia exhaustiva de 20 operación(es) del módulo `diagnostics`, derivada d
 9. [POST /diagnostics/imaging-endpoints](#9-post-diagnostics-imaging-endpoints) — Registrar un endpoint DICOM (soporte para STOW-RS)
 10. [POST /diagnostics/imaging-studies/{id}/dose-events](#10-post-diagnostics-imaging-studies-id-dose-events) — Registrar evento de dosis de radiación
 11. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#11-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
-12. [POST /diagnostics/reports/{reportId}/versions](#12-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
-13. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#13-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
-14. [POST /diagnostics/results/{observationId}/verifications](#14-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
-15. [POST /diagnostics/specimens](#15-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
-16. [POST /diagnostics/specimens/{id}/containers](#16-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
-17. [POST /diagnostics/specimens/{id}/rejection](#17-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
-18. [GET /diagnostics/work-orders](#18-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
-19. [POST /diagnostics/work-orders](#19-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
-20. [POST /dicomweb/studies](#20-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
+12. [GET /diagnostics/patients/{patientProfileId}/orders](#12-get-diagnostics-patients-patientprofileid-orders) — Órdenes de laboratorio e imagenología del paciente, con sus informes
+13. [POST /diagnostics/reports/{reportId}/versions](#13-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
+14. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#14-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
+15. [POST /diagnostics/results/{observationId}/verifications](#15-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
+16. [POST /diagnostics/specimens](#16-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
+17. [POST /diagnostics/specimens/{id}/containers](#17-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
+18. [POST /diagnostics/specimens/{id}/rejection](#18-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
+19. [GET /diagnostics/work-orders](#19-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
+20. [POST /diagnostics/work-orders](#20-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
+21. [POST /dicomweb/studies](#21-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
 
 ---
 
@@ -1527,7 +1528,171 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /diagnostics/reports/{reportId}/versions
+## 12. GET /diagnostics/patients/{patientProfileId}/orders
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-orders`
+- **Nombre:** Órdenes de laboratorio e imagenología del paciente, con sus informes
+- **Operation ID:** `DiagnosticsOrdersController_getPatientOrders`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsOrdersController.getPatientOrders](../../src/modules/diagnostics/controllers/diagnostics-orders.controller.ts)
+
+### Descripción de negocio
+
+Cierra el circuito del módulo: el alta de la orden es POST /clinical/service-requests y ésta es la lectura que la encuentra.
+
+Contexto declarado en el controlador: Órdenes de laboratorio e imagenología del paciente, con sus informes.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/patients/{patientProfileId}/orders` en `DiagnosticsOrdersController_getPatientOrders`. El controlador delega en `DiagnosticsOrdersService.getPatientOrders`. No recibe body. El tipo de retorno estático es `Promise<PatientDiagnosticOrdersResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope aplicado a cada bloque (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/patients/00000000-0000-4000-8000-000000000001/orders?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientDiagnosticOrdersResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientDiagnosticOrdersResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "orders": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+      "requesterProfileId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "reports": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "lifecycleStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "currentVersionId": "00000000-0000-4000-8000-000000000001",
+      "currentReleasedVersionId": "00000000-0000-4000-8000-000000000001",
+      "resultReleaseStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "limit": 1,
+  "truncated": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
+| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `orders[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].codeConceptId` | Sí | `string` | formato `uuid` | Qué se pidió (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `orders[].categoryConceptId` | No | `string` | formato `uuid` | Laboratorio o imagenología (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `orders[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la orden (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `orders[].priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `orders[].requesterProfileId` | No | `string` | formato `uuid` | Profesional que la solicitó. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
+| `reports` | Sí | `array<DiagnosticReportSummaryDto>` | Sin restricción adicional declarada | Informes diagnósticos, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","lifecycleStatusConceptId":"00000000-0000-4000-8000-000000000001","currentVersionId":"00000000-0000-4000-8000-000000000001","currentReleasedVersionId":"00000000-0000-4000-8000-000000000001","resultReleaseStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `reports[].id` | Sí | `string` | formato `uuid` | Identificador del informe. | `00000000-0000-4000-8000-000000000001` |
+| `reports[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `reports[].serviceRequestId` | No | `string` | formato `uuid` | Orden que lo originó, si cuelga de una. | `00000000-0000-4000-8000-000000000001` |
+| `reports[].encounterId` | No | `string` | formato `uuid` | Encuentro asociado, si lo hay. | `00000000-0000-4000-8000-000000000001` |
+| `reports[].codeConceptId` | Sí | `string` | formato `uuid` | Qué informa (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `reports[].categoryConceptId` | No | `string` | formato `uuid` | Categoría (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `reports[].lifecycleStatusConceptId` | Sí | `string` | formato `uuid` | Estado del ciclo de vida (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `reports[].currentVersionId` | No | `string` | formato `uuid` | Versión vigente, esté liberada o no. | `00000000-0000-4000-8000-000000000001` |
+| `reports[].currentReleasedVersionId` | No | `string` | formato `uuid` | Versión liberada al paciente, si alguna lo está. | `00000000-0000-4000-8000-000000000001` |
+| `reports[].resultReleaseStatusConceptId` | No | `string` | formato `uuid` | Estado de liberación de resultados (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `reports[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se emitió. | `2026-07-31T12:00:00.000Z` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a cada bloque. | `1` |
+| `truncated` | Sí | `array<string>` | Sin restricción adicional declarada | Bloques que quedaron recortados por el tope. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/patients/{patientProfileId}/orders"
+}
+```
+
+---
+
+## 13. POST /diagnostics/reports/{reportId}/versions
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1684,7 +1849,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
+## 14. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1815,7 +1980,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /diagnostics/results/{observationId}/verifications
+## 15. POST /diagnostics/results/{observationId}/verifications
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -1952,7 +2117,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /diagnostics/specimens
+## 16. POST /diagnostics/specimens
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -2090,7 +2255,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /diagnostics/specimens/{id}/containers
+## 17. POST /diagnostics/specimens/{id}/containers
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -2224,7 +2389,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /diagnostics/specimens/{id}/rejection
+## 18. POST /diagnostics/specimens/{id}/rejection
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -2359,7 +2524,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /diagnostics/work-orders
+## 19. GET /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -2475,7 +2640,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /diagnostics/work-orders
+## 20. POST /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -2630,7 +2795,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /dicomweb/studies
+## 21. POST /dicomweb/studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`

@@ -18508,6 +18508,44 @@ paths:
       description: >-
         Registrar evento de calidad de datos + enlazar provenance. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostics/patients/{patientProfileId}/orders:
+    get:
+      description: >-
+        Cierra el circuito del módulo: el alta de la orden es POST /clinical/service-requests y ésta es la lectura que
+        la encuentra.
+      operationId: DiagnosticsOrdersController_getPatientOrders
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Tope aplicado a cada bloque (por defecto 50)
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Órdenes de laboratorio e imagenología del paciente, con sus informes
+      tags:
+        - diagnostics-orders
   /education/courses/publish:
     post:
       description: La duración se deriva de la suma de las lecciones.
@@ -30408,6 +30446,105 @@ paths:
       summary: Generar los cargos y consolidar el uso del quirófano
       tags:
         - procedure-cases
+  /dental-procedures/catalog:
+    get:
+      description: Sale del seed de conceptos. Existe para que el cliente no tenga que llevar los UUID escritos a mano.
+      operationId: DentalController_catalog
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Catálogo odontológico: códigos, piezas (FDI) y cuadrantes'
+      tags:
+        - dental-procedures
+  /dental-procedures:
+    get:
+      description: >-
+        Devuelve además el total sin paginar: un histórico clínico recortado en silencio se lee como «no hay
+        antecedentes».
+      operationId: DentalController_listByPatient
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: query
+          description: Paciente consultado
+          schema:
+            format: uuid
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 50
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Histórico odontológico del paciente
+      tags:
+        - dental-procedures
+    post:
+      description: >-
+        Se escribe como procedimiento clínico con categoría odontológica; la pieza o el cuadrante quedan como sitio
+        anatómico.
+      operationId: DentalController_record
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDentalProcedureDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar un procedimiento odontológico
+      tags:
+        - dental-procedures
   /loyalty/programs:
     get:
       operationId: LoyaltyController_listActivePrograms
@@ -38594,6 +38731,10 @@ tags:
     description: >-
       Operaciones del dominio funcional delegated access requests. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: dental-procedures
+    description: >-
+      Operaciones del dominio funcional dental procedures. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: diagnostic-equipment
     description: >-
       Operaciones del dominio funcional diagnostic equipment. Consulte el catálogo Markdown de endpoints para payloads
@@ -38621,6 +38762,10 @@ tags:
   - name: diagnostics-laboratory
     description: >-
       Operaciones del dominio funcional diagnostics laboratory. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: diagnostics-orders
+    description: >-
+      Operaciones del dominio funcional diagnostics orders. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: diagnostics-reports
     description: >-
@@ -58980,6 +59125,45 @@ components:
           description: Segundos de recambio hasta el siguiente caso
       required:
         - items
+    CreateDentalProcedureDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+          description: Paciente tratado
+        procedureCodeConceptId:
+          type: string
+          format: uuid
+          description: >-
+            Qué se hizo. Los códigos sembrados salen de `GET /dental-procedures/catalog`; se admite cualquier concepto
+            válido.
+        performerProfileId:
+          type: string
+          format: uuid
+          description: Odontólogo que lo realizó. Si se omite se toma el profesional de la sesión.
+        toothSiteConceptId:
+          type: string
+          format: uuid
+          description: Pieza dentaria en notación FDI o cuadrante. Tiene que ser uno de los sitios del catálogo.
+        siteDetail:
+          type: string
+          maxLength: 200
+          description: Cara o superficie tratada, si corresponde
+        noteText:
+          type: string
+          maxLength: 4000
+        encounterId:
+          type: string
+          format: uuid
+          description: Encuentro en el que se realizó, si lo hubo
+        performedAt:
+          type: string
+          format: date-time
+          description: Cuándo se realizó. Si se omite, ahora.
+      required:
+        - patientProfileId
+        - procedureCodeConceptId
     LoyaltyTierDto:
       type: object
       properties:

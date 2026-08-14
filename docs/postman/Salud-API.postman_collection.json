@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "REDESA Health API · 958 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 958 requests en 122 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "REDESA Health API · 966 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 966 requests en 123 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -20217,6 +20217,176 @@
       ]
     },
     {
+      "name": "dental-procedures (3)",
+      "item": [
+        {
+          "name": "GET /dental-procedures · Histórico odontológico del paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dental-procedures?patientProfileId={{patientProfileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dental-procedures"
+              ],
+              "query": [
+                {
+                  "key": "patientProfileId",
+                  "value": "{{patientProfileId}}",
+                  "description": "Paciente consultado",
+                  "disabled": false
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Devuelve además el total sin paginar: un histórico clínico recortado en silencio se lee como «no hay antecedentes».\n\n`GET /dental-procedures`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DentalController_listByPatient`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.dentalProcedures || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('dentalProcedureId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /dental-procedures/catalog · Catálogo odontológico: códigos, piezas (FDI) y cuadrantes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dental-procedures/catalog",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dental-procedures",
+                "catalog"
+              ]
+            },
+            "description": "Sale del seed de conceptos. Existe para que el cliente no tenga que llevar los UUID escritos a mano.\n\n`GET /dental-procedures/catalog`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DentalController_catalog`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.dentalProcedures || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('dentalProcedureId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /dental-procedures · Registrar un procedimiento odontológico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dental-procedures",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dental-procedures"
+              ]
+            },
+            "description": "Se escribe como procedimiento clínico con categoría odontológica; la pieza o el cuadrante quedan como sitio anatómico.\n\n`POST /dental-procedures`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `DentalController_record`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"procedureCodeConceptId\": \"<procedureCodeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"siteDetail\": \"siteDetail-ejemplo\",\n  \"noteText\": \"noteText-ejemplo\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"performedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dentalProcedureId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.dentalProcedureId);",
+                  "  if (id) pm.environment.set('dentalProcedureId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "diagnostic-equipment (1)",
       "item": [
         {
@@ -21101,7 +21271,7 @@
       ]
     },
     {
-      "name": "diagnostics (19)",
+      "name": "diagnostics (20)",
       "item": [
         {
           "name": "diagnostics-imaging",
@@ -21753,6 +21923,75 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.verificationId);",
                       "  if (id) pm.environment.set('verificationId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "diagnostics-orders",
+          "item": [
+            {
+              "name": "GET /diagnostics/patients/{patientProfileId}/orders · Órdenes de laboratorio e imagenología del paciente, con sus informes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/diagnostics/patients/:patientProfileId/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "diagnostics",
+                    "patients",
+                    ":patientProfileId",
+                    "orders"
+                  ],
+                  "variable": [
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "Identificador de ruta · variable `{{patientProfileId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope aplicado a cada bloque (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Cierra el circuito del módulo: el alta de la orden es POST /clinical/service-requests y ésta es la lectura que la encuentra.\n\n`GET /diagnostics/patients/{patientProfileId}/orders`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DiagnosticsOrdersController_getPatientOrders`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.orders || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('orderId', first.id);",
                       "}"
                     ]
                   }

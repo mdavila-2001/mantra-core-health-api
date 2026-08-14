@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **962 de 962 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **966 de 966 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -63,7 +63,7 @@ Esta referencia documenta **962 de 962 operaciones HTTP** registradas en `openap
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
 | [delegated_access](delegated-access.md) | 11 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 16 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
-| [diagnostics](diagnostics.md) | 20 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-reports`, `diagnostics-specimens` | 4 |
+| [diagnostics](diagnostics.md) | 21 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-reports`, `diagnostics-specimens` | 5 |
 | [directory](directory.md) | 16 | `directory-admin-tenants`, `directory-tenants` | 2 |
 | [document_store](document-store.md) | 5 | `document-store` | 1 |
 | [education](education.md) | 14 | `education` | 1 |
@@ -89,7 +89,7 @@ Esta referencia documenta **962 de 962 operaciones HTTP** registradas en `openap
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 16 | `practice` | 5 |
-| [procedures_perioperative](procedures-perioperative.md) | 28 | `procedure-cases` | 1 |
+| [procedures_perioperative](procedures-perioperative.md) | 31 | `dental-procedures`, `procedure-cases` | 2 |
 | [profiles](profiles.md) | 18 | `profiles-patients`, `profiles-practitioners` | 2 |
 | [promotions](promotions.md) | 15 | `loyalty`, `promotions` | 2 |
 | [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
@@ -113,4 +113,4 @@ Esta referencia documenta **962 de 962 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 962 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 966 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
