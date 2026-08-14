@@ -61,15 +61,13 @@ function extractBusinessSummary(vaultEntry) {
 
 // readVault() no expone el markdown crudo directamente en todas las versiones de la librería;
 // se relee aquí solo el campo de propósito de forma defensiva si vault entries no lo trae.
+// La ruta sale de vault.mjs (VAULT, que honra SALUD_VAULT): tener una segunda copia
+// hardcodeada acá fue el mismo defecto que vault.mjs corrigió el 2026-08-07 — el guard de
+// arriba pasaba con la ruta nueva y esta lectura fallaba con la vieja, degradando el
+// catálogo a 1/1190 descripciones en silencio.
 import { readFileSync } from 'node:fs';
 import { readdirSync } from 'node:fs';
-const VAULT_ENT_DIR = join(
-  process.cwd(),
-  '..',
-  'mantra_core_technologies_health_docs',
-  'SALUD',
-  'Entidades',
-);
+const VAULT_ENT_DIR = join(VAULT, 'Entidades');
 const summaryByKey = new Map();
 try {
   for (const file of readdirSync(VAULT_ENT_DIR)) {
@@ -135,8 +133,8 @@ let md = `# Catálogo de entidades
 > Generado por \`yarn docs:data:sync\` (\`tools/docs/generate-data-catalog.mjs\`) cruzando las
 > **${ts.size} entidades MikroORM reales** (\`tools/catalog/lib/tsentities.mjs\`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
-> \`../mantra_core_technologies_health_docs/SALUD/Entidades\`, la misma fuente que usa
-> \`yarn orm:catalog\`) y fallbacks respaldados por el JSDoc de la entidad en este
+> \`../Mantra Core Health Vault/SALUD/Entidades\` vía \`vault.mjs\`, la misma fuente que usa
+> \`yarn orm:catalog\`; \`SALUD_VAULT\` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
 > repositorio. **${withSummary}/${rows.length}** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >

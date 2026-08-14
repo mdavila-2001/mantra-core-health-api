@@ -147,6 +147,11 @@ export class ObjectStorageRepository {
         expectedSizeBytes: data.expectedSizeBytes,
         status: data.status,
         expiresAt: data.expiresAt,
+        // Una subida multiparte nace sin nada recibido: la columna es NOT NULL
+        // y sin ella el alta fallaba con 500.
+        receivedSizeBytes: '0',
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -231,6 +236,9 @@ export class ObjectStorageRepository {
         patientProfileId: data.patientProfileId,
         lifecycleState: data.lifecycleState,
         retentionPolicyCode: data.retentionPolicyCode,
+        // Columnas NOT NULL sin default en el esquema.
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       { partial: true },
     );
@@ -295,6 +303,8 @@ export class ObjectStorageRepository {
         etag: data.etag,
         compression: data.compression,
         supersedesVersionId: data.supersedesVersionId,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -458,6 +468,8 @@ export class ObjectStorageRepository {
         encryptedDataKey: data.encryptedDataKey,
         keyVersion: data.keyVersion,
         encryptionContextHash: data.encryptionContextHash,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -611,6 +623,8 @@ export class ObjectStorageRepository {
         objectManifestId: data.objectManifestId,
         contentHash: data.contentHash,
         containsPhi: data.containsPhi,
+        // Columna NOT NULL sin default en el esquema.
+        createdAt: new Date(),
       },
       { partial: true },
     );

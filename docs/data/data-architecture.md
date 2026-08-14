@@ -21,8 +21,9 @@
 
 `src/modules/README.md`: "las entidades se generan, no se escriben". Si algo no cuadra entre el
 modelo de negocio y el código, se corrige el DDL (los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md))) y se regenera con
-`yarn orm:gen` — nunca se parchea la entidad TypeScript directamente. Ver
-[ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md).
+`python salud-db/gen_entities.py` → `yarn format` → `yarn docs:tsdoc` — nunca se parchea la
+entidad TypeScript directamente. Ver [ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md) y
+[ADR-0022](../adr/ADR-0022-generacion-de-entidades.md).
 
 ## Los 5 almacenes y su rol
 

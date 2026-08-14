@@ -1,9 +1,9 @@
 # REDESA Health API
 
 Backend del ecosistema de salud REDESA (Mantra Core Technologies): una API NestJS modular de
-**60 módulos de negocio documentados** (más el grupo raíz `app`), **869 operaciones HTTP**
+**61 módulos de negocio documentados** (más el grupo raíz `app`), **915 operaciones HTTP**
 documentadas en OpenAPI, sobre PostgreSQL con aislamiento por tenant, complementada por MongoDB,
-Redis, OpenSearch, MinIO y **20 procesos
+Redis, OpenSearch, MinIO y **21 procesos
 worker** independientes.
 
 Esta documentación se genera y verifica junto al código: cada afirmación técnica aquí es
@@ -25,7 +25,7 @@ flowchart LR
   API --> OS[(OpenSearch<br/>search_platform)]
   API --> MinIO[(MinIO/S3<br/>object_storage)]
   API -->|outbox| PG
-  subgraph W[20 workers independientes]
+  subgraph W[21 workers independientes]
     direction TB
     W1[worker-messaging]
     W2[worker-billing]
@@ -41,7 +41,7 @@ Detalle completo: [visión general de arquitectura](architecture/overview.md) ·
 
 ## Capacidades principales
 
-60 módulos agrupados en grandes áreas de negocio — catálogo completo, con métricas reales de cada
+61 módulos agrupados en grandes áreas de negocio — catálogo completo, con métricas reales de cada
 uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad y acceso (`iam`,
 `authz`, `auth_providers`, `identity_assurance`), clínica (`clinical`, `clinical_ext`,
 `diagnostics`, `pharmacy`, `procedures_perioperative`), operación de práctica (`practice`,
@@ -60,7 +60,7 @@ uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad 
 | Entender cómo se relacionan los módulos          | [Dependencias entre módulos](architecture/module-dependencies.md)                                                                                                                               |
 | Ver qué se auditó y cómo                         | [Línea base](reports/baseline.md) · [Auditoría Graphify](reports/graphify-audit.md)                                                                                                             |
 | Ver el estado real para producción               | [Auditoría de producción 2026-07-31](reports/production-readiness-2026-07-31.md)                                                                                                                |
-| Entender la integración del audio (ElevenLabs)   | [Auditoría e integración audio_tts 2026-08-11](reports/audio-tts-integration-2026-08-11.md)                                                                                                      |
+| Ver el progreso de la implementación de audio/TTS | [Informe de progreso](progress/progress-report.md)                                                                                                                                              |
 | Ver brechas documentales conocidas y su estado   | [Análisis de brechas](reports/documentation-gap-analysis.md)                                                                                                                                    |
 | Ver riesgos y su trazabilidad                    | [Matriz de trazabilidad](governance/traceability-matrix.md)                                                                                                                                     |
 | Responder a un incidente en producción           | [Runbooks](operations/runbooks/index.md)                                                                                                                                                        |

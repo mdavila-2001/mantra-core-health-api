@@ -36,6 +36,23 @@ export const authEnvSchema = Joi.object({
   JWT_ACCESS_TTL: Joi.string().default('15m'),
   JWT_REFRESH_TTL_DAYS: Joi.number().integer().min(1).default(30),
   ACCOUNT_LOCK_THRESHOLD: Joi.number().integer().min(1).default(5),
+  // Entrega del refresh token como cookie httpOnly. Apagada por defecto:
+  // encenderla cambia el contrato con el frontend (ver `src/common/auth/README.md`).
+  AUTH_REFRESH_COOKIE_ENABLED: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .empty('')
+    .default(false),
+  AUTH_REFRESH_COOKIE_NAME: Joi.string().default('mch_refresh'),
+  AUTH_REFRESH_COOKIE_PATH: Joi.string().default('/iam/auth/token/refresh'),
+  AUTH_REFRESH_COOKIE_SAMESITE: Joi.string()
+    .valid('strict', 'lax', 'none')
+    .default('strict'),
+  AUTH_REFRESH_COOKIE_SECURE: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .empty('')
+    .optional(),
 }).unknown(true);
 
 /**

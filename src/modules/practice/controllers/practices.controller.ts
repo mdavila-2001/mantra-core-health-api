@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,7 +11,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   PracticeSitesService,
   PracticeAccreditationsService,
@@ -28,6 +34,8 @@ import {
   CreateRoleAssignmentDto,
   CreateInventoryItemDto,
   PracticeResponseDto,
+  PracticeSummaryDto,
+  SiteSummaryDto,
   SiteResponseDto,
   AccreditationResponseDto,
   HealthcareServiceResponseDto,
@@ -66,6 +74,53 @@ export class PracticesController {
   ) {}
 
   /** Bootstrap: alta de la práctica (organización raíz). */
+  /**
+   * Prácticas activas del tenant.
+   *
+   * Abierta a los actores clínicos y de programación, no sólo a
+   * `SECURITY_ADMIN`: es el primer paso para resolver el quirófano que exige
+   * programar una intervención, y sin él ese uuid había que averiguarlo fuera
+   * del sistema. Sólo devuelve identificación y estado, no configuración.
+   */
+  @Get()
+  @Roles(
+    'SECURITY_ADMIN',
+    'SURGERY_SCHEDULER',
+    'PERIOP_ADMIN',
+    'SURGEON',
+    'ANESTHESIOLOGIST',
+    'PERIOP_NURSE',
+    'SCHEDULING_ADMIN',
+    // Los roles clínicos generales, que faltaban: sin ellos un médico no puede
+    // ni saber en qué práctica trabaja, y las lecturas del mayor —que cuelgan
+    // todas de un `practiceId`— quedan inalcanzables para él.
+    'PRACTITIONER',
+    'CLINICIAN',
+    'ACCOUNTING_APPROVER',
+  )
+  @ApiOperation({ summary: 'Listar las prácticas activas del tenant' })
+  listPractices(): Promise<PracticeSummaryDto[]> {
+    return this.sitesService.listPractices(requireTenantId());
+  }
+
+  /** Sedes de una práctica. */
+  @Get(':practiceId/sites')
+  @Roles(
+    'SECURITY_ADMIN',
+    'SURGERY_SCHEDULER',
+    'PERIOP_ADMIN',
+    'SURGEON',
+    'ANESTHESIOLOGIST',
+    'PERIOP_NURSE',
+    'SCHEDULING_ADMIN',
+  )
+  @ApiOperation({ summary: 'Listar las sedes de una práctica' })
+  listSites(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+  ): Promise<SiteSummaryDto[]> {
+    return this.sitesService.listSites(practiceId, requireTenantId());
+  }
+
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -15,6 +15,6 @@
 | **Worker** | Proceso Node independiente (17 en total) que ejecuta ticks periódicos de un dominio, llamando a la API por HTTP (`/internal/*`) — no accede a la base directamente. Ver [mapa de integraciones](../architecture/integration-map.md). |
 | **DDD por schema** | Cada uno de los 57-60 módulos de negocio corresponde a un *schema* PostgreSQL propio del "modelo canónico SALUD" — el límite de módulo en código es también el límite de schema en base de datos. |
 | **`@Public()`** | Decorador que exime un endpoint del guard JWT global — 9 endpoints en todo el sistema, lista verificada en [notas de generación de OpenAPI](../reports/openapi-generation-notes.md). |
-| **Modelo canónico SALUD** | Nombre del modelo de datos versionado (`v4.0.x` según `src/modules/README.md`) del que derivan los 60 módulos y sus ~1184 entidades. |
+| **Modelo canónico SALUD** | Nombre del modelo de datos versionado (**v4.0.10**, declarado en `Mantra Core Health Context/model-manifest.yaml` — la fuente que leen los generadores) del que derivan los 60 módulos y sus 1 186 entidades. |
 | **Break-the-glass** | Mecanismo de acceso clínico de emergencia que otorga acceso excepcional a PHI fuera del flujo normal de autorización, auditado explícitamente (módulo `authz`). |
 | **DomainException** | Jerarquía de excepciones propia (`ResourceNotFoundException`, `ConflictException`, `PreconditionFailedException`, ...) que homogeneiza el modelo de error entre los 60 módulos. Ver [modelo de error](../api/error-model.md). |

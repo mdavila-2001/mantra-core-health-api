@@ -32,6 +32,18 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       code: 'HEALTH_SCREENING_PASSED',
       display: 'Health data screening passed',
     },
+    POST_VISIBILITY_PUBLIC: {
+      code: 'POST_VISIBILITY_PUBLIC',
+      display: 'Public post',
+    },
+    POST_VISIBILITY_FOLLOWERS: {
+      code: 'POST_VISIBILITY_FOLLOWERS',
+      display: 'Followers-only post',
+    },
+    POST_VISIBILITY_PRIVATE: {
+      code: 'POST_VISIBILITY_PRIVATE',
+      display: 'Author-only post',
+    },
     MEDIA_ROLE_IMAGE: { code: 'MEDIA_ROLE_IMAGE', display: 'Image media' },
     MEDIA_ROLE_VIDEO: { code: 'MEDIA_ROLE_VIDEO', display: 'Video media' },
     MEDIA_ROLE_DOCUMENT: {
@@ -380,6 +392,19 @@ export const SOCIAL_OBJECT_CONCEPT_BY_CODE: Record<string, string> = {
   POST: COMM.CONTENT_TYPE_POST,
   COMMENT: COMM.CONTENT_TYPE_COMMENT,
   REVIEW: COMM.CONTENT_TYPE_REVIEW,
+};
+
+/**
+ * Visibilidad declarada de un post → concept id.
+ *
+ * Una fila con `visibility_concept_id` nulo se lee como pública: son los posts
+ * anteriores a que el módulo declarara estos conceptos, y degradarlos a privados
+ * los haría desaparecer de los muros donde ya se publicaron.
+ */
+export const POST_VISIBILITY_CONCEPT_BY_CODE: Record<string, string> = {
+  PUBLIC: COMM.POST_VISIBILITY_PUBLIC,
+  FOLLOWERS: COMM.POST_VISIBILITY_FOLLOWERS,
+  PRIVATE: COMM.POST_VISIBILITY_PRIVATE,
 };
 
 /** Followable object type enum → concept id (UC-19-05). */

@@ -49,7 +49,11 @@ function build() {
     createSpecimen: mockFn(),
     createReport: mockFn(),
     findReportForUpdate: mockFn(),
+    findReportsByCase: mockFn().mockResolvedValue([]),
     findLastReport: mockFn(),
+    findFindingsByCase: mockFn().mockResolvedValue([]),
+    findImplantsByCase: mockFn().mockResolvedValue([]),
+    findIdentifiersByImplants: mockFn().mockResolvedValue([]),
     createComplication: mockFn(),
     createPacuStay: mockFn(),
     findPacuStayForUpdate: mockFn(),
@@ -66,14 +70,19 @@ function build() {
     createLocation: mockFn(),
     findOpenLocation: mockFn(),
   };
+  // El alta del procedimiento cuando el informe llega por código.
+  const procedures = {
+    create: mockFn().mockResolvedValue({ id: 'proc-nuevo' }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PeriopIntraopService(
     em as any,
     intraopRepo,
     casesRepo as any,
+    procedures as any,
     logger as any,
   );
-  return { service, tx, intraopRepo, casesRepo, logger };
+  return { service, tx, intraopRepo, casesRepo, procedures, logger };
 }
 
 /**

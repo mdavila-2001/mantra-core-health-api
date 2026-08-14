@@ -183,6 +183,30 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   ROLE_USER: def('iam:role:user', 'USER', 'Standard user'),
   ROLE_PATIENT: def('iam:role:patient', 'PATIENT', 'Patient'),
+  /**
+   * Los dos roles del personal de salud.
+   *
+   * Faltaban, y no era un detalle: **57 declaraciones `@Roles(...)` los exigen**
+   * —32 `CLINICIAN` y 25 `PRACTITIONER`— así que esos endpoints sólo eran
+   * alcanzables por `SUPERADMIN`, que el guard trata como comodín. Un médico
+   * real recibía 403 en su agenda y en el expediente de sus pacientes.
+   *
+   * Es el mismo agujero que tenía `PATIENT` antes de sembrarse: sin el concepto,
+   * `conceptIdsToRoleCodes` descarta lo desconocido y el claim `roles` no puede
+   * contenerlo jamás.
+   *
+   * **Se separan a propósito.** `PRACTITIONER` es quién sos —agenda, recursos,
+   * tu propio perfil—; `CLINICIAN` es qué podés leer y escribir de un paciente,
+   * que es PHI. Registrarse otorga el primero; el segundo lo concede un
+   * administrador, porque la matrícula nace `PENDING` y declarar una matrícula
+   * no es probarla.
+   */
+  ROLE_PRACTITIONER: def(
+    'iam:role:practitioner',
+    'PRACTITIONER',
+    'Health practitioner',
+  ),
+  ROLE_CLINICIAN: def('iam:role:clinician', 'CLINICIAN', 'Clinician'),
 
   // --- Bloqueo de cuenta (iam.account_lockouts.*) ---
   LOCK_REASON_FAILED_ATTEMPTS: def(
@@ -5214,6 +5238,36 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // Las referencias de procedencia y linaje son polimórficas: la fila guarda
   // el par (tipo de entidad, id). Sin un vocabulario de tipos, el `target_id`
   // no diría a qué tabla apunta.
+  /**
+   * Papel por defecto de un objetivo de procedencia: el recurso **resultante**
+   * de la actividad.
+   *
+   * `health_provenance_targets.role_concept_id` es NOT NULL en el esquema y su
+   * contrato lo declaraba opcional; ningún llamador lo pasaba, así que toda
+   * escritura de procedencia fallaba con 500 —y con ella la proyección de un
+   * recurso canónico, que es la puerta de entrada del módulo—.
+   */
+  /**
+   * Formato por defecto del contenido de una versión canónica: JSON FHIR.
+   *
+   * `canonical_health_resource_versions.payload_format_concept_id` es NOT NULL
+   * y su contrato lo declaraba opcional; ningún llamador lo pasaba, así que
+   * proyectar un recurso canónico —la puerta de entrada del módulo— fallaba
+   * siempre con 500. Todo lo que el módulo normaliza hoy es JSON FHIR R5, así
+   * que es el valor honesto por defecto.
+   */
+  HD_PAYLOAD_FORMAT_FHIR_JSON: def(
+    'health-data:payload-format:fhir-json',
+    'HD_FMT_FHIR_JSON',
+    'FHIR R5 JSON payload',
+  ),
+
+  HD_TARGET_ROLE_OUTPUT: def(
+    'health-data:target-role:output',
+    'HD_TARGET_OUTPUT',
+    'Provenance target: resulting resource',
+  ),
+
   HD_ENTITY_INGESTION_RECORD: def(
     'health-data:entity-type:ingestion-record',
     'HD_ENT_RECORD',

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `identity_assurance`
 
-Referencia exhaustiva de 23 operación(es) del módulo `identity_assurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `identity_assurance`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance`
 - **Controladores:** `IdentityAssertionsController`, `IdentityAuthoritiesController`, `IdentityCasesController`, `IdentityChecksController`, `IdentityManualReviewController`, `IdentityPoliciesController`, `IdentitySelfServiceController`, `IdentityWorkerController`
@@ -23,17 +23,18 @@ Referencia exhaustiva de 23 operación(es) del módulo `identity_assurance`, der
 10. [POST /identity/me/tenants/{tenantId}/verification](#10-post-identity-me-tenants-tenantid-verification) — Solicitar la verificación de una institución propia
 11. [GET /identity/me/verification-cases](#11-get-identity-me-verification-cases) — Listar los casos de verificación propios
 12. [GET /identity/me/verification-cases/{caseId}](#12-get-identity-me-verification-cases-caseid) — Consultar el estado de un caso propio
-13. [POST /identity/verification-cases](#13-post-identity-verification-cases) — Iniciar un caso de verificación de identidad
-14. [POST /identity/verification-cases/{id}/assertions](#14-post-identity-verification-cases-id-assertions) — Emitir una aserción de identidad con nivel de aseguramiento
-15. [POST /identity/verification-cases/{id}/checks:plan](#15-post-identity-verification-cases-id-checks-plan) — Planificar los checks requeridos del caso
-16. [POST /identity/verification-cases/{id}/evidence](#16-post-identity-verification-cases-id-evidence) — Aportar evidencia documental bajo consentimiento
-17. [POST /identity/verification-cases/{id}/fraud-signals](#17-post-identity-verification-cases-id-fraud-signals) — Detectar y registrar una señal de fraude
-18. [POST /identity/verification-cases/{id}/manual-review](#18-post-identity-verification-cases-id-manual-review) — Escalar el caso a revisión manual
-19. [POST /identity/verification-cases/expire-sweep](#19-post-identity-verification-cases-expire-sweep) — Expirar por lote los casos vencidos (job programado)
-20. [POST /identity/verification-policies](#20-post-identity-verification-policies) — Crear una política de verificación de identidad (IAL/AAL)
-21. [POST /internal/identity/checks/{id}/attempts](#21-post-internal-identity-checks-id-attempts) — Registrar el intento del worker contra la autoridad externa
-22. [POST /internal/identity/checks/{id}/results](#22-post-internal-identity-checks-id-results) — Registrar el veredicto que devolvió la autoridad externa
-23. [GET /internal/identity/checks/dispatchable](#23-get-internal-identity-checks-dispatchable) — Listar los checks que el worker debe atender en este tick
+13. [GET /identity/verification-cases](#13-get-identity-verification-cases) — Listar los casos que esperan revisión
+14. [POST /identity/verification-cases](#14-post-identity-verification-cases) — Iniciar un caso de verificación de identidad
+15. [POST /identity/verification-cases/{id}/assertions](#15-post-identity-verification-cases-id-assertions) — Emitir una aserción de identidad con nivel de aseguramiento
+16. [POST /identity/verification-cases/{id}/checks:plan](#16-post-identity-verification-cases-id-checks-plan) — Planificar los checks requeridos del caso
+17. [POST /identity/verification-cases/{id}/evidence](#17-post-identity-verification-cases-id-evidence) — Aportar evidencia documental bajo consentimiento
+18. [POST /identity/verification-cases/{id}/fraud-signals](#18-post-identity-verification-cases-id-fraud-signals) — Detectar y registrar una señal de fraude
+19. [POST /identity/verification-cases/{id}/manual-review](#19-post-identity-verification-cases-id-manual-review) — Escalar el caso a revisión manual
+20. [POST /identity/verification-cases/expire-sweep](#20-post-identity-verification-cases-expire-sweep) — Expirar por lote los casos vencidos (job programado)
+21. [POST /identity/verification-policies](#21-post-identity-verification-policies) — Crear una política de verificación de identidad (IAL/AAL)
+22. [POST /internal/identity/checks/{id}/attempts](#22-post-internal-identity-checks-id-attempts) — Registrar el intento del worker contra la autoridad externa
+23. [POST /internal/identity/checks/{id}/results](#23-post-internal-identity-checks-id-results) — Registrar el veredicto que devolvió la autoridad externa
+24. [GET /internal/identity/checks/dispatchable](#24-get-internal-identity-checks-dispatchable) — Listar los checks que el worker debe atender en este tick
 
 ---
 
@@ -849,6 +850,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La revisión ya fue decidida | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
 | 422 | `PRECONDITION_FAILED` | La revisión está asignada a otro revisor | Excepción explícita en src/modules/identity_assurance/services/identity-manual-review.service.ts |
+| 422 | `PRECONDITION_FAILED` | La revisión quedó obsoleta: el caso ya no admite aprobación | Excepción explícita en src/modules/identity_assurance/services/identity-checks.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo determinar la autoridad que verificó el caso | Excepción explícita en src/modules/identity_assurance/services/identity-checks.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1594,7 +1597,132 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /identity/verification-cases
+## 13. GET /identity/verification-cases
+
+- **Módulo:** `identity_assurance`
+- **Etiqueta OpenAPI:** `identity-verification-cases`
+- **Nombre:** Listar los casos que esperan revisión
+- **Operation ID:** `IdentityCasesController_listQueue`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IdentityCasesController.listQueue](../../src/modules/identity_assurance/controllers/identity-cases.controller.ts)
+
+### Descripción de negocio
+
+Listar los casos que esperan revisión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La cola de revisión. Es la única lectura de esta superficie: habilita UC-27-08/09 sobre casos que el revisor descubre acá, en vez de exigirle que ya conozca el id. Restringida a `SECURITY_ADMIN` como el resto del controller. El rol es el único límite real: la tabla no tiene `tenant_id` y el RLS no la alcanza (ver `IdentityCasesService.listQueue`).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /identity/verification-cases` en `IdentityCasesController_listQueue`. El controlador delega en `IdentityCasesService.listQueue`. No recibe body. El tipo de retorno estático es `Promise<CaseQueueResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `string` | Sin restricción adicional declarada | Concepto de estado a listar; por defecto, los que esperan revisión | `ok` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Casos por página (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /identity/verification-cases HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /identity/verification-cases?status=ok&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CaseQueueResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseQueueResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "cases": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "status": "00000000-0000-4000-8000-000000000001",
+      "subjectTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "subjectEntityId": "00000000-0000-4000-8000-000000000001",
+      "identityVerificationPolicyId": "00000000-0000-4000-8000-000000000001",
+      "riskScore": "valor-ejemplo",
+      "openedAt": "2026-07-31T12:00:00.000Z",
+      "expiresAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `cases` | Sí | `array<QueuedCaseDto>` | Sin restricción adicional declarada | Valor de cases mantenido por la instancia. | `[{"id":"00000000-0000-4000-8000-000000000001","status":"00000000-0000-4000-8000-000000000001","subjectTypeConceptId":"00000000-0000-4000-8000-000000000001","subjectEntityId":"00000000-0000-4000-8000-000000000001","identityVerificationPolicyId":"00000000-0000-4000-8000-000000000001","riskScore":"valor-ejemplo","openedAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z"}]` |
+| `cases[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `cases[].status` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `cases[].subjectTypeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a subject type concept. | `00000000-0000-4000-8000-000000000001` |
+| `cases[].subjectEntityId` | Sí | `string` | formato `uuid` | Identificador asociado a subject entity. | `00000000-0000-4000-8000-000000000001` |
+| `cases[].identityVerificationPolicyId` | Sí | `string` | formato `uuid` | Identificador asociado a identity verification policy. | `00000000-0000-4000-8000-000000000001` |
+| `cases[].riskScore` | No | `string` | Sin restricción adicional declarada | Valor de risk score mantenido por la instancia. | `valor-ejemplo` |
+| `cases[].openedAt` | No | `string` | formato `date-time` | Valor de opened at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `cases[].expiresAt` | No | `string` | formato `date-time` | Valor de expires at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/identity/verification-cases"
+}
+```
+
+---
+
+## 14. POST /identity/verification-cases
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -1734,7 +1862,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /identity/verification-cases/{id}/assertions
+## 15. POST /identity/verification-cases/{id}/assertions
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -1875,7 +2003,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /identity/verification-cases/{id}/checks:plan
+## 16. POST /identity/verification-cases/{id}/checks:plan
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2019,7 +2147,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /identity/verification-cases/{id}/evidence
+## 17. POST /identity/verification-cases/{id}/evidence
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2160,7 +2288,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /identity/verification-cases/{id}/fraud-signals
+## 18. POST /identity/verification-cases/{id}/fraud-signals
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2297,7 +2425,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /identity/verification-cases/{id}/manual-review
+## 19. POST /identity/verification-cases/{id}/manual-review
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2429,7 +2557,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /identity/verification-cases/expire-sweep
+## 20. POST /identity/verification-cases/expire-sweep
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-verification-cases`
@@ -2537,7 +2665,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /identity/verification-policies
+## 21. POST /identity/verification-policies
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity-policies`
@@ -2680,7 +2808,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /internal/identity/checks/{id}/attempts
+## 22. POST /internal/identity/checks/{id}/attempts
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`
@@ -2823,7 +2951,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /internal/identity/checks/{id}/results
+## 23. POST /internal/identity/checks/{id}/results
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`
@@ -2966,7 +3094,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /internal/identity/checks/dispatchable
+## 24. GET /internal/identity/checks/dispatchable
 
 - **Módulo:** `identity_assurance`
 - **Etiqueta OpenAPI:** `identity_assurance`

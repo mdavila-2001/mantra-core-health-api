@@ -23,6 +23,7 @@ import {
   REACTION_CONCEPT_BY_CODE,
   SOCIAL_OBJECT_CONCEPT_BY_CODE,
   FOLLOWABLE_CONCEPT_BY_CODE,
+  POST_VISIBILITY_CONCEPT_BY_CODE,
 } from '../community.concepts';
 import {
   CreatePublicProfileDto,
@@ -37,6 +38,8 @@ import {
   CommentResponseDto,
   ReactionResponseDto,
   IdResponseDto,
+  UpsertOwnPublicProfileDto,
+  OwnPublicProfileDto,
 } from '../dto';
 
 const PROFILE_TARGET_BY_CODE: Record<string, string> = {
@@ -101,6 +104,144 @@ export class CommunitySocialService {
     this.logger.setContext(CommunitySocialService.name);
   }
 
+  /**
+   * El sujeto que una sesión representa en el grafo social.
+   *
+   * Un profesional es su **perfil profesional** —así su vitrina sobrevive a un
+   * cambio de cuenta y apunta a quien ejerce, no a quien inicia sesión—; el
+   * resto de las cuentas se representan a sí mismas.
+   *
+   * Está acá y no en `profiles` porque no hace falta preguntar nada: el claim
+   * `hpid` ya viaja en el token y el guard lo pone en el actor. Ir a `profiles` a
+   * resolver lo que el token ya dice ataría los dos módulos por una lectura que
+   * no aporta nada.
+   */
+  private sujetoDe(actor: AuthenticatedUser): {
+    targetId: string;
+    targetType: 'USER' | 'PRACTITIONER';
+  } {
+    return actor.practitionerProfileId
+      ? { targetId: actor.practitionerProfileId, targetType: 'PRACTITIONER' }
+      : { targetId: actor.id, targetType: 'USER' };
+  }
+
+  /**
+   * La vitrina pública propia, o `null` si todavía no creó ninguna.
+   *
+   * `null` y no un 404: **no tener vitrina es un estado normal**, no un fallo.
+   * Es de hecho el estado de todo el mundo hasta que decide publicar algo, y una
+   * pantalla que tiene que distinguir «no tenés» de «falló» leyendo un código de
+   * error termina tratando los dos casos igual.
+   *
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El identificador y los campos editables, o `null`.
+   */
+  async getOwnProfile(
+    actor: AuthenticatedUser,
+  ): Promise<OwnPublicProfileDto | null> {
+    const em = this.em.fork();
+    const { targetId } = this.sujetoDe(actor);
+    const profile = await this.profilesRepo.findByTarget(em, targetId);
+    if (!profile) {
+      return null;
+    }
+    return {
+      id: profile.id,
+      tenantId: profile.tenantId,
+      targetId: profile.targetId,
+      slug: profile.slug,
+      displayName: profile.displayName,
+      headline: profile.headline ?? null,
+      biography: profile.biography ?? null,
+      acceptsReviews: profile.acceptsReviews ?? null,
+      verificationStatusConceptId: profile.verificationStatusConceptId ?? null,
+      statusConceptId: profile.statusConceptId,
+    };
+  }
+
+  /**
+   * Crea o actualiza la vitrina propia. **Idempotente.**
+   *
+   * ## Por qué un `PUT` y no un `POST` más un `PATCH`
+   *
+   * Porque la pantalla que la edita no sabe —ni tiene por qué averiguar— si la
+   * persona ya tenía vitrina. Con dos endpoints, esa pantalla tendría que leer
+   * primero, decidir, y manejar la carrera entre las dos peticiones. Con un
+   * `PUT` manda lo que el formulario dice y el servidor resuelve cuál de las dos
+   * cosas es.
+   *
+   * ## Lo que no se puede declarar
+   *
+   * El estado de verificación, los sellos y el prestigio. Los otorga la
+   * plataforma: si alguien pudiera declararse verificado, un sello verificado no
+   * significaría nada. Y la organización no se cambia al editar — cambiar de
+   * organización una vitrina con publicaciones detrás las movería a un tenant
+   * que no las custodiaba.
+   *
+   * @param dto - Los campos de la vitrina.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns La vitrina, creada o actualizada.
+   */
+  async upsertOwnProfile(
+    dto: UpsertOwnPublicProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnPublicProfileDto> {
+    this.logger.info(
+      { operation: 'community.profile.upsertOwn', actorId: actor.id },
+      'Upserting own public profile',
+    );
+
+    const { targetId, targetType } = this.sujetoDe(actor);
+
+    await this.em.transactional(async (tx) => {
+      // El slug es la dirección pública: dos vitrinas con el mismo texto son dos
+      // enlaces que llevan a personas distintas según cuál resuelva primero.
+      const ocupado = await this.profilesRepo.findBySlug(tx, dto.slug);
+      if (ocupado && ocupado.targetId !== targetId) {
+        throw new ConflictException('Ese enlace ya está en uso', {
+          slug: dto.slug,
+        });
+      }
+
+      const existente = await this.profilesRepo.findByTarget(tx, targetId);
+      if (existente) {
+        existente.slug = dto.slug;
+        existente.displayName = dto.displayName;
+        existente.headline = dto.headline;
+        existente.biography = dto.biography;
+        if (dto.acceptsReviews !== undefined) {
+          existente.acceptsReviews = dto.acceptsReviews;
+        }
+        touch(existente, actor.id);
+      } else {
+        this.profilesRepo.create(tx, {
+          tenantId: dto.tenantId,
+          targetTypeConceptId: PROFILE_TARGET_BY_CODE[targetType],
+          targetId,
+          slug: dto.slug,
+          displayName: dto.displayName,
+          headline: dto.headline,
+          biography: dto.biography,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          acceptsReviews: dto.acceptsReviews,
+          actorUserId: actor.id,
+        });
+      }
+      await tx.flush();
+    });
+
+    // Se relee en vez de devolver lo que se acaba de escribir: así quien edita
+    // ve lo mismo que va a ver al recargar, incluido el estado de verificación
+    // que esta operación no toca.
+    const guardado = await this.getOwnProfile(actor);
+    if (!guardado) {
+      throw new PreconditionFailedException(
+        'No se pudo recuperar el perfil público recién guardado',
+      );
+    }
+    return guardado;
+  }
+
   /** Bootstrap: proyecta un sujeto de otro módulo como perfil público. */
   async createProfile(
     dto: CreatePublicProfileDto,
@@ -156,6 +297,8 @@ export class CommunitySocialService {
         postTypeConceptId:
           dto.postType === 'POLL' ? COMM.POST_TYPE_POLL : COMM.POST_TYPE_TEXT,
         bodyText: dto.bodyText,
+        visibilityConceptId:
+          POST_VISIBILITY_CONCEPT_BY_CODE[dto.visibility ?? 'PUBLIC'],
         commentsEnabled:
           dto.commentsEnabled ?? author.commentsDefaultEnabled ?? true,
         healthDataScreeningStatusConceptId: COMM.SCREENING_PASSED,

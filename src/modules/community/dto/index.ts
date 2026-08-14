@@ -1,5 +1,6 @@
 export * from './responses.dto';
 export * from './public-profile.dto';
+export * from './own-public-profile.dto';
 export * from './post.dto';
 export * from './comment.dto';
 export * from './reaction.dto';
@@ -14,3 +15,9 @@ export * from './review.dto';
 export * from './poll.dto';
 export * from './group.dto';
 export * from './feed.dto';
+export * from './read-social.dto';
+export * from './read-timeline.dto';
+export * from './read-messaging.dto';
+export * from './read-groups.dto';
+export * from './read-polls.dto';
+export * from './read-reviews.dto';

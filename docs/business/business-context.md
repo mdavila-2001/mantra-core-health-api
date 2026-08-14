@@ -1,7 +1,7 @@
 # Contexto de negocio
 
 > Fase 9. Síntesis a partir de `src/modules/README.md`, `ESTADO-Y-PENDIENTES.md` y el inventario
-> real de 60 módulos / 1184 entidades / 841 operaciones (`docs/reports/system-inventory.md`).
+> real de 60 módulos / 1184 entidades / 878 operaciones (`docs/reports/system-inventory.md`).
 
 ## Qué es REDESA Health
 

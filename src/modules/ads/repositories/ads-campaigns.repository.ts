@@ -29,7 +29,7 @@ export interface CreateCampaignData {
   /**
    * Valor de name mantenido por la instancia.
    */
-  name: string;
+  name?: string;
   /**
    * Identificador asociado a objective concept.
    */
@@ -572,7 +572,7 @@ export class AdsCampaignsRepository {
       /**
        * Valor de name mantenido por la instancia.
        */
-      name: string;
+      name?: string;
       /**
        * Identificador asociado a creative.
        */

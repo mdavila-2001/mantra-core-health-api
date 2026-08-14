@@ -1,10 +1,21 @@
 {
   "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Fijar la raíz es lo que mantiene estable `dist/src/…`. Sin esto, TypeScript la infiere del
+    // ancestro común de los archivos compilados: mientras existió un `.ts` suelto en `tools/`, la
+    // raíz era el repo y la salida quedaba en `dist/src/`; al quedar sólo `src/`, la raíz pasó a
+    // ser `src/` y todo se movió a `dist/`. Esa mudanza silenciosa rompe de golpe el `CMD` del
+    // Dockerfile, `start:prod`, los 20 arranques de worker y `postman:bootstrap`, que apuntan a
+    // `dist/src/…`. Es la misma clase de regresión que ya se documentó cuando `mock-provider-server`
+    // entraba en el build.
+    "rootDir": "."
+  },
   "exclude": [
     "node_modules",
     "test",
     "dist",
     "mock-provider-server",
+    "tools",
     "**/*spec.ts",
     "**/*.testing.ts"
   ]

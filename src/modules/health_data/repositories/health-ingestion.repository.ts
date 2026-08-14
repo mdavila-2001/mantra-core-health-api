@@ -3,9 +3,11 @@ import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   HealthSourceConnections,
+  HealthSourceSystems,
   HealthIngestionBatches,
   HealthIngestionRecords,
 } from '../entities';
+import { CONCEPTS } from '../../../common';
 
 /**
  * Describe el contrato estructural de create batch data.
@@ -110,6 +112,94 @@ export class HealthIngestionRepository {
     );
   }
 
+  /**
+   * Sistema de origen por código dentro del tenant.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant propietario.
+   * @param code - Código del sistema.
+   * @returns El sistema, si ya existe.
+   */
+  findSourceSystemByCode(
+    em: EntityManager,
+    tenantId: string,
+    code: string,
+  ): Promise<HealthSourceSystems | null> {
+    return em.findOne(HealthSourceSystems, { tenantId, code });
+  }
+
+  /**
+   * Da de alta el sistema de origen del que cuelgan las conexiones.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Identificación y clasificación del sistema.
+   * @returns El sistema creado.
+   */
+  createSourceSystem(
+    em: EntityManager,
+    data: {
+      /** Tenant propietario. */
+      tenantId: string;
+      /** Código único dentro del tenant. */
+      code: string;
+      /** Nombre legible. */
+      name: string;
+      /** Tipo de sistema. */
+      sourceTypeConceptId: string;
+      /** Nivel de confianza. */
+      trustLevelConceptId: string;
+    },
+  ): HealthSourceSystems {
+    const now = new Date();
+    return em.create(
+      HealthSourceSystems,
+      {
+        tenantId: data.tenantId,
+        code: data.code,
+        name: data.name,
+        sourceTypeConceptId: data.sourceTypeConceptId,
+        trustLevelConceptId: data.trustLevelConceptId,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+  }
+
+  /**
+   * Da de alta la conexión de origen: es lo que un lote de ingesta referencia.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Sistema del que cuelga y datos del extremo.
+   * @returns La conexión creada, activa.
+   */
+  createConnection(
+    em: EntityManager,
+    data: {
+      /** Sistema de origen del que cuelga. */
+      healthSourceSystemId: string;
+      /** Tipo de conexión. */
+      connectionTypeConceptId: string;
+      /** URI del extremo. */
+      endpointUri: string;
+    },
+  ): HealthSourceConnections {
+    const now = new Date();
+    return em.create(
+      HealthSourceConnections,
+      {
+        healthSourceSystemId: data.healthSourceSystemId,
+        connectionTypeConceptId: data.connectionTypeConceptId,
+        endpointUri: data.endpointUri,
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+  }
+
   // --- Lotes (UC-52-01, 02) ---
 
   /**
@@ -135,6 +225,11 @@ export class HealthIngestionRepository {
         sourcePeriodEnd: data.sourcePeriodEnd,
         payloadManifestFileId: data.payloadManifestFileId,
         statusConceptId: data.statusConceptId,
+        // `created_at` es NOT NULL y sin default en el esquema: sin esta línea
+        // abrir un lote fallaba SIEMPRE con 500 contra una base real, y no lo
+        // veía ninguna prueba porque las unitarias simulan el `EntityManager`.
+        // Mismo patrón que ya rompió `createOutboxMessage`.
+        createdAt: new Date(),
       },
       { partial: true },
     );
@@ -209,6 +304,8 @@ export class HealthIngestionRepository {
         payloadFileId: data.payloadFileId,
         validationStatusConceptId: data.validationStatusConceptId,
         processingStatusConceptId: data.processingStatusConceptId,
+        // Misma columna NOT NULL sin default que en el lote.
+        createdAt: new Date(),
       },
       { partial: true },
     );

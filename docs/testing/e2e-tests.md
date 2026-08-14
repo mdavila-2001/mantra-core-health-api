@@ -5,7 +5,7 @@
 ## Estado
 
 **No ejecutada en esta fase.** Un solo archivo E2E existe en el repositorio — cobertura E2E mínima
-comparada con las 841 operaciones del contrato OpenAPI real
+comparada con las 878 operaciones del contrato OpenAPI real
 ([openapi-generation-notes.md](../reports/openapi-generation-notes.md)).
 
 ## Qué cubre (por inspección, no ejecución)
@@ -17,7 +17,7 @@ globales.
 
 ## Brecha real
 
-Con 60 módulos y 841 operaciones, un solo archivo E2E es una cobertura muy delgada del camino
+Con 60 módulos y 878 operaciones, un solo archivo E2E es una cobertura muy delgada del camino
 completo cliente→API→base para los flujos de negocio críticos identificados en
 [flujos críticos](../business/critical-workflows.md) (ciclo de vida de una cita, consentimiento y
 acceso clínico). No se recomienda declarar cobertura E2E "suficiente" sin ampliarla.

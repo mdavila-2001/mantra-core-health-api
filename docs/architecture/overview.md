@@ -2,11 +2,11 @@
 
 > Fase 10. Modelo C4 (Simon Brown) aplicado a lo verificado en Fases 0-1
 > ([graphify-audit.md](../reports/graphify-audit.md), [system-inventory.md](../reports/system-inventory.md)).
-> Fuente de arquitectura versionable: [`structurizr/workspace.dsl`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/structurizr/workspace.dsl).
+> Fuente de arquitectura versionable: [`structurizr/workspace.dsl`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/structurizr/workspace.dsl).
 
 ## Estilo arquitectónico
 
-**Monolito modular**, no microservicios: una única aplicación NestJS (`AppModule`) registra 60
+**Monolito modular**, no microservicios: una única aplicación NestJS (`AppModule`) registra 61
 módulos de dominio en el mismo proceso HTTP, cada uno mapeado 1:1 a un schema PostgreSQL propio
 (`src/modules/README.md`). El aislamiento entre dominios se logra por **convención de código
 verificada mecánicamente** (`tools/redesa/coverage-report.mjs`), no por límites de proceso o red.
@@ -31,7 +31,5 @@ Flujos transversales complementarios: [ciclo de vida de una request](request-lif
 
 ## Coherencia con Graphify
 
-Los 60 módulos, 20 workers y 5 almacenes de datos descritos aquí coinciden exactamente con el
-inventario cuantitativo de [graphify-audit.md](../reports/graphify-audit.md) — no hay
-divergencia entre lo que dice el grafo estructural y lo que describen estos diagramas (ver
+El inventario fuente actual contiene 61 módulos, 21 workers y 5 almacenes de datos. El [graphify-audit.md](../reports/graphify-audit.md) conserva la línea base histórica anterior a `audio_assets` (60 módulos/20 workers); la diferencia actual está explicada por la incorporación del módulo y `worker-audio-assets` el 2026-08-10 (ver
 §10 de ese informe para la comparación explícita grafo-vs-código).

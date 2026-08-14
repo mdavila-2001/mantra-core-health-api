@@ -1,10 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { ProfessionalCredentials } from '../entities';
+import { PROF } from '../profiles.concepts';
 import { CONCEPTS, createdBy } from '../../../common';
 
-/** Estados de credencial que la acreditan como VIGENTE (verificada/activa). */
+/**
+ * Estados en los que una credencial profesional acredita que su titular puede
+ * ejercer.
+ *
+ * `PROF.CRED_VERIFIED` es el que escribe `verifyCredential`, el único acto que
+ * verifica una matrícula en todo el sistema. Faltaba de esta lista, que sólo
+ * miraba los estados transversales: las dos mitades del mismo hecho usaban
+ * catálogos distintos, así que **ninguna credencial verificada contaba jamás
+ * como vigente**. Aguas abajo eso bloqueaba el circuito quirúrgico entero
+ * (CAN-INT-002): ningún integrante podía acreditarse y ningún caso podía
+ * confirmarse, por muy en regla que estuviera la matrícula.
+ *
+ * Los dos transversales se conservan porque hay filas antiguas escritas con
+ * ellos y quitarlos las invalidaría de golpe.
+ */
 const CURRENT_CREDENTIAL_STATES: readonly string[] = [
+  PROF.CRED_VERIFIED,
   CONCEPTS.STATE_VERIFIED,
   CONCEPTS.STATE_ACTIVE,
 ];
@@ -27,6 +43,11 @@ export interface CreateCredentialData {
    * Valor de issuing institution text mantenido por la instancia.
    */
   issuingInstitutionText?: string;
+  /**
+   * Cuándo se emitió. Sin ella, una línea de tiempo de formación no se puede
+   * ordenar y se lee como una lista de títulos sueltos.
+   */
+  issueDate?: Date;
   /**
    * Valor de verification source uri mantenido por la instancia.
    */
@@ -76,6 +97,7 @@ export class ProfessionalCredentialsRepository {
         credentialTypeConceptId: data.credentialTypeConceptId,
         number: data.number,
         issuingInstitutionText: data.issuingInstitutionText,
+        issueDate: data.issueDate,
         verificationSourceUri: data.verificationSourceUri,
         stateConceptId: data.stateConceptId,
         ...createdBy(data.actorUserId),
@@ -102,6 +124,30 @@ export class ProfessionalCredentialsRepository {
       $or: [{ expiryDate: null }, { expiryDate: { $gte: now } }],
     });
     return count > 0;
+  }
+
+  /**
+   * Las credenciales del profesional: títulos, posgrados y certificaciones.
+   *
+   * Es **la trayectoria formativa** — lo que en un perfil profesional se lee
+   * como «estudios»—. Se devuelven todas, incluidas las vencidas y las que no
+   * llegaron a verificarse: una certificación que caducó sigue siendo formación
+   * cursada, y ocultarla dejaría huecos inexplicables en la línea de tiempo.
+   * Qué hacer con cada estado lo decide quien la muestra, no esta consulta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - Perfil profesional dueño de las credenciales.
+   * @returns Sus credenciales, de la más reciente a la más antigua.
+   */
+  findByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<ProfessionalCredentials[]> {
+    return em.find(
+      ProfessionalCredentials,
+      { practitionerProfileId },
+      { orderBy: { issueDate: 'desc', createdAt: 'desc' } },
+    );
   }
 
   /**

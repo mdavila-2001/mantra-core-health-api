@@ -78,7 +78,15 @@ function build() {
   const practitionerProfilesRepo = {
     findById: mockFn().mockResolvedValue(null),
   };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // Sin asignaciones en `authz`: el token queda con los roles de plataforma, que
+  // es el caso por defecto de una cuenta que no ejerce ningún rol asistencial.
+  const effectiveRoles = { codesForUser: mockFn().mockResolvedValue([]) };
+  const logger = {
+    setContext: mockFn(),
+    info: mockFn(),
+    warn: mockFn(),
+    error: mockFn(),
+  };
 
   const service = new IamAuthService(
     em as any,
@@ -90,6 +98,7 @@ function build() {
     rolesRepo as any,
     lockoutsRepo,
     eventsRepo,
+    effectiveRoles as any,
     accountLinksRepo as any,
     patientProfilesRepo as any,
     practitionerProfilesRepo as any,
@@ -97,6 +106,7 @@ function build() {
     new TracingService(),
   );
   return {
+    effectiveRoles,
     service,
     tx,
     tokenService,
@@ -143,6 +153,67 @@ describe('IamAuthService', () => {
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventTypeConceptId: CONCEPTS.SEC_LOGIN }),
+      );
+    });
+
+    it('carries the business roles of `authz` in the token claim', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      // El sujeto tiene el rol global `USER` y, en `authz`, el asistencial.
+      d.rolesRepo.findActiveForUser.mockResolvedValue([
+        { roleConceptId: CONCEPTS.ROLE_USER },
+      ]);
+      d.effectiveRoles.codesForUser.mockResolvedValue(['SURGEON']);
+
+      await d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4');
+
+      // Sin esto, `@Roles('SURGEON')` es inalcanzable para cualquiera que no
+      // sea `SUPERADMIN`, que es justamente lo que este cambio corrige.
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        ['USER', 'SURGEON'],
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('still issues the token when the business roles cannot be resolved', async () => {
+      const d = build();
+      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+        userId: 'u1',
+        secretHash: PASSWORD_HASH,
+      });
+      d.usersRepo.findById.mockResolvedValue({
+        id: 'u1',
+        statusConceptId: CONCEPTS.USER_ACTIVE,
+        updatedAt: new Date(),
+      });
+      d.sessionsRepo.create.mockReturnValue({ id: 's1' });
+      d.rolesRepo.findActiveForUser.mockResolvedValue([
+        { roleConceptId: CONCEPTS.ROLE_USER },
+      ]);
+      d.effectiveRoles.codesForUser.mockRejectedValue(new Error('authz down'));
+
+      // Un problema de autorización no debe convertirse en una caída de la
+      // autenticación: entra con sus roles de plataforma y recibirá un 403
+      // legible al tocar lo clínico.
+      await expect(
+        d.service.login({ email: 'a@x.io', password: PASSWORD }, '1.2.3.4'),
+      ).resolves.toBeDefined();
+      expect(d.tokenService.issueSessionTokens).toHaveBeenCalledWith(
+        'u1',
+        ['USER'],
+        expect.anything(),
+        expect.anything(),
       );
     });
 

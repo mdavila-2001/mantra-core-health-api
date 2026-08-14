@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { PublicProfiles } from '../entities';
+import { PublicProfiles, VerifiedBadges } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
 
 /** Datos para dar de alta un perfil público (anchor social del módulo). */
@@ -70,12 +70,127 @@ export class PublicProfilesRepository {
   }
 
   /**
+   * Varios perfiles por id, para hidratar autores de una página.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Perfiles a traer.
+   * @returns Los perfiles existentes, sin orden garantizado.
+   */
+  listByIds(em: EntityManager, ids: string[]): Promise<PublicProfiles[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PublicProfiles, { id: { $in: ids } });
+  }
+
+  /**
+   * Sellos de verificación vigentes de un sujeto.
+   *
+   * No filtra por tipo de sujeto porque el módulo todavía no declara conceptos
+   * para esa columna; el id del perfil ya es único, así que acotar por él es
+   * exacto sin inventar un concepto que el modelo no tiene.
+   *
+   * Vigencia: se descartan los sellos cuya ventana `valid_from`/`valid_to` no
+   * cubre el momento de la consulta — un sello vencido que se sigue mostrando
+   * es peor que ninguno.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param subjectRefId - Sujeto del sello (aquí, el perfil público).
+   * @param activeStatusConceptId - Estado que cuenta como vigente.
+   * @param now - Momento contra el que se evalúa la ventana.
+   * @returns Sellos vigentes del sujeto.
+   */
+  listBadgesBySubject(
+    em: EntityManager,
+    subjectRefId: string,
+    activeStatusConceptId: string,
+    now: Date,
+  ): Promise<VerifiedBadges[]> {
+    return em.find(
+      VerifiedBadges,
+      {
+        subjectRefId,
+        statusConceptId: activeStatusConceptId,
+        $and: [
+          { $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },
+          { $or: [{ validTo: null }, { validTo: { $gte: now } }] },
+        ],
+      },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' } },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `PublicProfiles`.
    */
+  /**
+   * Perfiles públicos de un tenant — la vitrina de la red social.
+   *
+   * Existía la escritura y ninguna lectura: se podían crear perfiles públicos y
+   * no había forma de listarlos, así que la red social no se podía mostrar. Es
+   * el mismo agujero que tenía el mayor contable.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filtros - Tenant obligatorio; tipo de sujeto y visibilidad opcionales.
+   * @param limit - Tope de filas.
+   * @returns Los perfiles, del más reciente al más antiguo.
+   */
+  findByTenant(
+    em: EntityManager,
+    filtros: {
+      tenantId: string;
+      targetTypeConceptId?: string;
+      visibilityConceptId?: string;
+    },
+    limit: number,
+  ): Promise<PublicProfiles[]> {
+    const where: Record<string, unknown> = { tenantId: filtros.tenantId };
+    if (filtros.targetTypeConceptId) {
+      where.targetTypeConceptId = filtros.targetTypeConceptId;
+    }
+    if (filtros.visibilityConceptId) {
+      where.visibilityConceptId = filtros.visibilityConceptId;
+    }
+    return em.find(PublicProfiles, where, {
+      orderBy: { createdAt: 'DESC' },
+      limit,
+    });
+  }
+
+  /**
+   * El perfil público de un sujeto concreto — un profesional, una organización.
+   *
+   * Es la lectura que hace falta para «ver el perfil de este médico»: se llega
+   * por quién es, no por el id del perfil, que nadie conoce de antemano.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetId - Sujeto del perfil.
+   * @returns El perfil, o `null` si ese sujeto no tiene vitrina.
+   */
+  findByTarget(
+    em: EntityManager,
+    targetId: string,
+  ): Promise<PublicProfiles | null> {
+    return em.findOne(PublicProfiles, { targetId });
+  }
+
+  /**
+   * El perfil público por su dirección legible.
+   *
+   * Es lo que hace falta para comprobar que un slug esté libre antes de
+   * asignarlo: dos vitrinas con el mismo texto serían dos enlaces que llevan a
+   * personas distintas según cuál resuelva primero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param slug - La dirección legible.
+   * @returns El perfil, o `null` si el slug está libre.
+   */
+  findBySlug(em: EntityManager, slug: string): Promise<PublicProfiles | null> {
+    return em.findOne(PublicProfiles, { slug });
+  }
+
   create(em: EntityManager, data: CreatePublicProfileData): PublicProfiles {
     return em.create(
       PublicProfiles,

@@ -22,7 +22,10 @@ function build() {
     markRead: mockFn(),
   };
   return {
-    controller: new CommunityMessagingController(service as any),
+    controller: new CommunityMessagingController(
+      service as any,
+      { listConversations: mockFn(), listMessages: mockFn() } as any,
+    ),
     service,
   };
 }

@@ -40,6 +40,83 @@ const DEID_OUTCOMES = ['COMPLETED', 'FAILED'] as const;
 // ---------------------------------------------------------------------------
 
 /** Cuerpo de `POST /health-data/ingestion-batches` (UC-52-01). */
+/**
+ * Cuerpo de `POST /health-data/source-connections`.
+ *
+ * El alta faltaba: `health_source_connections` y `health_source_systems` sólo
+ * podían existir si alguien las insertaba a mano, y sin una conexión no se puede
+ * abrir un lote, ni proyectar un recurso canónico, ni llegar a nada de lo que el
+ * informático clínico hace. El sistema de origen se crea aquí mismo a partir de
+ * su código: es el padre del que cuelga la conexión y no aporta ninguna decisión
+ * aparte.
+ */
+export class CreateSourceConnectionDto {
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({ format: 'uuid', description: 'Tenant propietario del origen' })
+  @IsUUID()
+  tenantId!: string;
+
+  /**
+   * Valor de source system code mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Código del sistema de origen; se crea si no existe',
+    maxLength: 100,
+  })
+  @IsString()
+  @MaxLength(100)
+  sourceSystemCode!: string;
+
+  /**
+   * Valor de source system name mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Nombre del sistema de origen', maxLength: 200 })
+  @IsString()
+  @MaxLength(200)
+  sourceSystemName!: string;
+
+  /**
+   * Identificador asociado a source type concept.
+   */
+  @ApiProperty({ format: 'uuid', description: 'Tipo de sistema de origen' })
+  @IsUUID()
+  sourceTypeConceptId!: string;
+
+  /**
+   * Identificador asociado a trust level concept.
+   */
+  @ApiProperty({ format: 'uuid', description: 'Nivel de confianza del origen' })
+  @IsUUID()
+  trustLevelConceptId!: string;
+
+  /**
+   * Identificador asociado a connection type concept.
+   */
+  @ApiProperty({ format: 'uuid', description: 'Tipo de conexión' })
+  @IsUUID()
+  connectionTypeConceptId!: string;
+
+  /**
+   * Valor de endpoint uri mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'URI del extremo del origen', maxLength: 500 })
+  @IsString()
+  @MaxLength(500)
+  endpointUri!: string;
+}
+
+/** Respuesta del alta de una conexión de origen. */
+export class SourceConnectionResponseDto {
+  /** Identificador de la conexión. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Sistema de origen del que cuelga (creado o reutilizado). */
+  @ApiProperty({ format: 'uuid' }) healthSourceSystemId!: string;
+  /** Concepto de estado: nace activa. */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+}
+
 export class OpenIngestionBatchDto {
   /**
    * Identificador asociado a health source connection.

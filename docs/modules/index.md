@@ -1,19 +1,19 @@
 # Catálogo de módulos
 
 > Generado por `yarn docs:modules:sync` desde `src/modules/*/README.md` reales — no editar a
-> mano. 60 módulos, de los cuales 57 tienen entidades propias (ver
+> mano. 61 módulos, de los cuales 58 tienen entidades propias (ver
 > [`docs/reports/system-inventory.md`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
+| [`community`](community.md) | 8 | 15 | 16 | 38 | 23 |
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
-| [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 16 |
+| [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 7 | 8 | 30 | 10 |
-| [`accounting`](accounting.md) | 7 | 7 | 9 | 42 | 8 |
-| [`authz`](authz.md) | 7 | 7 | 14 | 15 | 17 |
+| [`accounting`](accounting.md) | 7 | 8 | 9 | 42 | 9 |
+| [`authz`](authz.md) | 7 | 8 | 14 | 15 | 17 |
 | [`clinical_ext`](clinical_ext.md) | 7 | 7 | 11 | 12 | 8 |
-| [`community`](community.md) | 7 | 8 | 15 | 38 | 16 |
 | [`insurance`](insurance.md) | 7 | 7 | 6 | 29 | 8 |
 | [`clinical`](clinical.md) | 6 | 12 | 13 | 22 | 12 |
 | [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
@@ -37,7 +37,7 @@
 | [`read_models`](read_models.md) | 3 | 3 | 8 | 13 | 5 |
 | [`telemetry`](telemetry.md) | 3 | 3 | 14 | 14 | 12 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
-| [`audio_tts`](audio_tts.md) | 2 | 5 | 2 | 5 | 1 |
+| [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 4 | 3 | 20 | 1 |
 | [`directory`](directory.md) | 2 | 6 | 5 | 7 | 16 |
@@ -48,7 +48,7 @@
 | [`lakehouse`](lakehouse.md) | 2 | 3 | 3 | 18 | 1 |
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
 | [`object_storage`](object_storage.md) | 2 | 3 | 3 | 17 | 1 |
-| [`profiles`](profiles.md) | 2 | 3 | 13 | 18 | 12 |
+| [`profiles`](profiles.md) | 2 | 3 | 13 | 18 | 14 |
 | [`promotions`](promotions.md) | 2 | 2 | 2 | 11 | 1 |
 | [`qa_lab`](qa_lab.md) | 2 | 2 | 2 | 13 | 1 |
 | [`time_series`](time_series.md) | 2 | 4 | 2 | 12 | 1 |
@@ -68,4 +68,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **198** | **275** | **357** | **1191** | **382** |
+| **Total** | **199** | **283** | **358** | **1190** | **393** |

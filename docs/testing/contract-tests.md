@@ -9,14 +9,14 @@
 - El propio contrato se **genera desde el código** (`tools/openapi/generate-openapi.mjs`, ver
   [notas de generación](../reports/openapi-generation-notes.md)), lo cual garantiza que la
   *forma* declarada (nombres de campo, tipos de DTO) coincide con el código en el momento de
-  generar — pero no verifica que la *respuesta en runtime* de cada uno de los 841 endpoints
+  generar — pero no verifica que la *respuesta en runtime* de cada uno de los 878 endpoints
   cumpla ese schema contra datos reales.
 - `class-validator`/`ValidationPipe` garantiza que las *requests* entrantes cumplen el DTO
   (rechaza lo que no cumple) — es validación de entrada, no prueba de contrato de salida.
 
 ## Brecha real
 
-Ninguna de las 841 operaciones tiene una prueba automatizada que confirme "esta respuesta real
+Ninguna de las 878 operaciones tiene una prueba automatizada que confirme "esta respuesta real
 cumple exactamente el schema que el cliente espera" — el plan maestro (§14) lo exige como
 validación documental automatizada ("Los ejemplos cumplen el esquema"). No implementado.
 

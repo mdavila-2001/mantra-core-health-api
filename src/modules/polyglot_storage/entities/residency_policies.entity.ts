@@ -27,14 +27,22 @@ export class ResidencyPolicies {
   /**
    * Valor de forbidden country codes mantenido por la instancia.
    */
-  @Property({ fieldName: 'forbidden_country_codes', type: 'array' })
-  forbiddenCountryCodes!: string[];
+  @Property({
+    fieldName: 'forbidden_country_codes',
+    type: 'array',
+    nullable: true,
+  })
+  forbiddenCountryCodes?: string[];
 
   /**
    * Valor de allowed region codes mantenido por la instancia.
    */
-  @Property({ fieldName: 'allowed_region_codes', type: 'array' })
-  allowedRegionCodes!: string[];
+  @Property({
+    fieldName: 'allowed_region_codes',
+    type: 'array',
+    nullable: true,
+  })
+  allowedRegionCodes?: string[];
 
   /**
    * Valor de requires in country backup mantenido por la instancia.
@@ -45,8 +53,12 @@ export class ResidencyPolicies {
   /**
    * Valor de cross border transfer basis mantenido por la instancia.
    */
-  @Property({ fieldName: 'cross_border_transfer_basis', columnType: 'varchar' })
-  crossBorderTransferBasis!: string;
+  @Property({
+    fieldName: 'cross_border_transfer_basis',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  crossBorderTransferBasis?: string;
 
   /**
    * Valor de state mantenido por la instancia.

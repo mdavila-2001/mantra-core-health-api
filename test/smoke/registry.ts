@@ -9,6 +9,7 @@ import { AUDIT_SMOKE } from './modules/audit.smoke';
 import { SYSTEM_OPS_SMOKE } from './modules/system_ops.smoke';
 import { GEO_SMOKE } from './modules/geo.smoke';
 import { PRACTICE_SMOKE } from './modules/practice.smoke';
+import { SCHEDULING_SMOKE } from './modules/scheduling.smoke';
 import { CHART_SMOKE } from './modules/chart.smoke';
 import { INTEGRATIONS_SMOKE } from './modules/integrations.smoke';
 import { ACCOUNTING_SMOKE } from './modules/accounting.smoke';
@@ -28,6 +29,9 @@ import { PACIENTE_SMOKE } from './modules/paciente.smoke';
 import { MEDICO_SMOKE } from './modules/medico.smoke';
 import { ORGANIZACION_SMOKE } from './modules/organizacion.smoke';
 import { ADMINISTRADOR_SMOKE } from './modules/administrador.smoke';
+import { PHARMACY_INVENTORY_SMOKE } from './modules/pharmacy_inventory.smoke';
+import { INSURANCE_SMOKE } from './modules/insurance.smoke';
+import { TELEMETRY_SMOKE } from './modules/telemetry.smoke';
 
 /**
  * Registro de casos de smoke por módulo. El orquestador añade aquí una línea por
@@ -52,6 +56,9 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...SYSTEM_OPS_SMOKE,
   ...GEO_SMOKE,
   ...PRACTICE_SMOKE,
+  // Scheduling después de Profiles: consume el paciente y el profesional reales
+  // que aquél publica en `ctx.vars`.
+  ...SCHEDULING_SMOKE,
   ...CHART_SMOKE,
   ...INTEGRATIONS_SMOKE,
   ...ACCOUNTING_SMOKE,
@@ -66,6 +73,9 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...DELEGATED_ACCESS_SMOKE,
   ...READ_MODELS_SMOKE,
   ...INTEGRATION_CONTRACTS_SMOKE,
+  ...PHARMACY_INVENTORY_SMOKE,
+  ...INSURANCE_SMOKE,
+  ...TELEMETRY_SMOKE,
   // Va al final: cierra sesión del paciente y su recorrido no debe alterar el estado que
   // esperan los casos por módulo.
   ...PACIENTE_SMOKE,

@@ -104,6 +104,18 @@ export class CreatePostDto {
   postType?: 'TEXT' | 'POLL';
 
   /**
+   * Valor de visibility mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Quién puede leer el post. Omitirlo equivale a PUBLIC, que es como se leen las publicaciones anteriores a este campo.',
+    enum: ['PUBLIC', 'FOLLOWERS', 'PRIVATE'],
+  })
+  @IsOptional()
+  @IsString()
+  visibility?: 'PUBLIC' | 'FOLLOWERS' | 'PRIVATE';
+
+  /**
    * Valor de comments enabled mantenido por la instancia.
    */
   @ApiPropertyOptional({ description: 'Comentarios habilitados' })

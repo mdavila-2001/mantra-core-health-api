@@ -1,0 +1,359 @@
+{
+  "resumen": {
+    "entidadesBoveda": 1335,
+    "conjuntosDeIndicesBoveda": 1224,
+    "entidadesMapeadas": 1190,
+    "entidadesFaltantes": 0,
+    "entidadesSobrantes": 0,
+    "columnasFaltantes": 0,
+    "columnasSobrantes": 4,
+    "tiposDivergentes": 0,
+    "obligatoriedadDivergente": 0,
+    "vistasNoMaterializadas": 78,
+    "indicesDeclarados": 7743,
+    "indicesEnCatalogo": 7686,
+    "fkDeclaradas": 6622,
+    "fkEnCatalogo": 6622
+  },
+  "entidadesFaltantes": [],
+  "entidadesSobrantes": [],
+  "columnasFaltantes": [],
+  "columnasSobrantes": [
+    {
+      "key": "profiles.persons",
+      "columna": "name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.persons",
+      "columna": "middle_name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.persons",
+      "columna": "last_name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    },
+    {
+      "key": "profiles.persons",
+      "columna": "mother_last_name",
+      "archivo": "profiles/entities/persons.entity.ts"
+    }
+  ],
+  "tiposDivergentes": [],
+  "obligatoriedadDivergente": [],
+  "vistasNoMaterializadas": [
+    {
+      "key": "billing.receivables_aging_view",
+      "campos": 6
+    },
+    {
+      "key": "chart.patient_timeline_view",
+      "campos": 10
+    },
+    {
+      "key": "clinical_ext.vital_signs_view",
+      "campos": 7
+    },
+    {
+      "key": "community.rating_aggregates",
+      "campos": 6
+    },
+    {
+      "key": "forms.resource_fields_view",
+      "campos": 11
+    },
+    {
+      "key": "read_models.ads_campaign_delivery_dashboard_v",
+      "campos": 21
+    },
+    {
+      "key": "read_models.ads_conversion_quality_mv",
+      "campos": 15
+    },
+    {
+      "key": "read_models.ads_lead_inbox_v",
+      "campos": 15
+    },
+    {
+      "key": "read_models.ads_policy_review_queue_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.broker_commission_statement_v",
+      "campos": 10
+    },
+    {
+      "key": "read_models.broker_portfolio_v",
+      "campos": 11
+    },
+    {
+      "key": "read_models.crm_account_360_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.crm_activity_timeline_mv",
+      "campos": 18
+    },
+    {
+      "key": "read_models.crm_calendar_v",
+      "campos": 14
+    },
+    {
+      "key": "read_models.crm_case_queue_v",
+      "campos": 14
+    },
+    {
+      "key": "read_models.crm_opportunity_forecast_v",
+      "campos": 14
+    },
+    {
+      "key": "read_models.crm_pipeline_board_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.crm_task_queue_v",
+      "campos": 14
+    },
+    {
+      "key": "read_models.diagnostic_result_release_queue_v",
+      "campos": 9
+    },
+    {
+      "key": "read_models.diagnostic_unit_public_catalog_v",
+      "campos": 17
+    },
+    {
+      "key": "read_models.diagnostic_worklist_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.doctor_daily_workspace_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.doctor_note_history_v",
+      "campos": 11
+    },
+    {
+      "key": "read_models.doctor_patient_summary_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.doctor_result_inbox_v",
+      "campos": 10
+    },
+    {
+      "key": "read_models.education_learner_dashboard_v",
+      "campos": 8
+    },
+    {
+      "key": "read_models.erp_accounts_payable_queue_v",
+      "campos": 10
+    },
+    {
+      "key": "read_models.erp_accounts_receivable_queue_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.erp_asset_rollforward_mv",
+      "campos": 15
+    },
+    {
+      "key": "read_models.erp_business_partner_360_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.erp_contract_lifecycle_queue_v",
+      "campos": 16
+    },
+    {
+      "key": "read_models.erp_contract_obligation_queue_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.erp_financial_summary_v",
+      "campos": 10
+    },
+    {
+      "key": "read_models.erp_general_ledger_balance_v",
+      "campos": 9
+    },
+    {
+      "key": "read_models.erp_inventory_valuation_v",
+      "campos": 10
+    },
+    {
+      "key": "read_models.erp_journal_line_trace_v",
+      "campos": 16
+    },
+    {
+      "key": "read_models.erp_liability_maturity_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.erp_procure_to_pay_match_queue_v",
+      "campos": 14
+    },
+    {
+      "key": "read_models.health_data_ingestion_quality_v",
+      "campos": 16
+    },
+    {
+      "key": "read_models.hospital_bed_board_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.imaging_study_viewer_manifest_v",
+      "campos": 15
+    },
+    {
+      "key": "read_models.infrastructure_operations_dashboard_v",
+      "campos": 11
+    },
+    {
+      "key": "read_models.insurer_authorization_queue_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.insurer_claim_reconciliation_v",
+      "campos": 11
+    },
+    {
+      "key": "read_models.insurer_network_performance_v",
+      "campos": 10
+    },
+    {
+      "key": "read_models.lab_specimen_trace_v",
+      "campos": 18
+    },
+    {
+      "key": "read_models.marketing_campaign_performance_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.operating_room_schedule_v",
+      "campos": 16
+    },
+    {
+      "key": "read_models.ops_change_calendar_v",
+      "campos": 15
+    },
+    {
+      "key": "read_models.ops_incident_command_center_v",
+      "campos": 17
+    },
+    {
+      "key": "read_models.ops_service_health_overview_v",
+      "campos": 16
+    },
+    {
+      "key": "read_models.ops_slo_error_budget_mv",
+      "campos": 15
+    },
+    {
+      "key": "read_models.patient_appointments_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.patient_billing_wallet_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.patient_consent_center_v",
+      "campos": 11
+    },
+    {
+      "key": "read_models.patient_diagnostic_timeline_v",
+      "campos": 19
+    },
+    {
+      "key": "read_models.patient_health_timeline_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.patient_home_dashboard_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.patient_longitudinal_record_v",
+      "campos": 16
+    },
+    {
+      "key": "read_models.patient_medication_summary_v",
+      "campos": 11
+    },
+    {
+      "key": "read_models.patient_orders_results_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.patient_provider_search_v",
+      "campos": 17
+    },
+    {
+      "key": "read_models.payments_debt_checkout_v",
+      "campos": 17
+    },
+    {
+      "key": "read_models.payments_gateway_operations_v",
+      "campos": 14
+    },
+    {
+      "key": "read_models.payments_reconciliation_queue_v",
+      "campos": 15
+    },
+    {
+      "key": "read_models.pharmacy_dispensing_queue_v",
+      "campos": 10
+    },
+    {
+      "key": "read_models.pharmacy_inventory_dashboard_v",
+      "campos": 11
+    },
+    {
+      "key": "read_models.pharmacy_public_stock_offer_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.postoperative_followup_queue_v",
+      "campos": 16
+    },
+    {
+      "key": "read_models.procedure_case_command_center_v",
+      "campos": 19
+    },
+    {
+      "key": "read_models.public_feed_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.public_profile_detail_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.public_provider_directory_v",
+      "campos": 15
+    },
+    {
+      "key": "read_models.system_admin_dashboard_v",
+      "campos": 6
+    },
+    {
+      "key": "read_models.system_admin_integration_health_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.system_admin_tenant_list_v",
+      "campos": 13
+    },
+    {
+      "key": "read_models.system_admin_verification_queue_v",
+      "campos": 12
+    },
+    {
+      "key": "read_models.workforce_shift_board_v",
+      "campos": 10
+    }
+  ]
+}

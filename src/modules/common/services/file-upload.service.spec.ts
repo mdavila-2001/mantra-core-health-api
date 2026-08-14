@@ -36,7 +36,7 @@ describe('FileUploadService', () => {
   function build() {
     const forked = {};
     const em = { fork: fn(() => forked) };
-    const storage = { store: fn(), retrieve: fn() };
+    const storage = { store: fn(), retrieve: fn(), exists: fn(), delete: fn() };
     const filesService = { createFile: fn() };
     const filesRepo = { findById: fn() };
     const fileVersionsRepo = { findById: fn() };

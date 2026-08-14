@@ -6,6 +6,7 @@
 import '../observability/telemetry.bootstrap';
 
 import { Module, type Type } from '@nestjs/common';
+import type { ObjectSchema } from 'joi';
 import { NestFactory } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -61,6 +62,7 @@ import { startWorkerHealthServer } from './worker-health.server';
 export async function bootstrapWorker(
   domainModule: Type<unknown>,
   name: string,
+  additionalEnvSchema?: ObjectSchema,
 ): Promise<void> {
   // ANTES de construir nada: si el emulador de proveedores está configurado en
   // producción, el proceso no debe arrancar. Se comprueba aquí y no solo dentro
@@ -76,15 +78,16 @@ export async function bootstrapWorker(
     imports: [
       ConfigModule.forRoot({
         isGlobal: true,
-        validationSchema: authEnvSchema
-          .concat(loggingEnvSchema)
-          .concat(workerEnvSchema)
-          .concat(telemetryEnvSchema)
-          // Lo concatenan los 21 workers, no solo el de audio: todas sus
-          // variables tienen valor por defecto, y validarlas en todos hace que un
-          // `.env` compartido con una errata aborte el arranque en cualquiera de
-          // ellos en vez de solo en el que la usa.
-          .concat(audioTtsEnvSchema),
+        validationSchema: additionalEnvSchema
+          ? authEnvSchema
+              .concat(loggingEnvSchema)
+              .concat(workerEnvSchema)
+              .concat(telemetryEnvSchema)
+              .concat(additionalEnvSchema)
+          : authEnvSchema
+              .concat(loggingEnvSchema)
+              .concat(workerEnvSchema)
+              .concat(telemetryEnvSchema),
       }),
       LoggingModule,
       ObservabilityModule,

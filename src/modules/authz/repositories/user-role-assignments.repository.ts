@@ -59,14 +59,32 @@ export class UserRoleAssignmentsRepository {
     });
   }
 
-  /** Asignaciones activas del usuario (para resolver roles efectivos en el PDP). */
+  /**
+   * Asignaciones vigentes del usuario (para resolver roles efectivos en el PDP
+   * y para construir el claim `roles` del token).
+   *
+   * El estado activo no basta: `valid_from`/`valid_to` son la ventana con la que
+   * un administrador concede un rol temporal —una guardia, una suplencia— y
+   * filtrarla sólo por estado hacía que ese rol siguiera concediendo acceso
+   * indefinidamente, porque nada cambia el estado al vencer la fecha.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Usuario del que se resuelven las asignaciones.
+   * @param now - Instante de referencia; por defecto, el actual.
+   * @returns Las asignaciones activas cuya vigencia cubre `now`.
+   */
   findActiveForUser(
     em: EntityManager,
     userId: string,
+    now: Date = new Date(),
   ): Promise<UserRoleAssignments[]> {
     return em.find(UserRoleAssignments, {
       userId,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
+      $and: [
+        { $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },
+        { $or: [{ validTo: null }, { validTo: { $gt: now } }] },
+      ],
     });
   }
 

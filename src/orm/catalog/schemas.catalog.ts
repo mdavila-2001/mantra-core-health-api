@@ -1,7 +1,7 @@
 import type { SchemaSpec } from './catalog.types';
 
 /**
- * Registro de los 57 esquemas PostgreSQL que compone el modelo canónico.
+ * Registro de los 58 esquemas PostgreSQL que compone el modelo canónico.
  * La capa 02 del arranque crea cada uno con CREATE SCHEMA IF NOT EXISTS antes de
  * que MikroORM sincronice tablas: sin el schema, el DDL de tablas fallaría.
  * Generado desde la bóveda SALUD; regenerar con `yarn orm:catalog`.
@@ -10,6 +10,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   // [schema, número de módulo del modelo, carpeta del módulo NestJS, tablas mapeadas]
   ['accounting', 16, 'accounting', 42],
   ['ads', 43, 'ads', 73],
+  ['audio_assets', 64, 'audio_assets', 4],
   ['audit', 10, 'audit', 123],
   ['auth_providers', 40, 'auth_providers', 9],
   ['authz', 6, 'authz', 15],

@@ -174,4 +174,18 @@ export class CareTeamsService {
       return { ok: true };
     });
   }
+  /**
+   * Lista los equipos de cuidado de un paciente.
+   *
+   * La cara de lectura que faltaba: se escribían y no había forma de verlas, así
+   * que el expediente no podía mostrarlas.
+   *
+   * @param patientProfileId - Paciente.
+   * @param limit - Tope de filas.
+   * @returns Los registros, del más reciente al más antiguo.
+   */
+  async listByPatient(patientProfileId: string, limit = 50) {
+    const em = this.em.fork();
+    return this.teamsRepo.findByPatient(em, patientProfileId, limit);
+  }
 }

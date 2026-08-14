@@ -25,7 +25,24 @@ function build() {
     follow: mockFn(),
     block: mockFn(),
   };
-  return { controller: new CommunitySocialController(service as any), service };
+  const readService = {
+    getProfile: mockFn(),
+    listProfilePosts: mockFn(),
+    getPost: mockFn(),
+    listPostComments: mockFn(),
+    getPostReactions: mockFn(),
+    listFollows: mockFn(),
+    listBookmarks: mockFn(),
+    listBlocks: mockFn(),
+  };
+  return {
+    controller: new CommunitySocialController(
+      service as any,
+      readService as any,
+    ),
+    service,
+    readService,
+  };
 }
 
 describe('CommunitySocialController', () => {

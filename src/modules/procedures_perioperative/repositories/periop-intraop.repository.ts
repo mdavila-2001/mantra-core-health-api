@@ -660,6 +660,27 @@ export class PeriopIntraopRepository {
   }
 
   /** Última versión del reporte del caso: de ella sale el número siguiente. */
+  /**
+   * Informes operatorios del caso, del más reciente al más antiguo.
+   *
+   * Un informe firmado no se edita: la corrección es una versión nueva, así que
+   * el histórico completo es parte del registro clínico y no un detalle.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Caso consultado.
+   * @returns Las versiones del informe.
+   */
+  findReportsByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+  ): Promise<OperativeReports[]> {
+    return em.find(
+      OperativeReports,
+      { procedureCaseId },
+      { orderBy: { reportVersion: 'DESC' } },
+    );
+  }
+
   findLastReport(
     em: EntityManager,
     procedureCaseId: string,
@@ -669,6 +690,65 @@ export class PeriopIntraopRepository {
       { procedureCaseId },
       { orderBy: { reportVersion: 'DESC' } },
     );
+  }
+
+  /**
+   * Hallazgos intraoperatorios del caso, del más reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Caso consultado.
+   * @returns Los hallazgos registrados durante la intervención.
+   */
+  findFindingsByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+  ): Promise<OperativeFindings[]> {
+    return em.find(
+      OperativeFindings,
+      { procedureCaseId },
+      { orderBy: { recordedAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Implantes del caso, del más reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureCaseId - Caso consultado.
+   * @returns Los implantes colocados en la intervención.
+   */
+  findImplantsByCase(
+    em: EntityManager,
+    procedureCaseId: string,
+  ): Promise<ProcedureImplants[]> {
+    return em.find(
+      ProcedureImplants,
+      { procedureCaseId },
+      { orderBy: { implantedAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Identificadores (UDI, lote, serie) de un conjunto de implantes.
+   *
+   * Va por separado y no implante a implante para no encadenar una consulta por
+   * fila. La lista vacía se resuelve sin ir a la base: `IN ()` no es SQL válido
+   * y, además, un caso sin implantes es el caso corriente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureImplantIds - Implantes cuyos identificadores se buscan.
+   * @returns Los identificadores de esos implantes.
+   */
+  findIdentifiersByImplants(
+    em: EntityManager,
+    procedureImplantIds: readonly string[],
+  ): Promise<ImplantIdentifiers[]> {
+    if (procedureImplantIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(ImplantIdentifiers, {
+      procedureImplantId: { $in: [...procedureImplantIds] },
+    });
   }
 
   /** Complicación inmutable, con su relación causal declarada. */

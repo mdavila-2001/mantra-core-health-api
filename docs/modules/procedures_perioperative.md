@@ -139,6 +139,59 @@ queda listo tiene que ver el conjunto sin cambios en medio. `row_version` aporta
 vía aérea difícil, ante un evento de anestesia grave o crítico, al registrar una complicación y al
 cancelar un caso. Nunca se loguean datos clínicos del paciente más allá del identificador del caso.
 
+## El circuito verificado de punta a punta (2026-08-12)
+
+Hasta esta fecha el módulo **no funcionaba contra una base real**, y ninguna
+prueba lo veía porque las unitarias simulan el `EntityManager`. Cuatro fallos
+encadenados, todos corregidos y verificados con
+`yarn redesa:personas` (cada actor con su propio rol, no con el del
+administrador):
+
+1. **`POST /procedure-cases` fallaba siempre.** Las cuatro filas hijas del caso
+   (historial, hito, evento de quirófano, primer integrante) se creaban sin un
+   `flush` que persistiera antes el caso; las FK son columnas uuid planas, así
+   que MikroORM podía insertarlas primero y Postgres las rechazaba. Mismo patrón
+   corregido en la valoración preoperatoria (puntuaciones de riesgo), el plan
+   anestésico (valoración de vía aérea) y el registro de implantes
+   (identificadores UDI).
+2. **Ningún caso podía confirmarse.** `confirmCase` exige que cada integrante
+   esté `TEAM_ACCEPTED` y nada escribía ese estado. Se añadió
+   `POST /procedure-cases/:id/team-members/:memberId/accept` (sólo el propio
+   integrante o `PERIOP_ADMIN`, con credencial vigente comprobada) y
+   `GET /procedure-cases/:id/team-members`, sin el cual el cirujano principal
+   —dado de alta dentro del POST del caso— no tenía forma de conocer su id.
+3. **Una credencial verificada no contaba como vigente.** `verifyCredential`
+   escribe `PROF.CRED_VERIFIED` y `hasCurrentCredential` sólo miraba los estados
+   transversales: las dos mitades del mismo hecho usaban catálogos distintos, y
+   CAN-INT-002 bloqueaba con las matrículas en regla.
+4. **Las órdenes preoperatorias no se podían crear.**
+   `PeriopPreopRepository.createOrder` existía sin un solo llamador, así que
+   `verifyOrders` no tenía nada que verificar y el caso no llegaba a
+   `READY_FOR_SURGERY`. Se añadió `POST /procedure-cases/:id/preoperative-orders`.
+
+Además, dos pasos exigían crear antes un registro padre con un endpoint que el
+actor **no puede invocar** (`POST /clinical/conditions` y
+`POST /clinical/procedures` son de `CLINICIAN`/`PRACTITIONER`): el diagnóstico
+del caso y el informe operatorio aceptan ahora `conditionCodeConceptId` /
+`procedureCodeConceptId` y registran el padre en la historia a través de los
+servicios de `clinical`, que sigue siendo su dueño. Lo mismo con la orden
+preoperatoria y `clinical.service_requests`.
+
+## Lecturas (2026-08-12)
+
+El módulo era de **sólo escritura**: no tenía ni un `@Get`, así que un caso
+creado sólo era accesible por el uuid que devolvía su propio POST y ningún
+integrante podía consultar aquello en lo que participaba. Se añadieron tres:
+
+| Endpoint | Para qué |
+| --- | --- |
+| `GET /procedure-cases` | Agenda quirúrgica, acotada al tenant del contexto y filtrable por paciente, quirófano, cirujano, estado y ventana temporal. |
+| `GET /procedure-cases/:id` | Detalle agregado: cabecera, diagnósticos, equipo, hitos, órdenes preoperatorias, valoración, plan anestésico e informes. Va en una sola respuesta para que la pantalla no encadene ocho llamadas ni muestre un caso a medias si una falla. |
+| `GET /procedure-cases/:id/team-members` | Equipo con el estado de cada integrante; sin ella el cirujano principal —dado de alta dentro del POST del caso— no podía aceptar su participación. |
+
+El quirófano que exige `POST /procedure-cases` se resuelve con las lecturas de
+`practice` (`GET /practices` → `/practices/:id/sites` → `/sites/:id/care-spaces`).
+
 ## Pruebas
 
 `yarn test --testPathPatterns=procedures_perioperative` — 79 pruebas de servicio + delegación del

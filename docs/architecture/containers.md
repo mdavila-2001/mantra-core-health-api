@@ -9,7 +9,7 @@ flowchart TB
   Client[Cliente HTTP] -->|HTTPS + JWT Bearer| API
 
   subgraph Aplicación
-    API["api<br/>(NestJS · Node 24 · TypeScript)<br/>60 módulos · 841 operaciones"]
+    API["api<br/>(NestJS · Node 24 · TypeScript)<br/>61 módulos · 915 operaciones"]
     W1["worker-messaging"]
     W2["worker-billing"]
     W3["... 15 workers más<br/>(1 proceso por dominio)"]
@@ -30,7 +30,7 @@ flowchart TB
 
 | Contenedor | Tecnología | Responsabilidad | Réplicas esperadas |
 |---|---|---|---|
-| `api` | NestJS 11 / Node 24 / TypeScript, Express | Único punto de entrada HTTP; 60 módulos de dominio | Horizontal (sin estado propio más allá de la conexión a datos) |
+| `api` | NestJS 11 / Node 24 / TypeScript, Express | Único punto de entrada HTTP; 61 módulos de dominio | Horizontal (sin estado propio más allá de la conexión a datos) |
 | `worker-<dominio>` ×17 | NestJS `ApplicationContext` + `@nestjs/schedule` | Tick periódico de un dominio; llama a `api` por HTTP, nunca toca la base directamente | 1 por dominio, escalable independientemente |
 | `postgres` | PostgreSQL | Almacén transaccional primario, RLS por tenant | Ver estrategia real de HA en `docs/operations/environments.md` (Fase 14) — no verificada en esta fase |
 | `mongodb` | MongoDB | Documentos no relacionales (`document_store`) | — |
@@ -42,7 +42,7 @@ flowchart TB
 
 Comentario de diseño explícito en `src/worker/bootstrap.ts`: un tick largo o un crash de
 `automation` no debe afectar el tick de `messaging`; cada worker escala y se despliega por
-separado del resto. Es una decisión de aislamiento de fallos, no de tecnología (los 20 workers
+separado del resto. Es una decisión de aislamiento de fallos, no de tecnología (los 21 workers
 comparten exactamente el mismo framework y `bootstrapWorker()` que la API).
 
 ## Sin broker de mensajería como contenedor propio

@@ -17,7 +17,7 @@ Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de neg
 | CAN-RX-001..004 receta: draft editable, emitida inmutable, invalidar/reemplazar/renovar | clinical.medication_requests | issue/invalidate/replace/renew (comandos, no CRUD) | medications.service.spec | ✅ |
 | CAN-NOTE-001 notas: borrador editable, firmada inmutable, adenda | chart.clinical_note_versions + signatures | signVersion/cosign/amend | chart-notes.spec | ✅ |
 | CAN-INT-001 cambio de paciente solo en borrador | procedures_perioperative.procedure_cases | guarda por estado (DRAFT-only) | periop-cases.spec | 🟡→✅ (Fase E) |
-| CAN-INT-002 credenciales del equipo vigentes antes de confirmar | procedures_perioperative team | verificación fail-closed antes de confirmar/iniciar | periop-cases.spec | 🟡→✅ (Fase E) |
+| CAN-INT-002 credenciales del equipo vigentes antes de confirmar | procedures_perioperative team | aceptación del integrante + credencial vigente real antes de confirmar | periop-cases.spec, `yarn redesa:personas` | ✅ (2026-08-12: era inalcanzable — ver nota) |
 | CAN-SURVEY-001 encuestas privadas ≠ reseñas públicas | community.service_reviews + qa/encuestas | entidades separadas; agregados anonimizados | community smoke | 🟡 (umbral por afinar) |
 | CAN-DELETE-001 sin hard-delete de datos protegidos | transversal | guardrail `HARD_DELETE_RESTRICTED_DATA` bloquea CI | redesa:guardrails | ✅ |
 | CAN-AUDIT-001 auditoría append-only con hash | audit.audit_log (WORM, previous_hash/record_hash) | append serializado por tenant (advisory lock) | audit-log.repository.spec | ✅ |
@@ -53,6 +53,39 @@ Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de neg
 | D-06 retención por jurisdicción | `system_ops.retention_policies` + ejecución existente | plazos por jurisdicción (legal) |
 | CAN-ADV-001 significado de crédito publicitario | saldo prepago (wallets) | confirmación de negocio |
 | umbral de anonimización de agregados (C-15) | — | definir umbral mínimo |
+
+## Cobertura por actor clínico (2026-08-12)
+
+`yarn redesa:personas` (`tools/redesa/exercise-clinical-personas.mjs`) recorre la
+API real dando de alta un usuario por actor, verificando su matrícula e
+iniciando sesión con **su propio** token. Es la contraparte de
+`exercise-front-flows.mjs`, que recorre los mismos caminos con el administrador:
+`SUPERADMIN` atraviesa cualquier `@Roles(...)` por comodín, así que un flujo
+verde allí no demuestra que el actor pueda ejecutarlo.
+
+| Actor | Flujo recorrido | Estado |
+| --- | --- | --- |
+| `CLINICIAN` / `PRACTITIONER` | alta asistida de paciente → episodio → encuentro → condición → alergia con reacción → observación → receta (prescribir/firmar/emitir) → nota clínica → resumen y expediente | ✅ |
+| `SURGERY_SCHEDULER` | programar caso → asignar equipo → confirmar | ✅ |
+| `SURGEON` | diagnósticos del caso → aceptar participación → informe operatorio | ✅ |
+| `ANESTHESIOLOGIST` | valoración preoperatoria con puntuaciones → plan anestésico con vía aérea → orden preoperatoria | ✅ |
+| `PERIOP_NURSE` | aceptar participación → verificar órdenes preoperatorias | ✅ |
+| `CLINICAL_APPROVER` | grant de acceso clínico → break-the-glass | ✅ |
+| `PERIOP_ADMIN` | superconjunto de los anteriores (mismos endpoints) | ✅ por cobertura de rol |
+| `CLINICAL_INFORMATICIAN` | conexión de origen → lote → registro → recurso canónico → amarre y relación | ✅ |
+| `PRINCIPAL_INVESTIGATOR` | perfil de de-identificación → proyecto con aprobación ética → cohorte | ✅ |
+
+Los dos últimos no tenían principio: crear una conexión de origen y crear un
+perfil de de-identificación no existían como operación, y sin ellas el resto de
+su flujo era inalcanzable. Ver `ESTADO-Y-PENDIENTES.md` §P1.
+
+### Lecturas
+
+El recorrido incluye ahora las consultas sin las cuales el flujo no se puede
+operar: agenda quirúrgica y detalle del caso, prácticas/sedes/espacios —que es
+lo que resuelve el `operatingRoomId`—, cola del laboratorio y estudios de imagen
+del paciente. Antes de agosto de 2026, `procedures_perioperative`, `diagnostics`
+y `practice` no exponían ni una sola lectura.
 
 ## Guardrails de CI (criterios de rechazo §9)
 

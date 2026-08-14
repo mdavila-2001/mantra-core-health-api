@@ -65,6 +65,81 @@ export class BlocksRepository {
   }
 
   /**
+   * De un conjunto de perfiles, cuáles tienen un bloqueo activo con el actor.
+   *
+   * Resuelve en una consulta lo que si no serían dos por cada autor de la
+   * página; el sentido del bloqueo no importa, porque bloquear corta la
+   * visibilidad en ambas direcciones.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profileId - Perfil del lector.
+   * @param peerProfileIds - Perfiles a contrastar.
+   * @param activeStatusConceptId - Estado que cuenta como bloqueo vigente.
+   * @returns Los perfiles de `peerProfileIds` bloqueados en algún sentido.
+   */
+  async listBlockedPeers(
+    em: EntityManager,
+    profileId: string,
+    peerProfileIds: string[],
+    activeStatusConceptId: string,
+  ): Promise<string[]> {
+    if (peerProfileIds.length === 0) return [];
+    const rows = await em.find(UserBlocks, {
+      statusConceptId: activeStatusConceptId,
+      $or: [
+        {
+          blockerProfileId: profileId,
+          blockedProfileId: { $in: peerProfileIds },
+        },
+        {
+          blockerProfileId: { $in: peerProfileIds },
+          blockedProfileId: profileId,
+        },
+      ],
+    });
+    return rows.map((row) =>
+      row.blockerProfileId === profileId
+        ? row.blockedProfileId
+        : row.blockerProfileId,
+    );
+  }
+
+  /**
+   * Bloqueos emitidos por un perfil (UC-19-07, cara de lectura).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param blockerProfileId - Perfil que bloqueó.
+   * @param after - Clave de continuación `(createdAt, id)` de la página anterior.
+   * @param limit - Tope de filas.
+   * @returns Página de bloqueos, del más reciente al más antiguo.
+   */
+  listByBlocker(
+    em: EntityManager,
+    blockerProfileId: string,
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<UserBlocks[]> {
+    return em.find(
+      UserBlocks,
+      {
+        blockerProfileId,
+        ...(after
+          ? {
+              $or: [
+                { createdAt: { $lt: new Date(after.createdAt) } },
+                {
+                  createdAt: new Date(after.createdAt),
+                  id: { $lt: after.id },
+                },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

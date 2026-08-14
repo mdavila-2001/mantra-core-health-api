@@ -1,3 +1,4 @@
+export * from './ledger-read.dto';
 export * from './account.dto';
 export * from './journal.dto';
 export * from './fiscal.dto';

@@ -9,10 +9,17 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { PeriopCasesRepository } from '../repositories';
+import {
+  PeriopCasesRepository,
+  PeriopPreopRepository,
+  PeriopIntraopRepository,
+} from '../repositories';
 import { ProfessionalCredentialsRepository } from '../../profiles/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { OutboxService } from '../../messaging/services';
+// La historia clínica sigue siendo de `clinical`: el caso quirúrgico pide que
+// registre la condición, no la escribe por su cuenta.
+import { ConditionsService } from '../../clinical/services';
 import {
   ScheduleCaseDto,
   CaseResponseDto,
@@ -20,9 +27,15 @@ import {
   UpdateCaseResponseDto,
   ConfirmCaseResponseDto,
   AddDiagnosesDto,
+  CaseDiagnosisDto,
   DiagnosesResponseDto,
   AssignTeamMemberDto,
   TeamMemberResponseDto,
+  TeamMemberSummaryDto,
+  ListCasesQueryDto,
+  CaseSummaryDto,
+  CaseListResponseDto,
+  CaseDetailDto,
   CancelCaseDto,
   CancelCaseResponseDto,
   PostChargesDto,
@@ -145,14 +158,22 @@ export class PeriopCasesService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param preopRepo - Lectura de la fase preoperatoria (detalle del caso).
+   * @param intraopRepo - Lectura de la fase intraoperatoria (detalle del caso).
+   * @param conditions - Alta de condiciones en la historia clínica (`clinical`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly casesRepo: PeriopCasesRepository,
+    // Sólo para la lectura agregada del caso: las escrituras de cada fase
+    // siguen viviendo en su servicio.
+    private readonly preopRepo: PeriopPreopRepository,
+    private readonly intraopRepo: PeriopIntraopRepository,
     private readonly credentialsRepo: ProfessionalCredentialsRepository,
     private readonly auditTrail: AuditTrailService,
     private readonly outbox: OutboxService,
+    private readonly conditions: ConditionsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopCasesService.name);
@@ -234,6 +255,15 @@ export class PeriopCasesService {
         urgencyReasonText: dto.urgencyReasonText,
         actorUserId: actor.id,
       });
+      // Las cuatro filas de abajo referencian el caso por una columna uuid
+      // plana, no por una relación de MikroORM: el ORM no sabe que dependen de
+      // él y puede insertarlas antes en el mismo flush, violando la FK. Sin este
+      // flush explícito, `POST /procedure-cases` fallaba SIEMPRE contra una base
+      // real —ningún caso quirúrgico podía programarse— y el fallo no lo veía
+      // ninguna prueba porque las unitarias simulan el `EntityManager`. Mismo
+      // patrón y mismo motivo que en `OutboxService.publishDomainEvent` y
+      // `accounting/services/ledger.service.ts`.
+      await tx.flush();
 
       // El caso nace ya con su primera transición registrada: el historial no
       // debe empezar a medias.
@@ -613,19 +643,26 @@ export class PeriopCasesService {
       let sequenceNumber = existing.length;
 
       for (const diagnosis of dto.diagnoses) {
-        if (existingConditions.has(diagnosis.conditionId)) {
+        // La condición puede venir ya registrada en la historia o declararse
+        // aquí por su código: el diagnóstico postoperatorio se descubre en
+        // quirófano y quien lo anota no puede llamar antes a `clinical`.
+        const conditionId =
+          diagnosis.conditionId ??
+          (await this.ensureCondition(surgicalCase, diagnosis, actor));
+
+        if (existingConditions.has(conditionId)) {
           skipped += 1;
           continue;
         }
         sequenceNumber += 1;
         const created = this.casesRepo.createDiagnosis(tx, {
           procedureCaseId: caseId,
-          conditionId: diagnosis.conditionId,
+          conditionId,
           diagnosisRoleConceptId: DIAGNOSIS_ROLE_CONCEPT[diagnosis.role],
           sequenceNumber,
           presentOnAdmission: diagnosis.presentOnAdmission ?? false,
         });
-        existingConditions.add(diagnosis.conditionId);
+        existingConditions.add(conditionId);
         diagnosisIds.push(created.id);
       }
 
@@ -633,6 +670,62 @@ export class PeriopCasesService {
 
       return { procedureCaseId: caseId, diagnosisIds, skipped };
     });
+  }
+
+  /**
+   * Registra en la historia clínica la condición que el diagnóstico referencia,
+   * cuando el cuerpo la declara por código en vez de por id.
+   *
+   * Se delega en el servicio de `clinical` —no se escribe su tabla desde aquí—
+   * para que las invariantes de la historia (duplicado activo, estado inicial,
+   * auditoría) sigan siendo suyas. Si la condición ya existía activa, el
+   * servicio responde 409 y se reutiliza la que ya está.
+   *
+   * @param surgicalCase - Caso del que se toman paciente y tenant custodio.
+   * @param diagnosis - Diagnóstico declarado en el cuerpo.
+   * @param actor - Quien registra.
+   * @returns El id de la condición a la que apunta el diagnóstico.
+   */
+  private async ensureCondition(
+    surgicalCase: {
+      patientProfileId: string;
+      custodianTenantId: string;
+      encounterId?: string;
+    },
+    diagnosis: CaseDiagnosisDto,
+    actor: AuthenticatedUser,
+  ): Promise<string> {
+    if (!diagnosis.conditionCodeConceptId) {
+      throw new PreconditionFailedException(
+        'Indique la condición por `conditionId` o por `conditionCodeConceptId`',
+        {},
+      );
+    }
+    try {
+      const condition = await this.conditions.create(
+        {
+          custodianTenantId: surgicalCase.custodianTenantId,
+          patientProfileId: surgicalCase.patientProfileId,
+          encounterId: surgicalCase.encounterId,
+          codeConceptId: diagnosis.conditionCodeConceptId,
+        },
+        actor,
+      );
+      return condition.id;
+    } catch (error) {
+      // El paciente ya tenía esa condición activa: es el caso normal cuando el
+      // clínico la registró en consulta y el cirujano la vuelve a declarar como
+      // diagnóstico del caso. Rechazar el diagnóstico entero por eso sería
+      // convertir una coincidencia esperada en un error.
+      if (!(error instanceof ConflictException)) throw error;
+      const existing = await this.conditions.findActiveByCode(
+        surgicalCase.custodianTenantId,
+        surgicalCase.patientProfileId,
+        diagnosis.conditionCodeConceptId,
+      );
+      if (!existing) throw error;
+      return existing.id;
+    }
   }
 
   /** UC-53-02: asignar un miembro al equipo quirúrgico. */
@@ -698,6 +791,350 @@ export class PeriopCasesService {
         procedureCaseId: caseId,
         statusConceptId: CONCEPTS.TEAM_ASSIGNED,
         teamSize: team.length + 1,
+      };
+    });
+  }
+
+  /**
+   * Agenda quirúrgica del tenant, acotada por paciente, quirófano, cirujano,
+   * estado y ventana temporal.
+   *
+   * El módulo no tenía ninguna lectura: los casos se creaban y nadie podía
+   * consultarlos, así que el uuid de un caso sólo existía en la respuesta del
+   * POST que lo creó. Va siempre acotada por el tenant del contexto.
+   *
+   * @param tenantId - Tenant custodio (del contexto de la petición).
+   * @param query - Filtros y paginación.
+   * @returns La página de casos y el total que cumple el filtro.
+   */
+  async listCases(
+    tenantId: string,
+    query: ListCasesQueryDto,
+  ): Promise<CaseListResponseDto> {
+    const filtros = {
+      patientProfileId: query.patientProfileId,
+      operatingRoomId: query.operatingRoomId,
+      primarySurgeonProfileId: query.primarySurgeonProfileId,
+      statusConceptId: query.statusConceptId,
+      from: query.from ? new Date(query.from) : undefined,
+      to: query.to ? new Date(query.to) : undefined,
+    };
+    const [cases, total] = await Promise.all([
+      this.casesRepo.findCases(this.em, tenantId, {
+        ...filtros,
+        limit: query.limit ?? 50,
+        offset: query.offset ?? 0,
+      }),
+      this.casesRepo.countCasesMatching(this.em, tenantId, filtros),
+    ]);
+    return { items: cases.map((c) => this.toSummary(c)), total };
+  }
+
+  /**
+   * Detalle completo del caso: cabecera, diagnósticos, equipo, hitos, órdenes,
+   * valoración preoperatoria, plan anestésico e informes.
+   *
+   * Se sirve agregado porque es lo que hace falta para abrir un caso: pedirlo
+   * en ocho llamadas dejaría la pantalla a medias en cuanto una fallara.
+   *
+   * @param caseId - Caso consultado.
+   * @returns El caso con todo lo que cuelga de él.
+   * @throws ResourceNotFoundException si el caso no existe.
+   */
+  async getCaseDetail(caseId: string): Promise<CaseDetailDto> {
+    const surgicalCase = await this.casesRepo.findCaseById(this.em, caseId);
+    if (!surgicalCase) {
+      throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
+        caseId,
+      });
+    }
+
+    const [
+      diagnoses,
+      team,
+      milestones,
+      orders,
+      assessment,
+      plan,
+      reports,
+      steps,
+      findings,
+      implants,
+    ] = await Promise.all([
+      this.casesRepo.findDiagnosesByCase(this.em, caseId),
+      this.casesRepo.findTeamByCase(this.em, caseId),
+      this.casesRepo.findMilestonesByCase(this.em, caseId),
+      this.preopRepo.findOrdersByCase(this.em, caseId),
+      this.preopRepo.findAssessmentByCase(this.em, caseId),
+      this.preopRepo.findAnesthesiaPlanByCase(this.em, caseId),
+      this.intraopRepo.findReportsByCase(this.em, caseId),
+      this.intraopRepo.findStepsByCase(this.em, caseId),
+      this.intraopRepo.findFindingsByCase(this.em, caseId),
+      this.intraopRepo.findImplantsByCase(this.em, caseId),
+    ]);
+
+    // Los identificadores dependen de qué implantes salieron, así que no pueden
+    // ir en el `Promise.all` de arriba. Se agrupan por implante en memoria: son
+    // unas pocas filas por caso y la alternativa es una consulta por implante.
+    const identifiers = await this.intraopRepo.findIdentifiersByImplants(
+      this.em,
+      implants.map((implant) => implant.id),
+    );
+    const identifiersByImplant = new Map<
+      string,
+      CaseDetailDto['implants'][number]['identifiers']
+    >();
+    for (const identifier of identifiers) {
+      const group = identifiersByImplant.get(identifier.procedureImplantId);
+      const row = {
+        id: identifier.id,
+        identifierTypeConceptId: identifier.identifierTypeConceptId,
+        identifierValue: identifier.identifierValue,
+        issuingSystem: identifier.issuingSystem,
+        lotNumber: identifier.lotNumber,
+        serialNumber: identifier.serialNumber,
+        expirationDate: identifier.expirationDate,
+      };
+      if (group) {
+        group.push(row);
+      } else {
+        identifiersByImplant.set(identifier.procedureImplantId, [row]);
+      }
+    }
+
+    return {
+      case: this.toSummary(surgicalCase),
+      diagnoses: diagnoses.map((d) => ({
+        id: d.id,
+        conditionId: d.conditionId,
+        diagnosisRoleConceptId: d.diagnosisRoleConceptId,
+        sequenceNumber: d.sequenceNumber,
+      })),
+      team: team.map((m) => ({
+        id: m.id,
+        practitionerProfileId: m.practitionerProfileId,
+        teamRoleConceptId: m.teamRoleConceptId,
+        statusConceptId: m.statusConceptId,
+      })),
+      milestones: milestones.map((m) => ({
+        id: m.id,
+        milestoneTypeConceptId: m.milestoneTypeConceptId,
+        statusConceptId: m.statusConceptId,
+        plannedAt: m.plannedAt,
+        reachedAt: m.occurredAt,
+      })),
+      preoperativeOrders: orders.map((o) => ({
+        id: o.id,
+        serviceRequestId: o.serviceRequestId,
+        orderRoleConceptId: o.orderRoleConceptId,
+        statusConceptId: o.statusConceptId,
+      })),
+      preoperativeAssessment: assessment
+        ? {
+            id: assessment.id,
+            fitnessStatusConceptId: assessment.fitnessStatusConceptId,
+            asaClassConceptId: assessment.asaClassConceptId,
+          }
+        : null,
+      anesthesiaPlan: plan
+        ? {
+            id: plan.id,
+            anesthesiaTypeConceptId: plan.anesthesiaTypeConceptId,
+            statusConceptId: plan.statusConceptId,
+          }
+        : null,
+      operativeReports: reports.map((r) => ({
+        id: r.id,
+        reportVersion: r.reportVersion,
+        statusConceptId: r.statusConceptId,
+        signedAt: r.signedAt,
+      })),
+      operativeSteps: steps.map((s) => ({
+        id: s.id,
+        stepNumber: s.stepNumber,
+        stepCodeConceptId: s.stepCodeConceptId,
+        description: s.description,
+        performedByProfileId: s.performedByProfileId,
+        bodySiteConceptId: s.bodySiteConceptId,
+        lateralityConceptId: s.lateralityConceptId,
+        statusConceptId: s.statusConceptId,
+        startedAt: s.startedAt,
+        endedAt: s.endedAt,
+      })),
+      findings: findings.map((f) => ({
+        id: f.id,
+        operativeStepId: f.operativeStepId,
+        findingCodeConceptId: f.findingCodeConceptId,
+        findingText: f.findingText,
+        bodySiteConceptId: f.bodySiteConceptId,
+        lateralityConceptId: f.lateralityConceptId,
+        severityConceptId: f.severityConceptId,
+        recordedByProfileId: f.recordedByProfileId,
+        recordedAt: f.recordedAt,
+      })),
+      implants: implants.map((i) => ({
+        id: i.id,
+        procedureId: i.procedureId,
+        implantDeviceId: i.implantDeviceId,
+        implantRoleConceptId: i.implantRoleConceptId,
+        bodySiteConceptId: i.bodySiteConceptId,
+        lateralityConceptId: i.lateralityConceptId,
+        implantedAt: i.implantedAt,
+        explantedAt: i.explantedAt,
+        statusConceptId: i.statusConceptId,
+        identifiers: identifiersByImplant.get(i.id) ?? [],
+      })),
+    };
+  }
+
+  /**
+   * Proyección de cabecera compartida por el listado y el detalle.
+   *
+   * Varias columnas son opcionales en el esquema aunque el alta las exija
+   * siempre (`primary_surgeon_profile_id`, las horas programadas): hay filas
+   * antiguas sin ellas, así que se proyectan como opcionales en vez de afirmar
+   * algo que la tabla no garantiza.
+   */
+  private toSummary(surgicalCase: {
+    id: string;
+    caseNumber: string;
+    patientProfileId: string;
+    primarySurgeonProfileId?: string;
+    operatingRoomId?: string;
+    statusConceptId: string;
+    scheduledStartAt?: Date;
+    scheduledEndAt?: Date;
+  }): CaseSummaryDto {
+    return {
+      id: surgicalCase.id,
+      caseNumber: surgicalCase.caseNumber,
+      patientProfileId: surgicalCase.patientProfileId,
+      primarySurgeonProfileId: surgicalCase.primarySurgeonProfileId,
+      operatingRoomId: surgicalCase.operatingRoomId,
+      statusConceptId: surgicalCase.statusConceptId,
+      scheduledStartAt: surgicalCase.scheduledStartAt,
+      scheduledEndAt: surgicalCase.scheduledEndAt,
+    };
+  }
+
+  /**
+   * Equipo asignado al caso, con el estado de cada integrante.
+   *
+   * @param caseId - Caso consultado.
+   * @returns Los integrantes; lista vacía si el caso no tiene ninguno.
+   * @throws ResourceNotFoundException si el caso no existe.
+   */
+  async listTeamMembers(caseId: string): Promise<TeamMemberSummaryDto[]> {
+    const surgicalCase = await this.casesRepo.findCaseById(this.em, caseId);
+    if (!surgicalCase) {
+      throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
+        caseId,
+      });
+    }
+    const team = await this.casesRepo.findTeamByCase(this.em, caseId);
+    return team.map((member) => ({
+      id: member.id,
+      practitionerProfileId: member.practitionerProfileId,
+      teamRoleConceptId: member.teamRoleConceptId,
+      statusConceptId: member.statusConceptId,
+    }));
+  }
+
+  /**
+   * C-14 (CAN-INT-002): el integrante acepta su participación en el caso.
+   *
+   * Es el eslabón que faltaba del circuito quirúrgico. `confirmCase` exige que
+   * cada miembro con rol clínico esté `TEAM_ACCEPTED`, y nada llevaba a ese
+   * estado —`assignTeamMember` los deja `TEAM_ASSIGNED` y no había ningún otro
+   * camino—, así que la confirmación fallaba siempre con CAN-INT-002 por mucho
+   * que las credenciales estuvieran en regla.
+   *
+   * Acepta el propio integrante o un `PERIOP_ADMIN`: aceptar por otro es
+   * justamente lo que la regla quiere impedir. La credencial se comprueba aquí
+   * también, para que el estado no afirme algo que la fuente no respalda.
+   *
+   * @param caseId - Caso del equipo.
+   * @param memberId - Integrante que acepta.
+   * @param actor - Quien ejecuta el acto.
+   * @returns El miembro con su estado ya aceptado.
+   */
+  async acceptTeamMember(
+    caseId: string,
+    memberId: string,
+    actor: AuthenticatedUser,
+  ): Promise<TeamMemberResponseDto> {
+    this.logger.info(
+      { operation: 'periop.case.team-accept', caseId, memberId },
+      'Accepting team participation',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
+      if (!surgicalCase) {
+        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
+          caseId,
+        });
+      }
+      if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
+        throw new PreconditionFailedException('El caso está cancelado', {
+          caseId,
+        });
+      }
+
+      const team = await this.casesRepo.findTeamByCase(tx, caseId);
+      const member = team.find((m) => m.id === memberId);
+      if (!member) {
+        throw new ResourceNotFoundException(
+          'El integrante no pertenece al caso',
+          { caseId, memberId },
+        );
+      }
+
+      const esAdministracion =
+        actor.roles.includes('PERIOP_ADMIN') ||
+        actor.roles.includes('SUPERADMIN');
+      if (
+        !esAdministracion &&
+        actor.practitionerProfileId !== member.practitionerProfileId
+      ) {
+        throw new PreconditionFailedException(
+          'Sólo el propio integrante puede aceptar su participación',
+          { caseId, memberId },
+        );
+      }
+
+      if (member.statusConceptId === CONCEPTS.TEAM_ACCEPTED) {
+        // Aceptar dos veces no es un error: el estado ya es el pedido.
+        return {
+          id: member.id,
+          procedureCaseId: caseId,
+          statusConceptId: member.statusConceptId,
+          teamSize: team.length,
+        };
+      }
+
+      // Fail-closed: no se declara aceptado a quien no puede ejercer.
+      const credencialVigente = await this.credentialsRepo.hasCurrentCredential(
+        tx,
+        member.practitionerProfileId,
+        new Date(),
+      );
+      if (!credencialVigente) {
+        throw new PreconditionFailedException(
+          'CAN-INT-002: el integrante no tiene credencial profesional vigente',
+          { caseId, memberId },
+        );
+      }
+
+      member.statusConceptId = CONCEPTS.TEAM_ACCEPTED;
+      touch(member, actor.id);
+      touch(surgicalCase, actor.id);
+
+      return {
+        id: member.id,
+        procedureCaseId: caseId,
+        statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        teamSize: team.length,
       };
     });
   }

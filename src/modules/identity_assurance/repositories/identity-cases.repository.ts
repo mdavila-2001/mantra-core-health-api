@@ -141,6 +141,32 @@ export class IdentityVerificationCasesRepository {
     );
   }
 
+  /**
+   * Casos en los estados dados, del más antiguo al más nuevo.
+   *
+   * Es la cola de trabajo de un revisor, así que al frente va el caso que
+   * lleva más tiempo esperando. Ordenar por apertura descendente, como hace
+   * `findBySubjects` para el historial propio, dejaría a quien más esperó
+   * detrás de cada solicitud nueva.
+   *
+   * @param em - Contexto de persistencia.
+   * @param statuses - Estados que forman la cola.
+   * @param limit - Tope de resultados.
+   * @returns Casos ordenados por apertura ascendente.
+   */
+  findByStatuses(
+    em: EntityManager,
+    statuses: string[],
+    limit = 50,
+  ): Promise<IdentityVerificationCases[]> {
+    if (statuses.length === 0) return Promise.resolve([]);
+    return em.find(
+      IdentityVerificationCases,
+      { statusConceptId: { $in: statuses } },
+      { orderBy: { openedAt: 'ASC' }, limit },
+    );
+  }
+
   /** Casos vencidos (expires_at < now) aún no completados (UC-27-12). */
   findExpirable(
     em: EntityManager,

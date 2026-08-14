@@ -18,6 +18,7 @@ import {
   AuthzClinicalService,
   AuthzCareRelationshipsService,
   AuthzPdpService,
+  AuthzEffectiveRolesService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -88,6 +89,10 @@ import { MessagingModule } from '../messaging/messaging.module';
     AuthzClinicalService,
     AuthzCareRelationshipsService,
     AuthzPdpService,
+    AuthzEffectiveRolesService,
   ],
+  // `iam` lo consume al emitir y refrescar el token: es la única forma de que un
+  // rol asistencial llegue al `RolesGuard`.
+  exports: [AuthzEffectiveRolesService],
 })
 export class AuthzModule {}

@@ -1,16 +1,29 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { LedgerService } from '../services';
 import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
+import { LedgerReadService, LedgerService } from '../services';
+import {
+  ChartOfAccountsResponseDto,
+  JournalTransactionDetailDto,
+  ListJournalQueryDto,
+  ListJournalResponseDto,
+  TrialBalanceQueryDto,
+  TrialBalanceResponseDto,
   CreateAccountDto,
   AccountResponseDto,
   PostJournalDto,
@@ -36,7 +49,64 @@ export class AccountingLedgerController {
    *
    * @param ledgerService - Valor de ledger service requerido por la operación.
    */
-  constructor(private readonly ledgerService: LedgerService) {}
+  constructor(
+    private readonly ledgerService: LedgerService,
+    private readonly ledgerReadService: LedgerReadService,
+  ) {}
+
+  /* ---- Los libros. La cara de lectura que el módulo no tenía -------------
+     Veinte escrituras y ninguna lectura: se podían postear asientos y no había
+     forma de verlos. Sin diario, sin plan de cuentas y sin sumas y saldos, la
+     contabilidad no se puede auditar — y ninguna pantalla se podía construir.
+
+     Van declaradas **antes** que las rutas con parámetro: Nest resuelve por
+     orden y `journal-transactions/:id` capturaría `journal-transactions/…`
+     fijas si fueran después. */
+
+  /** UC-16-01·L: el plan de cuentas de una práctica. */
+  @Get('accounts')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Plan de cuentas de una práctica' })
+  chartOfAccounts(
+    @Query('practiceId', ParseUUIDPipe) practiceId: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ChartOfAccountsResponseDto> {
+    return this.ledgerReadService.chartOfAccounts(practiceId, limit);
+  }
+
+  /** UC-16-06: balance de sumas y saldos. */
+  @Get('trial-balance')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Balance de sumas y saldos',
+    description:
+      'Agrega sólo los asientos POSTEADOS: un borrador no es un hecho contable. Declara `balanced`, que es la comprobación de la que depende que el resto signifique algo.',
+  })
+  trialBalance(
+    @Query() query: TrialBalanceQueryDto,
+  ): Promise<TrialBalanceResponseDto> {
+    return this.ledgerReadService.trialBalance(query);
+  }
+
+  /** UC-16-01·L: el libro diario. */
+  @Get('journal-transactions')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Libro diario de una práctica' })
+  listJournal(
+    @Query() query: ListJournalQueryDto,
+  ): Promise<ListJournalResponseDto> {
+    return this.ledgerReadService.listJournal(query);
+  }
+
+  /** UC-16-01·D: el asiento con sus líneas, que es lo que se audita. */
+  @Get('journal-transactions/:id')
+  @Roles('SECURITY_ADMIN', 'ACCOUNTING_APPROVER', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Un asiento con sus líneas' })
+  getJournalTransaction(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<JournalTransactionDetailDto> {
+    return this.ledgerReadService.getJournalTransaction(id);
+  }
 
   /** Soporte: alta de cuenta del plan contable. */
   @Post('accounts')

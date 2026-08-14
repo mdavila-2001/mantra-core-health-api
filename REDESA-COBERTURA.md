@@ -1,7 +1,7 @@
 # Informe de cobertura REDESA (estático)
 
-- Entidades (tablas mapeadas): **1191**
-- Endpoints declarados: **909** en 198 controllers
+- Entidades (tablas mapeadas): **1190**
+- Endpoints declarados: **916** en 198 controllers
 - Módulos: **58**
 
 ## ORPHAN_TABLE — entidades sin consumidor fuera de `entities/` (4)
@@ -11,6 +11,7 @@
 - `pharmacy_inventory` · PurchaseQuotations (src/modules/pharmacy_inventory/entities/purchase_quotations.entity.ts)
 - `system_ops` · AcceptedRisks (src/modules/system_ops/entities/accepted_risks.entity.ts)
 
-## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (0)
+## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (1)
+- src/modules/audio_assets/controllers/audio-assets.controller.ts:28 — @Post 'resolve'
 
 ## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (0)

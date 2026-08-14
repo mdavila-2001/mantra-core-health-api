@@ -1,19 +1,44 @@
-import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
+import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsDate,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /** Cuerpo de `POST /authz/users/{userId}/role-assignments` (UC-06-04). */
 @ApiSchema({ name: 'AuthzCreateRoleAssignmentDto' })
 export class CreateRoleAssignmentDto {
   /**
    * Identificador asociado a role.
+   *
+   * Alternativa a `roleCode`: hay que indicar uno de los dos.
    */
-  @ApiProperty({
-    description: 'Rol a asignar (debe ser asignable)',
+  @ApiPropertyOptional({
+    description: 'Rol a asignar por id (debe ser asignable)',
     format: 'uuid',
   })
+  @IsOptional()
   @IsUUID()
-  roleId!: string;
+  roleId?: string;
+
+  /**
+   * Código del rol a asignar.
+   *
+   * Existe porque quien asigna conoce el rol por su código —el mismo que exige
+   * `@Roles('SURGEON')`— y no por su uuid. Exigir sólo el id obligaba a resolver
+   * antes la fila del rol, que es un paso previo que no aporta ninguna decisión.
+   */
+  @ApiPropertyOptional({
+    description: 'Rol a asignar por código (p. ej. `SURGEON`)',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  roleCode?: string;
 
   /**
    * Identificador asociado a tenant.

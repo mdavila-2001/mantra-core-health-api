@@ -26,6 +26,7 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const referralsRepo = {
     findById: mockFn(),
+    findByPatient: mockFn(() => Promise.resolve([])),
     findDuplicate: mockFn(),
     create: mockFn(),
   };

@@ -4,6 +4,7 @@ import { accountingForeignKeys2 } from './accounting.2.fk';
 import { adsForeignKeys1 } from './ads.1.fk';
 import { adsForeignKeys2 } from './ads.2.fk';
 import { adsForeignKeys3 } from './ads.3.fk';
+import { audioAssetsForeignKeys } from './audio_assets.fk';
 import { auditForeignKeys1 } from './audit.1.fk';
 import { auditForeignKeys2 } from './audit.2.fk';
 import { auditForeignKeys3 } from './audit.3.fk';
@@ -73,6 +74,7 @@ import { workflowForeignKeys } from './workflow.fk';
 export const foreignKeyCatalog: Readonly<Record<string, readonly (readonly ForeignKeyTuple[])[]>> = {
   accounting: [accountingForeignKeys1, accountingForeignKeys2],
   ads: [adsForeignKeys1, adsForeignKeys2, adsForeignKeys3],
+  audio_assets: [audioAssetsForeignKeys],
   audit: [auditForeignKeys1, auditForeignKeys2, auditForeignKeys3],
   auth_providers: [authProvidersForeignKeys],
   authz: [authzForeignKeys],

@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+// Las dos tablas del circuito diagnóstico que **no** son de este módulo: la
+// orden (`clinical.service_requests`) y el informe (`clinical.diagnostic_reports`).
+// Se registran para poder leerlas; escribirlas sigue siendo del módulo clínico.
+import { ServiceRequests, DiagnosticReports } from '../clinical/entities';
 import {
   DiagnosticsSpecimensController,
   DiagnosticsLabController,
   DiagnosticsReportsController,
   DiagnosticsImagingController,
+  DiagnosticsOrdersController,
 } from './controllers';
 import {
   DiagnosticsSpecimensService,
@@ -13,6 +18,7 @@ import {
   DiagnosticsReportsService,
   DiagnosticsImagingService,
   DiagnosticsMediaQualityService,
+  DiagnosticsOrdersService,
 } from './services';
 import {
   SpecimensRepository,
@@ -20,6 +26,7 @@ import {
   ReportsRepository,
   ImagingRepository,
   MediaQualityRepository,
+  DiagnosticOrdersRepository,
 } from './repositories';
 
 /**
@@ -29,12 +36,19 @@ import {
  * módulos globales (MikroORM / AuthModule).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature([
+      ...Object.values(entities),
+      ServiceRequests,
+      DiagnosticReports,
+    ]),
+  ],
   controllers: [
     DiagnosticsSpecimensController,
     DiagnosticsLabController,
     DiagnosticsReportsController,
     DiagnosticsImagingController,
+    DiagnosticsOrdersController,
   ],
   providers: [
     // Repositorios
@@ -43,12 +57,17 @@ import {
     ReportsRepository,
     ImagingRepository,
     MediaQualityRepository,
+    // Sin estado y recibe el `EntityManager` por parámetro, así que proveerlo
+    // acá no crea una segunda fuente de verdad — mismo criterio con el que
+    // `scheduling` provee `AppointmentsRepository`.
+    DiagnosticOrdersRepository,
     // Servicios
     DiagnosticsSpecimensService,
     DiagnosticsLabService,
     DiagnosticsReportsService,
     DiagnosticsImagingService,
     DiagnosticsMediaQualityService,
+    DiagnosticsOrdersService,
   ],
 })
 export class DiagnosticsModule {}

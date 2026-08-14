@@ -11,6 +11,13 @@ import {
   HttpDispatcherService,
   type OutboundDispatchResult,
 } from '../../src/common';
+import {
+  Persons,
+  HealthPractitionerProfiles,
+  SecretaryProfiles,
+  PatientProfiles,
+} from '../../src/modules/profiles/entities';
+import { SpecialtyChartTemplates } from '../../src/modules/chart/entities';
 
 /**
  * Vacía todos los datos de negocio antes de un arranque, dejando la base limpia
@@ -86,10 +93,27 @@ export interface TestContext {
   adminToken: string;
   /** Token privilegiado sin membresías, reservado para pruebas fail-closed. */
   tenantlessAdminToken: string;
+  /** Fixtures cross-módulo: ids de subtipos de profiles y una plantilla de chart. */
+  practitionerSubtypeId: string;
+  secretaryProfileId: string;
+  patientSubtypeId: string;
+  chartTemplateId: string;
 }
 
 /** Id determinista del administrador de pruebas (FK válida para created_by). */
 export const TEST_ADMIN_ID = '00000000-0000-4000-8000-000000000001';
+
+/**
+ * Ids deterministas de los fixtures cross-módulo. Los subtipos de profiles usan
+ * `profile_id` (= id de la persona) como CLAVE PRIMARIA, así que el "id del
+ * subtipo" es el id de la persona una vez existe la fila del subtipo.
+ */
+export const FIX = {
+  practPerson: '00000000-0000-4000-8000-0000000f1001',
+  secPerson: '00000000-0000-4000-8000-0000000f1003',
+  patPerson: '00000000-0000-4000-8000-0000000f1005',
+  chartTemplate: '00000000-0000-4000-8000-0000000f1007',
+};
 
 /**
  * Ejecuta la operación bootstrap test app.
@@ -148,6 +172,7 @@ export async function bootstrapTestApp(
   // efecto en runtime; fijar `TResult` lo resuelve sin recurrir a una aserción.
   const orm = app.get<MikroORM>(MikroORM);
   await seedAdmin(orm);
+  await seedFixtures(orm);
 
   const tokenService = app.get(TokenService);
   const adminToken = tokenService.signAccessToken(
@@ -168,7 +193,76 @@ export async function bootstrapTestApp(
     adminUserId: TEST_ADMIN_ID,
     adminToken,
     tenantlessAdminToken,
+    practitionerSubtypeId: FIX.practPerson,
+    secretaryProfileId: FIX.secPerson,
+    patientSubtypeId: FIX.patPerson,
+    chartTemplateId: FIX.chartTemplate,
   };
+}
+
+/**
+ * Materializa fixtures cross-módulo que varios smokes necesitan como FK reales y
+ * que ningún endpoint expone directamente: los subtipos de profiles
+ * (`health_practitioner_profiles`, `secretary_profiles`, `patient_profiles`) van
+ * sobre `persons`, y una plantilla de chart. Determinista e idempotente. Los
+ * `*_concept_id` requeridos usan un concepto ya sembrado (`STATE_ACTIVE`).
+ */
+async function seedFixtures(orm: MikroORM): Promise<void> {
+  const em = orm.em.fork();
+  if (
+    await em.findOne(HealthPractitionerProfiles, { profileId: FIX.practPerson })
+  ) {
+    return;
+  }
+  const audit = createdBy(TEST_ADMIN_ID);
+  const active = CONCEPTS.STATE_ACTIVE;
+
+  // Personas base (padres de los subtipos; su id es la PK del subtipo).
+  for (const personId of [FIX.practPerson, FIX.secPerson, FIX.patPerson]) {
+    em.create(
+      Persons,
+      { id: personId, personStatusConceptId: active, ...audit },
+      { partial: true },
+    );
+  }
+  await em.flush();
+
+  em.create(
+    HealthPractitionerProfiles,
+    {
+      profileId: FIX.practPerson,
+      practitionerCode: 'FIX-HP-1',
+      practitionerCategoryConceptId: active,
+      verificationStatusConceptId: active,
+      practiceStatusConceptId: active,
+      ...audit,
+    },
+    { partial: true },
+  );
+  em.create(
+    SecretaryProfiles,
+    { profileId: FIX.secPerson, ...audit },
+    { partial: true },
+  );
+  em.create(
+    PatientProfiles,
+    { profileId: FIX.patPerson, patientCode: 'FIX-PAT-1', ...audit },
+    { partial: true },
+  );
+  em.create(
+    SpecialtyChartTemplates,
+    {
+      id: FIX.chartTemplate,
+      specialtyConceptId: active,
+      code: 'FIX-TPL-1',
+      name: 'Fixture template',
+      version: 1,
+      statusConceptId: active,
+      ...audit,
+    },
+    { partial: true },
+  );
+  await em.flush();
 }
 
 /**

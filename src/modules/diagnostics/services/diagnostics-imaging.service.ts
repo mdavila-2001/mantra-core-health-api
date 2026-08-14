@@ -15,6 +15,7 @@ import {
   RecordDoseEventDto,
   ResourceCreatedDto,
   ImagingStudyStoredDto,
+  ImagingStudySummaryDto,
 } from '../dto';
 
 /**
@@ -41,6 +42,41 @@ export class DiagnosticsImagingService {
   }
 
   /** Soporte: da de alta un endpoint DICOM (STOW-RS/WADO). */
+  /**
+   * Estudios de imagen de un paciente.
+   *
+   * Sin esta lectura, un estudio almacenado sólo era accesible por el uuid que
+   * devolvía su POST: el clínico que pidió la prueba no tenía forma de
+   * encontrar su resultado.
+   *
+   * @param tenantId - Tenant custodio (del contexto de la petición).
+   * @param patientProfileId - Paciente consultado.
+   * @param limit - Tamaño de página.
+   * @param offset - Desplazamiento.
+   * @returns Sus estudios, del más reciente al más antiguo.
+   */
+  async listStudiesByPatient(
+    tenantId: string,
+    patientProfileId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<ImagingStudySummaryDto[]> {
+    const studies = await this.repo.findStudiesByPatient(
+      this.em,
+      tenantId,
+      patientProfileId,
+      limit,
+      offset,
+    );
+    return studies.map((s) => ({
+      id: s.id,
+      patientProfileId: s.patientProfileId,
+      serviceRequestId: s.serviceRequestId,
+      statusConceptId: s.statusConceptId,
+      studyInstanceUid: s.dicomStudyInstanceUid,
+    }));
+  }
+
   async createEndpoint(
     dto: CreateImagingEndpointDto,
     actor: AuthenticatedUser,

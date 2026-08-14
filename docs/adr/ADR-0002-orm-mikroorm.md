@@ -1,11 +1,14 @@
 # ADR-0002: ORM — MikroORM
 
 ## Estado
-Aceptado.
+Aceptado. **Corregido el 2026-08-07:** este ADR describía la generación de entidades como
+introspección de la base (`yarn orm:gen`). Nunca fue así — ver
+[ADR-0022](ADR-0022-generacion-de-entidades.md). La decisión de fondo (MikroORM) no cambia.
 
 ## Contexto
-1184 entidades sobre PostgreSQL, generadas por introspección del DDL real (`yarn orm:gen`), con
-bloqueo optimista (`row_version`) y necesidad de un catálogo propio de índices/foreign keys
+1 186 entidades sobre PostgreSQL, generadas desde los `.puml` del modelo canónico con
+`python salud-db/gen_entities.py` (la misma fuente que el DDL), con bloqueo optimista
+(`row_version`) y necesidad de un catálogo propio de índices/foreign keys
 (`src/orm/catalog/`) separado de las entidades.
 
 ## Fuerzas y restricciones
@@ -20,8 +23,8 @@ comparación original — se documenta la decisión ya tomada.
 
 ## Decisión
 MikroORM 7 (`@mikro-orm/core`, `@mikro-orm/postgresql`, `@mikro-orm/nestjs`) como capa de
-persistencia sobre PostgreSQL, con generación de entidades por introspección y catálogo de
-índices/FK mantenido fuera de las entidades (`src/orm/catalog/`).
+persistencia sobre PostgreSQL, con generación de entidades desde el modelo canónico —no por
+introspección— y catálogo de índices/FK mantenido fuera de las entidades (`src/orm/catalog/`).
 
 ## Consecuencias positivas
 - Bloqueo optimista de primera clase (`row_version`) — 353 usos de
@@ -32,8 +35,8 @@ persistencia sobre PostgreSQL, con generación de entidades por introspección y
 ## Consecuencias negativas
 - Sin `@ManyToOne` reales, cargar datos relacionados exige joins/queries explícitos en el
   repositorio en vez de navegación de grafo de objetos — más código explícito, menos "mágico".
-- Generación por introspección significa que el DDL es la fuente de verdad, no el código
-  TypeScript — un cambio de modelo siempre empieza en SQL.
+- Generar desde los `.puml` significa que el modelo canónico es la fuente de verdad, no el
+  código TypeScript — un cambio de modelo nunca empieza en la entidad.
 
 ## Riesgos
 Ver `DATA-001` en la [matriz de trazabilidad](../governance/traceability-matrix.md): el DDL vive
@@ -41,8 +44,10 @@ en SQL plano (los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](ADR-00
 [ADR-0016](ADR-0016-migraciones-sql-plano.md).
 
 ## Evidencia
-`package.json`, `src/modules/README.md`, `src/orm/catalog/`, `tools/catalog/generate-catalog.mjs`.
+`package.json` (sin `orm:gen` desde v4.0.10), `src/modules/README.md`, `src/orm/catalog/`,
+`tools/catalog/generate-catalog.mjs`, `salud-db/gen_entities.py`,
+[ADR-0022](ADR-0022-generacion-de-entidades.md).
 
 ## Plan de revisión
-Revisar si el volumen de entidades (1184) empieza a hacer inviable el flujo de introspección
+Revisar si el volumen de entidades (1 186) empieza a hacer inviable el flujo de regeneración
 manual.

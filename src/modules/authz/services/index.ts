@@ -5,3 +5,4 @@ export * from './authz-grants.service';
 export * from './authz-clinical.service';
 export * from './authz-care-relationships.service';
 export * from './authz-pdp.service';
+export * from './authz-effective-roles.service';

@@ -158,7 +158,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       request.id ?? request.headers['x-request-id'],
     );
 
-    const { status, code, message, details } = this.normalize(exception);
+    const { status, code, message, details, internals } =
+      this.normalize(exception);
 
     const body: ErrorResponseBody = {
       code,
@@ -200,6 +201,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
           path: request.url,
           method: request.method,
           status,
+          // Restricción, tabla y columna del error del driver. Van al log y NO
+          // a la respuesta: el nombre de una FK y el valor de la clave que la
+          // violó describen el esquema y los datos, y el cliente no ramifica
+          // sobre ellos —para eso está `code`—. Con el `correlationId` de la
+          // respuesta, soporte llega igual a esta línea.
+          ...(internals ? { integrity: internals } : {}),
         },
         message,
       );
@@ -254,6 +261,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
      * Valor de details mantenido por la instancia.
      */
     details?: unknown;
+    /**
+     * Contexto interno del error del driver (restricción, tabla, columna).
+     * Se registra en el log y **nunca** viaja en la respuesta.
+     */
+    internals?: unknown;
   } {
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
@@ -288,7 +300,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus.CONFLICT,
         code: ErrorCode.CONFLICT,
         message: 'El valor ya está en uso por otro registro',
-        details: this.constraintDetails(exception),
+        internals: this.constraintInternals(exception),
       };
     }
 
@@ -447,17 +459,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus;
         code: string;
         message: string;
-        details?: unknown;
+        internals?: unknown;
       }
     | undefined {
+    // 422 con `VALIDATION_FAILED` mezclaba dos situaciones bajo un mismo código
+    // que el contrato publica como 400; se mantiene el mismo mapeo que la ruta
+    // por SQLSTATE para que el cliente reciba lo mismo venga por donde venga.
     if (exception instanceof ForeignKeyConstraintViolationException) {
       return {
         status: HttpStatus.UNPROCESSABLE_ENTITY,
-        code: ErrorCode.VALIDATION_FAILED,
+        code: ErrorCode.PRECONDITION_FAILED,
         message:
           'La petición referencia un recurso que no existe: ' +
           'verifique los identificadores enviados',
-        details: this.constraintDetails(exception),
+        internals: this.constraintInternals(exception),
       };
     }
 
@@ -466,10 +481,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       exception instanceof CheckConstraintViolationException
     ) {
       return {
-        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        status: HttpStatus.BAD_REQUEST,
         code: ErrorCode.VALIDATION_FAILED,
         message: 'La petición trae un valor ausente o inválido para el modelo',
-        details: this.constraintDetails(exception),
+        internals: this.constraintInternals(exception),
       };
     }
 
@@ -525,8 +540,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: string;
         /** Mensaje legible para el cliente. */
         message: string;
-        /** Columna y tabla implicadas, cuando Postgres las informa. */
-        details?: unknown;
+        /** Restricción, tabla y columna implicadas: sólo para el log. */
+        internals?: unknown;
       }
     | undefined {
     const causa = this.findSqlState(exception);
@@ -534,7 +549,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return undefined;
     }
 
-    const details = {
+    const internals = {
       constraint: causa.constraint,
       table: causa.table,
       column: causa.column,
@@ -542,31 +557,39 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     switch (causa.sqlstate) {
+      // Clave foránea inexistente. Es 422 y por tanto **no** puede llevar
+      // `VALIDATION_FAILED`, que el contrato publica como 400: un cliente que
+      // ramifique por `code` para decidir si reintenta con otro cuerpo recibía
+      // el mismo código para dos situaciones distintas.
       case '23503':
         return {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
-          code: ErrorCode.VALIDATION_FAILED,
+          code: ErrorCode.PRECONDITION_FAILED,
           message:
             'La petición referencia un recurso que no existe: ' +
             'verifique los identificadores enviados',
-          details,
+          internals,
         };
       case '23505':
         return {
           status: HttpStatus.CONFLICT,
           code: ErrorCode.CONFLICT,
           message: 'Ya existe un recurso con esa clave',
-          details,
+          internals,
         };
+      // Valor ausente, fuera de restricción o con sintaxis inválida: es un
+      // defecto de forma del cuerpo, así que 400 + `VALIDATION_FAILED`, igual
+      // que cuando lo detecta el `ValidationPipe`. Antes salía 422 con ese
+      // mismo código, que el contrato reserva para 400.
       case '23502':
       case '23514':
       case '22P02':
         return {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          status: HttpStatus.BAD_REQUEST,
           code: ErrorCode.VALIDATION_FAILED,
           message:
             'La petición trae un valor ausente o inválido para el modelo',
-          details,
+          internals,
         };
       // Contención: la operación es válida y reintentarla funciona.
       // `40001` fallo de serialización, `40P01` interbloqueo,
@@ -656,8 +679,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
     return undefined;
   }
 
-  /** Columna, tabla y restricción que reporta el driver, si las trae. */
-  private constraintDetails(exception: unknown): unknown {
+  /**
+   * Columna, tabla y restricción que reporta el driver, si las trae.
+   *
+   * Va al log, nunca a la respuesta: el `detail` de PostgreSQL incluye el valor
+   * de la clave que falló, y el nombre de la restricción describe el esquema.
+   */
+  private constraintInternals(exception: unknown): unknown {
     const found = this.findSqlState(exception);
     if (!found) return undefined;
     return {

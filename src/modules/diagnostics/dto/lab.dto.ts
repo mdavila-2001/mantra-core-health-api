@@ -4,10 +4,13 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsIn,
+  IsInt,
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -301,4 +304,77 @@ export class VerifyResultDto {
   @IsString()
   @MaxLength(2000)
   verificationComment?: string;
+}
+
+/** Filtros de `GET /diagnostics/work-orders`. */
+export class ListWorkOrdersQueryDto {
+  /**
+   * Identificador asociado a laboratory accession.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Accesión de laboratorio',
+  })
+  @IsOptional()
+  @IsUUID()
+  laboratoryAccessionId?: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Estado de la orden' })
+  @IsOptional()
+  @IsUUID()
+  statusConceptId?: string;
+
+  /**
+   * Identificador asociado a assigned profile.
+   */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Profesional asignado' })
+  @IsOptional()
+  @IsUUID()
+  assignedProfileId?: string;
+
+  /**
+   * Valor de limit mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ default: 50, minimum: 1, maximum: 200 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  limit?: number;
+
+  /**
+   * Valor de offset mantenido por la instancia.
+   */
+  @ApiPropertyOptional({ default: 0, minimum: 0 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset?: number;
+}
+
+/** Orden de trabajo tal como la devuelve el listado. */
+export class WorkOrderSummaryDto {
+  /** Identificador de la orden. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  /** Número legible de la orden. */
+  @ApiProperty() workOrderNumber!: string;
+  /** Accesión de laboratorio de la que cuelga. */
+  @ApiProperty({ format: 'uuid' }) laboratoryAccessionId!: string;
+  /** Estado de la orden. */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+  /** Prioridad. */
+  @ApiProperty({ format: 'uuid' }) priorityConceptId!: string;
+  /** Profesional asignado, si lo hay. */
+  @ApiPropertyOptional({ format: 'uuid' }) assignedProfileId?: string;
+  /** Cuándo está programada. */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  scheduledAt?: Date;
+  /** Cuándo se completó. */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  completedAt?: Date;
 }
