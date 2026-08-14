@@ -807,6 +807,117 @@ export class CaseDetailDto {
     /** Cuándo se firmó, si ya ocurrió. */
     signedAt?: Date;
   }[];
+
+  /**
+   * Pasos operatorios, del primero al último.
+   *
+   * Se agregan a la respuesta porque hasta ahora sólo se podían escribir: los
+   * `POST` de pasos, hallazgos e implantes no tenían ninguna lectura que los
+   * devolviera, así que el registro intraoperatorio entraba y no volvía a salir
+   * por ninguna parte de la API.
+   */
+  @ApiProperty({
+    isArray: true,
+    description: 'Pasos de la intervención, en orden',
+  })
+  operativeSteps!: {
+    /** Identificador del paso. */
+    id: string;
+    /** Orden dentro de la intervención. */
+    stepNumber: number;
+    /** Código del paso. */
+    stepCodeConceptId: string;
+    /** Descripción escrita por quien lo registró. */
+    description: string;
+    /** Profesional que lo ejecutó, si se registró. */
+    performedByProfileId?: string;
+    /** Sitio anatómico, si se registró. */
+    bodySiteConceptId?: string;
+    /** Lateralidad, si aplica. */
+    lateralityConceptId?: string;
+    /** Estado del paso. */
+    statusConceptId: string;
+    /** Cuándo empezó, si se cronometró. */
+    startedAt?: Date;
+    /** Cuándo terminó, si se cronometró. */
+    endedAt?: Date;
+  }[];
+
+  /** Hallazgos intraoperatorios, del más reciente al más antiguo. */
+  @ApiProperty({
+    isArray: true,
+    description: 'Hallazgos registrados durante la intervención',
+  })
+  findings!: {
+    /** Identificador del hallazgo. */
+    id: string;
+    /** Paso en el que se halló, si se ató a uno. */
+    operativeStepId?: string;
+    /** Código del hallazgo. */
+    findingCodeConceptId: string;
+    /** Descripción escrita por quien lo halló. */
+    findingText: string;
+    /** Sitio anatómico, si se registró. */
+    bodySiteConceptId?: string;
+    /** Lateralidad, si aplica. */
+    lateralityConceptId?: string;
+    /** Severidad, si se graduó. */
+    severityConceptId?: string;
+    /** Profesional que lo registró, si consta. */
+    recordedByProfileId?: string;
+    /** Cuándo se registró. */
+    recordedAt: Date;
+  }[];
+
+  /**
+   * Implantes del caso, con sus identificadores.
+   *
+   * Los identificadores (UDI, lote, serie) van anidados y no en una lista
+   * aparte: un implante sin su lote no es trazable, que es justamente para lo
+   * que se lleva un registro de implantes —una alerta de retiro del mercado se
+   * resuelve por lote, no por modelo.
+   */
+  @ApiProperty({
+    isArray: true,
+    description: 'Implantes colocados, con sus identificadores',
+  })
+  implants!: {
+    /** Identificador del implante en el caso. */
+    id: string;
+    /** Procedimiento clínico al que se imputa. */
+    procedureId: string;
+    /** Dispositivo implantado. */
+    implantDeviceId: string;
+    /** Papel del implante en la intervención. */
+    implantRoleConceptId: string;
+    /** Sitio anatómico, si se registró. */
+    bodySiteConceptId?: string;
+    /** Lateralidad, si aplica. */
+    lateralityConceptId?: string;
+    /** Cuándo se implantó. */
+    implantedAt: Date;
+    /** Cuándo se explantó, si se explantó. */
+    explantedAt?: Date;
+    /** Estado del implante, si se registró. */
+    statusConceptId?: string;
+    /** UDI, lote y serie del implante. */
+    identifiers: {
+      /** Identificador de la fila. */
+      id: string;
+      /** Tipo de identificador (UDI-DI, UDI-PI, …). */
+      identifierTypeConceptId: string;
+      /** Valor del identificador. */
+      identifierValue: string;
+      /** Sistema emisor, si consta. */
+      issuingSystem?: string;
+      /** Número de lote, si consta. */
+      lotNumber?: string;
+      /** Número de serie, si consta. */
+      serialNumber?: string;
+      /** Vencimiento, si consta. */
+      expirationDate?: Date;
+    }[];
+  }[];
 }
 
 /** Cuerpo de `POST /procedure-cases/{id}/preoperative-assessments` (UC-53-03). */

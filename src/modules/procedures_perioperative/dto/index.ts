@@ -85,3 +85,13 @@ export type {
   CancellationCategory,
   ChargeType,
 } from './periop.dto';
+export {
+  CreateDentalProcedureDto,
+  DentalSiteDto,
+  DentalProcedureDto,
+  DentalProcedureResponseDto,
+  DentalProcedureListDto,
+  ListDentalProceduresQueryDto,
+  DentalCatalogEntryDto,
+  DentalCatalogDto,
+} from './dental.dto';
