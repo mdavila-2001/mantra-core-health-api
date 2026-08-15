@@ -4,7 +4,19 @@ import { PinoLogger } from 'nestjs-pino';
 import { Roles } from '../../modules/authz/entities';
 import { AUTHZ } from '../../modules/authz/authz.concepts';
 import { CLINICAL_ROLE_SEED } from '../../modules/authz/authz.seed';
+import { PHARMA_LAB_ROLE_SEED } from '../../modules/pharma_lab/pharma_lab.roles';
 import { CONCEPTS } from '../constants/concepts';
+
+/**
+ * Roles de sistema a materializar: los asistenciales del catálogo de actores más
+ * los que cada módulo declara por su cuenta.
+ *
+ * Los módulos declaran sus roles en su propio archivo (`<modulo>.roles.ts`) y se
+ * agregan acá, por el mismo motivo por el que los conceptos se agregan en
+ * `module-concepts.ts`: que dos carriles puedan añadir roles en paralelo sin
+ * editar el mismo archivo.
+ */
+const SYSTEM_ROLE_SEED = [...CLINICAL_ROLE_SEED, ...PHARMA_LAB_ROLE_SEED];
 
 /** Rol base declarado en la semilla → concepto de `authz`. */
 const BASE_ROLE_CONCEPT: Record<string, string> = {
@@ -63,7 +75,7 @@ export class AuthzClinicalRolesSeedService {
     const now = new Date();
     let inserted = 0;
 
-    for (const seed of CLINICAL_ROLE_SEED) {
+    for (const seed of SYSTEM_ROLE_SEED) {
       if (await em.findOne(Roles, { id: seed.id })) continue;
       // El `code` es único en la tabla: si un administrador ya creó a mano un
       // rol con el mismo código, se respeta el suyo en vez de romper el arranque
@@ -92,10 +104,7 @@ export class AuthzClinicalRolesSeedService {
     await em.flush();
 
     if (inserted > 0) {
-      this.logger.info(
-        { inserted },
-        'Roles asistenciales de sistema sembrados',
-      );
+      this.logger.info({ inserted }, 'Roles de sistema sembrados');
     }
     return { inserted };
   }
