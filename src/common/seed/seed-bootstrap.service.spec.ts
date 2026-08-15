@@ -39,11 +39,15 @@ function armar(fallan: Paso[] = []) {
       nombre,
       {
         run: fallan.includes(nombre)
-          ? jest.fn().mockRejectedValue(new Error(`explotó ${nombre}`))
-          : jest.fn().mockResolvedValue({ inserted: 0 }),
+          ? jest
+              .fn<() => Promise<unknown>>()
+              .mockRejectedValue(new Error(`explotó ${nombre}`))
+          : jest
+              .fn<() => Promise<unknown>>()
+              .mockResolvedValue({ inserted: 0 }),
       },
     ]),
-  ) as Record<Paso, { run: ReturnType<typeof jest.fn> }>;
+  ) as Record<Paso, { run: jest.Mock<() => Promise<unknown>> }>;
 
   const service = new SeedBootstrapService(
     dobles.terminology as never,
