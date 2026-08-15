@@ -4,6 +4,7 @@ import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.servi
 import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
+import { GlossarySeedService } from './glossary-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
@@ -18,6 +19,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *
    * @param terminology - Catálogo padre de todos los conceptos.
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
+   * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param messaging - Datos estructurales de mensajería.
    * @param identityVerification - Datos estructurales de identidad.
    * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
@@ -29,6 +31,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
   constructor(
     private readonly terminology: TerminologySeedService,
     private readonly dynamicEnums: DynamicEnumSeedService,
+    private readonly glossary: GlossarySeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
@@ -59,6 +62,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     await this.runDependent(
       'enumeraciones dinámicas',
       this.dynamicEnums.run.bind(this.dynamicEnums),
+    );
+    // Depende de `SEED.codeSystemVersionId`, ya materializado por el catálogo
+    // de conceptos. No depende de las enumeraciones dinámicas ni al revés,
+    // pero va justo después de ellas para agrupar los seeds que amplían el
+    // motor de terminología antes de los dominios operativos.
+    await this.runDependent(
+      'glosario médico',
+      this.glossary.run.bind(this.glossary),
     );
     await this.runDependent(
       'mensajería',

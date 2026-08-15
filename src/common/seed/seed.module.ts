@@ -4,6 +4,9 @@ import {
   CatalogConcepts,
   CodeSystemVersions,
   CodeSystems,
+  ConceptDesignations,
+  ConceptProperties,
+  ConceptRelationships,
   TerminologySources,
   ValueSetMembers,
   ValueSetVersions,
@@ -48,6 +51,7 @@ import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
+import { GlossarySeedService } from './glossary-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
@@ -74,6 +78,9 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
       CodeSystems,
       CodeSystemVersions,
       CatalogConcepts,
+      ConceptDesignations,
+      ConceptProperties,
+      ConceptRelationships,
       Tenants,
       ProcessingPurposes,
       Users,
@@ -113,6 +120,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
   providers: [
     TerminologySeedService,
     DynamicEnumSeedService,
+    GlossarySeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
     IdentityVerificationSeedService,
@@ -125,6 +133,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
   exports: [
     TerminologySeedService,
     DynamicEnumSeedService,
+    GlossarySeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
     IdentityVerificationSeedService,
