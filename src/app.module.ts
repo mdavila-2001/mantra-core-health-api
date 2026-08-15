@@ -65,6 +65,7 @@ import { MessagingModule } from './modules/messaging/messaging.module';
 import { ObjectStorageModule } from './modules/object_storage/object_storage.module';
 import { OrganizationExtensionsModule } from './modules/organization_extensions/organization_extensions.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { PharmaLabModule } from './modules/pharma_lab/pharma_lab.module';
 import { PharmacyModule } from './modules/pharmacy/pharmacy.module';
 import { PharmacyInventoryModule } from './modules/pharmacy_inventory/pharmacy_inventory.module';
 import { PlatformOpsModule } from './modules/platform_ops/platform_ops.module';
@@ -191,6 +192,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ObjectStorageModule,
     OrganizationExtensionsModule,
     PaymentsModule,
+    PharmaLabModule,
     PharmacyModule,
     PharmacyInventoryModule,
     PlatformOpsModule,
