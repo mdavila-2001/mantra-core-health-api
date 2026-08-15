@@ -186,6 +186,27 @@ describe('SeedBootstrapService', () => {
       expect(summary.inserted).toBe(391);
     });
 
+    it('no cuenta como fila lo que el seed declara como omitido', async () => {
+      // Caso real: el glosario devuelve `orphanRelationships`, relaciones cuyo
+      // destino no existe y que por eso NO se insertan. Sumarlas hacía que una
+      // corrida sin trabajo informara «1 filas».
+      const { service, dobles } = armar();
+      dobles.glossary.run.mockResolvedValue({
+        valueSets: 0,
+        terms: 0,
+        relationships: 0,
+        orphanRelationships: 1,
+      });
+
+      const summary = await service.run();
+
+      const paso = summary.steps.find(
+        (candidato) => candidato.name === 'glosario médico',
+      );
+      expect(paso?.inserted).toBe(0);
+      expect(summary.inserted).toBe(0);
+    });
+
     it('un seed que no devuelve contadores se registra sin inventar un número', async () => {
       const { service, dobles } = armar();
       dobles.bootstrapAdmin.run.mockResolvedValue(undefined);

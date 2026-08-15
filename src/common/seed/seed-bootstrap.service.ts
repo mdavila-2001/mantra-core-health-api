@@ -52,9 +52,15 @@ export interface SeedRunSummary {
  */
 function contarInsertados(result: unknown): number | null {
   if (typeof result !== 'object' || result === null) return null;
-  const numeros = Object.values(result as Record<string, unknown>).filter(
-    (valor): valor is number => typeof valor === 'number',
-  );
+  const numeros = Object.entries(result as Record<string, unknown>)
+    // No todo contador numérico cuenta filas escritas: el glosario devuelve
+    // `orphanRelationships`, que son relaciones declaradas cuyo destino no
+    // existe y por eso NO se insertan. Sumarlas hacía que una corrida sin
+    // trabajo informara «1 filas», que es justo la clase de mentira que este
+    // resumen vino a eliminar.
+    .filter(([nombre]) => !nombre.startsWith('orphan'))
+    .map(([, valor]) => valor)
+    .filter((valor): valor is number => typeof valor === 'number');
   if (numeros.length === 0) return null;
   return numeros.reduce((total, valor) => total + valor, 0);
 }
@@ -229,7 +235,13 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         tookMs: Date.now() - desde,
         failed: false,
       };
-      this.logger.info({ event: 'seed.step', ...paso }, 'Seed: ' + name);
+      // `detail` lleva los contadores tal como los devolvió el seed, incluidos
+      // los que `inserted` deja afuera: el agregado es para leer de un vistazo,
+      // el detalle es para no perder nada.
+      this.logger.info(
+        { event: 'seed.step', ...paso, detail: resultado },
+        'Seed: ' + name,
+      );
       return paso;
     } catch (error) {
       const paso: SeedStepResult = {
