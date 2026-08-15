@@ -60,8 +60,9 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "fieldId": "00000000-0000-4000-8000-000000000001",
-  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001"
+  "surveyVersionId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "APPOINTMENT",
+  "targetId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -75,16 +76,9 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `fieldId` | Sí | `string` | formato `uuid` | Campo a asignar | `00000000-0000-4000-8000-000000000001` |
-| `targetResourceConceptId` | Sí | `string` | formato `uuid` | Recurso destino (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `sectionId` | No | `string` | formato `uuid` | Sección destino; si se omite se aprovisiona una por defecto | `00000000-0000-4000-8000-000000000001` |
-| `profileTypeConceptId` | No | `string` | formato `uuid` | Perfil objetivo (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `tenantId` | No | `string` | formato `uuid` | Tenant que crea la asignación | `00000000-0000-4000-8000-000000000001` |
-| `branchId` | No | `string` | formato `uuid` | Branch destino | `00000000-0000-4000-8000-000000000001` |
-| `required` | No | `boolean` | Sin restricción adicional declarada | ¿Requerido? | `false` |
-| `visible` | No | `boolean` | Sin restricción adicional declarada | ¿Visible? | `true` |
-| `editable` | No | `boolean` | Sin restricción adicional declarada | ¿Editable? | `true` |
-| `ordinal` | No | `number` | mínimo 0 | Orden de presentación | `1` |
+| `surveyVersionId` | Sí | `string` | formato `uuid` | Versión publicada que se reparte | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | Sí | `string` | valores: `APPOINTMENT`, `SERVICE`, `CARE_TYPE` | Qué se evalúa: la reserva, el servicio o el tipo de atención | `APPOINTMENT` |
+| `targetId` | Sí | `string` | formato `uuid` | Identificador de la cosa evaluada, según `targetType` | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -97,16 +91,9 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "fieldId": "00000000-0000-4000-8000-000000000001",
-  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001",
-  "sectionId": "00000000-0000-4000-8000-000000000001",
-  "profileTypeConceptId": "00000000-0000-4000-8000-000000000001",
-  "tenantId": "00000000-0000-4000-8000-000000000001",
-  "branchId": "00000000-0000-4000-8000-000000000001",
-  "required": false,
-  "visible": true,
-  "editable": true,
-  "ordinal": 1
+  "surveyVersionId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "APPOINTMENT",
+  "targetId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -556,7 +543,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Valor de ok mantenido por la instancia. | `true` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1357,7 +1344,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Valor de ok mantenido por la instancia. | `true` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
