@@ -7,6 +7,12 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
+import {
+  GLOSSARY_ALL_TERMS_CODE,
+  GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
+  GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+  GLOSSARY_SLUG_PROPERTY_CODE,
+} from '../glossary.constants';
 
 const actor: AuthenticatedUser = { id: 'actor-1', roles: ['SECURITY_ADMIN'] };
 
@@ -23,6 +29,7 @@ function build() {
     findById: jest.fn(),
     findByIdForUpdate: jest.fn(),
     findByVersionAndCode: jest.fn(),
+    findByIds: jest.fn(() => Promise.resolve(new Map())),
     search: jest.fn(() => Promise.resolve([])),
   } as any;
   const designationsRepo = {
@@ -40,11 +47,13 @@ function build() {
   const relationshipsRepo = {
     findEquivalent: jest.fn(),
     create: jest.fn(),
+    findByTypesForSources: jest.fn(() => Promise.resolve([])),
   } as any;
   const valueSetsRepo = {
     findMembersByConceptForUpdate: jest.fn(() => Promise.resolve([])),
     findValueSetsByConceptIds: jest.fn(() => Promise.resolve(new Map())),
     findIncludedConceptIdsByValueSet: jest.fn(() => Promise.resolve([])),
+    findById: jest.fn(() => Promise.resolve(null)),
   } as any;
   const codeSystemsRepo = { findByCanonicalUrl: jest.fn() } as any;
   const versionsRepo = { findDefaultActiveVersion: jest.fn() } as any;
@@ -881,6 +890,341 @@ describe('ConceptsService', () => {
       await expect(service.readConcept('fantasma')).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
+    });
+  });
+
+  /**
+   * La extensión del glosario médico (Carril 03): categoría/etiquetas
+   * separadas de `valueSets`, relaciones tipadas resueltas, respaldo a
+   * castellano cuando falta el inglés, y exclusión de borradores.
+   */
+  describe('glosario médico', () => {
+    const glossaryValueSets = [
+      {
+        id: 'vs-cat-1',
+        internalCode: 'glossary-category-anatomy',
+        name: 'Anatomía',
+      },
+      {
+        id: 'vs-tag-1',
+        internalCode: 'glossary-tag-cardiovascular',
+        name: 'Cardiovascular',
+      },
+      {
+        id: 'vs-umbrella',
+        internalCode: GLOSSARY_ALL_TERMS_CODE,
+        name: 'Glosario médico',
+      },
+    ];
+
+    describe('búsqueda', () => {
+      it('acotada a un value set del glosario trae slug/categoría/etiquetas/resumen/estado y filtra por activo', async () => {
+        const { service, conceptsRepo, designationsRepo, valueSetsRepo, em } =
+          build();
+        valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([
+          'concept-1',
+        ]);
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: 'glossary-category-anatomy',
+        });
+        conceptsRepo.search.mockResolvedValue([
+          {
+            id: 'concept-1',
+            code: 'GLOSSARY_CORAZON',
+            display: 'Heart',
+            definition: undefined,
+            selectable: true,
+            codeSystemVersionId: 'v1',
+            stateConceptId: CONCEPTS.TERM_ACTIVE,
+          },
+        ]);
+        valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
+          new Map([['concept-1', glossaryValueSets]]),
+        );
+        designationsRepo.findPropertyForConcepts.mockImplementation(
+          (_em: unknown, ids: string[], propertyCode: string) => {
+            if (
+              propertyCode === GLOSSARY_SLUG_PROPERTY_CODE &&
+              ids.includes('concept-1')
+            ) {
+              return Promise.resolve([
+                { conceptId: 'concept-1', valueJson: 'corazon' },
+              ]);
+            }
+            if (
+              propertyCode === GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE &&
+              ids.includes('concept-1')
+            ) {
+              return Promise.resolve([
+                { conceptId: 'concept-1', valueJson: { es: 'Resumen corto' } },
+              ]);
+            }
+            return Promise.resolve([]);
+          },
+        );
+
+        const result = await service.searchConcepts(
+          undefined,
+          undefined,
+          50,
+          undefined,
+          { valueSetId: 'vs-1' },
+        );
+
+        expect(conceptsRepo.search).toHaveBeenCalledWith(
+          em,
+          expect.objectContaining({ stateConceptId: CONCEPTS.TERM_ACTIVE }),
+          50,
+        );
+        expect(result.items[0]).toMatchObject({
+          slug: 'corazon',
+          category: {
+            internalCode: 'glossary-category-anatomy',
+            name: 'Anatomía',
+          },
+          tags: ['Cardiovascular'],
+          shortDefinition: 'Resumen corto',
+          relationsCount: 0,
+          status: 'active',
+        });
+      });
+
+      it('fuera del glosario (otro value set) no agrega ninguno de los campos nuevos ni filtra por estado', async () => {
+        const { service, conceptsRepo, valueSetsRepo, em } = build();
+        valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([
+          'concept-1',
+        ]);
+        valueSetsRepo.findById.mockResolvedValue({
+          internalCode: 'administrative-gender',
+        });
+        conceptsRepo.search.mockResolvedValue([
+          {
+            id: 'concept-1',
+            code: 'GENDER_FEMALE',
+            display: 'Female',
+            definition: undefined,
+            selectable: true,
+            codeSystemVersionId: 'v1',
+          },
+        ]);
+
+        const result = await service.searchConcepts(
+          undefined,
+          undefined,
+          50,
+          undefined,
+          { valueSetId: 'vs-1' },
+        );
+
+        expect(conceptsRepo.search).toHaveBeenCalledWith(
+          em,
+          {
+            query: undefined,
+            codeSystemVersionId: undefined,
+            ids: ['concept-1'],
+          },
+          50,
+        );
+        expect(Object.keys(result.items[0])).not.toContain('slug');
+        expect(Object.keys(result.items[0])).not.toContain('category');
+        expect(Object.keys(result.items[0])).not.toContain('status');
+      });
+    });
+
+    describe('ficha', () => {
+      /** Configura los mocks comunes a la ficha de un término del glosario. */
+      function setUpGlossaryTermFicha({
+        stateConceptId = CONCEPTS.TERM_ACTIVE,
+      }: { stateConceptId?: string } = {}) {
+        const built = build();
+        const {
+          conceptsRepo,
+          designationsRepo,
+          valueSetsRepo,
+          relationshipsRepo,
+        } = built;
+        conceptsRepo.findById.mockResolvedValue({
+          id: 'concept-1',
+          code: 'GLOSSARY_CORAZON',
+          display: 'Heart',
+          definition: undefined,
+          selectable: true,
+          codeSystemVersionId: 'v1',
+          stateConceptId,
+        });
+        valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
+          new Map([['concept-1', glossaryValueSets]]),
+        );
+        designationsRepo.findByConcept.mockResolvedValue([
+          {
+            value: 'Corazón',
+            languageConceptId: CONCEPTS.LANG_ES,
+            preferred: true,
+          },
+        ]);
+        const slugByConcept: Record<string, string> = {
+          'concept-1': 'corazon',
+          'concept-2': 'insuficiencia-cardiaca',
+        };
+        const clinicalByConcept: Record<string, { es: string; en?: string }> = {
+          'concept-1': { es: 'Definición clínica en castellano' },
+        };
+        const plainByConcept: Record<string, { es: string; en?: string }> = {
+          'concept-1': {
+            es: 'Resumen en castellano',
+            en: 'Summary in English',
+          },
+        };
+        designationsRepo.findPropertyForConcepts.mockImplementation(
+          (_em: unknown, ids: string[], propertyCode: string) => {
+            const source =
+              propertyCode === GLOSSARY_SLUG_PROPERTY_CODE
+                ? slugByConcept
+                : propertyCode === GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE
+                  ? clinicalByConcept
+                  : propertyCode === GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE
+                    ? plainByConcept
+                    : {};
+            return Promise.resolve(
+              ids
+                .filter((id) => id in source)
+                .map((id) => ({
+                  conceptId: id,
+                  valueJson: (source as any)[id],
+                })),
+            );
+          },
+        );
+        relationshipsRepo.findByTypesForSources.mockResolvedValue([
+          {
+            sourceConceptId: 'concept-1',
+            targetConceptId: 'concept-2',
+            relationshipTypeConceptId: CONCEPTS.REL_ANATOMY,
+          },
+        ]);
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            ['concept-2', { id: 'concept-2', display: 'Heart failure' }],
+          ]),
+        );
+        return built;
+      }
+
+      it('separa categoría y etiquetas de `valueSets`, y resuelve las relaciones tipadas', async () => {
+        const { service } = setUpGlossaryTermFicha();
+
+        const ficha = await service.readConcept('concept-1');
+
+        expect(ficha.category).toEqual({
+          valueSetId: 'vs-cat-1',
+          internalCode: 'glossary-category-anatomy',
+          name: 'Anatomía',
+        });
+        expect(ficha.tags).toEqual([
+          {
+            valueSetId: 'vs-tag-1',
+            internalCode: 'glossary-tag-cardiovascular',
+            name: 'Cardiovascular',
+          },
+        ]);
+        // El value set paraguas no aparece ni como categoría ni como etiqueta.
+        expect(ficha.category?.internalCode).not.toBe(GLOSSARY_ALL_TERMS_CODE);
+        expect(
+          ficha.tags.some(
+            (tag) => tag.internalCode === GLOSSARY_ALL_TERMS_CODE,
+          ),
+        ).toBe(false);
+        expect(ficha.relations).toEqual([
+          {
+            type: 'ANATOMY',
+            conceptId: 'concept-2',
+            slug: 'insuficiencia-cardiaca',
+            display: 'Heart failure',
+          },
+        ]);
+        expect(ficha.slug).toBe('corazon');
+      });
+
+      it('sin `lang`, cae a castellano y lo marca como traducido (es el idioma nativo del contenido)', async () => {
+        const { service } = setUpGlossaryTermFicha();
+
+        const ficha = await service.readConcept('concept-1');
+
+        expect(ficha.clinicalDefinition).toEqual({
+          text: 'Definición clínica en castellano',
+          translated: true,
+        });
+        expect(ficha.plainSummary).toEqual({
+          text: 'Resumen en castellano',
+          translated: true,
+        });
+      });
+
+      it('con `lang=EN`, la definición clínica sin traducir cae a ES y se marca `translated: false`', async () => {
+        const { service } = setUpGlossaryTermFicha();
+
+        const ficha = await service.readConcept('concept-1', 'EN');
+
+        // No hay `clinicalDefinition.en` cargado para este término (ver fixture):
+        // debe caer al texto en castellano, no dejarlo en blanco.
+        expect(ficha.clinicalDefinition).toEqual({
+          text: 'Definición clínica en castellano',
+          translated: false,
+        });
+      });
+
+      it('con `lang=EN`, el resumen llano que sí tiene traducción se marca `translated: true`', async () => {
+        const { service } = setUpGlossaryTermFicha();
+
+        const ficha = await service.readConcept('concept-1', 'EN');
+
+        expect(ficha.plainSummary).toEqual({
+          text: 'Summary in English',
+          translated: true,
+        });
+      });
+
+      it('un término del glosario en borrador es 404, no una ficha a medias', async () => {
+        const { service } = setUpGlossaryTermFicha({
+          stateConceptId: CONCEPTS.TERM_DRAFT,
+        });
+
+        await expect(service.readConcept('concept-1')).rejects.toBeInstanceOf(
+          ResourceNotFoundException,
+        );
+      });
+
+      it('un concepto que no es del glosario no se ve afectado por el filtro de borrador', async () => {
+        const { service, conceptsRepo, valueSetsRepo } = build();
+        conceptsRepo.findById.mockResolvedValue({
+          id: 'concept-1',
+          code: 'X',
+          display: 'X',
+          selectable: true,
+          codeSystemVersionId: 'v1',
+          stateConceptId: CONCEPTS.TERM_DRAFT,
+        });
+        // No pertenece a `glossary-all-terms`: el filtro de borrador no aplica.
+        valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
+          new Map([
+            [
+              'concept-1',
+              [
+                {
+                  id: 'vs-x',
+                  internalCode: 'condition-severity',
+                  name: 'Severidad',
+                },
+              ],
+            ],
+          ]),
+        );
+
+        const ficha = await service.readConcept('concept-1');
+
+        expect(ficha.conceptId).toBe('concept-1');
+        expect(ficha.category).toBeNull();
+      });
     });
   });
 });
