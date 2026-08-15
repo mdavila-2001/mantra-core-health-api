@@ -157,7 +157,10 @@ describe('CommunityPublicService', () => {
     it('un perfil pendiente aparece pero no como verificado', async () => {
       const d = build();
       d.repo.searchProfiles.mockResolvedValue([
-        { ...perfilCompleto, verificationStatusConceptId: CONCEPTS.STATE_PENDING },
+        {
+          ...perfilCompleto,
+          verificationStatusConceptId: CONCEPTS.STATE_PENDING,
+        },
       ]);
 
       const res = await d.service.search({});
@@ -190,7 +193,10 @@ describe('CommunityPublicService', () => {
       const primera = await d.service.search({ limit: 1 });
       expect(primera.nextCursor).not.toBeNull();
 
-      await d.service.search({ cursor: primera.nextCursor as string, limit: 1 });
+      await d.service.search({
+        cursor: primera.nextCursor as string,
+        limit: 1,
+      });
 
       expect(d.repo.searchProfiles).toHaveBeenLastCalledWith(
         expect.anything(),

@@ -576,3 +576,77 @@ export class WaitlistCandidateSlotsResponseDto {
   })
   slotIds!: string[];
 }
+
+/* ============================================================================
+    Lo que el centro puede pedir o proponer antes de aceptar — CARRIL 11.
+
+    `accept` y `reject` son del carril 07 y ya viven arriba. Lo que sigue son
+    las dos cosas que la especificación de centros de diagnóstico agrega y que
+    ningún otro carril cubre: pedir algo antes de confirmar, y contraproponer
+    un horario sobre una solicitud que todavía no se aceptó.
+    ========================================================================== */
+
+/** Qué le falta a la solicitud cuando el centro pide algo. */
+export type BookingInfoRequest =
+  'DOCUMENTATION' | 'MEDICAL_ORDER' | 'PREPARATION';
+
+export const BOOKING_INFO_REQUESTS: readonly BookingInfoRequest[] = [
+  'DOCUMENTATION',
+  'MEDICAL_ORDER',
+  'PREPARATION',
+];
+
+/** Cuerpo de `POST /scheduling/bookings/{id}/request-info` (UC-41-18). */
+export class RequestBookingInfoDto {
+  /** Qué se le pide a la persona. */
+  @ApiProperty({
+    description: 'Qué falta antes de poder aceptar',
+    enum: BOOKING_INFO_REQUESTS,
+  })
+  @IsIn(BOOKING_INFO_REQUESTS as readonly string[])
+  infoRequested!: BookingInfoRequest;
+
+  /**
+   * El mensaje para la persona: qué documento traer, cómo prepararse.
+   *
+   * Obligatorio, como el motivo de rechazar o cancelar (corrección #14): pedir
+   * algo sin decir qué es no le sirve a nadie.
+   */
+  @ApiProperty({ description: 'Mensaje para el paciente' })
+  @IsString()
+  @MaxLength(500)
+  reasonText!: string;
+}
+
+/** Cuerpo de `POST /scheduling/bookings/{id}/propose-schedule` (UC-41-19). */
+export class ProposeScheduleDto {
+  /** Cupo que el centro propone en lugar del pedido. */
+  @ApiProperty({ format: 'uuid', description: 'Cupo propuesto' })
+  @IsUUID()
+  proposedSlotId!: string;
+
+  /** Por qué se propone otro horario. Obligatorio (corrección #14). */
+  @ApiProperty({ description: 'Motivo de la propuesta' })
+  @IsString()
+  @MaxLength(500)
+  reasonText!: string;
+}
+
+/** Resultado de contraproponer un horario. */
+export class ProposeScheduleResponseDto {
+  /** Solicitud sobre la que se propuso. */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /** Estado en el que quedó (concept id): sigue pendiente. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Cupo que se liberó. */
+  @ApiProperty({ format: 'uuid' })
+  fromSlotId!: string;
+
+  /** Cupo que quedó tomado. */
+  @ApiProperty({ format: 'uuid' })
+  toSlotId!: string;
+}

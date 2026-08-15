@@ -21,6 +21,10 @@ export {
   RequestBookingDto,
   AcceptBookingDto,
   RejectBookingDto,
+  RequestBookingInfoDto,
+  ProposeScheduleDto,
+  ProposeScheduleResponseDto,
+  BOOKING_INFO_REQUESTS,
   BookingDecisionResponseDto,
   BookingResponseDto,
   RescheduleBookingDto,
@@ -37,6 +41,7 @@ export {
   WaitlistCandidateSlotsResponseDto,
   BOOKING_CHANNELS,
 } from './scheduling-bookings.dto';
+export type { BookingInfoRequest } from './scheduling-bookings.dto';
 export type { BookingChannel } from './scheduling-bookings.dto';
 
 export {

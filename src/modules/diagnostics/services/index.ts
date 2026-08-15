@@ -4,3 +4,4 @@ export * from './diagnostics-reports.service';
 export * from './diagnostics-imaging.service';
 export * from './diagnostics-media-quality.service';
 export * from './diagnostics-orders.service';
+export * from './diagnostics-patient-results.service';

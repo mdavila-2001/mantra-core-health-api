@@ -1192,4 +1192,154 @@ describe('SchedulingBookingsService', () => {
       ]);
     });
   });
+
+  describe('request-info / propose-schedule — lo que el centro pide antes de aceptar (C11)', () => {
+    /** Una solicitud pendiente sobre la agenda del recurso `res-1`. */
+    function solicitudPendiente(overrides: Record<string, unknown> = {}) {
+      return {
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-1',
+        appointmentId: 'appt-1',
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        ...overrides,
+      };
+    }
+
+    it('pedir la orden médica deja el mensaje y NO libera el cupo', async () => {
+      const d = build();
+      const booking = solicitudPendiente();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+
+      const res = await d.service.requestInfo(
+        'booking-1',
+        {
+          infoRequested: 'MEDICAL_ORDER',
+          reasonText: 'Traé la orden de tu médico y vení en ayunas',
+        },
+        actor,
+      );
+
+      expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      // El cupo no se toca: pedir un papel no le quita el horario a nadie.
+      expect(d.bookingsRepo.findSlotForUpdate).not.toHaveBeenCalled();
+      // Qué se pidió y por qué viajan al historial, que es de donde el portal
+      // lo lee para decirle a la persona qué le falta.
+      expect(d.historyRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        'appointment_bookings',
+        'booking-1',
+        expect.objectContaining({
+          dataSnapshot: expect.objectContaining({
+            infoRequested: 'MEDICAL_ORDER',
+            reasonText: 'Traé la orden de tu médico y vení en ayunas',
+            actorKind: 'PROVIDER',
+          }),
+        }),
+      );
+    });
+
+    it('pedir algo exige decir qué, con motivo escrito (corrección #14)', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+
+      await expect(
+        d.service.requestInfo(
+          'booking-1',
+          { infoRequested: 'DOCUMENTATION', reasonText: 'ok' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('no se pide nada sobre una cita ya aceptada', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente({ statusConceptId: CONCEPTS.BOOKING_CONFIRMED }),
+      );
+
+      await expect(
+        d.service.requestInfo(
+          'booking-1',
+          {
+            infoRequested: 'DOCUMENTATION',
+            reasonText: 'faltaría el carnet del seguro',
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('proponer otro horario mueve el cupo y la solicitud sigue pendiente', async () => {
+      const d = build();
+      const booking = solicitudPendiente();
+      const origen = openSlot({
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      const destino = openSlot({ id: 'slot-2', remainingCapacity: 3 });
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.bookingsRepo.findSlotForUpdate.mockImplementation(
+        (_tx: any, id: string) =>
+          Promise.resolve(id === SLOT_ID ? origen : destino),
+      );
+
+      const res = await d.service.proposeSchedule(
+        'booking-1',
+        {
+          proposedSlotId: 'slot-2',
+          reasonText: 'Ese día no tenemos el equipo disponible',
+        },
+        actor,
+      );
+
+      // Proponer no es acordar: sigue pendiente de que la persona lo mire.
+      expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      expect(res.toSlotId).toBe('slot-2');
+      expect(booking.bookableSlotId).toBe('slot-2');
+      expect(origen.remainingCapacity).toBe(1);
+      expect(destino.remainingCapacity).toBe(2);
+      expect(d.bookingsRepo.recordReschedule).toHaveBeenCalled();
+    });
+
+    it('no se propone un cupo sin lugar', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.bookingsRepo.findSlotForUpdate.mockImplementation(
+        (_tx: any, id: string) =>
+          Promise.resolve(
+            id === SLOT_ID
+              ? openSlot()
+              : openSlot({ id: 'slot-2', remainingCapacity: 0 }),
+          ),
+      );
+
+      await expect(
+        d.service.proposeSchedule(
+          'booking-1',
+          { proposedSlotId: 'slot-2', reasonText: 'buscamos otro hueco' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('no se propone el mismo horario que ya tenía', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+
+      await expect(
+        d.service.proposeSchedule(
+          'booking-1',
+          { proposedSlotId: SLOT_ID, reasonText: 'no cambia nada realmente' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
 });

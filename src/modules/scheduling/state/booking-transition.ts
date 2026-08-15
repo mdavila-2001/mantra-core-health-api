@@ -46,7 +46,19 @@ export interface BookingTransitionSnapshot {
    * la cuenta, no el papel que jugaba.
    */
   actorKind?: BookingActorKind;
+  /**
+   * Qué se le pidió a la persona antes de aceptar, cuando el cambio viene de
+   * `request-info` (carril 11). Ausente en el resto de los cambios.
+   *
+   * Va acá y no en una columna por lo mismo que el motivo: son varios a lo
+   * largo de la vida de una solicitud, y una columna sólo guarda el último.
+   */
+  infoRequested?: BookingInfoRequestKind;
 }
+
+/** Qué le falta a la solicitud cuando el centro pide algo antes de aceptar. */
+export type BookingInfoRequestKind =
+  'DOCUMENTATION' | 'MEDICAL_ORDER' | 'PREPARATION';
 
 /** Desde qué lado del mostrador se hizo el cambio. */
 export type BookingActorKind = 'PATIENT' | 'PROVIDER';

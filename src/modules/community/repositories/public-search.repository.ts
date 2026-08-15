@@ -125,9 +125,11 @@ export class PublicSearchRepository {
     try {
       const filas = await em
         .getConnection()
-        .execute<
-          { id: string }[]
-        >(base.replace(/%NORM%/g, 'unaccent'), params, 'all');
+        .execute<{ id: string }[]>(
+          base.replace(/%NORM%/g, 'unaccent'),
+          params,
+          'all',
+        );
       return filas.map((f) => f.id);
     } catch {
       const filas = await em
@@ -167,7 +169,9 @@ export class PublicSearchRepository {
 
     const filas = await em
       .getConnection()
-      .execute<{ target_public_profile_id: string; avg: string; total: string }[]>(
+      .execute<
+        { target_public_profile_id: string; avg: string; total: string }[]
+      >(
         `SELECT target_public_profile_id, AVG(overall_rating)::numeric AS avg, COUNT(*) AS total
            FROM community.service_reviews
           WHERE target_public_profile_id IN (?)

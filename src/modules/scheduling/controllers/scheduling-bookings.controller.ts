@@ -29,6 +29,9 @@ import {
 import {
   AcceptBookingDto,
   RejectBookingDto,
+  RequestBookingInfoDto,
+  ProposeScheduleDto,
+  ProposeScheduleResponseDto,
   BookingDecisionResponseDto,
   RescheduleBookingDto,
   RescheduleResponseDto,
@@ -138,6 +141,48 @@ export class SchedulingBookingsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<BookingDecisionResponseDto> {
     return this.bookingsService.accept(id, dto, actor);
+  }
+
+  /**
+   * UC-41-18: el centro pide documentación, una orden médica o avisa cómo
+   * prepararse, antes de aceptar — CARRIL 11.
+   *
+   * No la alcanza `PATIENT`: es el prestador el que pide. La persona lee lo que
+   * le pidieron en el motivo de su propia cita.
+   */
+  @Post(':id/request-info')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Pedir documentación u orden médica antes de aceptar',
+    description:
+      'No libera el cupo: pedir un papel no le quita el horario a nadie.',
+  })
+  requestInfo(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RequestBookingInfoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    return this.bookingsService.requestInfo(id, dto, actor);
+  }
+
+  /**
+   * UC-41-19: el centro propone otro horario para la solicitud — CARRIL 11.
+   *
+   * Distinto de `reschedule`: aquélla mueve una cita **vigente** a pedido de
+   * quien la tiene; ésta contrapropone sobre lo que todavía no se aceptó, y la
+   * solicitud sigue pendiente de que la persona lo mire.
+   */
+  @Post(':id/propose-schedule')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Proponer otro horario para la solicitud' })
+  proposeSchedule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ProposeScheduleDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ProposeScheduleResponseDto> {
+    return this.bookingsService.proposeSchedule(id, dto, actor);
   }
 
   /**

@@ -5,12 +5,18 @@ import * as entities from './entities';
 // orden (`clinical.service_requests`) y el informe (`clinical.diagnostic_reports`).
 // Se registran para poder leerlas; escribirlas sigue siendo del módulo clínico.
 import { ServiceRequests, DiagnosticReports } from '../clinical/entities';
+// El portal del paciente necesita dos cosas de otros dominios y las toma por su
+// módulo, no por sus tablas: quién es el titular de la sesión (`profiles`) y
+// dónde vive un acceso compartido (`authz`).
+import { ProfilesModule } from '../profiles/profiles.module';
+import { AuthzModule } from '../authz/authz.module';
 import {
   DiagnosticsSpecimensController,
   DiagnosticsLabController,
   DiagnosticsReportsController,
   DiagnosticsImagingController,
   DiagnosticsOrdersController,
+  DiagnosticsPatientResultsController,
 } from './controllers';
 import {
   DiagnosticsSpecimensService,
@@ -19,6 +25,7 @@ import {
   DiagnosticsImagingService,
   DiagnosticsMediaQualityService,
   DiagnosticsOrdersService,
+  DiagnosticsPatientResultsService,
 } from './services';
 import {
   SpecimensRepository,
@@ -42,6 +49,8 @@ import {
       ServiceRequests,
       DiagnosticReports,
     ]),
+    ProfilesModule,
+    AuthzModule,
   ],
   controllers: [
     DiagnosticsSpecimensController,
@@ -49,6 +58,7 @@ import {
     DiagnosticsReportsController,
     DiagnosticsImagingController,
     DiagnosticsOrdersController,
+    DiagnosticsPatientResultsController,
   ],
   providers: [
     // Repositorios
@@ -68,6 +78,7 @@ import {
     DiagnosticsImagingService,
     DiagnosticsMediaQualityService,
     DiagnosticsOrdersService,
+    DiagnosticsPatientResultsService,
   ],
 })
 export class DiagnosticsModule {}

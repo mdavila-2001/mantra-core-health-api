@@ -391,4 +391,106 @@ export class ReportsRepository {
     const n = await em.count(CriticalResultNotifications, { observationId });
     return n > 0;
   }
+
+  /* ---- lectura del informe ya liberado ------------------------------------
+     Las tres consultas que necesita quien mira un resultado —el paciente o el
+     profesional autorizado— y que hasta ahora no existían: el módulo sabía
+     escribir versiones, archivos y eventos de liberación, y no sabía leerlos. */
+
+  /**
+   * Versiones de varios informes a la vez.
+   *
+   * En lote y no una por informe porque la lista de resultados del paciente pide
+   * las versiones de todos sus informes en la misma pantalla: una consulta por
+   * fila convierte una lista de treinta en treinta y una consultas.
+   *
+   * @param em - Contexto de persistencia.
+   * @param diagnosticReportIds - Informes cuyos versionados se leen.
+   * @returns Las versiones, de la más nueva a la más vieja.
+   */
+  findVersionsByReports(
+    em: EntityManager,
+    diagnosticReportIds: readonly string[],
+  ): Promise<DiagnosticReportVersions[]> {
+    if (diagnosticReportIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      DiagnosticReportVersions,
+      { diagnosticReportId: { $in: [...diagnosticReportIds] } },
+      { orderBy: { versionNumber: 'DESC' } },
+    );
+  }
+
+  /**
+   * Eventos de liberación de un conjunto de versiones.
+   *
+   * Son la **fuente de verdad de la visibilidad del paciente**: liberar una
+   * versión escribe acá si el resultado es visible u oculto para la persona, y
+   * ninguna otra tabla lo registra. Se devuelven del más nuevo al más viejo para
+   * que el llamador se quede con el último de cada versión, que es el que manda.
+   *
+   * @param em - Contexto de persistencia.
+   * @param versionIds - Versiones cuyos eventos se leen.
+   * @returns Los eventos, del más nuevo al más viejo.
+   */
+  findReleaseEventsByVersions(
+    em: EntityManager,
+    versionIds: readonly string[],
+  ): Promise<DiagnosticReleaseEvents[]> {
+    if (versionIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      DiagnosticReleaseEvents,
+      { diagnosticReportVersionId: { $in: [...versionIds] } },
+      { orderBy: { recordedAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Archivos enlazados a un conjunto de versiones.
+   *
+   * Son lo que se descarga: el `fileId` va a `GET /common/files/{id}/content`,
+   * que ya resuelve el contenido y su autorización. Este módulo no vuelve a
+   * implementar la descarga; sólo dice qué archivos cuelgan del informe.
+   *
+   * @param em - Contexto de persistencia.
+   * @param versionIds - Versiones cuyos archivos se leen.
+   * @returns Los archivos, en el orden declarado por el informe.
+   */
+  findFilesByVersions(
+    em: EntityManager,
+    versionIds: readonly string[],
+  ): Promise<DiagnosticReportFiles[]> {
+    if (versionIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      DiagnosticReportFiles,
+      { diagnosticReportVersionId: { $in: [...versionIds] } },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
+
+  /**
+   * Resultados (observaciones) enlazados a un conjunto de versiones.
+   *
+   * @param em - Contexto de persistencia.
+   * @param versionIds - Versiones cuyos resultados se leen.
+   * @returns Los resultados, en el orden declarado por el informe.
+   */
+  findResultsByVersions(
+    em: EntityManager,
+    versionIds: readonly string[],
+  ): Promise<DiagnosticReportResults[]> {
+    if (versionIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      DiagnosticReportResults,
+      { diagnosticReportVersionId: { $in: [...versionIds] } },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
 }
