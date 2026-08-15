@@ -2503,7 +2503,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
-      "verifiedAt": "2026-07-31T12:00:00.000Z"
+      "verifiedAt": "2026-07-31T12:00:00.000Z",
+      "verificationSourceUri": "valor-ejemplo"
     }
   ],
   "licenses": [
@@ -2522,6 +2523,22 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "languageConceptId": "00000000-0000-4000-8000-000000000001",
       "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
       "clinicalInterpretationAllowed": true
+    }
+  ],
+  "affiliations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "current": true,
+      "status": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
   "activity": {
@@ -2559,7 +2576,7 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Presente sólo si dejó de ejercerla. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Nº de título o certificado. | `valor-ejemplo` |
@@ -2568,6 +2585,7 @@ Campos de la respuesta:
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Cuándo se comprobó la credencial contra su fuente. Ausente significa «no verificada todavía», que no es lo mismo que «rechazada» —eso lo dice `stateConceptId`—. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Contra qué se comprobó la credencial (registro del colegio médico, portal de matrículas, etc). Ausente antes de verificar: es evidencia de la verificación, no del dato declarado. | `valor-ejemplo` |
 | `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -2580,6 +2598,19 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
+| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
+| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
+| `affiliations[].endDate` | No | `string` | formato `date`; admite null | Fin del vínculo, o `null` si sigue vigente. | `2026-07-31` |
+| `affiliations[].current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `affiliations[].status` | Sí | `string` | formato `uuid` | Estado del registro (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 | `activity` | Sí | `PractitionerActivityDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}` |
 | `activity.encounters` | Sí | `number` | Sin restricción adicional declarada | Encuentros que abrió. | `1` |
 | `activity.medicationRequests` | Sí | `number` | Sin restricción adicional declarada | Recetas que prescribió. | `1` |
@@ -2733,7 +2764,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
-      "verifiedAt": "2026-07-31T12:00:00.000Z"
+      "verifiedAt": "2026-07-31T12:00:00.000Z",
+      "verificationSourceUri": "valor-ejemplo"
     }
   ],
   "licenses": [
@@ -2752,6 +2784,22 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "languageConceptId": "00000000-0000-4000-8000-000000000001",
       "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
       "clinicalInterpretationAllowed": true
+    }
+  ],
+  "affiliations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "current": true,
+      "status": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
   "activity": {
@@ -2789,7 +2837,7 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Presente sólo si dejó de ejercerla. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Nº de título o certificado. | `valor-ejemplo` |
@@ -2798,6 +2846,7 @@ Campos de la respuesta:
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Cuándo se comprobó la credencial contra su fuente. Ausente significa «no verificada todavía», que no es lo mismo que «rechazada» —eso lo dice `stateConceptId`—. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Contra qué se comprobó la credencial (registro del colegio médico, portal de matrículas, etc). Ausente antes de verificar: es evidencia de la verificación, no del dato declarado. | `valor-ejemplo` |
 | `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -2810,6 +2859,19 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
+| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
+| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
+| `affiliations[].endDate` | No | `string` | formato `date`; admite null | Fin del vínculo, o `null` si sigue vigente. | `2026-07-31` |
+| `affiliations[].current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `affiliations[].status` | Sí | `string` | formato `uuid` | Estado del registro (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 | `activity` | Sí | `PractitionerActivityDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}` |
 | `activity.encounters` | Sí | `number` | Sin restricción adicional declarada | Encuentros que abrió. | `1` |
 | `activity.medicationRequests` | Sí | `number` | Sin restricción adicional declarada | Recetas que prescribió. | `1` |
@@ -3236,7 +3298,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
-      "verifiedAt": "2026-07-31T12:00:00.000Z"
+      "verifiedAt": "2026-07-31T12:00:00.000Z",
+      "verificationSourceUri": "valor-ejemplo"
     }
   ],
   "licenses": [
@@ -3255,6 +3318,22 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "languageConceptId": "00000000-0000-4000-8000-000000000001",
       "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
       "clinicalInterpretationAllowed": true
+    }
+  ],
+  "affiliations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": "valor-ejemplo",
+      "departmentText": "valor-ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "current": true,
+      "status": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
   "activity": {
@@ -3292,7 +3371,7 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Presente sólo si dejó de ejercerla. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Nº de título o certificado. | `valor-ejemplo` |
@@ -3301,6 +3380,7 @@ Campos de la respuesta:
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Cuándo se comprobó la credencial contra su fuente. Ausente significa «no verificada todavía», que no es lo mismo que «rechazada» —eso lo dice `stateConceptId`—. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Contra qué se comprobó la credencial (registro del colegio médico, portal de matrículas, etc). Ausente antes de verificar: es evidencia de la verificación, no del dato declarado. | `valor-ejemplo` |
 | `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -3313,6 +3393,19 @@ Campos de la respuesta:
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Historial laboral (UC-05-16): trayectoria, no PHI. Se devuelve un único array de la más reciente a la más antigua, con `current` ya derivado en cada fila — pantalla la agrupa en fases (formación/histórico/actual), la lectura no necesita decidir eso. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","departmentText":"valor-ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","affiliationTypeConceptId":"00000000-0000-4000-8000-000000000001","startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Institución. | `Nombre de ejemplo` |
+| `affiliations[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Cargo. | `valor-ejemplo` |
+| `affiliations[].departmentText` | No | `string` | admite null | Servicio o departamento. | `valor-ejemplo` |
+| `affiliations[].practiceSiteId` | No | `string` | formato `uuid`; admite null | Sede de la plataforma, si la institución está dentro. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].affiliationTypeConceptId` | No | `string` | formato `uuid`; admite null | Tipo de vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo. | `2026-07-31` |
+| `affiliations[].endDate` | No | `string` | formato `date`; admite null | Fin del vínculo, o `null` si sigue vigente. | `2026-07-31` |
+| `affiliations[].current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `affiliations[].status` | Sí | `string` | formato `uuid` | Estado del registro (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 | `activity` | Sí | `PractitionerActivityDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}` |
 | `activity.encounters` | Sí | `number` | Sin restricción adicional declarada | Encuentros que abrió. | `1` |
 | `activity.medicationRequests` | Sí | `number` | Sin restricción adicional declarada | Recetas que prescribió. | `1` |

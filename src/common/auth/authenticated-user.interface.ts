@@ -30,6 +30,21 @@ export interface AuthenticatedUser {
    * clínico bastaba para actuar en nombre de cualquier otro integrante.
    */
   readonly practitionerProfileId?: string;
+  /**
+   * Perfil de paciente del sujeto (`profiles.patient_profiles`), cuando la
+   * cuenta tiene uno. Viaja en el claim `pid`, que ya se firmaba pero no se
+   * reconstruía acá — así que ningún servicio podía saber de qué paciente era
+   * la sesión sin que el cliente se lo dijera.
+   *
+   * Lo necesitan las lecturas del autoservicio que **deben** acotarse al
+   * titular: los cuestionarios de un paciente son suyos, y resolver de quién
+   * son a partir de un parámetro del cliente deja que cualquiera pida los de
+   * otro. Con esto, el servidor lo decide solo.
+   *
+   * **No es una credencial ni participa de ninguna decisión de rol**, igual que
+   * `practitionerProfileId`: es identificación, no permiso.
+   */
+  readonly patientProfileId?: string;
 }
 
 /** Request de Express después de que `JwtAuthGuard` adjunta el sujeto validado. */

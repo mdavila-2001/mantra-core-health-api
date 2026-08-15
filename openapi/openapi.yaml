@@ -38280,6 +38280,435 @@ paths:
       summary: Consultar los cupos de una ventana
       tags:
         - scheduling-agenda
+  /surveys/templates:
+    post:
+      operationId: SurveysTemplatesController_createTemplate
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTemplateDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Crear una encuesta para pacientes
+      tags:
+        - surveys-templates
+      description: >-
+        Crear una encuesta para pacientes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: SurveysTemplatesController_listTemplates
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar mis encuestas
+      tags:
+        - surveys-templates
+      description: >-
+        Listar mis encuestas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
+  /surveys/templates/{id}:
+    get:
+      operationId: SurveysTemplatesController_getTemplate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Ver una encuesta y su cuestionario
+      tags:
+        - surveys-templates
+      description: >-
+        Ver una encuesta y su cuestionario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /surveys/templates/{id}/questions:
+    post:
+      operationId: SurveysTemplatesController_addQuestion
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddQuestionDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Configurar una pregunta y su tipo de respuesta
+      tags:
+        - surveys-templates
+      description: >-
+        Configurar una pregunta y su tipo de respuesta. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/templates/{id}/versions/{versionNumber}/publish:
+    post:
+      operationId: SurveysTemplatesController_publishVersion
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: versionNumber
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishVersionDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Publicar la encuesta y configurar su vigencia
+      tags:
+        - surveys-templates
+      description: >-
+        Publicar la encuesta y configurar su vigencia. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/templates/{id}/deactivate:
+    post:
+      operationId: SurveysTemplatesController_deactivateTemplate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Desactivar la encuesta
+      tags:
+        - surveys-templates
+      description: >-
+        Desactivar la encuesta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas
+        de error usan el envelope ErrorResponse.
+  /surveys/templates/{id}/responses:
+    get:
+      operationId: SurveysTemplatesController_listResponses
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Revisar las respuestas de los pacientes
+      tags:
+        - surveys-templates
+      description: >-
+        Revisar las respuestas de los pacientes. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/assignments:
+    post:
+      operationId: SurveysAssignmentsController_createAssignment
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAssignmentDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Asociar una encuesta a una consulta o servicio
+      tags:
+        - surveys-assignments
+      description: >-
+        Asociar una encuesta a una consulta o servicio. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/invitations:
+    post:
+      operationId: SurveysAssignmentsController_issueInvitations
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueInvitationsDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Emitir los cuestionarios de una atención completada
+      tags:
+        - surveys-assignments
+      description: >-
+        Emitir los cuestionarios de una atención completada. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /surveys/me/invitations:
+    get:
+      operationId: SurveysPatientController_listMyInvitations
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Ver mis cuestionarios
+      tags:
+        - surveys-patient
+      description: >-
+        Ver mis cuestionarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas
+        de error usan el envelope ErrorResponse.
+  /surveys/me/invitations/{id}:
+    get:
+      operationId: SurveysPatientController_getMyQuestionnaire
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Abrir un cuestionario para responderlo
+      tags:
+        - surveys-patient
+      description: >-
+        Abrir un cuestionario para responderlo. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /surveys/me/invitations/{id}/responses:
+    post:
+      operationId: SurveysPatientController_submitResponse
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitResponseDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Responder el cuestionario
+      tags:
+        - surveys-patient
+      description: >-
+        Responder el cuestionario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /system-context/dynamic-enums/bindings:
     get:
       description: Permite descubrir qué campos `*_concept_id` son de catálogo sin conocer ningún uuid.
@@ -43695,6 +44124,18 @@ tags:
   - name: search_platform
     description: >-
       Operaciones del dominio funcional search_platform. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: surveys-assignments
+    description: >-
+      Operaciones del dominio funcional surveys assignments. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: surveys-patient
+    description: >-
+      Operaciones del dominio funcional surveys patient. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: surveys-templates
+    description: >-
+      Operaciones del dominio funcional surveys templates. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: system-context
     description: >-
@@ -57492,48 +57933,25 @@ components:
     CreateAssignmentDto:
       type: object
       properties:
-        fieldId:
+        surveyVersionId:
           type: string
-          description: Campo a asignar
+          description: Versión publicada que se reparte
           format: uuid
-        targetResourceConceptId:
+        targetType:
           type: string
-          description: Recurso destino (concept id)
-          format: uuid
-        sectionId:
+          enum:
+            - APPOINTMENT
+            - SERVICE
+            - CARE_TYPE
+          description: 'Qué se evalúa: la reserva, el servicio o el tipo de atención'
+        targetId:
           type: string
-          description: Sección destino; si se omite se aprovisiona una por defecto
+          description: Identificador de la cosa evaluada, según `targetType`
           format: uuid
-        profileTypeConceptId:
-          type: string
-          description: Perfil objetivo (concept id)
-          format: uuid
-        tenantId:
-          type: string
-          description: Tenant que crea la asignación
-          format: uuid
-        branchId:
-          type: string
-          description: Branch destino
-          format: uuid
-        required:
-          type: boolean
-          description: ¿Requerido?
-          default: false
-        visible:
-          type: boolean
-          description: ¿Visible?
-          default: true
-        editable:
-          type: boolean
-          description: ¿Editable?
-          default: true
-        ordinal:
-          type: number
-          description: Orden de presentación
       required:
-        - fieldId
-        - targetResourceConceptId
+        - surveyVersionId
+        - targetType
+        - targetId
     OpenInstanceDto:
       type: object
       properties:
@@ -67614,30 +68032,26 @@ components:
     CreateTemplateDto:
       type: object
       properties:
-        name:
+        title:
           type: string
+          description: Título del instrumento
           maxLength: 200
-        rules:
-          description: Franjas semanales de la plantilla
-          type: array
-          items:
-            $ref: '#/components/schemas/ScheduleRuleDto'
-        slotMinutes:
-          type: number
-          description: Duración por defecto del slot, en minutos
-          default: 30
-        bookingPolicyId:
+        description:
           type: string
+          description: Consigna que ve el paciente antes de responder
+          maxLength: 2000
+        ownerPractitionerId:
+          type: string
+          description: Profesional dueño. Por defecto, el perfil profesional del actor.
           format: uuid
-        validFrom:
-          type: string
-          format: date-time
-        validTo:
-          type: string
-          format: date-time
+        responseWindowDays:
+          type: number
+          description: Días que tendrá el paciente para responder desde que se le emite la invitación
+          minimum: 1
+          maximum: 365
+          default: 30
       required:
-        - name
-        - rules
+        - title
     GenerateSlotsDto:
       type: object
       properties:
@@ -67920,6 +68334,95 @@ components:
       required:
         - tenantId
         - requestData
+    AddQuestionDto:
+      type: object
+      properties:
+        questionText:
+          type: string
+          description: Enunciado de la pregunta
+          maxLength: 500
+        answerType:
+          type: string
+          enum:
+            - TEXT
+            - SCALE
+            - BOOLEAN
+            - SINGLE_CHOICE
+            - MULTIPLE_CHOICE
+          description: Tipo de respuesta esperado
+        required:
+          type: boolean
+          description: Si responderla es obligatorio para poder enviar
+          default: false
+        options:
+          description: Opciones. Obligatorias en SINGLE_CHOICE / MULTIPLE_CHOICE, prohibidas en el resto.
+          type: array
+          items:
+            type: string
+        scaleMin:
+          type: number
+          description: Mínimo de la escala. Solo para SCALE.
+          default: 1
+        scaleMax:
+          type: number
+          description: Máximo de la escala. Solo para SCALE.
+          default: 5
+      required:
+        - questionText
+        - answerType
+    PublishVersionDto:
+      type: object
+      properties:
+        effectiveFrom:
+          type: string
+          description: Inicio de vigencia (ISO-8601). Por defecto, ahora.
+          format: date-time
+        effectiveTo:
+          type: string
+          description: Fin de vigencia (ISO-8601). Sin él, vigencia abierta.
+          format: date-time
+    IssueInvitationsDto:
+      type: object
+      properties:
+        appointmentBookingId:
+          type: string
+          description: Reserva completada que habilita las invitaciones
+          format: uuid
+      required:
+        - appointmentBookingId
+    AnswerInputDto:
+      type: object
+      properties:
+        questionId:
+          type: string
+          description: Pregunta contestada
+          format: uuid
+        valueText:
+          type: string
+          description: Respuesta de texto libre (TEXT)
+        valueNumber:
+          type: number
+          description: Respuesta numérica (SCALE)
+        valueBoolean:
+          type: boolean
+          description: Respuesta sí/no (BOOLEAN)
+        valueChoices:
+          description: Opciones elegidas (SINGLE_CHOICE / MULTIPLE_CHOICE)
+          type: array
+          items:
+            type: string
+      required:
+        - questionId
+    SubmitResponseDto:
+      type: object
+      properties:
+        answers:
+          description: Respuestas del cuestionario
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerInputDto'
+      required:
+        - answers
     CreateEnumDefinitionDto:
       type: object
       properties:
