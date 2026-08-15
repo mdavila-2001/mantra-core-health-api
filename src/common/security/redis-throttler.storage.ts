@@ -1,7 +1,10 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import type { ThrottlerStorage } from '@nestjs/throttler';
 import type { ThrottlerStorageRecord } from '@nestjs/throttler/dist/throttler-storage-record.interface';
-import { REDIS_CLIENT, type RedisClient } from '../../modules/redis_runtime/redis.provider';
+import {
+  REDIS_CLIENT,
+  type RedisClient,
+} from '../../modules/redis_runtime/redis.provider';
 
 /** Prefijo de las claves del cubo, para no colisionar con otros usos de Redis. */
 const KEY_PREFIX = 'throttle:';
@@ -38,7 +41,10 @@ const KEY_PREFIX = 'throttle:';
 export class RedisThrottlerStorage implements ThrottlerStorage {
   private readonly logger = new Logger(RedisThrottlerStorage.name);
   /** Cubo de reserva cuando Redis no responde. */
-  private readonly local = new Map<string, { count: number; expiresAt: number }>();
+  private readonly local = new Map<
+    string,
+    { count: number; expiresAt: number }
+  >();
   /** Evita repetir el aviso de degradación en cada petición. */
   private degradado = false;
 

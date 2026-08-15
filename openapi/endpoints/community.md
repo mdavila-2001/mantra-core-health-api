@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 38 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 51 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityReviewsController`, `CommunitySocialController`, `CommunityTimelineController`
+- **Etiquetas OpenAPI:** `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
+- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySocialController`, `CommunityTimelineController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -47,8 +47,21 @@ Referencia exhaustiva de 38 operación(es) del módulo `community`, derivada del
 34. [POST /community/public-profiles](#34-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
 35. [PUT /community/reactions](#35-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
 36. [POST /community/reports](#36-post-community-reports) — Reportar contenido y encolar moderación
-37. [GET /internal/community/feed/pending](#37-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-38. [POST /internal/community/feed/rebuild](#38-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+37. [GET /f/{slug}](#37-get-f-slug) — Ficha pública de una farmacia
+38. [GET /internal/community/feed/pending](#38-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+39. [POST /internal/community/feed/rebuild](#39-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+40. [GET /l/{slug}](#40-get-l-slug) — Ficha pública de un laboratorio
+41. [GET /o/{slug}](#41-get-o-slug) — Ficha pública de una organización
+42. [GET /p/{slug}](#42-get-p-slug) — Ficha pública de un profesional
+43. [GET /public/nearby](#43-get-public-nearby) — Prestadores cercanos, en línea recta
+44. [GET /public/search](#44-get-public-search) — Buscador público unificado
+45. [GET /public/search/diagnostic-units](#45-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+46. [GET /public/search/insurers](#46-get-public-search-insurers) — Aseguradoras en el directorio público
+47. [GET /public/search/medications](#47-get-public-search-medications) — Medicamentos ofertados públicamente
+48. [GET /public/search/organizations](#48-get-public-search-organizations) — Organizaciones en el directorio público
+49. [GET /public/search/pharmacies](#49-get-public-search-pharmacies) — Farmacias en el directorio público
+50. [GET /public/search/practitioners](#50-get-public-search-practitioners) — Profesionales en el directorio público
+51. [GET /s/{slug}](#51-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -1535,7 +1548,7 @@ Ejemplo de error normalizado:
 
 Seguimientos activos de un perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Seguimientos emitidos por un perfil.
+Contexto declarado en el controlador: Seguimientos emitidos por un perfil. Sólo su titular.
 
 ### Descripción del sistema
 
@@ -1632,6 +1645,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2157,6 +2171,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-groups-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2821,6 +2836,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Encuesta no encontrada | Excepción explícita en src/modules/community/services/community-polls-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3094,6 +3110,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Publicación no encontrada | Excepción explícita en src/modules/community/services/community-social-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3231,6 +3248,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Publicación no encontrada | Excepción explícita en src/modules/community/services/community-social-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3491,6 +3509,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Publicación no encontrada | Excepción explícita en src/modules/community/services/community-social-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3646,6 +3665,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Perfil público no encontrado | Excepción explícita en src/modules/community/services/community-social-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3781,6 +3801,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4943,7 +4964,163 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /internal/community/feed/pending
+## 37. GET /f/{slug}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Ficha pública de una farmacia
+- **Operation ID:** `CommunityPublicController_getPharmacy`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.getPharmacy](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Ficha pública de una farmacia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha pública de una farmacia.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /f/{slug}` en `CommunityPublicController_getPharmacy`. El controlador delega en `CommunityPublicService.getBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicDirectoryProfileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /f/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /f/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "kind": {},
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "avatarUrl": "valor-ejemplo",
+  "coverUrl": "valor-ejemplo",
+  "verified": true,
+  "city": "valor-ejemplo",
+  "address": "valor-ejemplo",
+  "location": {
+    "lat": 1,
+    "lng": 1
+  },
+  "specialties": [
+    "valor-ejemplo"
+  ],
+  "ratingAverage": 1,
+  "ratingCount": 1,
+  "acceptsReviews": true,
+  "posts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "bodyText": "valor-ejemplo",
+      "publishedAt": "valor-ejemplo",
+      "mediaUrls": [
+        "valor-ejemplo"
+      ],
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ],
+  "updatedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `avatarUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `coverUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `city` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `location` | No | `PublicLocationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lat":1,"lng":1}` |
+| `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
+| `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `posts[].publishedAt` | Sí | `string` | Sin restricción adicional declarada | Instante ISO-8601 en UTC | `valor-ejemplo` |
+| `posts[].mediaUrls` | Sí | `array<string>` | Sin restricción adicional declarada | Vacío, nunca null | `["valor-ejemplo"]` |
+| `posts[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `posts[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | Sin restricción adicional declarada | Alimenta el ETag y el <lastmod> del sitemap | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/f/{slug}"
+}
+```
+
+---
+
+## 38. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -5059,7 +5236,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /internal/community/feed/rebuild
+## 39. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -5182,6 +5359,1337 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/internal/community/feed/rebuild"
+}
+```
+
+---
+
+## 40. GET /l/{slug}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Ficha pública de un laboratorio
+- **Operation ID:** `CommunityPublicController_getDiagnosticUnit`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.getDiagnosticUnit](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Ficha pública de un laboratorio. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha pública de un laboratorio.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /l/{slug}` en `CommunityPublicController_getDiagnosticUnit`. El controlador delega en `CommunityPublicService.getBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicDirectoryProfileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /l/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /l/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "kind": {},
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "avatarUrl": "valor-ejemplo",
+  "coverUrl": "valor-ejemplo",
+  "verified": true,
+  "city": "valor-ejemplo",
+  "address": "valor-ejemplo",
+  "location": {
+    "lat": 1,
+    "lng": 1
+  },
+  "specialties": [
+    "valor-ejemplo"
+  ],
+  "ratingAverage": 1,
+  "ratingCount": 1,
+  "acceptsReviews": true,
+  "posts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "bodyText": "valor-ejemplo",
+      "publishedAt": "valor-ejemplo",
+      "mediaUrls": [
+        "valor-ejemplo"
+      ],
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ],
+  "updatedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `avatarUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `coverUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `city` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `location` | No | `PublicLocationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lat":1,"lng":1}` |
+| `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
+| `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `posts[].publishedAt` | Sí | `string` | Sin restricción adicional declarada | Instante ISO-8601 en UTC | `valor-ejemplo` |
+| `posts[].mediaUrls` | Sí | `array<string>` | Sin restricción adicional declarada | Vacío, nunca null | `["valor-ejemplo"]` |
+| `posts[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `posts[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | Sin restricción adicional declarada | Alimenta el ETag y el <lastmod> del sitemap | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/l/{slug}"
+}
+```
+
+---
+
+## 41. GET /o/{slug}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Ficha pública de una organización
+- **Operation ID:** `CommunityPublicController_getOrganization`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.getOrganization](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Ficha pública de una organización. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha pública de una organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /o/{slug}` en `CommunityPublicController_getOrganization`. El controlador delega en `CommunityPublicService.getBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicDirectoryProfileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /o/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /o/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "kind": {},
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "avatarUrl": "valor-ejemplo",
+  "coverUrl": "valor-ejemplo",
+  "verified": true,
+  "city": "valor-ejemplo",
+  "address": "valor-ejemplo",
+  "location": {
+    "lat": 1,
+    "lng": 1
+  },
+  "specialties": [
+    "valor-ejemplo"
+  ],
+  "ratingAverage": 1,
+  "ratingCount": 1,
+  "acceptsReviews": true,
+  "posts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "bodyText": "valor-ejemplo",
+      "publishedAt": "valor-ejemplo",
+      "mediaUrls": [
+        "valor-ejemplo"
+      ],
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ],
+  "updatedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `avatarUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `coverUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `city` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `location` | No | `PublicLocationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lat":1,"lng":1}` |
+| `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
+| `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `posts[].publishedAt` | Sí | `string` | Sin restricción adicional declarada | Instante ISO-8601 en UTC | `valor-ejemplo` |
+| `posts[].mediaUrls` | Sí | `array<string>` | Sin restricción adicional declarada | Vacío, nunca null | `["valor-ejemplo"]` |
+| `posts[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `posts[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | Sin restricción adicional declarada | Alimenta el ETag y el <lastmod> del sitemap | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/o/{slug}"
+}
+```
+
+---
+
+## 42. GET /p/{slug}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Ficha pública de un profesional
+- **Operation ID:** `CommunityPublicController_getPractitioner`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.getPractitioner](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Ficha pública de un profesional. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha pública de un profesional.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /p/{slug}` en `CommunityPublicController_getPractitioner`. El controlador delega en `CommunityPublicService.getBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicDirectoryProfileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /p/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /p/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "kind": {},
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "avatarUrl": "valor-ejemplo",
+  "coverUrl": "valor-ejemplo",
+  "verified": true,
+  "city": "valor-ejemplo",
+  "address": "valor-ejemplo",
+  "location": {
+    "lat": 1,
+    "lng": 1
+  },
+  "specialties": [
+    "valor-ejemplo"
+  ],
+  "ratingAverage": 1,
+  "ratingCount": 1,
+  "acceptsReviews": true,
+  "posts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "bodyText": "valor-ejemplo",
+      "publishedAt": "valor-ejemplo",
+      "mediaUrls": [
+        "valor-ejemplo"
+      ],
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ],
+  "updatedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `avatarUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `coverUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `city` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `location` | No | `PublicLocationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lat":1,"lng":1}` |
+| `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
+| `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `posts[].publishedAt` | Sí | `string` | Sin restricción adicional declarada | Instante ISO-8601 en UTC | `valor-ejemplo` |
+| `posts[].mediaUrls` | Sí | `array<string>` | Sin restricción adicional declarada | Vacío, nunca null | `["valor-ejemplo"]` |
+| `posts[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `posts[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | Sin restricción adicional declarada | Alimenta el ETag y el <lastmod> del sitemap | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/p/{slug}"
+}
+```
+
+---
+
+## 43. GET /public/nearby
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Prestadores cercanos, en línea recta
+- **Operation ID:** `CommunityPublicController_nearby`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.nearby](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Prestadores cercanos, en línea recta. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lo más cercano a un punto.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/nearby` en `CommunityPublicController_nearby`. El controlador delega en `CommunityPublicService.nearby`. No recibe body. El tipo de retorno estático es `Promise<PublicNearbyPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `lat` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `lng` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `radiusKm` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicNearbyPageDto>` | No |
+
+El controlador declara `PublicNearbyPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Se requieren coordenadas válidas: lat en [-90,90] y lng en [-180,180] | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/nearby"
+}
+```
+
+---
+
+## 44. GET /public/search
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Buscador público unificado
+- **Operation ID:** `CommunityPublicController_search`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.search](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Buscador público unificado. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Búsqueda unificada sobre todos los verticales.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/search` en `CommunityPublicController_search`. El controlador delega en `CommunityPublicService.search`. No recibe body. El tipo de retorno estático es `Promise<PublicSearchPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/search?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/search?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+
+El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/search"
+}
+```
+
+---
+
+## 45. GET /public/search/diagnostic-units
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Laboratorios y centros de diagnóstico
+- **Operation ID:** `CommunityPublicController_searchDiagnosticUnits`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.searchDiagnosticUnits](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Laboratorios y centros de diagnóstico. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Unidades de diagnóstico: laboratorios y centros de imágenes.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/search/diagnostic-units` en `CommunityPublicController_searchDiagnosticUnits`. El controlador delega en `CommunityPublicService.search`. No recibe body. El tipo de retorno estático es `Promise<PublicSearchPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/search/diagnostic-units?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/search/diagnostic-units?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+
+El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/search/diagnostic-units"
+}
+```
+
+---
+
+## 46. GET /public/search/insurers
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Aseguradoras en el directorio público
+- **Operation ID:** `CommunityPublicController_searchInsurers`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.searchInsurers](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Aseguradoras en el directorio público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Aseguradoras.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/search/insurers` en `CommunityPublicController_searchInsurers`. El controlador delega en `CommunityPublicService.search`. No recibe body. El tipo de retorno estático es `Promise<PublicSearchPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/search/insurers?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/search/insurers?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+
+El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/search/insurers"
+}
+```
+
+---
+
+## 47. GET /public/search/medications
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Medicamentos ofertados públicamente
+- **Operation ID:** `CommunityPublicController_searchMedications`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.searchMedications](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Medicamentos ofertados públicamente. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Medicamentos ofertados.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/search/medications` en `CommunityPublicController_searchMedications`. El controlador delega en `CommunityPublicService.search`. No recibe body. El tipo de retorno estático es `Promise<PublicSearchPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/search/medications?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/search/medications?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+
+El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/search/medications"
+}
+```
+
+---
+
+## 48. GET /public/search/organizations
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Organizaciones en el directorio público
+- **Operation ID:** `CommunityPublicController_searchOrganizations`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.searchOrganizations](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Organizaciones en el directorio público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Organizaciones de salud: hospitales, clínicas, centros.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/search/organizations` en `CommunityPublicController_searchOrganizations`. El controlador delega en `CommunityPublicService.search`. No recibe body. El tipo de retorno estático es `Promise<PublicSearchPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/search/organizations?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/search/organizations?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+
+El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/search/organizations"
+}
+```
+
+---
+
+## 49. GET /public/search/pharmacies
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Farmacias en el directorio público
+- **Operation ID:** `CommunityPublicController_searchPharmacies`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.searchPharmacies](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Farmacias en el directorio público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Farmacias.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/search/pharmacies` en `CommunityPublicController_searchPharmacies`. El controlador delega en `CommunityPublicService.search`. No recibe body. El tipo de retorno estático es `Promise<PublicSearchPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/search/pharmacies?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/search/pharmacies?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+
+El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/search/pharmacies"
+}
+```
+
+---
+
+## 50. GET /public/search/practitioners
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Profesionales en el directorio público
+- **Operation ID:** `CommunityPublicController_searchPractitioners`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.searchPractitioners](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Profesionales en el directorio público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Profesionales de la salud.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/search/practitioners` en `CommunityPublicController_searchPractitioners`. El controlador delega en `CommunityPublicService.search`. No recibe body. El tipo de retorno estático es `Promise<PublicSearchPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `verified` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/search/practitioners?q=valor-ejemplo&verified=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/search/practitioners?q=valor-ejemplo&verified=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicSearchPageDto>` | No |
+
+El controlador declara `PublicSearchPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/search/practitioners"
+}
+```
+
+---
+
+## 51. GET /s/{slug}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Ficha pública de una aseguradora
+- **Operation ID:** `CommunityPublicController_getInsurer`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.getInsurer](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Ficha pública de una aseguradora. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ficha pública de una aseguradora.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /s/{slug}` en `CommunityPublicController_getInsurer`. El controlador delega en `CommunityPublicService.getBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicDirectoryProfileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /s/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /s/valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicDirectoryProfileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "kind": {},
+  "slug": "valor-ejemplo",
+  "displayName": "Nombre de ejemplo",
+  "headline": "valor-ejemplo",
+  "biography": "valor-ejemplo",
+  "avatarUrl": "valor-ejemplo",
+  "coverUrl": "valor-ejemplo",
+  "verified": true,
+  "city": "valor-ejemplo",
+  "address": "valor-ejemplo",
+  "location": {
+    "lat": 1,
+    "lng": 1
+  },
+  "specialties": [
+    "valor-ejemplo"
+  ],
+  "ratingAverage": 1,
+  "ratingCount": 1,
+  "acceptsReviews": true,
+  "posts": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "bodyText": "valor-ejemplo",
+      "publishedAt": "valor-ejemplo",
+      "mediaUrls": [
+        "valor-ejemplo"
+      ],
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ],
+  "updatedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `{}` |
+| `slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `headline` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `biography` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `avatarUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `coverUrl` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `city` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `location` | No | `PublicLocationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lat":1,"lng":1}` |
+| `location.lat` | No | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `location.lng` | No | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `specialties` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `posts` | Sí | `array<PublicPostSummaryDto>` | Sin restricción adicional declarada | Máx. 20 | `[{"id":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","publishedAt":"valor-ejemplo","mediaUrls":["valor-ejemplo"],"reactionCount":1,"commentCount":1}]` |
+| `posts[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `posts[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `posts[].publishedAt` | Sí | `string` | Sin restricción adicional declarada | Instante ISO-8601 en UTC | `valor-ejemplo` |
+| `posts[].mediaUrls` | Sí | `array<string>` | Sin restricción adicional declarada | Vacío, nunca null | `["valor-ejemplo"]` |
+| `posts[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `posts[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `updatedAt` | Sí | `string` | Sin restricción adicional declarada | Alimenta el ETag y el <lastmod> del sitemap | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/s/{slug}"
 }
 ```
 

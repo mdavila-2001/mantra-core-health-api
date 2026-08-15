@@ -16,6 +16,7 @@ import {
   DiagnosticEquipmentService,
   DiagnosticUnitsReadService,
   DiagnosticUnitsAdminReadService,
+  DiagnosticUnitsSearchService,
 } from './services';
 import {
   DiagnosticUnitsRepository,
@@ -71,6 +72,7 @@ import {
     DiagnosticEquipmentService,
     DiagnosticUnitsReadService,
     DiagnosticUnitsAdminReadService,
+    DiagnosticUnitsSearchService,
   ],
 })
 export class DiagnosticUnitsModule {}

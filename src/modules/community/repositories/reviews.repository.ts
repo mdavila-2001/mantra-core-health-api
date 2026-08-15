@@ -170,6 +170,68 @@ export class ReviewsRepository {
     });
   }
 
+  /**
+   * Calificación media publicada de varios perfiles, en una sola consulta.
+   *
+   * Se cuentan **sólo las reseñas publicadas**: una reseña retirada por
+   * moderación sigue existiendo en la tabla, y sumarla al promedio dejaría que
+   * un contenido que el producto decidió no mostrar siga pesando en la nota que
+   * sí se muestra.
+   *
+   * Va en lote porque quien la usa es un buscador: pedir la media perfil por
+   * perfil convierte un listado de veinte centros en veinte consultas.
+   *
+   * @param em - Contexto de persistencia.
+   * @param targetPublicProfileIds - Perfiles calificados.
+   * @param publicationStatusConceptId - Estado de publicación exigido.
+   * @returns Media y cantidad por perfil; los perfiles sin reseñas no aparecen.
+   */
+  async averageByTargets(
+    em: EntityManager,
+    targetPublicProfileIds: readonly string[],
+    publicationStatusConceptId: string,
+  ): Promise<
+    Map<
+      string,
+      {
+        /** Media de `overall_rating`. */
+        average: number;
+        /** Cuántas reseñas la sostienen. */
+        count: number;
+      }
+    >
+  > {
+    const resultado = new Map<string, { average: number; count: number }>();
+    if (targetPublicProfileIds.length === 0) {
+      return resultado;
+    }
+
+    const filas = await em.find(
+      ServiceReviews,
+      {
+        targetPublicProfileId: { $in: [...targetPublicProfileIds] },
+        publicationStatusConceptId,
+      },
+      { fields: ['targetPublicProfileId', 'overallRating'] },
+    );
+
+    const acumulado = new Map<string, { total: number; count: number }>();
+    for (const fila of filas) {
+      const previo = acumulado.get(fila.targetPublicProfileId) ?? {
+        total: 0,
+        count: 0,
+      };
+      acumulado.set(fila.targetPublicProfileId, {
+        total: previo.total + fila.overallRating,
+        count: previo.count + 1,
+      });
+    }
+    for (const [profileId, { total, count }] of acumulado) {
+      resultado.set(profileId, { average: total / count, count });
+    }
+    return resultado;
+  }
+
   create(em: EntityManager, data: CreateReviewData): ServiceReviews {
     return em.create(
       ServiceReviews,

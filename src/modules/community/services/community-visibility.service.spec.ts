@@ -99,9 +99,9 @@ describe('CommunityVisibilityService', () => {
       const d = build();
       d.profilesRepo.findByTarget.mockResolvedValue({ id: 'p-propio' });
 
-      await expect(
-        d.service.resolveActorProfileId(em, patient),
-      ).resolves.toBe('p-propio');
+      await expect(d.service.resolveActorProfileId(em, patient)).resolves.toBe(
+        'p-propio',
+      );
     });
 
     it('un actor sin perfil público lee sin perfil, no falla', async () => {

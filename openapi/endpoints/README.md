@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **974 de 974 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **62 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1085 de 1085 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **63 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -52,18 +52,18 @@ Esta referencia documenta **974 de 974 operaciones HTTP** registradas en `openap
 | [auth_providers](auth-providers.md) | 12 | `auth-providers` | 1 |
 | [authz](authz.md) | 21 | `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles` | 7 |
 | [automation](automation.md) | 17 | `automation` | 2 |
-| [billing](billing.md) | 13 | `billing-operations`, `billing-payables`, `billing-receivables` | 3 |
+| [billing](billing.md) | 15 | `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog` | 4 |
 | [chart](chart.md) | 16 | `chart-care-plans`, `chart-documents`, `chart-notes`, `chart-read`, `chart-templates` | 5 |
 | [clinical](clinical.md) | 24 | `clinical-encounters`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-read`, `clinical-records` | 6 |
 | [clinical_ext](clinical-ext.md) | 23 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 7 |
 | [common](common.md) | 14 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files` | 5 |
-| [community](community.md) | 38 | `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-reviews`, `community-social`, `community-timeline` | 8 |
+| [community](community.md) | 51 | `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline` | 9 |
 | [consent](consent.md) | 12 | `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-patient-objections`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents` | 8 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
 | [delegated_access](delegated-access.md) | 11 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
-| [diagnostic_units](diagnostic-units.md) | 18 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
-| [diagnostics](diagnostics.md) | 21 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-reports`, `diagnostics-specimens` | 5 |
+| [diagnostic_units](diagnostic-units.md) | 21 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
+| [diagnostics](diagnostics.md) | 26 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reports`, `diagnostics-specimens` | 6 |
 | [directory](directory.md) | 16 | `directory-admin-tenants`, `directory-tenants` | 2 |
 | [document_store](document-store.md) | 5 | `document-store` | 1 |
 | [education](education.md) | 14 | `education` | 1 |
@@ -75,7 +75,7 @@ Esta referencia documenta **974 de 974 operaciones HTTP** registradas en `openap
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 30 | `iam-auth`, `iam-users` | 2 |
 | [identity_assurance](identity-assurance.md) | 24 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
-| [insurance](insurance.md) | 23 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-claims`, `insurance-coverage`, `insurance-prior-auth`, `insurance-reconciliation` | 7 |
+| [insurance](insurance.md) | 28 | `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-claims`, `insurance-coverage`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation` | 8 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
@@ -84,19 +84,20 @@ Esta referencia documenta **974 de 974 operaciones HTTP** registradas en `openap
 | [object_storage](object-storage.md) | 13 | `dicomweb`, `object-storage` | 2 |
 | [organization_extensions](organization-extensions.md) | 9 | `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals` | 4 |
 | [payments](payments.md) | 14 | `payments`, `payments-intents`, `payments-transactions` | 3 |
+| [pharma_lab](pharma-lab.md) | 76 | `pharma-lab-catalog`, `pharma-lab-notices`, `pharma-lab-pharmacovigilance`, `pharma-lab-reference`, `pharma-lab-regulatory`, `pharma-lab-social-accounting`, `pharma-lab-visit-agenda`, `pharma-lab-visit-records`, `pharma-lab-visit-requests`, `pharma-lab-visit-surveys`, `pharma-lab-visitors`, `pharma-labs` | 12 |
 | [pharmacy](pharmacy.md) | 11 | `pharmacy` | 1 |
 | [pharmacy_inventory](pharmacy-inventory.md) | 15 | `pharmacy-inventory`, `pharmacy-inventory-internal` | 4 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
-| [practice](practice.md) | 17 | `practice` | 6 |
-| [procedures_perioperative](procedures-perioperative.md) | 31 | `dental-procedures`, `procedure-cases` | 2 |
+| [practice](practice.md) | 18 | `practice` | 6 |
+| [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
 | [profiles](profiles.md) | 22 | `profiles-patients`, `profiles-practitioners` | 2 |
 | [promotions](promotions.md) | 15 | `loyalty`, `promotions` | 2 |
 | [qa_lab](qa-lab.md) | 13 | `qa`, `qa-internal` | 2 |
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
-| [scheduling](scheduling.md) | 26 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal` | 5 |
+| [scheduling](scheduling.md) | 31 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal` | 5 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
@@ -113,4 +114,4 @@ Esta referencia documenta **974 de 974 operaciones HTTP** registradas en `openap
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 974 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1085 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

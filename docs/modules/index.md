@@ -1,36 +1,37 @@
 # Catálogo de módulos
 
 > Generado por `yarn docs:modules:sync` desde `src/modules/*/README.md` reales — no editar a
-> mano. 61 módulos, de los cuales 58 tienen entidades propias (ver
+> mano. 62 módulos, de los cuales 59 tienen entidades propias (ver
 > [`docs/reports/system-inventory.md`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`community`](community.md) | 8 | 15 | 16 | 38 | 23 |
+| [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
+| [`community`](community.md) | 9 | 17 | 17 | 38 | 24 |
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
+| [`insurance`](insurance.md) | 8 | 8 | 7 | 29 | 9 |
 | [`system_ops`](system_ops.md) | 8 | 7 | 8 | 30 | 10 |
 | [`accounting`](accounting.md) | 7 | 8 | 9 | 42 | 9 |
 | [`authz`](authz.md) | 7 | 8 | 14 | 15 | 17 |
 | [`clinical_ext`](clinical_ext.md) | 7 | 7 | 11 | 12 | 8 |
-| [`insurance`](insurance.md) | 7 | 7 | 6 | 29 | 8 |
 | [`clinical`](clinical.md) | 6 | 12 | 13 | 22 | 12 |
-| [`practice`](practice.md) | 6 | 8 | 11 | 11 | 13 |
+| [`diagnostics`](diagnostics.md) | 6 | 7 | 6 | 36 | 8 |
+| [`practice`](practice.md) | 6 | 9 | 12 | 11 | 14 |
 | [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
 | [`chart`](chart.md) | 5 | 5 | 4 | 11 | 5 |
 | [`common`](common.md) | 5 | 5 | 7 | 7 | 4 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
-| [`diagnostic_units`](diagnostic_units.md) | 5 | 4 | 10 | 10 | 10 |
-| [`diagnostics`](diagnostics.md) | 5 | 6 | 6 | 36 | 7 |
+| [`diagnostic_units`](diagnostic_units.md) | 5 | 7 | 12 | 10 | 13 |
 | [`forms`](forms.md) | 5 | 5 | 6 | 16 | 13 |
 | [`scheduling`](scheduling.md) | 5 | 5 | 5 | 16 | 5 |
-| [`audit`](audit.md) | 4 | 6 | 7 | 123 | 9 |
+| [`audit`](audit.md) | 4 | 6 | 7 | 131 | 9 |
+| [`billing`](billing.md) | 4 | 11 | 10 | 20 | 12 |
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
 | [`integrations`](integrations.md) | 4 | 4 | 9 | 10 | 9 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 5 | 6 | 8 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 4 | 8 | 13 | 20 | 14 |
-| [`billing`](billing.md) | 3 | 10 | 9 | 20 | 11 |
 | [`messaging`](messaging.md) | 3 | 3 | 4 | 22 | 1 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
@@ -68,4 +69,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **202** | **286** | **361** | **1191** | **397** |
+| **Total** | **218** | **308** | **377** | **1230** | **416** |
