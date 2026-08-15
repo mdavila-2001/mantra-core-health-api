@@ -76,4 +76,17 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
       code: 'BOOKING_STATE_TRANSITION',
       display: 'Appointment booking state transition',
     },
+
+    /**
+     * Reprogramación registrada en el historial.
+     *
+     * Es una operación aparte y no una transición de estado porque mover una
+     * cita **no** la cambia de estado: sigue confirmada, en otro horario. Sin
+     * esta clave el motivo de la reprogramación (corrección #14) tendría que
+     * viajar bajo la operación de transición, que diría algo falso del cambio.
+     */
+    HISTORY_OP_RESCHEDULE: {
+      code: 'BOOKING_RESCHEDULE',
+      display: 'Appointment booking rescheduled',
+    },
   });

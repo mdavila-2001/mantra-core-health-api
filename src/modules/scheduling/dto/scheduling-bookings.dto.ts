@@ -10,7 +10,12 @@ import {
   IsUUID,
   MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
+import {
+  MAX_REASON_LENGTH,
+  MIN_REASON_LENGTH,
+} from '../state/booking-transition';
 
 /** Canal por el que se originó la reserva. */
 export type BookingChannel = 'PORTAL' | 'DESK' | 'PHONE';
@@ -118,6 +123,51 @@ export class ConfirmBookingDto {
 }
 
 /**
+ * Cuerpo de `POST /scheduling/holds/{holdToken}/request` (corrección #11).
+ *
+ * Es el mismo cuerpo de la confirmación **menos los recordatorios**: una
+ * solicitud todavía no tiene día garantizado, así que programarle avisos sería
+ * prometerle a alguien un turno que el profesional aún no aceptó. Se programan
+ * al aceptar.
+ */
+export class RequestBookingDto {
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  tenantId!: string;
+
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiProperty({
+    description: 'Paciente que solicita la cita',
+    format: 'uuid',
+  })
+  @IsUUID()
+  patientProfileId!: string;
+
+  /**
+   * Valor de channel mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Canal de la solicitud', enum: BOOKING_CHANNELS })
+  @IsIn(BOOKING_CHANNELS as readonly string[])
+  channel!: BookingChannel;
+
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Motivo de consulta: por qué se pide el turno',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText?: string;
+}
+
+/**
  * Define el contrato validado para booking response.
  */
 export class BookingResponseDto {
@@ -157,12 +207,21 @@ export class RescheduleBookingDto {
 
   /**
    * Valor de reason text mantenido por la instancia.
+   *
+   * **Obligatorio** (corrección #14): mover un turno le cambia el día a alguien,
+   * y esa persona tiene derecho a saber por qué. Se persiste con la transición y
+   * la otra parte lo ve en el detalle de la cita.
    */
-  @ApiPropertyOptional({ description: 'Motivo del cambio' })
-  @IsOptional()
+  @ApiProperty({
+    description:
+      'Motivo del cambio. Obligatorio: se le muestra a la otra parte en el detalle de la cita.',
+    minLength: MIN_REASON_LENGTH,
+    maxLength: MAX_REASON_LENGTH,
+  })
   @IsString()
-  @MaxLength(500)
-  reasonText?: string;
+  @MinLength(MIN_REASON_LENGTH)
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText!: string;
 }
 
 /**
@@ -211,6 +270,24 @@ export class CancelBookingDto {
   @IsOptional()
   @IsBoolean()
   isNoShow?: boolean;
+
+  /**
+   * Valor de reason text mantenido por la instancia.
+   *
+   * **Obligatorio** (corrección #14). El `reason_concept_id` que ya se
+   * persistía dice *quién* canceló, no *por qué*: eso es lo que la otra parte
+   * necesita leer, y hasta ahora no había forma de decirlo.
+   */
+  @ApiProperty({
+    description:
+      'Motivo de la cancelación. Obligatorio: se le muestra a la otra parte en el detalle de la cita.',
+    minLength: MIN_REASON_LENGTH,
+    maxLength: MAX_REASON_LENGTH,
+  })
+  @IsString()
+  @MinLength(MIN_REASON_LENGTH)
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText!: string;
 }
 
 /**
