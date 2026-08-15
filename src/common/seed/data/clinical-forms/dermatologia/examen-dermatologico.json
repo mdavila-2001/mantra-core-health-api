@@ -1,0 +1,122 @@
+{
+  "code": "DERMA_EXAMEN_BASE",
+  "name": "Examen dermatológico — versión general base",
+  "specialty": {
+    "code": "DERMATOLOGIA",
+    "display": "Dermatología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, examen de piel y faneras",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Estructura de la descripción semiológica de la lesión elemental, su distribución y su evolución."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_de_evolucion",
+      "name": "Tiempo de evolución",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "prurito",
+      "name": "Prurito",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "dolor_local",
+      "name": "Dolor local",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "lesion_elemental",
+      "name": "Lesión elemental predominante",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "descripcion_de_la_lesion",
+      "name": "Descripción de la lesión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "localizacion",
+      "name": "Localización",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "distribucion",
+      "name": "Distribución",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "numero_de_lesiones",
+      "name": "Número de lesiones",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "tamano_mayor_mm",
+      "name": "Tamaño de la lesión mayor (mm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "compromiso_de_mucosas",
+      "name": "Compromiso de mucosas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "compromiso_de_faneras",
+      "name": "Compromiso de uñas o cabello",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "factores_desencadenantes",
+      "name": "Factores desencadenantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "tratamientos_previos",
+      "name": "Tratamientos previos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estudios_solicitados",
+      "name": "Estudios solicitados",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

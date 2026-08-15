@@ -1,0 +1,122 @@
+{
+  "code": "TRAUMA_EVALUACION_BASE",
+  "name": "Evaluación musculoesquelética — versión general base",
+  "specialty": {
+    "code": "TRAUMATOLOGIA",
+    "display": "Traumatología y ortopedia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, examen del aparato locomotor",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Estructura de anamnesis y examen locomotor del formato oficial. Las escalas funcionales de sociedades científicas quedaron fuera por licencia — ver README."
+  },
+  "fields": [
+    {
+      "code": "mecanismo_de_lesion",
+      "name": "Mecanismo de lesión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "fecha_de_la_lesion",
+      "name": "Fecha de la lesión",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "segmento_afectado",
+      "name": "Segmento afectado",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "code": "lateralidad",
+      "name": "Lateralidad",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "dolor_en_reposo",
+      "name": "Dolor en reposo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "intensidad_del_dolor",
+      "name": "Intensidad del dolor (0–10)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "impotencia_funcional",
+      "name": "Impotencia funcional",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "deformidad",
+      "name": "Deformidad visible",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "edema_local",
+      "name": "Edema local",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "equimosis",
+      "name": "Equimosis",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "rango_de_movilidad",
+      "name": "Rango de movilidad",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "fuerza_muscular",
+      "name": "Fuerza muscular (0–5)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "estabilidad_articular",
+      "name": "Estabilidad articular",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estado_neurovascular_distal",
+      "name": "Estado neurovascular distal",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "imagenes_solicitadas",
+      "name": "Imágenes solicitadas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "hallazgos_imagenologicos",
+      "name": "Hallazgos imagenológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": true
+    }
+  ]
+}

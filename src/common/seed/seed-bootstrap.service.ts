@@ -7,6 +7,7 @@ import { IdentityVerificationSeedService } from './identity-verification-seed.se
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
+import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 
 /** Ejecuta los seeds estructurales en un orden explícito y determinista. */
 @Injectable()
@@ -20,6 +21,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param identityVerification - Datos estructurales de identidad.
    * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
+   * @param clinicalForms - Catálogo de formularios clínicos estándar.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
@@ -30,6 +32,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly identityVerification: IdentityVerificationSeedService,
     private readonly clinicalRoles: AuthzClinicalRolesSeedService,
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
+    private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -70,6 +73,13 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     await this.runDependent(
       'roles asistenciales',
       this.clinicalRoles.run.bind(this.clinicalRoles),
+    );
+    // Carril R2-5. Depende del catálogo de conceptos —siembra sus propias
+    // especialidades sobre el mismo sistema de códigos— y es contenido, no
+    // estructura: si falla, el resto del arranque sigue en pie.
+    await this.runDependent(
+      'formularios clínicos estándar',
+      this.clinicalForms.run.bind(this.clinicalForms),
     );
     // Va el último a propósito: el alta del administrador referencia conceptos
     // de estado y el tenant por defecto, que los sembra el catálogo.
