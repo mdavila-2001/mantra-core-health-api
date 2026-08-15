@@ -131,6 +131,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     ClinicalFormsSeedService,
   ],
   exports: [
+    SeedBootstrapService,
     TerminologySeedService,
     DynamicEnumSeedService,
     GlossarySeedService,

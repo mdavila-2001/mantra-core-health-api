@@ -17,6 +17,8 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
+    "seed:boot": "nest start --entryFile seed-cli",
+    "seed:boot:prod": "node dist/src/seed-cli.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main.js",

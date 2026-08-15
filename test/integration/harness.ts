@@ -18,6 +18,7 @@ import {
   PatientProfiles,
 } from '../../src/modules/profiles/entities';
 import { SpecialtyChartTemplates } from '../../src/modules/chart/entities';
+import { SeedBootstrapService } from '../../src/common/seed/seed-bootstrap.service';
 
 /**
  * Vacía todos los datos de negocio antes de un arranque, dejando la base limpia
@@ -132,6 +133,11 @@ export async function bootstrapTestApp(
   } = {},
 ): Promise<TestContext> {
   process.env.ORM_SCHEMA_SYNC = process.env.ORM_SCHEMA_SYNC ?? 'off';
+  // La siembra deja de colgar del ciclo de vida y pasa a ser un paso explicito
+  // de este arnes (ver mas abajo). Asi el resumen de la cadena queda atado al
+  // arranque de la prueba que lo pidio, y un seed que falla no se pierde entre
+  // los logs de `app.init()`.
+  process.env.SEED_ON_BOOT = 'false';
   // Las pruebas disparan muchas peticiones desde el mismo IP; sin esto el
   // ThrottlerGuard global las cortaría con 429.
   process.env.RATE_LIMIT_DISABLED = 'true';
@@ -171,6 +177,24 @@ export async function bootstrapTestApp(
   // declaran `TestApp.orm` y `seedAdmin`. Es varianza pura del contenedor, sin
   // efecto en runtime; fijar `TResult` lo resuelve sin recurrir a una aserción.
   const orm = app.get<MikroORM>(MikroORM);
+
+  // Siembra explicita, despues de `app.init()` y del TRUNCATE opcional. El
+  // orden importa: `resetBusinessData()` vacia los esquemas de negocio, y
+  // `seedAdmin`/`seedFixtures` escriben filas cuyas columnas `*_concept_id`
+  // son FK al catalogo que esta cadena materializa.
+  const seedSummary = await app.get(SeedBootstrapService).run();
+  if (seedSummary.failed > 0) {
+    // Antes un seed caido dejaba la base a medias y la prueba fallaba mas
+    // adelante con una violacion de FK que no decia nada del origen real.
+    throw new Error(
+      `La siembra dejo ${seedSummary.failed} seed(s) omitido(s): ` +
+        seedSummary.steps
+          .filter((paso) => paso.failed)
+          .map((paso) => paso.name)
+          .join(', '),
+    );
+  }
+
   await seedAdmin(orm);
   await seedFixtures(orm);
 
