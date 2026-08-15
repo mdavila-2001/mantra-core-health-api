@@ -45,7 +45,7 @@ Ninguno contra `origin/dev` (branch ya estaba al día). El único "conflicto" fu
 
 ## Pruebas ejecutadas (worktree aislado `api-c03`)
 - `yarn typecheck` → exit 0, limpio.
-- `yarn lint` → exit 0, limpio.
+- `yarn lint` → 2 errores preexistentes de formato (`prettier/prettier`) en `src/modules/profiles/controllers/profiles-practitioners.controller.ts` y `src/modules/profiles/services/profiles-practitioners.service.spec.ts` — confirmado que el módulo `profiles` no aparece en el diff de este carril (`git diff origin/dev...HEAD --stat`), por lo tanto no relacionado con este trabajo. Lint acotado a los archivos de este carril: limpio.
 - `yarn test` (suite completa, jest) → `Test Suites: 3 failed, 1 skipped, 469 passed, 472 of 473 total` / `Tests: 3 failed, 1 skipped, 4814 passed, 4818 total`. Los 3 fallos son timeouts (`Exceeded timeout of 15000 ms`) en módulos IAM no tocados por este carril (`iam-practitioner-self-registration.service.spec.ts`, `iam-password-reset.service.spec.ts`, `iam-organization-self-registration.service.spec.ts`) — confirmado que ninguno de esos archivos aparece en el diff de este carril; consistentes con contención de recursos por múltiples sesiones corriendo en paralelo en la misma máquina, no con el código de este carril.
 - Scoped: `jest --testPathPatterns "glossary|concepts|terminology"` → `Test Suites: 15 passed, 15 total` / `Tests: 155 passed, 155 total`.
 - `yarn test:integration` (requiere Postgres): **no ejecutado** — el contenedor compartido `mantra-redesa-postgres-1` estaba `unhealthy` durante la ejecución (posiblemente por la misma contención de recursos de sesiones paralelas). Pendiente de re-intentar cuando la infraestructura compartida esté saludable.
