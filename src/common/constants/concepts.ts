@@ -5610,6 +5610,66 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'MSG_PROV_EMAIL',
     'Email messaging provider',
   ),
+  // --- Carril 18: canales adicionales, proveedor in-app y categorías --------
+  // La spec (líneas 1751-1756) pide que el doctor pueda configurar el canal por
+  // categoría entre interna/correo/WhatsApp/SMS/push. WhatsApp/SMS/push no
+  // tienen un adaptador real conectado en este entorno (ninguna credencial de
+  // proveedor existe en el repo, igual que ya documenta `notification-delivery.job.ts`
+  // para email): se declara el TIPO de canal para que la preferencia se pueda
+  // fijar, pero deliberadamente NO se siembra un `messaging_providers`/
+  // `provider_channel_configs` para ellos — sin esa fila, `deliverNotification`
+  // rechaza el intento con 'El canal no tiene configuración de proveedor activa'
+  // en vez de fingir un envío. El canal in-app, en cambio, SÍ es 100% interno
+  // (nunca sale a un tercero) y se siembra completo, con proveedor propio.
+  CHANNEL_TYPE_WHATSAPP: def(
+    'messaging:channel-type:whatsapp',
+    'CHANNEL_WHATSAPP',
+    'WhatsApp channel',
+  ),
+  CHANNEL_TYPE_SMS: def(
+    'messaging:channel-type:sms',
+    'CHANNEL_SMS',
+    'SMS channel',
+  ),
+  CHANNEL_TYPE_PUSH: def(
+    'messaging:channel-type:push',
+    'CHANNEL_PUSH',
+    'Push notification channel',
+  ),
+  /** Proveedor que entrega el canal in-app: escribir en la bandeja propia, sin tercero. */
+  MSG_PROVIDER_TYPE_IN_APP: def(
+    'messaging:provider-type:in-app',
+    'MSG_PROV_IN_APP',
+    'In-app (internal) messaging provider',
+  ),
+  /**
+   * Categorías de notificación (spec línea 1761: "diferenciar notificaciones
+   * clínicas, administrativas, contables y promocionales"). Las promocionales
+   * son las únicas que dependen del opt-in del destinatario para lo crítico
+   * (línea 1762): `NotificationsService.evaluateSuppression` trata cualquier
+   * categoría distinta de `MSG_CATEGORY_PROMOTIONAL` como no supresible por
+   * preferencia cuando además está marcada `isCritical` en el request.
+   */
+  MSG_CATEGORY_CLINICAL: def(
+    'messaging:category:clinical',
+    'MSG_CAT_CLINICAL',
+    'Clinical notification category',
+  ),
+  MSG_CATEGORY_ADMINISTRATIVE: def(
+    'messaging:category:administrative',
+    'MSG_CAT_ADMIN',
+    'Administrative notification category',
+  ),
+  MSG_CATEGORY_ACCOUNTING: def(
+    'messaging:category:accounting',
+    'MSG_CAT_ACCOUNTING',
+    'Accounting notification category',
+  ),
+  MSG_CATEGORY_PROMOTIONAL: def(
+    'messaging:category:promotional',
+    'MSG_CAT_PROMOTIONAL',
+    'Promotional notification category',
+  ),
 
   // ==========================================================================
   // Módulo 32 · workflow — máquinas de estado y flujos entre dominios

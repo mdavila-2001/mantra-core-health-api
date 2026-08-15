@@ -72,5 +72,10 @@ import {
     DunningService,
     KpiSnapshotsService,
   ],
+  // Carril 18 — `accounting` reutiliza `LedgerService.postToLedger` (anclar
+  // `transaction_id` en el documento de origen, idempotente por documento)
+  // para que el asiento de un ingreso de consulta quede enlazado a la factura
+  // pagada que lo originó, sin reimplementar esa guarda en otro módulo.
+  exports: [LedgerService],
 })
 export class BillingModule {}

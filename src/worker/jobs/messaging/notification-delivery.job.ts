@@ -11,6 +11,19 @@ import {
 
 const DELIVERY_INTERVAL_MS = 5_000;
 
+/**
+ * `channel_type_concept_id` del canal in-app (`CHANNEL_TYPE_IN_APP` en
+ * `src/common/constants/concepts.ts`). Duplicado como literal aquí a propósito:
+ * el worker corre como proceso separado, sin acceso a la base ni al catálogo de
+ * conceptos vía import (solo habla con la API por HTTP,`SystemApiClient`), así
+ * que no puede importar `CONCEPTS` sin acoplar dos procesos que hoy se
+ * despliegan por separado. Es un UUIDv5 determinista de `deriveConceptId`, no
+ * un valor arbitrario: cambia si (y solo si) cambia la clave
+ * `'messaging:channel-type:in-app'` en `concepts.ts`, y un test de contrato lo
+ * verifica contra ese valor real.
+ */
+const CHANNEL_TYPE_IN_APP = '41557f04-1334-5b20-a794-16bf070f64fb';
+
 /** Refleja `PendingNotificationRequestDto`. */
 export interface PendingNotificationRequest {
   id: string;
@@ -19,6 +32,7 @@ export interface PendingNotificationRequest {
   payloadJson?: unknown;
   recipientAddress?: string;
   recipientUserId?: string;
+  channelTypeConceptId?: string;
 }
 
 /** Lo que el adapter de proveedor decide tras intentar el envío real. */
@@ -34,10 +48,18 @@ export interface ProviderDeliveryOutcome {
  * sea). El README de `messaging` lo deja explícito como pendiente: "la
  * llamada al proveedor la hace el worker fuera de esta transacción... elegir
  * el proveedor por `rate_limit_per_min` y rotar por prioridad vive en el
- * worker". Ninguna credencial de proveedor existe todavía en este repo, así
- * que el adapter por defecto **falla en vez de fingir éxito** — visible en
+ * worker". Ninguna credencial de proveedor externo existe todavía en este
+ * repo, así que el adapter por defecto **falla en vez de fingir éxito** para
+ * cualquier canal que dependa de un tercero — visible en
  * `notification_deliveries` como `FAILED` con un motivo claro, no una entrega
  * silenciosamente inventada.
+ *
+ * Carril 18 — el canal in-app es la única excepción legítima: "entregarlo" es
+ * escribir en la bandeja propia (`in_app_notifications`), que hace
+ * `deliverNotification` en el backend cuando el worker reporta `SENT` — no hay
+ * ningún proveedor externo que conectar, así que fallar por
+ * `PROVIDER_NOT_CONFIGURED` ahí sería un falso negativo, no honestidad. Por
+ * eso (y solo para ese canal) el adapter por defecto reporta éxito.
  */
 export type NotificationProviderAdapter = (
   request: PendingNotificationRequest,
@@ -45,13 +67,18 @@ export type NotificationProviderAdapter = (
 
 export const defaultProviderAdapter: NotificationProviderAdapter = async (
   request,
-) => ({
-  outcome: 'FAILED',
-  errorCode: 'PROVIDER_NOT_CONFIGURED',
-  errorText:
-    `Ningún NotificationProviderAdapter real está conectado para el canal ` +
-    `${request.channelId}. Implementarlo en notification-delivery.job.ts.`,
-});
+) => {
+  if (request.channelTypeConceptId === CHANNEL_TYPE_IN_APP) {
+    return { outcome: 'SENT' };
+  }
+  return {
+    outcome: 'FAILED',
+    errorCode: 'PROVIDER_NOT_CONFIGURED',
+    errorText:
+      `Ningún NotificationProviderAdapter real está conectado para el canal ` +
+      `${request.channelId}. Implementarlo en notification-delivery.job.ts.`,
+  };
+};
 
 /** Refleja `DeliverNotificationResponseDto` (solo lo que este job usa). */
 interface DeliverNotificationResponse {

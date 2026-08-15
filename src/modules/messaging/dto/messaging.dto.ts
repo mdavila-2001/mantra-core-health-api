@@ -819,6 +819,19 @@ export class PendingNotificationRequestDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   recipientUserId?: string;
+
+  /**
+   * Tipo del canal (`messaging.message_channels.channel_type_concept_id`).
+   *
+   * Carril 18: el worker (`notification-delivery.job.ts`) necesita distinguir
+   * el canal in-app —que se resuelve escribiendo en la bandeja propia, sin
+   * ningún proveedor externo— de los canales que sí dependen de un adaptador
+   * de terceros. Sin este campo, el adapter por defecto no tenía forma de
+   * saberlo sin una consulta adicional que el worker (proceso separado, sin
+   * acceso directo a la base) no puede hacer.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  channelTypeConceptId?: string;
 }
 
 /** Respuesta de `GET /internal/notifications/pending`. */

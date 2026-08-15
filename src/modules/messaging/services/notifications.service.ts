@@ -269,6 +269,21 @@ export class NotificationsService {
       }
       await tx.flush();
 
+      // Carril 18: el worker necesita saber si el canal es in-app (100%
+      // interno, sin proveedor externo) para no tratarlo como "sin adaptador
+      // conectado". Se resuelve en lote, no una consulta por solicitud.
+      const channelIds = [...new Set(requests.map((r) => r.channelId))];
+      const channelTypeById = new Map<string, string>();
+      for (const channelId of channelIds) {
+        const channel = await this.notificationsRepo.findChannelById(
+          tx,
+          channelId,
+        );
+        if (channel) {
+          channelTypeById.set(channelId, channel.channelTypeConceptId);
+        }
+      }
+
       return {
         requests: requests.map((request) => ({
           id: request.id,
@@ -277,6 +292,7 @@ export class NotificationsService {
           payloadJson: request.payloadJson,
           recipientAddress: request.recipientAddress,
           recipientUserId: request.recipientUserId,
+          channelTypeConceptId: channelTypeById.get(request.channelId),
         })),
       };
     });

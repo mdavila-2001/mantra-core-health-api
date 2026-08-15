@@ -7,6 +7,7 @@ export * from './create-care-space.dto';
 export * from './create-healthcare-service.dto';
 export * from './upsert-setting.dto';
 export * from './create-role-assignment.dto';
+export * from './self-request-role-assignment.dto';
 export * from './create-support-assignment.dto';
 export * from './create-inventory-item.dto';
 export * from './create-movement.dto';

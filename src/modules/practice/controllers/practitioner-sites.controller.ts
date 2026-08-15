@@ -1,8 +1,19 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles, requireTenantId } from '../../../common';
-import { PractitionerSitesService } from '../services';
-import { PractitionerSitesResponseDto } from '../dto';
+import {
+  CurrentUser,
+  Roles,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
+import {
+  PractitionerSitesService,
+  PracticeWorkforceService,
+} from '../services';
+import {
+  PractitionerSitesResponseDto,
+  MyRoleAssignmentResponseDto,
+} from '../dto';
 
 /**
  * Dónde atiende un profesional (`/practitioners/:profileId/sites`).
@@ -29,7 +40,29 @@ export class PractitionerSitesController {
    *
    * @param sitesService - Resolución de sedes de un profesional.
    */
-  constructor(private readonly sitesService: PractitionerSitesService) {}
+  constructor(
+    private readonly sitesService: PractitionerSitesService,
+    private readonly workforceService: PracticeWorkforceService,
+  ) {}
+
+  /**
+   * Carril 18 — «mis organizaciones»: todas las vinculaciones del profesional
+   * autenticado (cualquier estado, cualquier organización). Cuelga de `me` y
+   * no de un `:profileId` porque es autoservicio: cada profesional ve las
+   * suyas, no las de otro.
+   */
+  @Get('me/role-assignments')
+  @Roles('PRACTITIONER')
+  @ApiOperation({
+    summary: 'Mis vinculaciones con organizaciones',
+    description:
+      'Incluye pendientes, activas, suspendidas, rechazadas y finalizadas. No implica acceso a pacientes de esas organizaciones.',
+  })
+  listMyAssignments(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyRoleAssignmentResponseDto[]> {
+    return this.workforceService.listMyAssignments(actor);
+  }
 
   /** UC-14-15. */
   @Get(':profileId/sites')

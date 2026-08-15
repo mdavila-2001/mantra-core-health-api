@@ -32,6 +32,7 @@ import {
 } from '../dto';
 import { sumCents, fromCents } from './money';
 import { AuditTrailService } from '../../audit/services';
+import { PracticeTenantLookupService } from '../../practice/services';
 
 /** Recurso sellado en la cadena WORM para cada transición contable (CAN-AUDIT-001). */
 const JOURNAL_AUDIT_ENTITY = 'journal_transaction';
@@ -101,9 +102,47 @@ export class LedgerService {
     private readonly accountsRepo: AccountsRepository,
     private readonly fiscalRepo: FiscalRepository,
     private readonly auditTrail: AuditTrailService,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LedgerService.name);
+  }
+
+  /**
+   * Carril 18 — un `PRACTITIONER` (a diferencia de `SECURITY_ADMIN`/
+   * `ACCOUNTING_APPROVER`) sólo puede tocar asientos de una práctica a la que
+   * está vinculado con una asignación de rol ACTIVE. Sin este guardia, abrir
+   * `createDraft`/`classify`/`submitForReview`/`attachFile` al rol
+   * `PRACTITIONER` habría dejado que un doctor escribiera en la contabilidad
+   * de una práctica ajena con solo conocer su `practiceId`.
+   *
+   * Es un no-op para roles con autoridad administrativa/contable: ellos ya
+   * están habilitados a operar cualquier práctica, igual que en el resto del
+   * módulo.
+   */
+  private async assertPractitionerOwnsPractice(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<void> {
+    if (
+      actor.roles.includes('SECURITY_ADMIN') ||
+      actor.roles.includes('ACCOUNTING_APPROVER')
+    ) {
+      return;
+    }
+    if (!actor.roles.includes('PRACTITIONER') || !actor.practitionerProfileId) {
+      return;
+    }
+    const practiceIds =
+      await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+        actor.practitionerProfileId,
+      );
+    if (!practiceIds.includes(practiceId)) {
+      throw new PreconditionFailedException(
+        'El profesional no tiene una vinculación activa con esa práctica',
+        { practiceId },
+      );
+    }
   }
 
   /**
@@ -237,6 +276,7 @@ export class LedgerService {
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
     const { debitCents } = this.assertBalanced(dto.lines);
+    await this.assertPractitionerOwnsPractice(actor, dto.practiceId);
 
     return this.em.transactional(async (tx) => {
       const number = dto.transactionNumber ?? this.generateNumber('JT');
@@ -263,6 +303,8 @@ export class LedgerService {
         totalAmount: fromCents(debitCents),
         description: dto.description,
         reference: dto.reference,
+        sourceDocumentType: dto.sourceDocumentType,
+        sourceDocumentId: dto.sourceDocumentId,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -537,6 +579,14 @@ export class LedgerService {
     dto: AttachFileDto,
     actor: AuthenticatedUser,
   ): Promise<AccountingStatusDto> {
+    const owner = await this.journalRepo.findTransactionById(
+      this.em,
+      transactionId,
+    );
+    if (owner) {
+      await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
+    }
+
     return this.em.transactional(async (tx) => {
       const transaction = await this.journalRepo.findTransactionById(
         tx,
@@ -697,7 +747,7 @@ export class LedgerService {
    * Transición genérica de estado: carga el asiento, valida la transición y aplica
    * el nuevo estado (más una mutación opcional específica del comando).
    */
-  private transition(
+  private async transition(
     id: string,
     to: string,
     actor: AuthenticatedUser,
@@ -717,6 +767,13 @@ export class LedgerService {
       approvedByUserId?: string;
     }) => void,
   ): Promise<JournalTransactionResponseDto> {
+    // Fuera de la transacción: es una lectura contra `practice`, no contra
+    // `accounting`, y no necesita compartir el lock de la fila del asiento.
+    const owner = await this.journalRepo.findTransactionById(this.em, id);
+    if (owner) {
+      await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
+    }
+
     return this.em.transactional(async (tx) => {
       const txn = await this.journalRepo.findTransactionById(tx, id);
       if (!txn) {

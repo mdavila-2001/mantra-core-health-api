@@ -139,10 +139,12 @@ export class AccountingLedgerController {
    * del flujo canónico DRAFT → AUTO_CLASSIFIED → PENDING_REVIEW → APPROVED → POSTED.
    */
   @Post('journal-transactions/drafts')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear un asiento en borrador (DRAFT, sin postear)',
+    description:
+      'Un PRACTITIONER solo puede crear borradores en una práctica a la que esté vinculado con una asignación de rol activa (Carril 18); el servicio lo verifica y responde 422 si no.',
   })
   createDraft(
     @Body() dto: PostJournalDto,
@@ -153,7 +155,7 @@ export class AccountingLedgerController {
 
   /** REDESA C-17 — DRAFT → AUTO_CLASSIFIED. */
   @Post('journal-transactions/:id/classify')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Clasificar automáticamente el asiento' })
   classify(
@@ -166,7 +168,7 @@ export class AccountingLedgerController {
 
   /** REDESA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
   @Post('journal-transactions/:id/submit-review')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Enviar el asiento a revisión' })
   submitReview(
@@ -233,7 +235,7 @@ export class AccountingLedgerController {
 
   /** UC-16-13. */
   @Post('journal-transactions/:id/files')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar un documento soporte al asiento' })
   attachFile(
