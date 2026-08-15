@@ -8,6 +8,7 @@ consultas y materialización.
 
 | Repositorio | Tabla | Notas |
 |---|---|---|
+| `DiagnosticUnitsReadRepository` | varias tablas M23 + relaciones de solo lectura | listado/detalle aislados por tenant; filtra vigencia y visibilidad pública |
 | `DiagnosticUnitsRepository` | `diagnostic_units` | alta PENDING/ACTIVE; `findByCode` sobre UK (tenant, code) |
 | `DiagnosticUnitSitesRepository` | `diagnostic_unit_sites` | `countActiveForUnit` (precondición de verify) |
 | `DiagnosticUnitSpecialtiesRepository` | `diagnostic_unit_specialties` | upsert vigente; `verifyOpenForUnit` |

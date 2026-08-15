@@ -66,6 +66,7 @@
     "test:integration:cov": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-integration.json --coverage",
     "test:cov:merged": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --coverage && yarn test:integration:cov && node tools/coverage/merge-coverage.mjs",
     "seed:dev": "node tools/redesa/seed-dev-data.mjs",
+    "seed:diagnostic-units": "node tools/redesa/seed-diagnostic-units.mjs",
     "smoke": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-smoke.json",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest-cli/bin/jest.js --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",

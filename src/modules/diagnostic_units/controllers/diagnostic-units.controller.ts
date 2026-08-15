@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -8,12 +9,18 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
   DiagnosticUnitsService,
   DiagnosticStudiesService,
   DiagnosticPricingService,
+  DiagnosticUnitsReadService,
 } from '../services';
 import {
   AccreditationResponseDto,
@@ -25,6 +32,8 @@ import {
   CreatePriceScheduleDto,
   CreateStudyOfferingDto,
   DiagnosticUnitResponseDto,
+  DiagnosticUnitDetailDto,
+  DiagnosticUnitDirectoryResponseDto,
   PriceScheduleResponseDto,
   ReprojectResultDto,
   SetSpecialtiesDto,
@@ -53,7 +62,26 @@ export class DiagnosticUnitsController {
     private readonly unitsService: DiagnosticUnitsService,
     private readonly studiesService: DiagnosticStudiesService,
     private readonly pricingService: DiagnosticPricingService,
+    private readonly readService: DiagnosticUnitsReadService,
   ) {}
+
+  /** Directorio publicado del tenant activo. */
+  @Get()
+  @ApiOperation({ summary: 'Listar unidades diagnósticas publicadas' })
+  @ApiOkResponse({ type: DiagnosticUnitDirectoryResponseDto })
+  list(): Promise<DiagnosticUnitDirectoryResponseDto> {
+    return this.readService.list();
+  }
+
+  /** Perfil publicado; el servicio acota el id al tenant activo. */
+  @Get(':id')
+  @ApiOperation({ summary: 'Consultar el perfil de una unidad diagnóstica' })
+  @ApiOkResponse({ type: DiagnosticUnitDetailDto })
+  getById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<DiagnosticUnitDetailDto> {
+    return this.readService.getById(id);
+  }
 
   /** UC-23-01. */
   @Post()

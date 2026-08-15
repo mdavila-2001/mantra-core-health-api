@@ -8,3 +8,4 @@ export * from './diagnostic-study-components.repository';
 export * from './diagnostic-price-schedules.repository';
 export * from './diagnostic-study-prices.repository';
 export * from './diagnostic-equipment.repository';
+export * from './diagnostic-units-read.repository';
