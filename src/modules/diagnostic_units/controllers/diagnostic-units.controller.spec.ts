@@ -27,15 +27,37 @@ function build() {
   };
   const studiesService = { createOffering: mockFn() };
   const pricingService = { createSchedule: mockFn() };
+  const readService = { list: mockFn(), getById: mockFn() };
   const controller = new DiagnosticUnitsController(
     unitsService as any,
     studiesService as any,
     pricingService as any,
+    readService as any,
   );
-  return { controller, unitsService, studiesService, pricingService };
+  return {
+    controller,
+    unitsService,
+    studiesService,
+    pricingService,
+    readService,
+  };
 }
 
 describe('DiagnosticUnitsController', () => {
+  it('delegates the directory list', async () => {
+    const d = build();
+    d.readService.list.mockResolvedValue({ items: [], count: 0 });
+    await expect(d.controller.list()).resolves.toEqual({ items: [], count: 0 });
+    expect(d.readService.list).toHaveBeenCalledTimes(1);
+  });
+
+  it('delegates the tenant-scoped detail', async () => {
+    const d = build();
+    d.readService.getById.mockResolvedValue({ id: 'u1' });
+    await expect(d.controller.getById('u1')).resolves.toEqual({ id: 'u1' });
+    expect(d.readService.getById).toHaveBeenCalledWith('u1');
+  });
+
   it('delegates create (UC-23-01)', async () => {
     const d = build();
     const dto = { tenantId: 't1', code: 'DU-1', name: 'Lab' };

@@ -10,6 +10,7 @@ fija; la auditoría usa `createdBy`/`touch`. Excepciones de dominio:
 
 | Servicio | Casos de uso |
 |---|---|
+| `DiagnosticUnitsReadService` | directorio y perfil del tenant activo, con relaciones legibles y solo precios públicos vigentes |
 | `DiagnosticUnitsService` | alta (01), sitios (02), verify-and-publish (03), especialidades (04), asignación de especialistas (10), acreditaciones + renovación (11), reproyección (12) |
 | `DiagnosticStudiesService` | publicar oferta con componentes (05), retirar oferta (08) |
 | `DiagnosticPricingService` | cronograma (06), versionar precio append-only (07), cerrar precio (08) |
