@@ -91,8 +91,11 @@ import { MessagingModule } from '../messaging/messaging.module';
     AuthzPdpService,
     AuthzEffectiveRolesService,
   ],
-  // `iam` lo consume al emitir y refrescar el token: es la única forma de que un
-  // rol asistencial llegue al `RolesGuard`.
-  exports: [AuthzEffectiveRolesService],
+  // `iam` consume el primero al emitir y refrescar el token: es la única forma
+  // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume
+  // `diagnostics` para compartir un resultado con un profesional por un plazo:
+  // el grant vive acá, en la única tabla de grants del producto, y no se
+  // reimplementa del lado del que comparte.
+  exports: [AuthzEffectiveRolesService, ResourceScopeGrantsRepository],
 })
 export class AuthzModule {}
