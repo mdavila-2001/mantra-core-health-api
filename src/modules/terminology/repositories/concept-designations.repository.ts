@@ -148,6 +148,45 @@ export class ConceptDesignationsRepository {
   }
 
   /**
+   * La designación preferida de cada concepto en un idioma, indexada por
+   * concepto.
+   *
+   * Es lo que traduce un listado: la búsqueda devuelve hasta cincuenta conceptos
+   * y todos hay que mostrarlos en el idioma de quien mira. Pedirlos con
+   * `$lookup` de a uno serían cincuenta llamadas para pintar una pantalla, que
+   * es exactamente lo que el plan del carril prohíbe.
+   *
+   * Un concepto puede tener varias designaciones en el mismo idioma (la
+   * preferida y sus sinónimos), así que se filtra por `preferred`. Si aun así
+   * hubiera dos —el modelo lo impide por operación, no por restricción de
+   * base—, gana la primera y el resultado sigue siendo estable dentro de la
+   * misma consulta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param conceptIds - Conceptos a traducir.
+   * @param languageConceptId - Idioma pedido.
+   * @returns Mapa `conceptId -> designación`; los que no tengan no aparecen.
+   */
+  async findPreferredByLanguageForConcepts(
+    em: EntityManager,
+    conceptIds: string[],
+    languageConceptId: string,
+  ): Promise<Map<string, ConceptDesignations>> {
+    if (conceptIds.length === 0) return new Map();
+    const rows = await em.find(ConceptDesignations, {
+      conceptId: { $in: conceptIds },
+      languageConceptId,
+      preferred: true,
+    });
+
+    const porConcepto = new Map<string, ConceptDesignations>();
+    for (const row of rows) {
+      if (!porConcepto.has(row.conceptId)) porConcepto.set(row.conceptId, row);
+    }
+    return porConcepto;
+  }
+
+  /**
    * Una propiedad concreta de un conjunto de conceptos. La regla `prop` de una
    * expansión (UC-03-08) filtra por el valor de una propiedad, y resolverla
    * concepto a concepto emitiría una query por cada uno del catálogo.

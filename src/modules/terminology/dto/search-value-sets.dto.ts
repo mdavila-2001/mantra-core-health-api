@@ -49,6 +49,20 @@ export class ValueSetListItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   defaultVersionId!: string | null;
+
+  /**
+   * Cuántos conceptos incluye la versión vigente del conjunto.
+   *
+   * Se añade al final y es opcional en el contrato, pero el listado siempre lo
+   * informa: una categoría sin conteo obliga a expandirla para saber si tiene
+   * algo dentro, y ese es justamente el clic que el conteo ahorra. Un conjunto
+   * sin versión por defecto cuenta `0`, que es lo que efectivamente se puede
+   * leer de él.
+   */
+  @ApiPropertyOptional({
+    description: 'Conceptos incluidos en la versión vigente del conjunto',
+  })
+  memberCount?: number;
 }
 
 /** Página del listado de conjuntos de valores. */

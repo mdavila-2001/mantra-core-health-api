@@ -214,17 +214,37 @@ export class ValueSetsService {
         page.map((row) => row.id),
       );
 
+    // El conteo de miembros de cada conjunto, en una consulta para toda la
+    // página. Sin él, una pantalla que ofrezca las categorías tiene que expandir
+    // cada una para saber si tiene algo dentro — que es justo el clic que el
+    // conteo ahorra, y multiplicado por las filas de la página.
+    const memberCounts = await this.valueSetsRepo.countMembersByVersionIds(
+      em,
+      page
+        .map((row) => defaultVersions.get(row.id)?.id)
+        .filter((id): id is string => id !== undefined),
+    );
+
     const last = page.at(-1);
     return {
-      items: page.map((row) => ({
-        id: row.id,
-        internalCode: row.internalCode,
-        name: row.name,
-        canonicalUrl: row.canonicalUrl,
-        description: row.description,
-        stateConceptId: row.stateConceptId,
-        defaultVersionId: defaultVersions.get(row.id)?.id ?? null,
-      })),
+      items: page.map((row) => {
+        const defaultVersionId = defaultVersions.get(row.id)?.id ?? null;
+        return {
+          id: row.id,
+          internalCode: row.internalCode,
+          name: row.name,
+          canonicalUrl: row.canonicalUrl,
+          description: row.description,
+          stateConceptId: row.stateConceptId,
+          defaultVersionId,
+          // Un conjunto sin versión vigente cuenta cero, no «se desconoce»: cero
+          // es lo que efectivamente se puede leer de él hoy.
+          memberCount:
+            defaultVersionId === null
+              ? 0
+              : (memberCounts.get(defaultVersionId) ?? 0),
+        };
+      }),
       count: page.length,
       limit: options.limit,
       nextCursor:
