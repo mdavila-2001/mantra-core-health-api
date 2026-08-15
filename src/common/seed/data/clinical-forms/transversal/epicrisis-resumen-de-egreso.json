@@ -1,0 +1,92 @@
+{
+  "code": "TRANSV_EPICRISIS",
+  "name": "Epicrisis / Resumen de egreso",
+  "specialty": {
+    "code": "TRANSVERSAL",
+    "display": "Transversal (todas las especialidades)"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Resolución 1995 de 1999 — normas para el manejo de la historia clínica: epicrisis y resumen de egreso",
+    "organization": "Ministerio de Salud de Colombia",
+    "url": "https://www.minsalud.gov.co/normatividad_nuevo/resoluci%C3%93n%201995%20de%201999.pdf",
+    "license": "Norma estatal de acceso público",
+    "sourceVersion": "1995 de 1999",
+    "retrievedAt": "2026-08-14",
+    "note": "Transcripción del contenido mínimo que la norma exige en el resumen de egreso."
+  },
+  "fields": [
+    {
+      "code": "fecha_de_ingreso",
+      "name": "Fecha de ingreso",
+      "dataType": "date",
+      "required": true
+    },
+    {
+      "code": "fecha_de_egreso",
+      "name": "Fecha de egreso",
+      "dataType": "date",
+      "required": true
+    },
+    {
+      "code": "motivo_de_ingreso",
+      "name": "Motivo de ingreso",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "diagnostico_de_ingreso",
+      "name": "Diagnóstico de ingreso",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "diagnostico_de_egreso",
+      "name": "Diagnóstico de egreso",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "resumen_de_la_evolucion",
+      "name": "Resumen de la evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "procedimientos_realizados",
+      "name": "Procedimientos realizados",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "hallazgos_relevantes",
+      "name": "Hallazgos de laboratorio e imágenes relevantes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "tratamiento_al_egreso",
+      "name": "Tratamiento indicado al egreso",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "recomendaciones",
+      "name": "Recomendaciones al paciente",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "control_ambulatorio",
+      "name": "Fecha de control ambulatorio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "condicion_al_egreso",
+      "name": "Condición al egreso",
+      "dataType": "string",
+      "required": true
+    }
+  ]
+}

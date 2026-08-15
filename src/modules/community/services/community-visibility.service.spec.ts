@@ -22,7 +22,10 @@ const platform = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const profilesRepo = { findById: mockFn() };
+  const profilesRepo = {
+    findById: mockFn(),
+    findByTarget: mockFn().mockResolvedValue(null),
+  };
   const followsRepo = {
     findByFollowerTarget: mockFn(),
     listFollowedProfileIds: mockFn().mockResolvedValue([]),
@@ -87,6 +90,63 @@ describe('CommunityVisibilityService', () => {
       await expect(
         d.service.assertOwnProfile(em, 'profile-ajeno', platform),
       ).resolves.toBeUndefined();
+      expect(d.profilesRepo.findById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resolveActorProfileId', () => {
+    it('sin perfil pedido, resuelve el propio del actor', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget.mockResolvedValue({ id: 'p-propio' });
+
+      await expect(d.service.resolveActorProfileId(em, patient)).resolves.toBe(
+        'p-propio',
+      );
+    });
+
+    it('un actor sin perfil público lee sin perfil, no falla', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget.mockResolvedValue(null);
+
+      await expect(
+        d.service.resolveActorProfileId(em, patient),
+      ).resolves.toBeUndefined();
+    });
+
+    it('acepta el perfil pedido cuando es del actor', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({
+        id: 'p-1',
+        targetId: 'user-1',
+      });
+
+      await expect(
+        d.service.resolveActorProfileId(em, patient, 'p-1'),
+      ).resolves.toBe('p-1');
+    });
+
+    // La regresión que motivó el método: `canViewPost` concede la lectura de
+    // entrada cuando el lector es el autor, así que declarar el perfil del
+    // autor en `?actorProfileId=` entregaba sus publicaciones PRIVATE a
+    // cualquier sesión. El perfil ajeno tiene que rebotar antes de llegar ahí.
+    it('rechaza el perfil ajeno que el cliente declaró como suyo', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({
+        id: 'p-autor',
+        targetId: 'otro-usuario',
+      });
+
+      await expect(
+        d.service.resolveActorProfileId(em, patient, 'p-autor'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('plataforma puede mirar con cualquier perfil, es su trabajo', async () => {
+      const d = build();
+
+      await expect(
+        d.service.resolveActorProfileId(em, platform, 'p-ajeno'),
+      ).resolves.toBe('p-ajeno');
       expect(d.profilesRepo.findById).not.toHaveBeenCalled();
     });
   });

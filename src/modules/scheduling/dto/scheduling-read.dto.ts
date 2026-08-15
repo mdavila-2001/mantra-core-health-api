@@ -123,7 +123,47 @@ export class ResourceAgendaResponseDto {
   truncated!: boolean;
 }
 
-/** Una cita, tal como la lista la agenda o el portal del paciente. */
+/**
+ * Por qué la cita cambió de estado, tal como se le muestra a la otra parte.
+ *
+ * Sale del historial de auditoría de la reserva
+ * (`audit.appointment_bookings_history`), que es donde se persiste el motivo:
+ * ver `state/booking-transition.ts` para por qué ahí y no en una columna.
+ */
+export class BookingStatusReasonDto {
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Lo que escribió quien hizo el cambio' })
+  reasonText!: string;
+
+  /**
+   * Valor de actor kind mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    enum: ['PATIENT', 'PROVIDER'],
+    description:
+      'Desde qué lado se hizo el cambio. Permite decir «tu médico canceló» en vez de «la cita fue cancelada».',
+  })
+  actorKind?: 'PATIENT' | 'PROVIDER';
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Estado al que llevó el cambio, si fue una transición',
+  })
+  toStateConceptId?: string;
+
+  /**
+   * Valor de changed at mantenido por la instancia.
+   */
+  @ApiProperty({ type: String, format: 'date-time' })
+  changedAt!: Date;
+}
+
+/** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
   /**
    * Identificador único de la instancia.
@@ -224,6 +264,23 @@ export class BookingItemDto {
    */
   @ApiPropertyOptional()
   reasonText?: string;
+
+  /**
+   * Por qué la cita está como está, cuando el último cambio lo explicó.
+   *
+   * Es la mitad que le faltaba a la cancelación y a la reprogramación
+   * (corrección #14): la cita decía que estaba cancelada y no decía por qué, así
+   * que el paciente se enteraba del cambio pero no de la razón. Llega ausente
+   * cuando el último cambio no exigía motivo —una confirmación, un check-in— y
+   * en las citas anteriores a esta versión, que no lo registraron.
+   */
+  @ApiPropertyOptional({
+    type: () => BookingStatusReasonDto,
+    nullable: true,
+    description:
+      'Motivo del último cambio que lo exigía (cancelación, rechazo o reprogramación), con quién lo hizo y cuándo.',
+  })
+  statusReason?: BookingStatusReasonDto | null;
 
   /**
    * Fecha y hora en que se creó el registro.

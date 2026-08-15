@@ -8,3 +8,4 @@ export * from './reimbursements.service';
 export * from './patient-statements.service';
 export * from './dunning.service';
 export * from './kpi-snapshots.service';
+export * from './billing-service-catalog.service';

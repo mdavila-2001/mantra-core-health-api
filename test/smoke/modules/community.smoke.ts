@@ -849,4 +849,129 @@ export const COMMUNITY_SMOKE: SmokeCase[] = [
         throw new Error('la bandeja no trae unreadCount');
     },
   },
+  // ---- Superficie pública (P2): sin token, sin tenant --------------------
+  //
+  // `auth: false` no es decorativo: si alguna de estas rutas perdiera su
+  // `@Public()`, el guard global respondería 401 y el caso fallaría acá en vez
+  // de en producción.
+  {
+    module: 'Community',
+    endpoint: 'GET /public/search',
+    name: 'happy: el buscador público responde sin sesión',
+    method: 'get',
+    path: () => '/public/search?limit=5',
+    auth: false,
+    expectedStatus: 200,
+    // Esta comprobación es la que protege el ORDEN DE REGISTRO de los
+    // controladores. `read_models` sirve `@Get(':slug')` bajo el mismo prefijo
+    // `public`, y una ruta con parámetro captura cualquier segmento: si
+    // `ReadModelsModule` quedara antes que `CommunityModule` en la lista de
+    // imports de `app.module.ts` —al ordenarla alfabéticamente, por ejemplo—,
+    // `/public/search` devolvería la proyección de un slug llamado «search»
+    // con un 200, y nadie lo notaría. La envoltura del contrato no coincide,
+    // así que el caso falla.
+    capture: (b) => {
+      if (!Array.isArray(b.items))
+        throw new Error(
+          '/public/search no devolvió la envoltura del contrato: ' +
+            'probable captura por la ruta /public/:slug de read_models ' +
+            '(revisar el orden de CommunityModule y ReadModelsModule)',
+        );
+      if (!('nextCursor' in b) || !('generatedAt' in b))
+        throw new Error('la envoltura pública no trae nextCursor/generatedAt');
+    },
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/search/practitioners',
+    name: 'happy: vertical de profesionales sin sesión',
+    method: 'get',
+    path: () => '/public/search/practitioners?q=cardio&limit=5',
+    auth: false,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/search/organizations',
+    name: 'happy: vertical de organizaciones sin sesión',
+    method: 'get',
+    path: () => '/public/search/organizations?limit=5',
+    auth: false,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/search/diagnostic-units',
+    name: 'happy: vertical de laboratorios sin sesión',
+    method: 'get',
+    path: () => '/public/search/diagnostic-units?limit=5',
+    auth: false,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/search/insurers',
+    name: 'happy: vertical de aseguradoras sin sesión',
+    method: 'get',
+    path: () => '/public/search/insurers?limit=5',
+    auth: false,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/search/pharmacies',
+    name: 'happy: vertical de farmacias sin sesión',
+    method: 'get',
+    path: () => '/public/search/pharmacies?limit=5',
+    auth: false,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/search/medications',
+    name: 'happy: vertical de medicamentos sin sesión',
+    method: 'get',
+    path: () => '/public/search/medications?limit=5',
+    auth: false,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/nearby',
+    name: 'happy: cercanía con coordenadas de Santa Cruz',
+    method: 'get',
+    path: () => '/public/nearby?lat=-17.7833&lng=-63.1821&radiusKm=5',
+    auth: false,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /public/nearby',
+    name: 'límite: sin coordenadas responde 400, no una página vacía',
+    method: 'get',
+    path: () => '/public/nearby',
+    auth: false,
+    expectedStatus: 400,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /p/:slug',
+    name: 'límite: un slug inexistente responde 404 sin revelar nada',
+    method: 'get',
+    path: (c) => `/p/no-existe-${c.u}`,
+    auth: false,
+    expectedStatus: 404,
+  },
+  {
+    module: 'Community',
+    endpoint: 'GET /p/:slug',
+    name: 'límite: un perfil no publicado responde el mismo 404',
+    method: 'get',
+    // El perfil A existe y está activo, pero nace sin
+    // `visibility_concept_id`, y el nulo no es público: aparecer en el
+    // directorio es opt-in. Tiene que dar el MISMO 404 que uno inexistente.
+    path: (c) => `/p/prof-a-${c.u}`,
+    auth: false,
+    expectedStatus: 404,
+  },
 ];

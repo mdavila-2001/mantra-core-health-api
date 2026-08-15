@@ -1,0 +1,140 @@
+{
+  "code": "CARDIO_FICHA_BASE",
+  "name": "Ficha cardiológica — versión general base",
+  "specialty": {
+    "code": "CARDIOLOGIA",
+    "display": "Cardiología"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, evaluación cardiovascular",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Estructura de anamnesis y examen cardiovascular del formato oficial. No incluye ninguna escala de sociedad científica."
+  },
+  "fields": [
+    {
+      "code": "dolor_toracico",
+      "name": "Dolor torácico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "caracteristicas_del_dolor",
+      "name": "Características del dolor torácico",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "disnea",
+      "name": "Disnea",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "clase_funcional_nyha",
+      "name": "Clase funcional (I–IV)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "palpitaciones",
+      "name": "Palpitaciones",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "sincope",
+      "name": "Síncope o presíncope",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "edema_de_miembros_inferiores",
+      "name": "Edema de miembros inferiores",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "hipertension_arterial",
+      "name": "Antecedente de hipertensión arterial",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "diabetes",
+      "name": "Antecedente de diabetes",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "dislipidemia",
+      "name": "Antecedente de dislipidemia",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "tabaquismo",
+      "name": "Tabaquismo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "antecedente_familiar_coronario",
+      "name": "Antecedente familiar de enfermedad coronaria precoz",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "ruidos_cardiacos",
+      "name": "Ruidos cardíacos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "soplos",
+      "name": "Soplos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "pulsos_perifericos",
+      "name": "Pulsos periféricos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "ecg_hallazgos",
+      "name": "Electrocardiograma — hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "conducta",
+      "name": "Conducta",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

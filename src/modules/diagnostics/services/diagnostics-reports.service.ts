@@ -9,7 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { ReportsRepository } from '../repositories';
+import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
 import {
   CreateReportVersionDto,
@@ -34,11 +34,13 @@ export class DiagnosticsReportsService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param repo - Valor de repo requerido por la operación.
+   * @param ordersRepo - Acceso al informe en `clinical`, para marcarlo liberado.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: ReportsRepository,
+    private readonly ordersRepo: DiagnosticOrdersRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticsReportsService.name);
@@ -176,6 +178,22 @@ export class DiagnosticsReportsService {
 
       version.clinicalStatusConceptId = DIAG.REPORT_FINAL;
       version.issuedAt = new Date();
+
+      // El informe tiene que quedar sabiendo cuál es su versión liberada. Sin
+      // esto, `current_released_version_id` seguía en `null` para siempre y la
+      // única forma de saber si un resultado estaba liberado era recorrer sus
+      // eventos — que es justo lo que la columna existe para evitar.
+      const report = await this.ordersRepo.findReportById(tx, reportId);
+      if (report) {
+        this.ordersRepo.markReportReleased(
+          tx,
+          report,
+          version.id,
+          visibility,
+          actor.id,
+        );
+      }
+
       await tx.flush();
 
       return { id: version.id, status: version.clinicalStatusConceptId };

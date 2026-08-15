@@ -1,0 +1,116 @@
+{
+  "code": "TRANSV_EXAMEN_FISICO",
+  "name": "Examen físico general",
+  "specialty": {
+    "code": "TRANSVERSAL",
+    "display": "Transversal (todas las especialidades)"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, examen físico y funciones vitales",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Transcripción de la sección de funciones vitales y examen por aparatos del formato oficial."
+  },
+  "fields": [
+    {
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "temperatura",
+      "name": "Temperatura (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "saturacion_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "estado_general",
+      "name": "Estado general",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "piel_y_faneras",
+      "name": "Piel y faneras",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "cabeza_y_cuello",
+      "name": "Cabeza y cuello",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "aparato_respiratorio",
+      "name": "Aparato respiratorio",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "aparato_cardiovascular",
+      "name": "Aparato cardiovascular",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "abdomen",
+      "name": "Abdomen",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "sistema_nervioso",
+      "name": "Sistema nervioso",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "aparato_locomotor",
+      "name": "Aparato locomotor",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

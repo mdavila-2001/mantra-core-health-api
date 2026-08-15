@@ -27,6 +27,9 @@ import {
   SchedulingWaitlistService,
 } from '../services';
 import {
+  AcceptBookingDto,
+  RejectBookingDto,
+  BookingDecisionResponseDto,
   RescheduleBookingDto,
   RescheduleResponseDto,
   CancelBookingDto,
@@ -36,6 +39,7 @@ import {
   ScheduleRemindersResponseDto,
   BookingItemDto,
   SearchBookingsResponseDto,
+  BookingDecisionsResponseDto,
 } from '../dto';
 
 /** Operaciones sobre una cita ya confirmada. */
@@ -117,9 +121,109 @@ export class SchedulingBookingsController {
     return this.bookingsService.getBookingById(id);
   }
 
+  /**
+   * El historial de decisiones de una cita (carril 11).
+   *
+   * Complementa a `accept` y `reject`, que dicen **qué pasó ahora**: esto dice
+   * qué se fue decidiendo y qué escribió el prestador en cada paso. La alcanza
+   * `PATIENT` porque es justamente lo que necesita leer — el motivo de un
+   * rechazo vive acá.
+   */
+  @Get(':id/decisions')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({ summary: 'Historial de decisiones de la solicitud' })
+  listDecisions(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BookingDecisionsResponseDto> {
+    return this.bookingsService.listDecisions(id);
+  }
+
+  /**
+   * El profesional acepta la solicitud (corrección #11): la cita queda
+   * confirmada y recién ahí se programan sus recordatorios.
+   */
+  @Post(':id/accept')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Aceptar la solicitud de cita',
+    description:
+      'Solo la acepta quien atiende esa agenda (o quien administra la agenda de la organización).',
+  })
+  accept(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AcceptBookingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    return this.bookingsService.accept(id, dto, actor);
+  }
+
+  /**
+   * El profesional rechaza la solicitud, con motivo obligatorio
+   * (correcciones #11 y #14).
+   */
+  @Post(':id/reject')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rechazar la solicitud de cita',
+    description:
+      'Libera el cupo y deja el motivo, que el paciente ve en el detalle de su turno.',
+  })
+  reject(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RejectBookingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CancelBookingResponseDto> {
+    return this.bookingsService.reject(id, dto, actor);
+  }
+
+  /**
+   * Inicia la atención (corrección #15).
+   *
+   * **No valida la fecha**: una cita confirmada se empieza cuando el
+   * profesional decide, no cuando el reloj lo permite.
+   */
+  @Post(':id/start')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Iniciar la atención',
+    description:
+      'Disponible sobre cualquier cita confirmada, en cualquier momento: no exige que haya llegado el día agendado.',
+  })
+  start(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    return this.bookingsService.start(id, actor);
+  }
+
+  /**
+   * Completa la atención (corrección #15). El paciente ve «completada» apenas
+   * ocurre, sin refresco artificial.
+   */
+  @Post(':id/complete')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Completar la atención',
+    description:
+      'Cierra la cita en curso. Tampoco valida el reloj: solo el estado y quién la opera.',
+  })
+  complete(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    return this.bookingsService.complete(id, actor);
+  }
+
   /** UC-41-08. */
   @Post(':id/reschedule')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
+  // `PRACTITIONER` desde la corrección #14: mover un turno es un acto del
+  // profesional tanto como del mostrador, y ahora exige motivo en las dos
+  // direcciones.
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reprogramar la cita a otro slot' })
   reschedule(
@@ -132,7 +236,7 @@ export class SchedulingBookingsController {
 
   /** UC-41-09. */
   @Post(':id/cancel')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Cancelar la cita y liberar el cupo',

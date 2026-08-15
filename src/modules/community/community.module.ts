@@ -10,6 +10,7 @@ import {
   CommunityPollsController,
   CommunityFeedController,
   CommunityTimelineController,
+  CommunityPublicController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -20,6 +21,7 @@ import {
   CommunityPollsService,
   CommunityFeedService,
   PublicProfileProjectionService,
+  CommunityRatingsService,
   CommunityVisibilityService,
   CommunitySocialReadService,
   CommunityTimelineReadService,
@@ -27,6 +29,7 @@ import {
   CommunityGroupsReadService,
   CommunityPollsReadService,
   CommunityReviewsReadService,
+  CommunityPublicService,
 } from './services';
 import {
   PublicProfilesRepository,
@@ -45,6 +48,7 @@ import {
   NotificationsRepository,
   CommunityFeedbackRepository,
   CommunityPrestigeRepository,
+  PublicSearchRepository,
 } from './repositories';
 
 /**
@@ -64,6 +68,9 @@ import {
     CommunityPollsController,
     CommunityFeedController,
     CommunityTimelineController,
+    // Va en esta lista y no en read_models a propósito; el orden de registro
+    // frente a PublicProjectionsController lo protege community-public.smoke.ts.
+    CommunityPublicController,
   ],
   providers: [
     // Repositorios
@@ -83,6 +90,7 @@ import {
     NotificationsRepository,
     CommunityFeedbackRepository,
     CommunityPrestigeRepository,
+    PublicSearchRepository,
     // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
@@ -92,6 +100,7 @@ import {
     CommunityPollsService,
     CommunityFeedService,
     PublicProfileProjectionService,
+    CommunityRatingsService,
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
     CommunitySocialReadService,
@@ -100,7 +109,11 @@ import {
     CommunityGroupsReadService,
     CommunityPollsReadService,
     CommunityReviewsReadService,
+    CommunityPublicService,
   ],
-  exports: [PublicProfileProjectionService],
+  // La proyección la consume `diagnostic_units` al publicar un perfil; la nota,
+  // su buscador de centros. Las dos salen de acá y no de un `find` ajeno: la
+  // regla de qué reseña cuenta es de este módulo.
+  exports: [PublicProfileProjectionService, CommunityRatingsService],
 })
 export class CommunityModule {}

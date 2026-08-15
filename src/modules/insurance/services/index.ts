@@ -5,3 +5,4 @@ export * from './claims.service';
 export * from './appeals.service';
 export * from './reconciliation.service';
 export * from './broker-commission.service';
+export * from './insurance-read.service';

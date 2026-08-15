@@ -14,6 +14,7 @@ Casos de uso, reglas de negocio y coordinación transaccional.
 | `coverage.service.ts` | Casos de uso y reglas de negocio. |
 | `index.ts` | Punto de exportación pública de la carpeta. |
 | `insurance-backbone.service.ts` | Casos de uso y reglas de negocio. |
+| `insurance-read.service.ts` | Casos de uso y reglas de negocio. |
 | `prior-auth.service.ts` | Casos de uso y reglas de negocio. |
 | `reconciliation.service.ts` | Casos de uso y reglas de negocio. |
 

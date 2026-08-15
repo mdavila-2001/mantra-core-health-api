@@ -11,6 +11,7 @@ import { PriorAuthController } from './prior-auth.controller';
 import { ReconciliationController } from './reconciliation.controller';
 import { AppealsController } from './appeals.controller';
 import { BrokerCommissionController } from './broker-commission.controller';
+import { InsuranceReadController } from './insurance-read.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as never;
 const dto = {} as never;
@@ -116,5 +117,51 @@ describe('Insurance controllers (delegación)', () => {
     const c = new BrokerCommissionController(service as never) as any;
     await c.generate(dto, actor);
     expect(service.generate).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('InsuranceReadController delega en InsuranceReadService', async () => {
+    const service = {
+      listCarriers: mockFn().mockResolvedValue({ items: [], count: 0 }),
+      getCarrier: mockFn().mockResolvedValue({ id: ID }),
+      listBrokers: mockFn().mockResolvedValue({ items: [], count: 0 }),
+      getBroker: mockFn().mockResolvedValue({ id: ID }),
+      listBrokerClients: mockFn().mockResolvedValue({ items: [], count: 0 }),
+    };
+    const c = new InsuranceReadController(service as never) as any;
+
+    expect(await c.listCarriers()).toEqual({ items: [], count: 0 });
+    expect(service.listCarriers).toHaveBeenCalledWith();
+    await c.getCarrier(ID);
+    expect(service.getCarrier).toHaveBeenCalledWith(ID);
+    await c.listBrokers();
+    expect(service.listBrokers).toHaveBeenCalledWith();
+    await c.getBroker(ID);
+    expect(service.getBroker).toHaveBeenCalledWith(ID);
+    await c.listBrokerClients(ID);
+    expect(service.listBrokerClients).toHaveBeenCalledWith(ID);
+  });
+
+  /**
+   * Las lecturas no llevan `@Roles`: el aislamiento lo da el tenant del
+   * contexto, como en las rutas de organización de `directory`. Se comprueba
+   * acá para que reintroducir un rol global sea una decisión y no un descuido.
+   */
+  it('las lecturas no exigen rol global', () => {
+    const methods = [
+      'listCarriers',
+      'getCarrier',
+      'listBrokers',
+      'getBroker',
+      'listBrokerClients',
+    ];
+    for (const method of methods) {
+      const roles = Reflect.getMetadata(
+        'requiredRoles',
+        (InsuranceReadController.prototype as never as Record<string, object>)[
+          method
+        ],
+      );
+      expect(roles).toBeUndefined();
+    }
   });
 });

@@ -65,8 +65,9 @@ export class CommunityPollsController {
   @ApiOperation({ summary: 'Encuesta con opciones, recuentos y voto propio' })
   getPoll(
     @Param('pollId', ParseUUIDPipe) pollId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('actorProfileId') actorProfileId?: string,
   ): Promise<PollDetailDto> {
-    return this.readService.getPoll(pollId, actorProfileId);
+    return this.readService.getPoll(pollId, actor, actorProfileId);
   }
 }

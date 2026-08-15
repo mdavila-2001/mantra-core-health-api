@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -15,12 +16,19 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  TenantAgnostic,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DiagnosticUnitsService,
   DiagnosticStudiesService,
   DiagnosticPricingService,
   DiagnosticUnitsReadService,
+  DiagnosticUnitsAdminReadService,
+  DiagnosticUnitsSearchService,
 } from '../services';
 import {
   AccreditationResponseDto,
@@ -34,9 +42,13 @@ import {
   DiagnosticUnitResponseDto,
   DiagnosticUnitDetailDto,
   DiagnosticUnitDirectoryResponseDto,
+  DiagnosticUnitAdminDetailDto,
+  DiagnosticUnitAdminListDto,
   PriceScheduleResponseDto,
   ReprojectResultDto,
   SetSpecialtiesDto,
+  SearchDiagnosticUnitsQueryDto,
+  SearchDiagnosticUnitsResponseDto,
   SiteResponseDto,
   SpecialtiesResultDto,
   StudyOfferingResponseDto,
@@ -57,12 +69,16 @@ export class DiagnosticUnitsController {
    * @param unitsService - Valor de units service requerido por la operación.
    * @param studiesService - Valor de studies service requerido por la operación.
    * @param pricingService - Valor de pricing service requerido por la operación.
+   * @param readService - Lecturas del directorio público.
+   * @param adminReadService - Lecturas de la consola de administración (C16).
    */
   constructor(
     private readonly unitsService: DiagnosticUnitsService,
     private readonly studiesService: DiagnosticStudiesService,
     private readonly pricingService: DiagnosticPricingService,
     private readonly readService: DiagnosticUnitsReadService,
+    private readonly adminReadService: DiagnosticUnitsAdminReadService,
+    private readonly searchService: DiagnosticUnitsSearchService,
   ) {}
 
   /** Directorio publicado del tenant activo. */
@@ -73,6 +89,55 @@ export class DiagnosticUnitsController {
     return this.readService.list();
   }
 
+  /**
+   * Consola de administración: **todas** las unidades del tenant — CARRIL 16.
+   *
+   * Va declarada **antes** de `@Get(':id')` a propósito. El router de Nest
+   * prueba en orden de declaración y ese parámetro lleva `ParseUUIDPipe`:
+   * declarada después, `administration` entraría por la ruta del parámetro y el
+   * pipe respondería 400 en vez de servir el listado.
+   *
+   * A diferencia del directorio, no filtra por publicación: quien administra
+   * necesita ver el borrador que todavía no publicó — que es justamente lo que
+   * el directorio esconde.
+   */
+  @Get('administration')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Listar las unidades del tenant, publicadas o no',
+  })
+  @ApiOkResponse({ type: DiagnosticUnitAdminListDto })
+  listForAdministration(): Promise<DiagnosticUnitAdminListDto> {
+    return this.adminReadService.list();
+  }
+
+  /**
+   * El buscador del paciente: centros publicados de toda la plataforma.
+   *
+   * Va declarado **antes** que `:id` porque Nest resuelve por orden de
+   * declaración y `search` sería capturado por el parámetro si fuese después.
+   *
+   * No lleva `@Roles` porque es un directorio de prestadores publicados, no
+   * datos de nadie: qué centros hay, qué hacen y cuánto cuestan. Exigir un rol
+   * lo dejaría fuera del alcance del paciente, que es para quien existe.
+   */
+  @Get('search')
+  @TenantAgnostic()
+  @ApiOperation({
+    summary: 'Buscar centros de diagnóstico, laboratorio e imagen',
+    description:
+      'Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, ' +
+      'prestaciones, precio y calificación. A diferencia del directorio, no se ' +
+      'acota a la organización de la sesión: quien busca dónde hacerse un ' +
+      'estudio busca en la ciudad, no en su institución.',
+  })
+  @ApiOkResponse({ type: SearchDiagnosticUnitsResponseDto })
+  search(
+    @Query() query: SearchDiagnosticUnitsQueryDto,
+  ): Promise<SearchDiagnosticUnitsResponseDto> {
+    return this.searchService.search(query);
+  }
+
   /** Perfil publicado; el servicio acota el id al tenant activo. */
   @Get(':id')
   @ApiOperation({ summary: 'Consultar el perfil de una unidad diagnóstica' })
@@ -81,6 +146,26 @@ export class DiagnosticUnitsController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<DiagnosticUnitDetailDto> {
     return this.readService.getById(id);
+  }
+
+  /**
+   * Ficha administrativa completa de una unidad — CARRIL 16.
+   *
+   * Sedes, equipamiento con su calibración, catálogo de estudios con todos sus
+   * precios —también los de cronogramas internos—, legajo y personal con sus
+   * permisos de validación y firma. Una unidad de otro tenant responde el mismo
+   * 404 que una inexistente.
+   */
+  @Get(':id/administration')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Consola de administración de una unidad diagnóstica',
+  })
+  @ApiOkResponse({ type: DiagnosticUnitAdminDetailDto })
+  getForAdministration(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<DiagnosticUnitAdminDetailDto> {
+    return this.adminReadService.getById(id);
   }
 
   /** UC-23-01. */

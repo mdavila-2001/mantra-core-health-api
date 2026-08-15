@@ -12,3 +12,4 @@ export * from './create-support-assignment.dto';
 export * from './create-inventory-item.dto';
 export * from './create-movement.dto';
 export * from './responses.dto';
+export * from './organization-console.dto';

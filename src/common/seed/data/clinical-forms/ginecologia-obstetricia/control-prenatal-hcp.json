@@ -1,0 +1,152 @@
+{
+  "code": "GINOBS_CONTROL_PRENATAL",
+  "name": "Control prenatal — Historia Clínica Perinatal (CLAP/SMR)",
+  "specialty": {
+    "code": "GINECOLOGIA_OBSTETRICIA",
+    "display": "Ginecología y obstetricia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Historia Clínica Perinatal — Sistema Informático Perinatal (SIP)",
+    "organization": "Centro Latinoamericano de Perinatología, Salud de la Mujer y Reproductiva (CLAP/SMR) — OPS/OMS",
+    "url": "https://iris.paho.org/handle/10665.2/17048",
+    "license": "Publicación OPS/OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
+    "sourceVersion": "Historia clínica perinatal simplificada",
+    "retrievedAt": "2026-08-14",
+    "note": "Transcripción de la sección de control prenatal. El formulario completo cubre además parto, puerperio y recién nacido."
+  },
+  "fields": [
+    {
+      "code": "fecha_ultima_menstruacion",
+      "name": "Fecha de la última menstruación",
+      "dataType": "date",
+      "required": true
+    },
+    {
+      "code": "fecha_probable_de_parto",
+      "name": "Fecha probable de parto",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "code": "edad_gestacional_semanas",
+      "name": "Edad gestacional (semanas)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "gestas_previas",
+      "name": "Gestas previas",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "partos_previos",
+      "name": "Partos previos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "cesareas_previas",
+      "name": "Cesáreas previas",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "abortos_previos",
+      "name": "Abortos previos",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "altura_uterina_cm",
+      "name": "Altura uterina (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "presentacion_fetal",
+      "name": "Presentación fetal",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "frecuencia_cardiaca_fetal",
+      "name": "Frecuencia cardíaca fetal (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "movimientos_fetales",
+      "name": "Movimientos fetales presentes",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "edema",
+      "name": "Edema",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "proteinuria",
+      "name": "Proteinuria",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "vacuna_antitetanica",
+      "name": "Vacuna antitetánica al día",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "suplemento_hierro_folatos",
+      "name": "Recibe hierro y ácido fólico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "riesgo_detectado",
+      "name": "Riesgo detectado",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "proximo_control",
+      "name": "Fecha del próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ]
+}

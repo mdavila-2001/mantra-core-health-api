@@ -15,6 +15,7 @@ import {
   Max,
   MaxLength,
   Min,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -272,6 +273,24 @@ export class UpdateCaseResponseDto {
    */
   @ApiProperty({ description: 'true si se corrigió el paciente del caso' })
   patientChanged!: boolean;
+
+  /**
+   * Valor de reacceptance required mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'true si la modificación fue relevante y el equipo debe volver a aceptar',
+  })
+  reacceptanceRequired!: boolean;
+
+  /**
+   * Valor de acceptances invalidated mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'Aceptaciones que quedaron invalidadas por la modificación relevante',
+  })
+  acceptancesInvalidated!: number;
 }
 
 /**
@@ -430,6 +449,58 @@ export class AssignTeamMemberDto {
   @ApiProperty({ enum: TEAM_ROLES })
   @IsIn(TEAM_ROLES)
   role!: TeamRole;
+}
+
+/**
+ * Las tres respuestas negativas del integrante a su participación.
+ *
+ * Aceptar tiene endpoint propio (`.../accept`) porque es la única que hace
+ * avanzar el caso y la única que exige credencial vigente. Las otras tres
+ * comparten forma —todas piden un motivo y ninguna deja al integrante
+ * disponible— así que comparten endpoint y se distinguen por este campo.
+ *
+ * No son sinónimos y por eso no se colapsan en un solo «rechazado»: quien pide
+ * una modificación **sigue queriendo participar**, y quien informa
+ * indisponibilidad no está objetando la intervención. Al responsable le cambia
+ * la decisión: en un caso negocia, en otro reemplaza.
+ */
+export type TeamParticipationResponse =
+  'DECLINE' | 'REQUEST_CHANGE' | 'UNAVAILABLE';
+const TEAM_PARTICIPATION_RESPONSES = [
+  'DECLINE',
+  'REQUEST_CHANGE',
+  'UNAVAILABLE',
+] as const;
+
+/** Cuerpo de `POST /procedure-cases/{id}/team-members/{memberId}/respond`. */
+export class RespondTeamMemberDto {
+  /**
+   * Valor de response mantenido por la instancia.
+   */
+  @ApiProperty({
+    enum: TEAM_PARTICIPATION_RESPONSES,
+    description:
+      'Rechazo, solicitud de modificación o indisponibilidad informada',
+  })
+  @IsIn(TEAM_PARTICIPATION_RESPONSES)
+  response!: TeamParticipationResponse;
+
+  /**
+   * Valor de reason text mantenido por la instancia.
+   *
+   * Obligatorio: el motivo es lo que el responsable necesita para decidir si
+   * negocia, reemplaza o reprograma. Sin él la notificación diría sólo que
+   * alguien se bajó, que es justo lo que no ayuda.
+   */
+  @ApiProperty({
+    description: 'Motivo de la respuesta (obligatorio)',
+    minLength: 1,
+    maxLength: 2000,
+  })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
+  reasonText!: string;
 }
 
 /**
