@@ -46,6 +46,19 @@ export interface BookingTransitionSnapshot {
    * la cuenta, no el papel que jugaba.
    */
   actorKind?: BookingActorKind;
+  /**
+   * Qué resolvió el prestador sobre una solicitud (UC-41-17, carril 11).
+   *
+   * Viaja en el mismo snapshot que la transición y no en una tabla aparte
+   * porque **es** el porqué de esa transición: sin él, el historial dice que la
+   * cita pasó a cancelada y no que el prestador la rechazó. Presente sólo en
+   * las transiciones que nacen de una decisión.
+   */
+  decision?: string;
+  /** Qué documentación se pidió, cuando la decisión fue pedirla. */
+  infoRequested?: string;
+  /** Lo que el prestador le escribió al paciente al decidir. */
+  message?: string;
 }
 
 /** Desde qué lado del mostrador se hizo el cambio. */

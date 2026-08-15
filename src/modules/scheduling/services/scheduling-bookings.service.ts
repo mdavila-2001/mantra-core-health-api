@@ -55,6 +55,9 @@ import {
   BookingStatusReasonDto,
   SearchBookingsResponseDto,
   type BookingChannel,
+  BookingDecisionsResponseDto,
+  type BookingDecision,
+  type BookingInfoRequest,
 } from '../dto';
 
 const CHANNEL_CONCEPT: Readonly<Record<BookingChannel, string>> = {
@@ -153,6 +156,22 @@ const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
  * Flujo de reserva: holds anti-double-booking, confirmación, reprogramación,
  * cancelación, check-in y el worker de expiración (UC-41-05 … 10).
  */
+/**
+ * Estados en los que una solicitud todavía espera la decisión del prestador.
+ *
+ * La usa la lectura del historial de decisiones: son los estados desde los que
+ * `accept` y `reject` (carril 07) resuelven una solicitud.
+ */
+const PENDING_DECISION_STATES: readonly string[] = [
+  SCHED.BOOKING_REQUESTED,
+  SCHED.BOOKING_PENDING_CONFIRMATION,
+];
+
+/** El valor si es un texto no vacío; nada si no lo es. */
+function textoOpcional(value: unknown): string | undefined {
+  return typeof value === 'string' && value !== '' ? value : undefined;
+}
+
 @Injectable()
 export class SchedulingBookingsService {
   /**
@@ -1390,6 +1409,57 @@ export class SchedulingBookingsService {
     const template = await this.catalogRepo.findTemplateById(tx, templateId);
     if (!template?.bookingPolicyId) return null;
     return this.catalogRepo.findPolicyById(tx, template.bookingPolicyId);
+  }
+
+  /**
+   * Las decisiones registradas sobre una reserva.
+   *
+   * Sale del historial append-only de `audit`, que es donde
+   * `accept` y `reject` las sellan: el mensaje del prestador —qué documento
+   * traer, cómo prepararse, por qué se rechazó— no tiene columna propia en la
+   * reserva y no debería tenerla, porque son varios a lo largo del tiempo y
+   * una columna sólo guarda el último.
+   *
+   * @param bookingId - Reserva consultada.
+   * @returns Las decisiones, de la más vieja a la más nueva.
+   */
+  async listDecisions(bookingId: string): Promise<BookingDecisionsResponseDto> {
+    const em = this.em.fork();
+    const booking = await this.bookingsRepo.findBookingById(em, bookingId);
+    if (!booking) {
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
+    }
+
+    const revisions = await this.historyRepo.timeline(
+      em,
+      'appointment_bookings',
+      bookingId,
+    );
+
+    const items = revisions
+      .filter(
+        (revision) =>
+          revision.operationConceptId === SCHED.HISTORY_OP_STATE_TRANSITION,
+      )
+      .map((revision) => {
+        const snapshot = (revision.dataSnapshot ?? {}) as Record<
+          string,
+          unknown
+        >;
+        return {
+          fromStateConceptId: textoOpcional(snapshot.fromStateConceptId),
+          toStateConceptId: textoOpcional(snapshot.toStateConceptId),
+          decision: textoOpcional(snapshot.decision) as
+            BookingDecision | undefined,
+          infoRequested: textoOpcional(snapshot.infoRequested) as
+            BookingInfoRequest | undefined,
+          message: textoOpcional(snapshot.message),
+          recordedAt: revision.recordedAt,
+        };
+      })
+      .sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
+
+    return { bookingId, items };
   }
 }
 

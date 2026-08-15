@@ -29,12 +29,14 @@ function build() {
   const pricingService = { createSchedule: mockFn() };
   const readService = { list: mockFn(), getById: mockFn() };
   const adminReadService = { list: mockFn(), getById: mockFn() };
+  const searchService = { search: mockFn() };
   const controller = new DiagnosticUnitsController(
     unitsService as any,
     studiesService as any,
     pricingService as any,
     readService as any,
     adminReadService as any,
+    searchService as any,
   );
   return {
     controller,
@@ -43,6 +45,7 @@ function build() {
     pricingService,
     readService,
     adminReadService,
+    searchService,
   };
 }
 

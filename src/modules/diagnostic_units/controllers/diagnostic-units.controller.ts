@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -15,13 +16,19 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  TenantAgnostic,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   DiagnosticUnitsService,
   DiagnosticStudiesService,
   DiagnosticPricingService,
   DiagnosticUnitsReadService,
   DiagnosticUnitsAdminReadService,
+  DiagnosticUnitsSearchService,
 } from '../services';
 import {
   AccreditationResponseDto,
@@ -40,6 +47,8 @@ import {
   PriceScheduleResponseDto,
   ReprojectResultDto,
   SetSpecialtiesDto,
+  SearchDiagnosticUnitsQueryDto,
+  SearchDiagnosticUnitsResponseDto,
   SiteResponseDto,
   SpecialtiesResultDto,
   StudyOfferingResponseDto,
@@ -69,6 +78,7 @@ export class DiagnosticUnitsController {
     private readonly pricingService: DiagnosticPricingService,
     private readonly readService: DiagnosticUnitsReadService,
     private readonly adminReadService: DiagnosticUnitsAdminReadService,
+    private readonly searchService: DiagnosticUnitsSearchService,
   ) {}
 
   /** Directorio publicado del tenant activo. */
@@ -99,6 +109,33 @@ export class DiagnosticUnitsController {
   @ApiOkResponse({ type: DiagnosticUnitAdminListDto })
   listForAdministration(): Promise<DiagnosticUnitAdminListDto> {
     return this.adminReadService.list();
+  }
+
+  /**
+   * El buscador del paciente: centros publicados de toda la plataforma.
+   *
+   * Va declarado **antes** que `:id` porque Nest resuelve por orden de
+   * declaración y `search` sería capturado por el parámetro si fuese después.
+   *
+   * No lleva `@Roles` porque es un directorio de prestadores publicados, no
+   * datos de nadie: qué centros hay, qué hacen y cuánto cuestan. Exigir un rol
+   * lo dejaría fuera del alcance del paciente, que es para quien existe.
+   */
+  @Get('search')
+  @TenantAgnostic()
+  @ApiOperation({
+    summary: 'Buscar centros de diagnóstico, laboratorio e imagen',
+    description:
+      'Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, ' +
+      'prestaciones, precio y calificación. A diferencia del directorio, no se ' +
+      'acota a la organización de la sesión: quien busca dónde hacerse un ' +
+      'estudio busca en la ciudad, no en su institución.',
+  })
+  @ApiOkResponse({ type: SearchDiagnosticUnitsResponseDto })
+  search(
+    @Query() query: SearchDiagnosticUnitsQueryDto,
+  ): Promise<SearchDiagnosticUnitsResponseDto> {
+    return this.searchService.search(query);
   }
 
   /** Perfil publicado; el servicio acota el id al tenant activo. */

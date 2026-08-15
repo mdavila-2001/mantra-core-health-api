@@ -39,6 +39,8 @@ import {
   ScheduleRemindersResponseDto,
   BookingItemDto,
   SearchBookingsResponseDto,
+  DecideBookingDto,
+  BookingDecisionsResponseDto,
 } from '../dto';
 
 /** Operaciones sobre una cita ya confirmada. */

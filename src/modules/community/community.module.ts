@@ -21,6 +21,7 @@ import {
   CommunityPollsService,
   CommunityFeedService,
   PublicProfileProjectionService,
+  CommunityRatingsService,
   CommunityVisibilityService,
   CommunitySocialReadService,
   CommunityTimelineReadService,
@@ -99,6 +100,7 @@ import {
     CommunityPollsService,
     CommunityFeedService,
     PublicProfileProjectionService,
+    CommunityRatingsService,
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
     CommunitySocialReadService,
@@ -109,6 +111,9 @@ import {
     CommunityReviewsReadService,
     CommunityPublicService,
   ],
-  exports: [PublicProfileProjectionService],
+  // La proyección la consume `diagnostic_units` al publicar un perfil; la nota,
+  // su buscador de centros. Las dos salen de acá y no de un `find` ajeno: la
+  // regla de qué reseña cuenta es de este módulo.
+  exports: [PublicProfileProjectionService, CommunityRatingsService],
 })
 export class CommunityModule {}
