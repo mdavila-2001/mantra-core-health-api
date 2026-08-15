@@ -653,4 +653,84 @@ export class NotificationsRepository {
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
+
+  // --- Carril 18: autoservicio de preferencias y bandeja del propio usuario ---
+
+  /** Todos los canales activos, para que el usuario elija sobre cuáles declarar preferencia. */
+  listActiveChannels(
+    em: EntityManager,
+    activeStateConceptId: string,
+  ): Promise<MessageChannels[]> {
+    return em.find(
+      MessageChannels,
+      { stateConceptId: activeStateConceptId },
+      { orderBy: { code: 'ASC' } },
+    );
+  }
+
+  /** Todas las preferencias que el usuario ya declaró (cualquier canal/categoría). */
+  listPreferencesForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<RecipientPreferences[]> {
+    return em.find(RecipientPreferences, { userId });
+  }
+
+  /**
+   * Alta o actualización de una preferencia `(userId, channelId, categoryConceptId)`.
+   * Idempotente por esa clave: fijarla dos veces actualiza la misma fila, no
+   * crea una segunda que discreparía con la primera.
+   */
+  async upsertPreference(
+    em: EntityManager,
+    data: {
+      userId: string;
+      channelId: string;
+      categoryConceptId?: string;
+      optedIn: boolean;
+      quietHoursJson?: unknown;
+      actorUserId?: string;
+    },
+  ): Promise<RecipientPreferences> {
+    const existing = await em.findOne(RecipientPreferences, {
+      userId: data.userId,
+      channelId: data.channelId,
+      categoryConceptId: data.categoryConceptId,
+    });
+    const now = new Date();
+    if (existing) {
+      existing.optedIn = data.optedIn;
+      if (data.quietHoursJson !== undefined) {
+        existing.quietHoursJson = data.quietHoursJson;
+      }
+      existing.updatedAt = now;
+      existing.updatedByUserId = data.actorUserId;
+      return existing;
+    }
+    return em.create(
+      RecipientPreferences,
+      {
+        userId: data.userId,
+        channelId: data.channelId,
+        categoryConceptId: data.categoryConceptId,
+        optedIn: data.optedIn,
+        quietHoursJson: data.quietHoursJson,
+        ...createdBy(data.actorUserId, now),
+      },
+      { partial: true },
+    );
+  }
+
+  /** La bandeja in-app del destinatario, de la más reciente a la más antigua. */
+  listInAppForRecipient(
+    em: EntityManager,
+    recipientUserId: string,
+    limit: number,
+  ): Promise<InAppNotifications[]> {
+    return em.find(
+      InAppNotifications,
+      { recipientUserId },
+      { orderBy: { availableAt: 'DESC' }, limit },
+    );
+  }
 }

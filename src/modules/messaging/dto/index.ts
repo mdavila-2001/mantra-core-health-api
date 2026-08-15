@@ -26,6 +26,13 @@ export {
   ProviderReceiptDto,
   ProviderReceiptResponseDto,
   InAppReadResponseDto,
+  MessageChannelDto,
+  ListChannelsResponseDto,
+  NotificationPreferenceDto,
+  ListPreferencesResponseDto,
+  SetNotificationPreferenceDto,
+  MyInAppNotificationDto,
+  ListMyInAppResponseDto,
 } from './messaging.dto';
 export type {
   EventAckOutcome,

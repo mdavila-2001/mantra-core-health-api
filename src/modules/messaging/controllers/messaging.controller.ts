@@ -1,14 +1,22 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { QueuesService, NotificationsService } from '../services';
 import {
   EnqueueJobDto,
@@ -18,6 +26,11 @@ import {
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
   InAppReadResponseDto,
+  ListChannelsResponseDto,
+  ListPreferencesResponseDto,
+  SetNotificationPreferenceDto,
+  NotificationPreferenceDto,
+  ListMyInAppResponseDto,
 } from '../dto';
 
 /** Endpoints de mensajería que consumen los módulos de negocio y los usuarios. */
@@ -99,5 +112,50 @@ export class MessagingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<InAppReadResponseDto> {
     return this.notificationsService.markInAppRead(id, actor);
+  }
+
+  /** Carril 18 — canales disponibles para configurar preferencia. */
+  @Get('notifications/channels')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @ApiOperation({ summary: 'Canales de notificación disponibles' })
+  listChannels(): Promise<ListChannelsResponseDto> {
+    return this.notificationsService.listChannels();
+  }
+
+  /** Carril 18 — mis preferencias de notificación. */
+  @Get('notifications/preferences')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @ApiOperation({ summary: 'Mis preferencias de notificación' })
+  getMyPreferences(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ListPreferencesResponseDto> {
+    return this.notificationsService.getMyPreferences(actor);
+  }
+
+  /** Carril 18 — fijar una preferencia (canal + categoría opcional). */
+  @Put('notifications/preferences')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Configurar una preferencia de notificación',
+    description:
+      'Alta o actualización por (canal, categoría). Las categorías no promocionales no dependen de esta preferencia para las alertas críticas de seguridad — solo para las notificaciones ordinarias de esa categoría.',
+  })
+  setMyPreference(
+    @Body() dto: SetNotificationPreferenceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<NotificationPreferenceDto> {
+    return this.notificationsService.setMyPreference(dto, actor);
+  }
+
+  /** Carril 18 — mi bandeja de notificaciones in-app. */
+  @Get('notifications/in-app')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @ApiOperation({ summary: 'Mis notificaciones in-app' })
+  listMyInApp(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListMyInAppResponseDto> {
+    return this.notificationsService.listMyInApp(actor, limit);
   }
 }

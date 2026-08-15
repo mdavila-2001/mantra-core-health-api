@@ -24,8 +24,15 @@ import {
   ProviderReceiptDto,
   ProviderReceiptResponseDto,
   InAppReadResponseDto,
+  ListChannelsResponseDto,
+  ListPreferencesResponseDto,
+  SetNotificationPreferenceDto,
+  NotificationPreferenceDto,
+  ListMyInAppResponseDto,
   type ReceiptType,
 } from '../dto';
+
+const DEFAULT_IN_APP_LIMIT = 50;
 
 const RECEIPT_TYPE_CONCEPT: Readonly<Record<ReceiptType, string>> = {
   DELIVERED: CONCEPTS.MSG_RECEIPT_DELIVERED,
@@ -647,6 +654,109 @@ export class NotificationsService {
     });
   }
 
+  // --- Carril 18: autoservicio de preferencias y bandeja del propio usuario ---
+
+  /** Los canales disponibles para configurar preferencia (spec línea 1751-1756). */
+  async listChannels(): Promise<ListChannelsResponseDto> {
+    const channels = await this.notificationsRepo.listActiveChannels(
+      this.em,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    return {
+      items: channels.map((c) => ({
+        id: c.id,
+        code: c.code,
+        name: c.name,
+        channelTypeConceptId: c.channelTypeConceptId,
+      })),
+    };
+  }
+
+  /** Las preferencias que el usuario autenticado ya declaró. */
+  async getMyPreferences(
+    actor: AuthenticatedUser,
+  ): Promise<ListPreferencesResponseDto> {
+    const preferences = await this.notificationsRepo.listPreferencesForUser(
+      this.em,
+      actor.id,
+    );
+    return {
+      items: preferences.map((p): NotificationPreferenceDto => ({
+        id: p.id,
+        channelId: p.channelId,
+        categoryConceptId: p.categoryConceptId ?? null,
+        optedIn: p.optedIn,
+        quietHoursJson: p.quietHoursJson,
+      })),
+    };
+  }
+
+  /**
+   * Fija una preferencia del usuario autenticado (alta o actualización, por
+   * `(canal, categoría)`). El canal debe existir; que exista o no un
+   * proveedor real detrás es irrelevante acá — eso lo decide la entrega, no
+   * la preferencia.
+   */
+  async setMyPreference(
+    dto: SetNotificationPreferenceDto,
+    actor: AuthenticatedUser,
+  ): Promise<NotificationPreferenceDto> {
+    return this.em.transactional(async (tx) => {
+      const channel = await this.notificationsRepo.findChannelById(
+        tx,
+        dto.channelId,
+      );
+      if (!channel) {
+        throw new ResourceNotFoundException('Canal no encontrado', {
+          channelId: dto.channelId,
+        });
+      }
+      const preference = await this.notificationsRepo.upsertPreference(tx, {
+        userId: actor.id,
+        channelId: dto.channelId,
+        categoryConceptId: dto.categoryConceptId,
+        optedIn: dto.optedIn,
+        quietHoursJson: dto.quietHoursJson,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+      return {
+        id: preference.id,
+        channelId: preference.channelId,
+        categoryConceptId: preference.categoryConceptId ?? null,
+        optedIn: preference.optedIn,
+        quietHoursJson: preference.quietHoursJson,
+      };
+    });
+  }
+
+  /** La bandeja in-app del usuario autenticado, la más reciente primero. */
+  async listMyInApp(
+    actor: AuthenticatedUser,
+    limit?: number,
+  ): Promise<ListMyInAppResponseDto> {
+    const items = await this.notificationsRepo.listInAppForRecipient(
+      this.em,
+      actor.id,
+      limit ?? DEFAULT_IN_APP_LIMIT,
+    );
+    return {
+      items: items.map((n) => ({
+        id: n.id,
+        categoryConceptId: n.categoryConceptId ?? null,
+        subject: n.subject ?? null,
+        bodyText: n.bodyText ?? null,
+        payloadJson: n.payloadJson,
+        statusConceptId: n.statusConceptId,
+        relatedResourceType: n.relatedResourceType ?? null,
+        relatedResourceId: n.relatedResourceId ?? null,
+        availableAt: n.availableAt,
+        readAt: n.readAt ?? null,
+      })),
+      count: items.length,
+    };
+  }
+
   // --- Apoyo ---
 
   /**
@@ -661,6 +771,16 @@ export class NotificationsService {
   ): Promise<string | undefined> {
     if (!dto.recipientUserId) return undefined;
 
+    // Carril 18 (spec línea 1762): "las alertas críticas de seguridad,
+    // emergencias o cambios en citas confirmadas no deberán depender de las
+    // preferencias promocionales". La búsqueda de preferencia ya es por
+    // `categoryConceptId` exacto: un opt-out de PROMOTIONAL nunca puede
+    // suprimir una notificación categorizada como CLINICAL/ADMINISTRATIVE/
+    // ACCOUNTING, porque `findPreference` busca esa categoría, no
+    // "cualquiera". Eso ya cumple la regla sin necesitar un bypass aparte —
+    // uno haría imposible que el doctor "active o desactive categorías de
+    // notificaciones" (línea 1760) para lo no-promocional, que si debe poder
+    // desactivarse.
     const preference = await this.notificationsRepo.findPreference(
       tx,
       dto.recipientUserId,
