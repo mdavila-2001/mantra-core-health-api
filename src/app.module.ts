@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule, ThrottlerStorage } from '@nestjs/throttler';
+import {
+  ThrottlerGuard,
+  ThrottlerModule,
+  ThrottlerStorage,
+} from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppReadinessService } from './app-readiness.service';
@@ -48,6 +52,7 @@ import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/c
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
+import { SurveysModule } from './modules/surveys/surveys.module';
 import { EducationModule } from './modules/education/education.module';
 import { ErpModule } from './modules/erp/erp.module';
 import { FormsModule } from './modules/forms/forms.module';
@@ -192,6 +197,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ObjectStorageModule,
     OrganizationExtensionsModule,
     PaymentsModule,
+    SurveysModule,
     PharmaLabModule,
     PharmacyModule,
     PharmacyInventoryModule,

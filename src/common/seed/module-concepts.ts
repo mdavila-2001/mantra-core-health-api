@@ -1,6 +1,7 @@
 import type { ConceptSeed } from './concept-seed';
 import { DIRECTORY_CONCEPT_SEEDS } from '../../modules/directory/directory.concepts';
 import { PROFILES_CONCEPT_SEEDS } from '../../modules/profiles/profiles.concepts';
+import { SURVEYS_CONCEPT_SEEDS } from '../../modules/surveys/surveys.concepts';
 import { AUTHZ_CONCEPT_SEEDS } from '../../modules/authz/authz.concepts';
 import { CONSENT_CONCEPT_SEEDS } from '../../modules/consent/consent.concepts';
 import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
@@ -71,5 +72,6 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...INTEGRATION_CONTRACTS_CONCEPT_SEEDS,
   ...SCHEDULING_CONCEPT_SEEDS,
   ...PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS,
+  ...SURVEYS_CONCEPT_SEEDS,
   ...PHARMA_LAB_CONCEPT_SEEDS,
 ];

@@ -159,9 +159,9 @@ describe('CommunityPollsReadService', () => {
     d.pollsRepo.findPollById.mockResolvedValue(poll);
     d.visibility.canViewPost.mockResolvedValue(false);
 
-    await expect(d.service.getPoll('poll-1', actor, 'p-9')).rejects.toBeInstanceOf(
-      ResourceNotFoundException,
-    );
+    await expect(
+      d.service.getPoll('poll-1', actor, 'p-9'),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 
   it('usa el recuento real de votos y no el contador denormalizado', async () => {

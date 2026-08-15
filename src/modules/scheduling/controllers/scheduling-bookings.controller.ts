@@ -39,7 +39,6 @@ import {
   ScheduleRemindersResponseDto,
   BookingItemDto,
   SearchBookingsResponseDto,
-  DecideBookingDto,
   BookingDecisionsResponseDto,
 } from '../dto';
 
@@ -120,6 +119,23 @@ export class SchedulingBookingsController {
   @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
   getBooking(@Param('id', ParseUUIDPipe) id: string): Promise<BookingItemDto> {
     return this.bookingsService.getBookingById(id);
+  }
+
+  /**
+   * El historial de decisiones de una cita (carril 11).
+   *
+   * Complementa a `accept` y `reject`, que dicen **qué pasó ahora**: esto dice
+   * qué se fue decidiendo y qué escribió el prestador en cada paso. La alcanza
+   * `PATIENT` porque es justamente lo que necesita leer — el motivo de un
+   * rechazo vive acá.
+   */
+  @Get(':id/decisions')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({ summary: 'Historial de decisiones de la solicitud' })
+  listDecisions(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BookingDecisionsResponseDto> {
+    return this.bookingsService.listDecisions(id);
   }
 
   /**

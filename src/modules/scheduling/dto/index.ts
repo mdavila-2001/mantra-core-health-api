@@ -35,7 +35,6 @@ export {
   WorkerBatchResultDto,
   WorkerBatchDto,
   WaitlistCandidateSlotsResponseDto,
-  DecideBookingDto,
   BookingDecisionItemDto,
   BookingDecisionsResponseDto,
   BOOKING_CHANNELS,

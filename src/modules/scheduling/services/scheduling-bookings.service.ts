@@ -152,26 +152,15 @@ const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
   'health_practitioner_profiles',
 ];
 
-/**
- * Flujo de reserva: holds anti-double-booking, confirmación, reprogramación,
- * cancelación, check-in y el worker de expiración (UC-41-05 … 10).
- */
-/**
- * Estados en los que una solicitud todavía espera la decisión del prestador.
- *
- * La usa la lectura del historial de decisiones: son los estados desde los que
- * `accept` y `reject` (carril 07) resuelven una solicitud.
- */
-const PENDING_DECISION_STATES: readonly string[] = [
-  SCHED.BOOKING_REQUESTED,
-  SCHED.BOOKING_PENDING_CONFIRMATION,
-];
-
 /** El valor si es un texto no vacío; nada si no lo es. */
 function textoOpcional(value: unknown): string | undefined {
   return typeof value === 'string' && value !== '' ? value : undefined;
 }
 
+/**
+ * Flujo de reserva: holds anti-double-booking, confirmación, reprogramación,
+ * cancelación, check-in y el worker de expiración (UC-41-05 … 10).
+ */
 @Injectable()
 export class SchedulingBookingsService {
   /**

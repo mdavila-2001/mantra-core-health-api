@@ -610,51 +610,6 @@ export const BOOKING_INFO_REQUESTS: readonly BookingInfoRequest[] = [
   'PREPARATION',
 ];
 
-/** Cuerpo de `POST /scheduling/bookings/{id}/decision` (UC-41-17). */
-export class DecideBookingDto {
-  /** La decisión. */
-  @ApiProperty({
-    description: 'Decisión del prestador',
-    enum: BOOKING_DECISIONS,
-  })
-  @IsIn(BOOKING_DECISIONS as readonly string[])
-  decision!: BookingDecision;
-
-  /**
-   * Qué se le pide al paciente. Obligatorio con `REQUEST_INFO` y sin sentido
-   * en el resto: el servicio lo rechaza si no concuerdan.
-   */
-  @ApiPropertyOptional({
-    description: 'Qué falta, cuando la decisión es REQUEST_INFO',
-    enum: BOOKING_INFO_REQUESTS,
-  })
-  @IsOptional()
-  @IsIn(BOOKING_INFO_REQUESTS as readonly string[])
-  infoRequested?: BookingInfoRequest;
-
-  /**
-   * Horario propuesto. Obligatorio con `PROPOSE_SCHEDULE`.
-   */
-  @ApiPropertyOptional({
-    description: 'Cupo propuesto, cuando la decisión es PROPOSE_SCHEDULE',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  proposedSlotId?: string;
-
-  /**
-   * Lo que el prestador quiere decirle a la persona: el motivo del rechazo, qué
-   * documento traer, cómo prepararse. Queda en el historial de la reserva, que
-   * es de donde lo lee el portal.
-   */
-  @ApiPropertyOptional({ description: 'Mensaje para el paciente' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(1000)
-  message?: string;
-}
-
 /** Una decisión registrada sobre la reserva. */
 export class BookingDecisionItemDto {
   /** Estado del que salió (concept id). */
