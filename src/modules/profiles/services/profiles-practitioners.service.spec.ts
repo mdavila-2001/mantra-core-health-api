@@ -89,6 +89,11 @@ function build() {
     findActiveByUser: mockFn().mockResolvedValue(null),
   };
   const effectiveRoles = { ensureRoleByCode: mockFn().mockResolvedValue(true) };
+  // Por defecto el bypass está apagado: listPractitioners filtra por
+  // verificado, igual que se comportaría un arranque sin
+  // DEV_VERIFICATION_BYPASS. Los tests que necesitan el bypass activo lo
+  // pisan explícitamente.
+  const verificationBypass = { isActive: mockFn().mockReturnValue(false) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new ProfilesPractitionersService(
@@ -104,6 +109,7 @@ function build() {
     ownership as never,
     accountLinksRepo as any,
     effectiveRoles as any,
+    verificationBypass as any,
     logger as any,
   );
   return {
@@ -112,6 +118,7 @@ function build() {
     accountLinksRepo,
     effectiveRoles,
     affiliationsRepo,
+    verificationBypass,
     ownership,
     tx,
     personsRepo,
@@ -527,6 +534,69 @@ describe('ProfilesPractitionersService', () => {
       });
     });
 
+    /**
+     * Historial laboral (UC-05-16): el resumen lo incluía para la escritura y
+     * no para la lectura — sin esto, la pestaña Trayectoria del perfil no
+     * tiene de dónde sacar la experiencia histórica ni la actividad actual.
+     */
+    it('incluye el historial laboral, con `current` derivado por fila', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.personsRepo.findById.mockResolvedValue({ id: 'per-1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+      d.affiliationsRepo.findByPractitioner.mockResolvedValue([
+        {
+          id: 'aff-1',
+          practitionerProfileId: 'per-1',
+          organizationName: 'Hospital Obrero N.º 1',
+          roleTitle: 'Médica de planta',
+          departmentText: undefined,
+          practiceSiteId: undefined,
+          affiliationTypeConceptId: PROF.AFFILIATION_TYPE_EMPLOYMENT,
+          startDate: new Date('2018-01-01'),
+          endDate: new Date('2021-01-01'),
+          statusConceptId: PROF.AFFILIATION_ACTIVE,
+          createdAt: new Date('2018-01-02'),
+        },
+        {
+          id: 'aff-2',
+          practitionerProfileId: 'per-1',
+          organizationName: 'Clínica del Sur',
+          roleTitle: 'Cardióloga',
+          departmentText: 'Cardiología',
+          practiceSiteId: undefined,
+          affiliationTypeConceptId: PROF.AFFILIATION_TYPE_EMPLOYMENT,
+          startDate: new Date('2021-02-01'),
+          endDate: undefined,
+          statusConceptId: PROF.AFFILIATION_ACTIVE,
+          createdAt: new Date('2021-02-02'),
+        },
+      ]);
+
+      const perfil = await d.service.getOwnPractitionerProfile({
+        id: 'u-1',
+      } as any);
+
+      expect(perfil.affiliations).toHaveLength(2);
+      expect(perfil.affiliations[0]).toMatchObject({
+        organizationName: 'Hospital Obrero N.º 1',
+        current: false,
+      });
+      expect(perfil.affiliations[1]).toMatchObject({
+        organizationName: 'Clínica del Sur',
+        current: true,
+      });
+    });
+
     /** Los booleanos opcionales de la base no pueden llegar como `undefined`. */
     it('normaliza los booleanos ausentes a false', async () => {
       const d = build();
@@ -775,6 +845,50 @@ describe('ProfilesPractitionersService', () => {
         nextCursor: null,
       });
       expect(d.practitionersRepo.listPage).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Corrección #12/#13: fuera del bypass, la guía solo lista verificados.
+     */
+    it('con el bypass apagado filtra por verificado', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+
+      await d.service.listPractitioners({ limit: 50 });
+
+      expect(d.practitionersRepo.listPage.mock.calls[0][1]).toMatchObject({
+        verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+      });
+    });
+
+    it('con el bypass activo no filtra por verificación', async () => {
+      const d = build();
+      d.verificationBypass.isActive.mockReturnValue(true);
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+
+      await d.service.listPractitioners({ limit: 50 });
+
+      expect(
+        d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId,
+      ).toBeUndefined();
+    });
+
+    it('combina el bypass activo con el filtro de especialidad', async () => {
+      const d = build();
+      d.verificationBypass.isActive.mockReturnValue(true);
+      d.specialtiesRepo.findProfileIdsBySpecialty.mockResolvedValue(['per-1']);
+      d.practitionersRepo.listPage.mockResolvedValue([fila]);
+
+      const pagina = await d.service.listPractitioners({
+        specialtyConceptId: 'con-cardio',
+        limit: 50,
+      });
+
+      expect(pagina.items).toHaveLength(1);
+      expect(d.practitionersRepo.listPage.mock.calls[0][1]).toMatchObject({
+        profileIds: ['per-1'],
+        verificationStatusConceptId: undefined,
+      });
     });
   });
 

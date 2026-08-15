@@ -19,9 +19,11 @@ import {
   AuthModule,
   FileStorageModule,
   TenantContextInterceptor,
+  VerificationBypassModule,
   appSecurityEnvSchema,
   authEnvSchema,
   storageEnvSchema,
+  verificationBypassEnvSchema,
 } from './common';
 import { SeedModule } from './common/seed/seed.module';
 import { IamModule } from './modules/iam/iam.module';
@@ -108,7 +110,8 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
-        .concat(telemetryEnvSchema),
+        .concat(telemetryEnvSchema)
+        .concat(verificationBypassEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
     // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
@@ -139,6 +142,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // Almacenamiento de archivos: resuelve el adaptador activo (`local` en
     // disco por ahora) a partir de FILE_STORAGE_ADAPTER. Global.
     FileStorageModule,
+    // Bypass de verificación DEV/TEST (corrección #12): un solo `isActive()`
+    // que consumen los servicios de dominio que hoy filtran por verificación.
+    VerificationBypassModule,
     // Núcleo de persistencia: conexión, inyección idempotente del DDL en el
     // arranque, verificación de fidelidad y métricas del ORM. Ver src/orm.
     OrmModule,

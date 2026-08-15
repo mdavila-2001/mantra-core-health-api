@@ -244,6 +244,21 @@ const AUTORIDADES = [
 ];
 
 /**
+ * Hospitales previos, para la experiencia histórica del historial laboral
+ * (`practitioner_affiliations`). Distintos de `INSTITUCIONES` (universidades,
+ * de donde egresó) y de `SEDES` (dónde ejerce hoy, dentro de la plataforma):
+ * sin esto la pestaña Trayectoria no tiene de dónde sacar "experiencia
+ * histórica" y solo mostraría formación y actividad actual.
+ */
+const HOSPITALES_PREVIOS = [
+  'Hospital Obrero N.º 1',
+  'Hospital de Clínicas',
+  'Hospital Arco Iris',
+  'Clínica del Sur',
+  'Hospital Metodista',
+];
+
+/**
  * Posgrados: la segunda especialidad de quien tiene dos.
  *
  * No todos la reciben — la mitad, por índice par — porque un padrón donde
@@ -598,6 +613,15 @@ for (let index = 0; index < DOCTORS; index += 1) {
   // cuenta con la que entrar por la pantalla y ver un consultorio lleno.
   let profileId;
   let credentialId;
+  /**
+   * Token de sesión del propio médico. Solo existe para el índice 0 (la
+   * cuenta de prueba con login real) — es el único que puede llamar
+   * `POST /profiles/practitioners/me/affiliations`, deliberadamente
+   * self-service sin atajo de plataforma (ver `profile-ownership.service.ts`).
+   * Los demás médicos se dan de alta sin cuenta y quedan sin historial
+   * laboral sembrado, lo que además ejercita el estado "trayectoria vacía".
+   */
+  let doctorToken;
 
   if (index === 0) {
     const alta = await call(
@@ -635,7 +659,7 @@ for (let index = 0; index < DOCTORS; index += 1) {
           expect: [200, 201],
         },
       );
-      const doctorToken = login.body?.accessToken;
+      doctorToken = login.body?.accessToken;
       profileId = doctorToken
         ? JSON.parse(
             Buffer.from(doctorToken.split('.')[1], 'base64url').toString('utf8'),
@@ -660,6 +684,20 @@ for (let index = 0; index < DOCTORS; index += 1) {
           expect: [200, 201, 204],
         },
       );
+      // La activación no devuelve sesión: hace falta un login propio para
+      // poder sembrar después el historial laboral vía `me/affiliations`.
+      const login = await call(
+        'Profesionales',
+        'Iniciar sesión como la cuenta de prueba recién activada',
+        'POST',
+        '/iam/auth/login',
+        {
+          auth: false,
+          body: { email: DOCTOR_EMAIL, password: DOCTOR_PASSWORD },
+          expect: [200, 201],
+        },
+      );
+      doctorToken = login.body?.accessToken;
     }
 
     if (!profileId) continue;
@@ -813,6 +851,71 @@ for (let index = 0; index < DOCTORS; index += 1) {
     );
   }
 
+
+  // --- historial laboral: experiencia histórica y actividad actual ---------
+  // Sin esto, la pestaña Trayectoria del perfil profesional no tiene de dónde
+  // sacar "experiencia histórica" ni "actividad actual" — solo formación.
+  // `POST .../me/affiliations` es self-service sin atajo de plataforma (ver
+  // `profile-ownership.service.ts`), así que solo puede sembrarse para el
+  // médico con sesión real (índice 0); los demás quedan con trayectoria
+  // vacía, que es el otro estado que la pantalla debe poder mostrar.
+  if (doctorToken) {
+    const adminToken = token;
+    token = doctorToken;
+    try {
+      const existentes = await call(
+        'Profesionales',
+        `Leer historial laboral previo de ${apellido}`,
+        'GET',
+        '/profiles/practitioners/me/affiliations',
+        { expect: [200] },
+      );
+      const yaTiene = (organizationName) =>
+        (existentes.body?.items ?? []).some(
+          (item) => item.organizationName === organizationName,
+        );
+
+      const hospitalPrevio =
+        HOSPITALES_PREVIOS[index % HOSPITALES_PREVIOS.length];
+      if (!yaTiene(hospitalPrevio)) {
+        await call(
+          'Profesionales',
+          `Experiencia histórica de ${apellido} — ${hospitalPrevio}`,
+          'POST',
+          '/profiles/practitioners/me/affiliations',
+          {
+            body: {
+              organizationName: hospitalPrevio,
+              roleTitle: `${titulo} residente`,
+              startDate: `${2008 + (index % 6)}-03-01`,
+              endDate: `${2013 + (index % 6)}-02-28`,
+            },
+            expect: [200, 201],
+          },
+        );
+      }
+
+      if (!yaTiene(sede)) {
+        await call(
+          'Profesionales',
+          `Actividad actual de ${apellido} — ${sede}`,
+          'POST',
+          '/profiles/practitioners/me/affiliations',
+          {
+            body: {
+              organizationName: sede,
+              roleTitle: titulo,
+              startDate: `${2019 + (index % 4)}-04-01`,
+              // Sin `endDate`: sigue vigente — es la fila que hace "actual".
+            },
+            expect: [200, 201],
+          },
+        );
+      }
+    } finally {
+      token = adminToken;
+    }
+  }
 
   // Política de reserva: es lo que hace que la agenda tenga reglas de negocio
   // (antelación mínima, ventana de cancelación) en vez de aceptar cualquier cosa.

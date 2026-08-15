@@ -81,13 +81,19 @@ export class HealthPractitionerProfilesRepository {
    * que de todos modos junta las páginas para dibujar la guía entera.
    *
    * @param em - Contexto de persistencia.
-   * @param filters - Continuación y filtro opcional por perfiles.
+   * @param filters - Continuación, filtro opcional por perfiles y filtro
+   *   opcional por estado de verificación (corrección #12/#13: fuera del
+   *   bypass DEV/TEST, la guía solo lista profesionales verificados).
    * @param limit - Filas a traer (el servicio pide una de más).
    * @returns La página, en orden estable de código.
    */
   listPage(
     em: EntityManager,
-    filters: { afterCode?: string; profileIds?: readonly string[] },
+    filters: {
+      afterCode?: string;
+      profileIds?: readonly string[];
+      verificationStatusConceptId?: string;
+    },
     limit: number,
   ): Promise<HealthPractitionerProfiles[]> {
     const where: Record<string, unknown> = {};
@@ -98,6 +104,9 @@ export class HealthPractitionerProfilesRepository {
       // `$in` vacío se corta antes en el servicio: MikroORM lo traduce a
       // `in (null)` y la página saldría vacía sin decir por qué.
       where.profileId = { $in: [...filters.profileIds] };
+    }
+    if (filters.verificationStatusConceptId !== undefined) {
+      where.verificationStatusConceptId = filters.verificationStatusConceptId;
     }
     return em.find(HealthPractitionerProfiles, where, {
       orderBy: { practitionerCode: 'ASC' },
