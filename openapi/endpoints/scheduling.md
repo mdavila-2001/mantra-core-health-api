@@ -3527,14 +3527,7 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "name": "Nombre de ejemplo",
-  "rules": [
-    {
-      "dayOfWeek": 1,
-      "startTime": "08:00:00",
-      "endTime": "12:00:00"
-    }
-  ]
+  "title": "valor-ejemplo"
 }
 ```
 
@@ -3549,17 +3542,10 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | Sí | `array<ScheduleRuleDto>` | mínimo 1 elemento(s) | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1}]` |
-| `rules[].dayOfWeek` | Sí | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
-| `rules[].startTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
-| `rules[].endTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
-| `rules[].slotMinutes` | No | `number` | mínimo 5 | Duración del slot en minutos | `5` |
-| `rules[].capacityPerSlot` | No | `number` | mínimo 1 | Cupos por slot | `1` |
-| `slotMinutes` | No | `number` | mínimo 5 | Duración por defecto del slot, en minutos | `30` |
-| `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `title` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Título del instrumento | `valor-ejemplo` |
+| `description` | No | `string` | longitud máxima 2000 | Consigna que ve el paciente antes de responder | `Texto descriptivo de ejemplo` |
+| `ownerPractitionerId` | No | `string` | formato `uuid` | Profesional dueño. Por defecto, el perfil profesional del actor. | `00000000-0000-4000-8000-000000000001` |
+| `responseWindowDays` | No | `number` | mínimo 1; máximo 365 | Días que tendrá el paciente para responder desde que se le emite la invitación | `30` |
 
 ### Payload completo de ejemplo
 
@@ -3572,20 +3558,10 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "name": "Nombre de ejemplo",
-  "rules": [
-    {
-      "dayOfWeek": 1,
-      "startTime": "08:00:00",
-      "endTime": "12:00:00",
-      "slotMinutes": 5,
-      "capacityPerSlot": 1
-    }
-  ],
-  "slotMinutes": 30,
-  "bookingPolicyId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "2026-07-31T12:00:00.000Z",
-  "validTo": "2026-07-31T12:00:00.000Z"
+  "title": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "ownerPractitionerId": "00000000-0000-4000-8000-000000000001",
+  "responseWindowDays": 30
 }
 ```
 

@@ -84,6 +84,7 @@ import { QaLabModule } from './modules/qa_lab/qa_lab.module';
 import { ReadModelsModule } from './modules/read_models/read_models.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
+import { SurveysModule } from './modules/surveys/surveys.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
@@ -216,6 +217,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ReadModelsModule,
     ReportingModule,
     SchedulingModule,
+    SurveysModule,
     SystemContextModule,
     SystemOpsModule,
     TelemetryModule,

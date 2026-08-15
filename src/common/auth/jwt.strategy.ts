@@ -44,6 +44,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       roles: payload.roles ?? [],
       tenantIds: payload.tenants ?? [],
       practitionerProfileId: payload.hpid,
+      patientProfileId: payload.pid,
     };
   }
 }
