@@ -30,6 +30,7 @@ import {
   CaseDiagnosisDto,
   DiagnosesResponseDto,
   AssignTeamMemberDto,
+  RespondTeamMemberDto,
   TeamMemberResponseDto,
   TeamMemberSummaryDto,
   ListCasesQueryDto,
@@ -44,9 +45,11 @@ import {
   type CasePriority,
   type DiagnosisRole,
   type TeamRole,
+  type TeamParticipationResponse,
   type CancellationCategory,
   type ChargeType,
 } from '../dto';
+import { PERIOP } from '../procedures_perioperative.concepts';
 
 const CASE_TYPE_CONCEPT: Readonly<Record<SurgicalCaseType, string>> = {
   ELECTIVE: CONCEPTS.CASE_TYPE_ELECTIVE,
@@ -72,6 +75,20 @@ const TEAM_ROLE_CONCEPT: Readonly<Record<TeamRole, string>> = {
   ANESTHESIOLOGIST: CONCEPTS.TEAM_ROLE_ANESTHESIOLOGIST,
   SCRUB_NURSE: CONCEPTS.TEAM_ROLE_SCRUB_NURSE,
   CIRCULATING_NURSE: CONCEPTS.TEAM_ROLE_CIRCULATING_NURSE,
+};
+
+/**
+ * Spec 164: a qué estado deja al integrante cada respuesta negativa.
+ *
+ * Los tres son conceptos del módulo (`PERIOP`) y no del catálogo transversal
+ * porque sólo existen aquí: `CONCEPTS` sólo trae los dos del camino feliz.
+ */
+const TEAM_RESPONSE_CONCEPT: Readonly<
+  Record<TeamParticipationResponse, string>
+> = {
+  DECLINE: PERIOP.TEAM_DECLINED,
+  REQUEST_CHANGE: PERIOP.TEAM_CHANGE_REQUESTED,
+  UNAVAILABLE: PERIOP.TEAM_UNAVAILABLE,
 };
 
 const CANCELLATION_CATEGORY_CONCEPT: Readonly<
@@ -342,6 +359,27 @@ export class PeriopCasesService {
         });
       }
 
+      // Spec 223/228: qué cambios son "relevantes". De los campos que este
+      // endpoint admite, lo son la fecha/hora programada y el paciente; la
+      // prioridad y el texto de urgencia no alteran las responsabilidades ni
+      // las condiciones de participación de nadie, así que no invalidan nada.
+      // Se calcula **antes** de escribir: después ya no habría con qué comparar.
+      const relevantChanges: string[] = [];
+      if (
+        dto.scheduledStartAt &&
+        new Date(dto.scheduledStartAt).getTime() !==
+          surgicalCase.scheduledStartAt?.getTime()
+      ) {
+        relevantChanges.push('scheduledStartAt');
+      }
+      if (
+        dto.scheduledEndAt &&
+        new Date(dto.scheduledEndAt).getTime() !==
+          surgicalCase.scheduledEndAt?.getTime()
+      ) {
+        relevantChanges.push('scheduledEndAt');
+      }
+
       let patientChanged = false;
       if (
         dto.patientProfileId &&
@@ -368,6 +406,7 @@ export class PeriopCasesService {
         }
         surgicalCase.patientProfileId = dto.patientProfileId;
         patientChanged = true;
+        relevantChanges.push('patientProfileId');
       }
 
       if (dto.priority) {
@@ -393,6 +432,56 @@ export class PeriopCasesService {
         );
       }
 
+      // Spec 227-230: una aceptación vale para **la versión que se aceptó**.
+      // Si la intervención cambia en algo relevante, las aceptaciones previas
+      // dejan de significar nada —nadie aceptó operar otro día— y el caso
+      // vuelve a estar pendiente de aceptación del equipo. Sin esto, mover la
+      // fecha de un caso ya confirmado lo dejaba confirmado con aceptaciones
+      // que ya no correspondían a lo que se iba a hacer.
+      let acceptancesInvalidated = 0;
+      if (relevantChanges.length > 0) {
+        const team = await this.casesRepo.findTeamByCase(tx, caseId);
+        for (const member of team) {
+          if (member.statusConceptId !== CONCEPTS.TEAM_ACCEPTED) continue;
+          member.statusConceptId = CONCEPTS.TEAM_ASSIGNED;
+          // La aceptación deja de constar: `accepted_at` respalda el estado, y
+          // conservarla afirmaría que el integrante aceptó esta versión.
+          member.acceptedAt = undefined;
+          touch(member, actor.id);
+          acceptancesInvalidated += 1;
+        }
+
+        // Spec 229: el caso vuelve a "pendiente de aceptación del equipo". El
+        // modelo no tiene ese estado propio —ver `CASE_DRAFT_STATE`—: su
+        // equivalente es `CASE_SCHEDULED`, el estado previo a la confirmación.
+        if (surgicalCase.statusConceptId === CONCEPTS.CASE_READY_FOR_SURGERY) {
+          this.casesRepo.createStatusHistory(tx, {
+            procedureCaseId: caseId,
+            fromStatusConceptId: surgicalCase.statusConceptId,
+            toStatusConceptId: CONCEPTS.CASE_SCHEDULED,
+            changedByUserId: actor.id,
+            reasonText: `Modificación relevante (${relevantChanges.join(', ')}): el equipo debe volver a aceptar`,
+          });
+          surgicalCase.statusConceptId = CONCEPTS.CASE_SCHEDULED;
+        }
+
+        // Spec 225: la modificación relevante se comunica al equipo. Va por el
+        // outbox y no por una llamada directa para que el aviso se confirme
+        // con la misma transacción que hizo el cambio.
+        await this.outbox.publishDomainEvent(tx, {
+          tenantId: surgicalCase.custodianTenantId,
+          eventType: 'periop.case.reacceptance_required',
+          aggregateType: 'procedure_case',
+          aggregateId: caseId,
+          payloadJson: {
+            changedFields: relevantChanges,
+            acceptancesInvalidated,
+            responsibleProfileId: surgicalCase.primarySurgeonProfileId,
+          },
+          actorUserId: actor.id,
+        });
+      }
+
       touch(surgicalCase, actor.id);
 
       return {
@@ -400,6 +489,8 @@ export class PeriopCasesService {
         statusConceptId: surgicalCase.statusConceptId,
         patientProfileId: surgicalCase.patientProfileId,
         patientChanged,
+        reacceptanceRequired: relevantChanges.length > 0,
+        acceptancesInvalidated,
       };
     });
   }
@@ -1127,6 +1218,11 @@ export class PeriopCasesService {
       }
 
       member.statusConceptId = CONCEPTS.TEAM_ACCEPTED;
+      // Spec 163: la aceptación registra su fecha y hora. La columna existía y
+      // nadie la escribía, así que el estado decía "aceptado" sin decir cuándo
+      // —y es ese instante el que después distingue una aceptación vigente de
+      // una anterior a la última modificación relevante.
+      member.acceptedAt = new Date();
       touch(member, actor.id);
       touch(surgicalCase, actor.id);
 
@@ -1134,6 +1230,123 @@ export class PeriopCasesService {
         id: member.id,
         procedureCaseId: caseId,
         statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        teamSize: team.length,
+      };
+    });
+  }
+
+  /**
+   * Spec 164: el integrante **no** acepta — rechaza, pide una modificación o
+   * informa indisponibilidad.
+   *
+   * Era la mitad que faltaba del acto. Con sólo `accept`, negarse consistía en
+   * no hacer nada: el miembro quedaba `TEAM_ASSIGNED`, indistinguible de quien
+   * todavía no había contestado, y el responsable no se enteraba nunca. Las
+   * tres respuestas comparten endpoint porque comparten consecuencia —el rol
+   * queda sin cubrir y la confirmación sigue bloqueada— y se diferencian en el
+   * concepto que persisten, que es lo que después permite leer si hay que
+   * negociar, reemplazar o reprogramar.
+   *
+   * Spec 166: el rechazo se notifica al médico responsable y a la organización.
+   * Va por el outbox, dentro de la transacción: un aviso que sobreviva a un
+   * rollback avisaría de algo que no pasó.
+   *
+   * @param caseId - Caso del equipo.
+   * @param memberId - Integrante que responde.
+   * @param dto - Respuesta elegida y su motivo obligatorio.
+   * @param actor - Quien ejecuta el acto.
+   * @returns El miembro con el estado que dejó su respuesta.
+   */
+  async respondTeamMember(
+    caseId: string,
+    memberId: string,
+    dto: RespondTeamMemberDto,
+    actor: AuthenticatedUser,
+  ): Promise<TeamMemberResponseDto> {
+    this.logger.info(
+      {
+        operation: 'periop.case.team-respond',
+        caseId,
+        memberId,
+        response: dto.response,
+      },
+      'Recording team participation response',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
+      if (!surgicalCase) {
+        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
+          caseId,
+        });
+      }
+      if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
+        throw new PreconditionFailedException('El caso está cancelado', {
+          caseId,
+        });
+      }
+
+      const team = await this.casesRepo.findTeamByCase(tx, caseId);
+      const member = team.find((m) => m.id === memberId);
+      if (!member) {
+        throw new ResourceNotFoundException(
+          'El integrante no pertenece al caso',
+          { caseId, memberId },
+        );
+      }
+
+      // Spec 168: responder por otro es exactamente lo que la regla impide. La
+      // excepción administrativa es la misma que admite `acceptTeamMember`
+      // —autorización institucional expresa— y no se amplía aquí.
+      const esAdministracion =
+        actor.roles.includes('PERIOP_ADMIN') ||
+        actor.roles.includes('SUPERADMIN');
+      if (
+        !esAdministracion &&
+        actor.practitionerProfileId !== member.practitionerProfileId
+      ) {
+        throw new PreconditionFailedException(
+          'Sólo el propio integrante puede responder a su participación',
+          { caseId, memberId },
+        );
+      }
+
+      const statusConceptId = TEAM_RESPONSE_CONCEPT[dto.response];
+      member.statusConceptId = statusConceptId;
+      // La respuesta negativa borra cualquier aceptación previa: el instante
+      // sellado afirmaría que este integrante sigue dentro.
+      member.acceptedAt = undefined;
+      touch(member, actor.id);
+      touch(surgicalCase, actor.id);
+
+      await this.outbox.publishDomainEvent(tx, {
+        tenantId: surgicalCase.custodianTenantId,
+        eventType: 'periop.case.team_participation_declined',
+        aggregateType: 'procedure_case',
+        aggregateId: caseId,
+        payloadJson: {
+          memberId,
+          practitionerProfileId: member.practitionerProfileId,
+          teamRoleConceptId: member.teamRoleConceptId,
+          response: dto.response,
+          reasonText: dto.reasonText,
+          responsibleProfileId: surgicalCase.primarySurgeonProfileId,
+        },
+        actorUserId: actor.id,
+      });
+
+      // Spec 231/244: quién rechazó y por qué queda sellado en la bitácora.
+      await this.auditTrail.record(tx, actor, {
+        action: 'PERIOP_TEAM_PARTICIPATION_DECLINED',
+        entity: 'procedure_case_team_member',
+        entityId: memberId,
+        tenantId: surgicalCase.custodianTenantId,
+      });
+
+      return {
+        id: member.id,
+        procedureCaseId: caseId,
+        statusConceptId,
         teamSize: team.length,
       };
     });

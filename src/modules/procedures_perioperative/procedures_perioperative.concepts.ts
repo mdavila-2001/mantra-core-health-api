@@ -1,8 +1,8 @@
 import { defineModuleConcepts } from '../../common/seed/concept-seed';
 
 /**
- * Conceptos del módulo Procedures & Perioperative (53), hoy los del **registro
- * odontológico**.
+ * Conceptos del módulo Procedures & Perioperative (53): las respuestas del
+ * integrante a su participación en el equipo y el **registro odontológico**.
  *
  * ## Por qué odontología no trae tabla propia
  *
@@ -43,6 +43,27 @@ import { defineModuleConcepts } from '../../common/seed/concept-seed';
  */
 export const { seeds: PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS, ids: PERIOP } =
   defineModuleConcepts('procedures_perioperative', {
+    // --- respuesta del integrante a su participación (spec 164) --------------
+    // El catálogo transversal ya trae los dos estados del camino feliz
+    // (`CONCEPTS.TEAM_ASSIGNED` y `CONCEPTS.TEAM_ACCEPTED`), pero la
+    // especificación da al integrante **cuatro** respuestas posibles, no dos:
+    // aceptar, rechazar, pedir una modificación o informar indisponibilidad.
+    // Sin las tres de abajo, negarse quedaba indistinguible de no haber
+    // contestado todavía —ambos casos eran `TEAM_ASSIGNED`—, y el responsable
+    // no tenía forma de saber si esperaba una respuesta o ya la tenía.
+    TEAM_DECLINED: {
+      code: 'TEAM_DECLINED',
+      display: 'Team member declined participation',
+    },
+    TEAM_CHANGE_REQUESTED: {
+      code: 'TEAM_CHANGE_REQUESTED',
+      display: 'Team member requested a change to participate',
+    },
+    TEAM_UNAVAILABLE: {
+      code: 'TEAM_UNAVAILABLE',
+      display: 'Team member reported unavailability',
+    },
+
     // --- clasificación del registro odontológico -----------------------------
     DENTAL_PROCEDURE_CATEGORY: {
       code: 'DENTAL_PROC',
