@@ -152,6 +152,8 @@ export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
 export { appSecurityEnvSchema } from './security/app-security.env';
 
 // Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)
+export { describeBuild, loadBuildInfo } from './build-info';
+export type { BuildInfo } from './build-info';
 export { VerificationBypassModule } from './verification/verification-bypass.module';
 export { VerificationBypassService } from './verification/verification-bypass.service';
 export {
