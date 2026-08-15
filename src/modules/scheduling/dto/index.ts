@@ -18,6 +18,7 @@ export {
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
+  RequestBookingDto,
   BookingResponseDto,
   RescheduleBookingDto,
   RescheduleResponseDto,
@@ -49,6 +50,7 @@ export type { RuleScope, RuleDecision } from './scheduling-confirmation.dto';
 export {
   BookableSlotItemDto,
   ResourceAgendaResponseDto,
+  BookingStatusReasonDto,
   BookingItemDto,
   SearchBookingsResponseDto,
 } from './scheduling-read.dto';

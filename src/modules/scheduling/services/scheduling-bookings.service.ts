@@ -14,7 +14,10 @@ import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
 } from '../repositories';
-import { HistoryRepository } from '../../audit/repositories';
+import {
+  HistoryRepository,
+  type HistoryRevision,
+} from '../../audit/repositories';
 // Escritura cross-dominio acotada a la confirmación, como la lectura de
 // `directory` que hace `iam` al emitir un token: al confirmar una reserva nace
 // su cita clínica, porque son la misma cosa vista desde dos módulos. Ver
@@ -29,9 +32,15 @@ import type {
 import { SCHED } from '../scheduling.concepts';
 import { isValidBookingTransition } from '../state/booking-state-machine';
 import {
+  requireReason,
+  type BookingActorKind,
+  type BookingTransitionSnapshot,
+} from '../state/booking-transition';
+import {
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
+  RequestBookingDto,
   BookingResponseDto,
   RescheduleBookingDto,
   RescheduleResponseDto,
@@ -40,6 +49,7 @@ import {
   CheckInResponseDto,
   WorkerBatchResultDto,
   BookingItemDto,
+  BookingStatusReasonDto,
   SearchBookingsResponseDto,
   type BookingChannel,
 } from '../dto';
@@ -54,6 +64,44 @@ const CHANNEL_CONCEPT: Readonly<Record<BookingChannel, string>> = {
 const ACTIVE_BOOKING_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
+];
+
+/**
+ * Estados que un listado muestra cuando no se piden las canceladas.
+ *
+ * **No es la misma lista que {@link ACTIVE_BOOKING_STATES}**, y confundirlas
+ * tenía consecuencias visibles: «ocupa cupo» son dos estados, pero «hay que
+ * mostrarla» son seis. Con la lista de cupo, una solicitud recién hecha no
+ * aparecía en la cola del profesional —quedaba pedida y nadie la veía— y una
+ * cita completada desaparecía del listado del paciente en cuanto se cerraba,
+ * que es justo cuando la corrección #15 pide que la vea.
+ *
+ * Quedan fuera solo las dos terminales que el filtro nombra: cancelada y
+ * ausencia.
+ */
+const VISIBLE_BOOKING_STATES: readonly string[] = [
+  SCHED.BOOKING_REQUESTED,
+  SCHED.BOOKING_PENDING_CONFIRMATION,
+  CONCEPTS.BOOKING_CONFIRMED,
+  CONCEPTS.BOOKING_CHECKED_IN,
+  SCHED.BOOKING_IN_PROGRESS,
+  SCHED.BOOKING_COMPLETED,
+];
+
+/**
+ * Roles que actúan del lado del prestador.
+ *
+ * Son los mismos que los endpoints de operación de cita declaran en sus
+ * `@Roles`, más `SUPERADMIN`, que el `RolesGuard` trata como comodín. Se usan
+ * para decidir a quién atribuir un cambio (`actorKind`), no para autorizar: eso
+ * ya lo hizo el guard antes de llegar acá.
+ */
+const ROLES_DEL_PRESTADOR: readonly string[] = [
+  'SCHEDULING_ADMIN',
+  'SCHEDULING_AGENT',
+  'PRACTITIONER',
+  'CLINICIAN',
+  'SUPERADMIN',
 ];
 
 const DEFAULT_HOLD_TTL_SECONDS = 300;
@@ -195,6 +243,11 @@ export class SchedulingBookingsService {
    * Un hold vencido no se puede confirmar aunque el worker todavía no lo haya
    * reciclado: la comprobación por `expires_at` es lo que evita que una petición
    * tardía se cuele sobre un cupo que ya se considera libre.
+   *
+   * Es la entrada del mostrador y de quien ya tiene potestad para comprometer la
+   * agenda. El paciente que pide un turno entra por {@link requestBooking}: el
+   * cupo se toma igual, pero la cita nace pendiente de que el profesional la
+   * acepte.
    */
   async confirmBooking(
     holdToken: string,
@@ -209,6 +262,97 @@ export class SchedulingBookingsService {
       'Confirming booking from hold',
     );
 
+    return this.materializarReserva(
+      holdToken,
+      {
+        tenantId: dto.tenantId,
+        patientProfileId: dto.patientProfileId,
+        channel: dto.channel,
+        reasonText: dto.reasonText,
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        appointmentStatusConceptId: CLIN.APPOINTMENT_BOOKED,
+        confirmedAt: new Date(),
+        reminderOffsetsMinutes: dto.reminderOffsetsMinutes ?? [],
+      },
+      actor,
+    );
+  }
+
+  /**
+   * El paciente **solicita** un turno: la cita nace pendiente de aceptación
+   * (corrección #11, primer eslabón del P0).
+   *
+   * ## Qué cambia respecto de confirmar
+   *
+   * El cupo se toma igual —el hold ya lo descontó, y soltarlo mientras el
+   * profesional decide dejaría que otra persona lo tomara y que la solicitud no
+   * se pudiera aceptar nunca— pero la cita queda en `PENDING_CONFIRMATION`, sin
+   * `confirmed_at` y con su cita clínica en `pending`. La confirmación es del
+   * profesional (carril 07), no de quien pide.
+   *
+   * ## Por qué no se programan recordatorios
+   *
+   * Recordar un turno que todavía puede rechazarse es prometer algo que nadie
+   * comprometió. Se programan al aceptar.
+   */
+  async requestBooking(
+    holdToken: string,
+    dto: RequestBookingDto,
+    actor: AuthenticatedUser,
+  ): Promise<BookingResponseDto> {
+    this.logger.info(
+      {
+        operation: 'scheduling.booking.request',
+        patientProfileId: dto.patientProfileId,
+      },
+      'Requesting booking from hold',
+    );
+
+    return this.materializarReserva(
+      holdToken,
+      {
+        tenantId: dto.tenantId,
+        patientProfileId: dto.patientProfileId,
+        channel: dto.channel,
+        reasonText: dto.reasonText,
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        appointmentStatusConceptId: CLIN.APPOINTMENT_PENDING,
+        reminderOffsetsMinutes: [],
+      },
+      actor,
+    );
+  }
+
+  /**
+   * Convierte una retención viva en cita, en el estado que le corresponda.
+   *
+   * Es el cuerpo común de {@link confirmBooking} y {@link requestBooking}: las
+   * dos consumen el mismo hold, congelan la misma política, crean la misma cita
+   * clínica y liberan el mismo cupo si algo falla. Lo único que las distingue es
+   * el estado con el que la cita nace y si ya hay compromiso (`confirmedAt`).
+   */
+  private async materializarReserva(
+    holdToken: string,
+    plan: {
+      /** Organización dueña de la cita. */
+      tenantId: string;
+      /** Paciente titular. */
+      patientProfileId: string;
+      /** Canal por el que entró. */
+      channel: BookingChannel;
+      /** Motivo de consulta, si se declaró. */
+      reasonText?: string;
+      /** Estado con el que nace la reserva. */
+      statusConceptId: string;
+      /** Estado con el que nace la cita clínica que la respalda. */
+      appointmentStatusConceptId: string;
+      /** Instante del compromiso; ausente mientras nadie la aceptó. */
+      confirmedAt?: Date;
+      /** Recordatorios a programar junto con la cita. */
+      reminderOffsetsMinutes: readonly number[];
+    },
+    actor: AuthenticatedUser,
+  ): Promise<BookingResponseDto> {
     return this.em.transactional(async (tx) => {
       const hold = await this.bookingsRepo.findHoldByTokenForUpdate(
         tx,
@@ -244,9 +388,10 @@ export class SchedulingBookingsService {
         });
       }
 
-      // CAN-APT-001: se congela la política de cancelación vigente en el momento de
-      // confirmar. La referencia `booking_policy_id` puede mutar de versión después,
-      // pero el snapshot preserva las condiciones que el paciente aceptó.
+      // CAN-APT-001: se congela la política de cancelación vigente en el momento
+      // de tomar el cupo. La referencia `booking_policy_id` puede mutar de
+      // versión después, pero el snapshot preserva las condiciones que el
+      // paciente aceptó.
       const policy = slot.scheduleTemplateId
         ? await this.resolvePolicy(tx, slot.scheduleTemplateId)
         : null;
@@ -271,13 +416,14 @@ export class SchedulingBookingsService {
       // enlazarla: `appointment_id` es una columna uuid suelta, así que el orden
       // lo garantiza esto y no la unidad de trabajo.
       const appointment = this.crearCitaClinica(tx, {
-        tenantId: dto.tenantId,
-        patientProfileId: dto.patientProfileId,
+        tenantId: plan.tenantId,
+        patientProfileId: plan.patientProfileId,
         resourceRefType: resource?.resourceRefType,
         resourceRefId: resource?.resourceRefId,
         startAt: slot.startAt,
         endAt: slot.endAt,
-        reasonText: dto.reasonText,
+        reasonText: plan.reasonText,
+        statusConceptId: plan.appointmentStatusConceptId,
         actorUserId: actor.id,
       });
       // **Persistir la cita antes de crear la reserva.** `appointment_id` es una
@@ -288,19 +434,19 @@ export class SchedulingBookingsService {
       await tx.flush();
 
       const booking = this.bookingsRepo.createBooking(tx, {
-        tenantId: dto.tenantId,
-        patientProfileId: dto.patientProfileId,
+        tenantId: plan.tenantId,
+        patientProfileId: plan.patientProfileId,
         appointmentId: appointment.id,
         bookableSlotId: hold.bookableSlotId,
         resourceId: slot.resourceId,
         serviceConceptId: slot.serviceConceptId,
-        bookingChannelConceptId: CHANNEL_CONCEPT[dto.channel],
+        bookingChannelConceptId: CHANNEL_CONCEPT[plan.channel],
         bookedByUserId: actor.id,
-        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
-        confirmedAt: new Date(),
+        statusConceptId: plan.statusConceptId,
+        confirmedAt: plan.confirmedAt,
         bookingPolicyId: policy?.id,
         cancellationPolicySnapshot,
-        reasonText: dto.reasonText,
+        reasonText: plan.reasonText,
         actorUserId: actor.id,
       });
       // Mismo caso que la plantilla y sus franjas: `booking_id` es una columna
@@ -318,7 +464,7 @@ export class SchedulingBookingsService {
       touch(slot, actor.id);
 
       // Los recordatorios se programan junto con la cita (UC-41-13 va incluido aquí).
-      const offsets = dto.reminderOffsetsMinutes ?? [];
+      const offsets = plan.reminderOffsetsMinutes;
       for (const offset of offsets) {
         this.bookingsRepo.createReminder(tx, {
           bookingId: booking.id,
@@ -333,7 +479,7 @@ export class SchedulingBookingsService {
       return {
         id: booking.id,
         bookableSlotId: hold.bookableSlotId,
-        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        statusConceptId: plan.statusConceptId,
         remindersScheduled: offsets.length,
       };
     });
@@ -387,12 +533,21 @@ export class SchedulingBookingsService {
     });
   }
 
-  /** UC-41-08: mueve la cita a otro slot, liberando el cupo del original. */
+  /**
+   * UC-41-08: mueve la cita a otro slot, liberando el cupo del original.
+   *
+   * **Exige motivo** (corrección #14): mover un turno le cambia el día a
+   * alguien. El motivo se valida en el servidor —no alcanza con que el
+   * formulario lo pida— y queda en el historial de la cita, de donde lo lee la
+   * otra parte.
+   */
   async reschedule(
     bookingId: string,
     dto: RescheduleBookingDto,
     actor: AuthenticatedUser,
   ): Promise<RescheduleResponseDto> {
+    const motivo = requireReason(dto.reasonText, 'reprogramar la cita');
+
     this.logger.info(
       {
         operation: 'scheduling.booking.reschedule',
@@ -471,6 +626,21 @@ export class SchedulingBookingsService {
         occurredAt: new Date(),
       });
 
+      // El motivo va al historial y no a `booking_reschedules`: esa tabla solo
+      // tiene `reason_concept_id` (de catálogo), y lo que la otra parte necesita
+      // leer es el texto. Ver `state/booking-transition.ts`.
+      await this.historyRepo.append(tx, 'appointment_bookings', bookingId, {
+        operationConceptId: SCHED.HISTORY_OP_RESCHEDULE,
+        dataSnapshot: {
+          bookingId,
+          fromSlotId,
+          toSlotId: dto.toSlotId,
+          reasonText: motivo,
+          actorKind: this.actorKind(actor),
+        } satisfies BookingTransitionSnapshot,
+        changedByUserId: actor.id,
+      });
+
       return { bookingId, fromSlotId, toSlotId: dto.toSlotId };
     });
   }
@@ -481,12 +651,19 @@ export class SchedulingBookingsService {
    * El cargo por inasistencia solo se aplica si la política lo define y la
    * cancelación se marca como no-show: cobrar por una cancelación avisada a tiempo
    * sería inconsistente con la ventana de cancelación de la política.
+   *
+   * **Exige motivo** (corrección #14). El `reason_concept_id` que ya se
+   * persistía dice de qué clase es la cancelación —del paciente, del prestador,
+   * inasistencia—, no por qué: eso queda en el historial y es lo que la otra
+   * parte lee en el detalle de su cita.
    */
   async cancel(
     bookingId: string,
     dto: CancelBookingDto,
     actor: AuthenticatedUser,
   ): Promise<CancelBookingResponseDto> {
+    const motivo = requireReason(dto.reasonText, 'cancelar la cita');
+
     this.logger.info(
       {
         operation: 'scheduling.booking.cancel',
@@ -577,13 +754,13 @@ export class SchedulingBookingsService {
 
       booking.statusConceptId = CONCEPTS.BOOKING_CANCELLED;
       touch(booking, actor.id);
-      await this.recordTransition(
-        tx,
-        booking,
-        fromState,
-        CONCEPTS.BOOKING_CANCELLED,
-        actor,
-      );
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: fromState,
+        toStateConceptId: CONCEPTS.BOOKING_CANCELLED,
+        reasonText: motivo,
+        actorKind: dto.cancelledBy,
+      });
 
       let capacityReleased = false;
       if (slot) {
@@ -627,13 +804,11 @@ export class SchedulingBookingsService {
       booking.statusConceptId = CONCEPTS.BOOKING_CHECKED_IN;
       booking.checkedInAt = checkedInAt;
       touch(booking, actor.id);
-      await this.recordTransition(
-        tx,
-        booking,
-        fromState,
-        CONCEPTS.BOOKING_CHECKED_IN,
-        actor,
-      );
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: fromState,
+        toStateConceptId: CONCEPTS.BOOKING_CHECKED_IN,
+      });
 
       return { bookingId, checkedInAt: checkedInAt.toISOString() };
     });
@@ -662,25 +837,40 @@ export class SchedulingBookingsService {
    * Registra la transición en el historial existente
    * (`audit.appointment_bookings_history`). Se llama tras validar la transición y
    * aplicar el nuevo estado, con el estado de origen capturado antes de mutar.
+   *
+   * El snapshot va tipado (`BookingTransitionSnapshot`) porque desde la
+   * corrección #14 no lleva solo los dos estados: lleva también el motivo y
+   * desde qué lado se hizo el cambio, y la lectura los busca por nombre.
    */
   private async recordTransition(
     tx: EntityManager,
     booking: AppointmentBookings,
-    fromStateConceptId: string,
-    toStateConceptId: string,
     actor: AuthenticatedUser,
+    snapshot: BookingTransitionSnapshot,
   ): Promise<void> {
     // C-10: versiona la transición vía el historial del módulo audit (contrato de
     // dominio), no escribiendo su tabla directamente (evita DIRECT_CROSS_DOMAIN).
     await this.historyRepo.append(tx, 'appointment_bookings', booking.id, {
       operationConceptId: SCHED.HISTORY_OP_STATE_TRANSITION,
-      dataSnapshot: {
-        bookingId: booking.id,
-        fromStateConceptId,
-        toStateConceptId,
-      },
+      dataSnapshot: snapshot,
       changedByUserId: actor.id,
     });
+  }
+
+  /**
+   * Desde qué lado del mostrador actúa quien hace el cambio.
+   *
+   * Se decide por rol y no por la pantalla que llamó: un paciente que cancela su
+   * propio turno tiene el rol `PATIENT` y nada más, mientras que quien atiende
+   * —profesional, agente de agenda, administración— siempre trae alguno de los
+   * roles del prestador. La duda se resuelve del lado del prestador: decirle al
+   * paciente «lo cancelaste vos» cuando no fue así es peor que lo contrario.
+   */
+  private actorKind(actor: AuthenticatedUser): BookingActorKind {
+    const esDelPrestador = actor.roles.some((rol) =>
+      ROLES_DEL_PRESTADOR.includes(rol),
+    );
+    return esDelPrestador ? 'PROVIDER' : 'PATIENT';
   }
 
   /**
@@ -741,7 +931,7 @@ export class SchedulingBookingsService {
         // ya se cancelaron.
         statusConceptIds: filters.includeCancelled
           ? undefined
-          : [...ACTIVE_BOOKING_STATES],
+          : [...VISIBLE_BOOKING_STATES],
       },
       limit + 1,
     );
@@ -752,27 +942,19 @@ export class SchedulingBookingsService {
     const truncated = rows.length > limit || fetchCapReached;
     const page = rows.length > limit ? rows.slice(0, limit) : rows;
 
+    // Los motivos de la página, en **una** consulta (corrección #14): pedir el
+    // historial cita por cita convertiría un listado de 100 en 101 consultas.
+    const motivos = await this.historyRepo.latestBySource(
+      em,
+      'appointment_bookings',
+      page.map(({ booking }) => booking.id),
+      tieneMotivo,
+    );
+
     return {
-      items: page.map(({ booking, slot }) => ({
-        id: booking.id,
-        patientProfileId: booking.patientProfileId,
-        resourceId: booking.resourceId,
-        bookableSlotId: booking.bookableSlotId,
-        // El puente hacia `clinical`: es lo que el check-in de un encuentro
-        // acepta como `appointmentId`. `?? null` y no la ausencia, porque el
-        // contrato lo declara nullable y omitirlo obligaría a distinguir «no
-        // hay cita» de «no me lo dijeron», que acá son lo mismo.
-        appointmentId: booking.appointmentId ?? null,
-        startAt: slot?.startAt ?? null,
-        endAt: slot?.endAt ?? null,
-        statusConceptId: booking.statusConceptId,
-        serviceConceptId: booking.serviceConceptId,
-        bookingChannelConceptId: booking.bookingChannelConceptId,
-        confirmedAt: booking.confirmedAt,
-        checkedInAt: booking.checkedInAt,
-        reasonText: booking.reasonText,
-        createdAt: booking.createdAt,
-      })),
+      items: page.map(({ booking, slot }) =>
+        this.aBookingItem(booking, slot, motivos.get(booking.id)),
+      ),
       count: page.length,
       limit,
       truncated,
@@ -795,14 +977,38 @@ export class SchedulingBookingsService {
     const slot = booking.bookableSlotId
       ? await this.bookingsRepo.findSlotById(em, booking.bookableSlotId)
       : null;
+    const motivos = await this.historyRepo.latestBySource(
+      em,
+      'appointment_bookings',
+      [booking.id],
+      tieneMotivo,
+    );
 
+    return this.aBookingItem(booking, slot, motivos.get(booking.id));
+  }
+
+  /**
+   * Una cita como la devuelven las dos lecturas.
+   *
+   * Está en un solo lugar porque el listado y el detalle tienen que decir
+   * exactamente lo mismo: cuando el mapeo estaba duplicado, agregar un campo en
+   * uno y olvidarlo en el otro hacía que el detalle contradijera a la fila que
+   * lo abrió.
+   */
+  private aBookingItem(
+    booking: AppointmentBookings,
+    slot: { startAt: Date; endAt?: Date } | null,
+    motivo: HistoryRevision | undefined,
+  ): BookingItemDto {
     return {
       id: booking.id,
       patientProfileId: booking.patientProfileId,
       resourceId: booking.resourceId,
       bookableSlotId: booking.bookableSlotId,
-      // Mismo puente que en el listado: las dos lecturas de una cita tienen que
-      // decir lo mismo, o el detalle contradiría a la fila que lo abrió.
+      // El puente hacia `clinical`: es lo que el check-in de un encuentro
+      // acepta como `appointmentId`. `?? null` y no la ausencia, porque el
+      // contrato lo declara nullable y omitirlo obligaría a distinguir «no
+      // hay cita» de «no me lo dijeron», que acá son lo mismo.
       appointmentId: booking.appointmentId ?? null,
       startAt: slot?.startAt ?? null,
       endAt: slot?.endAt ?? null,
@@ -812,6 +1018,7 @@ export class SchedulingBookingsService {
       confirmedAt: booking.confirmedAt,
       checkedInAt: booking.checkedInAt,
       reasonText: booking.reasonText,
+      statusReason: aStatusReason(motivo),
       createdAt: booking.createdAt,
     };
   }
@@ -857,6 +1064,8 @@ export class SchedulingBookingsService {
       startAt: Date;
       endAt?: Date;
       reasonText?: string;
+      /** Estado clínico con el que nace: pendiente si se solicitó, reservada si se confirmó. */
+      statusConceptId: string;
       actorUserId?: string;
     },
   ): Appointments {
@@ -870,7 +1079,7 @@ export class SchedulingBookingsService {
       ...(esDeProfesional && datos.resourceRefId !== undefined
         ? { practitionerProfileId: datos.resourceRefId }
         : {}),
-      statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      statusConceptId: datos.statusConceptId,
       startAt: datos.startAt,
       ...(datos.endAt === undefined ? {} : { endAt: datos.endAt }),
       ...(datos.reasonText === undefined
@@ -888,4 +1097,57 @@ export class SchedulingBookingsService {
     if (!template?.bookingPolicyId) return null;
     return this.catalogRepo.findPolicyById(tx, template.bookingPolicyId);
   }
+}
+
+/**
+ * El snapshot de una revisión, si tiene la forma que este módulo escribe.
+ *
+ * La columna es `jsonb` y llega como `unknown`: puede traer lo que haya escrito
+ * cualquier versión anterior. Se comprueba en vez de castear, porque una cita de
+ * antes de la corrección #14 tiene snapshot sin motivo y eso es normal, no un
+ * error.
+ */
+function leerSnapshot(
+  revision: HistoryRevision,
+): BookingTransitionSnapshot | null {
+  const snapshot: unknown = revision.dataSnapshot;
+  if (typeof snapshot !== 'object' || snapshot === null) {
+    return null;
+  }
+  return snapshot as BookingTransitionSnapshot;
+}
+
+/** Si la revisión explica el cambio: es la que se le muestra a la otra parte. */
+function tieneMotivo(revision: HistoryRevision): boolean {
+  const motivo = leerSnapshot(revision)?.reasonText;
+  return typeof motivo === 'string' && motivo.trim().length > 0;
+}
+
+/**
+ * El motivo tal como sale por la API.
+ *
+ * `undefined` —y no un objeto con campos vacíos— cuando no hay ninguno: quien
+ * lo consuma tiene que poder preguntar «¿hay motivo?» sin inspeccionar el
+ * contenido.
+ */
+function aStatusReason(
+  revision: HistoryRevision | undefined,
+): BookingStatusReasonDto | undefined {
+  if (!revision) return undefined;
+  const snapshot = leerSnapshot(revision);
+  const motivo = snapshot?.reasonText;
+  if (typeof motivo !== 'string' || motivo.trim().length === 0) {
+    return undefined;
+  }
+
+  return {
+    reasonText: motivo,
+    ...(snapshot?.actorKind === undefined
+      ? {}
+      : { actorKind: snapshot.actorKind }),
+    ...(snapshot?.toStateConceptId === undefined
+      ? {}
+      : { toStateConceptId: snapshot.toStateConceptId }),
+    changedAt: revision.recordedAt,
+  };
 }

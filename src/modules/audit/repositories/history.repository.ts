@@ -176,6 +176,72 @@ export class HistoryRepository {
   }
 
   /**
+   * La última revisión de cada uno de varios agregados, en **una** consulta.
+   *
+   * Es el complemento de `timeline` para las lecturas de colección: un listado
+   * que quiera mostrar el último cambio de cada fila no puede llamar a
+   * `timeline` por fila sin convertir una página en N+1 consultas. Devuelve un
+   * mapa para que quien lo consuma no tenga que volver a agrupar.
+   *
+   * Con `ids` vacío no consulta nada y devuelve el mapa vacío: pedir
+   * `IN ()` a Postgres es una consulta que se sabe de antemano que no
+   * devuelve nada.
+   *
+   * `matches` deja elegir *cuál* es la revisión que interesa sin que este
+   * módulo tenga que saber qué guarda cada dominio en su snapshot: quien
+   * pregunta por «el último cambio que explicó por qué» pasa el predicado, y
+   * acá solo se recorre. Sin predicado, la última de todas.
+   *
+   * @param em - Contexto de lectura.
+   * @param entity - Clave del registro de historiales.
+   * @param ids - Agregados de los que se quiere la última revisión.
+   * @param matches - Filtro opcional sobre las revisiones candidatas.
+   * @returns Mapa `id -> última revisión`; sin entrada para los que no tienen.
+   */
+  async latestBySource(
+    em: EntityManager,
+    entity: string,
+    ids: readonly string[],
+    matches?: (revision: HistoryRevision) => boolean,
+  ): Promise<Map<string, HistoryRevision>> {
+    const binding = HISTORY_REGISTRY[entity];
+    if (!binding || ids.length === 0) return new Map();
+
+    const rows = await em.find(
+      binding.entity,
+      {
+        [binding.sourceField]: { $in: [...ids] },
+      },
+      { orderBy: { recordedAt: 'asc' } },
+    );
+
+    // Se recorre en orden ascendente y se pisa: la última escritura de cada
+    // agregado es la que queda. Ordenar descendente y quedarse con la primera
+    // haría lo mismo, pero dependería de que el motor conserve el orden entre
+    // filas con el mismo instante, que no está garantizado.
+    const ultimas = new Map<string, HistoryRevision>();
+    for (const row of rows) {
+      const source = (row as unknown as Record<string, unknown>)[
+        binding.sourceField
+      ];
+      if (typeof source !== 'string') continue;
+      const revision: HistoryRevision = {
+        revisionNo: row.revisionNo ?? row.rowVersion,
+        operationConceptId: row.operationConceptId,
+        validFrom: row.validFrom,
+        validTo: row.validTo,
+        changedByUserId: row.changedByUserId,
+        changeReasonConceptId: row.changeReasonConceptId,
+        recordedAt: row.recordedAt,
+        dataSnapshot: row.dataSnapshot,
+      };
+      if (matches && !matches(revision)) continue;
+      ultimas.set(source, revision);
+    }
+    return ultimas;
+  }
+
+  /**
    * Devuelve la línea de tiempo de `id` en `<entity>_history`. Con `asOf` filtra la
    * fila vigente a esa fecha (valid_from <= asOf < valid_to).
    */

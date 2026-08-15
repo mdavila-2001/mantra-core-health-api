@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+﻿import { jest } from '@jest/globals';
 
 /**
  * Ejecuta la operación mock fn.
@@ -15,10 +15,21 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { SCHED } from '../scheduling.concepts';
+import { CLIN } from '../../clinical/clinical.concepts';
 
 const actor = { id: 'user-1', roles: ['SCHEDULING_AGENT'] };
 const SLOT_ID = '11111111-1111-1111-1111-111111111111';
 const PATIENT = '22222222-2222-2222-2222-222222222222';
+
+/**
+ * Un motivo válido cualquiera (corrección #14).
+ *
+ * Cancelar y reprogramar lo exigen, así que todas las llamadas de estas pruebas
+ * lo llevan: sin él el caso que se quiere probar ni siquiera llega al código que
+ * se está probando.
+ */
+const MOTIVO = 'El paciente viaja esa semana';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -26,7 +37,10 @@ const PATIENT = '22222222-2222-2222-2222-222222222222';
  */
 function build() {
   const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  // Las lecturas trabajan sobre un fork del EntityManager; el doble se devuelve
+  // a sí mismo para que la prueba pueda seguir mirando las mismas llamadas.
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
   const bookingsRepo = {
     findSlotForUpdate: mockFn(),
     findSlotById: mockFn(),
@@ -35,6 +49,9 @@ function build() {
     findExpiredHolds: mockFn(),
     createBooking: mockFn(),
     findBookingByIdForUpdate: mockFn(),
+    // Las dos lecturas (UC-41-15): el detalle y el listado.
+    findBookingById: mockFn(),
+    findBookings: mockFn(),
     countActiveBookingsForPatient: mockFn(),
     recordReschedule: mockFn(),
     createCancellation: mockFn(),
@@ -46,7 +63,12 @@ function build() {
     findResourceById: mockFn(),
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
-  const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
+  // `latestBySource` es la lectura del motivo (corrección #14): por defecto no
+  // hay ninguno, que es lo que pasa con una cita que nadie cambió.
+  const historyRepo = {
+    append: mockFn().mockResolvedValue(undefined),
+    latestBySource: mockFn().mockResolvedValue(new Map()),
+  };
   // La confirmación crea la cita clínica que respalda la reserva: sin este doble
   // no hay nada que enlazar en `appointment_id`.
   const appointmentsRepo = {
@@ -439,7 +461,10 @@ describe('SchedulingBookingsService', () => {
 
       const res = await d.service.reschedule(
         'booking-1',
-        { toSlotId: '44444444-4444-4444-4444-444444444444' },
+        {
+          toSlotId: '44444444-4444-4444-4444-444444444444',
+          reasonText: MOTIVO,
+        },
         actor,
       );
 
@@ -463,7 +488,10 @@ describe('SchedulingBookingsService', () => {
       await expect(
         d.service.reschedule(
           'booking-1',
-          { toSlotId: '44444444-4444-4444-4444-444444444444' },
+          {
+            toSlotId: '44444444-4444-4444-4444-444444444444',
+            reasonText: MOTIVO,
+          },
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
@@ -510,7 +538,7 @@ describe('SchedulingBookingsService', () => {
 
       const res = await d.service.cancel(
         'booking-1',
-        { cancelledBy: 'PATIENT' },
+        { cancelledBy: 'PATIENT', reasonText: MOTIVO },
         actor,
       );
 
@@ -535,7 +563,7 @@ describe('SchedulingBookingsService', () => {
 
       const res = await d.service.cancel(
         'booking-1',
-        { cancelledBy: 'PATIENT' },
+        { cancelledBy: 'PATIENT', reasonText: MOTIVO },
         actor,
       );
 
@@ -563,7 +591,7 @@ describe('SchedulingBookingsService', () => {
 
       const res = await d.service.cancel(
         'booking-1',
-        { cancelledBy: 'PATIENT' },
+        { cancelledBy: 'PATIENT', reasonText: MOTIVO },
         actor,
       );
 
@@ -587,7 +615,7 @@ describe('SchedulingBookingsService', () => {
 
       const res = await d.service.cancel(
         'booking-1',
-        { cancelledBy: 'PATIENT' },
+        { cancelledBy: 'PATIENT', reasonText: MOTIVO },
         actor,
       );
 
@@ -611,7 +639,7 @@ describe('SchedulingBookingsService', () => {
 
       const res = await d.service.cancel(
         'booking-1',
-        { cancelledBy: 'PATIENT' },
+        { cancelledBy: 'PATIENT', reasonText: MOTIVO },
         actor,
       );
 
@@ -633,7 +661,7 @@ describe('SchedulingBookingsService', () => {
 
       const res = await d.service.cancel(
         'booking-1',
-        { cancelledBy: 'PATIENT', isNoShow: true },
+        { cancelledBy: 'PATIENT', isNoShow: true, reasonText: MOTIVO },
         actor,
       );
 
@@ -648,7 +676,11 @@ describe('SchedulingBookingsService', () => {
       });
 
       await expect(
-        d.service.cancel('booking-1', { cancelledBy: 'PATIENT' }, actor as any),
+        d.service.cancel(
+          'booking-1',
+          { cancelledBy: 'PATIENT', reasonText: MOTIVO },
+          actor as any,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
   });
@@ -678,6 +710,266 @@ describe('SchedulingBookingsService', () => {
       await expect(
         d.service.checkIn('booking-1', actor as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  /* ==========================================================================
+     Carril 06 — el paciente solicita, y todo cambio de turno se explica.
+     ========================================================================== */
+
+  describe('requestBooking — la solicitud del paciente (corrección #11)', () => {
+    /** Deja el hold vivo y el slot disponible: el camino feliz de la solicitud. */
+    function conHoldVivo(d: ReturnType<typeof build>) {
+      d.bookingsRepo.findHoldByTokenForUpdate.mockResolvedValue({
+        id: 'hold-1',
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.HOLD_ACTIVE,
+        expiresAt: new Date(Date.now() + 60_000),
+      });
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
+      d.bookingsRepo.createBooking.mockReturnValue({ id: 'booking-1' });
+    }
+
+    const solicitud = {
+      tenantId: '33333333-3333-3333-3333-333333333333',
+      patientProfileId: PATIENT,
+      channel: 'PORTAL' as const,
+      reasonText: 'Dolor de garganta hace tres días',
+    };
+
+    it('la cita nace pendiente de aceptación, no confirmada', async () => {
+      const d = build();
+      conHoldVivo(d);
+
+      const res = await d.service.requestBooking(
+        'hold-token',
+        solicitud,
+        actor,
+      );
+
+      expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      const creada = d.bookingsRepo.createBooking.mock.calls[0][1];
+      expect(creada.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      // Sin `confirmed_at`: nadie se comprometió todavía.
+      expect(creada.confirmedAt).toBeUndefined();
+    });
+
+    it('la cita clínica que la respalda también nace pendiente', async () => {
+      const d = build();
+      conHoldVivo(d);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      expect(d.appointmentsRepo.create.mock.calls[0][1].statusConceptId).toBe(
+        CLIN.APPOINTMENT_PENDING,
+      );
+    });
+
+    it('no programa recordatorios de un turno que todavía puede rechazarse', async () => {
+      const d = build();
+      conHoldVivo(d);
+
+      const res = await d.service.requestBooking(
+        'hold-token',
+        solicitud,
+        actor,
+      );
+
+      expect(res.remindersScheduled).toBe(0);
+      expect(d.bookingsRepo.createReminder).not.toHaveBeenCalled();
+    });
+
+    it('toma el cupo igual que una confirmación: el hold se consume', async () => {
+      const d = build();
+      conHoldVivo(d);
+
+      await d.service.requestBooking('hold-token', solicitud, actor);
+
+      expect(d.bookingsRepo.createBooking).toHaveBeenCalled();
+    });
+  });
+
+  describe('motivo obligatorio y visible (corrección #14)', () => {
+    /** Una cita vigente sobre la que se puede cancelar o reprogramar. */
+    function citaVigente() {
+      return {
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      };
+    }
+
+    it('cancelar sin motivo se rechaza en el servidor, no solo en el formulario', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaVigente());
+
+      await expect(
+        d.service.cancel('booking-1', { cancelledBy: 'PATIENT' } as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      // Se corta antes de tocar nada: la cita sigue viva.
+      expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+    });
+
+    it('un motivo de relleno tampoco pasa', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaVigente());
+
+      await expect(
+        d.service.cancel(
+          'booking-1',
+          { cancelledBy: 'PATIENT', reasonText: 'nada' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('el motivo de la cancelación queda en el historial, con quién la hizo', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaVigente());
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
+
+      await d.service.cancel(
+        'booking-1',
+        { cancelledBy: 'PROVIDER', reasonText: MOTIVO },
+        actor,
+      );
+
+      const [, entidad, id, datos] = d.historyRepo.append.mock.calls[0];
+      expect(entidad).toBe('appointment_bookings');
+      expect(id).toBe('booking-1');
+      expect(datos.dataSnapshot).toMatchObject({
+        reasonText: MOTIVO,
+        actorKind: 'PROVIDER',
+        toStateConceptId: CONCEPTS.BOOKING_CANCELLED,
+      });
+    });
+
+    it('reprogramar sin motivo se rechaza antes de mover el cupo', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaVigente());
+
+      await expect(
+        d.service.reschedule(
+          'booking-1',
+          { toSlotId: '44444444-4444-4444-4444-444444444444' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+    });
+
+    it('el motivo de la reprogramación se registra como reprogramación, no como cambio de estado', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaVigente());
+      d.bookingsRepo.findSlotForUpdate
+        .mockResolvedValueOnce(openSlot({ id: 'slot-2', remainingCapacity: 1 }))
+        .mockResolvedValueOnce(openSlot());
+
+      await d.service.reschedule(
+        'booking-1',
+        {
+          toSlotId: '44444444-4444-4444-4444-444444444444',
+          reasonText: MOTIVO,
+        },
+        actor,
+      );
+
+      const datos = d.historyRepo.append.mock.calls[0][3];
+      expect(datos.operationConceptId).toBe(SCHED.HISTORY_OP_RESCHEDULE);
+      expect(datos.dataSnapshot).toMatchObject({ reasonText: MOTIVO });
+    });
+  });
+
+  describe('lectura de citas — el motivo le llega a la otra parte', () => {
+    /** La cita tal como la devuelve el repositorio de lectura. */
+    const guardada = {
+      id: 'booking-1',
+      patientProfileId: PATIENT,
+      statusConceptId: CONCEPTS.BOOKING_CANCELLED,
+      createdAt: new Date('2026-08-01T10:00:00Z'),
+    };
+
+    it('el detalle trae el motivo del último cambio que lo explicó', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(guardada);
+      d.historyRepo.latestBySource.mockResolvedValue(
+        new Map([
+          [
+            'booking-1',
+            {
+              operationConceptId: SCHED.HISTORY_OP_STATE_TRANSITION,
+              recordedAt: new Date('2026-08-02T09:00:00Z'),
+              dataSnapshot: {
+                bookingId: 'booking-1',
+                reasonText: MOTIVO,
+                actorKind: 'PROVIDER',
+                toStateConceptId: CONCEPTS.BOOKING_CANCELLED,
+              },
+            },
+          ],
+        ]),
+      );
+
+      const res = await d.service.getBookingById('booking-1');
+
+      expect(res.statusReason).toEqual({
+        reasonText: MOTIVO,
+        actorKind: 'PROVIDER',
+        toStateConceptId: CONCEPTS.BOOKING_CANCELLED,
+        changedAt: new Date('2026-08-02T09:00:00Z'),
+      });
+    });
+
+    it('una cita que nadie explicó no inventa motivo', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingById.mockResolvedValue(guardada);
+
+      const res = await d.service.getBookingById('booking-1');
+
+      expect(res.statusReason).toBeUndefined();
+    });
+
+    it('el listado por omisión incluye las pendientes y las completadas', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [],
+        fetchCapReached: false,
+      });
+
+      await d.service.searchBookings(
+        { patientProfileId: PATIENT, includeCancelled: false },
+        50,
+      );
+
+      const estados = d.bookingsRepo.findBookings.mock.calls[0][1]
+        .statusConceptIds as string[];
+      // Sin esto, una solicitud recién hecha no la ve nadie y una cita cerrada
+      // desaparece del listado del paciente justo cuando tiene que verla.
+      expect(estados).toContain(SCHED.BOOKING_PENDING_CONFIRMATION);
+      expect(estados).toContain(SCHED.BOOKING_COMPLETED);
+      expect(estados).not.toContain(CONCEPTS.BOOKING_CANCELLED);
+    });
+
+    it('el motivo de la página se lee en una sola consulta', async () => {
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [
+          { booking: guardada, slot: null },
+          { booking: { ...guardada, id: 'booking-2' }, slot: null },
+        ],
+        fetchCapReached: false,
+      });
+
+      await d.service.searchBookings(
+        { patientProfileId: PATIENT, includeCancelled: true },
+        50,
+      );
+
+      expect(d.historyRepo.latestBySource).toHaveBeenCalledTimes(1);
+      expect(d.historyRepo.latestBySource.mock.calls[0][2]).toEqual([
+        'booking-1',
+        'booking-2',
+      ]);
     });
   });
 });
