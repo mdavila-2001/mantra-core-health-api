@@ -579,9 +579,17 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'REL_DISEASE',
     'Associated disease',
   ),
+  // El código NO es `REL_PROCEDURE` aunque el símbolo sí: ese código ya lo ocupa
+  // `RELATEDNESS_PROCEDURE` (`periop:relatedness:procedure`), y
+  // `catalog_concepts` tiene UNIQUE(code_system_version_id, code). Los dos son
+  // conceptos distintos —acá «el término se asocia a un procedimiento», allá «el
+  // evento adverso se relaciona con el procedimiento»— así que no se unifican.
+  // Se movió éste y no el de periop porque el de periop ya está materializado en
+  // las bases existentes: cambiarlo dejaría el código de la fila viva divergido
+  // para siempre del catálogo, ya que el seed inserta pero nunca actualiza.
   REL_PROCEDURE: def(
     'terminology:relationship:procedure',
-    'REL_PROCEDURE',
+    'REL_ASSOC_PROCEDURE',
     'Associated procedure',
   ),
   REL_TREATMENT: def(
