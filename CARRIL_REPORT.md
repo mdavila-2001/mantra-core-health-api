@@ -134,6 +134,7 @@ Dos detalles que sólo aparecieron al ejercer el flujo de verdad:
 | `yarn test:integration` (mis 2 specs aislados) | ✅ **23/23** |
 | `yarn test:integration` (suite completa) | 4 fallas **preexistentes**, verificadas contra `dev` limpio con `git stash`: `vademecum` (falta `SQL/patches/2026-07-30_vademecum_dev_seed.sql` en el workspace) e `identity-verification-cycle` (concept id). **Idénticas sin mis cambios.** |
 | `yarn seed:dev` | ✅ **545/545 conformes, 0 fuera de lo esperado** |
+| Playwright (repo web) contra este backend | ✅ **13/13**, incluye `carril-05-perfil-doctor.spec.ts` (2/2) y el barrido de rutas del carril 19 |
 
 Casos nuevos: bypass on/off/prod (env + service), `listPractitioners` filtra o no
 según bypass y combinado con filtro de especialidad, `buildSummary` incluye
