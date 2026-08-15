@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import type { AuthenticatedUser } from '../../../common';
 import {
   AllergyIntolerancesRepository,
   CareEpisodesRepository,
@@ -9,6 +10,15 @@ import {
   MedicationRequestsRepository,
   ObservationsRepository,
 } from '../repositories';
+// Los dos repositorios que resuelven «esta historia es tuya»: cuenta → persona
+// → perfil. Se proveen en `ClinicalModule` como `scheduling` provee
+// `AppointmentsRepository`: son clases sin estado que reciben el
+// `EntityManager` por parámetro, así que no duplican fuente de verdad ni
+// arrastran el módulo de perfiles entero.
+import {
+  PersonAccountLinksRepository,
+  PersonProfilesRepository,
+} from '../../profiles/repositories';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
 
 /**
@@ -45,9 +55,58 @@ export class ClinicalReadService {
     private readonly observationsRepo: ObservationsRepository,
     private readonly encountersRepo: EncountersRepository,
     private readonly episodesRepo: CareEpisodesRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly personProfilesRepo: PersonProfilesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ClinicalReadService.name);
+  }
+
+  /**
+   * Exige que la historia pedida sea **la propia** (carril 09).
+   *
+   * ## Por qué se resuelve contra la base y no contra el token
+   *
+   * El claim `pid` existe, pero su propia documentación dice que **no es una
+   * credencial y no participa de ninguna decisión de autorización**. Usarlo acá
+   * convertiría un dato de comodidad —puesto en el token para que el portal no
+   * tuviera que pedirlo— en la única barrera que separa la historia clínica de
+   * una persona de la de otra.
+   *
+   * Así que se resuelve como lo resuelve el resto del sistema: del vínculo
+   * activo entre la cuenta y su persona, y de ahí al perfil. Son dos consultas
+   * y ocurren una vez por lectura.
+   *
+   * ## Qué NO relaja el bypass de verificación
+   *
+   * Esto. El bypass de DEV (corrección #12) exime de estar verificado, no de
+   * ser el titular: un paciente sin verificar ve su historia, y ninguna otra.
+   *
+   * @param patientProfileId - La historia que se quiere leer.
+   * @param actor - Quién la pide.
+   * @throws ForbiddenException si no es la suya.
+   */
+  async assertOwnRecord(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    const perfil = await this.personProfilesRepo.findById(em, patientProfileId);
+
+    if (!link || !perfil || perfil.personId !== link.personId) {
+      this.logger.warn(
+        {
+          operation: 'clinical.patient.read.denied',
+          patientProfileId,
+          userId: actor.id,
+        },
+        'Intento de leer una historia clínica ajena',
+      );
+      throw new ForbiddenException(
+        'Sólo podés consultar tu propia historia clínica.',
+      );
+    }
   }
 
   /**

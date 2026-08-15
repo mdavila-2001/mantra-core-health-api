@@ -39,6 +39,16 @@ import {
   ProceduresRepository,
   ImmunizationsRepository,
 } from './repositories';
+// Los dos repositorios con los que la lectura comprueba que una historia es de
+// quien la pide (carril 09). Se proveen acá —y no se importa el módulo de
+// perfiles entero— por lo mismo que `scheduling` provee `AppointmentsRepository`:
+// son clases sin estado que reciben el `EntityManager` por parámetro, así que
+// no duplican fuente de verdad. Importar `ProfilesModule` además cerraría un
+// ciclo: `profiles` ya cuenta lo que un profesional dejó asentado en `clinical`.
+import {
+  PersonAccountLinksRepository,
+  PersonProfilesRepository,
+} from '../profiles/repositories';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -58,6 +68,8 @@ import {
   ],
   providers: [
     // Repositorios
+    PersonAccountLinksRepository,
+    PersonProfilesRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,

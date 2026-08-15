@@ -8,6 +8,8 @@
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { ForbiddenException } from '@nestjs/common';
+
 import { SchedulingBookingsService } from './scheduling-bookings.service';
 import {
   CONCEPTS,
@@ -877,6 +879,224 @@ describe('SchedulingBookingsService', () => {
       const datos = d.historyRepo.append.mock.calls[0][3];
       expect(datos.operationConceptId).toBe(SCHED.HISTORY_OP_RESCHEDULE);
       expect(datos.dataSnapshot).toMatchObject({ reasonText: MOTIVO });
+    });
+  });
+
+  /* ==========================================================================
+     Carril 07 — el profesional decide: acepta, rechaza, empieza y cierra.
+     ========================================================================== */
+
+  describe('accept / reject — la decisión del profesional (corrección #11)', () => {
+    /** Una solicitud pendiente sobre la agenda del recurso `res-1`. */
+    function solicitudPendiente() {
+      return {
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-1',
+        appointmentId: 'appt-1',
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+      };
+    }
+
+    it('aceptar confirma la cita y sella el compromiso', async () => {
+      const d = build();
+      const booking = solicitudPendiente();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+
+      const res = await d.service.accept('booking-1', {}, actor);
+
+      expect(booking.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+      expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+      // `confirmed_at` recién existe cuando alguien se comprometió.
+      expect((booking as Record<string, unknown>).confirmedAt).toBeInstanceOf(
+        Date,
+      );
+    });
+
+    it('al aceptar, la cita clínica deja de estar pendiente', async () => {
+      const d = build();
+      const cita = { id: 'appt-1', statusConceptId: CLIN.APPOINTMENT_PENDING };
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue(cita);
+
+      await d.service.accept('booking-1', {}, actor);
+
+      expect(cita.statusConceptId).toBe(CLIN.APPOINTMENT_BOOKED);
+    });
+
+    it('los recordatorios se programan al aceptar, no al solicitar', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+      d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
+
+      await d.service.accept(
+        'booking-1',
+        { reminderOffsetsMinutes: [1440, 120] },
+        actor,
+      );
+
+      expect(d.bookingsRepo.createReminder).toHaveBeenCalledTimes(2);
+    });
+
+    it('rechazar exige motivo y libera el cupo', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({ remainingCapacity: 0 }),
+      );
+
+      const res = await d.service.reject(
+        'booking-1',
+        { reasonText: 'Esa franja quedó tomada por una cirugía' },
+        actor,
+      );
+
+      expect(res.capacityReleased).toBe(true);
+      const datos = d.historyRepo.append.mock.calls[0][3];
+      expect(datos.dataSnapshot).toMatchObject({
+        reasonText: 'Esa franja quedó tomada por una cirugía',
+        actorKind: 'PROVIDER',
+      });
+    });
+
+    it('rechazar sin motivo no toca la cita', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitudPendiente(),
+      );
+
+      await expect(
+        d.service.reject('booking-1', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('start / complete — sin esperar la fecha (corrección #15)', () => {
+    /** Una cita confirmada para dentro de un año: el reloj no debe importar. */
+    function citaConfirmadaLejana() {
+      return {
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-1',
+        appointmentId: 'appt-1',
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      };
+    }
+
+    it('se inicia una confirmada aunque falte un año para el turno', async () => {
+      const d = build();
+      const booking = citaConfirmadaLejana();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+
+      const res = await d.service.start('booking-1', actor);
+
+      expect(booking.statusConceptId).toBe(SCHED.BOOKING_IN_PROGRESS);
+      expect(res.statusConceptId).toBe(SCHED.BOOKING_IN_PROGRESS);
+      // Nunca se mira el slot: si se mirara, sería para comparar contra el reloj.
+      expect(d.bookingsRepo.findSlotForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('no hace falta pasar por el mostrador: CONFIRMED → EN_CURSO es directa', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        citaConfirmadaLejana(),
+      );
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+
+      await expect(d.service.start('booking-1', actor)).resolves.toBeDefined();
+    });
+
+    it('completar cierra la que está en curso y la cita clínica queda cumplida', async () => {
+      const d = build();
+      const booking = {
+        ...citaConfirmadaLejana(),
+        statusConceptId: SCHED.BOOKING_IN_PROGRESS,
+      };
+      const cita = { id: 'appt-1', statusConceptId: CLIN.APPOINTMENT_BOOKED };
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.appointmentsRepo.findById.mockResolvedValue(cita);
+
+      const res = await d.service.complete('booking-1', actor);
+
+      expect(booking.statusConceptId).toBe(SCHED.BOOKING_COMPLETED);
+      expect(res.statusConceptId).toBe(SCHED.BOOKING_COMPLETED);
+      expect(cita.statusConceptId).toBe(CLIN.APPOINTMENT_FULFILLED);
+    });
+
+    it('no se completa una que nunca empezó', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        citaConfirmadaLejana(),
+      );
+
+      await expect(
+        d.service.complete('booking-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('quién puede operar una cita', () => {
+    const medico = {
+      id: 'user-2',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'hp-1',
+    };
+
+    /** Una cita de la agenda del profesional `hp-1`. */
+    function citaDeOtro() {
+      return {
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        resourceId: 'res-9',
+        appointmentId: 'appt-1',
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      };
+    }
+
+    it('un profesional no opera la cita de un colega', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaDeOtro());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-9',
+        resourceRefType: 'practitioner_profiles',
+        resourceRefId: 'hp-OTRO',
+      });
+
+      await expect(d.service.start('booking-1', medico)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+    });
+
+    it('sí opera la suya', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaDeOtro());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-9',
+        resourceRefType: 'practitioner_profiles',
+        resourceRefId: 'hp-1',
+      });
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+
+      await expect(d.service.start('booking-1', medico)).resolves.toBeDefined();
+    });
+
+    it('quien administra la agenda opera cualquiera, sin resolver el recurso', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(citaDeOtro());
+      d.appointmentsRepo.findById.mockResolvedValue({ id: 'appt-1' });
+
+      await expect(d.service.start('booking-1', actor)).resolves.toBeDefined();
+      expect(d.catalogRepo.findResourceById).not.toHaveBeenCalled();
     });
   });
 

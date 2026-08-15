@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -41,6 +41,9 @@ import {
   HoldResponseDto,
   ConfirmBookingDto,
   RequestBookingDto,
+  AcceptBookingDto,
+  RejectBookingDto,
+  BookingDecisionResponseDto,
   BookingResponseDto,
   RescheduleBookingDto,
   RescheduleResponseDto,
@@ -101,6 +104,23 @@ const ROLES_DEL_PRESTADOR: readonly string[] = [
   'SCHEDULING_AGENT',
   'PRACTITIONER',
   'CLINICIAN',
+  'SUPERADMIN',
+];
+
+/**
+ * Roles que operan **cualquier** agenda, no solo la propia.
+ *
+ * Es el oficio de quien atiende el mostrador y de quien administra la agenda de
+ * la organización: repartir turnos entre todos los consultorios. Un profesional
+ * NO está acá a propósito — opera las citas de su recurso, y eso lo comprueba
+ * `cargarParaOperar` contra el perfil de su token, no contra su rol.
+ *
+ * `SUPERADMIN` entra porque el `RolesGuard` lo trata como comodín: excluirlo
+ * acá le negaría en el servicio lo que el guard ya le concedió.
+ */
+const ROLES_DE_AGENDA: readonly string[] = [
+  'SCHEDULING_ADMIN',
+  'SCHEDULING_AGENT',
   'SUPERADMIN',
 ];
 
@@ -776,6 +796,191 @@ export class SchedulingBookingsService {
     });
   }
 
+  /**
+   * El profesional **acepta** la solicitud: la cita queda confirmada
+   * (corrección #11, segundo eslabón del P0).
+   *
+   * Es la contraparte de {@link requestBooking}. Recién acá hay compromiso, así
+   * que recién acá se sella `confirmed_at`, la cita clínica pasa a `booked` y
+   * se programan los recordatorios que la solicitud no programó.
+   */
+  async accept(
+    bookingId: string,
+    dto: AcceptBookingDto,
+    actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    this.logger.info(
+      { operation: 'scheduling.booking.accept', bookingId },
+      'Accepting booking request',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const fromState = booking.statusConceptId;
+      this.assertTransition(fromState, CONCEPTS.BOOKING_CONFIRMED);
+
+      const confirmedAt = new Date();
+      booking.statusConceptId = CONCEPTS.BOOKING_CONFIRMED;
+      booking.confirmedAt = confirmedAt;
+      touch(booking, actor.id);
+      await this.sincronizarCitaClinica(
+        tx,
+        booking,
+        CLIN.APPOINTMENT_BOOKED,
+        actor,
+      );
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: fromState,
+        toStateConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        actorKind: 'PROVIDER',
+      });
+
+      // Los recordatorios se programan al aceptar y no al solicitar: recordar
+      // un turno que todavía podía rechazarse sería prometer lo que nadie
+      // comprometió.
+      const offsets = dto.reminderOffsetsMinutes ?? [];
+      const slot =
+        offsets.length === 0
+          ? null
+          : await this.bookingsRepo.findSlotById(tx, booking.bookableSlotId);
+      for (const offset of offsets) {
+        if (!slot) break;
+        this.bookingsRepo.createReminder(tx, {
+          bookingId: booking.id,
+          channelConceptId: CONCEPTS.REMINDER_CH_SMS,
+          offsetMinutes: offset,
+          scheduledAt: new Date(slot.startAt.getTime() - offset * 60_000),
+          statusConceptId: CONCEPTS.REMINDER_SCHEDULED,
+          actorUserId: actor.id,
+        });
+      }
+
+      return {
+        bookingId: booking.id,
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        occurredAt: confirmedAt.toISOString(),
+      };
+    });
+  }
+
+  /**
+   * El profesional **rechaza** la solicitud, con motivo (correcciones #11 y #14).
+   *
+   * Rechazar es cancelar desde el otro lado del mostrador, así que reusa el
+   * mismo camino: libera el cupo, registra la cancelación con
+   * `CANCEL_BY_PROVIDER` y deja el motivo en el historial, de donde el paciente
+   * lo lee. Existe como acto propio porque en la agenda **es** otro acto —se
+   * rechaza lo que todavía no se aceptó— y darle su nombre evita que la pantalla
+   * tenga que explicar por qué «cancelar» aparece sobre una solicitud.
+   */
+  async reject(
+    bookingId: string,
+    dto: RejectBookingDto,
+    actor: AuthenticatedUser,
+  ): Promise<CancelBookingResponseDto> {
+    this.logger.info(
+      { operation: 'scheduling.booking.reject', bookingId },
+      'Rejecting booking request',
+    );
+
+    return this.cancel(
+      bookingId,
+      { cancelledBy: 'PROVIDER', reasonText: dto.reasonText },
+      actor,
+    );
+  }
+
+  /**
+   * El profesional **inicia** la atención (corrección #15).
+   *
+   * **Sin validación de reloj, y es lo importante**: una cita confirmada se
+   * puede empezar en cualquier momento. Las únicas comprobaciones son de estado
+   * —solo se inicia una confirmada o con llegada registrada— y de actor —solo
+   * quien atiende esa agenda—. Nunca de fecha.
+   */
+  async start(
+    bookingId: string,
+    actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    this.logger.info(
+      { operation: 'scheduling.booking.start', bookingId },
+      'Starting appointment',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const fromState = booking.statusConceptId;
+      this.assertTransition(fromState, SCHED.BOOKING_IN_PROGRESS);
+
+      booking.statusConceptId = SCHED.BOOKING_IN_PROGRESS;
+      touch(booking, actor.id);
+      await this.sincronizarCitaClinica(
+        tx,
+        booking,
+        CLIN.APPOINTMENT_CHECKED_IN,
+        actor,
+      );
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: fromState,
+        toStateConceptId: SCHED.BOOKING_IN_PROGRESS,
+        actorKind: 'PROVIDER',
+      });
+
+      return {
+        bookingId: booking.id,
+        statusConceptId: SCHED.BOOKING_IN_PROGRESS,
+        occurredAt: new Date().toISOString(),
+      };
+    });
+  }
+
+  /**
+   * El profesional **completa** la atención (corrección #15).
+   *
+   * Tampoco valida el reloj: se cierra la que está en curso, sin importar si
+   * llegó o no el día agendado. El paciente ve «completada» apenas ocurre —el
+   * listado por omisión incluye ese estado, ver {@link VISIBLE_BOOKING_STATES}—
+   * sin re-seed ni refresco artificial.
+   */
+  async complete(
+    bookingId: string,
+    actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    this.logger.info(
+      { operation: 'scheduling.booking.complete', bookingId },
+      'Completing appointment',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const booking = await this.cargarParaOperar(tx, bookingId, actor);
+      const fromState = booking.statusConceptId;
+      this.assertTransition(fromState, SCHED.BOOKING_COMPLETED);
+
+      booking.statusConceptId = SCHED.BOOKING_COMPLETED;
+      touch(booking, actor.id);
+      await this.sincronizarCitaClinica(
+        tx,
+        booking,
+        CLIN.APPOINTMENT_FULFILLED,
+        actor,
+      );
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: fromState,
+        toStateConceptId: SCHED.BOOKING_COMPLETED,
+        actorKind: 'PROVIDER',
+      });
+
+      return {
+        bookingId: booking.id,
+        statusConceptId: SCHED.BOOKING_COMPLETED,
+        occurredAt: new Date().toISOString(),
+      };
+    });
+  }
+
   /** UC-41-10: registra la llegada del paciente. */
   async checkIn(
     bookingId: string,
@@ -855,6 +1060,95 @@ export class SchedulingBookingsService {
       dataSnapshot: snapshot,
       changedByUserId: actor.id,
     });
+  }
+
+  /**
+   * Carga la cita para operarla y comprueba **quién** puede hacerlo.
+   *
+   * ## Por qué el actor se valida acá y no solo en el `@Roles`
+   *
+   * El guard de roles responde «¿es un profesional?», no «¿es *el* profesional
+   * de esta cita?». Sin esta comprobación, cualquier cuenta con rol clínico
+   * podría aceptar, iniciar o cerrar el turno de un colega, que es exactamente
+   * la clase de cosa que el rol solo no alcanza a impedir.
+   *
+   * Quien administra la agenda (`SCHEDULING_ADMIN`/`SCHEDULING_AGENT`) sí opera
+   * cualquier cita: ese **es** su trabajo. Un profesional, solo las de su
+   * recurso; y si su cuenta no declara perfil profesional, ninguna.
+   *
+   * @throws ResourceNotFoundException si la cita no existe.
+   * @throws ForbiddenActionException si la cita no es de quien la opera.
+   */
+  private async cargarParaOperar(
+    tx: EntityManager,
+    bookingId: string,
+    actor: AuthenticatedUser,
+  ): Promise<AppointmentBookings> {
+    const booking = await this.bookingsRepo.findBookingByIdForUpdate(
+      tx,
+      bookingId,
+    );
+    if (!booking) {
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
+    }
+
+    if (this.operaCualquierAgenda(actor)) {
+      return booking;
+    }
+
+    const recurso = booking.resourceId
+      ? await this.catalogRepo.findResourceById(tx, booking.resourceId)
+      : null;
+    const esSuAgenda =
+      actor.practitionerProfileId !== undefined &&
+      recurso !== null &&
+      recurso.resourceRefId === actor.practitionerProfileId &&
+      TABLAS_DE_PERFIL_PROFESIONAL.includes(recurso.resourceRefType);
+
+    if (!esSuAgenda) {
+      // Mismo mecanismo que usa `community` para «este perfil no es tuyo»: el
+      // `ForbiddenException` de Nest, que el filtro traduce a 403 FORBIDDEN.
+      throw new ForbiddenException(
+        'Esta cita es de otra agenda: solo la opera quien atiende en ella.',
+      );
+    }
+    return booking;
+  }
+
+  /** Si el actor administra agendas ajenas por oficio. */
+  private operaCualquierAgenda(actor: AuthenticatedUser): boolean {
+    return actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol));
+  }
+
+  /**
+   * Mantiene la cita clínica al día con el estado de la reserva.
+   *
+   * Son dos filas que cuentan lo mismo desde dos módulos, y desincronizarlas
+   * tiene consecuencias visibles: el archivo del paciente (carril 09) lee
+   * `clinical.appointments`, así que una cita atendida que allí siguiera
+   * diciendo `booked` se leería como un turno al que nadie fue.
+   *
+   * Si la reserva no tiene cita clínica detrás no hace nada: pasa con las
+   * reservas anteriores a que existiera ese vínculo, y no es un error.
+   */
+  private async sincronizarCitaClinica(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    statusConceptId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (booking.appointmentId === undefined) {
+      return;
+    }
+    const cita = await this.appointmentsRepo.findById(
+      tx,
+      booking.appointmentId,
+    );
+    if (!cita) {
+      return;
+    }
+    cita.statusConceptId = statusConceptId;
+    touch(cita, actor.id);
   }
 
   /**
