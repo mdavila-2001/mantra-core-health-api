@@ -9,3 +9,4 @@ export * from './accreditation.dto';
 export * from './create-practitioner-assignment.dto';
 export * from './responses.dto';
 export * from './directory-read.dto';
+export * from './administration-read.dto';

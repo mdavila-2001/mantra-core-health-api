@@ -24,6 +24,7 @@ import {
   PracticeSettingsService,
   PracticeWorkforceService,
   PracticeInventoryService,
+  PracticeOrganizationReadService,
 } from '../services';
 import {
   CreatePracticeDto,
@@ -43,6 +44,7 @@ import {
   RoleAssignmentResponseDto,
   InventoryItemResponseDto,
   StatusResultDto,
+  MedicalOrganizationConsoleDto,
 } from '../dto';
 
 /**
@@ -63,6 +65,7 @@ export class PracticesController {
    * @param settingsService - Valor de settings service requerido por la operación.
    * @param workforceService - Valor de workforce service requerido por la operación.
    * @param inventoryService - Valor de inventory service requerido por la operación.
+   * @param organizationReadService - Lectura completa de la organización (C13).
    */
   constructor(
     private readonly sitesService: PracticeSitesService,
@@ -71,6 +74,7 @@ export class PracticesController {
     private readonly settingsService: PracticeSettingsService,
     private readonly workforceService: PracticeWorkforceService,
     private readonly inventoryService: PracticeInventoryService,
+    private readonly organizationReadService: PracticeOrganizationReadService,
   ) {}
 
   /** Bootstrap: alta de la práctica (organización raíz). */
@@ -101,6 +105,41 @@ export class PracticesController {
   @ApiOperation({ summary: 'Listar las prácticas activas del tenant' })
   listPractices(): Promise<PracticeSummaryDto[]> {
     return this.sitesService.listPractices(requireTenantId());
+  }
+
+  /**
+   * El árbol completo de una organización médica — CARRIL 13.
+   *
+   * Sedes, áreas, infraestructura, servicios, plantilla, documentación legal e
+   * inventario en una sola lectura. Existe porque el módulo tenía once
+   * escrituras y tres lecturas: se podían dar de alta quirófanos, áreas,
+   * servicios y personal, y ninguna operación los volvía a mencionar.
+   *
+   * Los roles son los mismos que ya admite `GET /practices`: quien puede
+   * enumerar las prácticas del tenant puede ver la estructura de la suya. El
+   * aislamiento real lo hace el servicio, que responde 404 ante una práctica de
+   * otra organización.
+   */
+  @Get(':practiceId/organization')
+  @Roles(
+    'SECURITY_ADMIN',
+    'PERIOP_ADMIN',
+    'SURGERY_SCHEDULER',
+    'SCHEDULING_ADMIN',
+    'PRACTITIONER',
+    'CLINICIAN',
+    'ACCOUNTING_APPROVER',
+  )
+  @ApiOperation({
+    summary: 'Consola de organización médica: estructura, plantilla y legajo',
+  })
+  getOrganizationConsole(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+  ): Promise<MedicalOrganizationConsoleDto> {
+    return this.organizationReadService.getConsole(
+      practiceId,
+      requireTenantId(),
+    );
   }
 
   /** Sedes de una práctica. */

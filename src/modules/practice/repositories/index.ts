@@ -9,3 +9,4 @@ export * from './practitioner-role-assignments.repository';
 export * from './practitioner-support-assignments.repository';
 export * from './inventory-items.repository';
 export * from './inventory-movements.repository';
+export * from './practice-organization-read.repository';
