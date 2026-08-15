@@ -681,7 +681,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "internalCode": "condition-severity",
           "name": "Severidad"
         }
-      ]
+      ],
+      "slug": "hipertension-arterial",
+      "category": {
+        "internalCode": "glossary-category-anatomy",
+        "name": "Anatomía"
+      },
+      "shortDefinition": "valor-ejemplo",
+      "tags": [
+        "valor-ejemplo"
+      ],
+      "relationsCount": 1,
+      "status": "active"
     }
   ],
   "count": 1,
@@ -693,7 +704,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConceptSearchItemDto>` | Sin restricción adicional declarada | Conceptos que casan con el filtro. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","translated":true,"valueSets":[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"condition-severity","name":"Severidad"}]}]` |
+| `items` | Sí | `array<ConceptSearchItemDto>` | Sin restricción adicional declarada | Conceptos que casan con el filtro. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","translated":true,"valueSets":[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"condition-severity","name":"Severidad"}],"slug":"hipertension-arterial","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"shortDefinition":"valor-ejemplo","tags":["valor-ejemplo"],"relationsCount":1,"status":"active"}]` |
 | `items[].conceptId` | Sí | `string` | formato `uuid` | Valor a enviar en los campos `*ConceptId` del contrato | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código del concepto | `GENDER_FEMALE` |
 | `items[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación principal | `valor-ejemplo` |
@@ -705,6 +716,14 @@ Campos de la respuesta:
 | `items[].valueSets[].id` | No | `string` | formato `uuid` | Identificador del conjunto de valores. | `00000000-0000-4000-8000-000000000001` |
 | `items[].valueSets[].internalCode` | No | `string` | Sin restricción adicional declarada | Código interno estable, como `condition-severity`. | `condition-severity` |
 | `items[].valueSets[].name` | No | `string` | Sin restricción adicional declarada | Nombre legible del conjunto. Es el texto de la etiqueta. | `Severidad` |
+| `items[].slug` | No | `string` | Sin restricción adicional declarada | Slug kebab-case del término, único en el glosario. | `hipertension-arterial` |
+| `items[].category` | No | `ConceptTaxonomyRefDto` | Sin restricción adicional declarada | Categoría del término, o `null` si —siendo del glosario— no tiene ninguna asignada. | `{"internalCode":"glossary-category-anatomy","name":"Anatomía"}` |
+| `items[].category.internalCode` | No | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
+| `items[].category.name` | No | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
+| `items[].shortDefinition` | No | `string` | Sin restricción adicional declarada | Resumen en lenguaje llano, para la columna «definición corta» de la tabla. | `valor-ejemplo` |
+| `items[].tags` | No | `array<string>` | Sin restricción adicional declarada | Nombres de las etiquetas del término (la categoría no se repite acá). | `["valor-ejemplo"]` |
+| `items[].relationsCount` | No | `number` | Sin restricción adicional declarada | Cuántas relaciones tipadas tiene el término; la lista completa vive en la ficha. | `1` |
+| `items[].status` | No | `string` | Sin restricción adicional declarada | Estado publicado del término (`active`, hoy el único que puede llegar al glosario público). | `active` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
 
@@ -826,7 +845,43 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "language": "ES",
       "preferred": true
     }
-  ]
+  ],
+  "slug": "hipertension-arterial",
+  "clinicalDefinition": {
+    "text": "valor-ejemplo",
+    "translated": true
+  },
+  "plainSummary": {
+    "text": "valor-ejemplo",
+    "translated": true
+  },
+  "category": {
+    "valueSetId": "00000000-0000-4000-8000-000000000001",
+    "internalCode": "glossary-category-anatomy",
+    "name": "Anatomía"
+  },
+  "tags": [
+    {
+      "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "internalCode": "glossary-category-anatomy",
+      "name": "Anatomía"
+    }
+  ],
+  "relations": [
+    {
+      "type": {},
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "slug": "valor-ejemplo",
+      "display": "valor-ejemplo"
+    }
+  ],
+  "image": {
+    "source": "valor-ejemplo",
+    "license": "valor-ejemplo",
+    "attribution": "valor-ejemplo",
+    "alt": "valor-ejemplo",
+    "status": "approved"
+  }
 }
 ```
 
@@ -849,6 +904,32 @@ Campos de la respuesta:
 | `synonyms[].value` | Sí | `string` | Sin restricción adicional declarada | El texto de la denominación. | `valor-ejemplo` |
 | `synonyms[].language` | No | `string` | valores: `ES`, `EN` | Idioma de la denominación, cuando el catálogo lo declara. | `ES` |
 | `synonyms[].preferred` | No | `boolean` | Sin restricción adicional declarada | Si es la denominación preferida de su idioma. | `true` |
+| `slug` | No | `string` | Sin restricción adicional declarada | Slug del término, si es un término del glosario. | `hipertension-arterial` |
+| `clinicalDefinition` | No | `ConceptTextDto` | Sin restricción adicional declarada | Definición clínica, si el término la tiene cargada. | `{"text":"valor-ejemplo","translated":true}` |
+| `clinicalDefinition.text` | No | `string` | Sin restricción adicional declarada | El texto, en el idioma pedido o su respaldo en castellano. | `valor-ejemplo` |
+| `clinicalDefinition.translated` | No | `boolean` | Sin restricción adicional declarada | Si `text` vino en el idioma pedido. En `false`, es el texto en castellano —siempre presente, es obligatorio en el catálogo curado— porque no hay traducción cargada para ese idioma. | `true` |
+| `plainSummary` | No | `ConceptTextDto` | Sin restricción adicional declarada | Resumen en lenguaje llano, si el término lo tiene cargado. | `{"text":"valor-ejemplo","translated":true}` |
+| `plainSummary.text` | No | `string` | Sin restricción adicional declarada | El texto, en el idioma pedido o su respaldo en castellano. | `valor-ejemplo` |
+| `plainSummary.translated` | No | `boolean` | Sin restricción adicional declarada | Si `text` vino en el idioma pedido. En `false`, es el texto en castellano —siempre presente, es obligatorio en el catálogo curado— porque no hay traducción cargada para ese idioma. | `true` |
+| `category` | Sí | `ConceptCategoryRefDto` | Sin restricción adicional declarada | Categoría del glosario a la que pertenece, o `null` si no pertenece a ninguna. | `{"valueSetId":"00000000-0000-4000-8000-000000000001","internalCode":"glossary-category-anatomy","name":"Anatomía"}` |
+| `category.valueSetId` | Sí | `string` | formato `uuid` | Identificador del value set. | `00000000-0000-4000-8000-000000000001` |
+| `category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable. | `glossary-category-anatomy` |
+| `category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Anatomía` |
+| `tags` | Sí | `array<ConceptCategoryRefDto>` | Sin restricción adicional declarada | Etiquetas del glosario (la categoría no se repite acá). | `[{"valueSetId":"00000000-0000-4000-8000-000000000001","internalCode":"glossary-category-anatomy","name":"Anatomía"}]` |
+| `tags[].valueSetId` | Sí | `string` | formato `uuid` | Identificador del value set. | `00000000-0000-4000-8000-000000000001` |
+| `tags[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable. | `glossary-category-anatomy` |
+| `tags[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Anatomía` |
+| `relations` | Sí | `array<ConceptRelationDto>` | Sin restricción adicional declarada | Relaciones tipadas salientes, con el término destino ya resuelto. | `[{"type":{},"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo"}]` |
+| `relations[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo de relación. | `{}` |
+| `relations[].conceptId` | Sí | `string` | formato `uuid` | Id del concepto destino. | `00000000-0000-4000-8000-000000000001` |
+| `relations[].slug` | Sí | `string` | Sin restricción adicional declarada | Slug del término destino. | `valor-ejemplo` |
+| `relations[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación del término destino (EN, `CatalogConcepts.display`). | `valor-ejemplo` |
+| `image` | No | `ConceptImageDto` | Sin restricción adicional declarada | Imagen ilustrativa. Siempre ausente hoy (ver ); el campo existe para que un carril futuro pueda adjuntar una sin romper el contrato. | `{"source":"valor-ejemplo","license":"valor-ejemplo","attribution":"valor-ejemplo","alt":"valor-ejemplo","status":"approved"}` |
+| `image.source` | No | `string` | Sin restricción adicional declarada | URL o referencia del activo. | `valor-ejemplo` |
+| `image.license` | No | `string` | Sin restricción adicional declarada | Licencia bajo la que se usa la imagen. | `valor-ejemplo` |
+| `image.attribution` | No | `string` | Sin restricción adicional declarada | A quién atribuir la imagen. | `valor-ejemplo` |
+| `image.alt` | No | `string` | Sin restricción adicional declarada | Texto alternativo, para accesibilidad. | `valor-ejemplo` |
+| `image.status` | No | `string` | valores: `approved`, `pending`, `rejected` | Estado de revisión de la imagen. | `approved` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

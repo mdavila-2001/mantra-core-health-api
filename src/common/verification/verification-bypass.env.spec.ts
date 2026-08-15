@@ -52,12 +52,14 @@ describe('assertVerificationBypassNotInProduction', () => {
 
 describe('loadVerificationBypassEnv', () => {
   it('activo solo cuando el flag es exactamente "true"', () => {
-    expect(loadVerificationBypassEnv({ DEV_VERIFICATION_BYPASS: 'true' })).toEqual({
+    expect(
+      loadVerificationBypassEnv({ DEV_VERIFICATION_BYPASS: 'true' }),
+    ).toEqual({
       enabled: true,
     });
-    expect(loadVerificationBypassEnv({ DEV_VERIFICATION_BYPASS: 'false' })).toEqual(
-      { enabled: false },
-    );
+    expect(
+      loadVerificationBypassEnv({ DEV_VERIFICATION_BYPASS: 'false' }),
+    ).toEqual({ enabled: false });
     expect(loadVerificationBypassEnv({})).toEqual({ enabled: false });
   });
 });

@@ -869,7 +869,8 @@ describe('ProfilesPractitionersService', () => {
       await d.service.listPractitioners({ limit: 50 });
 
       expect(
-        d.practitionersRepo.listPage.mock.calls[0][1].verificationStatusConceptId,
+        d.practitionersRepo.listPage.mock.calls[0][1]
+          .verificationStatusConceptId,
       ).toBeUndefined();
     });
 
