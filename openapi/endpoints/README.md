@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1085 de 1085 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **63 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1097 de 1097 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **64 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -99,6 +99,7 @@ Esta referencia documenta **1085 de 1085 operaciones HTTP** registradas en `open
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
 | [scheduling](scheduling.md) | 31 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal` | 5 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
+| [surveys](surveys.md) | 12 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
 | [telemetry](telemetry.md) | 13 | `telemetry-consent`, `telemetry-events`, `telemetry-governance` | 3 |
@@ -114,4 +115,4 @@ Esta referencia documenta **1085 de 1085 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1085 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1097 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

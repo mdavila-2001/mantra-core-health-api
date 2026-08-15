@@ -335,22 +335,28 @@ export class ProfilesPractitionersService {
     }
 
     const profileId = practitioner.profileId;
-    const [specialties, credentials, licenses, languages, affiliations, activity] =
-      await Promise.all([
-        this.specialtiesRepo.findAllByPractitioner(em, profileId),
-        this.credentialsRepo.findByPractitioner(em, profileId),
-        this.authorizationsRepo.findByPractitioner(em, profileId),
-        this.languagesRepo.findByPractitioner(em, profileId),
-        this.affiliationsRepo.findByPractitioner(em, profileId),
-        subjectUserId === undefined
-          ? Promise.resolve({
-              encounters: 0,
-              medicationRequests: 0,
-              clinicalNotes: 0,
-              documents: 0,
-            })
-          : this.countActivity(em, subjectUserId),
-      ]);
+    const [
+      specialties,
+      credentials,
+      licenses,
+      languages,
+      affiliations,
+      activity,
+    ] = await Promise.all([
+      this.specialtiesRepo.findAllByPractitioner(em, profileId),
+      this.credentialsRepo.findByPractitioner(em, profileId),
+      this.authorizationsRepo.findByPractitioner(em, profileId),
+      this.languagesRepo.findByPractitioner(em, profileId),
+      this.affiliationsRepo.findByPractitioner(em, profileId),
+      subjectUserId === undefined
+        ? Promise.resolve({
+            encounters: 0,
+            medicationRequests: 0,
+            clinicalNotes: 0,
+            documents: 0,
+          })
+        : this.countActivity(em, subjectUserId),
+    ]);
 
     return {
       profileId,
