@@ -113,6 +113,51 @@ export class PractitionerSpecialtiesRepository {
     );
   }
 
+  /**
+   * Las especialidades de VARIOS profesionales en una sola lectura.
+   *
+   * Es lo que evita el N+1 del listado de la guía (carril R2-1): una página de
+   * cincuenta doctores sería cincuenta consultas con la variante de a uno.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileIds - Los perfiles de la página.
+   * @returns Filas de todos, con el mismo orden de presentación.
+   */
+  async findByPractitioners(
+    em: EntityManager,
+    practitionerProfileIds: readonly string[],
+  ): Promise<PractitionerSpecialties[]> {
+    if (practitionerProfileIds.length === 0) return [];
+    return em.find(
+      PractitionerSpecialties,
+      { practitionerProfileId: { $in: [...practitionerProfileIds] } },
+      { orderBy: { isPrimary: 'desc', validFrom: 'desc', createdAt: 'desc' } },
+    );
+  }
+
+  /**
+   * Los perfiles que ejercen una especialidad HOY (filtro de la guía).
+   *
+   * Vigente = sin `validTo`. Una especialidad cerrada sigue en la trayectoria
+   * del perfil, pero filtrar la guía por ella devolvería a alguien que ya no
+   * la ejerce — que es afirmar algo falso donde un paciente elige médico.
+   *
+   * @param em - Contexto de persistencia.
+   * @param specialtyConceptId - La especialidad buscada.
+   * @returns Ids de perfil, sin duplicados.
+   */
+  async findProfileIdsBySpecialty(
+    em: EntityManager,
+    specialtyConceptId: string,
+  ): Promise<string[]> {
+    const rows = await em.find(
+      PractitionerSpecialties,
+      { specialtyConceptId, validTo: null },
+      { fields: ['practitionerProfileId'] },
+    );
+    return [...new Set(rows.map((row) => row.practitionerProfileId))];
+  }
+
   /** Desmarca como primaria la especialidad primaria vigente previa. */
   demotePrimary(
     em: EntityManager,

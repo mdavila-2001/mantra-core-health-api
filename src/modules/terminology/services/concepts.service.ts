@@ -26,12 +26,43 @@ import {
   type ConceptPropertiesResponseDto,
   type DeprecateConceptDto,
   type DeprecateConceptResponseDto,
+  type DesignationLanguage,
   type LookupResponseDto,
+  type ConceptDetailDto,
+  type ConceptValueSetRefDto,
   SearchConceptsResponseDto,
 } from '../dto';
+import {
+  LANGUAGE_CONCEPT_BY_CODE,
+  definitionPropertyCode,
+} from '../terminology.constants';
 
 /** Tipo de dato por defecto para propiedades de concepto sin `dataType` explícito. */
 const DEFAULT_PROPERTY_DATA_TYPE = 'string';
+
+/** Qué se le pide de más a la búsqueda, sobre los filtros de siempre. */
+export interface ConceptReadOptions {
+  /**
+   * Idioma preferido de `display` y `definition`.
+   *
+   * Ausente significa **exactamente lo de siempre**: los textos del sistema de
+   * codificación, sin tocar. Es la garantía de retrocompatibilidad de esta
+   * lectura, que consumen la agenda, el perfil profesional, los diagnósticos y
+   * la ficha clínica.
+   */
+  readonly language?: DesignationLanguage;
+  /** Si cada concepto debe traer los conjuntos de valores a los que pertenece. */
+  readonly includeValueSets?: boolean;
+  /**
+   * Acota a los conceptos que pertenecen a un conjunto de valores.
+   *
+   * Es «navegar por categoría» dicho como filtro. La alternativa era `$expand`,
+   * que devuelve los miembros crudos —sin traducir, sin sus otras etiquetas y
+   * con su propia paginación—: dos lecturas distintas para la misma pantalla,
+   * que se verían distinto.
+   */
+  readonly valueSetId?: string;
+}
 
 /**
  * Reglas de negocio sobre conceptos ya existentes: alta de designaciones (y
@@ -529,11 +560,21 @@ export class ConceptsService {
    * Se resuelve en lote a propósito: una tabla de citas trae decenas de estados
    * distintos y pedirlos de a uno sería N+1 desde el navegador.
    *
+   * ## El idioma y las etiquetas, que se piden y no vienen solos
+   *
+   * `options` gobierna las dos capacidades que el glosario necesitaba y esta
+   * lectura no tenía. **Las dos están apagadas por omisión, y eso no es una
+   * comodidad sino el contrato:** sin `language` la respuesta es la de siempre,
+   * campo por campo. La consumen la agenda, el perfil profesional, los
+   * diagnósticos y la ficha clínica, y ninguna puede cambiar de comportamiento
+   * porque una pantalla nueva necesite dos datos más.
+   *
    * @param query - Texto a buscar en código o denominación.
    * @param codeSystemVersionId - Versión a la que acotar, si se indica.
    * @param limit - Tope de resultados.
    * @param ids - Ids concretos a resolver; excluyente con la búsqueda por texto
    *   en la práctica, aunque se pueden combinar.
+   * @param options - Idioma preferido y si hay que resolver las etiquetas.
    * @returns Conceptos que casan, con el id que espera el resto del contrato.
    */
   async searchConcepts(
@@ -541,6 +582,7 @@ export class ConceptsService {
     codeSystemVersionId: string | undefined,
     limit: number,
     ids?: string[],
+    options: ConceptReadOptions = {},
   ): Promise<SearchConceptsResponseDto> {
     this.logger.info(
       {
@@ -548,6 +590,7 @@ export class ConceptsService {
         query,
         limit,
         idCount: ids?.length,
+        language: options.language,
       },
       'Buscando conceptos',
     );
@@ -559,23 +602,253 @@ export class ConceptsService {
       return { items: [], count: 0, limit };
     }
 
+    // Filtrar por categoría se resuelve acotando la lista de ids, no con un
+    // `join` en la búsqueda: así el filtro se combina con el texto y con la
+    // versión sin tocar la consulta que ya existía. Un conjunto vacío —o sin
+    // versión vigente— corta acá: pedir «los términos de esta categoría» y
+    // recibir el catálogo entero sería lo peor que podría pasar.
+    let effectiveIds = ids;
+    if (options.valueSetId !== undefined) {
+      const miembros =
+        await this.valueSetsRepo.findIncludedConceptIdsByValueSet(
+          this.em,
+          options.valueSetId,
+        );
+      if (miembros === null) {
+        throw new ResourceNotFoundException(
+          'El conjunto de valores no existe o no tiene versión vigente',
+          { valueSetId: options.valueSetId },
+        );
+      }
+      effectiveIds =
+        ids === undefined
+          ? miembros
+          : // Con las dos listas presentes vale la intersección: cada filtro
+            // acota, ninguno amplía.
+            miembros.filter((conceptId) => ids.includes(conceptId));
+      if (effectiveIds.length === 0) {
+        return { items: [], count: 0, limit };
+      }
+    }
+
     const concepts = await this.conceptsRepo.search(
       this.em,
-      { query, codeSystemVersionId, ids },
+      { query, codeSystemVersionId, ids: effectiveIds },
       limit,
     );
 
-    return {
-      items: concepts.map((concept) => ({
+    const conceptIds = concepts.map((concept) => concept.id);
+    const [textos, etiquetas] = await Promise.all([
+      this.resolveTexts(conceptIds, options.language),
+      options.includeValueSets
+        ? this.valueSetsRepo.findValueSetsByConceptIds(this.em, conceptIds)
+        : Promise.resolve(undefined),
+    ]);
+
+    const items = concepts.map((concept) => {
+      const texto = textos.get(concept.id);
+      return {
         conceptId: concept.id,
         code: concept.code,
-        display: concept.display,
-        definition: concept.definition,
+        // Sin idioma pedido, `texto` es `undefined` y esto es literalmente lo
+        // que devolvía antes. Con idioma, cae al original cuando falta la
+        // designación: un término sin traducir se muestra igual, marcado.
+        display: texto?.display ?? concept.display,
+        definition: texto?.definition ?? concept.definition,
         selectable: concept.selectable,
         codeSystemVersionId: concept.codeSystemVersionId,
-      })),
-      count: concepts.length,
-      limit,
+        // Las claves ausentes no viajan en el JSON, así que sin `language` ni
+        // `includeValueSets` el cuerpo es idéntico al de siempre.
+        ...(options.language === undefined
+          ? {}
+          : { translated: texto?.translated ?? false }),
+        ...(etiquetas === undefined
+          ? {}
+          : { valueSets: toValueSetRefs(etiquetas.get(concept.id)) }),
+      };
+    });
+
+    // Un glosario se lee en orden alfabético por el nombre; el catálogo viene
+    // ordenado por código, que es el orden que necesita quien configura. Sólo se
+    // reordena cuando se pidió idioma —o sea, cuando el llamador es una pantalla
+    // de lectura—: sin `lang` el orden es el de siempre, porque el catálogo de
+    // administración y los selectores lo esperan así.
+    if (options.language !== undefined) {
+      items.sort((a, b) => a.display.localeCompare(b.display, 'es'));
+    }
+
+    return { items, count: items.length, limit };
+  }
+
+  /**
+   * La ficha completa de un término: sus textos en el idioma pedido, las
+   * categorías bajo las que cae y sus otras denominaciones.
+   *
+   * ## Por qué no alcanzaba con `$lookup`
+   *
+   * `$lookup` es la única lectura que devolvía designaciones, pero se resuelve
+   * por `(system, code)`: exige la URL canónica del sistema de codificación. Un
+   * cliente que llegó al término desde un listado tiene su `conceptId` y nada
+   * más, así que para abrir una ficha tendría que resolver antes la versión y
+   * el sistema — tres llamadas, dos de ellas sólo para poder hacer la tercera.
+   *
+   * @param conceptId - Término a leer.
+   * @param language - Idioma preferido de los textos.
+   * @returns La ficha, con sus etiquetas y sinónimos.
+   */
+  async readConcept(
+    conceptId: string,
+    language?: DesignationLanguage,
+  ): Promise<ConceptDetailDto> {
+    this.logger.info(
+      { operation: 'terminology.concept.read', conceptId, language },
+      'Leyendo la ficha de un concepto',
+    );
+
+    const concept = await this.conceptsRepo.findById(this.em, conceptId);
+    if (!concept) {
+      throw new ResourceNotFoundException('Concepto no encontrado', {
+        conceptId,
+      });
+    }
+
+    const [textos, etiquetas, designations] = await Promise.all([
+      this.resolveTexts([conceptId], language),
+      this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
+      this.designationsRepo.findByConcept(this.em, conceptId),
+    ]);
+
+    const texto = textos.get(conceptId);
+    const display = texto?.display ?? concept.display;
+
+    return {
+      conceptId: concept.id,
+      code: concept.code,
+      display,
+      definition: texto?.definition ?? concept.definition,
+      selectable: concept.selectable,
+      codeSystemVersionId: concept.codeSystemVersionId,
+      ...(language === undefined
+        ? {}
+        : { translated: texto?.translated ?? false }),
+      valueSets: toValueSetRefs(etiquetas.get(conceptId)),
+      synonyms: designations
+        // La que ya se está mostrando arriba no es un sinónimo de sí misma:
+        // repetirla bajo «también se le dice» no informa de nada.
+        .filter((designation) => designation.value !== display)
+        .map((designation) => ({
+          value: designation.value,
+          ...(designation.languageConceptId === undefined
+            ? {}
+            : { language: languageCodeOf(designation.languageConceptId) }),
+          ...(designation.preferred === undefined
+            ? {}
+            : { preferred: designation.preferred }),
+        })),
     };
   }
+
+  /**
+   * Los textos de un puñado de conceptos en el idioma pedido, en dos consultas.
+   *
+   * Sin idioma devuelve el mapa vacío y no consulta nada: el llamador cae al
+   * `display` y la `definition` del propio concepto, que es el comportamiento
+   * histórico.
+   *
+   * El nombre sale de `concept_designations` y la definición de
+   * `concept_properties` — ver `terminology.constants.ts` para por qué están en
+   * tablas distintas. Se resuelven **en lote**: traducir de a un concepto con
+   * `$lookup` serían cincuenta llamadas para pintar una página de resultados.
+   *
+   * `translated` se decide por el **nombre**, no por la definición: es el texto
+   * que la pantalla muestra siempre, mientras que la definición puede faltar
+   * legítimamente en cualquier idioma —hay conceptos que no la tienen— y no
+   * debería hacer que un término bien traducido se anuncie como sin traducir.
+   *
+   * @param conceptIds - Conceptos a resolver.
+   * @param language - Idioma preferido, o `undefined` para no traducir.
+   * @returns Mapa `conceptId -> textos`; vacío si no se pidió idioma.
+   */
+  private async resolveTexts(
+    conceptIds: string[],
+    language?: DesignationLanguage,
+  ): Promise<
+    Map<
+      string,
+      {
+        /** El nombre en el idioma pedido, si lo hay. */
+        display?: string;
+        /** La definición en el idioma pedido, si la hay. */
+        definition?: string;
+        /** Si el nombre vino efectivamente traducido. */
+        translated: boolean;
+      }
+    >
+  > {
+    if (language === undefined || conceptIds.length === 0) return new Map();
+
+    const [designations, definitions] = await Promise.all([
+      this.designationsRepo.findPreferredByLanguageForConcepts(
+        this.em,
+        conceptIds,
+        LANGUAGE_CONCEPT_BY_CODE[language],
+      ),
+      this.designationsRepo.findPropertyForConcepts(
+        this.em,
+        conceptIds,
+        definitionPropertyCode(language),
+      ),
+    ]);
+
+    const definicionPorConcepto = new Map<string, string>();
+    for (const property of definitions) {
+      // `value_json` es jsonb: la definición se guarda como cadena JSON, pero un
+      // valor cargado a mano podría ser cualquier cosa. Sólo se acepta texto —
+      // pintar `[object Object]` en un glosario sería peor que no traducir.
+      if (typeof property.valueJson === 'string') {
+        definicionPorConcepto.set(property.conceptId, property.valueJson);
+      }
+    }
+
+    const textos = new Map<
+      string,
+      { display?: string; definition?: string; translated: boolean }
+    >();
+    for (const conceptId of conceptIds) {
+      const designation = designations.get(conceptId);
+      const definition = definicionPorConcepto.get(conceptId);
+      if (designation === undefined && definition === undefined) continue;
+      textos.set(conceptId, {
+        ...(designation === undefined ? {} : { display: designation.value }),
+        ...(definition === undefined ? {} : { definition }),
+        translated: designation !== undefined,
+      });
+    }
+    return textos;
+  }
+}
+
+/** Los conjuntos de valores de un concepto, reducidos a lo que pinta una etiqueta. */
+function toValueSetRefs(
+  valueSets: readonly { id: string; internalCode: string; name: string }[] = [],
+): ConceptValueSetRefDto[] {
+  return valueSets.map((valueSet) => ({
+    id: valueSet.id,
+    internalCode: valueSet.internalCode,
+    name: valueSet.name,
+  }));
+}
+
+/**
+ * El código de idioma de una designación, a partir del concepto que lo
+ * representa.
+ *
+ * Devuelve `undefined` para un idioma que no esté entre los admitidos, en vez de
+ * inventar un código: una designación cargada con un idioma desconocido se
+ * muestra igual, sin etiqueta de idioma, que es más honesto que llamarla `ES`.
+ */
+function languageCodeOf(languageConceptId: string): string | undefined {
+  return Object.entries(LANGUAGE_CONCEPT_BY_CODE).find(
+    ([, conceptId]) => conceptId === languageConceptId,
+  )?.[0];
 }

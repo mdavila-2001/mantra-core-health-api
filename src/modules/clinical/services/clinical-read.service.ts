@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   AllergyIntolerancesRepository,
+  CareEpisodesRepository,
   ConditionsRepository,
   EncountersRepository,
   MedicationRequestsRepository,
@@ -33,6 +34,7 @@ export class ClinicalReadService {
    * @param medicationRequestsRepo - Acceso a prescripciones.
    * @param observationsRepo - Acceso a observaciones.
    * @param encountersRepo - Acceso a encuentros.
+   * @param episodesRepo - Acceso a episodios de cuidado (internaciones).
    * @param logger - Registro estructurado.
    */
   constructor(
@@ -42,6 +44,7 @@ export class ClinicalReadService {
     private readonly medicationRequestsRepo: MedicationRequestsRepository,
     private readonly observationsRepo: ObservationsRepository,
     private readonly encountersRepo: EncountersRepository,
+    private readonly episodesRepo: CareEpisodesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ClinicalReadService.name);
@@ -52,7 +55,8 @@ export class ClinicalReadService {
    *
    * @param patientProfileId - Paciente cuyo historial se lee.
    * @param limit - Tope por bloque.
-   * @returns Condiciones, alergias, medicación, observaciones y encuentros.
+   * @returns Condiciones, alergias, medicación, observaciones, encuentros y
+   *          episodios de cuidado.
    */
   async getPatientSummary(
     patientProfileId: string,
@@ -72,12 +76,14 @@ export class ClinicalReadService {
       medicationRequests,
       observations,
       encounters,
+      careEpisodes,
     ] = await Promise.all([
       this.conditionsRepo.findByPatient(em, patientProfileId, over),
       this.allergiesRepo.findByPatient(em, patientProfileId, over),
       this.medicationRequestsRepo.findByPatient(em, patientProfileId, over),
       this.observationsRepo.findByPatient(em, patientProfileId, over),
       this.encountersRepo.findByPatient(em, patientProfileId, over),
+      this.episodesRepo.findByPatient(em, patientProfileId, over),
     ]);
 
     const truncated: string[] = [];
@@ -158,6 +164,21 @@ export class ClinicalReadService {
           endAt: row.endAt,
         }),
       ),
+      careEpisodes: this.cut(
+        careEpisodes,
+        limit,
+        'careEpisodes',
+        truncated,
+      ).map((row) => ({
+        id: row.id,
+        tenantId: row.tenantId,
+        typeConceptId: row.typeConceptId,
+        statusConceptId: row.statusConceptId,
+        responsiblePractitionerId: row.responsiblePractitionerId,
+        startAt: row.startAt,
+        endAt: row.endAt,
+        createdAt: row.createdAt,
+      })),
       limit,
       truncated,
     };

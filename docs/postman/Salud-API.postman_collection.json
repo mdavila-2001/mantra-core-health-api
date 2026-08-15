@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "REDESA Health API · 966 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 966 requests en 123 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "REDESA Health API · 974 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 974 requests en 124 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -224,6 +224,24 @@
                   "key": "ids",
                   "value": "",
                   "description": "Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato",
+                  "disabled": true
+                },
+                {
+                  "key": "lang",
+                  "value": "ES",
+                  "description": "Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica; con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false`",
+                  "disabled": true
+                },
+                {
+                  "key": "includeValueSets",
+                  "value": "includeValueSets-ejemplo",
+                  "description": "Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand`",
+                  "disabled": true
+                },
+                {
+                  "key": "valueSetId",
+                  "value": "valueSetId-ejemplo",
+                  "description": "Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand`",
                   "disabled": true
                 }
               ]
@@ -20705,8 +20723,54 @@
       ]
     },
     {
-      "name": "diagnostic-units (9)",
+      "name": "diagnostic-units (11)",
       "item": [
+        {
+          "name": "GET /diagnostic-units · Listar unidades diagnósticas publicadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/diagnostic-units",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "diagnostic-units"
+              ]
+            },
+            "description": "Listar unidades diagnósticas publicadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /diagnostic-units`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DiagnosticUnitsController_list`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.diagnosticUnits || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('diagnosticUnitId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "POST /diagnostic-units · Alta de unidad diagnóstica con sitios y acreditaciones",
           "request": {
@@ -21202,6 +21266,60 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.diagnosticUnitId);",
                   "  if (id) pm.environment.set('diagnosticUnitId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /diagnostic-units/{id} · Consultar el perfil de una unidad diagnóstica",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/diagnostic-units/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "diagnostic-units",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{diagnosticUnitId}}",
+                  "description": "Identificador de ruta · variable `{{diagnosticUnitId}}`"
+                }
+              ]
+            },
+            "description": "Consultar el perfil de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /diagnostic-units/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DiagnosticUnitsController_getById`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.diagnosticUnits || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('diagnosticUnitId', first.id);",
                   "}"
                 ]
               }
@@ -46505,6 +46623,66 @@
       ]
     },
     {
+      "name": "practitioners (1)",
+      "item": [
+        {
+          "name": "GET /practitioners/{profileId}/sites · Consultorios donde atiende el profesional",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practitioners/:profileId/sites",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practitioners",
+                ":profileId",
+                "sites"
+              ],
+              "variable": [
+                {
+                  "key": "profileId",
+                  "value": "{{profileId}}",
+                  "description": "Identificador de ruta · variable `{{profileId}}`"
+                }
+              ]
+            },
+            "description": "Sale de sus asignaciones de rol vigentes con sede. Una lista vacía significa que no tiene ninguna, no que el profesional no exista.\n\n`GET /practitioners/{profileId}/sites`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `PractitionerSitesController_listSites`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.sites || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('siteId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "price-schedules (1)",
       "item": [
         {
@@ -48556,7 +48734,7 @@
       ]
     },
     {
-      "name": "profiles (18)",
+      "name": "profiles (22)",
       "item": [
         {
           "name": "profiles-patients",
@@ -49319,6 +49497,122 @@
           "name": "profiles-practitioners",
           "item": [
             {
+              "name": "GET /profiles/practitioners · Listar profesionales para la guía, con sus especialidades",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners"
+                  ],
+                  "query": [
+                    {
+                      "key": "specialtyConceptId",
+                      "value": "<specialtyConceptId: uuid del catálogo, ver GET /terminology/concepts>",
+                      "description": "Filtra por especialidad vigente (concept id)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "description": "Tope de resultados (por defecto 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Listar profesionales para la guía, con sus especialidades. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/practitioners`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesPractitionersController_listPractitioners`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.practitioners || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('practitionerId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/practitioners/me/affiliations · Historial laboral propio (instituciones donde trabajó)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/me/affiliations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    "me",
+                    "affiliations"
+                  ]
+                },
+                "description": "Historial laboral propio (instituciones donde trabajó). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/practitioners/me/affiliations`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `ProfilesPractitionersController_listOwnAffiliations`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.affiliations || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('affiliationId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "GET /profiles/practitioners/me/summary · Consultar el perfil profesional propio (trayectoria y actividad)",
               "request": {
                 "method": "GET",
@@ -49420,6 +49714,67 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.practitionerId);",
                       "  if (id) pm.environment.set('practitionerId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/practitioners/me/affiliations · Registrar una afiliación institucional en el historial propio",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/me/affiliations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    "me",
+                    "affiliations"
+                  ]
+                },
+                "description": "El sujeto sale de la sesión: no hay forma de escribir el historial de otro.\n\n`POST /profiles/practitioners/me/affiliations`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_addOwnAffiliation`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"primaryTenantId\": \"<primaryTenantId: uuid existente>\",\n  \"participatingTenantId\": \"<participatingTenantId: uuid existente>\",\n  \"healthcareServiceId\": \"{{healthcareServiceId}}\",\n  \"contractReference\": \"contractReference-ejemplo\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{affiliationId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.affiliationId);",
+                      "  if (id) pm.environment.set('affiliationId', id);",
                       "}"
                     ]
                   }
@@ -49624,6 +49979,62 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.specialtyId);",
                       "  if (id) pm.environment.set('specialtyId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/practitioners/{profileId}/summary · Consultar el perfil profesional de un colega (ficha de la guía)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/:profileId/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    ":profileId",
+                    "summary"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "Consultar el perfil profesional de un colega (ficha de la guía). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/practitioners/{profileId}/summary`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `ProfilesPractitionersController_getPractitionerSummary`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.practitioners || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('practitionerId', first.id);",
                       "}"
                     ]
                   }
@@ -58313,7 +58724,7 @@
       ]
     },
     {
-      "name": "terminology (16)",
+      "name": "terminology (17)",
       "item": [
         {
           "name": "GET /terminology/CodeSystem/$lookup · UC-03-11: resuelve un concepto por sistema y código",
@@ -58421,6 +58832,24 @@
                   "key": "ids",
                   "value": "",
                   "description": "Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato",
+                  "disabled": true
+                },
+                {
+                  "key": "lang",
+                  "value": "ES",
+                  "description": "Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica; con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false`",
+                  "disabled": true
+                },
+                {
+                  "key": "includeValueSets",
+                  "value": "includeValueSets-ejemplo",
+                  "description": "Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand`",
+                  "disabled": true
+                },
+                {
+                  "key": "valueSetId",
+                  "value": "valueSetId-ejemplo",
+                  "description": "Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand`",
                   "disabled": true
                 }
               ]
@@ -59217,6 +59646,69 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.versionId);",
                   "  if (id) pm.environment.set('versionId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /terminology/concepts/{conceptId} · Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/terminology/concepts/:conceptId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "terminology",
+                "concepts",
+                ":conceptId"
+              ],
+              "variable": [
+                {
+                  "key": "conceptId",
+                  "value": "{{conceptId}}",
+                  "description": "Identificador de ruta · variable `{{conceptId}}`"
+                }
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ES",
+                  "description": "Idioma preferido de `display` y `definition`",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/concepts/{conceptId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TerminologyConceptsController_readConcept`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.concepts || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('conceptId', first.id);",
                   "}"
                 ]
               }

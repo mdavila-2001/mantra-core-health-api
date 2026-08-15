@@ -2486,6 +2486,170 @@
         "description": "Consultar el perfil profesional propio (trayectoria y actividad). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/profiles/practitioners": {
+      "get": {
+        "operationId": "ProfilesPractitionersController_listPractitioners",
+        "parameters": [
+          {
+            "name": "specialtyConceptId",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por especialidad vigente (concept id)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope de resultados (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar profesionales para la guía, con sus especialidades",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Listar profesionales para la guía, con sus especialidades. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "operationId": "ProfilesPractitionersController_onboardPractitioner",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePractitionerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de profesional de salud (workforce generalista)",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Alta de profesional de salud (workforce generalista). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/practitioners/{profileId}/summary": {
+      "get": {
+        "operationId": "ProfilesPractitionersController_getPractitionerSummary",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar el perfil profesional de un colega (ficha de la guía)",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Consultar el perfil profesional de un colega (ficha de la guía). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/profiles/practitioners/me": {
       "patch": {
         "operationId": "ProfilesPractitionersController_updateOwnPractitionerProfile",
@@ -2539,61 +2703,6 @@
           "profiles-practitioners"
         ],
         "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/profiles/practitioners": {
-      "post": {
-        "operationId": "ProfilesPractitionersController_onboardPractitioner",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePractitionerDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de profesional de salud (workforce generalista)",
-        "tags": [
-          "profiles-practitioners"
-        ],
-        "description": "Alta de profesional de salud (workforce generalista). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/profiles/practitioners/{profileId}/jurisdiction-authorizations": {
@@ -2661,6 +2770,95 @@
           "profiles-practitioners"
         ],
         "description": "Registrar/renovar autorización jurisdiccional (licencia). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/practitioners/me/affiliations": {
+      "get": {
+        "operationId": "ProfilesPractitionersController_listOwnAffiliations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Historial laboral propio (instituciones donde trabajó)",
+        "tags": [
+          "profiles-practitioners"
+        ],
+        "description": "Historial laboral propio (instituciones donde trabajó). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "description": "El sujeto sale de la sesión: no hay forma de escribir el historial de otro.",
+        "operationId": "ProfilesPractitionersController_addOwnAffiliation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAffiliationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar una afiliación institucional en el historial propio",
+        "tags": [
+          "profiles-practitioners"
+        ]
       }
     },
     "/profiles/practitioners/{profileId}/specialties": {
@@ -9019,6 +9217,37 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "lang",
+            "required": false,
+            "in": "query",
+            "description": "Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica; con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false`",
+            "schema": {
+              "enum": [
+                "ES",
+                "EN"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeValueSets",
+            "required": false,
+            "in": "query",
+            "description": "Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand`",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueSetId",
+            "required": false,
+            "in": "query",
+            "description": "Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand`",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -9051,6 +9280,67 @@
           "terminology"
         ],
         "description": "UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/terminology/concepts/{conceptId}": {
+      "get": {
+        "operationId": "TerminologyConceptsController_readConcept",
+        "parameters": [
+          {
+            "name": "conceptId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": false,
+            "in": "query",
+            "description": "Idioma preferido de `display` y `definition`",
+            "schema": {
+              "enum": [
+                "ES",
+                "EN"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas",
+        "tags": [
+          "terminology"
+        ],
+        "description": "Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/terminology/concepts/{conceptId}/designations": {
@@ -17051,6 +17341,54 @@
           "practice"
         ],
         "description": "Verificar o caducar una acreditación (transición de estado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practitioners/{profileId}/sites": {
+      "get": {
+        "description": "Sale de sus asignaciones de rol vigentes con sede. Una lista vacía significa que no tiene ninguna, no que el profesional no exista.",
+        "operationId": "PractitionerSitesController_listSites",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultorios donde atiende el profesional",
+        "tags": [
+          "practice"
+        ]
       }
     },
     "/role-assignments/{roleId}/support-assignments": {
@@ -25759,6 +26097,47 @@
       }
     },
     "/diagnostic-units": {
+      "get": {
+        "operationId": "DiagnosticUnitsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticUnitDirectoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar unidades diagnósticas publicadas",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Listar unidades diagnósticas publicadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "post": {
         "operationId": "DiagnosticUnitsController_create",
         "parameters": [],
@@ -25811,6 +26190,61 @@
           "diagnostic-units"
         ],
         "description": "Alta de unidad diagnóstica con sitios y acreditaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/diagnostic-units/{id}": {
+      "get": {
+        "operationId": "DiagnosticUnitsController_getById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnosticUnitDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar el perfil de una unidad diagnóstica",
+        "tags": [
+          "diagnostic-units"
+        ],
+        "description": "Consultar el perfil de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/diagnostic-units/{id}/sites": {
@@ -60623,6 +61057,58 @@
           "licenseNumber"
         ]
       },
+      "CreateAffiliationDto": {
+        "type": "object",
+        "properties": {
+          "primaryTenantId": {
+            "type": "string",
+            "description": "Tenant primario (organizador)",
+            "format": "uuid"
+          },
+          "participatingTenantId": {
+            "type": "string",
+            "description": "Tenant participante",
+            "format": "uuid"
+          },
+          "affiliationTypeConceptId": {
+            "type": "string",
+            "description": "Tipo de afiliación (concepto)",
+            "format": "uuid"
+          },
+          "hostPracticeSiteId": {
+            "type": "string",
+            "description": "Sitio de práctica anfitrión",
+            "format": "uuid"
+          },
+          "healthcareServiceId": {
+            "type": "string",
+            "description": "Servicio de salud implicado",
+            "format": "uuid"
+          },
+          "contractReference": {
+            "type": "string",
+            "description": "Referencia de contrato",
+            "maxLength": 200
+          },
+          "dataUseAgreementId": {
+            "type": "string",
+            "description": "Acuerdo de uso de datos (DUA) firmado",
+            "format": "uuid"
+          },
+          "validFrom": {
+            "type": "string",
+            "description": "Vigente desde (ISO date-time)"
+          },
+          "validTo": {
+            "type": "string",
+            "description": "Vigente hasta (ISO date-time)"
+          }
+        },
+        "required": [
+          "primaryTenantId",
+          "participatingTenantId"
+        ]
+      },
       "AddSpecialtyDto": {
         "type": "object",
         "properties": {
@@ -73218,6 +73704,367 @@
           "purpose"
         ]
       },
+      "DiagnosticConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "DiagnosticUnitDirectoryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DiagnosticConceptDto"
+          },
+          "siteCount": {
+            "type": "number"
+          },
+          "equipmentCount": {
+            "type": "number"
+          },
+          "studyCount": {
+            "type": "number"
+          },
+          "acceptsExternalOrders": {
+            "type": "object",
+            "nullable": true
+          },
+          "walkInAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "homeCollectionAvailable": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "type",
+          "siteCount",
+          "equipmentCount",
+          "studyCount"
+        ]
+      },
+      "DiagnosticUnitDirectoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticUnitDirectoryItemDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "DiagnosticUnitSiteDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/DiagnosticConceptDto"
+          },
+          "sampleCollectionAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "imagingAvailable": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "role"
+        ]
+      },
+      "DiagnosticEquipmentDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DiagnosticConceptDto"
+          },
+          "manufacturer": {
+            "type": "object",
+            "nullable": true
+          },
+          "model": {
+            "type": "object",
+            "nullable": true
+          },
+          "modality": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiagnosticConceptDto"
+              }
+            ]
+          },
+          "operationalStatus": {
+            "$ref": "#/components/schemas/DiagnosticConceptDto"
+          },
+          "lastCalibrationAt": {
+            "type": "object",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nextCalibrationDueAt": {
+            "type": "object",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "siteId",
+          "type",
+          "operationalStatus"
+        ]
+      },
+      "DiagnosticPublicPriceDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/DiagnosticConceptDto"
+          },
+          "scheduleCode": {
+            "type": "string"
+          },
+          "siteId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "amount",
+          "currency",
+          "scheduleCode"
+        ]
+      },
+      "DiagnosticStudyDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "siteId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "modality": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiagnosticConceptDto"
+              }
+            ]
+          },
+          "preparationInstructions": {
+            "type": "object",
+            "nullable": true
+          },
+          "expectedDurationMinutes": {
+            "type": "object",
+            "nullable": true
+          },
+          "expectedTurnaroundMinutes": {
+            "type": "object",
+            "nullable": true
+          },
+          "requiresMedicalOrder": {
+            "type": "object",
+            "nullable": true
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticPublicPriceDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "prices"
+        ]
+      },
+      "DiagnosticAccreditationDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DiagnosticConceptDto"
+          },
+          "number": {
+            "type": "object",
+            "nullable": true
+          },
+          "siteId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "validFrom": {
+            "type": "object",
+            "format": "date",
+            "nullable": true
+          },
+          "validTo": {
+            "type": "object",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "DiagnosticUnitDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DiagnosticConceptDto"
+          },
+          "siteCount": {
+            "type": "number"
+          },
+          "equipmentCount": {
+            "type": "number"
+          },
+          "studyCount": {
+            "type": "number"
+          },
+          "acceptsExternalOrders": {
+            "type": "object",
+            "nullable": true
+          },
+          "walkInAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "homeCollectionAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticUnitSiteDetailDto"
+            }
+          },
+          "equipment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticEquipmentDetailDto"
+            }
+          },
+          "studies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticStudyDetailDto"
+            }
+          },
+          "accreditations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticAccreditationDetailDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "type",
+          "siteCount",
+          "equipmentCount",
+          "studyCount",
+          "sites",
+          "equipment",
+          "studies",
+          "accreditations"
+        ]
+      },
       "CreateUnitSiteDto": {
         "type": "object",
         "properties": {
@@ -81591,58 +82438,6 @@
         },
         "required": [
           "decision"
-        ]
-      },
-      "CreateAffiliationDto": {
-        "type": "object",
-        "properties": {
-          "primaryTenantId": {
-            "type": "string",
-            "description": "Tenant primario (organizador)",
-            "format": "uuid"
-          },
-          "participatingTenantId": {
-            "type": "string",
-            "description": "Tenant participante",
-            "format": "uuid"
-          },
-          "affiliationTypeConceptId": {
-            "type": "string",
-            "description": "Tipo de afiliación (concepto)",
-            "format": "uuid"
-          },
-          "hostPracticeSiteId": {
-            "type": "string",
-            "description": "Sitio de práctica anfitrión",
-            "format": "uuid"
-          },
-          "healthcareServiceId": {
-            "type": "string",
-            "description": "Servicio de salud implicado",
-            "format": "uuid"
-          },
-          "contractReference": {
-            "type": "string",
-            "description": "Referencia de contrato",
-            "maxLength": 200
-          },
-          "dataUseAgreementId": {
-            "type": "string",
-            "description": "Acuerdo de uso de datos (DUA) firmado",
-            "format": "uuid"
-          },
-          "validFrom": {
-            "type": "string",
-            "description": "Vigente desde (ISO date-time)"
-          },
-          "validTo": {
-            "type": "string",
-            "description": "Vigente hasta (ISO date-time)"
-          }
-        },
-        "required": [
-          "primaryTenantId",
-          "participatingTenantId"
         ]
       },
       "CreateDataBoundaryDto": {
