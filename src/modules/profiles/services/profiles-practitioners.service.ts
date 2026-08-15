@@ -5,6 +5,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  VerificationBypassService,
   decodeKeysetCursor,
   encodeKeysetCursor,
   getCurrentTenantId,
@@ -78,6 +79,7 @@ export class ProfilesPractitionersService {
    * @param affiliationsRepo - Historial laboral (afiliaciones institucionales).
    * @param accountLinksRepo - Vínculo persona-cuenta del titular del perfil.
    * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
+   * @param verificationBypass - Bypass DEV/TEST del filtro de verificación (corrección #12).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -93,6 +95,7 @@ export class ProfilesPractitionersService {
     private readonly ownership: ProfileOwnershipService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
+    private readonly verificationBypass: VerificationBypassService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -163,6 +166,18 @@ export class ProfilesPractitionersService {
    * especialidad considera únicamente las vigentes: presentar a alguien por
    * una especialidad que dejó de ejercer es decir algo falso.
    *
+   * ## Filtro de verificación (corrección #12/#13)
+   *
+   * Fuera del bypass DEV/TEST, la guía solo lista profesionales con
+   * `verificationStatusConceptId = PRACT_VERIF_VERIFIED`: presentar a un
+   * paciente un profesional no verificado como si fuera elegible sería el
+   * mismo tipo de dato falso que una especialidad ya abandonada. Con el
+   * bypass activo (`VerificationBypassService.isActive()`), el filtro se
+   * suprime — los sembrados/registrados sin verificar deben poder probarse
+   * de punta a punta en DEV/TEST — pero el estado sigue viajando en cada
+   * fila (`verificationStatusConceptId`) como badge informativo, nunca como
+   * criterio de exclusión adicional.
+   *
    * @param options - Filtro por especialidad, cursor y tope de página.
    * @returns Página de la guía con el cursor de la siguiente.
    */
@@ -197,11 +212,15 @@ export class ProfilesPractitionersService {
       }
     }
 
+    const verificationStatusConceptId = this.verificationBypass.isActive()
+      ? undefined
+      : PROF.PRACT_VERIF_VERIFIED;
+
     // Una fila de más para saber si hay página siguiente sin pagar un COUNT
     // sobre toda la tabla en cada página.
     const rows = await this.practitionersRepo.listPage(
       em,
-      { afterCode, profileIds },
+      { afterCode, profileIds, verificationStatusConceptId },
       options.limit + 1,
     );
     const hasMore = rows.length > options.limit;
@@ -316,12 +335,13 @@ export class ProfilesPractitionersService {
     }
 
     const profileId = practitioner.profileId;
-    const [specialties, credentials, licenses, languages, activity] =
+    const [specialties, credentials, licenses, languages, affiliations, activity] =
       await Promise.all([
         this.specialtiesRepo.findAllByPractitioner(em, profileId),
         this.credentialsRepo.findByPractitioner(em, profileId),
         this.authorizationsRepo.findByPractitioner(em, profileId),
         this.languagesRepo.findByPractitioner(em, profileId),
+        this.affiliationsRepo.findByPractitioner(em, profileId),
         subjectUserId === undefined
           ? Promise.resolve({
               encounters: 0,
@@ -364,6 +384,7 @@ export class ProfilesPractitionersService {
         expiryDate: credential.expiryDate,
         stateConceptId: credential.stateConceptId,
         verifiedAt: credential.verifiedAt,
+        verificationSourceUri: credential.verificationSourceUri,
       })),
       licenses: licenses.map((license) => ({
         id: license.id,
@@ -380,6 +401,7 @@ export class ProfilesPractitionersService {
         clinicalInterpretationAllowed:
           language.clinicalInterpretationAllowed ?? false,
       })),
+      affiliations: affiliations.map((row) => toAffiliation(row)),
       activity,
       createdAt: practitioner.createdAt,
     };

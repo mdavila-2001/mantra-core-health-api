@@ -151,6 +151,16 @@ export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
 export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
 export { appSecurityEnvSchema } from './security/app-security.env';
 
+// Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)
+export { VerificationBypassModule } from './verification/verification-bypass.module';
+export { VerificationBypassService } from './verification/verification-bypass.service';
+export {
+  verificationBypassEnvSchema,
+  loadVerificationBypassEnv,
+  assertVerificationBypassNotInProduction,
+} from './verification/verification-bypass.env';
+export type { VerificationBypassEnv } from './verification/verification-bypass.env';
+
 // Conceptos de dominio
 export {
   CONCEPTS,
