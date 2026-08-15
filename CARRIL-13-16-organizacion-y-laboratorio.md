@@ -134,7 +134,34 @@ Cobertura nueva:
 - Los dos controladores: que delegan en el servicio administrativo y **no** en
   el de directorio, y que el tenant del contexto llega al servicio.
 
-## 5. Deuda y hallazgos ajenos
+## 5. Evidencia contra el stack vivo
+
+Los tres endpoints se verificaron con la aplicación real, no con dobles: el
+front del carril servido por `ng serve` proxeando a esta API, recorrido con
+Playwright sobre Chromium (`scripts/e2e-carril-13-16.mjs` del repositorio del
+front).
+
+```
+GET /practices/:id/organization          → HTTP 200 · 4 sedes reales del seed
+GET /diagnostic-units/administration     → HTTP 200 · {items: [], count: 0}
+```
+
+Las rutas quedan registradas en el arranque del contenedor:
+
+```
+Mapped {/practices/:practiceId/organization, GET} route
+Mapped {/diagnostic-units/administration, GET} route
+Mapped {/diagnostic-units/:id/administration, GET} route
+```
+
+El listado de laboratorios devolvió vacío porque **los conceptos del módulo 23
+nunca se materializaron en esta base local** y `tools/redesa/seed-diagnostic-units.mjs`
+se detiene en vez de inventarlos — que es el comportamiento correcto del
+seeder. Lo que quedó probado end-to-end de C16 es el recorrido completo
+—sesión, rol, petición, respuesta y estado vacío—; el camino con datos lo
+cubren las pruebas unitarias.
+
+## 6. Deuda y hallazgos ajenos
 
 - **Dos errores de formato preexistentes en `profiles`** (`prettier/prettier` en
   `profiles-practitioners.controller.ts` y `profiles-practitioners.service.spec.ts`)
