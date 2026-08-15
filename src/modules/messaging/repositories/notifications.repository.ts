@@ -692,10 +692,17 @@ export class NotificationsRepository {
       actorUserId?: string;
     },
   ): Promise<RecipientPreferences> {
+    // `null` explícito, no `undefined`: la clave de la fila es
+    // `(userId, channelId, categoryConceptId)` y una preferencia "general"
+    // (sin categoría) tiene que buscarse y guardarse como `IS NULL`, no como
+    // "sin filtrar" — con `undefined` en el `where`, un ORM puede tratar la
+    // clave como ausente y devolver la primera fila de ese (userId, channelId)
+    // sin importar su categoría, pisando una preferencia categorizada distinta.
+    const categoryConceptId = data.categoryConceptId ?? null;
     const existing = await em.findOne(RecipientPreferences, {
       userId: data.userId,
       channelId: data.channelId,
-      categoryConceptId: data.categoryConceptId,
+      categoryConceptId,
     });
     const now = new Date();
     if (existing) {
@@ -712,7 +719,7 @@ export class NotificationsRepository {
       {
         userId: data.userId,
         channelId: data.channelId,
-        categoryConceptId: data.categoryConceptId,
+        categoryConceptId,
         optedIn: data.optedIn,
         quietHoursJson: data.quietHoursJson,
         ...createdBy(data.actorUserId, now),
