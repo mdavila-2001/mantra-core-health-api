@@ -36,6 +36,8 @@ import {
   ScheduleRemindersResponseDto,
   BookingItemDto,
   SearchBookingsResponseDto,
+  DecideBookingDto,
+  BookingDecisionResponseDto,
 } from '../dto';
 
 /** Operaciones sobre una cita ya confirmada. */
@@ -115,6 +117,29 @@ export class SchedulingBookingsController {
   @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
   getBooking(@Param('id', ParseUUIDPipe) id: string): Promise<BookingItemDto> {
     return this.bookingsService.getBookingById(id);
+  }
+
+  /**
+   * UC-41-17: la decisión del prestador sobre una solicitud.
+   *
+   * No la alcanza `PATIENT`: quien pide no puede aceptarse a sí mismo el
+   * pedido. El paciente sigue teniendo `cancel` y `reschedule` para lo suyo, y
+   * lee el motivo de la decisión en la propia cita.
+   */
+  @Post(':id/decision')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Aceptar, rechazar, proponer otro horario o pedir documentación',
+    description:
+      'Sólo sobre una solicitud pendiente. Rechazar nunca genera cargo.',
+  })
+  decide(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DecideBookingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    return this.bookingsService.decideBooking(id, dto, actor);
   }
 
   /** UC-41-08. */

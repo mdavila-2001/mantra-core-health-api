@@ -502,3 +502,103 @@ export class WaitlistCandidateSlotsResponseDto {
   })
   slotIds!: string[];
 }
+
+/* ============================================================================
+    La decisión del prestador sobre una solicitud (UC-41-17).
+
+    `POST /scheduling/holds/{token}/request` deja la reserva pendiente. Esto es
+    lo que la resuelve. La especificación de centros de diagnóstico enumera
+    exactamente lo que un centro puede hacer con un pedido: confirmarlo,
+    rechazarlo, proponer otro horario, pedir documentación adicional, pedir una
+    orden médica e informar instrucciones de preparación. Las tres últimas son
+    la misma situación —falta algo antes de confirmar— y por eso son una sola
+    decisión con un motivo tipado, no tres estados que después nadie distingue.
+    ========================================================================== */
+
+/** Qué decidió el prestador sobre la solicitud. */
+export type BookingDecision =
+  | 'CONFIRM'
+  | 'REJECT'
+  | 'REQUEST_INFO'
+  | 'PROPOSE_SCHEDULE';
+
+export const BOOKING_DECISIONS: readonly BookingDecision[] = [
+  'CONFIRM',
+  'REJECT',
+  'REQUEST_INFO',
+  'PROPOSE_SCHEDULE',
+];
+
+/** Qué le falta a la solicitud cuando el prestador pide información. */
+export type BookingInfoRequest =
+  | 'DOCUMENTATION'
+  | 'MEDICAL_ORDER'
+  | 'PREPARATION';
+
+export const BOOKING_INFO_REQUESTS: readonly BookingInfoRequest[] = [
+  'DOCUMENTATION',
+  'MEDICAL_ORDER',
+  'PREPARATION',
+];
+
+/** Cuerpo de `POST /scheduling/bookings/{id}/decision` (UC-41-17). */
+export class DecideBookingDto {
+  /** La decisión. */
+  @ApiProperty({
+    description: 'Decisión del prestador',
+    enum: BOOKING_DECISIONS,
+  })
+  @IsIn(BOOKING_DECISIONS as readonly string[])
+  decision!: BookingDecision;
+
+  /**
+   * Qué se le pide al paciente. Obligatorio con `REQUEST_INFO` y sin sentido en
+   * el resto: el servicio lo rechaza si no concuerdan.
+   */
+  @ApiPropertyOptional({
+    description: 'Qué falta, cuando la decisión es REQUEST_INFO',
+    enum: BOOKING_INFO_REQUESTS,
+  })
+  @IsOptional()
+  @IsIn(BOOKING_INFO_REQUESTS as readonly string[])
+  infoRequested?: BookingInfoRequest;
+
+  /** Horario propuesto. Obligatorio con `PROPOSE_SCHEDULE`. */
+  @ApiPropertyOptional({
+    description: 'Cupo propuesto, cuando la decisión es PROPOSE_SCHEDULE',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  proposedSlotId?: string;
+
+  /**
+   * Lo que el prestador quiere decirle a la persona: el motivo del rechazo, qué
+   * documento traer, cómo prepararse. Obligatorio salvo al aceptar (corrección
+   * #14) y queda en el historial, que es de donde lo lee el portal.
+   */
+  @ApiPropertyOptional({ description: 'Mensaje para el paciente' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  reasonText?: string;
+}
+
+/** Resultado de resolver una solicitud. */
+export class BookingDecisionResponseDto {
+  /** Reserva decidida. */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /** Estado en el que quedó (concept id). */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+
+  /** Cupo en el que quedó la reserva, si la decisión lo movió. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  bookableSlotId?: string;
+
+  /** El cupo original volvió a estar disponible. */
+  @ApiProperty()
+  capacityReleased!: boolean;
+}

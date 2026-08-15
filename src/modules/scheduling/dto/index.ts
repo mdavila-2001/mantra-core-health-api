@@ -32,9 +32,17 @@ export {
   WorkerBatchResultDto,
   WorkerBatchDto,
   WaitlistCandidateSlotsResponseDto,
+  DecideBookingDto,
+  BookingDecisionResponseDto,
   BOOKING_CHANNELS,
+  BOOKING_DECISIONS,
+  BOOKING_INFO_REQUESTS,
 } from './scheduling-bookings.dto';
-export type { BookingChannel } from './scheduling-bookings.dto';
+export type {
+  BookingChannel,
+  BookingDecision,
+  BookingInfoRequest,
+} from './scheduling-bookings.dto';
 
 export {
   CreateConfirmationRuleDto,

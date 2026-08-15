@@ -46,7 +46,34 @@ export interface BookingTransitionSnapshot {
    * la cuenta, no el papel que jugaba.
    */
   actorKind?: BookingActorKind;
+  /**
+   * Qué decidió el prestador, cuando la transición viene de resolver una
+   * solicitud (UC-41-17). Ausente en el resto de los cambios.
+   */
+  decision?: BookingDecisionKind;
+  /**
+   * Qué se le pidió al paciente, cuando la decisión fue pedir información.
+   */
+  infoRequested?: BookingInfoRequestKind;
 }
+
+/**
+ * Qué puede decidir el prestador sobre una solicitud.
+ *
+ * Vive acá y no en el DTO porque es lo que se **guarda** en el historial: el
+ * DTO lo valida en la frontera, el snapshot lo conserva.
+ */
+export type BookingDecisionKind =
+  | 'CONFIRM'
+  | 'REJECT'
+  | 'REQUEST_INFO'
+  | 'PROPOSE_SCHEDULE';
+
+/** Qué le falta a la solicitud cuando el prestador pide información. */
+export type BookingInfoRequestKind =
+  | 'DOCUMENTATION'
+  | 'MEDICAL_ORDER'
+  | 'PREPARATION';
 
 /** Desde qué lado del mostrador se hizo el cambio. */
 export type BookingActorKind = 'PATIENT' | 'PROVIDER';

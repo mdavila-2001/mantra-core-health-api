@@ -51,7 +51,10 @@ import {
   BookingItemDto,
   BookingStatusReasonDto,
   SearchBookingsResponseDto,
+  DecideBookingDto,
+  BookingDecisionResponseDto,
   type BookingChannel,
+  type BookingDecision,
 } from '../dto';
 
 const CHANNEL_CONCEPT: Readonly<Record<BookingChannel, string>> = {
@@ -79,6 +82,20 @@ const ACTIVE_BOOKING_STATES: readonly string[] = [
  * Quedan fuera solo las dos terminales que el filtro nombra: cancelada y
  * ausencia.
  */
+/** Estados en los que una solicitud todavía espera la decisión del prestador. */
+const PENDING_DECISION_STATES: readonly string[] = [
+  SCHED.BOOKING_REQUESTED,
+  SCHED.BOOKING_PENDING_CONFIRMATION,
+];
+
+/** Cómo se nombra cada decisión al exigir su motivo. */
+const ACCION_DE_DECISION: Readonly<Record<BookingDecision, string>> = {
+  CONFIRM: 'aceptar la solicitud',
+  REJECT: 'rechazar la solicitud',
+  REQUEST_INFO: 'pedir documentación',
+  PROPOSE_SCHEDULE: 'proponer otro horario',
+};
+
 const VISIBLE_BOOKING_STATES: readonly string[] = [
   SCHED.BOOKING_REQUESTED,
   SCHED.BOOKING_PENDING_CONFIRMATION,
@@ -773,6 +790,231 @@ export class SchedulingBookingsService {
       }
 
       return { bookingId, feeAmount, capacityReleased };
+    });
+  }
+
+  /**
+   * UC-41-17: el prestador resuelve una solicitud de reserva.
+   *
+   * Es la contraparte de {@link requestBooking}: si una reserva puede nacer
+   * pedida, alguien tiene que poder resolverla. Cubre las cinco cosas que la
+   * especificación de centros de diagnóstico permite hacer con una solicitud
+   * —confirmarla, rechazarla, proponer otro horario, pedir documentación y pedir
+   * una orden médica— con las transiciones que la máquina de estados ya declara
+   * y el mismo historial donde el resto de los cambios deja su motivo.
+   *
+   * Las tres últimas no son estados distintos: son la misma situación —«falta
+   * algo antes de confirmar»— así que se modelan como un único paso a
+   * `PENDING_CONFIRMATION` con un motivo tipado, y no como tres estados que
+   * después nadie sabe distinguir.
+   *
+   * **Rechazar no cobra nunca.** Es la diferencia con cancelar: una cita
+   * confirmada que se cancela tarde puede generar cargo porque alguien ya
+   * reservó ese tiempo; una solicitud que el prestador no aceptó no llegó a
+   * comprometer nada, y cobrarla sería cobrar por haber preguntado.
+   *
+   * @param bookingId - Solicitud a resolver.
+   * @param dto - La decisión y su motivo.
+   * @param actor - Quien decide, del lado del prestador.
+   * @returns El estado resultante.
+   */
+  async decideBooking(
+    bookingId: string,
+    dto: DecideBookingDto,
+    actor: AuthenticatedUser,
+  ): Promise<BookingDecisionResponseDto> {
+    if (dto.decision === 'REQUEST_INFO' && dto.infoRequested === undefined) {
+      throw new PreconditionFailedException(
+        'Indicá qué se le pide al paciente (`infoRequested`)',
+        { bookingId },
+      );
+    }
+    if (
+      dto.decision === 'PROPOSE_SCHEDULE' &&
+      dto.proposedSlotId === undefined
+    ) {
+      throw new PreconditionFailedException(
+        'Indicá el cupo propuesto (`proposedSlotId`)',
+        { bookingId },
+      );
+    }
+    // El motivo es obligatorio salvo al aceptar: quien recibe un rechazo, una
+    // propuesta de otro horario o un pedido de papeles tiene que poder leer por
+    // qué. Aceptar no necesita explicación.
+    const motivo =
+      dto.decision === 'CONFIRM'
+        ? dto.reasonText
+        : requireReason(dto.reasonText, ACCION_DE_DECISION[dto.decision]);
+
+    this.logger.info(
+      {
+        operation: 'scheduling.booking.decide',
+        bookingId,
+        decision: dto.decision,
+      },
+      'Deciding on a booking request',
+    );
+
+    return this.em.transactional(async (tx) => {
+      const booking = await this.bookingsRepo.findBookingByIdForUpdate(
+        tx,
+        bookingId,
+      );
+      if (!booking) {
+        throw new ResourceNotFoundException('Cita no encontrada', {
+          bookingId,
+        });
+      }
+      const fromState = booking.statusConceptId;
+      if (!PENDING_DECISION_STATES.includes(fromState)) {
+        throw new PreconditionFailedException(
+          'Sólo se decide sobre una solicitud pendiente',
+          { bookingId, statusConceptId: fromState },
+        );
+      }
+
+      /** Sella la decisión en el historial, con el motivo y el lado. */
+      const anotar = (toState: string): Promise<void> =>
+        this.recordTransition(tx, booking, actor, {
+          bookingId: booking.id,
+          fromStateConceptId: fromState,
+          toStateConceptId: toState,
+          ...(motivo === undefined ? {} : { reasonText: motivo }),
+          actorKind: 'PROVIDER',
+          decision: dto.decision,
+          ...(dto.infoRequested === undefined
+            ? {}
+            : { infoRequested: dto.infoRequested }),
+        });
+
+      if (dto.decision === 'CONFIRM') {
+        this.assertTransition(fromState, CONCEPTS.BOOKING_CONFIRMED);
+        booking.statusConceptId = CONCEPTS.BOOKING_CONFIRMED;
+        booking.confirmedAt = new Date();
+        touch(booking, actor.id);
+        await anotar(CONCEPTS.BOOKING_CONFIRMED);
+        return {
+          bookingId,
+          statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+          bookableSlotId: booking.bookableSlotId,
+          capacityReleased: false,
+        };
+      }
+
+      if (dto.decision === 'REQUEST_INFO') {
+        this.assertTransition(fromState, SCHED.BOOKING_PENDING_CONFIRMATION);
+        booking.statusConceptId = SCHED.BOOKING_PENDING_CONFIRMATION;
+        touch(booking, actor.id);
+        await anotar(SCHED.BOOKING_PENDING_CONFIRMATION);
+        // El cupo se mantiene tomado: pedirle un papel a alguien no es motivo
+        // para regalarle su horario a otra persona mientras lo consigue.
+        return {
+          bookingId,
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+          bookableSlotId: booking.bookableSlotId,
+          capacityReleased: false,
+        };
+      }
+
+      if (dto.decision === 'PROPOSE_SCHEDULE') {
+        const propuesto = dto.proposedSlotId!;
+        if (propuesto === booking.bookableSlotId) {
+          throw new PreconditionFailedException(
+            'El horario propuesto es el que ya tiene la solicitud',
+            { bookingId },
+          );
+        }
+        const destino = await this.bookingsRepo.findSlotForUpdate(
+          tx,
+          propuesto,
+        );
+        if (!destino) {
+          throw new ResourceNotFoundException('Cupo propuesto no encontrado', {
+            slotId: propuesto,
+          });
+        }
+        if (destino.remainingCapacity <= 0) {
+          throw new ConflictException('El cupo propuesto no tiene lugar', {
+            slotId: propuesto,
+          });
+        }
+
+        const origenId = booking.bookableSlotId;
+        const origen = await this.bookingsRepo.findSlotForUpdate(tx, origenId);
+        if (origen) {
+          origen.remainingCapacity += 1;
+          if (origen.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
+            origen.statusConceptId = CONCEPTS.SLOT_OPEN;
+          }
+          touch(origen, actor.id);
+        }
+        destino.remainingCapacity -= 1;
+        if (destino.remainingCapacity === 0) {
+          destino.statusConceptId = CONCEPTS.SLOT_HELD;
+        }
+        touch(destino, actor.id);
+
+        booking.bookableSlotId = propuesto;
+        // **Proponer no es acordar.** La solicitud sigue siendo una solicitud:
+        // la persona todavía tiene que poder mirar el horario nuevo y decidir.
+        // Por eso queda pendiente de confirmación y el cupo queda tomado, no
+        // reservado.
+        this.assertTransition(fromState, SCHED.BOOKING_PENDING_CONFIRMATION);
+        booking.statusConceptId = SCHED.BOOKING_PENDING_CONFIRMATION;
+        touch(booking, actor.id);
+
+        this.bookingsRepo.recordReschedule(tx, {
+          bookingId,
+          fromSlotId: origenId,
+          toSlotId: propuesto,
+          rescheduledByUserId: actor.id,
+          occurredAt: new Date(),
+        });
+        await anotar(SCHED.BOOKING_PENDING_CONFIRMATION);
+
+        return {
+          bookingId,
+          statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+          bookableSlotId: propuesto,
+          capacityReleased: origen != null,
+        };
+      }
+
+      // REJECT.
+      this.assertTransition(fromState, CONCEPTS.BOOKING_CANCELLED);
+      this.bookingsRepo.createCancellation(tx, {
+        bookingId,
+        reasonConceptId: CONCEPTS.CANCEL_BY_PROVIDER,
+        cancelledByUserId: actor.id,
+        isNoShow: false,
+        cancelledAt: new Date(),
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        actorUserId: actor.id,
+      });
+      booking.statusConceptId = CONCEPTS.BOOKING_CANCELLED;
+      touch(booking, actor.id);
+      await anotar(CONCEPTS.BOOKING_CANCELLED);
+
+      const slot = await this.bookingsRepo.findSlotForUpdate(
+        tx,
+        booking.bookableSlotId,
+      );
+      let capacityReleased = false;
+      if (slot) {
+        slot.remainingCapacity += 1;
+        if (slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
+          slot.statusConceptId = CONCEPTS.SLOT_OPEN;
+        }
+        touch(slot, actor.id);
+        capacityReleased = true;
+      }
+
+      return {
+        bookingId,
+        statusConceptId: CONCEPTS.BOOKING_CANCELLED,
+        bookableSlotId: booking.bookableSlotId,
+        capacityReleased,
+      };
     });
   }
 

@@ -972,4 +972,201 @@ describe('SchedulingBookingsService', () => {
       ]);
     });
   });
+
+  describe('decideBooking (UC-41-17) — el prestador resuelve la solicitud', () => {
+    /** Una solicitud recién hecha, lista para que el prestador la resuelva. */
+    function solicitud(overrides: Record<string, unknown> = {}) {
+      return {
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        statusConceptId: SCHED.BOOKING_PENDING_CONFIRMATION,
+        ...overrides,
+      };
+    }
+
+    it('accepts without demanding a reason, and stamps confirmedAt', async () => {
+      const d = build();
+      const booking = solicitud();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+
+      const res = await d.service.decideBooking(
+        'booking-1',
+        { decision: 'CONFIRM' },
+        actor as any,
+      );
+
+      expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CONFIRMED);
+      expect((booking as any).confirmedAt).toEqual(expect.any(Date));
+      expect(res.capacityReleased).toBe(false);
+    });
+
+    it('demands a written reason to reject, per correction #14', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(solicitud());
+
+      await expect(
+        d.service.decideBooking(
+          'booking-1',
+          { decision: 'REJECT' } as any,
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects without ever charging a fee, and gives the seat back', async () => {
+      const d = build();
+      const booking = solicitud();
+      const slot = openSlot({
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+
+      const res = await d.service.decideBooking(
+        'booking-1',
+        { decision: 'REJECT', reasonText: 'No hacemos ese estudio acá' },
+        actor as any,
+      );
+
+      expect(res.statusConceptId).toBe(CONCEPTS.BOOKING_CANCELLED);
+      expect(res.capacityReleased).toBe(true);
+      expect(slot.remainingCapacity).toBe(1);
+      // Rechazar un pedido no es cancelar una cita: nunca lleva cargo.
+      expect(d.bookingsRepo.createCancellation).toHaveBeenCalledWith(
+        d.tx,
+        expect.not.objectContaining({ feeAmount: expect.anything() }),
+      );
+    });
+
+    it('asks for a medical order without releasing the seat', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(solicitud());
+
+      const res = await d.service.decideBooking(
+        'booking-1',
+        {
+          decision: 'REQUEST_INFO',
+          infoRequested: 'MEDICAL_ORDER',
+          reasonText: 'Traé la orden de tu médico y vení en ayunas',
+        },
+        actor as any,
+      );
+
+      expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      expect(res.capacityReleased).toBe(false);
+      // El motivo y qué se pidió viajan al historial, que es de donde el portal
+      // los lee para decirle a la persona qué le falta.
+      expect(d.historyRepo.append).toHaveBeenCalledWith(
+        d.tx,
+        'appointment_bookings',
+        'booking-1',
+        expect.objectContaining({
+          dataSnapshot: expect.objectContaining({
+            decision: 'REQUEST_INFO',
+            infoRequested: 'MEDICAL_ORDER',
+            reasonText: 'Traé la orden de tu médico y vení en ayunas',
+            actorKind: 'PROVIDER',
+          }),
+        }),
+      );
+    });
+
+    it('demands what is being asked for when requesting information', async () => {
+      const d = build();
+
+      await expect(
+        d.service.decideBooking(
+          'booking-1',
+          { decision: 'REQUEST_INFO', reasonText: 'falta algo' } as any,
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('moves the seat when proposing another time, and stays a request', async () => {
+      const d = build();
+      const booking = solicitud();
+      const origen = openSlot({
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_BOOKED,
+      });
+      const destino = openSlot({ id: 'slot-2', remainingCapacity: 3 });
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.bookingsRepo.findSlotForUpdate.mockImplementation(
+        (_tx: any, id: string) =>
+          Promise.resolve(id === SLOT_ID ? origen : destino),
+      );
+
+      const res = await d.service.decideBooking(
+        'booking-1',
+        {
+          decision: 'PROPOSE_SCHEDULE',
+          proposedSlotId: 'slot-2',
+          reasonText: 'Ese día no tenemos el equipo disponible',
+        },
+        actor as any,
+      );
+
+      // Proponer no es acordar: sigue pendiente de que la persona lo mire.
+      expect(res.statusConceptId).toBe(SCHED.BOOKING_PENDING_CONFIRMATION);
+      expect(res.bookableSlotId).toBe('slot-2');
+      expect(origen.remainingCapacity).toBe(1);
+      expect(destino.remainingCapacity).toBe(2);
+      expect(d.bookingsRepo.recordReschedule).toHaveBeenCalled();
+    });
+
+    it('refuses to propose a slot with no room', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(solicitud());
+      d.bookingsRepo.findSlotForUpdate.mockImplementation(
+        (_tx: any, id: string) =>
+          Promise.resolve(
+            id === SLOT_ID
+              ? openSlot()
+              : openSlot({ id: 'slot-2', remainingCapacity: 0 }),
+          ),
+      );
+
+      await expect(
+        d.service.decideBooking(
+          'booking-1',
+          {
+            decision: 'PROPOSE_SCHEDULE',
+            proposedSlotId: 'slot-2',
+            reasonText: 'buscamos otro hueco',
+          },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('refuses to decide on a booking that is already confirmed', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        solicitud({ statusConceptId: CONCEPTS.BOOKING_CONFIRMED }),
+      );
+
+      await expect(
+        d.service.decideBooking(
+          'booking-1',
+          { decision: 'CONFIRM' },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('404s on a booking that does not exist', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(null);
+
+      await expect(
+        d.service.decideBooking(
+          'booking-1',
+          { decision: 'CONFIRM' },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
 });

@@ -115,3 +115,61 @@ export const CLINICAL_ROLE_SEED: readonly ClinicalRoleSeed[] = [
 export const CLINICAL_ROLE_CODES: readonly string[] = CLINICAL_ROLE_SEED.map(
   (r) => r.code,
 );
+
+/* ============================================================================
+    Permisos de plataforma materializados en `authz.permissions`.
+
+    Un `resource_scope_grants` —el grant polimórfico sujeto→recurso— exige un
+    `permission_id` que exista. Hasta ahora la única forma de tener uno era que
+    un `SECURITY_ADMIN` diera de alta el permiso a mano por
+    `POST /authz/permissions`, lo que dejaba **inutilizable** todo flujo donde
+    quien concede no es un administrador: el caso del paciente que comparte un
+    resultado con un profesional.
+
+    Se siembran acá, con id determinista y por código, exactamente los permisos
+    que un flujo de producto necesita nombrar. No es un catálogo de permisos
+    completo y no pretende serlo: cada fila entra cuando un caso de uso la pide.
+    ========================================================================== */
+
+/** Un permiso de sistema que algún flujo del producto nombra por código. */
+export interface PlatformPermissionSeed {
+  /** Identificador determinista de la fila en `authz.permissions`. */
+  id: string;
+  /** Código por el que el flujo lo busca. */
+  code: string;
+  /** Nombre legible en español. */
+  name: string;
+  /** Recurso sobre el que actúa, en la nomenclatura del catálogo. */
+  resource: string;
+  /** Acción que habilita. */
+  action: 'READ' | 'WRITE' | 'CREATE' | 'DELETE' | 'EXECUTE' | 'APPROVE';
+  /** Ámbito por defecto de la concesión. */
+  scope: RoleScope;
+}
+
+/** Deriva el id determinista de un permiso de sistema por su código. */
+export function platformPermissionId(code: string): string {
+  return deterministicId(`seed:authz-permission:${code}`);
+}
+
+/**
+ * Permiso de lectura de un resultado diagnóstico concreto.
+ *
+ * Es el que respalda «compartir temporalmente un estudio con un profesional
+ * autorizado» (M20): el grant que el paciente crea apunta a este permiso, al
+ * informe como recurso y al profesional como sujeto, con `valid_to` como
+ * vencimiento. El «temporalmente» del requisito **es** ese `valid_to`.
+ */
+export const DIAGNOSTIC_RESULT_READ_PERMISSION_CODE = 'DIAGNOSTIC_RESULT_READ';
+
+/** Los permisos de sistema, en el orden en que se siembran. */
+export const PLATFORM_PERMISSION_SEED: readonly PlatformPermissionSeed[] = [
+  {
+    id: platformPermissionId(DIAGNOSTIC_RESULT_READ_PERMISSION_CODE),
+    code: DIAGNOSTIC_RESULT_READ_PERMISSION_CODE,
+    name: 'Leer un resultado diagnóstico compartido',
+    resource: 'diagnostics.diagnostic_report',
+    action: 'READ',
+    scope: 'SELF',
+  },
+] as const;
