@@ -235,6 +235,22 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'APPT_CHECKED_IN',
       display: 'Appointment checked in',
     },
+    /**
+     * La atención ocurrió (FHIR `fulfilled`).
+     *
+     * Sin este estado, una cita atendida se quedaba en `booked` para siempre y
+     * la historia del paciente no podía distinguir el turno que se cumplió del
+     * que nadie tocó.
+     */
+    APPOINTMENT_FULFILLED: {
+      code: 'APPT_FULFILLED',
+      display: 'Appointment fulfilled',
+    },
+    /** El turno no va a ocurrir: lo canceló alguna de las dos partes. */
+    APPOINTMENT_CANCELLED: {
+      code: 'APPT_CANCELLED',
+      display: 'Appointment cancelled',
+    },
 
     /* --- vademécum inicial de la receta ---------------------------------------
        ⚠️ CATÁLOGO INICIAL, NO UN VADEMÉCUM. Estos doce fármacos existen para que
