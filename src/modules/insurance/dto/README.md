@@ -11,6 +11,7 @@ Contratos de entrada y salida, validación y documentación de la API.
 | `appeals.dto.ts` | Contratos validados de entrada y salida. |
 | `backbone.dto.ts` | Contratos validados de entrada y salida. |
 | `broker-commission.dto.ts` | Contratos validados de entrada y salida. |
+| `read.dto.ts` | Contratos validados de entrada y salida. |
 | `claims.dto.ts` | Contratos validados de entrada y salida. |
 | `common.dto.ts` | Contratos validados de entrada y salida. |
 | `coverage.dto.ts` | Contratos validados de entrada y salida. |
