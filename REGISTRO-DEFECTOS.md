@@ -29,8 +29,16 @@ Este archivo no los reemplaza: los indexa y los ordena por lo que cuesta que sig
 | R-3 | **`yarn lint` estaba rojo en `dev`** (19 errores de prettier de los merges del 15/08). Nadie lo vio porque el CI está caído. | #106 |
 | R-4 | **El corpus MeSH cargaba 1 441 367 filas que no consulta nadie** (98,3 % del total, 501 MiB, el grueso de los ~10 min de carga). | #107 |
 | R-5 | **No se podía saber qué código corre un contenedor.** Una imagen del 14/08 sin tres seeds pasó un día entera sin que nadie lo notara. | #108 |
+| R-6 | **`generateSlots` ignoraba la zona horaria de la sede** (H-02). Una agenda de La Paz (UTC−4) que publicaba «08:00–12:00» materializaba sus cupos a las 04:00–08:00 hora local. | #110 |
 
 ---
+
+## Verificados y ya resueltos antes de este corte
+
+**`yarn.lock` con entrada huérfana.** Figuraba como bloqueante («falla la construcción de la
+imagen»), pero **ya no reproduce**: la entrada `@aws-sdk/s3-request-presigner` no está en el
+lockfile, `yarn install --immutable` pasa, y la etapa `prod-deps` del `Dockerfile` construye con
+exit 0. Lo había limpiado el PR #84. Se deja anotado para que nadie vuelva a gastar tiempo en él.
 
 ## Bloqueantes abiertos
 
@@ -51,11 +59,6 @@ vault ausente. Cualquiera que regenere un módulo acá introduce la regresión.
 **B-4 · `postgres-init` falla en algunas máquinas** — busca `/init/SQL/apply_all.sql` y el
 directorio está vacío. Impide levantar el stack limpio y correr `yarn test:integration`.
 *(`COORDINACION-AGENTES.md:1489-1495`)*
-
-**B-5 · `yarn.lock` no instala con `--immutable`** — entrada huérfana
-`@aws-sdk/s3-request-presigner@3.1094.0` que `package.json` ya no pide. El `Dockerfile` usa
-`--immutable`, así que **falla la construcción de la imagen**.
-*(`COORDINACION-AGENTES.md:1483-1488`)*
 
 **B-6 · `profiles.practitioner_affiliations` no tiene backend en `dev`.** El front está
 mergeado pero el DDL y el `affiliations` del summary siguen en una rama sin integrar: la
