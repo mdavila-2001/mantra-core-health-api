@@ -669,7 +669,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"brokerCode":"CODIGO_EJEMPLO","licenseNumber":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz"}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","payer":{"carrierCode":"CODIGO_EJEMPLO","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz"}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
@@ -678,10 +678,39 @@ Content-Type: application/json
 | `organization.payer.carrierCode` | No | `string` | longitud mínima 1; longitud máxima 60 | Código de la aseguradora | `CODIGO_EJEMPLO` |
 | `organization.payer.regulatorIdentifier` | No | `string` | longitud mínima 1; longitud máxima 100 | Identificador ante el regulador de seguros | `valor-ejemplo` |
 | `organization.payer.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `organization.broker` | No | `BrokerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"brokerCode":"CODIGO_EJEMPLO","licenseNumber":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
-| `organization.broker.brokerCode` | No | `string` | longitud mínima 1; longitud máxima 60 | Código del corredor | `CODIGO_EJEMPLO` |
-| `organization.broker.licenseNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Número de licencia de intermediación | `valor-ejemplo` |
-| `organization.broker.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.broker` | No | `BrokerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"}` |
+| `organization.broker.id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.broker.brokerCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `organization.broker.legalName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `organization.broker.licenseNumber` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `organization.broker.jurisdiction` | No | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `organization.broker.jurisdiction.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `organization.broker.jurisdiction.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `organization.broker.status` | No | `InsuranceConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `organization.broker.status.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `organization.broker.status.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `organization.broker.verification` | No | `InsuranceConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `organization.broker.verification.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `organization.broker.verification.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `organization.broker.independent` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `organization.broker.currentCarrierCount` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `organization.broker.createdAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `organization.broker.agreements` | No | `array<BrokerAgreementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `organization.broker.agreements[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.broker.agreements[].insuranceCarrierId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.broker.agreements[].carrierLegalName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `organization.broker.agreements[].agreementCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `organization.broker.agreements[].commissionModel` | No | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `organization.broker.agreements[].commissionModel.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `organization.broker.agreements[].commissionModel.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `organization.broker.agreements[].effectiveFrom` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `organization.broker.agreements[].effectiveTo` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `organization.broker.agreements[].status` | No | `InsuranceConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `organization.broker.agreements[].status.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `organization.broker.agreements[].status.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `organization.broker.agreements[].current` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `organization.broker.agreements[].contractFileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.broker.publicProfileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
@@ -712,9 +741,46 @@ Content-Type: application/json
       "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001"
     },
     "broker": {
+      "id": "00000000-0000-4000-8000-000000000001",
       "brokerCode": "CODIGO_EJEMPLO",
+      "legalName": "Nombre de ejemplo",
       "licenseNumber": "valor-ejemplo",
-      "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001"
+      "jurisdiction": {
+        "code": "CARRIER_ACTIVE",
+        "display": "Aseguradora activa"
+      },
+      "status": {
+        "code": "CARRIER_ACTIVE",
+        "display": "Aseguradora activa"
+      },
+      "verification": {
+        "code": "CARRIER_ACTIVE",
+        "display": "Aseguradora activa"
+      },
+      "independent": true,
+      "currentCarrierCount": 1,
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "agreements": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+          "carrierLegalName": "Nombre de ejemplo",
+          "agreementCode": "CODIGO_EJEMPLO",
+          "commissionModel": {
+            "code": "CARRIER_ACTIVE",
+            "display": "Aseguradora activa"
+          },
+          "effectiveFrom": "valor-ejemplo",
+          "effectiveTo": "valor-ejemplo",
+          "status": {
+            "code": "CARRIER_ACTIVE",
+            "display": "Aseguradora activa"
+          },
+          "current": true,
+          "contractFileId": "00000000-0000-4000-8000-000000000001"
+        }
+      ],
+      "publicProfileId": "00000000-0000-4000-8000-000000000001"
     },
     "countryConceptId": "00000000-0000-4000-8000-000000000001",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",

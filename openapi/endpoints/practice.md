@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 17 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
 - **Controladores:** `AccreditationsController`, `InventoryItemsController`, `PracticesController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
@@ -18,16 +18,17 @@ Referencia exhaustiva de 17 operación(es) del módulo `practice`, derivada del 
 5. [POST /practices/{practiceId}/accreditations](#5-post-practices-practiceid-accreditations) — Registrar una acreditación con evidencia
 6. [POST /practices/{practiceId}/healthcare-services](#6-post-practices-practiceid-healthcare-services) — Publicar un servicio de salud
 7. [POST /practices/{practiceId}/inventory-items](#7-post-practices-practiceid-inventory-items) — Dar de alta un insumo de inventario de práctica
-8. [POST /practices/{practiceId}/role-assignments](#8-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
-9. [PUT /practices/{practiceId}/settings/{settingKey}](#9-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
-10. [GET /practices/{practiceId}/sites](#10-get-practices-practiceid-sites) — Listar las sedes de una práctica
-11. [POST /practices/{practiceId}/sites](#11-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
-12. [DELETE /practices/{practiceId}/sites/{siteId}](#12-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
-13. [GET /practitioners/{profileId}/sites](#13-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
-14. [POST /role-assignments/{roleId}/support-assignments](#14-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
-15. [GET /sites/{siteId}/care-spaces](#15-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
-16. [POST /sites/{siteId}/care-spaces](#16-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
-17. [POST /sites/{siteId}/clinical-units](#17-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+8. [GET /practices/{practiceId}/organization](#8-get-practices-practiceid-organization) — Consola de organización médica: estructura, plantilla y legajo
+9. [POST /practices/{practiceId}/role-assignments](#9-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
+10. [PUT /practices/{practiceId}/settings/{settingKey}](#10-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
+11. [GET /practices/{practiceId}/sites](#11-get-practices-practiceid-sites) — Listar las sedes de una práctica
+12. [POST /practices/{practiceId}/sites](#12-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
+13. [DELETE /practices/{practiceId}/sites/{siteId}](#13-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
+14. [GET /practitioners/{profileId}/sites](#14-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
+15. [POST /role-assignments/{roleId}/support-assignments](#15-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
+16. [GET /sites/{siteId}/care-spaces](#16-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
+17. [POST /sites/{siteId}/care-spaces](#17-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
+18. [POST /sites/{siteId}/clinical-units](#18-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
 
 ---
 
@@ -974,7 +975,425 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /practices/{practiceId}/role-assignments
+## 8. GET /practices/{practiceId}/organization
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Consola de organización médica: estructura, plantilla y legajo
+- **Operation ID:** `PracticesController_getOrganizationConsole`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PracticesController.getOrganizationConsole](../../src/modules/practice/controllers/practices.controller.ts)
+
+### Descripción de negocio
+
+Consola de organización médica: estructura, plantilla y legajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El árbol completo de una organización médica — CARRIL 13. Sedes, áreas, infraestructura, servicios, plantilla, documentación legal e inventario en una sola lectura. Existe porque el módulo tenía once escrituras y tres lecturas: se podían dar de alta quirófanos, áreas, servicios y personal, y ninguna operación los volvía a mencionar. Los roles son los mismos que ya admite `GET /practices`: quien puede enumerar las prácticas del tenant puede ver la estructura de la suya. El aislamiento real lo hace el servicio, que responde 404 ante una práctica de otra organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practices/{practiceId}/organization` en `PracticesController_getOrganizationConsole`. El controlador delega en `PracticeOrganizationReadService.getConsole`. No recibe body. El tipo de retorno estático es `Promise<MedicalOrganizationConsoleDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/organization HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PERIOP_ADMIN`, `SURGERY_SCHEDULER`, `SCHEDULING_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `ACCOUNTING_APPROVER`.
+- Deben ser UUID válidos: `practiceId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/organization HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalOrganizationConsoleDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "organization": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "code": "CODIGO_EJEMPLO",
+    "name": "Nombre de ejemplo",
+    "type": {
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo"
+    },
+    "status": {
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo"
+    },
+    "timeZone": "America/La_Paz",
+    "currency": {
+      "code": "CODIGO_EJEMPLO",
+      "display": "valor-ejemplo"
+    }
+  },
+  "sites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "physicalType": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "operationalStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "timeZone": "America/La_Paz",
+      "branchId": "00000000-0000-4000-8000-000000000001",
+      "clinicalUnitCount": 1,
+      "careSpaceCount": 1
+    }
+  ],
+  "clinicalUnits": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "parentUnitId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "specialty": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "serviceMode": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ],
+  "careSpaces": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+      "parentSpaceId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "capacity": 1,
+      "operationalStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ],
+  "healthcareServices": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+      "service": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "specialty": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "referralRequired": true,
+      "appointmentRequired": true,
+      "telehealthAvailable": true,
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ],
+  "staff": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
+      "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+      "role": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "specialty": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "isPrimary": true,
+      "validFrom": "2026-07-31",
+      "validTo": "2026-07-31",
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ],
+  "legalDocuments": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "number": "valor-ejemplo",
+      "issuerName": "Nombre de ejemplo",
+      "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31",
+      "validTo": "2026-07-31",
+      "daysToExpiry": 1,
+      "verificationStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ],
+  "inventory": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "lotNumber": "valor-ejemplo",
+      "expiryDate": "2026-07-31",
+      "quantityOnHand": 12,
+      "unit": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "reorderLevel": "valor-ejemplo",
+      "belowReorderLevel": true,
+      "status": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      }
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `organization` | Sí | `OrganizationHeaderDto` | Sin restricción adicional declarada | La organización. | `{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"timeZone":"America/La_Paz","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}` |
+| `organization.id` | Sí | `string` | formato `uuid` | Identificador de la práctica. | `00000000-0000-4000-8000-000000000001` |
+| `organization.code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro del tenant. | `CODIGO_EJEMPLO` |
+| `organization.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `organization.type` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Tipo de organización: hospital, clínica, centro médico, consultorio… | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `organization.type.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `organization.type.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `organization.status` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de la práctica. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `organization.status.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `organization.status.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `organization.timeZone` | No | `string` | admite null | Zona horaria IANA declarada, si la tiene. | `America/La_Paz` |
+| `organization.currency` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Moneda de la práctica, si la declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `organization.currency.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `organization.currency.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `sites` | Sí | `array<OrganizationSiteDto>` | Sin restricción adicional declarada | Sus sedes. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"physicalType":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"operationalStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"timeZone":"America/La_Paz","branchId":"00000000-0000-4000-8000-000000000001","clinicalUnitCount":1,"careSpaceCount":1}]` |
+| `sites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `sites[].type` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Tipo de sede. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `sites[].type.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `sites[].type.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `sites[].physicalType` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Tipo físico del emplazamiento, si lo declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `sites[].physicalType.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `sites[].physicalType.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `sites[].operationalStatus` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Estado operativo (planificada, abierta, cerrada), si lo declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `sites[].operationalStatus.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `sites[].operationalStatus.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `sites[].status` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de ciclo de vida. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `sites[].status.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `sites[].status.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `sites[].timeZone` | No | `string` | admite null | Zona horaria IANA de la sede, si la declara. | `America/La_Paz` |
+| `sites[].branchId` | No | `string` | formato `uuid`; admite null | Sucursal de `directory` con la que se corresponde, si la hay. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].clinicalUnitCount` | Sí | `number` | Sin restricción adicional declarada | Áreas registradas en la sede. | `1` |
+| `sites[].careSpaceCount` | Sí | `number` | Sin restricción adicional declarada | Espacios de atención registrados en la sede. | `1` |
+| `clinicalUnits` | Sí | `array<OrganizationClinicalUnitDto>` | Sin restricción adicional declarada | Sus áreas y sub-áreas. | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","parentUnitId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"specialty":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"serviceMode":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `clinicalUnits[].id` | Sí | `string` | formato `uuid` | Identificador del área. | `00000000-0000-4000-8000-000000000001` |
+| `clinicalUnits[].siteId` | Sí | `string` | formato `uuid` | Sede a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `clinicalUnits[].parentUnitId` | No | `string` | formato `uuid`; admite null | Área padre, cuando es una sub-área. | `00000000-0000-4000-8000-000000000001` |
+| `clinicalUnits[].code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la sede. | `CODIGO_EJEMPLO` |
+| `clinicalUnits[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `clinicalUnits[].type` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Tipo de unidad. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `clinicalUnits[].type.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `clinicalUnits[].type.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `clinicalUnits[].specialty` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Especialidad del área, si la declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `clinicalUnits[].specialty.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `clinicalUnits[].specialty.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `clinicalUnits[].serviceMode` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Modalidad de servicio, si la declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `clinicalUnits[].serviceMode.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `clinicalUnits[].serviceMode.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `clinicalUnits[].status` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de ciclo de vida. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `clinicalUnits[].status.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `clinicalUnits[].status.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `careSpaces` | Sí | `array<OrganizationCareSpaceDto>` | Sin restricción adicional declarada | Su infraestructura: quirófanos, consultorios y demás espacios. | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","clinicalUnitId":"00000000-0000-4000-8000-000000000001","parentSpaceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"capacity":1,"operationalStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `careSpaces[].id` | Sí | `string` | formato `uuid` | Identificador del espacio. | `00000000-0000-4000-8000-000000000001` |
+| `careSpaces[].siteId` | Sí | `string` | formato `uuid` | Sede a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `careSpaces[].clinicalUnitId` | No | `string` | formato `uuid`; admite null | Área a la que pertenece, si cuelga de una. | `00000000-0000-4000-8000-000000000001` |
+| `careSpaces[].parentSpaceId` | No | `string` | formato `uuid`; admite null | Espacio contenedor, cuando es una subdivisión. | `00000000-0000-4000-8000-000000000001` |
+| `careSpaces[].code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la sede. | `CODIGO_EJEMPLO` |
+| `careSpaces[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `careSpaces[].type` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Tipo de espacio. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `careSpaces[].type.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `careSpaces[].type.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `careSpaces[].capacity` | No | `number` | admite null | Capacidad declarada, si la tiene. | `1` |
+| `careSpaces[].operationalStatus` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Disponibilidad operativa (disponible, en limpieza, fuera de servicio…). | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `careSpaces[].operationalStatus.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `careSpaces[].operationalStatus.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `careSpaces[].status` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de ciclo de vida. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `careSpaces[].status.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `careSpaces[].status.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `healthcareServices` | Sí | `array<OrganizationHealthcareServiceDto>` | Sin restricción adicional declarada | Los servicios que ofrece. | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","clinicalUnitId":"00000000-0000-4000-8000-000000000001","service":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"specialty":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"referralRequired":true,"appointmentRequired":true,"telehealthAvailable":true,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `healthcareServices[].id` | Sí | `string` | formato `uuid` | Identificador del servicio. | `00000000-0000-4000-8000-000000000001` |
+| `healthcareServices[].siteId` | No | `string` | formato `uuid`; admite null | Sede donde se presta, si está acotado a una. | `00000000-0000-4000-8000-000000000001` |
+| `healthcareServices[].clinicalUnitId` | No | `string` | formato `uuid`; admite null | Área que lo presta, si cuelga de una. | `00000000-0000-4000-8000-000000000001` |
+| `healthcareServices[].service` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Servicio del catálogo. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `healthcareServices[].service.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `healthcareServices[].service.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `healthcareServices[].specialty` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Especialidad asociada, si la declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `healthcareServices[].specialty.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `healthcareServices[].specialty.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `healthcareServices[].referralRequired` | No | `boolean` | admite null | Si exige derivación previa. | `true` |
+| `healthcareServices[].appointmentRequired` | No | `boolean` | admite null | Si exige turno previo. | `true` |
+| `healthcareServices[].telehealthAvailable` | No | `boolean` | admite null | Si admite atención remota. | `true` |
+| `healthcareServices[].status` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de ciclo de vida. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `healthcareServices[].status.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `healthcareServices[].status.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `staff` | Sí | `array<OrganizationStaffMemberDto>` | Sin restricción adicional declarada | Su plantilla profesional. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","siteId":"00000000-0000-4000-8000-000000000001","clinicalUnitId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","role":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"specialty":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"isPrimary":true,"validFrom":"2026-07-31","validTo":"2026-07-31","status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `staff[].id` | Sí | `string` | formato `uuid` | Identificador de la asignación. | `00000000-0000-4000-8000-000000000001` |
+| `staff[].practitionerProfileId` | Sí | `string` | formato `uuid` | Perfil profesional asignado. | `00000000-0000-4000-8000-000000000001` |
+| `staff[].practitionerName` | No | `string` | admite null | Nombre del profesional, o `null` si el perfil no lo tiene registrado. `null` es un estado real —un perfil creado sin persona detrás— y quien lo reciba tiene que decirlo, nunca sustituirlo por un uuid. | `Nombre de ejemplo` |
+| `staff[].siteId` | No | `string` | formato `uuid`; admite null | Sede del vínculo, si está acotado a una. | `00000000-0000-4000-8000-000000000001` |
+| `staff[].clinicalUnitId` | No | `string` | formato `uuid`; admite null | Área del vínculo, si está acotado a una. | `00000000-0000-4000-8000-000000000001` |
+| `staff[].healthcareServiceId` | No | `string` | formato `uuid`; admite null | Servicio del vínculo, si está acotado a uno. | `00000000-0000-4000-8000-000000000001` |
+| `staff[].role` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Rol clínico asignado. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `staff[].role.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `staff[].role.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `staff[].specialty` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Especialidad con la que ejerce en este vínculo, si la declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `staff[].specialty.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `staff[].specialty.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `staff[].isPrimary` | No | `boolean` | admite null | Si es el vínculo principal del profesional. | `true` |
+| `staff[].validFrom` | No | `string` | formato `date`; admite null | Inicio de la vinculación. | `2026-07-31` |
+| `staff[].validTo` | No | `string` | formato `date`; admite null | Fin de la vinculación; `null` mientras siga abierta. | `2026-07-31` |
+| `staff[].status` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de la asignación. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `staff[].status.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `staff[].status.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `legalDocuments` | Sí | `array<OrganizationLegalDocumentDto>` | Sin restricción adicional declarada | Su documentación legal y acreditaciones. | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"number":"valor-ejemplo","issuerName":"Nombre de ejemplo","evidenceFileId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31","validTo":"2026-07-31","daysToExpiry":1,"verificationStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `legalDocuments[].id` | Sí | `string` | formato `uuid` | Identificador del documento. | `00000000-0000-4000-8000-000000000001` |
+| `legalDocuments[].siteId` | No | `string` | formato `uuid`; admite null | Sede a la que corresponde, si está acotado a una. | `00000000-0000-4000-8000-000000000001` |
+| `legalDocuments[].type` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Tipo de acreditación o documento. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `legalDocuments[].type.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `legalDocuments[].type.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `legalDocuments[].number` | No | `string` | admite null | Número o matrícula del documento. | `valor-ejemplo` |
+| `legalDocuments[].issuerName` | No | `string` | admite null | Entidad emisora, tal como se registró. | `Nombre de ejemplo` |
+| `legalDocuments[].evidenceFileId` | No | `string` | formato `uuid`; admite null | Archivo de respaldo, si se adjuntó. | `00000000-0000-4000-8000-000000000001` |
+| `legalDocuments[].validFrom` | No | `string` | formato `date`; admite null | Inicio de vigencia. | `2026-07-31` |
+| `legalDocuments[].validTo` | No | `string` | formato `date`; admite null | Fin de vigencia. | `2026-07-31` |
+| `legalDocuments[].daysToExpiry` | No | `number` | admite null | Días que faltan para el vencimiento; negativo si ya venció. Se calcula en el servidor a propósito: la alerta por vencimiento que pide la especificación tiene que dar el mismo resultado en toda pantalla y en todo informe, y el reloj del navegador no es una base confiable para eso. `null` cuando el documento no declara vencimiento. | `1` |
+| `legalDocuments[].verificationStatus` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado de verificación del documento. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `legalDocuments[].verificationStatus.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `legalDocuments[].verificationStatus.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `inventory` | Sí | `array<OrganizationInventoryItemDto>` | Sin restricción adicional declarada | Su inventario de insumos y equipamiento. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","lotNumber":"valor-ejemplo","expiryDate":"2026-07-31","quantityOnHand":12,"unit":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"reorderLevel":"valor-ejemplo","belowReorderLevel":true,"status":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}}]` |
+| `inventory[].id` | Sí | `string` | formato `uuid` | Identificador del insumo. | `00000000-0000-4000-8000-000000000001` |
+| `inventory[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `inventory[].lotNumber` | No | `string` | admite null | Lote, si se registró. | `valor-ejemplo` |
+| `inventory[].expiryDate` | No | `string` | formato `date`; admite null | Fecha de vencimiento del lote, si la tiene. | `2026-07-31` |
+| `inventory[].quantityOnHand` | Sí | `string` | Sin restricción adicional declarada | Existencias actuales, como decimal exacto. | `12` |
+| `inventory[].unit` | No | `PracticeConceptDto` | Sin restricción adicional declarada | Unidad de medida, si la declara. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `inventory[].unit.code` | No | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `inventory[].unit.display` | No | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+| `inventory[].reorderLevel` | No | `string` | admite null | Punto de reposición configurado, si lo tiene. | `valor-ejemplo` |
+| `inventory[].belowReorderLevel` | Sí | `boolean` | Sin restricción adicional declarada | Si las existencias cayeron al punto de reposición o por debajo. `false` cuando no hay punto configurado: sin umbral no hay faltante que declarar, y decir `true` ahí sería una alarma inventada. | `true` |
+| `inventory[].status` | Sí | `PracticeConceptDto` | Sin restricción adicional declarada | Estado del insumo. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `inventory[].status.code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
+| `inventory[].status.display` | Sí | `string` | Sin restricción adicional declarada | Etiqueta legible. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-organization-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practices/{practiceId}/organization"
+}
+```
+
+---
+
+## 9. POST /practices/{practiceId}/role-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1128,7 +1547,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PUT /practices/{practiceId}/settings/{settingKey}
+## 10. PUT /practices/{practiceId}/settings/{settingKey}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1261,7 +1680,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /practices/{practiceId}/sites
+## 11. GET /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1373,7 +1792,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /practices/{practiceId}/sites
+## 12. POST /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1524,7 +1943,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. DELETE /practices/{practiceId}/sites/{siteId}
+## 13. DELETE /practices/{practiceId}/sites/{siteId}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1635,7 +2054,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /practitioners/{profileId}/sites
+## 14. GET /practitioners/{profileId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1760,7 +2179,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /role-assignments/{roleId}/support-assignments
+## 15. POST /role-assignments/{roleId}/support-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1899,7 +2318,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /sites/{siteId}/care-spaces
+## 16. GET /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2012,7 +2431,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /sites/{siteId}/care-spaces
+## 17. POST /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2161,7 +2580,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /sites/{siteId}/clinical-units
+## 18. POST /sites/{siteId}/clinical-units
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`

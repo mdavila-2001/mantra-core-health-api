@@ -9,7 +9,7 @@
 # Módulo `pharma_lab`
 
 **Fuente:** [`src/modules/pharma_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharma_lab/README.md)
-· 10 controllers · 13 services · 10 repositories · 30 entidades · 11 DTO
+· 12 controllers · 13 services · 10 repositories · 31 entidades · 11 DTO
 
 ---
 
