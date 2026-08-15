@@ -83,6 +83,44 @@ export class CommunityVisibilityService {
     );
   }
 
+  /**
+   * Resuelve, contra la sesión, con qué perfil está leyendo el actor.
+   *
+   * **Por qué existe.** Las lecturas del módulo recibían el perfil del lector en
+   * un parámetro de consulta (`?actorProfileId=`), y ninguna lo verificaba. Como
+   * `canViewPost` concede la lectura de entrada cuando el lector *es* el autor,
+   * bastaba con pasar el id del autor para leer una publicación `PRIVATE` ajena
+   * —y con omitir el parámetro para que no se evaluara ningún bloqueo—. La regla
+   * de visibilidad estaba bien escrita; lo que estaba mal era de dónde venía su
+   * insumo. **La identidad del lector no puede llegar en la petición.**
+   *
+   * Se sigue admitiendo el parámetro porque un actor puede tener más de un
+   * perfil (el suyo de usuario y el de la organización que administra) y hace
+   * falta poder elegir; pero se admite sólo si es **suyo**, con la misma prueba
+   * de titularidad que `assertOwnProfile`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param actor - Quien pide la lectura.
+   * @param requested - Perfil que el cliente pidió usar, si pidió alguno.
+   * @returns El perfil con el que se evalúa la visibilidad, o `undefined` si el
+   *   actor no tiene perfil público (lee como cualquier sesión, sin privilegio).
+   * @throws ForbiddenException si pidió un perfil que no es suyo.
+   */
+  async resolveActorProfileId(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+    requested?: string,
+  ): Promise<string | undefined> {
+    if (requested) {
+      // La plataforma puede mirar con cualquier perfil: es su trabajo moderar.
+      if (this.isPlatform(actor)) return requested;
+      await this.assertOwnProfile(em, requested, actor);
+      return requested;
+    }
+    const own = await this.profilesRepo.findByTarget(em, actor.id);
+    return own?.id;
+  }
+
   /** ¿Hay un bloqueo activo entre estos dos perfiles, en cualquier sentido? */
   async isBlockedBetween(
     em: EntityManager,

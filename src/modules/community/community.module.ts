@@ -10,6 +10,7 @@ import {
   CommunityPollsController,
   CommunityFeedController,
   CommunityTimelineController,
+  CommunityPublicController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -28,6 +29,7 @@ import {
   CommunityGroupsReadService,
   CommunityPollsReadService,
   CommunityReviewsReadService,
+  CommunityPublicService,
 } from './services';
 import {
   PublicProfilesRepository,
@@ -46,6 +48,7 @@ import {
   NotificationsRepository,
   CommunityFeedbackRepository,
   CommunityPrestigeRepository,
+  PublicSearchRepository,
 } from './repositories';
 
 /**
@@ -65,6 +68,9 @@ import {
     CommunityPollsController,
     CommunityFeedController,
     CommunityTimelineController,
+    // Va en esta lista y no en read_models a propósito; el orden de registro
+    // frente a PublicProjectionsController lo protege community-public.smoke.ts.
+    CommunityPublicController,
   ],
   providers: [
     // Repositorios
@@ -84,6 +90,7 @@ import {
     NotificationsRepository,
     CommunityFeedbackRepository,
     CommunityPrestigeRepository,
+    PublicSearchRepository,
     // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
@@ -102,6 +109,7 @@ import {
     CommunityGroupsReadService,
     CommunityPollsReadService,
     CommunityReviewsReadService,
+    CommunityPublicService,
   ],
   // La proyección la consume `diagnostic_units` al publicar un perfil; la nota,
   // su buscador de centros. Las dos salen de acá y no de un `find` ajeno: la

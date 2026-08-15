@@ -14,3 +14,4 @@ export * from './community-groups-read.service';
 export * from './community-polls-read.service';
 export * from './community-reviews-read.service';
 export * from './community-ratings.service';
+export * from './community-public.service';
