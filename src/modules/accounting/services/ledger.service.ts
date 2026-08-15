@@ -130,8 +130,19 @@ export class LedgerService {
     ) {
       return;
     }
-    if (!actor.roles.includes('PRACTITIONER') || !actor.practitionerProfileId) {
+    if (!actor.roles.includes('PRACTITIONER')) {
+      // Ningún otro rol llega hoy a estas rutas (el `@Roles` del controlador
+      // ya lo impide); no-op defensivo, no un permiso implícito.
       return;
+    }
+    if (!actor.practitionerProfileId) {
+      // Tiene el rol pero el JWT no trae perfil profesional: no hay forma de
+      // comprobar pertenencia, así que se deniega — lo contrario sería tratar
+      // "no puedo verificar" como "está permitido".
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional asociado',
+        { actorId: actor.id },
+      );
     }
     const practiceIds =
       await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(

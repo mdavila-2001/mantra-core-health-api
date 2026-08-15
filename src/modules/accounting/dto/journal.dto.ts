@@ -193,7 +193,8 @@ export class PostJournalDto {
    * pero ningún DTO la exponía.
    */
   @ApiPropertyOptional({
-    description: 'Tipo del documento origen (p. ej. INVOICE, APPOINTMENT, EXPENSE)',
+    description:
+      'Tipo del documento origen (p. ej. INVOICE, APPOINTMENT, EXPENSE)',
     maxLength: 40,
   })
   @IsOptional()
