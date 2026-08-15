@@ -20,7 +20,11 @@ import {
 @Module({
   controllers: [RedisRuntimeController],
   providers: [redisClientProvider, RedisRuntimeService],
-  exports: [RedisRuntimeService],
+  // `REDIS_CLIENT` se exporta además del servicio para que el almacenamiento de
+  // rate limit (`RedisThrottlerStorage`) comparta **esta** conexión en vez de
+  // abrir la suya: dos clientes ioredis contra el mismo Redis duplican sockets
+  // y, sobre todo, dejan uno sin el cierre ordenado de `OnModuleDestroy`.
+  exports: [RedisRuntimeService, REDIS_CLIENT],
 })
 export class RedisRuntimeModule implements OnModuleDestroy {
   /**

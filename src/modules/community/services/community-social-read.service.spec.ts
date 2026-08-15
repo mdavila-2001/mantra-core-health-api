@@ -49,6 +49,12 @@ function build() {
       Promise.resolve(posts),
     ),
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
+    isBlockedBetween: mockFn().mockResolvedValue(false),
+    // El doble devuelve lo pedido, como haría el real tras comprobar que es
+    // suyo; los casos de perfil ajeno se prueban haciéndolo rechazar.
+    resolveActorProfileId: mockFn((_em: any, _actor: any, pedido?: string) =>
+      Promise.resolve(pedido),
+    ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
@@ -113,7 +119,7 @@ describe('CommunitySocialReadService', () => {
         totalPoints: '120',
       });
 
-      const res = await d.service.getProfile('p-1');
+      const res = await d.service.getProfile('p-1', actor);
 
       expect(res.slug).toBe('dra-quispe');
       expect(res.badges).toHaveLength(1);
@@ -123,7 +129,7 @@ describe('CommunitySocialReadService', () => {
     it('404 si el perfil no existe', async () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(null);
-      await expect(d.service.getProfile('p-x')).rejects.toBeInstanceOf(
+      await expect(d.service.getProfile('p-x', actor)).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
     });
@@ -137,7 +143,7 @@ describe('CommunitySocialReadService', () => {
         { ...post, id: 'post-2' },
       ]);
 
-      const res = await d.service.listProfilePosts('p-1', { limit: 1 });
+      const res = await d.service.listProfilePosts('p-1', actor, { limit: 1 });
 
       expect(d.postsRepo.listByAuthorPage).toHaveBeenCalledWith(
         expect.anything(),
@@ -154,7 +160,7 @@ describe('CommunitySocialReadService', () => {
       const d = build();
       d.postsRepo.listByAuthorPage.mockResolvedValue([post]);
 
-      const res = await d.service.listProfilePosts('p-1', { limit: 10 });
+      const res = await d.service.listProfilePosts('p-1', actor, { limit: 10 });
 
       expect(res.nextCursor).toBeNull();
       expect(res.count).toBe(1);
@@ -165,7 +171,7 @@ describe('CommunitySocialReadService', () => {
       d.postsRepo.listByAuthorPage.mockResolvedValue([post]);
       d.visibility.filterVisiblePosts.mockResolvedValue([]);
 
-      const res = await d.service.listProfilePosts('p-1', {
+      const res = await d.service.listProfilePosts('p-1', actor, {
         actorProfileId: 'p-2',
         limit: 10,
       });
@@ -181,7 +187,7 @@ describe('CommunitySocialReadService', () => {
       d.postsRepo.findById.mockResolvedValue(post);
       d.postsRepo.listHashtags.mockResolvedValue([{ id: 'h-1', tag: 'salud' }]);
 
-      const res = await d.service.getPost('post-1', 'p-1');
+      const res = await d.service.getPost('post-1', actor, 'p-1');
 
       expect(res.id).toBe('post-1');
       expect(res.hashtags).toEqual([{ id: 'h-1', tag: 'salud' }]);
@@ -192,7 +198,7 @@ describe('CommunitySocialReadService', () => {
       d.postsRepo.findById.mockResolvedValue(post);
       d.visibility.canViewPost.mockResolvedValue(false);
 
-      await expect(d.service.getPost('post-1', 'p-9')).rejects.toBeInstanceOf(
+      await expect(d.service.getPost('post-1', actor, 'p-9')).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
     });
@@ -220,7 +226,7 @@ describe('CommunitySocialReadService', () => {
         },
       ]);
 
-      const res = await d.service.listPostComments('post-1', { limit: 10 });
+      const res = await d.service.listPostComments('post-1', actor, { limit: 10 });
 
       expect(res.items).toHaveLength(1);
       expect(res.items[0].replies).toHaveLength(1);
@@ -240,7 +246,7 @@ describe('CommunitySocialReadService', () => {
         reactionTypeConceptId: 'like',
       });
 
-      const res = await d.service.getPostReactions('post-1', 'p-2');
+      const res = await d.service.getPostReactions('post-1', actor, 'p-2');
 
       expect(res.total).toBe(5);
       expect(res.actorReactionTypeConceptId).toBe('like');
@@ -250,7 +256,7 @@ describe('CommunitySocialReadService', () => {
       const d = build();
       d.postsRepo.findById.mockResolvedValue(post);
 
-      const res = await d.service.getPostReactions('post-1');
+      const res = await d.service.getPostReactions('post-1', actor);
 
       expect(res.actorReactionTypeConceptId).toBeUndefined();
       expect(d.reactionsRepo.findByActorTarget).not.toHaveBeenCalled();

@@ -10,6 +10,7 @@ import {
   CommunityPollsController,
   CommunityFeedController,
   CommunityTimelineController,
+  CommunityPublicController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -27,6 +28,7 @@ import {
   CommunityGroupsReadService,
   CommunityPollsReadService,
   CommunityReviewsReadService,
+  CommunityPublicService,
 } from './services';
 import {
   PublicProfilesRepository,
@@ -45,6 +47,7 @@ import {
   NotificationsRepository,
   CommunityFeedbackRepository,
   CommunityPrestigeRepository,
+  PublicSearchRepository,
 } from './repositories';
 
 /**
@@ -64,6 +67,9 @@ import {
     CommunityPollsController,
     CommunityFeedController,
     CommunityTimelineController,
+    // Va en esta lista y no en read_models a propósito; el orden de registro
+    // frente a PublicProjectionsController lo protege community-public.smoke.ts.
+    CommunityPublicController,
   ],
   providers: [
     // Repositorios
@@ -83,6 +89,7 @@ import {
     NotificationsRepository,
     CommunityFeedbackRepository,
     CommunityPrestigeRepository,
+    PublicSearchRepository,
     // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
@@ -100,6 +107,7 @@ import {
     CommunityGroupsReadService,
     CommunityPollsReadService,
     CommunityReviewsReadService,
+    CommunityPublicService,
   ],
   exports: [PublicProfileProjectionService],
 })

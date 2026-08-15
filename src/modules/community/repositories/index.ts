@@ -14,3 +14,4 @@ export * from './feed.repository';
 export * from './notifications.repository';
 export * from './community-feedback.repository';
 export * from './community-prestige.repository';
+export * from './public-search.repository';

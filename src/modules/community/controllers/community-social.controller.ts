@@ -193,8 +193,9 @@ export class CommunitySocialController {
   @ApiOperation({ summary: 'Ficha de un perfil público' })
   getProfile(
     @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PublicProfileDetailDto> {
-    return this.readService.getProfile(profileId);
+    return this.readService.getProfile(profileId, actor);
   }
 
   /** Muro del perfil, filtrado por lo que el lector puede ver. */
@@ -202,11 +203,12 @@ export class CommunitySocialController {
   @ApiOperation({ summary: 'Publicaciones de un perfil' })
   listProfilePosts(
     @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('actorProfileId') actorProfileId?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PostPageDto> {
-    return this.readService.listProfilePosts(profileId, {
+    return this.readService.listProfilePosts(profileId, actor, {
       actorProfileId,
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
@@ -218,9 +220,10 @@ export class CommunitySocialController {
   @ApiOperation({ summary: 'Publicación con media, hashtags y menciones' })
   getPost(
     @Param('postId', ParseUUIDPipe) postId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('actorProfileId') actorProfileId?: string,
   ): Promise<PostDetailDto> {
-    return this.readService.getPost(postId, actorProfileId);
+    return this.readService.getPost(postId, actor, actorProfileId);
   }
 
   /** Hilo de comentarios de una publicación. */
@@ -228,11 +231,12 @@ export class CommunitySocialController {
   @ApiOperation({ summary: 'Comentarios de una publicación (hilo anidado)' })
   listPostComments(
     @Param('postId', ParseUUIDPipe) postId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('actorProfileId') actorProfileId?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<CommentThreadPageDto> {
-    return this.readService.listPostComments(postId, {
+    return this.readService.listPostComments(postId, actor, {
       actorProfileId,
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
@@ -246,20 +250,22 @@ export class CommunitySocialController {
   })
   getPostReactions(
     @Param('postId', ParseUUIDPipe) postId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('actorProfileId') actorProfileId?: string,
   ): Promise<ReactionSummaryDto> {
-    return this.readService.getPostReactions(postId, actorProfileId);
+    return this.readService.getPostReactions(postId, actor, actorProfileId);
   }
 
-  /** Seguimientos emitidos por un perfil. */
+  /** Seguimientos emitidos por un perfil. Sólo su titular. */
   @Get('follows')
   @ApiOperation({ summary: 'Seguimientos activos de un perfil' })
   listFollows(
     @Query('followerProfileId', ParseUUIDPipe) followerProfileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<FollowPageDto> {
-    return this.readService.listFollows(followerProfileId, {
+    return this.readService.listFollows(followerProfileId, actor, {
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
     });

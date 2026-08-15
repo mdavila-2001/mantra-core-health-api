@@ -6,3 +6,4 @@ export * from './community-groups.controller';
 export * from './community-polls.controller';
 export * from './community-feed.controller';
 export * from './community-timeline.controller';
+export * from './community-public.controller';
