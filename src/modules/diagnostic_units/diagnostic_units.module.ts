@@ -15,6 +15,7 @@ import {
   DiagnosticPricingService,
   DiagnosticEquipmentService,
   DiagnosticUnitsReadService,
+  DiagnosticUnitsAdminReadService,
 } from './services';
 import {
   DiagnosticUnitsRepository,
@@ -28,6 +29,7 @@ import {
   DiagnosticStudyPricesRepository,
   DiagnosticEquipmentRepository,
   DiagnosticUnitsReadRepository,
+  DiagnosticUnitsAdminReadRepository,
 } from './repositories';
 
 /**
@@ -61,12 +63,14 @@ import {
     DiagnosticStudyPricesRepository,
     DiagnosticEquipmentRepository,
     DiagnosticUnitsReadRepository,
+    DiagnosticUnitsAdminReadRepository,
     // Servicios
     DiagnosticUnitsService,
     DiagnosticStudiesService,
     DiagnosticPricingService,
     DiagnosticEquipmentService,
     DiagnosticUnitsReadService,
+    DiagnosticUnitsAdminReadService,
   ],
 })
 export class DiagnosticUnitsModule {}

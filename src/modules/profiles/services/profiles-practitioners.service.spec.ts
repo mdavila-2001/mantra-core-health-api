@@ -768,7 +768,12 @@ describe('ProfilesPractitionersService', () => {
         limit: 50,
       });
 
-      expect(pagina).toEqual({ items: [], count: 0, limit: 50, nextCursor: null });
+      expect(pagina).toEqual({
+        items: [],
+        count: 0,
+        limit: 50,
+        nextCursor: null,
+      });
       expect(d.practitionersRepo.listPage).not.toHaveBeenCalled();
     });
   });
