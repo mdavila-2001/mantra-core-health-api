@@ -9,3 +9,4 @@ export * from './patient-statement.dto';
 export * from './dunning.dto';
 export * from './payment-plan.dto';
 export * from './kpi-snapshot.dto';
+export * from './service-catalog.dto';
