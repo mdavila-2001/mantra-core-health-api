@@ -49,7 +49,7 @@
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
 | [`object_storage`](object_storage.md) | 2 | 3 | 3 | 17 | 1 |
 | [`procedures_perioperative`](procedures_perioperative.md) | 2 | 4 | 5 | 37 | 2 |
-| [`profiles`](profiles.md) | 2 | 3 | 14 | 19 | 15 |
+| [`profiles`](profiles.md) | 2 | 3 | 14 | 19 | 16 |
 | [`promotions`](promotions.md) | 2 | 2 | 2 | 11 | 1 |
 | [`qa_lab`](qa_lab.md) | 2 | 2 | 2 | 13 | 1 |
 | [`time_series`](time_series.md) | 2 | 4 | 2 | 12 | 1 |
@@ -68,4 +68,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **202** | **286** | **361** | **1191** | **396** |
+| **Total** | **202** | **286** | **361** | **1191** | **397** |
