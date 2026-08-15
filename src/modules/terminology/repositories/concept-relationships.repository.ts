@@ -68,6 +68,32 @@ export class ConceptRelationshipsRepository {
     });
   }
 
+  /**
+   * Aristas de cualquiera de los tipos indicados cuyo origen está entre los
+   * conceptos indicados.
+   *
+   * Es lo que necesita la ficha/búsqueda del glosario para resolver las
+   * relaciones tipadas (`RELATED_TERM`/`DISEASE`/`PROCEDURE`/`TREATMENT`/
+   * `ANATOMY`/`DIAGNOSTIC_TEST`) de un lote de términos en una sola consulta,
+   * en vez de una por término y por tipo.
+   */
+  findByTypesForSources(
+    em: EntityManager,
+    relationshipTypeConceptIds: string[],
+    sourceConceptIds: string[],
+  ): Promise<ConceptRelationships[]> {
+    if (
+      relationshipTypeConceptIds.length === 0 ||
+      sourceConceptIds.length === 0
+    ) {
+      return Promise.resolve([]);
+    }
+    return em.find(ConceptRelationships, {
+      relationshipTypeConceptId: { $in: relationshipTypeConceptIds },
+      sourceConceptId: { $in: sourceConceptIds },
+    });
+  }
+
   /** Crea la relación en la unidad de trabajo (sin flush). */
   create(
     em: EntityManager,

@@ -556,6 +556,49 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   REL_IS_A: def('terminology:relationship:is-a', 'IS_A', 'Is a'),
   REL_PART_OF: def('terminology:relationship:part-of', 'PART_OF', 'Part of'),
+  // --- Terminology: relaciones tipadas del glosario médico (Carril 03) ------
+  // Aditivas a `REL_IS_A`/`REL_PART_OF`: la jerarquía genérica del catálogo no
+  // alcanza para expresar «este síntoma se asocia a esta enfermedad» o «este
+  // término se diagnostica con esta prueba». Semántica de cada una (documentada
+  // también en el encabezado del seed del glosario):
+  //  - RELATED_TERM: «ver también» genérico, sin direccionalidad implícita.
+  //  - DISEASE: el origen se asocia clínicamente a / es manifestación de / está
+  //    indicado para la enfermedad destino.
+  //  - PROCEDURE: el origen se asocia al procedimiento clínico destino.
+  //  - TREATMENT: el origen se trata mediante / involucra el tratamiento destino.
+  //  - ANATOMY: el origen se relaciona con la estructura anatómica destino.
+  //  - DIAGNOSTIC_TEST: el origen se diagnostica/monitorea mediante la prueba
+  //    diagnóstica destino.
+  REL_RELATED_TERM: def(
+    'terminology:relationship:related-term',
+    'RELATED_TERM',
+    'Related term',
+  ),
+  REL_DISEASE: def(
+    'terminology:relationship:disease',
+    'REL_DISEASE',
+    'Associated disease',
+  ),
+  REL_PROCEDURE: def(
+    'terminology:relationship:procedure',
+    'REL_PROCEDURE',
+    'Associated procedure',
+  ),
+  REL_TREATMENT: def(
+    'terminology:relationship:treatment',
+    'REL_TREATMENT',
+    'Associated treatment',
+  ),
+  REL_ANATOMY: def(
+    'terminology:relationship:anatomy',
+    'REL_ANATOMY',
+    'Associated anatomy',
+  ),
+  REL_DIAGNOSTIC_TEST: def(
+    'terminology:relationship:diagnostic-test',
+    'REL_DIAGNOSTIC_TEST',
+    'Associated diagnostic test',
+  ),
   VS_OP_IN: def('terminology:vs-operator:in', 'IN', 'In'),
   VS_OP_IS_A: def(
     'terminology:vs-operator:is-a',
