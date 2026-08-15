@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `diagnostic_units`
 
-Referencia exhaustiva de 16 operación(es) del módulo `diagnostic_units`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `diagnostic_units`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units`
 - **Controladores:** `DiagnosticEquipmentController`, `DiagnosticPricingController`, `DiagnosticUnitAccreditationsController`, `DiagnosticUnitSitesController`, `DiagnosticUnitsController`
@@ -16,17 +16,19 @@ Referencia exhaustiva de 16 operación(es) del módulo `diagnostic_units`, deriv
 3. [POST /diagnostic-unit-accreditations/{id}/renew](#3-post-diagnostic-unit-accreditations-id-renew) — Renovar/registrar acreditación con evidencia
 4. [PATCH /diagnostic-unit-sites/{siteId}](#4-patch-diagnostic-unit-sites-siteid) — Actualizar un sitio operativo de la unidad
 5. [POST /diagnostic-unit-sites/{siteId}/equipment](#5-post-diagnostic-unit-sites-siteid-equipment) — Registrar equipamiento y calibración del sitio
-6. [POST /diagnostic-units](#6-post-diagnostic-units) — Alta de unidad diagnóstica con sitios y acreditaciones
-7. [POST /diagnostic-units/{id}/accreditations](#7-post-diagnostic-units-id-accreditations) — Registrar una acreditación con evidencia
-8. [POST /diagnostic-units/{id}/practitioner-assignments](#8-post-diagnostic-units-id-practitioner-assignments) — Asignar un especialista a la unidad/sitio
-9. [POST /diagnostic-units/{id}/price-schedules](#9-post-diagnostic-units-id-price-schedules) — Crear un cronograma de precios
-10. [POST /diagnostic-units/{id}/reproject](#10-post-diagnostic-units-id-reproject) — Reconstruir la proyección del perfil público
-11. [POST /diagnostic-units/{id}/sites](#11-post-diagnostic-units-id-sites) — Registrar un sitio operativo de la unidad
-12. [PUT /diagnostic-units/{id}/specialties](#12-put-diagnostic-units-id-specialties) — Declarar las especialidades de la unidad
-13. [POST /diagnostic-units/{id}/study-offerings](#13-post-diagnostic-units-id-study-offerings) — Publicar oferta de estudio con componentes (panel)
-14. [POST /diagnostic-units/{id}/verify-and-publish](#14-post-diagnostic-units-id-verify-and-publish) — Verificar la unidad y publicar su perfil público
-15. [POST /price-schedules/{scheduleId}/study-prices](#15-post-price-schedules-scheduleid-study-prices) — Fijar/versionar el precio de un estudio (append-only)
-16. [POST /study-prices/{priceId}/close](#16-post-study-prices-priceid-close) — Cerrar una versión de precio vigente
+6. [GET /diagnostic-units](#6-get-diagnostic-units) — Listar unidades diagnósticas publicadas
+7. [POST /diagnostic-units](#7-post-diagnostic-units) — Alta de unidad diagnóstica con sitios y acreditaciones
+8. [GET /diagnostic-units/{id}](#8-get-diagnostic-units-id) — Consultar el perfil de una unidad diagnóstica
+9. [POST /diagnostic-units/{id}/accreditations](#9-post-diagnostic-units-id-accreditations) — Registrar una acreditación con evidencia
+10. [POST /diagnostic-units/{id}/practitioner-assignments](#10-post-diagnostic-units-id-practitioner-assignments) — Asignar un especialista a la unidad/sitio
+11. [POST /diagnostic-units/{id}/price-schedules](#11-post-diagnostic-units-id-price-schedules) — Crear un cronograma de precios
+12. [POST /diagnostic-units/{id}/reproject](#12-post-diagnostic-units-id-reproject) — Reconstruir la proyección del perfil público
+13. [POST /diagnostic-units/{id}/sites](#13-post-diagnostic-units-id-sites) — Registrar un sitio operativo de la unidad
+14. [PUT /diagnostic-units/{id}/specialties](#14-put-diagnostic-units-id-specialties) — Declarar las especialidades de la unidad
+15. [POST /diagnostic-units/{id}/study-offerings](#15-post-diagnostic-units-id-study-offerings) — Publicar oferta de estudio con componentes (panel)
+16. [POST /diagnostic-units/{id}/verify-and-publish](#16-post-diagnostic-units-id-verify-and-publish) — Verificar la unidad y publicar su perfil público
+17. [POST /price-schedules/{scheduleId}/study-prices](#17-post-price-schedules-scheduleid-study-prices) — Fijar/versionar el precio de un estudio (append-only)
+18. [POST /study-prices/{priceId}/close](#18-post-study-prices-priceid-close) — Cerrar una versión de precio vigente
 
 ---
 
@@ -690,7 +692,138 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /diagnostic-units
+## 6. GET /diagnostic-units
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Listar unidades diagnósticas publicadas
+- **Operation ID:** `DiagnosticUnitsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticUnitsController.list](../../src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts)
+
+### Descripción de negocio
+
+Listar unidades diagnósticas publicadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Directorio publicado del tenant activo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-units` en `DiagnosticUnitsController_list`. El controlador delega en `DiagnosticUnitsReadService.list`. No recibe body. El tipo de retorno estático es `Promise<DiagnosticUnitDirectoryResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-units HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-units HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitDirectoryResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "siteCount": 1,
+      "equipmentCount": 1,
+      "studyCount": 1,
+      "acceptsExternalOrders": {},
+      "walkInAvailable": {},
+      "homeCollectionAvailable": {}
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<DiagnosticUnitDirectoryItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"siteCount":1,"equipmentCount":1,"studyCount":1,"acceptsExternalOrders":{},"walkInAvailable":{},"homeCollectionAvailable":{}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].type` | Sí | `DiagnosticConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `items[].type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].type.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].siteCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].equipmentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].studyCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].acceptsExternalOrders` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].walkInAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].homeCollectionAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units"
+}
+```
+
+---
+
+## 7. POST /diagnostic-units
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -868,7 +1001,267 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /diagnostic-units/{id}/accreditations
+## 8. GET /diagnostic-units/{id}
+
+- **Módulo:** `diagnostic_units`
+- **Etiqueta OpenAPI:** `diagnostic-units`
+- **Nombre:** Consultar el perfil de una unidad diagnóstica
+- **Operation ID:** `DiagnosticUnitsController_getById`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticUnitsController.getById](../../src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts)
+
+### Descripción de negocio
+
+Consultar el perfil de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Perfil publicado; el servicio acota el id al tenant activo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-units/{id}` en `DiagnosticUnitsController_getById`. El controlador delega en `DiagnosticUnitsReadService.getById`. No recibe body. El tipo de retorno estático es `Promise<DiagnosticUnitDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-units/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "type": {
+    "code": "CODIGO_EJEMPLO",
+    "display": "valor-ejemplo"
+  },
+  "siteCount": 1,
+  "equipmentCount": 1,
+  "studyCount": 1,
+  "acceptsExternalOrders": {},
+  "walkInAvailable": {},
+  "homeCollectionAvailable": {},
+  "sites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "role": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "sampleCollectionAvailable": {},
+      "imagingAvailable": {}
+    }
+  ],
+  "equipment": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "manufacturer": {},
+      "model": {},
+      "modality": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "operationalStatus": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "lastCalibrationAt": {},
+      "nextCalibrationDueAt": {}
+    }
+  ],
+  "studies": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": {},
+      "siteId": {},
+      "modality": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "preparationInstructions": {},
+      "expectedDurationMinutes": {},
+      "expectedTurnaroundMinutes": {},
+      "requiresMedicalOrder": {},
+      "prices": [
+        {
+          "amount": "valor-ejemplo",
+          "currency": {
+            "code": "CODIGO_EJEMPLO",
+            "display": "valor-ejemplo"
+          },
+          "scheduleCode": "CODIGO_EJEMPLO",
+          "siteId": {}
+        }
+      ]
+    }
+  ],
+  "accreditations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": {
+        "code": "CODIGO_EJEMPLO",
+        "display": "valor-ejemplo"
+      },
+      "number": {},
+      "siteId": {},
+      "validFrom": {},
+      "validTo": {}
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `type` | Sí | `DiagnosticConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `type.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `siteCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `equipmentCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `studyCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `acceptsExternalOrders` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `walkInAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `homeCollectionAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sites` | Sí | `array<DiagnosticUnitSiteDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","role":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"sampleCollectionAvailable":{},"imagingAvailable":{}}]` |
+| `sites[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sites[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `sites[].role` | Sí | `DiagnosticConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `sites[].role.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `sites[].role.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sites[].sampleCollectionAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sites[].imagingAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `equipment` | Sí | `array<DiagnosticEquipmentDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"manufacturer":{},"model":{},"modality":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"operationalStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"lastCalibrationAt":{},"nextCalibrationDueAt":{}}]` |
+| `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].siteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `equipment[].type` | Sí | `DiagnosticConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `equipment[].type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `equipment[].type.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].manufacturer` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `equipment[].model` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `equipment[].modality` | No | `DiagnosticConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `equipment[].modality.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `equipment[].modality.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].operationalStatus` | Sí | `DiagnosticConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `equipment[].operationalStatus.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `equipment[].operationalStatus.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `equipment[].lastCalibrationAt` | No | `object` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `equipment[].nextCalibrationDueAt` | No | `object` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `studies` | Sí | `array<DiagnosticStudyDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":{},"siteId":{},"modality":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"preparationInstructions":{},"expectedDurationMinutes":{},"expectedTurnaroundMinutes":{},"requiresMedicalOrder":{},"prices":[{"amount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"scheduleCode":"CODIGO_EJEMPLO","siteId":{}}]}]` |
+| `studies[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `studies[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `studies[].description` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `studies[].siteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `studies[].modality` | No | `DiagnosticConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `studies[].modality.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].modality.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `studies[].preparationInstructions` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `studies[].expectedDurationMinutes` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `studies[].expectedTurnaroundMinutes` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `studies[].requiresMedicalOrder` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `studies[].prices` | Sí | `array<DiagnosticPublicPriceDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"amount":"valor-ejemplo","currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"scheduleCode":"CODIGO_EJEMPLO","siteId":{}}]` |
+| `studies[].prices[].amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `studies[].prices[].currency` | Sí | `DiagnosticConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `studies[].prices[].currency.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].prices[].currency.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `studies[].prices[].scheduleCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `studies[].prices[].siteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `accreditations` | Sí | `array<DiagnosticAccreditationDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"number":{},"siteId":{},"validFrom":{},"validTo":{}}]` |
+| `accreditations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `accreditations[].type` | Sí | `DiagnosticConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
+| `accreditations[].type.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `accreditations[].type.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `accreditations[].number` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `accreditations[].siteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `accreditations[].validFrom` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `accreditations[].validTo` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Unidad diagnóstica no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-units/{id}"
+}
+```
+
+---
+
+## 9. POST /diagnostic-units/{id}/accreditations
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1011,7 +1404,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /diagnostic-units/{id}/practitioner-assignments
+## 10. POST /diagnostic-units/{id}/practitioner-assignments
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1153,7 +1546,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /diagnostic-units/{id}/price-schedules
+## 11. POST /diagnostic-units/{id}/price-schedules
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1299,7 +1692,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /diagnostic-units/{id}/reproject
+## 12. POST /diagnostic-units/{id}/reproject
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1410,7 +1803,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /diagnostic-units/{id}/sites
+## 13. POST /diagnostic-units/{id}/sites
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1553,7 +1946,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. PUT /diagnostic-units/{id}/specialties
+## 14. PUT /diagnostic-units/{id}/specialties
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1692,7 +2085,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /diagnostic-units/{id}/study-offerings
+## 15. POST /diagnostic-units/{id}/study-offerings
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1866,7 +2259,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /diagnostic-units/{id}/verify-and-publish
+## 16. POST /diagnostic-units/{id}/verify-and-publish
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-units`
@@ -1991,7 +2384,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /price-schedules/{scheduleId}/study-prices
+## 17. POST /price-schedules/{scheduleId}/study-prices
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`
@@ -2139,7 +2532,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /study-prices/{priceId}/close
+## 18. POST /study-prices/{priceId}/close
 
 - **Módulo:** `diagnostic_units`
 - **Etiqueta OpenAPI:** `diagnostic-pricing`

@@ -6138,6 +6138,31 @@ paths:
             type: array
             items:
               type: string
+        - name: lang
+          required: false
+          in: query
+          description: >-
+            Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica;
+            con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false`
+          schema:
+            enum:
+              - ES
+              - EN
+            type: string
+        - name: includeValueSets
+          required: false
+          in: query
+          description: Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand`
+          schema:
+            type: string
+        - name: valueSetId
+          required: false
+          in: query
+          description: >-
+            Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve
+            lo mismo que la búsqueda, no los miembros crudos de `$expand`
+          schema:
+            type: string
       responses:
         '200':
           description: ''
@@ -6159,6 +6184,50 @@ paths:
       description: >-
         UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o
         alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /terminology/concepts/{conceptId}:
+    get:
+      operationId: TerminologyConceptsController_readConcept
+      parameters:
+        - name: conceptId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: lang
+          required: false
+          in: query
+          description: Idioma preferido de `display` y `definition`
+          schema:
+            enum:
+              - ES
+              - EN
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: >-
+        Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y
+        denominaciones alternativas
+      tags:
+        - terminology
+      description: >-
+        Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y
+        denominaciones alternativas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /terminology/concepts/{conceptId}/designations:
     post:
       operationId: TerminologyConceptsController_addDesignation
@@ -17174,6 +17243,34 @@ paths:
         Evaluar actor efectivo por propósito (step-up). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostic-units:
+    get:
+      operationId: DiagnosticUnitsController_list
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticUnitDirectoryResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar unidades diagnósticas publicadas
+      tags:
+        - diagnostic-units
+      description: >-
+        Listar unidades diagnósticas publicadas. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
     post:
       operationId: DiagnosticUnitsController_create
       parameters: []
@@ -17209,6 +17306,42 @@ paths:
         - diagnostic-units
       description: >-
         Alta de unidad diagnóstica con sitios y acreditaciones. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /diagnostic-units/{id}:
+    get:
+      operationId: DiagnosticUnitsController_getById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticUnitDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Consultar el perfil de una unidad diagnóstica
+      tags:
+        - diagnostic-units
+      description: >-
+        Consultar el perfil de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /diagnostic-units/{id}/sites:
     post:
@@ -49684,6 +49817,264 @@ components:
       required:
         - practitionerDelegateAssignmentId
         - purpose
+    DiagnosticConceptDto:
+      type: object
+      properties:
+        code:
+          type: string
+        display:
+          type: string
+      required:
+        - code
+        - display
+    DiagnosticUnitDirectoryItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        siteCount:
+          type: number
+        equipmentCount:
+          type: number
+        studyCount:
+          type: number
+        acceptsExternalOrders:
+          type: object
+          nullable: true
+        walkInAvailable:
+          type: object
+          nullable: true
+        homeCollectionAvailable:
+          type: object
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - type
+        - siteCount
+        - equipmentCount
+        - studyCount
+    DiagnosticUnitDirectoryResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitDirectoryItemDto'
+        count:
+          type: number
+      required:
+        - items
+        - count
+    DiagnosticUnitSiteDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        sampleCollectionAvailable:
+          type: object
+          nullable: true
+        imagingAvailable:
+          type: object
+          nullable: true
+      required:
+        - id
+        - code
+        - name
+        - role
+    DiagnosticEquipmentDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        manufacturer:
+          type: object
+          nullable: true
+        model:
+          type: object
+          nullable: true
+        modality:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        operationalStatus:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        lastCalibrationAt:
+          type: object
+          format: date-time
+          nullable: true
+        nextCalibrationDueAt:
+          type: object
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - siteId
+        - type
+        - operationalStatus
+    DiagnosticPublicPriceDto:
+      type: object
+      properties:
+        amount:
+          type: string
+        currency:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        scheduleCode:
+          type: string
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+      required:
+        - amount
+        - currency
+        - scheduleCode
+    DiagnosticStudyDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: object
+          nullable: true
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+        modality:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/DiagnosticConceptDto'
+        preparationInstructions:
+          type: object
+          nullable: true
+        expectedDurationMinutes:
+          type: object
+          nullable: true
+        expectedTurnaroundMinutes:
+          type: object
+          nullable: true
+        requiresMedicalOrder:
+          type: object
+          nullable: true
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticPublicPriceDto'
+      required:
+        - id
+        - code
+        - name
+        - prices
+    DiagnosticAccreditationDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        number:
+          type: object
+          nullable: true
+        siteId:
+          type: object
+          format: uuid
+          nullable: true
+        validFrom:
+          type: object
+          format: date
+          nullable: true
+        validTo:
+          type: object
+          format: date
+          nullable: true
+      required:
+        - id
+        - type
+    DiagnosticUnitDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DiagnosticConceptDto'
+        siteCount:
+          type: number
+        equipmentCount:
+          type: number
+        studyCount:
+          type: number
+        acceptsExternalOrders:
+          type: object
+          nullable: true
+        walkInAvailable:
+          type: object
+          nullable: true
+        homeCollectionAvailable:
+          type: object
+          nullable: true
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitSiteDetailDto'
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticEquipmentDetailDto'
+        studies:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticStudyDetailDto'
+        accreditations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticAccreditationDetailDto'
+      required:
+        - id
+        - code
+        - name
+        - type
+        - siteCount
+        - equipmentCount
+        - studyCount
+        - sites
+        - equipment
+        - studies
+        - accreditations
     CreateUnitSiteDto:
       type: object
       properties:

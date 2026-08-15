@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "REDESA Health API · 971 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 971 requests en 124 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "REDESA Health API · 974 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 974 requests en 124 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -224,6 +224,24 @@
                   "key": "ids",
                   "value": "",
                   "description": "Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato",
+                  "disabled": true
+                },
+                {
+                  "key": "lang",
+                  "value": "ES",
+                  "description": "Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica; con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false`",
+                  "disabled": true
+                },
+                {
+                  "key": "includeValueSets",
+                  "value": "includeValueSets-ejemplo",
+                  "description": "Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand`",
+                  "disabled": true
+                },
+                {
+                  "key": "valueSetId",
+                  "value": "valueSetId-ejemplo",
+                  "description": "Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand`",
                   "disabled": true
                 }
               ]
@@ -20705,8 +20723,54 @@
       ]
     },
     {
-      "name": "diagnostic-units (9)",
+      "name": "diagnostic-units (11)",
       "item": [
+        {
+          "name": "GET /diagnostic-units · Listar unidades diagnósticas publicadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/diagnostic-units",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "diagnostic-units"
+              ]
+            },
+            "description": "Listar unidades diagnósticas publicadas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /diagnostic-units`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DiagnosticUnitsController_list`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.diagnosticUnits || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('diagnosticUnitId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "POST /diagnostic-units · Alta de unidad diagnóstica con sitios y acreditaciones",
           "request": {
@@ -21202,6 +21266,60 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.diagnosticUnitId);",
                   "  if (id) pm.environment.set('diagnosticUnitId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /diagnostic-units/{id} · Consultar el perfil de una unidad diagnóstica",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/diagnostic-units/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "diagnostic-units",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{diagnosticUnitId}}",
+                  "description": "Identificador de ruta · variable `{{diagnosticUnitId}}`"
+                }
+              ]
+            },
+            "description": "Consultar el perfil de una unidad diagnóstica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /diagnostic-units/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `DiagnosticUnitsController_getById`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.diagnosticUnits || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('diagnosticUnitId', first.id);",
                   "}"
                 ]
               }
@@ -58606,7 +58724,7 @@
       ]
     },
     {
-      "name": "terminology (16)",
+      "name": "terminology (17)",
       "item": [
         {
           "name": "GET /terminology/CodeSystem/$lookup · UC-03-11: resuelve un concepto por sistema y código",
@@ -58714,6 +58832,24 @@
                   "key": "ids",
                   "value": "",
                   "description": "Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato",
+                  "disabled": true
+                },
+                {
+                  "key": "lang",
+                  "value": "ES",
+                  "description": "Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica; con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false`",
+                  "disabled": true
+                },
+                {
+                  "key": "includeValueSets",
+                  "value": "includeValueSets-ejemplo",
+                  "description": "Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand`",
+                  "disabled": true
+                },
+                {
+                  "key": "valueSetId",
+                  "value": "valueSetId-ejemplo",
+                  "description": "Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand`",
                   "disabled": true
                 }
               ]
@@ -59510,6 +59646,69 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.versionId);",
                   "  if (id) pm.environment.set('versionId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /terminology/concepts/{conceptId} · Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/terminology/concepts/:conceptId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "terminology",
+                "concepts",
+                ":conceptId"
+              ],
+              "variable": [
+                {
+                  "key": "conceptId",
+                  "value": "{{conceptId}}",
+                  "description": "Identificador de ruta · variable `{{conceptId}}`"
+                }
+              ],
+              "query": [
+                {
+                  "key": "lang",
+                  "value": "ES",
+                  "description": "Idioma preferido de `display` y `definition`",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /terminology/concepts/{conceptId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `TerminologyConceptsController_readConcept`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.concepts || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('conceptId', first.id);",
                   "}"
                 ]
               }
