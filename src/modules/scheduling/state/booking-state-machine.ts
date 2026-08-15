@@ -6,8 +6,21 @@ import { SCHED } from '../scheduling.concepts';
  *
  *   REQUESTED → PENDING_CONFIRMATION → CONFIRMED
  *   CONFIRMED → CHECKED_IN → IN_PROGRESS → COMPLETED
+ *   CONFIRMED → IN_PROGRESS            (sin pasar por el mostrador)
  *   {REQUESTED, PENDING_CONFIRMATION, CONFIRMED, CHECKED_IN} → CANCELLED
  *   {CONFIRMED, CHECKED_IN} → NO_SHOW
+ *
+ * ## Por qué CONFIRMED → IN_PROGRESS existe (corrección #15)
+ *
+ * El check-in es el registro de que alguien **llegó al mostrador**, y hay
+ * atenciones donde no hay mostrador: la teleconsulta, el consultorio de una
+ * persona sola, la cita que el profesional decide atender antes. Exigir el paso
+ * intermedio convertía a un trámite administrativo en requisito para atender.
+ *
+ * Sigue habiendo una sola forma de completar —desde EN_CURSO— y una sola de
+ * empezar —desde una cita confirmada, con o sin llegada registrada—. Lo que no
+ * hay, y es deliberado, es **validación de reloj**: ni empezar ni cerrar
+ * comprueban que llegó el día agendado.
  *
  * La reprogramación NO es una transición de estado: se modela como evento/relación
  * (`booking_reschedules`) sin sobrescribir la reserva original, por lo que la cita
@@ -30,6 +43,8 @@ export const BOOKING_TRANSITIONS: Readonly<Record<string, readonly string[]>> =
     ],
     [CONCEPTS.BOOKING_CONFIRMED]: [
       CONCEPTS.BOOKING_CHECKED_IN,
+      // Corrección #15: se puede empezar sin registrar llegada.
+      SCHED.BOOKING_IN_PROGRESS,
       CONCEPTS.BOOKING_CANCELLED,
       SCHED.BOOKING_NO_SHOW,
     ],

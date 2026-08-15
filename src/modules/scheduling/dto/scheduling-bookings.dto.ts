@@ -196,6 +196,80 @@ export class BookingResponseDto {
   remindersScheduled!: number;
 }
 
+/**
+ * Cuerpo de `POST /scheduling/bookings/{id}/accept` (corrección #11).
+ *
+ * Todo opcional: aceptar es un acto sin datos. Los recordatorios se declaran
+ * acá y no al solicitar porque recién al aceptar hay un turno que recordar.
+ */
+export class AcceptBookingDto {
+  /**
+   * Valor de reminder offsets minutes mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Minutos de antelación de los recordatorios a programar',
+    isArray: true,
+    type: Number,
+    example: [1440, 120],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  reminderOffsetsMinutes?: number[];
+}
+
+/**
+ * Cuerpo de `POST /scheduling/bookings/{id}/reject` (correcciones #11 y #14).
+ *
+ * El motivo es obligatorio: a nadie se le rechaza un turno sin decirle por qué.
+ */
+export class RejectBookingDto {
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'Motivo del rechazo. Obligatorio: el paciente lo ve en el detalle de su turno.',
+    minLength: MIN_REASON_LENGTH,
+    maxLength: MAX_REASON_LENGTH,
+  })
+  @IsString()
+  @MinLength(MIN_REASON_LENGTH)
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText!: string;
+}
+
+/**
+ * Resultado de aceptar, iniciar o completar: en qué estado quedó y cuándo.
+ *
+ * Los tres devuelven lo mismo porque los tres son la misma clase de acto —una
+ * transición decidida por el profesional— y quien los consume hace lo mismo con
+ * la respuesta: releer y refrescar el estado en pantalla.
+ */
+export class BookingDecisionResponseDto {
+  /**
+   * Identificador asociado a booking.
+   */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado en el que quedó la cita',
+  })
+  statusConceptId!: string;
+
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
+  @ApiProperty({ type: String, format: 'date-time' })
+  occurredAt!: string;
+}
+
 /** Cuerpo de `POST /scheduling/bookings/{id}/reschedule` (UC-41-08). */
 export class RescheduleBookingDto {
   /**
