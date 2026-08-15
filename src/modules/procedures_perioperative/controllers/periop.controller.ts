@@ -31,6 +31,7 @@ import {
   AddDiagnosesDto,
   DiagnosesResponseDto,
   AssignTeamMemberDto,
+  RespondTeamMemberDto,
   TeamMemberResponseDto,
   TeamMemberSummaryDto,
   ListCasesQueryDto,
@@ -301,6 +302,37 @@ export class PeriopController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TeamMemberResponseDto> {
     return this.casesService.acceptTeamMember(id, memberId, actor);
+  }
+
+  /**
+   * Spec 164: el integrante rechaza, pide una modificación o informa
+   * indisponibilidad.
+   *
+   * La contracara de `accept`, que era lo único que se podía contestar: sin
+   * esto, negarse era callarse, y quedaba indistinguible de no haber
+   * respondido todavía.
+   */
+  @Post('procedure-cases/:id/team-members/:memberId/respond')
+  @Roles(
+    'SURGEON',
+    'ANESTHESIOLOGIST',
+    'PERIOP_NURSE',
+    'SURGERY_SCHEDULER',
+    'PERIOP_ADMIN',
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rechazar, pedir cambios o informar indisponibilidad',
+    description:
+      'Sólo el propio integrante o un PERIOP_ADMIN; el motivo es obligatorio y el rechazo se notifica al responsable y a la organización.',
+  })
+  respondTeamMember(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('memberId', ParseUUIDPipe) memberId: string,
+    @Body() dto: RespondTeamMemberDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TeamMemberResponseDto> {
+    return this.casesService.respondTeamMember(id, memberId, dto, actor);
   }
 
   /** UC-53-04. */

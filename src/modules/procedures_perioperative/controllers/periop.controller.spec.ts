@@ -25,6 +25,7 @@ function build() {
     confirmCase: mockFn(),
     addDiagnoses: mockFn(),
     assignTeamMember: mockFn(),
+    respondTeamMember: mockFn(),
     cancelCase: mockFn(),
     postCharges: mockFn(),
   };
@@ -102,6 +103,24 @@ describe('PeriopController', () => {
     expect(d.casesService.assignTeamMember).toHaveBeenCalledWith(
       ID,
       teamDto,
+      actor,
+    );
+  });
+
+  it('delegates the team participation response (spec 164)', async () => {
+    const d = build();
+    const dto = {
+      response: 'DECLINE',
+      reasonText: 'Conflicto de agenda',
+    } as any;
+    d.casesService.respondTeamMember.mockResolvedValue({ id: ID });
+
+    await d.controller.respondTeamMember(ID, 'member-1', dto, actor);
+
+    expect(d.casesService.respondTeamMember).toHaveBeenCalledWith(
+      ID,
+      'member-1',
+      dto,
       actor,
     );
   });
