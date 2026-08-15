@@ -38,6 +38,8 @@ function build() {
     findMembersPage: jest.fn(() => Promise.resolve([])),
     searchPage: jest.fn(() => Promise.resolve([])),
     findDefaultVersionsByValueSetIds: jest.fn(() => Promise.resolve(new Map())),
+    countMembersByVersionIds: jest.fn(() => Promise.resolve(new Map())),
+    findValueSetsByConceptIds: jest.fn(() => Promise.resolve(new Map())),
   } as any;
   const conceptsRepo = {
     findByVersion: jest.fn(() => Promise.resolve([])),
@@ -757,6 +759,7 @@ describe('ValueSetsService.searchValueSets', () => {
         description: undefined,
         stateConceptId: CONCEPTS.TERM_ACTIVE,
         defaultVersionId: 'ver-1',
+        memberCount: 0,
       },
     ]);
     expect(result.nextCursor).toBeNull();
@@ -769,6 +772,44 @@ describe('ValueSetsService.searchValueSets', () => {
     const result = await d.service.searchValueSets({ limit: 50 });
 
     expect(result.items[0].defaultVersionId).toBeNull();
+  });
+
+  it('cuenta los miembros de la versión vigente de cada conjunto, en una sola consulta', async () => {
+    const d = build();
+    d.valueSetsRepo.searchPage.mockResolvedValue([
+      row('condition-severity', 'vs-1'),
+      row('condition-laterality', 'vs-2'),
+    ]);
+    d.valueSetsRepo.findDefaultVersionsByValueSetIds.mockResolvedValue(
+      new Map([
+        ['vs-1', { id: 'ver-1' }],
+        ['vs-2', { id: 'ver-2' }],
+      ]),
+    );
+    d.valueSetsRepo.countMembersByVersionIds.mockResolvedValue(
+      new Map([
+        ['ver-1', 3],
+        ['ver-2', 3],
+      ]),
+    );
+
+    const result = await d.service.searchValueSets({ limit: 50 });
+
+    expect(d.valueSetsRepo.countMembersByVersionIds).toHaveBeenCalledTimes(1);
+    expect(d.valueSetsRepo.countMembersByVersionIds).toHaveBeenCalledWith(
+      expect.anything(),
+      ['ver-1', 'ver-2'],
+    );
+    expect(result.items.map((item: any) => item.memberCount)).toEqual([3, 3]);
+  });
+
+  it('un conjunto sin versión vigente cuenta cero, no «se desconoce»', async () => {
+    const d = build();
+    d.valueSetsRepo.searchPage.mockResolvedValue([row('sin-version', 'vs-2')]);
+
+    const result = await d.service.searchValueSets({ limit: 50 });
+
+    expect(result.items[0].memberCount).toBe(0);
   });
 
   it('pide una fila de más y la recorta para saber si hay página siguiente', async () => {

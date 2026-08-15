@@ -67,9 +67,37 @@ export const { seeds: DIAGNOSTIC_UNITS_CONCEPT_SEEDS, ids: DUNIT } =
       code: 'DU_STUDY_GENERIC',
       display: 'Generic diagnostic study',
     },
+    STUDY_COMPLETE_BLOOD_COUNT: {
+      code: 'DU_STUDY_CBC',
+      display: 'Complete blood count',
+    },
+    STUDY_GLUCOSE: {
+      code: 'DU_STUDY_GLUCOSE',
+      display: 'Blood glucose test',
+    },
+    STUDY_PCR: {
+      code: 'DU_STUDY_PCR',
+      display: 'C-reactive protein test',
+    },
+    STUDY_CHEST_XRAY: {
+      code: 'DU_STUDY_CHEST_XRAY',
+      display: 'Chest X-ray',
+    },
+    STUDY_ABDOMINAL_ULTRASOUND: {
+      code: 'DU_STUDY_ABDOMINAL_ULTRASOUND',
+      display: 'Abdominal ultrasound',
+    },
     MODALITY_LABORATORY: {
       code: 'DU_MODALITY_LAB',
       display: 'Laboratory modality',
+    },
+    MODALITY_XRAY: {
+      code: 'DU_MODALITY_XRAY',
+      display: 'X-ray modality',
+    },
+    MODALITY_ULTRASOUND: {
+      code: 'DU_MODALITY_ULTRASOUND',
+      display: 'Ultrasound modality',
     },
     COMPONENT_ROLE_PANEL: {
       code: 'DU_COMP_PANEL',
@@ -95,6 +123,7 @@ export const { seeds: DIAGNOSTIC_UNITS_CONCEPT_SEEDS, ids: DUNIT } =
       display: 'Insurer price schedule',
     },
     CURRENCY_PEN: { code: 'DU_CUR_PEN', display: 'Peruvian sol' },
+    CURRENCY_BOB: { code: 'DU_CUR_BOB', display: 'Boliviano' },
     SCHEDULE_ACTIVE: {
       code: 'DU_SCHED_ACTIVE',
       display: 'Price schedule active',
@@ -116,6 +145,14 @@ export const { seeds: DIAGNOSTIC_UNITS_CONCEPT_SEEDS, ids: DUNIT } =
     EQUIPMENT_TYPE_ANALYZER: {
       code: 'DU_EQ_ANALYZER',
       display: 'Automated analyzer equipment',
+    },
+    EQUIPMENT_TYPE_XRAY: {
+      code: 'DU_EQ_XRAY',
+      display: 'Digital X-ray equipment',
+    },
+    EQUIPMENT_TYPE_ULTRASOUND: {
+      code: 'DU_EQ_ULTRASOUND',
+      display: 'Ultrasound equipment',
     },
     EQUIPMENT_OPERATIONAL: {
       code: 'DU_EQ_OPERATIONAL',

@@ -27,15 +27,66 @@ function build() {
   };
   const studiesService = { createOffering: mockFn() };
   const pricingService = { createSchedule: mockFn() };
+  const readService = { list: mockFn(), getById: mockFn() };
+  const adminReadService = { list: mockFn(), getById: mockFn() };
+  const searchService = { search: mockFn() };
   const controller = new DiagnosticUnitsController(
     unitsService as any,
     studiesService as any,
     pricingService as any,
+    readService as any,
+    adminReadService as any,
+    searchService as any,
   );
-  return { controller, unitsService, studiesService, pricingService };
+  return {
+    controller,
+    unitsService,
+    studiesService,
+    pricingService,
+    readService,
+    adminReadService,
+    searchService,
+  };
 }
 
 describe('DiagnosticUnitsController', () => {
+  it('delegates the directory list', async () => {
+    const d = build();
+    d.readService.list.mockResolvedValue({ items: [], count: 0 });
+    await expect(d.controller.list()).resolves.toEqual({ items: [], count: 0 });
+    expect(d.readService.list).toHaveBeenCalledTimes(1);
+  });
+
+  it('delegates the tenant-scoped detail', async () => {
+    const d = build();
+    d.readService.getById.mockResolvedValue({ id: 'u1' });
+    await expect(d.controller.getById('u1')).resolves.toEqual({ id: 'u1' });
+    expect(d.readService.getById).toHaveBeenCalledWith('u1');
+  });
+
+  it('separa la consola de administración del directorio público (C16)', async () => {
+    const d = build();
+    d.adminReadService.list.mockResolvedValue({ items: [], count: 0 });
+
+    await d.controller.listForAdministration();
+
+    // La consola no puede caer en la lectura del directorio: aquélla filtra a
+    // publicadas y verificadas, y es justo lo que la administración no quiere.
+    expect(d.adminReadService.list).toHaveBeenCalledTimes(1);
+    expect(d.readService.list).not.toHaveBeenCalled();
+  });
+
+  it('delega la ficha administrativa de una unidad (C16)', async () => {
+    const d = build();
+    d.adminReadService.getById.mockResolvedValue({ id: 'u1' });
+
+    await expect(d.controller.getForAdministration('u1')).resolves.toEqual({
+      id: 'u1',
+    });
+    expect(d.adminReadService.getById).toHaveBeenCalledWith('u1');
+    expect(d.readService.getById).not.toHaveBeenCalled();
+  });
+
   it('delegates create (UC-23-01)', async () => {
     const d = build();
     const dto = { tenantId: 't1', code: 'DU-1', name: 'Lab' };

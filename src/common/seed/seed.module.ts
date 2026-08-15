@@ -32,12 +32,16 @@ import {
   MessagingProviders,
   ProviderChannelConfigs,
 } from '../../modules/messaging/entities';
-import { Roles as AuthzRoles } from '../../modules/authz/entities';
+import {
+  Permissions as AuthzPermissions,
+  Roles as AuthzRoles,
+} from '../../modules/authz/entities';
 import { IamModule } from '../../modules/iam/iam.module';
 import { TenantMemberships } from '../../modules/directory/entities';
 import { TerminologySeedService } from './terminology-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
+import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
@@ -45,6 +49,13 @@ import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SpecialtyChartTemplates } from '../../modules/chart/entities';
+import {
+  DynamicFieldDefinitions,
+  DynamicFieldSections,
+  FieldAssignments,
+} from '../../modules/forms/entities';
+import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -85,6 +96,14 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
       MessageQueues,
       AudioTemplates,
       AuthzRoles,
+      // Carril R2-5: el catálogo de formularios clínicos estándar. La plantilla
+      // vive en `chart` y su esquema en `forms`, igual que cuando la arma un
+      // admin por API.
+      SpecialtyChartTemplates,
+      DynamicFieldSections,
+      DynamicFieldDefinitions,
+      FieldAssignments,
+      AuthzPermissions,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
@@ -98,8 +117,10 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     AudioAssetsSeedService,
     IdentityVerificationSeedService,
     AuthzClinicalRolesSeedService,
+    AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
     SeedBootstrapService,
+    ClinicalFormsSeedService,
   ],
   exports: [
     TerminologySeedService,
@@ -108,7 +129,9 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     AudioAssetsSeedService,
     IdentityVerificationSeedService,
     AuthzClinicalRolesSeedService,
+    AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    ClinicalFormsSeedService,
   ],
 })
 export class SeedModule {}

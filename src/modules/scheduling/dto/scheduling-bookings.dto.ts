@@ -10,7 +10,12 @@ import {
   IsUUID,
   MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
+import {
+  MAX_REASON_LENGTH,
+  MIN_REASON_LENGTH,
+} from '../state/booking-transition';
 
 /** Canal por el que se originó la reserva. */
 export type BookingChannel = 'PORTAL' | 'DESK' | 'PHONE';
@@ -118,6 +123,51 @@ export class ConfirmBookingDto {
 }
 
 /**
+ * Cuerpo de `POST /scheduling/holds/{holdToken}/request` (corrección #11).
+ *
+ * Es el mismo cuerpo de la confirmación **menos los recordatorios**: una
+ * solicitud todavía no tiene día garantizado, así que programarle avisos sería
+ * prometerle a alguien un turno que el profesional aún no aceptó. Se programan
+ * al aceptar.
+ */
+export class RequestBookingDto {
+  /**
+   * Identificador asociado a tenant.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  tenantId!: string;
+
+  /**
+   * Identificador asociado a patient profile.
+   */
+  @ApiProperty({
+    description: 'Paciente que solicita la cita',
+    format: 'uuid',
+  })
+  @IsUUID()
+  patientProfileId!: string;
+
+  /**
+   * Valor de channel mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Canal de la solicitud', enum: BOOKING_CHANNELS })
+  @IsIn(BOOKING_CHANNELS as readonly string[])
+  channel!: BookingChannel;
+
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Motivo de consulta: por qué se pide el turno',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText?: string;
+}
+
+/**
  * Define el contrato validado para booking response.
  */
 export class BookingResponseDto {
@@ -146,6 +196,80 @@ export class BookingResponseDto {
   remindersScheduled!: number;
 }
 
+/**
+ * Cuerpo de `POST /scheduling/bookings/{id}/accept` (corrección #11).
+ *
+ * Todo opcional: aceptar es un acto sin datos. Los recordatorios se declaran
+ * acá y no al solicitar porque recién al aceptar hay un turno que recordar.
+ */
+export class AcceptBookingDto {
+  /**
+   * Valor de reminder offsets minutes mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Minutos de antelación de los recordatorios a programar',
+    isArray: true,
+    type: Number,
+    example: [1440, 120],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  reminderOffsetsMinutes?: number[];
+}
+
+/**
+ * Cuerpo de `POST /scheduling/bookings/{id}/reject` (correcciones #11 y #14).
+ *
+ * El motivo es obligatorio: a nadie se le rechaza un turno sin decirle por qué.
+ */
+export class RejectBookingDto {
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'Motivo del rechazo. Obligatorio: el paciente lo ve en el detalle de su turno.',
+    minLength: MIN_REASON_LENGTH,
+    maxLength: MAX_REASON_LENGTH,
+  })
+  @IsString()
+  @MinLength(MIN_REASON_LENGTH)
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText!: string;
+}
+
+/**
+ * Resultado de aceptar, iniciar o completar: en qué estado quedó y cuándo.
+ *
+ * Los tres devuelven lo mismo porque los tres son la misma clase de acto —una
+ * transición decidida por el profesional— y quien los consume hace lo mismo con
+ * la respuesta: releer y refrescar el estado en pantalla.
+ */
+export class BookingDecisionResponseDto {
+  /**
+   * Identificador asociado a booking.
+   */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /**
+   * Identificador asociado a status concept.
+   */
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Estado en el que quedó la cita',
+  })
+  statusConceptId!: string;
+
+  /**
+   * Valor de occurred at mantenido por la instancia.
+   */
+  @ApiProperty({ type: String, format: 'date-time' })
+  occurredAt!: string;
+}
+
 /** Cuerpo de `POST /scheduling/bookings/{id}/reschedule` (UC-41-08). */
 export class RescheduleBookingDto {
   /**
@@ -157,12 +281,21 @@ export class RescheduleBookingDto {
 
   /**
    * Valor de reason text mantenido por la instancia.
+   *
+   * **Obligatorio** (corrección #14): mover un turno le cambia el día a alguien,
+   * y esa persona tiene derecho a saber por qué. Se persiste con la transición y
+   * la otra parte lo ve en el detalle de la cita.
    */
-  @ApiPropertyOptional({ description: 'Motivo del cambio' })
-  @IsOptional()
+  @ApiProperty({
+    description:
+      'Motivo del cambio. Obligatorio: se le muestra a la otra parte en el detalle de la cita.',
+    minLength: MIN_REASON_LENGTH,
+    maxLength: MAX_REASON_LENGTH,
+  })
   @IsString()
-  @MaxLength(500)
-  reasonText?: string;
+  @MinLength(MIN_REASON_LENGTH)
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText!: string;
 }
 
 /**
@@ -211,6 +344,24 @@ export class CancelBookingDto {
   @IsOptional()
   @IsBoolean()
   isNoShow?: boolean;
+
+  /**
+   * Valor de reason text mantenido por la instancia.
+   *
+   * **Obligatorio** (corrección #14). El `reason_concept_id` que ya se
+   * persistía dice *quién* canceló, no *por qué*: eso es lo que la otra parte
+   * necesita leer, y hasta ahora no había forma de decirlo.
+   */
+  @ApiProperty({
+    description:
+      'Motivo de la cancelación. Obligatorio: se le muestra a la otra parte en el detalle de la cita.',
+    minLength: MIN_REASON_LENGTH,
+    maxLength: MAX_REASON_LENGTH,
+  })
+  @IsString()
+  @MinLength(MIN_REASON_LENGTH)
+  @MaxLength(MAX_REASON_LENGTH)
+  reasonText!: string;
 }
 
 /**
@@ -424,4 +575,75 @@ export class WaitlistCandidateSlotsResponseDto {
     description: 'Slots candidatos a promoción, del más próximo al más lejano',
   })
   slotIds!: string[];
+}
+
+/* ============================================================================
+    La decisión del prestador sobre una solicitud de reserva.
+
+    La especificación de centros de diagnóstico enumera exactamente lo que un
+    centro puede hacer con un pedido: confirmarlo, rechazarlo, proponer otro
+    horario, pedir documentación adicional, pedir una orden médica e informar
+    instrucciones de preparación. Las tres últimas no son estados distintos —son
+    la misma situación, «falta algo antes de confirmar»— así que se modelan como
+    un único paso a `PENDING_CONFIRMATION` con un motivo tipado, y no como tres
+    estados que después nadie sabe distinguir.
+    ========================================================================== */
+
+/** Qué decidió el prestador sobre la solicitud. */
+export type BookingDecision =
+  'CONFIRM' | 'REJECT' | 'REQUEST_INFO' | 'PROPOSE_SCHEDULE';
+
+export const BOOKING_DECISIONS: readonly BookingDecision[] = [
+  'CONFIRM',
+  'REJECT',
+  'REQUEST_INFO',
+  'PROPOSE_SCHEDULE',
+];
+
+/** Qué le falta a la solicitud cuando el prestador pide información. */
+export type BookingInfoRequest =
+  'DOCUMENTATION' | 'MEDICAL_ORDER' | 'PREPARATION';
+
+export const BOOKING_INFO_REQUESTS: readonly BookingInfoRequest[] = [
+  'DOCUMENTATION',
+  'MEDICAL_ORDER',
+  'PREPARATION',
+];
+
+/** Una decisión registrada sobre la reserva. */
+export class BookingDecisionItemDto {
+  /** Estado del que salió (concept id). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  fromStateConceptId?: string;
+
+  /** Estado al que pasó (concept id). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  toStateConceptId?: string;
+
+  /** La decisión, si la transición vino de una. */
+  @ApiPropertyOptional({ enum: BOOKING_DECISIONS })
+  decision?: BookingDecision;
+
+  /** Qué se pidió, si se pidió algo. */
+  @ApiPropertyOptional({ enum: BOOKING_INFO_REQUESTS })
+  infoRequested?: BookingInfoRequest;
+
+  /** Lo que el prestador escribió. */
+  @ApiPropertyOptional()
+  message?: string;
+
+  /** Cuándo se registró. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  recordedAt!: Date;
+}
+
+/** El historial de decisiones de una reserva. */
+export class BookingDecisionsResponseDto {
+  /** Reserva consultada. */
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  /** Las decisiones, de la más vieja a la más nueva. */
+  @ApiProperty({ type: [BookingDecisionItemDto] })
+  items!: BookingDecisionItemDto[];
 }

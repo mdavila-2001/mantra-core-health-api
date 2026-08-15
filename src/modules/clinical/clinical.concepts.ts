@@ -218,10 +218,38 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     },
 
     // --- appointments (referenciado por check-in) ------------------------------
+    /**
+     * Turno pedido por el paciente y todavía sin aceptar (FHIR `pending`).
+     *
+     * Nace con la solicitud (corrección #11): la cita clínica existe desde el
+     * primer momento para que el turno tenga a qué colgarse, pero decir que está
+     * `booked` antes de que el profesional la acepte sería afirmar un compromiso
+     * que nadie tomó. La acepta el profesional y recién ahí pasa a `booked`.
+     */
+    APPOINTMENT_PENDING: {
+      code: 'APPT_PENDING',
+      display: 'Appointment pending confirmation',
+    },
     APPOINTMENT_BOOKED: { code: 'APPT_BOOKED', display: 'Appointment booked' },
     APPOINTMENT_CHECKED_IN: {
       code: 'APPT_CHECKED_IN',
       display: 'Appointment checked in',
+    },
+    /**
+     * La atención ocurrió (FHIR `fulfilled`).
+     *
+     * Sin este estado, una cita atendida se quedaba en `booked` para siempre y
+     * la historia del paciente no podía distinguir el turno que se cumplió del
+     * que nadie tocó.
+     */
+    APPOINTMENT_FULFILLED: {
+      code: 'APPT_FULFILLED',
+      display: 'Appointment fulfilled',
+    },
+    /** El turno no va a ocurrir: lo canceló alguna de las dos partes. */
+    APPOINTMENT_CANCELLED: {
+      code: 'APPT_CANCELLED',
+      display: 'Appointment cancelled',
     },
 
     /* --- vademécum inicial de la receta ---------------------------------------

@@ -14,6 +14,7 @@ Consultas y operaciones de persistencia aisladas de la lógica de negocio.
 | `dispute.repository.ts` | Consultas y operaciones de persistencia. |
 | `index.ts` | Punto de exportación pública de la carpeta. |
 | `prior-auth.repository.ts` | Consultas y operaciones de persistencia. |
+| `read.repository.ts` | Consultas y operaciones de persistencia. |
 | `settlement.repository.ts` | Consultas y operaciones de persistencia. |
 
 ## Criterios de mantenimiento

@@ -14,6 +14,7 @@ import {
   RoleAssignmentsController,
   InventoryItemsController,
 } from './index';
+import { runWithTenant } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -33,6 +34,7 @@ describe('PracticesController', () => {
     const settingsService = { upsert: mockFn() };
     const workforceService = { assignRole: mockFn() };
     const inventoryService = { createItem: mockFn() };
+    const organizationReadService = { getConsole: mockFn() };
     const controller = new PracticesController(
       sitesService as any,
       accreditationsService as any,
@@ -40,6 +42,7 @@ describe('PracticesController', () => {
       settingsService as any,
       workforceService as any,
       inventoryService as any,
+      organizationReadService as any,
     );
     return {
       controller,
@@ -49,6 +52,7 @@ describe('PracticesController', () => {
       settingsService,
       workforceService,
       inventoryService,
+      organizationReadService,
     };
   }
 
@@ -118,6 +122,17 @@ describe('PracticesController', () => {
       'p1',
       dto,
       actor,
+    );
+  });
+
+  it('pasa el tenant del contexto a la consola de organización (C13)', async () => {
+    const d = build();
+    await runWithTenant('tenant-1', () =>
+      d.controller.getOrganizationConsole('p1'),
+    );
+    expect(d.organizationReadService.getConsole).toHaveBeenCalledWith(
+      'p1',
+      'tenant-1',
     );
   });
 

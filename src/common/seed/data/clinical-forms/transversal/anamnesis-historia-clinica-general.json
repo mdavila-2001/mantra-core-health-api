@@ -1,0 +1,104 @@
+{
+  "code": "TRANSV_ANAMNESIS_GENERAL",
+  "name": "Anamnesis / Historia clínica general",
+  "specialty": {
+    "code": "TRANSVERSAL",
+    "display": "Transversal (todas las especialidades)"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, formatos de historia clínica",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Transcripción de la estructura de anamnesis del formato oficial. No reproduce ningún instrumento con puntaje propietario."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "tiempo_enfermedad",
+      "name": "Tiempo de enfermedad",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "enfermedad_actual",
+      "name": "Enfermedad actual (relato cronológico)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "antecedentes_patologicos",
+      "name": "Antecedentes personales patológicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "antecedentes_quirurgicos",
+      "name": "Antecedentes quirúrgicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "antecedentes_alergicos",
+      "name": "Alergias conocidas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "medicacion_habitual",
+      "name": "Medicación habitual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "antecedentes_familiares",
+      "name": "Antecedentes familiares",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "habito_tabaco",
+      "name": "Consume tabaco",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "habito_alcohol",
+      "name": "Consume alcohol",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "habito_actividad_fisica",
+      "name": "Actividad física habitual",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "revision_por_sistemas",
+      "name": "Revisión por aparatos y sistemas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "impresion_diagnostica",
+      "name": "Impresión diagnóstica",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "plan_de_trabajo",
+      "name": "Plan de trabajo",
+      "dataType": "text",
+      "required": false
+    }
+  ]
+}

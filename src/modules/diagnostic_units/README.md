@@ -9,6 +9,8 @@ asignación de especialistas; más la reproyección del perfil público.
 
 | UC | Método y ruta | Descripción |
 |---|---|---|
+| Directorio P3 | `GET /diagnostic-units` | Listar unidades activas y verificadas del tenant activo |
+| Directorio P3 | `GET /diagnostic-units/{id}` | Perfil con sedes, equipos, oferta, precios públicos y acreditaciones vigentes |
 | UC-23-01 | `POST /diagnostic-units` | Alta de unidad con sitios (1..N) y acreditaciones (0..N) |
 | UC-23-02 | `POST /diagnostic-units/{id}/sites` | Registrar sitio operativo |
 | UC-23-02 | `PATCH /diagnostic-unit-sites/{siteId}` | Actualizar sitio |
@@ -52,9 +54,10 @@ asignación de especialistas; más la reproyección del perfil público.
 
 ## Permisos
 
-Guard JWT global; todas las operaciones requieren rol `SECURITY_ADMIN`
-(`@Roles('SECURITY_ADMIN')`), `@CurrentUser()` como actor y `ParseUUIDPipe` en los
-parámetros de ruta.
+Guard JWT global. Las lecturas del directorio aceptan cualquier sesión con tenant
+activo y nunca reciben `tenantId` del cliente; los comandos requieren rol
+`SECURITY_ADMIN` (`@Roles('SECURITY_ADMIN')`) y `@CurrentUser()` como actor.
+Los identificadores de ruta se validan con `ParseUUIDPipe`.
 
 ## Conceptos
 

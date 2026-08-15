@@ -9,6 +9,7 @@ import {
   AppealsController,
   ReconciliationController,
   BrokerCommissionController,
+  InsuranceReadController,
 } from './controllers';
 import {
   InsuranceBackboneService,
@@ -18,6 +19,7 @@ import {
   AppealsService,
   ReconciliationService,
   BrokerCommissionService,
+  InsuranceReadService,
 } from './services';
 import {
   CatalogRepository,
@@ -26,6 +28,7 @@ import {
   ClaimRepository,
   DisputeRepository,
   SettlementRepository,
+  InsuranceReadRepository,
 } from './repositories';
 
 /**
@@ -43,10 +46,12 @@ import {
     AppealsController,
     ReconciliationController,
     BrokerCommissionController,
+    InsuranceReadController,
   ],
   providers: [
     // Repositorios
     CatalogRepository,
+    InsuranceReadRepository,
     CoverageRepository,
     PriorAuthRepository,
     ClaimRepository,
@@ -60,6 +65,7 @@ import {
     AppealsService,
     ReconciliationService,
     BrokerCommissionService,
+    InsuranceReadService,
   ],
   // Lo consume `directory` para materializar la aseguradora o el corredor en la
   // misma transacción en la que se da de alta el tenant de ese tipo.

@@ -18,6 +18,10 @@ export {
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
+  RequestBookingDto,
+  AcceptBookingDto,
+  RejectBookingDto,
+  BookingDecisionResponseDto,
   BookingResponseDto,
   RescheduleBookingDto,
   RescheduleResponseDto,
@@ -31,9 +35,17 @@ export {
   WorkerBatchResultDto,
   WorkerBatchDto,
   WaitlistCandidateSlotsResponseDto,
+  BookingDecisionItemDto,
+  BookingDecisionsResponseDto,
   BOOKING_CHANNELS,
+  BOOKING_DECISIONS,
+  BOOKING_INFO_REQUESTS,
 } from './scheduling-bookings.dto';
-export type { BookingChannel } from './scheduling-bookings.dto';
+export type {
+  BookingChannel,
+  BookingDecision,
+  BookingInfoRequest,
+} from './scheduling-bookings.dto';
 
 export {
   CreateConfirmationRuleDto,
@@ -49,6 +61,7 @@ export type { RuleScope, RuleDecision } from './scheduling-confirmation.dto';
 export {
   BookableSlotItemDto,
   ResourceAgendaResponseDto,
+  BookingStatusReasonDto,
   BookingItemDto,
   SearchBookingsResponseDto,
 } from './scheduling-read.dto';

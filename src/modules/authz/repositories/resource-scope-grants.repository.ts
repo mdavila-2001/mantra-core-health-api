@@ -74,6 +74,51 @@ export class ResourceScopeGrantsRepository {
   }
 
   /**
+   * Grants sobre un recurso, para un permiso concreto.
+   *
+   * Es la lectura que necesita quien concedió: «¿con quién compartí esto y hasta
+   * cuándo?». El PDP pregunta por (sujeto, recurso) porque resuelve el acceso de
+   * alguien; acá la pregunta es la inversa —el recurso primero— y por eso no
+   * alcanzaba con {@link findForSubjectResource}.
+   *
+   * @param em - Contexto de persistencia.
+   * @param resourceId - Recurso compartido.
+   * @param permissionId - Permiso concedido.
+   * @returns Los grants, del más nuevo al más viejo.
+   */
+  findForResource(
+    em: EntityManager,
+    resourceId: string,
+    permissionId: string,
+  ): Promise<ResourceScopeGrants[]> {
+    return em.find(
+      ResourceScopeGrants,
+      { resourceId, permissionId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Un grant concreto sobre un recurso, para poder revocarlo.
+   *
+   * Lleva el `resourceId` además del id a propósito: revocar es una operación
+   * sobre «lo que compartí», y comprobar que el grant pertenece al recurso que
+   * el llamador dice evita que un id suelto revoque el permiso de otra cosa.
+   *
+   * @param em - Contexto de persistencia.
+   * @param id - Grant buscado.
+   * @param resourceId - Recurso al que debe pertenecer.
+   * @returns El grant, o `null` si no existe o no es de ese recurso.
+   */
+  findByIdForResource(
+    em: EntityManager,
+    id: string,
+    resourceId: string,
+  ): Promise<ResourceScopeGrants | null> {
+    return em.findOne(ResourceScopeGrants, { id, resourceId });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

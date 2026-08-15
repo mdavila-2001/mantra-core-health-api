@@ -32,6 +32,10 @@ function build() {
     findByConcept: jest.fn(() => Promise.resolve([])),
     findProperty: jest.fn(),
     findPropertiesByConcept: jest.fn(() => Promise.resolve([])),
+    findPreferredByLanguageForConcepts: jest.fn(() =>
+      Promise.resolve(new Map()),
+    ),
+    findPropertyForConcepts: jest.fn(() => Promise.resolve([])),
   } as any;
   const relationshipsRepo = {
     findEquivalent: jest.fn(),
@@ -39,6 +43,8 @@ function build() {
   } as any;
   const valueSetsRepo = {
     findMembersByConceptForUpdate: jest.fn(() => Promise.resolve([])),
+    findValueSetsByConceptIds: jest.fn(() => Promise.resolve(new Map())),
+    findIncludedConceptIdsByValueSet: jest.fn(() => Promise.resolve([])),
   } as any;
   const codeSystemsRepo = { findByCanonicalUrl: jest.fn() } as any;
   const versionsRepo = { findDefaultActiveVersion: jest.fn() } as any;
@@ -512,6 +518,369 @@ describe('ConceptsService', () => {
         5,
       );
       expect(result.count).toBe(0);
+    });
+  });
+
+  /**
+   * El idioma preferido y las etiquetas: las dos capacidades que el glosario
+   * necesitaba y que esta lectura —que consume medio frontend— no tenía.
+   *
+   * La primera prueba del bloque es la que importa: **sin los parámetros
+   * nuevos, nada cambia**. Está escrita contra el objeto entero y no con
+   * `toMatchObject` a propósito: un campo de más, aunque sea opcional, es un
+   * cambio de contrato para quien serializa la respuesta.
+   */
+  describe('searchConcepts · idioma y etiquetas', () => {
+    const conceptoIngles = {
+      id: 'concept-1',
+      code: 'COND_SEV_MILD',
+      display: 'Mild',
+      definition: undefined,
+      selectable: true,
+      codeSystemVersionId: 'version-1',
+    };
+
+    it('sin `lang` ni `includeValueSets` devuelve exactamente lo de siempre', async () => {
+      const { service, conceptsRepo, designationsRepo, valueSetsRepo } =
+        build();
+      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+
+      const result = await service.searchConcepts(undefined, undefined, 50);
+
+      expect(result.items).toEqual([
+        {
+          conceptId: 'concept-1',
+          code: 'COND_SEV_MILD',
+          display: 'Mild',
+          definition: undefined,
+          selectable: true,
+          codeSystemVersionId: 'version-1',
+        },
+      ]);
+      // Ni `translated` ni `valueSets` aparecen como claves.
+      expect(Object.keys(result.items[0])).not.toContain('translated');
+      expect(Object.keys(result.items[0])).not.toContain('valueSets');
+      // Y no se paga ninguna consulta de más por existir la capacidad.
+      expect(
+        designationsRepo.findPreferredByLanguageForConcepts,
+      ).not.toHaveBeenCalled();
+      expect(valueSetsRepo.findValueSetsByConceptIds).not.toHaveBeenCalled();
+    });
+
+    it('con `lang` devuelve la designación de ese idioma y su definición', async () => {
+      const { service, conceptsRepo, designationsRepo } = build();
+      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
+        new Map([['concept-1', { value: 'Leve' }]]),
+      );
+      designationsRepo.findPropertyForConcepts.mockResolvedValue([
+        {
+          conceptId: 'concept-1',
+          valueJson: 'Molesta pero no limita la vida diaria.',
+        },
+      ]);
+
+      const result = await service.searchConcepts(
+        undefined,
+        undefined,
+        50,
+        undefined,
+        {
+          language: 'ES',
+        },
+      );
+
+      expect(result.items[0]).toMatchObject({
+        display: 'Leve',
+        definition: 'Molesta pero no limita la vida diaria.',
+        translated: true,
+      });
+      expect(
+        designationsRepo.findPreferredByLanguageForConcepts,
+      ).toHaveBeenCalledWith(
+        expect.anything(),
+        ['concept-1'],
+        CONCEPTS.LANG_ES,
+      );
+    });
+
+    it('sin traducción cargada devuelve el original y lo marca — no lo deja en blanco', async () => {
+      const { service, conceptsRepo } = build();
+      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+
+      const result = await service.searchConcepts(
+        undefined,
+        undefined,
+        50,
+        undefined,
+        {
+          language: 'ES',
+        },
+      );
+
+      expect(result.items[0]).toMatchObject({
+        display: 'Mild',
+        translated: false,
+      });
+    });
+
+    it('una definición que no sea texto se descarta en vez de pintarse cruda', async () => {
+      const { service, conceptsRepo, designationsRepo } = build();
+      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      designationsRepo.findPropertyForConcepts.mockResolvedValue([
+        { conceptId: 'concept-1', valueJson: { texto: 'algo' } },
+      ]);
+
+      const result = await service.searchConcepts(
+        undefined,
+        undefined,
+        50,
+        undefined,
+        {
+          language: 'ES',
+        },
+      );
+
+      expect(result.items[0].definition).toBeUndefined();
+    });
+
+    it('resuelve las etiquetas de toda la página en una sola consulta', async () => {
+      const { service, conceptsRepo, valueSetsRepo } = build();
+      conceptsRepo.search.mockResolvedValue([
+        conceptoIngles,
+        { ...conceptoIngles, id: 'concept-2', code: 'COND_SEV_SEVERE' },
+      ]);
+      valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
+        new Map([
+          [
+            'concept-1',
+            [
+              {
+                id: 'vs-1',
+                internalCode: 'condition-severity',
+                name: 'Severidad',
+              },
+            ],
+          ],
+        ]),
+      );
+
+      const result = await service.searchConcepts(
+        undefined,
+        undefined,
+        50,
+        undefined,
+        {
+          includeValueSets: true,
+        },
+      );
+
+      expect(valueSetsRepo.findValueSetsByConceptIds).toHaveBeenCalledTimes(1);
+      expect(valueSetsRepo.findValueSetsByConceptIds).toHaveBeenCalledWith(
+        expect.anything(),
+        ['concept-1', 'concept-2'],
+      );
+      expect(result.items[0].valueSets).toEqual([
+        { id: 'vs-1', internalCode: 'condition-severity', name: 'Severidad' },
+      ]);
+      // Un concepto que no está en ningún conjunto trae la lista vacía, no
+      // `undefined`: la pantalla no tiene que ramificar por ausencia.
+      expect(result.items[1].valueSets).toEqual([]);
+    });
+
+    it('con `lang` ordena por nombre — un glosario se lee alfabético', async () => {
+      const { service, conceptsRepo, designationsRepo } = build();
+      conceptsRepo.search.mockResolvedValue([
+        { ...conceptoIngles, id: 'c-1', code: 'A_CODE' },
+        { ...conceptoIngles, id: 'c-2', code: 'B_CODE' },
+      ]);
+      designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
+        new Map([
+          ['c-1', { value: 'Zurdo' }],
+          ['c-2', { value: 'Ámbito' }],
+        ]),
+      );
+
+      const result = await service.searchConcepts(
+        undefined,
+        undefined,
+        50,
+        undefined,
+        { language: 'ES' },
+      );
+
+      // Y con las tildes en su sitio: «Ámbito» va antes que «Zurdo».
+      expect(result.items.map((item: any) => item.display)).toEqual([
+        'Ámbito',
+        'Zurdo',
+      ]);
+    });
+
+    it('sin `lang` conserva el orden del catálogo, que es por código', async () => {
+      const { service, conceptsRepo } = build();
+      conceptsRepo.search.mockResolvedValue([
+        { ...conceptoIngles, id: 'c-1', code: 'A_CODE', display: 'Zebra' },
+        { ...conceptoIngles, id: 'c-2', code: 'B_CODE', display: 'Alfa' },
+      ]);
+
+      const result = await service.searchConcepts(undefined, undefined, 50);
+
+      expect(result.items.map((item: any) => item.display)).toEqual([
+        'Zebra',
+        'Alfa',
+      ]);
+    });
+  });
+
+  describe('searchConcepts · filtro por categoría', () => {
+    it('acota a los conceptos del conjunto de valores pedido', async () => {
+      const { service, conceptsRepo, valueSetsRepo, em } = build();
+      valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([
+        'concept-1',
+        'concept-2',
+      ]);
+
+      await service.searchConcepts(undefined, undefined, 50, undefined, {
+        valueSetId: 'vs-1',
+      });
+
+      expect(conceptsRepo.search).toHaveBeenCalledWith(
+        em,
+        {
+          query: undefined,
+          codeSystemVersionId: undefined,
+          ids: ['concept-1', 'concept-2'],
+        },
+        50,
+      );
+    });
+
+    it('combinado con `ids` vale la intersección: cada filtro acota', async () => {
+      const { service, conceptsRepo, valueSetsRepo } = build();
+      valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([
+        'concept-1',
+        'concept-2',
+      ]);
+
+      await service.searchConcepts(
+        undefined,
+        undefined,
+        50,
+        ['concept-2', 'concept-9'],
+        { valueSetId: 'vs-1' },
+      );
+
+      expect(conceptsRepo.search).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ ids: ['concept-2'] }),
+        50,
+      );
+    });
+
+    it('una categoría vacía devuelve cero términos, nunca el catálogo entero', async () => {
+      const { service, conceptsRepo, valueSetsRepo } = build();
+      valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue([]);
+
+      const result = await service.searchConcepts(
+        undefined,
+        undefined,
+        50,
+        undefined,
+        { valueSetId: 'vs-vacio' },
+      );
+
+      expect(result.count).toBe(0);
+      expect(conceptsRepo.search).not.toHaveBeenCalled();
+    });
+
+    it('una categoría inexistente es 404, no una lista vacía', async () => {
+      const { service, valueSetsRepo } = build();
+      valueSetsRepo.findIncludedConceptIdsByValueSet.mockResolvedValue(null);
+
+      await expect(
+        service.searchConcepts(undefined, undefined, 50, undefined, {
+          valueSetId: 'fantasma',
+        }),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('readConcept', () => {
+    const concepto = {
+      id: 'concept-1',
+      code: 'I10',
+      display: 'Hipertensión esencial',
+      definition: undefined,
+      selectable: true,
+      codeSystemVersionId: 'version-1',
+    };
+
+    it('arma la ficha con sus textos, sus etiquetas y sus sinónimos', async () => {
+      const { service, conceptsRepo, designationsRepo, valueSetsRepo } =
+        build();
+      conceptsRepo.findById.mockResolvedValue(concepto);
+      designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
+        new Map([['concept-1', { value: 'Hipertensión esencial' }]]),
+      );
+      designationsRepo.findPropertyForConcepts.mockResolvedValue([
+        { conceptId: 'concept-1', valueJson: 'Presión arterial alta.' },
+      ]);
+      designationsRepo.findByConcept.mockResolvedValue([
+        {
+          value: 'Hipertensión esencial',
+          languageConceptId: CONCEPTS.LANG_ES,
+          preferred: true,
+        },
+        {
+          value: 'Hypertensive disorder',
+          languageConceptId: CONCEPTS.LANG_EN,
+          preferred: true,
+        },
+      ]);
+      valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
+        new Map([
+          [
+            'concept-1',
+            [
+              {
+                id: 'vs-1',
+                internalCode: 'condition-code',
+                name: 'Diagnóstico',
+              },
+            ],
+          ],
+        ]),
+      );
+
+      const ficha = await service.readConcept('concept-1', 'ES');
+
+      expect(ficha).toMatchObject({
+        conceptId: 'concept-1',
+        code: 'I10',
+        display: 'Hipertensión esencial',
+        definition: 'Presión arterial alta.',
+        translated: true,
+      });
+      expect(ficha.valueSets).toEqual([
+        { id: 'vs-1', internalCode: 'condition-code', name: 'Diagnóstico' },
+      ]);
+      // El nombre que ya se muestra arriba no vuelve como sinónimo de sí mismo.
+      expect(ficha.synonyms).toEqual([
+        {
+          value: 'Hypertensive disorder',
+          language: 'EN',
+          preferred: true,
+        },
+      ]);
+    });
+
+    it('un concepto inexistente es 404, no una ficha vacía', async () => {
+      const { service, conceptsRepo } = build();
+      conceptsRepo.findById.mockResolvedValue(null);
+
+      await expect(service.readConcept('fantasma')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
     });
   });
 });

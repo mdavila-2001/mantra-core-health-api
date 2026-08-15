@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 16 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
 - **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
@@ -16,17 +16,18 @@ Referencia exhaustiva de 16 operación(es) del módulo `terminology`, derivada d
 3. [GET /terminology/CodeSystem/$lookup](#3-get-terminology-codesystem-lookup) — UC-03-11: resuelve un concepto por sistema y código
 4. [POST /terminology/ConceptMap/$translate](#4-post-terminology-conceptmap-translate) — UC-03-09: cura o consulta un mapeo entre conceptos
 5. [GET /terminology/concepts](#5-get-terminology-concepts) — UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
-6. [POST /terminology/concepts/{conceptId}/$deprecate](#6-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
-7. [POST /terminology/concepts/{conceptId}/designations](#7-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
-8. [POST /terminology/concepts/{conceptId}/properties](#8-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
-9. [POST /terminology/concepts/{conceptId}/relationships](#9-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
-10. [PUT /terminology/tenants/{tenantId}/catalog-policies](#10-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-11. [GET /terminology/value-sets](#11-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-12. [POST /terminology/value-sets](#12-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-13. [GET /terminology/value-sets/{id}/$expand](#13-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-14. [POST /terminology/ValueSet/{id}/$expand](#14-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-15. [POST /terminology/versions/{versionId}/import](#15-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-16. [POST /terminology/versions/{versionId}/publish](#16-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+6. [GET /terminology/concepts/{conceptId}](#6-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
+7. [POST /terminology/concepts/{conceptId}/$deprecate](#7-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
+8. [POST /terminology/concepts/{conceptId}/designations](#8-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
+9. [POST /terminology/concepts/{conceptId}/properties](#9-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
+10. [POST /terminology/concepts/{conceptId}/relationships](#10-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
+11. [PUT /terminology/tenants/{tenantId}/catalog-policies](#11-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+12. [GET /terminology/value-sets](#12-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+13. [POST /terminology/value-sets](#13-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+14. [GET /terminology/value-sets/{id}/$expand](#14-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+15. [POST /terminology/ValueSet/{id}/$expand](#15-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+16. [POST /terminology/versions/{versionId}/import](#16-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+17. [POST /terminology/versions/{versionId}/publish](#17-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -604,7 +605,7 @@ Ejemplo de error normalizado:
 
 UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-03-13: busca conceptos por texto para poder rellenar cualquier campo `*ConceptId` del contrato. Es de sólo lectura y no exige rol de administración: el catálogo es metadato compartido, sin datos de paciente, y cualquier cliente autenticado necesita resolver estos ids para poder crear recursos. Con `ids` hace el camino inverso —de id a etiqueta—, que es el que necesita cualquier pantalla que muestre lo que el contrato devuelve: los estados, ciclos de vida y clasificaciones viajan siempre como `*ConceptId` en UUID.
+Contexto declarado en el controlador: UC-03-13: busca conceptos por texto para poder rellenar cualquier campo `*ConceptId` del contrato. Es de sólo lectura y no exige rol de administración: el catálogo es metadato compartido, sin datos de paciente, y cualquier cliente autenticado necesita resolver estos ids para poder crear recursos. Con `ids` hace el camino inverso —de id a etiqueta—, que es el que necesita cualquier pantalla que muestre lo que el contrato devuelve: los estados, ciclos de vida y clasificaciones viajan siempre como `*ConceptId` en UUID. ## Los dos parámetros nuevos, y la promesa que los acompaña `lang` devuelve `display` y `definition` en ese idioma —resueltos desde las designaciones del catálogo, cayendo al texto del sistema de codificación cuando falta la traducción— e `includeValueSets` añade a cada concepto los conjuntos de valores a los que pertenece. **Sin ellos, la respuesta es exactamente la de siempre.** No es una intención: los campos que agregan son claves opcionales que ni siquiera viajan en el JSON si no se piden, y hay una prueba que lo fija. Esta lectura la consumen la agenda, el perfil profesional, los diagnósticos y la ficha clínica a través de `readConceptLabels`, y ninguna de ellas manda estos parámetros.
 
 ### Descripción del sistema
 
@@ -618,6 +619,9 @@ NestJS resuelve `GET /terminology/concepts` en `TerminologyConceptsController_se
 | `codeSystemVersionId` | query | No | `string` | Sin restricción adicional declarada | Acota la búsqueda a una versión de sistema de códigos | `00000000-0000-4000-8000-000000000001` |
 | `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de resultados (por defecto 50) | `1` |
 | `ids` | query | No | `array<string>` | Sin restricción adicional declarada | Ids de concepto a resolver, separados por coma (máx. 200). Es la vía para traducir a etiqueta los `*ConceptId` que devuelve el resto del contrato | `["valor-ejemplo"]` |
+| `lang` | query | No | `string` | valores: `ES`, `EN` | Idioma preferido de `display` y `definition`. Sin este parámetro la respuesta es idéntica a la histórica; con él, los conceptos sin designación en ese idioma vuelven con su texto original y `translated: false` | `ES` |
+| `includeValueSets` | query | No | `string` | Sin restricción adicional declarada | Añade a cada concepto los conjuntos de valores a los que pertenece — el camino inverso al de `$expand` | `valor-ejemplo` |
+| `valueSetId` | query | No | `string` | Sin restricción adicional declarada | Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand` | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -642,7 +646,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /terminology/concepts?q=valor-ejemplo&codeSystemVersionId=00000000-0000-4000-8000-000000000001&limit=1&ids=valor-ejemplo HTTP/1.1
+GET /terminology/concepts?q=valor-ejemplo&codeSystemVersionId=00000000-0000-4000-8000-000000000001&limit=1&ids=valor-ejemplo&lang=ES&includeValueSets=valor-ejemplo&valueSetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -669,7 +673,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "display": "valor-ejemplo",
       "definition": "valor-ejemplo",
       "selectable": true,
-      "codeSystemVersionId": "00000000-0000-4000-8000-000000000001"
+      "codeSystemVersionId": "00000000-0000-4000-8000-000000000001",
+      "translated": true,
+      "valueSets": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "internalCode": "condition-severity",
+          "name": "Severidad"
+        }
+      ]
     }
   ],
   "count": 1,
@@ -681,13 +693,18 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConceptSearchItemDto>` | Sin restricción adicional declarada | Conceptos que casan con el filtro. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<ConceptSearchItemDto>` | Sin restricción adicional declarada | Conceptos que casan con el filtro. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"GENDER_FEMALE","display":"valor-ejemplo","definition":"valor-ejemplo","selectable":true,"codeSystemVersionId":"00000000-0000-4000-8000-000000000001","translated":true,"valueSets":[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"condition-severity","name":"Severidad"}]}]` |
 | `items[].conceptId` | Sí | `string` | formato `uuid` | Valor a enviar en los campos `*ConceptId` del contrato | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código del concepto | `GENDER_FEMALE` |
 | `items[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación principal | `valor-ejemplo` |
 | `items[].definition` | No | `string` | Sin restricción adicional declarada | Definición del concepto | `valor-ejemplo` |
 | `items[].selectable` | No | `boolean` | Sin restricción adicional declarada | Si el concepto puede seleccionarse | `true` |
 | `items[].codeSystemVersionId` | Sí | `string` | formato `uuid` | Versión del sistema de códigos | `00000000-0000-4000-8000-000000000001` |
+| `items[].translated` | No | `boolean` | Sin restricción adicional declarada | Si los textos vienen en el idioma pedido. `false` significa que se devolvió el original del sistema de codificación porque falta la designación | `true` |
+| `items[].valueSets` | No | `array<ConceptValueSetRefDto>` | Sin restricción adicional declarada | Conjuntos de valores a los que pertenece el concepto. Sólo se informa con `includeValueSets=true`. Son las categorías bajo las cuales el término tiene sentido —«Diagnóstico», «Severidad», «Vía de administración»— y es lo que el glosario pinta como etiquetas. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"condition-severity","name":"Severidad"}]` |
+| `items[].valueSets[].id` | No | `string` | formato `uuid` | Identificador del conjunto de valores. | `00000000-0000-4000-8000-000000000001` |
+| `items[].valueSets[].internalCode` | No | `string` | Sin restricción adicional declarada | Código interno estable, como `condition-severity`. | `condition-severity` |
+| `items[].valueSets[].name` | No | `string` | Sin restricción adicional declarada | Nombre legible del conjunto. Es el texto de la etiqueta. | `Severidad` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
 
@@ -700,6 +717,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El conjunto de valores no existe o no tiene versión vigente | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -717,7 +735,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /terminology/concepts/{conceptId}/$deprecate
+## 6. GET /terminology/concepts/{conceptId}
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
+- **Operation ID:** `TerminologyConceptsController_readConcept`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyConceptsController.readConcept](../../src/modules/terminology/controllers/terminology-concepts.controller.ts)
+
+### Descripción de negocio
+
+Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La ficha de un término: sus textos, sus etiquetas y sus sinónimos. Es lo que abre el glosario al hacer clic en una entrada. Va **después** del `@Get()` de la búsqueda, que no tiene segmento: si estuviera antes, un `:conceptId` se comería la ruta del listado. De sólo lectura y sin rol de administración, por el mismo motivo que la búsqueda: el catálogo es metadato compartido, sin datos de paciente.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/concepts/{conceptId}` en `TerminologyConceptsController_readConcept`. El controlador delega en `ConceptsService.readConcept`. No recibe body. El tipo de retorno estático es `Promise<ConceptDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lang` | query | No | `string` | valores: `ES`, `EN` | Idioma preferido de `display` y `definition` | `ES` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conceptId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001?lang=ES HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConceptDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conceptId": "00000000-0000-4000-8000-000000000001",
+  "code": "I10",
+  "display": "valor-ejemplo",
+  "definition": "valor-ejemplo",
+  "selectable": true,
+  "codeSystemVersionId": "00000000-0000-4000-8000-000000000001",
+  "translated": true,
+  "valueSets": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "internalCode": "condition-severity",
+      "name": "Severidad"
+    }
+  ],
+  "synonyms": [
+    {
+      "value": "valor-ejemplo",
+      "language": "ES",
+      "preferred": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conceptId` | Sí | `string` | formato `uuid` | Id del concepto. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código dentro de su sistema. | `I10` |
+| `display` | Sí | `string` | Sin restricción adicional declarada | Denominación, en el idioma pedido si la hay. | `valor-ejemplo` |
+| `definition` | No | `string` | Sin restricción adicional declarada | Definición, en el idioma pedido si la hay. | `valor-ejemplo` |
+| `selectable` | No | `boolean` | Sin restricción adicional declarada | Si el concepto puede seleccionarse. | `true` |
+| `codeSystemVersionId` | Sí | `string` | formato `uuid` | Versión del sistema de códigos a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `translated` | No | `boolean` | Sin restricción adicional declarada | Si los textos vienen en el idioma pedido; ver . | `true` |
+| `valueSets` | Sí | `array<ConceptValueSetRefDto>` | Sin restricción adicional declarada | Categorías a las que pertenece el término. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"condition-severity","name":"Severidad"}]` |
+| `valueSets[].id` | Sí | `string` | formato `uuid` | Identificador del conjunto de valores. | `00000000-0000-4000-8000-000000000001` |
+| `valueSets[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `condition-severity`. | `condition-severity` |
+| `valueSets[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible del conjunto. Es el texto de la etiqueta. | `Severidad` |
+| `synonyms` | Sí | `array<ConceptSynonymDto>` | Sin restricción adicional declarada | Otras formas de nombrar lo mismo. Se excluye la designación que ya se está mostrando como `display`: repetirla bajo el título «también se le dice» no informa de nada. | `[{"value":"valor-ejemplo","language":"ES","preferred":true}]` |
+| `synonyms[].value` | Sí | `string` | Sin restricción adicional declarada | El texto de la denominación. | `valor-ejemplo` |
+| `synonyms[].language` | No | `string` | valores: `ES`, `EN` | Idioma de la denominación, cuando el catálogo lo declara. | `ES` |
+| `synonyms[].preferred` | No | `boolean` | Sin restricción adicional declarada | Si es la denominación preferida de su idioma. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Concepto no encontrado | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/concepts/{conceptId}"
+}
+```
+
+---
+
+## 7. POST /terminology/concepts/{conceptId}/$deprecate
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -851,7 +1011,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /terminology/concepts/{conceptId}/designations
+## 8. POST /terminology/concepts/{conceptId}/designations
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1005,7 +1165,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /terminology/concepts/{conceptId}/properties
+## 9. POST /terminology/concepts/{conceptId}/properties
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1148,7 +1308,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /terminology/concepts/{conceptId}/relationships
+## 10. POST /terminology/concepts/{conceptId}/relationships
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1289,7 +1449,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 11. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1456,7 +1616,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /terminology/value-sets
+## 12. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1535,7 +1695,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "canonicalUrl": "valor-ejemplo",
       "description": "Texto descriptivo de ejemplo",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
-      "defaultVersionId": "00000000-0000-4000-8000-000000000001"
+      "defaultVersionId": "00000000-0000-4000-8000-000000000001",
+      "memberCount": 1
     }
   ],
   "count": 1,
@@ -1548,7 +1709,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ValueSetListItemDto>` | Sin restricción adicional declarada | Conjuntos de esta página, ordenados por código interno. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"administrative-gender","name":"Nombre de ejemplo","canonicalUrl":"valor-ejemplo","description":"Texto descriptivo de ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","defaultVersionId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<ValueSetListItemDto>` | Sin restricción adicional declarada | Conjuntos de esta página, ordenados por código interno. | `[{"id":"00000000-0000-4000-8000-000000000001","internalCode":"administrative-gender","name":"Nombre de ejemplo","canonicalUrl":"valor-ejemplo","description":"Texto descriptivo de ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","defaultVersionId":"00000000-0000-4000-8000-000000000001","memberCount":1}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador del conjunto de valores. | `00000000-0000-4000-8000-000000000001` |
 | `items[].internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable. Es la clave por la que se busca sin conocer el uuid. | `administrative-gender` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
@@ -1556,6 +1717,7 @@ Campos de la respuesta:
 | `items[].description` | No | `string` | Sin restricción adicional declarada | Descripción de qué agrupa. | `Texto descriptivo de ejemplo` |
 | `items[].stateConceptId` | No | `string` | formato `uuid` | Estado del conjunto en el ciclo de vida de terminología. | `00000000-0000-4000-8000-000000000001` |
 | `items[].defaultVersionId` | No | `string` | formato `uuid`; admite null | Versión marcada por defecto, o `null` si todavía no hay ninguna. | `00000000-0000-4000-8000-000000000001` |
+| `items[].memberCount` | No | `number` | Sin restricción adicional declarada | Conceptos incluidos en la versión vigente del conjunto | `1` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
@@ -1586,7 +1748,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /terminology/value-sets
+## 13. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1732,7 +1894,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /terminology/value-sets/{id}/$expand
+## 14. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1873,7 +2035,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /terminology/ValueSet/{id}/$expand
+## 15. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2015,7 +2177,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /terminology/versions/{versionId}/import
+## 16. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2159,7 +2321,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /terminology/versions/{versionId}/publish
+## 17. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

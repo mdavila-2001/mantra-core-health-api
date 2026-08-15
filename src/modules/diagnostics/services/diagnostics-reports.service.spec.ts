@@ -35,10 +35,26 @@ function build() {
     recordReleaseEvent: mockFn(),
     createCriticalNotification: mockFn(),
     criticalExistsForObservation: mockFn().mockResolvedValue(false),
+    findVersionsByReports: mockFn().mockResolvedValue([]),
+    findReleaseEventsByVersions: mockFn().mockResolvedValue([]),
+    findFilesByVersions: mockFn().mockResolvedValue([]),
+    findResultsByVersions: mockFn().mockResolvedValue([]),
+  };
+  // Liberar una versión también deja marcado el informe en `clinical`, y esa
+  // tabla la toca `DiagnosticOrdersRepository`. Por defecto devuelve un informe:
+  // el caso de que no exista se prueba aparte.
+  const ordersRepo = {
+    findReportById: mockFn().mockResolvedValue({ id: 'r1' }),
+    markReportReleased: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DiagnosticsReportsService(em as any, repo, logger as any);
-  return { service, tx, repo };
+  const service = new DiagnosticsReportsService(
+    em as any,
+    repo,
+    ordersRepo as any,
+    logger as any,
+  );
+  return { service, tx, repo, ordersRepo };
 }
 
 describe('DiagnosticsReportsService', () => {
@@ -111,6 +127,54 @@ describe('DiagnosticsReportsService', () => {
       expect(res).toEqual({ id: 'v1', status: DIAG.REPORT_FINAL });
       expect(version.clinicalStatusConceptId).toBe(DIAG.REPORT_FINAL);
       expect(d.repo.recordReleaseEvent).toHaveBeenCalled();
+      // Y el informe queda sabiendo cuál es su versión liberada: sin esto,
+      // `current_released_version_id` se quedaba en `null` para siempre.
+      expect(d.ordersRepo.markReportReleased).toHaveBeenCalledWith(
+        d.tx,
+        { id: 'r1' },
+        'v1',
+        DIAG.VISIBILITY_PATIENT_VISIBLE,
+        actor.id,
+      );
+    });
+
+    it('marks the report hidden when released as hidden', async () => {
+      const d = build();
+      d.repo.findVersionInReport.mockResolvedValue({
+        id: 'v1',
+        releaseEligibilityConceptId: DIAG.RELEASE_ELIGIBLE,
+        clinicalStatusConceptId: DIAG.REPORT_PRELIMINARY,
+      });
+
+      await d.service.releaseVersion(
+        'r1',
+        'v1',
+        { patientVisibility: 'HIDDEN' },
+        actor,
+      );
+
+      expect(d.ordersRepo.markReportReleased).toHaveBeenCalledWith(
+        d.tx,
+        { id: 'r1' },
+        'v1',
+        DIAG.VISIBILITY_PATIENT_HIDDEN,
+        actor.id,
+      );
+    });
+
+    it('still releases when the report row is gone', async () => {
+      const d = build();
+      d.repo.findVersionInReport.mockResolvedValue({
+        id: 'v1',
+        releaseEligibilityConceptId: DIAG.RELEASE_ELIGIBLE,
+        clinicalStatusConceptId: DIAG.REPORT_PRELIMINARY,
+      });
+      d.ordersRepo.findReportById.mockResolvedValue(null);
+
+      const res = await d.service.releaseVersion('r1', 'v1', {}, actor);
+
+      expect(res).toEqual({ id: 'v1', status: DIAG.REPORT_FINAL });
+      expect(d.ordersRepo.markReportReleased).not.toHaveBeenCalled();
     });
 
     it('conflicts when already released', async () => {

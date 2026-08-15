@@ -42,6 +42,7 @@ import {
   CreateHoldDto,
   HoldResponseDto,
   ConfirmBookingDto,
+  RequestBookingDto,
   BookingResponseDto,
   CreateWaitlistEntryDto,
   WaitlistEntryResponseDto,
@@ -227,6 +228,32 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<BookingResponseDto> {
     return this.bookingsService.confirmBooking(holdToken, dto, actor);
+  }
+
+  /**
+   * El paciente **solicita** el turno: queda pendiente de que el profesional lo
+   * acepte (corrección #11).
+   *
+   * Es la otra salida de la misma retención: `confirm` compromete la agenda
+   * —lo hace el mostrador— y `request` pide. Se declara como ruta propia y no
+   * como una bandera del cuerpo porque son dos actos distintos con dos permisos
+   * distintos, y una bandera que cambia quién puede hacer qué es una bandera que
+   * tarde o temprano llega en `true` desde donde no debe.
+   */
+  @Post('holds/:holdToken/request')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Solicitar la cita a partir de la reserva temporal',
+    description:
+      'La cita nace PENDING_CONFIRMATION: ocupa el cupo pero no está comprometida hasta que el profesional la acepta.',
+  })
+  requestBooking(
+    @Param('holdToken', ParseUUIDPipe) holdToken: string,
+    @Body() dto: RequestBookingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BookingResponseDto> {
+    return this.bookingsService.requestBooking(holdToken, dto, actor);
   }
 
   /** UC-41-11. */

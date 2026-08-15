@@ -14,6 +14,24 @@ import {
 } from 'class-validator';
 import { TECHNICAL_DATA_TYPES, type TechnicalDataType } from '../../forms/dto';
 
+/**
+ * Código del campo reservado que transporta la ficha de catálogo de una
+ * plantilla sembrada (carril R2-5).
+ *
+ * `chart.specialty_chart_templates` no tiene columnas para organismo, URL ni
+ * licencia, y el modelo de datos no se edita a mano —el pipeline es
+ * `.puml` → `gen_ddl.py` → `SQL/patches/`, fuera de este repo—. Hasta que
+ * existan, la procedencia viaja dentro del propio esquema de la plantilla, en
+ * el `default_value_json` de un `forms.dynamic_field_definitions` con este
+ * código.
+ *
+ * `ChartTemplatesService` lo **saca de `fields`** al responder y lo publica como
+ * `provenance`: para todo consumidor —incluido `specialty-form-block`, que
+ * dibuja un control por campo— la plantilla tiene exactamente los campos que un
+ * médico debe completar, ni uno más.
+ */
+export const CHART_TEMPLATE_PROVENANCE_FIELD_CODE = '__catalog__';
+
 /** Cuerpo de `POST /charts/templates/{templateId}/assignments` (UC-15-12). */
 export class AssignTemplateDto {
   /**
@@ -252,6 +270,48 @@ export class ChartTemplateFieldDto {
   ordinal?: number;
 }
 
+/**
+ * De dónde salió una plantilla del catálogo de formularios estándar.
+ *
+ * Muchos formularios clínicos estándar tienen derechos de autor: algunos son de
+ * uso libre y citable, otros son propiedad de sociedades científicas o
+ * editoriales y no se pueden incorporar a un producto comercial sin licencia,
+ * aunque el PDF se baje gratis. Por eso la procedencia es un dato del catálogo y
+ * no una nota en un chat — se muestra junto al formulario, en pantalla.
+ *
+ * Ausente en las plantillas que arma un admin a mano: sólo la traen las
+ * sembradas por `ClinicalFormsSeedService`.
+ */
+export class ChartTemplateProvenanceDto {
+  /** Título del documento tal como lo publica el organismo. */
+  @ApiProperty()
+  sourceTitle!: string;
+
+  /** Organismo que lo publica. */
+  @ApiProperty()
+  organization!: string;
+
+  /** URL de la que se descargó. */
+  @ApiProperty()
+  url!: string;
+
+  /** Licencia bajo la que se puede usar. */
+  @ApiProperty()
+  license!: string;
+
+  /** Versión o edición del documento de origen. */
+  @ApiPropertyOptional()
+  sourceVersion?: string;
+
+  /** Fecha de descarga, en ISO `YYYY-MM-DD`. */
+  @ApiProperty()
+  retrievedAt!: string;
+
+  /** Qué se transcribió y qué quedó afuera, cuando no es obvio. */
+  @ApiPropertyOptional()
+  note?: string;
+}
+
 /** Respuesta de `POST /charts/templates`, `GET /charts/templates` y `GET /charts/templates/:id`. */
 export class ChartTemplateResponseDto {
   /**
@@ -301,4 +361,10 @@ export class ChartTemplateResponseDto {
    */
   @ApiProperty({ type: [ChartTemplateFieldDto] })
   fields!: ChartTemplateFieldDto[];
+
+  /**
+   * De dónde salió la plantilla, si vino del catálogo de formularios estándar.
+   */
+  @ApiPropertyOptional({ type: ChartTemplateProvenanceDto })
+  provenance?: ChartTemplateProvenanceDto;
 }

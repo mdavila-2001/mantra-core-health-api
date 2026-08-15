@@ -1,0 +1,110 @@
+{
+  "code": "PEDIA_CONTROL_NINO_SANO",
+  "name": "Control de niño sano",
+  "specialty": {
+    "code": "PEDIATRIA",
+    "display": "Pediatría"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, atención integral del niño",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Estructura del control periódico. Las curvas de crecimiento van en su propio formulario (PEDIA_CURVAS_CRECIMIENTO_OMS)."
+  },
+  "fields": [
+    {
+      "code": "edad_en_meses",
+      "name": "Edad (meses)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "code": "talla_cm",
+      "name": "Talla / longitud (cm)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "code": "perimetro_cefalico_cm",
+      "name": "Perímetro cefálico (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "alimentacion",
+      "name": "Alimentación actual",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "lactancia_materna_exclusiva",
+      "name": "Lactancia materna exclusiva",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "vacunas_al_dia",
+      "name": "Esquema de vacunación al día",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "desarrollo_motor",
+      "name": "Desarrollo motor",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "desarrollo_del_lenguaje",
+      "name": "Desarrollo del lenguaje",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "desarrollo_social",
+      "name": "Desarrollo social",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "agudeza_visual",
+      "name": "Tamizaje visual",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "tamizaje_auditivo",
+      "name": "Tamizaje auditivo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "salud_bucal",
+      "name": "Salud bucal",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "signos_de_alarma",
+      "name": "Signos de alarma detectados",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "proximo_control",
+      "name": "Fecha del próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ]
+}

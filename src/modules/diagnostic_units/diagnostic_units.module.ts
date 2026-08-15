@@ -14,6 +14,9 @@ import {
   DiagnosticStudiesService,
   DiagnosticPricingService,
   DiagnosticEquipmentService,
+  DiagnosticUnitsReadService,
+  DiagnosticUnitsAdminReadService,
+  DiagnosticUnitsSearchService,
 } from './services';
 import {
   DiagnosticUnitsRepository,
@@ -26,6 +29,8 @@ import {
   DiagnosticPriceSchedulesRepository,
   DiagnosticStudyPricesRepository,
   DiagnosticEquipmentRepository,
+  DiagnosticUnitsReadRepository,
+  DiagnosticUnitsAdminReadRepository,
 } from './repositories';
 
 /**
@@ -58,11 +63,16 @@ import {
     DiagnosticPriceSchedulesRepository,
     DiagnosticStudyPricesRepository,
     DiagnosticEquipmentRepository,
+    DiagnosticUnitsReadRepository,
+    DiagnosticUnitsAdminReadRepository,
     // Servicios
     DiagnosticUnitsService,
     DiagnosticStudiesService,
     DiagnosticPricingService,
     DiagnosticEquipmentService,
+    DiagnosticUnitsReadService,
+    DiagnosticUnitsAdminReadService,
+    DiagnosticUnitsSearchService,
   ],
 })
 export class DiagnosticUnitsModule {}

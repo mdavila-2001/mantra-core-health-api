@@ -1,12 +1,14 @@
 import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
+import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
+import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 
 /** Ejecuta los seeds estructurales en un orden explícito y determinista. */
 @Injectable()
@@ -19,7 +21,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param messaging - Datos estructurales de mensajería.
    * @param identityVerification - Datos estructurales de identidad.
    * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
+   * @param platformPermissions - Permisos de sistema en `authz.permissions`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
+   * @param clinicalForms - Catálogo de formularios clínicos estándar.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
@@ -29,7 +33,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly audioAssets: AudioAssetsSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
     private readonly clinicalRoles: AuthzClinicalRolesSeedService,
+    private readonly platformPermissions: AuthzPlatformPermissionsSeedService,
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
+    private readonly clinicalForms: ClinicalFormsSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -70,6 +76,19 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     await this.runDependent(
       'roles asistenciales',
       this.clinicalRoles.run.bind(this.clinicalRoles),
+    );
+    // Carril R2-5. Depende del catálogo de conceptos —siembra sus propias
+    // especialidades sobre el mismo sistema de códigos— y es contenido, no
+    // estructura: si falla, el resto del arranque sigue en pie.
+    await this.runDependent(
+      'formularios clínicos estándar',
+      this.clinicalForms.run.bind(this.clinicalForms),
+    );
+    // Mismo motivo que los roles: sus conceptos de acción, ámbito y estado los
+    // acaba de materializar el catálogo.
+    await this.runDependent(
+      'permisos de plataforma',
+      this.platformPermissions.run.bind(this.platformPermissions),
     );
     // Va el último a propósito: el alta del administrador referencia conceptos
     // de estado y el tenant por defecto, que los sembra el catálogo.

@@ -15,6 +15,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { PERIOP } from '../procedures_perioperative.concepts';
 
 const actor = { id: 'user-1', roles: ['PERIOP_ADMIN'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
@@ -535,6 +536,95 @@ describe('PeriopCasesService', () => {
       expect(res.patientChanged).toBe(false);
       expect(surgicalCase.urgencyReasonText).toBe('Actualización de la nota');
     });
+
+    /* -- Spec 227-230: la aceptación vale para la versión aceptada ---------- */
+
+    /** Caso confirmado, con un integrante que ya había aceptado. */
+    function confirmadoConAceptacion() {
+      const d = build();
+      const surgicalCase = draftCase({
+        statusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
+        custodianTenantId: TENANT,
+        scheduledStartAt: new Date('2026-09-01T13:00:00Z'),
+        scheduledEndAt: new Date('2026-09-01T15:00:00Z'),
+      });
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+      const member: any = {
+        id: 'm-1',
+        practitionerProfileId: SURGEON,
+        teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        acceptedAt: new Date('2026-08-20T09:00:00Z'),
+      };
+      d.casesRepo.findTeamByCase.mockResolvedValue([member]);
+      return { d, surgicalCase, member };
+    }
+
+    it('mover la fecha invalida las aceptaciones y devuelve el caso a pendiente', async () => {
+      // Nadie aceptó operar otro día: mantener la aceptación afirmaría algo
+      // que el integrante nunca dijo.
+      const { d, surgicalCase, member } = confirmadoConAceptacion();
+
+      const res = await d.service.updateCase(
+        CASE,
+        {
+          scheduledStartAt: '2026-09-02T13:00:00Z',
+          scheduledEndAt: '2026-09-02T15:00:00Z',
+        },
+        actor,
+      );
+
+      expect(res.reacceptanceRequired).toBe(true);
+      expect(res.acceptancesInvalidated).toBe(1);
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+      expect(member.acceptedAt).toBeUndefined();
+      expect(surgicalCase.statusConceptId).toBe(CONCEPTS.CASE_SCHEDULED);
+      expect(d.casesRepo.createStatusHistory).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          fromStatusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
+          toStatusConceptId: CONCEPTS.CASE_SCHEDULED,
+        }),
+      );
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          eventType: 'periop.case.reacceptance_required',
+        }),
+      );
+    });
+
+    it('reenviar la misma fecha no invalida nada', async () => {
+      // Una modificación que no cambia nada no es una modificación: pedir la
+      // re-aceptación por un PATCH idempotente sería ruido puro.
+      const { d, member } = confirmadoConAceptacion();
+
+      const res = await d.service.updateCase(
+        CASE,
+        { scheduledStartAt: '2026-09-01T13:00:00Z' },
+        actor,
+      );
+
+      expect(res.reacceptanceRequired).toBe(false);
+      expect(res.acceptancesInvalidated).toBe(0);
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('cambiar sólo la prioridad no invalida aceptaciones', async () => {
+      // Spec 228: la lista de cambios que invalidan no incluye la prioridad —
+      // no altera responsabilidades ni condiciones de participación.
+      const { d, member } = confirmadoConAceptacion();
+
+      const res = await d.service.updateCase(
+        CASE,
+        { priority: 'URGENT' },
+        actor,
+      );
+
+      expect(res.reacceptanceRequired).toBe(false);
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+    });
   });
 
   describe('confirmCase (C-14 · CAN-INT-002)', () => {
@@ -753,6 +843,157 @@ describe('PeriopCasesService', () => {
 
       await expect(
         d.service.acceptTeamMember(CASE, 'otro-id', actor as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('sella la fecha y hora de la aceptación (spec 163)', async () => {
+      const { d, member } = conEquipo();
+      const titular = {
+        id: 'user-9',
+        roles: ['SURGEON'],
+        practitionerProfileId: 'prac-1',
+      };
+
+      await d.service.acceptTeamMember(CASE, 'm-1', titular as any);
+
+      expect(member.acceptedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe('respondTeamMember (spec 164 · 166 · 168)', () => {
+    /** Caso y equipo con un único integrante aceptado. */
+    function conEquipo(statusConceptId = CONCEPTS.TEAM_ACCEPTED) {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        custodianTenantId: TENANT,
+        statusConceptId: CONCEPTS.CASE_SCHEDULED,
+        primarySurgeonProfileId: SURGEON,
+      });
+      const member: any = {
+        id: 'm-1',
+        practitionerProfileId: 'prac-1',
+        teamRoleConceptId: CONCEPTS.TEAM_ROLE_ASSISTANT,
+        statusConceptId,
+        acceptedAt: new Date('2026-08-14T10:00:00Z'),
+      };
+      d.casesRepo.findTeamByCase.mockResolvedValue([member]);
+      const titular = {
+        id: 'user-9',
+        roles: ['SURGEON'],
+        practitionerProfileId: 'prac-1',
+      };
+      return { d, member, titular };
+    }
+
+    it.each([
+      ['DECLINE', PERIOP.TEAM_DECLINED],
+      ['REQUEST_CHANGE', PERIOP.TEAM_CHANGE_REQUESTED],
+      ['UNAVAILABLE', PERIOP.TEAM_UNAVAILABLE],
+    ])(
+      'la respuesta %s deja al integrante en su propio estado',
+      async (response, esperado) => {
+        // Las tres son distinguibles a propósito: pedir un cambio no es
+        // rechazar, y al responsable le cambia qué hacer a continuación.
+        const { d, member, titular } = conEquipo();
+
+        const res = await d.service.respondTeamMember(
+          CASE,
+          'm-1',
+          { response, reasonText: 'Motivo declarado' } as any,
+          titular as any,
+        );
+
+        expect(res.statusConceptId).toBe(esperado);
+        expect(member.statusConceptId).toBe(esperado);
+      },
+    );
+
+    it('borra la aceptación previa: el integrante ya no está dentro', async () => {
+      const { d, member, titular } = conEquipo();
+
+      await d.service.respondTeamMember(
+        CASE,
+        'm-1',
+        { response: 'DECLINE', reasonText: 'Conflicto de agenda' } as any,
+        titular as any,
+      );
+
+      expect(member.acceptedAt).toBeUndefined();
+    });
+
+    it('notifica al responsable y a la organización (spec 166)', async () => {
+      const { d, titular } = conEquipo();
+
+      await d.service.respondTeamMember(
+        CASE,
+        'm-1',
+        { response: 'DECLINE', reasonText: 'Conflicto de agenda' } as any,
+        titular as any,
+      );
+
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          tenantId: TENANT,
+          eventType: 'periop.case.team_participation_declined',
+          payloadJson: expect.objectContaining({
+            response: 'DECLINE',
+            reasonText: 'Conflicto de agenda',
+            responsibleProfileId: SURGEON,
+          }),
+        }),
+      );
+      expect(d.auditTrail.record).toHaveBeenCalled();
+    });
+
+    it('rechaza que otro profesional responda en su nombre (spec 168)', async () => {
+      const { d, member } = conEquipo();
+      const otro = {
+        id: 'user-8',
+        roles: ['SURGEON'],
+        practitionerProfileId: 'prac-2',
+      };
+
+      await expect(
+        d.service.respondTeamMember(
+          CASE,
+          'm-1',
+          { response: 'DECLINE', reasonText: 'Motivo' } as any,
+          otro as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+    });
+
+    it('rechaza responder sobre un caso cancelado', async () => {
+      const { d, titular } = conEquipo();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue({
+        id: CASE,
+        custodianTenantId: TENANT,
+        statusConceptId: CONCEPTS.CASE_CANCELLED,
+      });
+
+      await expect(
+        d.service.respondTeamMember(
+          CASE,
+          'm-1',
+          { response: 'DECLINE', reasonText: 'Motivo' } as any,
+          titular as any,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rechaza al integrante que no pertenece al caso', async () => {
+      const { d, titular } = conEquipo();
+
+      await expect(
+        d.service.respondTeamMember(
+          CASE,
+          'otro-id',
+          { response: 'DECLINE', reasonText: 'Motivo' } as any,
+          titular as any,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

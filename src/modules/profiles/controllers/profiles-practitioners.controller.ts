@@ -8,9 +8,20 @@ import {
   Patch,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ProfilesPractitionersService } from '../services';
 import {
   CreatePractitionerDto,
@@ -26,6 +37,7 @@ import {
   ListAffiliationsResponseDto,
   PractitionerProfileSummaryDto,
   UpdateOwnPractitionerProfileDto,
+  ListPractitionersResponseDto,
 } from '../dto';
 
 /**
@@ -71,6 +83,68 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
     return this.practitionersService.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * La guía de profesionales (carril R2-1).
+   *
+   * **Sin `@Roles`, siguiendo el criterio del propio módulo**: son datos
+   * profesionales de presentación —lo que una guía médica publica—, no PHI, y
+   * es el menú del PACIENTE el que la muestra. Exigir un rol dejaría la guía
+   * exactamente para quienes no la necesitan.
+   *
+   * @param specialtyConceptId - Sólo quienes ejercen esta especialidad hoy.
+   * @param cursor - Continuación de la página anterior.
+   * @param limit - Tope de filas (por defecto 50).
+   * @returns Página de la guía.
+   */
+  @Get('practitioners')
+  @ApiOperation({
+    summary: 'Listar profesionales para la guía, con sus especialidades',
+  })
+  @ApiQuery({
+    name: 'specialtyConceptId',
+    required: false,
+    description: 'Filtra por especialidad vigente (concept id)',
+  })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope de resultados (por defecto 50)',
+  })
+  listPractitioners(
+    @Query('specialtyConceptId', new ParseUUIDPipe({ optional: true }))
+    specialtyConceptId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListPractitionersResponseDto> {
+    return this.practitionersService.listPractitioners({
+      specialtyConceptId,
+      cursor,
+      limit: limit ?? 50,
+    });
+  }
+
+  /**
+   * El perfil de un colega — la ficha que abre la guía (R2-1).
+   *
+   * Mismo shape que `me/summary`: mismo contrato, cambia de dónde sale el
+   * sujeto. Sin `@Roles` por lo mismo que el listado. Va declarado DESPUÉS de
+   * las rutas `practitioners/me/*`: Nest resuelve por orden de declaración y
+   * el parámetro capturaría `me` (el pipe lo respondería 400).
+   *
+   * @param profileId - El profesional consultado.
+   * @returns Su perfil completo de presentación.
+   */
+  @Get('practitioners/:profileId/summary')
+  @ApiOperation({
+    summary: 'Consultar el perfil profesional de un colega (ficha de la guía)',
+  })
+  getPractitionerSummary(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.getPractitionerSummary(profileId);
   }
 
   /**

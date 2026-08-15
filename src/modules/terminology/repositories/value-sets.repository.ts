@@ -181,6 +181,156 @@ export class ValueSetsRepository {
     return new Map(rows.map((row) => [row.valueSetId, row]));
   }
 
+  /**
+   * Cuántos conceptos incluye cada versión, en una sola consulta.
+   *
+   * El listado de conjuntos lo necesita para poder mostrar el conteo junto a
+   * cada categoría. Un `em.count` por conjunto serían tantas consultas como
+   * filas tenga la página —hoy, medio centenar— en el camino de la pantalla que
+   * más se abre del glosario.
+   *
+   * Se traen sólo los identificadores de versión y se agrupan acá en vez de
+   * pedirle un `GROUP BY` a la base. Es una consulta igual, y a cambio se queda
+   * dentro del `em.find` tipado que usa el resto del repositorio. El coste es
+   * traer una fila por miembro en vez de una por versión: con el catálogo actual
+   * son un par de centenares de uuid, despreciable. **Si algún día un conjunto
+   * de valores tiene decenas de miles de miembros, esto se cambia por un
+   * `GROUP BY`** — el lugar es este método y no hay otro llamador.
+   *
+   * @param em - Contexto de persistencia.
+   * @param valueSetVersionIds - Versiones cuyos miembros se cuentan.
+   * @returns Mapa `valueSetVersionId -> cantidad`; una versión sin miembros
+   *   incluidos no aparece.
+   */
+  async countMembersByVersionIds(
+    em: EntityManager,
+    valueSetVersionIds: string[],
+  ): Promise<Map<string, number>> {
+    if (valueSetVersionIds.length === 0) return new Map();
+    const rows = await em.find(
+      ValueSetMembers,
+      { valueSetVersionId: { $in: valueSetVersionIds }, included: true },
+      { fields: ['valueSetVersionId'] },
+    );
+
+    const conteo = new Map<string, number>();
+    for (const row of rows) {
+      conteo.set(
+        row.valueSetVersionId,
+        (conteo.get(row.valueSetVersionId) ?? 0) + 1,
+      );
+    }
+    return conteo;
+  }
+
+  /**
+   * A qué conjuntos de valores pertenece cada concepto — el camino inverso al de
+   * `$expand`.
+   *
+   * ## Por qué existe
+   *
+   * `$expand` va de conjunto a conceptos, y no había nada que fuera al revés. Un
+   * glosario que quiera mostrar bajo qué categorías cae un término tenía como
+   * única salida expandir los conjuntos **todos** y armarse el índice inverso en
+   * el navegador: con un catálogo real, cientos de llamadas y una pantalla que
+   * tarda. Esto lo resuelve en tres consultas, sean uno o cincuenta conceptos.
+   *
+   * ## Sólo la versión vigente
+   *
+   * Se filtra por la versión marcada por defecto de cada conjunto. Sin ese
+   * filtro, un término aparecería etiquetado con categorías de las que ya salió
+   * —porque una versión anterior lo incluía— y no habría forma de distinguir eso
+   * de la pertenencia actual.
+   *
+   * @param em - Contexto de persistencia.
+   * @param conceptIds - Conceptos cuya pertenencia se resuelve.
+   * @returns Mapa `conceptId -> conjuntos`, ordenados por código interno; un
+   *   concepto que no está en ninguno no aparece.
+   */
+  async findValueSetsByConceptIds(
+    em: EntityManager,
+    conceptIds: string[],
+  ): Promise<Map<string, ValueSets[]>> {
+    if (conceptIds.length === 0) return new Map();
+
+    const members = await em.find(ValueSetMembers, {
+      conceptId: { $in: conceptIds },
+      included: true,
+    });
+    if (members.length === 0) return new Map();
+
+    const versions = await em.find(ValueSetVersions, {
+      id: { $in: [...new Set(members.map((row) => row.valueSetVersionId))] },
+      isDefault: true,
+    });
+    if (versions.length === 0) return new Map();
+
+    const valueSetIdPorVersion = new Map(
+      versions.map((version) => [version.id, version.valueSetId]),
+    );
+    const valueSets = await em.find(
+      ValueSets,
+      { id: { $in: [...new Set(versions.map((v) => v.valueSetId))] } },
+      { orderBy: { internalCode: 'ASC' } },
+    );
+    const valueSetPorId = new Map(valueSets.map((row) => [row.id, row]));
+
+    const porConcepto = new Map<string, ValueSets[]>();
+    for (const member of members) {
+      const valueSetId = valueSetIdPorVersion.get(member.valueSetVersionId);
+      if (valueSetId === undefined) continue;
+      const valueSet = valueSetPorId.get(valueSetId);
+      if (valueSet === undefined) continue;
+
+      const acumulado = porConcepto.get(member.conceptId);
+      if (acumulado === undefined) {
+        porConcepto.set(member.conceptId, [valueSet]);
+      } else if (!acumulado.includes(valueSet)) {
+        acumulado.push(valueSet);
+      }
+    }
+
+    // El orden de `members` es el de la tabla, no el del catálogo: sin esto, las
+    // etiquetas de un término saldrían en un orden distinto en cada consulta y
+    // la pantalla parecería inestable sin haber cambiado nada.
+    for (const lista of porConcepto.values()) {
+      lista.sort((a, b) => a.internalCode.localeCompare(b.internalCode));
+    }
+    return porConcepto;
+  }
+
+  /**
+   * Los conceptos que incluye la versión vigente de un conjunto de valores.
+   *
+   * Es lo que necesita **filtrar la búsqueda por categoría**: sin esto, la única
+   * forma de ver los términos de «Diagnóstico» era `$expand`, que devuelve los
+   * miembros crudos —sin traducir y sin sus otras etiquetas— y pagina por su
+   * cuenta. Con esto, navegar por etiqueta y buscar por texto son la misma
+   * lectura, y por lo tanto se ven igual.
+   *
+   * Devuelve `null`, y no una lista vacía, cuando el conjunto no existe o no
+   * tiene versión vigente: son casos distintos de «existe y no tiene miembros»,
+   * y el llamador tiene que poder responder 404 en vez de «no hay términos».
+   *
+   * @param em - Contexto de persistencia.
+   * @param valueSetId - Conjunto cuya expansión vigente se lee.
+   * @returns Los ids de concepto incluidos, o `null` si no hay versión vigente.
+   */
+  async findIncludedConceptIdsByValueSet(
+    em: EntityManager,
+    valueSetId: string,
+  ): Promise<string[] | null> {
+    const version = await this.findDefaultVersion(em, valueSetId);
+    if (version === null) return null;
+
+    const members = await em.find(
+      ValueSetMembers,
+      { valueSetVersionId: version.id, included: true },
+      { fields: ['conceptId'], orderBy: [{ ordinal: 'ASC' }] },
+    );
+    return members.map((member) => member.conceptId);
+  }
+
   /** Crea el conjunto de valores en la unidad de trabajo (sin flush). */
   createValueSet(em: EntityManager, data: CreateValueSetData): ValueSets {
     return em.create(

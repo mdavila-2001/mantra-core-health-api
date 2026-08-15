@@ -2330,7 +2330,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "practiceId": "00000000-0000-4000-8000-000000000001",
       "timeZone": "America/La_Paz",
       "capacity": 1,
-      "stateConceptId": "00000000-0000-4000-8000-000000000001"
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "site": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo",
+        "code": "CODIGO_EJEMPLO",
+        "addressText": "Av. Brasil 1234, La Paz",
+        "timeZone": "America/La_Paz"
+      }
     }
   ],
   "count": 1
@@ -2341,7 +2348,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ResourceListItemDto>` | Sin restricción adicional declarada | Recursos de esta página. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","resourceTypeConceptId":"00000000-0000-4000-8000-000000000001","resourceRefType":"health_practitioner_profiles","resourceRefId":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","capacity":1,"stateConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<ResourceListItemDto>` | Sin restricción adicional declarada | Recursos de esta página. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","resourceTypeConceptId":"00000000-0000-4000-8000-000000000001","resourceRefType":"health_practitioner_profiles","resourceRefId":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","capacity":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","site":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","code":"CODIGO_EJEMPLO","addressText":"Av. Brasil 1234, La Paz","timeZone":"America/La_Paz"}}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `items[].resourceTypeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a resource type concept. | `00000000-0000-4000-8000-000000000001` |
@@ -2351,6 +2358,12 @@ Campos de la respuesta:
 | `items[].timeZone` | No | `string` | admite null | Zona horaria IANA del recurso. | `America/La_Paz` |
 | `items[].capacity` | Sí | `number` | Sin restricción adicional declarada | Atenciones simultáneas que admite. 1 cuando el recurso no lo declara. | `1` |
 | `items[].stateConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a state concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].site` | No | `ResourceSiteDto` | Sin restricción adicional declarada | Dónde se atiende con este recurso. Derivado de lo que el recurso ya declara —la asignación de rol vigente si apunta a un profesional, el espacio de atención si apunta a un box— y no de una columna propia: guardarlo dos veces sería tener dos verdades sobre el mismo hecho. `null` es un estado corriente y no un error: un recurso sin asignación vigente con sede no tiene dónde que mostrar, y la agenda sigue sirviendo para elegir horario. | `{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","code":"CODIGO_EJEMPLO","addressText":"Av. Brasil 1234, La Paz","timeZone":"America/La_Paz"}` |
+| `items[].site.id` | No | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
+| `items[].site.name` | No | `string` | Sin restricción adicional declarada | Nombre legible de la sede. | `Nombre de ejemplo` |
+| `items[].site.code` | No | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
+| `items[].site.addressText` | No | `string` | admite null | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `Av. Brasil 1234, La Paz` |
+| `items[].site.timeZone` | No | `string` | admite null | Zona horaria IANA de la sede, si la declara. | `America/La_Paz` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.

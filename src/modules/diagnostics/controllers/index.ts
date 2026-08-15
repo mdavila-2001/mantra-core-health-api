@@ -3,3 +3,4 @@ export * from './diagnostics-lab.controller';
 export * from './diagnostics-reports.controller';
 export * from './diagnostics-imaging.controller';
 export * from './diagnostics-orders.controller';
+export * from './diagnostics-patient-results.controller';

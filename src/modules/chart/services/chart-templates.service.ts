@@ -13,10 +13,20 @@ import { FORMS } from '../../forms/forms.concepts';
 import {
   AssignmentResponseDto,
   AssignTemplateDto,
+  CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
   ChartTemplateFieldDto,
+  ChartTemplateProvenanceDto,
   ChartTemplateResponseDto,
   CreateChartTemplateDto,
 } from '../dto';
+
+/** El esquema de una plantilla, ya separado de su ficha de catálogo. */
+interface ResolvedSchema {
+  /** Los campos que un médico completa, sin la clave reservada. */
+  fields: ChartTemplateFieldDto[];
+  /** De dónde salió la plantilla, si vino del catálogo sembrado. */
+  provenance?: ChartTemplateProvenanceDto;
+}
 
 /**
  * Caso de uso de asignación de plantilla de chart por especialidad (UC-15-12).
@@ -181,7 +191,7 @@ export class ChartTemplatesService {
         },
         'Chart template created',
       );
-      return this.toResponse(template, fields);
+      return this.toResponse(template, { fields });
     });
   }
 
@@ -197,8 +207,8 @@ export class ChartTemplatesService {
     );
     return Promise.all(
       templates.map(async (template) => {
-        const fields = await this.resolveFields(template.sectionId);
-        return this.toResponse(template, fields);
+        const schema = await this.resolveSchema(template.sectionId);
+        return this.toResponse(template, schema);
       }),
     );
   }
@@ -209,20 +219,29 @@ export class ChartTemplatesService {
     if (!template) {
       throw new ResourceNotFoundException('Plantilla no encontrada', { id });
     }
-    const fields = await this.resolveFields(template.sectionId);
-    return this.toResponse(template, fields);
+    const schema = await this.resolveSchema(template.sectionId);
+    return this.toResponse(template, schema);
   }
 
-  /** Compone los campos de una sección, en su orden de presentación. */
-  private async resolveFields(
+  /**
+   * Compone los campos de una sección, en su orden de presentación, y separa la
+   * ficha de catálogo de los campos que un médico completa.
+   *
+   * La separación es lo que permite que la procedencia de un formulario del
+   * catálogo (carril R2-5) viaje dentro del esquema mientras
+   * `specialty_chart_templates` no tenga columnas para ella, sin que ningún
+   * consumidor la vea como un campo más. Una plantilla armada a mano no trae la
+   * clave reservada y responde exactamente lo mismo que antes.
+   */
+  private async resolveSchema(
     sectionId: string | undefined,
-  ): Promise<ChartTemplateFieldDto[]> {
-    if (!sectionId) return [];
+  ): Promise<ResolvedSchema> {
+    if (!sectionId) return { fields: [] };
     const assignments = await this.templatesRepo.findFieldAssignmentsBySection(
       this.em,
       sectionId,
     );
-    if (assignments.length === 0) return [];
+    if (assignments.length === 0) return { fields: [] };
 
     const fieldDefinitions = await this.templatesRepo.findFieldDefinitionsByIds(
       this.em,
@@ -230,29 +249,40 @@ export class ChartTemplatesService {
     );
     const fieldById = new Map(fieldDefinitions.map((f) => [f.id, f]));
 
-    return assignments
-      .map((assignment): ChartTemplateFieldDto | null => {
-        const field = fieldById.get(assignment.fieldId);
-        if (!field) return null;
-        return {
-          assignmentId: assignment.id,
-          fieldId: field.id,
-          code: field.code,
-          name: field.name,
-          dataType: field.dataType as ChartTemplateFieldDto['dataType'],
-          valueSetId: field.valueSetId,
-          required: assignment.required,
-          ordinal: assignment.ordinal,
-        };
-      })
-      .filter((f): f is ChartTemplateFieldDto => f !== null);
+    let provenance: ChartTemplateProvenanceDto | undefined;
+    const fields: ChartTemplateFieldDto[] = [];
+
+    for (const assignment of assignments) {
+      const field = fieldById.get(assignment.fieldId);
+      if (!field) continue;
+
+      // El código viene prefijado con el de la plantilla porque
+      // `dynamic_field_definitions` es una tabla global; se compara el sufijo.
+      if (esClaveDeCatalogo(field.code)) {
+        provenance = leerProcedencia(field.defaultValueJson);
+        continue;
+      }
+
+      fields.push({
+        assignmentId: assignment.id,
+        fieldId: field.id,
+        code: field.code,
+        name: field.name,
+        dataType: field.dataType as ChartTemplateFieldDto['dataType'],
+        valueSetId: field.valueSetId,
+        required: assignment.required,
+        ordinal: assignment.ordinal,
+      });
+    }
+
+    return { fields, provenance };
   }
 
   /**
    * Ensambla la respuesta pública de una plantilla.
    *
    * @param template - Plantilla persistida.
-   * @param fields - Campos de su esquema, ya resueltos.
+   * @param schema - Campos y ficha de catálogo, ya resueltos.
    */
   private toResponse(
     template: {
@@ -264,7 +294,7 @@ export class ChartTemplatesService {
       version: number;
       statusConceptId: string;
     },
-    fields: ChartTemplateFieldDto[],
+    schema: ResolvedSchema,
   ): ChartTemplateResponseDto {
     return {
       id: template.id,
@@ -274,7 +304,57 @@ export class ChartTemplatesService {
       name: template.name,
       version: template.version,
       statusConceptId: template.statusConceptId,
-      fields,
+      fields: schema.fields,
+      provenance: schema.provenance,
     };
   }
+}
+
+/**
+ * Si un código de campo es el de la clave reservada de catálogo.
+ *
+ * Se compara el sufijo porque el seed prefija cada código con el de su
+ * plantilla —`dynamic_field_definitions` es una tabla global y quince
+ * formularios comparten nombres de campo—, pero se acepta también el código
+ * pelado: una plantilla podría traer la clave sin prefijo.
+ */
+function esClaveDeCatalogo(code: string): boolean {
+  return (
+    code === CHART_TEMPLATE_PROVENANCE_FIELD_CODE ||
+    code.endsWith(`.${CHART_TEMPLATE_PROVENANCE_FIELD_CODE}`)
+  );
+}
+
+/**
+ * Lee la ficha de catálogo del `default_value_json` de la clave reservada.
+ *
+ * Devuelve `undefined` si el contenido no tiene la forma esperada en vez de
+ * lanzar: una plantilla con la clave mal escrita tiene que seguir siendo
+ * legible y completable — se pierde el renglón de procedencia, no el
+ * formulario.
+ */
+function leerProcedencia(
+  value: unknown,
+): ChartTemplateProvenanceDto | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const raw = value as Record<string, unknown>;
+  const requeridos = [
+    'sourceTitle',
+    'organization',
+    'url',
+    'license',
+    'retrievedAt',
+  ] as const;
+  if (requeridos.some((key) => typeof raw[key] !== 'string')) return undefined;
+
+  return {
+    sourceTitle: raw.sourceTitle as string,
+    organization: raw.organization as string,
+    url: raw.url as string,
+    license: raw.license as string,
+    sourceVersion:
+      typeof raw.sourceVersion === 'string' ? raw.sourceVersion : undefined,
+    retrievedAt: raw.retrievedAt as string,
+    note: typeof raw.note === 'string' ? raw.note : undefined,
+  };
 }

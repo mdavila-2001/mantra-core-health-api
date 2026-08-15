@@ -14,6 +14,7 @@ Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la ló
 | `coverage.controller.ts` | Endpoints HTTP y adaptación del transporte. |
 | `index.ts` | Punto de exportación pública de la carpeta. |
 | `insurance-backbone.controller.ts` | Endpoints HTTP y adaptación del transporte. |
+| `insurance-read.controller.ts` | Endpoints HTTP y adaptación del transporte. |
 | `prior-auth.controller.ts` | Endpoints HTTP y adaptación del transporte. |
 | `reconciliation.controller.ts` | Endpoints HTTP y adaptación del transporte. |
 

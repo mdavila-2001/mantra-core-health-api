@@ -1,0 +1,86 @@
+{
+  "code": "TRANSV_CONSENTIMIENTO_INFORMADO",
+  "name": "Consentimiento informado",
+  "specialty": {
+    "code": "TRANSVERSAL",
+    "display": "Transversal (todas las especialidades)"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Modelo de consentimiento informado — Resolución 1738",
+    "organization": "Ministerio de Salud y Protección Social de Colombia",
+    "url": "https://www.minsalud.gov.co/sites/rid/Lists/BibliotecaDigital/RIDE/VS/ED/VSP/modelo-consentimiento-informado-resolucion-1738.pdf",
+    "license": "Documento oficial de acceso público",
+    "sourceVersion": "Resolución 1738",
+    "retrievedAt": "2026-08-14",
+    "note": "Transcripción de los campos del modelo oficial. El texto legal de cada procedimiento lo aporta la organización."
+  },
+  "fields": [
+    {
+      "code": "procedimiento_propuesto",
+      "name": "Procedimiento o tratamiento propuesto",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "diagnostico_que_lo_motiva",
+      "name": "Diagnóstico que lo motiva",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "beneficios_esperados",
+      "name": "Beneficios esperados",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "riesgos_y_complicaciones",
+      "name": "Riesgos y complicaciones posibles",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "alternativas_disponibles",
+      "name": "Alternativas disponibles",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "consecuencias_de_no_aceptar",
+      "name": "Consecuencias de no aceptar",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "preguntas_del_paciente",
+      "name": "Preguntas formuladas por el paciente",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "acepta_el_procedimiento",
+      "name": "El paciente acepta el procedimiento",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "code": "otorgado_por_representante",
+      "name": "Lo otorga un representante legal",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "nombre_del_representante",
+      "name": "Nombre del representante legal",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "fecha_de_otorgamiento",
+      "name": "Fecha de otorgamiento",
+      "dataType": "date",
+      "required": true
+    }
+  ]
+}

@@ -88,10 +88,28 @@ export class CommunitySocialReadService {
    * @returns Ficha del perfil.
    * @throws ResourceNotFoundException si el perfil no existe.
    */
-  async getProfile(profileId: string): Promise<PublicProfileDetailDto> {
+  async getProfile(
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PublicProfileDetailDto> {
     const em = this.em.fork();
     const profile = await this.profilesRepo.findById(em, profileId);
     if (!profile)
+      throw new ResourceNotFoundException('Perfil público no encontrado', {
+        profileId,
+      });
+
+    // Un bloqueo responde 404 y no 403, por lo mismo que en las publicaciones:
+    // «existe pero no podés verlo» ya confirma que ese perfil existe, y quien
+    // bloqueó no quiere que el bloqueado sepa siquiera eso.
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+    );
+    if (
+      actorProfileId &&
+      (await this.visibility.isBlockedBetween(em, actorProfileId, profile.id))
+    )
       throw new ResourceNotFoundException('Perfil público no encontrado', {
         profileId,
       });
@@ -146,8 +164,9 @@ export class CommunitySocialReadService {
    */
   async listProfilePosts(
     profileId: string,
+    actor: AuthenticatedUser,
     options: {
-      /** Perfil del lector, para resolver visibilidad y bloqueos. */
+      /** Perfil del lector **propuesto**; se verifica que sea suyo. */
       actorProfileId?: string;
       /** Cursor opaco de la página anterior. */
       cursor?: string;
@@ -178,7 +197,11 @@ export class CommunitySocialReadService {
     const visible = await this.visibility.filterVisiblePosts(
       em,
       page,
-      options.actorProfileId,
+      await this.visibility.resolveActorProfileId(
+        em,
+        actor,
+        options.actorProfileId,
+      ),
     );
 
     // El cursor sale de la última fila **leída**, no de la última visible: si
@@ -212,7 +235,8 @@ export class CommunitySocialReadService {
    */
   async getPost(
     postId: string,
-    actorProfileId?: string,
+    actor: AuthenticatedUser,
+    requestedProfileId?: string,
   ): Promise<PostDetailDto> {
     const em = this.em.fork();
     const post = await this.postsRepo.findById(em, postId);
@@ -221,6 +245,11 @@ export class CommunitySocialReadService {
         postId,
       });
 
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+      requestedProfileId,
+    );
     const canView = await this.visibility.canViewPost(em, post, actorProfileId);
     if (!canView)
       throw new ResourceNotFoundException('Publicación no encontrada', {
@@ -261,8 +290,9 @@ export class CommunitySocialReadService {
    */
   async listPostComments(
     postId: string,
+    actor: AuthenticatedUser,
     options: {
-      /** Perfil del lector. */
+      /** Perfil del lector **propuesto**; se verifica que sea suyo. */
       actorProfileId?: string;
       /** Cursor opaco de la página anterior. */
       cursor?: string;
@@ -271,7 +301,12 @@ export class CommunitySocialReadService {
     },
   ): Promise<CommentThreadPageDto> {
     const em = this.em.fork();
-    await this.assertPostVisible(em, postId, options.actorProfileId);
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+      options.actorProfileId,
+    );
+    await this.assertPostVisible(em, postId, actorProfileId);
 
     const after = options.cursor
       ? decodeKeysetCursor(options.cursor)
@@ -321,9 +356,15 @@ export class CommunitySocialReadService {
    */
   async getPostReactions(
     postId: string,
-    actorProfileId?: string,
+    actor: AuthenticatedUser,
+    requestedProfileId?: string,
   ): Promise<ReactionSummaryDto> {
     const em = this.em.fork();
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+      requestedProfileId,
+    );
     await this.assertPostVisible(em, postId, actorProfileId);
 
     const tallies = await this.reactionsRepo.summarizeByTarget(
@@ -350,14 +391,21 @@ export class CommunitySocialReadService {
   }
 
   /**
-   * Seguimientos emitidos por un perfil.
+   * Seguimientos emitidos por un perfil. Exige ser el titular.
+   *
+   * A quién sigue alguien es una lectura privada: dice con qué especialistas se
+   * trata, y en una red social médica eso deja ver la condición de la persona.
+   * Se leía con sólo poner el uuid ajeno en la consulta.
    *
    * @param followerProfileId - Perfil que sigue.
+   * @param actor - Quien pide la lectura; tiene que ser el titular.
    * @param options - Cursor y tope.
    * @returns Página de seguimientos activos.
+   * @throws ForbiddenException si el perfil no es suyo.
    */
   async listFollows(
     followerProfileId: string,
+    actor: AuthenticatedUser,
     options: {
       /** Cursor opaco de la página anterior. */
       cursor?: string;
@@ -366,6 +414,7 @@ export class CommunitySocialReadService {
     },
   ): Promise<FollowPageDto> {
     const em = this.em.fork();
+    await this.visibility.assertOwnProfile(em, followerProfileId, actor);
     const afterKey = this.decodeCreatedAtCursor(options.cursor);
 
     const rows = await this.followsRepo.listByFollowerPage(

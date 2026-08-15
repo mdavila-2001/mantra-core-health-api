@@ -5,6 +5,8 @@ import {
   CatalogConcepts,
   CodeSystemVersions,
   CodeSystems,
+  ConceptDesignations,
+  ConceptProperties,
   TerminologySources,
 } from '../../modules/terminology/entities';
 import { Tenants } from '../../modules/directory/entities';
@@ -17,6 +19,29 @@ import {
   deterministicId,
 } from '../constants/concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
+import {
+  SPANISH_DEFINITION_PROPERTY_CODE,
+  SPANISH_DESIGNATIONS,
+} from './terminology-designations.es';
+
+/** Tipo de dato de la propiedad que guarda la definición en castellano. */
+const SPANISH_DEFINITION_DATA_TYPE = 'string';
+
+/**
+ * Identificador determinista de la designación `ES` de un concepto.
+ *
+ * Deterministas por el mismo motivo que el resto del seed: el arranque compara
+ * por id para saber qué falta, y con un uuid aleatorio cada reinicio insertaría
+ * una designación duplicada del mismo texto.
+ */
+export function spanishDesignationId(conceptId: string): string {
+  return deterministicId(`seed:designation:es:${conceptId}`);
+}
+
+/** Identificador determinista de la propiedad con la definición en castellano. */
+export function spanishDefinitionPropertyId(conceptId: string): string {
+  return deterministicId(`seed:concept-property:definition-es:${conceptId}`);
+}
 
 /**
  * Materializa el catálogo de conceptos internos que el resto del sistema
@@ -187,6 +212,15 @@ export class TerminologySeedService {
     }
     await em.flush();
 
+    // Nivel 2b: el catálogo en castellano —el nombre y la explicación de cada
+    // concepto—, que es lo que el glosario muestra.
+    //
+    // Va después del flush de los conceptos y no dentro de él: las dos tablas
+    // referencian `catalog_concepts.id` por FK, y como son columnas uuid planas
+    // (no relaciones del ORM) MikroORM no ordena los inserts por sí mismo. Es el
+    // mismo motivo por el que los tres niveles de arriba se flushean uno a uno.
+    inserted += await this.seedSpanishDesignations(em, now);
+
     // Nivel 3: tenant por defecto (depende de conceptos ya materializados).
     if (!(await em.findOne(Tenants, { id: SEED.tenantId }))) {
       em.create(
@@ -258,6 +292,149 @@ export class TerminologySeedService {
       );
     }
     return { inserted };
+  }
+
+  /**
+   * Materializa el catálogo en castellano: la designación `ES` preferida de cada
+   * concepto y su definición en lenguaje llano.
+   *
+   * ## Por qué hacía falta
+   *
+   * `catalog_concepts.display` guarda el rótulo del sistema de codificación, que
+   * en este catálogo está en inglés, y `catalog_concepts.definition` **nunca se
+   * escribe**: el nivel 2 la deja vacía para todo el catálogo. El glosario
+   * mostraba, entonces, nombres en inglés y explicaciones en blanco. Ver
+   * `terminology-designations.es.ts` para el contenido y sus fuentes.
+   *
+   * ## Dónde va cada mitad
+   *
+   * El nombre a `concept_designations` (un texto por idioma, que es para lo que
+   * esa tabla existe) y la definición a `concept_properties` bajo
+   * `definition-es`. **`catalog_concepts.definition` no se toca**: es una sola
+   * columna sin idioma declarado en un catálogo multilingüe, y escribir
+   * castellano ahí dejaría la segunda lengua sin sitio.
+   *
+   * ## Idempotencia, y por qué no se pisa lo que ya está
+   *
+   * Los identificadores son deterministas, así que el seed compara por id e
+   * inserta sólo lo que falta — misma regla que el resto del arranque. Lo que ya
+   * existe **no se actualiza**: si alguien corrigió una designación por API
+   * (`POST /terminology/concepts/:id/designations`), el arranque siguiente no le
+   * deshace el cambio. Cambiar una traducción de este archivo, por lo mismo, no
+   * reescribe la fila ya sembrada: hay que corregirla por API, que es la vía que
+   * queda auditada.
+   *
+   * Un concepto sin traducción declarada sencillamente no recibe fila. La
+   * lectura lo devuelve con su rótulo original y marcado como no traducido, que
+   * es preferible a dejarlo en blanco o a inventarle un texto.
+   *
+   * @param em - Contexto de persistencia del seed, con los conceptos ya volcados.
+   * @param now - Instante único de la corrida, compartido con el resto de niveles.
+   * @returns Cuántas filas se insertaron entre las dos tablas.
+   */
+  private async seedSpanishDesignations(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<number> {
+    const conceptIds = [...SPANISH_DESIGNATIONS.keys()];
+    if (conceptIds.length === 0) return 0;
+
+    const designationIds = conceptIds.map(spanishDesignationId);
+    const propertyIds = conceptIds.map(spanishDefinitionPropertyId);
+
+    // Se consultan de golpe los ya presentes: son ciento y pico conceptos y esto
+    // corre en cada arranque, así que comprobar fila a fila sería un N+1 en el
+    // camino crítico del despegue.
+    const [existingDesignations, existingProperties, existingConcepts] =
+      await Promise.all([
+        em.find(
+          ConceptDesignations,
+          { id: { $in: designationIds } },
+          { fields: ['id'] },
+        ),
+        em.find(
+          ConceptProperties,
+          { id: { $in: propertyIds } },
+          { fields: ['id'] },
+        ),
+        em.find(
+          CatalogConcepts,
+          { id: { $in: conceptIds } },
+          { fields: ['id'] },
+        ),
+      ]);
+
+    const yaEstaLaDesignacion = new Set(
+      existingDesignations.map((row) => row.id),
+    );
+    const yaEstaLaPropiedad = new Set(existingProperties.map((row) => row.id));
+    // Traducir un concepto que no existe violaría la FK y abortaría el arranque
+    // entero. Se filtra y se avisa: el catálogo declarado y el sembrado pueden
+    // divergir mientras alguien está a mitad de mover un concepto de módulo.
+    const conceptoSembrado = new Set(existingConcepts.map((row) => row.id));
+
+    let inserted = 0;
+    const huerfanos: string[] = [];
+
+    for (const [conceptId, traduccion] of SPANISH_DESIGNATIONS) {
+      if (!conceptoSembrado.has(conceptId)) {
+        huerfanos.push(conceptId);
+        continue;
+      }
+
+      const designationId = spanishDesignationId(conceptId);
+      if (!yaEstaLaDesignacion.has(designationId)) {
+        em.create(
+          ConceptDesignations,
+          {
+            id: designationId,
+            conceptId,
+            value: traduccion.display,
+            languageConceptId: CONCEPTS.LANG_ES,
+            designationTypeConceptId: CONCEPTS.DESIG_PREFERRED,
+            preferred: true,
+            createdAt: now,
+            updatedAt: now,
+          },
+          { partial: true },
+        );
+        inserted++;
+      }
+
+      const propertyId = spanishDefinitionPropertyId(conceptId);
+      if (!yaEstaLaPropiedad.has(propertyId)) {
+        em.create(
+          ConceptProperties,
+          {
+            id: propertyId,
+            conceptId,
+            propertyCode: SPANISH_DEFINITION_PROPERTY_CODE,
+            dataType: SPANISH_DEFINITION_DATA_TYPE,
+            valueJson: traduccion.definition,
+            createdAt: now,
+            updatedAt: now,
+          },
+          { partial: true },
+        );
+        inserted++;
+      }
+    }
+
+    await em.flush();
+
+    if (huerfanos.length > 0) {
+      this.logger.warn(
+        { operation: 'seed.terminology.es', count: huerfanos.length },
+        'Hay traducciones declaradas para conceptos que no están en el catálogo: se omiten',
+      );
+    }
+    if (inserted > 0) {
+      this.logger.info(
+        { operation: 'seed.terminology.es', inserted },
+        'Catálogo en castellano materializado',
+      );
+    }
+    return inserted;
   }
 
   /**

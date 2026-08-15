@@ -96,11 +96,12 @@ export class CommunityGroupsController {
   @ApiOperation({ summary: 'Integrantes de un grupo' })
   listMembers(
     @Param('groupId', ParseUUIDPipe) groupId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('actorProfileId') actorProfileId?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<GroupMemberPageDto> {
-    return this.readService.listMembers(groupId, actorProfileId, {
+    return this.readService.listMembers(groupId, actor, actorProfileId, {
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
     });
