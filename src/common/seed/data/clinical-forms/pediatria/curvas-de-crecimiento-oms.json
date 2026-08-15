@@ -1,0 +1,86 @@
+{
+  "code": "PEDIA_CURVAS_CRECIMIENTO_OMS",
+  "name": "Curvas de crecimiento (patrones OMS)",
+  "specialty": {
+    "code": "PEDIATRIA",
+    "display": "Pediatría"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Patrones de crecimiento infantil de la OMS (WHO Child Growth Standards)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/es/news-room/questions-and-answers/item/child-growth-standards",
+    "license": "Publicación OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
+    "sourceVersion": "OMS 2006 (0–5 años) y OMS 2007 (5–19 años)",
+    "retrievedAt": "2026-08-14",
+    "note": "Registra las mediciones y sus puntuaciones Z. Las tablas de referencia no se transcriben: se consultan en la fuente."
+  },
+  "fields": [
+    {
+      "code": "fecha_de_medicion",
+      "name": "Fecha de la medición",
+      "dataType": "date",
+      "required": true
+    },
+    {
+      "code": "edad_en_meses",
+      "name": "Edad (meses)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "code": "talla_cm",
+      "name": "Talla / longitud (cm)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "code": "perimetro_cefalico_cm",
+      "name": "Perímetro cefálico (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "imc",
+      "name": "Índice de masa corporal (kg/m²)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "z_peso_para_la_edad",
+      "name": "Puntuación Z — peso para la edad",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "z_talla_para_la_edad",
+      "name": "Puntuación Z — talla para la edad",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "z_peso_para_la_talla",
+      "name": "Puntuación Z — peso para la talla",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "z_imc_para_la_edad",
+      "name": "Puntuación Z — IMC para la edad",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "code": "clasificacion_nutricional",
+      "name": "Clasificación del estado nutricional",
+      "dataType": "string",
+      "required": false
+    }
+  ]
+}

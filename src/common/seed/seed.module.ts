@@ -45,6 +45,13 @@ import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SpecialtyChartTemplates } from '../../modules/chart/entities';
+import {
+  DynamicFieldDefinitions,
+  DynamicFieldSections,
+  FieldAssignments,
+} from '../../modules/forms/entities';
+import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -85,6 +92,13 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
       MessageQueues,
       AudioTemplates,
       AuthzRoles,
+      // Carril R2-5: el catálogo de formularios clínicos estándar. La plantilla
+      // vive en `chart` y su esquema en `forms`, igual que cuando la arma un
+      // admin por API.
+      SpecialtyChartTemplates,
+      DynamicFieldSections,
+      DynamicFieldDefinitions,
+      FieldAssignments,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
@@ -100,6 +114,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     AuthzClinicalRolesSeedService,
     BootstrapAdminSeedService,
     SeedBootstrapService,
+    ClinicalFormsSeedService,
   ],
   exports: [
     TerminologySeedService,
@@ -109,6 +124,7 @@ import { SeedBootstrapService } from './seed-bootstrap.service';
     IdentityVerificationSeedService,
     AuthzClinicalRolesSeedService,
     BootstrapAdminSeedService,
+    ClinicalFormsSeedService,
   ],
 })
 export class SeedModule {}

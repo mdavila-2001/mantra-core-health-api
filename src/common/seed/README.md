@@ -12,6 +12,8 @@ Agrupa los componentes relacionados con **seed** y mantiene cohesionada esta res
 | `module-concepts.ts` | Implementación o recurso de soporte de esta carpeta. |
 | `seed.module.ts` | Composición de dependencias del módulo NestJS. |
 | `terminology-seed.service.ts` | Casos de uso y reglas de negocio. |
+| `clinical-forms-seed.service.ts` | Siembra el catálogo de formularios clínicos estándar por especialidad (carril R2-5). |
+| `data/clinical-forms/` | El contenido de ese catálogo: un `.json` por formulario, con su ficha de procedencia. Tiene su propio `README.md`. |
 
 ## Criterios de mantenimiento
 

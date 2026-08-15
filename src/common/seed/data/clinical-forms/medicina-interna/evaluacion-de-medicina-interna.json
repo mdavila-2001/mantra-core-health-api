@@ -1,0 +1,110 @@
+{
+  "code": "MEDINT_EVALUACION_BASE",
+  "name": "Evaluación de medicina interna — versión general base",
+  "specialty": {
+    "code": "MEDICINA_INTERNA",
+    "display": "Medicina interna"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, historia clínica de consulta externa",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "Estructura de la evaluación integral del adulto: comorbilidades, polifarmacia y revisión por sistemas."
+  },
+  "fields": [
+    {
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "enfermedad_actual",
+      "name": "Enfermedad actual",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "comorbilidades",
+      "name": "Comorbilidades activas",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "medicacion_actual",
+      "name": "Medicación actual",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "cantidad_de_farmacos",
+      "name": "Cantidad de fármacos habituales",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "code": "alergias",
+      "name": "Alergias",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "habitos_toxicos",
+      "name": "Hábitos tóxicos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "estado_funcional",
+      "name": "Estado funcional / autonomía",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "code": "perdida_de_peso_reciente",
+      "name": "Pérdida de peso reciente",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "code": "revision_por_sistemas",
+      "name": "Revisión por sistemas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "examen_fisico_dirigido",
+      "name": "Examen físico dirigido",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "laboratorio_relevante",
+      "name": "Laboratorio relevante",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "code": "problemas_activos",
+      "name": "Lista de problemas activos",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "code": "plan_por_problema",
+      "name": "Plan por problema",
+      "dataType": "text",
+      "required": true
+    }
+  ]
+}
