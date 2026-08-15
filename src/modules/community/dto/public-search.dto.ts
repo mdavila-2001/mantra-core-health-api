@@ -248,7 +248,10 @@ export class PublicPageDto<T> {
   @ApiProperty({ description: 'Nunca null; vacío es []' })
   items!: T[];
 
-  @ApiProperty({ nullable: true, description: 'Cursor opaco; null = no hay más' })
+  @ApiProperty({
+    nullable: true,
+    description: 'Cursor opaco; null = no hay más',
+  })
   nextCursor!: string | null;
 
   @ApiProperty({ nullable: true, description: 'Aproximado' })

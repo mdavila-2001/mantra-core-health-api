@@ -212,9 +212,7 @@ export class CommunityPublicController {
   @Public()
   @Get('f/:slug')
   @ApiOperation({ summary: 'Ficha pública de una farmacia' })
-  getPharmacy(
-    @Param('slug') slug: string,
-  ): Promise<PublicDirectoryProfileDto> {
+  getPharmacy(@Param('slug') slug: string): Promise<PublicDirectoryProfileDto> {
     return this.service.getBySlug(slug, TARGET_CONCEPT_BY_SLUG_PREFIX.f);
   }
 

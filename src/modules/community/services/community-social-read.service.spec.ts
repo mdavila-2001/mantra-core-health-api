@@ -198,9 +198,9 @@ describe('CommunitySocialReadService', () => {
       d.postsRepo.findById.mockResolvedValue(post);
       d.visibility.canViewPost.mockResolvedValue(false);
 
-      await expect(d.service.getPost('post-1', actor, 'p-9')).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        d.service.getPost('post-1', actor, 'p-9'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 
@@ -226,7 +226,9 @@ describe('CommunitySocialReadService', () => {
         },
       ]);
 
-      const res = await d.service.listPostComments('post-1', actor, { limit: 10 });
+      const res = await d.service.listPostComments('post-1', actor, {
+        limit: 10,
+      });
 
       expect(res.items).toHaveLength(1);
       expect(res.items[0].replies).toHaveLength(1);
