@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1085 de 1085 endpoints** en **63 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1097 de 1097 endpoints** en **64 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -61,6 +61,7 @@ Se documentan **1085 de 1085 endpoints** en **63 módulos**. La referencia compl
 | `reporting` | 12 | [Abrir referencia](endpoints/reporting.md) |
 | `scheduling` | 31 | [Abrir referencia](endpoints/scheduling.md) |
 | `search_platform` | 3 | [Abrir referencia](endpoints/search-platform.md) |
+| `surveys` | 12 | [Abrir referencia](endpoints/surveys.md) |
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |
 | `telemetry` | 13 | [Abrir referencia](endpoints/telemetry.md) |
