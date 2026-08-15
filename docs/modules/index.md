@@ -1,12 +1,13 @@
 # Catálogo de módulos
 
 > Generado por `yarn docs:modules:sync` desde `src/modules/*/README.md` reales — no editar a
-> mano. 61 módulos, de los cuales 58 tienen entidades propias (ver
+> mano. 62 módulos, de los cuales 59 tienen entidades propias (ver
 > [`docs/reports/system-inventory.md`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
+| [`pharma_lab`](pharma_lab.md) | 10 | 13 | 10 | 30 | 11 |
 | [`community`](community.md) | 8 | 15 | 16 | 38 | 23 |
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
