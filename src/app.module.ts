@@ -30,6 +30,7 @@ import {
   verificationBypassEnvSchema,
 } from './common';
 import { SeedModule } from './common/seed/seed.module';
+import { seedBootEnvSchema } from './common/seed/seed-boot.env';
 import { IamModule } from './modules/iam/iam.module';
 import { DirectoryModule } from './modules/directory/directory.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -117,7 +118,8 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
         .concat(telemetryEnvSchema)
-        .concat(verificationBypassEnvSchema),
+        .concat(verificationBypassEnvSchema)
+        .concat(seedBootEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es
     // generoso (backstop); los endpoints sensibles (login/refresh) declaran un
