@@ -58,6 +58,56 @@ const recurso = (over: Record<string, unknown> = {}): any => ({
 });
 
 describe('SchedulingAgendaService', () => {
+  describe('listResources · nombre del profesional', () => {
+    it('resuelve el nombre de la persona detrás del recurso, en lote', async () => {
+      const d = build();
+      const fork = d.em.fork() as any;
+      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      // Los tres saltos de findPractitionerNames: perfil profesional →
+      // person_profiles → persons.
+      fork.find = mockFn()
+        .mockResolvedValueOnce([{ profileId: 'prac-1' }])
+        .mockResolvedValueOnce([{ id: 'prac-1', personId: 'per-1' }])
+        .mockResolvedValueOnce([
+          { id: 'per-1', name: 'Rosa', lastName: 'Quispe' },
+        ]);
+
+      const res = await d.service.listResources({ tenantId: TENANT } as any);
+
+      expect(res.items[0].practitionerName).toBe('Rosa Quispe');
+    });
+
+    it('si la resolución falla, la lista sigue con null y el nombre del recurso', async () => {
+      // El selector caía en cascada si la sede no resolvía; el nombre sigue el
+      // mismo criterio: quedarse sin etiqueta linda no puede tirar la agenda.
+      const d = build();
+      const fork = d.em.fork() as any;
+      d.agendaRepo.findResources.mockResolvedValue([recurso()]);
+      fork.find = mockFn().mockRejectedValue(new Error('se cayó profiles'));
+
+      const res = await d.service.listResources({ tenantId: TENANT } as any);
+
+      expect(res.items[0].practitionerName).toBeNull();
+      expect(res.items[0].name).toBe('Dra. Quispe');
+      expect(d.logger.warn).toHaveBeenCalled();
+    });
+
+    it('una sala no consulta profiles y va con null', async () => {
+      const d = build();
+      const fork = d.em.fork() as any;
+      fork.find = mockFn();
+      d.agendaRepo.findResources.mockResolvedValue([
+        recurso({ resourceRefType: 'care_spaces', name: 'Consultorio 3' }),
+      ]);
+
+      const res = await d.service.listResources({ tenantId: TENANT } as any);
+
+      expect(res.items[0].practitionerName).toBeNull();
+      // Con cero perfiles profesionales en la lista, ni siquiera se consulta.
+      expect(fork.find).not.toHaveBeenCalled();
+    });
+  });
+
   describe('listResources · dónde atiende cada recurso', () => {
     it('attaches the resolved site to each resource', async () => {
       const d = build();
