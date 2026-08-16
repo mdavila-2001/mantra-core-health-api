@@ -13,7 +13,12 @@ import { Logger, PinoLogger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
-import { installProcessGuards, installShutdownWatchdog } from './common';
+import {
+  describeBuild,
+  installProcessGuards,
+  installShutdownWatchdog,
+  loadBuildInfo,
+} from './common';
 
 /**
  * Splash de arranque. Se escribe directo a stdout, no por el logger: es un
@@ -57,6 +62,13 @@ async function bootstrap() {
   // servicios) queda enrutado a pino.
   app.useLogger(app.get(Logger));
   app.flushLogs();
+
+  // Lo primero que se dice por el logger definitivo es QUÉ artefacto arrancó.
+  // Va antes que cualquier otra cosa a propósito: si algo del arranque falla,
+  // esta línea ya quedó escrita y el diagnóstico empieza sabiendo qué código
+  // corría, en vez de tener que inspeccionar el `dist/` del contenedor.
+  const build = loadBuildInfo();
+  app.get(Logger).log({ event: 'app.build', ...build }, describeBuild(build));
 
   const logger = await app.resolve(PinoLogger);
   logger.setContext('bootstrap');

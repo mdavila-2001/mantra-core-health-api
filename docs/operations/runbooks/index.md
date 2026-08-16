@@ -15,5 +15,6 @@
 | [Consumo elevado de recursos](high-resource-usage.md) | CPU/memoria elevada en `api` o un worker |
 | [Recuperación desde backup](restore-from-backup.md) | Pérdida de datos — **procedimiento no probado, ver advertencia en el propio runbook** |
 | [Rollback de despliegue](deployment-rollback.md) | Un despliegue reciente causó una regresión |
+| [Tabla de seed vacía y arranque mudo](seed-tables-empty.md) | Falta una tabla que la cadena de seeds debía poblar y los logs no acusan nada |
 
 Ver también [operación](../maintenance.md), [observabilidad](../../observability/alerts.md).

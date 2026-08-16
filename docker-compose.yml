@@ -478,6 +478,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Se pasan desde el entorno para que el arranque pueda decir qué código
+      # corre. Vacíos quedan en "desconocido"; para llenarlos:
+      #   GIT_COMMIT=$(git rev-parse HEAD) BUILD_TIME=$(date -Iseconds) docker compose build api
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-desconocido}
+        BUILD_TIME: ${BUILD_TIME:-desconocido}
+        APP_VERSION: ${APP_VERSION:-desconocido}
     restart: always
     command: ["node", "dist/src/main.js"]
     environment:
