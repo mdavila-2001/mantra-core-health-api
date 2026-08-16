@@ -25,6 +25,7 @@ import {
   type ResourceType,
   type ExceptionType,
 } from '../dto';
+import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -266,6 +267,15 @@ export class SchedulingCatalogService {
         });
       }
 
+      // La zona de la sede, que es en la que están escritas las reglas. Sin
+      // recurso —o sin zona declarada— se cae a UTC, que es exactamente lo que
+      // hacía antes: así una agenda sin zona no cambia de comportamiento.
+      const resource = await this.catalogRepo.findResourceById(
+        tx,
+        template.resourceId,
+      );
+      const zona = resource?.timeZone ?? 'UTC';
+
       const rules = await this.catalogRepo.findRulesByTemplate(tx, templateId);
       const existing = await this.catalogRepo.findSlotsByTemplateInRange(
         tx,
@@ -285,9 +295,14 @@ export class SchedulingCatalogService {
           rule.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
         const capacity = rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY;
 
-        for (const day of this.daysMatching(from, to, rule.dayOfWeek)) {
-          const dayStart = this.atTime(day, rule.startTime);
-          const dayEnd = this.atTime(day, rule.endTime);
+        for (const day of diasLocalesQueCoinciden(
+          from,
+          to,
+          rule.dayOfWeek,
+          zona,
+        )) {
+          const dayStart = horaLocalAUtc(day, rule.startTime, zona);
+          const dayEnd = horaLocalAUtc(day, rule.endTime, zona);
 
           for (
             let cursor = dayStart;
@@ -296,6 +311,12 @@ export class SchedulingCatalogService {
           ) {
             const end = new Date(cursor.getTime() + slotMinutes * 60_000);
             if (end > dayEnd) break;
+            // El barrido de días locales se ensancha un día por lado, porque un
+            // día de la sede puede empezar antes de `from` o terminar después de
+            // `to`. Acá se recorta a lo que se pidió: sin esto, una ventana de
+            // un día en una zona al oeste de UTC materializaría cupos del día
+            // anterior.
+            if (cursor < from || end > to) continue;
 
             if (existingStarts.has(cursor.getTime())) {
               skipped += 1;
@@ -482,24 +503,6 @@ export class SchedulingCatalogService {
   }
 
   /** Días del rango que caen en el día de la semana de la regla. */
-  private daysMatching(from: Date, to: Date, dayOfWeek: number): Date[] {
-    const days: Date[] = [];
-    const cursor = new Date(from);
-    cursor.setUTCHours(0, 0, 0, 0);
-    while (cursor < to) {
-      if (cursor.getUTCDay() === dayOfWeek) days.push(new Date(cursor));
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
-    }
-    return days;
-  }
-
-  /** Combina el día con la hora `HH:MM[:SS]` de la franja, en UTC. */
-  private atTime(day: Date, time: string): Date {
-    const [hours, minutes, seconds] = time.split(':').map(Number);
-    const result = new Date(day);
-    result.setUTCHours(hours, minutes, seconds ?? 0, 0);
-    return result;
-  }
 }
 
 /**

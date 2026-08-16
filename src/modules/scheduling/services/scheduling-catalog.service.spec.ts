@@ -251,6 +251,117 @@ describe('SchedulingCatalogService', () => {
       expect(res.skipped).toBe(1);
     });
 
+    it('materialises the rule in the resource time zone, not in UTC', async () => {
+      // El defecto: una agenda de La Paz (UTC-4) que publica «08:00 a 10:00»
+      // materializaba los cupos a las 08:00 UTC, o sea 04:00 hora local, y el
+      // portal del paciente ofrecia turnos de madrugada.
+      const d = buildCatalog();
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        resourceId: RESOURCE,
+        slotMinutes: 60,
+      });
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        timeZone: 'America/La_Paz',
+      });
+      d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+        {
+          dayOfWeek: 1,
+          startTime: '08:00:00',
+          endTime: '10:00:00',
+          slotMinutes: 60,
+          capacityPerSlot: 1,
+        },
+      ]);
+      d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+      await d.service.generateSlots(
+        'tpl-1',
+        { from: '2026-06-01T00:00:00Z', to: '2026-06-03T00:00:00Z' },
+        actor,
+      );
+
+      const inicios = d.catalogRepo.createSlot.mock.calls.map(
+        ([, slot]: [unknown, { startAt: Date }]) => slot.startAt.toISOString(),
+      );
+      expect(inicios).toEqual([
+        '2026-06-01T12:00:00.000Z',
+        '2026-06-01T13:00:00.000Z',
+      ]);
+    });
+
+    it('falls back to UTC when the resource declares no time zone', async () => {
+      // Una agenda sin zona no puede cambiar de comportamiento: es lo que
+      // permite desplegar esto sin mover los cupos ya publicados.
+      const d = buildCatalog();
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        resourceId: RESOURCE,
+        slotMinutes: 60,
+      });
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+        {
+          dayOfWeek: 1,
+          startTime: '08:00:00',
+          endTime: '09:00:00',
+          slotMinutes: 60,
+          capacityPerSlot: 1,
+        },
+      ]);
+      d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+      await d.service.generateSlots(
+        'tpl-1',
+        { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+        actor,
+      );
+
+      const inicios = d.catalogRepo.createSlot.mock.calls.map(
+        ([, slot]: [unknown, { startAt: Date }]) => slot.startAt.toISOString(),
+      );
+      expect(inicios).toEqual(['2026-06-01T08:00:00.000Z']);
+    });
+
+    it('does not spill slots outside the requested window', async () => {
+      // El barrido de dias locales se ensancha un dia por lado; sin el recorte,
+      // una zona al oeste de UTC materializaria cupos del dia anterior.
+      const d = buildCatalog();
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        resourceId: RESOURCE,
+        slotMinutes: 60,
+      });
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        timeZone: 'America/La_Paz',
+      });
+      d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+        {
+          dayOfWeek: 1,
+          startTime: '08:00:00',
+          endTime: '10:00:00',
+          slotMinutes: 60,
+          capacityPerSlot: 1,
+        },
+      ]);
+      d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+      // La ventana empieza despues del primer cupo del lunes local.
+      const res = await d.service.generateSlots(
+        'tpl-1',
+        { from: '2026-06-01T12:30:00Z', to: '2026-06-03T00:00:00Z' },
+        actor,
+      );
+
+      const inicios = d.catalogRepo.createSlot.mock.calls.map(
+        ([, slot]: [unknown, { startAt: Date }]) => slot.startAt.toISOString(),
+      );
+      expect(inicios).toEqual(['2026-06-01T13:00:00.000Z']);
+      expect(res.created).toBe(1);
+    });
+
     it('rejects an inverted window', async () => {
       const d = buildCatalog();
 

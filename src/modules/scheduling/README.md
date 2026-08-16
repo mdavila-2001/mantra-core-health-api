@@ -86,34 +86,33 @@ La proyección vía `messaging.outbox_events` (disponibilidad en read models, no
 recordatorios) depende del módulo 35, aún no implementado. `dispatchReminders` mueve el estado a
 `sent` pero **no envía**: el envío real será responsabilidad de messaging.
 
-### Defecto conocido · `generateSlots` ignora la zona horaria del recurso
+### `generateSlots` respeta la zona horaria del recurso
 
-`schedulable_resources.time_zone` se declara en el modelo, se guarda, se expone en
-`GET /scheduling/resources` y se congela en el `cancellation_policy_snapshot` de cada reserva —
-pero **no se usa para materializar cupos**. `SchedulingCatalogService.atTime()` resuelve el
-`startTime` de la franja con `setUTCHours`, así que la hora de una regla se interpreta en UTC sea
-cual sea la sede.
+`schedulable_resources.time_zone` se usa para materializar cupos: las reglas de una plantilla
+declaran **hora de pared de la sede** («los lunes de 08:00 a 12:00» son las ocho de la mañana
+allí), y `scheduling-time.ts` las convierte al instante UTC que se guarda.
 
-**Consecuencia, medida el 2026-08-11 contra la base viva:** una agenda de La Paz (UTC−4) que
-publica «mañanas de 08:00 a 12:00» materializa sus cupos a las **04:00–08:00 hora local**, y el
-portal del paciente le ofrece turnos de madrugada.
+Hasta el 2026-08-15 la hora se resolvía con `setUTCHours`, así que se interpretaba en UTC sea cual
+fuera la sede: una agenda de La Paz (UTC−4) que publicaba «08:00 a 12:00» materializaba sus cupos a
+las **04:00–08:00 hora local** y el portal ofrecía turnos de madrugada.
 
-```sql
--- los 907 cupos futuros del seeder, en hora de la sede
-select distinct to_char(start_at at time zone 'America/La_Paz','HH24:MI')
-  from scheduling.bookable_slots where start_at > now() order by 1;
---  04:00 04:30 05:00 05:30 06:00 06:30 07:00 07:30
-```
+Tres cosas que el arreglo tuvo que resolver, y que conviene no deshacer:
 
-**Por qué no se arregló acá.** No es una línea. Además de la hora hay que evaluar el
-**día de la semana** en la zona de la sede —si no, una regla de lunes puede materializarse en
-domingo local para zonas cuyo desfase cruza la medianoche—, contemplar el horario de verano
-(Bolivia no lo tiene, otras zonas del alcance sí) y actualizar los specs de
-`scheduling-catalog.service.spec.ts`, que hoy fijan el comportamiento UTC. Cambiar la semántica de
-generación de cupos exige además regenerar los cupos ya materializados en cada entorno.
+- **El día de la semana también es local.** Una regla de lunes se evalúa en el calendario de la
+  sede; si no, para zonas cuyo desfase cruza la medianoche puede caer en domingo local. Por eso
+  `diasLocalesQueCoinciden` recorre el calendario de la zona y no los días UTC.
+- **El horario de verano se mide, no se supone.** La conversión usa `Intl` —Node trae la base IANA
+  completa— en vez de sumar un desplazamiento fijo, que se rompería dos veces al año en las zonas
+  del alcance que sí lo tienen. La segunda pasada de `horaLocalAUtc` existe para los dos días del
+  año en que el desplazamiento del instante supuesto no coincide con el del corregido.
+- **Sin zona declarada se cae a UTC**, que es exactamente lo que hacía antes. Así una agenda sin
+  `time_zone` no cambia de comportamiento y los cupos ya publicados no se mueven.
 
-**Mientras tanto**, `tools/redesa/seed-dev-data.mjs` declara sus franjas ya convertidas
-(`horaUtcDeLocal`) para que los datos de desarrollo se vean como se verían si el generador fuera
-correcto. Es una compensación deliberada y documentada en el propio seeder: cuando `generateSlots`
-lea `time_zone`, esa función se borra y las franjas vuelven a declararse en hora local.
+Como el barrido de días locales se ensancha un día por lado, los cupos se recortan a la ventana
+pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día anterior.
+
+**Pendiente relacionado:** `tools/redesa/seed-dev-data.mjs` declara sus franjas ya convertidas con
+`horaUtcDeLocal`, una compensación deliberada de cuando el generador era incorrecto. Ahora que
+`generateSlots` lee `time_zone`, esa función sobra y las franjas deberían volver a declararse en
+hora local — vive en `salud-db`/`tools`, fuera del alcance de este cambio.
 
