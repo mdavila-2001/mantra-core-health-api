@@ -129,7 +129,12 @@ export class SchedulingController {
 
   /** UC-41-01. */
   @Post('resources')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Dar de alta un recurso agendable' })
   createResource(
@@ -141,7 +146,12 @@ export class SchedulingController {
 
   /** UC-41-01. */
   @Post('booking-policies')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Definir una política de reserva' })
   createPolicy(
@@ -153,7 +163,12 @@ export class SchedulingController {
 
   /** UC-41-02. */
   @Post('resources/:id/templates')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar una plantilla de agenda con sus franjas' })
   createTemplate(
@@ -166,7 +181,12 @@ export class SchedulingController {
 
   /** UC-41-03. */
   @Post('templates/:id/generate-slots')
-  @Roles('SCHEDULING_ADMIN')
+  // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
+  // recurso apunte a SU perfil (`assertPuedeCrearRecurso` /
+  // `assertRecursoDelActor`) y que el tenant sea uno de los suyos. Sin esta
+  // apertura, un profesional recién registrado no tenía forma de volverse
+  // reservable: el asistente de alta de agenda moría con 403 en el primer paso.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Materializar los slots de la plantilla en una ventana',

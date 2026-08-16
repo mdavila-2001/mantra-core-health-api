@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { ForbiddenException } from '@nestjs/common';
 import { SchedulingCatalogService } from './scheduling-catalog.service';
 import {
   CONCEPTS,
@@ -74,7 +75,7 @@ describe('SchedulingCatalogService', () => {
 
       await d.service.createResource(
         { ...base, resourceRefType: 'practitioner_profiles' } as never,
-        { id: 'u-1' } as never,
+        actor as never,
       );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
@@ -91,7 +92,7 @@ describe('SchedulingCatalogService', () => {
 
       await d.service.createResource(
         { ...base, resourceRefType: 'health_practitioner_profiles' } as never,
-        { id: 'u-1' } as never,
+        actor as never,
       );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
@@ -113,13 +114,185 @@ describe('SchedulingCatalogService', () => {
           resourceType: 'ROOM',
           resourceRefType: 'care_spaces',
         } as never,
-        { id: 'u-1' } as never,
+        actor as never,
       );
 
       expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ resourceRefType: 'care_spaces' }),
       );
+    });
+  });
+
+  describe('autoservicio del profesional', () => {
+    const HPID = 'hp-propio';
+    const profesional = {
+      id: 'user-pract',
+      roles: ['USER', 'PRACTITIONER'],
+      practitionerProfileId: HPID,
+      tenantIds: [TENANT],
+    };
+    const dtoPropio = {
+      tenantId: TENANT,
+      resourceType: 'PRACTITIONER' as const,
+      resourceRefType: 'health_practitioner_profiles',
+      resourceRefId: HPID,
+      name: 'Agenda propia',
+    };
+
+    it('un profesional publica SU propio recurso', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(dtoPropio as never, profesional as never);
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ resourceRefId: HPID }),
+      );
+    });
+
+    it('acepta el alias practitioner_profiles tambien en el guard', async () => {
+      // El guard canonicaliza antes de comparar: sin eso, el mismo payload que
+      // el contrato documenta con el alias daria 403 solo por el nombre.
+      const d = buildCatalog();
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(
+        { ...dtoPropio, resourceRefType: 'practitioner_profiles' } as never,
+        profesional as never,
+      );
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalled();
+    });
+
+    it('rechaza publicar el recurso de OTRO profesional', async () => {
+      const d = buildCatalog();
+
+      await expect(
+        d.service.createResource(
+          { ...dtoPropio, resourceRefId: 'hp-ajeno' } as never,
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.catalogRepo.createResource).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un recurso que no sea de tipo PRACTITIONER', async () => {
+      // Un profesional no da de alta salas ni equipos: eso sigue siendo del
+      // administrador de agenda.
+      const d = buildCatalog();
+
+      await expect(
+        d.service.createResource(
+          { ...dtoPropio, resourceType: 'ROOM' } as never,
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('rechaza publicar en un tenant del que no es miembro', async () => {
+      // GET /scheduling/resources filtra por tenant: un recurso creado en un
+      // tenant ajeno existiria pero jamas se listaria — una forma silenciosa
+      // de no existir. Mejor negarlo de entrada.
+      const d = buildCatalog();
+
+      await expect(
+        d.service.createResource(
+          { ...dtoPropio, tenantId: 'otro-tenant' } as never,
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('rechaza a quien no tiene perfil profesional en el token', async () => {
+      const d = buildCatalog();
+
+      await expect(
+        d.service.createResource(
+          dtoPropio as never,
+          {
+            id: 'user-pac',
+            roles: ['USER', 'PATIENT'],
+            tenantIds: [TENANT],
+          } as never,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('una plantilla sobre el recurso propio pasa; sobre uno ajeno, 403', async () => {
+      const d = buildCatalog();
+      const dto = {
+        name: 'Semana tipo',
+        slotMinutes: 30,
+        rules: [{ dayOfWeek: 1, startTime: '08:00:00', endTime: '12:00:00' }],
+      };
+      d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+      d.catalogRepo.createRule.mockReturnValue({ id: 'rule-1' });
+
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        resourceRefType: 'health_practitioner_profiles',
+        resourceRefId: HPID,
+      });
+      await d.service.createTemplate(
+        RESOURCE,
+        dto as never,
+        profesional as never,
+      );
+      expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
+
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        resourceRefType: 'health_practitioner_profiles',
+        resourceRefId: 'hp-ajeno',
+      });
+      await expect(
+        d.service.createTemplate(RESOURCE, dto as never, profesional as never),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('generar cupos exige que la agenda sea suya', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        resourceId: RESOURCE,
+        slotMinutes: 30,
+      });
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        resourceRefType: 'health_practitioner_profiles',
+        resourceRefId: 'hp-ajeno',
+      });
+      d.catalogRepo.findRulesByTemplate.mockResolvedValue([]);
+      d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+      await expect(
+        d.service.generateSlots(
+          'tpl-1',
+          { from: '2026-06-01T00:00:00Z', to: '2026-06-02T00:00:00Z' },
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('una politica en su tenant pasa; en uno ajeno, 403', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findPolicyByCode.mockResolvedValue(null);
+      d.catalogRepo.createPolicy.mockReturnValue({ id: 'pol-1' });
+
+      await d.service.createPolicy(
+        { tenantId: TENANT, code: 'BASE', name: 'Base' } as never,
+        profesional as never,
+      );
+      expect(d.catalogRepo.createPolicy).toHaveBeenCalled();
+
+      await expect(
+        d.service.createPolicy(
+          { tenantId: 'otro-tenant', code: 'BASE', name: 'Base' } as never,
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 

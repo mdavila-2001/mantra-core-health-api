@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -26,6 +26,28 @@ import {
   type ExceptionType,
 } from '../dto';
 import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
+
+/**
+ * Roles que administran el catálogo de agendas de terceros por oficio.
+ *
+ * Un `PRACTITIONER` NO está acá a propósito: puede publicar y operar **su
+ * propia** agenda —eso decide `esSuPerfil`—, nunca la de otro. Antes ni eso:
+ * toda la cadena exigía `SCHEDULING_ADMIN`, así que un profesional recién
+ * registrado no tenía forma de volverse reservable — el asistente de alta de
+ * agenda moría con 403 en el primer paso, y la única vía era pedirle a un
+ * administrador que corriera las cuatro llamadas a mano (o el seeder de demo,
+ * que es exactamente lo que hacía que "solo aparezcan los doctores de prueba").
+ */
+const ROLES_QUE_ADMINISTRAN_CATALOGO: readonly string[] = ['SCHEDULING_ADMIN'];
+
+/**
+ * Mismas dos formas que acepta `scheduling-bookings.service.ts`: la tabla real
+ * y el alias con el que llegaron los recursos sembrados.
+ */
+const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+  'practitioner_profiles',
+  'health_practitioner_profiles',
+];
 
 const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,
@@ -70,6 +92,7 @@ export class SchedulingCatalogService {
     dto: CreateResourceDto,
     actor: AuthenticatedUser,
   ): Promise<ResourceResponseDto> {
+    this.assertPuedeCrearRecurso(dto, actor);
     this.logger.info(
       { operation: 'scheduling.resource.create', tenantId: dto.tenantId },
       'Creating schedulable resource',
@@ -110,6 +133,8 @@ export class SchedulingCatalogService {
       },
       'Creating booking policy',
     );
+
+    this.assertTenantDelActor(dto.tenantId, actor);
 
     const duplicate = await this.catalogRepo.findPolicyByCode(
       this.em,
@@ -179,6 +204,7 @@ export class SchedulingCatalogService {
           resourceId,
         });
       }
+      this.assertRecursoDelActor(resource, actor);
 
       const template = this.catalogRepo.createTemplate(tx, {
         resourceId,
@@ -275,6 +301,7 @@ export class SchedulingCatalogService {
         template.resourceId,
       );
       const zona = resource?.timeZone ?? 'UTC';
+      if (resource) this.assertRecursoDelActor(resource, actor);
 
       const rules = await this.catalogRepo.findRulesByTemplate(tx, templateId);
       const existing = await this.catalogRepo.findSlotsByTemplateInRange(
@@ -503,6 +530,90 @@ export class SchedulingCatalogService {
   }
 
   /** Días del rango que caen en el día de la semana de la regla. */
+  /** Si el actor administra agendas ajenas por oficio. */
+  private esAdministradorDeCatalogo(actor: AuthenticatedUser): boolean {
+    return actor.roles.some((rol) =>
+      ROLES_QUE_ADMINISTRAN_CATALOGO.includes(rol),
+    );
+  }
+
+  /**
+   * Autoriza el alta de un recurso: administradores, cualquiera; un profesional,
+   * solo el suyo.
+   *
+   * Las cuatro condiciones del camino de autoservicio son deliberadas: el tipo
+   * tiene que ser `PRACTITIONER` (un profesional no da de alta salas ni
+   * equipos), la referencia tiene que apuntar a un perfil profesional, ese
+   * perfil tiene que ser el del token (`hpid` — identificación, no permiso), y
+   * el tenant tiene que ser uno de los suyos, porque `GET /scheduling/resources`
+   * filtra por tenant y un recurso creado en otro sería invisible para siempre.
+   */
+  private assertPuedeCrearRecurso(
+    dto: CreateResourceDto,
+    actor: AuthenticatedUser,
+  ): void {
+    if (this.esAdministradorDeCatalogo(actor)) return;
+
+    const esSuPerfil =
+      dto.resourceType === 'PRACTITIONER' &&
+      TABLAS_DE_PERFIL_PROFESIONAL.includes(
+        canonicalRefType(dto.resourceRefType),
+      ) &&
+      actor.practitionerProfileId !== undefined &&
+      dto.resourceRefId === actor.practitionerProfileId;
+    if (!esSuPerfil) {
+      throw new ForbiddenException(
+        'Un profesional solo puede publicar su propia agenda: el recurso debe ' +
+          'apuntar a su perfil profesional.',
+      );
+    }
+    this.assertTenantDelActor(dto.tenantId, actor);
+  }
+
+  /**
+   * Autoriza operar un recurso ya existente (plantillas, generación de cupos).
+   *
+   * Mismo criterio que `scheduling-bookings.service.ts` para «esta agenda es
+   * tuya»: la referencia del recurso apunta al perfil del token, aceptando las
+   * dos formas de `resourceRefType` que conviven en los datos.
+   */
+  private assertRecursoDelActor(
+    resource: { resourceRefType: string; resourceRefId: string },
+    actor: AuthenticatedUser,
+  ): void {
+    if (this.esAdministradorDeCatalogo(actor)) return;
+
+    const esSuAgenda =
+      actor.practitionerProfileId !== undefined &&
+      resource.resourceRefId === actor.practitionerProfileId &&
+      TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType);
+    if (!esSuAgenda) {
+      throw new ForbiddenException(
+        'Esta agenda es de otro profesional: solo la administra quien atiende ' +
+          'en ella.',
+      );
+    }
+  }
+
+  /**
+   * El tenant del payload tiene que ser uno del actor.
+   *
+   * Para un administrador no aplica (opera cualquier tenant); para el
+   * autoservicio evita dos males: publicar en un tenant ajeno, y publicarse en
+   * uno del que no es miembro — donde su agenda existiría pero jamás se
+   * listaría, que es una forma silenciosa de no existir.
+   */
+  private assertTenantDelActor(
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): void {
+    if (this.esAdministradorDeCatalogo(actor)) return;
+    if (!actor.tenantIds?.includes(tenantId)) {
+      throw new ForbiddenException(
+        'El tenant indicado no es uno de los del actor.',
+      );
+    }
+  }
 }
 
 /**
