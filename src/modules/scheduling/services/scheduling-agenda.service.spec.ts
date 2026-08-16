@@ -65,11 +65,13 @@ describe('SchedulingAgendaService', () => {
       d.agendaRepo.findResources.mockResolvedValue([recurso()]);
       // Los tres saltos de findPractitionerNames: perfil profesional →
       // person_profiles → persons.
+      // Los dos saltos de findPractitionerNames: el perfil confirma que el id
+      // es de un profesional, y persons (mismo id, por FK directa de
+      // profile_id) trae el nombre.
       fork.find = mockFn()
         .mockResolvedValueOnce([{ profileId: 'prac-1' }])
-        .mockResolvedValueOnce([{ id: 'prac-1', personId: 'per-1' }])
         .mockResolvedValueOnce([
-          { id: 'per-1', name: 'Rosa', lastName: 'Quispe' },
+          { id: 'prac-1', name: 'Rosa', lastName: 'Quispe' },
         ]);
 
       const res = await d.service.listResources({ tenantId: TENANT } as any);
