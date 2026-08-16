@@ -135,6 +135,18 @@ x-app-env: &app-env
   # La verificación de fidelidad solo compara y registra advertencias; nunca
   # lanza ni aborta el arranque (`SchemaFidelityService.verifyAndReport`).
   ORM_VERIFY_FIDELITY: ${ORM_VERIFY_FIDELITY:-true}
+  # Bypass de verificación DEV/TEST. Tiene que estar declarado ACÁ, no solo en
+  # el `.env`: este ancla es una enumeración explícita y no hay `env_file:` en
+  # ningún servicio, así que una variable que no figure en la lista sencillamente
+  # no existe dentro del contenedor (ver la advertencia de más abajo sobre qué
+  # hace y qué no hace el `.env` con Compose). Faltaba, y por eso el bypass era
+  # inerte en Docker: la Guía de profesionales seguía filtrando por verificado
+  # aunque el `.env` dijera lo contrario. El esquema Joi de la aplicación aborta
+  # el arranque si esto llega en `true` con NODE_ENV=production.
+  DEV_VERIFICATION_BYPASS: ${DEV_VERIFICATION_BYPASS:-false}
+  # Mismo motivo: sin esta línea el interruptor de siembra no llega al
+  # contenedor y no habría forma de apagarla en el stack dockerizado.
+  SEED_ON_BOOT: ${SEED_ON_BOOT:-true}
   # Los 21 workers llaman la API por el nombre del servicio, no localhost.
   WORKER_API_BASE_URL: http://api:3000
   WORKER_HTTP_TIMEOUT_MS: ${WORKER_HTTP_TIMEOUT_MS:-30000}
