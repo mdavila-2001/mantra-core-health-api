@@ -7,6 +7,7 @@ import { CONCEPTS, PreconditionFailedException } from '../../../common';
 // que no cierra ciclo.
 import { PractitionerSitesService } from '../../practice/services';
 import { SchedulingAgendaRepository } from '../repositories';
+import { findPractitionerNames } from '../../profiles/read/practitioner-names';
 import type { BookableSlots, SchedulableResources } from '../entities';
 import {
   AGENDA_MAX_LIMIT,
@@ -43,6 +44,15 @@ const MAX_WINDOW_MS = MAX_WINDOW_DAYS * 24 * 60 * 60 * 1000;
  * no hay forma de obtener el `slotId` que pide `POST /scheduling/slots/{id}/holds`,
  * de modo que reservar una cita desde el portal era, literalmente, imposible.
  */
+/**
+ * Las dos formas de `resourceRefType` que apuntan a un perfil profesional,
+ * las mismas que aceptan bookings y el catálogo.
+ */
+const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+  'practitioner_profiles',
+  'health_practitioner_profiles',
+];
+
 @Injectable()
 export class SchedulingAgendaService {
   /**
@@ -99,8 +109,33 @@ export class SchedulingAgendaService {
       );
     }
 
+    // El nombre del profesional se resuelve en lote, por la misma razón que la
+    // sede: el selector del paciente pinta todos los recursos juntos. Si la
+    // resolución falla, la lista sigue con `practitionerName: null` — el
+    // cliente cae al nombre del recurso, que es lo que mostraba siempre.
+    let nombres = new Map<string, string>();
+    try {
+      nombres = await findPractitionerNames(
+        em,
+        resources
+          .filter((resource) =>
+            TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType),
+          )
+          .map((resource) => resource.resourceRefId),
+      );
+    } catch (error) {
+      this.logger.warn(
+        { operation: 'scheduling.resources.list', err: error },
+        'No se pudo resolver el nombre de los profesionales; la agenda va con el nombre del recurso',
+      );
+    }
+
     const items = resources.map((resource) =>
-      this.toResourceItem(resource, sites.get(resource.resourceRefId) ?? null),
+      this.toResourceItem(
+        resource,
+        sites.get(resource.resourceRefId) ?? null,
+        nombres.get(resource.resourceRefId) ?? null,
+      ),
     );
     return { items, count: items.length };
   }
@@ -160,9 +195,11 @@ export class SchedulingAgendaService {
   private toResourceItem(
     resource: SchedulableResources,
     site: ResourceSiteDto | null,
+    practitionerName: string | null,
   ): ResourceListItemDto {
     return {
       site,
+      practitionerName,
       id: resource.id,
       name: resource.name,
       resourceTypeConceptId: resource.resourceTypeConceptId,
