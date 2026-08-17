@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -302,7 +302,18 @@ export class ScheduleRuleDto {
   capacityPerSlot?: number;
 }
 
-/** Cuerpo de `POST /scheduling/resources/{id}/templates` (UC-41-02). */
+/**
+ * Cuerpo de `POST /scheduling/resources/{id}/templates` (UC-41-02).
+ *
+ * El nombre de esquema va explícito porque `surveys` declara otra clase
+ * `CreateTemplateDto`: sin desambiguar, ambas colapsan en un único
+ * `#/components/schemas/CreateTemplateDto` y el contrato publicaba la forma de
+ * los cuestionarios (`title`, `ownerPractitionerId`…) para la publicación de
+ * agenda de un profesional. Cualquier cliente generado desde el contrato —la
+ * colección de Postman incluida— mandaba un cuerpo que este endpoint rechaza.
+ * Mismo remedio que `PharmacyCreateSiteDto` y compañía.
+ */
+@ApiSchema({ name: 'SchedulingCreateTemplateDto' })
 export class CreateTemplateDto {
   /**
    * Valor de name mantenido por la instancia.
