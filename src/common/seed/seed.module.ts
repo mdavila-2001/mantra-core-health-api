@@ -47,6 +47,7 @@ import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.servi
 import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
+import { VademecumSeedService } from './vademecum-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
@@ -123,6 +124,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     GlossarySeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
+    VademecumSeedService,
     IdentityVerificationSeedService,
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
@@ -137,6 +139,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     GlossarySeedService,
     MessagingSeedService,
     AudioAssetsSeedService,
+    VademecumSeedService,
     IdentityVerificationSeedService,
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
