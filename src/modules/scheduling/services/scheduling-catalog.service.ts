@@ -37,8 +37,18 @@ import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
  * agenda moría con 403 en el primer paso, y la única vía era pedirle a un
  * administrador que corriera las cuatro llamadas a mano (o el seeder de demo,
  * que es exactamente lo que hacía que "solo aparezcan los doctores de prueba").
+ *
+ * `SUPERADMIN` entra porque el `RolesGuard` lo trata como comodín: excluirlo
+ * acá le negaría en el servicio lo que el guard ya le concedió — mismo criterio
+ * que `ROLES_DE_AGENDA` en `scheduling-bookings.service.ts`. Sin él, el admin
+ * de arranque (sin perfil profesional en el token) caía al camino de
+ * autoservicio, que exige `hpid`, y recibía 403 en toda la cadena
+ * recurso → políticas → plantillas → cupos.
  */
-const ROLES_QUE_ADMINISTRAN_CATALOGO: readonly string[] = ['SCHEDULING_ADMIN'];
+const ROLES_QUE_ADMINISTRAN_CATALOGO: readonly string[] = [
+  'SCHEDULING_ADMIN',
+  'SUPERADMIN',
+];
 
 /**
  * Mismas dos formas que acepta `scheduling-bookings.service.ts`: la tabla real
