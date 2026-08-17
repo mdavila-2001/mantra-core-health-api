@@ -106,3 +106,13 @@ dist-docs/
 # versionado en `openapi/`. El contrato bueno lo produce `yarn docs:openapi:generate`.
 docs/endpoints/
 .yarn/install-state.gz
+
+# Documentos de coordinación de carriles: material de proceso de cada sesión de
+# trabajo, no del producto. Reparten el trabajo entre quienes tocan el árbol a la
+# vez y dejan de significar algo cuando el carril cierra. Versionarlos ensucia la
+# raíz del repositorio y provoca conflictos en cada merge, siempre en el mismo
+# archivo y siempre sin nada que decidir.
+/CARRIL-*.md
+/CARRILES-*.md
+/CARRIL_*.md
+/COORDINACION-AGENTES.md
