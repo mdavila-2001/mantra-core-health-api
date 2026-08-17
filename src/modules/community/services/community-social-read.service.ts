@@ -20,6 +20,10 @@ import {
 } from '../repositories';
 import { COMM, SOCIAL_OBJECT_CONCEPT_BY_CODE } from '../community.concepts';
 import { CommunityVisibilityService } from './community-visibility.service';
+import {
+  CommunityEngagementService,
+  type PostEngagement,
+} from './community-engagement.service';
 import type {
   PublicProfileDetailDto,
   PostPageDto,
@@ -63,6 +67,7 @@ export class CommunitySocialReadService {
    * @param blocksRepo - Acceso a `community.user_blocks`.
    * @param prestigeRepo - Acceso a `community.prestige_scores`.
    * @param visibility - Reglas transversales de visibilidad y propiedad.
+   * @param engagement - Recuento de reacciones y comentarios de la página.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -76,6 +81,7 @@ export class CommunitySocialReadService {
     private readonly blocksRepo: BlocksRepository,
     private readonly prestigeRepo: CommunityPrestigeRepository,
     private readonly visibility: CommunityVisibilityService,
+    private readonly engagement: CommunityEngagementService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunitySocialReadService.name);
@@ -194,14 +200,23 @@ export class CommunitySocialReadService {
     const hasMore = rows.length > options.limit;
     const page = hasMore ? rows.slice(0, options.limit) : rows;
 
+    const actorProfileId = await this.visibility.resolveActorProfileId(
+      em,
+      actor,
+      options.actorProfileId,
+    );
     const visible = await this.visibility.filterVisiblePosts(
       em,
       page,
-      await this.visibility.resolveActorProfileId(
-        em,
-        actor,
-        options.actorProfileId,
-      ),
+      actorProfileId,
+    );
+
+    // El compromiso se resuelve sobre lo **visible**: contar reacciones de una
+    // publicación que este lector no puede ver revelaría que existe.
+    const engagement = await this.engagement.ofPosts(
+      em,
+      visible.map((post) => post.id),
+      actorProfileId,
     );
 
     // El cursor sale de la última fila **leída**, no de la última visible: si
@@ -209,7 +224,9 @@ export class CommunitySocialReadService {
     // cada página y el listado no avanzaría.
     const last = page.at(-1);
     return {
-      items: visible.map((post) => this.toPostListItem(post)),
+      items: visible.map((post) =>
+        this.toPostListItem(post, engagement.get(post.id)),
+      ),
       count: visible.length,
       limit: options.limit,
       nextCursor:
@@ -256,14 +273,15 @@ export class CommunitySocialReadService {
         postId,
       });
 
-    const [media, hashtags, mentions] = await Promise.all([
+    const [media, hashtags, mentions, engagement] = await Promise.all([
       this.postsRepo.listMedia(em, post.id),
       this.postsRepo.listHashtags(em, post.id),
       this.postsRepo.listMentions(em, post.id),
+      this.engagement.ofPosts(em, [post.id], actorProfileId),
     ]);
 
     return {
-      ...this.toPostListItem(post),
+      ...this.toPostListItem(post, engagement.get(post.id)),
       media: media.map((item) => ({
         id: item.id,
         fileId: item.fileId,
@@ -575,7 +593,10 @@ export class CommunitySocialReadService {
   }
 
   /** Proyecta la entidad de publicación a la fila del muro. */
-  private toPostListItem(post: SocialPosts): PostListItemDto {
+  private toPostListItem(
+    post: SocialPosts,
+    engagement?: PostEngagement,
+  ): PostListItemDto {
     return {
       id: post.id,
       authorPublicProfileId: post.authorPublicProfileId,
@@ -585,6 +606,9 @@ export class CommunitySocialReadService {
       commentsEnabled: post.commentsEnabled ?? null,
       publishedAt: post.publishedAt ?? null,
       editedAt: post.editedAt ?? null,
+      reactions: (engagement ?? CommunityEngagementService.vacio()).reactions,
+      commentCount: (engagement ?? CommunityEngagementService.vacio())
+        .commentCount,
     };
   }
 

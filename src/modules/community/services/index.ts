@@ -7,6 +7,7 @@ export * from './community-polls.service';
 export * from './community-feed.service';
 export * from './public-profile-projection.service';
 export * from './community-visibility.service';
+export * from './community-engagement.service';
 export * from './community-social-read.service';
 export * from './community-timeline-read.service';
 export * from './community-messaging-read.service';

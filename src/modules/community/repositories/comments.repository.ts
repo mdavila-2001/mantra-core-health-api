@@ -128,6 +128,49 @@ export class CommentsRepository {
   }
 
   /**
+   * Cuántos comentarios vigentes tiene cada contenido de una página.
+   *
+   * Cuenta **el hilo completo**, raíces y respuestas: para quien mira el muro,
+   * «8 comentarios» es la conversación entera, no sólo las intervenciones de
+   * primer nivel.
+   *
+   * Igual que el recuento de reacciones, se calcula al leer y agrupado:
+   * `community.social_posts` no tiene columna de contador y agregarle una para
+   * comodidad de esta lectura sería agregar esquema por comodidad.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param commentableTypeConceptId - Tipo del contenido comentado.
+   * @param commentableRefIds - Ids de los contenidos de la página.
+   * @param activeStatusConceptId - Estado que cuenta como comentario vigente.
+   * @returns Pares contenido → cantidad, sólo de los que tienen alguno.
+   */
+  async countByTargets(
+    em: EntityManager,
+    commentableTypeConceptId: string,
+    commentableRefIds: string[],
+    activeStatusConceptId: string,
+  ): Promise<{ commentableRefId: string; count: number }[]> {
+    if (commentableRefIds.length === 0) return [];
+    const rows = await em
+      .getConnection()
+      .execute<Array<{ commentable_ref_id: string; count: number }>>(
+        `select commentable_ref_id, count(*)::int as count
+           from community.comments
+          where commentable_type_concept_id=?
+            and commentable_ref_id = any(?)
+            and status_concept_id=?
+          group by commentable_ref_id`,
+        [commentableTypeConceptId, commentableRefIds, activeStatusConceptId],
+        'all',
+      );
+
+    return rows.map((row) => ({
+      commentableRefId: row.commentable_ref_id,
+      count: row.count,
+    }));
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

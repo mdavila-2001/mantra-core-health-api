@@ -23,6 +23,7 @@ import {
   PublicProfileProjectionService,
   CommunityRatingsService,
   CommunityVisibilityService,
+  CommunityEngagementService,
   CommunitySocialReadService,
   CommunityTimelineReadService,
   CommunityMessagingReadService,
@@ -103,6 +104,7 @@ import {
     CommunityRatingsService,
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
+    CommunityEngagementService,
     CommunitySocialReadService,
     CommunityTimelineReadService,
     CommunityMessagingReadService,

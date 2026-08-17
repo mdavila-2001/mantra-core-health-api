@@ -93,6 +93,76 @@ export class ReactionsRepository {
   }
 
   /**
+   * Lo mismo que {@link summarizeByTarget} pero para toda una página.
+   *
+   * **Por qué existe.** `community.social_posts` no tiene columna de contador
+   * —y agregarle una para comodidad de esta lectura sería agregar esquema por
+   * comodidad—, así que el recuento se calcula al leer. Calculado publicación
+   * por publicación, un muro de cincuenta costaría cincuenta consultas; agrupado
+   * por `reactable_ref_id`, cuesta una.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param reactableTypeConceptId - Tipo del contenido reaccionado.
+   * @param reactableRefIds - Ids de los contenidos de la página.
+   * @returns Tripletas contenido → tipo de reacción → cantidad.
+   */
+  async summarizeByTargets(
+    em: EntityManager,
+    reactableTypeConceptId: string,
+    reactableRefIds: string[],
+  ): Promise<
+    { reactableRefId: string; reactionTypeConceptId: string; count: number }[]
+  > {
+    if (reactableRefIds.length === 0) return [];
+    const rows = await em.getConnection().execute<
+      Array<{
+        reactable_ref_id: string;
+        reaction_type_concept_id: string;
+        count: number;
+      }>
+    >(
+      `select reactable_ref_id, reaction_type_concept_id, count(*)::int as count
+           from community.reactions
+          where reactable_type_concept_id=? and reactable_ref_id = any(?)
+          group by reactable_ref_id, reaction_type_concept_id`,
+      [reactableTypeConceptId, reactableRefIds],
+      'all',
+    );
+
+    return rows.map((row) => ({
+      reactableRefId: row.reactable_ref_id,
+      reactionTypeConceptId: row.reaction_type_concept_id,
+      count: row.count,
+    }));
+  }
+
+  /**
+   * Las reacciones del propio lector sobre los contenidos de una página.
+   *
+   * Es lo que permite pintar un botón como activo tras recargar: sin esto, el
+   * estado propio sólo existía mientras durara el gesto en la pantalla.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param actorProfileId - Perfil del lector.
+   * @param reactableTypeConceptId - Tipo del contenido reaccionado.
+   * @param reactableRefIds - Ids de los contenidos de la página.
+   * @returns Las reacciones propias que existan, una por contenido a lo sumo.
+   */
+  listByActorTargets(
+    em: EntityManager,
+    actorProfileId: string,
+    reactableTypeConceptId: string,
+    reactableRefIds: string[],
+  ): Promise<Reactions[]> {
+    if (reactableRefIds.length === 0) return Promise.resolve([]);
+    return em.find(Reactions, {
+      actorProfileId,
+      reactableTypeConceptId,
+      reactableRefId: { $in: reactableRefIds },
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
