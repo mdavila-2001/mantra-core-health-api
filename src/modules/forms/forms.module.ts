@@ -14,6 +14,7 @@ import {
   FormsAssignmentsService,
   FormsInstancesService,
   FormsValuesService,
+  FormsReadService,
 } from './services';
 import {
   DefinitionSetsRepository,
@@ -53,6 +54,7 @@ import {
     FormsAssignmentsService,
     FormsInstancesService,
     FormsValuesService,
+    FormsReadService,
   ],
 })
 export class FormsModule {}

@@ -225,6 +225,34 @@ export class FieldValuesRepository {
   }
 
   /**
+   * Valores vigentes de una instancia: todos menos los reemplazados por una
+   * corrección. El valor nuevo de un supersede convive con el viejo en la misma
+   * tabla; la lectura muestra el vigente y deja el historial para la auditoría.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param formInstanceId - Identificador de form instance.
+   * @param supersededStatusConceptId - Concepto del estado reemplazado, a excluir.
+   * @returns Valores vigentes en orden de captura.
+   */
+  findCurrentByInstance(
+    em: EntityManager,
+    formInstanceId: string,
+    supersededStatusConceptId: string,
+  ): Promise<FieldValues[]> {
+    return em.find(
+      FieldValues,
+      {
+        formInstanceId,
+        $or: [
+          { valueStatusConceptId: null },
+          { valueStatusConceptId: { $ne: supersededStatusConceptId } },
+        ],
+      },
+      { orderBy: { ordinal: 'ASC', createdAt: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

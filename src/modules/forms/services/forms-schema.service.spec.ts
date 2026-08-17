@@ -36,7 +36,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new FormsSchemaService(
     em as any,
-    setsRepo,
+    setsRepo as any,
     migrationsRepo,
     logger as any,
   );

@@ -26,11 +26,37 @@ describe('FormsDefinitionSetsController', () => {
       publishVersion: mockFn(),
       runMigration: mockFn(),
     };
+    const readService = {
+      listDefinitionSets: mockFn(),
+      getDefinitionSet: mockFn(),
+    };
     return {
-      controller: new FormsDefinitionSetsController(schemaService as any),
+      controller: new FormsDefinitionSetsController(
+        schemaService as any,
+        readService as any,
+      ),
       schemaService,
+      readService,
     };
   }
+
+  it('delegates listDefinitionSets with the default limit', async () => {
+    const d = build();
+    await d.controller.listDefinitionSets(undefined);
+    expect(d.readService.listDefinitionSets).toHaveBeenCalledWith(
+      undefined,
+      50,
+    );
+  });
+
+  it('delegates getDefinitionSet', async () => {
+    const d = build();
+    await d.controller.getDefinitionSet('set1');
+    expect(d.readService.getDefinitionSet).toHaveBeenCalledWith(
+      'set1',
+      undefined,
+    );
+  });
 
   it('delegates createDefinitionSet (UC-09-01)', async () => {
     const d = build();
@@ -127,16 +153,40 @@ describe('FormsFieldsController', () => {
 });
 
 describe('FormsAssignmentsController', () => {
-  it('delegates createAssignment (UC-09-06)', async () => {
+  /**
+   * Construye el sistema bajo prueba con dependencias controladas.
+   * @returns Resultado de build.
+   */
+  function build() {
     const assignmentsService = { createAssignment: mockFn() };
-    const controller = new FormsAssignmentsController(
-      assignmentsService as any,
-    );
+    const readService = { listAssignments: mockFn() };
+    return {
+      controller: new FormsAssignmentsController(
+        assignmentsService as any,
+        readService as any,
+      ),
+      assignmentsService,
+      readService,
+    };
+  }
+
+  it('delegates createAssignment (UC-09-06)', async () => {
+    const d = build();
     const dto = { fieldId: 'f1', targetResourceConceptId: 'rt' };
-    await controller.createAssignment(dto, actor);
-    expect(assignmentsService.createAssignment).toHaveBeenCalledWith(
+    await d.controller.createAssignment(dto, actor);
+    expect(d.assignmentsService.createAssignment).toHaveBeenCalledWith(
       dto,
       actor,
+    );
+  });
+
+  it('delegates listAssignments with its filters and the default limit', async () => {
+    const d = build();
+    await d.controller.listAssignments('rt', 'f1', undefined, undefined);
+    expect(d.readService.listAssignments).toHaveBeenCalledWith(
+      { targetResourceConceptId: 'rt', fieldId: 'f1', sectionId: undefined },
+      undefined,
+      50,
     );
   });
 });
@@ -152,15 +202,36 @@ describe('FormsInstancesController', () => {
       closeInstance: mockFn(),
     };
     const valuesService = { captureValues: mockFn() };
+    const readService = {
+      listInstancesByEncounter: mockFn(),
+      getInstance: mockFn(),
+    };
     return {
       controller: new FormsInstancesController(
         instancesService as any,
         valuesService as any,
+        readService as any,
       ),
       instancesService,
       valuesService,
+      readService,
     };
   }
+
+  it('delegates listInstances by encounter with the default limit', async () => {
+    const d = build();
+    await d.controller.listInstances('enc-1', undefined);
+    expect(d.readService.listInstancesByEncounter).toHaveBeenCalledWith(
+      'enc-1',
+      50,
+    );
+  });
+
+  it('delegates getInstance', async () => {
+    const d = build();
+    await d.controller.getInstance('i1');
+    expect(d.readService.getInstance).toHaveBeenCalledWith('i1');
+  });
 
   it('delegates openInstance (UC-09-07)', async () => {
     const d = build();
