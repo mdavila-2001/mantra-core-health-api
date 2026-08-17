@@ -149,6 +149,12 @@ export { LocalDiskFileStorageAdapter } from './storage/local-disk-file-storage.a
 export { S3FileStorageAdapter } from './storage/s3-file-storage.adapter';
 export { storageEnvSchema, loadStorageEnv } from './storage/storage.env';
 export type { StorageEnv, FileStorageAdapterName } from './storage/storage.env';
+export {
+  UPLOAD_MIME_ALLOWLIST,
+  isMimeTypeAllowedForCategory,
+  sniffMimeType,
+} from './storage/upload-content-type';
+export type { SniffedMimeType } from './storage/upload-content-type';
 export { appSecurityEnvSchema } from './security/app-security.env';
 
 // Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)
