@@ -238,11 +238,25 @@ literal en pantalla; el nombre del campo lo dice para que nadie lo confunda al c
 no existe **o** que no es público · `429` · `503` si el índice no está disponible. **No hay `401` ni
 `403` en esta superficie.**
 
-Un `404` devuelve siempre el mismo cuerpo, sin distinguir el motivo:
+Un `404` devuelve siempre el mismo cuerpo, sin distinguir el motivo. El cuerpo lo arma el filtro de
+excepciones del proyecto, no esta superficie, así que tiene la forma de todos los errores de la API
+—verificado contra la API viva el 2026-08-17—:
 
 ```json
-{ "statusCode": 404, "message": "No encontrado" }
+{
+  "code": "NOT_FOUND",
+  "message": "No encontrado",
+  "correlationId": "6",
+  "details": { "slug": "no-existe" },
+  "timestamp": "2026-08-17T21:03:50.781Z",
+  "path": "/p/no-existe"
+}
 ```
+
+`details.slug` **no revela existencia**: es el slug que mandó quien pregunta, devuelto tal cual. Un
+slug inexistente y uno despublicado producen respuestas idénticas salvo por ese eco y el
+`correlationId`, y eso es lo que hay que preservar. Lo comprueba `seed:e2e:verify`, que pide los dos
+y compara los mensajes.
 
 ---
 
