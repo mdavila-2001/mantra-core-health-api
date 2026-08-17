@@ -46,8 +46,8 @@ import {
 // no duplican fuente de verdad. Importar `ProfilesModule` además cerraría un
 // ciclo: `profiles` ya cuenta lo que un profesional dejó asentado en `clinical`.
 import {
+  PatientProfilesRepository,
   PersonAccountLinksRepository,
-  PersonProfilesRepository,
 } from '../profiles/repositories';
 
 /**
@@ -69,7 +69,7 @@ import {
   providers: [
     // Repositorios
     PersonAccountLinksRepository,
-    PersonProfilesRepository,
+    PatientProfilesRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,
