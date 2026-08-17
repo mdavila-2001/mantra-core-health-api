@@ -2,6 +2,22 @@
 
 Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
 
+## Rama canónica: `dev` (declarado 2026-08-17)
+
+**`dev` es la única rama de la que se parte y a la que se integra.** `master` **no** se usa
+como punto de partida de ningún carril ni de ninguna rama de trabajo.
+
+Motivo, medido el 2026-08-17: `master` tiene 11 commits que `dev` no tiene (y `dev` 59 que
+`master` no), pero revisados uno por uno **`master` está detrás y además revierte
+correcciones deliberadas de `dev`** — reintroduce `ensureRowVersionDefaults()` (el
+`ALTER TABLE` en cada arranque que ADR-0021 prohíbe, resuelto en el DDL generado) y vuelve al
+salto por `person_profiles` en `practitioner-names.ts` que no resolvía ni un nombre (0 de 14
+filas comparten PK). Lo único de `master` que `dev` no tiene es
+`GET /scheduling/bookings/:id/decisions`, anotado como hallazgo pendiente.
+
+Esa ambigüedad ya costó código: los carriles del 14/08 partieron de `master`. Evidencia
+completa en `CARRIL_REPORT-marcelo.md`.
+
 ## Estado actual
 
 - **🔴 BLOQUEADOR ABIERTO · `profiles.practitioner_affiliations` no existe en la
