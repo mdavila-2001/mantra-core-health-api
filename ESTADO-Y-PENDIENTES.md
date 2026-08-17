@@ -4,7 +4,23 @@ Fuente de continuidad operativa del repositorio. Fecha de corte: **2026-07-30**.
 
 ## Estado actual
 
-- **🔴 BLOQUEADOR ABIERTO · `profiles.practitioner_affiliations` no existe en la
+- **✅ CERRADO (2026-08-17) · `profiles.practitioner_affiliations` ya existe en la
+  base.** La tabla se promovió al modelo canónico por el camino de ADR-0021: la declara
+  `Mantra Core Health Context/modules/diagram_05_profiles.puml`, la emite `gen_ddl.py 05`
+  en `SQL/05_profiles/` y las bases vivas la reciben con
+  `SQL/patches/2026-08-17_v410_profiles_practitioner_affiliations.sql`. Los destinos de
+  sus 6 FKs quedaron resueltos en el vault (`SALUD/FK/FK profiles.practitioner_affiliations.*`)
+  y sus 8 índices en `SALUD/Entidades/E profiles.idxset_practitioner_affiliations.md`, así que
+  el generador ya no infiere ninguno. **Ningún cambio de código hizo falta**: regenerar el
+  módulo 05 completo reproduce las 19 entidades byte a byte, incluida la que estaba escrita a
+  mano. De paso se eliminó `tools/redesa/2026-08-15_c05_practitioner_affiliations.sql`, que
+  declaraba la misma tabla **fuera de `SQL/`** y por eso hacía fallar el paso 0/4 de
+  `rebuild_stack.py` (`check_ddl_sources.py`) **para todo el equipo** desde el 15/08.
+  Evidencia de la reconstrucción en `CARRIL_REPORT-marcelo.md`.
+
+  El texto original del bloqueador, que documenta por qué existía, se conserva abajo.
+
+- **🔴 (histórico) BLOQUEADOR · `profiles.practitioner_affiliations` no existe en la
   base (2026-08-14).** El carril 5 (puntos 8, 9 y 11 del reclamo) trajo el
   **historial laboral del profesional**: dónde trabajó, con qué cargo y en qué
   período. El módulo `profiles` sabía dónde se **formó** alguien
