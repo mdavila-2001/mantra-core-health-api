@@ -55,6 +55,14 @@ import {
   ],
   // Documento de identidad y correo del auto-registro de pacientes los escribe
   // IAM dentro de su propia transacción, así que necesita estos repositorios.
-  exports: [IdentifiersRepository, ContactPointsRepository],
+  // `FilesRepository` sale por la misma razón: Community valida dentro de su
+  // transacción que el archivo que un post pretende adjuntar exista y sea de
+  // quien publica, y esa comprobación no puede vivir en otro dominio.
+  exports: [
+    IdentifiersRepository,
+    ContactPointsRepository,
+    FilesRepository,
+    FileVersionsRepository,
+  ],
 })
 export class CommonModule {}
