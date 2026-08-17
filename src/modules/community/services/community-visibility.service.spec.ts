@@ -149,6 +149,95 @@ describe('CommunityVisibilityService', () => {
       ).resolves.toBe('p-ajeno');
       expect(d.profilesRepo.findById).not.toHaveBeenCalled();
     });
+
+    /**
+     * El hueco que unificó la resolución del sujeto: la escritura creaba la
+     * vitrina de un profesional con `target_id = hpid` y la lectura la buscaba
+     * por `target_id = sub`. Un profesional no resolvía su propio perfil al
+     * leer, y sus publicaciones FOLLOWERS/PRIVATE desaparecían de su propio muro
+     * porque `canViewPost` recibía un lector sin perfil.
+     */
+    it('resuelve por el perfil profesional cuando la sesión es de un practitioner', async () => {
+      const d = build();
+      const doctor = {
+        id: 'user-2',
+        roles: ['CLINICIAN'],
+        practitionerProfileId: 'hp-9',
+      } as any;
+      d.profilesRepo.findByTarget.mockImplementation(
+        (_em: any, target: string) =>
+          Promise.resolve(target === 'hp-9' ? { id: 'p-doctor' } : null),
+      );
+
+      await expect(d.service.resolveActorProfileId(em, doctor)).resolves.toBe(
+        'p-doctor',
+      );
+    });
+
+    it('un practitioner sin vitrina profesional cae en la de su cuenta', async () => {
+      const d = build();
+      const doctor = {
+        id: 'user-2',
+        roles: ['CLINICIAN'],
+        practitionerProfileId: 'hp-9',
+      } as any;
+      d.profilesRepo.findByTarget.mockImplementation(
+        (_em: any, target: string) =>
+          Promise.resolve(target === 'user-2' ? { id: 'p-cuenta' } : null),
+      );
+
+      await expect(d.service.resolveActorProfileId(em, doctor)).resolves.toBe(
+        'p-cuenta',
+      );
+    });
+  });
+
+  /**
+   * La cara de escritura de la propiedad. Se distingue de `assertOwnProfile` en
+   * una sola cosa —no hay atajo de plataforma— y esa diferencia es el punto:
+   * leer contenido ajeno con rol de moderación es trabajo de un moderador;
+   * firmar contenido ajeno no lo es de nadie.
+   */
+  describe('assertActsAsProfile', () => {
+    it('acepta el perfil del propio actor', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({ targetId: 'user-1' });
+      await expect(
+        d.service.assertActsAsProfile(em, 'p-1', patient),
+      ).resolves.toBeUndefined();
+    });
+
+    it('acepta la vitrina profesional de la sesión', async () => {
+      const d = build();
+      const doctor = {
+        id: 'user-2',
+        roles: ['CLINICIAN'],
+        practitionerProfileId: 'hp-9',
+      } as any;
+      d.profilesRepo.findById.mockResolvedValue({
+        targetId: 'hp-9',
+        createdByUserId: 'un-admin',
+      });
+      await expect(
+        d.service.assertActsAsProfile(em, 'p-doctor', doctor),
+      ).resolves.toBeUndefined();
+    });
+
+    it('rechaza el perfil ajeno', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({ targetId: 'otro' });
+      await expect(
+        d.service.assertActsAsProfile(em, 'p-ajeno', patient),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('no deja pasar a plataforma: moderar no es suplantar', async () => {
+      const d = build();
+      d.profilesRepo.findById.mockResolvedValue({ targetId: 'otro' });
+      await expect(
+        d.service.assertActsAsProfile(em, 'p-ajeno', platform),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
   });
 
   describe('canViewPost', () => {
