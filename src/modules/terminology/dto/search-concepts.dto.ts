@@ -364,6 +364,37 @@ export class ConceptDetailDto {
   relations!: ConceptRelationDto[];
 
   /**
+   * Propiedades declaradas del concepto, indexadas por su código.
+   *
+   * Es donde cada code system guarda lo suyo sin que el modelo tenga que
+   * declarar una columna por vocabulario: el vademécum publica acá
+   * `dose_forms`, `strengths` y `routes` —lo que la pantalla de receta necesita
+   * para que el profesional elija presentación y concentración en vez de
+   * teclearlas—, y también `rxnorm_cui` o `snomed_code` para cruzar con otros
+   * catálogos.
+   *
+   * Se devuelve como mapa `código -> valor` y no como lista de pares porque se
+   * consume por nombre (`properties.strengths`), nunca recorriéndolo. El valor
+   * es el `value_json` tal como se guardó: un texto, una lista o un objeto,
+   * según lo que declare cada propiedad.
+   *
+   * Va sólo en la ficha, no en la búsqueda: son varias filas por concepto y
+   * traerlas para cada resultado de un autocompletar es peso que la lista no
+   * usa.
+   */
+  @ApiProperty({
+    type: 'object',
+    additionalProperties: true,
+    example: {
+      dose_forms: ['oral capsule', 'powder for solution for infusion'],
+      strengths: ['500 mg', '1 g'],
+      routes: ['intravenous', 'oral'],
+      rxnorm_cui: '11124',
+    },
+  })
+  properties!: Record<string, unknown>;
+
+  /**
    * Imagen ilustrativa. Siempre ausente hoy (ver {@link ConceptImageDto}); el
    * campo existe para que un carril futuro pueda adjuntar una sin romper el
    * contrato.

@@ -8,6 +8,7 @@ import { GlossarySeedService } from './glossary-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
+import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
@@ -79,6 +80,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param messaging - Datos estructurales de mensajería.
    * @param audioAssets - Colas y plantillas de audio.
+   * @param vademecum - Catálogo de medicamentos para prescribir.
    * @param identityVerification - Datos estructurales de identidad.
    * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
    * @param platformPermissions - Permisos de sistema en `authz.permissions`.
@@ -92,6 +94,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly glossary: GlossarySeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
+    private readonly vademecum: VademecumSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
     private readonly clinicalRoles: AuthzClinicalRolesSeedService,
     private readonly platformPermissions: AuthzPlatformPermissionsSeedService,
@@ -170,6 +173,16 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     // motor de terminología antes de los dominios operativos.
     steps.push(
       await this.runStep('glosario médico', () => this.glossary.run()),
+    );
+    // Mismo motivo que el glosario: amplía el motor de terminología con un code
+    // system propio. Depende del catálogo de conceptos por los idiomas de cada
+    // designación (`EN`/`ES`) y por las severidades `clinical_ext:SEVERITY_*` de
+    // las interacciones: aplicado antes, viola esas FK. Vivía como patch SQL
+    // fuera de `apply_all.sql`, así que una base reconstruida no lo traía.
+    steps.push(
+      await this.runStep('vademécum de medicamentos', () =>
+        this.vademecum.run(),
+      ),
     );
     steps.push(await this.runStep('mensajería', () => this.messaging.run()));
     steps.push(
