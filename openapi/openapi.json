@@ -56668,7 +56668,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateTemplateDto"
+                "$ref": "#/components/schemas/SchedulingCreateTemplateDto"
               }
             }
           }
@@ -98923,34 +98923,41 @@
           "endTime"
         ]
       },
-      "CreateTemplateDto": {
+      "SchedulingCreateTemplateDto": {
         "type": "object",
         "properties": {
-          "title": {
+          "name": {
             "type": "string",
-            "description": "Título del instrumento",
             "maxLength": 200
           },
-          "description": {
-            "type": "string",
-            "description": "Consigna que ve el paciente antes de responder",
-            "maxLength": 2000
+          "rules": {
+            "description": "Franjas semanales de la plantilla",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleRuleDto"
+            }
           },
-          "ownerPractitionerId": {
+          "slotMinutes": {
+            "type": "number",
+            "description": "Duración por defecto del slot, en minutos",
+            "default": 30
+          },
+          "bookingPolicyId": {
             "type": "string",
-            "description": "Profesional dueño. Por defecto, el perfil profesional del actor.",
             "format": "uuid"
           },
-          "responseWindowDays": {
-            "type": "number",
-            "description": "Días que tendrá el paciente para responder desde que se le emite la invitación",
-            "minimum": 1,
-            "maximum": 365,
-            "default": 30
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
-          "title"
+          "name",
+          "rules"
         ]
       },
       "GenerateSlotsDto": {
@@ -99331,6 +99338,36 @@
         "required": [
           "tenantId",
           "requestData"
+        ]
+      },
+      "CreateTemplateDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Título del instrumento",
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "description": "Consigna que ve el paciente antes de responder",
+            "maxLength": 2000
+          },
+          "ownerPractitionerId": {
+            "type": "string",
+            "description": "Profesional dueño. Por defecto, el perfil profesional del actor.",
+            "format": "uuid"
+          },
+          "responseWindowDays": {
+            "type": "number",
+            "description": "Días que tendrá el paciente para responder desde que se le emite la invitación",
+            "minimum": 1,
+            "maximum": 365,
+            "default": 30
+          }
+        },
+        "required": [
+          "title"
         ]
       },
       "AddQuestionDto": {
