@@ -32,7 +32,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new FormsAssignmentsService(
     em as any,
-    assignmentsRepo,
+    assignmentsRepo as any,
     fieldsRepo as any,
     logger as any,
   );

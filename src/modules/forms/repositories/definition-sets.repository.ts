@@ -194,4 +194,68 @@ export class DefinitionSetsRepository {
       { partial: true },
     );
   }
+
+  /**
+   * Sets visibles para el tenant del actor: los globales (sin dueño) y los
+   * propios. Un set que otra organización definió para sí no debe aparecer.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant del actor, si el contexto lo fijó.
+   * @param limit - Tope de filas (el llamador pide una de más para declarar el recorte).
+   * @returns Sets ordenados por nombre.
+   */
+  findSets(
+    em: EntityManager,
+    tenantId: string | undefined,
+    limit: number,
+  ): Promise<FieldDefinitionSets[]> {
+    return em.find(
+      FieldDefinitionSets,
+      {
+        $or: [
+          { ownerTenantId: null },
+          ...(tenantId ? [{ ownerTenantId: tenantId }] : []),
+        ],
+      },
+      { orderBy: { name: 'ASC' }, limit },
+    );
+  }
+
+  /**
+   * Versiones de un set, de la más antigua a la más reciente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param definitionSetId - Identificador de definition set.
+   * @returns Versiones del set en orden de registro.
+   */
+  findVersionsBySet(
+    em: EntityManager,
+    definitionSetId: string,
+  ): Promise<FieldDefinitionSetVersions[]> {
+    return em.find(
+      FieldDefinitionSetVersions,
+      { definitionSetId },
+      { orderBy: { recordedAt: 'ASC' } },
+    );
+  }
+
+  /**
+   * Miembros de un lote de versiones, en una sola consulta para no ir versión
+   * por versión.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param versionIds - Ids de versión a resolver.
+   * @returns Miembros de todas las versiones pedidas, por orden de presentación.
+   */
+  findMembersByVersions(
+    em: EntityManager,
+    versionIds: readonly string[],
+  ): Promise<FieldSetMembers[]> {
+    if (versionIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      FieldSetMembers,
+      { definitionSetVersionId: { $in: [...versionIds] } },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
 }

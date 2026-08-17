@@ -386,4 +386,100 @@ export class FieldDefinitionsRepository {
       { partial: true },
     );
   }
+
+  /**
+   * Definiciones de campo por id, en lote: las lecturas resuelven todos los
+   * campos de una instancia o un set de una vez, no de a uno (N+1).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Ids de campo a resolver.
+   * @returns Definiciones encontradas.
+   */
+  findFieldsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<DynamicFieldDefinitions[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(DynamicFieldDefinitions, { id: { $in: [...ids] } });
+  }
+
+  /**
+   * Reglas de validación de un lote de campos, en su orden de evaluación.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldIds - Ids de campo a resolver.
+   * @returns Reglas de todos los campos pedidos.
+   */
+  findValidationRulesByFieldIds(
+    em: EntityManager,
+    fieldIds: readonly string[],
+  ): Promise<FieldValidationRules[]> {
+    if (fieldIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      FieldValidationRules,
+      { fieldId: { $in: [...fieldIds] } },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
+
+  /**
+   * Dependencias condicionales que gobiernan un lote de campos destino.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetFieldIds - Ids de campo destino a resolver.
+   * @returns Dependencias cuyas condiciones controlan los campos pedidos.
+   */
+  findDependenciesByTargetFieldIds(
+    em: EntityManager,
+    targetFieldIds: readonly string[],
+  ): Promise<FieldDependencies[]> {
+    if (targetFieldIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      FieldDependencies,
+      { targetFieldId: { $in: [...targetFieldIds] } },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
+
+  /**
+   * Localizaciones i18n de un lote de campos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldIds - Ids de campo a resolver.
+   * @returns Localizaciones de todos los campos pedidos.
+   */
+  findLocalizationsByFieldIds(
+    em: EntityManager,
+    fieldIds: readonly string[],
+  ): Promise<FieldDefinitionLocalizations[]> {
+    if (fieldIds.length === 0) return Promise.resolve([]);
+    return em.find(FieldDefinitionLocalizations, {
+      fieldId: { $in: [...fieldIds] },
+    });
+  }
+
+  /**
+   * Reglas de acceso activas de un lote de campos.
+   *
+   * La lectura de valores las consulta para decidir el enmascarado: mientras la
+   * semántica de `read_role_value_set_id` no sea evaluable (no existe puente
+   * rol→value-set en el sistema), la mera presencia de una regla activa basta
+   * para no exponer el valor.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldIds - Ids de campo a resolver.
+   * @param statusConceptId - Concepto del estado activo de la regla.
+   * @returns Reglas activas de los campos pedidos.
+   */
+  findActiveAccessRulesByFieldIds(
+    em: EntityManager,
+    fieldIds: readonly string[],
+    statusConceptId: string,
+  ): Promise<FieldValueAccessRules[]> {
+    if (fieldIds.length === 0) return Promise.resolve([]);
+    return em.find(FieldValueAccessRules, {
+      fieldId: { $in: [...fieldIds] },
+      statusConceptId,
+    });
+  }
 }

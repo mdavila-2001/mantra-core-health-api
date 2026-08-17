@@ -35,7 +35,7 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new FormsInstancesService(
     em as any,
-    instancesRepo,
+    instancesRepo as any,
     valuesRepo as any,
     logger as any,
   );
