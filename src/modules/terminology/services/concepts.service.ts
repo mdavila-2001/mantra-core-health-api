@@ -787,14 +787,21 @@ export class ConceptsService {
       });
     }
 
-    const [textos, etiquetas, designations, glossaryTexts, relations] =
-      await Promise.all([
-        this.resolveTexts([conceptId], language),
-        this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
-        this.designationsRepo.findByConcept(this.em, conceptId),
-        this.resolveGlossaryTexts([conceptId], language),
-        this.resolveGlossaryRelations([conceptId]),
-      ]);
+    const [
+      textos,
+      etiquetas,
+      designations,
+      glossaryTexts,
+      relations,
+      properties,
+    ] = await Promise.all([
+      this.resolveTexts([conceptId], language),
+      this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
+      this.designationsRepo.findByConcept(this.em, conceptId),
+      this.resolveGlossaryTexts([conceptId], language),
+      this.resolveGlossaryRelations([conceptId]),
+      this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
+    ]);
 
     const etiquetasDelConcepto = etiquetas.get(conceptId);
     const esTerminoDelGlosario = (etiquetasDelConcepto ?? []).some(
@@ -854,6 +861,16 @@ export class ConceptsService {
       category,
       tags,
       relations: relations.get(conceptId) ?? [],
+      // Mapa `código -> valor`: se consume por nombre (`properties.strengths`),
+      // nunca recorriéndolo. Si un code system repitiera el mismo código en dos
+      // filas —que el UPSERT de `upsertProperties` impide— gana la última, que
+      // es la misma regla que aplica esa escritura.
+      properties: Object.fromEntries(
+        properties.map((property) => [
+          property.propertyCode,
+          property.valueJson,
+        ]),
+      ),
     };
   }
 
