@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../common';
 import { CommentsRepository, ReactionsRepository } from '../repositories';
-import { SOCIAL_OBJECT_CONCEPT_BY_CODE } from '../community.concepts';
+import {
+  REACTION_CODE_BY_CONCEPT,
+  SOCIAL_OBJECT_CONCEPT_BY_CODE,
+} from '../community.concepts';
 import type { ReactionSummaryDto } from '../dto';
 
 /** Reacciones y comentarios de una publicación, tal como los pinta una tarjeta. */
@@ -119,6 +122,8 @@ export class CommunityEngagementService {
           .filter((tally) => tally.reactableRefId === postId)
           .map((tally) => ({
             reactionTypeConceptId: tally.reactionTypeConceptId,
+            reactionType:
+              REACTION_CODE_BY_CONCEPT[tally.reactionTypeConceptId] ?? null,
             count: tally.count,
           }));
         return [
@@ -131,7 +136,14 @@ export class CommunityEngagementService {
               // «no reaccionó». La interfaz necesita distinguirlos para saber si
               // puede pintar el botón como activo o si no tiene el dato.
               ...(actorProfileId
-                ? { actorReactionTypeConceptId: propiaPor.get(postId) ?? null }
+                ? {
+                    actorReactionTypeConceptId: propiaPor.get(postId) ?? null,
+                    actorReactionType: propiaPor.has(postId)
+                      ? (REACTION_CODE_BY_CONCEPT[
+                          propiaPor.get(postId) as string
+                        ] ?? null)
+                      : null,
+                  }
                 : {}),
             },
             commentCount: comentariosPor.get(postId) ?? 0,

@@ -410,6 +410,24 @@ export const REACTION_CONCEPT_BY_CODE: Record<string, string> = {
   SUPPORT: COMM.REACTION_SUPPORT,
 };
 
+/**
+ * Concept id → código de reacción. Es la inversa de {@link REACTION_CONCEPT_BY_CODE}.
+ *
+ * **Por qué hace falta.** El módulo se escribe con la palabra (`LIKE`) y se leía
+ * sólo con el uuid del concepto. Una interfaz que recibe el uuid de «con qué
+ * reaccionaste» no puede marcar el botón correspondiente sin resolver
+ * terminología en cada render — y el DoD del módulo dice que ninguna respuesta
+ * expone un uuid interno que la interfaz no pueda resolver a etiqueta legible.
+ * Se deriva del mapa directo para que no puedan desincronizarse.
+ */
+export const REACTION_CODE_BY_CONCEPT: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(REACTION_CONCEPT_BY_CODE).map(([code, concept]) => [
+      concept,
+      code,
+    ]),
+  );
+
 /** Reactable/commentable/bookmarkable object type enum → concept id. */
 export const SOCIAL_OBJECT_CONCEPT_BY_CODE: Record<string, string> = {
   POST: COMM.CONTENT_TYPE_POST,

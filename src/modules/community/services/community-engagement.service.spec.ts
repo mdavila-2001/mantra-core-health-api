@@ -10,7 +10,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityEngagementService } from './community-engagement.service';
 import { CONCEPTS } from '../../../common';
-import { SOCIAL_OBJECT_CONCEPT_BY_CODE } from '../community.concepts';
+import {
+  REACTION_CONCEPT_BY_CODE,
+  SOCIAL_OBJECT_CONCEPT_BY_CODE,
+} from '../community.concepts';
 
 const em = {} as any;
 
@@ -120,6 +123,54 @@ describe('CommunityEngagementService', () => {
       'actorReactionTypeConceptId' in (mapa.get('post-1')?.reactions ?? {}),
     ).toBe(false);
     expect(d.reactionsRepo.listByActorTargets).not.toHaveBeenCalled();
+  });
+
+  /**
+   * El módulo se escribe con la palabra y se leía sólo con el uuid. Una interfaz
+   * que recibe el uuid no puede marcar el botón que le corresponde sin resolver
+   * terminología en cada render.
+   */
+  it('resuelve el código de la reacción junto al concepto', async () => {
+    const d = build();
+    d.reactionsRepo.summarizeByTargets.mockResolvedValue([
+      {
+        reactableRefId: 'post-1',
+        reactionTypeConceptId: REACTION_CONCEPT_BY_CODE.LIKE,
+        count: 2,
+      },
+    ]);
+    d.reactionsRepo.listByActorTargets.mockResolvedValue([
+      {
+        reactableRefId: 'post-1',
+        reactionTypeConceptId: REACTION_CONCEPT_BY_CODE.INSIGHTFUL,
+      },
+    ]);
+
+    const mapa = await d.service.ofPosts(em, ['post-1'], 'p-lector');
+
+    expect(mapa.get('post-1')?.reactions.tallies[0]?.reactionType).toBe('LIKE');
+    expect(mapa.get('post-1')?.reactions.actorReactionType).toBe('INSIGHTFUL');
+  });
+
+  /**
+   * Un concepto que no está en el enum del módulo —dato viejo o escrito por
+   * fuera— se informa como no resuelto. Inventar un código diría que la fila
+   * guarda algo que no guarda.
+   */
+  it('no inventa un código para un concepto desconocido', async () => {
+    const d = build();
+    d.reactionsRepo.summarizeByTargets.mockResolvedValue([
+      {
+        reactableRefId: 'post-1',
+        reactionTypeConceptId: 'concepto-de-otra-epoca',
+        count: 1,
+      },
+    ]);
+
+    const mapa = await d.service.ofPosts(em, ['post-1']);
+
+    expect(mapa.get('post-1')?.reactions.tallies[0]?.reactionType).toBeNull();
+    expect(mapa.get('post-1')?.reactions.total).toBe(1);
   });
 
   it('sólo cuenta comentarios vigentes', async () => {

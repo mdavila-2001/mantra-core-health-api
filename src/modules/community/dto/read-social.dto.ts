@@ -165,6 +165,20 @@ export class ReactionTallyDto {
   @ApiProperty({ format: 'uuid' })
   reactionTypeConceptId!: string;
 
+  /**
+   * El código del tipo (`LIKE`, `INSIGHTFUL`, …), el mismo con el que se escribe.
+   *
+   * Viaja junto al uuid porque el módulo **se escribe con la palabra y se leía
+   * sólo con el uuid**, y una interfaz que recibe el uuid no puede marcar el
+   * botón que le corresponde sin resolver terminología en cada render.
+   *
+   * Nulo sólo si la fila guarda un concepto que no está en el enum del módulo
+   * —dato viejo o escrito por fuera—: en ese caso se dice que no se pudo
+   * resolver, en lugar de inventar un código.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  reactionType?: string | null;
+
   /** Cantidad de reacciones de ese tipo. */
   @ApiProperty()
   count!: number;
@@ -189,6 +203,16 @@ export class ReactionSummaryDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   actorReactionTypeConceptId?: string | null;
+
+  /**
+   * El código de la reacción del propio actor, resuelto del concepto.
+   *
+   * Es lo que la interfaz necesita para pintar activo el botón correcto tras
+   * recargar. Sigue la misma distinción que el campo de arriba: ausente si no se
+   * preguntó, `null` si no reaccionó.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  actorReactionType?: string | null;
 }
 
 /** Fila del muro: una publicación sin sus hijos. */

@@ -18,7 +18,11 @@ import {
   BlocksRepository,
   CommunityPrestigeRepository,
 } from '../repositories';
-import { COMM, SOCIAL_OBJECT_CONCEPT_BY_CODE } from '../community.concepts';
+import {
+  COMM,
+  REACTION_CODE_BY_CONCEPT,
+  SOCIAL_OBJECT_CONCEPT_BY_CODE,
+} from '../community.concepts';
 import { CommunityVisibilityService } from './community-visibility.service';
 import {
   CommunityEngagementService,
@@ -400,10 +404,21 @@ export class CommunitySocialReadService {
       : undefined;
 
     return {
-      tallies,
+      // El código viaja junto al uuid, igual que en la fila del muro: quien
+      // dibuja la barra de reacciones no puede resolver terminología por render.
+      tallies: tallies.map((tally) => ({
+        ...tally,
+        reactionType:
+          REACTION_CODE_BY_CONCEPT[tally.reactionTypeConceptId] ?? null,
+      })),
       total: tallies.reduce((sum, tally) => sum + tally.count, 0),
       ...(actorProfileId
-        ? { actorReactionTypeConceptId: own?.reactionTypeConceptId ?? null }
+        ? {
+            actorReactionTypeConceptId: own?.reactionTypeConceptId ?? null,
+            actorReactionType: own
+              ? (REACTION_CODE_BY_CONCEPT[own.reactionTypeConceptId] ?? null)
+              : null,
+          }
         : {}),
     };
   }
