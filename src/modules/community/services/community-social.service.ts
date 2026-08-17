@@ -40,7 +40,12 @@ import {
   IdResponseDto,
   UpsertOwnPublicProfileDto,
   OwnPublicProfileDto,
+  UnfollowQueryDto,
+  UnbookmarkQueryDto,
+  UnblockQueryDto,
+  SocialRemovalResponseDto,
 } from '../dto';
+import { CommunityVisibilityService } from './community-visibility.service';
 
 const PROFILE_TARGET_BY_CODE: Record<string, string> = {
   USER: COMM.PROFILE_TARGET_USER,
@@ -74,6 +79,23 @@ const BLOCK_REASON_BY_CODE: Record<string, string> = {
  * El servicio posee la unidad de trabajo (`em.transactional`) y hace `flush` del
  * padre antes de crear hijos, porque las FK son columnas uuid planas y MikroORM
  * no ordena inserts entre entidades no relacionadas.
+ *
+ * ## El perfil que firma no lo elige el cliente
+ *
+ * Todas las escrituras recibían el perfil autor en el cuerpo
+ * —`authorProfileId`, `actorProfileId`, `profileId`, `followerProfileId`,
+ * `blockerProfileId`— o en la ruta, y **ninguna comprobaba que fuera del
+ * actor**. Con una sesión cualquiera y el uuid de un perfil ajeno —que las
+ * lecturas del muro publican— se podía publicar en el muro de un médico,
+ * comentar y reaccionar en su nombre, guardar en sus colecciones, hacerlo seguir
+ * a quien fuera y bloquear a sus pacientes.
+ *
+ * No era un agujero de visibilidad: la visibilidad estaba bien resuelta y el
+ * commit que cerró la identidad del **lector** dejó abierta la del **escritor**.
+ * Ahora cada escritura pasa por
+ * {@link CommunityVisibilityService.assertActsAsProfile}, que no admite atajo de
+ * rol: leer contenido ajeno es trabajo de moderación, firmar contenido ajeno no
+ * lo es de nadie.
  */
 @Injectable()
 export class CommunitySocialService {
@@ -88,6 +110,7 @@ export class CommunitySocialService {
    * @param bookmarksRepo - Valor de bookmarks repo requerido por la operación.
    * @param followsRepo - Valor de follows repo requerido por la operación.
    * @param blocksRepo - Valor de blocks repo requerido por la operación.
+   * @param visibility - Propiedad del perfil con el que se firma la escritura.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -99,6 +122,7 @@ export class CommunitySocialService {
     private readonly bookmarksRepo: BookmarksRepository,
     private readonly followsRepo: FollowsRepository,
     private readonly blocksRepo: BlocksRepository,
+    private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunitySocialService.name);
@@ -290,6 +314,7 @@ export class CommunitySocialService {
         throw new ResourceNotFoundException('Perfil autor no encontrado', {
           profileId,
         });
+      await this.visibility.assertActsAsProfile(tx, profileId, actor);
 
       const now = new Date();
       const post = this.postsRepo.create(tx, {
@@ -379,6 +404,7 @@ export class CommunitySocialService {
         throw new ResourceNotFoundException('Perfil autor no encontrado', {
           profileId: dto.authorProfileId,
         });
+      await this.visibility.assertActsAsProfile(tx, dto.authorProfileId, actor);
 
       let parentCommentId: string | undefined;
       let rootCommentId: string | undefined;
@@ -445,6 +471,7 @@ export class CommunitySocialService {
     actor: AuthenticatedUser,
   ): Promise<ReactionResponseDto> {
     return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(tx, dto.actorProfileId, actor);
       const reactableType = SOCIAL_OBJECT_CONCEPT_BY_CODE[dto.reactableType];
       const reactionType = REACTION_CONCEPT_BY_CODE[dto.reactionType];
       const existing = await this.reactionsRepo.findByActorTarget(
@@ -480,6 +507,7 @@ export class CommunitySocialService {
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(tx, dto.profileId, actor);
       const type = SOCIAL_OBJECT_CONCEPT_BY_CODE[dto.bookmarkableType];
       const dup = await this.bookmarksRepo.findByProfileTarget(
         tx,
@@ -509,6 +537,11 @@ export class CommunitySocialService {
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(
+        tx,
+        dto.followerProfileId,
+        actor,
+      );
       if (
         dto.followableType === 'PROFILE' &&
         dto.followableRefId === dto.followerProfileId
@@ -557,6 +590,11 @@ export class CommunitySocialService {
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(
+        tx,
+        dto.blockerProfileId,
+        actor,
+      );
       if (dto.blockerProfileId === dto.blockedProfileId) {
         throw new PreconditionFailedException(
           'No se puede bloquear a uno mismo',
@@ -565,25 +603,38 @@ export class CommunitySocialService {
           },
         );
       }
-      const dup = await this.blocksRepo.findByPair(
+      // Un bloqueo levantado deja la fila en `STATE_REVOKED`, no la borra: es el
+      // rastro de que ese bloqueo existió. Volver a bloquear reactiva esa misma
+      // fila. Sin distinguir el estado, el 409 de duplicado convertía «bloqueé,
+      // desbloqueé, quiero volver a bloquear» en un error permanente.
+      const previo = await this.blocksRepo.findByPair(
         tx,
         dto.blockerProfileId,
         dto.blockedProfileId,
       );
-      if (dup)
+      if (previo?.statusConceptId === CONCEPTS.STATE_ACTIVE)
         throw new ConflictException('El usuario ya está bloqueado', {
           blockedProfileId: dto.blockedProfileId,
         });
 
-      const block = this.blocksRepo.create(tx, {
-        blockerProfileId: dto.blockerProfileId,
-        blockedProfileId: dto.blockedProfileId,
-        reasonConceptId: dto.reason
-          ? BLOCK_REASON_BY_CODE[dto.reason]
-          : undefined,
-        statusConceptId: CONCEPTS.STATE_ACTIVE,
-        actorUserId: actor.id,
-      });
+      if (previo) {
+        previo.statusConceptId = CONCEPTS.STATE_ACTIVE;
+        if (dto.reason) {
+          previo.reasonConceptId = BLOCK_REASON_BY_CODE[dto.reason];
+        }
+        touch(previo, actor.id);
+      }
+      const block =
+        previo ??
+        this.blocksRepo.create(tx, {
+          blockerProfileId: dto.blockerProfileId,
+          blockedProfileId: dto.blockedProfileId,
+          reasonConceptId: dto.reason
+            ? BLOCK_REASON_BY_CODE[dto.reason]
+            : undefined,
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          actorUserId: actor.id,
+        });
 
       // Poda: soft-delete de follows mutuos entre ambas partes.
       const mutual = await this.followsRepo.findMutualBetween(
@@ -599,6 +650,135 @@ export class CommunitySocialService {
 
       await tx.flush();
       return { id: block.id };
+    });
+  }
+
+  /**
+   * UC-19-05, cara inversa: deja de seguir un objeto social.
+   *
+   * **Soft-delete, no borrado.** El follow pasa a `FOLLOW_REMOVED` —el mismo
+   * estado que usa la poda de un bloqueo— porque `follow()` reactiva la fila que
+   * encuentra: borrarla haría que seguir de nuevo perdiera la fecha en que esa
+   * relación empezó, y el fan-out del feed se apoya en ella.
+   *
+   * @param query - Perfil seguidor y objeto seguido.
+   * @param actor - Sesión, que debe ser titular del perfil seguidor.
+   * @returns Si esta llamada deshizo el follow.
+   */
+  async unfollow(
+    query: UnfollowQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    this.logger.info(
+      {
+        operation: 'community.follow.remove',
+        followableRefId: query.followableRefId,
+      },
+      'Removing follow',
+    );
+    return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(
+        tx,
+        query.followerProfileId,
+        actor,
+      );
+      const follow = await this.followsRepo.findByFollowerTarget(
+        tx,
+        query.followerProfileId,
+        FOLLOWABLE_CONCEPT_BY_CODE[query.followableType],
+        query.followableRefId,
+      );
+      if (!follow || follow.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
+        return { removed: false };
+      }
+      follow.statusConceptId = COMM.FOLLOW_REMOVED;
+      touch(follow, actor.id);
+      await tx.flush();
+      return { removed: true };
+    });
+  }
+
+  /**
+   * UC-19-04, cara inversa: quita un marcador.
+   *
+   * **Borrado real, y no por descuido.** `community.bookmarks` no tiene columna
+   * de estado, y agregarle una para poder «archivar» marcadores sería agregar
+   * esquema por comodidad de esta operación. Tampoco hace falta: un marcador es
+   * la lista privada de quien lo guardó, no contenido publicado que alguien
+   * pueda tener que auditar después. Quitarlo es quitarlo.
+   *
+   * @param query - Perfil dueño y objeto guardado.
+   * @param actor - Sesión, que debe ser titular del perfil.
+   * @returns Si esta llamada quitó el marcador.
+   */
+  async unbookmark(
+    query: UnbookmarkQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(tx, query.profileId, actor);
+      const bookmark = await this.bookmarksRepo.findByProfileTarget(
+        tx,
+        query.profileId,
+        SOCIAL_OBJECT_CONCEPT_BY_CODE[query.bookmarkableType],
+        query.bookmarkableRefId,
+      );
+      // Si se pidió acotar a una colección, un marcador de otra colección no es
+      // el que se pidió quitar.
+      if (
+        !bookmark ||
+        (query.collectionName !== undefined &&
+          bookmark.collectionName !== query.collectionName)
+      ) {
+        return { removed: false };
+      }
+      tx.remove(bookmark);
+      await tx.flush();
+      return { removed: true };
+    });
+  }
+
+  /**
+   * UC-19-14, cara inversa: levanta un bloqueo.
+   *
+   * **Los follows podados no vuelven.** Bloquear cortó dos relaciones que ya
+   * existían; desbloquear devuelve el permiso de volver a seguir, no la decisión
+   * de seguir. Reactivarlas en silencio haría reaparecer en el muro de las dos
+   * partes a alguien que ninguna eligió seguir de nuevo.
+   *
+   * @param query - Perfil que bloqueó y perfil bloqueado.
+   * @param actor - Sesión, que debe ser titular del perfil que bloqueó.
+   * @returns Si esta llamada levantó el bloqueo.
+   */
+  async unblock(
+    query: UnblockQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    this.logger.info(
+      {
+        operation: 'community.block.remove',
+        blockedProfileId: query.blockedProfileId,
+      },
+      'Lifting block',
+    );
+    return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(
+        tx,
+        query.blockerProfileId,
+        actor,
+      );
+      const block = await this.blocksRepo.findByPair(
+        tx,
+        query.blockerProfileId,
+        query.blockedProfileId,
+      );
+      if (!block || block.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
+        return { removed: false };
+      }
+      block.statusConceptId = CONCEPTS.STATE_REVOKED;
+      touch(block, actor.id);
+      await tx.flush();
+      return { removed: true };
     });
   }
 }

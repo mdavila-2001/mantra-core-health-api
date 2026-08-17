@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -44,6 +45,10 @@ import {
   BlockPageDto,
   UpsertOwnPublicProfileDto,
   OwnPublicProfileDto,
+  UnfollowQueryDto,
+  UnbookmarkQueryDto,
+  UnblockQueryDto,
+  SocialRemovalResponseDto,
 } from '../dto';
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
@@ -180,6 +185,46 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.service.block(dto, actor);
+  }
+
+  // --- Caras inversas (UC-19-04/05/14) ---
+  //
+  // Van por query y no por el id de la fila porque la pantalla que las ofrece
+  // sabe *a quién* dejó de seguir o *qué* dejó de guardar, no el uuid del
+  // vínculo: pedirle ese uuid la obligaría a una lectura extra sólo para poder
+  // deshacer lo que acaba de hacer.
+
+  /** UC-19-05, cara inversa. */
+  @Delete('follows')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Dejar de seguir un objeto social' })
+  unfollow(
+    @Query() query: UnfollowQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.service.unfollow(query, actor);
+  }
+
+  /** UC-19-04, cara inversa. */
+  @Delete('bookmarks')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Quitar un marcador' })
+  unbookmark(
+    @Query() query: UnbookmarkQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.service.unbookmark(query, actor);
+  }
+
+  /** UC-19-14, cara inversa. */
+  @Delete('blocks')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Levantar un bloqueo' })
+  unblock(
+    @Query() query: UnblockQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.service.unblock(query, actor);
   }
 
   // --- Lecturas (UC-19-01..07, cara de lectura) ---
