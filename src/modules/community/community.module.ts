@@ -29,6 +29,7 @@ import {
   CommunityGroupsReadService,
   CommunityPollsReadService,
   CommunityReviewsReadService,
+  CommunityModerationReadService,
   CommunityPublicService,
 } from './services';
 import {
@@ -109,6 +110,7 @@ import {
     CommunityGroupsReadService,
     CommunityPollsReadService,
     CommunityReviewsReadService,
+    CommunityModerationReadService,
     CommunityPublicService,
   ],
   // La proyección la consume `diagnostic_units` al publicar un perfil; la nota,
