@@ -10,13 +10,36 @@
 
 | Fase | Estado |
 |---|---|
-| Prerequisitos | Hecho — con 2 hallazgos de entorno que bloqueaban a todo el equipo |
+| Prerequisitos | Hecho — con 4 hallazgos de entorno que bloqueaban a todo el equipo |
 | Fase 2 · **H-01** | **CERRADO y verificado contra la API viva (403 → 200)** |
-| Fase 1 · recorrida de la vertical | En curso |
-| Fase 3 · última milla de UI | Pendiente (depende de la fase 1) |
-| Fase 4 · E2E integrado | Pendiente (viernes) |
+| Fase 1 · recorrida de la vertical | **Hecha** — 3 defectos encontrados: 2 cerrados, 1 necesita decisión |
+| Fase 3 · última milla de UI | **El hueco grande cerrado** (el doctor ya puede publicar su agenda) |
+| Fase 4 · E2E integrado | **Guion listo y corriendo: 26/27 PASS.** El viernes se le suman los tramos de los demás |
 
 H-01 se resolvió primero porque es el bloqueo de entrada de la propia vertical.
+
+**Ramas:** `justin/h01-verificacion-habilita-acceso` (API, 3 commits) ·
+`justin/vertical-p0` (front, 3 commits).
+
+### Lo entregado, en una línea cada uno
+
+1. **H-01 — cerrado.** El veredicto de la autoridad no cerraba el intento, así
+   que la verificación de un paciente **nunca** terminaba. 403 → 200. *(API)*
+2. **El doctor no podía publicar su agenda desde la UI — cerrado.** El backend
+   abrió el autoservicio el 16/08 y el front siguió diciéndole «No tenés
+   permiso», justo en el CTA que lo invita a publicarla. *(front)*
+3. **El contrato OpenAPI mentía sobre la publicación de agenda — cerrado.**
+   Colisión de nombres de DTO: publicaba la forma de los cuestionarios. *(API)*
+4. **Un paciente no puede leer su propia historia clínica — ABIERTO, D-3.**
+   403 permanente por una traducción de identificadores equivocada. Es el último
+   paso de la vertical y necesita una decisión de Marcelo (`profiles`).
+5. **El E2E de la vertical existe y corre**: 26/27 pasos en PASS contra la API
+   viva, con doctor y paciente nuevos. El único rojo es el punto 4.
+
+> **Para el reviewer, en un minuto:** los tres arreglos están verificados
+> ejecutando, no leyendo. El pendiente (D-3) está con causa raíz, evidencia SQL y
+> parche propuesto; no lo apliqué porque cae en `profiles`, que esta semana es de
+> Marcelo (regla 4).
 
 ---
 
@@ -164,6 +187,223 @@ Y **2 int-specs**:
 
 ---
 
+---
+
+## Fase 1 y 3 · la vertical, y los dos defectos que aparecieron
+
+La recorrida se hizo **contra el contrato vivo** (`/docs-json` de la API en
+marcha) y contra el código del front, no por la pantalla: el hallazgo E-1 dejó el
+entorno de pruebas inservible hasta reconstruirlo, y con el tiempo que quedaba
+rendía más recorrer los 6 tramos de la escalera endpoint por endpoint. La
+recorrida por UI queda para el miércoles, ya con el camino desbloqueado.
+
+### D-1 · el doctor no podía publicar su agenda desde la UI (CERRADO)
+
+**El agujero que dejaron los merges del 16/08.** El backend abrió el autoservicio
+—las cinco escrituras del catálogo de scheduling declaran
+`@Roles('SCHEDULING_ADMIN', 'PRACTITIONER')` y el servicio le acota el recurso al
+suyo (`assertPuedeCrearRecurso`)—. El front no acompañó:
+
+- `agenda.html` le dice al doctor «Todavía no publicaste tu agenda … Los
+  pacientes todavía no pueden pedirte turno», con un botón **«Publicar mi
+  agenda»** que lleva a `/schedule/new`;
+- `/schedule/new` le respondía **«No tenés permiso para crear agenda»**, porque
+  su lista de roles seguía siendo la de antes del autoservicio
+  (`agenda-create.ts`, `ROLES_QUE_CREAN`);
+- y el botón «Crear agenda» de la cabecera tampoco se le mostraba
+  (`agenda.ts`, `ROLES_QUE_CREAN_AGENDA`, con un comentario que decía «ni el
+  agente de mostrador ni el profesional arman la grilla» — cierto hasta el 16/08).
+
+Callejón sin salida **en el único camino que vuelve reservable a un doctor
+nuevo**: es literalmente el paso 1 de la recorrida de este carril.
+
+Abrir el rol no alcanzaba. La fase 1 del asistente pide teclear `resourceType`,
+`resourceRefType` y `resourceRefId` — y esos tres son justo los que el backend
+exige que sean los del propio actor. El tercero es un uuid: un doctor no lo sabe,
+y habría chocado con un 403 después de completar el formulario. Ahora la pantalla
+los **aporta y los deshabilita** (se ven —es su agenda, conviene que lo vea— y
+`getRawValue()` los sigue enviando). Si la sesión no declara
+`practitionerProfileId`, se avisa antes de empezar las cinco fases en vez de
+dejarlo chocar al final.
+
+Quien administra el catálogo no cambia: sigue armando la agenda de cualquiera,
+sin nada fijado ni deshabilitado (hay prueba que lo fija).
+
+**Verificación:** `agenda-create` 11 → **16 pruebas**; `agenda` **42/42** intacto;
+`corepack yarn build` EXIT=0; `npx tsc -p tsconfig.spec.json --noEmit` EXIT=0.
+
+### D-2 · el contrato OpenAPI describía mal la publicación de agenda (CERRADO)
+
+`POST /scheduling/resources/{id}/templates` publicaba **el cuerpo de los
+cuestionarios**:
+
+```
+campos publicados: title, description, ownerPractitionerId, responseWindowDays
+campos reales:     name, rules[], slotMinutes, bookingPolicyId, validFrom, validTo
+```
+
+Causa: `scheduling` y `surveys` declaran **cada uno una clase
+`CreateTemplateDto`**, y sin `@ApiSchema({ name })` ambas colapsan en un único
+`#/components/schemas/CreateTemplateDto` — gana la última en registrarse. Es
+válido como OpenAPI, así que ni Redocly ni el `git diff --exit-code` de CI lo
+detectan; simplemente **describe otra cosa**. Cualquier cliente generado del
+contrato —la colección de Postman que CI genera incluida— mandaba un cuerpo que
+el endpoint rechaza.
+
+Arreglado con el mismo remedio que ya usa el repo en 22 pares de DTOs
+(`PharmacyCreateSiteDto` y compañía): `@ApiSchema({ name:
+'SchedulingCreateTemplateDto' })`. Contrato regenerado con
+`corepack yarn docs:openapi:generate` (EXIT=0); `surveys` conserva el nombre
+genérico, así que su contrato no se mueve.
+
+**Verificado sobre el `openapi.json` regenerado:**
+
+```
+ref ahora: #/components/schemas/SchedulingCreateTemplateDto
+campos: name, rules, slotMinutes, bookingPolicyId, validFrom, validTo
+requeridos: name, rules
+ref surveys: #/components/schemas/CreateTemplateDto
+```
+
+### D-2b · las otras dos colisiones (NO tocadas — son de otros carriles)
+
+Un barrido de los 63 módulos encontró **82 nombres de DTO repetidos, 60 sin
+`@ApiSchema`**. La mayoría son DTOs de respuesta y el daño es menor, pero hay
+**otros dos cuerpos de request igual de rotos** que `CreateTemplateDto`:
+
+| Esquema | Rutas que lo comparten | Forma que se publica |
+|---|---|---|
+| `CreateAffiliationDto` | `POST /profiles/practitioners/me/affiliations` · `POST /orgext/affiliations` | la de `organization_extensions` |
+| `CreateAssignmentDto` | `POST /forms/assignments` · `POST /surveys/assignments` | la de `surveys` (`surveyVersionId`) |
+
+`CreateAffiliationDto` toca la trayectoria del profesional (**B-6, carril de
+Marcelo**) y `CreateAssignmentDto` toca `forms` (**carril de Ender**), así que no
+los toqué. El arreglo es de una línea por DTO, igual que el de arriba.
+
+El generador ya lo avisa por consola —`WARN Duplicate DTO detected:
+"CreateAssignmentDto" is defined multiple times with different schemas`— pero es
+un aviso, no un fallo: **nada en CI lo convierte en rojo**. Propuesta para
+Marcelo: que `docs:openapi:generate` falle ante un duplicado.
+
+### D-3 · un paciente NO puede leer su propia historia clínica (abierto — decide Marcelo)
+
+**El defecto más serio que encontró la recorrida, y el último paso de la
+vertical.** `GET /clinical/patients/{id}/summary` responde **403 al titular**,
+siempre. No es un caso borde: **ningún paciente puede ver su propia historia**.
+
+Causa raíz, verificada contra la base:
+
+```sql
+select pat.profile_id, pp.id as person_profile_id, pp.person_id,
+       (pat.profile_id = pp.id) as pat_es_person_profile,
+       (pat.profile_id = pp.person_id) as pat_es_persona
+  from profiles.patient_profiles pat
+  left join profiles.person_profiles pp on pp.person_id = pat.profile_id;
+```
+```
+          patient_profile_id          |          person_profile_id           | pat_es_person_profile | pat_es_persona
+--------------------------------------+--------------------------------------+-----------------------+----------------
+ bbc6e86d-8c32-5d7f-a4b7-d4957a886360 | a1b2ba28-ef61-5497-8d68-01239a749e0f | f                     | t
+ 850e04d6-94dd-4075-94e1-05ffa55f9e44 | 73a83782-c007-4d42-a082-c1339abacfa8 | f                     | t
+ b5b0912b-6fd3-45a9-aac1-b16cd66b1476 | d0093717-89e4-46dc-8017-a60af028554c | f                     | t
+```
+
+`patient_profiles.profile_id` **es el id de la persona**, no el de
+`person_profiles`. Pero `ClinicalReadService.assertOwnRecord` hace:
+
+```ts
+const perfil = await this.personProfilesRepo.findById(em, patientProfileId);
+if (!link || !perfil || perfil.personId !== link.personId) throw new ForbiddenException(...)
+```
+
+es decir, busca `person_profiles` **por su `id`** usando un valor que es un id de
+**persona**. No encuentra fila, `perfil` es `null`, y el 403 sale siempre.
+
+**Por qué las pruebas no lo veían:** las cinco unitarias de `assertOwnRecord`
+mockean `personProfilesRepo.findById` para que devuelva `{ personId: 'persona-1' }`.
+El mock da por buena justamente la traducción de identificadores que está mal. Es
+el punto ciego que el propio CLAUDE.md advierte de las unitarias con el
+`EntityManager` mockeado — y la razón por la que este carril se corrió contra la
+API viva.
+
+**Arreglo propuesto** (no aplicado): la comprobación quiere dos cosas —que el
+perfil exista y que sea del actor—. Con la semántica real de los identificadores
+son `patientProfileId === link.personId` más la existencia del perfil de paciente
+de esa persona (`findByPersonAndType(em, link.personId, PROFILE_TYPE_PATIENT)`,
+que ya existe en el repositorio). Un uuid inventado sigue sin abrir nada, porque
+no va a coincidir con `link.personId`.
+
+**Por qué no lo toqué:** el arreglo depende de cuál es la semántica *pretendida*
+de `patient_profiles.profile_id`, y `profiles` es carril de Marcelo (regla 4 de
+la semana). Si la intención del modelo es que apunte a `person_profiles.id`,
+entonces el defecto está en los datos y no en esta comprobación, y eso se corrige
+en el pipeline, no acá. **Necesita su decisión; el parche de arriba es de tres
+líneas una vez decidido.**
+
+---
+
+## Fase 4 (adelantada) · el E2E de la vertical, contra la API viva
+
+Guion HTTP de la escalera completa con un doctor y un paciente **nuevos**, sin
+tocar la base a mano. **26 de 27 pasos en PASS**; el único FAIL es D-3.
+
+```
+ 1 registro publico del profesional                      201 PASS
+ 2 el profesional inicia sesion                          200 PASS
+ 3 publica su recurso de agenda (autoservicio)           201 PASS
+ 4 publica su plantilla con franjas                      201 PASS
+ 5 materializa los cupos                                 201 PASS   (280 cupos)
+ 6 alta publica del paciente                             201 PASS
+ 7 el paciente inicia sesion con su documento            200 PASS
+ 8 el paciente ve la lista de agendas                    200 PASS   (el doctor nuevo APARECE con su nombre)
+ 9 lista los cupos libres del doctor                     200 PASS
+10 retiene el cupo (hold)                                201 PASS
+11 solicita la cita desde el portal                      201 PASS
+12 el doctor acepta la cita                              200 PASS
+13 inicia la atencion                                    200 PASS
+14 abre el encuentro clinico                             201 PASS
+15 lee el vademecum del binding dinamico                 200 PASS   (Paracetamol N02BE01)
+16 prescribe (queda en borrador)                         201 PASS
+17 D-05: emitir SIN firmar se rechaza                    422 PASS
+18 firma la receta                                       200 PASS
+19 emite la receta                                       200 PASS
+20 cierra el encuentro                                   200 PASS
+21 completa la cita                                      200 PASS
+22 el DOCTOR ve el archivo del paciente                  200 PASS   (1 receta, 1 encuentro)
+23 el PACIENTE ve su propio archivo                      403 FAIL   <-- D-3
+24 rechaza una cita con motivo                           200 PASS
+25 reprograma la cita a otro cupo                        200 PASS
+26 cancela la cita con motivo                            200 PASS
+27 limite: rechazo con motivo de relleno se rechaza      422 PASS
+```
+
+Lo que esto deja probado, y que hasta ahora nadie había recorrido junto:
+
+- **El médico invisible está realmente cerrado en el backend**: un profesional
+  recién registrado publica su agenda con su propio token y aparece con su nombre
+  en la lista que ve un paciente. (Lo que faltaba era la UI — D-1.)
+- **D-05 se cumple de verdad**: emitir sin firmar da 422, firmar y emitir da 200.
+- **Los motivos obligatorios funcionan**, incluida la detección de relleno.
+  Ojo al escribir pruebas: con menos de 5 caracteres contesta **400** (`@MinLength`)
+  y no llega a la regla de relleno, que es la que responde 422.
+
+El guion queda en el scratchpad de la sesión (`vertical-p0.ps1`); el viernes se
+le suman los tramos nuevos de Pablo, Ender y Marcelo, que es lo que pide la fase 4.
+
+### Lo que la recorrida confirmó que SÍ está bien
+
+- El ciclo completo de la cita existe y pide motivo donde corresponde: `reject`,
+  `cancel` y `reschedule` exigen `reasonText`, con mínimo de 5 caracteres y un
+  rechazo explícito de relleno («na», «prueba», «…») que responde 422
+  `REASON_REQUIRED` / `REASON_PLACEHOLDER`.
+- **Falsa alarma que descarté:** el botón de check-in de la agenda del doctor.
+  El endpoint no admite `PRACTITIONER`, pero el front **ya** lo gatea con su
+  propia lista (`ROLES_QUE_OPERAN_CITAS`) y documenta la razón —registrar la
+  llegada es trabajo del mostrador—. No hay defecto; lo verifiqué antes de
+  anotarlo.
+
+---
+
 ## Hallazgos de entorno (bloqueaban a todo el equipo, no sólo a este carril)
 
 ### E-1 · `dist/` estaba obsoleto y le faltaba el módulo `surveys`
@@ -208,6 +448,25 @@ integración; cualquier otro int-spec en rojo es invisible.
 No lo toqué: `messaging` es el carril de Pablo y el arreglo (hacer idempotente el
 seed por `code`) le corresponde a él o a Marcelo. **Queda como bloqueador
 compartido.**
+
+---
+
+### E-4 · una prueba del front caía por tiempo, no por su contenido (CERRADO)
+
+Al sumar 5 pruebas al asistente de agenda, la suite completa del front empezó a
+dar 1 rojo en `definitions.spec.ts` («cada objetivo de cada paso existe en alguna
+plantilla»). **No era una aserción**: `Error: Test timed out in 5000ms`. Esa
+prueba recorre `src/app` con `readdirSync`/`readFileSync` —unos 1 700 archivos
+leídos de forma síncrona— y con la suite entera compitiendo por CPU se pasa del
+timeout por defecto de vitest.
+
+Medido: **3,26 s aislada · 5 040 ms dentro de la suite**. Línea base en `dev`
+(mismo árbol, misma máquina): **271/271 suites · 2 598 pruebas · EXIT 0**, así
+que el rojo aparecía sólo con la carga extra.
+
+Se le dio timeout propio (30 s) con la explicación al lado, en vez de adelgazar
+la comprobación: leer el árbol es justamente lo que hace que la prueba valga.
+**Suite completa en la rama: 271/271 · 2 603/2 603 · EXIT 0.**
 
 ---
 
