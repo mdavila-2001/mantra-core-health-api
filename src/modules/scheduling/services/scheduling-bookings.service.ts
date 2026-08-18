@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -30,6 +30,15 @@ import type {
   CancellationPolicySnapshot,
 } from '../entities';
 import { SCHED } from '../scheduling.concepts';
+import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
+import {
+  AGENDA_NOTICE_PORT,
+  type AgendaNoticePort,
+} from '../ports/agenda-notice.port';
+import {
+  avisoDeCambioDeCita,
+  type CambioDeCita,
+} from '../notices/agenda-notices';
 import { isValidBookingTransition } from '../state/booking-state-machine';
 import {
   requireReason,
@@ -53,6 +62,7 @@ import {
   WorkerBatchResultDto,
   BookingItemDto,
   BookingStatusReasonDto,
+  BookingDelayNoticeDto,
   SearchBookingsResponseDto,
   type BookingChannel,
 } from '../dto';
@@ -124,6 +134,14 @@ const ROLES_DE_AGENDA: readonly string[] = [
   'SUPERADMIN',
 ];
 
+/**
+ * Antelación de los recordatorios que se programan al aceptar (P8).
+ *
+ * Víspera y dos horas antes: la primera sirve para reorganizar el día, la
+ * segunda para salir a tiempo. Son las dos que el registro del cliente nombra.
+ */
+const DEFAULT_REMINDER_OFFSETS: readonly number[] = [24 * 60, 2 * 60];
+
 const DEFAULT_HOLD_TTL_SECONDS = 300;
 const DEFAULT_WORKER_BATCH = 100;
 
@@ -171,6 +189,9 @@ export class SchedulingBookingsService {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly historyRepo: HistoryRepository,
     private readonly appointmentsRepo: AppointmentsRepository,
+    private readonly noticeRepo: SchedulingNoticeRepository,
+    @Inject(AGENDA_NOTICE_PORT)
+    private readonly notices: AgendaNoticePort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SchedulingBookingsService.name);
@@ -577,7 +598,7 @@ export class SchedulingBookingsService {
       'Rescheduling booking',
     );
 
-    return this.em.transactional(async (tx) => {
+    const resultado = await this.em.transactional(async (tx) => {
       const booking = await this.bookingsRepo.findBookingByIdForUpdate(
         tx,
         bookingId,
@@ -663,6 +684,15 @@ export class SchedulingBookingsService {
 
       return { bookingId, fromSlotId, toSlotId: dto.toSlotId };
     });
+
+    // Con el motivo (P8): el aviso dice el horario nuevo y por qué se movió.
+    await this.avisarCambio(
+      bookingId,
+      'RESCHEDULED',
+      motivo,
+      this.actorKind(actor),
+    );
+    return resultado;
   }
 
   /**
@@ -682,6 +712,25 @@ export class SchedulingBookingsService {
     dto: CancelBookingDto,
     actor: AuthenticatedUser,
   ): Promise<CancelBookingResponseDto> {
+    return this.cancelarYAvisar(bookingId, dto, actor, 'CANCELLED');
+  }
+
+  /**
+   * El cuerpo compartido por cancelar y rechazar, con el aviso que corresponde
+   * a cada uno (P8).
+   *
+   * Existe porque los dos hacen exactamente lo mismo con la cita —liberan el
+   * cupo, registran la cancelación con su motivo— y lo único que cambia es qué
+   * se le dice al otro lado: «tu turno se canceló» no es «no se pudo tomar tu
+   * solicitud». Compartir el camino y separar el aviso es lo que evita que un
+   * rechazo llegue con el texto de una cancelación.
+   */
+  private async cancelarYAvisar(
+    bookingId: string,
+    dto: CancelBookingDto,
+    actor: AuthenticatedUser,
+    cambio: CambioDeCita,
+  ): Promise<CancelBookingResponseDto> {
     const motivo = requireReason(dto.reasonText, 'cancelar la cita');
 
     this.logger.info(
@@ -693,7 +742,7 @@ export class SchedulingBookingsService {
       'Cancelling booking',
     );
 
-    return this.em.transactional(async (tx) => {
+    const resultado = await this.em.transactional(async (tx) => {
       const booking = await this.bookingsRepo.findBookingByIdForUpdate(
         tx,
         bookingId,
@@ -794,6 +843,9 @@ export class SchedulingBookingsService {
 
       return { bookingId, feeAmount, capacityReleased };
     });
+
+    await this.avisarCambio(bookingId, cambio, motivo, dto.cancelledBy);
+    return resultado;
   }
 
   /**
@@ -814,7 +866,7 @@ export class SchedulingBookingsService {
       'Accepting booking request',
     );
 
-    return this.em.transactional(async (tx) => {
+    const resultado = await this.em.transactional(async (tx) => {
       const booking = await this.cargarParaOperar(tx, bookingId, actor);
       const fromState = booking.statusConceptId;
       this.assertTransition(fromState, CONCEPTS.BOOKING_CONFIRMED);
@@ -839,7 +891,11 @@ export class SchedulingBookingsService {
       // Los recordatorios se programan al aceptar y no al solicitar: recordar
       // un turno que todavía podía rechazarse sería prometer lo que nadie
       // comprometió.
-      const offsets = dto.reminderOffsetsMinutes ?? [];
+      // P8: por omisión, víspera y dos horas antes. Aceptar sin recordatorios
+      // dejaba el UC-41-13 dependiendo de que alguien los pidiera a mano, y el
+      // registro del cliente pide el recordatorio como comportamiento, no como
+      // opción. Un `[]` explícito sigue significando «ninguno».
+      const offsets = dto.reminderOffsetsMinutes ?? DEFAULT_REMINDER_OFFSETS;
       const slot =
         offsets.length === 0
           ? null
@@ -862,6 +918,11 @@ export class SchedulingBookingsService {
         occurredAt: confirmedAt.toISOString(),
       };
     });
+
+    // Fuera de la transacción a propósito (P8): un aviso que falla no puede
+    // deshacer una cita que ya se confirmó. Ver `ports/agenda-notice.port.ts`.
+    await this.avisarCambio(bookingId, 'ACCEPTED', undefined, 'PROVIDER');
+    return resultado;
   }
 
   /**
@@ -884,10 +945,11 @@ export class SchedulingBookingsService {
       'Rejecting booking request',
     );
 
-    return this.cancel(
+    return this.cancelarYAvisar(
       bookingId,
       { cancelledBy: 'PROVIDER', reasonText: dto.reasonText },
       actor,
+      'REJECTED',
     );
   }
 
@@ -1115,6 +1177,59 @@ export class SchedulingBookingsService {
     return booking;
   }
 
+  /**
+   * Avisa del cambio de estado a quien no lo provocó (P8, tareas 4 y 5).
+   *
+   * ## A quién
+   *
+   * Al paciente, salvo cuando fue él quien canceló o reprogramó: en ese caso el
+   * que necesita enterarse es el profesional. Avisarle al paciente de su propia
+   * cancelación sería ruido, y no avisarle al profesional lo dejaría con un
+   * hueco en la agenda que nadie le anunció.
+   *
+   * ## Por qué no lanza
+   *
+   * Porque se invoca **después** de que la transacción cerró y el estado ya es
+   * el nuevo. Un fallo del canal se registra y se descarta: la regla del README
+   * es que emitir jamás rompa una reserva. Ver `ports/agenda-notice.port.ts`.
+   */
+  private async avisarCambio(
+    bookingId: string,
+    cambio: CambioDeCita,
+    motivo: string | undefined,
+    actorKind: BookingActorKind,
+  ): Promise<void> {
+    const em = this.em.fork();
+    const booking = await this.noticeRepo.describeBooking(em, bookingId);
+    if (!booking) return;
+
+    const alProfesional = actorKind === 'PATIENT';
+    const destinatario = alProfesional
+      ? await this.noticeRepo.findResourceAccount(em, booking.resourceId)
+      : null;
+
+    if (alProfesional && destinatario === null) {
+      // Un recurso que no es de un profesional —una sala, un equipo— no tiene a
+      // quién avisarle. No es un fallo: es que no hay destinatario.
+      this.logger.info(
+        { operation: 'scheduling.notice.change', bookingId, cambio },
+        'El recurso de la cita no tiene profesional al que avisar',
+      );
+      return;
+    }
+
+    await this.notices.emit(
+      avisoDeCambioDeCita(
+        booking,
+        cambio,
+        motivo,
+        alProfesional
+          ? { userId: destinatario as string }
+          : { patientProfileId: booking.patientProfileId },
+      ),
+    );
+  }
+
   /** Si el actor administra agendas ajenas por oficio. */
   private operaCualquierAgenda(actor: AuthenticatedUser): boolean {
     return actor.roles.some((rol) => ROLES_DE_AGENDA.includes(rol));
@@ -1244,10 +1359,25 @@ export class SchedulingBookingsService {
       page.map(({ booking }) => booking.id),
       tieneMotivo,
     );
+    // Segunda pasada sobre el mismo historial, con otro predicado: la demora
+    // (P8) no es un motivo de cambio de estado y `latestBySource` devuelve una
+    // revisión por agregado, así que pedir las dos cosas juntas dejaría fuera
+    // la que llegó antes.
+    const demoras = await this.historyRepo.latestBySource(
+      em,
+      'appointment_bookings',
+      page.map(({ booking }) => booking.id),
+      esDemora,
+    );
 
     return {
       items: page.map(({ booking, slot }) =>
-        this.aBookingItem(booking, slot, motivos.get(booking.id)),
+        this.aBookingItem(
+          booking,
+          slot,
+          motivos.get(booking.id),
+          demoras.get(booking.id),
+        ),
       ),
       count: page.length,
       limit,
@@ -1277,8 +1407,19 @@ export class SchedulingBookingsService {
       [booking.id],
       tieneMotivo,
     );
+    const demoras = await this.historyRepo.latestBySource(
+      em,
+      'appointment_bookings',
+      [booking.id],
+      esDemora,
+    );
 
-    return this.aBookingItem(booking, slot, motivos.get(booking.id));
+    return this.aBookingItem(
+      booking,
+      slot,
+      motivos.get(booking.id),
+      demoras.get(booking.id),
+    );
   }
 
   /**
@@ -1293,6 +1434,7 @@ export class SchedulingBookingsService {
     booking: AppointmentBookings,
     slot: { startAt: Date; endAt?: Date } | null,
     motivo: HistoryRevision | undefined,
+    demora?: HistoryRevision,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -1313,6 +1455,7 @@ export class SchedulingBookingsService {
       checkedInAt: booking.checkedInAt,
       reasonText: booking.reasonText,
       statusReason: aStatusReason(motivo),
+      delayNotice: aDelayNotice(demora),
       createdAt: booking.createdAt,
     };
   }
@@ -1415,6 +1558,42 @@ function leerSnapshot(
 function tieneMotivo(revision: HistoryRevision): boolean {
   const motivo = leerSnapshot(revision)?.reasonText;
   return typeof motivo === 'string' && motivo.trim().length > 0;
+}
+
+/**
+ * Si la revisión es una demora informada (P8).
+ *
+ * Se reconoce por sus minutos y no por el concepto de operación porque el
+ * predicado sólo ve el snapshot; los minutos son, además, lo único sin lo cual
+ * la demora no se puede mostrar.
+ */
+function esDemora(revision: HistoryRevision): boolean {
+  const minutos = leerSnapshot(revision)?.delayMinutes;
+  return typeof minutos === 'number' && minutos > 0;
+}
+
+/**
+ * La demora tal como sale por la API.
+ *
+ * `undefined` cuando no hay ninguna: quien la consuma tiene que poder preguntar
+ * «¿se demora?» sin inspeccionar campos vacíos, igual que con el motivo.
+ */
+function aDelayNotice(
+  revision: HistoryRevision | undefined,
+): BookingDelayNoticeDto | undefined {
+  if (!revision) return undefined;
+  const snapshot = leerSnapshot(revision);
+  const minutos = snapshot?.delayMinutes;
+  if (typeof minutos !== 'number' || minutos <= 0) return undefined;
+
+  const mensaje = snapshot?.reasonText;
+  return {
+    delayMinutes: minutos,
+    ...(typeof mensaje === 'string' && mensaje.trim().length > 0
+      ? { message: mensaje }
+      : {}),
+    announcedAt: revision.recordedAt,
+  };
 }
 
 /**

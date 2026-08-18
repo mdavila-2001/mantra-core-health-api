@@ -24,6 +24,7 @@ import {
 } from '../../../common';
 import {
   SchedulingBookingsService,
+  SchedulingDelayService,
   SchedulingWaitlistService,
 } from '../services';
 import {
@@ -39,6 +40,8 @@ import {
   ScheduleRemindersResponseDto,
   BookingItemDto,
   SearchBookingsResponseDto,
+  DelayBookingDto,
+  DelayNoticeResponseDto,
 } from '../dto';
 
 /** Operaciones sobre una cita ya confirmada. */
@@ -55,6 +58,7 @@ export class SchedulingBookingsController {
   constructor(
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
+    private readonly delayService: SchedulingDelayService,
   ) {}
 
   /**
@@ -243,6 +247,29 @@ export class SchedulingBookingsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CheckInResponseDto> {
     return this.bookingsService.checkIn(id, actor);
+  }
+
+  /**
+   * P8: el profesional avisa que se demora sobre **esta** cita.
+   *
+   * No cambia el estado de la cita ni toca su cupo: es comunicación. La demora
+   * queda en el historial del turno —así el paciente la ve aunque no abra la
+   * campana— y sale como aviso in-app.
+   */
+  @Post(':id/delay')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Informar una demora sobre una cita',
+    description:
+      'Sólo la informa quien atiende esa agenda. No mueve el turno: avisa que empieza más tarde.',
+  })
+  delay(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DelayBookingDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DelayNoticeResponseDto> {
+    return this.delayService.delayBooking(id, dto, actor);
   }
 
   /** UC-41-13. */

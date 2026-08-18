@@ -26,6 +26,7 @@ import {
 import {
   SchedulingCatalogService,
   SchedulingBookingsService,
+  SchedulingDelayService,
   SchedulingWaitlistService,
 } from '../services';
 import {
@@ -47,6 +48,10 @@ import {
   CreateWaitlistEntryDto,
   WaitlistEntryResponseDto,
   ResourceAgendaResponseDto,
+  ListWaitlistQueryDto,
+  ListWaitlistResponseDto,
+  DelayResourceDto,
+  DelayNoticeResponseDto,
 } from '../dto';
 
 /**
@@ -63,11 +68,13 @@ export class SchedulingController {
    * @param catalogService - Valor de catalog service requerido por la operación.
    * @param bookingsService - Valor de bookings service requerido por la operación.
    * @param waitlistService - Valor de waitlist service requerido por la operación.
+   * @param delayService - Avisos de demora del profesional (P8).
    */
   constructor(
     private readonly catalogService: SchedulingCatalogService,
     private readonly bookingsService: SchedulingBookingsService,
     private readonly waitlistService: SchedulingWaitlistService,
+    private readonly delayService: SchedulingDelayService,
   ) {}
 
   /**
@@ -286,5 +293,52 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<WaitlistEntryResponseDto> {
     return this.waitlistService.enroll(dto, actor);
+  }
+
+  /**
+   * P8 · UC-41-11 (lectura): en qué listas de espera está un paciente.
+   *
+   * Faltaba: el módulo dejaba anotarse y no ofrecía forma de comprobarlo, así
+   * que «estás en espera» sólo podía ser una suposición del cliente.
+   */
+  @Get('waitlist')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @ApiOperation({
+    summary: 'Listar las entradas de lista de espera de un paciente',
+  })
+  @ApiQuery({ name: 'patientProfileId', required: true, format: 'uuid' })
+  @ApiQuery({
+    name: 'includeClosed',
+    required: false,
+    description: 'Incluye las cubiertas y canceladas (por omisión, no)',
+  })
+  @ApiQuery({ name: 'limit', required: false })
+  listWaitlist(
+    @Query() query: ListWaitlistQueryDto,
+  ): Promise<ListWaitlistResponseDto> {
+    return this.waitlistService.listForPatient(query);
+  }
+
+  /**
+   * P8: «me demoro veinte minutos hoy».
+   *
+   * Es como el profesional lo dice en la práctica —la demora es de la jornada,
+   * no de un turno suelto— y por eso cuelga del recurso. Alcanza a las citas
+   * vigentes de la ventana informada; por omisión, de ahora al fin del día.
+   */
+  @Post('resources/:id/delay')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Informar una demora que alcanza a toda la agenda del recurso',
+    description:
+      'Avisa a los pacientes con cita vigente en la ventana. No mueve ningún turno ni toca los cupos.',
+  })
+  delayResource(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DelayResourceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DelayNoticeResponseDto> {
+    return this.delayService.delayResource(id, dto, actor);
   }
 }
