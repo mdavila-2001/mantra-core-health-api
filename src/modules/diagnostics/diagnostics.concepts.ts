@@ -1,4 +1,5 @@
 import { defineModuleConcepts } from '../../common/seed/concept-seed';
+import { CLIN } from '../clinical/clinical.concepts';
 
 /**
  * Conceptos propios del módulo Diagnostics (20 — laboratorio, imagen médica y
@@ -231,3 +232,22 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
       display: 'Provenance derivation activity',
     },
   });
+
+/**
+ * Las categorías de `service_requests` que forman el circuito diagnóstico.
+ *
+ * Laboratorio la declara `clinical` (es suya desde antes); imagenología la
+ * declara este módulo. Son las dos únicas: si mañana aparece otra, se agrega
+ * acá y **las dos lecturas** —la del personal y la del portal del paciente— la
+ * muestran sin cambiar nada más.
+ *
+ * Vive en el catálogo y no en un servicio porque tiene dos consumidores:
+ * `DiagnosticsOrdersService` (mostrador) y `DiagnosticsPatientResultsService`
+ * (portal). Cuando estaba declarada en cada uno, agregar una categoría exigía
+ * tocar dos lugares y olvidarse de uno dejaba una pantalla mostrando menos que
+ * la otra, en silencio.
+ */
+export const CATEGORIAS_DIAGNOSTICAS: readonly string[] = [
+  CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+  DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+];

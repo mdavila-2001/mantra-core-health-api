@@ -153,6 +153,26 @@ export class CommunityPublicService {
         )
       : undefined;
 
+    // Un vertical pedido que no tiene concepto de sujeto **no se puede
+    // filtrar**, y dejar caer el filtro devuelve el directorio entero: era lo
+    // que hacía `/public/search/medications`, que servía la lista completa de
+    // profesionales a quien buscaba un remedio. Un medicamento no es un perfil
+    // —vive en el catálogo de farmacia, no en `community.public_profiles`—, así
+    // que acá no hay nada que devolver y la respuesta honesta es vacía, como ya
+    // hace `nearby` mientras no existan las coordenadas.
+    if (filtros.kind !== undefined && targetTypeConceptId === undefined) {
+      this.logger.info(
+        { operation: 'community.public.search', kind: filtros.kind },
+        'Vertical sin sujeto en el directorio: se sirve vacío en vez del directorio completo',
+      );
+      return {
+        items: [],
+        nextCursor: null,
+        totalHint: 0,
+        generatedAt: new Date().toISOString(),
+      };
+    }
+
     const rows = await this.repo.searchProfiles(
       em,
       {

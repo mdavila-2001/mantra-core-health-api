@@ -25,3 +25,10 @@ export type {
   ListResourcesFilter,
   ListSlotsFilter,
 } from './scheduling-agenda.repository';
+
+export { SchedulingNoticeRepository } from './scheduling-notice.repository';
+export type {
+  BookingNoticeSnapshot,
+  SlotNoticeSnapshot,
+  WaitlistEntrySnapshot,
+} from './scheduling-notice.repository';

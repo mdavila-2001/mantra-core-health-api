@@ -30,7 +30,7 @@
  * Además del padrón administrado por el admin, siembra **una práctica** (sin
  * ella `GET /practices` responde vacío y el selector de contabilidad no tiene
  * qué ofrecer) y **una cuenta de médico con login real**
- * (`DOCTOR_EMAIL` / `DOCTOR_PASSWORD`, por defecto `doctora.demo@redesa.test`
+ * (`DOCTOR_EMAIL` / `DOCTOR_PASSWORD`, por defecto el buzón real del padrón
  * / `D3mo-passw0rd!`): es el primer profesional del padrón, así que entra a
  * la aplicación y ve su propio consultorio con agenda, pacientes e historias
  * ya cargados — no una pantalla vacía a la espera de un segundo script.
@@ -45,6 +45,7 @@
 import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { CORREOS, resumenDeCorreos } from './correos-reales.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
@@ -64,7 +65,7 @@ const BASE = arg(
   'base-url',
   process.env.API_BASE_URL ?? 'http://localhost:3000',
 );
-const EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'admin@redesa.test';
+const EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? CORREOS.admin;
 const PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
 /**
  * Credenciales fijas del primer médico sembrado, para que el equipo tenga una
@@ -76,7 +77,7 @@ const PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
  * usaba ese script, una migración de credenciales no rompe nada que ya
  * estuviera anotado en algún lado.
  */
-const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? 'doctora.demo@redesa.test';
+const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? CORREOS.doctor;
 const DOCTOR_PASSWORD = process.env.DOCTOR_PASSWORD ?? 'D3mo-passw0rd!';
 const DOCTORS = Number(arg('doctors', 8));
 const PATIENTS = Number(arg('patients', 24));
@@ -632,7 +633,14 @@ for (let index = 0; index < DOCTORS; index += 1) {
       {
         body: {
           email: DOCTOR_EMAIL,
-          displayName: `Dr(a). ${nombre} ${apellido}`,
+          // Sin honorífico, y a propósito: el registro real no lo pide ni lo
+          // escribe, así que un seed que lo mete fabrica la inconsistencia que
+          // la analista funcional reportó —tarjetas con «Dr(a)», otras con
+          // «Dra», otras sin nada— sobre datos que en producción serían
+          // uniformes. El tratamiento, el día que el producto lo quiera, sale
+          // de un dato del profesional y lo pone la vista una sola vez, no cada
+          // origen de alta por su cuenta.
+          displayName: `${nombre} ${apellido}`,
           licenseNumber: `LIC-${suffix}`,
           credentialNumber: `CRED-${suffix}`,
           professionalTitle: titulo,
@@ -710,7 +718,14 @@ for (let index = 0; index < DOCTORS; index += 1) {
       {
         body: {
           practitionerCode: `MED-${suffix}`,
-          displayName: `Dr(a). ${nombre} ${apellido}`,
+          // Sin honorífico, y a propósito: el registro real no lo pide ni lo
+          // escribe, así que un seed que lo mete fabrica la inconsistencia que
+          // la analista funcional reportó —tarjetas con «Dr(a)», otras con
+          // «Dra», otras sin nada— sobre datos que en producción serían
+          // uniformes. El tratamiento, el día que el producto lo quiera, sale
+          // de un dato del profesional y lo pone la vista una sola vez, no cada
+          // origen de alta por su cuenta.
+          displayName: `${nombre} ${apellido}`,
           licenseNumber: `LIC-${suffix}`,
           credentialNumber: `CRED-${suffix}`,
           professionalTitle: titulo,
@@ -1944,6 +1959,10 @@ function writeReport() {
   );
   console.log(`  Detalle completo: ${OUT}`);
   console.log(`  Cuenta de prueba:  ${DOCTOR_EMAIL} / ${DOCTOR_PASSWORD}`);
+  // Dónde mirar: sin esto hay que abrir `correos-reales.mjs` para saber a qué
+  // buzón llegó el correo de verificación que la siembra acaba de disparar.
+  console.log(`
+${resumenDeCorreos()}`);
 
   if (failed.length > 0) {
     console.log('\n  Fuera de lo esperado:');

@@ -30,7 +30,10 @@ function build() {
     write: mockFn((_op: string, work: any) => work({})),
     transaction: mockFn((_op: string, work: any) => work({}, transaction)),
   };
-  const reader = { findSlotsWithActiveCandidates: mockFn() };
+  const reader = {
+    findSlotsWithActiveCandidates: mockFn(),
+    findEntriesForPatient: mockFn().mockResolvedValue([]),
+  };
   const writer = {
     enroll: mockFn(),
     findSlotCapacity: mockFn(),
@@ -42,14 +45,22 @@ function build() {
     markRemindersSent: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // P8: el colaborador que emite los avisos. Por omisión no avisa a nadie —lo
+  // que importa acá es que el caso de uso le pase los ids correctos—; las
+  // pruebas del aviso viven en su propio archivo.
+  const avisos = {
+    avisarCupoLiberado: mockFn().mockResolvedValue(0),
+    avisarRecordatorios: mockFn().mockResolvedValue(0),
+  };
 
   const service = new SchedulingWaitlistService(
     session as any,
     reader as any,
     writer as any,
+    avisos as any,
     logger as any,
   );
-  return { service, session, transaction, reader, writer, logger };
+  return { service, session, transaction, reader, writer, avisos, logger };
 }
 
 describe('SchedulingWaitlistService', () => {
@@ -149,6 +160,44 @@ describe('SchedulingWaitlistService', () => {
         { transaction: d.transaction },
       );
     });
+
+    /* P8 · el cupo liberado deja de ser un dato interno --------------------- */
+
+    it('avisa a los candidatos promovidos, fuera de la transacción', async () => {
+      const d = build();
+      d.writer.findSlotCapacity.mockResolvedValue({
+        id: SLOT_ID,
+        resourceId: 'res-1',
+        remainingCapacity: 3,
+      });
+      d.writer.findActiveCandidates.mockResolvedValue([
+        { id: 'c1', priority: 5 },
+        { id: 'c2', priority: 1 },
+      ]);
+      d.writer.markCandidatesFulfilled.mockResolvedValue(2);
+      d.avisos.avisarCupoLiberado.mockResolvedValue(2);
+
+      const res = await d.service.promoteWaitlist(SLOT_ID);
+
+      expect(d.avisos.avisarCupoLiberado).toHaveBeenCalledWith(SLOT_ID, [
+        'c1',
+        'c2',
+      ]);
+      expect(res.detail).toMatch(/avisados \(2 de 2\)/);
+    });
+
+    it('sin promoción no avisa a nadie', async () => {
+      const d = build();
+      d.writer.findSlotCapacity.mockResolvedValue({
+        id: SLOT_ID,
+        resourceId: 'res-1',
+        remainingCapacity: 0,
+      });
+
+      await d.service.promoteWaitlist(SLOT_ID);
+
+      expect(d.avisos.avisarCupoLiberado).toHaveBeenCalledWith(SLOT_ID, []);
+    });
   });
 
   describe('enroll (UC-41-11)', () => {
@@ -240,6 +289,85 @@ describe('SchedulingWaitlistService', () => {
         { transaction: d.transaction },
       );
       expect(res.processed).toBe(2);
+    });
+
+    /* P8 · el recordatorio se entrega, no sólo se marca ---------------------- */
+
+    it('entrega por el canal in-app los recordatorios que acaba de despachar', async () => {
+      const d = build();
+      d.writer.findDueReminders.mockResolvedValue([{ id: 'r1' }, { id: 'r2' }]);
+      d.writer.markRemindersSent.mockResolvedValue(2);
+      d.avisos.avisarRecordatorios.mockResolvedValue(2);
+
+      const res = await d.service.dispatchReminders();
+
+      expect(d.avisos.avisarRecordatorios).toHaveBeenCalledWith(['r1', 'r2']);
+      expect(res.detail).toMatch(/canal in-app \(2 de 2\)/);
+    });
+
+    it('un lote vacío no intenta entregar nada', async () => {
+      const d = build();
+      d.writer.findDueReminders.mockResolvedValue([]);
+      d.writer.markRemindersSent.mockResolvedValue(0);
+
+      const res = await d.service.dispatchReminders();
+
+      expect(d.avisos.avisarRecordatorios).toHaveBeenCalledWith([]);
+      expect(res.detail).toMatch(/No había recordatorios vencidos/);
+    });
+  });
+
+  describe('listForPatient (UC-41-11, lectura — P8)', () => {
+    it('por omisión trae sólo las esperas activas', async () => {
+      const d = build();
+
+      await d.service.listForPatient({ patientProfileId: 'paciente-1' });
+
+      expect(d.reader.findEntriesForPatient).toHaveBeenCalledWith(
+        'paciente-1',
+        [CONCEPTS.WAITLIST_ACTIVE],
+        50,
+      );
+    });
+
+    it('con includeClosed las trae todas', async () => {
+      const d = build();
+
+      await d.service.listForPatient({
+        patientProfileId: 'paciente-1',
+        includeClosed: 'true',
+        limit: 10,
+      });
+
+      expect(d.reader.findEntriesForPatient).toHaveBeenCalledWith(
+        'paciente-1',
+        undefined,
+        10,
+      );
+    });
+
+    it('devuelve el nombre de la agenda, no su uuid', async () => {
+      const d = build();
+      d.reader.findEntriesForPatient.mockResolvedValue([
+        {
+          id: 'entry-1',
+          tenantId: 'tenant-1',
+          patientProfileId: 'paciente-1',
+          resourceId: 'res-1',
+          resourceLabel: 'Dra. Rivas',
+          priority: 0,
+          statusConceptId: CONCEPTS.WAITLIST_ACTIVE,
+          createdAt: new Date('2026-08-18T10:00:00.000Z'),
+        },
+      ]);
+
+      const res = await d.service.listForPatient({
+        patientProfileId: 'paciente-1',
+      });
+
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].resourceLabel).toBe('Dra. Rivas');
+      expect(res.items[0].statusConceptId).toBe(CONCEPTS.WAITLIST_ACTIVE);
     });
   });
 });

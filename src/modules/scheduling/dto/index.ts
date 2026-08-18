@@ -35,7 +35,16 @@ export {
   WorkerBatchResultDto,
   WorkerBatchDto,
   WaitlistCandidateSlotsResponseDto,
+  DelayBookingDto,
+  DelayResourceDto,
+  DelayNoticeResponseDto,
+  ListWaitlistQueryDto,
+  WaitlistEntryItemDto,
+  ListWaitlistResponseDto,
   BOOKING_CHANNELS,
+  MIN_DELAY_MINUTES,
+  MAX_DELAY_MINUTES,
+  MAX_DELAY_MESSAGE_LENGTH,
 } from './scheduling-bookings.dto';
 export type { BookingChannel } from './scheduling-bookings.dto';
 
@@ -54,6 +63,7 @@ export {
   BookableSlotItemDto,
   ResourceAgendaResponseDto,
   BookingStatusReasonDto,
+  BookingDelayNoticeDto,
   BookingItemDto,
   SearchBookingsResponseDto,
 } from './scheduling-read.dto';

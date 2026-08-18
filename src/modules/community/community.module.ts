@@ -10,10 +10,7 @@ import { MessagingModule } from '../messaging/messaging.module';
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
 import { PersonAccountLinksRepository } from '../profiles/repositories';
-// La elegibilidad de una reseña se apoya en la atención que la respalda. Se
-// declara **el repositorio** y no se importa el módulo clínico entero, igual
-// que hace `scheduling` con `AppointmentsRepository`.
-import { EncountersRepository } from '../clinical/repositories';
+import { ClinicalModule } from '../clinical/clinical.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -77,9 +74,14 @@ import {
   // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
   // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
   // manda el cliente.
+  // `ClinicalModule` por `EncountersRepository`: `CommunityReviewsService` exige
+  // atención real antes de aceptar una reseña. No hay ciclo — `clinical` no
+  // importa nada de `community` — y es el mismo patrón que ya usa
+  // `procedures_perioperative`.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommonModule,
+    ClinicalModule,
     MessagingModule,
   ],
   controllers: [
@@ -97,9 +99,6 @@ import {
   ],
   providers: [
     // Repositorios
-    // `EncountersRepository` es del módulo clínico: la elegibilidad de una
-    // reseña se apoya en la atención que la respalda.
-    EncountersRepository,
     PublicProfilesRepository,
     PostsRepository,
     CommentsRepository,
