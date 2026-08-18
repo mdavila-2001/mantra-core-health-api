@@ -425,6 +425,15 @@ export class NotificationsService implements InAppNotificationEmitter {
 
       // El canal in-app no sale a ningún proveedor: la entrega es escribir en
       // la bandeja del destinatario.
+      //
+      // La entrega se materializa **antes** de crear la fila de la bandeja, y
+      // no por gusto: `in_app_notifications.notification_delivery_id` es una FK
+      // NOT NULL a la entrega, y el orden en que la unidad de trabajo inserta
+      // no lo decide el orden en que se crean las entidades. Sin este `flush`,
+      // Postgres rechazaba la bandeja con
+      // `fk_in_app_notifications_notification_delivery_id` — es decir, **toda**
+      // notificación in-app fallaba. No se había visto porque hasta el carril
+      // P8 no existía ningún canal in-app sembrado y esta rama nunca corría.
       let inAppNotificationId: string | undefined;
       const channel = await this.notificationsRepo.findChannelById(
         tx,
@@ -440,6 +449,10 @@ export class NotificationsService implements InAppNotificationEmitter {
             { requestId },
           );
         }
+
+        // Ver el comentario de arriba: la entrega tiene que existir en la base
+        // antes de que la bandeja la referencie.
+        await tx.flush();
 
         inAppNotificationId = this.notificationsRepo.createInAppNotification(
           tx,
