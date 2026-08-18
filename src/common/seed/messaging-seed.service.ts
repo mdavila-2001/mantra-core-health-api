@@ -105,9 +105,45 @@ export class MessagingSeedService {
   }
 
   /** Canal lógico EMAIL. */
+  /**
+   * El id **vigente** de un canal, buscado por su código.
+   *
+   * Existe porque el id de esta fila puede no ser el que este seed calcula: el
+   * paquete de `salud-db` siembra los mismos canales con uuid derivados de otra
+   * forma, y el que gana es el que ya está en la base. Las filas hijas tienen
+   * que apuntar a ése o la FK las rechaza.
+   *
+   * @param em - Contexto de persistencia.
+   * @param code - Código del canal.
+   * @param porDefecto - El id que este seed usaría si tuviera que crearlo.
+   * @returns El id que hay que referenciar.
+   */
+  private async idDeCanal(
+    em: EntityManager,
+    code: string,
+    porDefecto: string,
+  ): Promise<string> {
+    const fila = await em.findOne(MessageChannels, { code });
+    return fila?.id ?? porDefecto;
+  }
+
+  /** El id vigente de un proveedor, por su código. Ver {@link idDeCanal}. */
+  private async idDeProveedor(
+    em: EntityManager,
+    code: string,
+    porDefecto: string,
+  ): Promise<string> {
+    const fila = await em.findOne(MessagingProviders, { code });
+    return fila?.id ?? porDefecto;
+  }
+
   private async seedChannel(em: EntityManager, now: Date): Promise<number> {
+    // Mismo criterio que {@link seedInAppChannel}: la clave natural es la que
+    // tiene única, y es la que decide si esta fila ya existe.
     if (
-      await em.findOne(MessageChannels, { id: MESSAGING_SEED.emailChannelId })
+      await em.findOne(MessageChannels, {
+        code: MESSAGING_SEED.emailChannelCode,
+      })
     )
       return 0;
     em.create(
@@ -131,7 +167,7 @@ export class MessagingSeedService {
   private async seedProvider(em: EntityManager, now: Date): Promise<number> {
     if (
       await em.findOne(MessagingProviders, {
-        id: MESSAGING_SEED.emailProviderId,
+        code: MESSAGING_SEED.emailProviderCode,
       })
     )
       return 0;
@@ -167,8 +203,14 @@ export class MessagingSeedService {
     em: EntityManager,
     now: Date,
   ): Promise<number> {
+    // Por CÓDIGO y no por id: `uq_message_channels_code` es la restricción que
+    // existe, y el paquete de seeds ya sembró `IN_APP` con un uuid derivado de
+    // otra forma. Buscar por id no lo encontraba y el INSERT moría contra esa
+    // única — con el arnés de integración abortando la suite entera.
     if (
-      await em.findOne(MessageChannels, { id: MESSAGING_SEED.inAppChannelId })
+      await em.findOne(MessageChannels, {
+        code: MESSAGING_SEED.inAppChannelCode,
+      })
     )
       return 0;
     em.create(
@@ -206,7 +248,7 @@ export class MessagingSeedService {
   ): Promise<number> {
     if (
       await em.findOne(MessagingProviders, {
-        id: MESSAGING_SEED.inAppProviderId,
+        code: MESSAGING_SEED.inAppProviderCode,
       })
     )
       return 0;
@@ -248,12 +290,22 @@ export class MessagingSeedService {
       })
     )
       return 0;
+    const channelId = await this.idDeCanal(
+      em,
+      MESSAGING_SEED.inAppChannelCode,
+      MESSAGING_SEED.inAppChannelId,
+    );
+    const providerId = await this.idDeProveedor(
+      em,
+      MESSAGING_SEED.inAppProviderCode,
+      MESSAGING_SEED.inAppProviderId,
+    );
     em.create(
       ProviderChannelConfigs,
       {
         id: MESSAGING_SEED.inAppChannelConfigId,
-        providerId: MESSAGING_SEED.inAppProviderId,
-        channelId: MESSAGING_SEED.inAppChannelId,
+        providerId,
+        channelId,
         tenantId: SEED.tenantId,
         priority: 1,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
@@ -280,12 +332,22 @@ export class MessagingSeedService {
       })
     )
       return 0;
+    const channelId = await this.idDeCanal(
+      em,
+      MESSAGING_SEED.emailChannelCode,
+      MESSAGING_SEED.emailChannelId,
+    );
+    const providerId = await this.idDeProveedor(
+      em,
+      MESSAGING_SEED.emailProviderCode,
+      MESSAGING_SEED.emailProviderId,
+    );
     em.create(
       ProviderChannelConfigs,
       {
         id: MESSAGING_SEED.emailChannelConfigId,
-        providerId: MESSAGING_SEED.emailProviderId,
-        channelId: MESSAGING_SEED.emailChannelId,
+        providerId,
+        channelId,
         tenantId: SEED.tenantId,
         priority: 1,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
