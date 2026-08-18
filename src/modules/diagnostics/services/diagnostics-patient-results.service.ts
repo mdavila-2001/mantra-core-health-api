@@ -20,8 +20,7 @@ import {
   platformPermissionId,
 } from '../../authz/authz.seed';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
-import { DIAG } from '../diagnostics.concepts';
-import { CLIN } from '../../clinical/clinical.concepts';
+import { CATEGORIAS_DIAGNOSTICAS, DIAG } from '../diagnostics.concepts';
 import type {
   DiagnosticResultShareDto,
   DiagnosticResultSharesResponseDto,
@@ -43,19 +42,6 @@ import type {
 const RESULT_READ_PERMISSION_ID = platformPermissionId(
   DIAGNOSTIC_RESULT_READ_PERMISSION_CODE,
 );
-
-/**
- * Las categorías que forman el circuito diagnóstico.
- *
- * `clinical.service_requests` guarda toda orden de servicio —derivaciones e
- * interconsultas incluidas—, así que sin este filtro el portal le mostraría al
- * paciente, bajo el título «mis estudios», cosas que no son estudios. Mismo
- * criterio que la lectura del personal en `DiagnosticsOrdersService`.
- */
-const CATEGORIAS_DIAGNOSTICAS: readonly string[] = [
-  CLIN.SERVICE_REQUEST_CATEGORY_LAB,
-  DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
-];
 
 /**
  * Los resultados diagnósticos vistos **por la persona a la que pertenecen**.
@@ -217,10 +203,18 @@ export class DiagnosticsPatientResultsService {
    *
    * Un mismo estudio puede estar publicado por varios centros con textos
    * distintos, y la orden todavía no eligió centro: acá se queda con el primero
-   * que tenga texto. Es una simplificación consciente y no un empate resuelto
-   * al azar —el orden de `find` es estable— pero el texto definitivo es el del
-   * centro donde la persona termine reservando, y eso lo sabrá la pantalla de
-   * reserva (J2), no esta lectura.
+   * de la lista. Ese «primero» es **el de nombre alfabéticamente menor entre
+   * las ofertas activas**, porque el repositorio ordena por `displayName`; no
+   * es el mejor texto ni el más nuevo, es simplemente uno **estable**.
+   *
+   * Una versión anterior de este comentario decía que «el orden de `find` es
+   * estable» sin `ORDER BY`. Es falso —Postgres no lo garantiza— y la
+   * consecuencia era que dos centros con indicaciones contradictorias podían
+   * dar una respuesta distinta entre dos peticiones idénticas.
+   *
+   * Sigue siendo una simplificación: el texto definitivo es el del centro donde
+   * la persona termine reservando, y eso lo sabrá la pantalla de reserva (J2),
+   * no esta lectura.
    *
    * @param em - Contexto de persistencia.
    * @param conceptIds - Conceptos de los estudios pedidos.
@@ -267,13 +261,31 @@ export class DiagnosticsPatientResultsService {
     );
     const visibles = await this.projectReleasedResults(em, informes);
 
-    const porOrden = new Map<string, string>();
+    // Una orden puede tener más de un informe visible: un estudio que se repite
+    // por muestra insuficiente deja el primero liberado y agrega el segundo.
+    // Gana **el liberado más recientemente**, que es el que la persona vino a
+    // ver; quedarse con el último que apareció en la lista sería resolver un
+    // empate clínico por orden de iteración.
+    const porOrden = new Map<string, { reportId: string; releasedAt: Date }>();
     for (const resultado of visibles) {
-      if (resultado.serviceRequestId !== undefined) {
-        porOrden.set(resultado.serviceRequestId, resultado.reportId);
+      const ordenId = resultado.serviceRequestId;
+      if (ordenId === undefined) {
+        continue;
+      }
+      const actual = porOrden.get(ordenId);
+      if (
+        actual === undefined ||
+        resultado.releasedAt.getTime() > actual.releasedAt.getTime()
+      ) {
+        porOrden.set(ordenId, {
+          reportId: resultado.reportId,
+          releasedAt: resultado.releasedAt,
+        });
       }
     }
-    return porOrden;
+    return new Map(
+      [...porOrden].map(([ordenId, elegido]) => [ordenId, elegido.reportId]),
+    );
   }
 
   /**

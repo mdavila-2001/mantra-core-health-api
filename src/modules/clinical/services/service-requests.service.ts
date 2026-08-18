@@ -91,7 +91,6 @@ export class ServiceRequestsService {
       // visible para el paciente —`GET /diagnostic-results/me/orders`—, así que
       // la ausencia del aviso retrasa el enterarse, no lo impide.
 
-
       return {
         id: sr.id,
         patientProfileId: sr.patientProfileId,

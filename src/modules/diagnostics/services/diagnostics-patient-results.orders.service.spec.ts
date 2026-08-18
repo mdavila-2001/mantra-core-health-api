@@ -187,6 +187,45 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     expect(salida.items[0].reportId).toBe('rep-1');
   });
 
+  it('con dos informes visibles de la misma orden, enlaza el liberado más reciente', async () => {
+    const { service, ordersRepo, reportsRepo } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([orden('o1')]);
+    ordersRepo.findReportsByServiceRequests.mockResolvedValue([
+      {
+        id: 'rep-viejo',
+        serviceRequestId: 'o1',
+        codeConceptId: CONCEPTO_HEMOGRAMA,
+      },
+      {
+        id: 'rep-nuevo',
+        serviceRequestId: 'o1',
+        codeConceptId: CONCEPTO_HEMOGRAMA,
+      },
+    ]);
+    reportsRepo.findVersionsByReports.mockResolvedValue([
+      { id: 'ver-viejo', diagnosticReportId: 'rep-viejo', versionNumber: 1 },
+      { id: 'ver-nuevo', diagnosticReportId: 'rep-nuevo', versionNumber: 1 },
+    ]);
+    reportsRepo.findReleaseEventsByVersions.mockResolvedValue([
+      {
+        diagnosticReportVersionId: 'ver-viejo',
+        patientVisibilityConceptId: DIAG.VISIBILITY_PATIENT_VISIBLE,
+        recordedAt: new Date('2026-08-10T09:00:00Z'),
+      },
+      {
+        diagnosticReportVersionId: 'ver-nuevo',
+        patientVisibilityConceptId: DIAG.VISIBILITY_PATIENT_VISIBLE,
+        recordedAt: new Date('2026-08-16T09:00:00Z'),
+      },
+    ]);
+
+    const salida = await service.listOwnOrders(USUARIO, 50);
+
+    // Un estudio repetido por muestra insuficiente deja dos informes: gana el
+    // que la persona vino a ver, no el que salió primero de la iteración.
+    expect(salida.items[0].reportId).toBe('rep-nuevo');
+  });
+
   it('trae la preparación del catálogo emparejada por concepto', async () => {
     const { service, ordersRepo } = build();
     ordersRepo.findOrdersForPatientPortal.mockResolvedValue([orden('o1')]);
