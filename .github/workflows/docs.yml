@@ -140,7 +140,21 @@ jobs:
         # MinIO no admite un command propio dentro de `services:` (solo el CMD
         # por defecto de la imagen, que requiere el argumento `server /data`) —
         # se levanta con `docker run` en vez de como service container.
+        #
+        # El `rm -f` de arriba no es defensivo porque sí: en un runner propio los
+        # contenedores **sobreviven al job**, y este no es un service container
+        # que el runner limpie. El primer job que muriera antes del `rm` de abajo
+        # dejaba un `minio` parado, y a partir de ahí TODA corrida del repo
+        # fallaba acá con `Conflict. The container name "/minio" is already in
+        # use` (exit 125), en el paso 7 de 30 y dejando los otros 23 en
+        # `skipped`. Pasó el 18/08: se llevó puestos los PRs #142, #149 y #150.
+        #
+        # No alcanza con limpiar al final: el job puede morir sin llegar ahí
+        # —cancelado, sin recursos, con la máquina apagada—, que es exactamente
+        # como se generó el contenedor huérfano. Por eso el arreglo va al
+        # principio, donde el estado sucio ya existe y hay que tolerarlo.
         run: |
+          docker rm -f minio 2>/dev/null || true
           docker run -d --name minio -p 9000:9000 \
             -e MINIO_ROOT_USER=mantra -e MINIO_ROOT_PASSWORD=mantra12345678 \
             minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
@@ -298,3 +312,16 @@ jobs:
             openapi/openapi.json
             asyncapi/asyncapi.yaml
           retention-days: 30
+
+      # `always()` para que corra también cuando el job falló o lo cancelaron:
+      # dejar MinIO andando en un runner propio le come memoria a la corrida
+      # siguiente —que comparte máquina con el stack de desarrollo del equipo— y
+      # le retiene el 9000. Los service containers de `services:` los limpia el
+      # runner; este, levantado a mano, es nuestro.
+      #
+      # El paso de arriba igual empieza con `rm -f`: esta limpieza es la que
+      # mantiene la máquina ordenada, no la que garantiza que el próximo job
+      # arranque.
+      - name: Retirar MinIO
+        if: always()
+        run: docker rm -f minio 2>/dev/null || true
