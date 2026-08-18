@@ -351,6 +351,13 @@ export class CommunitySocialService {
         headline: dto.headline,
         biography: dto.biography,
         statusConceptId: CONCEPTS.STATE_ACTIVE,
+        // Misma regla que el `PUT` del dueño: sin declaración explícita queda
+        // privada. Que este endpoint no la escribiera dejaba la columna nula y
+        // el perfil fuera del directorio para siempre.
+        visibilityConceptId:
+          dto.visibility === undefined
+            ? undefined
+            : PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility],
         acceptsReviews: dto.acceptsReviews,
         actorUserId: actor.id,
       });

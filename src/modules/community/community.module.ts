@@ -3,6 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
 import { ClinicalModule } from '../clinical/clinical.module';
+import { SearchPlatformModule } from '../search_platform/search_platform.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -13,6 +14,7 @@ import {
   CommunityFeedController,
   CommunityTimelineController,
   CommunityPublicController,
+  CommunitySearchIndexController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -34,6 +36,7 @@ import {
   CommunityReviewsReadService,
   CommunityModerationReadService,
   CommunityPublicService,
+  CommunitySearchIndexService,
 } from './services';
 import {
   PublicProfilesRepository,
@@ -81,10 +84,14 @@ import { EncountersRepository } from '../clinical/repositories';
   // atención real antes de aceptar una reseña. No hay ciclo — `clinical` no
   // importa nada de `community` — y es el mismo patrón que ya usa
   // `procedures_perioperative`.
+  // `SearchPlatformModule` por P10: el buscador público consulta OpenSearch y
+  // degrada a SQL si no responde. No hay ciclo — `search_platform` es
+  // infraestructura y no importa ningún módulo de dominio.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommonModule,
     ClinicalModule,
+    SearchPlatformModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -98,6 +105,7 @@ import { EncountersRepository } from '../clinical/repositories';
     // Va en esta lista y no en read_models a propósito; el orden de registro
     // frente a PublicProjectionsController lo protege community-public.smoke.ts.
     CommunityPublicController,
+    CommunitySearchIndexController,
   ],
   providers: [
     // Repositorios
@@ -129,6 +137,7 @@ import { EncountersRepository } from '../clinical/repositories';
     CommunityFeedService,
     PublicProfileProjectionService,
     CommunityRatingsService,
+    CommunitySearchIndexService,
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
     CommunityEngagementService,
