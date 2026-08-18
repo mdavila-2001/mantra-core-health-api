@@ -27,6 +27,7 @@ import type {
   DiagnosticResultSharesResponseDto,
   PatientDiagnosticResultDto,
   PatientDiagnosticResultsResponseDto,
+  PatientOwnOrdersResponseDto,
 } from '../dto';
 import { ShareDiagnosticResultDto } from '../dto';
 
@@ -89,6 +90,39 @@ export class DiagnosticsPatientResultsController {
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PatientDiagnosticResultsResponseDto> {
     return this.results.listOwnResults(actor, limit ?? 50);
+  }
+
+  /**
+   * Las órdenes diagnósticas del titular.
+   *
+   * ## Va antes de `me/:reportId` a propósito
+   *
+   * Nest resuelve por orden de declaración. Debajo de la ruta con parámetro,
+   * `orders` entraría como `:reportId` y moriría en el `ParseUUIDPipe` con un
+   * 400 que además parece un error del cliente. No es estilo: moverla rompe el
+   * endpoint.
+   *
+   * @param actor - Usuario autenticado.
+   * @param limit - Tope de órdenes (por defecto 50).
+   * @returns Las órdenes de la persona, con preparación y resultado.
+   */
+  @Get('me/orders')
+  @ApiOperation({
+    summary: 'Órdenes de laboratorio e imagen del titular',
+    description:
+      'El pedido del médico visto por quien tiene que cumplirlo: qué le ' +
+      'pidieron, cómo prepararse y si ya hay resultado para abrir.',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope de órdenes (por defecto 50)',
+  })
+  listOwnOrders(
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PatientOwnOrdersResponseDto> {
+    return this.results.listOwnOrders(actor, limit ?? 50);
   }
 
   /**

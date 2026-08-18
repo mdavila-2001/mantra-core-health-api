@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -8,6 +9,9 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+/** Visibilidad declarable de una vitrina pública. */
+export type ProfileVisibility = 'PUBLIC' | 'PRIVATE';
 
 /**
  * Cuerpo de `PUT /community/profiles/me` — la vitrina pública propia.
@@ -83,6 +87,33 @@ export class UpsertOwnPublicProfileDto {
   @IsOptional()
   @IsBoolean()
   acceptsReviews?: boolean;
+
+  /**
+   * Si la vitrina se lista en el directorio público.
+   *
+   * ## Por qué es el titular quien lo declara, y por qué omitirlo no publica
+   *
+   * Antes de este campo **nada en el producto escribía
+   * `public_profiles.visibility_concept_id`**: ni este `PUT` ni el bootstrap de
+   * `POST /community/public-profiles`. La columna existía, el mapa
+   * `PROFILE_VISIBILITY_CONCEPT_BY_CODE` existía, y no había una sola ruta que
+   * los uniera — así que toda vitrina nacía con la columna nula y el directorio
+   * público, que exige `visibility = PROFILE_VISIBILITY_PUBLIC`, estaba vacío
+   * por construcción. No era un directorio sin datos: era un directorio al que
+   * no se podía entrar.
+   *
+   * Omitirlo **no cambia** la visibilidad que ya tenga la vitrina, y en el alta
+   * la deja nula, que se lee como privada. Publicarse en internet a través de
+   * todos los tenants es opt-in explícito, y un `PUT` idempotente que omite un
+   * campo no puede significar «publicame».
+   */
+  @ApiPropertyOptional({
+    description: 'Listar la vitrina en el directorio público',
+    enum: ['PUBLIC', 'PRIVATE'],
+  })
+  @IsOptional()
+  @IsIn(['PUBLIC', 'PRIVATE'])
+  visibility?: ProfileVisibility;
 }
 
 /**
@@ -118,6 +149,17 @@ export class OwnPublicProfileDto {
 
   @ApiProperty({ nullable: true })
   acceptsReviews!: boolean | null;
+
+  /**
+   * Si la vitrina está listada en el directorio público.
+   *
+   * Se devuelve como el código y no como el concept id: es la única forma de
+   * que la pantalla de edición muestre el interruptor en la posición correcta
+   * sin tener que resolver un uuid contra el catálogo de conceptos. `PRIVATE`
+   * cubre también la columna nula — las vitrinas anteriores a este campo.
+   */
+  @ApiProperty({ enum: ['PUBLIC', 'PRIVATE'] })
+  visibility!: ProfileVisibility;
 
   /** Lo otorga la plataforma; se muestra, no se declara. */
   @ApiProperty({ format: 'uuid', nullable: true })
