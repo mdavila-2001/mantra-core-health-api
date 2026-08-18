@@ -34,23 +34,20 @@ function build() {
     findOpenAppealForDecision: mockFn(),
     findAppealById: mockFn(),
   };
-  // Por defecto el perfil que apela es del actor; los casos de perfil ajeno lo
-  // cambian. La regla en sí se prueba en los casos de propiedad, más abajo.
-  const profilesRepo = {
-    findById: mockFn().mockResolvedValue({
-      id: 'pp-1',
-      targetId: 'mod-1',
-      createdByUserId: 'mod-1',
-    }),
+  // Por defecto la propiedad se concede; los casos de perfil ajeno hacen que el
+  // doble rechace. La regla en sí vive en `CommunityVisibilityService`, que
+  // tiene su propia prueba con la implementación real.
+  const visibility = {
+    assertActsAsProfile: mockFn(() => Promise.resolve(undefined)),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityModerationService(
     em as any,
     moderationRepo as any,
-    profilesRepo as any,
+    visibility as any,
     logger as any,
   );
-  return { service, tx, moderationRepo, profilesRepo };
+  return { service, tx, moderationRepo, visibility };
 }
 
 describe('CommunityModerationService', () => {
@@ -189,15 +186,38 @@ describe('CommunityModerationService', () => {
    * El apelante no lo elige el cliente. Sin la comprobación, cualquiera podía
    * abrir una apelación en nombre de otro — y como una decisión sólo admite una
    * apelación abierta a la vez, además le quemaba la suya al sancionado.
+   *
+   * La regla es la misma que gobierna toda escritura del grafo social, así que
+   * se usa la compartida: acá se prueba que se pida con el perfil correcto y que
+   * su negativa corte la operación.
    */
   describe('propiedad del apelante', () => {
-    it('rechaza apelar con un perfil ajeno', async () => {
+    it('exige la titularidad del perfil que apela', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue({
-        id: 'pp-ajeno',
-        targetId: 'otro-sujeto',
-        createdByUserId: 'otro-admin',
-      });
+      d.moderationRepo.findDecisionById.mockResolvedValue(null);
+
+      await expect(
+        d.service.appeal(
+          'dec1',
+          { appellantProfileId: 'pp-1', reasonText: 'apelo' } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      // Llegó hasta buscar la decisión, o sea que la propiedad no lo frenó, y se
+      // pidió con el perfil declarado y no con otro.
+      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'pp-1',
+        actor,
+      );
+    });
+
+    it('no crea la apelación si el perfil no es del actor', async () => {
+      const d = build();
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
 
       await expect(
         d.service.appeal(
@@ -207,47 +227,6 @@ describe('CommunityModerationService', () => {
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(d.moderationRepo.createAppeal).not.toHaveBeenCalled();
-    });
-
-    /** Moderar es revisar apelaciones ajenas, no presentarlas. */
-    it('el rol de moderación no habilita apelar por otro', async () => {
-      const d = build();
-      d.profilesRepo.findById.mockResolvedValue({
-        id: 'pp-ajeno',
-        targetId: 'otro-sujeto',
-        createdByUserId: 'otro-admin',
-      });
-
-      await expect(
-        d.service.appeal(
-          'dec1',
-          { appellantProfileId: 'pp-ajeno', reasonText: 'apelo por él' } as any,
-          { id: 'admin-9', roles: ['SECURITY_ADMIN', 'SUPERADMIN'] } as any,
-        ),
-      ).rejects.toBeInstanceOf(ForbiddenException);
-    });
-
-    it('acepta la vitrina profesional de la sesión', async () => {
-      const d = build();
-      d.profilesRepo.findById.mockResolvedValue({
-        id: 'pp-doctor',
-        targetId: 'hp-1',
-        createdByUserId: 'un-admin',
-      });
-      d.moderationRepo.findDecisionById.mockResolvedValue(null);
-
-      // Llega hasta la búsqueda de la decisión: la propiedad no lo frenó.
-      await expect(
-        d.service.appeal(
-          'dec1',
-          { appellantProfileId: 'pp-doctor', reasonText: 'apelo' } as any,
-          {
-            id: 'u2',
-            roles: ['CLINICIAN'],
-            practitionerProfileId: 'hp-1',
-          } as any,
-        ),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 
