@@ -654,8 +654,7 @@ Content-Type: application/json
   },
   "owner": {
     "email": "usuario@example.com",
-    "password": "ClaveSegura2026!",
-    "displayName": "Nombre de ejemplo"
+    "password": "ClaveSegura2026!"
   }
 }
 ```
@@ -714,10 +713,14 @@ Content-Type: application/json
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
-| `owner` | Sí | `RegisterOrganizationOwnerDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"email":"usuario@example.com","password":"ClaveSegura2026!","displayName":"Nombre de ejemplo","timeZone":"America/La_Paz"}` |
+| `owner` | Sí | `RegisterOrganizationOwnerDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"email":"usuario@example.com","password":"ClaveSegura2026!","name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","displayName":"Nombre de ejemplo","timeZone":"America/La_Paz"}` |
 | `owner.email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo con el que el owner iniciará sesión | `usuario@example.com` |
 | `owner.password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
-| `owner.displayName` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `owner.name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
+| `owner.middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `owner.lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rojas` |
+| `owner.motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Paz` |
+| `owner.displayName` | No | `string` | longitud mínima 1; longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `owner.timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
 
 ### Payload completo de ejemplo
@@ -789,6 +792,10 @@ Content-Type: application/json
   "owner": {
     "email": "usuario@example.com",
     "password": "ClaveSegura2026!",
+    "name": "Ana",
+    "middleName": "Lucía",
+    "lastName": "Rojas",
+    "motherLastName": "Paz",
     "displayName": "Nombre de ejemplo",
     "timeZone": "America/La_Paz"
   }
@@ -1062,7 +1069,6 @@ Content-Type: application/json
 {
   "email": "usuario@example.com",
   "password": "ClaveSegura2026!",
-  "displayName": "Nombre de ejemplo",
   "licenseNumber": "valor-ejemplo",
   "credentialNumber": "valor-ejemplo"
 }
@@ -1079,7 +1085,11 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo que actúa como identidad de login | `usuario@example.com` |
 | `password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
-| `displayName` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rojas` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Paz` |
+| `displayName` | No | `string` | longitud mínima 1; longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `licenseNumber` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Número de licencia o matrícula profesional | `valor-ejemplo` |
 | `credentialNumber` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Número del título profesional que respalda la licencia | `valor-ejemplo` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
@@ -1108,6 +1118,10 @@ Content-Type: application/json
 {
   "email": "usuario@example.com",
   "password": "ClaveSegura2026!",
+  "name": "Ana",
+  "middleName": "Lucía",
+  "lastName": "Rojas",
+  "motherLastName": "Paz",
   "displayName": "Nombre de ejemplo",
   "licenseNumber": "valor-ejemplo",
   "credentialNumber": "valor-ejemplo",
@@ -3718,7 +3732,6 @@ Content-Type: application/json
 
 {
   "email": "usuario@example.com",
-  "displayName": "Nombre de ejemplo",
   "licenseNumber": "valor-ejemplo",
   "credentialNumber": "valor-ejemplo",
   "reason": "Texto descriptivo de ejemplo"
@@ -3736,7 +3749,11 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo que actúa como identidad de login | `usuario@example.com` |
-| `displayName` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `name` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rojas` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Paz` |
+| `displayName` | No | `string` | longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `licenseNumber` | Sí | `string` | longitud máxima 100 | Número de licencia o matrícula profesional | `valor-ejemplo` |
 | `credentialNumber` | Sí | `string` | longitud máxima 100 | Número del título profesional que respalda la licencia | `valor-ejemplo` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
@@ -3767,6 +3784,10 @@ Content-Type: application/json
 
 {
   "email": "usuario@example.com",
+  "name": "Ana",
+  "middleName": "Lucía",
+  "lastName": "Rojas",
+  "motherLastName": "Paz",
   "displayName": "Nombre de ejemplo",
   "licenseNumber": "valor-ejemplo",
   "credentialNumber": "valor-ejemplo",
@@ -3895,7 +3916,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "displayName": "Nombre de ejemplo",
   "email": "usuario@example.com",
   "reason": "Texto descriptivo de ejemplo"
 }
@@ -3911,7 +3931,11 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `displayName` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre visible del paciente | `Nombre de ejemplo` |
+| `name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Andrea` |
+| `lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mamani` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Quispe` |
+| `displayName` | No | `string` | longitud mínima 1; longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `email` | Sí | `string` | formato `email`; longitud máxima 320 | Identificador verificado (email) que actúa como identidad de login | `usuario@example.com` |
 | `reason` | Sí | `string` | longitud mínima 1; longitud máxima 500 | Motivo del registro asistido (queda en la trazabilidad C-18) | `Texto descriptivo de ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA del paciente | `America/La_Paz` |
@@ -3929,6 +3953,10 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
+  "name": "Lucía",
+  "middleName": "Andrea",
+  "lastName": "Mamani",
+  "motherLastName": "Quispe",
   "displayName": "Nombre de ejemplo",
   "email": "usuario@example.com",
   "reason": "Texto descriptivo de ejemplo",

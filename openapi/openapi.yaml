@@ -44631,10 +44631,27 @@ components:
     AssistedRegistrationDto:
       type: object
       properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Lucía
+        middleName:
+          type: string
+          maxLength: 100
+          example: Andrea
+        lastName:
+          type: string
+          maxLength: 100
+          example: Mamani
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Quispe
         displayName:
           type: string
-          description: Nombre visible del paciente
           maxLength: 200
+          description: Forma anterior de declarar el nombre. Preferí name/lastName.
+          deprecated: true
         email:
           type: string
           description: Identificador verificado (email) que actúa como identidad de login
@@ -44655,7 +44672,6 @@ components:
           description: Id del usuario representante legal (dato mínimo si no hay representación formal)
           format: uuid
       required:
-        - displayName
         - email
         - reason
     AssistedPractitionerRegistrationDto:
@@ -44666,9 +44682,27 @@ components:
           description: Correo que actúa como identidad de login
           format: email
           maxLength: 320
+        name:
+          type: string
+          maxLength: 100
+          example: Ana
+        middleName:
+          type: string
+          maxLength: 100
+          example: Lucía
+        lastName:
+          type: string
+          maxLength: 100
+          example: Rojas
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Paz
         displayName:
           type: string
           maxLength: 200
+          description: Forma anterior de declarar el nombre. Preferí name/lastName.
+          deprecated: true
         licenseNumber:
           type: string
           description: Número de licencia o matrícula profesional
@@ -44743,7 +44777,6 @@ components:
             type: string
       required:
         - email
-        - displayName
         - licenseNumber
         - credentialNumber
         - reason
@@ -45064,16 +45097,33 @@ components:
           type: string
           minLength: 8
           maxLength: 200
+        name:
+          type: string
+          maxLength: 100
+          example: Ana
+        middleName:
+          type: string
+          maxLength: 100
+          example: Lucía
+        lastName:
+          type: string
+          maxLength: 100
+          example: Rojas
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Paz
         displayName:
           type: string
           maxLength: 200
+          description: Forma anterior de declarar el nombre. Preferí name/lastName.
+          deprecated: true
         timeZone:
           type: string
           maxLength: 100
       required:
         - email
         - password
-        - displayName
     RegisterOrganizationDto:
       type: object
       properties:
@@ -45096,9 +45146,27 @@ components:
           type: string
           minLength: 8
           maxLength: 200
+        name:
+          type: string
+          maxLength: 100
+          example: Ana
+        middleName:
+          type: string
+          maxLength: 100
+          example: Lucía
+        lastName:
+          type: string
+          maxLength: 100
+          example: Rojas
+        motherLastName:
+          type: string
+          maxLength: 100
+          example: Paz
         displayName:
           type: string
           maxLength: 200
+          description: Forma anterior de declarar el nombre. Preferí name/lastName.
+          deprecated: true
         licenseNumber:
           type: string
           description: Número de licencia o matrícula profesional
@@ -45162,7 +45230,6 @@ components:
       required:
         - email
         - password
-        - displayName
         - licenseNumber
         - credentialNumber
     ResendVerificationDto:

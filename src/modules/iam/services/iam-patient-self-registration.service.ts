@@ -28,7 +28,7 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
 } from '../../profiles/repositories';
-import { composePersonDisplayName } from '../../profiles/person-name';
+import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
   ContactPointsRepository,
   IdentifiersRepository,
@@ -186,7 +186,7 @@ export class IamPatientSelfRegistrationService {
       // El nombre para mostrar sale de las partes; si el cliente mandó la forma
       // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
       // -la cuenta y la persona- para que no puedan divergir.
-      const displayName = composeDisplayName(dto);
+      const displayName = composeAccountDisplayName(dto);
 
       const user = this.usersRepo.create(tx, {
         displayName,
@@ -494,23 +494,4 @@ export class IamPatientSelfRegistrationService {
       return false;
     }
   }
-}
-
-/**
- * El nombre para mostrar de la CUENTA (`iam.users.display_name`).
- *
- * `profiles.persons` lo deriva solo —lo hace `PersonsRepository.create`, que es
- * el único punto de inserción—, pero la cuenta es otra tabla en otro esquema y
- * necesita el mismo valor calculado acá para que las dos no puedan divergir.
- *
- * `displayName` explícito gana: es la forma anterior de declarar el nombre y
- * sigue aceptándose, así que quien la use tiene que ver exactamente lo que
- * mandó. Nunca devuelve vacío: el DTO exige `name` y `lastName` cuando no viene
- * `displayName`.
- *
- * @param dto - Cuerpo del alta.
- * @returns El nombre para mostrar de la cuenta.
- */
-function composeDisplayName(dto: RegisterPatientDto): string {
-  return dto.displayName ?? composePersonDisplayName(dto) ?? '';
 }

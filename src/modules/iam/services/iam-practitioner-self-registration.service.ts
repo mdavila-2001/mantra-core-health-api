@@ -25,6 +25,7 @@ import {
   BIRTH_SEX_CONCEPT_BY_CODE,
   PROF,
 } from '../../profiles/profiles.concepts';
+import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
@@ -266,12 +267,17 @@ export class IamPractitionerSelfRegistrationService {
         });
       }
 
+      // El nombre para mostrar sale de las partes; si el cliente mandó la forma
+      // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
+      // -la cuenta y la persona- para que no puedan divergir.
+      const displayName = composeAccountDisplayName(dto);
+
       // 1) La cuenta. En el autorregistro nace ACTIVA porque el titular está
       // presente y fija su propia contraseña. En el alta administrativa nace
       // PENDIENTE: quien la crea no puede elegir la clave de otro, así que se
       // emite un token de activación y el titular la fija al entrar.
       const user = this.usersRepo.create(tx, {
-        displayName: dto.displayName,
+        displayName,
         statusConceptId: asistido
           ? CONCEPTS.STATE_PENDING
           : CONCEPTS.USER_ACTIVE,
@@ -325,7 +331,11 @@ export class IamPractitionerSelfRegistrationService {
       const person = this.personsRepo.create(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
-        displayName: dto.displayName,
+        name: dto.name,
+        middleName: dto.middleName,
+        lastName: dto.lastName,
+        motherLastName: dto.motherLastName,
+        displayName,
         birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
         administrativeGenderConceptId: dto.gender
           ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender]
