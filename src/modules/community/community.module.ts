@@ -3,6 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
 import { MessagingModule } from '../messaging/messaging.module';
+import { ClinicalModule } from '../clinical/clinical.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -58,6 +59,18 @@ import {
   CommunityPrestigeRepository,
   PublicSearchRepository,
 } from './repositories';
+// La reseña verificada comprueba que hubo atención real leyendo el encuentro
+// clínico. Es un repositorio sin estado que recibe el `EntityManager` por
+// parámetro, así que proveerlo acá no duplica nada ni crea dos fuentes de
+// verdad — el mismo criterio con el que `scheduling` provee
+// `AppointmentsRepository`—, y evita importar el módulo clínico entero.
+//
+// FALTABA: `CommunityReviewsService` lo inyecta desde el commit 4293c63f y
+// nadie lo proveía, así que **la aplicación entera no arrancaba**
+// (`UnknownDependenciesException` en `CommunityModule`). Detectado desde el
+// carril P8 al levantar la API para su evidencia funcional; queda anotado en
+// `reports/P8.md` para el responsable de community.
+import { EncountersRepository } from '../clinical/repositories';
 
 /**
  * Módulo Community (19): perfiles públicos, grafo social (posts, comentarios,
@@ -72,9 +85,15 @@ import {
   //
   // `MessagingModule` entra por el contrato de notificaciones de P1: community
   // decide a quién avisar de lo que pasa en un grupo; messaging entrega.
+  //
+  // `ClinicalModule` por `EncountersRepository`: `CommunityReviewsService` exige
+  // atención real antes de aceptar una reseña. No hay ciclo — `clinical` no
+  // importa nada de `community` — y es el mismo patrón que ya usa
+  // `procedures_perioperative`.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommonModule,
+    ClinicalModule,
     MessagingModule,
   ],
   controllers: [
@@ -93,6 +112,7 @@ import {
   ],
   providers: [
     // Repositorios
+    EncountersRepository,
     PublicProfilesRepository,
     PostsRepository,
     CommentsRepository,

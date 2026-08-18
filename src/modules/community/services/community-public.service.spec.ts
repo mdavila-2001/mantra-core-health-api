@@ -222,6 +222,56 @@ describe('CommunityPublicService', () => {
     });
   });
 
+  describe('un vertical sin sujeto en el directorio', () => {
+    it('sirve vacío en vez del directorio completo', async () => {
+      const { service, repo } = build();
+      // El repositorio devolvería el directorio entero si lo llamaran: es
+      // exactamente el fallo que se está cubriendo, así que el doble tiene que
+      // poder cometerlo.
+      repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+
+      const pagina = await service.search({ kind: 'MEDICATION' });
+
+      expect(pagina.items).toEqual([]);
+      expect(pagina.nextCursor).toBeNull();
+      expect(pagina.totalHint).toBe(0);
+    });
+
+    it('no llega a consultar el directorio', async () => {
+      const { service, repo } = build();
+
+      await service.search({ kind: 'MEDICATION' });
+
+      // Si consultara, el filtro se habría perdido y la consulta habría traído
+      // todos los perfiles públicos, que es lo que servía antes.
+      expect(repo.searchProfiles).not.toHaveBeenCalled();
+    });
+
+    it('los cinco verticales que sí son perfiles siguen consultando', async () => {
+      for (const kind of [
+        'PRACTITIONER',
+        'ORGANIZATION',
+        'PHARMACY',
+        'DIAGNOSTIC_UNIT',
+        'INSURER',
+      ] as const) {
+        const { service, repo } = build();
+        await service.search({ kind });
+        expect(repo.searchProfiles).toHaveBeenCalled();
+      }
+    });
+
+    it('la búsqueda unificada no acota por tipo', async () => {
+      const { service, repo } = build();
+
+      await service.search({});
+
+      expect(repo.searchProfiles).toHaveBeenCalled();
+      const filtros = repo.searchProfiles.mock.calls[0][1];
+      expect(filtros.targetTypeConceptId).toBeUndefined();
+    });
+  });
+
   describe('nearby', () => {
     it.each([
       ['sin coordenadas', {}],

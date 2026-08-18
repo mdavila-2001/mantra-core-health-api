@@ -28,6 +28,27 @@ export interface WaitlistCandidateSnapshot {
   readonly priority: number;
 }
 
+/**
+ * Una entrada de la lista de espera vista desde fuera (P8).
+ *
+ * Trae `resourceLabel` resuelto —el nombre del profesional o del recurso— y no
+ * sólo su id: quien está esperando un turno necesita saber en qué agenda
+ * espera, y un uuid no se lo dice. Resolverlo es trabajo del adaptador, que es
+ * quien puede leer las tablas de perfiles.
+ */
+export interface WaitlistEntryView {
+  readonly id: string;
+  readonly tenantId: string;
+  readonly patientProfileId: string;
+  readonly resourceId?: string;
+  readonly resourceLabel: string;
+  readonly desiredFrom?: Date;
+  readonly desiredTo?: Date;
+  readonly priority: number;
+  readonly statusConceptId: string;
+  readonly createdAt: Date;
+}
+
 /** Cita y hora de inicio de su slot, para calcular los recordatorios. */
 export interface BookingScheduleSnapshot {
   readonly bookingId: string;
@@ -83,6 +104,25 @@ export interface WaitlistReadPort {
     now: Date,
     context?: ReadContext,
   ): Promise<string[]>;
+
+  /**
+   * La lista de espera de un paciente (P8).
+   *
+   * El módulo no tenía **ninguna** lectura de la lista de espera: se podía
+   * anotar a alguien y no había forma de decirle que estaba anotado. Sin esto,
+   * el estado «en espera» de la pantalla de turnos sería una suposición del
+   * cliente sobre un POST que ya devolvió.
+   *
+   * @param patientProfileId - Paciente titular.
+   * @param statusConceptIds - Estados a incluir; `undefined` los trae todos.
+   * @param limit - Tope de filas.
+   */
+  findEntriesForPatient(
+    patientProfileId: string,
+    statusConceptIds: readonly string[] | undefined,
+    limit: number,
+    context?: ReadContext,
+  ): Promise<readonly WaitlistEntryView[]>;
 }
 
 /**

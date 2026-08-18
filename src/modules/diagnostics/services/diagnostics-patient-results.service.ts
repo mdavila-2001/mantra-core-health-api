@@ -20,12 +20,14 @@ import {
   platformPermissionId,
 } from '../../authz/authz.seed';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
-import { DIAG } from '../diagnostics.concepts';
+import { CATEGORIAS_DIAGNOSTICAS, DIAG } from '../diagnostics.concepts';
 import type {
   DiagnosticResultShareDto,
   DiagnosticResultSharesResponseDto,
   PatientDiagnosticResultDto,
   PatientDiagnosticResultsResponseDto,
+  PatientOrderSummaryDto,
+  PatientOwnOrdersResponseDto,
   ShareDiagnosticResultDto,
 } from '../dto';
 import type {
@@ -128,6 +130,162 @@ export class DiagnosticsPatientResultsService {
     const items = await this.projectReleasedResults(em, page);
 
     return { patientProfileId, items, limit, truncated };
+  }
+
+  /**
+   * Las órdenes diagnósticas del titular de la sesión.
+   *
+   * Es la otra mitad de {@link listOwnResults}: aquélla contesta «¿qué me
+   * volvió?» y ésta «¿qué me pidieron y qué tengo que hacer para cumplirlo?».
+   * Sin ella el paciente sólo ve el resultado de estudios que ya se hizo, y el
+   * pedido —que es lo que necesita para ir a hacérselo— no aparece en ningún
+   * lado de su portal.
+   *
+   * @param actor - Usuario autenticado.
+   * @param limit - Tope de órdenes.
+   * @returns Las órdenes de la persona, con su preparación y su resultado.
+   */
+  async listOwnOrders(
+    actor: AuthenticatedUser,
+    limit: number,
+  ): Promise<PatientOwnOrdersResponseDto> {
+    const em = this.em.fork();
+    const patientProfileId = await this.resolveOwnPatientProfileId(em, actor);
+
+    this.logger.info(
+      { operation: 'diagnostics.patient-orders.list', limit },
+      'Leyendo las órdenes diagnósticas del titular',
+    );
+
+    // Una fila de más para poder decir «hay más» sin pagar un `count` aparte,
+    // igual que {@link listOwnResults}.
+    const rows = await this.ordersRepo.findOrdersForPatientPortal(
+      em,
+      patientProfileId,
+      CATEGORIAS_DIAGNOSTICAS,
+      limit + 1,
+    );
+    const truncated = rows.length > limit;
+    const page = rows.slice(0, limit);
+
+    const [preparacion, informePorOrden] = await Promise.all([
+      this.preparacionPorConcepto(
+        em,
+        page.map((orden) => orden.codeConceptId),
+      ),
+      this.informeLiberadoPorOrden(
+        em,
+        page.map((orden) => orden.id),
+      ),
+    ]);
+
+    const items: PatientOrderSummaryDto[] = page.map((orden) => {
+      const reportId = informePorOrden.get(orden.id);
+      return {
+        id: orden.id,
+        encounterId: orden.encounterId,
+        codeConceptId: orden.codeConceptId,
+        categoryConceptId: orden.categoryConceptId,
+        statusConceptId: orden.statusConceptId,
+        priorityConceptId: orden.priorityConceptId,
+        createdAt: orden.createdAt,
+        preparationInstructions: preparacion.get(orden.codeConceptId),
+        hasReleasedResult: reportId !== undefined,
+        reportId,
+      };
+    });
+
+    return { patientProfileId, items, limit, truncated };
+  }
+
+  /**
+   * La preparación de cada estudio, indexada por concepto.
+   *
+   * Un mismo estudio puede estar publicado por varios centros con textos
+   * distintos, y la orden todavía no eligió centro: acá se queda con el primero
+   * de la lista. Ese «primero» es **el de nombre alfabéticamente menor entre
+   * las ofertas activas**, porque el repositorio ordena por `displayName`; no
+   * es el mejor texto ni el más nuevo, es simplemente uno **estable**.
+   *
+   * Una versión anterior de este comentario decía que «el orden de `find` es
+   * estable» sin `ORDER BY`. Es falso —Postgres no lo garantiza— y la
+   * consecuencia era que dos centros con indicaciones contradictorias podían
+   * dar una respuesta distinta entre dos peticiones idénticas.
+   *
+   * Sigue siendo una simplificación: el texto definitivo es el del centro donde
+   * la persona termine reservando, y eso lo sabrá la pantalla de reserva (J2),
+   * no esta lectura.
+   *
+   * @param em - Contexto de persistencia.
+   * @param conceptIds - Conceptos de los estudios pedidos.
+   * @returns Concepto → preparación publicada.
+   */
+  private async preparacionPorConcepto(
+    em: EntityManager,
+    conceptIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const ofertas = await this.ordersRepo.findPreparationByStudyConcepts(
+      em,
+      conceptIds,
+    );
+    const porConcepto = new Map<string, string>();
+    for (const oferta of ofertas) {
+      const texto = oferta.preparationInstructions;
+      if (texto !== undefined && !porConcepto.has(oferta.studyConceptId)) {
+        porConcepto.set(oferta.studyConceptId, texto);
+      }
+    }
+    return porConcepto;
+  }
+
+  /**
+   * El informe **liberado y visible** de cada orden, indexado por orden.
+   *
+   * Reutiliza {@link projectReleasedResults} en vez de mirar el puntero del
+   * informe: «hay resultado» para el paciente no es «hay informe», es que su
+   * última liberación lo dejó visible para él. Duplicar esa decisión acá sería
+   * abrir la puerta a que esta pantalla muestre como resultado un borrador que
+   * la otra oculta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param orderIds - Órdenes de la página.
+   * @returns Orden → informe visible, sólo para las que lo tienen.
+   */
+  private async informeLiberadoPorOrden(
+    em: EntityManager,
+    orderIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const informes = await this.ordersRepo.findReportsByServiceRequests(
+      em,
+      orderIds,
+    );
+    const visibles = await this.projectReleasedResults(em, informes);
+
+    // Una orden puede tener más de un informe visible: un estudio que se repite
+    // por muestra insuficiente deja el primero liberado y agrega el segundo.
+    // Gana **el liberado más recientemente**, que es el que la persona vino a
+    // ver; quedarse con el último que apareció en la lista sería resolver un
+    // empate clínico por orden de iteración.
+    const porOrden = new Map<string, { reportId: string; releasedAt: Date }>();
+    for (const resultado of visibles) {
+      const ordenId = resultado.serviceRequestId;
+      if (ordenId === undefined) {
+        continue;
+      }
+      const actual = porOrden.get(ordenId);
+      if (
+        actual === undefined ||
+        resultado.releasedAt.getTime() > actual.releasedAt.getTime()
+      ) {
+        porOrden.set(ordenId, {
+          reportId: resultado.reportId,
+          releasedAt: resultado.releasedAt,
+        });
+      }
+    }
+    return new Map(
+      [...porOrden].map(([ordenId, elegido]) => [ordenId, elegido.reportId]),
+    );
   }
 
   /**

@@ -79,6 +79,18 @@ export class ServiceRequestsService {
         },
         'Service request placed',
       );
+
+      // TODO(J1/P1): avisarle al paciente «tu médico te dejó una orden».
+      //
+      // Va acá, después del flush y DENTRO de la transacción sólo para
+      // encolar: la emisión real sale por outbox, nunca por una llamada
+      // externa dentro de la ventana de lock.
+      //
+      // No se escribe todavía porque el canal in-app es el carril P1 y a la
+      // fecha no mergeó: no hay a quién llamar. Mientras tanto la orden SÍ es
+      // visible para el paciente —`GET /diagnostic-results/me/orders`—, así que
+      // la ausencia del aviso retrasa el enterarse, no lo impide.
+
       return {
         id: sr.id,
         patientProfileId: sr.patientProfileId,

@@ -75,25 +75,45 @@ tipo equivocado da 404, no una redirección (`/p/` profesional · `/o/` organiza
 
 ### Comunes a las siete búsquedas (1–7)
 
-| Parámetro | Tipo | Por omisión | Nota |
-|---|---|---|---|
-| `q` | `string` | — | Texto libre. Sin acentos y sin distinguir mayúsculas: «cardiologo» encuentra «Cardiología». Máx. 120 caracteres |
-| `city` | `string` | — | Nombre de ciudad tal como lo sirve `geo` |
-| `cursor` | `string` | — | Cursor opaco. **No se construye en el cliente**: se copia de `nextCursor` |
-| `limit` | `int` | `20` | Acotado a `[1, 50]`. Un valor fuera de rango se **recorta**, no da 400 |
+> **Lo implementado y lo previsto se distinguen en estas tablas.** Un parámetro
+> marcado como previsto **hoy se ignora en silencio**: la respuesta llega sin
+> acotar. Quien construya una pantalla contra él va a dibujar un filtro que no
+> filtra, que es peor que no dibujarlo — la lista no cambia y la pantalla le
+> dice a quien lo usó, sin decírselo, que todos los resultados cumplen su
+> criterio. Verificado contra el controlador el 2026-08-18.
+
+| Parámetro | Tipo | Por omisión | Estado | Nota |
+|---|---|---|---|---|
+| `q` | `string` | — | **implementado** | Texto libre. Sin acentos y sin distinguir mayúsculas: «cardiologo» encuentra «Cardiología». Máx. 120 caracteres |
+| `cursor` | `string` | — | **implementado** | Cursor opaco. **No se construye en el cliente**: se copia de `nextCursor` |
+| `limit` | `int` | `20` | **implementado** | Acotado a `[1, 50]`. Un valor fuera de rango se **recorta**, no da 400 |
+| `city` | `string` | — | *previsto* | El controlador no lo lee. `community.public_profiles` no tiene columna de ciudad, y `city` viaja como `null` en toda respuesta: no hay dato con el que filtrar hasta que exista la fuente |
 
 ### Propios de cada vertical
 
-| Ruta | Parámetro | Tipo | Nota |
-|---|---|---|---|
-| `/search/practitioners` | `specialty` | `string` | Código de especialidad o su etiqueta |
-| | `verified` | `boolean` | `true` = sólo verificados. Omitido = todos, verificados primero (D7) |
-| `/search/medications` | `form` | `string` | Forma farmacéutica |
-| | `inStock` | `boolean` | Sólo con existencia positiva |
-| `/search/organizations` | `kind` | `string` | Tipo de organización |
-| `/search/diagnostic-units` | `study` | `string` | Estudio ofertado |
-| `/search/insurers` | `planKind` | `string` | Tipo de plan |
-| `/search/pharmacies` | `open` | `boolean` | Abiertas al momento de la consulta |
+| Ruta | Parámetro | Tipo | Estado | Nota |
+|---|---|---|---|---|
+| `/search/practitioners` | `verified` | `boolean` | **implementado** | `true` = sólo verificados. Omitido = todos, verificados primero (D7) |
+| | `specialty` | `string` | *previsto* | Código de especialidad o su etiqueta |
+| `/search/medications` | `form` | `string` | *previsto* | Forma farmacéutica |
+| | `inStock` | `boolean` | *previsto* | Sólo con existencia positiva |
+| `/search/organizations` | `kind` | `string` | *previsto* | Tipo de organización |
+| `/search/diagnostic-units` | `study` | `string` | *previsto* | Estudio ofertado |
+| `/search/insurers` | `planKind` | `string` | *previsto* | Tipo de plan |
+| `/search/pharmacies` | `open` | `boolean` | *previsto* | Abiertas al momento de la consulta |
+
+### `/search/medications` devuelve vacío, y es correcto
+
+Un medicamento **no es un perfil**: vive en el catálogo de farmacia, y el
+buscador público consulta `community.public_profiles` y nada más. El vertical
+acota por `kind: 'MEDICATION'`, que no tiene concepto de sujeto en esa tabla.
+
+Hasta el 2026-08-18 ese filtro **se perdía en silencio** y la ruta devolvía el
+directorio completo de profesionales a quien buscaba un remedio. Ahora devuelve
+la envoltura con `items: []` y lo deja anotado en el log del servicio, igual que
+`nearby` mientras no existan las coordenadas. Los campos de
+`PublicMedicationSummaryDto` quedan declarados para cuando el catálogo tenga
+superficie pública; hoy no los sirve nadie.
 
 ### `/public/nearby` (9)
 
@@ -238,11 +258,25 @@ literal en pantalla; el nombre del campo lo dice para que nadie lo confunda al c
 no existe **o** que no es público · `429` · `503` si el índice no está disponible. **No hay `401` ni
 `403` en esta superficie.**
 
-Un `404` devuelve siempre el mismo cuerpo, sin distinguir el motivo:
+Un `404` devuelve siempre el mismo cuerpo, sin distinguir el motivo. El cuerpo lo arma el filtro de
+excepciones del proyecto, no esta superficie, así que tiene la forma de todos los errores de la API
+—verificado contra la API viva el 2026-08-17—:
 
 ```json
-{ "statusCode": 404, "message": "No encontrado" }
+{
+  "code": "NOT_FOUND",
+  "message": "No encontrado",
+  "correlationId": "6",
+  "details": { "slug": "no-existe" },
+  "timestamp": "2026-08-17T21:03:50.781Z",
+  "path": "/p/no-existe"
+}
 ```
+
+`details.slug` **no revela existencia**: es el slug que mandó quien pregunta, devuelto tal cual. Un
+slug inexistente y uno despublicado producen respuestas idénticas salvo por ese eco y el
+`correlationId`, y eso es lo que hay que preservar. Lo comprueba `seed:e2e:verify`, que pide los dos
+y compara los mensajes.
 
 ---
 

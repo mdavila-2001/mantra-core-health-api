@@ -14,6 +14,8 @@ import {
   SchedulingWaitlistService,
   SchedulingConfirmationService,
   SchedulingAgendaService,
+  SchedulingDelayService,
+  SchedulingAgendaNoticesService,
 } from './services';
 import {
   SchedulingCatalogRepository,
@@ -21,6 +23,7 @@ import {
   SchedulingConfirmationRepository,
   SchedulingAbsencesRepository,
   SchedulingAgendaRepository,
+  SchedulingNoticeRepository,
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
 // El repositorio de citas clínicas es una clase sin estado que recibe el
@@ -34,7 +37,17 @@ import { AppointmentsRepository } from '../clinical/repositories';
 // pertenencia al tenant) que no son de esta agenda. `practice` no importa
 // `scheduling`, así que la dependencia no cierra ciclo.
 import { PracticeModule } from '../practice/practice.module';
+// P8: los avisos de agenda se entregan por el canal in-app de mensajería, que
+// ya evalúa consentimiento, preferencia por categoría y horas de silencio.
+// `messaging` no importa `scheduling`, así que la dependencia no cierra ciclo.
+import { MessagingModule } from '../messaging/messaging.module';
+// Las entidades de `profiles` que el aviso necesita leer para saber a qué
+// cuenta va y cómo se llama el profesional. Se registran acá —y no se importa
+// el módulo entero— por el mismo criterio que `AppointmentsRepository`.
+import * as profileEntities from '../profiles/entities';
 import { schedulingPersistenceProviders } from './scheduling.persistence';
+import { AGENDA_NOTICE_PORT } from './ports/agenda-notice.port';
+import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice.adapter';
 
 /**
  * Módulo de agenda: recursos, políticas, plantillas, slots, reservas con
@@ -42,9 +55,13 @@ import { schedulingPersistenceProviders } from './scheduling.persistence';
  */
 @Module({
   imports: [
-    MikroOrmModule.forFeature(Object.values(entities)),
+    MikroOrmModule.forFeature([
+      ...Object.values(entities),
+      ...Object.values(profileEntities),
+    ]),
     AuditModule,
     PracticeModule,
+    MessagingModule,
   ],
   controllers: [
     SchedulingController,
@@ -63,12 +80,20 @@ import { schedulingPersistenceProviders } from './scheduling.persistence';
     SchedulingConfirmationRepository,
     SchedulingAbsencesRepository,
     SchedulingAgendaRepository,
+    SchedulingNoticeRepository,
     AppointmentsRepository,
     SchedulingCatalogService,
     SchedulingBookingsService,
     SchedulingWaitlistService,
     SchedulingConfirmationService,
     SchedulingAgendaService,
+    // P8 · avisos de agenda. El puerto se resuelve hoy con el adaptador de
+    // mensajería; cuando P1 publique su servicio de emisión, se sustituye
+    // **sólo** esta línea y ningún caso de uso cambia.
+    SchedulingDelayService,
+    SchedulingAgendaNoticesService,
+    MessagingAgendaNoticeAdapter,
+    { provide: AGENDA_NOTICE_PORT, useExisting: MessagingAgendaNoticeAdapter },
   ],
 })
 export class SchedulingModule {}
