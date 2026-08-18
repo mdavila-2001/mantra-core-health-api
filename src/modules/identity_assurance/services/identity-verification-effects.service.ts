@@ -9,6 +9,8 @@ import {
 } from '../../profiles/repositories';
 import { TenantsRepository } from '../../directory/repositories';
 import { DIR } from '../../directory/directory.concepts';
+import { CommunityVerificationService } from '../../community/services';
+import { COMM } from '../../community/community.concepts';
 import { IDA } from '../identity_assurance.concepts';
 import type { IdentityVerificationCases } from '../entities';
 
@@ -27,6 +29,19 @@ import type { IdentityVerificationCases } from '../entities';
  * propósito: la aserción activa en `identity_assertions` ya es la fuente de
  * verdad que consulta el guard de cuenta verificada, y duplicarla en una columna
  * de `profiles` crearía dos verdades que se pueden desincronizar.
+ *
+ * ## El sello del perfil público (P13)
+ *
+ * Desde P13 el efecto incluye el sello «Verificado» de `community`. Antes no:
+ * `verified_badges` no tenía ningún camino de escritura, así que un profesional
+ * podía pasar la verificación de matrícula —H-01, que ya funciona— y **no ganar
+ * el sello**, mientras que un perfil sin verificar nada podía lucirlo si alguien
+ * metía la fila a mano. En una red de salud, que el sello sea confiable ES el
+ * producto.
+ *
+ * El puente va acá y no en `identity_assurance` a secas por la misma razón que
+ * el resto de este archivo: este servicio sabe qué significa «verificado» para
+ * cada dominio; el motor de verificación no tiene por qué conocer community.
  */
 @Injectable()
 export class IdentityVerificationEffectsService {
@@ -42,6 +57,7 @@ export class IdentityVerificationEffectsService {
     private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
     private readonly practitionersRepo: HealthPractitionerProfilesRepository,
     private readonly tenantsRepo: TenantsRepository,
+    private readonly verification: CommunityVerificationService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityVerificationEffectsService.name);
@@ -73,6 +89,74 @@ export class IdentityVerificationEffectsService {
         // Identidad de persona: la aserción emitida ya es el efecto.
         return;
     }
+  }
+
+  /**
+   * Aplica el efecto de dominio de un caso que dejó de estar verificado.
+   *
+   * Es la otra mitad de `applyVerified`, y sin ella el sello sería una promesa
+   * que sólo se puede hacer y nunca deshacer: una matrícula revocada dejaría el
+   * perfil luciendo «Verificado» para siempre.
+   *
+   * **No revierte el efecto de dominio** —la matrícula y el tenant siguen su
+   * propia máquina de estados, que no es de este carril—: baja el sello, que es
+   * lo que ve el público.
+   *
+   * @param tx - Transacción activa.
+   * @param kase - Caso revocado o vencido.
+   * @param actorUserId - Quién lo registró.
+   * @param motivo - Si la autoridad retiró el respaldo o si sólo venció.
+   */
+  async applyRevoked(
+    tx: EntityManager,
+    kase: IdentityVerificationCases,
+    actorUserId: string,
+    motivo: 'REVOKED' | 'EXPIRED' = 'REVOKED',
+  ): Promise<void> {
+    const targetId = await this.publicSubjectOf(tx, kase);
+    if (!targetId) return;
+
+    const { revoked } = await this.verification.applyRevoked(
+      tx,
+      targetId,
+      actorUserId,
+      motivo,
+    );
+
+    this.logger.info(
+      {
+        operation: 'ida.effects.badge-revoke',
+        caseId: kase.id,
+        targetId,
+        revoked,
+        motivo,
+      },
+      'Public verified badge revoked after the case lost its backing',
+    );
+  }
+
+  /**
+   * El sujeto que el perfil público proyecta, para el caso dado.
+   *
+   * Una matrícula verificada respalda al **profesional**, no a la fila de la
+   * matrícula: el perfil público apunta al primero. Un caso de otro tipo no
+   * tiene sello asociado y devuelve `null`.
+   */
+  private async publicSubjectOf(
+    tx: EntityManager,
+    kase: IdentityVerificationCases,
+  ): Promise<string | null> {
+    if (kase.subjectTypeConceptId === IDA.SUBJECT_TENANT_IDENTITY) {
+      return kase.subjectEntityId;
+    }
+    if (kase.subjectTypeConceptId !== IDA.SUBJECT_PRACTITIONER_LICENSE) {
+      return null;
+    }
+    const authorization = await this.authorizationsRepo.findById(
+      tx,
+      kase.subjectEntityId,
+    );
+    return authorization?.practitionerProfileId ?? null;
   }
 
   /**
@@ -116,6 +200,17 @@ export class IdentityVerificationEffectsService {
       touch(practitioner, actorUserId);
     }
 
+    // El sello público del profesional. `validTo` sale del vencimiento de la
+    // propia matrícula: un sello que dure más que la habilitación que lo
+    // respalda es el sello que miente.
+    await this.verification.applyVerified(tx, {
+      targetId: authorization.practitionerProfileId,
+      methodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
+      actorUserId,
+      evidenceRef: `identity_verification_case:${authorization.id}`,
+      validTo: authorization.validTo ?? undefined,
+    });
+
     this.logger.info(
       {
         operation: 'ida.effects.license',
@@ -156,6 +251,13 @@ export class IdentityVerificationEffectsService {
       tenant.statusConceptId = CONCEPTS.TENANT_ACTIVE;
     }
     touch(tenant, actorUserId);
+
+    await this.verification.applyVerified(tx, {
+      targetId: tenantId,
+      methodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
+      actorUserId,
+      evidenceRef: `tenant:${tenantId}`,
+    });
 
     this.logger.info(
       { operation: 'ida.effects.tenant', tenantId },

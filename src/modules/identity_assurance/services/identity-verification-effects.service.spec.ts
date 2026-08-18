@@ -21,13 +21,25 @@ describe('IdentityVerificationEffectsService', () => {
     const authorizationsRepo = { findById: fn().mockResolvedValue(null) };
     const practitionersRepo = { findById: fn().mockResolvedValue(null) };
     const tenantsRepo = { findById: fn().mockResolvedValue(null) };
+    const verification = {
+      applyVerified: fn().mockResolvedValue({ action: 'granted' }),
+      applyRevoked: fn().mockResolvedValue({ revoked: 1 }),
+    };
     const service = new IdentityVerificationEffectsService(
       authorizationsRepo as never,
       practitionersRepo as never,
       tenantsRepo as never,
+      verification as never,
       logger as never,
     );
-    return { service, tx, authorizationsRepo, practitionersRepo, tenantsRepo };
+    return {
+      service,
+      tx,
+      authorizationsRepo,
+      practitionersRepo,
+      tenantsRepo,
+      verification,
+    };
   }
 
   /** Caso verificado del tipo de sujeto indicado. */
@@ -129,5 +141,191 @@ describe('IdentityVerificationEffectsService', () => {
       ),
     ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalled();
+  });
+});
+
+/**
+ * P13 · el sello del perfil público sale de la verificación real.
+ *
+ * Antes de P13 `community.verified_badges` no tenía ningún camino de
+ * escritura: un profesional podía pasar la verificación de matrícula y **no
+ * ganar el sello**, mientras que un perfil sin verificar nada podía lucirlo si
+ * alguien metía la fila a mano. Estas pruebas son las que impiden que el puente
+ * se corte sin que nadie se entere.
+ */
+describe('IdentityVerificationEffectsService · sello público (P13)', () => {
+  const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
+
+  /** Igual que el `build` de arriba, pero exponiendo el doble de community. */
+  function build() {
+    const tx = {};
+    const authorizationsRepo = { findById: fn().mockResolvedValue(null) };
+    const practitionersRepo = { findById: fn().mockResolvedValue(null) };
+    const tenantsRepo = { findById: fn().mockResolvedValue(null) };
+    const verification = {
+      applyVerified: fn().mockResolvedValue({ action: 'granted' }),
+      applyRevoked: fn().mockResolvedValue({ revoked: 1 }),
+    };
+    const service = new IdentityVerificationEffectsService(
+      authorizationsRepo as never,
+      practitionersRepo as never,
+      tenantsRepo as never,
+      verification as never,
+      logger as never,
+    );
+    return {
+      service,
+      tx,
+      authorizationsRepo,
+      practitionersRepo,
+      tenantsRepo,
+      verification,
+    };
+  }
+
+  it('una matrícula verificada emite el sello del profesional', async () => {
+    const d = build();
+    d.authorizationsRepo.findById.mockResolvedValue({
+      id: 'auth-1',
+      practitionerProfileId: 'prof-1',
+      validTo: new Date('2027-01-01T00:00:00Z'),
+    });
+
+    await d.service.applyVerified(
+      d.tx as never,
+      {
+        subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
+        subjectEntityId: 'auth-1',
+      } as never,
+      ACTOR,
+    );
+
+    const [[, outcome]] = d.verification.applyVerified.mock.calls;
+    expect(outcome.targetId).toBe('prof-1');
+    // El sello no puede durar más que la habilitación que lo respalda.
+    expect(outcome.validTo).toEqual(new Date('2027-01-01T00:00:00Z'));
+  });
+
+  it('una institución verificada emite su sello', async () => {
+    const d = build();
+    d.tenantsRepo.findById.mockResolvedValue({
+      id: 'tenant-1',
+      statusConceptId: DIR.TENANT_PENDING,
+    });
+
+    await d.service.applyVerified(
+      d.tx as never,
+      {
+        subjectTypeConceptId: IDA.SUBJECT_TENANT_IDENTITY,
+        subjectEntityId: 'tenant-1',
+      } as never,
+      ACTOR,
+    );
+
+    const [[, outcome]] = d.verification.applyVerified.mock.calls;
+    expect(outcome.targetId).toBe('tenant-1');
+  });
+
+  it('la identidad de una persona no emite sello de matrícula', async () => {
+    const d = build();
+
+    await d.service.applyVerified(
+      d.tx as never,
+      {
+        subjectTypeConceptId: IDA.SUBJECT_PATIENT_IDENTITY,
+        subjectEntityId: 'p-1',
+      } as never,
+      ACTOR,
+    );
+
+    // Un sello que dice «matrícula verificada» sobre un paciente sería peor
+    // que la ausencia del sello.
+    expect(d.verification.applyVerified).not.toHaveBeenCalled();
+  });
+
+  describe('applyRevoked', () => {
+    it('una matrícula revocada hace caer el sello del profesional', async () => {
+      const d = build();
+      d.authorizationsRepo.findById.mockResolvedValue({
+        id: 'auth-1',
+        practitionerProfileId: 'prof-1',
+      });
+
+      await d.service.applyRevoked(
+        d.tx as never,
+        {
+          id: 'caso-1',
+          subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
+          subjectEntityId: 'auth-1',
+        } as never,
+        ACTOR,
+        'REVOKED',
+      );
+
+      expect(d.verification.applyRevoked).toHaveBeenCalledWith(
+        d.tx,
+        'prof-1',
+        ACTOR,
+        'REVOKED',
+      );
+    });
+
+    it('un caso vencido baja el sello como VENCIDO, no como revocado', async () => {
+      const d = build();
+
+      await d.service.applyRevoked(
+        d.tx as never,
+        {
+          id: 'caso-1',
+          subjectTypeConceptId: IDA.SUBJECT_TENANT_IDENTITY,
+          subjectEntityId: 'tenant-1',
+        } as never,
+        ACTOR,
+        'EXPIRED',
+      );
+
+      // «La autoridad retiró el respaldo» y «hay que renovar» no significan lo
+      // mismo, y la pantalla los muestra distinto.
+      expect(d.verification.applyRevoked).toHaveBeenCalledWith(
+        d.tx,
+        'tenant-1',
+        ACTOR,
+        'EXPIRED',
+      );
+    });
+
+    it('un caso de otro tipo no toca ningún sello', async () => {
+      const d = build();
+
+      await d.service.applyRevoked(
+        d.tx as never,
+        {
+          id: 'caso-1',
+          subjectTypeConceptId: IDA.SUBJECT_PATIENT_IDENTITY,
+          subjectEntityId: 'p-1',
+        } as never,
+        ACTOR,
+      );
+
+      expect(d.verification.applyRevoked).not.toHaveBeenCalled();
+    });
+
+    it('una matrícula que ya no existe no revienta el cierre del caso', async () => {
+      const d = build();
+      d.authorizationsRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.applyRevoked(
+          d.tx as never,
+          {
+            id: 'caso-1',
+            subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_LICENSE,
+            subjectEntityId: 'auth-x',
+          } as never,
+          ACTOR,
+        ),
+      ).resolves.toBeUndefined();
+      expect(d.verification.applyRevoked).not.toHaveBeenCalled();
+    });
   });
 });

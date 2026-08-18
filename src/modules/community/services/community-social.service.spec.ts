@@ -95,6 +95,16 @@ function build() {
     logger as any,
   );
 
+  const stats = {
+    recordView: mockFn(),
+    recordImpressions: mockFn(),
+    read: mockFn().mockResolvedValue({
+      windowDays: 7,
+      views: 0,
+      searchAppearances: 0,
+      daily: [],
+    }),
+  };
   const service = new CommunitySocialService(
     em as any,
     profilesRepo as any,
@@ -106,6 +116,7 @@ function build() {
     blocksRepo as any,
     visibility as any,
     attachableFiles,
+    stats as any,
     logger as any,
   );
   return {

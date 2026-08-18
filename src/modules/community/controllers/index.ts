@@ -8,3 +8,4 @@ export * from './community-feed.controller';
 export * from './community-timeline.controller';
 export * from './community-public.controller';
 export * from './community-search-index.controller';
+export * from './community-verification.controller';

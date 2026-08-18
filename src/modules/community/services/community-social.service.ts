@@ -48,6 +48,8 @@ import {
   SocialRemovalResponseDto,
 } from '../dto';
 import { CommunityVisibilityService } from './community-visibility.service';
+import { CommunityProfileStatsService } from './community-profile-stats.service';
+import type { ProfileStatsDto } from '../dto';
 
 const PROFILE_TARGET_BY_CODE: Record<string, string> = {
   USER: COMM.PROFILE_TARGET_USER,
@@ -127,6 +129,7 @@ export class CommunitySocialService {
     private readonly blocksRepo: BlocksRepository,
     private readonly visibility: CommunityVisibilityService,
     private readonly attachableFiles: AttachableFileService,
+    private readonly stats: CommunityProfileStatsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunitySocialService.name);
@@ -202,6 +205,25 @@ export class CommunitySocialService {
    * @param actor - La sesión, que es también el sujeto.
    * @returns El identificador y los campos editables, o `null`.
    */
+  /**
+   * «Tu perfil esta semana» (`ORG-PUB-005`).
+   *
+   * Un profesional sin vitrina no es un error: devuelve la ventana en ceros,
+   * que es la respuesta honesta —no tuvo visitas porque no hay nada que
+   * visitar— y deja la pantalla construida para cuando la publique.
+   *
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns Visitas y apariciones de los últimos días.
+   */
+  async getOwnProfileStats(actor: AuthenticatedUser): Promise<ProfileStatsDto> {
+    const em = this.em.fork();
+    const profile = await this.vitrinaDe(em, actor);
+    if (!profile) {
+      return { windowDays: 7, views: 0, searchAppearances: 0, daily: [] };
+    }
+    return this.stats.read(profile.tenantId, profile.id);
+  }
+
   async getOwnProfile(
     actor: AuthenticatedUser,
   ): Promise<OwnPublicProfileDto | null> {

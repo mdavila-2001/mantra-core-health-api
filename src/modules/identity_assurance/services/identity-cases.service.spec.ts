@@ -49,6 +49,7 @@ function build() {
   };
   const assertionsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const effects = { applyRevoked: mockFn().mockResolvedValue(undefined) };
   const service = new IdentityCasesService(
     em as any,
     casesRepo,
@@ -58,11 +59,13 @@ function build() {
     fraudRepo as any,
     reviewRepo as any,
     assertionsRepo as any,
+    effects as any,
     logger as any,
   );
   return {
     service,
     tx,
+    effects,
     forked,
     casesRepo,
     policiesRepo,

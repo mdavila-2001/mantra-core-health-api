@@ -16,6 +16,7 @@ import {
   TARGET_CONCEPT_BY_SLUG_PREFIX,
   haversineKm,
 } from './community-public.service';
+import { CommunityVerificationService } from './community-verification.service';
 import { ResourceNotFoundException, CONCEPTS } from '../../../common';
 import { COMM } from '../community.concepts';
 
@@ -65,6 +66,9 @@ function build(opciones?: {
     listPublicPosts: mockFn().mockResolvedValue([]),
     countPublishedReviews: mockFn().mockResolvedValue(0),
     nearbyProfiles: mockFn().mockResolvedValue([]),
+    badgesByProfiles: mockFn().mockResolvedValue(new Map()),
+    agendaByPractitioner: mockFn().mockResolvedValue(new Map()),
+    locationsByOwner: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // Por omisión el índice falla: así estas pruebas ejercen el camino SQL —el
@@ -79,13 +83,27 @@ function build(opciones?: {
         })
       : mockFn().mockRejectedValue(new Error('OpenSearch no responde')),
   };
+  // El servicio de verificación es real y no un doble: `readBadge` es pura y
+  // deriva el sello de los datos, así que probar la proyección con un doble
+  // sería probar el doble. Es justamente la lógica que P13 tiene que garantizar.
+  const verification = new CommunityVerificationService(
+    em as any,
+    {} as any,
+    { setContext: mockFn(), info: mockFn(), warn: mockFn() } as any,
+  );
+  const stats = {
+    recordView: mockFn(),
+    recordImpressions: mockFn(),
+  };
   const service = new CommunityPublicService(
     em as any,
     repo as any,
     searchIndex as any,
+    verification,
+    stats as any,
     logger as any,
   );
-  return { service, repo, searchIndex, logger };
+  return { service, repo, searchIndex, logger, verification, stats };
 }
 
 describe('CommunityPublicService', () => {
@@ -470,6 +488,232 @@ describe('CommunityPublicService · P10', () => {
 
       await expect(d.service.nearby({ lat: 999, lng: 0 })).rejects.toThrow();
       expect(d.searchIndex.search).not.toHaveBeenCalled();
+    });
+  });
+});
+
+/**
+ * P13 · el sello dice lo mismo en todas las superficies.
+ *
+ * La regla del carril es que haya **un campo y una semántica**: buscador, ficha
+ * pública, Guía y selector de turnos leen `verifiedBadge`, no cuatro
+ * interpretaciones de un booleano. Estas pruebas comparan las dos formas de
+ * servir el mismo perfil —índice y SQL— y exigen que coincidan.
+ */
+describe('CommunityPublicService · sello y agenda (P13)', () => {
+  const AYER = new Date(Date.now() - 24 * 3_600_000);
+
+  /** Un sello con los campos que la lectura mira. */
+  function sello(over: Record<string, unknown> = {}): any {
+    return {
+      id: 'badge-1',
+      subjectRefId: perfilCompleto.id,
+      badgeTypeConceptId: COMM.BADGE_TYPE_LICENSE_VERIFIED,
+      verificationMethodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      validFrom: new Date('2026-01-01T00:00:00Z'),
+      validTo: null,
+      ...over,
+    };
+  }
+
+  describe('camino SQL', () => {
+    it('sin sello, el perfil no se muestra verificado aunque la columna lo diga', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.badgesByProfiles.mockResolvedValue(new Map());
+
+      const res = await d.service.search({});
+
+      // `perfilCompleto` tiene `verificationStatusConceptId = STATE_ACTIVE`.
+      // El sello manda: es el que tiene la evidencia detrás.
+      expect(res.items[0].verified).toBe(false);
+      expect(res.items[0].verifiedBadge.status).toBe('NONE');
+    });
+
+    it('con sello vigente sale VERIFIED y con su procedencia', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.badgesByProfiles.mockResolvedValue(
+        new Map([[perfilCompleto.id, [sello()]]]),
+      );
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].verified).toBe(true);
+      expect(res.items[0].verifiedBadge.status).toBe('VERIFIED');
+      expect(res.items[0].verifiedBadge.verificationMethodConceptId).toBe(
+        COMM.BADGE_METHOD_AUTHORITY_CHECK,
+      );
+    });
+
+    it('con sello vencido sale EXPIRED, que no es lo mismo que NONE', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.badgesByProfiles.mockResolvedValue(
+        new Map([[perfilCompleto.id, [sello({ validTo: AYER })]]]),
+      );
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].verified).toBe(false);
+      expect(res.items[0].verifiedBadge.status).toBe('EXPIRED');
+    });
+  });
+
+  describe('«Pedir turno» sólo cuando es verdad (PAC-CITA-001)', () => {
+    it('sin agenda publicada, `hasPublishedAgenda` es false', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].hasPublishedAgenda).toBe(false);
+      expect(res.items[0].nextAvailableDate).toBeNull();
+    });
+
+    it('con agenda y hueco, el resultado lo dice y trae el día', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.agendaByPractitioner.mockResolvedValue(
+        new Map([
+          [
+            perfilCompleto.targetId,
+            { hasAgenda: true, nextAvailableDate: '2026-08-20' },
+          ],
+        ]),
+      );
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].hasPublishedAgenda).toBe(true);
+      // Truncado a día a propósito: la hora exacta cambia entre que la tarjeta
+      // se pinta y el paciente la toca.
+      expect(res.items[0].nextAvailableDate).toBe('2026-08-20');
+    });
+
+    it('con agenda pero sin huecos, se ofrece la agenda y no una fecha inventada', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.agendaByPractitioner.mockResolvedValue(
+        new Map([
+          [
+            perfilCompleto.targetId,
+            { hasAgenda: true, nextAvailableDate: null },
+          ],
+        ]),
+      );
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].hasPublishedAgenda).toBe(true);
+      expect(res.items[0].nextAvailableDate).toBeNull();
+    });
+  });
+
+  describe('camino del índice: la misma forma', () => {
+    it('recompone el sello desde los campos planos del documento', async () => {
+      const d = build({
+        hits: [
+          {
+            id: 'perfil-1',
+            score: 2,
+            sort: [1],
+            source: {
+              kind: 'PRACTITIONER',
+              slug: 'dra-demo',
+              displayName: 'Dra. Demo',
+              verified: true,
+              verifiedBadgeStatus: 'VERIFIED',
+              badgeTypeConceptId: COMM.BADGE_TYPE_LICENSE_VERIFIED,
+              verificationMethodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
+              verifiedAt: '2026-01-01T00:00:00.000Z',
+              validUntil: null,
+              hasPublishedAgenda: true,
+              nextAvailableDate: '2026-08-20',
+            },
+          },
+        ],
+      });
+
+      const res = await d.service.search({ q: 'demo' });
+
+      expect(res.items[0].verifiedBadge).toEqual({
+        status: 'VERIFIED',
+        badgeTypeConceptId: COMM.BADGE_TYPE_LICENSE_VERIFIED,
+        verificationMethodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
+        verifiedAt: '2026-01-01T00:00:00.000Z',
+        validUntil: null,
+      });
+      expect(res.items[0].hasPublishedAgenda).toBe(true);
+      expect(res.items[0].nextAvailableDate).toBe('2026-08-20');
+    });
+
+    it('un documento viejo sin el estado del sello no miente: cae al booleano', async () => {
+      const d = build({
+        hits: [
+          {
+            id: 'perfil-1',
+            score: 2,
+            sort: [1],
+            source: {
+              kind: 'PRACTITIONER',
+              slug: 'dra-demo',
+              displayName: 'Dra. Demo',
+              verified: false,
+            },
+          },
+        ],
+      });
+
+      const res = await d.service.search({ q: 'demo' });
+
+      // Entre el despliegue y el reindexado hay documentos sin los campos
+      // nuevos; servirlos como `NONE` es lo honesto, no como `VERIFIED`.
+      expect(res.items[0].verifiedBadge.status).toBe('NONE');
+    });
+
+    it('la fila del índice sigue teniendo exactamente las claves permitidas', async () => {
+      const d = build({
+        hits: [
+          {
+            id: 'perfil-1',
+            score: 2,
+            sort: [1],
+            source: { kind: 'PRACTITIONER', slug: 'x', displayName: 'X' },
+          },
+        ],
+      });
+
+      const res = await d.service.search({ q: 'x' });
+
+      expect(Object.keys(res.items[0]).sort()).toEqual(
+        [...PUBLIC_RESULT_KEYS].sort(),
+      );
+    });
+  });
+
+  describe('estadísticas del perfil (ORG-PUB-005)', () => {
+    it('abrir la ficha cuenta una visita', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+
+      await d.service.getBySlug('dra-demo');
+
+      expect(d.stats.recordView).toHaveBeenCalledWith(
+        perfilCompleto.tenantId,
+        perfilCompleto.id,
+      );
+    });
+
+    it('aparecer en resultados cuenta como aparición, no como visita', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+
+      await d.service.search({});
+
+      expect(d.stats.recordImpressions).toHaveBeenCalled();
+      expect(d.stats.recordView).not.toHaveBeenCalled();
     });
   });
 });
