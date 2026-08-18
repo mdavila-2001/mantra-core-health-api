@@ -37,6 +37,11 @@ function build() {
       }),
     ),
     findLiveRequestByDebounceKey: mockFn(() => Promise.resolve(null)),
+    // El rebote del in-app mira si ya hay un aviso SIN LEER para el mismo
+    // objeto, no si la solicitud sigue viva: una solicitud in-app nace `SENT` y
+    // se queda así, así que aquel criterio dejaba una conversación avisando una
+    // sola vez en toda su historia. Lo encontró el journey funcional.
+    findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
     // Carril P9: el emisor lee todas las preferencias del canal y elige la
     // fila que corresponde, porque la ventana de silencio vive en la fila sin
     // categoría y la lectura por categoría no la encontraba nunca.
@@ -161,23 +166,41 @@ describe('NotificationsService · carril P1 (campana)', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('devuelve la solicitud viva en vez de crear una segunda con la misma clave de rebote', async () => {
+    it('no crea un aviso nuevo si ya hay uno SIN LEER para el mismo objeto', async () => {
       const d = build();
-      d.notificationsRepo.findLiveRequestByDebounceKey.mockResolvedValue({
-        id: 'request-previa',
+      d.notificationsRepo.findUnreadInAppForResource.mockResolvedValue({
+        id: 'in-app-previa',
+        notificationRequestId: 'request-previa',
       });
 
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'MESSAGES',
         subject: 'Mensaje nuevo',
-        debounceKey: 'conversation:c-1',
+        destination: { type: 'CONVERSATION', id: 'c-1' },
       });
 
-      expect(res.requestId).toBe('request-previa');
+      // Diez mensajes seguidos en un hilo son un campanazo, no diez.
+      expect(res.inAppNotificationId).toBe('in-app-previa');
       expect(
         d.notificationsRepo.createNotificationRequest,
       ).not.toHaveBeenCalled();
+    });
+
+    it('pero si el anterior YA se leyó, el siguiente vuelve a avisar', async () => {
+      const d = build();
+      // Sin aviso sin leer para ese objeto: el rebote no aplica.
+      d.notificationsRepo.findUnreadInAppForResource.mockResolvedValue(null);
+
+      const res = await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'MESSAGES',
+        subject: 'Mensaje nuevo',
+        destination: { type: 'CONVERSATION', id: 'c-1' },
+      });
+
+      expect(res.inAppNotificationId).toBe('in-app-1');
+      expect(d.notificationsRepo.createInAppNotification).toHaveBeenCalled();
     });
 
     it('no lanza si algo falla: informa `failed` y deja seguir al caso de uso que emitía', async () => {
