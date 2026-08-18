@@ -41,12 +41,32 @@ imagen»), pero **ya no reproduce**: la entrada `@aws-sdk/s3-request-presigner` 
 lockfile, `yarn install --immutable` pasa, y la etapa `prod-deps` del `Dockerfile` construye con
 exit 0. Lo había limpiado el PR #84. Se deja anotado para que nadie vuelva a gastar tiempo en él.
 
-## Bloqueantes abiertos
+**B-1 · El CI estaba caído a nivel de cuenta desde el 14/08 — RESUELTO el 18/08 (#137, #154).**
+La causa era facturación, no código: la anotación de GitHub decía literalmente *«The job was not
+started because recent account payments have failed or your spending limit needs to be
+increased»*, y por eso los jobs morían en 2-4 s sin ejecutar un paso. Como la facturación no se
+podía reponer en el día, se montaron **dos runners self-hosted** (`marcelo-wsl-api`,
+`marcelo-wsl-front`) sobre WSL Ubuntu con Docker, y los workflows pasaron a `runs-on:
+[self-hosted, linux, x64]` con el disparo acotado a `pull_request`.
 
-**B-1 · El CI de GitHub Actions está caído a nivel de cuenta desde el 2026-08-14.**
-Las corridas mueren en 3-5 s sin asignar runner, en todas las ramas de los dos repos.
-**Ninguna verificación automática está corriendo.** Todo lo que se mergee hasta que se
-reponga entra sin checks; hay que verificar local y pegar la evidencia.
+Dos cosas que conviene saber, porque cambian cómo se trabaja:
+
+- **Los checks ahora bloquean el merge.** Mientras no existían, la protección de rama sólo pedía
+  un review; al volver, un check en rojo deja el PR en `BLOCKED`.
+- **El runner vive en una máquina del equipo**: si está apagada, los checks se encolan. La
+  verificación local sigue siendo obligatoria, no opcional.
+
+Operación, contingencia y el riesgo aceptado (ejecutar código de PRs en una máquina del equipo)
+están en `docs/operations/ci-runner-self-hosted.md`.
+
+**B-6 · `practitioner_affiliations` sin backend — OBSOLETO, ya no reproduce.** La tabla está
+declarada en `SQL/05_profiles/02_tables.sql` (más su FK en `03_fk_intra.sql` y su índice en
+`04_indexes.sql`), y en la API existen la entidad
+`src/modules/profiles/entities/practitioner_affiliations.entity.ts`, su repositorio
+`repositories/practitioner-affiliations.repository.ts` y su registro en `profiles.module.ts`. Lo
+cerró el PR #115 el 17/08; el registro quedó desactualizado.
+
+## Bloqueantes abiertos
 
 **B-2 · `.puml`, `SQL/` y `salud-db/` no están bajo control de versiones.**
 Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la causa raíz de
@@ -60,10 +80,6 @@ vault ausente. Cualquiera que regenere un módulo acá introduce la regresión.
 **B-4 · `postgres-init` falla en algunas máquinas** — busca `/init/SQL/apply_all.sql` y el
 directorio está vacío. Impide levantar el stack limpio y correr `yarn test:integration`.
 *(`COORDINACION-AGENTES.md:1489-1495`)*
-
-**B-6 · `profiles.practitioner_affiliations` no tiene backend en `dev`.** El front está
-mergeado pero el DDL y el `affiliations` del summary siguen en una rama sin integrar: la
-pestaña Trayectoria no tiene quién la sirva.
 
 **B-7 · El schema `surveys` no existe en ninguna base construida por el pipeline.** El
 carril 10 (`53689fae`, 15/08) trajo las 7 entidades (`survey_templates`, `survey_versions`,
