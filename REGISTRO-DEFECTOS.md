@@ -41,29 +41,53 @@ imagen»), pero **ya no reproduce**: la entrada `@aws-sdk/s3-request-presigner` 
 lockfile, `yarn install --immutable` pasa, y la etapa `prod-deps` del `Dockerfile` construye con
 exit 0. Lo había limpiado el PR #84. Se deja anotado para que nadie vuelva a gastar tiempo en él.
 
-## Bloqueantes abiertos
+**B-1 · El CI estaba caído a nivel de cuenta desde el 14/08 — RESUELTO el 18/08 (#137, #154).**
+La causa era facturación, no código: la anotación de GitHub decía literalmente *«The job was not
+started because recent account payments have failed or your spending limit needs to be
+increased»*, y por eso los jobs morían en 2-4 s sin ejecutar un paso. Como la facturación no se
+podía reponer en el día, se montaron **dos runners self-hosted** (`marcelo-wsl-api`,
+`marcelo-wsl-front`) sobre WSL Ubuntu con Docker, y los workflows pasaron a `runs-on:
+[self-hosted, linux, x64]` con el disparo acotado a `pull_request`.
 
-**B-1 · El CI de GitHub Actions está caído a nivel de cuenta desde el 2026-08-14.**
-Las corridas mueren en 3-5 s sin asignar runner, en todas las ramas de los dos repos.
-**Ninguna verificación automática está corriendo.** Todo lo que se mergee hasta que se
-reponga entra sin checks; hay que verificar local y pegar la evidencia.
+Dos cosas que conviene saber, porque cambian cómo se trabaja:
+
+- **Los checks ahora bloquean el merge.** Mientras no existían, la protección de rama sólo pedía
+  un review; al volver, un check en rojo deja el PR en `BLOCKED`.
+- **El runner vive en una máquina del equipo**: si está apagada, los checks se encolan. La
+  verificación local sigue siendo obligatoria, no opcional.
+
+Operación, contingencia y el riesgo aceptado (ejecutar código de PRs en una máquina del equipo)
+están en `docs/operations/ci-runner-self-hosted.md`.
+
+**B-6 · `practitioner_affiliations` sin backend — OBSOLETO, ya no reproduce.** La tabla está
+declarada en `SQL/05_profiles/02_tables.sql` (más su FK en `03_fk_intra.sql` y su índice en
+`04_indexes.sql`), y en la API existen la entidad
+`src/modules/profiles/entities/practitioner_affiliations.entity.ts`, su repositorio
+`repositories/practitioner-affiliations.repository.ts` y su registro en `profiles.module.ts`. Lo
+cerró el PR #115 el 17/08; el registro quedó desactualizado.
+
+## Bloqueantes abiertos
 
 **B-2 · `.puml`, `SQL/` y `salud-db/` no están bajo control de versiones.**
 Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la causa raíz de
 B-3 y de que el ajuste de `rebuild_stack.py` del PR #107 no pueda revisarse.
 *(`CARRIL_REPORT.md:98-103`)*
 
-**B-3 · `gen_ddl.py 05` pierde 7 FK ya resueltas** al regenerar en este workspace: lee un
-vault ausente. Cualquiera que regenere un módulo acá introduce la regresión.
+**B-3 · `gen_ddl.py 05` pierde 7 FK ya resueltas** al regenerar: lee un vault ausente.
 *(`CARRIL_REPORT.md:86-92`)*
+
+> **No reproduce con el vault presente (verificado 18/08).** `gen_ddl.py` lee los destinos de
+> `Mantra Core Health Vault/SALUD/FK/`, que en un workspace completo tiene **6 652 notas**.
+> Prueba: copiar `SQL/05_profiles/` aparte, `python salud-db/gen_ddl.py 05`, `diff -r` → **sin
+> diferencias**; la corrida reporta `24 FK intra · 99 FK diferidas · 0 inferidas` y ninguna
+> pérdida. El bloqueante real no es el generador sino **B-2**: como `salud-db/` y el vault no
+> viajan en git, quien clone solo el repo de la API no los tiene y ahí sí pierde las FKs.
+> Se deja abierto por eso, pero **con la condición correcta**: no es «regenerar rompe», es
+> «regenerar sin el vault rompe».
 
 **B-4 · `postgres-init` falla en algunas máquinas** — busca `/init/SQL/apply_all.sql` y el
 directorio está vacío. Impide levantar el stack limpio y correr `yarn test:integration`.
 *(`COORDINACION-AGENTES.md:1489-1495`)*
-
-**B-6 · `profiles.practitioner_affiliations` no tiene backend en `dev`.** El front está
-mergeado pero el DDL y el `affiliations` del summary siguen en una rama sin integrar: la
-pestaña Trayectoria no tiene quién la sirva.
 
 **B-7 · El schema `surveys` no existe en ninguna base construida por el pipeline.** El
 carril 10 (`53689fae`, 15/08) trajo las 7 entidades (`survey_templates`, `survey_versions`,
@@ -74,6 +98,31 @@ módulo revienta con `relation "surveys.*" does not exist` (F-14 fue el primero 
 usuario). Misma familia que `audio_assets` (módulo 64). Sale por el camino canónico —`.puml`
 → `gen_ddl.py` → patch → `rebuild_stack.py`— y es de Marcelo (M4); mientras tanto la
 lectura del paciente degrada a `200 []` (R-7).
+**CERRADO el 18/08**: módulo 65 promovido a las 4 capas (`diagram_65_surveys.puml`,
+`SQL/65_surveys/`, patch `2026-08-18_v4011_surveys_promocion_modulo_65.sql`, catálogo ORM).
+`rebuild_stack.py --yes` → **PASS**: tablas 1 185 → **1 192**, FKs 6 669 → **6 705**,
+índices 9 130 → **9 154**. El degradado a `200 []` se retiró junto con el bloqueante.
+
+**B-8 · El schema `pharma_lab` no existe en ninguna base construida por el pipeline — y son
+31 entidades, no 7.** Mismo defecto que B-7 y `audio_assets`, un orden de magnitud más
+grande. El módulo (carril 17, spec 5667-5702) vive **solo en el código**:
+`src/modules/pharma_lab/` tiene 31 entidades MikroORM, 13 controladores y **47 rutas que la
+app mapea al arrancar**, pero no hay `diagram_XX_pharma_lab.puml` ni carpeta en `SQL/`, y
+`schemas.catalog.ts` lo declara con módulo **`null`** — la misma firma que tenía `surveys`
+antes de promoverse. Verificado el 18/08 arrancando con `ORM_SCHEMA_SYNC=dry-run` contra la
+base recién reconstruida: `Deriva detectada … 69 diferencias (tabla-ausente=45,
+obligatoriedad-divergente=24)`, de las cuales **15 visibles son de `pharma_lab`** y 4 más son
+sus tablas de historia en `audit` (`pharma_lab_staff_history`, `pharma_products_history`,
+`regulatory_documents_history`, `visit_requests_history`); el schema **no figura** en la
+lista de `information_schema.schemata`. Las 47 rutas responden 500 contra cualquier base del
+pipeline. Sale por el camino canónico y es de Marcelo (M4) — **es un carril propio, no una
+tarea suelta**.
+
+> **Ojo al citar la deriva conocida:** la cifra de «6 diferencias (tabla-ausente=6)» que
+> repiten `CLAUDE.md` y los documentos de arquitectura **quedó vieja**. Medida hoy contra
+> base limpia es **69**: las 6 entidades fantasma de siempre + `pharma_lab` (B-8) + 24
+> `obligatoriedad-divergente` sin triar. Ese número es el que hay que usar como referencia
+> hasta que B-8 se cierre.
 
 ---
 

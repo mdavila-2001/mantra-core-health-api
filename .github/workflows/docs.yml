@@ -85,12 +85,19 @@ jobs:
         env:
           discovery.type: single-node
           DISABLE_SECURITY_PLUGIN: "true"
+          # Medio giga en vez del gigabyte por defecto. Acá OpenSearch solo
+          # tiene que existir para que AppModule levante y se genere el
+          # contrato: no se indexa nada ni se consulta nada pesado. En el
+          # runner propio, que comparte memoria con lo que el equipo tenga
+          # abierto, pedir 1 GB de heap es lo que lo dejaba sin arrancar.
+          OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
         ports: ["9200:9200"]
         options: >-
           --health-cmd "curl -sf http://localhost:9200/_cluster/health || exit 1"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 15
+          --health-retries 20
+          --health-start-period 120s
 
     steps:
       - uses: actions/checkout@v4
@@ -101,8 +108,24 @@ jobs:
       # `packageManager: yarn@4.14.1`, ese yarn 1.22 aborta y el job muere en el
       # setup, antes de compilar nada. Usa el Node preinstalado del runner, que
       # es suficiente para activar los shims.
+      #
+      # Los shims van a un directorio del propio job y no al `bin` del Node
+      # global: `corepack enable` a secas escribe en `/usr/bin`, que en un runner
+      # hospedado pertenece al usuario del runner y en el propio no. Ahí moría
+      # con `EACCES: permission denied, symlink … -> '/usr/bin/pnpm'`, en el paso
+      # 4 de 30, dejando los otros 26 en `skipped` — o sea sin instalar
+      # dependencias ni mirar una línea de código.
+      #
+      # `$RUNNER_TEMP` es escribible por definición y se limpia solo entre jobs,
+      # así que esto sigue siendo correcto el día que se vuelva a `ubuntu-latest`.
+      #
+      # El `mkdir` no sobra: corepack no crea el directorio de destino, hace
+      # `realpath` sobre él y muere con `ENOENT` si no existe.
       - name: Habilitar Corepack
-        run: corepack enable
+        run: |
+          mkdir -p "$RUNNER_TEMP/corepack"
+          corepack enable --install-directory "$RUNNER_TEMP/corepack"
+          echo "$RUNNER_TEMP/corepack" >> "$GITHUB_PATH"
 
       - uses: actions/setup-node@v4
         with:

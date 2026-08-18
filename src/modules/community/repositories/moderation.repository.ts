@@ -413,7 +413,15 @@ export class ModerationRepository {
    * `coalesce(queued_at, created_at)`: una entrada sin marca de encolado no
    * puede irse al final de la cola para siempre.
    *
+   * El `tenantId` es **obligatorio y no opcional**, igual que en `groups`: la
+   * cola es el listado abierto de una tabla con `tenant_id`, así que servirla
+   * sin acotar mostraría a un moderador el contenido reportado de otra
+   * organización. `SECURITY_ADMIN` es un rol **global de plataforma**, de modo
+   * que el rol por sí solo no acota nada — el límite lo pone el tenant del
+   * contexto del request.
+   *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización cuya cola se lee.
    * @param filtros - Estado, prioridad, tipo de contenido y antigüedad mínima.
    * @param after - Clave de continuación `(queuedAt, id)`.
    * @param limit - Tope de filas.
@@ -421,6 +429,7 @@ export class ModerationRepository {
    */
   async listQueuePage(
     em: EntityManager,
+    tenantId: string,
     filtros: {
       /** Estados admitidos; vacío o ausente significa todos. */
       statusConceptIds?: string[];
@@ -434,7 +443,7 @@ export class ModerationRepository {
     after: { queuedAt: string; id: string } | undefined,
     limit: number,
   ): Promise<ModerationQueue[]> {
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { tenantId };
     if (filtros.statusConceptIds?.length) {
       where.statusConceptId = { $in: filtros.statusConceptIds };
     }
@@ -495,14 +504,17 @@ export class ModerationRepository {
     contentRefIds: string[],
   ): Promise<{ targetId: string; count: number }[]> {
     if (contentRefIds.length === 0) return [];
+    // Un marcador por id: el driver no traduce un arreglo de JavaScript a un
+    // arreglo de Postgres. Ver la nota en `ReactionsRepository`.
+    const marcadores = contentRefIds.map(() => '?').join(', ');
     const rows = await em
       .getConnection()
       .execute<Array<{ target_id: string; count: number }>>(
         `select target_id, count(*)::int as count
            from community.content_reports
-          where target_id = any(?)
+          where target_id in (${marcadores})
           group by target_id`,
-        [contentRefIds],
+        [...contentRefIds],
         'all',
       );
     return rows.map((row) => ({ targetId: row.target_id, count: row.count }));
