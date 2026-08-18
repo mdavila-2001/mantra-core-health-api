@@ -8,6 +8,7 @@ import {
   TracingService,
   type TraceSpan,
 } from '../../../observability';
+import { CONCEPTS } from '../../../common';
 
 const DELIVERY_INTERVAL_MS = 5_000;
 
@@ -15,6 +16,8 @@ const DELIVERY_INTERVAL_MS = 5_000;
 export interface PendingNotificationRequest {
   id: string;
   channelId: string;
+  /** Tipo del canal; ausente si el backend es anterior al carril P1. */
+  channelTypeConceptId?: string;
   statusConceptId: string;
   payloadJson?: unknown;
   recipientAddress?: string;
@@ -125,10 +128,24 @@ export class NotificationDeliveryJob {
     request: PendingNotificationRequest,
     span: TraceSpan,
   ): Promise<void> {
-    span.addEvent('provider.attempt.started');
-    const result = await this.providerAdapter(request);
+    // Carril P1 · el canal in-app no tiene proveedor al que llamar: su entrega
+    // es la fila que el backend escribe en la bandeja del destinatario. Sin
+    // esta rama, el adaptador por defecto devolvía `PROVIDER_NOT_CONFIGURED` y
+    // toda notificación de la campana que llegara por el camino genérico
+    // quedaba `FAILED` — un fallo que no describía ningún problema real.
+    const esInApp =
+      request.channelTypeConceptId === CONCEPTS.CHANNEL_TYPE_IN_APP;
+
+    let result: ProviderDeliveryOutcome;
+    if (esInApp) {
+      span.setAttribute('messaging.delivery.provider', 'in-app');
+      result = { outcome: 'SENT' };
+    } else {
+      span.addEvent('provider.attempt.started');
+      result = await this.providerAdapter(request);
+      span.addEvent('provider.attempt.finished');
+    }
     span.setAttribute('messaging.delivery.outcome', result.outcome);
-    span.addEvent('provider.attempt.finished');
 
     const response = await this.api.post<DeliverNotificationResponse>(
       `/internal/notifications/${request.id}/deliver`,

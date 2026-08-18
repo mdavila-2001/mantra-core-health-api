@@ -127,20 +127,4 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
       code: 'AGENDA_NOTICE_BOOKING_STATE',
       display: 'Agenda notice: the appointment changed state',
     },
-
-    /**
-     * Tipo del proveedor que entrega la bandeja in-app.
-     *
-     * Debería vivir junto a `MSG_PROVIDER_TYPE_EMAIL` en el catálogo central,
-     * pero ese archivo es compartido y este carril no lo toca (regla 3 de
-     * `PABLO.md`: los cambios en archivos calientes van aislados). Se declara
-     * acá porque P8 es quien materializa el canal in-app y sin un tipo de
-     * proveedor la fila no se puede escribir —la columna es FK NOT NULL—.
-     * Cuando P1 publique su módulo de canal, mover esta clave a un
-     * `messaging.concepts.ts` es un renombrado de una constante.
-     */
-    MSG_PROVIDER_TYPE_IN_APP: {
-      code: 'MSG_PROV_IN_APP',
-      display: 'In-app messaging provider',
-    },
   });

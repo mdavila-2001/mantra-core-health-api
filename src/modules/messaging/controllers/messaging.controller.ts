@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -18,6 +20,9 @@ import {
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
   InAppReadResponseDto,
+  InAppNotificationPageDto,
+  MarkAllInAppReadResponseDto,
+  MyNotificationsQueryDto,
 } from '../dto';
 
 /** Endpoints de mensajería que consumen los módulos de negocio y los usuarios. */
@@ -84,6 +89,51 @@ export class MessagingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<NotificationRequestResponseDto> {
     return this.notificationsService.createRequest(dto, actor);
+  }
+
+  /**
+   * Carril P1 · la bandeja de la campana.
+   *
+   * Es la lectura **del usuario final**, la que faltaba. El módulo tenía
+   * `GET /internal/notifications/pending` —que reclama solicitudes para que un
+   * worker las entregue— y nada con lo que dibujar una campana: se podía
+   * marcar como leída una notificación cuyo id no había forma de conocer.
+   *
+   * `?unread=true&limit=1` alcanza para el badge; sin filtro es el centro de
+   * notificaciones. Es la misma lectura porque es la misma bandeja.
+   */
+  @Get('notifications/me')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @ApiOperation({
+    summary: 'Mis notificaciones in-app',
+    description:
+      'Bandeja propia con el total sin leer. Nadie lee la bandeja de otro.',
+  })
+  listMyNotifications(
+    @Query() query: MyNotificationsQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<InAppNotificationPageDto> {
+    return this.notificationsService.listMine(actor, query);
+  }
+
+  /**
+   * Carril P1 · marcar todo como leído.
+   *
+   * Sin esto, bajar un badge de cuarenta exige abrir cuarenta notificaciones,
+   * y quien tiene cuarenta avisos viejos no los abre: aprende a ignorar la
+   * campana. Una campana que se ignora no notifica.
+   */
+  @Post('notifications/in-app/read-all')
+  @Roles('USER', 'MESSAGING_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Marcar toda mi bandeja como leída',
+    description: 'Acota el lote y devuelve cuántas quedaron sin leer.',
+  })
+  markAllInAppRead(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MarkAllInAppReadResponseDto> {
+    return this.notificationsService.markAllInAppRead(actor);
   }
 
   /** UC-35-13. */

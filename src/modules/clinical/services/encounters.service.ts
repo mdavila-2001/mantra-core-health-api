@@ -15,6 +15,7 @@ import {
   EncounterResponseDto,
 } from '../dto';
 import { CLIN } from '../clinical.concepts';
+import { ClinicalNotificationsService } from './clinical-notifications.service';
 
 /**
  * UC-08-02 (check-in) y UC-08-14 (cierre) de encuentros. El check-in abre el
@@ -29,12 +30,14 @@ export class EncountersService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param encountersRepo - Valor de encounters repo requerido por la operación.
    * @param episodesRepo - Valor de episodes repo requerido por la operación.
+   * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly encountersRepo: EncountersRepository,
     private readonly episodesRepo: CareEpisodesRepository,
+    private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(EncountersService.name);
@@ -141,7 +144,7 @@ export class EncountersService {
       { operation: 'clinical.encounter.close', encounterId },
       'Closing encounter',
     );
-    return this.em.transactional(async (tx) => {
+    const cerrado = await this.em.transactional(async (tx) => {
       const encounter = await this.encountersRepo.findById(tx, encounterId);
       if (!encounter) {
         throw new ResourceNotFoundException('Encuentro no encontrado', {
@@ -212,5 +215,15 @@ export class EncountersService {
         createdAt: encounter.createdAt,
       };
     });
+
+    // Carril P1: «tu consulta está disponible». Fuera de la transacción por lo
+    // mismo que en la receta — el encuentro ya está cerrado y no puede
+    // desandarse porque falle un aviso.
+    await this.clinicalNotifications.encounterClosed(
+      cerrado.id,
+      cerrado.patientProfileId,
+      actor.id,
+    );
+    return cerrado;
   }
 }

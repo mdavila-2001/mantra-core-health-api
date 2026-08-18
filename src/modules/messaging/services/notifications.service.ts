@@ -9,7 +9,9 @@ import {
   SEED,
   UnauthorizedException,
   canonicalJson,
+  decodeKeysetCursor,
   deriveWebhookSecret,
+  encodeKeysetCursor,
   touch,
   verifySignature,
   type AuthenticatedUser,
@@ -24,8 +26,18 @@ import {
   ProviderReceiptDto,
   ProviderReceiptResponseDto,
   InAppReadResponseDto,
+  InAppNotificationPageDto,
+  MarkAllInAppReadResponseDto,
+  MyNotificationsQueryDto,
   type ReceiptType,
 } from '../dto';
+import {
+  NOTIFICATION_CATEGORY_BY_CONCEPT,
+  NOTIFICATION_CATEGORY_CONCEPT,
+  type EmitInAppInput,
+  type EmitInAppResult,
+  type InAppNotificationEmitter,
+} from '../notifications.contract';
 
 const RECEIPT_TYPE_CONCEPT: Readonly<Record<ReceiptType, string>> = {
   DELIVERED: CONCEPTS.MSG_RECEIPT_DELIVERED,
@@ -49,6 +61,10 @@ const LIVE_REQUEST_STATES: readonly string[] = [
 ];
 
 const DEFAULT_PRIORITY = 5;
+/** Cuántas notificaciones trae la bandeja si nadie pide un tope. */
+const DEFAULT_INBOX_PAGE = 20;
+/** Tope de filas que marca de una vez «marcar todas como leídas». */
+const MARK_ALL_BATCH = 500;
 const DEFAULT_PENDING_BATCH = 50;
 /** Cuánto puede quedar `NOTIF_SENDING` antes de considerarse huérfana y reclamable de nuevo. */
 const SENDING_CLAIM_STALE_MS = 5 * 60_000;
@@ -59,7 +75,7 @@ const SENDING_CLAIM_STALE_MS = 5 * 60_000;
  * (UC-35-10 … 13).
  */
 @Injectable()
-export class NotificationsService {
+export class NotificationsService implements InAppNotificationEmitter {
   /**
    * Inicializa la instancia y sus dependencias.
    *
@@ -269,10 +285,22 @@ export class NotificationsService {
       }
       await tx.flush();
 
+      // El tipo de canal se resuelve una vez por canal distinto del lote, no
+      // una por solicitud: un lote de cincuenta correos es un solo canal.
+      const channelTypes = new Map<string, string>();
+      for (const channelId of new Set(requests.map((r) => r.channelId))) {
+        const channel = await this.notificationsRepo.findChannelById(
+          tx,
+          channelId,
+        );
+        if (channel) channelTypes.set(channelId, channel.channelTypeConceptId);
+      }
+
       return {
         requests: requests.map((request) => ({
           id: request.id,
           channelId: request.channelId,
+          channelTypeConceptId: channelTypes.get(request.channelId),
           statusConceptId: request.statusConceptId,
           payloadJson: request.payloadJson,
           recipientAddress: request.recipientAddress,
@@ -644,6 +672,167 @@ export class NotificationsService {
     });
   }
 
+  /**
+   * Carril P1 · emite una notificación in-app. **No lanza.**
+   *
+   * ## Por qué la entrega es inmediata y no la hace el worker
+   *
+   * El resto de los canales pasan por `listDeliverable` → worker → proveedor →
+   * `deliverNotification`, porque del otro lado hay un tercero cuya latencia no
+   * controlamos y una transacción abierta esperándolo agota el pool. El canal
+   * in-app **no tiene tercero**: entregarlo es escribir una fila nuestra. Pasar
+   * por el worker le agregaría hasta un tic de demora a la campana sin comprar
+   * nada, y ataría la funcionalidad más visible del producto a que un proceso
+   * aparte esté vivo.
+   *
+   * Se escriben igual la solicitud y la entrega, con su intento y su proveedor
+   * `IN_APP_DIRECT`: la auditoría de mensajería sigue contando la misma
+   * historia para todos los canales, y una in-app se puede rastrear con las
+   * mismas consultas que un correo.
+   *
+   * ## Por qué no lanza
+   *
+   * Porque quien la llama está a mitad de emitir una receta o de guardar un
+   * mensaje. Si notificar pudiera fallar hacia arriba, un problema de la
+   * campana desharía un acto clínico. El fallo se registra y se devuelve en
+   * `failed`, que es donde una prueba lo puede afirmar.
+   *
+   * @param input - Destinatario, categoría, texto y destino navegable.
+   * @returns Qué se creó, o por qué no se creó nada.
+   */
+  async emitInApp(input: EmitInAppInput): Promise<EmitInAppResult> {
+    try {
+      return await this.em.transactional((tx) => this.writeInApp(tx, input));
+    } catch (error) {
+      // Un fallo acá no puede tumbar la receta que lo disparó: se registra con
+      // todo lo necesario para reconstruirlo y el caso de uso sigue.
+      this.logger.error(
+        {
+          operation: 'messaging.notification.emit-in-app',
+          recipientUserId: input.recipientUserId,
+          category: input.category,
+          err: error,
+        },
+        'No se pudo emitir la notificación in-app',
+      );
+      return { suppressed: false, failed: true };
+    }
+  }
+
+  /**
+   * Carril P1 · la bandeja de quien pregunta.
+   *
+   * Es la lectura que faltaba. `GET /internal/notifications/pending` reclama
+   * solicitudes para entregar —es del worker y devuelve trabajo, no avisos— y
+   * `POST /notifications/in-app/:id/read` ya permitía marcar una notificación
+   * que no había forma de listar. La campana necesitaba justamente esto.
+   *
+   * @param actor - Dueño de la bandeja. No se lee la de nadie más.
+   * @param query - Filtro de no leídas, cursor y tope.
+   * @returns La página pedida, con el total sin leer para el badge.
+   */
+  async listMine(
+    actor: AuthenticatedUser,
+    query: MyNotificationsQueryDto,
+  ): Promise<InAppNotificationPageDto> {
+    const em = this.em.fork();
+    const limit = query.limit ?? DEFAULT_INBOX_PAGE;
+
+    const after = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
+    const afterKey =
+      typeof after?.availableAt === 'string' && typeof after?.id === 'string'
+        ? { availableAt: new Date(after.availableAt), id: after.id }
+        : undefined;
+
+    // Se pide una de más para saber si hay página siguiente sin contar el total.
+    const rows = await this.notificationsRepo.listInAppPage(em, actor.id, {
+      unreadOnly: query.unread === true,
+      after: afterKey,
+      limit: limit + 1,
+      unreadStatusConceptId: CONCEPTS.INAPP_UNREAD,
+    });
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    const unreadCount = await this.notificationsRepo.countUnreadInApp(
+      em,
+      actor.id,
+      CONCEPTS.INAPP_UNREAD,
+    );
+
+    return {
+      items: page.map((row) => ({
+        id: row.id,
+        category:
+          NOTIFICATION_CATEGORY_BY_CONCEPT.get(row.categoryConceptId ?? '') ??
+          null,
+        subject: row.subject ?? null,
+        bodyText: row.bodyText ?? null,
+        destination: row.relatedResourceType
+          ? { type: row.relatedResourceType, id: row.relatedResourceId ?? '' }
+          : null,
+        payloadJson: row.payloadJson ?? null,
+        unread: row.statusConceptId !== CONCEPTS.INAPP_READ,
+        availableAt: row.availableAt.toISOString(),
+        readAt: row.readAt ? row.readAt.toISOString() : null,
+      })),
+      count: page.length,
+      limit,
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({
+              availableAt: last.availableAt.toISOString(),
+              id: last.id,
+            })
+          : null,
+      unreadCount,
+    };
+  }
+
+  /**
+   * Carril P1 · marca toda la bandeja como leída.
+   *
+   * Existe porque sin esto la única forma de bajar un badge de 40 es abrir 40
+   * notificaciones, y quien tiene 40 avisos viejos no los va a abrir: va a
+   * aprender a ignorar la campana, que es el modo en que una notificación deja
+   * de notificar.
+   *
+   * Acota el lote y devuelve cuántas quedan: con una bandeja enorme, dos
+   * llamadas terminan el trabajo y ninguna toma la tabla entera.
+   *
+   * @param actor - Dueño de la bandeja.
+   * @returns Cuántas se marcaron y cuántas quedan sin leer.
+   */
+  async markAllInAppRead(
+    actor: AuthenticatedUser,
+  ): Promise<MarkAllInAppReadResponseDto> {
+    return this.em.transactional(async (tx) => {
+      const pendientes = await this.notificationsRepo.findUnreadInApp(
+        tx,
+        actor.id,
+        CONCEPTS.INAPP_UNREAD,
+        MARK_ALL_BATCH,
+      );
+
+      const readAt = new Date();
+      for (const notification of pendientes) {
+        notification.statusConceptId = CONCEPTS.INAPP_READ;
+        notification.readAt ??= readAt;
+        notification.openedAt ??= readAt;
+        touch(notification, actor.id, readAt);
+      }
+      await tx.flush();
+
+      const unreadCount = await this.notificationsRepo.countUnreadInApp(
+        tx,
+        actor.id,
+        CONCEPTS.INAPP_UNREAD,
+      );
+      return { marked: pendientes.length, unreadCount };
+    });
+  }
+
   // --- Apoyo ---
 
   /**
@@ -654,7 +843,16 @@ export class NotificationsService {
    */
   private async evaluateSuppression(
     tx: EntityManager,
-    dto: CreateNotificationRequestDto,
+    dto: {
+      /** Canal por el que saldría. */
+      channelId: string;
+      /** Destinatario interno, si lo hay. */
+      recipientUserId?: string;
+      /** Categoría, que es la unidad de preferencia. */
+      categoryConceptId?: string;
+      /** Cuándo saldría, para las horas de silencio. */
+      scheduledAt?: string;
+    },
   ): Promise<string | undefined> {
     if (!dto.recipientUserId) return undefined;
 
@@ -720,5 +918,184 @@ export class NotificationsService {
     return from <= to
       ? minutes >= from && minutes < to
       : minutes >= from || minutes < to;
+  }
+
+  /**
+   * La escritura de `emitInApp`, dentro de una sola transacción.
+   *
+   * Hace en un paso lo que para un canal externo son tres —solicitud, intento
+   * de entrega y fila de bandeja— porque para el in-app los tres ocurren a la
+   * vez, y separarlos sólo dejaría estados intermedios que nadie puede
+   * resolver: una solicitud in-app «pendiente» no está esperando a nadie.
+   */
+  private async writeInApp(
+    tx: EntityManager,
+    input: EmitInAppInput,
+  ): Promise<EmitInAppResult> {
+    const channel = await this.notificationsRepo.findActiveChannelByType(
+      tx,
+      CONCEPTS.CHANNEL_TYPE_IN_APP,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    if (!channel) {
+      throw new PreconditionFailedException(
+        'No hay canal in-app activo: falta correr el seed de mensajería',
+        { recipientUserId: input.recipientUserId },
+      );
+    }
+
+    const categoryConceptId = NOTIFICATION_CATEGORY_CONCEPT[input.category];
+    const actorUserId = input.actorUserId ?? SEED.systemWorkerUserId;
+
+    // El rebote colapsa el mismo aviso repetido —diez mensajes seguidos en un
+    // hilo son un campanazo, no diez— y conserva el primero.
+    if (input.debounceKey) {
+      const live = await this.notificationsRepo.findLiveRequestByDebounceKey(
+        tx,
+        input.debounceKey,
+        [...LIVE_REQUEST_STATES],
+      );
+      if (live) {
+        return { requestId: live.id, suppressed: false };
+      }
+    }
+
+    const suppression = await this.evaluateSuppression(tx, {
+      channelId: channel.id,
+      recipientUserId: input.recipientUserId,
+      categoryConceptId,
+    });
+
+    const contentSnapshotJson = {
+      subject: input.subject,
+      bodyText: input.bodyText ?? null,
+      categoryConceptId,
+    };
+    const now = new Date();
+
+    const request = this.notificationsRepo.createNotificationRequest(tx, {
+      tenantId: input.tenantId,
+      recipientUserId: input.recipientUserId,
+      channelId: channel.id,
+      payloadJson: input.payloadJson,
+      debounceKey: input.debounceKey,
+      priority: DEFAULT_PRIORITY,
+      categoryConceptId,
+      relatedResourceType: input.destination?.type,
+      relatedResourceId: input.destination?.id,
+      statusConceptId: suppression
+        ? CONCEPTS.NOTIF_SUPPRESSED
+        : CONCEPTS.NOTIF_SENT,
+      scheduledAt: now,
+      idempotencyKey: input.debounceKey ?? `in-app-${randomUUID()}`,
+      recipientTypeConceptId: CONCEPTS.NOTIF_RECIPIENT_USER,
+      recipientRefId: input.recipientUserId,
+      sourceConceptId: CONCEPTS.NOTIF_SOURCE_SYSTEM,
+      authorizedByUserId: actorUserId,
+      authorizationSnapshotJson: {
+        suppressed: suppression !== undefined,
+        suppressionReason: suppression ?? null,
+        evaluatedAt: now.toISOString(),
+        authorizedByUserId: actorUserId,
+      },
+      contentSnapshotJson,
+      contentHash: createHash('sha256')
+        .update(canonicalJson(contentSnapshotJson))
+        .digest('hex'),
+      actorUserId,
+    });
+    await tx.flush();
+
+    if (suppression) {
+      this.logger.info(
+        {
+          operation: 'messaging.notification.emit-in-app',
+          requestId: request.id,
+          reason: suppression,
+        },
+        'In-app notification suppressed by recipient preference',
+      );
+      return {
+        requestId: request.id,
+        suppressed: true,
+        suppressionReason: suppression,
+      };
+    }
+
+    // La entrega existe aunque no haya proveedor externo: es la fila que
+    // convierte «se pidió avisar» en «se avisó», y la que
+    // `in_app_notifications.notification_delivery_id` exige NOT NULL.
+    const configs = await this.notificationsRepo.findChannelConfigs(
+      tx,
+      channel.id,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    const config = configs[0];
+    if (!config) {
+      throw new PreconditionFailedException(
+        'El canal in-app no tiene configuración de proveedor activa',
+        { channelId: channel.id },
+      );
+    }
+    const provider = await this.notificationsRepo.findProviderById(
+      tx,
+      config.providerId,
+    );
+    if (!provider) {
+      throw new ResourceNotFoundException(
+        'El proveedor configurado para el canal in-app no existe',
+        { providerId: config.providerId },
+      );
+    }
+
+    const delivery = this.notificationsRepo.createDelivery(tx, {
+      notificationRequestId: request.id,
+      providerId: config.providerId,
+      channelId: channel.id,
+      providerChannelConfigId: config.id,
+      adapterCode: provider.adapterCode,
+      adapterVersion: provider.adapterVersion,
+      attemptNumber: 1,
+      // DELIVERED y no SENT: en el resto de los canales «entregado» lo confirma
+      // un acuse del proveedor que acá no va a llegar nunca, porque el
+      // destinatario de la entrega es nuestra propia tabla.
+      statusConceptId: CONCEPTS.NOTIF_DELIVERY_DELIVERED,
+      sentAt: now,
+      actorUserId,
+    });
+    await tx.flush();
+
+    const inApp = this.notificationsRepo.createInAppNotification(tx, {
+      recipientUserId: input.recipientUserId,
+      tenantId: input.tenantId,
+      channelConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
+      categoryConceptId,
+      subject: input.subject,
+      bodyText: input.bodyText,
+      payloadJson: input.payloadJson,
+      relatedResourceType: input.destination?.type,
+      relatedResourceId: input.destination?.id,
+      statusConceptId: CONCEPTS.INAPP_UNREAD,
+      notificationRequestId: request.id,
+      notificationDeliveryId: delivery.id,
+      actorUserId,
+    });
+    await tx.flush();
+
+    this.logger.info(
+      {
+        operation: 'messaging.notification.emit-in-app',
+        requestId: request.id,
+        inAppNotificationId: inApp.id,
+        category: input.category,
+      },
+      'In-app notification delivered',
+    );
+
+    return {
+      requestId: request.id,
+      inAppNotificationId: inApp.id,
+      suppressed: false,
+    };
   }
 }

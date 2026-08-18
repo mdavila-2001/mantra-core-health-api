@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalNotificationsService } from './clinical-notifications.service';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -60,6 +61,7 @@ export class MedicationsService {
    * @param requestsRepo - Valor de requests repo requerido por la operación.
    * @param recordsRepo - Valor de records repo requerido por la operación.
    * @param signaturePolicies - Valor de signature policies requerido por la operación.
+   * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -69,6 +71,7 @@ export class MedicationsService {
     private readonly signaturePolicies: PrescriptionSignaturePoliciesService,
     private readonly auditTrail: AuditTrailService,
     private readonly historyRepo: HistoryRepository,
+    private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MedicationsService.name);
@@ -277,7 +280,7 @@ export class MedicationsService {
       { operation: 'clinical.medication.issue', requestId },
       'Issuing medication request',
     );
-    return this.em.transactional(async (tx) => {
+    const emitida = await this.em.transactional(async (tx) => {
       const request = await this.loadRequestOrThrow(tx, requestId);
       // CAN §6 (idempotencia): un reintento de la emisión con la MISMA clave sobre
       // una receta ya emitida devuelve el resultado sellado (replay), sin volver a
@@ -356,6 +359,19 @@ export class MedicationsService {
       );
       return this.toRequestResponse(request);
     });
+
+    // Carril P1 · peldaño 8 del flujo principal: «tu receta está lista».
+    //
+    // Va DESPUÉS del commit y no dentro, a propósito. La receta ya está sellada
+    // e inmutable cuando esto corre, así que ningún problema de la campana
+    // puede deshacerla. `prescriptionIssued` no lanza: el peor caso es una
+    // receta emitida sin su aviso, nunca un aviso sin su receta.
+    await this.clinicalNotifications.prescriptionIssued(
+      emitida.id,
+      emitida.patientProfileId,
+      actor.id,
+    );
+    return emitida;
   }
 
   /**

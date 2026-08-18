@@ -7,10 +7,6 @@ import {
   ProviderChannelConfigs,
 } from '../../modules/messaging/entities';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
-// El tipo de proveedor in-app se declara en los conceptos del módulo de agenda:
-// el catálogo central sólo trae el de correo y es un archivo compartido que el
-// carril P8 no modifica. Ver `scheduling.concepts.ts`.
-import { SCHED } from '../../modules/scheduling/scheduling.concepts';
 
 /**
  * Identificadores deterministas del canal de correo por defecto.
@@ -25,18 +21,14 @@ export const MESSAGING_SEED = {
   emailProviderId: deterministicId('seed:messaging-provider:email'),
   emailProviderCode: 'DEFAULT_EMAIL',
   emailChannelConfigId: deterministicId('seed:provider-channel-config:email'),
-  /**
-   * Canal in-app: la bandeja del propio producto.
-   *
-   * Existe por la misma razón que el de correo —`notification_requests.channel_id`
-   * es FK NOT NULL y no hay caso de uso para dar de alta canales—, y porque sin
-   * él **ninguna** notificación in-app se puede pedir: `deliverNotification`
-   * escribe en `messaging.in_app_notifications` sólo cuando el canal declara
-   * `CHANNEL_TYPE_IN_APP`. Lo materializa el carril P8 (avisos de agenda) porque
-   * fue el primero en necesitarlo; los ids son deterministas, así que cualquier
-   * otro carril que lo siembre obtiene exactamente estas filas y no una segunda
-   * copia.
-   */
+
+  /* --- Canal in-app (carril P1) -------------------------------------------
+     La campana necesita un canal igual que el correo, y por el mismo motivo:
+     `notification_requests.channel_id` es una FK NOT NULL y el módulo no
+     expone alta de canales. La diferencia es que este canal **no sale a
+     ningún proveedor** — su entrega es escribir en `in_app_notifications`,
+     que es lo que `deliverNotification` ya hacía para el tipo in-app y no
+     tenía canal con el que ejercitarse. */
   inAppChannelId: deterministicId('seed:message-channel:in-app'),
   inAppChannelCode: 'IN_APP',
   inAppProviderId: deterministicId('seed:messaging-provider:in-app'),
@@ -98,7 +90,7 @@ export class MessagingSeedService {
     if (inserted > 0) {
       this.logger.info(
         { inserted },
-        'Canales de correo e in-app por defecto materializados',
+        'Canales por defecto (correo e in-app) materializados',
       );
     }
     return { inserted };
@@ -162,7 +154,14 @@ export class MessagingSeedService {
     return 1;
   }
 
-  /** Canal lógico IN_APP: la campana del propio producto. */
+  /**
+   * Canal lógico IN_APP (carril P1).
+   *
+   * `supportsTemplates: false` a propósito: el texto de una notificación de la
+   * campana lo arma el módulo que la emite, con el nombre del médico o el de la
+   * receta ya resueltos. Una plantilla de `message_templates` acá obligaría a
+   * dar de alta una fila por disparador antes de poder emitir.
+   */
   private async seedInAppChannel(
     em: EntityManager,
     now: Date,
@@ -178,8 +177,6 @@ export class MessagingSeedService {
         code: MESSAGING_SEED.inAppChannelCode,
         name: 'In-app',
         channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
-        // Los avisos de agenda arman su texto con los datos del turno; una
-        // plantilla publicada llegará con el centro de notificaciones.
         supportsTemplates: false,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
         createdAt: now,
@@ -191,14 +188,13 @@ export class MessagingSeedService {
   }
 
   /**
-   * Proveedor del canal in-app.
+   * Proveedor del canal in-app: el propio backend.
    *
-   * No sale a ningún tercero: entregar in-app es escribir en la bandeja del
-   * destinatario, y eso lo hace `NotificationsService` dentro de la misma
-   * transacción. La fila existe porque `notification_deliveries` exige
-   * `adapter_code`/`adapter_version` y una configuración de proveedor activa;
-   * declarar `IN_APP_INBOX` es más honesto que nombrar a un proveedor que no
-   * interviene.
+   * `adapter_code = 'IN_APP_DIRECT'` y no `'WORKER_DISPATCHED'` porque la
+   * diferencia es real y se lee en la auditoría: el correo lo entrega un
+   * tercero cuya latencia y cuyos fallos no controlamos, y esto lo entrega
+   * una escritura nuestra en la misma transacción. Todos los `supports*` van
+   * en `false`: no hay acuses de un proveedor que no existe.
    */
   private async seedInAppProvider(
     em: EntityManager,
@@ -215,18 +211,16 @@ export class MessagingSeedService {
       {
         id: MESSAGING_SEED.inAppProviderId,
         code: MESSAGING_SEED.inAppProviderCode,
-        name: 'In-app inbox',
-        providerTypeConceptId: SCHED.MSG_PROVIDER_TYPE_IN_APP,
+        name: 'In-app delivery',
+        providerTypeConceptId: CONCEPTS.MSG_PROVIDER_TYPE_IN_APP,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
-        adapterCode: 'IN_APP_INBOX',
+        adapterCode: 'IN_APP_DIRECT',
         adapterVersion: '1',
         isBuiltin: true,
         supportsWebhooks: false,
         supportsPolling: false,
-        // La bandeja sí sabe si se leyó: es la propia fila la que lo registra
-        // (`read_at`), y es lo que el badge de no leídos cuenta.
-        supportsDeliveryReceipts: true,
-        supportsReadReceipts: true,
+        supportsDeliveryReceipts: false,
+        supportsReadReceipts: false,
         supportsClickReceipts: false,
         supportsReplyReceipts: false,
         createdAt: now,
@@ -237,7 +231,7 @@ export class MessagingSeedService {
     return 1;
   }
 
-  /** Configuración activa del canal in-app para el tenant por defecto. */
+  /** Configuración activa que une el proveedor in-app con su canal. */
   private async seedInAppChannelConfig(
     em: EntityManager,
     now: Date,
