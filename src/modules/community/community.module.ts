@@ -10,6 +10,10 @@ import { MessagingModule } from '../messaging/messaging.module';
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
 import { PersonAccountLinksRepository } from '../profiles/repositories';
+// La elegibilidad de una reseña se apoya en la atención que la respalda. Se
+// declara **el repositorio** y no se importa el módulo clínico entero, igual
+// que hace `scheduling` con `AppointmentsRepository`.
+import { EncountersRepository } from '../clinical/repositories';
 import {
   CommunitySocialController,
   CommunityMessagingController,
