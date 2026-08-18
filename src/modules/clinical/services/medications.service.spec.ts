@@ -38,6 +38,11 @@ function build() {
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const historyRepo = { append: mockFn().mockResolvedValue(undefined) };
+  // Carril P1: el aviso «tu receta está lista». Doblado para que emitir no
+  // participe de lo que estas pruebas afirman sobre el sellado de la receta.
+  const clinicalNotifications = {
+    prescriptionIssued: mockFn().mockResolvedValue({ suppressed: false }),
+  };
   const service = new MedicationsService(
     em as any,
     requestsRepo,
@@ -45,9 +50,11 @@ function build() {
     signaturePolicies as any,
     auditTrail as any,
     historyRepo as any,
+    clinicalNotifications as any,
     logger as any,
   );
   return {
+    clinicalNotifications,
     service,
     requestsRepo,
     recordsRepo,
