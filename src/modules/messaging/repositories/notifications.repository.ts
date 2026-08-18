@@ -814,6 +814,43 @@ export class NotificationsRepository {
   }
 
   /**
+   * El aviso sin leer que ya apunta a ese mismo objeto, si lo hay.
+   *
+   * Es el rebote del canal in-app, y **no puede ser el mismo que el de los
+   * canales externos**. Aquél colapsa mientras la solicitud siga «viva»
+   * (`PENDING`/`SENDING`/`SENT`), que para un correo dura lo que tarda en
+   * salir. Una solicitud in-app nace `SENT` y se queda `SENT` para siempre, así
+   * que con ese criterio una conversación avisaría **una sola vez en toda su
+   * historia**: leído el primer mensaje, ningún mensaje posterior volvería a
+   * sonar. Lo encontró el journey funcional, no una prueba unitaria.
+   *
+   * El criterio correcto para una bandeja es el estado del aviso, no el de la
+   * solicitud: si ya hay uno **sin leer** apuntando al mismo hilo, uno más no
+   * agrega información. En cuanto se lee, el siguiente mensaje vuelve a avisar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param recipientUserId - Dueño de la bandeja.
+   * @param relatedResourceType - Clase de objeto al que apunta.
+   * @param relatedResourceId - Identificador de ese objeto.
+   * @param unreadStatusConceptId - Estado que significa «sin leer».
+   * @returns El aviso sin leer, o `null`.
+   */
+  findUnreadInAppForResource(
+    em: EntityManager,
+    recipientUserId: string,
+    relatedResourceType: string,
+    relatedResourceId: string,
+    unreadStatusConceptId: string,
+  ): Promise<InAppNotifications | null> {
+    return em.findOne(InAppNotifications, {
+      recipientUserId,
+      relatedResourceType,
+      relatedResourceId,
+      statusConceptId: unreadStatusConceptId,
+    });
+  }
+
+  /**
    * Cuántas le quedan sin leer. Es el número del badge.
    *
    * @param em - Contexto de persistencia o transacción activa.

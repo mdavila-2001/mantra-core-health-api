@@ -72,6 +72,7 @@ function build() {
     listInAppPage: mockFn(() => Promise.resolve([])),
     countUnreadInApp: mockFn(() => Promise.resolve(0)),
     findUnreadInApp: mockFn(() => Promise.resolve([])),
+    findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new NotificationsService(

@@ -1180,14 +1180,27 @@ export class NotificationsService implements InAppNotificationEmitter {
 
     // El rebote colapsa el mismo aviso repetido —diez mensajes seguidos en un
     // hilo son un campanazo, no diez— y conserva el primero.
-    if (input.debounceKey) {
-      const live = await this.notificationsRepo.findLiveRequestByDebounceKey(
+    //
+    // Se mira si ya hay un aviso **sin leer** apuntando al mismo objeto, y no
+    // si la solicitud sigue «viva» como en los canales externos: una solicitud
+    // in-app nace `SENT` y se queda así para siempre, de modo que con aquel
+    // criterio una conversación habría avisado una sola vez en toda su
+    // historia. En cuanto la persona lo lee, el siguiente mensaje vuelve a
+    // avisar, que es lo que cualquiera espera de una bandeja.
+    if (input.destination) {
+      const sinLeer = await this.notificationsRepo.findUnreadInAppForResource(
         tx,
-        input.debounceKey,
-        [...LIVE_REQUEST_STATES],
+        input.recipientUserId,
+        input.destination.type,
+        input.destination.id,
+        CONCEPTS.INAPP_UNREAD,
       );
-      if (live) {
-        return { requestId: live.id, suppressed: false };
+      if (sinLeer) {
+        return {
+          inAppNotificationId: sinLeer.id,
+          requestId: sinLeer.notificationRequestId,
+          suppressed: false,
+        };
       }
     }
 
