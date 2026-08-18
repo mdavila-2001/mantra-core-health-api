@@ -65,6 +65,12 @@ function build() {
     findReceipt: mockFn(() => Promise.resolve(null)),
     createInAppNotification: mockFn(() => ({ id: 'in-app-1' })),
     findInAppForUpdate: mockFn(),
+    // Carril P1 · la bandeja y la emisión in-app.
+    findActiveChannelByType: mockFn(() => Promise.resolve(null)),
+    findPreferences: mockFn(() => Promise.resolve([])),
+    listInAppPage: mockFn(() => Promise.resolve([])),
+    countUnreadInApp: mockFn(() => Promise.resolve(0)),
+    findUnreadInApp: mockFn(() => Promise.resolve([])),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new NotificationsService(

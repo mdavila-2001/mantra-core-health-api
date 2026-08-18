@@ -167,6 +167,51 @@ export class NotificationsRepository {
     });
   }
 
+  /**
+   * El canal activo de un tipo dado (carril P1).
+   *
+   * La campana necesita resolver «el canal in-app» sin conocer el id que el
+   * seed le dio. Se busca por tipo y no por código para que el día que el
+   * canal se llame distinto —o exista uno por tenant— la emisión siga
+   * encontrándolo: lo que la define es que se entrega dentro del producto, no
+   * cómo se llama la fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param channelTypeConceptId - Tipo de canal buscado.
+   * @param activeStateConceptId - Estado que cuenta como activo.
+   * @returns El canal, o `null` si el seed no corrió.
+   */
+  findActiveChannelByType(
+    em: EntityManager,
+    channelTypeConceptId: string,
+    activeStateConceptId: string,
+  ): Promise<MessageChannels | null> {
+    return em.findOne(MessageChannels, {
+      channelTypeConceptId,
+      stateConceptId: activeStateConceptId,
+    });
+  }
+
+  /**
+   * Todas las preferencias del destinatario en un canal (carril P9).
+   *
+   * Se traen juntas —y no una consulta por categoría— porque la pantalla de
+   * preferencias las muestra todas a la vez y el emisor necesita además la
+   * fila sin categoría, que es la que gobierna el canal entero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - Dueño de las preferencias.
+   * @param channelId - Canal al que se refieren.
+   * @returns Las filas, incluida la de categoría nula si existe.
+   */
+  findPreferences(
+    em: EntityManager,
+    userId: string,
+    channelId: string,
+  ): Promise<RecipientPreferences[]> {
+    return em.find(RecipientPreferences, { userId, channelId });
+  }
+
   // --- Solicitudes (UC-35-10, 11, 12) ---
 
   /**
@@ -651,6 +696,108 @@ export class NotificationsRepository {
       InAppNotifications,
       { id },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Una página de la bandeja de una persona (carril P1).
+   *
+   * Ordena por `available_at` descendente: el criterio es **cuándo le quedó
+   * disponible al destinatario**, no cuándo el sistema creó la fila. Con la
+   * entrega inmediata del in-app las dos fechas coinciden hoy, pero un aviso
+   * programado —«tu turno es mañana»— se crea mucho antes de estar disponible,
+   * y ordenarlo por creación lo hundiría al fondo de la bandeja el día que
+   * aparece.
+   *
+   * El cursor es de conjunto de claves `(availableAt, id)` y no un `offset`:
+   * mientras alguien pagina, llegan notificaciones nuevas arriba, y un offset
+   * devolvería la misma fila dos veces.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param recipientUserId - Dueño de la bandeja.
+   * @param options - Filtro de no leídas, cursor y tope.
+   * @returns Las filas de la página, ya ordenadas.
+   */
+  listInAppPage(
+    em: EntityManager,
+    recipientUserId: string,
+    options: {
+      /** Sólo las que siguen sin leer. */
+      unreadOnly?: boolean;
+      /** Última fila de la página anterior. */
+      after?: {
+        /** Cuándo quedó disponible. */
+        availableAt: Date;
+        /** Identificador, para desempatar. */
+        id: string;
+      };
+      /** Cuántas traer. */
+      limit: number;
+      /** Estado que significa «sin leer». */
+      unreadStatusConceptId: string;
+    },
+  ): Promise<InAppNotifications[]> {
+    const where: Record<string, unknown> = { recipientUserId };
+    if (options.unreadOnly) {
+      where.statusConceptId = options.unreadStatusConceptId;
+    }
+    if (options.after) {
+      where.$or = [
+        { availableAt: { $lt: options.after.availableAt } },
+        {
+          availableAt: options.after.availableAt,
+          id: { $lt: options.after.id },
+        },
+      ];
+    }
+    return em.find(InAppNotifications, where, {
+      orderBy: { availableAt: 'DESC', id: 'DESC' },
+      limit: options.limit,
+    });
+  }
+
+  /**
+   * Cuántas le quedan sin leer. Es el número del badge.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param recipientUserId - Dueño de la bandeja.
+   * @param unreadStatusConceptId - Estado que significa «sin leer».
+   * @returns El total sin leer.
+   */
+  countUnreadInApp(
+    em: EntityManager,
+    recipientUserId: string,
+    unreadStatusConceptId: string,
+  ): Promise<number> {
+    return em.count(InAppNotifications, {
+      recipientUserId,
+      statusConceptId: unreadStatusConceptId,
+    });
+  }
+
+  /**
+   * Las no leídas de una persona, para marcarlas todas de una vez.
+   *
+   * Devuelve entidades y no ejecuta un `UPDATE` masivo a propósito: cada fila
+   * lleva `row_version` optimista y `updated_by_user_id`, y saltarse el ORM
+   * dejaría la versión desincronizada con las instancias vivas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param recipientUserId - Dueño de la bandeja.
+   * @param unreadStatusConceptId - Estado que significa «sin leer».
+   * @param limit - Tope de filas por pasada.
+   * @returns Las notificaciones sin leer.
+   */
+  findUnreadInApp(
+    em: EntityManager,
+    recipientUserId: string,
+    unreadStatusConceptId: string,
+    limit: number,
+  ): Promise<InAppNotifications[]> {
+    return em.find(
+      InAppNotifications,
+      { recipientUserId, statusConceptId: unreadStatusConceptId },
+      { orderBy: { availableAt: 'DESC' }, limit },
     );
   }
 }
