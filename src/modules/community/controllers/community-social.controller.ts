@@ -45,6 +45,7 @@ import {
   BlockPageDto,
   UpsertOwnPublicProfileDto,
   OwnPublicProfileDto,
+  ProfileStatsDto,
   UnfollowQueryDto,
   UnbookmarkQueryDto,
   UnblockQueryDto,
@@ -116,6 +117,30 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<OwnPublicProfileDto> {
     return this.service.upsertOwnProfile(dto, actor);
+  }
+
+  /**
+   * «Tu perfil esta semana» (`ORG-PUB-005`).
+   *
+   * Va declarado **antes** que `profiles/:profileId`, igual que
+   * `profiles/me`: Nest resuelve por orden de declaración y un parámetro
+   * capturaría `me`.
+   *
+   * Sin `@Roles`: el sujeto lo resuelve el servidor desde la sesión, así que
+   * no hay forma de pedir las estadísticas de otro. Es la misma regla que
+   * `GET profiles/me`.
+   */
+  @Get('profiles/me/stats')
+  @ApiOperation({
+    summary: 'Estadísticas de la vitrina pública propia',
+    description:
+      'Visitas y apariciones en búsquedas de los últimos 7 días. Son visitas, ' +
+      'no visitantes únicos: no se guarda ningún rastro del visitante.',
+  })
+  ownProfileStats(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ProfileStatsDto> {
+    return this.service.getOwnProfileStats(actor);
   }
 
   /** UC-19-01. */

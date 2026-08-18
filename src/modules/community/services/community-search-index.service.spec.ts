@@ -16,6 +16,7 @@ import {
 import { COMM } from '../community.concepts';
 import { PUBLIC_RESULT_KEYS } from './community-public.service';
 import { CommunitySearchIndexService } from './community-search-index.service';
+import { CommunityVerificationService } from './community-verification.service';
 
 /** Un perfil con TODOS sus campos poblados, internos incluidos. */
 const perfilCompleto: any = {
@@ -50,6 +51,10 @@ const perfilCompleto: any = {
 function build(opciones?: {
   /** Perfiles que devuelve el primer lote. */
   rows?: any[];
+  /** Sellos del perfil. */
+  badges?: any[];
+  /** Agenda del sujeto. */
+  agenda?: { hasAgenda: boolean; nextAvailableDate: string | null };
   /** Ubicación del sujeto. */
   location?: { city: string | null; lat: number | null; lng: number | null };
   /** Especialidades del sujeto. */
@@ -71,6 +76,14 @@ function build(opciones?: {
     specialtiesByPractitioner: mockFn().mockResolvedValue(
       new Map([['sujeto-interno', opciones?.specialties ?? ['Cardiología']]]),
     ),
+    badgesByProfiles: mockFn().mockResolvedValue(
+      new Map([['perfil-1', opciones?.badges ?? []]]),
+    ),
+    agendaByPractitioner: mockFn().mockResolvedValue(
+      opciones?.agenda
+        ? new Map([['sujeto-interno', opciones.agenda]])
+        : new Map(),
+    ),
   };
   const search = {
     ping: mockFn().mockResolvedValue(undefined),
@@ -88,10 +101,16 @@ function build(opciones?: {
     countDocuments: mockFn().mockResolvedValue(rows.length),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const verification = new CommunityVerificationService(
+    em as any,
+    {} as any,
+    { setContext: mockFn(), info: mockFn(), warn: mockFn() } as any,
+  );
   const service = new CommunitySearchIndexService(
     em as any,
     repo as any,
     search as any,
+    verification,
     logger as any,
   );
   return { service, repo, search, logger };
@@ -136,11 +155,27 @@ describe('CommunitySearchIndexService', () => {
     it('todo campo que el buscador público sirve existe en el documento', async () => {
       const documento = await documentoIndexado(build());
 
-      // Si el índice no tuviera un campo del DTO, la fila servida desde
-      // OpenSearch saldría con un hueco que la servida desde SQL no tiene: el
-      // mismo perfil se vería distinto según quién respondió.
+      // `verifiedBadge` es lo único que no viaja con su nombre: el sello va al
+      // índice descompuesto en campos planos (OpenSearch no gana nada indexando
+      // un objeto que nadie filtra por dentro) y `hitToResult` lo recompone.
+      // El resto tiene que estar tal cual: si al índice le faltara un campo del
+      // DTO, la fila servida desde OpenSearch saldría con un hueco que la
+      // servida desde SQL no tiene, y el mismo perfil se vería distinto según
+      // quién respondió.
+      const APLANADOS: Record<string, string[]> = {
+        verifiedBadge: [
+          'verifiedBadgeStatus',
+          'badgeTypeConceptId',
+          'verificationMethodConceptId',
+          'verifiedAt',
+          'validUntil',
+        ],
+      };
+
       for (const clave of PUBLIC_RESULT_KEYS) {
-        expect(documento).toHaveProperty(clave);
+        for (const real of APLANADOS[clave] ?? [clave]) {
+          expect(documento).toHaveProperty(real);
+        }
       }
     });
 

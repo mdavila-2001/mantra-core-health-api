@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../common';
-import { PublicProfiles, ServiceReviews, SocialPosts } from '../entities';
+import {
+  PublicProfiles,
+  ServiceReviews,
+  SocialPosts,
+  VerifiedBadges,
+} from '../entities';
 import { COMM } from '../community.concepts';
 
 /**
@@ -379,6 +384,120 @@ export class PublicSearchRepository {
       const previas = salida.get(fila.practitioner_profile_id) ?? [];
       if (!previas.includes(fila.display)) previas.push(fila.display);
       salida.set(fila.practitioner_profile_id, previas);
+    }
+    return salida;
+  }
+
+  /**
+   * Agenda publicada y primer día con hueco, por sujeto profesional.
+   *
+   * Es lo que hace verdadera la promesa `PAC-CITA-001` («puedo agendar con lo
+   * que veo»): sin este dato el resultado ofrece «Pedir turno» a ciegas, y el
+   * paciente descubre que no hay agenda **después** de hacer clic.
+   *
+   * Dos cosas distintas y por eso dos columnas:
+   *
+   *  - `has_agenda` sale de `scheduling.practitioner_schedules` vigente: el
+   *    profesional declaró horarios de atención.
+   *  - `next_slot` sale de `scheduling.bookable_slots` con capacidad libre, y
+   *    va **truncado a día**. La hora exacta cambia entre que la tarjeta se
+   *    pinta y el paciente la toca, así que prometerla sería prometer de más.
+   *
+   * Un profesional puede tener agenda declarada y ningún hueco libre; se
+   * muestran por separado para que el CTA diga la verdad en los dos casos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileIds - Sujetos de los perfiles del lote.
+   * @returns Mapa `practitionerProfileId → { hasAgenda, nextAvailableDate }`.
+   */
+  async agendaByPractitioner(
+    em: EntityManager,
+    practitionerProfileIds: string[],
+  ): Promise<
+    Map<string, { hasAgenda: boolean; nextAvailableDate: string | null }>
+  > {
+    const salida = new Map<
+      string,
+      { hasAgenda: boolean; nextAvailableDate: string | null }
+    >();
+    if (practitionerProfileIds.length === 0) return salida;
+
+    const filas = await em.getConnection().execute<
+      {
+        practitioner_profile_id: string;
+        has_agenda: boolean;
+        next_slot: string | null;
+      }[]
+    >(
+      `SELECT s.practitioner_profile_id,
+                TRUE AS has_agenda,
+                (SELECT MIN(bs.start_at)
+                   FROM scheduling.bookable_slots bs
+                   JOIN scheduling.schedulable_resources sr ON sr.id = bs.resource_id
+                  WHERE sr.resource_ref_id = s.practitioner_profile_id
+                    AND bs.start_at >= now()
+                    AND bs.remaining_capacity > 0
+                    AND bs.status_concept_id = s.status_concept_id) AS next_slot
+           FROM scheduling.practitioner_schedules s
+          WHERE s.practitioner_profile_id IN (?)
+            AND s.status_concept_id = ?
+            AND (s.valid_from IS NULL OR s.valid_from <= CURRENT_DATE)
+            AND (s.valid_to IS NULL OR s.valid_to >= CURRENT_DATE)
+          GROUP BY s.practitioner_profile_id, s.status_concept_id`,
+      [practitionerProfileIds, CONCEPTS.STATE_ACTIVE],
+      'all',
+    );
+
+    for (const fila of filas) {
+      const previo = salida.get(fila.practitioner_profile_id);
+      const dia = fila.next_slot
+        ? new Date(fila.next_slot).toISOString().slice(0, 10)
+        : null;
+      salida.set(fila.practitioner_profile_id, {
+        hasAgenda: true,
+        // Varias franjas por profesional: gana el primer hueco de todas.
+        nextAvailableDate:
+          previo?.nextAvailableDate && dia
+            ? previo.nextAvailableDate < dia
+              ? previo.nextAvailableDate
+              : dia
+            : (previo?.nextAvailableDate ?? dia),
+      });
+    }
+    return salida;
+  }
+
+  /**
+   * Sellos de verificación de varios perfiles a la vez.
+   *
+   * Uno por página y no uno por fila: el buscador pinta cincuenta tarjetas con
+   * su sello, y cincuenta viajes por eso serían cincuenta de más.
+   *
+   * Trae los caídos además de los vigentes, porque la pantalla necesita
+   * distinguir «nunca se verificó» de «se le venció»: sin los caídos, el
+   * segundo caso se vería igual que el primero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profileIds - Perfiles de la página.
+   * @returns Mapa `profileId → sellos`, del más reciente al más viejo.
+   */
+  async badgesByProfiles(
+    em: EntityManager,
+    profileIds: string[],
+  ): Promise<Map<string, VerifiedBadges[]>> {
+    const salida = new Map<string, VerifiedBadges[]>();
+    if (profileIds.length === 0) return salida;
+
+    const badges = await em.find(
+      VerifiedBadges,
+      { subjectRefId: { $in: profileIds } },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' } },
+    );
+
+    for (const badge of badges) {
+      const previos = salida.get(badge.subjectRefId) ?? [];
+      previos.push(badge);
+      salida.set(badge.subjectRefId, previos);
     }
     return salida;
   }

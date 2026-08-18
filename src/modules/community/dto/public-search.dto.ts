@@ -47,6 +47,39 @@ export class PublicLocationDto {
  * archivo: el cliente público no tiene sesión y por tanto no puede pedir una
  * URL firmada. Resolverla es del servidor.
  */
+/**
+ * El sello, en la forma única que sirven todas las superficies.
+ *
+ * Existe porque `verified` como booleano no puede decir «Verificación
+ * vencida»: un `false` mezcla al que nunca se verificó con al que se le venció
+ * la matrícula, y son dos cosas muy distintas para quien elige un médico.
+ * Buscador, ficha pública, Guía y selector de turnos leen este objeto, no
+ * cuatro interpretaciones del booleano.
+ */
+export class PublicVerifiedBadgeDto {
+  @ApiProperty({
+    enum: ['VERIFIED', 'EXPIRED', 'NONE'],
+    description:
+      '`VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció',
+  })
+  status!: 'VERIFIED' | 'EXPIRED' | 'NONE';
+
+  @ApiProperty({ nullable: true, description: 'Qué se verificó' })
+  badgeTypeConceptId!: string | null;
+
+  @ApiProperty({
+    nullable: true,
+    description: 'Cómo se verificó (autoridad externa, alta manual auditada)',
+  })
+  verificationMethodConceptId!: string | null;
+
+  @ApiProperty({ nullable: true, description: 'Desde cuándo vale, ISO' })
+  verifiedAt!: string | null;
+
+  @ApiProperty({ nullable: true, description: 'Hasta cuándo vale, ISO' })
+  validUntil!: string | null;
+}
+
 export class PublicSearchResultDto {
   @ApiProperty({ description: 'Tipo de sujeto' })
   kind!: PublicResultKind;
@@ -74,6 +107,29 @@ export class PublicSearchResultDto {
 
   @ApiProperty({ description: 'Cantidad de reseñas; 0 cuando no hay' })
   ratingCount!: number;
+
+  @ApiProperty({
+    type: PublicVerifiedBadgeDto,
+    description:
+      'El sello con su procedencia. `verified` es su resumen booleano y se ' +
+      'mantiene por compatibilidad: `verified === (verifiedBadge.status === "VERIFIED")`.',
+  })
+  verifiedBadge!: PublicVerifiedBadgeDto;
+
+  @ApiProperty({
+    description:
+      'Si el profesional tiene agenda publicada. El CTA «Pedir turno» sólo ' +
+      'se muestra cuando es verdad (PAC-CITA-001).',
+  })
+  hasPublishedAgenda!: boolean;
+
+  @ApiProperty({
+    nullable: true,
+    description:
+      'Primer día con hueco disponible (YYYY-MM-DD), truncado a día a ' +
+      'propósito: la hora exacta cambia entre que se pinta y se toca.',
+  })
+  nextAvailableDate!: string | null;
 }
 
 /** Profesional de la salud en el directorio público. */
@@ -230,6 +286,21 @@ export class PublicDirectoryProfileDto {
 
   @ApiProperty()
   acceptsReviews!: boolean;
+
+  @ApiProperty({
+    type: PublicVerifiedBadgeDto,
+    description: 'El mismo sello y la misma semántica que en el buscador',
+  })
+  verifiedBadge!: PublicVerifiedBadgeDto;
+
+  @ApiProperty({ description: 'Si tiene agenda publicada' })
+  hasPublishedAgenda!: boolean;
+
+  @ApiProperty({
+    nullable: true,
+    description: 'Primer día con hueco (YYYY-MM-DD)',
+  })
+  nextAvailableDate!: string | null;
 
   @ApiProperty({ type: [PublicPostSummaryDto], description: 'Máx. 20' })
   posts!: PublicPostSummaryDto[];

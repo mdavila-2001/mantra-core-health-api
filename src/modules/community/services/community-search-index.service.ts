@@ -9,6 +9,10 @@ import {
 import { SearchIndexService } from '../../search_platform/services';
 import { PublicProfiles } from '../entities';
 import { PublicSearchRepository } from '../repositories';
+import {
+  CommunityVerificationService,
+  type VerifiedBadgeDto,
+} from './community-verification.service';
 import type { ProfileLocation } from '../repositories/public-search.repository';
 import type { SearchIndexHealthDto } from '../dto';
 import { COMM } from '../community.concepts';
@@ -60,10 +64,22 @@ export interface PublicProfileDocument {
   city: string | null;
   /** Ruta servida por la API, nunca el id del archivo. */
   avatarUrl: string | null;
-  /** Si el sello de verificado está vigente. */
+  /** Si el sello de verificado está vigente. Resumen de `verifiedBadgeStatus`. */
   verified: boolean;
-  /** Si tiene agenda publicada (lo llena P13; hoy siempre `false`). */
+  /** Estado del sello: `VERIFIED`, `EXPIRED` o `NONE`. */
+  verifiedBadgeStatus: string;
+  /** Qué se verificó, o `null`. */
+  badgeTypeConceptId: string | null;
+  /** Cómo se verificó, o `null`. */
+  verificationMethodConceptId: string | null;
+  /** Desde cuándo vale el sello, en ISO. */
+  verifiedAt: string | null;
+  /** Hasta cuándo vale el sello, en ISO. */
+  validUntil: string | null;
+  /** Si tiene agenda publicada (`PAC-CITA-001`). */
   hasPublishedAgenda: boolean;
+  /** Primer día con hueco (`YYYY-MM-DD`), o `null`. */
+  nextAvailableDate: string | null;
   /** Promedio de reseñas publicadas, o `null`. */
   ratingAverage: number | null;
   /** Cantidad de reseñas publicadas. */
@@ -125,6 +141,7 @@ export class CommunitySearchIndexService {
     private readonly em: EntityManager,
     private readonly repo: PublicSearchRepository,
     private readonly search: SearchIndexService,
+    private readonly verification: CommunityVerificationService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunitySearchIndexService.name);
@@ -296,11 +313,15 @@ export class CommunitySearchIndexService {
     const ids = rows.map((row) => row.id);
     const targetIds = rows.map((row) => row.targetId);
 
-    const [ratings, locations, specialties] = await Promise.all([
-      this.repo.ratingsByProfile(em, ids),
-      this.repo.locationsByOwner(em, targetIds),
-      this.repo.specialtiesByPractitioner(em, targetIds),
-    ]);
+    const [ratings, locations, specialties, badges, agenda] = await Promise.all(
+      [
+        this.repo.ratingsByProfile(em, ids),
+        this.repo.locationsByOwner(em, targetIds),
+        this.repo.specialtiesByPractitioner(em, targetIds),
+        this.repo.badgesByProfiles(em, ids),
+        this.repo.agendaByPractitioner(em, targetIds),
+      ],
+    );
 
     return rows.map((row) => ({
       id: row.id,
@@ -309,6 +330,11 @@ export class CommunitySearchIndexService {
         ratings.get(row.id) ?? null,
         locations.get(row.targetId) ?? null,
         specialties.get(row.targetId) ?? [],
+        // El sello se calcula con el MISMO servicio que sirve el camino SQL:
+        // si el índice derivara el estado por su cuenta, el mismo perfil se
+        // vería verificado o vencido según quién respondiera la búsqueda.
+        this.verification.readBadge(row, badges.get(row.id) ?? []),
+        agenda.get(row.targetId) ?? null,
       ) as unknown as Record<string, unknown>,
     }));
   }
@@ -323,6 +349,8 @@ export class CommunitySearchIndexService {
     rating: { average: number; count: number } | null,
     location: ProfileLocation | null,
     specialties: string[],
+    badge: VerifiedBadgeDto,
+    agenda: { hasAgenda: boolean; nextAvailableDate: string | null } | null,
   ): PublicProfileDocument {
     return {
       kind: this.kindOf(profile),
@@ -335,10 +363,14 @@ export class CommunitySearchIndexService {
       avatarUrl: profile.avatarFileId
         ? `/public/media/${profile.avatarFileId}`
         : null,
-      verified: profile.verificationStatusConceptId === CONCEPTS.STATE_ACTIVE,
-      // P13 lo llena cruzando con `scheduling`; hasta entonces la promesa
-      // «pedí turno» no se hace, que es distinto de hacerla en falso.
-      hasPublishedAgenda: false,
+      verified: badge.status === 'VERIFIED',
+      verifiedBadgeStatus: badge.status,
+      badgeTypeConceptId: badge.badgeTypeConceptId,
+      verificationMethodConceptId: badge.verificationMethodConceptId,
+      verifiedAt: badge.verifiedAt,
+      validUntil: badge.validUntil,
+      hasPublishedAgenda: agenda?.hasAgenda ?? false,
+      nextAvailableDate: agenda?.nextAvailableDate ?? null,
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
       location:
