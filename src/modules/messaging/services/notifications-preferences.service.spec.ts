@@ -63,7 +63,11 @@ function build() {
     warn: mockFn(),
     error: mockFn(),
   };
-  const service = new NotificationsService(em, notificationsRepo, logger as any);
+  const service = new NotificationsService(
+    em,
+    notificationsRepo,
+    logger as any,
+  );
   return { service, tx, notificationsRepo, logger };
 }
 
@@ -153,9 +157,7 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
       expect(d.notificationsRepo.createPreference).toHaveBeenCalledTimes(1);
       const [, data] = d.notificationsRepo.createPreference.mock
         .calls[0] as any[];
-      expect(data.categoryConceptId).toBe(
-        NOTIFICATION_CATEGORY_CONCEPT.SOCIAL,
-      );
+      expect(data.categoryConceptId).toBe(NOTIFICATION_CATEGORY_CONCEPT.SOCIAL);
       expect(data.optedIn).toBe(false);
     });
 
@@ -225,7 +227,9 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
       });
 
       expect(res.suppressed).toBe(true);
-      expect(d.notificationsRepo.createInAppNotification).not.toHaveBeenCalled();
+      expect(
+        d.notificationsRepo.createInAppNotification,
+      ).not.toHaveBeenCalled();
     });
 
     it('pero sí entrega lo clínico: silenciar «social» no silencia una receta', async () => {
