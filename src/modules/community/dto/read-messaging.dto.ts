@@ -19,6 +19,24 @@ export class ConversationPreviewMessageDto {
   sentAt?: Date | null;
 }
 
+/**
+ * El otro lado de una conversación.
+ *
+ * Carril P2. La bandeja devolvía la conversación sin decir **con quién** es:
+ * una lista de «Conversación · hace 2 h» no es una bandeja, es un registro de
+ * actividad. El nombre no puede resolverlo el cliente sin una llamada por
+ * fila, así que viaja con la lectura.
+ */
+export class ConversationPeerDto {
+  /** Perfil público del participante. */
+  @ApiProperty({ format: 'uuid' })
+  profileId!: string;
+
+  /** Cómo se llama, para poder pintar la fila. */
+  @ApiPropertyOptional()
+  displayName?: string | null;
+}
+
 /** Una conversación de la bandeja del actor. */
 export class ConversationListItemDto {
   /** Identificador de la conversación. */
@@ -48,6 +66,16 @@ export class ConversationListItemDto {
   /** Cuántos mensajes le quedan sin leer al actor. */
   @ApiProperty()
   unreadCount!: number;
+
+  /**
+   * Los demás participantes, sin el propio.
+   *
+   * Sin el propio porque la bandeja se lee desde un lado: incluirse a uno
+   * mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra
+   * «Conversación con vos».
+   */
+  @ApiProperty({ type: [ConversationPeerDto] })
+  peers!: ConversationPeerDto[];
 }
 
 /** Bandeja de conversaciones (UC-19-14, cara de lectura). */
