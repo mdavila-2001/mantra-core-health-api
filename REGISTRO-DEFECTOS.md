@@ -73,9 +73,17 @@ Ningún cambio de esquema puede viajar en un PR: se distribuye por zip. Es la ca
 B-3 y de que el ajuste de `rebuild_stack.py` del PR #107 no pueda revisarse.
 *(`CARRIL_REPORT.md:98-103`)*
 
-**B-3 · `gen_ddl.py 05` pierde 7 FK ya resueltas** al regenerar en este workspace: lee un
-vault ausente. Cualquiera que regenere un módulo acá introduce la regresión.
+**B-3 · `gen_ddl.py 05` pierde 7 FK ya resueltas** al regenerar: lee un vault ausente.
 *(`CARRIL_REPORT.md:86-92`)*
+
+> **No reproduce con el vault presente (verificado 18/08).** `gen_ddl.py` lee los destinos de
+> `Mantra Core Health Vault/SALUD/FK/`, que en un workspace completo tiene **6 652 notas**.
+> Prueba: copiar `SQL/05_profiles/` aparte, `python salud-db/gen_ddl.py 05`, `diff -r` → **sin
+> diferencias**; la corrida reporta `24 FK intra · 99 FK diferidas · 0 inferidas` y ninguna
+> pérdida. El bloqueante real no es el generador sino **B-2**: como `salud-db/` y el vault no
+> viajan en git, quien clone solo el repo de la API no los tiene y ahí sí pierde las FKs.
+> Se deja abierto por eso, pero **con la condición correcta**: no es «regenerar rompe», es
+> «regenerar sin el vault rompe».
 
 **B-4 · `postgres-init` falla en algunas máquinas** — busca `/init/SQL/apply_all.sql` y el
 directorio está vacío. Impide levantar el stack limpio y correr `yarn test:integration`.
