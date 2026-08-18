@@ -80,7 +80,9 @@ async function persona(label, roles) {
     token: A,
     body: {
       email,
-      displayName: `Dr. ${label}`,
+      // Sin honorífico: el registro real no lo escribe, y un seed que lo mete
+      // deja el directorio con tratamientos mezclados.
+      displayName: label,
       licenseNumber: `LIC-${label}-${U}`,
       credentialNumber: `CRED-${label}-${U}`,
       professionalTitle: label,

@@ -71,7 +71,8 @@ let alta = await call(
     token: adminToken,
     body: {
       email: DOCTOR_EMAIL,
-      displayName: 'Dra. Valeria Fuentes Aramayo',
+      // Sin honorífico: el registro real no lo escribe (ver seed-dev-data.mjs).
+      displayName: 'Valeria Fuentes Aramayo',
       licenseNumber: `LIC-DEMO-${sufijo}`,
       credentialNumber: `CRED-DEMO-${sufijo}`,
       professionalTitle: 'Medicina general',
