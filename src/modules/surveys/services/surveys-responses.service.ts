@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { TableNotFoundException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -69,10 +70,7 @@ export class SurveysResponsesService {
     actor: AuthenticatedUser,
   ): Promise<PatientInvitationDto[]> {
     const patientProfileId = this.requirePatientProfile(actor);
-    const invitations = await this.invitationsRepo.listByPatient(
-      this.em,
-      patientProfileId,
-    );
+    const invitations = await this.listInvitationsOf(patientProfileId);
 
     const now = new Date();
     const result: PatientInvitationDto[] = [];
@@ -250,13 +248,48 @@ export class SurveysResponsesService {
    * las de otro.
    */
   private requirePatientProfile(actor: AuthenticatedUser): string {
+    // 403 y no 422: no es una precondición que el cliente pueda cumplir
+    // mandando otra cosa — es que esta sesión no es la de un paciente. Mismo
+    // criterio que `community-reviews.service.ts` para calificar.
     if (!actor.patientProfileId) {
-      throw new PreconditionFailedException(
-        'La sesión no tiene perfil de paciente asociado',
-        { userId: actor.id },
+      throw new ForbiddenException(
+        'Solo un paciente puede ver sus cuestionarios',
       );
     }
     return actor.patientProfileId;
+  }
+
+  /**
+   * Las invitaciones del paciente, tolerando que la tabla todavía no exista.
+   *
+   * TODO(F-14 · bloqueador de esquema a Marcelo, M4): el módulo nació con las
+   * entidades y sin DDL —no hay `.puml` ni nada en `SQL/`—, así que en toda
+   * base construida por el pipeline el schema `surveys` no existe y esta
+   * lectura reventaba con 500 en la primera pantalla que abre un paciente
+   * recién registrado. Hasta que el esquema se materialice por el camino
+   * canónico, «no hay tabla» se responde como «no hay cuestionarios» y se deja
+   * aviso en el log. Quitar el `catch` cuando el esquema exista: a partir de
+   * ahí una tabla ausente vuelve a ser un despliegue roto, no un caso vacío.
+   *
+   * @param patientProfileId - Paciente de la sesión.
+   * @returns Sus invitaciones, o ninguna si el esquema aún no está.
+   */
+  private async listInvitationsOf(
+    patientProfileId: string,
+  ): Promise<SurveyInvitations[]> {
+    try {
+      return await this.invitationsRepo.listByPatient(
+        this.em,
+        patientProfileId,
+      );
+    } catch (error) {
+      if (!(error instanceof TableNotFoundException)) throw error;
+      this.logger.warn(
+        { operation: 'surveys.me.invitations', error: error.message },
+        'El esquema surveys no está materializado: se responde sin cuestionarios',
+      );
+      return [];
+    }
   }
 
   /** Carga la invitación comprobando que sea del paciente de la sesión. */
