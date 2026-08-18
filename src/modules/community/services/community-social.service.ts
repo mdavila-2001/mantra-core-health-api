@@ -153,6 +153,44 @@ export class CommunitySocialService {
   }
 
   /**
+   * Todos los sujetos que esta sesión representa, del preferido al alternativo.
+   *
+   * ## El desajuste que corrige
+   *
+   * La escritura acepta como titular el perfil profesional **o** la cuenta
+   * (`CommunityVisibilityService.sujetosDe`, en plural); la lectura de la
+   * vitrina propia elegía **uno solo**, el profesional. Una profesional con
+   * vitrina creada a nombre de su cuenta —el caso de toda vitrina anterior a
+   * que tuviera perfil profesional, y el que produce el alta por administración—
+   * podía publicar con ella y recibía `null` al preguntar por la suya: la
+   * pantalla le ofrecía crear una vitrina que ya existía, y el `slug` ocupado la
+   * frenaba con un conflicto.
+   *
+   * Comprobado en vivo antes de esta corrección: la doctora publicaba con su
+   * vitrina y `GET /community/profiles/me` le respondía vacío.
+   *
+   * El orden importa: primero el perfil profesional, que es el sujeto canónico
+   * de quien ejerce, y sólo si no tiene vitrina se mira la cuenta.
+   */
+  private sujetosDe(actor: AuthenticatedUser): string[] {
+    return actor.practitionerProfileId
+      ? [actor.practitionerProfileId, actor.id]
+      : [actor.id];
+  }
+
+  /** La vitrina de cualquiera de los sujetos del actor, o `null`. */
+  private async vitrinaDe(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<Awaited<ReturnType<PublicProfilesRepository['findByTarget']>>> {
+    for (const targetId of this.sujetosDe(actor)) {
+      const profile = await this.profilesRepo.findByTarget(em, targetId);
+      if (profile) return profile;
+    }
+    return null;
+  }
+
+  /**
    * La vitrina pública propia, o `null` si todavía no creó ninguna.
    *
    * `null` y no un 404: **no tener vitrina es un estado normal**, no un fallo.
@@ -167,8 +205,7 @@ export class CommunitySocialService {
     actor: AuthenticatedUser,
   ): Promise<OwnPublicProfileDto | null> {
     const em = this.em.fork();
-    const { targetId } = this.sujetoDe(actor);
-    const profile = await this.profilesRepo.findByTarget(em, targetId);
+    const profile = await this.vitrinaDe(em, actor);
     if (!profile) {
       return null;
     }
@@ -224,13 +261,17 @@ export class CommunitySocialService {
       // El slug es la dirección pública: dos vitrinas con el mismo texto son dos
       // enlaces que llevan a personas distintas según cuál resuelva primero.
       const ocupado = await this.profilesRepo.findBySlug(tx, dto.slug);
-      if (ocupado && ocupado.targetId !== targetId) {
+      // Contra todos los sujetos del actor, no sólo el preferido: si su vitrina
+      // está a nombre de la cuenta, conservar su propio slug no es un conflicto.
+      if (ocupado && !this.sujetosDe(actor).includes(ocupado.targetId)) {
         throw new ConflictException('Ese enlace ya está en uso', {
           slug: dto.slug,
         });
       }
 
-      const existente = await this.profilesRepo.findByTarget(tx, targetId);
+      // Misma resolución que la lectura: si la vitrina existe a nombre de la
+      // cuenta, editarla es editar la suya, no crear una segunda.
+      const existente = await this.vitrinaDe(tx, actor);
       if (existente) {
         existente.slug = dto.slug;
         existente.displayName = dto.displayName;
