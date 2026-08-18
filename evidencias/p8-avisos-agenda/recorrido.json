@@ -1,0 +1,403 @@
+{
+  "generadoContra": "http://localhost:3010",
+  "corrida": "045383731",
+  "tenantId": "1befcfea-44c0-563a-81cd-337ec6acc840",
+  "recurso": {
+    "id": "d7bbfe08-0545-4ed2-8870-84a2841d550e",
+    "name": "Consultorio Medicina General — Rojas Villarroel · Sede Central Sopocachi · #36792084"
+  },
+  "pacientes": {
+    "A": {
+      "nombre": "Ana Quispe",
+      "nationalId": "P80453837311",
+      "password": "P8-passw0rd!",
+      "patientProfileId": "fd462b4f-c380-4aa1-a65f-1349b659507a",
+      "userId": "d8cabcf1-d1a8-436b-9e75-465542e0e86b"
+    },
+    "B": {
+      "nombre": "Bruno Mamani",
+      "nationalId": "P80453837312",
+      "password": "P8-passw0rd!",
+      "patientProfileId": "141e575a-c4cd-4e21-bd99-1833a8f26e72",
+      "userId": "ff647ad9-29ea-4c6b-9969-9d4cb3854e5a"
+    }
+  },
+  "reservas": {
+    "A": "4cad7bff-fcfe-4ed6-bb9f-5d661b8df1bf",
+    "B": "a7dbd803-2960-4d14-ad86-37cc17aaa55a"
+  },
+  "listaDeEspera": {
+    "items": [
+      {
+        "id": "41a49aef-05f7-408d-8681-0d0603eb957e",
+        "patientProfileId": "141e575a-c4cd-4e21-bd99-1833a8f26e72",
+        "resourceId": "d7bbfe08-0545-4ed2-8870-84a2841d550e",
+        "resourceLabel": "Dr(a). Camila Rojas Villarroel",
+        "desiredFrom": null,
+        "desiredTo": null,
+        "priority": 50,
+        "statusConceptId": "3897dfe3-e2b9-5827-894b-264a156f1bdf",
+        "createdAt": "2026-08-18T09:29:44.366Z"
+      }
+    ]
+  },
+  "esperaAbiertaDeA": {
+    "items": [
+      {
+        "id": "8105d3a9-8406-4054-b592-ae89ec782ed3",
+        "patientProfileId": "fd462b4f-c380-4aa1-a65f-1349b659507a",
+        "resourceId": "d7bbfe08-0545-4ed2-8870-84a2841d550e",
+        "resourceLabel": "Dr(a). Camila Rojas Villarroel",
+        "desiredFrom": null,
+        "desiredTo": null,
+        "priority": 0,
+        "statusConceptId": "3897dfe3-e2b9-5827-894b-264a156f1bdf",
+        "createdAt": "2026-08-18T09:29:44.723Z"
+      }
+    ]
+  },
+  "candidatosDelWorker": {
+    "slotIds": [
+      "95176a9a-13ca-4e1b-b4b9-99759a47db13",
+      "bd084758-22fb-465c-8e54-66c3e0c64a6b",
+      "c2e92b58-4bb4-415c-a449-c7a93586d76f",
+      "1c3812ae-97c8-44eb-a488-6c9ac4be31c9",
+      "224c658d-059a-4933-ae76-d9a4d09aa1a0",
+      "0b97b95f-b89f-4478-9ade-fc19b5ab37a4",
+      "09d37602-52a7-419a-8dcf-2fae18f8a657",
+      "e3796fb3-8861-424c-ac2a-e8784aaaf7df",
+      "09770fe5-425e-43a8-a02d-377c3dcde82e",
+      "37cb4136-8dcf-42f8-8f07-7fada198de1e",
+      "1d6fe761-c916-4b98-84e4-3a313c2b24ce",
+      "0140eae4-617d-4c6f-aa58-a5dd72d0e64b",
+      "552800f5-d299-49ec-8a2b-df4b0c63617e",
+      "a3753eeb-aa45-46a6-a361-37d7252eb440",
+      "77e4f6e7-d0e0-4bb4-9fb9-51a3f8890a12",
+      "6c1669a2-d73c-46f1-8cfd-44588af50890",
+      "81a4a383-900a-4c50-b44e-68532b684691",
+      "159b5c66-3906-4f14-94a4-cb0ea90383de",
+      "1bde842f-2a84-4fcd-b72b-65cc331e7607",
+      "aff7ae86-2b2a-4321-84b6-d0dee7b28b5f",
+      "ff79e742-048c-4acf-aac9-0c5e62771a6b",
+      "7653d135-7f69-4280-9d7d-59c992f46c04",
+      "6a3de8d8-87e2-4e66-a39f-b1b9a1347ac5",
+      "b95ff15d-1dbb-441b-9039-02f7abf8ad42",
+      "446c5f2c-21a7-4eb8-838a-6f19e6a7b4ee",
+      "f326a3d6-e88b-451a-8f84-fbcc88ad129f",
+      "2a974204-a308-451c-8e49-187402cb0159",
+      "94d91d69-7182-4bc6-9b86-1fb66b79d04a",
+      "4f33b8a0-9d5d-4a40-b936-a4ae589cac5f",
+      "5b0f3107-fa24-4c2f-84ee-c8e01ff99a44",
+      "afa3043e-8251-4f16-bce8-7dc56a8fff9c",
+      "b8ed1917-2b02-4bfd-9874-e019b2f166e9",
+      "b9c7ede0-9d6f-414d-a85d-6397eefa27f8",
+      "6d233c5c-bc39-439f-ae0a-942e4e91300e",
+      "371c776b-5e90-4c95-a3d2-d8859af8bc2f",
+      "70360f5a-66c6-464a-83ab-e64377b60927",
+      "f74621d2-5a2c-4136-af6c-3879bb24e8c8",
+      "fe31b979-5866-4aa3-a681-36678b179271",
+      "1ca8be5e-d3b2-4f9d-ba6b-105d644a0c2d",
+      "63c1e862-e15f-4bb4-9f48-545b6c13d30d",
+      "234bd55b-81a4-439e-948d-c5ce5f0126c9",
+      "3d637957-008f-49dd-9b8c-87e6e50d3f5d",
+      "abd9e04e-6423-422a-a8d5-40d811497a34",
+      "fd6f4556-6667-4ed7-b640-d13d69e5fefd",
+      "9af97864-0534-4a28-ae7d-5f77e6e82950",
+      "4115a07f-66af-483c-b733-bd303516f951",
+      "8fabe037-2b03-4fcd-af80-b1f2ba98f572",
+      "a8855260-7c2e-4971-8ffd-1ea36618d84f",
+      "ea03ef8d-96a6-45c7-9601-0d158a6c908e",
+      "a3caf146-3480-45f7-a145-c5c342763d24",
+      "453c22bf-4925-4bfd-9320-7bf93d7a159a",
+      "52e132a4-1c3d-4f5a-8a8a-0039b056d057",
+      "811ee3d5-d727-4957-9e04-29ee880ef28f",
+      "74ca9d6e-19a8-42f9-b1df-326658a7faa5",
+      "87eab97d-d599-4e0d-a56b-3fee259dd358",
+      "700199ff-47ae-4478-b647-49c31ad889ba",
+      "19c24f8c-a65b-41a0-8f0a-c42d4b5a08c0"
+    ]
+  },
+  "promocion": {
+    "processed": 1,
+    "detail": "Candidatos promovidos y avisados (1 de 1); la reserva la confirma el paciente"
+  },
+  "demoraDeLaCita": {
+    "notified": 1,
+    "affected": 1,
+    "bookingIds": [
+      "a7dbd803-2960-4d14-ad86-37cc17aaa55a"
+    ],
+    "detail": "La demora quedó registrada y todos los pacientes recibieron el aviso"
+  },
+  "demoraDeLaAgenda": {
+    "notified": 5,
+    "affected": 14,
+    "bookingIds": [
+      "5fc4953a-a375-4072-a119-c68b5ecb3c8e",
+      "c0edc84b-9f0d-4061-95c4-feaba685fc05",
+      "3c69e12f-7093-4041-83c0-fc5485ca3fe0",
+      "ccc3d0a3-3588-456d-ae2c-ecb3bedf2f21",
+      "7c48752e-c7dd-4797-a976-ee3e14834731",
+      "35231342-cbb9-4fd6-a22e-bb55636e21a2",
+      "450ec07c-b6b7-4443-ace1-e94c2f670dc1",
+      "f2326761-5e48-4b5b-8f63-3dfa9d304832",
+      "bcb4a054-4ca7-46d1-8024-915bf679c8dc",
+      "852384ea-b542-4fc9-9fd4-bf3433672fbb",
+      "6a06cd8a-0553-4e20-a3f4-1a196e5e4f12",
+      "1ac90e7b-3239-4cbc-8cfe-36a1f47b3986",
+      "5d76af3e-aab6-476a-bda7-cd88b8dd2c75",
+      "a7dbd803-2960-4d14-ad86-37cc17aaa55a"
+    ],
+    "detail": "La demora quedó registrada en las 14 citas; 5 pacientes recibieron el aviso in-app (el resto no tiene cuenta de portal o no acepta este aviso)"
+  },
+  "citaConDemora": {
+    "delayMinutes": 20,
+    "message": "Estoy en una urgencia",
+    "announcedAt": "2026-08-18T09:29:44.496Z"
+  },
+  "despachoDeRecordatorios": {
+    "processed": 1,
+    "detail": "Recordatorios despachados y entregados por el canal in-app (1 de 1)"
+  },
+  "totales": {
+    "pasos": 23,
+    "ok": 23,
+    "fallidos": 0
+  },
+  "pasos": [
+    {
+      "seccion": "Sesión",
+      "descripcion": "Login del administrador de arranque",
+      "peticion": "POST /iam/auth/login",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Agenda",
+      "descripcion": "Recursos agendables de la organización",
+      "peticion": "GET /scheduling/resources?tenantId=1befcfea-44c0-563a-81cd-337ec6acc840",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Agenda",
+      "descripcion": "Cupos publicados del recurso",
+      "peticion": "GET /scheduling/resources/d7bbfe08-0545-4ed2-8870-84a2841d550e/slots?from=2026-08-18T09%3A29%3A43.916Z&to=2026-09-17T09%3A29%3A43.916Z",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Pacientes",
+      "descripcion": "Alta de Ana Quispe con cuenta de portal",
+      "peticion": "POST /iam/auth/register-patient",
+      "esperado": [
+        201
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Pacientes",
+      "descripcion": "Login de Ana",
+      "peticion": "POST /iam/auth/login",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Pacientes",
+      "descripcion": "Alta de Bruno Mamani con cuenta de portal",
+      "peticion": "POST /iam/auth/register-patient",
+      "esperado": [
+        201
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Pacientes",
+      "descripcion": "Login de Bruno",
+      "peticion": "POST /iam/auth/login",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Reserva",
+      "descripcion": "Paciente A retiene el cupo",
+      "peticion": "POST /scheduling/slots/95176a9a-13ca-4e1b-b4b9-99759a47db13/holds",
+      "esperado": [
+        201,
+        200
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Reserva",
+      "descripcion": "Paciente A confirma la reserva",
+      "peticion": "POST /scheduling/holds/07d5f674-8e5d-49aa-a994-603fa7f5535b/confirm",
+      "esperado": [
+        201,
+        200
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Lista de espera",
+      "descripcion": "Paciente B se anota en la lista de espera",
+      "peticion": "POST /scheduling/waitlist",
+      "esperado": [
+        201
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Lista de espera",
+      "descripcion": "La lectura devuelve la espera de B (P8)",
+      "peticion": "GET /scheduling/waitlist?patientProfileId=141e575a-c4cd-4e21-bd99-1833a8f26e72",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 4 · cambio de estado",
+      "descripcion": "El paciente A cancela su turno con motivo",
+      "peticion": "POST /scheduling/bookings/4cad7bff-fcfe-4ed6-bb9f-5d661b8df1bf/cancel",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 1 · cupo liberado",
+      "descripcion": "El worker descubre los cupos con candidatos",
+      "peticion": "GET /scheduling/internal/waitlist-candidates",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 1 · cupo liberado",
+      "descripcion": "El worker promueve la lista de espera del cupo liberado",
+      "peticion": "POST /scheduling/internal/promote-waitlist/95176a9a-13ca-4e1b-b4b9-99759a47db13",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Reserva",
+      "descripcion": "Paciente B retiene otro cupo",
+      "peticion": "POST /scheduling/slots/09d37602-52a7-419a-8dcf-2fae18f8a657/holds",
+      "esperado": [
+        201,
+        200
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Reserva",
+      "descripcion": "Paciente B confirma su reserva",
+      "peticion": "POST /scheduling/holds/1c6b64b5-1426-48ef-a660-1e0985d947b5/confirm",
+      "esperado": [
+        201,
+        200
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 2 · demora",
+      "descripcion": "El profesional avisa que se demora sobre esa cita",
+      "peticion": "POST /scheduling/bookings/a7dbd803-2960-4d14-ad86-37cc17aaa55a/delay",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 2 · demora",
+      "descripcion": "El turno muestra la demora aunque el aviso no se abra",
+      "peticion": "GET /scheduling/bookings/a7dbd803-2960-4d14-ad86-37cc17aaa55a",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 2 · demora",
+      "descripcion": "El profesional se demora en toda su agenda",
+      "peticion": "POST /scheduling/resources/d7bbfe08-0545-4ed2-8870-84a2841d550e/delay",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Lista de espera",
+      "descripcion": "El paciente A se anota tras quedarse sin turno",
+      "peticion": "POST /scheduling/waitlist",
+      "esperado": [
+        201
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Lista de espera",
+      "descripcion": "La espera de A queda activa y legible",
+      "peticion": "GET /scheduling/waitlist?patientProfileId=fd462b4f-c380-4aa1-a65f-1349b659507a",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 3 · recordatorio",
+      "descripcion": "Se programa un recordatorio que ya venció",
+      "peticion": "POST /scheduling/bookings/a7dbd803-2960-4d14-ad86-37cc17aaa55a/reminders",
+      "esperado": [
+        201
+      ],
+      "status": 201,
+      "ok": true
+    },
+    {
+      "seccion": "Aviso 3 · recordatorio",
+      "descripcion": "El worker despacha los recordatorios vencidos",
+      "peticion": "POST /scheduling/internal/dispatch-reminders",
+      "esperado": [
+        200
+      ],
+      "status": 200,
+      "ok": true
+    }
+  ]
+}

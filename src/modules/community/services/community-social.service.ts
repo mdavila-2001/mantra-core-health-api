@@ -25,6 +25,7 @@ import {
   SOCIAL_OBJECT_CONCEPT_BY_CODE,
   FOLLOWABLE_CONCEPT_BY_CODE,
   POST_VISIBILITY_CONCEPT_BY_CODE,
+  PROFILE_VISIBILITY_CONCEPT_BY_CODE,
 } from '../community.concepts';
 import {
   CreatePublicProfileDto,
@@ -218,6 +219,14 @@ export class CommunitySocialService {
       headline: profile.headline ?? null,
       biography: profile.biography ?? null,
       acceptsReviews: profile.acceptsReviews ?? null,
+      // La columna nula se lee como privada, igual que la lee el directorio
+      // público. Devolver `null` acá obligaría a la pantalla de edición a
+      // decidir la misma regla por su cuenta, y a decidirla distinto el día que
+      // alguien la olvide.
+      visibility:
+        profile.visibilityConceptId === COMM.PROFILE_VISIBILITY_PUBLIC
+          ? 'PUBLIC'
+          : 'PRIVATE',
       verificationStatusConceptId: profile.verificationStatusConceptId ?? null,
       statusConceptId: profile.statusConceptId,
     };
@@ -280,6 +289,13 @@ export class CommunitySocialService {
         if (dto.acceptsReviews !== undefined) {
           existente.acceptsReviews = dto.acceptsReviews;
         }
+        // Omitir `visibility` conserva la que tenga. Un `PUT` idempotente que
+        // no menciona el campo no puede significar «publicame en internet», y
+        // tampoco «despublicame»: significa que la pantalla no lo editó.
+        if (dto.visibility !== undefined) {
+          existente.visibilityConceptId =
+            PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility];
+        }
         touch(existente, actor.id);
       } else {
         this.profilesRepo.create(tx, {
@@ -291,6 +307,12 @@ export class CommunitySocialService {
           headline: dto.headline,
           biography: dto.biography,
           statusConceptId: CONCEPTS.STATE_ACTIVE,
+          // Sin declaración explícita queda nula, que es privada: el alta de
+          // una vitrina no publica a nadie por omisión.
+          visibilityConceptId:
+            dto.visibility === undefined
+              ? undefined
+              : PROFILE_VISIBILITY_CONCEPT_BY_CODE[dto.visibility],
           acceptsReviews: dto.acceptsReviews,
           actorUserId: actor.id,
         });

@@ -14,15 +14,25 @@ name: Documentación
 # no reportaba ni un solo check —el equipo mergeaba a ciegas— y el trabajo
 # llegaba a `master` ya integrado, donde el fallo aparece tarde y mezclado con
 # el de otros.
+# Desde el 18/08 corre en un runner propio (ver más abajo), que es una máquina
+# del equipo y no una flota elástica: el disparo se acota a `pull_request` para
+# que el trabajo llegue en el momento en que sirve —antes de mergear— sin
+# duplicar cada corrida con el `push` que sigue al merge. `workflow_dispatch`
+# queda para lanzar la batería a mano sobre una rama cuando haga falta.
 on:
   pull_request:
     branches: [master, dev]
-  push:
-    branches: [master, dev]
+  workflow_dispatch:
 
 jobs:
   docs:
-    runs-on: ubuntu-latest
+    # Runner self-hosted: los minutos de GitHub están agotados por facturación
+    # desde el 14/08 y los jobs morían en 2 s sin máquina, así que ~30 PRs
+    # entraron sin un solo check. `marcelo-wsl-api` es Linux con Docker, que es
+    # lo que exigen los `services:` de acá abajo. Cuando la facturación se
+    # reponga, volver a `ubuntu-latest` es cambiar esta línea.
+    # Detalles y recuperación: docs/operations/ci-runner-self-hosted.md
+    runs-on: [self-hosted, linux, x64]
     env:
       # El heap por defecto de Node (~2 GB) no alcanza en este repositorio. El
       # lint type-aware sobre 60 módulos y ~1185 entidades muere con "JavaScript
