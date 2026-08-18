@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
+import { ClinicalModule } from '../clinical/clinical.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -76,7 +77,15 @@ import { EncountersRepository } from '../clinical/repositories';
   // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
   // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
   // manda el cliente.
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), CommonModule],
+  // `ClinicalModule` por `EncountersRepository`: `CommunityReviewsService` exige
+  // atención real antes de aceptar una reseña. No hay ciclo — `clinical` no
+  // importa nada de `community` — y es el mismo patrón que ya usa
+  // `procedures_perioperative`.
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    CommonModule,
+    ClinicalModule,
+  ],
   controllers: [
     CommunitySocialController,
     CommunityMessagingController,

@@ -38,6 +38,14 @@ export interface CreatePublicProfileData {
    */
   statusConceptId: string;
   /**
+   * Identificador asociado a visibility concept.
+   *
+   * Ausente deja la columna nula, que el directorio público lee como **no
+   * publicado** (ver `PROFILE_VISIBILITY_CONCEPT_BY_CODE`). Aparecer en el
+   * directorio es opt-in explícito, así que el alta no lo asume.
+   */
+  visibilityConceptId?: string;
+  /**
    * Valor de accepts reviews mantenido por la instancia.
    */
   acceptsReviews?: boolean;
@@ -203,6 +211,7 @@ export class PublicProfilesRepository {
         headline: data.headline,
         biography: data.biography,
         statusConceptId: data.statusConceptId,
+        visibilityConceptId: data.visibilityConceptId,
         verificationStatusConceptId: CONCEPTS.STATE_PENDING,
         acceptsReviews: data.acceptsReviews ?? true,
         commentsDefaultEnabled: data.commentsDefaultEnabled ?? true,
