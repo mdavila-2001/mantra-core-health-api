@@ -894,7 +894,7 @@
             "description": "Alta pública desde cero, sin admin: crea cuenta + credencial + rol + persona + perfil profesional + licencia + título + idioma + membresía en una transacción. La licencia nace PENDIENTE de verificación: registrarse declara la matrícula, no la prueba, así que el perfil no aparece como habilitado ni acepta pacientes.\n\nRegistrarse como profesional de salud con su matrícula. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-practitioner`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPractitioner`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
+              "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1032,7 +1032,7 @@
             "description": "Requiere token con rol CLINICIAN o SECURITY_ADMIN. Devuelve el token de activación.\n\nRegistro asistido de un paciente (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_assistedRegistration`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"displayName\": \"Paciente asistido\",\n  \"email\": \"asistido-{{$timestamp}}@example.test\",\n  \"reason\": \"Alta asistida de prueba\"\n}",
+              "raw": "{\n  \"email\": \"asistido-{{$timestamp}}@example.test\",\n  \"reason\": \"Alta asistida de prueba\",\n  \"displayName\": \"Paciente asistido\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -32191,7 +32191,7 @@
                 "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrarse como profesional de salud con su matrícula. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-practitioner`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_registerPractitioner`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
+                  "raw": "{\n  \"email\": \"medico-{{$timestamp}}@example.test\",\n  \"password\": \"{{password}}\",\n  \"licenseNumber\": \"MP-{{$timestamp}}\",\n  \"credentialNumber\": \"TIT-{{$timestamp}}\",\n  \"displayName\": \"Dra. de prueba\",\n  \"phone\": \"+591 70012345\",\n  \"gender\": \"FEMALE\",\n  \"sexAtBirth\": \"FEMALE\",\n  \"birthDate\": \"1985-04-12\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -32675,7 +32675,7 @@
                 "description": "Alta administrativa de un profesional (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-practitioner-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_assistedPractitionerRegistration`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
+                  "raw": "{\n  \"email\": \"{{email}}\",\n  \"name\": \"Ana\",\n  \"middleName\": \"Lucía\",\n  \"lastName\": \"Rojas\",\n  \"motherLastName\": \"Paz\",\n  \"displayName\": \"displayName-ejemplo\",\n  \"licenseNumber\": \"licenseNumber-ejemplo\",\n  \"credentialNumber\": \"credentialNumber-ejemplo\",\n  \"regulatoryAuthority\": \"2026-01-01T00:00:00.000Z\",\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"birthDate\": \"2026-01-01\",\n  \"gender\": \"MALE\",\n  \"sexAtBirth\": \"MALE\",\n  \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\",\n  \"acceptsNewPatients\": false,\n  \"timeZone\": \"timeZone-ejemplo\",\n  \"reason\": \"reason-ejemplo\",\n  \"clinicalRoles\": [\n    \"CLINICIAN\",\n    \"SURGEON\"\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -32735,7 +32735,7 @@
                 "description": "Cuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistro asistido de un paciente (devuelve token de activación). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/users/assisted-registration`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamUsersController_assistedRegistration`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"displayName\": \"Paciente asistido\",\n  \"email\": \"asistido-{{$timestamp}}@example.test\",\n  \"reason\": \"Alta asistida de prueba\"\n}",
+                  "raw": "{\n  \"email\": \"asistido-{{$timestamp}}@example.test\",\n  \"reason\": \"Alta asistida de prueba\",\n  \"displayName\": \"Paciente asistido\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"

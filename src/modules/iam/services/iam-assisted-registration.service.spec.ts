@@ -72,7 +72,8 @@ describe('IamAssistedRegistrationService', () => {
 
       const res = await d.service.assistedRegistration(
         {
-          displayName: 'Paciente Uno',
+          name: 'Lucía',
+          lastName: 'Mamani',
           email: 'paciente@x.io',
           reason: 'paciente sin acceso digital',
         },
@@ -84,12 +85,14 @@ describe('IamAssistedRegistrationService', () => {
       expect(res.status).toBe('PENDING_ACTIVATION');
       expect((res as any).password).toBeUndefined();
 
-      // La cuenta nace pendiente y con cambio de contraseña obligatorio.
+      // La cuenta nace pendiente, con cambio de contraseña obligatorio y con el
+      // nombre compuesto a partir de sus partes.
       expect(d.usersRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           statusConceptId: CONCEPTS.STATE_PENDING,
           mustChangePassword: true,
+          displayName: 'Lucía Mamani',
         }),
       );
       // Credencial de contraseña PENDIENTE, sin secreto definitivo.
@@ -112,6 +115,27 @@ describe('IamAssistedRegistrationService', () => {
             flow: 'assisted-registration',
           }),
         }),
+      );
+    });
+
+    it('keeps honouring displayName for clients that still send it', async () => {
+      const d = build();
+      d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue(null);
+      d.usersRepo.create.mockReturnValue({ id: 'u1' });
+
+      await d.service.assistedRegistration(
+        {
+          displayName: 'Paciente Uno',
+          email: 'paciente@x.io',
+          reason: 'paciente sin acceso digital',
+        },
+        actor,
+      );
+
+      // Quien mandó la forma anterior tiene que ver exactamente lo que mandó.
+      expect(d.usersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ displayName: 'Paciente Uno' }),
       );
     });
 

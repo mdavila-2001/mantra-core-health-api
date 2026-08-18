@@ -1,5 +1,6 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { HealthPractitionerProfiles, Persons } from '../entities';
+import { composePersonDisplayName } from '../person-name';
 
 /**
  * Nombre legible de un lote de perfiles profesionales.
@@ -65,8 +66,5 @@ function nombreDe(persona: Persons): string | undefined {
   if (persona.displayName !== undefined && persona.displayName !== '') {
     return persona.displayName;
   }
-  const compuesto = [persona.name, persona.lastName, persona.motherLastName]
-    .filter((parte): parte is string => parte !== undefined && parte !== '')
-    .join(' ');
-  return compuesto === '' ? undefined : compuesto;
+  return composePersonDisplayName(persona);
 }

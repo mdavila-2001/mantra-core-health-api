@@ -53,7 +53,8 @@ export const ORGANIZACION_SMOKE: SmokeCase[] = [
       owner: {
         email: ownerEmail(c),
         password: 'S3cret-passw0rd',
-        displayName: 'Owner Smoke',
+        name: 'Owner',
+        lastName: 'Smoke',
       },
     }),
     expectedStatus: 201,

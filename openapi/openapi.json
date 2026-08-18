@@ -67637,10 +67637,31 @@
       "AssistedRegistrationDto": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Andrea"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Mamani"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Quispe"
+          },
           "displayName": {
             "type": "string",
-            "description": "Nombre visible del paciente",
-            "maxLength": 200
+            "maxLength": 200,
+            "description": "Forma anterior de declarar el nombre. Preferí name/lastName.",
+            "deprecated": true
           },
           "email": {
             "type": "string",
@@ -67668,7 +67689,6 @@
           }
         },
         "required": [
-          "displayName",
           "email",
           "reason"
         ]
@@ -67682,9 +67702,31 @@
             "format": "email",
             "maxLength": 320
           },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Ana"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Rojas"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Paz"
+          },
           "displayName": {
             "type": "string",
-            "maxLength": 200
+            "maxLength": 200,
+            "description": "Forma anterior de declarar el nombre. Preferí name/lastName.",
+            "deprecated": true
           },
           "licenseNumber": {
             "type": "string",
@@ -67782,7 +67824,6 @@
         },
         "required": [
           "email",
-          "displayName",
           "licenseNumber",
           "credentialNumber",
           "reason"
@@ -68202,9 +68243,31 @@
             "minLength": 8,
             "maxLength": 200
           },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Ana"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Rojas"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Paz"
+          },
           "displayName": {
             "type": "string",
-            "maxLength": 200
+            "maxLength": 200,
+            "description": "Forma anterior de declarar el nombre. Preferí name/lastName.",
+            "deprecated": true
           },
           "timeZone": {
             "type": "string",
@@ -68213,8 +68276,7 @@
         },
         "required": [
           "email",
-          "password",
-          "displayName"
+          "password"
         ]
       },
       "RegisterOrganizationDto": {
@@ -68246,9 +68308,31 @@
             "minLength": 8,
             "maxLength": 200
           },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Ana"
+          },
+          "middleName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Lucía"
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Rojas"
+          },
+          "motherLastName": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Paz"
+          },
           "displayName": {
             "type": "string",
-            "maxLength": 200
+            "maxLength": 200,
+            "description": "Forma anterior de declarar el nombre. Preferí name/lastName.",
+            "deprecated": true
           },
           "licenseNumber": {
             "type": "string",
@@ -68331,7 +68415,6 @@
         "required": [
           "email",
           "password",
-          "displayName",
           "licenseNumber",
           "credentialNumber"
         ]

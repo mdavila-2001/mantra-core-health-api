@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { composeAccountDisplayName } from '../../profiles/person-name';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -112,8 +113,10 @@ export class IamAssistedRegistrationService {
       }
 
       // Cuenta en estado PENDING, sin contraseña definitiva y con cambio exigido.
+      // El nombre sale de las partes; si el cliente mandó la forma anterior,
+      // manda esa.
       const user = this.usersRepo.create(tx, {
-        displayName: dto.displayName,
+        displayName: composeAccountDisplayName(dto),
         statusConceptId: CONCEPTS.STATE_PENDING,
         mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
         timeZone: dto.timeZone,
