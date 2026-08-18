@@ -875,6 +875,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "display": "valor-ejemplo"
     }
   ],
+  "properties": {
+    "clave": "valor"
+  },
   "image": {
     "source": "valor-ejemplo",
     "license": "valor-ejemplo",
@@ -924,6 +927,7 @@ Campos de la respuesta:
 | `relations[].conceptId` | Sí | `string` | formato `uuid` | Id del concepto destino. | `00000000-0000-4000-8000-000000000001` |
 | `relations[].slug` | Sí | `string` | Sin restricción adicional declarada | Slug del término destino. | `valor-ejemplo` |
 | `relations[].display` | Sí | `string` | Sin restricción adicional declarada | Denominación del término destino (EN, `CatalogConcepts.display`). | `valor-ejemplo` |
+| `properties` | Sí | `object` | Sin restricción adicional declarada | Propiedades declaradas del concepto, indexadas por su código. Es donde cada code system guarda lo suyo sin que el modelo tenga que declarar una columna por vocabulario: el vademécum publica acá `dose_forms`, `strengths` y `routes` —lo que la pantalla de receta necesita para que el profesional elija presentación y concentración en vez de teclearlas—, y también `rxnorm_cui` o `snomed_code` para cruzar con otros catálogos. Se devuelve como mapa `código -> valor` y no como lista de pares porque se consume por nombre (`properties.strengths`), nunca recorriéndolo. El valor es el `value_json` tal como se guardó: un texto, una lista o un objeto, según lo que declare cada propiedad. Va sólo en la ficha, no en la búsqueda: son varias filas por concepto y traerlas para cada resultado de un autocompletar es peso que la lista no usa. | `{"clave":"valor"}` |
 | `image` | No | `ConceptImageDto` | Sin restricción adicional declarada | Imagen ilustrativa. Siempre ausente hoy (ver ); el campo existe para que un carril futuro pueda adjuntar una sin romper el contrato. | `{"source":"valor-ejemplo","license":"valor-ejemplo","attribution":"valor-ejemplo","alt":"valor-ejemplo","status":"approved"}` |
 | `image.source` | No | `string` | Sin restricción adicional declarada | URL o referencia del activo. | `valor-ejemplo` |
 | `image.license` | No | `string` | Sin restricción adicional declarada | Licencia bajo la que se usa la imagen. | `valor-ejemplo` |

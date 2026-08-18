@@ -22124,6 +22124,90 @@
         ],
         "description": "Guardar un bookmark en una colección. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       },
+      "delete": {
+        "operationId": "CommunitySocialController_unbookmark",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "query",
+            "description": "Perfil dueño del marcador",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "bookmarkableType",
+            "required": true,
+            "in": "query",
+            "description": "Tipo de objeto",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "POST",
+                "COMMENT",
+                "REVIEW"
+              ]
+            }
+          },
+          {
+            "name": "bookmarkableRefId",
+            "required": true,
+            "in": "query",
+            "description": "Id del objeto",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "collectionName",
+            "required": false,
+            "in": "query",
+            "description": "Colección a la que acotar el borrado",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Quitar un marcador",
+        "tags": [
+          "community-social"
+        ],
+        "description": "Quitar un marcador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "get": {
         "operationId": "CommunitySocialController_listBookmarks",
         "parameters": [
@@ -22246,6 +22330,82 @@
         ],
         "description": "Seguir un objeto social. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       },
+      "delete": {
+        "operationId": "CommunitySocialController_unfollow",
+        "parameters": [
+          {
+            "name": "followerProfileId",
+            "required": true,
+            "in": "query",
+            "description": "Perfil que deja de seguir",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "followableType",
+            "required": true,
+            "in": "query",
+            "description": "Tipo de objeto seguido",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PROFILE",
+                "TOPIC",
+                "HASHTAG",
+                "GROUP"
+              ]
+            }
+          },
+          {
+            "name": "followableRefId",
+            "required": true,
+            "in": "query",
+            "description": "Id del objeto seguido",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dejar de seguir un objeto social",
+        "tags": [
+          "community-social"
+        ],
+        "description": "Dejar de seguir un objeto social. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "get": {
         "operationId": "CommunitySocialController_listFollows",
         "parameters": [
@@ -22359,6 +22519,67 @@
           "community-social"
         ],
         "description": "Bloquear a un usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "CommunitySocialController_unblock",
+        "parameters": [
+          {
+            "name": "blockerProfileId",
+            "required": true,
+            "in": "query",
+            "description": "Perfil que bloqueó",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "blockedProfileId",
+            "required": true,
+            "in": "query",
+            "description": "Perfil bloqueado",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Levantar un bloqueo",
+        "tags": [
+          "community-social"
+        ],
+        "description": "Levantar un bloqueo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "get": {
         "operationId": "CommunitySocialController_listBlocks",
@@ -32061,6 +32282,50 @@
       }
     },
     "/forms/definition-sets": {
+      "get": {
+        "operationId": "FormsDefinitionSetsController_listDefinitionSets",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los sets de definiciones visibles",
+        "tags": [
+          "forms-definition-sets"
+        ],
+        "description": "Listar los sets de definiciones visibles. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "post": {
         "operationId": "FormsDefinitionSetsController_createDefinitionSet",
         "parameters": [],
@@ -32113,6 +32378,54 @@
           "forms-definition-sets"
         ],
         "description": "Definir un set de campos dinámicos y su versión inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/forms/definition-sets/{id}": {
+      "get": {
+        "operationId": "FormsDefinitionSetsController_getDefinitionSet",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones",
+        "tags": [
+          "forms-definition-sets"
+        ],
+        "description": "Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/forms/definition-sets/{id}/versions/{ver}/publish": {
@@ -32530,6 +32843,77 @@
       }
     },
     "/forms/assignments": {
+      "get": {
+        "operationId": "FormsAssignmentsController_listAssignments",
+        "parameters": [
+          {
+            "name": "targetResourceConceptId",
+            "required": false,
+            "in": "query",
+            "description": "Acotar por target",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fieldId",
+            "required": false,
+            "in": "query",
+            "description": "Acotar por campo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sectionId",
+            "required": false,
+            "in": "query",
+            "description": "Acotar por sección",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar asignaciones de campo (globales y del tenant)",
+        "tags": [
+          "forms-assignments"
+        ],
+        "description": "Listar asignaciones de campo (globales y del tenant). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "post": {
         "operationId": "FormsAssignmentsController_createAssignment",
         "parameters": [],
@@ -32585,6 +32969,59 @@
       }
     },
     "/forms/instances": {
+      "get": {
+        "operationId": "FormsInstancesController_listInstances",
+        "parameters": [
+          {
+            "name": "encounter",
+            "required": true,
+            "in": "query",
+            "description": "Encuentro cuyos formularios se listan",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las instancias de formulario de un encuentro",
+        "tags": [
+          "forms-instances"
+        ],
+        "description": "Listar las instancias de formulario de un encuentro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
       "post": {
         "operationId": "FormsInstancesController_openInstance",
         "parameters": [],
@@ -32637,6 +33074,54 @@
           "forms-instances"
         ],
         "description": "Abrir una instancia de formulario para un recurso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/forms/instances/{id}": {
+      "get": {
+        "operationId": "FormsInstancesController_getInstance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Leer una instancia con sus valores vigentes, por tipo resuelto",
+        "tags": [
+          "forms-instances"
+        ],
+        "description": "Leer una instancia con sus valores vigentes, por tipo resuelto. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/forms/instances/{id}/values": {

@@ -9,7 +9,7 @@
 # Módulo `common`
 
 **Fuente:** [`src/modules/common/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/common/README.md)
-· 5 controllers · 5 services · 7 repositories · 7 entidades · 4 DTO
+· 5 controllers · 6 services · 7 repositories · 7 entidades · 4 DTO
 
 ---
 
