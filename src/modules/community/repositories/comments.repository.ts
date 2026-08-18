@@ -151,16 +151,19 @@ export class CommentsRepository {
     activeStatusConceptId: string,
   ): Promise<{ commentableRefId: string; count: number }[]> {
     if (commentableRefIds.length === 0) return [];
+    // Un marcador por id: el driver no traduce un arreglo de JavaScript a un
+    // arreglo de Postgres. Ver la nota en `ReactionsRepository`.
+    const marcadores = commentableRefIds.map(() => '?').join(', ');
     const rows = await em
       .getConnection()
       .execute<Array<{ commentable_ref_id: string; count: number }>>(
         `select commentable_ref_id, count(*)::int as count
            from community.comments
           where commentable_type_concept_id=?
-            and commentable_ref_id = any(?)
+            and commentable_ref_id in (${marcadores})
             and status_concept_id=?
           group by commentable_ref_id`,
-        [commentableTypeConceptId, commentableRefIds, activeStatusConceptId],
+        [commentableTypeConceptId, ...commentableRefIds, activeStatusConceptId],
         'all',
       );
 
