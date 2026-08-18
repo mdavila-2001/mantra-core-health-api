@@ -35,6 +35,11 @@ function build() {
   const conversionsRepo = { findExisting: mockFn(), create: mockFn() };
   const subjectsRepo = { findById: mockFn() };
   const consentsRepo = { findLatest: mockFn() };
+  const webAnalytics = {
+    trackActivityEvents: mockFn(),
+    trackWebVitals: mockFn(),
+    trackConversion: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new TelemetryEventsService(
@@ -49,6 +54,7 @@ function build() {
     conversionsRepo,
     subjectsRepo as any,
     consentsRepo as any,
+    webAnalytics as any,
     logger as any,
   );
   return {
@@ -64,6 +70,7 @@ function build() {
     conversionsRepo,
     subjectsRepo,
     consentsRepo,
+    webAnalytics,
   };
 }
 
@@ -121,6 +128,51 @@ describe('TelemetryEventsService', () => {
       expect(res.inserted).toBe(0);
       expect(res.skipped).toBe(1);
       expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      // Lo que el gate descarta tampoco puede salir hacia la analítica externa.
+      expect(d.webAnalytics.trackActivityEvents).toHaveBeenCalledWith([], {
+        tenantId: undefined,
+      });
+    });
+
+    it('forwards what it persisted to the web analytics adapter', async () => {
+      const d = build();
+      d.schemasRepo.findById.mockResolvedValue({
+        id: 's1',
+        eventName: 'page_view',
+        purposeDefinitionId: 'p1',
+        portalTypeConceptId: TELE.PORTAL_WEB,
+      });
+      d.journeysRepo.create.mockReturnValue({ id: 'j1', eventCount: 0 });
+      d.eventsRepo.create.mockReturnValue({ id: 'e1' });
+
+      await d.service.captureActivityEvents({
+        events: [
+          {
+            eventSchemaDefinitionId: 's1',
+            sessionId: 'sess-1',
+            tenantId: 't1',
+            analyticsSubjectId: 'subj-1',
+            routeTemplate: '/doctores/:id',
+            occurredAt: '2026-08-17T10:00:00.000Z',
+            properties: [{ propertyName: 'specialty', valueString: 'cardio' }],
+          },
+        ],
+      });
+
+      expect(d.webAnalytics.trackActivityEvents).toHaveBeenCalledWith(
+        [
+          {
+            eventName: 'page_view',
+            analyticsSubjectId: 'subj-1',
+            sessionJourneyId: 'j1',
+            routeTemplate: '/doctores/:id',
+            occurredAt: new Date('2026-08-17T10:00:00.000Z'),
+            consentGranted: false,
+            properties: { specialty: 'cardio' },
+          },
+        ],
+        { tenantId: 't1' },
+      );
     });
 
     it('404 when a schema is missing', async () => {
@@ -172,6 +224,9 @@ describe('TelemetryEventsService', () => {
       });
       expect(res.inserted).toBe(2);
       expect(res.ids).toEqual(['w1', 'w2']);
+      const [forwarded] = d.webAnalytics.trackWebVitals.mock.calls[0];
+      expect(forwarded).toHaveLength(2);
+      expect(forwarded[0]).toMatchObject({ metric: 'LCP', metricValue: 1200 });
     });
 
     it('404 when a referenced journey is missing', async () => {
@@ -188,7 +243,11 @@ describe('TelemetryEventsService', () => {
   describe('recordConversion (UC-28-11)', () => {
     it('records a conversion and marks the journey converted', async () => {
       const d = build();
-      d.funnelsRepo.findById.mockResolvedValue({ id: 'f1' });
+      d.funnelsRepo.findById.mockResolvedValue({
+        id: 'f1',
+        funnelCode: 'appointment_booked',
+        versionNumber: 2,
+      });
       d.subjectsRepo.findById.mockResolvedValue({ id: 's1' });
       d.conversionsRepo.findExisting.mockResolvedValue(null);
       d.conversionsRepo.create.mockReturnValue({
@@ -209,6 +268,35 @@ describe('TelemetryEventsService', () => {
       });
       expect(res.id).toBe('cv1');
       expect(journey.journeyStatusConceptId).toBe(TELE.JOURNEY_CONVERTED);
+      expect(d.webAnalytics.trackConversion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          funnelCode: 'appointment_booked',
+          funnelVersion: 2,
+          analyticsSubjectId: 's1',
+          sessionJourneyId: 'j1',
+        }),
+      );
+    });
+
+    it('does not re-forward an already recorded conversion', async () => {
+      const d = build();
+      d.funnelsRepo.findById.mockResolvedValue({ id: 'f1' });
+      d.subjectsRepo.findById.mockResolvedValue({ id: 's1' });
+      d.conversionsRepo.findExisting.mockResolvedValue({
+        id: 'cv1',
+        funnelDefinitionId: 'f1',
+        analyticsSubjectId: 's1',
+        createdAt: new Date(),
+      });
+
+      const res = await d.service.recordConversion({
+        funnelDefinitionId: 'f1',
+        analyticsSubjectId: 's1',
+      });
+
+      expect(res.id).toBe('cv1');
+      // GA4 no deduplica eventos clave: reenviarla contaría dos conversiones.
+      expect(d.webAnalytics.trackConversion).not.toHaveBeenCalled();
     });
 
     it('404 when the funnel is missing', async () => {

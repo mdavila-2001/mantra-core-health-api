@@ -88,6 +88,7 @@ import { SurveysModule } from './modules/surveys/surveys.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
+import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -118,6 +119,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
         .concat(telemetryEnvSchema)
+        .concat(webAnalyticsEnvSchema)
         .concat(verificationBypassEnvSchema)
         .concat(seedBootEnvSchema),
     }),
