@@ -2,6 +2,14 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
+// Carril P2: enviar un mensaje avisa al destinatario por el canal in-app de P1.
+// `MessagingModule` exporta `NotificationsService` justamente para esto, y no
+// hay ciclo: `messaging` no sabe nada de `community`.
+import { MessagingModule } from '../messaging/messaging.module';
+// El vínculo persona ↔ cuenta, para resolver a qué usuario avisarle. Se provee
+// el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
+// `clinical`: es una clase sin estado que recibe el `EntityManager`.
+import { PersonAccountLinksRepository } from '../profiles/repositories';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -28,6 +36,7 @@ import {
   CommunitySocialReadService,
   CommunityTimelineReadService,
   CommunityMessagingReadService,
+  CommunityMessageNotificationsService,
   CommunityGroupsReadService,
   CommunityPollsReadService,
   CommunityReviewsReadService,
@@ -64,7 +73,11 @@ import {
   // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
   // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
   // manda el cliente.
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), CommonModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    CommonModule,
+    MessagingModule,
+  ],
   controllers: [
     CommunitySocialController,
     CommunityMessagingController,
@@ -97,9 +110,11 @@ import {
     CommunityFeedbackRepository,
     CommunityPrestigeRepository,
     PublicSearchRepository,
+    PersonAccountLinksRepository,
     // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
+    CommunityMessageNotificationsService,
     CommunityModerationService,
     CommunityReviewsService,
     CommunityGroupsService,
