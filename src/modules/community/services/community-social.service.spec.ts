@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import { CommunitySocialService } from './community-social.service';
+import { AttachableFileService } from '../../common/services';
 import {
   CONCEPTS,
   ConflictException,
@@ -84,6 +85,14 @@ function build() {
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // El servicio compartido va **de verdad**, no doblado: la regla que interesa
+  // acá es la que corre en producción, y sus casos siguen escribiéndose contra
+  // los repositorios como antes de extraerla.
+  const attachableFiles = new AttachableFileService(
+    filesRepo as any,
+    fileVersionsRepo as any,
+    logger as any,
+  );
 
   const service = new CommunitySocialService(
     em as any,
@@ -95,8 +104,7 @@ function build() {
     followsRepo as any,
     blocksRepo as any,
     visibility as any,
-    filesRepo as any,
-    fileVersionsRepo as any,
+    attachableFiles,
     logger as any,
   );
   return {

@@ -10,6 +10,7 @@ import {
 } from './controllers';
 import {
   AddressesService,
+  AttachableFileService,
   ContactPointsService,
   FileUploadService,
   FilesService,
@@ -45,6 +46,7 @@ import {
     AddressesService,
     FilesService,
     FileUploadService,
+    AttachableFileService,
     IdentifiersRepository,
     ContactPointsRepository,
     AddressesRepository,
@@ -55,14 +57,16 @@ import {
   ],
   // Documento de identidad y correo del auto-registro de pacientes los escribe
   // IAM dentro de su propia transacción, así que necesita estos repositorios.
-  // `FilesRepository` sale por la misma razón: Community valida dentro de su
-  // transacción que el archivo que un post pretende adjuntar exista y sea de
-  // quien publica, y esa comprobación no puede vivir en otro dominio.
+  // `AttachableFileService` sale por la misma razón: quien adjunta un archivo
+  // —el muro social a una publicación, `profiles` a la foto del profesional—
+  // tiene que poder comprobar dentro de su propia transacción que ese archivo
+  // existe y es de quien lo adjunta.
   exports: [
     IdentifiersRepository,
     ContactPointsRepository,
     FilesRepository,
     FileVersionsRepository,
+    AttachableFileService,
   ],
 })
 export class CommonModule {}

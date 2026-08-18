@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -18,10 +18,7 @@ import {
   FollowsRepository,
   BlocksRepository,
 } from '../repositories';
-import {
-  FileVersionsRepository,
-  FilesRepository,
-} from '../../common/repositories';
+import { AttachableFileService } from '../../common/services';
 import {
   COMM,
   REACTION_CONCEPT_BY_CODE,
@@ -115,8 +112,7 @@ export class CommunitySocialService {
    * @param followsRepo - Valor de follows repo requerido por la operación.
    * @param blocksRepo - Valor de blocks repo requerido por la operación.
    * @param visibility - Propiedad del perfil con el que se firma la escritura.
-   * @param filesRepo - Acceso a `common.files` para validar la media adjunta.
-   * @param fileVersionsRepo - Acceso a `common.file_versions` para el estado de escaneo.
+   * @param attachableFiles - La regla compartida de qué archivo se puede adjuntar.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -129,8 +125,7 @@ export class CommunitySocialService {
     private readonly followsRepo: FollowsRepository,
     private readonly blocksRepo: BlocksRepository,
     private readonly visibility: CommunityVisibilityService,
-    private readonly filesRepo: FilesRepository,
-    private readonly fileVersionsRepo: FileVersionsRepository,
+    private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunitySocialService.name);
@@ -309,66 +304,32 @@ export class CommunitySocialService {
   /**
    * Comprueba que un archivo puede adjuntarse a un post de este autor.
    *
-   * `post_media.file_id` es una FK a `common.files` y nada más: sin esta
-   * comprobación, cualquier usuario autenticado que conociera o enumerara el
-   * uuid de un archivo ajeno —la evidencia de identidad de otro, un adjunto
-   * clínico— podía colgarlo de un post propio y publicarlo. La FK sólo garantiza
-   * que la fila existe, no que sea suya ni que esté en condiciones de mostrarse.
-   *
-   * El escaneo pendiente **no** bloquea: en este despliegue no hay antivirus
-   * cableado y exigir `SCAN_CLEAN` dejaría toda la media inservible. Se rechaza
-   * lo que se sabe infectado, que es lo que hoy se puede afirmar.
+   * La regla —existe, es de quien publica, sigue vivo, tiene versión vigente y
+   * esa versión no está marcada infectada— vive en
+   * {@link AttachableFileService}, porque la foto del perfil profesional exige
+   * exactamente la misma y una regla de seguridad duplicada termina divergiendo.
+   * Acá queda sólo lo que es propio de la publicación: cómo se llama el archivo
+   * en los mensajes y bajo qué operación se registra el rechazo.
    *
    * @param tx - Transacción activa de la publicación.
    * @param fileId - Archivo que el cliente pretende adjuntar.
    * @param actor - Usuario autenticado que publica.
-   * @throws ResourceNotFoundException si el archivo no existe.
-   * @throws ForbiddenException si el archivo lo subió otro usuario.
-   * @throws PreconditionFailedException si está borrado, no tiene versión
-   *   vigente o esa versión resultó infectada.
    */
   private async assertMediaFileUsableBy(
     tx: EntityManager,
     fileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    const file = await this.filesRepo.findById(tx, fileId);
-    if (!file) {
-      throw new ResourceNotFoundException('Archivo adjunto no encontrado', {
-        fileId,
-      });
-    }
-    if (file.createdByUserId !== actor.id) {
-      this.logger.warn(
-        { operation: 'community.post.publish', fileId, actorId: actor.id },
-        'Refused to attach a file uploaded by someone else',
-      );
-      throw new ForbiddenException('El archivo adjunto no le pertenece');
-    }
-    if (
-      file.deletedAt ||
-      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
-    ) {
-      throw new PreconditionFailedException('El archivo adjunto está borrado', {
-        fileId,
-      });
-    }
-    if (!file.currentVersionId) {
-      throw new PreconditionFailedException(
-        'El archivo adjunto no tiene una versión vigente',
-        { fileId },
-      );
-    }
-    const version = await this.fileVersionsRepo.findById(
+    await this.attachableFiles.assertUsableBy(
       tx,
-      file.currentVersionId,
+      fileId,
+      actor,
+      { operation: 'community.post.publish' },
+      {
+        subject: 'El archivo adjunto',
+        notFound: 'Archivo adjunto no encontrado',
+      },
     );
-    if (version?.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED) {
-      throw new PreconditionFailedException(
-        'El archivo adjunto resultó infectado',
-        { fileId },
-      );
-    }
   }
 
   /** UC-19-01: publica un post con hashtags, media y menciones. */
