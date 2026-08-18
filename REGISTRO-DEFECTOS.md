@@ -98,6 +98,31 @@ módulo revienta con `relation "surveys.*" does not exist` (F-14 fue el primero 
 usuario). Misma familia que `audio_assets` (módulo 64). Sale por el camino canónico —`.puml`
 → `gen_ddl.py` → patch → `rebuild_stack.py`— y es de Marcelo (M4); mientras tanto la
 lectura del paciente degrada a `200 []` (R-7).
+**CERRADO el 18/08**: módulo 65 promovido a las 4 capas (`diagram_65_surveys.puml`,
+`SQL/65_surveys/`, patch `2026-08-18_v4011_surveys_promocion_modulo_65.sql`, catálogo ORM).
+`rebuild_stack.py --yes` → **PASS**: tablas 1 185 → **1 192**, FKs 6 669 → **6 705**,
+índices 9 130 → **9 154**. El degradado a `200 []` se retiró junto con el bloqueante.
+
+**B-8 · El schema `pharma_lab` no existe en ninguna base construida por el pipeline — y son
+31 entidades, no 7.** Mismo defecto que B-7 y `audio_assets`, un orden de magnitud más
+grande. El módulo (carril 17, spec 5667-5702) vive **solo en el código**:
+`src/modules/pharma_lab/` tiene 31 entidades MikroORM, 13 controladores y **47 rutas que la
+app mapea al arrancar**, pero no hay `diagram_XX_pharma_lab.puml` ni carpeta en `SQL/`, y
+`schemas.catalog.ts` lo declara con módulo **`null`** — la misma firma que tenía `surveys`
+antes de promoverse. Verificado el 18/08 arrancando con `ORM_SCHEMA_SYNC=dry-run` contra la
+base recién reconstruida: `Deriva detectada … 69 diferencias (tabla-ausente=45,
+obligatoriedad-divergente=24)`, de las cuales **15 visibles son de `pharma_lab`** y 4 más son
+sus tablas de historia en `audit` (`pharma_lab_staff_history`, `pharma_products_history`,
+`regulatory_documents_history`, `visit_requests_history`); el schema **no figura** en la
+lista de `information_schema.schemata`. Las 47 rutas responden 500 contra cualquier base del
+pipeline. Sale por el camino canónico y es de Marcelo (M4) — **es un carril propio, no una
+tarea suelta**.
+
+> **Ojo al citar la deriva conocida:** la cifra de «6 diferencias (tabla-ausente=6)» que
+> repiten `CLAUDE.md` y los documentos de arquitectura **quedó vieja**. Medida hoy contra
+> base limpia es **69**: las 6 entidades fantasma de siempre + `pharma_lab` (B-8) + 24
+> `obligatoriedad-divergente` sin triar. Ese número es el que hay que usar como referencia
+> hasta que B-8 se cierre.
 
 ---
 
