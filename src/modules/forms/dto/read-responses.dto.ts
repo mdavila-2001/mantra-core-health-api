@@ -569,6 +569,16 @@ export class FieldValueItemDto {
   dataType?: string;
 
   /**
+   * Nombre legible del campo.
+   */
+  @ApiPropertyOptional({
+    nullable: true,
+    description:
+      'Nombre del campo, si su definición sigue existiendo. Es la etiqueta con que una pantalla sin acceso a las plantillas puede re-pintar el valor',
+  })
+  fieldName?: string;
+
+  /**
    * Valor de value mantenido por la instancia.
    */
   @ApiPropertyOptional({
@@ -616,6 +626,34 @@ export class FieldValueItemDto {
       'true si el campo tiene una regla de acceso activa que hoy no puede evaluarse: el valor no se expone (deny-by-default)',
   })
   masked!: boolean;
+}
+
+/**
+ * Listado del autoservicio del paciente: sus instancias, de todos sus
+ * encuentros del tenant activo. Sin `encounterId`: acá no se filtra por un
+ * encuentro elegido sino por la titularidad de la sesión.
+ */
+export class MyFormInstanceListResponseDto {
+  /**
+   * Valor de items mantenido por la instancia.
+   */
+  @ApiProperty({ type: [FormInstanceItemDto] })
+  items!: FormInstanceItemDto[];
+
+  /**
+   * Tope aplicado a la consulta.
+   */
+  @ApiProperty({ description: 'Tope aplicado al listado' })
+  limit!: number;
+
+  /**
+   * Valor de truncated mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'true si quedaron instancias fuera del tope. Se declara, no se calla',
+  })
+  truncated!: boolean;
 }
 
 /** El detalle de una instancia con sus valores vigentes. */

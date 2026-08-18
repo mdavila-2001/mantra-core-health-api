@@ -213,10 +213,22 @@ export class ChartTemplatesService {
     );
   }
 
-  /** El esquema completo de una plantilla, por id. */
-  async getTemplate(id: string): Promise<ChartTemplateResponseDto> {
+  /**
+   * El esquema completo de una plantilla, por id.
+   *
+   * Mismo aislamiento que el listado: se sirven las globales (sin tenant) y
+   * las del tenant del actor. La de otra organización responde **404 y no
+   * 403**: confirmar que ese uuid existe ya filtra información.
+   *
+   * @param id - Identificador de la plantilla.
+   * @param tenantId - Tenant del actor, si el contexto lo fijó.
+   */
+  async getTemplate(
+    id: string,
+    tenantId?: string,
+  ): Promise<ChartTemplateResponseDto> {
     const template = await this.templatesRepo.findTemplateById(this.em, id);
-    if (!template) {
+    if (!template || (template.tenantId && template.tenantId !== tenantId)) {
       throw new ResourceNotFoundException('Plantilla no encontrada', { id });
     }
     const schema = await this.resolveSchema(template.sectionId);

@@ -17,14 +17,21 @@ import {
 
 const TENANT = 'tenant-1';
 
+/** Una sesión con perfil de paciente, para el autoservicio. */
+const PACIENTE = { id: 'u-1', patientProfileId: 'pp-1' } as any;
+
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
 function build() {
   // La lectura trabaja sobre un fork del EntityManager; el fork expone el
-  // findOne con que el service ancla el encuentro de la instancia.
-  const emFork = { findOne: mockFn().mockResolvedValue(null) };
+  // findOne con que el service ancla el encuentro de la instancia y el find
+  // con que el autoservicio junta los encuentros del paciente.
+  const emFork = {
+    findOne: mockFn().mockResolvedValue(null),
+    find: mockFn().mockResolvedValue([]),
+  };
   const em = { fork: mockFn(() => emFork) };
   const setsRepo = {
     findSetById: mockFn(),
@@ -46,6 +53,7 @@ function build() {
   const instancesRepo = {
     findById: mockFn(),
     findByResourceId: mockFn().mockResolvedValue([]),
+    findByResourceIds: mockFn().mockResolvedValue([]),
   };
   const valuesRepo = { findCurrentByInstance: mockFn().mockResolvedValue([]) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -387,6 +395,194 @@ describe('FormsReadService', () => {
       expect(sensible.value).toBeNull();
       expect(libre.masked).toBe(false);
       expect(libre.value).toBe('ok');
+    });
+  });
+
+  describe('listMyInstances', () => {
+    it('rejects a session without a patient profile', async () => {
+      const d = build();
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.listMyInstances({ id: 'u-staff' } as any, 50),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('requires a tenant in the context', async () => {
+      const d = build();
+      await expect(
+        d.service.listMyInstances(PACIENTE, 50),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('lists only the instances anchored to the patient own encounters', async () => {
+      const d = build();
+      d.emFork.find.mockResolvedValue([{ id: 'enc-1' }, { id: 'enc-2' }]);
+      d.instancesRepo.findByResourceIds.mockResolvedValue([
+        {
+          id: 'i1',
+          resourceId: 'enc-1',
+          resourceTypeConceptId: FORMS.RESOURCE_TYPE_PATIENT,
+          schemaVersion: 1,
+          createdAt: new Date('2026-01-03'),
+        },
+      ]);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.listMyInstances(PACIENTE, 50),
+      );
+
+      // Los encuentros se buscan por el claim de la sesión y el tenant activo:
+      // el perfil jamás llega por parámetro.
+      expect(d.emFork.find).toHaveBeenCalledWith(expect.anything(), {
+        patientProfileId: 'pp-1',
+        tenantId: TENANT,
+      });
+      // Y las instancias, en un solo lote sobre esos encuentros.
+      expect(d.instancesRepo.findByResourceIds).toHaveBeenCalledWith(
+        d.emFork,
+        ['enc-1', 'enc-2'],
+        51,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].id).toBe('i1');
+      expect(res.truncated).toBe(false);
+    });
+
+    it('declares the cut instead of hiding it', async () => {
+      const d = build();
+      d.emFork.find.mockResolvedValue([{ id: 'enc-1' }]);
+      d.instancesRepo.findByResourceIds.mockResolvedValue([
+        { id: 'i1', resourceId: 'enc-1', createdAt: new Date() },
+        { id: 'i2', resourceId: 'enc-1', createdAt: new Date() },
+      ]);
+      const res = await runWithTenant(TENANT, () =>
+        d.service.listMyInstances(PACIENTE, 1),
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.truncated).toBe(true);
+    });
+
+    it('a patient without encounters gets an empty list, not an error', async () => {
+      const d = build();
+      const res = await runWithTenant(TENANT, () =>
+        d.service.listMyInstances(PACIENTE, 50),
+      );
+      expect(res.items).toEqual([]);
+      expect(res.truncated).toBe(false);
+    });
+  });
+
+  describe('getMyInstance', () => {
+    /** Instancia cuyo encuentro es del paciente de la sesión y del tenant. */
+    function conInstanciaDelPaciente(d: ReturnType<typeof build>) {
+      d.instancesRepo.findById.mockResolvedValue({
+        id: 'i1',
+        resourceId: 'enc-1',
+        resourceTypeConceptId: FORMS.RESOURCE_TYPE_PATIENT,
+        schemaVersion: 1,
+        stateConceptId: FORMS.INSTANCE_CLOSED,
+        createdAt: new Date('2026-01-03'),
+      });
+      d.emFork.findOne.mockResolvedValue({
+        id: 'enc-1',
+        tenantId: TENANT,
+        patientProfileId: 'pp-1',
+      });
+    }
+
+    it('rejects a session without a patient profile', async () => {
+      const d = build();
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.getMyInstance('i1', { id: 'u-staff' } as any),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('throws 404 when the instance does not exist', async () => {
+      const d = build();
+      d.instancesRepo.findById.mockResolvedValue(null);
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.getMyInstance('missing', PACIENTE),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('fails closed when the resource does not resolve to an encounter', async () => {
+      const d = build();
+      d.instancesRepo.findById.mockResolvedValue({
+        id: 'i1',
+        resourceId: 'no-es-encuentro',
+      });
+      d.emFork.findOne.mockResolvedValue(null);
+      await expect(
+        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PACIENTE)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('hides the instance of another patient behind the same 404', async () => {
+      const d = build();
+      d.instancesRepo.findById.mockResolvedValue({
+        id: 'i1',
+        resourceId: 'enc-1',
+      });
+      d.emFork.findOne.mockResolvedValue({
+        id: 'enc-1',
+        tenantId: TENANT,
+        patientProfileId: 'pp-otra-persona',
+      });
+      await expect(
+        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PACIENTE)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('hides the instance of another tenant behind the same 404', async () => {
+      const d = build();
+      d.instancesRepo.findById.mockResolvedValue({
+        id: 'i1',
+        resourceId: 'enc-1',
+      });
+      d.emFork.findOne.mockResolvedValue({
+        id: 'enc-1',
+        tenantId: 'tenant-ajeno',
+        patientProfileId: 'pp-1',
+      });
+      await expect(
+        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PACIENTE)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('serves the own instance with its values, names and masking applied', async () => {
+      const d = build();
+      conInstanciaDelPaciente(d);
+      d.valuesRepo.findCurrentByInstance.mockResolvedValue([
+        { id: 'v1', fieldId: 'f-sensible', ordinal: 0, valueString: 'VIH+' },
+        { id: 'v2', fieldId: 'f-libre', ordinal: 1, valueString: 'ok' },
+      ]);
+      d.fieldsRepo.findFieldsByIds.mockResolvedValue([
+        { id: 'f-sensible', name: 'Serología', dataType: 'string' },
+        { id: 'f-libre', name: 'Tolerancia', dataType: 'string' },
+      ]);
+      d.fieldsRepo.findActiveAccessRulesByFieldIds.mockResolvedValue([
+        { id: 'ar1', fieldId: 'f-sensible' },
+      ]);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.getMyInstance('i1', PACIENTE),
+      );
+
+      const sensible = res.values.find((v) => v.fieldId === 'f-sensible')!;
+      const libre = res.values.find((v) => v.fieldId === 'f-libre')!;
+      // El enmascarado no cede en el autoservicio: valor omitido, jamás 'VIH+'.
+      expect(sensible.masked).toBe(true);
+      expect(sensible.value).toBeNull();
+      // La etiqueta sí viaja: lo protegido es el contenido, no el campo.
+      expect(sensible.fieldName).toBe('Serología');
+      expect(libre.masked).toBe(false);
+      expect(libre.value).toBe('ok');
+      expect(libre.fieldName).toBe('Tolerancia');
     });
   });
 
