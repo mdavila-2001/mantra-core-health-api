@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { decodeKeysetCursor, encodeKeysetCursor } from '../../../common';
+import {
+  decodeKeysetCursor,
+  encodeKeysetCursor,
+  requireTenantId,
+} from '../../../common';
 import { ModerationRepository } from '../repositories';
 import {
   APPEAL_STATUS_BY_CODE,
@@ -69,6 +73,12 @@ export class CommunityModerationReadService {
   /**
    * Página de la cola de moderación, con su contexto de reporte.
    *
+   * Se acota al tenant del contexto: `SECURITY_ADMIN` es un rol global de
+   * plataforma, así que sin esto un moderador veía el contenido reportado de
+   * todas las organizaciones. Si el request no fijó tenant, `requireTenantId()`
+   * lo dice (422) en vez de devolver una página vacía, que sería mentir sobre
+   * el motivo.
+   *
    * @param query - Filtros, cursor y tope.
    * @param limit - Tope efectivo ya resuelto por el controlador.
    * @returns Página de entradas con el reporte que las originó.
@@ -77,6 +87,7 @@ export class CommunityModerationReadService {
     query: ModerationQueueQueryDto,
     limit: number,
   ): Promise<ModerationQueuePageDto> {
+    const tenantId = requireTenantId();
     const em = this.em.fork();
 
     const after = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
@@ -88,6 +99,7 @@ export class CommunityModerationReadService {
     // Una fila de más para saber si hay página siguiente sin contar la tabla.
     const rows = await this.moderationRepo.listQueuePage(
       em,
+      tenantId,
       {
         statusConceptIds: query.status?.map(
           (code) => QUEUE_STATUS_BY_CODE[code],
