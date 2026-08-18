@@ -68,6 +68,7 @@ function build() {
     // Carril P1 · la bandeja y la emisión in-app.
     findActiveChannelByType: mockFn(() => Promise.resolve(null)),
     findPreferences: mockFn(() => Promise.resolve([])),
+    createPreference: mockFn(() => ({ id: 'pref-1' })),
     listInAppPage: mockFn(() => Promise.resolve([])),
     countUnreadInApp: mockFn(() => Promise.resolve(0)),
     findUnreadInApp: mockFn(() => Promise.resolve([])),
@@ -205,7 +206,13 @@ describe('NotificationsService', () => {
     it('suppresses but still records when the recipient opted out', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-      d.notificationsRepo.findPreference.mockResolvedValue({ optedIn: false });
+      // Carril P9: el emisor lee **todas** las preferencias del canal y elige
+      // la fila que corresponde. Antes leía sólo la de la categoría, y por eso
+      // la ventana de silencio —que vive en la fila sin categoría— no se
+      // aplicaba nunca.
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        { categoryConceptId: CATEGORY, optedIn: false },
+      ]);
 
       const res = await d.service.createRequest(dto, actor);
 
@@ -220,10 +227,13 @@ describe('NotificationsService', () => {
     it('suppresses inside the recipient quiet hours', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-      d.notificationsRepo.findPreference.mockResolvedValue({
-        optedIn: true,
-        quietHoursJson: { start: '22:00', end: '07:00' },
-      });
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: CATEGORY,
+          optedIn: true,
+          quietHoursJson: { start: '22:00', end: '07:00' },
+        },
+      ]);
 
       const res = await d.service.createRequest(
         { ...dto, scheduledAt: '2026-07-20T23:30:00.000Z' },
@@ -236,10 +246,13 @@ describe('NotificationsService', () => {
     it('delivers outside the quiet hours that cross midnight', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
-      d.notificationsRepo.findPreference.mockResolvedValue({
-        optedIn: true,
-        quietHoursJson: { start: '22:00', end: '07:00' },
-      });
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: CATEGORY,
+          optedIn: true,
+          quietHoursJson: { start: '22:00', end: '07:00' },
+        },
+      ]);
 
       const res = await d.service.createRequest(
         { ...dto, scheduledAt: '2026-07-20T12:00:00.000Z' },

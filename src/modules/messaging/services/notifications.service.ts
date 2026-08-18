@@ -29,9 +29,12 @@ import {
   InAppNotificationPageDto,
   MarkAllInAppReadResponseDto,
   MyNotificationsQueryDto,
+  MyPreferencesDto,
+  UpdateMyPreferencesDto,
   type ReceiptType,
 } from '../dto';
 import {
+  NOTIFICATION_CATEGORIES,
   NOTIFICATION_CATEGORY_BY_CONCEPT,
   NOTIFICATION_CATEGORY_CONCEPT,
   type EmitInAppInput,
@@ -737,6 +740,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       after: afterKey,
       limit: limit + 1,
       unreadStatusConceptId: CONCEPTS.INAPP_UNREAD,
+      now: new Date(),
     });
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
@@ -820,6 +824,143 @@ export class NotificationsService implements InAppNotificationEmitter {
     });
   }
 
+  /**
+   * Carril P9 · las preferencias in-app de quien pregunta.
+   *
+   * **Siempre devuelve las cuatro categorías**, haya filas o no. Quien nunca
+   * tocó nada las recibe todas en `true`, que es lo que efectivamente le pasa:
+   * `evaluateSuppression` sólo suprime cuando encuentra un `opted_in = false`.
+   * Devolver una lista vacía obligaría a la pantalla a saber cuál es el
+   * comportamiento por defecto del emisor, y esa es exactamente la clase de
+   * conocimiento duplicado que después se desincroniza.
+   *
+   * @param actor - Dueño de las preferencias.
+   * @returns Las cuatro categorías y la ventana de silencio.
+   */
+  async readMyPreferences(actor: AuthenticatedUser): Promise<MyPreferencesDto> {
+    const em = this.em.fork();
+    const channel = await this.notificationsRepo.findActiveChannelByType(
+      em,
+      CONCEPTS.CHANNEL_TYPE_IN_APP,
+      CONCEPTS.STATE_ACTIVE,
+    );
+    if (!channel) {
+      throw new PreconditionFailedException(
+        'No hay canal in-app activo: falta correr el seed de mensajería',
+        { userId: actor.id },
+      );
+    }
+
+    const filas = await this.notificationsRepo.findPreferences(
+      em,
+      actor.id,
+      channel.id,
+    );
+    const porCategoria = new Map(
+      filas
+        .filter((fila) => fila.categoryConceptId)
+        .map((fila) => [fila.categoryConceptId, fila]),
+    );
+
+    return {
+      categories: NOTIFICATION_CATEGORIES.map((category) => ({
+        category,
+        optedIn:
+          porCategoria.get(NOTIFICATION_CATEGORY_CONCEPT[category])?.optedIn ??
+          true,
+      })),
+      quietHours: this.leerHorasDeSilencio(
+        filas.find((fila) => !fila.categoryConceptId)?.quietHoursJson,
+      ),
+    };
+  }
+
+  /**
+   * Carril P9 · guarda las preferencias.
+   *
+   * Es un reemplazo **por categoría**: lo que no viene no se toca. Mandar el
+   * conjunto entero obligaría a la pantalla a reenviar decisiones que la
+   * persona no tocó, y a pisar las que hubiera cambiado en otra pestaña.
+   *
+   * La ventana de silencio vive en la fila **sin categoría**: es del canal
+   * entero. Guardarla por categoría permitiría configurar cuatro silencios
+   * distintos, que es una pantalla que nadie termina de leer y una regla que
+   * nadie sabría explicar.
+   *
+   * @param actor - Dueño de las preferencias.
+   * @param dto - Qué cambia.
+   * @returns Las preferencias ya guardadas.
+   */
+  async updateMyPreferences(
+    actor: AuthenticatedUser,
+    dto: UpdateMyPreferencesDto,
+  ): Promise<MyPreferencesDto> {
+    await this.em.transactional(async (tx) => {
+      const channel = await this.notificationsRepo.findActiveChannelByType(
+        tx,
+        CONCEPTS.CHANNEL_TYPE_IN_APP,
+        CONCEPTS.STATE_ACTIVE,
+      );
+      if (!channel) {
+        throw new PreconditionFailedException(
+          'No hay canal in-app activo: falta correr el seed de mensajería',
+          { userId: actor.id },
+        );
+      }
+
+      const filas = await this.notificationsRepo.findPreferences(
+        tx,
+        actor.id,
+        channel.id,
+      );
+
+      for (const cambio of dto.categories ?? []) {
+        const conceptId = NOTIFICATION_CATEGORY_CONCEPT[cambio.category];
+        const fila = filas.find(
+          (candidata) => candidata.categoryConceptId === conceptId,
+        );
+        if (fila) {
+          fila.optedIn = cambio.optedIn;
+          touch(fila, actor.id);
+        } else {
+          this.notificationsRepo.createPreference(tx, {
+            userId: actor.id,
+            channelId: channel.id,
+            categoryConceptId: conceptId,
+            optedIn: cambio.optedIn,
+            actorUserId: actor.id,
+          });
+        }
+      }
+
+      // `undefined` significa «no la toques»; `null`, «quitala».
+      if (dto.quietHours !== undefined) {
+        const valor =
+          dto.quietHours === null
+            ? undefined
+            : { start: dto.quietHours.start, end: dto.quietHours.end };
+        const fila = filas.find((candidata) => !candidata.categoryConceptId);
+        if (fila) {
+          fila.quietHoursJson = valor;
+          touch(fila, actor.id);
+        } else {
+          this.notificationsRepo.createPreference(tx, {
+            userId: actor.id,
+            channelId: channel.id,
+            // Sin categoría: gobierna el canal entero.
+            optedIn: true,
+            quietHoursJson: valor,
+            actorUserId: actor.id,
+          });
+        }
+      }
+
+      await tx.flush();
+    });
+
+    return this.readMyPreferences(actor);
+  }
+
   // --- Apoyo ---
 
   /**
@@ -839,31 +980,134 @@ export class NotificationsService implements InAppNotificationEmitter {
       categoryConceptId?: string;
       /** Cuándo saldría, para las horas de silencio. */
       scheduledAt?: string;
+      /**
+       * Saltearse las horas de silencio (carril P9).
+       *
+       * Sólo lo pide el canal in-app, que las aplaza en vez de suprimirlas.
+       * Los canales externos las siguen respetando como supresión: un correo
+       * aplazado llegaría igual y sonaría el teléfono.
+       */
+      ignoreQuietHours?: boolean;
     },
   ): Promise<string | undefined> {
     if (!dto.recipientUserId) return undefined;
 
-    const preference = await this.notificationsRepo.findPreference(
+    // Dos filas gobiernan la decisión y hay que mirar las dos (carril P9): la
+    // de la categoría dice si acepta ESE tipo de aviso, y la del canal —sin
+    // categoría— guarda la ventana de silencio, que es del canal entero.
+    // Mirando sólo la de la categoría, el silencio nocturno no se aplicaba
+    // nunca: la fila que lo guarda no coincidía con el filtro.
+    const preferences = await this.notificationsRepo.findPreferences(
       tx,
       dto.recipientUserId,
       dto.channelId,
-      dto.categoryConceptId,
     );
-    if (preference && preference.optedIn === false) {
+    const deCategoria = dto.categoryConceptId
+      ? preferences.find(
+          (preference) =>
+            preference.categoryConceptId === dto.categoryConceptId,
+        )
+      : undefined;
+    const deCanal = preferences.find(
+      (preference) => !preference.categoryConceptId,
+    );
+
+    if (deCategoria?.optedIn === false) {
       return 'El destinatario no acepta este canal para esta categoría';
     }
+    if (deCanal?.optedIn === false) {
+      return 'El destinatario no acepta este canal';
+    }
+
+    if (dto.ignoreQuietHours) return undefined;
 
     const scheduledAt = dto.scheduledAt
       ? new Date(dto.scheduledAt)
       : new Date();
-    if (
-      preference &&
-      this.inQuietHours(preference.quietHoursJson, scheduledAt)
-    ) {
+    const horasDeSilencio =
+      deCategoria?.quietHoursJson ?? deCanal?.quietHoursJson;
+    if (this.inQuietHours(horasDeSilencio, scheduledAt)) {
       return 'La notificación cae dentro de las horas de silencio del destinatario';
     }
 
     return undefined;
+  }
+
+  /**
+   * Cuándo queda visible una in-app: ahora, o al final del silencio nocturno.
+   *
+   * @param tx - Transacción activa.
+   * @param recipientUserId - Destinatario.
+   * @param channelId - Canal in-app.
+   * @param categoryConceptId - Categoría del aviso.
+   * @returns El instante desde el que se muestra.
+   */
+  private async aplazarPorSilencio(
+    tx: EntityManager,
+    recipientUserId: string,
+    channelId: string,
+    categoryConceptId: string,
+  ): Promise<Date> {
+    const ahora = new Date();
+    const preferences = await this.notificationsRepo.findPreferences(
+      tx,
+      recipientUserId,
+      channelId,
+    );
+    const ventana =
+      preferences.find(
+        (preference) => preference.categoryConceptId === categoryConceptId,
+      )?.quietHoursJson ??
+      preferences.find((preference) => !preference.categoryConceptId)
+        ?.quietHoursJson;
+
+    if (!this.inQuietHours(ventana, ahora)) return ahora;
+
+    const fin = this.finDeVentana(ventana);
+    if (fin === undefined) return ahora;
+
+    const disponible = new Date(ahora);
+    disponible.setUTCHours(Math.floor(fin / 60), fin % 60, 0, 0);
+    // Si el fin ya pasó hoy, la ventana cruza la medianoche: termina mañana.
+    if (disponible <= ahora) {
+      disponible.setUTCDate(disponible.getUTCDate() + 1);
+    }
+    return disponible;
+  }
+
+  /** Los minutos UTC en que termina la ventana, o `undefined`. */
+  private finDeVentana(quietHoursJson: unknown): number | undefined {
+    if (!quietHoursJson || typeof quietHoursJson !== 'object') return undefined;
+    const { end } = quietHoursJson as {
+      /** Hora de fin. */
+      end?: unknown;
+    };
+    if (typeof end !== 'string') return undefined;
+    const match = /^(\d{1,2}):(\d{2})$/.exec(end.trim());
+    return match ? Number(match[1]) * 60 + Number(match[2]) : undefined;
+  }
+
+  /**
+   * Lee la ventana de silencio guardada, o `null` si no hay una válida.
+   *
+   * Una ventana con formato roto se trata como ausente y no como error: el
+   * emisor ya la ignora con la misma lógica, y devolver un 500 al abrir la
+   * pantalla de preferencias por una fila vieja mal escrita dejaría a alguien
+   * sin poder arreglarla.
+   */
+  private leerHorasDeSilencio(
+    quietHoursJson: unknown,
+  ): { start: string; end: string } | null {
+    if (!quietHoursJson || typeof quietHoursJson !== 'object') return null;
+    const { start, end } = quietHoursJson as {
+      /** Hora de inicio. */
+      start?: unknown;
+      /** Hora de fin. */
+      end?: unknown;
+    };
+    return typeof start === 'string' && typeof end === 'string'
+      ? { start, end }
+      : null;
   }
 
   /**
@@ -951,7 +1195,25 @@ export class NotificationsService implements InAppNotificationEmitter {
       channelId: channel.id,
       recipientUserId: input.recipientUserId,
       categoryConceptId,
+      // El in-app no se suprime por horario: se aplaza. Se pide la evaluación
+      // sin horas de silencio y el aplazamiento se calcula aparte.
+      ignoreQuietHours: true,
     });
+
+    // Carril P9 · el silencio nocturno **aplaza, no borra**.
+    //
+    // Para un correo, caer en horas de silencio significa no mandarlo: llegaría
+    // igual y sonaría el teléfono. Una notificación in-app no suena — está
+    // esperando en una bandeja—, así que suprimirla haría que el paciente nunca
+    // se entere de algo que sí ocurrió. Se crea con `available_at` al final de
+    // la ventana y aparece a la mañana, que es literalmente lo que el carril
+    // pide: «no crece entre 22:00 y 07:00; se muestra a la mañana».
+    const availableAt = await this.aplazarPorSilencio(
+      tx,
+      input.recipientUserId,
+      channel.id,
+      categoryConceptId,
+    );
 
     const contentSnapshotJson = {
       subject: input.subject,
@@ -1066,6 +1328,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       notificationRequestId: request.id,
       notificationDeliveryId: delivery.id,
       actorUserId,
+      availableAt,
     });
     await tx.flush();
 

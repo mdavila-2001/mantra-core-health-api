@@ -37,7 +37,10 @@ function build() {
       }),
     ),
     findLiveRequestByDebounceKey: mockFn(() => Promise.resolve(null)),
-    findPreference: mockFn(() => Promise.resolve(null)),
+    // Carril P9: el emisor lee todas las preferencias del canal y elige la
+    // fila que corresponde, porque la ventana de silencio vive en la fila sin
+    // categoría y la lectura por categoría no la encontraba nunca.
+    findPreferences: mockFn(() => Promise.resolve([])),
     createNotificationRequest: mockFn((_em: any, data: any) => ({
       id: REQUEST,
       ...data,
@@ -132,10 +135,13 @@ describe('NotificationsService · carril P1 (campana)', () => {
 
     it('registra la solicitud pero no entrega nada cuando la preferencia la silencia', async () => {
       const d = build();
-      d.notificationsRepo.findPreference.mockResolvedValue({
-        optedIn: false,
-        quietHoursJson: null,
-      });
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.SOCIAL,
+          optedIn: false,
+          quietHoursJson: null,
+        },
+      ]);
 
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,

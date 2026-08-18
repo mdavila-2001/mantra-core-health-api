@@ -212,6 +212,48 @@ export class NotificationsRepository {
     return em.find(RecipientPreferences, { userId, channelId });
   }
 
+  /**
+   * Crea la preferencia de un destinatario para un canal y una categoría
+   * (carril P9).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Dueño, canal, categoría y decisión.
+   * @returns La fila creada, todavía sin flush.
+   */
+  createPreference(
+    em: EntityManager,
+    data: {
+      /** Dueño de la preferencia. */
+      userId: string;
+      /** Canal al que se refiere. */
+      channelId: string;
+      /** Categoría, o ausente para la preferencia de canal completo. */
+      categoryConceptId?: string;
+      /** Si acepta recibir. */
+      optedIn: boolean;
+      /** Ventana de silencio, en hora UTC. */
+      quietHoursJson?: unknown;
+      /** Quién la registra. */
+      actorUserId?: string;
+    },
+  ): RecipientPreferences {
+    const now = new Date();
+    return em.create(
+      RecipientPreferences,
+      {
+        userId: data.userId,
+        channelId: data.channelId,
+        categoryConceptId: data.categoryConceptId,
+        optedIn: data.optedIn,
+        quietHoursJson: data.quietHoursJson,
+        // `createdBy` ya pone `createdAt`/`updatedAt` con el mismo instante:
+        // repetirlos acá los pisaría con otra llamada a `new Date()`.
+        ...createdBy(data.actorUserId, now),
+      },
+      { partial: true },
+    );
+  }
+
   // --- Solicitudes (UC-35-10, 11, 12) ---
 
   /**
@@ -655,6 +697,14 @@ export class NotificationsRepository {
        * Identificador asociado a actor user.
        */
       actorUserId?: string;
+      /**
+       * Cuándo queda visible para el destinatario (carril P9).
+       *
+       * Por defecto, ya. Con silencio nocturno activo, a la hora en que la
+       * ventana termina: la notificación **existe** desde que se emitió y
+       * aparece a la mañana, que es distinto de no haberla creado.
+       */
+      availableAt?: Date;
     },
   ): InAppNotifications {
     return em.create(
@@ -674,7 +724,7 @@ export class NotificationsRepository {
         notificationRequestId: data.notificationRequestId,
         notificationDeliveryId: data.notificationDeliveryId,
         sentAt: new Date(),
-        availableAt: new Date(),
+        availableAt: data.availableAt ?? new Date(),
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -735,9 +785,16 @@ export class NotificationsRepository {
       limit: number;
       /** Estado que significa «sin leer». */
       unreadStatusConceptId: string;
+      /** Momento de la consulta: lo posterior todavía no se muestra. */
+      now: Date;
     },
   ): Promise<InAppNotifications[]> {
-    const where: Record<string, unknown> = { recipientUserId };
+    // Lo que todavía no está disponible no se lista: es lo que hace que el
+    // silencio nocturno **aplace** en vez de borrar (carril P9).
+    const where: Record<string, unknown> = {
+      recipientUserId,
+      availableAt: { $lte: options.now },
+    };
     if (options.unreadOnly) {
       where.statusConceptId = options.unreadStatusConceptId;
     }
@@ -768,10 +825,14 @@ export class NotificationsRepository {
     em: EntityManager,
     recipientUserId: string,
     unreadStatusConceptId: string,
+    now: Date = new Date(),
   ): Promise<number> {
     return em.count(InAppNotifications, {
       recipientUserId,
       statusConceptId: unreadStatusConceptId,
+      // El badge tampoco crece con lo aplazado: si contara lo que la lista no
+      // muestra, alguien vería un «3» y abriría una bandeja con una sola.
+      availableAt: { $lte: now },
     });
   }
 
