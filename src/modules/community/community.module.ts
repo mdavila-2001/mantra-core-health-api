@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { CommonModule } from '../common/common.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -59,7 +60,10 @@ import {
  * fan-out de feed. Auth vía guard global (`AuthModule`).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
+  // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
+  // manda el cliente.
+  imports: [MikroOrmModule.forFeature(Object.values(entities)), CommonModule],
   controllers: [
     CommunitySocialController,
     CommunityMessagingController,

@@ -8,7 +8,9 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { CommunitySocialService } from './community-social.service';
+import { AttachableFileService } from '../../common/services';
 import {
   CONCEPTS,
   ConflictException,
@@ -62,7 +64,35 @@ function build() {
   const visibility = {
     assertActsAsProfile: mockFn(() => Promise.resolve(undefined)),
   };
+  // Por defecto el archivo adjunto existe, es del actor y su versión está limpia:
+  // así las pruebas que no hablan de media no tienen que montarlo.
+  const filesRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'f1',
+        createdByUserId: actor.id,
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      }),
+    ),
+  };
+  const fileVersionsRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'v1',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+      }),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // El servicio compartido va **de verdad**, no doblado: la regla que interesa
+  // acá es la que corre en producción, y sus casos siguen escribiéndose contra
+  // los repositorios como antes de extraerla.
+  const attachableFiles = new AttachableFileService(
+    filesRepo as any,
+    fileVersionsRepo as any,
+    logger as any,
+  );
 
   const service = new CommunitySocialService(
     em as any,
@@ -74,6 +104,7 @@ function build() {
     followsRepo as any,
     blocksRepo as any,
     visibility as any,
+    attachableFiles,
     logger as any,
   );
   return {
@@ -88,6 +119,8 @@ function build() {
     followsRepo,
     blocksRepo,
     visibility,
+    filesRepo,
+    fileVersionsRepo,
   };
 }
 
@@ -277,6 +310,120 @@ describe('CommunitySocialService', () => {
         actor.id,
       );
       expect(d.postsRepo.createMention).toHaveBeenCalled();
+    });
+
+    /** Autor válido con un post listo para publicar; sólo cambia la media. */
+    function withAuthor(d: ReturnType<typeof build>) {
+      d.profilesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        commentsDefaultEnabled: true,
+      });
+      d.postsRepo.create.mockReturnValue({
+        id: 'post1',
+        authorPublicProfileId: 'p1',
+        publicationStatusConceptId: 'pub',
+        publishedAt: new Date(),
+      });
+    }
+
+    it('refuses to attach a file uploaded by someone else', async () => {
+      const d = build();
+      withAuthor(d);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f1',
+        createdByUserId: 'otro-usuario',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'f1' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('refuses a media file that does not exist', async () => {
+      const d = build();
+      withAuthor(d);
+      d.filesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'fantasma' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('refuses a media file whose current version is infected', async () => {
+      const d = build();
+      withAuthor(d);
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_INFECTED,
+      });
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'f1' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('refuses a soft-deleted media file', async () => {
+      const d = build();
+      withAuthor(d);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'f1',
+        createdByUserId: actor.id,
+        currentVersionId: 'v1',
+        deletedAt: new Date('2026-01-01'),
+        lifecycleStatusConceptId: CONCEPTS.FILE_DELETED,
+      });
+
+      await expect(
+        d.service.publishPost(
+          'p1',
+          { bodyText: 'hi', media: [{ fileId: 'f1' }] } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.postsRepo.createMedia).not.toHaveBeenCalled();
+    });
+
+    it('attaches media in a stable order when the file is the author own', async () => {
+      const d = build();
+      withAuthor(d);
+
+      await d.service.publishPost(
+        'p1',
+        {
+          bodyText: 'hi',
+          media: [{ fileId: 'f1' }, { fileId: 'f2' }],
+        } as any,
+        actor,
+      );
+
+      expect(d.postsRepo.createMedia).toHaveBeenCalledTimes(2);
+      expect(d.postsRepo.createMedia).toHaveBeenNthCalledWith(
+        1,
+        d.tx,
+        expect.objectContaining({ fileId: 'f1', ordinal: 0 }),
+      );
+      expect(d.postsRepo.createMedia).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        expect.objectContaining({ fileId: 'f2', ordinal: 1 }),
+      );
     });
   });
 

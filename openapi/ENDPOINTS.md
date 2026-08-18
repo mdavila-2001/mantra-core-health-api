@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1097 de 1097 endpoints** en **64 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1107 de 1107 endpoints** en **64 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -19,7 +19,7 @@ Se documentan **1097 de 1097 endpoints** en **64 módulos**. La referencia compl
 | `clinical` | 24 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 23 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 14 | [Abrir referencia](endpoints/common.md) |
-| `community` | 51 | [Abrir referencia](endpoints/community.md) |
+| `community` | 54 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 12 | [Abrir referencia](endpoints/consent.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
@@ -30,7 +30,7 @@ Se documentan **1097 de 1097 endpoints** en **64 módulos**. La referencia compl
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
 | `erp` | 17 | [Abrir referencia](endpoints/erp.md) |
-| `forms` | 13 | [Abrir referencia](endpoints/forms.md) |
+| `forms` | 18 | [Abrir referencia](endpoints/forms.md) |
 | `geo` | 10 | [Abrir referencia](endpoints/geo.md) |
 | `graph_intelligence` | 15 | [Abrir referencia](endpoints/graph-intelligence.md) |
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
@@ -53,7 +53,7 @@ Se documentan **1097 de 1097 endpoints** en **64 módulos**. La referencia compl
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 18 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 22 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 24 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 15 | [Abrir referencia](endpoints/promotions.md) |
 | `qa_lab` | 13 | [Abrir referencia](endpoints/qa-lab.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |

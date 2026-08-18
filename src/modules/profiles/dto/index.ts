@@ -13,4 +13,5 @@ export * from './decease-person.dto';
 export * from './read-patients.dto';
 export * from './read-practitioner-profile.dto';
 export * from './update-practitioner-profile.dto';
+export * from './set-practitioner-photo.dto';
 export * from './list-practitioners.dto';

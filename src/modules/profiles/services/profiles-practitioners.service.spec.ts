@@ -8,13 +8,16 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { ProfilesPractitionersService } from './profiles-practitioners.service';
 import { PROF } from '../profiles.concepts';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { AttachableFileService } from '../../common/services';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -23,7 +26,7 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = { flush: mockFn().mockResolvedValue(undefined), remove: mockFn() };
   // `fork` devuelve el mismo doble: las lecturas usan un contexto propio y las
   // escrituras una transacción, pero para la prueba es el mismo objeto. `count`
   // responde 0 salvo que una prueba lo cambie — es lo que consume el conteo de
@@ -95,6 +98,34 @@ function build() {
   // pisan explícitamente.
   const verificationBypass = { isActive: mockFn().mockReturnValue(false) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // Por defecto el archivo de la foto existe, es del actor, está vivo y es una
+  // imagen: así las pruebas que no hablan de la foto no tienen que montarlo.
+  const filesRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'file-1',
+        createdByUserId: actor.id,
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      }),
+    ),
+  };
+  const fileVersionsRepo = {
+    findById: mockFn(() =>
+      Promise.resolve({
+        id: 'v1',
+        mimeType: 'image/png',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      }),
+    ),
+  };
+  // El servicio compartido va de verdad: la foto tiene que apoyarse en la misma
+  // regla que corre en producción, no en un doble que diga que sí.
+  const attachableFiles = new AttachableFileService(
+    filesRepo as any,
+    fileVersionsRepo as any,
+    logger as any,
+  );
 
   const service = new ProfilesPractitionersService(
     em as any,
@@ -107,6 +138,7 @@ function build() {
     languagesRepo,
     affiliationsRepo as any,
     ownership as never,
+    attachableFiles,
     accountLinksRepo as any,
     effectiveRoles as any,
     verificationBypass as any,
@@ -128,6 +160,8 @@ function build() {
     credentialsRepo,
     specialtiesRepo,
     languagesRepo,
+    filesRepo,
+    fileVersionsRepo,
   };
 }
 
@@ -890,6 +924,169 @@ describe('ProfilesPractitionersService', () => {
         profileIds: ['per-1'],
         verificationStatusConceptId: undefined,
       });
+    });
+  });
+
+  describe('foto del perfil profesional', () => {
+    /** Perfil existente y legible, que es lo que la respuesta relee. */
+    function conPerfil(d: ReturnType<typeof build>) {
+      const practitioner: any = {
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_VERIFIED,
+        practiceStatusConceptId: PROF.PRACTICE_ACTIVE,
+        createdAt: new Date(),
+      };
+      d.practitionersRepo.findById.mockResolvedValue(practitioner);
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'per-1',
+        displayName: 'Dra. Lucía Salas',
+      });
+      return practitioner;
+    }
+
+    it('escribe photo_file_id y lo devuelve en la ficha releída', async () => {
+      const d = build();
+      const practitioner = conPerfil(d);
+
+      const perfil = await d.service.setPractitionerPhoto(
+        'per-1',
+        { fileId: 'file-1' },
+        actor,
+      );
+
+      expect(practitioner.photoFileId).toBe('file-1');
+      expect(perfil.photoFileId).toBe('file-1');
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('exige ser el titular del perfil o plataforma', async () => {
+      const d = build();
+      conPerfil(d);
+      d.ownership.assertOwnsPractitionerProfile.mockRejectedValue(
+        new ForbiddenException('no'),
+      );
+
+      await expect(
+        d.service.setPractitionerPhoto('per-1', { fileId: 'file-1' }, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('no acepta el archivo de otra persona', async () => {
+      // La foto es la cara de quien ejerce: apuntarla al archivo de otro es
+      // exactamente lo que la FK sola no impide.
+      const d = build();
+      conPerfil(d);
+      d.filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'otro-usuario',
+        currentVersionId: 'v1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        d.service.setPractitionerPhoto('per-1', { fileId: 'file-1' }, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('no acepta un archivo que no existe', async () => {
+      const d = build();
+      conPerfil(d);
+      d.filesRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.setPractitionerPhoto('per-1', { fileId: 'fantasma' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('no acepta un archivo que no es imagen', async () => {
+      // Un PDF subido como DOCUMENT es del titular y está vivo: lo único que
+      // lo descarta como foto es su tipo, el deducido de los bytes al subirlo.
+      const d = build();
+      conPerfil(d);
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'application/pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+      });
+
+      await expect(
+        d.service.setPractitionerPhoto('per-1', { fileId: 'file-1' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('no acepta un archivo marcado infectado', async () => {
+      const d = build();
+      conPerfil(d);
+      d.fileVersionsRepo.findById.mockResolvedValue({
+        id: 'v1',
+        mimeType: 'image/png',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_INFECTED,
+      });
+
+      await expect(
+        d.service.setPractitionerPhoto('per-1', { fileId: 'file-1' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('un perfil inexistente responde no encontrado', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.setPractitionerPhoto('per-1', { fileId: 'file-1' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('reemplazar la foto cambia la referencia y no borra el archivo anterior', async () => {
+      // El archivo anterior puede estar en uso en otro lado; borrarlo desde acá
+      // dejaría colgada esa otra referencia.
+      const d = build();
+      const practitioner = conPerfil(d);
+      practitioner.photoFileId = 'file-vieja';
+
+      await d.service.setPractitionerPhoto(
+        'per-1',
+        { fileId: 'file-1' },
+        actor,
+      );
+
+      expect(practitioner.photoFileId).toBe('file-1');
+      expect(d.tx.remove).not.toHaveBeenCalled();
+    });
+
+    it('quitar la foto deja la referencia en nulo sin tocar el archivo', async () => {
+      const d = build();
+      const practitioner = conPerfil(d);
+      practitioner.photoFileId = 'file-1';
+
+      const perfil = await d.service.removePractitionerPhoto('per-1', actor);
+
+      expect(practitioner.photoFileId).toBeUndefined();
+      expect(perfil.photoFileId).toBeUndefined();
+      expect(d.filesRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('quitar la foto de un perfil que no la tiene no falla', async () => {
+      const d = build();
+      conPerfil(d);
+
+      await expect(
+        d.service.removePractitionerPhoto('per-1', actor),
+      ).resolves.toBeDefined();
+    });
+
+    it('quitar la foto exige ser el titular o plataforma', async () => {
+      const d = build();
+      conPerfil(d);
+      d.ownership.assertOwnsPractitionerProfile.mockRejectedValue(
+        new ForbiddenException('no'),
+      );
+
+      await expect(
+        d.service.removePractitionerPhoto('per-1', actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 

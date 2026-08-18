@@ -87,7 +87,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -169,7 +169,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El tenant indicado no es uno de los del actor. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 409 | `CONFLICT` | Ya existe una política con ese código | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2995,6 +2996,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "resourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "resourceRefType": "health_practitioner_profiles",
       "resourceRefId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "practiceId": "00000000-0000-4000-8000-000000000001",
       "timeZone": "America/La_Paz",
       "capacity": 1,
@@ -3016,12 +3018,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ResourceListItemDto>` | Sin restricción adicional declarada | Recursos de esta página. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","resourceTypeConceptId":"00000000-0000-4000-8000-000000000001","resourceRefType":"health_practitioner_profiles","resourceRefId":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","capacity":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","site":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","code":"CODIGO_EJEMPLO","addressText":"Av. Brasil 1234, La Paz","timeZone":"America/La_Paz"}}]` |
+| `items` | Sí | `array<ResourceListItemDto>` | Sin restricción adicional declarada | Recursos de esta página. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","resourceTypeConceptId":"00000000-0000-4000-8000-000000000001","resourceRefType":"health_practitioner_profiles","resourceRefId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","practiceId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","capacity":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","site":{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","code":"CODIGO_EJEMPLO","addressText":"Av. Brasil 1234, La Paz","timeZone":"America/La_Paz"}}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `items[].resourceTypeConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a resource type concept. | `00000000-0000-4000-8000-000000000001` |
 | `items[].resourceRefType` | Sí | `string` | Sin restricción adicional declarada | Tipo de la entidad referenciada por el recurso. | `health_practitioner_profiles` |
 | `items[].resourceRefId` | Sí | `string` | formato `uuid` | Identificador asociado a resource ref. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerName` | Sí | `string` | admite null | Nombre del profesional detrás del recurso, cuando la referencia apunta a un perfil profesional y la persona pudo resolverse. El selector del paciente pregunta «¿con quién te querés atender?» — la respuesta honesta es una persona, no el nombre interno de la agenda. `null` para salas, equipos, o cuando el perfil referido no existe: la ausencia es un estado real que el cliente debe poder distinguir. | `Nombre de ejemplo` |
 | `items[].practiceId` | No | `string` | formato `uuid`; admite null | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
 | `items[].timeZone` | No | `string` | admite null | Zona horaria IANA del recurso. | `America/La_Paz` |
 | `items[].capacity` | Sí | `number` | Sin restricción adicional declarada | Atenciones simultáneas que admite. 1 cuando el recurso no lo declara. | `1` |
@@ -3104,7 +3107,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -3182,7 +3185,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Un profesional solo puede publicar su propia agenda: el recurso debe ' +           'apuntar a su perfil profesional. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
+| 403 | `FORBIDDEN` | El tenant indicado no es uno de los del actor. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3508,7 +3513,7 @@ Publicar una plantilla de agenda con sus franjas. Requiere JWT y los roles o alc
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /scheduling/resources/{id}/templates` en `SchedulingController_createTemplate`. El controlador delega en `SchedulingCatalogService.createTemplate`. Valida el body como `CreateTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<TemplateResponseDto>`.
+NestJS resuelve `POST /scheduling/resources/{id}/templates` en `SchedulingController_createTemplate`. El controlador delega en `SchedulingCatalogService.createTemplate`. Valida el body como `SchedulingCreateTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<TemplateResponseDto>`.
 
 ### Parámetros
 
@@ -3518,7 +3523,7 @@ NestJS resuelve `POST /scheduling/resources/{id}/templates` en `SchedulingContro
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateTemplateDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `SchedulingCreateTemplateDto`; los campos opcionales se omiten.
 
 ```http
 POST /scheduling/resources/00000000-0000-4000-8000-000000000001/templates HTTP/1.1
@@ -3527,14 +3532,21 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "title": "valor-ejemplo"
+  "name": "Nombre de ejemplo",
+  "rules": [
+    {
+      "dayOfWeek": 1,
+      "startTime": "08:00:00",
+      "endTime": "12:00:00"
+    }
+  ]
 }
 ```
 
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -3542,10 +3554,17 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `title` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Título del instrumento | `valor-ejemplo` |
-| `description` | No | `string` | longitud máxima 2000 | Consigna que ve el paciente antes de responder | `Texto descriptivo de ejemplo` |
-| `ownerPractitionerId` | No | `string` | formato `uuid` | Profesional dueño. Por defecto, el perfil profesional del actor. | `00000000-0000-4000-8000-000000000001` |
-| `responseWindowDays` | No | `number` | mínimo 1; máximo 365 | Días que tendrá el paciente para responder desde que se le emite la invitación | `30` |
+| `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1}]` |
+| `rules[].dayOfWeek` | Sí | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
+| `rules[].startTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
+| `rules[].endTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
+| `rules[].slotMinutes` | No | `number` | mínimo 5 | Duración del slot en minutos | `5` |
+| `rules[].capacityPerSlot` | No | `number` | mínimo 1 | Cupos por slot | `1` |
+| `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `30` |
+| `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 
 ### Payload completo de ejemplo
 
@@ -3558,10 +3577,20 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "title": "valor-ejemplo",
-  "description": "Texto descriptivo de ejemplo",
-  "ownerPractitionerId": "00000000-0000-4000-8000-000000000001",
-  "responseWindowDays": 30
+  "name": "Nombre de ejemplo",
+  "rules": [
+    {
+      "dayOfWeek": 1,
+      "startTime": "08:00:00",
+      "endTime": "12:00:00",
+      "slotMinutes": 5,
+      "capacityPerSlot": 1
+    }
+  ],
+  "slotMinutes": 30,
+  "bookingPolicyId": "00000000-0000-4000-8000-000000000001",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -3608,7 +3637,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La franja debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
@@ -3942,7 +3972,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -4010,7 +4040,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/services/scheduling-catalog.service.ts |

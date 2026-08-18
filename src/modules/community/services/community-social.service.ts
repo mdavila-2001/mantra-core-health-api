@@ -18,6 +18,7 @@ import {
   FollowsRepository,
   BlocksRepository,
 } from '../repositories';
+import { AttachableFileService } from '../../common/services';
 import {
   COMM,
   REACTION_CONCEPT_BY_CODE,
@@ -111,6 +112,7 @@ export class CommunitySocialService {
    * @param followsRepo - Valor de follows repo requerido por la operación.
    * @param blocksRepo - Valor de blocks repo requerido por la operación.
    * @param visibility - Propiedad del perfil con el que se firma la escritura.
+   * @param attachableFiles - La regla compartida de qué archivo se puede adjuntar.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -123,6 +125,7 @@ export class CommunitySocialService {
     private readonly followsRepo: FollowsRepository,
     private readonly blocksRepo: BlocksRepository,
     private readonly visibility: CommunityVisibilityService,
+    private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunitySocialService.name);
@@ -298,6 +301,37 @@ export class CommunitySocialService {
     });
   }
 
+  /**
+   * Comprueba que un archivo puede adjuntarse a un post de este autor.
+   *
+   * La regla —existe, es de quien publica, sigue vivo, tiene versión vigente y
+   * esa versión no está marcada infectada— vive en
+   * {@link AttachableFileService}, porque la foto del perfil profesional exige
+   * exactamente la misma y una regla de seguridad duplicada termina divergiendo.
+   * Acá queda sólo lo que es propio de la publicación: cómo se llama el archivo
+   * en los mensajes y bajo qué operación se registra el rechazo.
+   *
+   * @param tx - Transacción activa de la publicación.
+   * @param fileId - Archivo que el cliente pretende adjuntar.
+   * @param actor - Usuario autenticado que publica.
+   */
+  private async assertMediaFileUsableBy(
+    tx: EntityManager,
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.attachableFiles.assertUsableBy(
+      tx,
+      fileId,
+      actor,
+      { operation: 'community.post.publish' },
+      {
+        subject: 'El archivo adjunto',
+        notFound: 'Archivo adjunto no encontrado',
+      },
+    );
+  }
+
   /** UC-19-01: publica un post con hashtags, media y menciones. */
   async publishPost(
     profileId: string,
@@ -336,6 +370,7 @@ export class CommunitySocialService {
       await tx.flush();
 
       for (const [i, m] of (dto.media ?? []).entries()) {
+        await this.assertMediaFileUsableBy(tx, m.fileId, actor);
         this.postsRepo.createMedia(tx, {
           postId: post.id,
           fileId: m.fileId,

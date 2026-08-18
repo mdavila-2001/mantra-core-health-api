@@ -26,6 +26,11 @@ import {
 } from '../repositories';
 import type { SessionJourneys } from '../entities';
 import {
+  TelemetryWebAnalyticsService,
+  type ForwardedActivityEvent,
+  type ForwardedWebVital,
+} from './telemetry-web-analytics.service';
+import {
   CaptureActivityEventsDto,
   ActivityEventsResponseDto,
   CreateClientContextDto,
@@ -45,6 +50,12 @@ import {
  *
  * Las tablas de eventos son append-only; los journeys se materializan/actualizan
  * bajo la misma transacción (row_version optimista lo gestiona MikroORM).
+ *
+ * Lo que se persiste aquí se ofrece además a la analítica web externa
+ * (`TelemetryWebAnalyticsService`) **después de confirmar la transacción** y
+ * sólo si se persistió: lo que el gate de consentimiento descarta no se reenvía,
+ * y un proveedor caído no cambia ni un byte de lo que se guardó ni de lo que se
+ * responde al portal.
  */
 @Injectable()
 export class TelemetryEventsService {
@@ -62,6 +73,7 @@ export class TelemetryEventsService {
    * @param conversionsRepo - Valor de conversions repo requerido por la operación.
    * @param subjectsRepo - Valor de subjects repo requerido por la operación.
    * @param consentsRepo - Valor de consents repo requerido por la operación.
+   * @param webAnalytics - Reenvío de mejor esfuerzo a la analítica web externa.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -76,6 +88,7 @@ export class TelemetryEventsService {
     private readonly conversionsRepo: ConversionEventsRepository,
     private readonly subjectsRepo: AnalyticsSubjectsRepository,
     private readonly consentsRepo: TrackingConsentsRepository,
+    private readonly webAnalytics: TelemetryWebAnalyticsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(TelemetryEventsService.name);
@@ -89,7 +102,9 @@ export class TelemetryEventsService {
       { operation: 'telemetry.activity.capture', count: dto.events.length },
       'Capturing activity events',
     );
-    return this.em.transactional(async (tx) => {
+    const forwarded: ForwardedActivityEvent[] = [];
+    let tenantId: string | undefined;
+    const response = await this.em.transactional(async (tx) => {
       const eventIds: string[] = [];
       let skipped = 0;
       let journey: SessionJourneys | null = null;
@@ -139,6 +154,9 @@ export class TelemetryEventsService {
           portalTypeConceptId: item.portalTypeConceptId,
         });
 
+        const occurredAt = item.occurredAt
+          ? new Date(item.occurredAt)
+          : new Date();
         const event = this.eventsRepo.create(tx, {
           eventSchemaDefinitionId: item.eventSchemaDefinitionId,
           analyticsSubjectId: item.analyticsSubjectId,
@@ -152,7 +170,7 @@ export class TelemetryEventsService {
           eventName: item.eventName ?? schema.eventName,
           eventIdempotencyKey: idemKey,
           routeTemplate: item.routeTemplate,
-          occurredAt: item.occurredAt ? new Date(item.occurredAt) : new Date(),
+          occurredAt,
           receivedAt: new Date(),
           correlationId: item.correlationId,
         });
@@ -182,6 +200,19 @@ export class TelemetryEventsService {
           journey.updatedAt = new Date();
         }
         await tx.flush();
+
+        forwarded.push({
+          eventName: item.eventName ?? schema.eventName,
+          analyticsSubjectId: item.analyticsSubjectId,
+          sessionJourneyId: journey?.id,
+          routeTemplate: item.routeTemplate,
+          occurredAt,
+          // Sólo llega aquí lo que pasó el gate: un evento con usuario
+          // identificado implica una decisión GRANTED vigente.
+          consentGranted: Boolean(item.userId),
+          properties: this.forwardableProperties(item.properties),
+        });
+        tenantId ??= item.tenantId;
       }
 
       return {
@@ -191,6 +222,9 @@ export class TelemetryEventsService {
         sessionJourneyId: journey?.id,
       };
     });
+
+    this.webAnalytics.trackActivityEvents(forwarded, { tenantId });
+    return response;
   }
 
   /** UC-28-08: registra el contexto de cliente y crea/enlaza el journey de sesión. */
@@ -254,7 +288,8 @@ export class TelemetryEventsService {
       { operation: 'telemetry.webvitals.record', count: dto.metrics.length },
       'Recording web vitals',
     );
-    return this.em.transactional(async (tx) => {
+    const forwarded: ForwardedWebVital[] = [];
+    const response = await this.em.transactional(async (tx) => {
       const ids: string[] = [];
       for (const m of dto.metrics) {
         if (m.sessionJourneyId) {
@@ -268,6 +303,7 @@ export class TelemetryEventsService {
             );
           }
         }
+        const measuredAt = new Date();
         const vital = this.webVitalsRepo.create(tx, {
           userActivityEventId: m.userActivityEventId,
           sessionJourneyId: m.sessionJourneyId,
@@ -281,13 +317,25 @@ export class TelemetryEventsService {
             ? RATING_CONCEPT_BY_CODE[m.rating]
             : undefined,
           navigationTypeConceptId: TELE.NAV_NAVIGATE,
-          measuredAt: new Date(),
+          measuredAt,
         });
         ids.push(vital.id);
+        forwarded.push({
+          metric: m.metric,
+          metricValue: m.metricValue,
+          rating: m.rating,
+          routeTemplate: m.routeTemplate,
+          analyticsSubjectId: m.analyticsSubjectId,
+          sessionJourneyId: m.sessionJourneyId,
+          measuredAt,
+        });
       }
       await tx.flush();
       return { inserted: ids.length, ids };
     });
+
+    this.webAnalytics.trackWebVitals(forwarded);
+    return response;
   }
 
   /** UC-28-11: registra una conversión con atribución y marca el journey. */
@@ -301,7 +349,7 @@ export class TelemetryEventsService {
       },
       'Recording conversion',
     );
-    return this.em.transactional(async (tx) => {
+    const response = await this.em.transactional(async (tx) => {
       const funnel = await this.funnelsRepo.findById(
         tx,
         dto.funnelDefinitionId,
@@ -330,12 +378,18 @@ export class TelemetryEventsService {
         dto.analyticsSubjectId,
         dto.sessionJourneyId,
       );
+      // La conversión es idempotente por (funnel, sujeto, journey): reenviarla
+      // duplicaría el evento clave en el proveedor, que no deduplica por su
+      // cuenta. Por eso el `forward` sólo se prepara en la rama que crea.
       if (existing) {
         return {
-          id: existing.id,
-          funnelDefinitionId: existing.funnelDefinitionId,
-          analyticsSubjectId: existing.analyticsSubjectId,
-          convertedAt: existing.convertedAt ?? existing.createdAt,
+          response: {
+            id: existing.id,
+            funnelDefinitionId: existing.funnelDefinitionId,
+            analyticsSubjectId: existing.analyticsSubjectId,
+            convertedAt: existing.convertedAt ?? existing.createdAt,
+          },
+          forward: undefined,
         };
       }
 
@@ -363,12 +417,24 @@ export class TelemetryEventsService {
       }
 
       return {
-        id: conversion.id,
-        funnelDefinitionId: conversion.funnelDefinitionId,
-        analyticsSubjectId: conversion.analyticsSubjectId,
-        convertedAt: now,
+        response: {
+          id: conversion.id,
+          funnelDefinitionId: conversion.funnelDefinitionId,
+          analyticsSubjectId: conversion.analyticsSubjectId,
+          convertedAt: now,
+        },
+        forward: {
+          funnelCode: funnel.funnelCode,
+          funnelVersion: funnel.versionNumber,
+          analyticsSubjectId: dto.analyticsSubjectId,
+          sessionJourneyId: dto.sessionJourneyId,
+          convertedAt: now,
+        },
       };
     });
+
+    if (response.forward) this.webAnalytics.trackConversion(response.forward);
+    return response.response;
   }
 
   /** UC-28-13: cierra un journey de sesión y consolida métricas. */
@@ -478,6 +544,43 @@ export class TelemetryEventsService {
       purposeDefinitionId,
     );
     return latest?.decisionConceptId === TELE.DECISION_GRANTED;
+  }
+
+  /**
+   * Aplana las propiedades del evento al par nombre/valor que entiende la
+   * analítica externa. No se reenvía la clasificación del dato ni ninguna
+   * propiedad sin valor: lo que no aporta medida, no sale del sistema.
+   */
+  private forwardableProperties(
+    properties:
+      | {
+          /**
+           * Nombre de la propiedad.
+           */
+          propertyName: string;
+          /**
+           * Valor string, si lo trae.
+           */
+          valueString?: string;
+          /**
+           * Valor numérico, si lo trae.
+           */
+          valueNumber?: number;
+          /**
+           * Valor booleano, si lo trae.
+           */
+          valueBoolean?: boolean;
+        }[]
+      | undefined,
+  ): Record<string, string | number | boolean> | undefined {
+    if (!properties?.length) return undefined;
+    const out: Record<string, string | number | boolean> = {};
+    for (const property of properties) {
+      const value =
+        property.valueString ?? property.valueNumber ?? property.valueBoolean;
+      if (value !== undefined) out[property.propertyName] = value;
+    }
+    return Object.keys(out).length ? out : undefined;
   }
 
   /** Determina el concepto de tipo de valor de una propiedad. */

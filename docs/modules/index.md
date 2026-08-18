@@ -8,7 +8,7 @@
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
-| [`community`](community.md) | 9 | 17 | 17 | 38 | 24 |
+| [`community`](community.md) | 9 | 18 | 17 | 38 | 25 |
 | [`consent`](consent.md) | 8 | 8 | 9 | 10 | 12 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 8 | 8 | 11 | 17 |
 | [`insurance`](insurance.md) | 8 | 8 | 7 | 29 | 9 |
@@ -21,10 +21,10 @@
 | [`practice`](practice.md) | 6 | 9 | 12 | 11 | 14 |
 | [`terminology`](terminology.md) | 6 | 6 | 9 | 15 | 14 |
 | [`chart`](chart.md) | 5 | 5 | 4 | 11 | 5 |
-| [`common`](common.md) | 5 | 5 | 7 | 7 | 4 |
+| [`common`](common.md) | 5 | 6 | 7 | 7 | 4 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 7 | 12 | 10 | 13 |
-| [`forms`](forms.md) | 5 | 5 | 6 | 16 | 13 |
+| [`forms`](forms.md) | 5 | 6 | 6 | 16 | 14 |
 | [`scheduling`](scheduling.md) | 5 | 5 | 5 | 16 | 5 |
 | [`audit`](audit.md) | 4 | 6 | 7 | 131 | 9 |
 | [`billing`](billing.md) | 4 | 11 | 10 | 20 | 12 |
@@ -37,7 +37,7 @@
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
 | [`read_models`](read_models.md) | 3 | 3 | 8 | 13 | 5 |
 | [`surveys`](surveys.md) | 3 | 3 | 4 | 7 | 7 |
-| [`telemetry`](telemetry.md) | 3 | 3 | 14 | 14 | 12 |
+| [`telemetry`](telemetry.md) | 3 | 4 | 14 | 14 | 12 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
 | [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
@@ -51,7 +51,7 @@
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
 | [`object_storage`](object_storage.md) | 2 | 3 | 3 | 17 | 1 |
 | [`procedures_perioperative`](procedures_perioperative.md) | 2 | 4 | 5 | 37 | 2 |
-| [`profiles`](profiles.md) | 2 | 3 | 14 | 19 | 16 |
+| [`profiles`](profiles.md) | 2 | 3 | 14 | 19 | 17 |
 | [`promotions`](promotions.md) | 2 | 2 | 2 | 11 | 1 |
 | [`qa_lab`](qa_lab.md) | 2 | 2 | 2 | 13 | 1 |
 | [`time_series`](time_series.md) | 2 | 4 | 2 | 12 | 1 |
@@ -70,4 +70,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **221** | **311** | **381** | **1237** | **423** |
+| **Total** | **221** | **315** | **381** | **1237** | **426** |
