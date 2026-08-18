@@ -363,6 +363,29 @@ const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
   'src/modules/workflow/repositories/workflow-runtime.repository.ts#findDueInstancesForUpdate',
 ]);
 
+/**
+ * Lecturas **públicas** que cruzan tenants a propósito: son el directorio que
+ * un paciente consulta antes de elegir dónde atenderse, y acotarlas al tenant
+ * las vaciaría —la pregunta no es «qué tiene mi organización» sino «dónde me
+ * hago esto».
+ *
+ * No van en la lista de arriba porque no son barridos de un worker SYSTEM: son
+ * lecturas de cara al público, y la diferencia importa al revisarlas. Lo que
+ * las hace seguras no es un rol sino el **filtro de publicación** que cada una
+ * aplica en su criterio; si ese filtro se cae, la entrada acá deja de estar
+ * justificada. Confirmadas leyendo cada criterio en el triage 2026-08-18.
+ *
+ * - `searchProfiles`: exige `visibility = PUBLIC` y `status = ACTIVE`.
+ * - `searchVisible` / `countVisible`: exigen `status = UNIT_ACTIVE` y
+ *   `verification = VERIFIED`, y aceptan `tenantId` como filtro opcional
+ *   cuando quien pregunta sí quiere acotar.
+ */
+const TENANT_SCOPE_PUBLIC_DIRECTORY_ALLOWLIST = new Set([
+  'src/modules/community/repositories/public-search.repository.ts#searchProfiles',
+  'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#searchVisible',
+  'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#countVisible',
+]);
+
 /** Nombre del método de clase que contiene la línea `atLine` (busca hacia atrás). */
 function enclosingMethodName(lines, atLine) {
   for (let i = atLine; i >= 0; i--) {
@@ -419,9 +442,11 @@ for (const file of repoFiles) {
       continue;
 
     const method = enclosingMethodName(lines, i);
+    const clave = method ? `${rel(file)}#${method}` : '';
     if (
-      method &&
-      TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(`${rel(file)}#${method}`)
+      clave &&
+      (TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(clave) ||
+        TENANT_SCOPE_PUBLIC_DIRECTORY_ALLOWLIST.has(clave))
     )
       continue;
 
