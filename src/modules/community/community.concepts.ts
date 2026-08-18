@@ -118,6 +118,17 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       code: 'CONTENT_TYPE_PROFILE',
       display: 'Profile content',
     },
+    /**
+     * El grupo como cosa comentable (P7).
+     *
+     * El muro de un grupo son `comments` colgados del grupo, no `social_posts`:
+     * `social_posts` no tiene `group_id` en el modelo y este carril no crea
+     * esquema. Ver `CommunityGroupWallService` para el razonamiento completo.
+     */
+    CONTENT_TYPE_GROUP: {
+      code: 'CONTENT_TYPE_GROUP',
+      display: 'Group content',
+    },
     CONTENT_TYPE_MESSAGE: {
       code: 'CONTENT_TYPE_MESSAGE',
       display: 'Message content',
@@ -368,6 +379,19 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
     },
     GROUP_ROLE_MEMBER: { code: 'GROUP_ROLE_MEMBER', display: 'Group member' },
     GROUP_ROLE_OWNER: { code: 'GROUP_ROLE_OWNER', display: 'Group owner' },
+    /**
+     * Modera y aprueba altas sin ser el dueño (P7).
+     *
+     * Un grupo privado necesita más de una persona que apruebe: si sólo el
+     * dueño puede hacerlo, la cola de pendientes se detiene el día que se toma
+     * vacaciones. `ADMIN` hace todo lo del dueño salvo existir sin él;
+     * `MODERATOR` sólo interviene sobre el contenido del muro.
+     */
+    GROUP_ROLE_ADMIN: { code: 'GROUP_ROLE_ADMIN', display: 'Group admin' },
+    GROUP_ROLE_MODERATOR: {
+      code: 'GROUP_ROLE_MODERATOR',
+      display: 'Group moderator',
+    },
     GROUP_JOIN_ACTIVE: {
       code: 'GROUP_JOIN_ACTIVE',
       display: 'Membership active',
@@ -375,6 +399,27 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
     GROUP_JOIN_PENDING: {
       code: 'GROUP_JOIN_PENDING',
       display: 'Membership pending',
+    },
+    /**
+     * Estados terminales de una membresía (P7).
+     *
+     * La fila no se borra: `LEFT` y `REMOVED` se distinguen porque volver a
+     * entrar a un grupo del que uno se fue es un alta común, y volver a entrar
+     * a uno del que lo expulsaron no debería serlo. Guardar el desenlace es lo
+     * que deja esa regla escribible más adelante sin inventar una tabla de
+     * historial.
+     */
+    GROUP_JOIN_REJECTED: {
+      code: 'GROUP_JOIN_REJECTED',
+      display: 'Membership rejected',
+    },
+    GROUP_JOIN_LEFT: {
+      code: 'GROUP_JOIN_LEFT',
+      display: 'Membership left',
+    },
+    GROUP_JOIN_REMOVED: {
+      code: 'GROUP_JOIN_REMOVED',
+      display: 'Membership removed by an admin',
     },
 
     // --- Blocks ---
@@ -476,6 +521,19 @@ export const FOLLOWABLE_CONCEPT_BY_CODE: Record<string, string> = {
   TOPIC: COMM.FOLLOWABLE_TOPIC,
   HASHTAG: COMM.FOLLOWABLE_HASHTAG,
   GROUP: COMM.FOLLOWABLE_GROUP,
+};
+
+/**
+ * Rol dentro de un grupo → concept id (P7).
+ *
+ * `OWNER` no está en el mapa a propósito: la propiedad de un grupo se otorga al
+ * crearlo, no por un `PATCH` de rol. Dejarlo entrar por acá permitiría que un
+ * administrador se coronara dueño de un grupo ajeno.
+ */
+export const GROUP_ROLE_CONCEPT_BY_CODE: Record<string, string> = {
+  MEMBER: COMM.GROUP_ROLE_MEMBER,
+  MODERATOR: COMM.GROUP_ROLE_MODERATOR,
+  ADMIN: COMM.GROUP_ROLE_ADMIN,
 };
 
 /** Report target type enum → concept id (UC-19-08). */

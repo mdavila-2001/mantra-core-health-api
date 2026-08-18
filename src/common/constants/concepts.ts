@@ -5706,6 +5706,26 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'Social notifications',
   ),
 
+  /**
+   * Categorías de notificación de comunidad que consume la misma campana (P7).
+   *
+   * Se suman al mismo `category_concept_id` que las clínicas, y no a un canal
+   * aparte, porque el destinatario tiene una sola bandeja: separar el aviso de
+   * un grupo del de una receta obligaría a mirar dos lugares. Lo que sí las
+   * separa es la categoría, que es justamente lo que `recipient_preferences`
+   * necesita para que alguien silencie los grupos sin silenciar su receta.
+   */
+  NOTIF_CAT_GROUP_JOIN_APPROVED: def(
+    'messaging:notification-category:group-join-approved',
+    'NOTIF_CAT_GRP_JOINED',
+    'Group membership approved',
+  ),
+  NOTIF_CAT_GROUP_NEW_POST: def(
+    'messaging:notification-category:group-new-post',
+    'NOTIF_CAT_GRP_POST',
+    'New post in a group',
+  ),
+
   // ==========================================================================
   // Módulo 32 · workflow — máquinas de estado y flujos entre dominios
   // ==========================================================================

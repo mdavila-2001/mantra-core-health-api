@@ -16,6 +16,7 @@ import {
   CommunityModerationController,
   CommunityReviewsController,
   CommunityGroupsController,
+  CommunityTopicsController,
   CommunityPollsController,
   CommunityFeedController,
   CommunityTimelineController,
@@ -27,6 +28,9 @@ import {
   CommunityModerationService,
   CommunityReviewsService,
   CommunityGroupsService,
+  CommunityGroupWallService,
+  CommunityGroupAccessService,
+  CommunityGroupNotificationsService,
   CommunityPollsService,
   CommunityFeedService,
   PublicProfileProjectionService,
@@ -85,6 +89,9 @@ import { EncountersRepository } from '../clinical/repositories';
   // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
   // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
   // manda el cliente.
+  //
+  // `MessagingModule` entra por el contrato de notificaciones de P1: community
+  // decide a quién avisar de lo que pasa en un grupo; messaging entrega.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommonModule,
@@ -96,6 +103,7 @@ import { EncountersRepository } from '../clinical/repositories';
     CommunityModerationController,
     CommunityReviewsController,
     CommunityGroupsController,
+    CommunityTopicsController,
     CommunityPollsController,
     CommunityFeedController,
     CommunityTimelineController,
@@ -131,6 +139,8 @@ import { EncountersRepository } from '../clinical/repositories';
     CommunityModerationService,
     CommunityReviewsService,
     CommunityGroupsService,
+    CommunityGroupWallService,
+    CommunityGroupNotificationsService,
     CommunityPollsService,
     CommunityFeedService,
     PublicProfileProjectionService,
@@ -138,6 +148,7 @@ import { EncountersRepository } from '../clinical/repositories';
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
     CommunityEngagementService,
+    CommunityGroupAccessService,
     CommunitySocialReadService,
     CommunityTimelineReadService,
     CommunityMessagingReadService,
