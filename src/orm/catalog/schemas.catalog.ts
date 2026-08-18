@@ -59,7 +59,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['read_models', 30, 'read_models', 13],
   ['reporting', 39, 'reporting', 12],
   ['scheduling', 41, 'scheduling', 16],
-  ['surveys', null, 'surveys', 7],
+  ['surveys', 65, 'surveys', 7],
   ['system_context', 45, 'system_context', 9],
   ['system_ops', 11, 'system_ops', 30],
   ['telemetry', 28, 'telemetry', 14],
