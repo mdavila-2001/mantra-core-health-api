@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -8,6 +9,7 @@ import {
   Patch,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -38,6 +40,7 @@ import {
   PractitionerProfileSummaryDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  SetPractitionerPhotoDto,
 } from '../dto';
 
 /**
@@ -168,6 +171,58 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
     return this.practitionersService.updateOwnPractitionerProfile(dto, actor);
+  }
+
+  /**
+   * Fijar la foto del perfil profesional.
+   *
+   * Va con `:profileId` y no con `me` a propósito: la misma ruta sirve al
+   * titular y a la plataforma, y quién puede lo decide
+   * `ProfileOwnershipService` —titular o rol de plataforma— en vez de
+   * duplicarse en dos superficies que después divergen. Con `me` la intención
+   * de un administrador que arregla la ficha de otro no quedaría escrita en
+   * ningún lado.
+   *
+   * `PUT` porque el resultado no depende de cuántas veces se pida: el perfil
+   * queda con esa foto.
+   *
+   * @param profileId - El perfil cuya foto se fija.
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya con su foto.
+   */
+  @Put('practitioners/:profileId/photo')
+  @ApiOperation({ summary: 'Fijar la foto del perfil profesional' })
+  setPractitionerPhoto(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: SetPractitionerPhotoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.setPractitionerPhoto(
+      profileId,
+      dto,
+      actor,
+    );
+  }
+
+  /**
+   * Quitar la foto del perfil profesional.
+   *
+   * Quita la referencia; el archivo no se toca. Quien quiera borrar el archivo
+   * del almacenamiento tiene el camino de `common/files`, que lleva su propio
+   * borrado lógico.
+   *
+   * @param profileId - El perfil cuya foto se quita.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya sin foto.
+   */
+  @Delete('practitioners/:profileId/photo')
+  @ApiOperation({ summary: 'Quitar la foto del perfil profesional' })
+  removePractitionerPhoto(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    return this.practitionersService.removePractitionerPhoto(profileId, actor);
   }
 
   /** UC-05-03. */

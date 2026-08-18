@@ -5,6 +5,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UPLOAD_MIME_ALLOWLIST,
   VerificationBypassService,
   decodeKeysetCursor,
   encodeKeysetCursor,
@@ -52,7 +53,9 @@ import {
   PractitionerActivityDto,
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
+  SetPractitionerPhotoDto,
 } from '../dto';
+import { AttachableFileService } from '../../common/services';
 import { ProfileOwnershipService } from './profile-ownership.service';
 
 /**
@@ -77,6 +80,7 @@ export class ProfilesPractitionersService {
    * @param specialtiesRepo - Valor de specialties repo requerido por la operación.
    * @param languagesRepo - Valor de languages repo requerido por la operación.
    * @param affiliationsRepo - Historial laboral (afiliaciones institucionales).
+   * @param attachableFiles - La regla compartida de qué archivo se puede referenciar.
    * @param accountLinksRepo - Vínculo persona-cuenta del titular del perfil.
    * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
    * @param verificationBypass - Bypass DEV/TEST del filtro de verificación (corrección #12).
@@ -93,6 +97,7 @@ export class ProfilesPractitionersService {
     private readonly languagesRepo: PractitionerLanguagesRepository,
     private readonly affiliationsRepo: PractitionerAffiliationsRepository,
     private readonly ownership: ProfileOwnershipService,
+    private readonly attachableFiles: AttachableFileService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
@@ -489,6 +494,140 @@ export class ProfilesPractitionersService {
     // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
     // las colecciones y la actividad, que esta operación no toca.
     return this.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * Fija la foto del perfil profesional.
+   *
+   * ## El hueco que cierra
+   *
+   * `health_practitioner_profiles.photo_file_id` se **leía** —la ficha del
+   * profesional y el listado de la guía lo devuelven— y no lo escribía nadie:
+   * la columna existía, la FK existía, y no había forma de llenarla desde la
+   * API. Un profesional no podía ponerse una foto.
+   *
+   * ## Qué se comprueba, y por qué cada cosa
+   *
+   * - **Quién pide.** El titular del perfil o la plataforma
+   *   ({@link ProfileOwnershipService.assertOwnsPractitionerProfile}). La foto
+   *   es la cara de quien ejerce: ponerle a un colega la imagen que uno elija
+   *   es suplantación con otro nombre.
+   * - **De quién es el archivo.** La misma regla que usa el muro social para la
+   *   media de una publicación ({@link AttachableFileService}): sin ella, el
+   *   `fileId` sería un uuid que el cliente declara, y cualquiera podría
+   *   apuntar la foto de su perfil al documento de identidad de otra persona
+   *   —que después se sirve a quien abra la ficha—.
+   * - **Que sea una imagen.** El límite es el `mime_type` que quedó registrado
+   *   al subir, deducido de los bytes y no del encabezado del cliente. Un PDF
+   *   subido como `DOCUMENT` pasa las dos comprobaciones anteriores y no es una
+   *   foto.
+   *
+   * ## Reemplazo
+   *
+   * Se cambia la referencia y nada más: el archivo anterior sigue vivo en
+   * `common.files`, con sus versiones y sus vínculos. Borrarlo desde acá dejaría
+   * colgado a cualquier otro uso del mismo archivo —el borrado de archivos tiene
+   * su propio camino, con su borrado lógico—. Un `photo_file_id` que apunta a
+   * una fila que ya no está sería justamente la referencia corrupta que el
+   * contrato del carril prohíbe.
+   *
+   * @param profileId - Perfil profesional cuya foto se fija.
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya con su foto.
+   * @throws ForbiddenException si no es el titular ni plataforma, o si el
+   *   archivo lo subió otra persona.
+   * @throws ResourceNotFoundException si el perfil o el archivo no existen.
+   * @throws PreconditionFailedException si el archivo está borrado, sin versión
+   *   vigente, infectado o no es una imagen.
+   */
+  async setPractitionerPhoto(
+    profileId: string,
+    dto: SetPractitionerPhotoDto,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.setPhoto',
+        profileId,
+        actorId: actor.id,
+      },
+      'Setting practitioner profile photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
+      const practitioner = await this.practitionersRepo.findById(tx, profileId);
+      if (!practitioner) {
+        throw new ResourceNotFoundException('Profesional no encontrado', {
+          profileId,
+        });
+      }
+      // Dentro de la misma transacción que la escritura: comprobar contra un
+      // estado y escribir sobre otro no comprueba nada.
+      await this.attachableFiles.assertUsableBy(
+        tx,
+        dto.fileId,
+        actor,
+        {
+          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+          operation: 'profiles.practitioner.setPhoto',
+        },
+        {
+          subject: 'El archivo de la foto',
+          notFound: 'El archivo de la foto no existe',
+        },
+      );
+      practitioner.photoFileId = dto.fileId;
+      touch(practitioner, actor.id);
+      await tx.flush();
+    });
+
+    return this.getPractitionerSummary(profileId);
+  }
+
+  /**
+   * Quita la foto del perfil profesional.
+   *
+   * Deja `photo_file_id` en nulo y no toca el archivo: quitar la foto de la
+   * ficha es una decisión de presentación, borrar un archivo del almacenamiento
+   * es otra cosa y tiene su propio camino. Es idempotente —quitar la foto de un
+   * perfil que no tiene se responde igual—, porque el resultado que el cliente
+   * pidió es el que queda.
+   *
+   * @param profileId - Perfil profesional cuya foto se quita.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil releído, ya sin foto.
+   * @throws ForbiddenException si no es el titular ni plataforma.
+   * @throws ResourceNotFoundException si el perfil no existe.
+   */
+  async removePractitionerPhoto(
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.removePhoto',
+        profileId,
+        actorId: actor.id,
+      },
+      'Removing practitioner profile photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
+      const practitioner = await this.practitionersRepo.findById(tx, profileId);
+      if (!practitioner) {
+        throw new ResourceNotFoundException('Profesional no encontrado', {
+          profileId,
+        });
+      }
+      practitioner.photoFileId = undefined;
+      touch(practitioner, actor.id);
+      await tx.flush();
+    });
+
+    return this.getPractitionerSummary(profileId);
   }
 
   /**

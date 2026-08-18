@@ -1829,6 +1829,85 @@ paths:
       description: >-
         Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /profiles/practitioners/{profileId}/photo:
+    put:
+      operationId: ProfilesPractitionersController_setPractitionerPhoto
+      parameters:
+        - name: profileId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPractitionerPhotoDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Fijar la foto del perfil profesional
+      tags:
+        - profiles-practitioners
+      description: >-
+        Fijar la foto del perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: ProfilesPractitionersController_removePractitionerPhoto
+      parameters:
+        - name: profileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Quitar la foto del perfil profesional
+      tags:
+        - profiles-practitioners
+      description: >-
+        Quitar la foto del perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /profiles/practitioners/{profileId}/jurisdiction-authorizations:
     post:
       operationId: ProfilesPractitionersController_addJurisdictionAuthorization
@@ -45344,6 +45423,15 @@ components:
         telehealthAvailable:
           type: boolean
           description: Si atiende por telemedicina
+    SetPractitionerPhotoDto:
+      type: object
+      properties:
+        fileId:
+          type: string
+          description: Identificador del archivo ya subido que será la foto
+          format: uuid
+      required:
+        - fileId
     CreatePractitionerDto:
       type: object
       properties:

@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "REDESA Health API · 1105 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1105 requests en 136 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "REDESA Health API · 1107 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1107 requests en 136 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -53501,7 +53501,7 @@
       ]
     },
     {
-      "name": "profiles (22)",
+      "name": "profiles (24)",
       "item": [
         {
           "name": "profiles-patients",
@@ -54845,6 +54845,115 @@
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /profiles/practitioners/{profileId}/photo · Fijar la foto del perfil profesional",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/:profileId/photo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    ":profileId",
+                    "photo"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "Fijar la foto del perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /profiles/practitioners/{profileId}/photo`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_setPractitionerPhoto`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": \"{{fileId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /profiles/practitioners/{profileId}/photo · Quitar la foto del perfil profesional",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/:profileId/photo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    ":profileId",
+                    "photo"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "Quitar la foto del perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /profiles/practitioners/{profileId}/photo`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `ProfilesPractitionersController_removePractitionerPhoto`"
               },
               "response": [],
               "event": [

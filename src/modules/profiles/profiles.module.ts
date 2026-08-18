@@ -3,6 +3,9 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 // Verificar una matrícula concede el rol asistencial: la autoridad sobre los
 // roles es de `authz`, que no importa `profiles` (no cierra ciclo).
 import { AuthzModule } from '../authz/authz.module';
+// La foto del perfil profesional es un archivo de `common`: fijarla exige
+// comprobar contra `common.files` que sea del titular y siga siendo utilizable.
+import { CommonModule } from '../common/common.module';
 import * as entities from './entities';
 import {
   ProfilesPatientsController,
@@ -38,7 +41,11 @@ import { ProfileOwnershipService } from './services';
  * relacionadas, proxies de portal y defunción/anonimización.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), AuthzModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    AuthzModule,
+    CommonModule,
+  ],
   controllers: [ProfilesPatientsController, ProfilesPractitionersController],
   providers: [
     ProfileOwnershipService,
