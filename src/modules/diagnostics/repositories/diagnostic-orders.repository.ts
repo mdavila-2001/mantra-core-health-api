@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { ServiceRequests, DiagnosticReports } from '../../clinical/entities';
+import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
 import { touch } from '../../../common';
 
 /**
@@ -111,6 +112,94 @@ export class DiagnosticOrdersRepository {
       { patientProfileId },
       { orderBy: { createdAt: 'DESC' }, limit },
     );
+  }
+
+  /**
+   * Las órdenes diagnósticas del paciente, para su propio portal.
+   *
+   * Gemela de {@link findReportsForPatientPortal} y por la misma razón: la orden
+   * que le dieron en una clínica y la que le dieron en otra son su lista, no la
+   * de cada institución. Acotar por `custodian_tenant_id` —correcto en
+   * {@link findOrdersByPatient}, que es la lectura del personal— le mostraría
+   * sólo las del tenant con el que tenga sesión abierta.
+   *
+   * Sigue filtrando por categoría: `service_requests` también guarda
+   * derivaciones e interconsultas, y el circuito diagnóstico es únicamente
+   * laboratorio e imagenología.
+   *
+   * @param em - Contexto de persistencia.
+   * @param patientProfileId - Paciente cuyas órdenes se leen.
+   * @param categoryConceptIds - Categorías que definen el circuito diagnóstico.
+   * @param limit - Tope de filas.
+   * @returns Las órdenes, de la más nueva a la más vieja.
+   */
+  findOrdersForPatientPortal(
+    em: EntityManager,
+    patientProfileId: string,
+    categoryConceptIds: readonly string[],
+    limit: number,
+  ): Promise<ServiceRequests[]> {
+    return em.find(
+      ServiceRequests,
+      {
+        patientProfileId,
+        categoryConceptId: { $in: [...categoryConceptIds] },
+      },
+      { orderBy: { createdAt: 'DESC' }, limit },
+    );
+  }
+
+  /**
+   * Los informes que cuelgan de un conjunto de órdenes.
+   *
+   * Se busca por orden y no por ventana de tiempo a propósito: preguntar «¿los
+   * últimos N informes de esta persona incluyen el de esta orden?» convierte un
+   * tope de paginado en una respuesta clínica, y una orden vieja aparecería
+   * como «sin resultado» sólo porque su informe quedó fuera del recorte.
+   *
+   * @param em - Contexto de persistencia.
+   * @param serviceRequestIds - Órdenes cuyas informes se buscan.
+   * @returns Los informes de esas órdenes.
+   */
+  findReportsByServiceRequests(
+    em: EntityManager,
+    serviceRequestIds: readonly string[],
+  ): Promise<DiagnosticReports[]> {
+    if (serviceRequestIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(DiagnosticReports, {
+      serviceRequestId: { $in: [...serviceRequestIds] },
+    });
+  }
+
+  /**
+   * La preparación publicada para un conjunto de estudios.
+   *
+   * El vínculo entre la orden y el catálogo es el **concepto**: la orden guarda
+   * `code_concept_id` y la oferta guarda `study_concept_id`. No hay FK entre
+   * ambas —la orden no elige centro— así que el emparejamiento es por concepto
+   * y puede devolver varias filas para el mismo estudio, una por centro que lo
+   * ofrece.
+   *
+   * Sólo trae las que tienen texto: una oferta sin preparación no aporta nada a
+   * esta pregunta y filtrarla acá evita que quien llama tenga que hacerlo.
+   *
+   * @param em - Contexto de persistencia.
+   * @param studyConceptIds - Conceptos de estudio a buscar.
+   * @returns Las ofertas con preparación publicada.
+   */
+  findPreparationByStudyConcepts(
+    em: EntityManager,
+    studyConceptIds: readonly string[],
+  ): Promise<DiagnosticStudyOfferings[]> {
+    if (studyConceptIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(DiagnosticStudyOfferings, {
+      studyConceptId: { $in: [...studyConceptIds] },
+      preparationInstructions: { $ne: null },
+    });
   }
 
   /**
