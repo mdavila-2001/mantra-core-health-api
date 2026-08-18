@@ -24,6 +24,9 @@ function build() {
     bookmark: mockFn(),
     follow: mockFn(),
     block: mockFn(),
+    unfollow: mockFn(),
+    unbookmark: mockFn(),
+    unblock: mockFn(),
   };
   const readService = {
     getProfile: mockFn(),
@@ -111,5 +114,34 @@ describe('CommunitySocialController', () => {
     const dto = { blockerProfileId: 'p1', blockedProfileId: 'p2' };
     await d.controller.block(dto, actor);
     expect(d.service.block).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates unfollow (UC-19-05, cara inversa)', async () => {
+    const d = build();
+    const query = {
+      followerProfileId: 'p1',
+      followableType: 'PROFILE',
+      followableRefId: 'p2',
+    };
+    await d.controller.unfollow(query as any, actor);
+    expect(d.service.unfollow).toHaveBeenCalledWith(query, actor);
+  });
+
+  it('delegates unbookmark (UC-19-04, cara inversa)', async () => {
+    const d = build();
+    const query = {
+      profileId: 'p1',
+      bookmarkableType: 'POST',
+      bookmarkableRefId: 'post1',
+    };
+    await d.controller.unbookmark(query as any, actor);
+    expect(d.service.unbookmark).toHaveBeenCalledWith(query, actor);
+  });
+
+  it('delegates unblock (UC-19-14, cara inversa)', async () => {
+    const d = build();
+    const query = { blockerProfileId: 'p1', blockedProfileId: 'p2' };
+    await d.controller.unblock(query as any, actor);
+    expect(d.service.unblock).toHaveBeenCalledWith(query, actor);
   });
 });

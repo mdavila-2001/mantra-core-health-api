@@ -7,6 +7,7 @@ export * from './reaction.dto';
 export * from './bookmark.dto';
 export * from './follow.dto';
 export * from './block.dto';
+export * from './social-removal.dto';
 export * from './conversation.dto';
 export * from './report.dto';
 export * from './moderation-decision.dto';

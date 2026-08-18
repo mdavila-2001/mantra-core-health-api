@@ -32,10 +32,11 @@ const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
  * Sobre la propiedad hay una limitación conocida: **no existe tabla que ate
  * `iam.users` con `community.public_profiles`**. El vínculo es polimórfico
  * (`target_type_concept_id` + `target_id`), así que el titular se reconoce por
- * `target_id = actor` (perfiles de usuario) o por `created_by_user_id = actor`
- * (los que alguien creó para sí). Un perfil de profesional u organización que
- * creó otro administrador no lo reconoce como propio: hasta que el modelo
- * declare el vínculo formal, ese caso pasa por rol de plataforma.
+ * los sujetos que el token ya declara —el usuario (`sub`) y su perfil
+ * profesional (`hpid`)— o por `created_by_user_id = actor` (los que alguien creó
+ * para sí). Un perfil de organización que creó otro administrador no lo reconoce
+ * como propio: hasta que el modelo declare el vínculo formal, ese caso pasa por
+ * rol de plataforma en las lecturas y **no pasa** en las escrituras.
  */
 @Injectable()
 export class CommunityVisibilityService {
@@ -59,6 +60,44 @@ export class CommunityVisibilityService {
   }
 
   /**
+   * Los sujetos que una sesión representa en el grafo social.
+   *
+   * Un profesional es su **perfil profesional** —así su vitrina sobrevive a un
+   * cambio de cuenta y apunta a quien ejerce, no a quien inicia sesión—; toda
+   * cuenta se representa además a sí misma. Los dos claims (`hpid` y `sub`) ya
+   * viajan en el token, así que no hace falta preguntarle nada a `profiles`.
+   *
+   * **Por qué es una lista y no un valor.** Antes cada cara del módulo resolvía
+   * el sujeto por su cuenta y las dos no coincidían: la escritura creaba la
+   * vitrina de un profesional con `target_id = hpid` y la lectura la buscaba por
+   * `target_id = sub`. El resultado era que un profesional no resolvía su propio
+   * perfil al leer, y sus publicaciones `FOLLOWERS` o `PRIVATE` desaparecían de
+   * su propio muro: `canViewPost` recibía un lector sin perfil y ningún perfil
+   * puede seguirse a sí mismo. Con una sola resolución compartida, las dos caras
+   * hablan del mismo sujeto.
+   *
+   * El orden importa: el perfil profesional va primero porque es el sujeto que
+   * el módulo escribe cuando existe.
+   */
+  private sujetosDe(actor: AuthenticatedUser): string[] {
+    return actor.practitionerProfileId
+      ? [actor.practitionerProfileId, actor.id]
+      : [actor.id];
+  }
+
+  /** `true` si el perfil es de alguno de los sujetos que la sesión representa. */
+  private esTitular(
+    profile: { targetId: string; createdByUserId?: string | null } | null,
+    actor: AuthenticatedUser,
+  ): boolean {
+    if (!profile) return false;
+    return (
+      this.sujetosDe(actor).includes(profile.targetId) ||
+      profile.createdByUserId === actor.id
+    );
+  }
+
+  /**
    * Exige que el perfil pertenezca al actor, o que el actor sea plataforma.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -73,13 +112,39 @@ export class CommunityVisibilityService {
   ): Promise<void> {
     if (this.isPlatform(actor)) return;
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (
-      profile &&
-      (profile.targetId === actor.id || profile.createdByUserId === actor.id)
-    )
-      return;
+    if (this.esTitular(profile, actor)) return;
     throw new ForbiddenException(
       'Sólo el titular del perfil puede leer su contenido privado',
+    );
+  }
+
+  /**
+   * Exige que el actor pueda **actuar como** ese perfil, sin excepción de rol.
+   *
+   * Es la versión de {@link assertOwnProfile} que gobierna las escrituras, y se
+   * distingue en una sola cosa: **no hay atajo de plataforma**.
+   *
+   * Leer el contenido de otro con rol de moderación es el trabajo de un
+   * moderador; escribir en nombre de otro no lo es de nadie. Si `SECURITY_ADMIN`
+   * pasara por acá, un administrador podría publicar, comentar, reaccionar,
+   * seguir o bloquear firmando con el perfil de cualquier profesional, y la
+   * autoría del muro dejaría de significar algo. La suplantación no es un
+   * privilegio de moderación.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profileId - Perfil con el que el actor pretende escribir.
+   * @param actor - Quien pide la escritura.
+   * @throws ForbiddenException si ese perfil no es suyo.
+   */
+  async assertActsAsProfile(
+    em: EntityManager,
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const profile = await this.profilesRepo.findById(em, profileId);
+    if (this.esTitular(profile, actor)) return;
+    throw new ForbiddenException(
+      'No se puede escribir en el grafo social con un perfil ajeno',
     );
   }
 
@@ -117,8 +182,13 @@ export class CommunityVisibilityService {
       await this.assertOwnProfile(em, requested, actor);
       return requested;
     }
-    const own = await this.profilesRepo.findByTarget(em, actor.id);
-    return own?.id;
+    // Se prueban los sujetos en orden —perfil profesional antes que cuenta—
+    // porque es el orden en que el módulo los escribe.
+    for (const sujeto of this.sujetosDe(actor)) {
+      const own = await this.profilesRepo.findByTarget(em, sujeto);
+      if (own) return own.id;
+    }
+    return undefined;
   }
 
   /** ¿Hay un bloqueo activo entre estos dos perfiles, en cualquier sentido? */

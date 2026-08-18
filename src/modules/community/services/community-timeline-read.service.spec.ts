@@ -30,6 +30,7 @@ function build() {
       Promise.resolve(posts),
     ),
   };
+  const engagement = { ofPosts: mockFn().mockResolvedValue(new Map()) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new CommunityTimelineReadService(
@@ -38,9 +39,17 @@ function build() {
     notificationsRepo as any,
     postsRepo as any,
     visibility as any,
+    engagement as any,
     logger as any,
   );
-  return { service, feedRepo, notificationsRepo, postsRepo, visibility };
+  return {
+    service,
+    feedRepo,
+    notificationsRepo,
+    postsRepo,
+    visibility,
+    engagement,
+  };
 }
 
 const feedItem = {
