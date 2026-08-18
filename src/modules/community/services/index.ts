@@ -17,5 +17,8 @@ export * from './community-reviews-read.service';
 export * from './community-moderation-read.service';
 export * from './community-ratings.service';
 export * from './community-public.service';
+export * from './community-group-access.service';
+export * from './community-group-wall.service';
+export * from './community-group-notifications.service';
 // Carril P2: el enganche con el contrato de notificaciones de P1.
 export { CommunityMessageNotificationsService } from './community-message-notifications.service';

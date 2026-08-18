@@ -17,6 +17,7 @@ import {
   CommunityModerationController,
   CommunityReviewsController,
   CommunityGroupsController,
+  CommunityTopicsController,
   CommunityPollsController,
   CommunityFeedController,
   CommunityTimelineController,
@@ -28,6 +29,9 @@ import {
   CommunityModerationService,
   CommunityReviewsService,
   CommunityGroupsService,
+  CommunityGroupWallService,
+  CommunityGroupAccessService,
+  CommunityGroupNotificationsService,
   CommunityPollsService,
   CommunityFeedService,
   PublicProfileProjectionService,
@@ -74,6 +78,10 @@ import {
   // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
   // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
   // manda el cliente.
+  //
+  // `MessagingModule` entra por el contrato de notificaciones de P1: community
+  // decide a quién avisar de lo que pasa en un grupo; messaging entrega.
+  //
   // `ClinicalModule` por `EncountersRepository`: `CommunityReviewsService` exige
   // atención real antes de aceptar una reseña. No hay ciclo — `clinical` no
   // importa nada de `community` — y es el mismo patrón que ya usa
@@ -90,6 +98,7 @@ import {
     CommunityModerationController,
     CommunityReviewsController,
     CommunityGroupsController,
+    CommunityTopicsController,
     CommunityPollsController,
     CommunityFeedController,
     CommunityTimelineController,
@@ -124,6 +133,8 @@ import {
     CommunityModerationService,
     CommunityReviewsService,
     CommunityGroupsService,
+    CommunityGroupWallService,
+    CommunityGroupNotificationsService,
     CommunityPollsService,
     CommunityFeedService,
     PublicProfileProjectionService,
@@ -131,6 +142,7 @@ import {
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
     CommunityEngagementService,
+    CommunityGroupAccessService,
     CommunitySocialReadService,
     CommunityTimelineReadService,
     CommunityMessagingReadService,
