@@ -108,6 +108,85 @@ export class PatientDiagnosticResultsResponseDto {
 }
 
 /**
+ * Una orden diagnóstica vista **por el paciente al que se la dieron**.
+ *
+ * ## Por qué lleva concept ids y no textos
+ *
+ * Misma convención que {@link PatientDiagnosticResultDto}: la API entrega el
+ * concepto y la pantalla resuelve la etiqueta contra el catálogo, que es lo que
+ * permite traducir sin re-desplegar la API y lo que ya hace el bloque de la
+ * consulta. Que el paciente no vea un uuid es responsabilidad del front, y es
+ * una regla de este carril.
+ *
+ * ## Lo que sí resuelve el servidor
+ *
+ * `preparationInstructions` y `hasReleasedResult`, porque ninguna de las dos es
+ * una etiqueta: la primera es un `JOIN` contra el catálogo de estudios que el
+ * navegador no puede hacer, y la segunda es una **regla de dominio** —informe
+ * liberado y visible para el paciente, no meramente redactado— que no puede
+ * reimplementarse en la pantalla sin arriesgar mostrar un borrador como
+ * resultado.
+ */
+export class PatientOrderSummaryDto {
+  /** Identificador de la orden. */
+  @ApiProperty({ format: 'uuid' }) id!: string;
+
+  /** Encuentro en el que se pidió, si se pidió durante uno. */
+  @ApiPropertyOptional({ format: 'uuid' }) encounterId?: string;
+
+  /** Qué se pidió (concept id). */
+  @ApiProperty({ format: 'uuid' }) codeConceptId!: string;
+
+  /** Laboratorio o imagenología (concept id). */
+  @ApiPropertyOptional({ format: 'uuid' }) categoryConceptId?: string;
+
+  /** Estado de la orden (concept id). */
+  @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
+
+  /** Prioridad (concept id). */
+  @ApiPropertyOptional({ format: 'uuid' }) priorityConceptId?: string;
+
+  /** Cuándo se pidió. */
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
+
+  /**
+   * Cómo prepararse: ayunas, horarios, qué llevar.
+   *
+   * Sale del catálogo de estudios (`diagnostic_study_offerings`), emparejado
+   * por concepto. Ausente cuando ningún centro publicó preparación para ese
+   * estudio — que es distinto de «no hay que prepararse», y por eso la pantalla
+   * no debe inventar un texto tranquilizador cuando falta.
+   */
+  @ApiPropertyOptional() preparationInstructions?: string;
+
+  /** Ya hay un resultado liberado y visible para esta orden. */
+  @ApiProperty() hasReleasedResult!: boolean;
+
+  /** El informe a abrir, cuando {@link hasReleasedResult} es verdadero. */
+  @ApiPropertyOptional({ format: 'uuid' }) reportId?: string;
+}
+
+/**
+ * Las órdenes diagnósticas de una persona.
+ *
+ * Mismo criterio de `truncated` que {@link PatientDiagnosticResultsResponseDto}.
+ */
+export class PatientOwnOrdersResponseDto {
+  /** Paciente leído. */
+  @ApiProperty({ format: 'uuid' }) patientProfileId!: string;
+
+  /** Órdenes, de la más nueva a la más vieja. */
+  @ApiProperty({ type: [PatientOrderSummaryDto] })
+  items!: PatientOrderSummaryDto[];
+
+  /** Tope aplicado. */
+  @ApiProperty() limit!: number;
+
+  /** La lista quedó recortada por el tope. */
+  @ApiProperty() truncated!: boolean;
+}
+
+/**
  * Compartir un resultado con un profesional, por un plazo.
  *
  * El plazo es obligatorio y no tiene valor por defecto: «compartir para

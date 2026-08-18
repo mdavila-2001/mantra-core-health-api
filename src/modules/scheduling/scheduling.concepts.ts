@@ -89,4 +89,42 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
       code: 'BOOKING_RESCHEDULE',
       display: 'Appointment booking rescheduled',
     },
+
+    /**
+     * Demora del profesional anotada en el historial de la cita (P8).
+     *
+     * Es una operación propia y no una transición: informar una demora **no**
+     * cambia el estado de la cita —sigue confirmada, más tarde— y persistirla
+     * como columna exigiría el ciclo completo del modelo, que este carril no
+     * puede hacer (ver `reports/P8.md`). El historial ya es append-only, guarda
+     * quién y cuándo, y su `data_snapshot` es `jsonb`: es donde el modelo ya
+     * declara que vive la razón de un cambio. Gracias a eso el paciente ve la
+     * demora en el detalle de su turno aunque el aviso in-app se pierda.
+     */
+    HISTORY_OP_DELAY: {
+      code: 'BOOKING_DELAY_ANNOUNCED',
+      display: 'Practitioner announced a delay',
+    },
+
+    // --- Categorías de los cuatro avisos de agenda (P8) ---------------------
+    // Son el `category_concept_id` de `messaging.notification_requests` y de la
+    // bandeja in-app. Existen como conceptos propios —y no como un texto en el
+    // payload— porque la preferencia por categoría (P9) se declara contra un
+    // concepto: sin él, «no quiero recordatorios» no se puede expresar.
+    NOTICE_SLOT_RELEASED: {
+      code: 'AGENDA_NOTICE_SLOT_RELEASED',
+      display: 'Agenda notice: a slot was released',
+    },
+    NOTICE_PRACTITIONER_DELAY: {
+      code: 'AGENDA_NOTICE_PRACTITIONER_DELAY',
+      display: 'Agenda notice: the practitioner is running late',
+    },
+    NOTICE_APPOINTMENT_REMINDER: {
+      code: 'AGENDA_NOTICE_APPOINTMENT_REMINDER',
+      display: 'Agenda notice: appointment reminder',
+    },
+    NOTICE_BOOKING_STATE_CHANGED: {
+      code: 'AGENDA_NOTICE_BOOKING_STATE',
+      display: 'Agenda notice: the appointment changed state',
+    },
   });

@@ -8,6 +8,7 @@ import {
 import { touch } from '../../../common';
 import { AppointmentReminders, WaitlistEntries } from '../entities';
 import { SchedulingBookingsRepository } from '../repositories';
+import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import { SCHEDULING_MODULE } from '../scheduling.tokens';
 import type {
   BookingScheduleSnapshot,
@@ -16,6 +17,7 @@ import type {
   ScheduleRemindersInput,
   SlotCapacitySnapshot,
   WaitlistCandidateSnapshot,
+  WaitlistEntryView,
   WaitlistReadPort,
   WaitlistWritePort,
 } from '../ports/waitlist.port';
@@ -40,6 +42,10 @@ export class PostgresWaitlistAdapter
     @Inject(persistenceSessionToken(SCHEDULING_MODULE))
     private readonly session: PersistenceSession,
     private readonly repository: SchedulingBookingsRepository,
+    // P8: la lectura de la lista de espera necesita además resolver el nombre
+    // de la agenda, que vive en `profiles`. Es mapeo de entidad a modelo de
+    // lectura, que es exactamente lo que este adaptador hace.
+    private readonly noticeRepository: SchedulingNoticeRepository,
   ) {}
 
   // ---------------------------------------------------------------- lectura
@@ -63,6 +69,25 @@ export class PostgresWaitlistAdapter
       // Declararlo `eventual` es lo que permite que esta consulta -de las más
       // pesadas del módulo- salga de la primaria el día que haya réplica.
       { ...context, consistency: context.consistency ?? 'eventual' },
+    );
+  }
+
+  findEntriesForPatient(
+    patientProfileId: string,
+    statusConceptIds: readonly string[] | undefined,
+    limit: number,
+    context: ReadContext = {},
+  ): Promise<readonly WaitlistEntryView[]> {
+    return this.session.read(
+      'waitlist.findEntriesForPatient',
+      (em) =>
+        this.noticeRepository.findWaitlistByPatient(
+          em,
+          patientProfileId,
+          statusConceptIds,
+          limit,
+        ),
+      context,
     );
   }
 

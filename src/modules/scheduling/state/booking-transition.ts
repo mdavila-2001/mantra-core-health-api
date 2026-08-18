@@ -46,6 +46,16 @@ export interface BookingTransitionSnapshot {
    * la cuenta, no el papel que jugaba.
    */
   actorKind?: BookingActorKind;
+  /**
+   * Minutos de demora informados por el profesional (P8).
+   *
+   * Sólo lo trae la operación `HISTORY_OP_DELAY`. Vive en el mismo snapshot que
+   * el motivo porque una demora **es** una razón anotada sobre la cita, con su
+   * autor y su instante; lo único que la distingue es que no cambia el estado.
+   * Persistirla en columna exigiría el ciclo completo del modelo, que este
+   * carril no hace (ver `reports/P8.md`).
+   */
+  delayMinutes?: number;
 }
 
 /** Desde qué lado del mostrador se hizo el cambio. */
