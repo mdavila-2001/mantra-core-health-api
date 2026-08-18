@@ -105,7 +105,10 @@ export class ClinicalReadService {
   ): Promise<void> {
     const em = this.em.fork();
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    const perfil = await this.patientProfilesRepo.findById(em, patientProfileId);
+    const perfil = await this.patientProfilesRepo.findById(
+      em,
+      patientProfileId,
+    );
 
     if (!link || !perfil || perfil.profileId !== link.personId) {
       this.logger.warn(
