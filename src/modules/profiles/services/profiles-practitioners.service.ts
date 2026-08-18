@@ -66,6 +66,18 @@ import { ProfileOwnershipService } from './profile-ownership.service';
  * Todas las escrituras son `em.transactional` con `flush` padre-antes-de-hijo,
  * porque las FK son columnas uuid planas y MikroORM no ordena inserts.
  */
+/**
+ * La actividad de un perfil sin cuenta vinculada, y el vacío con el que se
+ * responde si el conteo no se pudo hacer. Cero es un dato legítimo acá: un
+ * perfil dado de alta por la organización nunca escribió nada.
+ */
+const SIN_ACTIVIDAD: PractitionerActivityDto = {
+  encounters: 0,
+  medicationRequests: 0,
+  clinicalNotes: 0,
+  documents: 0,
+};
+
 @Injectable()
 export class ProfilesPractitionersService {
   /**
@@ -340,6 +352,14 @@ export class ProfilesPractitionersService {
     }
 
     const profileId = practitioner.profileId;
+    // Cada pieza del perfil se lee **sin poder tumbar a las demás** (F-18,
+    // 18/08/2026). La ficha de la Guía devolvía 500 —con código de soporte a la
+    // vista del paciente— en cuanto una de estas seis lecturas fallaba sobre un
+    // perfil pelado, que es justo como quedan los del seeder técnico: sin
+    // credenciales, sin especialidad, sin foto. Un perfil incompleto es un
+    // perfil que se muestra incompleto, no un error: la pantalla ya sabe pintar
+    // vacíos dignos. Lo que no puede faltar —la persona y su perfil— sigue
+    // cortando arriba con 404.
     const [
       specialties,
       credentials,
@@ -348,19 +368,38 @@ export class ProfilesPractitionersService {
       affiliations,
       activity,
     ] = await Promise.all([
-      this.specialtiesRepo.findAllByPractitioner(em, profileId),
-      this.credentialsRepo.findByPractitioner(em, profileId),
-      this.authorizationsRepo.findByPractitioner(em, profileId),
-      this.languagesRepo.findByPractitioner(em, profileId),
-      this.affiliationsRepo.findByPractitioner(em, profileId),
+      this.sinTumbarLaFicha(
+        () => this.specialtiesRepo.findAllByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'especialidades' },
+      ),
+      this.sinTumbarLaFicha(
+        () => this.credentialsRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'credenciales' },
+      ),
+      this.sinTumbarLaFicha(
+        () => this.authorizationsRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'matrículas' },
+      ),
+      this.sinTumbarLaFicha(
+        () => this.languagesRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'idiomas' },
+      ),
+      this.sinTumbarLaFicha(
+        () => this.affiliationsRepo.findByPractitioner(em, profileId),
+        [],
+        { profileId, pieza: 'afiliaciones' },
+      ),
       subjectUserId === undefined
-        ? Promise.resolve({
-            encounters: 0,
-            medicationRequests: 0,
-            clinicalNotes: 0,
-            documents: 0,
-          })
-        : this.countActivity(em, subjectUserId),
+        ? Promise.resolve(SIN_ACTIVIDAD)
+        : this.sinTumbarLaFicha(
+            () => this.countActivity(em, subjectUserId),
+            SIN_ACTIVIDAD,
+            { profileId, pieza: 'actividad' },
+          ),
     ]);
 
     return {
@@ -641,6 +680,33 @@ export class ProfilesPractitionersService {
    * @param userId - La cuenta cuya actividad se cuenta.
    * @returns Las cuatro cifras de actividad.
    */
+
+  /**
+   * Ejecuta una lectura accesoria de la ficha y, si revienta, devuelve el vacío
+   * en vez de propagar.
+   *
+   * Es deliberadamente estrecho: **sólo** para las piezas que la ficha muestra
+   * como lista o como conteo. Nada de lo que decide si el perfil existe pasa
+   * por acá — eso sigue siendo un 404 explícito. Se registra en `warn` con la
+   * pieza y el perfil, porque un vacío silencioso que en realidad es un fallo
+   * es peor que el 500 que reemplaza: el log es lo que lo hace visible.
+   */
+  private async sinTumbarLaFicha<T>(
+    leer: () => Promise<T>,
+    vacio: T,
+    contexto: { profileId: string; pieza: string },
+  ): Promise<T> {
+    try {
+      return await leer();
+    } catch (error) {
+      this.logger.warn(
+        { ...contexto, err: error },
+        'La ficha del profesional se devuelve sin esta pieza: la lectura falló',
+      );
+      return vacio;
+    }
+  }
+
   private async countActivity(
     em: EntityManager,
     userId: string,

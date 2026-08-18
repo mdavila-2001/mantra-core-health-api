@@ -1030,6 +1030,50 @@ describe('ProfilesPractitionersService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
+    /**
+     * F-18 (18/08/2026): abrir la ficha desde la Guía devolvía 500 con código
+     * de soporte a la vista del paciente. Los perfiles del seeder técnico están
+     * pelados —sin credenciales, sin especialidad, sin foto— y basta con que
+     * una de las lecturas accesorias falle para tumbar la ficha entera.
+     */
+    it('un perfil pelado se muestra incompleto, nunca con un error', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'u-titular',
+      });
+      d.personsRepo.findById.mockResolvedValue({ id: 'per-1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'per-1',
+        practitionerCode: 'MED-7',
+        practitionerCategoryConceptId: PROF.PRACT_CATEGORY_GENERAL,
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+        createdAt: new Date(),
+      });
+      // Las seis lecturas accesorias revientan a la vez: el peor caso.
+      const revienta = new Error('columna inexistente');
+      d.specialtiesRepo.findAllByPractitioner.mockRejectedValue(revienta);
+      d.credentialsRepo.findByPractitioner.mockRejectedValue(revienta);
+      d.authorizationsRepo.findByPractitioner.mockRejectedValue(revienta);
+      d.languagesRepo.findByPractitioner.mockRejectedValue(revienta);
+      d.affiliationsRepo.findByPractitioner.mockRejectedValue(revienta);
+      d.em.count.mockRejectedValue(revienta);
+
+      const perfil = await d.service.getPractitionerSummary('per-1');
+
+      expect(perfil.profileId).toBe('per-1');
+      expect(perfil.specialties).toEqual([]);
+      expect(perfil.credentials).toEqual([]);
+      expect(perfil.licenses).toEqual([]);
+      expect(perfil.languages).toEqual([]);
+      expect(perfil.activity).toEqual({
+        encounters: 0,
+        medicationRequests: 0,
+        clinicalNotes: 0,
+        documents: 0,
+      });
+    });
+
     it('un perfil inexistente responde no encontrado', async () => {
       const d = build();
       d.practitionersRepo.findById.mockResolvedValue(null);
