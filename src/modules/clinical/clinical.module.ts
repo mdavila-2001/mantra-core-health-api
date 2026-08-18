@@ -111,6 +111,15 @@ import {
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:
   // las invariantes de la historia clínica siguen viviendo aquí.
-  exports: [ConditionsService, ProceduresService, ServiceRequestsService],
+  // `EncountersRepository` se exporta porque `CommunityReviewsService` lo pide:
+  // una reseña sólo vale si hubo atención real, y comprobarlo es leer el
+  // encuentro. El repositorio ya estaba en `providers`; sin exportarlo, el
+  // módulo que lo inyecta no puede verlo.
+  exports: [
+    ConditionsService,
+    ProceduresService,
+    ServiceRequestsService,
+    EncountersRepository,
+  ],
 })
 export class ClinicalModule {}

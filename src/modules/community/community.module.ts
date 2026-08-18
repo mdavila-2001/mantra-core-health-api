@@ -10,6 +10,7 @@ import { MessagingModule } from '../messaging/messaging.module';
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
 import { PersonAccountLinksRepository } from '../profiles/repositories';
+import { ClinicalModule } from '../clinical/clinical.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -92,9 +93,15 @@ import { EncountersRepository } from '../clinical/repositories';
   //
   // `MessagingModule` entra por el contrato de notificaciones de P1: community
   // decide a quién avisar de lo que pasa en un grupo; messaging entrega.
+  //
+  // `ClinicalModule` por `EncountersRepository`: `CommunityReviewsService` exige
+  // atención real antes de aceptar una reseña. No hay ciclo — `clinical` no
+  // importa nada de `community` — y es el mismo patrón que ya usa
+  // `procedures_perioperative`.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommonModule,
+    ClinicalModule,
     MessagingModule,
   ],
   controllers: [

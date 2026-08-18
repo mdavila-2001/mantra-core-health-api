@@ -11,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ForbiddenException } from '@nestjs/common';
 import { CommunitySocialService } from './community-social.service';
 import { AttachableFileService } from '../../common/services';
+import { COMM } from '../community.concepts';
 import {
   CONCEPTS,
   ConflictException,
@@ -336,6 +337,133 @@ describe('CommunitySocialService', () => {
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.profilesRepo.create).not.toHaveBeenCalled();
+    });
+
+    /**
+     * El alta no publica a nadie. Es la mitad que faltaba del opt-in: la
+     * columna existía y ninguna ruta la escribía, así que toda vitrina nacía
+     * nula —privada— y el directorio público quedaba vacío por construcción.
+     */
+    it('no publica la vitrina nueva cuando no se declara la visibilidad', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: 'pp-1',
+          tenantId: 't-1',
+          targetId: 'u-1',
+          slug: 'nuevo-slug',
+          displayName: 'Nombre',
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+        });
+
+      const resultado = await d.service.upsertOwnProfile(
+        { tenantId: 't-1', slug: 'nuevo-slug', displayName: 'Nombre' },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(d.profilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ visibilityConceptId: undefined }),
+      );
+      expect(resultado.visibility).toBe('PRIVATE');
+    });
+
+    /** Declararla `PUBLIC` es lo que la lista en el directorio anónimo. */
+    it('publica la vitrina nueva cuando el titular lo declara', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: 'pp-1',
+          tenantId: 't-1',
+          targetId: 'u-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Doctora Uno',
+          statusConceptId: CONCEPTS.STATE_ACTIVE,
+          visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+        });
+
+      const resultado = await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Doctora Uno',
+          visibility: 'PUBLIC',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(d.profilesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+        }),
+      );
+      expect(resultado.visibility).toBe('PUBLIC');
+    });
+
+    /**
+     * Omitir el campo al editar **conserva** lo que había. Si el `PUT` lo
+     * borrara, cualquier pantalla que edite el titular sin tocar el
+     * interruptor despublicaría la vitrina sin decirlo.
+     */
+    it('conserva la visibilidad existente cuando el PUT no la menciona', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'doctor-uno-e2e',
+        displayName: 'Nombre viejo',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+
+      await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Nombre nuevo',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(existente.visibilityConceptId).toBe(
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+      );
+    });
+
+    /** Y declararla `PRIVATE` la saca del directorio. */
+    it('despublica la vitrina cuando el titular declara PRIVATE', async () => {
+      const d = build();
+      const existente = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'doctor-uno-e2e',
+        displayName: 'Doctora Uno',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      };
+      d.profilesRepo.findByTarget.mockResolvedValue(existente);
+      d.profilesRepo.findBySlug.mockResolvedValue(existente);
+
+      await d.service.upsertOwnProfile(
+        {
+          tenantId: 't-1',
+          slug: 'doctor-uno-e2e',
+          displayName: 'Doctora Uno',
+          visibility: 'PRIVATE',
+        },
+        { id: 'u-1', roles: [] } as any,
+      );
+
+      expect(existente.visibilityConceptId).toBe(
+        COMM.PROFILE_VISIBILITY_PRIVATE,
+      );
     });
   });
 

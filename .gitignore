@@ -122,3 +122,9 @@ docs/endpoints/
 /CARRILES-*.md
 /CARRIL_*.md
 /COORDINACION-AGENTES.md
+
+# Entorno E2E aislado (carril P4). Contiene credenciales locales: nunca se versiona.
+.env.e2e
+
+# Salida del sembrador E2E: es del entorno de cada máquina, no del repo.
+seed-manifest.json

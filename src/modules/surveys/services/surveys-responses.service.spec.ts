@@ -1,4 +1,6 @@
 import { jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
+import { TableNotFoundException } from '@mikro-orm/core';
 
 /**
  * Ejecuta la operación mock fn.
@@ -73,7 +75,7 @@ function build() {
     templatesRepo as any,
     logger as any,
   );
-  return { service, tx, invitationsRepo, responsesRepo, templatesRepo };
+  return { service, tx, invitationsRepo, responsesRepo, templatesRepo, logger };
 }
 
 /** Invitación pendiente del paciente de la prueba. */
@@ -124,11 +126,12 @@ describe('SurveysResponsesService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
-    it('rechaza a una sesión sin perfil de paciente', async () => {
+    it('rechaza con 403 a una sesión sin perfil de paciente', async () => {
       const d = build();
       await expect(
         d.service.listMyInvitations(practitionerActor),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.invitationsRepo.listByPatient).not.toHaveBeenCalled();
     });
 
     it('no deja que otro paciente responda la invitación', async () => {
@@ -146,6 +149,73 @@ describe('SurveysResponsesService', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('listMyInvitations', () => {
+    it('devuelve las invitaciones del paciente con el título de su encuesta', async () => {
+      const d = build();
+      d.invitationsRepo.listByPatient.mockResolvedValue([pendingInvitation()]);
+      d.templatesRepo.findVersionById.mockResolvedValue({
+        id: 'ver-1',
+        surveyTemplateId: 'tpl-1',
+      });
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        title: 'Cómo fue tu consulta',
+        description: 'Tres preguntas',
+      });
+
+      const result = await d.service.listMyInvitations(patientActor);
+
+      expect(d.invitationsRepo.listByPatient).toHaveBeenCalledWith(
+        expect.anything(),
+        PATIENT,
+      );
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'inv-1',
+          title: 'Cómo fue tu consulta',
+          status: 'PENDING',
+        }),
+      ]);
+    });
+
+    it('un paciente sin invitaciones recibe una lista vacía, no un error', async () => {
+      const d = build();
+
+      await expect(d.service.listMyInvitations(patientActor)).resolves.toEqual(
+        [],
+      );
+      expect(d.logger.warn).not.toHaveBeenCalled();
+    });
+
+    // F-14: el esquema `surveys` todavía no está materializado por el pipeline
+    // y la primera pantalla del paciente reventaba con 500. Mientras dure el
+    // bloqueador (M4), «no hay tabla» se lee como «no hay cuestionarios».
+    it('si la tabla todavía no existe responde vacío y lo avisa, en vez de un 500', async () => {
+      const d = build();
+      d.invitationsRepo.listByPatient.mockRejectedValue(
+        new TableNotFoundException(
+          new Error('relation "surveys.survey_invitations" does not exist'),
+        ),
+      );
+
+      await expect(d.service.listMyInvitations(patientActor)).resolves.toEqual(
+        [],
+      );
+      expect(d.logger.warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('cualquier otro fallo de la base sigue subiendo', async () => {
+      const d = build();
+      d.invitationsRepo.listByPatient.mockRejectedValue(
+        new Error('connection refused'),
+      );
+
+      await expect(d.service.listMyInvitations(patientActor)).rejects.toThrow(
+        'connection refused',
+      );
     });
   });
 

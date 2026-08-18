@@ -21,6 +21,8 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// Correos reales: ver `correos-reales.mjs`.
+import { CORREOS } from './correos-reales.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
@@ -33,7 +35,7 @@ function arg(name, fallback) {
 }
 
 const BASE = arg('base-url', process.env.API_BASE_URL ?? 'http://localhost:3000');
-const EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'admin@redesa.test';
+const EMAIL = process.env.BOOTSTRAP_ADMIN_EMAIL ?? CORREOS.admin;
 const PASSWORD = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
 const U = Date.now().toString().slice(-7);
 
