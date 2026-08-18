@@ -13,15 +13,31 @@ const actor = { id: 'u1', roles: [] } as any;
 
 describe('CommunityReviewsController', () => {
   it('delegates publishReview (UC-19-11)', async () => {
-    const service = { publishReview: mockFn() };
+    const service = { publishReview: mockFn(), respondToReview: mockFn() };
     const controller = new CommunityReviewsController(
       service as any,
       {
         listProfileReviews: mockFn(),
       } as any,
     );
-    const dto = { reviewerPatientProfileId: 'pp1', overallRating: 5 };
+    const dto = { overallRating: 5, verifiedEncounterId: 'enc-1' };
     await controller.publishReview('p1', dto, actor);
     expect(service.publishReview).toHaveBeenCalledWith('p1', dto, actor);
+  });
+
+  it('delegates respondToReview', async () => {
+    const service = { publishReview: mockFn(), respondToReview: mockFn() };
+    const controller = new CommunityReviewsController(
+      service as any,
+      { listProfileReviews: mockFn() } as any,
+    );
+    const dto = { responseText: 'Gracias.' };
+    await controller.respondToReview('p1', 'rev1', dto as any, actor);
+    expect(service.respondToReview).toHaveBeenCalledWith(
+      'p1',
+      'rev1',
+      dto,
+      actor,
+    );
   });
 });

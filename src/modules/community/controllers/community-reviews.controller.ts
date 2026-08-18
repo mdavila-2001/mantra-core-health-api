@@ -21,6 +21,8 @@ import {
 } from '../services';
 import {
   CreateReviewDto,
+  CreateReviewResponseDto,
+  IdResponseDto,
   ReviewResponseDto,
   ServiceReviewPageDto,
 } from '../dto';
@@ -73,5 +75,24 @@ export class CommunityReviewsController {
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
     });
+  }
+
+  /**
+   * UC-19-11: el profesional contesta una reseña de su propia vitrina.
+   *
+   * `community.review_responses` existía como tabla y la lectura ya devolvía las
+   * respuestas, pero no había forma de crear ninguna: un profesional podía ser
+   * calificado en público sin poder contestar.
+   */
+  @Post(':profileId/reviews/:reviewId/responses')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Responder una reseña de la propia vitrina' })
+  respondToReview(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Param('reviewId', ParseUUIDPipe) reviewId: string,
+    @Body() dto: CreateReviewResponseDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<IdResponseDto> {
+    return this.service.respondToReview(profileId, reviewId, dto, actor);
   }
 }

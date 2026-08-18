@@ -547,6 +547,47 @@ export const APPEAL_RESOLUTION_BY_CODE: Record<string, string> = {
   PARTIAL: COMM.APPEAL_PARTIAL,
 };
 
+/**
+ * Estado de apelación enum → concept id, para **filtrar** lecturas.
+ *
+ * Se distingue de `APPEAL_RESOLUTION_BY_CODE` en que incluye `OPEN`: una
+ * apelación abierta no tiene resolución, y es justamente la que un moderador
+ * busca cuando entra a trabajar.
+ */
+export const APPEAL_STATUS_BY_CODE: Record<string, string> = {
+  OPEN: COMM.APPEAL_OPEN,
+  ...APPEAL_RESOLUTION_BY_CODE,
+};
+
+/** Estado de la cola de moderación enum → concept id (UC-19-09, lectura). */
+export const QUEUE_STATUS_BY_CODE: Record<string, string> = {
+  QUEUED: COMM.QUEUE_QUEUED,
+  IN_REVIEW: COMM.QUEUE_IN_REVIEW,
+  RESOLVED: COMM.QUEUE_RESOLVED,
+};
+
+/** Prioridad de la cola enum → concept id (UC-19-09, lectura). */
+export const QUEUE_PRIORITY_BY_CODE: Record<string, string> = {
+  LOW: COMM.QUEUE_PRIORITY_LOW,
+  NORMAL: COMM.QUEUE_PRIORITY_NORMAL,
+  HIGH: COMM.QUEUE_PRIORITY_HIGH,
+};
+
+/**
+ * Tipo de contenido moderable enum → concept id.
+ *
+ * Es el mismo mapa que la escritura de reportes derivaba del target; se declara
+ * acá para que la lectura filtre por los mismos conceptos con los que se escribe
+ * y no por una segunda tabla equivalente.
+ */
+export const CONTENT_TYPE_BY_CODE: Record<string, string> = {
+  POST: COMM.CONTENT_TYPE_POST,
+  COMMENT: COMM.CONTENT_TYPE_COMMENT,
+  PROFILE: COMM.CONTENT_TYPE_PROFILE,
+  MESSAGE: COMM.CONTENT_TYPE_MESSAGE,
+  REVIEW: COMM.CONTENT_TYPE_REVIEW,
+};
+
 /** Review dimension enum → concept id (UC-19-11). */
 export const REVIEW_DIMENSION_BY_CODE: Record<string, string> = {
   COMMUNICATION: COMM.REVIEW_DIMENSION_COMMUNICATION,

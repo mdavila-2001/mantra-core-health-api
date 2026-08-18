@@ -376,4 +376,234 @@ export class ModerationRepository {
       statusConceptId: openStatusConceptId,
     });
   }
+
+  /**
+   * Una apelación por su id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la apelación.
+   * @returns La apelación, o `null`.
+   */
+  findAppealById(
+    em: EntityManager,
+    id: string,
+  ): Promise<ModerationAppeals | null> {
+    return em.findOne(ModerationAppeals, { id });
+  }
+
+  // --- Lecturas de la cola de trabajo (UC-19-09/10, cara de lectura) ---
+  //
+  // Sin estas tres, la moderación se podía **decidir** pero no **trabajar**: un
+  // moderador podía resolver una entrada cuyo uuid ya conociera, y no había
+  // forma de saber qué entradas había. Una cola que no se puede leer no es una
+  // cola.
+
+  /**
+   * Página de la cola de moderación, con filtros de trabajo.
+   *
+   * ## Orden y determinismo
+   *
+   * Ordena por prioridad declarada y luego por antigüedad —lo urgente primero,
+   * y a igual urgencia lo que lleva más tiempo esperando—. El desempate final es
+   * por `id`, y no es un adorno: sin él, dos filas con el mismo instante podrían
+   * salir en orden distinto entre dos páginas y el cursor saltearía una o
+   * repetiría otra.
+   *
+   * `queued_at` puede ser nulo en filas viejas, así que el orden usa
+   * `coalesce(queued_at, created_at)`: una entrada sin marca de encolado no
+   * puede irse al final de la cola para siempre.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filtros - Estado, prioridad, tipo de contenido y antigüedad mínima.
+   * @param after - Clave de continuación `(queuedAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de entradas de cola.
+   */
+  async listQueuePage(
+    em: EntityManager,
+    filtros: {
+      /** Estados admitidos; vacío o ausente significa todos. */
+      statusConceptIds?: string[];
+      /** Prioridades admitidas; vacío o ausente significa todas. */
+      priorityConceptIds?: string[];
+      /** Tipos de contenido admitidos; vacío o ausente significa todos. */
+      contentTypeConceptIds?: string[];
+      /** Sólo lo encolado antes de este instante (antigüedad mínima). */
+      queuedBefore?: Date;
+    },
+    after: { queuedAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<ModerationQueue[]> {
+    const where: Record<string, unknown> = {};
+    if (filtros.statusConceptIds?.length) {
+      where.statusConceptId = { $in: filtros.statusConceptIds };
+    }
+    if (filtros.priorityConceptIds?.length) {
+      where.priorityConceptId = { $in: filtros.priorityConceptIds };
+    }
+    if (filtros.contentTypeConceptIds?.length) {
+      where.contentTypeConceptId = { $in: filtros.contentTypeConceptIds };
+    }
+    if (filtros.queuedBefore) {
+      where.queuedAt = { $lte: filtros.queuedBefore };
+    }
+    if (after) {
+      // Keyset sobre `(queuedAt, id)` ascendente: lo más viejo primero.
+      where.$or = [
+        { queuedAt: { $gt: new Date(after.queuedAt) } },
+        { queuedAt: new Date(after.queuedAt), id: { $gt: after.id } },
+      ];
+    }
+
+    return em.find(ModerationQueue, where, {
+      orderBy: { queuedAt: 'ASC', id: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
+   * Los reportes que originaron un conjunto de entradas de cola.
+   *
+   * Da el contexto que el moderador necesita —razón declarada y detalle— sin
+   * una consulta por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores de reporte.
+   * @returns Los reportes encontrados.
+   */
+  listReportsByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<ContentReports[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(ContentReports, { id: { $in: ids } });
+  }
+
+  /**
+   * Cuántos reportes tiene cada contenido de una página.
+   *
+   * Diez personas reportando lo mismo es una señal distinta de una sola, y la
+   * cola deduplica por contenido: sin este recuento, las dos entradas se ven
+   * iguales.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param contentRefIds - Contenidos de la página.
+   * @returns Pares contenido → cantidad de reportes.
+   */
+  async countReportsByContent(
+    em: EntityManager,
+    contentRefIds: string[],
+  ): Promise<{ targetId: string; count: number }[]> {
+    if (contentRefIds.length === 0) return [];
+    const rows = await em
+      .getConnection()
+      .execute<Array<{ target_id: string; count: number }>>(
+        `select target_id, count(*)::int as count
+           from community.content_reports
+          where target_id = any(?)
+          group by target_id`,
+        [contentRefIds],
+        'all',
+      );
+    return rows.map((row) => ({ targetId: row.target_id, count: row.count }));
+  }
+
+  /**
+   * Página de decisiones tomadas, de la más reciente hacia atrás.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filtros - Cola concreta o decisión concreta, si se acota.
+   * @param after - Clave de continuación `(decidedAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de decisiones.
+   */
+  listDecisionsPage(
+    em: EntityManager,
+    filtros: {
+      /** Acota a una entrada de cola. */
+      moderationQueueId?: string;
+      /** Acota a un tipo de decisión. */
+      decisionConceptIds?: string[];
+    },
+    after: { decidedAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<ModerationDecisions[]> {
+    const where: Record<string, unknown> = {};
+    if (filtros.moderationQueueId) {
+      where.moderationQueueId = filtros.moderationQueueId;
+    }
+    if (filtros.decisionConceptIds?.length) {
+      where.decisionConceptId = { $in: filtros.decisionConceptIds };
+    }
+    if (after) {
+      // Descendente: lo último decidido es lo que un moderador quiere revisar.
+      where.$or = [
+        { decidedAt: { $lt: new Date(after.decidedAt) } },
+        { decidedAt: new Date(after.decidedAt), id: { $lt: after.id } },
+      ];
+    }
+
+    return em.find(ModerationDecisions, where, {
+      orderBy: { decidedAt: 'DESC', id: 'DESC' },
+      limit,
+    });
+  }
+
+  /**
+   * Las decisiones de un conjunto de ids, para hidratar apelaciones.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores de decisión.
+   * @returns Las decisiones encontradas.
+   */
+  listDecisionsByIds(
+    em: EntityManager,
+    ids: string[],
+  ): Promise<ModerationDecisions[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(ModerationDecisions, { id: { $in: ids } });
+  }
+
+  /**
+   * Página de apelaciones, de la más antigua hacia adelante.
+   *
+   * Ascendente y no descendente como las decisiones: una apelación es trabajo
+   * **pendiente**, y el trabajo pendiente se atiende por orden de llegada.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filtros - Estado y apelante, si se acota.
+   * @param after - Clave de continuación `(createdAt, id)`.
+   * @param limit - Tope de filas.
+   * @returns Página de apelaciones.
+   */
+  listAppealsPage(
+    em: EntityManager,
+    filtros: {
+      /** Estados admitidos; vacío o ausente significa todos. */
+      statusConceptIds?: string[];
+      /** Acota a un apelante concreto. */
+      appellantProfileId?: string;
+    },
+    after: { createdAt: string; id: string } | undefined,
+    limit: number,
+  ): Promise<ModerationAppeals[]> {
+    const where: Record<string, unknown> = {};
+    if (filtros.statusConceptIds?.length) {
+      where.statusConceptId = { $in: filtros.statusConceptIds };
+    }
+    if (filtros.appellantProfileId) {
+      where.appellantProfileId = filtros.appellantProfileId;
+    }
+    if (after) {
+      where.$or = [
+        { createdAt: { $gt: new Date(after.createdAt) } },
+        { createdAt: new Date(after.createdAt), id: { $gt: after.id } },
+      ];
+    }
+
+    return em.find(ModerationAppeals, where, {
+      orderBy: { createdAt: 'ASC', id: 'ASC' },
+      limit,
+    });
+  }
 }
