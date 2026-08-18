@@ -18,6 +18,7 @@ import {
   IdResponseDto,
   ReviewResponseDto,
 } from '../dto';
+import { CommunityVisibilityService } from './community-visibility.service';
 
 /**
  * Reviews verificadas de servicio (UC-19-11).
@@ -58,6 +59,7 @@ export class CommunityReviewsService {
    * @param profilesRepo - Valor de profiles repo requerido por la operación.
    * @param reviewsRepo - Valor de reviews repo requerido por la operación.
    * @param encountersRepo - Atenciones clínicas, que respaldan la elegibilidad.
+   * @param visibility - Propiedad del perfil con el que se firma la respuesta.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -65,6 +67,7 @@ export class CommunityReviewsService {
     private readonly profilesRepo: PublicProfilesRepository,
     private readonly reviewsRepo: ReviewsRepository,
     private readonly encountersRepo: EncountersRepository,
+    private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityReviewsService.name);
@@ -290,21 +293,11 @@ export class CommunityReviewsService {
           profileId,
         });
 
-      // Titularidad estricta, sin atajo de rol: ver la reseña ajena es una cosa,
-      // contestarla en nombre de otro es otra. (Al integrar P3 esto pasa a
-      // `CommunityVisibilityService.assertActsAsProfile`, que es la misma regla
-      // compartida.)
-      const sujetos = actor.practitionerProfileId
-        ? [actor.practitionerProfileId, actor.id]
-        : [actor.id];
-      if (
-        !sujetos.includes(target.targetId) &&
-        target.createdByUserId !== actor.id
-      ) {
-        throw new ForbiddenException(
-          'Sólo el titular del perfil puede responder sus reseñas',
-        );
-      }
+      // Titularidad estricta, sin atajo de rol: ver la reseña ajena es una cosa
+      // —trabajo de un moderador—, contestarla en nombre de otro es otra, y no
+      // lo es de nadie. La regla es la misma que gobierna toda escritura del
+      // grafo social, así que se usa la compartida y no una copia.
+      await this.visibility.assertActsAsProfile(tx, profileId, actor);
 
       const review = await this.reviewsRepo.findById(tx, reviewId);
       // «No es de esta vitrina» y «no existe» dan lo mismo: distinguirlos

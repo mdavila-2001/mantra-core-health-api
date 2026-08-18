@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -7,10 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import {
-  ModerationRepository,
-  PublicProfilesRepository,
-} from '../repositories';
+import { ModerationRepository } from '../repositories';
 import {
   COMM,
   APPEAL_RESOLUTION_BY_CODE,
@@ -28,6 +25,7 @@ import {
   ModerationDecisionResponseDto,
   IdResponseDto,
 } from '../dto';
+import { CommunityVisibilityService } from './community-visibility.service';
 
 /** Tipo de contenido para la cola de moderación derivado del target del reporte. */
 const CONTENT_TYPE_BY_TARGET: Record<string, string> = {
@@ -49,56 +47,16 @@ export class CommunityModerationService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param moderationRepo - Valor de moderation repo requerido por la operación.
-   * @param profilesRepo - Perfiles públicos, para comprobar quién apela.
+   * @param visibility - Propiedad del perfil con el que se firma la escritura.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly moderationRepo: ModerationRepository,
-    private readonly profilesRepo: PublicProfilesRepository,
+    private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityModerationService.name);
-  }
-
-  /**
-   * Exige que el perfil que apela sea del actor.
-   *
-   * ## Por qué está acá y no en `CommunityVisibilityService`
-   *
-   * Porque este carril (P6) sale de `dev` en paralelo con P3, que es el que
-   * lleva la versión compartida de esta regla (`assertActsAsProfile`). Meterla
-   * allá desde acá sería escribir en el archivo de otro carril. **Al integrar
-   * P3, esta comprobación se reemplaza por la compartida** — quedan los mismos
-   * tres sujetos y el mismo criterio, así que el reemplazo es mecánico.
-   *
-   * No hay atajo de rol de plataforma, y es a propósito: revisar una apelación
-   * ajena es trabajo de un moderador; **presentarla** en nombre de otro no lo es
-   * de nadie.
-   *
-   * @param em - Transacción activa.
-   * @param profileId - Perfil declarado como apelante.
-   * @param actor - Quien pide la operación.
-   * @throws ForbiddenException si ese perfil no es del actor.
-   */
-  private async assertApelanteEsDelActor(
-    em: EntityManager,
-    profileId: string,
-    actor: AuthenticatedUser,
-  ): Promise<void> {
-    const perfil = await this.profilesRepo.findById(em, profileId);
-    const sujetos = actor.practitionerProfileId
-      ? [actor.practitionerProfileId, actor.id]
-      : [actor.id];
-    if (
-      perfil &&
-      (sujetos.includes(perfil.targetId) || perfil.createdByUserId === actor.id)
-    ) {
-      return;
-    }
-    throw new ForbiddenException(
-      'Sólo el titular del perfil sancionado puede apelar',
-    );
   }
 
   /** UC-19-08: reporta contenido y lo encola (dedup por contenido en cola abierta). */
@@ -231,7 +189,11 @@ export class CommunityModerationService {
       // podía abrir una apelación en nombre de otro — y como una decisión sólo
       // admite una apelación abierta a la vez, además le quemaba la suya al
       // sancionado, que después chocaba con un 409.
-      await this.assertApelanteEsDelActor(tx, dto.appellantProfileId, actor);
+      await this.visibility.assertActsAsProfile(
+        tx,
+        dto.appellantProfileId,
+        actor,
+      );
 
       const decision = await this.moderationRepo.findDecisionById(
         tx,

@@ -69,15 +69,21 @@ function build() {
   const encountersRepo = {
     findById: mockFn().mockResolvedValue(atencionValida),
   };
+  // La propiedad se concede por defecto; los casos de perfil ajeno la hacen
+  // rechazar. La regla en sí tiene su propia prueba en el servicio compartido.
+  const visibility = {
+    assertActsAsProfile: mockFn(() => Promise.resolve(undefined)),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityReviewsService(
     em as any,
     profilesRepo as any,
     reviewsRepo as any,
     encountersRepo as any,
+    visibility as any,
     logger as any,
   );
-  return { service, tx, profilesRepo, reviewsRepo, encountersRepo };
+  return { service, tx, profilesRepo, reviewsRepo, encountersRepo, visibility };
 }
 
 describe('CommunityReviewsService (UC-19-11)', () => {
@@ -271,28 +277,40 @@ describe('CommunityReviewsService (UC-19-11)', () => {
       ).resolves.toEqual({ id: 'resp-1' });
     });
 
-    it('otro profesional no puede responder por él', async () => {
+    it('exige la titularidad de la vitrina con la regla compartida', async () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.reviewsRepo.findById.mockResolvedValue({
+        id: 'rev1',
+        targetPublicProfileId: 'p1',
+      });
+      d.reviewsRepo.createResponse.mockReturnValue({ id: 'resp-1' });
 
-      await expect(
-        d.service.respondToReview(
-          'p1',
-          'rev1',
-          { responseText: 'No es mi vitrina.' } as any,
-          {
-            id: 'u3',
-            roles: ['CLINICIAN'],
-            practitionerProfileId: 'hp-9',
-          } as any,
-        ),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      await d.service.respondToReview(
+        'p1',
+        'rev1',
+        { responseText: 'Gracias.' } as any,
+        doctor,
+      );
+
+      expect(d.visibility.assertActsAsProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'p1',
+        doctor,
+      );
     });
 
-    /** Moderar no es hablar por el profesional en su ficha pública. */
-    it('un administrador tampoco puede responder por él', async () => {
+    /**
+     * Contestar en nombre de otro no lo habilita ningún rol — tampoco el de
+     * moderación. `assertActsAsProfile` no tiene atajo de plataforma, y acá se
+     * comprueba que su negativa corte la operación antes de escribir nada.
+     */
+    it('si la vitrina no es del actor, no escribe nada', async () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
 
       await expect(
         d.service.respondToReview(
@@ -302,6 +320,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
           { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any,
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.reviewsRepo.createResponse).not.toHaveBeenCalled();
     });
 
     /**
