@@ -220,6 +220,26 @@ describe('SchedulingCatalogService', () => {
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
+    it('un SUPERADMIN sin perfil profesional publica el recurso de cualquier profesional', async () => {
+      // El RolesGuard trata SUPERADMIN como comodín; negarlo en el servicio le
+      // quitaba lo que el guard ya le concedió. El caso real: el admin de
+      // arranque (SUPERADMIN + SECURITY_ADMIN, sin hpid ni tenantIds) siembra
+      // las agendas de los médicos de demo — con la regresión recibía 403 y el
+      // seeder terminaba con Agenda 0/8.
+      const d = buildCatalog();
+      d.catalogRepo.createResource.mockReturnValue({ id: 'res-1' });
+
+      await d.service.createResource(
+        { ...dtoPropio, resourceRefId: 'hp-ajeno' } as never,
+        { id: 'user-root', roles: ['SECURITY_ADMIN', 'SUPERADMIN'] } as never,
+      );
+
+      expect(d.catalogRepo.createResource).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ resourceRefId: 'hp-ajeno' }),
+      );
+    });
+
     it('una plantilla sobre el recurso propio pasa; sobre uno ajeno, 403', async () => {
       const d = buildCatalog();
       const dto = {
