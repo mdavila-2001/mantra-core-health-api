@@ -93,6 +93,9 @@ import {
   ],
   providers: [
     // Repositorios
+    // `EncountersRepository` es del módulo clínico: la elegibilidad de una
+    // reseña se apoya en la atención que la respalda.
+    EncountersRepository,
     PublicProfilesRepository,
     PostsRepository,
     CommentsRepository,
