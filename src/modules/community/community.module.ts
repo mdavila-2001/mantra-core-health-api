@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -22,6 +23,7 @@ import {
   CommunityGroupsService,
   CommunityGroupWallService,
   CommunityGroupAccessService,
+  CommunityGroupNotificationsService,
   CommunityPollsService,
   CommunityFeedService,
   PublicProfileProjectionService,
@@ -67,7 +69,14 @@ import {
   // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
   // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
   // manda el cliente.
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), CommonModule],
+  //
+  // `MessagingModule` entra por el contrato de notificaciones de P1: community
+  // decide a quién avisar de lo que pasa en un grupo; messaging entrega.
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    CommonModule,
+    MessagingModule,
+  ],
   controllers: [
     CommunitySocialController,
     CommunityMessagingController,
@@ -108,6 +117,7 @@ import {
     CommunityReviewsService,
     CommunityGroupsService,
     CommunityGroupWallService,
+    CommunityGroupNotificationsService,
     CommunityPollsService,
     CommunityFeedService,
     PublicProfileProjectionService,

@@ -19,3 +19,4 @@ export * from './community-ratings.service';
 export * from './community-public.service';
 export * from './community-group-access.service';
 export * from './community-group-wall.service';
+export * from './community-group-notifications.service';

@@ -21,6 +21,7 @@ import {
   UpdateGroupMemberDto,
 } from '../dto';
 import { CommunityGroupAccessService } from './community-group-access.service';
+import { CommunityGroupNotificationsService } from './community-group-notifications.service';
 import { CommunityVisibilityService } from './community-visibility.service';
 
 const GROUP_VISIBILITY_BY_CODE: Record<string, string> = {
@@ -50,6 +51,7 @@ export class CommunityGroupsService {
    * @param groupsRepo - Acceso a `community.groups` y `group_members`.
    * @param access - Reglas de quién administra el grupo.
    * @param visibility - Resuelve el perfil del actor contra la sesión.
+   * @param notifications - Avisos in-app del grupo por el canal de P1.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -57,6 +59,7 @@ export class CommunityGroupsService {
     private readonly groupsRepo: GroupsRepository,
     private readonly access: CommunityGroupAccessService,
     private readonly visibility: CommunityVisibilityService,
+    private readonly notifications: CommunityGroupNotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityGroupsService.name);
@@ -303,7 +306,7 @@ export class CommunityGroupsService {
       'Updating group membership',
     );
 
-    return this.em.transactional(async (tx) => {
+    const { result, approved } = await this.em.transactional(async (tx) => {
       const access = await this.access.resolve(
         tx,
         groupId,
@@ -346,8 +349,33 @@ export class CommunityGroupsService {
       touch(member, actor.id);
       await tx.flush();
 
-      return this.toMemberUpdated(member);
+      return {
+        result: this.toMemberUpdated(member),
+        // El aviso sale **después** del commit y nunca dentro de él: la persona
+        // ya quedó dentro del grupo, y que el canal falle no puede deshacerlo.
+        approved:
+          member.joinStatusConceptId === COMM.GROUP_JOIN_ACTIVE &&
+          dto.decision === 'APPROVE'
+            ? {
+                group: {
+                  id: access.group.id,
+                  name: access.group.name,
+                  tenantId: access.group.tenantId,
+                },
+                memberProfileId: member.memberProfileId,
+              }
+            : undefined,
+      };
     });
+
+    if (approved)
+      await this.notifications.notifyJoinApproved(
+        approved.group,
+        approved.memberProfileId,
+        actor,
+      );
+
+    return result;
   }
 
   // --- Apoyo ---

@@ -53,15 +53,19 @@ function build() {
     assertCanPost: mockFn(),
     assertCanRead: mockFn(),
   };
+  const notifications = {
+    notifyNewPost: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityGroupWallService(
     em as any,
     commentsRepo as any,
     profilesRepo as any,
     access as any,
+    notifications as any,
     logger as any,
   );
-  return { service, commentsRepo, profilesRepo, access, group };
+  return { service, commentsRepo, profilesRepo, access, group, notifications };
 }
 
 /** Una fila de `comments` con lo que la proyección necesita. */
@@ -144,6 +148,12 @@ describe('CommunityGroupWallService (P7)', () => {
       );
 
       expect(d.group.postCount).toBe(1);
+      // El aviso sale fuera de la transaccion, ya con la publicacion en el muro.
+      expect(d.notifications.notifyNewPost).toHaveBeenCalledWith(
+        { id: 'g1', name: undefined, tenantId: 't1' },
+        'p1',
+        actor,
+      );
     });
 
     it('una respuesta no suma al contador y sí al del hilo', async () => {
@@ -168,6 +178,8 @@ describe('CommunityGroupWallService (P7)', () => {
       expect(parent.replyCount).toBe(3);
       // Doce publicaciones en la tarjeta tienen que ser doce hilos.
       expect(d.group.postCount).toBe(0);
+      // Un hilo animado no le manda una notificacion por mensaje al grupo.
+      expect(d.notifications.notifyNewPost).not.toHaveBeenCalled();
     });
 
     it('rechaza responder a un hilo de otro grupo', async () => {

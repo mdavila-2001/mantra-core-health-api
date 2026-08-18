@@ -43,15 +43,19 @@ function build() {
   const visibility = {
     resolveActorProfileId: mockFn().mockResolvedValue('owner-profile'),
   };
+  const notifications = {
+    notifyJoinApproved: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityGroupsService(
     em as any,
     groupsRepo as any,
     access as any,
     visibility as any,
+    notifications as any,
     logger as any,
   );
-  return { service, tx, groupsRepo, access, visibility };
+  return { service, tx, groupsRepo, access, visibility, notifications };
 }
 
 describe('CommunityGroupsService', () => {
@@ -270,6 +274,31 @@ describe('CommunityGroupsService', () => {
 
       expect(res.joinStatusConceptId).toBe(COMM.GROUP_JOIN_ACTIVE);
       expect(group.memberCount).toBe(5);
+      expect(d.notifications.notifyJoinApproved).toHaveBeenCalled();
+    });
+
+    it('un rechazo no le avisa a nadie', async () => {
+      const d = build();
+      const group: any = { memberCount: 4, updatedAt: new Date() };
+      d.access.resolve.mockResolvedValue({ group, actorProfileId: 'admin' });
+      d.groupsRepo.findMemberById.mockResolvedValue({
+        id: 'm3',
+        memberProfileId: 'p3',
+        memberRoleConceptId: COMM.GROUP_ROLE_MEMBER,
+        joinStatusConceptId: COMM.GROUP_JOIN_PENDING,
+        updatedAt: new Date(),
+      });
+
+      const res = await d.service.updateMember(
+        'g1',
+        'm3',
+        { decision: 'REJECT' },
+        actor,
+      );
+
+      expect(res.joinStatusConceptId).toBe(COMM.GROUP_JOIN_REJECTED);
+      expect(group.memberCount).toBe(4);
+      expect(d.notifications.notifyJoinApproved).not.toHaveBeenCalled();
     });
 
     it('promotes a member without touching the head count', async () => {
@@ -293,6 +322,7 @@ describe('CommunityGroupsService', () => {
 
       expect(res.memberRoleConceptId).toBe(COMM.GROUP_ROLE_ADMIN);
       expect(group.memberCount).toBe(4);
+      expect(d.notifications.notifyJoinApproved).not.toHaveBeenCalled();
     });
 
     it('refuses to resolve a join that was already resolved', async () => {

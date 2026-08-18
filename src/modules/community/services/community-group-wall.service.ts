@@ -18,6 +18,7 @@ import type {
 } from '../dto';
 import type { Comments } from '../entities';
 import { CommunityGroupAccessService } from './community-group-access.service';
+import { CommunityGroupNotificationsService } from './community-group-notifications.service';
 
 /** Tope de respuestas que se traen por página de muro. */
 const REPLIES_PER_PAGE = 200;
@@ -53,6 +54,7 @@ export class CommunityGroupWallService {
    * @param commentsRepo - Acceso a `community.comments`.
    * @param profilesRepo - Acceso a `community.public_profiles`.
    * @param access - Reglas de quién lee y quién escribe dentro del grupo.
+   * @param notifications - Avisos in-app del grupo por el canal de P1.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -60,6 +62,7 @@ export class CommunityGroupWallService {
     private readonly commentsRepo: CommentsRepository,
     private readonly profilesRepo: PublicProfilesRepository,
     private readonly access: CommunityGroupAccessService,
+    private readonly notifications: CommunityGroupNotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityGroupWallService.name);
@@ -85,7 +88,7 @@ export class CommunityGroupWallService {
       'Publishing on a group wall',
     );
 
-    return this.em.transactional(async (tx) => {
+    const { item, announce } = await this.em.transactional(async (tx) => {
       const access = await this.access.resolve(
         tx,
         groupId,
@@ -153,8 +156,30 @@ export class CommunityGroupWallService {
       }
       await tx.flush();
 
-      return this.toWallItem(post, []);
+      return {
+        item: this.toWallItem(post, []),
+        // Sólo las publicaciones avisan, no cada respuesta: un hilo animado no
+        // puede mandarle una notificación por mensaje a todo el grupo.
+        announce: parentCommentId
+          ? undefined
+          : {
+              id: access.group.id,
+              name: access.group.name,
+              tenantId: access.group.tenantId,
+            },
+      };
     });
+
+    // Fuera de la transacción: la publicación ya está en el muro, y que el
+    // canal de notificación falle no puede borrarla.
+    if (announce)
+      await this.notifications.notifyNewPost(
+        announce,
+        dto.authorProfileId,
+        actor,
+      );
+
+    return item;
   }
 
   /**
