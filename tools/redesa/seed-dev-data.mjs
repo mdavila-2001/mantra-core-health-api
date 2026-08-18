@@ -633,7 +633,14 @@ for (let index = 0; index < DOCTORS; index += 1) {
       {
         body: {
           email: DOCTOR_EMAIL,
-          displayName: `Dr(a). ${nombre} ${apellido}`,
+          // Sin honorífico, y a propósito: el registro real no lo pide ni lo
+          // escribe, así que un seed que lo mete fabrica la inconsistencia que
+          // la analista funcional reportó —tarjetas con «Dr(a)», otras con
+          // «Dra», otras sin nada— sobre datos que en producción serían
+          // uniformes. El tratamiento, el día que el producto lo quiera, sale
+          // de un dato del profesional y lo pone la vista una sola vez, no cada
+          // origen de alta por su cuenta.
+          displayName: `${nombre} ${apellido}`,
           licenseNumber: `LIC-${suffix}`,
           credentialNumber: `CRED-${suffix}`,
           professionalTitle: titulo,
@@ -711,7 +718,14 @@ for (let index = 0; index < DOCTORS; index += 1) {
       {
         body: {
           practitionerCode: `MED-${suffix}`,
-          displayName: `Dr(a). ${nombre} ${apellido}`,
+          // Sin honorífico, y a propósito: el registro real no lo pide ni lo
+          // escribe, así que un seed que lo mete fabrica la inconsistencia que
+          // la analista funcional reportó —tarjetas con «Dr(a)», otras con
+          // «Dra», otras sin nada— sobre datos que en producción serían
+          // uniformes. El tratamiento, el día que el producto lo quiera, sale
+          // de un dato del profesional y lo pone la vista una sola vez, no cada
+          // origen de alta por su cuenta.
+          displayName: `${nombre} ${apellido}`,
           licenseNumber: `LIC-${suffix}`,
           credentialNumber: `CRED-${suffix}`,
           professionalTitle: titulo,

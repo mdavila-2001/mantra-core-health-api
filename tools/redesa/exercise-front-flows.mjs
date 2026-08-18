@@ -172,7 +172,8 @@ const practitioner = await call(
   {
     body: {
       practitionerCode: `MED-${U}`,
-      displayName: 'Dr. Carlos Rojas',
+      // Sin honorífico: el registro real no lo escribe (ver seed-dev-data.mjs).
+      displayName: 'Carlos Rojas',
       licenseNumber: `LIC-${U}`,
       credentialNumber: `CRED-${U}`,
       professionalTitle: 'Medicina General',
