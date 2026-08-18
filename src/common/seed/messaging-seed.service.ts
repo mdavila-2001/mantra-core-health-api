@@ -21,6 +21,19 @@ export const MESSAGING_SEED = {
   emailProviderId: deterministicId('seed:messaging-provider:email'),
   emailProviderCode: 'DEFAULT_EMAIL',
   emailChannelConfigId: deterministicId('seed:provider-channel-config:email'),
+
+  /* --- Canal in-app (carril P1) -------------------------------------------
+     La campana necesita un canal igual que el correo, y por el mismo motivo:
+     `notification_requests.channel_id` es una FK NOT NULL y el módulo no
+     expone alta de canales. La diferencia es que este canal **no sale a
+     ningún proveedor** — su entrega es escribir en `in_app_notifications`,
+     que es lo que `deliverNotification` ya hacía para el tipo in-app y no
+     tenía canal con el que ejercitarse. */
+  inAppChannelId: deterministicId('seed:message-channel:in-app'),
+  inAppChannelCode: 'IN_APP',
+  inAppProviderId: deterministicId('seed:messaging-provider:in-app'),
+  inAppProviderCode: 'DEFAULT_IN_APP',
+  inAppChannelConfigId: deterministicId('seed:provider-channel-config:in-app'),
 } as const;
 
 /**
@@ -66,15 +79,18 @@ export class MessagingSeedService {
     // Canal y proveedor son padres de la configuración: se flushean antes.
     inserted += await this.seedChannel(em, now);
     inserted += await this.seedProvider(em, now);
+    inserted += await this.seedInAppChannel(em, now);
+    inserted += await this.seedInAppProvider(em, now);
     await em.flush();
 
     inserted += await this.seedChannelConfig(em, now);
+    inserted += await this.seedInAppChannelConfig(em, now);
     await em.flush();
 
     if (inserted > 0) {
       this.logger.info(
         { inserted },
-        'Canal de correo por defecto materializado',
+        'Canales por defecto (correo e in-app) materializados',
       );
     }
     return { inserted };
@@ -130,6 +146,115 @@ export class MessagingSeedService {
         supportsReadReceipts: false,
         supportsClickReceipts: false,
         supportsReplyReceipts: false,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    return 1;
+  }
+
+  /**
+   * Canal lógico IN_APP (carril P1).
+   *
+   * `supportsTemplates: false` a propósito: el texto de una notificación de la
+   * campana lo arma el módulo que la emite, con el nombre del médico o el de la
+   * receta ya resueltos. Una plantilla de `message_templates` acá obligaría a
+   * dar de alta una fila por disparador antes de poder emitir.
+   */
+  private async seedInAppChannel(
+    em: EntityManager,
+    now: Date,
+  ): Promise<number> {
+    if (
+      await em.findOne(MessageChannels, { id: MESSAGING_SEED.inAppChannelId })
+    )
+      return 0;
+    em.create(
+      MessageChannels,
+      {
+        id: MESSAGING_SEED.inAppChannelId,
+        code: MESSAGING_SEED.inAppChannelCode,
+        name: 'In-app',
+        channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
+        supportsTemplates: false,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    return 1;
+  }
+
+  /**
+   * Proveedor del canal in-app: el propio backend.
+   *
+   * `adapter_code = 'IN_APP_DIRECT'` y no `'WORKER_DISPATCHED'` porque la
+   * diferencia es real y se lee en la auditoría: el correo lo entrega un
+   * tercero cuya latencia y cuyos fallos no controlamos, y esto lo entrega
+   * una escritura nuestra en la misma transacción. Todos los `supports*` van
+   * en `false`: no hay acuses de un proveedor que no existe.
+   */
+  private async seedInAppProvider(
+    em: EntityManager,
+    now: Date,
+  ): Promise<number> {
+    if (
+      await em.findOne(MessagingProviders, {
+        id: MESSAGING_SEED.inAppProviderId,
+      })
+    )
+      return 0;
+    em.create(
+      MessagingProviders,
+      {
+        id: MESSAGING_SEED.inAppProviderId,
+        code: MESSAGING_SEED.inAppProviderCode,
+        name: 'In-app delivery',
+        providerTypeConceptId: CONCEPTS.MSG_PROVIDER_TYPE_IN_APP,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        adapterCode: 'IN_APP_DIRECT',
+        adapterVersion: '1',
+        isBuiltin: true,
+        supportsWebhooks: false,
+        supportsPolling: false,
+        supportsDeliveryReceipts: false,
+        supportsReadReceipts: false,
+        supportsClickReceipts: false,
+        supportsReplyReceipts: false,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    return 1;
+  }
+
+  /** Configuración activa que une el proveedor in-app con su canal. */
+  private async seedInAppChannelConfig(
+    em: EntityManager,
+    now: Date,
+  ): Promise<number> {
+    if (
+      await em.findOne(ProviderChannelConfigs, {
+        id: MESSAGING_SEED.inAppChannelConfigId,
+      })
+    )
+      return 0;
+    em.create(
+      ProviderChannelConfigs,
+      {
+        id: MESSAGING_SEED.inAppChannelConfigId,
+        providerId: MESSAGING_SEED.inAppProviderId,
+        channelId: MESSAGING_SEED.inAppChannelId,
+        tenantId: SEED.tenantId,
+        priority: 1,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+        adapterConfigVersion: 1,
+        trackingModeConceptId: CONCEPTS.MSG_TRACKING_MODE_NONE,
+        statusMappingVersion: 1,
+        enabledAt: now,
         createdAt: now,
         updatedAt: now,
       },

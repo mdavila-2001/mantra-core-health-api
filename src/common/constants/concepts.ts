@@ -5661,6 +5661,50 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'MSG_PROV_EMAIL',
     'Email messaging provider',
   ),
+  /**
+   * Tipo de proveedor del canal in-app. No hay nadie externo del otro lado: la
+   * «entrega» es escribir en `in_app_notifications`. Existe porque
+   * `provider_channel_configs` exige un proveedor y fingir que el in-app lo
+   * entrega el proveedor de correo mezclaría dos entregabilidades distintas en
+   * la misma métrica.
+   */
+  MSG_PROVIDER_TYPE_IN_APP: def(
+    'messaging:provider-type:in-app',
+    'MSG_PROV_IN_APP',
+    'In-app messaging provider',
+  ),
+
+  /* --- Categorías de notificación (carril P1) -----------------------------
+     La categoría es la unidad de preferencia: `recipient_preferences` guarda
+     un opt-in por (usuario, canal, categoría), así que silenciar es silenciar
+     una de estas cuatro. Son cuatro y no una por disparador porque quien
+     configura razona en estos términos —«no me avises de lo social»— y una
+     categoría por evento produciría una pantalla de preferencias que nadie
+     termina de leer. Ver `messaging/notifications.contract.ts`. */
+  /** Receta emitida, encuentro cerrado, resultado disponible. */
+  NOTIF_CATEGORY_CLINICAL: def(
+    'messaging:notification-category:clinical',
+    'NOTIF_CAT_CLINICAL',
+    'Clinical notifications',
+  ),
+  /** Cupo liberado, demora del profesional, recordatorio, cambio de cita. */
+  NOTIF_CATEGORY_SCHEDULING: def(
+    'messaging:notification-category:scheduling',
+    'NOTIF_CAT_SCHEDULING',
+    'Appointment notifications',
+  ),
+  /** Mensajería directa entre personas. */
+  NOTIF_CATEGORY_MESSAGES: def(
+    'messaging:notification-category:messages',
+    'NOTIF_CAT_MESSAGES',
+    'Direct message notifications',
+  ),
+  /** Muro, reacciones, comentarios, grupos. */
+  NOTIF_CATEGORY_SOCIAL: def(
+    'messaging:notification-category:social',
+    'NOTIF_CAT_SOCIAL',
+    'Social notifications',
+  ),
 
   // ==========================================================================
   // Módulo 32 · workflow — máquinas de estado y flujos entre dominios
