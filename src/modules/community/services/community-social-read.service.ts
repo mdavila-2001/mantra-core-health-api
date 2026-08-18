@@ -98,6 +98,37 @@ export class CommunitySocialReadService {
    * @returns Ficha del perfil.
    * @throws ResourceNotFoundException si el perfil no existe.
    */
+  /**
+   * La misma ficha, resuelta por el slug del directorio público (carril P2).
+   *
+   * ## Por qué hace falta
+   *
+   * El buscador público devuelve `slug` y **no** el uuid del perfil: la
+   * superficie sin sesión no expone identificadores internos, y está bien que
+   * no lo haga. Pero para abrir una conversación con alguien hace falta su
+   * `profileId`, y sin este puente el botón «Escribir al doctor» no tiene con
+   * qué. La alternativa —publicar el uuid en el buscador— cambiaría un
+   * contrato público desde un carril que no es el suyo.
+   *
+   * Va detrás de sesión, como el resto de estas lecturas.
+   *
+   * @param slug - El slug estable del directorio.
+   * @param actor - Quien pide la lectura.
+   * @returns La ficha, con su identificador.
+   * @throws ResourceNotFoundException si no hay perfil con ese slug.
+   */
+  async getProfileBySlug(
+    slug: string,
+    actor: AuthenticatedUser,
+  ): Promise<PublicProfileDetailDto> {
+    const em = this.em.fork();
+    const perfil = await this.profilesRepo.findBySlug(em, slug);
+    if (!perfil) {
+      throw new ResourceNotFoundException('Perfil no encontrado', { slug });
+    }
+    return this.getProfile(perfil.id, actor);
+  }
+
   async getProfile(
     profileId: string,
     actor: AuthenticatedUser,

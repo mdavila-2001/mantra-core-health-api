@@ -8,7 +8,10 @@ import {
   encodeKeysetCursor,
   type AuthenticatedUser,
 } from '../../../common';
-import { ConversationsRepository } from '../repositories';
+import {
+  ConversationsRepository,
+  PublicProfilesRepository,
+} from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
 import type { ConversationPageDto, DirectMessagePageDto } from '../dto';
 
@@ -30,12 +33,14 @@ export class CommunityMessagingReadService {
    *
    * @param em - Contexto de persistencia.
    * @param conversationsRepo - Acceso a conversaciones, participantes y mensajes.
+   * @param profilesRepo - Perfiles públicos, para nombrar el otro lado.
    * @param visibility - Reglas transversales de propiedad y bloqueo.
    * @param logger - Logger estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly conversationsRepo: ConversationsRepository,
+    private readonly profilesRepo: PublicProfilesRepository,
     private readonly visibility: CommunityVisibilityService,
     private readonly logger: PinoLogger,
   ) {
@@ -76,6 +81,31 @@ export class CommunityMessagingReadService {
       ]),
     );
 
+    // Los participantes de todas las conversaciones de la página, y sus
+    // perfiles, en **dos** consultas: una por fila multiplicaría la bandeja de
+    // alguien con cincuenta hilos por cincuenta.
+    const participantesPorConversacion = new Map<string, string[]>();
+    await Promise.all(
+      conversations.map(async (conversation) => {
+        const participantes = await this.conversationsRepo.findParticipants(
+          em,
+          conversation.id,
+        );
+        participantesPorConversacion.set(
+          conversation.id,
+          participantes
+            .map((participante) => participante.participantProfileId)
+            .filter((otro) => otro !== profileId),
+        );
+      }),
+    );
+    const perfiles = await this.profilesRepo.listByIds(em, [
+      ...new Set([...participantesPorConversacion.values()].flat()),
+    ]);
+    const nombrePorPerfil = new Map(
+      perfiles.map((perfil) => [perfil.id, perfil.displayName]),
+    );
+
     const items = await Promise.all(
       conversations.map(async (conversation) => {
         const [lastMessage, unreadCount] = await Promise.all([
@@ -87,6 +117,12 @@ export class CommunityMessagingReadService {
           ),
         ]);
         return {
+          peers: (participantesPorConversacion.get(conversation.id) ?? []).map(
+            (otro) => ({
+              profileId: otro,
+              displayName: nombrePorPerfil.get(otro) ?? null,
+            }),
+          ),
           id: conversation.id,
           conversationTypeConceptId: conversation.conversationTypeConceptId,
           groupId: conversation.groupId ?? null,
