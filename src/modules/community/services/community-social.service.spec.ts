@@ -192,9 +192,71 @@ describe('CommunitySocialService', () => {
 
       expect(d.profilesRepo.findByTarget).toHaveBeenCalledWith(d.em, 'u-1');
     });
+
+    /**
+     * El desajuste que se comprobó en vivo: la escritura acepta como titular el
+     * perfil profesional **o** la cuenta, y la lectura miraba sólo el primero.
+     * Una profesional con vitrina a nombre de su cuenta publicaba con ella y
+     * recibía `null` al pedir la suya.
+     */
+    it('encuentra la vitrina creada a nombre de la cuenta de un profesional', async () => {
+      const d = build();
+      d.profilesRepo.findByTarget.mockImplementation((_em: any, targetId: string) =>
+        Promise.resolve(
+          targetId === 'u-1'
+            ? {
+                id: 'pp-1',
+                tenantId: 't-1',
+                targetId: 'u-1',
+                slug: 'dra-salas',
+                displayName: 'Dra. Salas',
+                statusConceptId: CONCEPTS.STATE_ACTIVE,
+              }
+            : null,
+        ),
+      );
+
+      const perfil = await d.service.getOwnProfile({
+        id: 'u-1',
+        roles: [],
+        practitionerProfileId: 'hp-1',
+      } as any);
+
+      expect(perfil?.id).toBe('pp-1');
+      // Primero el perfil profesional, que es el sujeto canónico; la cuenta es
+      // el camino alternativo, no el preferido.
+      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(1, d.em, 'hp-1');
+      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(2, d.em, 'u-1');
+    });
   });
 
   describe('upsertOwnProfile', () => {
+    it('editar la vitrina propia con su mismo slug no da conflicto', async () => {
+      // El slug ocupado es el suyo: si la comprobación mirase sólo el sujeto
+      // preferido, editar su propia vitrina le respondería «ese enlace ya está
+      // en uso».
+      const d = build();
+      const propia = {
+        id: 'pp-1',
+        tenantId: 't-1',
+        targetId: 'u-1',
+        slug: 'dra-salas',
+        displayName: 'Dra. Salas',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+      };
+      d.profilesRepo.findBySlug.mockResolvedValue(propia);
+      d.profilesRepo.findByTarget.mockImplementation((_em: any, targetId: string) =>
+        Promise.resolve(targetId === 'u-1' ? propia : null),
+      );
+
+      await expect(
+        d.service.upsertOwnProfile(
+          { tenantId: 't-1', slug: 'dra-salas', displayName: 'Dra. Salas' },
+          { id: 'u-1', roles: [], practitionerProfileId: 'hp-1' } as any,
+        ),
+      ).resolves.toBeDefined();
+    });
+
     /** Sin vitrina previa: crea. */
     it('crea la vitrina cuando el sujeto no tenía ninguna', async () => {
       const d = build();

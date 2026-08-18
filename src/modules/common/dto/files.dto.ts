@@ -232,6 +232,44 @@ export class ScanResultDto {
   result!: ScanResult;
 }
 
+/** Una versión que espera escaneo, con lo justo para ir a buscar sus bytes. */
+export class PendingScanItemDto {
+  /** Versión a escanear. */
+  @ApiProperty({ format: 'uuid' })
+  versionId!: string;
+
+  /** Archivo al que pertenece, para el rastro del resultado. */
+  @ApiProperty({ format: 'uuid' })
+  fileId!: string;
+
+  /**
+   * Dónde están los bytes.
+   *
+   * El worker los lee por el mismo adaptador de almacenamiento que la API, no
+   * por HTTP: mover un archivo de 10 MiB por el cuerpo de una respuesta JSON lo
+   * obligaría a viajar en base64 y a pasar dos veces por la red.
+   */
+  @ApiProperty({
+    description: 'URI de almacenamiento (`s3://…` o `file://…`).',
+  })
+  storageUri!: string;
+
+  /** Tamaño declarado, para acotar el lote y descartar lo que excede al escáner. */
+  @ApiProperty()
+  sizeBytes!: number;
+
+  /** Tipo deducido de los bytes al subir. Va sólo para el registro. */
+  @ApiProperty()
+  mimeType!: string;
+}
+
+/** Respuesta de `GET /internal/files/versions/pending-scan`. */
+export class PendingScanResponseDto {
+  /** Lote de versiones pendientes, de la más antigua a la más nueva. */
+  @ApiProperty({ type: [PendingScanItemDto] })
+  items!: PendingScanItemDto[];
+}
+
 /** Representación segura de un archivo. */
 export class FileResponseDto {
   /**
