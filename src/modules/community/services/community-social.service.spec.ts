@@ -202,19 +202,20 @@ describe('CommunitySocialService', () => {
      */
     it('encuentra la vitrina creada a nombre de la cuenta de un profesional', async () => {
       const d = build();
-      d.profilesRepo.findByTarget.mockImplementation((_em: any, targetId: string) =>
-        Promise.resolve(
-          targetId === 'u-1'
-            ? {
-                id: 'pp-1',
-                tenantId: 't-1',
-                targetId: 'u-1',
-                slug: 'dra-salas',
-                displayName: 'Dra. Salas',
-                statusConceptId: CONCEPTS.STATE_ACTIVE,
-              }
-            : null,
-        ),
+      d.profilesRepo.findByTarget.mockImplementation(
+        (_em: any, targetId: string) =>
+          Promise.resolve(
+            targetId === 'u-1'
+              ? {
+                  id: 'pp-1',
+                  tenantId: 't-1',
+                  targetId: 'u-1',
+                  slug: 'dra-salas',
+                  displayName: 'Dra. Salas',
+                  statusConceptId: CONCEPTS.STATE_ACTIVE,
+                }
+              : null,
+          ),
       );
 
       const perfil = await d.service.getOwnProfile({
@@ -226,8 +227,16 @@ describe('CommunitySocialService', () => {
       expect(perfil?.id).toBe('pp-1');
       // Primero el perfil profesional, que es el sujeto canónico; la cuenta es
       // el camino alternativo, no el preferido.
-      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(1, d.em, 'hp-1');
-      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(2, d.em, 'u-1');
+      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(
+        1,
+        d.em,
+        'hp-1',
+      );
+      expect(d.profilesRepo.findByTarget).toHaveBeenNthCalledWith(
+        2,
+        d.em,
+        'u-1',
+      );
     });
   });
 
@@ -246,8 +255,9 @@ describe('CommunitySocialService', () => {
         statusConceptId: CONCEPTS.STATE_ACTIVE,
       };
       d.profilesRepo.findBySlug.mockResolvedValue(propia);
-      d.profilesRepo.findByTarget.mockImplementation((_em: any, targetId: string) =>
-        Promise.resolve(targetId === 'u-1' ? propia : null),
+      d.profilesRepo.findByTarget.mockImplementation(
+        (_em: any, targetId: string) =>
+          Promise.resolve(targetId === 'u-1' ? propia : null),
       );
 
       await expect(
