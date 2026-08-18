@@ -35,6 +35,7 @@ import {
   CommunityPublicService,
 } from './services';
 import {
+  EncountersRepository,
   PublicProfilesRepository,
   PostsRepository,
   CommentsRepository,
@@ -53,6 +54,13 @@ import {
   CommunityPrestigeRepository,
   PublicSearchRepository,
 } from './repositories';
+// La elegibilidad de una reseña se apoya en la atención que la respalda, que
+// es un dato clínico. Se declara **el repositorio** y no se importa el módulo
+// clínico entero, igual que hace `scheduling` con `AppointmentsRepository`: lo
+// que hace falta acá es leer un encuentro, no las reglas del módulo que lo
+// gobierna — y traer el módulo entero abriría una dependencia entre dos
+// verticales que no la necesitan.
+import { EncountersRepository } from '../clinical/repositories';
 
 /**
  * Módulo Community (19): perfiles públicos, grafo social (posts, comentarios,
