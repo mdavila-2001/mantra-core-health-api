@@ -63,6 +63,18 @@ export class CreateGroupDto {
   groupType?: 'GENERAL' | 'SUPPORT';
 
   /**
+   * Tema por el que se clasifica el grupo (P7).
+   *
+   * Es un concepto de terminología —una fila de `community.topics`— y no texto
+   * libre: el directorio filtra por tema, y un filtro sobre texto libre deja
+   * fuera al que escribió "cardiologia" sin tilde.
+   */
+  @ApiPropertyOptional({ description: 'Tema del grupo', format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  topicId?: string;
+
+  /**
    * Identificador asociado a owner profile.
    */
   @ApiPropertyOptional({ description: 'Perfil propietario', format: 'uuid' })
