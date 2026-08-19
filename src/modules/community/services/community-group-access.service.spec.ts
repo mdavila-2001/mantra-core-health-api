@@ -9,7 +9,7 @@ import { ForbiddenException } from '@nestjs/common';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityGroupAccessService } from './community-group-access.service';
-import { ResourceNotFoundException } from '../../../common';
+import { CONCEPTS, ResourceNotFoundException } from '../../../common';
 import { COMM } from '../community.concepts';
 
 const actor = { id: 'user-1', roles: ['USER'] } as any;
@@ -36,8 +36,11 @@ function build() {
 }
 
 /** Un grupo con la visibilidad pedida. */
-function group(visibilityConceptId: string) {
-  return { id: 'g1', visibilityConceptId, tenantId: 't1' };
+function group(
+  visibilityConceptId: string,
+  statusConceptId = CONCEPTS.STATE_ACTIVE,
+) {
+  return { id: 'g1', visibilityConceptId, tenantId: 't1', statusConceptId };
 }
 
 /** Una membresía activa con el rol pedido. */
@@ -193,6 +196,44 @@ describe('CommunityGroupAccessService (P7)', () => {
       expect(() =>
         d.service.assertCanAdminister({ canAdminister: false } as any),
       ).toThrow(ForbiddenException);
+    });
+  });
+
+  /**
+   * TP-3 · regla 08: un grupo sin nadie adentro se disuelve, y su dirección
+   * deja de abrir. 404 y no 403 porque no es una cuestión de permiso: el grupo
+   * dejó de existir como tal.
+   */
+  describe('grupo disuelto (TP-3)', () => {
+    it('su dirección deja de abrir, incluso para quien fue integrante', async () => {
+      const d = build();
+      d.groupsRepo.findById.mockResolvedValue(
+        group(COMM.GROUP_VISIBILITY_PUBLIC, CONCEPTS.STATE_REVOKED),
+      );
+      d.groupsRepo.findMember.mockResolvedValue(
+        membership(COMM.GROUP_ROLE_MEMBER),
+      );
+
+      await expect(
+        d.service.resolve({} as any, 'g1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    /**
+     * Moderar lo que se publicó en un grupo que después se disolvió sigue
+     * siendo trabajo de la plataforma: dejarla fuera crearía un punto ciego que
+     * se abre con sólo vaciar el grupo.
+     */
+    it('la plataforma sí lo alcanza', async () => {
+      const d = build();
+      d.groupsRepo.findById.mockResolvedValue(
+        group(COMM.GROUP_VISIBILITY_PUBLIC, CONCEPTS.STATE_REVOKED),
+      );
+      d.visibility.isPlatform.mockReturnValue(true);
+
+      const access = await d.service.resolve({} as any, 'g1', actor);
+
+      expect(access.canModerate).toBe(true);
     });
   });
 });

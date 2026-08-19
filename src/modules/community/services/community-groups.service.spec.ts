@@ -603,6 +603,32 @@ describe('CommunityGroupsService', () => {
      * transferirlo», lo que en la práctica lo dejaba atado a un grupo del que
      * quería salir.
      */
+    /**
+     * «Irse» y «que te echen» no son lo mismo.
+     *
+     * TP-3 dejó que el dueño se fuera y que alguien heredara. Sin esta guarda,
+     * un administrador expulsaba al dueño y la sucesión lo dejaba a él a cargo:
+     * cualquier admin se apoderaba del grupo con una sola llamada.
+     */
+    it('un administrador NO puede expulsar al dueño y quedarse con el grupo', async () => {
+      const d = build();
+      const group = conGrupo(d, {
+        rolDelQueSale: COMM.GROUP_ROLE_OWNER,
+        quedan: 2,
+      });
+      // Quien pide la baja es otro: un administrador, no el dueño.
+      d.access.resolve.mockResolvedValue({
+        group,
+        actorProfileId: 'perfil-admin',
+      });
+
+      await expect(
+        d.service.leaveGroup('grp-1', 'owner-profile', actor),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(group.ownerProfileId).toBe('owner-profile');
+      expect(d.groupsRepo.listActiveMembersByAge).not.toHaveBeenCalled();
+    });
+
     it('si el dueño sale y queda gente, alguien hereda el grupo', async () => {
       const d = build();
       const group = conGrupo(d, {

@@ -351,6 +351,20 @@ export class CommunityGroupsService {
       const wasActive = member.joinStatusConceptId === COMM.GROUP_JOIN_ACTIVE;
       const eraDueno = member.memberRoleConceptId === COMM.GROUP_ROLE_OWNER;
 
+      // Al dueño lo saca el dueño, y nadie más.
+      //
+      // TP-3 permite que el dueño **se vaya** —antes estaba atado al grupo— y
+      // que alguien herede. Pero "irse" y "que te echen" no son lo mismo:
+      // sin esta línea, un administrador expulsa al dueño y la sucesión que
+      // corre abajo lo deja a él a cargo. Es decir, cualquier admin se
+      // apodera del grupo con una sola llamada. La regla nueva abrió esa
+      // puerta y ésta la cierra.
+      if (eraDueno && !isSelf)
+        throw new ConflictException(
+          'Al dueño del grupo no lo puede sacar otro: sólo él puede irse, o transferir el grupo antes',
+          { groupId, memberProfileId },
+        );
+
       member.joinStatusConceptId = isSelf
         ? COMM.GROUP_JOIN_LEFT
         : COMM.GROUP_JOIN_REMOVED;

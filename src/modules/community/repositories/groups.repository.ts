@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode, type EntityManager } from '@mikro-orm/postgresql';
 import { Groups, GroupMembers, Topics } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 
 /** Filtros opcionales del directorio de grupos (P7). */
 export interface GroupSearchFilters {
@@ -131,6 +131,11 @@ export class GroupsRepository {
       {
         tenantId,
         visibilityConceptId: { $ne: secretVisibilityConceptId },
+        // TP-3 · regla 08: los grupos disueltos salen del directorio. Sin este
+        // filtro, un grupo sin nadie adentro seguía apareciendo en la búsqueda
+        // y se podía «entrar» a él — que es la mitad del problema que
+        // disolverlo viene a resolver.
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
         ...(filters?.topicId ? { topicId: filters.topicId } : {}),
         // El buscador del directorio mira nombre y descripcion, no solo el
         // nombre: quien busca "cardio" espera encontrar el grupo cuyo nombre es
