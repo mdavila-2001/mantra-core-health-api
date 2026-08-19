@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityModerationReadService } from './community-moderation-read.service';
-import { decodeKeysetCursor } from '../../../common';
+import { decodeKeysetCursor, runWithTenant } from '../../../common';
 import {
   APPEAL_STATUS_BY_CODE,
   COMM,
@@ -18,6 +18,9 @@ import {
   QUEUE_PRIORITY_BY_CODE,
   QUEUE_STATUS_BY_CODE,
 } from '../community.concepts';
+
+/** Tenant del contexto: la cola se acota a él, así que las pruebas lo fijan. */
+const TENANT = '11111111-1111-1111-1111-111111111111';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -59,10 +62,11 @@ describe('CommunityModerationReadService', () => {
   describe('listQueue', () => {
     it('pide una fila más que el tope, para saber si hay siguiente', async () => {
       const d = build();
-      await d.service.listQueue({} as any, 20);
+      await runWithTenant(TENANT, () => d.service.listQueue({} as any, 20));
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
         expect.anything(),
+        TENANT,
         expect.anything(),
         undefined,
         21,
@@ -75,17 +79,20 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce los códigos de filtro a conceptos', async () => {
       const d = build();
-      await d.service.listQueue(
-        {
-          status: ['QUEUED', 'IN_REVIEW'],
-          priority: ['HIGH'],
-          contentType: ['POST'],
-        } as any,
-        20,
+      await runWithTenant(TENANT, () =>
+        d.service.listQueue(
+          {
+            status: ['QUEUED', 'IN_REVIEW'],
+            priority: ['HIGH'],
+            contentType: ['POST'],
+          } as any,
+          20,
+        ),
       );
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
         expect.anything(),
+        TENANT,
         expect.objectContaining({
           statusConceptIds: [
             QUEUE_STATUS_BY_CODE.QUEUED,
@@ -105,9 +112,12 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce la antigüedad en horas a un instante', async () => {
       const d = build();
-      await d.service.listQueue({ minAgeHours: 24 } as any, 20);
+      await runWithTenant(TENANT, () =>
+        d.service.listQueue({ minAgeHours: 24 } as any, 20),
+      );
 
-      const filtros = d.moderationRepo.listQueuePage.mock.calls[0][1];
+      // `[2]` y no `[1]`: el tenant va ahora entre el `em` y los filtros.
+      const filtros = d.moderationRepo.listQueuePage.mock.calls[0][2];
       expect(filtros.queuedBefore).toBeInstanceOf(Date);
       const horas =
         (Date.now() - (filtros.queuedBefore as Date).getTime()) /
@@ -120,7 +130,9 @@ describe('CommunityModerationReadService', () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
 
-      const page = await d.service.listQueue({} as any, 20);
+      const page = await runWithTenant(TENANT, () =>
+        d.service.listQueue({} as any, 20),
+      );
 
       expect(page.count).toBe(1);
       expect(page.nextCursor).toBeNull();
@@ -133,7 +145,9 @@ describe('CommunityModerationReadService', () => {
         fila('q2'),
       ]);
 
-      const page = await d.service.listQueue({} as any, 1);
+      const page = await runWithTenant(TENANT, () =>
+        d.service.listQueue({} as any, 1),
+      );
 
       expect(page.count).toBe(1);
       expect(page.items[0]!.id).toBe('q1');
@@ -157,7 +171,9 @@ describe('CommunityModerationReadService', () => {
         fila('q2'),
       ]);
 
-      const page = await d.service.listQueue({} as any, 1);
+      const page = await runWithTenant(TENANT, () =>
+        d.service.listQueue({} as any, 1),
+      );
 
       expect(decodeKeysetCursor(page.nextCursor!)).toEqual({
         queuedAt: '2026-08-01T08:00:00.000Z',
@@ -186,7 +202,9 @@ describe('CommunityModerationReadService', () => {
         },
       ]);
 
-      const page = await d.service.listQueue({} as any, 20);
+      const page = await runWithTenant(TENANT, () =>
+        d.service.listQueue({} as any, 20),
+      );
 
       expect(page.items[0]!.reportCount).toBe(7);
       expect(page.items[0]!.report?.detailText).toBe(
@@ -194,11 +212,40 @@ describe('CommunityModerationReadService', () => {
       );
     });
 
+    /**
+     * La cola se listaba **sin filtro de tenant**: un moderador de una clínica
+     * veía los reportes de todas las demás —el contenido denunciado, quién lo
+     * denunció y por qué—. Es la prueba que impide que vuelva a pasar.
+     */
+    it('acota la cola al tenant del contexto', async () => {
+      const d = build();
+
+      await runWithTenant(TENANT, () => d.service.listQueue({} as any, 20));
+
+      expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
+        expect.anything(),
+        TENANT,
+        expect.anything(),
+        undefined,
+        21,
+      );
+    });
+
+    it('sin tenant en el contexto falla en vez de servir la cola de todos', async () => {
+      const d = build();
+
+      // Servir vacío mentiría sobre el motivo; servir sin acotar sería la fuga.
+      await expect(d.service.listQueue({} as any, 20)).rejects.toThrow();
+      expect(d.moderationRepo.listQueuePage).not.toHaveBeenCalled();
+    });
+
     it('una entrada sin reporte asociado trae report en null, no undefined', async () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
 
-      const page = await d.service.listQueue({} as any, 20);
+      const page = await runWithTenant(TENANT, () =>
+        d.service.listQueue({} as any, 20),
+      );
 
       expect(page.items[0]!.report).toBeNull();
       expect(page.items[0]!.reportCount).toBe(0);

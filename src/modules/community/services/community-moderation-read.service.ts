@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { decodeKeysetCursor, encodeKeysetCursor } from '../../../common';
+import {
+  decodeKeysetCursor,
+  encodeKeysetCursor,
+  requireTenantId,
+} from '../../../common';
 import { ModerationRepository } from '../repositories';
 import {
   APPEAL_STATUS_BY_CODE,
@@ -88,6 +92,10 @@ export class CommunityModerationReadService {
     // Una fila de más para saber si hay página siguiente sin contar la tabla.
     const rows = await this.moderationRepo.listQueuePage(
       em,
+      // Exigido, no opcional: sin tenant la única respuesta correcta es decirlo,
+      // porque servir la cola sin acotar sería la fuga y servirla vacía sería
+      // mentir sobre el motivo.
+      requireTenantId(),
       {
         statusConceptIds: query.status?.map(
           (code) => QUEUE_STATUS_BY_CODE[code],

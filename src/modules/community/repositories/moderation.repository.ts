@@ -413,7 +413,21 @@ export class ModerationRepository {
    * `coalesce(queued_at, created_at)`: una entrada sin marca de encolado no
    * puede irse al final de la cola para siempre.
    *
+   * ## Acotada al tenant, y no por precaución
+   *
+   * La cola se listaba **sin filtro de tenant**: un moderador de una clínica
+   * veía los reportes de todas las demás —el contenido denunciado, quién lo
+   * denunció y por qué—. `tenant_id` es límite de acceso en este módulo, así
+   * que el filtro va acá, en el único lugar por el que pasa la lectura, y no en
+   * el servicio, donde se puede olvidar la próxima vez.
+   *
+   * Las filas viejas con `tenant_id` nulo **quedan fuera**: se comparan por
+   * igualdad y no con «distinto de otro tenant». Una fila sin dueño no
+   * pertenece a nadie, y hacerla visible para todos es exactamente el defecto
+   * que este filtro cierra.
+   *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Organización cuya cola se lista.
    * @param filtros - Estado, prioridad, tipo de contenido y antigüedad mínima.
    * @param after - Clave de continuación `(queuedAt, id)`.
    * @param limit - Tope de filas.
@@ -421,6 +435,7 @@ export class ModerationRepository {
    */
   async listQueuePage(
     em: EntityManager,
+    tenantId: string,
     filtros: {
       /** Estados admitidos; vacío o ausente significa todos. */
       statusConceptIds?: string[];
@@ -455,10 +470,14 @@ export class ModerationRepository {
       ];
     }
 
-    return em.find(ModerationQueue, where, {
-      orderBy: { queuedAt: 'ASC', id: 'ASC' },
-      limit,
-    });
+    // El tenant se aplica **en la consulta misma** y no al armar `where`: es la
+    // condición que no se puede olvidar, y ponerla acá la deja a la vista de
+    // quien lea la línea que ejecuta la lectura.
+    return em.find(
+      ModerationQueue,
+      { ...where, tenantId },
+      { orderBy: { queuedAt: 'ASC', id: 'ASC' }, limit },
+    );
   }
 
   /**
