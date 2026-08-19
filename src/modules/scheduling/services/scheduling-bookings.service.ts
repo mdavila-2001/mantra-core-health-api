@@ -798,8 +798,40 @@ export class SchedulingBookingsService {
         slot != null &&
         Date.now() >= slot.startAt.getTime() - windowMinutes * 60_000;
 
+      // TJ-2 · el paciente no cancela fuera de plazo; quien atiende, sí.
+      //
+      // La ventana ya se calculaba, pero sólo decidía si se COBRABA: el
+      // paciente podía cancelar cinco minutos antes y el sistema se limitaba a
+      // facturarlo. Para el consultorio eso es un hueco que no se puede
+      // rellenar, que es justamente lo que la ventana existe para evitar.
+      //
+      // Se comprueba contra el perfil del token y no contra `dto.cancelledBy`:
+      // ese campo lo manda el cliente, y una regla que se apaga cambiando el
+      // cuerpo de la petición no es una regla.
+      //
+      // Quien atiende cancela siempre —una urgencia no espera a la ventana— y
+      // su cancelación dispara el aviso al paciente (P8).
+      const esElPacienteTitular =
+        actor.patientProfileId !== undefined &&
+        actor.patientProfileId === booking.patientProfileId;
+
+      if (esElPacienteTitular && withinWindow && !isNoShow) {
+        throw new PreconditionFailedException(
+          `Podés cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no podés asistir, comunicate con el consultorio.`,
+          {
+            bookingId,
+            cancellationWindowMinutes: windowMinutes,
+            startAt: slot?.startAt.toISOString(),
+          },
+        );
+      }
+
       // Se cobra si es inasistencia o si la cancelación cae dentro de la ventana
       // (tardía). Una cancelación avisada a tiempo no genera cargo.
+      //
+      // Tras la regla de arriba, la cancelación tardía sólo puede venir de quien
+      // atiende o de una inasistencia: al paciente ya no se le cobra por algo
+      // que no puede hacer.
       const chargeable = isNoShow || withinWindow;
       const feeAmount = chargeable ? (feeSource ?? undefined) : undefined;
 
@@ -1312,6 +1344,7 @@ export class SchedulingBookingsService {
       includeCancelled: boolean;
     },
     limit: number,
+    actor?: AuthenticatedUser,
   ): Promise<SearchBookingsResponseDto> {
     if (!filters.patientProfileId && !filters.resourceId) {
       throw new PreconditionFailedException(
@@ -1370,6 +1403,29 @@ export class SchedulingBookingsService {
       esDemora,
     );
 
+    const origenes = await this.bookingsRepo.latestRescheduleOrigins(
+      em,
+      page.map(({ booking }) => booking.id),
+    );
+
+    // Los recursos de la página, en lote y sólo si el actor es un profesional:
+    // es lo único que puede convertir «esta cita es de alguien» en «esta cita
+    // es MÍA» para decidir el motivo. Un paciente no los necesita.
+    const duenosDeAgenda = new Map<string, string>();
+    if (actor?.practitionerProfileId !== undefined) {
+      const ids = [
+        ...new Set(
+          page
+            .map(({ booking }) => booking.resourceId)
+            .filter((id): id is string => id !== undefined),
+        ),
+      ];
+      for (const id of ids) {
+        const recurso = await this.catalogRepo.findResourceById(em, id);
+        if (recurso) duenosDeAgenda.set(id, recurso.resourceRefId);
+      }
+    }
+
     return {
       items: page.map(({ booking, slot }) =>
         this.aBookingItem(
@@ -1377,6 +1433,11 @@ export class SchedulingBookingsService {
           slot,
           motivos.get(booking.id),
           demoras.get(booking.id),
+          actor,
+          booking.resourceId
+            ? duenosDeAgenda.get(booking.resourceId)
+            : undefined,
+          origenes.get(booking.id),
         ),
       ),
       count: page.length,
@@ -1392,7 +1453,10 @@ export class SchedulingBookingsService {
    * @returns La cita con su instante resuelto desde el slot.
    * @throws ResourceNotFoundException si no existe.
    */
-  async getBookingById(bookingId: string): Promise<BookingItemDto> {
+  async getBookingById(
+    bookingId: string,
+    actor?: AuthenticatedUser,
+  ): Promise<BookingItemDto> {
     const em = this.em.fork();
     const booking = await this.bookingsRepo.findBookingById(em, bookingId);
     if (!booking) {
@@ -1414,11 +1478,25 @@ export class SchedulingBookingsService {
       esDemora,
     );
 
+    const origenes = await this.bookingsRepo.latestRescheduleOrigins(em, [
+      booking.id,
+    ]);
+
+    // Sólo se busca el recurso si hace falta para decidir el motivo: un
+    // paciente titular ya tiene permiso sin mirar la agenda.
+    const recurso =
+      booking.resourceId && actor?.practitionerProfileId !== undefined
+        ? await this.catalogRepo.findResourceById(em, booking.resourceId)
+        : null;
+
     return this.aBookingItem(
       booking,
       slot,
       motivos.get(booking.id),
       demoras.get(booking.id),
+      actor,
+      recurso?.resourceRefId,
+      origenes.get(booking.id),
     );
   }
 
@@ -1430,11 +1508,52 @@ export class SchedulingBookingsService {
    * uno y olvidarlo en el otro hacía que el detalle contradijera a la fila que
    * lo abrió.
    */
+  /**
+   * ¿Puede este actor leer el **motivo de consulta** de esta cita?
+   *
+   * Sólo el paciente titular y el profesional que la atiende. Ni la
+   * organización, ni otro médico, ni un administrador: por qué alguien pide un
+   * turno es un dato clínico, y una agenda de organización que lo muestre
+   * convierte un listado operativo en una lista de diagnósticos presuntos.
+   *
+   * **No** es lo mismo que el motivo de CANCELACIÓN (`statusReason`), que sí es
+   * visible para las dos partes: ahí el interés es saber por qué se cayó el
+   * turno, y quien lo escribió sabía que el otro lado lo iba a leer.
+   *
+   * Vive acá —en la proyección, un solo lugar— para que cualquier lectura
+   * futura lo herede sin acordarse. Es lo que hace que la agenda de la
+   * organización (TP-5) nazca sin la fuga.
+   */
+  private puedeVerElMotivo(
+    booking: AppointmentBookings,
+    actor?: AuthenticatedUser,
+    profesionalDeLaAgenda?: string,
+  ): boolean {
+    if (!actor) return false;
+    if (
+      actor.patientProfileId !== undefined &&
+      actor.patientProfileId === booking.patientProfileId
+    ) {
+      return true;
+    }
+    // El profesional que atiende. La cita no lo guarda: cuelga del recurso
+    // (`resource_ref_id`), así que lo aporta quien proyecta — que es el único
+    // que sabe si ya lo tenía cargado o no vale la pena buscarlo.
+    return (
+      actor.practitionerProfileId !== undefined &&
+      profesionalDeLaAgenda !== undefined &&
+      actor.practitionerProfileId === profesionalDeLaAgenda
+    );
+  }
+
   private aBookingItem(
     booking: AppointmentBookings,
     slot: { startAt: Date; endAt?: Date } | null,
     motivo: HistoryRevision | undefined,
     demora?: HistoryRevision,
+    actor?: AuthenticatedUser,
+    profesionalDeLaAgenda?: string,
+    reprogramadaDesde?: Date,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -1453,7 +1572,13 @@ export class SchedulingBookingsService {
       bookingChannelConceptId: booking.bookingChannelConceptId,
       confirmedAt: booking.confirmedAt,
       checkedInAt: booking.checkedInAt,
-      reasonText: booking.reasonText,
+      // El motivo de consulta se omite salvo para el titular y su médico. Se
+      // omite, no se vacía: un `''` diría «no escribió motivo», que es una
+      // afirmación distinta y falsa.
+      ...(this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+        ? { reasonText: booking.reasonText }
+        : {}),
+      ...(reprogramadaDesde ? { rescheduledFrom: reprogramadaDesde } : {}),
       statusReason: aStatusReason(motivo),
       delayNotice: aDelayNotice(demora),
       createdAt: booking.createdAt,
