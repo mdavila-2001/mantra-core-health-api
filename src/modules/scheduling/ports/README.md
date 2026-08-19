@@ -7,9 +7,9 @@ por tanto no puede provocar una escritura asignando un campo.
 Son el módulo piloto de la migración descrita en
 [ADR-0023](../../../../docs/adr/ADR-0023-puertos-persistencia-read-write.md).
 
-| Puerto | Ruta | Por qué |
-|---|---|---|
-| `WaitlistReadPort` | lectura | Descubrimiento de trabajo para un worker; tolera consistencia eventual |
+| Puerto              | Ruta      | Por qué                                                                |
+| ------------------- | --------- | ---------------------------------------------------------------------- |
+| `WaitlistReadPort`  | lectura   | Descubrimiento de trabajo para un worker; tolera consistencia eventual |
 | `WaitlistWritePort` | escritura | Altas, promoción de candidatos y recordatorios; siempre en transacción |
 
 Los implementa `adapters/postgres-waitlist.adapter.ts`.

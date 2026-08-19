@@ -165,6 +165,17 @@ export class OwnPublicProfileDto {
   @ApiProperty({ format: 'uuid', nullable: true })
   verificationStatusConceptId!: string | null;
 
+  /**
+   * La foto de la vitrina, o `null` si todavía no subió ninguna.
+   *
+   * Viaja porque es una de las tres condiciones que hacen a un perfil
+   * "completo" para presentar un grupo público (TP-3, regla 06), y sin ella la
+   * pantalla no puede anticipar el rechazo: tendría que dejar que la persona
+   * llene el formulario entero para enterarse recién al enviar.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true })
+  avatarFileId!: string | null;
+
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 }

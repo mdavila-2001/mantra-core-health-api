@@ -47,15 +47,38 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
+  // Quién administra la organización se prueba en
+  // `tenant-administration.service.spec.ts`; acá el doble deja pasar para no
+  // mezclar el permiso con la lógica del servicio.
+  const tenantAdmin = {
+    assertCanAdminister: mockFn().mockResolvedValue(undefined),
+    assertCanRead: mockFn().mockResolvedValue(undefined),
+    assertCanChangeOwnership: mockFn().mockResolvedValue(undefined),
+  };
+  // La vitrina pública: acá sólo interesa que la verificación la pida; lo que
+  // la proyección hace por dentro se prueba en su propio spec.
+  const publicProfiles = {
+    projectOrganization: mockFn().mockResolvedValue('pub-1'),
+  };
   const service = new DirectoryTenantsService(
     em as any,
     tenantsRepo,
     membershipsRepo as any,
     branchesRepo as any,
     typeProfile as any,
+    tenantAdmin as any,
+    publicProfiles as any,
     logger as any,
   );
-  return { service, tx, tenantsRepo, membershipsRepo, branchesRepo };
+  return {
+    service,
+    tx,
+    tenantsRepo,
+    membershipsRepo,
+    branchesRepo,
+    tenantAdmin,
+    publicProfiles,
+  };
 }
 
 describe('DirectoryTenantsService', () => {
@@ -258,6 +281,146 @@ describe('DirectoryTenantsService', () => {
       expect(tenant.statusConceptId).toBe(DIR.TENANT_SUSPENDED);
       expect(branch.statusConceptId).toBe(DIR.BRANCH_SUSPENDED);
       expect(membership.statusConceptId).toBe(DIR.MEMBERSHIP_SUSPENDED);
+    });
+  });
+
+  /**
+   * TP-1: una organización se aprovisionaba y después no había forma de
+   * tocarla. Corregir la razón social mal tipeada, poner el nombre comercial
+   * con el que la conocen los pacientes o declarar su zona horaria —que decide
+   * cómo se leen los horarios de sus agendas— exigía escribir en la base.
+   */
+  describe('updateTenant (TP-1)', () => {
+    const actor = { id: 'user-org', roles: ['USER'] } as any;
+
+    /** La organización que existe, para no repetirla en cada prueba. */
+    function conOrganizacion(d: ReturnType<typeof build>): any {
+      const tenant = {
+        id: 'ten-1',
+        code: 'CLIN-1',
+        legalName: 'Clinica del Centro SRL',
+        tradeName: undefined as string | undefined,
+        timeZone: undefined as string | undefined,
+        tenantTypeConceptId: 'tt-1',
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+      };
+      d.tenantsRepo.findById.mockResolvedValue(tenant);
+      return tenant;
+    }
+
+    it('cambia sólo los campos que vienen', async () => {
+      const d = build();
+      const tenant = conOrganizacion(d);
+
+      await d.service.updateTenant(
+        'ten-1',
+        { tradeName: 'Clínica del Centro', timeZone: 'America/La_Paz' } as any,
+        actor,
+      );
+
+      expect(tenant.tradeName).toBe('Clínica del Centro');
+      expect(tenant.timeZone).toBe('America/La_Paz');
+      // No vino en el cuerpo: no se toca.
+      expect(tenant.legalName).toBe('Clinica del Centro SRL');
+    });
+
+    it('exige poder administrar ESA organización', async () => {
+      const d = build();
+      conOrganizacion(d);
+
+      await d.service.updateTenant('ten-1', { tradeName: 'X' } as any, actor);
+
+      expect(d.tenantAdmin.assertCanAdminister).toHaveBeenCalledWith(
+        expect.anything(),
+        'ten-1',
+        actor,
+      );
+    });
+
+    /**
+     * 404 antes que 403: lo contrario permitiría sondear qué identificadores
+     * existen midiendo qué código de error devuelve cada uno.
+     */
+    it('una organización inexistente responde no encontrada, sin consultar permisos', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.updateTenant('ten-x', { tradeName: 'X' } as any, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.tenantAdmin.assertCanAdminister).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * TP-1: antes de esto una organización jamás llegaba al directorio público
+   * —nadie proyectaba su vitrina—, así que «la no verificada es invisible» se
+   * cumplía por la peor de las razones: lo eran todas.
+   */
+  describe('verify · publica la organización (TP-1)', () => {
+    const actor = { id: 'user-plat', roles: ['SECURITY_ADMIN'] } as any;
+
+    it('verificar proyecta la vitrina pública con el nombre comercial', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'CLIN-1',
+        legalName: 'Clinica del Centro SRL',
+        tradeName: 'Clínica del Centro',
+        statusConceptId: DIR.TENANT_PENDING,
+        tenantTypeConceptId: 'tt-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+      });
+
+      await d.service.verify('ten-1', {} as any, actor);
+
+      expect(d.publicProfiles.projectOrganization).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          targetId: 'ten-1',
+          displayName: 'Clínica del Centro',
+        }),
+      );
+    });
+
+    it('sin nombre comercial se publica con la razón social', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-2',
+        code: 'CLIN-2',
+        legalName: 'Centro Médico Norte SRL',
+        statusConceptId: DIR.TENANT_PENDING,
+        tenantTypeConceptId: 'tt-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+      });
+
+      await d.service.verify('ten-2', {} as any, actor);
+
+      expect(d.publicProfiles.projectOrganization).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ displayName: 'Centro Médico Norte SRL' }),
+      );
+    });
+
+    /** Sin aprobar no aparece: la vitrina se crea al verificar, no antes. */
+    it('una organización que no está pendiente no se publica', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-3',
+        statusConceptId: 'otro-estado',
+        legalName: 'X',
+        createdAt: new Date(),
+      });
+
+      await expect(
+        d.service.verify('ten-3', {} as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.publicProfiles.projectOrganization).not.toHaveBeenCalled();
     });
   });
 });

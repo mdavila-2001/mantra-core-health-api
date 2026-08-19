@@ -42,6 +42,13 @@ export class PublicProfileProjectionService {
     em: EntityManager,
     data: OrganizationPublicProfileProjection,
   ): Promise<string> {
+    // Idempotente: un sujeto tiene una vitrina, no una por vez que alguien
+    // vuelva a verificarlo. Sin esto, reverificar dejaba dos filas para el
+    // mismo sujeto —dos enlaces públicos a lo mismo— y el slug, que es único,
+    // hacía caer la segunda con un error de base que no nombraba el problema.
+    const existente = await this.profilesRepo.findByTarget(em, data.targetId);
+    if (existente) return existente.id;
+
     const profile = this.profilesRepo.create(em, {
       tenantId: data.tenantId,
       targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
@@ -49,6 +56,11 @@ export class PublicProfileProjectionService {
       slug: data.slug,
       displayName: data.displayName,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
+      // Explícita, y no por omisión: el buscador público filtra por
+      // visibilidad, así que una vitrina proyectada sin ella queda publicada y
+      // a la vez invisible — lo peor de los dos mundos, porque nadie la
+      // encuentra y nadie sabe por qué.
+      visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
       acceptsReviews: true,
       actorUserId: data.actorUserId,
     });

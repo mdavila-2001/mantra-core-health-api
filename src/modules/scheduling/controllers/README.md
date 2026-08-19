@@ -4,11 +4,11 @@ Capa HTTP. Validan, autorizan y delegan; la transacción vive en el servicio.
 
 ## Rutas
 
-| Controlador | Prefijo | Endpoints |
-| --- | --- | --- |
-| `SchedulingController` | `scheduling` | UC-41-01, 02, 03, 04, 05, 06, 11 |
-| `SchedulingBookingsController` | `scheduling/bookings` | UC-41-08, 09, 10, 13 |
-| `SchedulingInternalController` | `scheduling/internal` | UC-41-07, 12, 14 |
+| Controlador                    | Prefijo               | Endpoints                        |
+| ------------------------------ | --------------------- | -------------------------------- |
+| `SchedulingController`         | `scheduling`          | UC-41-01, 02, 03, 04, 05, 06, 11 |
+| `SchedulingBookingsController` | `scheduling/bookings` | UC-41-08, 09, 10, 13             |
+| `SchedulingInternalController` | `scheduling/internal` | UC-41-07, 12, 14                 |
 
 ## Autenticación y autorización
 

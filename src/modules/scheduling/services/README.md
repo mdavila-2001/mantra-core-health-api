@@ -4,11 +4,11 @@ Lógica de negocio de la agenda. Cada método público resuelve un caso de uso e
 
 ## Servicios
 
-| Servicio | Casos de uso | Responsabilidad |
-| --- | --- | --- |
-| `SchedulingCatalogService` | 01, 02, 03, 04 | Recursos, políticas, plantillas, slots y excepciones |
+| Servicio                    | Casos de uso           | Responsabilidad                                                        |
+| --------------------------- | ---------------------- | ---------------------------------------------------------------------- |
+| `SchedulingCatalogService`  | 01, 02, 03, 04         | Recursos, políticas, plantillas, slots y excepciones                   |
 | `SchedulingBookingsService` | 05, 06, 07, 08, 09, 10 | Holds, confirmación, expiración, reprogramación, cancelación, check-in |
-| `SchedulingWaitlistService` | 11, 12, 13, 14 | Lista de espera y recordatorios |
+| `SchedulingWaitlistService` | 11, 12, 13, 14         | Lista de espera y recordatorios                                        |
 
 ## Reglas de negocio
 
