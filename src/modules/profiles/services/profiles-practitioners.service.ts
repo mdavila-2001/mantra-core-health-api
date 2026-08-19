@@ -64,6 +64,7 @@ import {
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
 import { ProfileOwnershipService } from './profile-ownership.service';
+import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
 /**
  * Casos de uso de la fuerza laboral de salud (regla GENERALIST): onboarding
@@ -104,6 +105,9 @@ export class ProfilesPractitionersService {
     private readonly languagesRepo: PractitionerLanguagesRepository,
     private readonly affiliationsRepo: PractitionerAffiliationsRepository,
     private readonly ownership: ProfileOwnershipService,
+    // TP-2: con qué estado nace un vínculo y cuáles se le pueden mostrar a un
+    // tercero se deciden en un solo lugar.
+    private readonly affiliations: ProfilesAffiliationsService,
     private readonly attachableFiles: AttachableFileService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
@@ -485,7 +489,14 @@ export class ProfilesPractitionersService {
       this.credentialsRepo.findByPractitioner(em, profileId),
       this.authorizationsRepo.findByPractitioner(em, profileId),
       this.languagesRepo.findByPractitioner(em, profileId),
-      this.affiliationsRepo.findByPractitioner(em, profileId),
+      // TP-2: el titular ve su trayectoria entera —incluida la solicitud que
+      // mandó y todavía nadie aceptó, que si no no sabría que la mandó—; quien
+      // mira la ficha de un colega ve sólo los vínculos aprobados. Decir que
+      // alguien trabaja en una clínica que no lo aceptó es afirmar algo falso,
+      // y era lo que esta lectura hacía.
+      subjectUserId === undefined
+        ? this.affiliations.visiblesDeTerceros(em, profileId)
+        : this.affiliationsRepo.findByPractitioner(em, profileId),
       subjectUserId === undefined
         ? Promise.resolve({
             encounters: 0,
@@ -1253,6 +1264,26 @@ export class ProfilesPractitionersService {
         );
       }
 
+      // TP-2: y pedir dos veces atender en la MISMA sede es lo mismo, aunque el
+      // cargo o la fecha se escriban distinto. `findSame` compara institución,
+      // cargo e inicio —sirve para no cargar dos veces la misma línea del
+      // currículum—, y con eso solo, reenviar el formulario con una coma de
+      // diferencia dejaba dos solicitudes para la misma sede en la bandeja de
+      // la organización.
+      if (dto.practiceSiteId) {
+        const yaPedida = await this.affiliationsRepo.findByPractitionerAndSite(
+          tx,
+          profileId,
+          dto.practiceSiteId,
+        );
+        if (yaPedida) {
+          throw new ConflictException('Ya pediste vincularte a esa sede', {
+            practiceSiteId: dto.practiceSiteId,
+            statusConceptId: yaPedida.statusConceptId,
+          });
+        }
+      }
+
       const affiliation = this.affiliationsRepo.create(tx, {
         practitionerProfileId: profileId,
         organizationName,
@@ -1263,7 +1294,19 @@ export class ProfilesPractitionersService {
           dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
         startDate,
         endDate,
-        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        // TP-2: un vínculo a una sede ajena nace **pendiente**, no activo.
+        //
+        // Hasta acá, declarar una afiliación la daba por cierta en el acto:
+        // cualquiera podía decirse parte de una clínica y el sistema lo
+        // publicaba en su trayectoria y en su perfil, sin que nadie de esa
+        // clínica se enterara siquiera. Sin sede sigue naciendo activa —eso es
+        // historial laboral y no hay a quién pedirle permiso—, y con una sede
+        // propia también, porque pedirse permiso a uno mismo no es una regla.
+        statusConceptId: await this.affiliations.estadoInicial(
+          tx,
+          dto.practiceSiteId,
+          actor,
+        ),
         actorUserId: actor.id,
       });
       await tx.flush();
