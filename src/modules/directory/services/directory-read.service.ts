@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
@@ -236,6 +237,8 @@ export class DirectoryReadService {
         canAdminister: ROLES_QUE_ADMINISTRAN.has(
           membership.tenantRoleConceptId,
         ),
+        isVerified:
+          tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED,
       });
     }
 

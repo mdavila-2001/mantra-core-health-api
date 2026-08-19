@@ -32,6 +32,20 @@ export class MyOrganizationDto extends TenantDetailResponseDto {
     description: 'Verdadero para owner y admin de la organización',
   })
   canAdminister!: boolean;
+
+  /**
+   * Si la plataforma ya la aprobó.
+   *
+   * Viaja resuelto y no sólo como `verificationStatusConceptId` porque el
+   * estado es un uuid del catálogo: para saber cuál de todos significa
+   * «verificada», la pantalla tendría que atarse a un identificador sembrado.
+   * Y le importa: sin aprobar, la organización no aparece en el directorio
+   * público, y eso hay que poder decírselo a quien la administra.
+   */
+  @ApiProperty({
+    description: 'Verdadero cuando la plataforma verificó la organización',
+  })
+  isVerified!: boolean;
 }
 
 /**
