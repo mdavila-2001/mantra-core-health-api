@@ -35,6 +35,16 @@ import { COMM } from '../community.concepts';
  * «cardiologo» encuentre «Cardiología»: es el mínimo que hace que un buscador
  * sirva, y no depende de que el índice exista.
  */
+/** Ciudad y punto de un sujeto; sin coordenadas, `lat`/`lng` van en nulo. */
+export interface ProfileLocation {
+  /** Ciudad legible, tal como se muestra. */
+  readonly city: string | null;
+  /** Latitud, o `null` si la dirección no la tiene cargada. */
+  readonly lat: number | null;
+  /** Longitud, o `null` si la dirección no la tiene cargada. */
+  readonly lng: number | null;
+}
+
 @Injectable()
 export class PublicSearchRepository {
   /**
@@ -137,6 +147,240 @@ export class PublicSearchRepository {
         .execute<{ id: string }[]>(base.replace(/%NORM%/g, ''), params, 'all');
       return filas.map((f) => f.id);
     }
+  }
+
+  /**
+   * Perfiles públicos con coordenadas dentro de una caja envolvente.
+   *
+   * Es la red de «lo más cercano» cuando el índice geográfico no responde. La
+   * caja se calcula en grados —barata y con índice— y deja pasar las esquinas
+   * que el radio real excluye; el recorte fino por distancia es del servicio,
+   * con la misma fórmula que rotula la pantalla.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param punto - Centro, radio en km y vertical opcional.
+   * @param limit - Tope de filas candidatas.
+   * @returns Perfiles con su punto y ciudad.
+   */
+  async nearbyProfiles(
+    em: EntityManager,
+    punto: {
+      /** Latitud del observador. */
+      lat: number;
+      /** Longitud del observador. */
+      lng: number;
+      /** Radio en kilómetros. */
+      radiusKm: number;
+      /** Vertical al que acotar. */
+      targetTypeConceptId?: string;
+    },
+    limit: number,
+  ): Promise<
+    Array<{
+      /** El perfil público. */
+      profile: PublicProfiles;
+      /** Latitud de su dirección. */
+      lat: number;
+      /** Longitud de su dirección. */
+      lng: number;
+      /** Ciudad, o `null`. */
+      city: string | null;
+    }>
+  > {
+    // Un grado de latitud son ~111 km en cualquier parte; uno de longitud se
+    // encoge con el coseno de la latitud, y cerca de los polos el divisor se
+    // va a cero — de ahí el mínimo, que evita una caja infinita.
+    const gradosLat = punto.radiusKm / 111;
+    const cos = Math.max(Math.abs(Math.cos((punto.lat * Math.PI) / 180)), 0.01);
+    const gradosLng = punto.radiusKm / (111 * cos);
+
+    const filas = await em.getConnection().execute<
+      {
+        id: string;
+        latitude: string;
+        longitude: string;
+        city: string | null;
+      }[]
+    >(
+      `SELECT DISTINCT ON (pp.id)
+                pp.id, a.latitude, a.longitude, a.city
+           FROM community.public_profiles pp
+           JOIN common.addresses a ON a.owner_id = pp.target_id
+          WHERE pp.visibility_concept_id = ?
+            AND pp.status_concept_id = ?
+            AND (CAST(? AS uuid) IS NULL OR pp.target_type_concept_id = CAST(? AS uuid))
+            AND a.latitude IS NOT NULL AND a.longitude IS NOT NULL
+            AND a.latitude BETWEEN ? AND ?
+            AND a.longitude BETWEEN ? AND ?
+            AND (a.valid_to IS NULL OR a.valid_to >= CURRENT_DATE)
+          ORDER BY pp.id, a.valid_from DESC NULLS LAST
+          LIMIT ?`,
+      [
+        COMM.PROFILE_VISIBILITY_PUBLIC,
+        CONCEPTS.STATE_ACTIVE,
+        punto.targetTypeConceptId ?? null,
+        punto.targetTypeConceptId ?? null,
+        punto.lat - gradosLat,
+        punto.lat + gradosLat,
+        punto.lng - gradosLng,
+        punto.lng + gradosLng,
+        limit,
+      ],
+      'all',
+    );
+
+    if (filas.length === 0) return [];
+
+    const perfiles = await em.find(PublicProfiles, {
+      id: { $in: filas.map((fila) => fila.id) },
+    });
+    const porId = new Map(perfiles.map((perfil) => [perfil.id, perfil]));
+
+    return filas.flatMap((fila) => {
+      const profile = porId.get(fila.id);
+      if (!profile) return [];
+      return [
+        {
+          profile,
+          lat: Number(fila.latitude),
+          lng: Number(fila.longitude),
+          city: fila.city,
+        },
+      ];
+    });
+  }
+
+  /**
+   * Página de perfiles indexables, en orden estable por id.
+   *
+   * El reindexado recorre el directorio entero por lotes y no puede permitirse
+   * ni saltarse ni repetir filas, así que pagina por clave (`id > after`) y no
+   * por `offset`: con `offset`, una alta concurrente durante el barrido corre
+   * todas las páginas siguientes y deja perfiles sin indexar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param after - Último id de la página anterior.
+   * @param limit - Tamaño del lote.
+   * @returns Los perfiles públicos y activos del lote.
+   */
+  listIndexable(
+    em: EntityManager,
+    after: string | undefined,
+    limit: number,
+  ): Promise<PublicProfiles[]> {
+    const where: Record<string, unknown> = {
+      visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    };
+    if (after) where.id = { $gt: after };
+    return em.find(PublicProfiles, where, { orderBy: { id: 'ASC' }, limit });
+  }
+
+  /** Cuántos perfiles públicos hay: el denominador de «indexados N de N». */
+  countIndexable(em: EntityManager): Promise<number> {
+    return em.count(PublicProfiles, {
+      visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
+  /**
+   * Ciudad y coordenadas de cada sujeto, para el índice.
+   *
+   * Una consulta para todo el lote, no una por perfil: el reindexado completo
+   * hace lo mismo que una página del buscador, sólo que muchas veces seguidas,
+   * y ahí un viaje por fila sí se nota.
+   *
+   * Se descartan las direcciones cuya vigencia ya venció y se queda la más
+   * reciente por sujeto: un profesional que se mudó aparece donde atiende hoy.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ownerIds - Sujetos de los perfiles del lote (`target_id`).
+   * @returns Mapa `ownerId → { city, lat, lng }`; sin dirección, no aparece.
+   */
+  async locationsByOwner(
+    em: EntityManager,
+    ownerIds: string[],
+  ): Promise<Map<string, ProfileLocation>> {
+    const salida = new Map<string, ProfileLocation>();
+    if (ownerIds.length === 0) return salida;
+
+    const filas = await em.getConnection().execute<
+      {
+        owner_id: string;
+        city: string | null;
+        latitude: string | null;
+        longitude: string | null;
+      }[]
+    >(
+      `SELECT DISTINCT ON (owner_id) owner_id, city, latitude, longitude
+           FROM common.addresses
+          WHERE owner_id IN (?)
+            AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
+          ORDER BY owner_id, valid_from DESC NULLS LAST, updated_at DESC`,
+      [ownerIds],
+      'all',
+    );
+
+    for (const fila of filas) {
+      const lat = fila.latitude === null ? null : Number(fila.latitude);
+      const lng = fila.longitude === null ? null : Number(fila.longitude);
+      // Una dirección sin coordenadas todavía sirve para filtrar por ciudad;
+      // lo que no puede es entrar como `geo_point`, que rechaza un nulo.
+      const geoValida =
+        lat !== null &&
+        lng !== null &&
+        Number.isFinite(lat) &&
+        Number.isFinite(lng);
+      if (!geoValida) {
+        if (fila.city) {
+          salida.set(fila.owner_id, { city: fila.city, lat: null, lng: null });
+        }
+        continue;
+      }
+      salida.set(fila.owner_id, { city: fila.city, lat, lng });
+    }
+    return salida;
+  }
+
+  /**
+   * Especialidades legibles de cada sujeto profesional.
+   *
+   * Devuelve el `display` del concepto y no su uuid: el índice es una copia
+   * pública, y un identificador interno ahí es una fuga que después no se puede
+   * deshacer. Se descartan las especialidades vencidas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileIds - Sujetos de los perfiles del lote.
+   * @returns Mapa `practitionerProfileId → nombres de especialidad`.
+   */
+  async specialtiesByPractitioner(
+    em: EntityManager,
+    practitionerProfileIds: string[],
+  ): Promise<Map<string, string[]>> {
+    const salida = new Map<string, string[]>();
+    if (practitionerProfileIds.length === 0) return salida;
+
+    const filas = await em
+      .getConnection()
+      .execute<{ practitioner_profile_id: string; display: string }[]>(
+        `SELECT ps.practitioner_profile_id, cc.display
+           FROM profiles.practitioner_specialties ps
+           JOIN terminology.catalog_concepts cc ON cc.id = ps.specialty_concept_id
+          WHERE ps.practitioner_profile_id IN (?)
+            AND (ps.valid_to IS NULL OR ps.valid_to >= CURRENT_DATE)
+          ORDER BY ps.is_primary DESC NULLS LAST, cc.display ASC`,
+        [practitionerProfileIds],
+        'all',
+      );
+
+    for (const fila of filas) {
+      if (!fila.display) continue;
+      const previas = salida.get(fila.practitioner_profile_id) ?? [];
+      if (!previas.includes(fila.display)) previas.push(fila.display);
+      salida.set(fila.practitioner_profile_id, previas);
+    }
+    return salida;
   }
 
   /** El perfil público de ese slug, o `null` si no existe **o no es público**. */

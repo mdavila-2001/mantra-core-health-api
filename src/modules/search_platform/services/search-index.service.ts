@@ -13,6 +13,28 @@ import {
   type SearchIndexDefinition,
 } from '../constants';
 
+/** Punto y radio de una búsqueda «lo más cercano». */
+export interface GeoParams {
+  /** Campo `geo_point` del índice sobre el que se mide. */
+  readonly field: string;
+  /** Latitud del observador. */
+  readonly lat: number;
+  /** Longitud del observador. */
+  readonly lng: number;
+  /** Radio máximo en kilómetros. */
+  readonly radiusKm: number;
+  /** Ordenar por distancia ascendente (si no, manda la relevancia). */
+  readonly sortByDistance?: boolean;
+}
+
+/** Criterio de orden explícito sobre un campo declarado en `sortFields`. */
+export interface SortParams {
+  /** Campo por el que ordenar. */
+  readonly field: string;
+  /** Sentido. */
+  readonly direction: 'asc' | 'desc';
+}
+
 /** Parámetros de una búsqueda tipada (el query DSL nunca lo aporta el cliente). */
 export interface SearchParams {
   /**
@@ -47,6 +69,15 @@ export interface SearchParams {
    * Valor de size mantenido por la instancia.
    */
   readonly size?: number;
+  /** Acotar y ordenar por cercanía a un punto (`geo_distance`). */
+  readonly geo?: GeoParams;
+  /** Orden explícito; sin él manda la relevancia (`_score`). */
+  readonly sort?: readonly SortParams[];
+  /**
+   * Campo `search_after` de OpenSearch para paginar sin `from` profundo.
+   * Se pasa tal cual lo devolvió el acierto anterior.
+   */
+  readonly searchAfter?: readonly unknown[];
 }
 
 /** Un acierto normalizado. */
@@ -63,6 +94,13 @@ export interface SearchHit {
    * Valor de source mantenido por la instancia.
    */
   source: Record<string, unknown>;
+  /**
+   * Claves de orden del acierto (`sort` de OpenSearch), para `search_after`.
+   * Cuando la búsqueda es geográfica, su primer valor es la distancia en km.
+   */
+  sort?: unknown[];
+  /** Distancia en kilómetros al punto pedido, si la búsqueda fue geográfica. */
+  distanceKm?: number;
 }
 
 /** Resultado de una búsqueda: aciertos + facetas. */
@@ -154,10 +192,53 @@ export class SearchIndexService {
     }
     await this.client.indices.create({
       index: def.name,
-      body: { mappings: def.mappings },
+      body: {
+        // Los `settings` sólo se pueden fijar al crear: OpenSearch no cambia el
+        // analizador de un índice vivo. Cambiar el analizador es, por tanto,
+        // borrar y reindexar — que es justo lo que `search:reindex` hace.
+        ...(def.settings ? { settings: def.settings } : {}),
+        mappings: def.mappings,
+      },
     });
     this.logger.info({ index: def.name }, 'Índice de búsqueda creado');
     return { created: true };
+  }
+
+  /**
+   * Borra el índice y lo vuelve a crear con sus `settings` y `mappings` al día.
+   *
+   * Es la única forma de que un cambio de analizador o de mapping tenga efecto:
+   * OpenSearch no reduce mappings ni cambia analizadores sobre un índice vivo.
+   * Se usa desde el reindexado completo, nunca desde el camino de escritura
+   * normal, porque entre el borrado y el primer lote el índice queda vacío.
+   */
+  async recreateIndex(name: string): Promise<{
+    /** Si existía un índice previo que hubo que borrar. */
+    dropped: boolean;
+  }> {
+    const def = this.resolveIndex(name);
+    const exists = await this.client.indices.exists({ index: def.name });
+    const dropped = exists.body === true;
+    if (dropped) {
+      await this.client.indices.delete({ index: def.name });
+    }
+    await this.ensureIndex(def.name);
+    this.logger.info(
+      { index: def.name, dropped },
+      'Índice de búsqueda recreado',
+    );
+    return { dropped };
+  }
+
+  /** Cuántos documentos tiene el índice para ese tenant (verificación del reindex). */
+  async countDocuments(index: string, tenantId: string): Promise<number> {
+    this.assertTenant(tenantId);
+    const def = this.resolveIndex(index);
+    const response = await this.client.count({
+      index: def.name,
+      body: { query: { term: { [TENANT_FIELD]: tenantId } } },
+    });
+    return this.asNumber((response.body as { count?: unknown }).count) ?? 0;
   }
 
   /**
@@ -182,6 +263,7 @@ export class SearchIndexService {
     const def = this.resolveIndex(index);
     await this.ensureIndex(def.name);
 
+    this.assertIndexableDocument(def, doc);
     const body = { ...doc, [TENANT_FIELD]: tenantId };
     const response = await this.client.index({
       index: def.name,
@@ -213,6 +295,9 @@ export class SearchIndexService {
     }
     await this.ensureIndex(def.name);
 
+    for (const entry of documents) {
+      this.assertIndexableDocument(def, entry.document);
+    }
     const operations = documents.flatMap((entry) => [
       { index: { _index: def.name, _id: entry.id } },
       { ...entry.document, [TENANT_FIELD]: tenantId },
@@ -271,15 +356,62 @@ export class SearchIndexService {
       };
     }
 
+    // «Más cercana» de verdad: el radio acota en el `filter` (no puntúa) y el
+    // orden por distancia se pide aparte, para que un resultado lejano con
+    // mejor texto no se cuele por encima del de la esquina.
+    const sort: Array<Record<string, unknown> | string> = [];
+    if (params.geo) {
+      this.assertAllowedField(
+        def,
+        params.geo.field,
+        def.geoFields ?? [],
+        'geo',
+      );
+      filter.push({
+        geo_distance: {
+          distance: `${params.geo.radiusKm}km`,
+          [params.geo.field]: {
+            lat: params.geo.lat,
+            lon: params.geo.lng,
+          },
+        },
+      });
+      if (params.geo.sortByDistance !== false) {
+        sort.push({
+          _geo_distance: {
+            [params.geo.field]: {
+              lat: params.geo.lat,
+              lon: params.geo.lng,
+            },
+            order: 'asc',
+            unit: 'km',
+          },
+        });
+      }
+    }
+    for (const clause of params.sort ?? []) {
+      this.assertAllowedField(def, clause.field, def.sortFields ?? [], 'orden');
+      sort.push({ [clause.field]: { order: clause.direction } });
+    }
+    // Desempate estable: sin él, dos perfiles con el mismo puntaje pueden
+    // alternar de página en página y el cursor se salta filas.
+    if (sort.length > 0) {
+      sort.push({ _id: { order: 'asc' } });
+    }
+
     const body: Record<string, unknown> = {
-      from: params.from ?? 0,
+      // `search_after` y `from` son excluyentes en OpenSearch: con cursor, el
+      // desplazamiento lo marca la clave del último acierto, no un offset.
+      ...(params.searchAfter ? {} : { from: params.from ?? 0 }),
       size: params.size ?? 20,
       query: { bool: { must, filter } },
+      ...(sort.length > 0 ? { sort } : {}),
+      ...(params.searchAfter ? { search_after: [...params.searchAfter] } : {}),
       ...(Object.keys(aggregations).length > 0 ? { aggs: aggregations } : {}),
     };
     const response = await this.client.search({ index: def.name, body });
 
-    return this.normalizeResult(response.body);
+    return this.normalizeResult(response.body, params.geo !== undefined);
   }
 
   /** Elimina un documento por id (acotado al índice). */
@@ -363,7 +495,7 @@ export class SearchIndexService {
   // --- Internos -------------------------------------------------------------
 
   /** Traduce el cuerpo de OpenSearch a la forma normalizada del dominio. */
-  private normalizeResult(body: unknown): SearchResult {
+  private normalizeResult(body: unknown, geo = false): SearchResult {
     const root = this.asRecord(body);
     const hitContainer = this.asRecord(root.hits);
     const rawHits = this.asUnknownArray(hitContainer.hits);
@@ -375,10 +507,19 @@ export class SearchIndexService {
 
     const hits: SearchHit[] = rawHits.map((rawHit) => {
       const hit = this.asRecord(rawHit);
+      const sort = this.asUnknownArray(hit.sort);
+      // Con orden geográfico, la primera clave de `sort` ES la distancia en km
+      // que devolvió OpenSearch: no se recalcula en memoria, que era el defecto
+      // que P10 vino a cerrar.
+      const distanceKm = geo && sort.length > 0 ? this.asNumber(sort[0]) : null;
       return {
         id: this.asString(hit._id),
         score: this.asNumber(hit._score),
         source: this.asRecord(hit._source),
+        ...(sort.length > 0 ? { sort } : {}),
+        ...(distanceKm !== null
+          ? { distanceKm: Math.round(distanceKm * 10) / 10 }
+          : {}),
       };
     });
 
@@ -452,12 +593,37 @@ export class SearchIndexService {
     }
   }
 
+  /**
+   * Un índice con `documentKeys` declarados sólo acepta esas claves.
+   *
+   * Es la tarea 40 de P10 aplicada donde no se puede saltear: en la escritura.
+   * Un índice público que gana un campo —porque alguien amplió una proyección
+   * río arriba— deja de indexarse en vez de publicar en silencio un dato
+   * interno. Falla ruidoso y temprano; un 422 en el reindexado se ve, una fuga
+   * en un índice consultado sin sesión no.
+   */
+  private assertIndexableDocument(
+    def: SearchIndexDefinition,
+    doc: Record<string, unknown>,
+  ): void {
+    if (!def.documentKeys) return;
+    const extra = Object.keys(doc).filter(
+      (key) => key !== TENANT_FIELD && !def.documentKeys!.includes(key),
+    );
+    if (extra.length > 0) {
+      throw new PreconditionFailedException(
+        'El documento trae campos no declarados para este índice',
+        { index: def.name, extra, allowed: [...def.documentKeys] },
+      );
+    }
+  }
+
   /** Valida que un campo esté en la allowlist correspondiente del índice. */
   private assertAllowedField(
     def: SearchIndexDefinition,
     field: string,
     allowed: readonly string[],
-    kind: 'filtro' | 'faceta',
+    kind: 'filtro' | 'faceta' | 'geo' | 'orden',
   ): void {
     if (!allowed.includes(field)) {
       throw new PreconditionFailedException(

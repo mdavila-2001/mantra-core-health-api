@@ -53,7 +53,10 @@ const perfilCompleto = {
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build() {
+function build(opciones?: {
+  /** Aciertos que devuelve el índice; sin esto, el índice «no responde». */
+  hits?: unknown[];
+}) {
   const em = { fork: mockFn(() => ({})) };
   const repo = {
     searchProfiles: mockFn().mockResolvedValue([]),
@@ -61,14 +64,28 @@ function build() {
     ratingsByProfile: mockFn().mockResolvedValue(new Map()),
     listPublicPosts: mockFn().mockResolvedValue([]),
     countPublishedReviews: mockFn().mockResolvedValue(0),
+    nearbyProfiles: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // Por omisión el índice falla: así estas pruebas ejercen el camino SQL —el
+  // que degrada— sin montar un OpenSearch, y el que sirve el índice se prueba
+  // pasándole aciertos explícitos.
+  const searchIndex = {
+    search: opciones?.hits
+      ? mockFn().mockResolvedValue({
+          total: opciones.hits.length,
+          hits: opciones.hits,
+          facets: {},
+        })
+      : mockFn().mockRejectedValue(new Error('OpenSearch no responde')),
+  };
   const service = new CommunityPublicService(
     em as any,
     repo as any,
+    searchIndex as any,
     logger as any,
   );
-  return { service, repo };
+  return { service, repo, searchIndex, logger };
 }
 
 describe('CommunityPublicService', () => {
@@ -311,6 +328,148 @@ describe('CommunityPublicService', () => {
       // ~530 km en línea recta; el margen cubre la elección de radio terrestre.
       expect(km).toBeGreaterThan(500);
       expect(km).toBeLessThan(560);
+    });
+  });
+});
+
+/**
+ * P10 · el buscador consulta el índice y degrada a SQL, no rompe.
+ *
+ * El buscador público es la portada del producto: si OpenSearch se cae, tiene
+ * que encontrar menos y peor —eso es un defecto— pero seguir respondiendo. Un
+ * 500 acá es una caída visible para cualquiera que entre sin sesión.
+ */
+describe('CommunityPublicService · P10', () => {
+  /** Un acierto del índice con la forma que devuelve OpenSearch. */
+  const acierto = {
+    id: 'perfil-1',
+    score: 3.2,
+    sort: [1, 'Dra. Marisol Quispe Ticona'],
+    source: {
+      kind: 'PRACTITIONER',
+      slug: 'dra-marisol-quispe',
+      displayName: 'Dra. Marisol Quispe Ticona',
+      headline: 'Cardiología',
+      city: 'La Paz',
+      avatarUrl: '/public/media/archivo-1',
+      verified: true,
+      ratingAverage: 4.5,
+      ratingCount: 12,
+      location: { lat: -16.5, lon: -68.15 },
+      updatedAt: '2026-08-01T12:00:00.000Z',
+    },
+  };
+
+  describe('cuando el índice responde', () => {
+    it('sirve desde el índice y no toca el SQL', async () => {
+      const d = build({ hits: [acierto] });
+
+      const res = await d.service.search({ q: 'cardiologo' });
+
+      expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].displayName).toBe('Dra. Marisol Quispe Ticona');
+      expect(res.items[0].city).toBe('La Paz');
+    });
+
+    it('la fila del índice tiene exactamente las claves permitidas', async () => {
+      const d = build({ hits: [acierto] });
+
+      const res = await d.service.search({ q: 'cardiologo' });
+
+      // El documento indexado trae `location` y `updatedAt`, que la fila del
+      // buscador NO publica: la proyección de lectura los deja fuera.
+      expect(Object.keys(res.items[0]).sort()).toEqual(
+        [...PUBLIC_RESULT_KEYS].sort(),
+      );
+    });
+
+    it('los verificados van primero: D7 se resuelve rankeando, no excluyendo', async () => {
+      const d = build({ hits: [acierto] });
+
+      await d.service.search({ q: 'cardiologo' });
+
+      const [[, params]] = d.searchIndex.search.mock.calls;
+      expect(params.sort[0]).toEqual({ field: 'verified', direction: 'desc' });
+    });
+
+    it('el vertical se traduce a filtro del índice', async () => {
+      const d = build({ hits: [acierto] });
+
+      await d.service.search({ kind: 'PRACTITIONER' });
+
+      const [[, params]] = d.searchIndex.search.mock.calls;
+      expect(params.filters).toContainEqual({
+        field: 'kind',
+        values: ['PRACTITIONER'],
+      });
+    });
+  });
+
+  describe('cuando el índice no responde', () => {
+    it('degrada a SQL en vez de fallar', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+
+      const res = await d.service.search({ q: 'cardiologo' });
+
+      expect(d.repo.searchProfiles).toHaveBeenCalled();
+      expect(res.items).toHaveLength(1);
+    });
+
+    it('la degradación queda registrada, no silenciosa', async () => {
+      const d = build();
+
+      await d.service.search({ q: 'cardiologo' });
+
+      expect(d.logger.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe('«más cercana» de verdad', () => {
+    it('pide `geo_distance` con el radio y el orden por distancia', async () => {
+      const d = build({ hits: [{ ...acierto, distanceKm: 1.2 }] });
+
+      const res = await d.service.nearby({
+        lat: -16.5,
+        lng: -68.15,
+        radiusKm: 3,
+      });
+
+      const [[indice, params]] = d.searchIndex.search.mock.calls;
+      expect(indice).toBe('community_public_profiles');
+      expect(params.geo).toEqual({
+        field: 'location',
+        lat: -16.5,
+        lng: -68.15,
+        radiusKm: 3,
+        sortByDistance: true,
+      });
+      expect(res.items[0].distanceKm).toBe(1.2);
+      expect(res.items[0].location).toEqual({ lat: -16.5, lng: -68.15 });
+    });
+
+    it('un acierto sin punto se descarta en vez de servir una distancia inventada', async () => {
+      const d = build({
+        hits: [
+          {
+            ...acierto,
+            distanceKm: 1.2,
+            source: { ...acierto.source, location: null },
+          },
+        ],
+      });
+
+      const res = await d.service.nearby({ lat: -16.5, lng: -68.15 });
+
+      expect(res.items).toHaveLength(0);
+    });
+
+    it('sigue exigiendo coordenadas válidas antes de consultar nada', async () => {
+      const d = build({ hits: [] });
+
+      await expect(d.service.nearby({ lat: 999, lng: 0 })).rejects.toThrow();
+      expect(d.searchIndex.search).not.toHaveBeenCalled();
     });
   });
 });
