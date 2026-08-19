@@ -21,34 +21,48 @@ const db = new pg.Client({
 
 const requestedTenant = process.env.DIAGNOSTIC_UNITS_SEED_TENANT_ID ?? null;
 
-const REQUIRED_CONCEPT_CODES = [
-  'DU_TYPE_LAB',
-  'DU_TYPE_IMAGING',
-  'DU_OWN_PRIVATE',
-  'DU_VERIF_VERIFIED',
-  'DU_UNIT_ACTIVE',
-  'DU_SITE_PRIMARY',
-  'DU_SITE_COLLECTION',
-  'DU_SITE_ACTIVE',
-  'DU_STUDY_CBC',
-  'DU_STUDY_GLUCOSE',
-  'DU_STUDY_PCR',
-  'DU_STUDY_CHEST_XRAY',
-  'DU_STUDY_ABDOMINAL_ULTRASOUND',
-  'DU_MODALITY_LAB',
-  'DU_MODALITY_XRAY',
-  'DU_MODALITY_ULTRASOUND',
-  'DU_OFFER_ACTIVE',
-  'DU_PS_STANDARD',
-  'DU_CUR_BOB',
-  'DU_SCHED_ACTIVE',
-  'DU_PRICE_ACTIVE',
-  'DU_ACC_ISO15189',
-  'DU_EQ_ANALYZER',
-  'DU_EQ_XRAY',
-  'DU_EQ_ULTRASOUND',
-  'DU_EQ_OPERATIONAL',
-];
+/**
+ * Alias del script → código real del catálogo.
+ *
+ * El script nombraba los conceptos con alias cortos (`DU_TYPE_LAB`) que el seed
+ * de terminología nunca materializó: los suyos van prefijados por módulo
+ * (`diagnostic_units:UNIT_TYPE_LABORATORY`). Por eso este seeder abortaba con
+ * «faltan conceptos» y el directorio de laboratorios seguía vacío (F-15,
+ * 18/08/2026) — no faltaba el seed de terminología, faltaba la traducción.
+ *
+ * Se mantiene el alias como clave para no tocar las treinta llamadas a
+ * `concept(...)` que hay más abajo: lo que cambia es contra qué se resuelve.
+ */
+const CONCEPTOS = {
+  DU_TYPE_LAB: 'diagnostic_units:UNIT_TYPE_LABORATORY',
+  DU_TYPE_IMAGING: 'diagnostic_units:UNIT_TYPE_IMAGING',
+  DU_OWN_PRIVATE: 'diagnostic_units:OWNERSHIP_PRIVATE',
+  DU_VERIF_VERIFIED: 'diagnostic_units:VERIFICATION_VERIFIED',
+  DU_UNIT_ACTIVE: 'diagnostic_units:UNIT_ACTIVE',
+  DU_SITE_PRIMARY: 'diagnostic_units:SITE_ROLE_PRIMARY',
+  DU_SITE_COLLECTION: 'diagnostic_units:SITE_ROLE_COLLECTION',
+  DU_SITE_ACTIVE: 'diagnostic_units:SITE_ACTIVE',
+  DU_STUDY_CBC: 'diagnostic_units:STUDY_COMPLETE_BLOOD_COUNT',
+  DU_STUDY_GLUCOSE: 'diagnostic_units:STUDY_GLUCOSE',
+  DU_STUDY_PCR: 'diagnostic_units:STUDY_PCR',
+  DU_STUDY_CHEST_XRAY: 'diagnostic_units:STUDY_CHEST_XRAY',
+  DU_STUDY_ABDOMINAL_ULTRASOUND: 'diagnostic_units:STUDY_ABDOMINAL_ULTRASOUND',
+  DU_MODALITY_LAB: 'diagnostic_units:MODALITY_LABORATORY',
+  DU_MODALITY_XRAY: 'diagnostic_units:MODALITY_XRAY',
+  DU_MODALITY_ULTRASOUND: 'diagnostic_units:MODALITY_ULTRASOUND',
+  DU_OFFER_ACTIVE: 'diagnostic_units:OFFERING_ACTIVE',
+  DU_PS_STANDARD: 'diagnostic_units:PRICE_SCHEDULE_STANDARD',
+  DU_CUR_BOB: 'diagnostic_units:CURRENCY_BOB',
+  DU_SCHED_ACTIVE: 'diagnostic_units:SCHEDULE_ACTIVE',
+  DU_PRICE_ACTIVE: 'diagnostic_units:PRICE_ACTIVE',
+  DU_ACC_ISO15189: 'diagnostic_units:ACCREDITATION_ISO15189',
+  DU_EQ_ANALYZER: 'diagnostic_units:EQUIPMENT_TYPE_ANALYZER',
+  DU_EQ_XRAY: 'diagnostic_units:EQUIPMENT_TYPE_XRAY',
+  DU_EQ_ULTRASOUND: 'diagnostic_units:EQUIPMENT_TYPE_ULTRASOUND',
+  DU_EQ_OPERATIONAL: 'diagnostic_units:EQUIPMENT_OPERATIONAL',
+};
+
+const REQUIRED_CONCEPT_CODES = Object.keys(CONCEPTOS);
 
 function stableId(tenantId, key) {
   const hex = createHash('md5')
@@ -96,9 +110,15 @@ async function loadConcepts() {
     `SELECT id, code
        FROM terminology.catalog_concepts
       WHERE code = ANY($1::varchar[])`,
-    [REQUIRED_CONCEPT_CODES],
+    [Object.values(CONCEPTOS)],
   );
-  const concepts = new Map(rows.map((row) => [row.code, row.id]));
+  // Indexado por el alias del script, no por el código del catálogo.
+  const porCodigo = new Map(rows.map((row) => [row.code, row.id]));
+  const concepts = new Map(
+    REQUIRED_CONCEPT_CODES.filter((alias) => porCodigo.has(CONCEPTOS[alias])).map(
+      (alias) => [alias, porCodigo.get(CONCEPTOS[alias])],
+    ),
+  );
   const missing = REQUIRED_CONCEPT_CODES.filter((code) => !concepts.has(code));
   if (missing.length > 0) {
     throw new Error(
