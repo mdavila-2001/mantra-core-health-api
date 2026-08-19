@@ -35,6 +35,7 @@ import {
   ExpireSweepResponseDto,
   CaseQueueResponseDto,
 } from '../dto';
+import { IdentityVerificationEffectsService } from './identity-verification-effects.service';
 
 const MS_PER_HOUR = 3_600_000;
 /** Cuántos casos devuelve la cola de revisión si no se pide otra cosa. */
@@ -93,6 +94,7 @@ export class IdentityCasesService {
     private readonly fraudRepo: IdentityFraudSignalsRepository,
     private readonly reviewRepo: IdentityManualReviewCasesRepository,
     private readonly assertionsRepo: IdentityAssertionsRepository,
+    private readonly effects: IdentityVerificationEffectsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityCasesService.name);
@@ -482,6 +484,10 @@ export class IdentityCasesService {
           check.statusConceptId = IDA.CHECK_CANCELLED;
           touch(check, actor.id);
         }
+        // P13: si el caso que vence respaldaba un sello público, el sello cae
+        // con él. Un caso vencido con el perfil todavía «Verificado» es el
+        // sello que miente, sólo que en cámara lenta.
+        await this.effects.applyRevoked(tx, kase, actor.id, 'EXPIRED');
         caseIds.push(kase.id);
       }
       await tx.flush();

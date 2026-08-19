@@ -2,8 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
-import type { PublicProfiles } from '../entities';
+import type { PublicProfiles, VerifiedBadges } from '../entities';
 import { PublicSearchRepository } from '../repositories';
+import type { ProfileLocation } from '../repositories/public-search.repository';
 import {
   COMMUNITY_PUBLIC_PROFILES_INDEX,
   PUBLIC_DIRECTORY_TENANT,
@@ -13,6 +14,11 @@ import {
   type SearchHit,
 } from '../../search_platform/services';
 import { COMM } from '../community.concepts';
+import {
+  CommunityVerificationService,
+  type VerifiedBadgeDto,
+} from './community-verification.service';
+import { CommunityProfileStatsService } from './community-profile-stats.service';
 import type {
   PublicDirectoryProfileDto,
   PublicNearbyPageDto,
@@ -71,6 +77,11 @@ export const PUBLIC_RESULT_KEYS = [
   'verified',
   'ratingAverage',
   'ratingCount',
+  // P13. `verified` se mantiene porque el front ya lo consume, pero es el
+  // resumen booleano de `verifiedBadge.status`, no una segunda verdad.
+  'verifiedBadge',
+  'hasPublishedAgenda',
+  'nextAvailableDate',
 ] as const;
 
 /** Las claves que la ficha pública puede tener. Nada más. */
@@ -90,9 +101,27 @@ export const PUBLIC_PROFILE_KEYS = [
   'ratingAverage',
   'ratingCount',
   'acceptsReviews',
+  'verifiedBadge',
+  'hasPublishedAgenda',
+  'nextAvailableDate',
   'posts',
   'updatedAt',
 ] as const;
+
+/** Todo lo que una página de resultados necesita, resuelto en bloque. */
+interface ProfileSignals {
+  /** Promedio y cantidad de reseñas, por perfil. */
+  readonly ratings: Map<string, { average: number; count: number }>;
+  /** Sellos (vigentes y caídos), por perfil. */
+  readonly badges: Map<string, VerifiedBadges[]>;
+  /** Agenda publicada y primer día con hueco, por sujeto. */
+  readonly agenda: Map<
+    string,
+    { hasAgenda: boolean; nextAvailableDate: string | null }
+  >;
+  /** Ciudad y punto, por sujeto. */
+  readonly locations: Map<string, ProfileLocation>;
+}
 
 /**
  * Sirve el buscador público (P2). Sin sesión, sin tenant, sin PHI.
@@ -130,6 +159,8 @@ export class CommunityPublicService {
     private readonly em: EntityManager,
     private readonly repo: PublicSearchRepository,
     private readonly searchIndex: SearchIndexService,
+    private readonly verification: CommunityVerificationService,
+    private readonly stats: CommunityProfileStatsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityPublicService.name);
@@ -209,14 +240,18 @@ export class CommunityPublicService {
 
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
-    const ratings = await this.repo.ratingsByProfile(
-      em,
-      page.map((perfil) => perfil.id),
-    );
+    const señales = await this.señalesDe(em, page);
     const last = page.at(-1);
 
+    // Aparecer no es lo mismo que ser abierto, y el profesional necesita ver
+    // las dos: «apareciste 200 veces y te abrieron 3» es un problema de la
+    // tarjeta, no de la búsqueda.
+    for (const row of page) {
+      this.stats.recordImpressions(row.tenantId, [row.id]);
+    }
+
     return {
-      items: page.map((row) => this.toResult(row, ratings)),
+      items: page.map((row) => this.toResult(row, señales)),
       nextCursor: hasMore && last ? this.encodeCursor(last) : null,
       totalHint: null,
       generatedAt: new Date().toISOString(),
@@ -248,11 +283,21 @@ export class CommunityPublicService {
     )
       throw new ResourceNotFoundException('No encontrado', { slug });
 
-    const [ratings, posts] = await Promise.all([
-      this.repo.ratingsByProfile(em, [profile.id]),
+    const [señales, posts] = await Promise.all([
+      this.señalesDe(em, [profile]),
       this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
     ]);
-    const rating = ratings.get(profile.id);
+    const rating = señales.ratings.get(profile.id);
+    const badge = this.verification.readBadge(
+      profile,
+      señales.badges.get(profile.id) ?? [],
+    );
+    const agenda = señales.agenda.get(profile.targetId);
+    const ubicacion = señales.locations.get(profile.targetId);
+
+    // ORG-PUB-005. No se espera: la ficha de un profesional no puede caerse
+    // ni tardar más porque el contador esté ocupado.
+    this.stats.recordView(profile.tenantId, profile.id);
 
     return {
       kind: this.kindOf(profile) as PublicDirectoryProfileDto['kind'],
@@ -262,18 +307,24 @@ export class CommunityPublicService {
       biography: profile.biography ?? null,
       avatarUrl: this.fileUrl(profile.avatarFileId),
       coverUrl: this.fileUrl(profile.coverFileId),
-      verified: this.isVerified(profile),
-      // `city`, `address`, `location` y `specialties` viven en `directory` y
-      // `profiles`, y su vínculo con el perfil público es polimórfico. Se
-      // sirven en su forma final —null y vacío, no ausentes— para que la
-      // pantalla ya esté construida cuando P5 los llene desde el índice.
-      city: null,
+      verified: badge.status === 'VERIFIED',
+      city: ubicacion?.city ?? null,
+      // `address` y `specialties` viven en `directory` y `profiles`, y su
+      // vínculo con el perfil público es polimórfico. Se sirven en su forma
+      // final —null y vacío, no ausentes— para que la pantalla ya esté
+      // construida cuando se llenen.
       address: null,
-      location: null,
+      location:
+        ubicacion?.lat != null && ubicacion?.lng != null
+          ? { lat: ubicacion.lat, lng: ubicacion.lng }
+          : null,
       specialties: [],
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
       acceptsReviews: profile.acceptsReviews ?? false,
+      verifiedBadge: badge,
+      hasPublishedAgenda: agenda?.hasAgenda ?? false,
+      nextAvailableDate: agenda?.nextAvailableDate ?? null,
       posts: posts.map((post) => ({
         id: post.id,
         bodyText: post.bodyText,
@@ -413,9 +464,9 @@ export class CommunityPublicService {
       limit * 4,
     );
 
-    const ratings = await this.repo.ratingsByProfile(
+    const señales = await this.señalesDe(
       em,
-      filas.map((fila) => fila.profile.id),
+      filas.map((fila) => fila.profile),
     );
 
     const items = filas
@@ -427,7 +478,7 @@ export class CommunityPublicService {
       .sort((a, b) => a.distanceKm - b.distanceKm)
       .slice(0, limit)
       .map((entrada) => ({
-        ...this.toResult(entrada.fila.profile, ratings),
+        ...this.toResult(entrada.fila.profile, señales),
         city: entrada.fila.city,
         distanceKm: entrada.distanceKm,
         location: { lat: entrada.fila.lat, lng: entrada.fila.lng },
@@ -546,6 +597,24 @@ export class CommunityPublicService {
       return typeof valor === 'number' && Number.isFinite(valor) ? valor : null;
     };
 
+    // El sello viaja al índice descompuesto en campos planos —OpenSearch no
+    // gana nada indexando un objeto anidado que nadie filtra— y se recompone
+    // acá en la MISMA forma que sirve el camino SQL. Si las dos formas
+    // divergieran, el mismo perfil se vería distinto según quién respondió.
+    const estado = texto('verifiedBadgeStatus');
+    const verifiedBadge: VerifiedBadgeDto = {
+      status:
+        estado === 'VERIFIED' || estado === 'EXPIRED'
+          ? estado
+          : source.verified === true
+            ? 'VERIFIED'
+            : 'NONE',
+      badgeTypeConceptId: texto('badgeTypeConceptId'),
+      verificationMethodConceptId: texto('verificationMethodConceptId'),
+      verifiedAt: texto('verifiedAt'),
+      validUntil: texto('validUntil'),
+    };
+
     return {
       kind: (texto('kind') ?? 'PRACTITIONER') as PublicResultKind,
       slug: texto('slug') ?? '',
@@ -553,9 +622,12 @@ export class CommunityPublicService {
       headline: texto('headline'),
       city: texto('city'),
       avatarUrl: texto('avatarUrl'),
-      verified: source.verified === true,
+      verified: verifiedBadge.status === 'VERIFIED',
       ratingAverage: numero('ratingAverage'),
       ratingCount: numero('ratingCount') ?? 0,
+      verifiedBadge,
+      hasPublishedAgenda: source.hasPublishedAgenda === true,
+      nextAvailableDate: texto('nextAvailableDate'),
     };
   }
 
@@ -610,20 +682,53 @@ export class CommunityPublicService {
    */
   private toResult(
     profile: PublicProfiles,
-    ratings: Map<string, { average: number; count: number }>,
+    señales: ProfileSignals,
   ): PublicSearchResultDto {
-    const rating = ratings.get(profile.id);
+    const rating = señales.ratings.get(profile.id);
+    const badge = this.verification.readBadge(
+      profile,
+      señales.badges.get(profile.id) ?? [],
+    );
+    const agenda = señales.agenda.get(profile.targetId);
     return {
       kind: this.kindOf(profile),
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,
-      city: null,
+      city: señales.locations.get(profile.targetId)?.city ?? null,
       avatarUrl: this.fileUrl(profile.avatarFileId),
-      verified: this.isVerified(profile),
+      // El booleano deriva del sello, no de la columna resumen: si las dos se
+      // desincronizaran, manda el que tiene la evidencia detrás.
+      verified: badge.status === 'VERIFIED',
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
+      verifiedBadge: badge,
+      hasPublishedAgenda: agenda?.hasAgenda ?? false,
+      nextAvailableDate: agenda?.nextAvailableDate ?? null,
     };
+  }
+
+  /**
+   * Resuelve en bloque todo lo que una página de resultados necesita.
+   *
+   * Cuatro consultas por página, no cuatro por fila: una tarjeta del buscador
+   * muestra reseñas, sello, ciudad y agenda, y un listado de cincuenta
+   * prestadores no puede costar doscientos viajes.
+   */
+  private async señalesDe(
+    em: EntityManager,
+    page: PublicProfiles[],
+  ): Promise<ProfileSignals> {
+    const ids = page.map((perfil) => perfil.id);
+    const targetIds = page.map((perfil) => perfil.targetId);
+
+    const [ratings, badges, agenda, locations] = await Promise.all([
+      this.repo.ratingsByProfile(em, ids),
+      this.repo.badgesByProfiles(em, ids),
+      this.repo.agendaByPractitioner(em, targetIds),
+      this.repo.locationsByOwner(em, targetIds),
+    ]);
+    return { ratings, badges, agenda, locations };
   }
 
   /** Tipo de resultado; un perfil de usuario se sirve como profesional. */
