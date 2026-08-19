@@ -250,6 +250,7 @@ export class CommunitySocialService {
           ? 'PUBLIC'
           : 'PRIVATE',
       verificationStatusConceptId: profile.verificationStatusConceptId ?? null,
+      avatarFileId: profile.avatarFileId ?? null,
       statusConceptId: profile.statusConceptId,
     };
   }

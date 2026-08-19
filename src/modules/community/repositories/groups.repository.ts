@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import type { EntityManager } from '@mikro-orm/postgresql';
+import { LockMode, type EntityManager } from '@mikro-orm/postgresql';
 import { Groups, GroupMembers, Topics } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 
 /** Filtros opcionales del directorio de grupos (P7). */
 export interface GroupSearchFilters {
@@ -131,6 +131,11 @@ export class GroupsRepository {
       {
         tenantId,
         visibilityConceptId: { $ne: secretVisibilityConceptId },
+        // TP-3 · regla 08: los grupos disueltos salen del directorio. Sin este
+        // filtro, un grupo sin nadie adentro seguía apareciendo en la búsqueda
+        // y se podía «entrar» a él — que es la mitad del problema que
+        // disolverlo viene a resolver.
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
         ...(filters?.topicId ? { topicId: filters.topicId } : {}),
         // El buscador del directorio mira nombre y descripcion, no solo el
         // nombre: quien busca "cardio" espera encontrar el grupo cuyo nombre es
@@ -320,6 +325,58 @@ export class GroupsRepository {
       { orderBy: { createdAt: 'ASC', id: 'ASC' }, limit },
     );
     return [...new Set(rows.map((row) => row.memberProfileId))];
+  }
+
+  /**
+   * El grupo, tomado para escribir hasta que la transacción termine.
+   *
+   * `FOR UPDATE`. Es lo que hace que dos salidas simultáneas no puedan leer las
+   * dos «quedaba uno» y decidir las dos que el grupo sigue vivo — o peor, que
+   * las dos lo disuelvan. Sin el candado, el recuento y la decisión que depende
+   * de él ocurren en dos mundos paralelos que no se ven.
+   *
+   * Se toma sobre el **grupo** y no sobre la membresía a propósito: lo que se
+   * está protegiendo es el recuento del grupo, que es compartido; las
+   * membresías las toca cada quien la suya.
+   *
+   * @param em - Transacción activa. Sin transacción el candado no significa nada.
+   * @param id - Grupo a tomar.
+   * @returns El grupo, o `null` si no existe.
+   */
+  findByIdForUpdate(em: EntityManager, id: string): Promise<Groups | null> {
+    return em.findOne(Groups, { id }, { lockMode: LockMode.PESSIMISTIC_WRITE });
+  }
+
+  /**
+   * Los integrantes activos de un grupo, del más antiguo al más nuevo.
+   *
+   * Es lo que decide la sucesión cuando el dueño se va: el orden de alta es el
+   * criterio, y resolverlo con una consulta ordenada evita que dos lecturas
+   * distintas elijan dos herederos distintos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param groupId - Grupo consultado.
+   * @param joinStatusConceptId - Estado que cuenta como integrante.
+   * @param excludeProfileId - Perfil a excluir (normalmente, quien se va).
+   * @returns Sus integrantes por antigüedad.
+   */
+  listActiveMembersByAge(
+    em: EntityManager,
+    groupId: string,
+    joinStatusConceptId: string,
+    excludeProfileId?: string,
+  ): Promise<GroupMembers[]> {
+    return em.find(
+      GroupMembers,
+      {
+        groupId,
+        joinStatusConceptId,
+        ...(excludeProfileId
+          ? { memberProfileId: { $ne: excludeProfileId } }
+          : {}),
+      },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
   }
 
   /**
