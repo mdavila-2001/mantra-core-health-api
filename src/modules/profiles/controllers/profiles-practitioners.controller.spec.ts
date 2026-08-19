@@ -24,6 +24,7 @@ function build() {
     verifyCredential: mockFn(),
     setPractitionerPhoto: mockFn(),
     removePractitionerPhoto: mockFn(),
+    getOwnOnboarding: mockFn(),
   };
   const controller = new ProfilesPractitionersController(
     practitionersService as any,
@@ -110,5 +111,25 @@ describe('ProfilesPractitionersController', () => {
       'pp1',
       actor,
     );
+  });
+
+  /**
+   * TJ-1: el sujeto sale de la sesión y no hay parámetro que apunte a otro, así
+   * que lo único que este endpoint puede devolver es el avance de quien pregunta.
+   */
+  it('delegates getOwnOnboarding con el actor de la sesión (TJ-1)', async () => {
+    const d = build();
+    d.practitionersService.getOwnOnboarding.mockResolvedValue({
+      practitionerProfileId: 'pp1',
+      steps: [],
+      firstIncomplete: 'done',
+    });
+
+    await expect(d.controller.getOwnOnboarding(actor)).resolves.toEqual({
+      practitionerProfileId: 'pp1',
+      steps: [],
+      firstIncomplete: 'done',
+    });
+    expect(d.practitionersService.getOwnOnboarding).toHaveBeenCalledWith(actor);
   });
 });

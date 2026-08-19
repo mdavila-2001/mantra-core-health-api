@@ -42,7 +42,12 @@ import {
   PersonAccountLinksRepository,
 } from '../repositories';
 import { PractitionerAffiliations } from '../entities';
-import { SchedulableResources } from '../../scheduling/entities';
+// Misma licencia que las cuentas de actividad: se importan las ENTIDADES de
+// `scheduling` y no su servicio, y lo único que se hace con ellas es contar
+// filtrando por el perfil del propio actor. No sale ni una fila de agenda de
+// nadie, y `profiles` no queda atado al módulo entero para responder «¿ya
+// publicó horarios?».
+import { BookableSlots, SchedulableResources } from '../../scheduling/entities';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -209,6 +214,20 @@ export class ProfilesPractitionersService {
         em.find(SchedulableResources, { resourceRefId: practitionerProfileId }),
       ]);
 
+    // Tener el recurso no es tener agenda. El asistente crea el recurso en su
+    // primer paso, así que darlo por «horarios publicados» daba por completa el
+    // alta de alguien a quien todavía no se le puede pedir turno — que es
+    // exactamente lo que este paso existe para evitar. Se cuentan todos los
+    // cupos y no sólo los futuros: si vencieran, un alta ya terminada volvería
+    // a mostrarse incompleta sola, y la agenda vencida es otro aviso, con su
+    // propia superficie.
+    const cupos =
+      recursos.length === 0
+        ? 0
+        : await em.count(BookableSlots, {
+            resourceId: { $in: recursos.map((recurso) => recurso.id) },
+          });
+
     const tieneFoto =
       perfil.photoFileId !== undefined && perfil.photoFileId !== null;
 
@@ -244,8 +263,13 @@ export class ProfilesPractitionersService {
       },
       {
         key: 'schedule',
-        complete: recursos.length > 0,
-        missing: recursos.length > 0 ? [] : ['published-schedule'],
+        complete: cupos > 0,
+        missing:
+          cupos > 0
+            ? []
+            : recursos.length === 0
+              ? ['published-schedule']
+              : ['slots'],
       },
     ];
 
