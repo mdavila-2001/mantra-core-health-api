@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SchedulingCatalogRepository } from '../repositories';
+import type { SchedulableResources } from '../entities';
 import {
   CreateResourceDto,
   ResourceResponseDto,
@@ -215,6 +216,8 @@ export class SchedulingCatalogService {
         });
       }
       this.assertRecursoDelActor(resource, actor);
+
+      await this.assertSinSolapeConSusOtrasAgendas(tx, resource, dto);
 
       const template = this.catalogRepo.createTemplate(tx, {
         resourceId,
@@ -558,6 +561,71 @@ export class SchedulingCatalogService {
    * el tenant tiene que ser uno de los suyos, porque `GET /scheduling/resources`
    * filtra por tenant y un recurso creado en otro sería invisible para siempre.
    */
+  /**
+   * Rechaza publicar una franja que choca con otra agenda del mismo profesional.
+   *
+   * ## Por qué el choque importa
+   *
+   * Un médico con dos consultorios puede declarar «lunes 9 a 12» en los dos, y
+   * el motor genera cupos simultáneos en ambos. No hay error visible hasta que
+   * dos pacientes reservan la misma hora en lugares distintos y alguien tiene
+   * que llamar a uno de los dos. El conflicto no es de datos: es que **una
+   * persona no puede estar en dos lugares**.
+   *
+   * ## Qué NO comprueba
+   *
+   * Sólo recursos que apuntan al mismo `resource_ref_id`. Una sala o un equipo
+   * no tienen este problema —dos salas sí pueden abrir a la misma hora— y por
+   * eso la comprobación se saltea cuando el recurso no referencia un perfil
+   * profesional.
+   *
+   * Tampoco mira el calendario: compara **día de la semana y rango horario**,
+   * que es lo que declara una plantilla. Dos plantillas con vigencias que no se
+   * cruzan podrían convivir; se rechaza igual, y es deliberado: distinguirlo
+   * exige comparar `valid_from`/`valid_to` con la semana concreta, y un falso
+   * rechazo se resuelve editando la plantilla, mientras que un falso permiso
+   * termina en dos pacientes citados.
+   */
+  private async assertSinSolapeConSusOtrasAgendas(
+    tx: EntityManager,
+    resource: SchedulableResources,
+    dto: CreateTemplateDto,
+  ): Promise<void> {
+    if (!TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
+      return;
+    }
+
+    const ajenas = await this.catalogRepo.findRulesByResourceOwner(
+      tx,
+      resource.resourceRefId,
+      CONCEPTS.TEMPLATE_PUBLISHED,
+      resource.id,
+    );
+    if (ajenas.length === 0) return;
+
+    for (const nueva of dto.rules) {
+      const choque = ajenas.find(
+        (otra) =>
+          otra.rule.dayOfWeek === nueva.dayOfWeek &&
+          // Se tocan si cada una empieza antes de que termine la otra. Los
+          // extremos NO chocan: terminar 12:00 y empezar 12:00 es legítimo.
+          nueva.startTime < otra.rule.endTime &&
+          otra.rule.startTime < nueva.endTime,
+      );
+      if (choque) {
+        throw new PreconditionFailedException(
+          'Ya tenés una agenda publicada que se superpone con esa franja',
+          {
+            dayOfWeek: nueva.dayOfWeek,
+            nueva: `${nueva.startTime}-${nueva.endTime}`,
+            existente: `${choque.rule.startTime}-${choque.rule.endTime}`,
+            agenda: choque.resourceName,
+          },
+        );
+      }
+    }
+  }
+
   private assertPuedeCrearRecurso(
     dto: CreateResourceDto,
     actor: AuthenticatedUser,

@@ -25,6 +25,7 @@ import { AuthzEffectiveRolesService } from '../../authz/services';
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
 import { PROF } from '../profiles.concepts';
+import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
 import {
   PersonsRepository,
   PersonProfilesRepository,
@@ -36,7 +37,8 @@ import {
   PractitionerAffiliationsRepository,
   PersonAccountLinksRepository,
 } from '../repositories';
-import type { PractitionerAffiliations } from '../entities';
+import { PractitionerAffiliations } from '../entities';
+import { SchedulableResources } from '../../scheduling/entities';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -152,6 +154,113 @@ export class ProfilesPractitionersService {
     }
 
     return this.buildSummary(em, link.personId, actor.id);
+  }
+
+  /**
+   * En qué punto del alta está el profesional de la sesión.
+   *
+   * ## Por qué se calcula y no se guarda
+   *
+   * El asistente necesita saber «por dónde iba», y la tentación es una columna
+   * `onboarding_step`. No hace falta y sería peor: crearía un segundo estado
+   * que puede contradecir al primero —alguien carga su foto desde el perfil y
+   * el contador sigue diciendo que le falta— y obligaría a migrar a todos los
+   * profesionales que ya existen.
+   *
+   * Derivándolo de los datos, retomar sale gratis y los profesionales de antes
+   * aparecen completos sin tocar una fila.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las cinco etapas y la primera incompleta.
+   */
+  async getOwnOnboarding(
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    const em = this.em.fork();
+
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene una persona vinculada',
+      );
+    }
+    const perfil = await this.practitionersRepo.findById(em, link.personId);
+    if (!perfil) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene perfil profesional',
+        { personId: link.personId },
+      );
+    }
+    const practitionerProfileId = perfil.profileId;
+
+    const [matriculas, especialidades, afiliaciones, recursos] =
+      await Promise.all([
+        this.authorizationsRepo.findByPractitioner(em, practitionerProfileId),
+        this.specialtiesRepo.findAllByPractitioner(em, practitionerProfileId),
+        em.find(PractitionerAffiliations, { practitionerProfileId }),
+        // La agenda propia: el recurso de scheduling que apunta a este perfil.
+        // Se mira desde acá y no se le pide al otro módulo porque es una
+        // pregunta de este —«¿ya publicó?»— y `resource_ref_id` es su vínculo.
+        em.find(SchedulableResources, { resourceRefId: practitionerProfileId }),
+      ]);
+
+    const faltaEnDatos: string[] = [];
+    if (!matriculas.some((fila) => fila.licenseNumber.trim() !== '')) {
+      faltaEnDatos.push('license-number');
+    }
+    if (especialidades.length === 0) faltaEnDatos.push('specialty');
+
+    const pasos: OnboardingStepDto[] = [
+      {
+        key: 'professional-data',
+        complete: faltaEnDatos.length === 0,
+        missing: faltaEnDatos,
+      },
+      {
+        key: 'photo',
+        complete: perfil.photoFileId !== undefined,
+        missing: perfil.photoFileId === undefined ? ['photo'] : [],
+      },
+      {
+        // Vale una afiliación **o** una agenda propia: un profesional que
+        // atiende en su propio consultorio no está afiliado a nadie, y pedirle
+        // una afiliación lo dejaría trabado en un paso que no le corresponde.
+        key: 'organizations',
+        complete: afiliaciones.length > 0 || recursos.length > 0,
+        missing:
+          afiliaciones.length > 0 || recursos.length > 0 ? [] : ['affiliation'],
+      },
+      {
+        key: 'schedule',
+        complete: recursos.length > 0,
+        missing: recursos.length > 0 ? [] : ['published-schedule'],
+      },
+    ];
+
+    // La revisión no pide nada propio: está cumplida cuando lo están las cuatro
+    // anteriores. Se declara igual para que la pantalla dibuje cinco pasos.
+    const previosCompletos = pasos.every((paso) => paso.complete);
+    pasos.push({
+      key: 'review',
+      complete: previosCompletos,
+      missing: previosCompletos ? [] : ['previous-steps'],
+    });
+
+    const primerIncompleto = pasos.find((paso) => !paso.complete);
+
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.onboarding',
+        firstIncomplete: primerIncompleto?.key ?? 'done',
+      },
+      'Calculando el avance del alta del profesional',
+    );
+
+    return {
+      practitionerProfileId,
+      steps: pasos,
+      firstIncomplete: primerIncompleto?.key ?? 'done',
+    };
   }
 
   /**

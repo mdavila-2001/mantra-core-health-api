@@ -31,6 +31,10 @@ function buildCatalog() {
   const catalogRepo = {
     createResource: mockFn(),
     findResourceById: mockFn(),
+    // TJ-1: la comprobación de solape consulta las franjas de sus otros
+    // recursos. Sin agendas previas no hay con qué chocar, que es el caso por
+    // defecto de estas pruebas.
+    findRulesByResourceOwner: mockFn().mockResolvedValue([]),
     createPolicy: mockFn(),
     findPolicyByCode: mockFn(),
     findPolicyById: mockFn(),

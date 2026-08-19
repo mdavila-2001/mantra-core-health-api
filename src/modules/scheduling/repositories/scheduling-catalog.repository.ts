@@ -447,6 +447,66 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Las franjas vigentes del profesional en **todos** sus recursos.
+   *
+   * Existe para poder rechazar un solape antes de publicarlo: un médico con dos
+   * consultorios puede declarar «lunes 9–12» en los dos, y el motor generaría
+   * cupos simultáneos en dos lugares. El paciente reserva uno y el profesional
+   * descubre el choque cuando ya hay dos personas citadas.
+   *
+   * Se busca por `resource_ref_id` —el vínculo del recurso con el perfil— y no
+   * por tenant: el mismo profesional puede publicar en organizaciones distintas
+   * y el choque es igual de real, porque el que no puede estar en dos lugares
+   * es él.
+   *
+   * Sólo plantillas **publicadas**: una en borrador todavía no ocupa horario.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceRefId - Perfil profesional dueño de los recursos.
+   * @param publishedStatusConceptId - Estado que cuenta como publicada.
+   * @param exceptResourceId - Recurso que se está editando, si se excluye.
+   * @returns Las franjas, con el recurso y la plantilla a la que pertenecen.
+   */
+  async findRulesByResourceOwner(
+    em: EntityManager,
+    resourceRefId: string,
+    publishedStatusConceptId: string,
+    exceptResourceId?: string,
+  ): Promise<
+    { rule: ScheduleRules; resourceId: string; resourceName: string }[]
+  > {
+    const recursos = await em.find(SchedulableResources, { resourceRefId });
+    const suyos = recursos.filter((recurso) => recurso.id !== exceptResourceId);
+    if (suyos.length === 0) return [];
+
+    const plantillas = await em.find(ScheduleTemplates, {
+      resourceId: { $in: suyos.map((recurso) => recurso.id) },
+      statusConceptId: publishedStatusConceptId,
+    });
+    if (plantillas.length === 0) return [];
+
+    const franjas = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: plantillas.map((plantilla) => plantilla.id) },
+    });
+
+    const recursoPorPlantilla = new Map(
+      plantillas.map((plantilla) => [plantilla.id, plantilla.resourceId]),
+    );
+    const nombrePorRecurso = new Map(
+      suyos.map((recurso) => [recurso.id, recurso.name]),
+    );
+
+    return franjas.map((rule) => {
+      const resourceId = recursoPorPlantilla.get(rule.scheduleTemplateId) ?? '';
+      return {
+        rule,
+        resourceId,
+        resourceName: nombrePorRecurso.get(resourceId) ?? '',
+      };
+    });
+  }
+
+  /**
    * Crea create exception.
    *
    * @param em - Contexto de persistencia o transacción activa.

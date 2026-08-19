@@ -41,6 +41,7 @@ import {
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
   SetPractitionerPhotoDto,
+  PractitionerOnboardingDto,
 } from '../dto';
 
 /**
@@ -86,6 +87,33 @@ export class ProfilesPractitionersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerProfileSummaryDto> {
     return this.practitionersService.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * En qué punto del alta está el profesional de la sesión.
+   *
+   * Va **antes** de cualquier `practitioners/:profileId` por lo mismo que
+   * `me/summary`: Nest resuelve por orden de declaración y un parámetro
+   * capturaría `me`.
+   *
+   * Sin `@Roles`: el filtro real es tener perfil profesional, que es un dato de
+   * la cuenta y no un rol. Si no lo tiene, el servicio lo dice con un 422.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las cinco etapas del alta y la primera incompleta.
+   */
+  @Get('practitioners/me/onboarding')
+  @ApiOperation({
+    summary: 'Qué le falta al profesional para completar su alta',
+    description:
+      'El paso se DERIVA de los datos que ya existen (matrícula, especialidad, ' +
+      'foto, afiliación o agenda propia): no hay columna de progreso, así que ' +
+      'retomar sale gratis y los perfiles anteriores aparecen completos sin migrar.',
+  })
+  getOwnOnboarding(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    return this.practitionersService.getOwnOnboarding(actor);
   }
 
   /**
