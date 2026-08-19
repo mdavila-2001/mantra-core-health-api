@@ -31,16 +31,20 @@ export const MAX_SPECIALTIES_PER_PRACTITIONER = 3;
  * de base: **el concepto tiene que ser miembro vigente del value set que
  * gobierna la columna**.
  *
- * ## Cuál es el catálogo, y por qué no el otro
+ * ## Cuál es el catálogo
  *
- * El modelo declara `VS_MEDICAL_SPECIALTY` (36 especialidades en castellano,
- * patch v4.0.11) y es el que usan **todas** las filas sembradas. Existe además
- * un `practitioner-specialty` en el catálogo de enums dinámicos de la API, con
- * un solo miembro (`SPECIALTY_GENERAL`) y **cero filas** que lo usen: es un
- * duplicado anterior al patch que hoy no gobierna nada. Validar contra él
- * rechazaría las 36 especialidades reales, así que el catálogo es el del
- * modelo. Que existan dos declarando la misma columna es una deriva anotada
- * para el dueño del modelo, no algo que este servicio pueda resolver.
+ * `VS_MEDICAL_SPECIALTY` (36 especialidades en castellano, patch v4.0.11), el que
+ * declara el modelo y el que usan **todas** las filas sembradas. Hubo un duplicado
+ * en el catálogo de enums dinámicos de la API —`practitioner-specialty`, un solo
+ * miembro en inglés— que además era el único atado a la columna, así que pedir el
+ * catálogo por campo destino devolvía esa única opción (F-19). Se retiró: la
+ * entrada salió de `DYNAMIC_ENUM_CATALOG` y en las bases ya sembradas su definición
+ * quedó `ENUM_DEF_RETIRED`.
+ *
+ * Que la columna no tenga hoy enumeración dinámica es deliberado —el front resuelve
+ * las especialidades por terminología— y esta validación de dominio es lo que
+ * ocupa ese lugar: la base acepta cualquier concepto, y quién decide cuáles son
+ * especialidades es este servicio.
  */
 @Injectable()
 export class MedicalSpecialtyCatalogService {

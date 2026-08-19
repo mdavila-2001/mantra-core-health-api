@@ -334,14 +334,13 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     defaultConceptId: PROF.AUTH_PENDING,
     targets: ['profiles.jurisdiction_authorizations.state_concept_id'],
   },
-  {
-    code: 'practitioner-specialty',
-    name: 'Especialidad',
-    description: 'Especialidad clínica declarada por el profesional.',
-    concepts: [PROF.SPECIALTY_GENERAL],
-    defaultConceptId: PROF.SPECIALTY_GENERAL,
-    targets: ['profiles.practitioner_specialties.specialty_concept_id'],
-  },
+  // `profiles.practitioner_specialties.specialty_concept_id` no tiene enumeración
+  // dinámica a propósito: la gobierna `VS_MEDICAL_SPECIALTY` —las 36 especialidades
+  // que siembra el paquete del modelo—, y el front y `MedicalSpecialtyCatalogService`
+  // la resuelven por terminología. Acá hubo un duplicado (`practitioner-specialty`,
+  // un solo miembro en inglés) que era el único atado a la columna: por eso pedir el
+  // catálogo por campo destino devolvía una sola opción y un médico no podía decir
+  // que es cardiólogo (F-19). Re-declararlo lo resucitaría sólo en bases nuevas.
   {
     code: 'practitioner-specialty-role',
     name: 'Rol de la especialidad',

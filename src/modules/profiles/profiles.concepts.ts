@@ -104,11 +104,9 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
     CRED_VERIFIED: { code: 'CRED_VERIFIED', display: 'Credential verified' },
     CRED_REJECTED: { code: 'CRED_REJECTED', display: 'Credential rejected' },
 
-    // Especialidades
-    SPECIALTY_GENERAL: {
-      code: 'SPECIALTY_GENERAL',
-      display: 'General medicine specialty',
-    },
+    // Especialidades. Cuál es cada especialidad no se declara acá: lo dice
+    // `VS_MEDICAL_SPECIALTY`, que siembra el paquete del modelo. Estos conceptos
+    // describen el rol y la verificación de la especialidad declarada, no su nombre.
     SPECIALTY_ROLE_PRIMARY: {
       code: 'SPECIALTY_ROLE_PRIMARY',
       display: 'Primary specialty role',

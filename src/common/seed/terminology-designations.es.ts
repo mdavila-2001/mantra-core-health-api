@@ -447,14 +447,6 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
-    PROF.SPECIALTY_GENERAL,
-    {
-      display: 'Medicina general',
-      definition:
-        'Atención médica integral, primer contacto del paciente con el sistema de salud.',
-    },
-  ],
-  [
     PROF.SPECIALTY_ROLE_PRIMARY,
     {
       display: 'Especialidad principal',
