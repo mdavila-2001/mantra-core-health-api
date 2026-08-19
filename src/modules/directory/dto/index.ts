@@ -14,3 +14,4 @@ export * from './branch-membership-response.dto';
 export * from './status-result.dto';
 export * from './tenant-type-profile.dto';
 export * from './directory-read.dto';
+export * from './my-organizations.dto';
