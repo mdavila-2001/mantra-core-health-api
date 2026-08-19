@@ -464,8 +464,12 @@ export class SchedulingCatalogRepository {
    * @param em - Contexto de persistencia o transacción activa.
    * @param resourceRefId - Perfil profesional dueño de los recursos.
    * @param publishedStatusConceptId - Estado que cuenta como publicada.
+   * Devuelve también la **zona** de cada sede y la **vigencia** de cada
+   * plantilla: sin ellas, quien compara sólo puede mirar el texto de la hora, y
+   * «las nueve» de dos sedes en zonas distintas no son el mismo momento.
+   *
    * @param exceptResourceId - Recurso que se está editando, si se excluye.
-   * @returns Las franjas, con el recurso y la plantilla a la que pertenecen.
+   * @returns Las franjas, con su recurso, su zona y la vigencia de su plantilla.
    */
   async findRulesByResourceOwner(
     em: EntityManager,
@@ -473,7 +477,13 @@ export class SchedulingCatalogRepository {
     publishedStatusConceptId: string,
     exceptResourceId?: string,
   ): Promise<
-    { rule: ScheduleRules; resourceId: string; resourceName: string }[]
+    {
+      rule: ScheduleRules;
+      resourceId: string;
+      resourceName: string;
+      timeZone?: string;
+      validTo?: Date;
+    }[]
   > {
     const recursos = await em.find(SchedulableResources, { resourceRefId });
     const suyos = recursos.filter((recurso) => recurso.id !== exceptResourceId);
@@ -495,6 +505,12 @@ export class SchedulingCatalogRepository {
     const nombrePorRecurso = new Map(
       suyos.map((recurso) => [recurso.id, recurso.name]),
     );
+    const zonaPorRecurso = new Map(
+      suyos.map((recurso) => [recurso.id, recurso.timeZone]),
+    );
+    const vigenciaPorPlantilla = new Map(
+      plantillas.map((plantilla) => [plantilla.id, plantilla.validTo]),
+    );
 
     return franjas.map((rule) => {
       const resourceId = recursoPorPlantilla.get(rule.scheduleTemplateId) ?? '';
@@ -502,6 +518,8 @@ export class SchedulingCatalogRepository {
         rule,
         resourceId,
         resourceName: nombrePorRecurso.get(resourceId) ?? '',
+        timeZone: zonaPorRecurso.get(resourceId),
+        validTo: vigenciaPorPlantilla.get(rule.scheduleTemplateId),
       };
     });
   }
