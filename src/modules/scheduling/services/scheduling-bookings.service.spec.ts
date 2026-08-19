@@ -53,6 +53,11 @@ function build() {
     findBookingByIdForUpdate: mockFn(),
     // Las dos lecturas (UC-41-15): el detalle y el listado.
     findBookingById: mockFn(),
+    // TJ-2: la lectura del origen de una reprogramación. Sin filas, ninguna
+
+    // cita se declara reprogramada — que es el caso por defecto de estas pruebas.
+
+    latestRescheduleOrigins: mockFn().mockResolvedValue(new Map()),
     findBookings: mockFn(),
     countActiveBookingsForPatient: mockFn(),
     recordReschedule: mockFn(),

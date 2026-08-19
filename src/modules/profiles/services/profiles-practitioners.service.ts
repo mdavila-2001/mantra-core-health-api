@@ -16,6 +16,10 @@ import {
 // Verificar la matrícula es lo que habilita a ejercer; el rol con el que se
 // ejerce lo custodia `authz`.
 import { AuthzEffectiveRolesService } from '../../authz/services';
+import {
+  MAX_SPECIALTIES_PER_PRACTITIONER,
+  MedicalSpecialtyCatalogService,
+} from './medical-specialty-catalog.service';
 // Lectura de SÓLO CONTEO sobre otros módulos, para la actividad del perfil.
 // Se importan las entidades y no sus servicios a propósito: lo único que se
 // hace con ellas es `em.count(...)` filtrando por el usuario que creó la fila,
@@ -108,6 +112,7 @@ export class ProfilesPractitionersService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
+    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -890,6 +895,12 @@ export class ProfilesPractitionersService {
         clinicalInterpretationAllowed: true,
         actorUserId: actor.id,
       });
+      await this.declareSpecialties(
+        tx,
+        personId,
+        dto.specialtyConceptIds ?? [],
+        actor,
+      );
       await tx.flush();
 
       this.logger.info(
@@ -1081,6 +1092,59 @@ export class ProfilesPractitionersService {
   }
 
   /** UC-05-06: agrega una especialidad con credencial de soporte verificada. */
+  /**
+   * Deja declaradas las especialidades que vinieron con el alta.
+   *
+   * Va **dentro de la transacción del registro** y no como llamadas sueltas
+   * después: es la regla 11 del modelo —el alta de un profesional es atómica—,
+   * y además es lo único que permite elegir la especialidad al registrarse, que
+   * es cuando la persona la tiene presente. Si una no pertenece al catálogo, el
+   * alta entera se rechaza: registrar a medias a un profesional con una
+   * especialidad inventada es peor que pedirle que la corrija.
+   *
+   * La primera de la lista queda como principal. No hay «cuál es la principal»
+   * en el alta a propósito: quien se registra ordena sus especialidades, y la
+   * primera es la que da la respuesta obvia a «¿de qué sos?».
+   *
+   * @param tx - La transacción del alta.
+   * @param profileId - El perfil profesional recién creado.
+   * @param specialtyConceptIds - Los conceptos declarados, ya sin repetidos.
+   * @param actor - Quién registra, para la autoría de las filas.
+   */
+  private async declareSpecialties(
+    tx: EntityManager,
+    profileId: string,
+    specialtyConceptIds: readonly string[],
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (specialtyConceptIds.length === 0) return;
+
+    const unicas = [...new Set(specialtyConceptIds)];
+    if (unicas.length > MAX_SPECIALTIES_PER_PRACTITIONER) {
+      throw new PreconditionFailedException(
+        `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
+        { declaradas: unicas.length },
+      );
+    }
+
+    const ahora = new Date();
+    for (const [orden, specialtyConceptId] of unicas.entries()) {
+      await this.specialtyCatalog.assertIsMedicalSpecialty(
+        tx,
+        specialtyConceptId,
+      );
+      this.specialtiesRepo.create(tx, {
+        practitionerProfileId: profileId,
+        specialtyConceptId,
+        isPrimary: orden === 0,
+        boardCertified: false,
+        verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+        validFrom: ahora,
+        actorUserId: actor.id,
+      });
+    }
+  }
+
   async addSpecialty(
     profileId: string,
     dto: AddSpecialtyDto,
@@ -1122,8 +1186,35 @@ export class ProfilesPractitionersService {
         }
       }
 
-      const specialtyConceptId =
-        dto.specialtyConceptId ?? PROF.SPECIALTY_GENERAL;
+      // Omitir la especialidad ya no cae en «medicina general»: ese concepto
+      // venía de un catálogo paralelo de la API que NINGUNA fila usa, así que
+      // el default escribía en silencio una especialidad fuera del catálogo del
+      // modelo. Si no se dice cuál, no hay especialidad que registrar.
+      const specialtyConceptId = dto.specialtyConceptId;
+      if (specialtyConceptId === undefined) {
+        throw new PreconditionFailedException('Falta indicar la especialidad', {
+          profileId,
+        });
+      }
+      await this.specialtyCatalog.assertIsMedicalSpecialty(
+        tx,
+        specialtyConceptId,
+      );
+
+      // El tope es del registro del cliente, y se cuenta sobre las VIGENTES:
+      // una especialidad dada de baja no debería ocupar un lugar para siempre.
+      const vigentes = await this.specialtiesRepo.findAllByPractitioner(
+        tx,
+        profileId,
+      );
+      const activas = vigentes.filter((especialidad) => !especialidad.validTo);
+      if (activas.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
+        throw new PreconditionFailedException(
+          `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
+          { profileId, activas: activas.length },
+        );
+      }
+
       const duplicate = await this.specialtiesRepo.findActive(
         tx,
         profileId,

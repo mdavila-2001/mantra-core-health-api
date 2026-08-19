@@ -493,6 +493,59 @@ export class SchedulingBookingsRepository {
   }
 
   /**
+   * La última reprogramación de cada cita, con el instante del que se movió.
+   *
+   * Devuelve el **instante original**, no el id del cupo: la tarjeta dice
+   * «reprogramada desde el 20/08 a las 15:30», y resolver ese cupo desde el
+   * front obligaría a una petición por cita para pintar una línea de texto.
+   *
+   * Sólo la última: una cita movida tres veces le interesa a la auditoría, no
+   * a quien mira su turno — ahí la pregunta es «¿esto cambió?», y la respuesta
+   * útil es de dónde viene ahora.
+   *
+   * @param em - Contexto de persistencia.
+   * @param bookingIds - Citas de la página.
+   * @returns Cita → instante del que se movió.
+   */
+  async latestRescheduleOrigins(
+    em: EntityManager,
+    bookingIds: readonly string[],
+  ): Promise<Map<string, Date>> {
+    if (bookingIds.length === 0) return new Map();
+
+    const filas = await em.find(
+      BookingReschedules,
+      { bookingId: { $in: [...bookingIds] } },
+      { orderBy: { recordedAt: 'DESC' } },
+    );
+    if (filas.length === 0) return new Map();
+
+    // La primera de cada cita es la más reciente: vienen ordenadas.
+    const ultimaPorCita = new Map<string, BookingReschedules>();
+    for (const fila of filas) {
+      if (!ultimaPorCita.has(fila.bookingId)) {
+        ultimaPorCita.set(fila.bookingId, fila);
+      }
+    }
+
+    const cupos = await em.find(BookableSlots, {
+      id: {
+        $in: [...new Set([...ultimaPorCita.values()].map((f) => f.fromSlotId))],
+      },
+    });
+    const inicioPorCupo = new Map(cupos.map((cupo) => [cupo.id, cupo.startAt]));
+
+    const salida = new Map<string, Date>();
+    for (const [bookingId, fila] of ultimaPorCita) {
+      const inicio = inicioPorCupo.get(fila.fromSlotId);
+      // Sin el cupo original no se afirma nada: mejor no decir «reprogramada»
+      // que decirlo sin poder decir desde cuándo.
+      if (inicio) salida.set(bookingId, inicio);
+    }
+    return salida;
+  }
+
+  /**
    * Crea create cancellation.
    *
    * @param em - Contexto de persistencia o transacción activa.
