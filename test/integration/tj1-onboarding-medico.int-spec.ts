@@ -180,6 +180,17 @@ describe('TJ-1 · alta del profesional (integración)', () => {
     ]);
   });
 
+  it('sin foto cargada, el paso de la foto NO se da por cumplido', async () => {
+    // `photo_file_id` es nullable y MikroORM lo hidrata como `null`. Con
+    // `!== undefined` el paso salía «completado» para un profesional que nunca
+    // subió una foto — se vio en pantalla antes que en ninguna prueba.
+    const estado = await onboarding();
+    const foto = estado.steps.find((paso) => paso.key === 'photo');
+
+    expect(foto?.complete).toBe(false);
+    expect(foto?.missing).toContain('photo');
+  });
+
   it('una cuenta sin perfil profesional recibe 422, no un 500', async () => {
     const sufijo = randomUUID().slice(0, 8);
     const nationalId = `TJ1-PAC-${sufijo}`;
