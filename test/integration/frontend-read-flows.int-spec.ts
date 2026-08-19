@@ -1,5 +1,10 @@
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  deleteFixturesByRunMark,
+  type TestContext,
+} from './harness';
 import { SEED } from '../../src/common';
 
 /**
@@ -20,7 +25,11 @@ import { SEED } from '../../src/common';
  */
 describe('Flujos de lectura del frontend (integración)', () => {
   let ctx: TestContext;
-  /** Sufijo único: la suite corre contra una base con datos de otras corridas. */
+  /**
+   * Marca de esta corrida: entra en los códigos naturales (`MED-…`, `PAC-…`) para
+   * no chocar por unicidad con lo que ya haya en la base compartida, y es por la
+   * que el `afterAll` vuelve a encontrar lo creado para borrarlo.
+   */
   const u = Date.now();
 
   beforeAll(async () => {
@@ -28,6 +37,10 @@ describe('Flujos de lectura del frontend (integración)', () => {
   });
 
   afterAll(async () => {
+    // La suite comparte base con la demo: sin este borrado sus actores quedan en
+    // el padrón y la Guía de profesionales los publica como si fueran médicos
+    // reales, uno más por cada corrida.
+    await deleteFixturesByRunMark(u);
     await ctx.app.close();
   });
 

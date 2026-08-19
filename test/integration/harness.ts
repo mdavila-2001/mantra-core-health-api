@@ -335,3 +335,294 @@ export function bearer(token: string): {
 } {
   return { Authorization: `Bearer ${token}` };
 }
+
+/** Conexión a la base de pruebas, con los mismos defaults que `resetBusinessData`. */
+function testDbClient(): pg.Client {
+  return new pg.Client({
+    host: process.env.DB_HOST ?? 'localhost',
+    port: Number(process.env.DB_PORT ?? 5434),
+    user: process.env.DB_USER ?? 'mantra',
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME ?? 'mantra_redesa_health',
+  });
+}
+
+/** Una arista del grafo de FK: qué columna de qué tabla apunta a cuál. */
+interface ForeignKeyEdge {
+  /**
+   * Valor de childTable mantenido por la instancia.
+   */
+  childTable: string;
+  /**
+   * Valor de childColumn mantenido por la instancia.
+   */
+  childColumn: string;
+  /**
+   * Valor de parentTable mantenido por la instancia.
+   */
+  parentTable: string;
+  /**
+   * Valor de parentColumn mantenido por la instancia.
+   */
+  parentColumn: string;
+  /**
+   * Si la columna hija admite NULL: decide si una referencia se puede cortar en
+   * vez de arrastrar la fila.
+   */
+  childNullable: boolean;
+}
+
+/** El grafo de FK y la PK de cada tabla, leídos del catálogo en una sola pasada. */
+interface SchemaGraph {
+  /**
+   * Valor de edges mantenido por la instancia.
+   */
+  edges: ForeignKeyEdge[];
+  /**
+   * Valor de primaryKey mantenido por la instancia.
+   */
+  primaryKey: Map<string, string>;
+  /** Tablas cuyo trigger WORM prohíbe borrar. */
+  noBorrables: Set<string>;
+  /** Tablas cuyo trigger WORM prohíbe actualizar. */
+  noActualizables: Set<string>;
+}
+
+/**
+ * Lee del catálogo el grafo de FK de los esquemas de negocio.
+ *
+ * Se consulta `pg_constraint` en vez de escribir la lista de tablas a mano: una
+ * lista fija envejece en silencio, y el día que una suite escriba en una tabla
+ * nueva el borrado la ignoraría y el fixture quedaría en la base compartida.
+ *
+ * El schema `audit` **entra**: sus tablas `*_history` referencian al expediente con
+ * FK obligatoria, así que excluirlas dejaba el borrado del encabezado bloqueado.
+ * Lo que no se toca son las tablas cuyo trigger WORM lo prohíbe, y esas se
+ * averiguan del propio catálogo (`pg_trigger`) en vez de darlas por sabidas: hoy
+ * son cinco y ninguna cuelga de los fixtures. Se excluyen además las tablas sin
+ * clave primaria de una sola columna, que no se pueden borrar por id.
+ */
+async function readSchemaGraph(client: pg.Client): Promise<SchemaGraph> {
+  const { rows: edges } = await client.query<ForeignKeyEdge>(
+    `select format('%I.%I', cn.nspname, cc.relname) as "childTable",
+            ca.attname                              as "childColumn",
+            format('%I.%I', pn.nspname, pc.relname) as "parentTable",
+            pa.attname                              as "parentColumn",
+            not ca.attnotnull                       as "childNullable"
+       from pg_constraint k
+       join pg_class cc     on cc.oid = k.conrelid
+       join pg_namespace cn on cn.oid = cc.relnamespace
+       join pg_class pc     on pc.oid = k.confrelid
+       join pg_namespace pn on pn.oid = pc.relnamespace
+       join lateral unnest(k.conkey)  with ordinality as ck(attnum, ord) on true
+       join lateral unnest(k.confkey) with ordinality as pk(attnum, ord) on ck.ord = pk.ord
+       join pg_attribute ca on ca.attrelid = cc.oid and ca.attnum = ck.attnum
+       join pg_attribute pa on pa.attrelid = pc.oid and pa.attnum = pk.attnum
+      where k.contype = 'f'`,
+  );
+
+  const { rows: pks } = await client.query<{
+    /**
+     * Valor de table mantenido por la instancia.
+     */
+    table: string; /**
+     * Valor de column mantenido por la instancia.
+     */
+    column: string;
+  }>(
+    `select format('%I.%I', n.nspname, c.relname) as "table",
+            min(a.attname)                        as "column"
+       from pg_index i
+       join pg_class c      on c.oid = i.indrelid
+       join pg_namespace n  on n.oid = c.relnamespace
+       join pg_attribute a  on a.attrelid = i.indrelid and a.attnum = any(i.indkey)
+      where i.indisprimary
+      group by 1
+     having count(*) = 1`,
+  );
+
+  const { rows: worm } = await client.query<{
+    /**
+     * Valor de table mantenido por la instancia.
+     */
+    table: string; /**
+     * Valor de forbidsDelete mantenido por la instancia.
+     */
+    forbidsDelete: boolean; /**
+     * Valor de forbidsUpdate mantenido por la instancia.
+     */
+    forbidsUpdate: boolean;
+  }>(
+    `select format('%I.%I', n.nspname, c.relname) as "table",
+            bool_or((t.tgtype & 8) > 0)           as "forbidsDelete",
+            bool_or((t.tgtype & 16) > 0)          as "forbidsUpdate"
+       from pg_trigger t
+       join pg_class c     on c.oid = t.tgrelid
+       join pg_namespace n on n.oid = c.relnamespace
+      where not t.tgisinternal and t.tgname like '%forbid%'
+      group by 1`,
+  );
+
+  return {
+    edges,
+    primaryKey: new Map(pks.map((r) => [r.table, r.column])),
+    noBorrables: new Set(worm.filter((r) => r.forbidsDelete).map((r) => r.table)),
+    noActualizables: new Set(worm.filter((r) => r.forbidsUpdate).map((r) => r.table)),
+  };
+}
+
+/**
+ * Borra filas y todo lo que dependa de ellas, hijas antes que madre.
+ *
+ * El recorrido corta por ciclos con un registro de lo ya visitado:
+ * `profiles.persons` se referencia a sí misma (`related_persons`) y sin ese corte
+ * la recursión no terminaría. Los ids viajan como texto para no depender del tipo
+ * de cada clave.
+ */
+async function deleteWithDependents(
+  client: pg.Client,
+  graph: SchemaGraph,
+  table: string,
+  ids: readonly string[],
+  visited: Set<string>,
+): Promise<number> {
+  const pk = graph.primaryKey.get(table);
+  if (pk === undefined || ids.length === 0 || graph.noBorrables.has(table)) return 0;
+
+  const pending = ids.filter((id) => !visited.has(`${table}:${id}`));
+  if (pending.length === 0) return 0;
+  for (const id of pending) visited.add(`${table}:${id}`);
+
+  let borradas = 0;
+  for (const edge of graph.edges.filter((e) => e.parentTable === table)) {
+    if (!graph.primaryKey.has(edge.childTable)) continue;
+    const referidos = await client.query<{
+      /**
+       * Valor de valor mantenido por la instancia.
+       */
+      valor: string;
+    }>(
+      `select distinct "${edge.parentColumn}"::text as valor
+         from ${table} where "${pk}"::text = any($1::text[])`,
+      [pending],
+    );
+    const claves = referidos.rows.map((r) => r.valor).filter((v) => v !== null);
+    if (claves.length === 0) continue;
+
+    const hijas = await client.query<{
+      /**
+       * Valor de id mantenido por la instancia.
+       */
+      id: string;
+    }>(
+      `select "${graph.primaryKey.get(edge.childTable) as string}"::text as id
+         from ${edge.childTable} where "${edge.childColumn}"::text = any($1::text[])`,
+      [claves],
+    );
+    borradas += await deleteWithDependents(
+      client,
+      graph,
+      edge.childTable,
+      hijas.rows.map((r) => r.id),
+      visited,
+    );
+  }
+
+  // Corte de ciclos: dos tablas pueden apuntarse entre sí —una nota tiene versiones
+  // y a la vez declara cuál es su versión vigente—, así que el recorrido no alcanza:
+  // llegue por donde llegue, una de las dos se borra con la otra todavía viva. Antes
+  // de borrar se anulan las referencias que ADMITEN nulo; las obligatorias no hacen
+  // falta, porque esas filas ya cayeron en la recursión de arriba.
+  for (const edge of graph.edges.filter(
+    (e) =>
+      e.parentTable === table &&
+      e.childNullable &&
+      !graph.noActualizables.has(e.childTable),
+  )) {
+    await client.query(
+      `update ${edge.childTable} set "${edge.childColumn}" = null
+        where "${edge.childColumn}"::text in (
+          select "${edge.parentColumn}"::text from ${table}
+           where "${pk}"::text = any($1::text[]))`,
+      [pending],
+    );
+  }
+
+  const res = await client.query(
+    `delete from ${table} where "${pk}"::text = any($1::text[])`,
+    [pending],
+  );
+  return borradas + (res.rowCount ?? 0);
+}
+
+/**
+ * Borra los fixtures que una suite de integración creó, por su marca de corrida.
+ *
+ * Las suites corren contra la **base compartida** —la misma que alimenta la demo—
+ * y hasta ahora no limpiaban nada: cada corrida dejaba sus actores («Dr. agenda»,
+ * «Dr. cancel», «Dr. ventana»…) en el padrón, donde la Guía de profesionales los
+ * publica junto a los médicos de verdad, duplicados una vez por corrida. La
+ * analista funcional los reportó como defecto del producto, que es exactamente lo
+ * que un fixture olvidado parece desde la pantalla.
+ *
+ * La marca es el sufijo único que la suite ya usaba para no chocar por unicidad
+ * (`Date.now()`), presente en los códigos naturales `MED-<marca>-…` y
+ * `PAC-<marca>-…`. De esas dos raíces —las dos son `profiles.persons`— cuelga todo
+ * lo demás: credenciales, encuentros, notas, agendas y reservas.
+ *
+ * @param marca - Sufijo único de la corrida, tal como se compuso en los códigos.
+ * @throws Si sobrevive algún fixture con la marca: uno que queda en silencio es
+ *   justamente el defecto que esta función existe para impedir.
+ */
+export async function deleteFixturesByRunMark(
+  marca: string | number,
+): Promise<void> {
+  const medicos = `MED-${marca}-%`;
+  const pacientes = `PAC-${marca}-%`;
+  const client = testDbClient();
+  await client.connect();
+  try {
+    const graph = await readSchemaGraph(client);
+    const { rows } = await client.query<{
+      /**
+       * Valor de id mantenido por la instancia.
+       */
+      id: string;
+    }>(
+      `select profile_id::text as id from profiles.health_practitioner_profiles
+        where practitioner_code like $1
+       union
+       select profile_id::text as id from profiles.patient_profiles
+        where patient_code like $2`,
+      [medicos, pacientes],
+    );
+    await deleteWithDependents(
+      client,
+      graph,
+      'profiles.persons',
+      rows.map((r) => r.id),
+      new Set<string>(),
+    );
+
+    const { rows: resto } = await client.query<{
+      /**
+       * Valor de total mantenido por la instancia.
+       */
+      total: string;
+    }>(
+      `select (select count(*) from profiles.health_practitioner_profiles
+                where practitioner_code like $1)
+            + (select count(*) from profiles.patient_profiles
+                where patient_code like $2) as total`,
+      [medicos, pacientes],
+    );
+    const pendientes = Number(resto[0]?.total ?? 0);
+    if (pendientes > 0) {
+      throw new Error(
+        `La limpieza dejó ${pendientes} fixture(s) con la marca ${marca} en la base compartida.`,
+      );
+    }
+  } finally {
+    await client.end();
+  }
+}
