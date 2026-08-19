@@ -13,22 +13,22 @@ and Pino logging.
 
 ## Endpoints
 
-| UC | Method + path | Purpose | Auth | Code |
-| --- | --- | --- | --- | --- |
-| 05-01 | `POST /profiles/patients` | Register person + patient profile | `SECURITY_ADMIN` | 201 |
-| 05-02 | `POST /profiles/persons/:personId/account-links` | Link portal account to a person | `SECURITY_ADMIN` | 201 |
-| 05-03 | `POST /profiles/practitioners` | Onboard health practitioner (+ licence + credential) | `SECURITY_ADMIN` | 201 |
-| 05-04 | `POST /profiles/practitioners/:profileId/jurisdiction-authorizations` | Register/renew jurisdiction licence | `SECURITY_ADMIN` | 201 |
-| 05-05 | `POST /profiles/credentials/:credentialId/verify` | Verify/reject a professional credential | `SECURITY_ADMIN` | 200 |
-| 05-06 | `POST /profiles/practitioners/:profileId/specialties` | Add specialty with supporting credential | `SECURITY_ADMIN` | 201 |
-| 05-07 | `POST /profiles/patients/:profileId/identity-links` | Link external patient identity (MPI, upsert) | `SECURITY_ADMIN` | 201 |
-| 05-08 | `POST /profiles/patients/merge` | Merge duplicate patients | `SECURITY_ADMIN` | 201 |
-| 05-09 | `POST /profiles/patients/merge/:eventId/reverse` | Reverse a patient merge | `SECURITY_ADMIN` | 201 |
-| 05-10 | `POST /profiles/patients/:profileId/related-persons` | Register related person / emergency contact | `SECURITY_ADMIN` | 201 |
-| 05-11 | `POST /profiles/patients/:profileId/portal-proxies` | Grant a portal proxy to a representative | `SECURITY_ADMIN` | 201 |
-| 05-12 | `POST /profiles/persons/:personId/decease` | Record decease and anonymization | `SECURITY_ADMIN` | 200 |
-| P5 §3 | `PUT /profiles/practitioners/:profileId/photo` | Set the practitioner profile photo from an already uploaded file | owner or platform | 200 |
-| P5 §3 | `DELETE /profiles/practitioners/:profileId/photo` | Clear the practitioner profile photo (the file is not deleted) | owner or platform | 200 |
+| UC    | Method + path                                                         | Purpose                                                          | Auth              | Code |
+| ----- | --------------------------------------------------------------------- | ---------------------------------------------------------------- | ----------------- | ---- |
+| 05-01 | `POST /profiles/patients`                                             | Register person + patient profile                                | `SECURITY_ADMIN`  | 201  |
+| 05-02 | `POST /profiles/persons/:personId/account-links`                      | Link portal account to a person                                  | `SECURITY_ADMIN`  | 201  |
+| 05-03 | `POST /profiles/practitioners`                                        | Onboard health practitioner (+ licence + credential)             | `SECURITY_ADMIN`  | 201  |
+| 05-04 | `POST /profiles/practitioners/:profileId/jurisdiction-authorizations` | Register/renew jurisdiction licence                              | `SECURITY_ADMIN`  | 201  |
+| 05-05 | `POST /profiles/credentials/:credentialId/verify`                     | Verify/reject a professional credential                          | `SECURITY_ADMIN`  | 200  |
+| 05-06 | `POST /profiles/practitioners/:profileId/specialties`                 | Add specialty with supporting credential                         | `SECURITY_ADMIN`  | 201  |
+| 05-07 | `POST /profiles/patients/:profileId/identity-links`                   | Link external patient identity (MPI, upsert)                     | `SECURITY_ADMIN`  | 201  |
+| 05-08 | `POST /profiles/patients/merge`                                       | Merge duplicate patients                                         | `SECURITY_ADMIN`  | 201  |
+| 05-09 | `POST /profiles/patients/merge/:eventId/reverse`                      | Reverse a patient merge                                          | `SECURITY_ADMIN`  | 201  |
+| 05-10 | `POST /profiles/patients/:profileId/related-persons`                  | Register related person / emergency contact                      | `SECURITY_ADMIN`  | 201  |
+| 05-11 | `POST /profiles/patients/:profileId/portal-proxies`                   | Grant a portal proxy to a representative                         | `SECURITY_ADMIN`  | 201  |
+| 05-12 | `POST /profiles/persons/:personId/decease`                            | Record decease and anonymization                                 | `SECURITY_ADMIN`  | 200  |
+| P5 §3 | `PUT /profiles/practitioners/:profileId/photo`                        | Set the practitioner profile photo from an already uploaded file | owner or platform | 200  |
+| P5 §3 | `DELETE /profiles/practitioners/:profileId/photo`                     | Clear the practitioner profile photo (the file is not deleted)   | owner or platform | 200  |
 
 ## Entities (schema `profiles`)
 
@@ -67,7 +67,7 @@ and Pino logging.
   and be verified (422); reject a duplicate active specialty (409); demote the
   previous primary when a new primary is added.
 - **Identity link (UC-05-07)** — upsert by `(source_tenant, source_system,
-  source_identifier)`; marks the patient `linked`.
+source_identifier)`; marks the patient `linked`.
 - **Merge (UC-05-08)** — immutable event; loser patient → `merged`, loser person →
   `merged` pointing at the survivor person; identity links, related persons and
   proxies are reassigned to the survivor. Cannot merge with itself (422) or

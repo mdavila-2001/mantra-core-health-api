@@ -56,10 +56,15 @@ import {
   // `TenantsRepository` lo necesita identity_assurance para marcar verificada la
   // institución cuando la autoridad externa la aprueba; `TenantMembershipsRepository`
   // para comprobar que quien pide la verificación manda en ese tenant.
+  // `TenantAdministrationService` lo necesita `profiles` para la bandeja de
+  // vínculos de TP-2: quién administra una organización se decide en un solo
+  // lugar, y ese lugar es éste. Copiar el criterio allá daría dos definiciones
+  // de «admin de la organización» que se separan con el tiempo.
   exports: [
     TenantsRepository,
     TenantMembershipsRepository,
     TenantTypeProfileService,
+    TenantAdministrationService,
   ],
 })
 export class DirectoryModule {}

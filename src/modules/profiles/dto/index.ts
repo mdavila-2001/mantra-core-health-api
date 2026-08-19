@@ -15,3 +15,4 @@ export * from './read-practitioner-profile.dto';
 export * from './update-practitioner-profile.dto';
 export * from './set-practitioner-photo.dto';
 export * from './list-practitioners.dto';
+export * from './affiliation-request.dto';
