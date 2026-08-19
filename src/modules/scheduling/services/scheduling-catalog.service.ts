@@ -679,7 +679,6 @@ export class SchedulingCatalogService {
     }
   }
 
-
   private assertPuedeCrearRecurso(
     dto: CreateResourceDto,
     actor: AuthenticatedUser,

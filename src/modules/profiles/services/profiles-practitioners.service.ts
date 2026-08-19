@@ -253,7 +253,11 @@ export class ProfilesPractitionersService {
         key: 'schedule',
         complete: cupos > 0,
         missing:
-          cupos > 0 ? [] : recursos.length === 0 ? ['published-schedule'] : ['slots'],
+          cupos > 0
+            ? []
+            : recursos.length === 0
+              ? ['published-schedule']
+              : ['slots'],
       },
     ];
 

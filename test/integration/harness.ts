@@ -466,8 +466,12 @@ async function readSchemaGraph(client: pg.Client): Promise<SchemaGraph> {
   return {
     edges,
     primaryKey: new Map(pks.map((r) => [r.table, r.column])),
-    noBorrables: new Set(worm.filter((r) => r.forbidsDelete).map((r) => r.table)),
-    noActualizables: new Set(worm.filter((r) => r.forbidsUpdate).map((r) => r.table)),
+    noBorrables: new Set(
+      worm.filter((r) => r.forbidsDelete).map((r) => r.table),
+    ),
+    noActualizables: new Set(
+      worm.filter((r) => r.forbidsUpdate).map((r) => r.table),
+    ),
   };
 }
 
@@ -487,7 +491,8 @@ async function deleteWithDependents(
   visited: Set<string>,
 ): Promise<number> {
   const pk = graph.primaryKey.get(table);
-  if (pk === undefined || ids.length === 0 || graph.noBorrables.has(table)) return 0;
+  if (pk === undefined || ids.length === 0 || graph.noBorrables.has(table))
+    return 0;
 
   const pending = ids.filter((id) => !visited.has(`${table}:${id}`));
   if (pending.length === 0) return 0;

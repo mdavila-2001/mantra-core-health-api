@@ -1192,9 +1192,7 @@ describe('ProfilesPractitionersService', () => {
       d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
         { id: 'sp-1', specialtyConceptId: 'con-cardio' },
       ]);
-      d.affiliationsRepo.findByPractitioner.mockResolvedValue([
-        { id: 'af-1' },
-      ]);
+      d.affiliationsRepo.findByPractitioner.mockResolvedValue([{ id: 'af-1' }]);
       d.em.find.mockResolvedValue([{ id: 'res-1' }]);
       d.em.count.mockResolvedValue(48);
     }
