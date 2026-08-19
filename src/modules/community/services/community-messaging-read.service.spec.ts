@@ -28,6 +28,9 @@ function build() {
     findParticipants: mockFn().mockResolvedValue([]),
     listMessagesPage: mockFn().mockResolvedValue([]),
   };
+  // Carril P2: la bandeja nombra al otro lado. Por defecto no hay perfiles
+  // que resolver, que es lo que ven las pruebas que no miran los nombres.
+  const profilesRepo = { listByIds: mockFn().mockResolvedValue([]) };
   const visibility = {
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
     isBlockedBetween: mockFn().mockResolvedValue(false),
@@ -37,10 +40,11 @@ function build() {
   const service = new CommunityMessagingReadService(
     em as any,
     conversationsRepo as any,
+    profilesRepo as any,
     visibility as any,
     logger as any,
   );
-  return { service, conversationsRepo, visibility };
+  return { service, conversationsRepo, profilesRepo, visibility };
 }
 
 describe('CommunityMessagingReadService', () => {

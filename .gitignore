@@ -42,6 +42,12 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+# El entorno del seed E2E lleva contraseñas de cuentas reales de la máquina que
+# lo corre: se versiona el ejemplo (`.env.e2e.example`), nunca el archivo.
+.env.e2e
+# El manifiesto lo **genera** `seed-e2e.mjs` y trae los uuid de las cuentas de
+# esa base. Versionarlo prometería actores que en otra máquina no existen.
+tools/e2e/seed-manifest.json
 
 # temp directory
 .temp

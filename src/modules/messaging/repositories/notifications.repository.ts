@@ -212,6 +212,48 @@ export class NotificationsRepository {
     return em.find(RecipientPreferences, { userId, channelId });
   }
 
+  /**
+   * Crea la preferencia de un destinatario para un canal y una categoría
+   * (carril P9).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Dueño, canal, categoría y decisión.
+   * @returns La fila creada, todavía sin flush.
+   */
+  createPreference(
+    em: EntityManager,
+    data: {
+      /** Dueño de la preferencia. */
+      userId: string;
+      /** Canal al que se refiere. */
+      channelId: string;
+      /** Categoría, o ausente para la preferencia de canal completo. */
+      categoryConceptId?: string;
+      /** Si acepta recibir. */
+      optedIn: boolean;
+      /** Ventana de silencio, en hora UTC. */
+      quietHoursJson?: unknown;
+      /** Quién la registra. */
+      actorUserId?: string;
+    },
+  ): RecipientPreferences {
+    const now = new Date();
+    return em.create(
+      RecipientPreferences,
+      {
+        userId: data.userId,
+        channelId: data.channelId,
+        categoryConceptId: data.categoryConceptId,
+        optedIn: data.optedIn,
+        quietHoursJson: data.quietHoursJson,
+        // `createdBy` ya pone `createdAt`/`updatedAt` con el mismo instante:
+        // repetirlos acá los pisaría con otra llamada a `new Date()`.
+        ...createdBy(data.actorUserId, now),
+      },
+      { partial: true },
+    );
+  }
+
   // --- Solicitudes (UC-35-10, 11, 12) ---
 
   /**
@@ -655,6 +697,14 @@ export class NotificationsRepository {
        * Identificador asociado a actor user.
        */
       actorUserId?: string;
+      /**
+       * Cuándo queda visible para el destinatario (carril P9).
+       *
+       * Por defecto, ya. Con silencio nocturno activo, a la hora en que la
+       * ventana termina: la notificación **existe** desde que se emitió y
+       * aparece a la mañana, que es distinto de no haberla creado.
+       */
+      availableAt?: Date;
     },
   ): InAppNotifications {
     return em.create(
@@ -674,7 +724,7 @@ export class NotificationsRepository {
         notificationRequestId: data.notificationRequestId,
         notificationDeliveryId: data.notificationDeliveryId,
         sentAt: new Date(),
-        availableAt: new Date(),
+        availableAt: data.availableAt ?? new Date(),
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -735,9 +785,16 @@ export class NotificationsRepository {
       limit: number;
       /** Estado que significa «sin leer». */
       unreadStatusConceptId: string;
+      /** Momento de la consulta: lo posterior todavía no se muestra. */
+      now: Date;
     },
   ): Promise<InAppNotifications[]> {
-    const where: Record<string, unknown> = { recipientUserId };
+    // Lo que todavía no está disponible no se lista: es lo que hace que el
+    // silencio nocturno **aplace** en vez de borrar (carril P9).
+    const where: Record<string, unknown> = {
+      recipientUserId,
+      availableAt: { $lte: options.now },
+    };
     if (options.unreadOnly) {
       where.statusConceptId = options.unreadStatusConceptId;
     }
@@ -757,6 +814,43 @@ export class NotificationsRepository {
   }
 
   /**
+   * El aviso sin leer que ya apunta a ese mismo objeto, si lo hay.
+   *
+   * Es el rebote del canal in-app, y **no puede ser el mismo que el de los
+   * canales externos**. Aquél colapsa mientras la solicitud siga «viva»
+   * (`PENDING`/`SENDING`/`SENT`), que para un correo dura lo que tarda en
+   * salir. Una solicitud in-app nace `SENT` y se queda `SENT` para siempre, así
+   * que con ese criterio una conversación avisaría **una sola vez en toda su
+   * historia**: leído el primer mensaje, ningún mensaje posterior volvería a
+   * sonar. Lo encontró el journey funcional, no una prueba unitaria.
+   *
+   * El criterio correcto para una bandeja es el estado del aviso, no el de la
+   * solicitud: si ya hay uno **sin leer** apuntando al mismo hilo, uno más no
+   * agrega información. En cuanto se lee, el siguiente mensaje vuelve a avisar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param recipientUserId - Dueño de la bandeja.
+   * @param relatedResourceType - Clase de objeto al que apunta.
+   * @param relatedResourceId - Identificador de ese objeto.
+   * @param unreadStatusConceptId - Estado que significa «sin leer».
+   * @returns El aviso sin leer, o `null`.
+   */
+  findUnreadInAppForResource(
+    em: EntityManager,
+    recipientUserId: string,
+    relatedResourceType: string,
+    relatedResourceId: string,
+    unreadStatusConceptId: string,
+  ): Promise<InAppNotifications | null> {
+    return em.findOne(InAppNotifications, {
+      recipientUserId,
+      relatedResourceType,
+      relatedResourceId,
+      statusConceptId: unreadStatusConceptId,
+    });
+  }
+
+  /**
    * Cuántas le quedan sin leer. Es el número del badge.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -768,10 +862,14 @@ export class NotificationsRepository {
     em: EntityManager,
     recipientUserId: string,
     unreadStatusConceptId: string,
+    now: Date = new Date(),
   ): Promise<number> {
     return em.count(InAppNotifications, {
       recipientUserId,
       statusConceptId: unreadStatusConceptId,
+      // El badge tampoco crece con lo aplazado: si contara lo que la lista no
+      // muestra, alguien vería un «3» y abriría una bandeja con una sola.
+      availableAt: { $lte: now },
     });
   }
 

@@ -2,6 +2,14 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
+// Carril P2: enviar un mensaje avisa al destinatario por el canal in-app de P1.
+// `MessagingModule` exporta `NotificationsService` justamente para esto, y no
+// hay ciclo: `messaging` no sabe nada de `community`.
+import { MessagingModule } from '../messaging/messaging.module';
+// El vínculo persona ↔ cuenta, para resolver a qué usuario avisarle. Se provee
+// el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
+// `clinical`: es una clase sin estado que recibe el `EntityManager`.
+import { PersonAccountLinksRepository } from '../profiles/repositories';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
 import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
@@ -11,6 +19,7 @@ import {
   CommunityModerationController,
   CommunityReviewsController,
   CommunityGroupsController,
+  CommunityTopicsController,
   CommunityPollsController,
   CommunityFeedController,
   CommunityTimelineController,
@@ -24,6 +33,9 @@ import {
   CommunityModerationService,
   CommunityReviewsService,
   CommunityGroupsService,
+  CommunityGroupWallService,
+  CommunityGroupAccessService,
+  CommunityGroupNotificationsService,
   CommunityPollsService,
   CommunityFeedService,
   PublicProfileProjectionService,
@@ -33,6 +45,7 @@ import {
   CommunitySocialReadService,
   CommunityTimelineReadService,
   CommunityMessagingReadService,
+  CommunityMessageNotificationsService,
   CommunityGroupsReadService,
   CommunityPollsReadService,
   CommunityReviewsReadService,
@@ -62,18 +75,6 @@ import {
   PublicSearchRepository,
   VerifiedBadgesRepository,
 } from './repositories';
-// La reseña verificada comprueba que hubo atención real leyendo el encuentro
-// clínico. Es un repositorio sin estado que recibe el `EntityManager` por
-// parámetro, así que proveerlo acá no duplica nada ni crea dos fuentes de
-// verdad — el mismo criterio con el que `scheduling` provee
-// `AppointmentsRepository`—, y evita importar el módulo clínico entero.
-//
-// FALTABA: `CommunityReviewsService` lo inyecta desde el commit 4293c63f y
-// nadie lo proveía, así que **la aplicación entera no arrancaba**
-// (`UnknownDependenciesException` en `CommunityModule`). Detectado desde el
-// carril P8 al levantar la API para su evidencia funcional; queda anotado en
-// `reports/P8.md` para el responsable de community.
-import { EncountersRepository } from '../clinical/repositories';
 
 /**
  * Módulo Community (19): perfiles públicos, grafo social (posts, comentarios,
@@ -85,6 +86,10 @@ import { EncountersRepository } from '../clinical/repositories';
   // `CommonModule` entra por el subsistema de archivos: adjuntar media a un post
   // exige comprobar el archivo contra `common.files`, no confiar en el uuid que
   // manda el cliente.
+  //
+  // `MessagingModule` entra por el contrato de notificaciones de P1: community
+  // decide a quién avisar de lo que pasa en un grupo; messaging entrega.
+  //
   // `ClinicalModule` por `EncountersRepository`: `CommunityReviewsService` exige
   // atención real antes de aceptar una reseña. No hay ciclo — `clinical` no
   // importa nada de `community` — y es el mismo patrón que ya usa
@@ -101,6 +106,7 @@ import { EncountersRepository } from '../clinical/repositories';
     // por perfil y día, que es lo que Redis hace bien y lo que evita guardar el
     // rastro de cada visitante anónimo para poder contarlo.
     RedisRuntimeModule,
+    MessagingModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -108,6 +114,7 @@ import { EncountersRepository } from '../clinical/repositories';
     CommunityModerationController,
     CommunityReviewsController,
     CommunityGroupsController,
+    CommunityTopicsController,
     CommunityPollsController,
     CommunityFeedController,
     CommunityTimelineController,
@@ -119,7 +126,6 @@ import { EncountersRepository } from '../clinical/repositories';
   ],
   providers: [
     // Repositorios
-    EncountersRepository,
     PublicProfilesRepository,
     PostsRepository,
     CommentsRepository,
@@ -138,12 +144,16 @@ import { EncountersRepository } from '../clinical/repositories';
     CommunityPrestigeRepository,
     PublicSearchRepository,
     VerifiedBadgesRepository,
+    PersonAccountLinksRepository,
     // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
+    CommunityMessageNotificationsService,
     CommunityModerationService,
     CommunityReviewsService,
     CommunityGroupsService,
+    CommunityGroupWallService,
+    CommunityGroupNotificationsService,
     CommunityPollsService,
     CommunityFeedService,
     PublicProfileProjectionService,
@@ -154,6 +164,7 @@ import { EncountersRepository } from '../clinical/repositories';
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
     CommunityEngagementService,
+    CommunityGroupAccessService,
     CommunitySocialReadService,
     CommunityTimelineReadService,
     CommunityMessagingReadService,

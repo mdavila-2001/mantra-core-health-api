@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { ResourceNotFoundException, requireTenantId } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  requireTenantId,
+  type AuthenticatedUser,
+} from '../../../common';
 import { Encounters } from '../../clinical/entities';
 import {
   DefinitionSetsRepository,
@@ -26,6 +31,7 @@ import {
   FormInstanceDetailResponseDto,
   FieldValueItemDto,
   FieldAssignmentListResponseDto,
+  MyFormInstanceListResponseDto,
 } from '../dto';
 import { FORMS } from '../forms.concepts';
 
@@ -302,32 +308,97 @@ export class FormsReadService {
     // El ancla de propiedad es el encuentro del recurso; sin él no se sirve.
     await this.loadOwnEncounter(em, instance.resourceId, id);
 
-    const values = await this.valuesRepo.findCurrentByInstance(
+    return this.composeInstanceDetail(em, instance);
+  }
+
+  /**
+   * Los formularios del paciente de la sesión, de todos sus encuentros del
+   * tenant activo (autoservicio, Fase 3 del carril).
+   *
+   * El perfil de paciente **no se acepta por parámetro**: sale del claim de la
+   * sesión, igual que en las lecturas de surveys. La propiedad se demuestra por
+   * el mismo ancla que el resto de las lecturas: los encuentros del paciente en
+   * el tenant, y las instancias adjuntas a esos encuentros.
+   *
+   * @param actor - Sujeto autenticado; debe tener perfil de paciente.
+   * @param limit - Tope del listado.
+   * @returns Las instancias del paciente, con el recorte declarado.
+   */
+  async listMyInstances(
+    actor: AuthenticatedUser,
+    limit: number,
+  ): Promise<MyFormInstanceListResponseDto> {
+    const patientProfileId = this.requirePatientProfile(actor);
+    const tenantId = requireTenantId();
+    this.logger.info(
+      { operation: 'forms.read.myInstances', limit },
+      'Listando los formularios del paciente de la sesión',
+    );
+    const em = this.em.fork();
+
+    // Primero los encuentros propios; las instancias se buscan por lote sobre
+    // sus ids, nunca una consulta por encuentro.
+    const encounters = await em.find(Encounters, {
+      patientProfileId,
+      tenantId,
+    });
+    const rows = await this.instancesRepo.findByResourceIds(
       em,
-      instance.id,
-      FORMS.VALUE_SUPERSEDED,
+      encounters.map((encounter) => encounter.id),
+      limit + 1,
     );
-
-    const fieldIds = [...new Set(values.map((value) => value.fieldId))];
-    const [fields, accessRules] = await Promise.all([
-      this.fieldsRepo.findFieldsByIds(em, fieldIds),
-      this.fieldsRepo.findActiveAccessRulesByFieldIds(
-        em,
-        fieldIds,
-        FORMS.ACCESS_RULE_ACTIVE,
-      ),
-    ]);
-    const typeByField = new Map(
-      fields.map((field) => [field.id, field.dataType]),
-    );
-    const maskedFields = new Set(accessRules.map((rule) => rule.fieldId));
-
+    const truncated = rows.length > limit;
     return {
-      ...this.toInstanceItem(instance),
-      values: values.map((value) =>
-        this.toValueItem(value, typeByField, maskedFields),
-      ),
+      items: rows.slice(0, limit).map((row) => this.toInstanceItem(row)),
+      limit,
+      truncated,
     };
+  }
+
+  /**
+   * El detalle de una instancia del propio paciente, con sus valores vigentes.
+   *
+   * Mismo 404 para lo inexistente, lo de otro paciente, lo de otro tenant y lo
+   * que no ancla a un encuentro: confirmar cuál de esas cosas pasó ya filtra
+   * información.
+   *
+   * @param id - Identificador de la instancia.
+   * @param actor - Sujeto autenticado; debe tener perfil de paciente.
+   * @returns La instancia y sus valores, con el enmascarado aplicado.
+   * @throws ResourceNotFoundException si la instancia no es alcanzable por el actor.
+   */
+  async getMyInstance(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<FormInstanceDetailResponseDto> {
+    const patientProfileId = this.requirePatientProfile(actor);
+    const tenantId = requireTenantId();
+    this.logger.info(
+      { operation: 'forms.read.myInstance', instanceId: id },
+      'Leyendo un formulario del paciente de la sesión',
+    );
+    const em = this.em.fork();
+
+    const instance = await this.instancesRepo.findById(em, id);
+    if (!instance) {
+      throw new ResourceNotFoundException('Instancia no encontrada', {
+        instanceId: id,
+      });
+    }
+    const encounter = await em.findOne(Encounters, {
+      id: instance.resourceId,
+    });
+    if (
+      !encounter ||
+      encounter.tenantId !== tenantId ||
+      encounter.patientProfileId !== patientProfileId
+    ) {
+      throw new ResourceNotFoundException('Instancia no encontrada', {
+        instanceId: id,
+      });
+    }
+
+    return this.composeInstanceDetail(em, instance);
   }
 
   /**
@@ -395,6 +466,71 @@ export class FormsReadService {
       limit,
       truncated,
     };
+  }
+
+  /**
+   * Compone el detalle de una instancia **ya autorizada**: sus valores
+   * vigentes, cada uno con la columna `value_*` resuelta según el tipo del
+   * campo y el enmascarado deny-by-default aplicado.
+   *
+   * La autorización es del llamador a propósito: la lectura clínica ancla en el
+   * tenant y el autoservicio ancla además en el paciente, pero lo que se sirve
+   * después es idéntico — dos composiciones divergirían en el primer cambio.
+   *
+   * @param em - Contexto de persistencia de la lectura.
+   * @param instance - Instancia cuya propiedad ya se comprobó.
+   * @returns La instancia y sus valores.
+   */
+  private async composeInstanceDetail(
+    em: EntityManager,
+    instance: FormInstances,
+  ): Promise<FormInstanceDetailResponseDto> {
+    const values = await this.valuesRepo.findCurrentByInstance(
+      em,
+      instance.id,
+      FORMS.VALUE_SUPERSEDED,
+    );
+
+    const fieldIds = [...new Set(values.map((value) => value.fieldId))];
+    const [fields, accessRules] = await Promise.all([
+      this.fieldsRepo.findFieldsByIds(em, fieldIds),
+      this.fieldsRepo.findActiveAccessRulesByFieldIds(
+        em,
+        fieldIds,
+        FORMS.ACCESS_RULE_ACTIVE,
+      ),
+    ]);
+    const fieldById = new Map(fields.map((field) => [field.id, field]));
+    const maskedFields = new Set(accessRules.map((rule) => rule.fieldId));
+
+    return {
+      ...this.toInstanceItem(instance),
+      values: values.map((value) =>
+        this.toValueItem(value, fieldById, maskedFields),
+      ),
+    };
+  }
+
+  /**
+   * Exige que la sesión tenga perfil de paciente.
+   *
+   * Es lo que impide que un profesional o un administrador entren por la
+   * puerta del autoservicio, y el identificador no se acepta por parámetro
+   * justamente para que nadie pida los formularios de otro (mismo criterio que
+   * el autoservicio de surveys).
+   *
+   * @param actor - Sujeto autenticado.
+   * @returns El perfil de paciente del claim.
+   * @throws PreconditionFailedException si la cuenta no tiene perfil de paciente.
+   */
+  private requirePatientProfile(actor: AuthenticatedUser): string {
+    if (!actor.patientProfileId) {
+      throw new PreconditionFailedException(
+        'La sesión no tiene perfil de paciente asociado',
+        { userId: actor.id },
+      );
+    }
+    return actor.patientProfileId;
   }
 
   /**
@@ -537,22 +673,28 @@ export class FormsReadService {
    * Proyecta un valor: resuelve la columna `value_*` según el tipo del campo y
    * aplica el enmascarado deny-by-default.
    *
+   * `fieldName` viaja también cuando el valor está enmascarado: lo protegido es
+   * el contenido, no la existencia del campo — la pantalla imprime la etiqueta
+   * junto al marcador.
+   *
    * @param value - Fila de valor vigente.
-   * @param typeByField - Tipo técnico por campo, de las definiciones leídas.
+   * @param fieldById - Definición por campo, de las definiciones leídas.
    * @param maskedFields - Campos con regla de acceso activa.
    * @returns El item de valor de la respuesta.
    */
   private toValueItem(
     value: FieldValues,
-    typeByField: Map<string, string>,
+    fieldById: Map<string, DynamicFieldDefinitions>,
     maskedFields: Set<string>,
   ): FieldValueItemDto {
-    const dataType = typeByField.get(value.fieldId);
+    const field = fieldById.get(value.fieldId);
+    const dataType = field?.dataType;
     const masked = maskedFields.has(value.fieldId);
     return {
       id: value.id,
       fieldId: value.fieldId,
       dataType,
+      fieldName: field?.name,
       value: masked ? null : this.resolveValue(value, dataType),
       unitConceptId: value.unitConceptId,
       valueStatusConceptId: value.valueStatusConceptId,

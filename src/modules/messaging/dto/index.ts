@@ -45,4 +45,8 @@ export {
   InAppNotificationDto,
   InAppNotificationPageDto,
   MarkAllInAppReadResponseDto,
+  QuietHoursDto,
+  CategoryPreferenceDto,
+  UpdateMyPreferencesDto,
+  MyPreferencesDto,
 } from './in-app.dto';

@@ -258,6 +258,24 @@ export class CommunitySocialController {
   // —marcadores y bloqueos— comprueban la propiedad del perfil en el servicio,
   // que es donde hay base para comprobarla.
 
+  /**
+   * La misma ficha, por el slug del directorio público (carril P2).
+   *
+   * **Va declarada antes que `profiles/:profileId`**, y no es un detalle de
+   * estilo: el router prueba en orden, y aunque el parámetro lleva
+   * `ParseUUIDPipe` —que rechazaría `by-slug`— dejar que la ruta específica
+   * quede después de la genérica es la forma de que un cambio futuro del pipe
+   * la apague sin que nadie se entere.
+   */
+  @Get('profiles/by-slug/:slug')
+  @ApiOperation({ summary: 'Ficha de un perfil público por su slug' })
+  getProfileBySlug(
+    @Param('slug') slug: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PublicProfileDetailDto> {
+    return this.readService.getProfileBySlug(slug, actor);
+  }
+
   /** Ficha del perfil, con sellos de verificación y prestigio. */
   @Get('profiles/:profileId')
   @ApiOperation({ summary: 'Ficha de un perfil público' })

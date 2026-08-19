@@ -6,6 +6,7 @@ import {
   FormsFieldsController,
   FormsAssignmentsController,
   FormsInstancesController,
+  FormsMeController,
   FormsValuesController,
 } from './controllers';
 import {
@@ -38,6 +39,7 @@ import {
     FormsFieldsController,
     FormsAssignmentsController,
     FormsInstancesController,
+    FormsMeController,
     FormsValuesController,
   ],
   providers: [
