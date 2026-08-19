@@ -14,13 +14,26 @@ import {
   TenantsRepository,
 } from '../repositories';
 import { TenantAdministrationService } from './tenant-administration.service';
+import { DIR } from '../directory.concepts';
 import type {
   ListBranchAssignmentsResponseDto,
   ListBranchesResponseDto,
+  MyOrganizationDto,
+  MyOrganizationsResponseDto,
   SearchMembershipsResponseDto,
   SearchTenantsResponseDto,
   TenantDetailResponseDto,
 } from '../dto';
+
+/**
+ * Los roles de organización que la administran.
+ *
+ * Copia deliberada del criterio de `TenantAdministrationService`: allí decide
+ * si una escritura pasa, y acá sólo rotula lo que la pantalla puede ofrecer.
+ * Son dos preguntas distintas sobre el mismo hecho, y la que autoriza sigue
+ * siendo la de allá.
+ */
+const ROLES_QUE_ADMINISTRAN = new Set<string>([DIR.ROLE_OWNER, DIR.ROLE_ADMIN]);
 
 /**
  * Cara de lectura de `directory`: organizaciones, sus sub-organizaciones, sus
@@ -153,6 +166,80 @@ export class DirectoryReadService {
       timeZone: tenant.timeZone,
       updatedAt: tenant.updatedAt,
     };
+  }
+
+  /**
+   * TP-1: las organizaciones del actor, sin que tenga que saber sus ids.
+   *
+   * ## Qué problema resuelve
+   *
+   * Todas las lecturas del directorio empiezan por un `tenantId` que hay que
+   * traer de algún lado. Para la plataforma eso está bien —elige a cuál
+   * mirar—, pero para quien administra su propia organización era un callejón:
+   * la pantalla necesitaba el id para pedir la ficha, y el único lugar de donde
+   * podía sacarlo era la ficha. El panel de la organización no podía abrirse
+   * solo.
+   *
+   * ## Por qué devuelve una lista
+   *
+   * Porque una persona puede pertenecer a más de una organización, y elegir por
+   * ella sería inventar cuál es «la» suya. Vacía es una respuesta legítima:
+   * quien no pertenece a ninguna simplemente no tiene panel de organización.
+   *
+   * ## Por qué trae el rol
+   *
+   * Para que la pantalla se dibuje sin adivinar: un `staff` ve la organización
+   * pero no los botones de editar ni de invitar. La autorización real la
+   * vuelve a hacer el servidor en cada escritura — esto es para que la pantalla
+   * no mienta, no para permitir nada.
+   *
+   * @param actor - Quien pregunta por lo suyo.
+   * @returns Sus organizaciones con su rol en cada una.
+   */
+  async listMyTenants(
+    actor: AuthenticatedUser,
+  ): Promise<MyOrganizationsResponseDto> {
+    const em = this.em.fork();
+
+    const memberships = await this.membershipsRepo.findActiveByUser(
+      em,
+      actor.id,
+      DIR.MEMBERSHIP_ACTIVE,
+    );
+    if (memberships.length === 0) return { items: [] };
+
+    const items: MyOrganizationDto[] = [];
+    for (const membership of memberships) {
+      const tenant = await this.tenantsRepo.findById(em, membership.tenantId);
+      // Una membresía viva contra una organización que ya no está no es un
+      // error del que pregunta: se omite en vez de romperle el panel.
+      if (!tenant) continue;
+
+      items.push({
+        id: tenant.id,
+        code: tenant.code,
+        legalName: tenant.legalName,
+        tradeName: tenant.tradeName,
+        tenantTypeConceptId: tenant.tenantTypeConceptId,
+        statusConceptId: tenant.statusConceptId,
+        verificationStatusConceptId: tenant.verificationStatusConceptId,
+        parentTenantId: tenant.parentTenantId ?? null,
+        createdAt: tenant.createdAt,
+        legalEntityTypeConceptId: tenant.legalEntityTypeConceptId,
+        countryConceptId: tenant.countryConceptId,
+        jurisdictionConceptId: tenant.jurisdictionConceptId,
+        dataResidencyRegionConceptId: tenant.dataResidencyRegionConceptId,
+        currencyConceptId: tenant.currencyConceptId,
+        timeZone: tenant.timeZone,
+        updatedAt: tenant.updatedAt,
+        myRoleConceptId: membership.tenantRoleConceptId,
+        canAdminister: ROLES_QUE_ADMINISTRAN.has(
+          membership.tenantRoleConceptId,
+        ),
+      });
+    }
+
+    return { items };
   }
 
   /**
