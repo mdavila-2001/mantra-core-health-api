@@ -79,7 +79,16 @@ function build() {
   const affiliationsRepo = {
     findByPractitioner: mockFn().mockResolvedValue([]),
     findSame: mockFn().mockResolvedValue(null),
+    // TP-2: por defecto no hay una solicitud previa a la misma sede.
+    findByPractitionerAndSite: mockFn().mockResolvedValue(null),
+    findByPractitionerInStatus: mockFn().mockResolvedValue([]),
+    findById: mockFn().mockResolvedValue(null),
+    findBySites: mockFn().mockResolvedValue([]),
     create: mockFn(),
+  };
+  const afiliaciones = {
+    estadoInicial: mockFn().mockResolvedValue(PROF.AFFILIATION_ACTIVE),
+    visiblesDeTerceros: mockFn().mockResolvedValue([]),
   };
   // La propiedad del perfil se prueba en `profile-ownership.service.spec.ts`; aquí el
   // doble deja pasar para no mezclar el permiso con la lógica del servicio.
@@ -149,6 +158,10 @@ function build() {
     languagesRepo,
     affiliationsRepo as any,
     ownership as never,
+    // TP-2: con qué estado nace un vínculo y cuáles ve un tercero. Por defecto
+    // nace aprobado —el caso del historial laboral sin sede— para que las
+    // pruebas que no hablan del vínculo no tengan que montarlo.
+    afiliaciones as never,
     attachableFiles,
     accountLinksRepo as any,
     effectiveRoles as any,
@@ -163,6 +176,7 @@ function build() {
     accountLinksRepo,
     effectiveRoles,
     affiliationsRepo,
+    afiliaciones,
     verificationBypass,
     ownership,
     tx,

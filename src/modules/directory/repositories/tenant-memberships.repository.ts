@@ -74,6 +74,35 @@ export class TenantMembershipsRepository {
     });
   }
 
+  /**
+   * Todas las membresías activas de una persona, en cualquier organización.
+   *
+   * Es lo que permite preguntar «¿de qué organizaciones sos?» sin saber de
+   * antemano de cuáles: hasta ahora sólo se podía comprobar la pertenencia a
+   * una organización que ya se conocía, así que el panel no tenía forma de
+   * abrirse solo.
+   *
+   * No lleva filtro de tenant, y es correcto: el alcance de esta lectura es
+   * **la persona**, que es más estrecho que un tenant. Acotarla además por
+   * tenant sería pedirle el dato que viene a buscar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userId - La cuenta consultada.
+   * @param activeStatusConceptId - Concepto que cuenta como membresía activa.
+   * @returns Sus membresías activas, de la más reciente a la más antigua.
+   */
+  findActiveByUser(
+    em: EntityManager,
+    userId: string,
+    activeStatusConceptId: string,
+  ): Promise<TenantMemberships[]> {
+    return em.find(
+      TenantMemberships,
+      { userId, statusConceptId: activeStatusConceptId },
+      { orderBy: { createdAt: 'DESC', id: 'ASC' } },
+    );
+  }
+
   /** Cuenta las membresías activas del tenant con un rol dado (protección del último OWNER). */
   countActiveByTenantRole(
     em: EntityManager,

@@ -45,6 +45,8 @@ import {
   SearchMembershipsResponseDto,
   SearchTenantsResponseDto,
   TenantDetailResponseDto,
+  MyOrganizationsResponseDto,
+  UpdateTenantDto,
 } from '../dto';
 
 /** Tope de filas por página cuando el cliente no pide uno. */
@@ -85,6 +87,47 @@ export class TenantsController {
    * @param actor - Quien pide la lectura.
    * @returns Ficha de la organización.
    */
+  /**
+   * TP-1: las organizaciones del actor.
+   *
+   * Va declarada **antes** que `:tenantId`: Nest resuelve por orden y el
+   * parámetro capturaría `me` —y `ParseUUIDPipe` lo rechazaría con un 400 que
+   * no explica nada—.
+   *
+   * Sin `@Roles`: lo único que puede devolver es lo del propio actor, porque
+   * el sujeto sale de la sesión y no hay parámetro que apunte a otro. Una
+   * lista vacía es una respuesta legítima —quien no pertenece a ninguna
+   * organización no tiene panel—, no un 403.
+   */
+  @Get('me')
+  @ApiOperation({
+    summary: 'Las organizaciones del actor, con su rol en cada una',
+    description:
+      'Con esto el panel de la organización puede abrirse sin que la pantalla ' +
+      'conozca de antemano el identificador de la organización.',
+  })
+  listMyTenants(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyOrganizationsResponseDto> {
+    return this.readService.listMyTenants(actor);
+  }
+
+  /**
+   * TP-1: la organización corrige sus propios datos.
+   *
+   * Sólo owner o admin **de esa** organización (o la plataforma): un `staff`
+   * la ve y no la edita.
+   */
+  @Patch(':tenantId')
+  @ApiOperation({ summary: 'Editar los datos de la propia organización' })
+  updateTenant(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Body() dto: UpdateTenantDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TenantResponseDto> {
+    return this.tenantsService.updateTenant(tenantId, dto, actor);
+  }
+
   @Get(':tenantId')
   @ApiOperation({ summary: 'Ficha de una organización' })
   getTenant(

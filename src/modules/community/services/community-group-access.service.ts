@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  CONCEPTS,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
@@ -113,6 +114,17 @@ export class CommunityGroupAccessService {
 
     const isSecret = group.visibilityConceptId === COMM.GROUP_VISIBILITY_SECRET;
     if (isSecret && !isMember && !isPlatform)
+      throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+
+    // TP-3 · regla 08: un grupo disuelto ya no está en pie, y su dirección deja
+    // de abrir para todos —incluidos los que fueron miembros—. 404 y no 403
+    // porque no es una cuestión de permiso: el grupo dejó de existir como tal,
+    // y su rastro vive en la auditoría, no en una pantalla.
+    //
+    // La plataforma sí lo alcanza: moderar lo que se publicó en un grupo que
+    // después se disolvió sigue siendo su trabajo, y dejarlo fuera crearía un
+    // punto ciego que se abre con sólo vaciar el grupo.
+    if (group.statusConceptId !== CONCEPTS.STATE_ACTIVE && !isPlatform)
       throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
 
     const isPublic = group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC;

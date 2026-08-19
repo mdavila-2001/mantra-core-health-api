@@ -428,6 +428,106 @@ export class SchedulingBookingsRepository {
     return { rows: inWindow, fetchCapReached };
   }
 
+  /**
+   * La agenda de una organización: las citas de sus recursos en una ventana.
+   *
+   * ## El filtro de tenant va acá, no en el servicio
+   *
+   * `tenantId` entra en el `where` de la consulta y no se comprueba después
+   * sobre las filas devueltas. Es la lección del #156 —la cola de moderación se
+   * armaba sin filtro y un moderador veía las denuncias de todas las clínicas—
+   * y es también lo que exige el guardrail que hoy es gate duro del CI.
+   *
+   * La diferencia no es de estilo. Filtrar después significa que la base ya
+   * leyó las filas ajenas y que **cualquier camino que se saltee ese paso las
+   * expone**: un `map` antes del filtro, un log que imprima el resultado
+   * crudo, un `catch` que devuelva lo que había. Filtrando en la consulta esas
+   * filas nunca existieron.
+   *
+   * ## Por qué recibe los recursos ya resueltos
+   *
+   * El filtro por profesional se traduce a «los recursos de este profesional en
+   * esta organización», y esa resolución es del servicio. Acá llegan ids que ya
+   * fueron acotados al tenant, así que la consulta es doblemente estrecha: por
+   * `tenant_id` y por recurso.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Organización, ventana y recursos a los que acotar.
+   * @param limit - Tope de filas.
+   * @returns Las citas con su cupo, en orden cronológico.
+   */
+  async findTenantAgenda(
+    em: EntityManager,
+    filters: {
+      /** La organización dueña de la agenda. Obligatoria: es el perímetro. */
+      tenantId: string;
+      /** Inicio de la ventana. */
+      from: Date;
+      /** Fin de la ventana. */
+      to: Date;
+      /** Recursos a los que acotar; vacío = todos los de la organización. */
+      resourceIds?: readonly string[];
+      /** Estados a incluir. */
+      statusConceptIds?: readonly string[];
+    },
+    limit: number,
+  ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
+    // Un filtro por recursos vacío no es «todos»: es «ninguno». Pasa cuando se
+    // pide la agenda de un profesional que no tiene recursos en esta
+    // organización, y devolver todo sería exactamente la fuga que este método
+    // existe para evitar.
+    if (filters.resourceIds?.length === 0) return [];
+
+    const where: Record<string, unknown> = {
+      tenantId: filters.tenantId,
+    };
+    if (filters.resourceIds && filters.resourceIds.length > 0) {
+      where.resourceId = { $in: [...filters.resourceIds] };
+    }
+    if (filters.statusConceptIds && filters.statusConceptIds.length > 0) {
+      where.statusConceptId = { $in: [...filters.statusConceptIds] };
+    }
+
+    // Se traen más de `limit` porque el instante vive en el cupo y no en la
+    // cita: no se sabe cuántas caen en la ventana hasta resolverlos. El mismo
+    // criterio que `findBookings`, con el mismo motivo.
+    const bookings = await em.find(AppointmentBookings, where, {
+      orderBy: { createdAt: 'DESC' },
+      limit: Math.max(limit * 20, 500),
+    });
+
+    const slotIds = bookings
+      .map((booking) => booking.bookableSlotId)
+      .filter((id): id is string => Boolean(id));
+    const slots =
+      slotIds.length > 0
+        ? await em.find(BookableSlots, { id: { $in: slotIds } })
+        : [];
+    const slotById = new Map(slots.map((slot) => [slot.id, slot]));
+
+    return (
+      bookings
+        .map((booking) => ({
+          booking,
+          slot: booking.bookableSlotId
+            ? (slotById.get(booking.bookableSlotId) ?? null)
+            : null,
+        }))
+        // Sin cupo no hay instante contra el que comparar: queda fuera en vez de
+        // colarse con fecha desconocida.
+        .filter(
+          (
+            fila,
+          ): fila is { booking: AppointmentBookings; slot: BookableSlots } =>
+            fila.slot !== null &&
+            fila.slot.startAt >= filters.from &&
+            fila.slot.startAt < filters.to,
+        )
+        .sort((a, b) => a.slot.startAt.getTime() - b.slot.startAt.getTime())
+        .slice(0, limit)
+    );
+  }
+
   /** Citas vigentes del paciente: la política limita cuántas puede tener a la vez. */
   countActiveBookingsForPatient(
     em: EntityManager,

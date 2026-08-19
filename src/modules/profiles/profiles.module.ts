@@ -7,13 +7,18 @@ import { AuthzModule } from '../authz/authz.module';
 // comprobar contra `common.files` que sea del titular y siga siendo utilizable.
 import { CommonModule } from '../common/common.module';
 import { TerminologyModule } from '../terminology/terminology.module';
+// TP-2: quién administra cada organización lo decide `directory`, y de ahí sale
+// el permiso para aprobar o rechazar un vínculo médico–organización.
+import { DirectoryModule } from '../directory/directory.module';
 import * as entities from './entities';
 import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
 import {
   ProfilesPatientsController,
   ProfilesPractitionersController,
+  TenantPractitionerRequestsController,
 } from './controllers';
 import {
+  ProfilesAffiliationsService,
   ProfilesPatientsService,
   ProfilesPractitionersService,
 } from './services';
@@ -43,6 +48,9 @@ import { ProfileOwnershipService } from './services';
  * relacionadas, proxies de portal y defunción/anonimización.
  */
 @Module({
+  // DirectoryModule: TP-2 necesita saber quién administra cada organización
+  // para decidir quién aprueba un vínculo, y ese criterio ya vive allá. No hay
+  // ciclo: `directory` no depende de `profiles`.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     AuthzModule,
@@ -50,11 +58,17 @@ import { ProfileOwnershipService } from './services';
     // Sólo para leer el catálogo de especialidades: la regla de qué uuid es
     // una especialidad válida vive en terminología, no en una lista de acá.
     TerminologyModule,
+    DirectoryModule,
   ],
-  controllers: [ProfilesPatientsController, ProfilesPractitionersController],
+  controllers: [
+    ProfilesPatientsController,
+    ProfilesPractitionersController,
+    TenantPractitionerRequestsController,
+  ],
   providers: [
     ProfileOwnershipService,
     MedicalSpecialtyCatalogService,
+    ProfilesAffiliationsService,
     // Repositorios
     PersonsRepository,
     PersonProfilesRepository,
