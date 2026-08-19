@@ -364,24 +364,36 @@ const TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST = new Set([
 ]);
 
 /**
- * Lecturas **públicas** que cruzan tenants a propósito: son el directorio que
- * un paciente consulta antes de elegir dónde atenderse, y acotarlas al tenant
- * las vaciaría —la pregunta no es «qué tiene mi organización» sino «dónde me
- * hago esto».
+ * Lecturas de **directorio público**: cruzan tenants a propósito porque la
+ * superficie que sirven es anónima y transversal — nadie busca «un cardiólogo
+ * dentro de la clínica X» sin saber que X existe, y acotar por tenant
+ * devolvería un directorio vacío.
  *
- * No van en la lista de arriba porque no son barridos de un worker SYSTEM: son
- * lecturas de cara al público, y la diferencia importa al revisarlas. Lo que
- * las hace seguras no es un rol sino el **filtro de publicación** que cada una
- * aplica en su criterio; si ese filtro se cae, la entrada acá deja de estar
- * justificada. Confirmadas leyendo cada criterio en el triage 2026-08-18.
+ * Es una lista aparte de la de barridos del worker y no un apéndice suyo: la
+ * justificación es distinta y hay que poder revisarlas por separado. En un
+ * barrido SYSTEM, el motivo es que no se sabe de antemano qué tenants tienen
+ * algo pendiente. Acá el motivo es que **la barrera no es el tenant**: es el
+ * par publicación/estado que cada consulta aplica por su cuenta
+ * (`visibility = PUBLIC AND status = ACTIVE` en community; `ACTIVE` +
+ * `VERIFIED` en unidades diagnósticas).
  *
- * - `searchProfiles`: exige `visibility = PUBLIC` y `status = ACTIVE`.
- * - `searchVisible` / `countVisible`: exigen `status = UNIT_ACTIVE` y
- *   `verification = VERIFIED`, y aceptan `tenantId` como filtro opcional
- *   cuando quien pregunta sí quiere acotar.
+ * Antes de agregar una entrada acá, comprobá las dos cosas: que la lectura la
+ * sirva un endpoint declarado `@Public()` o `@TenantAgnostic()` —o sea, que la
+ * superficie ya renuncie al tenant a la vista de todos—, y que su `where`
+ * traiga ese par por igualdad, no como «distinto de privado». Si falta
+ * cualquiera de las dos, lo que hay es una fuga, no una excepción.
  */
-const TENANT_SCOPE_PUBLIC_DIRECTORY_ALLOWLIST = new Set([
+const PUBLIC_DIRECTORY_ALLOWLIST = new Set([
+  // Buscador público del directorio de la red social (P4/P10). El repositorio
+  // documenta el par de condiciones arriba de todo, y la proyección enumera
+  // campos a mano para que no se escape ningún identificador interno.
   'src/modules/community/repositories/public-search.repository.ts#searchProfiles',
+  // Denominador de «indexados N de N» del reindexado del mismo directorio, que
+  // corre como SYSTEM desde `internal/community/search/reindex`.
+  'src/modules/community/repositories/public-search.repository.ts#countIndexable',
+  // Buscador público de unidades diagnósticas: `searchWhere` exige
+  // `UNIT_ACTIVE` + `VERIFICATION_VERIFIED` y acepta `tenantId` como filtro
+  // opcional, no como límite de acceso.
   'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#searchVisible',
   'src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts#countVisible',
 ]);
@@ -442,11 +454,11 @@ for (const file of repoFiles) {
       continue;
 
     const method = enclosingMethodName(lines, i);
-    const clave = method ? `${rel(file)}#${method}` : '';
+    const qualified = method ? `${rel(file)}#${method}` : null;
     if (
-      clave &&
-      (TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(clave) ||
-        TENANT_SCOPE_PUBLIC_DIRECTORY_ALLOWLIST.has(clave))
+      qualified &&
+      (TENANT_SCOPE_SYSTEM_SWEEP_ALLOWLIST.has(qualified) ||
+        PUBLIC_DIRECTORY_ALLOWLIST.has(qualified))
     )
       continue;
 
