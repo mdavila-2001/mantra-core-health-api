@@ -3,11 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 /**
  * Las cinco etapas del alta del profesional, en el orden en que se recorren.
  *
- * Son claves y no prosa a propósito: la API dice **qué** falta y el front
- * decide cómo pedírselo a la persona. Un cambio de redacción no es un cambio
- * de contrato.
+ * Son claves y no números: el orden puede cambiar y un `2` guardado en algún
+ * lado dejaría de significar lo mismo. La pantalla las traduce.
  */
-export const ONBOARDING_STEP_KEYS = [
+export const PASOS_DE_ONBOARDING = [
   'professional-data',
   'photo',
   'organizations',
@@ -16,72 +15,51 @@ export const ONBOARDING_STEP_KEYS = [
 ] as const;
 
 /** Una de las cinco etapas. */
-export type OnboardingStepKey = (typeof ONBOARDING_STEP_KEYS)[number];
+export type PasoDeOnboarding = (typeof PASOS_DE_ONBOARDING)[number];
 
-/**
- * Qué le falta a una etapa, en claves estables.
- *
- * Mismo criterio que las etapas: `license-number` viaja así y el texto
- * «Cargá tu matrícula» lo pone quien dibuja la pantalla.
- */
-export const ONBOARDING_MISSING_KEYS = [
-  'license-number',
-  'specialty',
-  'photo',
-  'affiliation',
-  'schedule',
-  'slots',
-] as const;
-
-/** Un dato pendiente dentro de una etapa. */
-export type OnboardingMissingKey = (typeof ONBOARDING_MISSING_KEYS)[number];
-
-/** Una etapa del alta, con lo que le falta para darse por cumplida. */
+/** El estado de una etapa concreta. */
 export class OnboardingStepDto {
-  /** Cuál de las cinco etapas es. */
-  @ApiProperty({ enum: ONBOARDING_STEP_KEYS })
-  key!: OnboardingStepKey;
+  /** Qué etapa es. */
+  @ApiProperty({ enum: PASOS_DE_ONBOARDING }) key!: PasoDeOnboarding;
 
-  /** Si ya está cumplida con los datos que hoy existen. */
-  @ApiProperty()
-  complete!: boolean;
+  /** Está cumplida con los datos que el profesional ya cargó. */
+  @ApiProperty() complete!: boolean;
 
   /**
-   * Los datos que faltan, en claves estables. Vacío cuando la etapa está
-   * cumplida.
+   * Qué falta, en claves estables que la pantalla traduce.
+   *
+   * Van en clave y no en prosa porque el texto es del front: acá se dice qué
+   * falta, no cómo se le pide a la persona.
    */
-  @ApiProperty({ isArray: true, enum: ONBOARDING_MISSING_KEYS })
-  missing!: OnboardingMissingKey[];
+  @ApiProperty({ type: [String] }) missing!: string[];
 }
 
 /**
- * En qué punto del alta está el profesional — respuesta de
- * `GET /profiles/practitioners/me/onboarding`.
+ * En qué punto del alta está el profesional.
  *
- * ## Por qué no hay «paso guardado»
+ * ## Por qué no hay columna de «paso actual»
  *
- * Porque el paso se **deriva** de los datos que ya existen: matrícula,
- * especialidad, foto, dónde atiende y si publicó horarios. Persistir un
- * contador sería una segunda verdad sobre los mismos hechos, y las dos
- * verdades se separan: bastaría con que alguien cargue su foto por otra
- * pantalla para que el contador mintiera.
+ * Porque el paso **se deriva de los datos que ya existen**: si tiene matrícula
+ * y especialidad, el paso 1 está hecho; si tiene foto, el 2. Guardar el paso en
+ * una columna crea un segundo estado que puede contradecir al primero — alguien
+ * carga su foto por otra pantalla y el contador sigue diciendo que le falta.
  *
- * Deriva también significa que retomar sale gratis —volver a entrar recalcula
- * y aterriza donde corresponde— y que los profesionales dados de alta antes de
- * que esta pantalla existiera aparecen completos sin migrar una sola fila.
+ * Retomable sale gratis: al volver a entrar se recalcula. Y los profesionales
+ * que ya estaban completos **antes** de que este asistente existiera aparecen
+ * completos sin migrar una sola fila.
  */
 export class PractitionerOnboardingDto {
-  /** Perfil profesional al que corresponde el avance. */
-  @ApiProperty({ format: 'uuid' })
-  practitionerProfileId!: string;
+  /** El perfil consultado. */
+  @ApiProperty({ format: 'uuid' }) practitionerProfileId!: string;
 
-  /** Las cinco etapas, siempre las cinco y siempre en orden. */
-  @ApiProperty({ type: [OnboardingStepDto] })
-  steps!: OnboardingStepDto[];
+  /** Las cinco etapas, siempre las cinco y en orden. */
+  @ApiProperty({ type: [OnboardingStepDto] }) steps!: OnboardingStepDto[];
 
   /**
-   * La etapa en la que hay que aterrizar, o `done` si no falta ninguna.
+   * La primera etapa incompleta, o `done` si no queda ninguna.
+   *
+   * Es lo único que la pantalla necesita para decidir dónde aterrizar.
    */
-  @ApiProperty({ enum: [...ONBOARDING_STEP_KEYS, 'done'] })
-  firstIncomplete!: OnboardingStepKey | 'done';
+  @ApiProperty({ enum: [...PASOS_DE_ONBOARDING, 'done'] })
+  firstIncomplete!: PasoDeOnboarding | 'done';
 }

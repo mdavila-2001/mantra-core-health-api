@@ -31,6 +31,10 @@ function buildCatalog() {
   const catalogRepo = {
     createResource: mockFn(),
     findResourceById: mockFn(),
+    // TJ-1: la comprobación de solape consulta las franjas de sus otros
+    // recursos. Sin agendas previas no hay con qué chocar, que es el caso por
+    // defecto de estas pruebas.
+    findRulesByResourceOwner: mockFn().mockResolvedValue([]),
     createPolicy: mockFn(),
     findPolicyByCode: mockFn(),
     findPolicyById: mockFn(),
@@ -43,12 +47,6 @@ function buildCatalog() {
     findSlotsByTemplateInRange: mockFn(),
     findSlotsByResourceInRange: mockFn().mockResolvedValue([]),
     findOpenSlotsInWindow: mockFn(),
-    // La comprobación de solapamientos (TJ-1). Por defecto el profesional no
-    // tiene ninguna otra agenda publicada, que es el caso de quien publica la
-    // primera.
-    findResourcesByRef: mockFn().mockResolvedValue([]),
-    findPublishedTemplatesByResources: mockFn().mockResolvedValue([]),
-    findRulesByTemplates: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new SchedulingCatalogService(
@@ -673,19 +671,14 @@ describe('SchedulingCatalogService', () => {
       zona = 'UTC',
       validTo?: Date,
     ): void {
-      d.catalogRepo.findResourcesByRef.mockResolvedValue([
+      d.catalogRepo.findRulesByResourceOwner.mockResolvedValue([
         {
-          id: CLINICA,
-          resourceRefType: 'health_practitioner_profiles',
-          resourceRefId: HPID,
+          rule: { scheduleTemplateId: 'tpl-clinica', ...rule },
+          resourceId: CLINICA,
+          resourceName: 'Clínica del centro',
           timeZone: zona,
+          validTo,
         },
-      ]);
-      d.catalogRepo.findPublishedTemplatesByResources.mockResolvedValue([
-        { id: 'tpl-clinica', resourceId: CLINICA, validTo },
-      ]);
-      d.catalogRepo.findRulesByTemplates.mockResolvedValue([
-        { scheduleTemplateId: 'tpl-clinica', ...rule },
       ]);
     }
 
@@ -737,7 +730,9 @@ describe('SchedulingCatalogService', () => {
         .catch((e: unknown) => e as any);
 
       expect(error).toBeInstanceOf(PreconditionFailedException);
-      expect(JSON.stringify(error.getResponse?.() ?? {})).toContain('lunes');
+      const detalle = JSON.stringify(error.getResponse?.() ?? {});
+      expect(detalle).toContain('lunes');
+      expect(detalle).toContain('Clínica del centro');
     });
 
     /**
@@ -853,7 +848,7 @@ describe('SchedulingCatalogService', () => {
           profesional as never,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.catalogRepo.findResourcesByRef).not.toHaveBeenCalled();
+      expect(d.catalogRepo.findRulesByResourceOwner).not.toHaveBeenCalled();
     });
 
     /**
@@ -906,7 +901,7 @@ describe('SchedulingCatalogService', () => {
         { id: 'user-adm', roles: ['SCHEDULING_ADMIN'] } as never,
       );
 
-      expect(d.catalogRepo.findResourcesByRef).not.toHaveBeenCalled();
+      expect(d.catalogRepo.findRulesByResourceOwner).not.toHaveBeenCalled();
       expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
     });
   });

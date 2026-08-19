@@ -1303,7 +1303,7 @@ describe('ProfilesPractitionersService', () => {
       const avance = await d.service.getOwnOnboarding(actor);
 
       const agenda = avance.steps.find((paso) => paso.key === 'schedule');
-      expect(agenda?.missing).toEqual(['schedule']);
+      expect(agenda?.missing).toEqual(['published-schedule']);
     });
 
     /**

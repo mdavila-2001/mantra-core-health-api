@@ -8,7 +8,7 @@ import {
   AvailabilityExceptions,
   BookableSlots,
 } from '../entities';
-import { CONCEPTS, createdBy } from '../../../common';
+import { createdBy } from '../../../common';
 
 /**
  * Describe el contrato estructural de create resource data.
@@ -313,77 +313,6 @@ export class SchedulingCatalogRepository {
   }
 
   /**
-   * Los recursos agendables que apuntan a una misma referencia.
-   *
-   * Es lo que permite mirar a un profesional entero y no a una de sus sedes:
-   * un médico que atiende en tres lugares tiene tres recursos, y sus franjas se
-   * pisan entre sí aunque cada recurso, por separado, sea impecable.
-   *
-   * Acepta varias formas de `resourceRefType` porque es texto libre y en los
-   * datos conviven dos alias de la misma tabla.
-   *
-   * No lleva filtro de tenant a propósito, y no es un descuido: la referencia
-   * al perfil profesional es un alcance **más** estrecho que el tenant —es una
-   * persona—, y acotar además por tenant dejaría fuera justamente el caso que
-   * esta lectura existe para encontrar, el del médico que atiende en dos
-   * organizaciones distintas.
-   *
-   * @param em - Contexto de persistencia o transacción activa.
-   * @param refTypes - Alias aceptados de la tabla referenciada.
-   * @param refId - Identificador de la fila referenciada.
-   * @returns Los recursos que apuntan a esa fila.
-   */
-  findResourcesByRef(
-    em: EntityManager,
-    refTypes: readonly string[],
-    refId: string,
-  ): Promise<SchedulableResources[]> {
-    return em.find(SchedulableResources, {
-      resourceRefType: { $in: [...refTypes] },
-      resourceRefId: refId,
-    });
-  }
-
-  /**
-   * Las plantillas publicadas de varios recursos, en una sola lectura.
-   *
-   * Sólo las publicadas: un borrador no ocupa la agenda de nadie todavía, y
-   * hacerlo chocar impediría preparar la agenda de la sede nueva antes de
-   * mudarse.
-   *
-   * @param em - Contexto de persistencia o transacción activa.
-   * @param resourceIds - Recursos consultados.
-   * @returns Sus plantillas publicadas.
-   */
-  findPublishedTemplatesByResources(
-    em: EntityManager,
-    resourceIds: readonly string[],
-  ): Promise<ScheduleTemplates[]> {
-    if (resourceIds.length === 0) return Promise.resolve([]);
-    return em.find(ScheduleTemplates, {
-      resourceId: { $in: [...resourceIds] },
-      statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
-    });
-  }
-
-  /**
-   * Las franjas de varias plantillas, en una sola lectura.
-   *
-   * @param em - Contexto de persistencia o transacción activa.
-   * @param scheduleTemplateIds - Plantillas consultadas.
-   * @returns Sus franjas.
-   */
-  findRulesByTemplates(
-    em: EntityManager,
-    scheduleTemplateIds: readonly string[],
-  ): Promise<ScheduleRules[]> {
-    if (scheduleTemplateIds.length === 0) return Promise.resolve([]);
-    return em.find(ScheduleRules, {
-      scheduleTemplateId: { $in: [...scheduleTemplateIds] },
-    });
-  }
-
-  /**
    * Crea create policy.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -515,6 +444,84 @@ export class SchedulingCatalogRepository {
     scheduleTemplateId: string,
   ): Promise<ScheduleRules[]> {
     return em.find(ScheduleRules, { scheduleTemplateId });
+  }
+
+  /**
+   * Las franjas vigentes del profesional en **todos** sus recursos.
+   *
+   * Existe para poder rechazar un solape antes de publicarlo: un médico con dos
+   * consultorios puede declarar «lunes 9–12» en los dos, y el motor generaría
+   * cupos simultáneos en dos lugares. El paciente reserva uno y el profesional
+   * descubre el choque cuando ya hay dos personas citadas.
+   *
+   * Se busca por `resource_ref_id` —el vínculo del recurso con el perfil— y no
+   * por tenant: el mismo profesional puede publicar en organizaciones distintas
+   * y el choque es igual de real, porque el que no puede estar en dos lugares
+   * es él.
+   *
+   * Sólo plantillas **publicadas**: una en borrador todavía no ocupa horario.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceRefId - Perfil profesional dueño de los recursos.
+   * @param publishedStatusConceptId - Estado que cuenta como publicada.
+   * Devuelve también la **zona** de cada sede y la **vigencia** de cada
+   * plantilla: sin ellas, quien compara sólo puede mirar el texto de la hora, y
+   * «las nueve» de dos sedes en zonas distintas no son el mismo momento.
+   *
+   * @param exceptResourceId - Recurso que se está editando, si se excluye.
+   * @returns Las franjas, con su recurso, su zona y la vigencia de su plantilla.
+   */
+  async findRulesByResourceOwner(
+    em: EntityManager,
+    resourceRefId: string,
+    publishedStatusConceptId: string,
+    exceptResourceId?: string,
+  ): Promise<
+    {
+      rule: ScheduleRules;
+      resourceId: string;
+      resourceName: string;
+      timeZone?: string;
+      validTo?: Date;
+    }[]
+  > {
+    const recursos = await em.find(SchedulableResources, { resourceRefId });
+    const suyos = recursos.filter((recurso) => recurso.id !== exceptResourceId);
+    if (suyos.length === 0) return [];
+
+    const plantillas = await em.find(ScheduleTemplates, {
+      resourceId: { $in: suyos.map((recurso) => recurso.id) },
+      statusConceptId: publishedStatusConceptId,
+    });
+    if (plantillas.length === 0) return [];
+
+    const franjas = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: plantillas.map((plantilla) => plantilla.id) },
+    });
+
+    const recursoPorPlantilla = new Map(
+      plantillas.map((plantilla) => [plantilla.id, plantilla.resourceId]),
+    );
+    const nombrePorRecurso = new Map(
+      suyos.map((recurso) => [recurso.id, recurso.name]),
+    );
+    const zonaPorRecurso = new Map(
+      suyos.map((recurso) => [recurso.id, recurso.timeZone]),
+    );
+    const vigenciaPorPlantilla = new Map(
+      plantillas.map((plantilla) => [plantilla.id, plantilla.validTo]),
+    );
+
+    return franjas.map((rule) => {
+      const resourceId = recursoPorPlantilla.get(rule.scheduleTemplateId) ?? '';
+      return {
+        rule,
+        resourceId,
+        resourceName: nombrePorRecurso.get(resourceId) ?? '',
+        timeZone: zonaPorRecurso.get(resourceId),
+        validTo: vigenciaPorPlantilla.get(rule.scheduleTemplateId),
+      };
+    });
   }
 
   /**
