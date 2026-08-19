@@ -126,6 +126,35 @@ export class RedisRuntimeService {
     return { count, ttlSec };
   }
 
+  /**
+   * Lee varios contadores de una vez; los que no existen valen 0.
+   *
+   * Existe porque un panel que muestra «tu perfil esta semana» necesita siete
+   * claves —una por día— y siete viajes por una tarjeta no se justifican. Es
+   * sólo lectura: no crea las claves que faltan ni les toca el TTL.
+   *
+   * @param tenant - Tenant que namespacea las claves.
+   * @param keys - Claves de contador, sin prefijo.
+   * @returns Mapa `clave → valor`, con 0 para las ausentes.
+   */
+  async getCounters(
+    tenant: string,
+    keys: readonly string[],
+  ): Promise<Map<string, number>> {
+    const salida = new Map<string, number>();
+    if (keys.length === 0) return salida;
+
+    const valores = await this.redis.mget(
+      ...keys.map((key) => this.keyFor(tenant, 'counter', key)),
+    );
+    keys.forEach((key, i) => {
+      const crudo = valores[i];
+      const valor = crudo === null ? 0 : Number.parseInt(crudo, 10);
+      salida.set(key, Number.isFinite(valor) ? valor : 0);
+    });
+    return salida;
+  }
+
   // --- Locks distribuidos --------------------------------------------------
 
   /**

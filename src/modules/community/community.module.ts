@@ -4,6 +4,7 @@ import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
+import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -15,6 +16,7 @@ import {
   CommunityTimelineController,
   CommunityPublicController,
   CommunitySearchIndexController,
+  CommunityVerificationController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -37,6 +39,8 @@ import {
   CommunityModerationReadService,
   CommunityPublicService,
   CommunitySearchIndexService,
+  CommunityVerificationService,
+  CommunityProfileStatsService,
 } from './services';
 import {
   PublicProfilesRepository,
@@ -56,6 +60,7 @@ import {
   CommunityFeedbackRepository,
   CommunityPrestigeRepository,
   PublicSearchRepository,
+  VerifiedBadgesRepository,
 } from './repositories';
 // La reseña verificada comprueba que hubo atención real leyendo el encuentro
 // clínico. Es un repositorio sin estado que recibe el `EntityManager` por
@@ -92,6 +97,10 @@ import { EncountersRepository } from '../clinical/repositories';
     CommonModule,
     ClinicalModule,
     SearchPlatformModule,
+    // `RedisRuntimeModule` por P13: las estadísticas del perfil son un contador
+    // por perfil y día, que es lo que Redis hace bien y lo que evita guardar el
+    // rastro de cada visitante anónimo para poder contarlo.
+    RedisRuntimeModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -106,6 +115,7 @@ import { EncountersRepository } from '../clinical/repositories';
     // frente a PublicProjectionsController lo protege community-public.smoke.ts.
     CommunityPublicController,
     CommunitySearchIndexController,
+    CommunityVerificationController,
   ],
   providers: [
     // Repositorios
@@ -127,6 +137,7 @@ import { EncountersRepository } from '../clinical/repositories';
     CommunityFeedbackRepository,
     CommunityPrestigeRepository,
     PublicSearchRepository,
+    VerifiedBadgesRepository,
     // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
@@ -138,6 +149,8 @@ import { EncountersRepository } from '../clinical/repositories';
     PublicProfileProjectionService,
     CommunityRatingsService,
     CommunitySearchIndexService,
+    CommunityVerificationService,
+    CommunityProfileStatsService,
     // Servicios de lectura (la visibilidad la comparten todos)
     CommunityVisibilityService,
     CommunityEngagementService,
@@ -153,6 +166,15 @@ import { EncountersRepository } from '../clinical/repositories';
   // La proyección la consume `diagnostic_units` al publicar un perfil; la nota,
   // su buscador de centros. Las dos salen de acá y no de un `find` ajeno: la
   // regla de qué reseña cuenta es de este módulo.
-  exports: [PublicProfileProjectionService, CommunityRatingsService],
+  // `CommunityVerificationService` se exporta para el puente de P13: es
+  // `identity_assurance` quien decide que una matrícula quedó verificada, y
+  // community quien sabe qué significa eso para el sello del perfil. No hay
+  // ciclo — community no importa identity_assurance —, y es el mismo patrón
+  // con el que ese módulo ya usa `profiles` y `directory` para sus efectos.
+  exports: [
+    PublicProfileProjectionService,
+    CommunityRatingsService,
+    CommunityVerificationService,
+  ],
 })
 export class CommunityModule {}
