@@ -31,7 +31,7 @@ import {
  * `ValueSetMembers` directamente.
  *
  * Los códigos de esta taxonomía (`glossary-*`) no colisionan con ninguno de
- * los 52 códigos de `DYNAMIC_ENUM_CATALOG`, así que reutilizar el mismo
+ * los 51 códigos de `DYNAMIC_ENUM_CATALOG`, así que reutilizar el mismo
  * espacio de derivación (`seed:value-set:<code>`) es seguro.
  */
 
