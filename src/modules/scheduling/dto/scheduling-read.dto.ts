@@ -293,6 +293,17 @@ export class BookingItemDto {
   reasonText?: string;
 
   /**
+   * De cuándo se movió, si la cita se reprogramó.
+   *
+   * Ausente cuando nunca se movió — que es distinto de «se movió y no sé
+   * desde cuándo». Es el instante ORIGINAL, no el id del cupo: la tarjeta dice
+   * «reprogramada desde el 20/08 a las 15:30», y resolverlo en la pantalla
+   * costaría una petición por cita para pintar una línea.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  rescheduledFrom?: Date;
+
+  /**
    * Por qué la cita está como está, cuando el último cambio lo explicó.
    *
    * Es la mitad que le faltaba a la cancelación y a la reprogramación

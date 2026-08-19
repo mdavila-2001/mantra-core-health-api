@@ -239,4 +239,57 @@ describe('TJ-2 · reglas finas de la cita (integración)', () => {
       'Agenda reprogramada',
     );
   });
+
+  it('reprogramar deja UNA sola reserva viva y dice de cuándo se movió', async () => {
+    const { slotId } = await agendaDesde(120);
+    const bookingId = await reservar(slotId, 'Control de presión');
+
+    // Un cupo distinto del mismo recurso, más adelante en la misma ventana.
+    const cupos = await http()
+      .get(`/scheduling/resources/${resourceId}/slots`)
+      .query({
+        from: new Date(Date.now() + 120 * 60 * 60 * 1000).toISOString(),
+        to: new Date(Date.now() + 122 * 60 * 60 * 1000).toISOString(),
+        limit: 5,
+      })
+      .set(admin())
+      .expect(200);
+
+    const otro = cupos.body.items.find(
+      (cupo: { id: string; available: boolean }) =>
+        cupo.id !== slotId && cupo.available,
+    );
+    expect(otro).toBeDefined();
+
+    await http()
+      .post(`/scheduling/bookings/${bookingId}/reschedule`)
+      .set(admin())
+      .send({ toSlotId: otro.id, reasonText: 'El profesional pidió moverla' })
+      .expect(200);
+
+    const detalle = await http()
+      .get(`/scheduling/bookings/${bookingId}`)
+      .set(bearer(tokenPaciente))
+      .expect(200);
+
+    // Es la MISMA reserva movida, no una nueva: por eso la trazabilidad sirve.
+    expect(detalle.body.id).toBe(bookingId);
+    expect(detalle.body.bookableSlotId).toBe(otro.id);
+    // Y dice de cuándo se movió, que es lo que la tarjeta muestra.
+    expect(detalle.body.rescheduledFrom).toBeDefined();
+  });
+
+  it('una cita que nunca se movió no dice que se movió', async () => {
+    const { slotId } = await agendaDesde(140);
+    const bookingId = await reservar(slotId, 'Primera consulta');
+
+    const detalle = await http()
+      .get(`/scheduling/bookings/${bookingId}`)
+      .set(bearer(tokenPaciente))
+      .expect(200);
+
+    // Ausente, no vacío: «nunca se movió» y «se movió y no sé desde cuándo»
+    // son dos cosas distintas.
+    expect(detalle.body.rescheduledFrom).toBeUndefined();
+  });
 });

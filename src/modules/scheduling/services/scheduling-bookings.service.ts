@@ -1403,6 +1403,11 @@ export class SchedulingBookingsService {
       esDemora,
     );
 
+    const origenes = await this.bookingsRepo.latestRescheduleOrigins(
+      em,
+      page.map(({ booking }) => booking.id),
+    );
+
     // Los recursos de la página, en lote y sólo si el actor es un profesional:
     // es lo único que puede convertir «esta cita es de alguien» en «esta cita
     // es MÍA» para decidir el motivo. Un paciente no los necesita.
@@ -1432,6 +1437,7 @@ export class SchedulingBookingsService {
           booking.resourceId
             ? duenosDeAgenda.get(booking.resourceId)
             : undefined,
+          origenes.get(booking.id),
         ),
       ),
       count: page.length,
@@ -1472,6 +1478,10 @@ export class SchedulingBookingsService {
       esDemora,
     );
 
+    const origenes = await this.bookingsRepo.latestRescheduleOrigins(em, [
+      booking.id,
+    ]);
+
     // Sólo se busca el recurso si hace falta para decidir el motivo: un
     // paciente titular ya tiene permiso sin mirar la agenda.
     const recurso =
@@ -1486,6 +1496,7 @@ export class SchedulingBookingsService {
       demoras.get(booking.id),
       actor,
       recurso?.resourceRefId,
+      origenes.get(booking.id),
     );
   }
 
@@ -1542,6 +1553,7 @@ export class SchedulingBookingsService {
     demora?: HistoryRevision,
     actor?: AuthenticatedUser,
     profesionalDeLaAgenda?: string,
+    reprogramadaDesde?: Date,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -1566,6 +1578,7 @@ export class SchedulingBookingsService {
       ...(this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
         ? { reasonText: booking.reasonText }
         : {}),
+      ...(reprogramadaDesde ? { rescheduledFrom: reprogramadaDesde } : {}),
       statusReason: aStatusReason(motivo),
       delayNotice: aDelayNotice(demora),
       createdAt: booking.createdAt,
