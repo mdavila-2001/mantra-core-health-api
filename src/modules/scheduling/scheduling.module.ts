@@ -7,6 +7,7 @@ import {
   SchedulingInternalController,
   SchedulingConfirmationController,
   SchedulingAgendaController,
+  TenantAgendaController,
 } from './controllers';
 import {
   SchedulingCatalogService,
@@ -16,6 +17,7 @@ import {
   SchedulingAgendaService,
   SchedulingDelayService,
   SchedulingAgendaNoticesService,
+  SchedulingTenantAgendaService,
 } from './services';
 import {
   SchedulingCatalogRepository,
@@ -26,6 +28,7 @@ import {
   SchedulingNoticeRepository,
 } from './repositories';
 import { AuditModule } from '../audit/audit.module';
+import { DirectoryModule } from '../directory/directory.module';
 // El repositorio de citas clínicas es una clase sin estado que recibe el
 // `EntityManager` por parámetro, así que proveerlo acá no duplica nada ni crea
 // dos fuentes de verdad: evita importar el módulo clínico entero sólo para
@@ -60,6 +63,10 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
       ...Object.values(profileEntities),
     ]),
     AuditModule,
+    // TP-5: quién pertenece a cada organización lo decide `directory`, y de
+    // ahí sale el permiso para leer su agenda. No hay ciclo: `directory` no
+    // depende de `scheduling`.
+    DirectoryModule,
     PracticeModule,
     MessagingModule,
   ],
@@ -69,6 +76,7 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     SchedulingInternalController,
     SchedulingConfirmationController,
     SchedulingAgendaController,
+    TenantAgendaController,
   ],
   providers: [
     // Piloto de la migración a puertos (§47, Fase 5): sesión del módulo,
@@ -87,6 +95,7 @@ import { MessagingAgendaNoticeAdapter } from './adapters/messaging-agenda-notice
     SchedulingWaitlistService,
     SchedulingConfirmationService,
     SchedulingAgendaService,
+    SchedulingTenantAgendaService,
     // P8 · avisos de agenda. El puerto se resuelve hoy con el adaptador de
     // mensajería; cuando P1 publique su servicio de emisión, se sustituye
     // **sólo** esta línea y ningún caso de uso cambia.

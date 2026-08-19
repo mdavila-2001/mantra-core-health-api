@@ -4,9 +4,9 @@ Contratos de entrada/salida con `class-validator` y anotaciones Swagger.
 
 ## Archivos
 
-| Archivo | Contenido |
-| --- | --- |
-| `scheduling-catalog.dto.ts` | Recursos, políticas, plantillas y franjas, generación de slots, excepciones |
+| Archivo                      | Contenido                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `scheduling-catalog.dto.ts`  | Recursos, políticas, plantillas y franjas, generación de slots, excepciones                                  |
 | `scheduling-bookings.dto.ts` | Holds, confirmación, reprogramación, cancelación, check-in, lista de espera, recordatorios y lotes de worker |
 
 ## Convenciones

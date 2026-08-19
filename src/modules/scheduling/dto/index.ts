@@ -78,3 +78,4 @@ export {
   SlotListItemDto,
   ListSlotsResponseDto,
 } from './scheduling-agenda.dto';
+export * from './tenant-agenda.dto';

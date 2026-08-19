@@ -9,9 +9,9 @@ PostgreSQL, schema `scheduling`. Entidades generadas por introspección. Las alt
 
 ## Repositorios
 
-| Repositorio | Tablas | Métodos destacados |
-| --- | --- | --- |
-| `SchedulingCatalogRepository` | `schedulable_resources`, `booking_policies`, `schedule_templates`, `schedule_rules`, `availability_exceptions`, `bookable_slots` | `createResource`, `createPolicy`, `findPolicyByCode`, `createTemplate`, `createRule`, `findRulesByTemplate`, `createException`, `createSlot`, `findSlotsByTemplateInRange`, `findOpenSlotsInWindow` |
+| Repositorio                    | Tablas                                                                                                                                              | Métodos destacados                                                                                                                                                                                                                                                   |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SchedulingCatalogRepository`  | `schedulable_resources`, `booking_policies`, `schedule_templates`, `schedule_rules`, `availability_exceptions`, `bookable_slots`                    | `createResource`, `createPolicy`, `findPolicyByCode`, `createTemplate`, `createRule`, `findRulesByTemplate`, `createException`, `createSlot`, `findSlotsByTemplateInRange`, `findOpenSlotsInWindow`                                                                  |
 | `SchedulingBookingsRepository` | `bookable_slots`, `slot_holds`, `appointment_bookings`, `booking_reschedules`, `booking_cancellations`, `waitlist_entries`, `appointment_reminders` | `findSlotForUpdate`, `createHold`, `findHoldByTokenForUpdate`, `findExpiredHolds`, `createBooking`, `countActiveBookingsForPatient`, `recordReschedule`, `createCancellation`, `createWaitlistEntry`, `findWaitlistCandidates`, `createReminder`, `findDueReminders` |
 
 ## Lecturas con bloqueo
