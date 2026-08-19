@@ -27,6 +27,7 @@ import {
   type ExceptionType,
 } from '../dto';
 import { diasLocalesQueCoinciden, horaLocalAUtc } from '../scheduling-time';
+import type { DiaLocal } from '../scheduling-time';
 
 /**
  * Roles que administran el catálogo de agendas de terceros por oficio.
@@ -216,7 +217,6 @@ export class SchedulingCatalogService {
         });
       }
       this.assertRecursoDelActor(resource, actor);
-
       await this.assertSinSolapeConSusOtrasAgendas(tx, resource, dto);
 
       const template = this.catalogRepo.createTemplate(tx, {
@@ -572,6 +572,28 @@ export class SchedulingCatalogService {
    * que llamar a uno de los dos. El conflicto no es de datos: es que **una
    * persona no puede estar en dos lugares**.
    *
+   * Se valida al publicar la plantilla y no al generar los cupos porque es el
+   * momento en que la persona todavía está decidiendo su horario: rechazar
+   * recién al materializar sería avisarle cuando ya lo dio por hecho.
+   *
+   * ## Por qué se comparan instantes y no textos
+   *
+   * Las franjas declaran horas de **pared** y cada sede puede estar en otra
+   * zona, así que comparar «09:00» con «09:00» compara dos cosas distintas: a
+   * las nueve de La Paz son las diez en São Paulo. Comparando textos no sólo
+   * sobran rechazos —que se resuelven editando—, sino que **faltan**: La Paz
+   * 13–15 y São Paulo 14–16 no se tocan como texto y son el mismo rato. Un
+   * falso permiso termina en dos pacientes citados, que es justo lo que esta
+   * comprobación existe para evitar.
+   *
+   * Las dos franjas se proyectan sobre una **semana de referencia** —la del
+   * `validFrom` de la plantilla, o la de hoy— con los mismos helpers que usa la
+   * generación de cupos, y se comparan como instantes. Es una simplificación
+   * consciente: en las dos semanas del año en que una zona cambia de horario,
+   * dos franjas al filo podrían evaluarse con el desplazamiento de la semana
+   * equivocada. Recorrer todas las semanas de vigencia es mucho trabajo para un
+   * borde de una hora.
+   *
    * ## Qué NO comprueba
    *
    * Sólo recursos que apuntan al mismo `resource_ref_id`. Una sala o un equipo
@@ -579,18 +601,44 @@ export class SchedulingCatalogService {
    * eso la comprobación se saltea cuando el recurso no referencia un perfil
    * profesional.
    *
-   * Tampoco mira el calendario: compara **día de la semana y rango horario**,
-   * que es lo que declara una plantilla. Dos plantillas con vigencias que no se
-   * cruzan podrían convivir; se rechaza igual, y es deliberado: distinguirlo
-   * exige comparar `valid_from`/`valid_to` con la semana concreta, y un falso
-   * rechazo se resuelve editando la plantilla, mientras que un falso permiso
-   * termina en dos pacientes citados.
+   * Tampoco las plantillas en borrador (todavía no ocupan horario) ni las
+   * vencidas: una cuyo `validTo` ya pasó no puede chocar con nada que se
+   * publique hoy, y hacerla chocar dejaría trabado a quien cambió de sede.
    */
   private async assertSinSolapeConSusOtrasAgendas(
     tx: EntityManager,
     resource: SchedulableResources,
     dto: CreateTemplateDto,
   ): Promise<void> {
+    const semana = semanaDeReferencia(
+      dto.validFrom ? new Date(dto.validFrom) : new Date(),
+    );
+    const zonaPropia = resource.timeZone ?? 'UTC';
+
+    const nuevas = dto.rules.map((rule) => ({
+      etiqueta: etiquetaDeFranja(rule),
+      ...intervaloEnSemana(
+        semana,
+        rule.dayOfWeek,
+        rule.startTime,
+        rule.endTime,
+        zonaPropia,
+      ),
+    }));
+
+    // Primero contra sí mismas: dos franjas del mismo envío que se pisan son el
+    // caso más frecuente, y detectarlo no cuesta una consulta.
+    for (let i = 0; i < nuevas.length; i += 1) {
+      for (let j = i + 1; j < nuevas.length; j += 1) {
+        if (seSolapan(nuevas[i], nuevas[j])) {
+          throw new PreconditionFailedException(
+            'Dos franjas de esta agenda se solapan entre sí',
+            { nueva: nuevas[i].etiqueta, existente: nuevas[j].etiqueta },
+          );
+        }
+      }
+    }
+
     if (!TABLAS_DE_PERFIL_PROFESIONAL.includes(resource.resourceRefType)) {
       return;
     }
@@ -601,25 +649,30 @@ export class SchedulingCatalogService {
       CONCEPTS.TEMPLATE_PUBLISHED,
       resource.id,
     );
-    if (ajenas.length === 0) return;
 
-    for (const nueva of dto.rules) {
-      const choque = ajenas.find(
-        (otra) =>
-          otra.rule.dayOfWeek === nueva.dayOfWeek &&
-          // Se tocan si cada una empieza antes de que termine la otra. Los
-          // extremos NO chocan: terminar 12:00 y empezar 12:00 es legítimo.
-          nueva.startTime < otra.rule.endTime &&
-          otra.rule.startTime < nueva.endTime,
-      );
+    for (const otra of ajenas) {
+      if (estaVencida(otra.validTo, semana.inicio)) continue;
+
+      const existente = {
+        etiqueta: etiquetaDeFranja(otra.rule),
+        ...intervaloEnSemana(
+          semana,
+          otra.rule.dayOfWeek,
+          otra.rule.startTime,
+          otra.rule.endTime,
+          otra.timeZone ?? 'UTC',
+        ),
+      };
+
+      const choque = nuevas.find((nueva) => seSolapan(nueva, existente));
       if (choque) {
         throw new PreconditionFailedException(
           'Ya tenés una agenda publicada que se superpone con esa franja',
           {
-            dayOfWeek: nueva.dayOfWeek,
-            nueva: `${nueva.startTime}-${nueva.endTime}`,
-            existente: `${choque.rule.startTime}-${choque.rule.endTime}`,
-            agenda: choque.resourceName,
+            dayOfWeek: otra.rule.dayOfWeek,
+            nueva: choque.etiqueta,
+            existente: existente.etiqueta,
+            agenda: otra.resourceName,
           },
         );
       }
@@ -720,4 +773,120 @@ const ALIAS_DE_TABLA: Readonly<Record<string, string>> = {
 
 function canonicalRefType(refType: string): string {
   return ALIAS_DE_TABLA[refType] ?? refType;
+}
+
+/** Milisegundos de un día del calendario. */
+const UN_DIA_MS = 24 * 60 * 60 * 1000;
+
+/** Los siete días de la semana, para nombrar la franja que choca. */
+const NOMBRE_DEL_DIA: readonly string[] = [
+  'domingo',
+  'lunes',
+  'martes',
+  'miércoles',
+  'jueves',
+  'viernes',
+  'sábado',
+];
+
+/**
+ * Una semana concreta del calendario sobre la que proyectar franjas semanales.
+ *
+ * Las reglas de una plantilla no tienen fecha —dicen «los lunes»—, y dos horas
+ * de pared de zonas distintas no se pueden comparar sin aterrizarlas en un
+ * instante. Esta es esa tierra: siete fechas reales, una por día de la semana.
+ */
+interface SemanaDeReferencia {
+  /** Fecha del calendario de cada día de la semana, indexada 0 = domingo. */
+  readonly fechas: readonly DiaLocal[];
+  /** Domingo de la semana, como instante, para descartar plantillas vencidas. */
+  readonly inicio: Date;
+}
+
+/**
+ * La semana del calendario que contiene el instante dado.
+ *
+ * Las fechas se toman del calendario UTC porque lo único que se necesita de
+ * ellas es que sean siete días consecutivos con el día de semana correcto: la
+ * zona entra después, al convertir cada hora de pared sobre esas fechas.
+ *
+ * @param desde - Instante de referencia.
+ * @returns Las siete fechas de esa semana y su domingo.
+ */
+function semanaDeReferencia(desde: Date): SemanaDeReferencia {
+  const base = Date.UTC(
+    desde.getUTCFullYear(),
+    desde.getUTCMonth(),
+    desde.getUTCDate(),
+  );
+  const domingo = base - new Date(base).getUTCDay() * UN_DIA_MS;
+
+  const fechas = Array.from({ length: 7 }, (_, indice) => {
+    const fecha = new Date(domingo + indice * UN_DIA_MS);
+    return {
+      year: fecha.getUTCFullYear(),
+      month: fecha.getUTCMonth() + 1,
+      day: fecha.getUTCDate(),
+    };
+  });
+
+  return { fechas, inicio: new Date(domingo) };
+}
+
+/**
+ * Proyecta una franja semanal sobre la semana de referencia.
+ *
+ * @param semana - Semana sobre la que aterrizar.
+ * @param diaSemana - Día de la regla, 0 = domingo.
+ * @param inicio - Hora de pared de comienzo.
+ * @param fin - Hora de pared de fin.
+ * @param zona - Zona de la sede donde esa hora de pared se lee.
+ */
+function intervaloEnSemana(
+  semana: SemanaDeReferencia,
+  diaSemana: number,
+  inicio: string,
+  fin: string,
+  zona: string,
+): { desde: number; hasta: number } {
+  const fecha = semana.fechas[((diaSemana % 7) + 7) % 7];
+  return {
+    desde: horaLocalAUtc(fecha, inicio, zona).getTime(),
+    hasta: horaLocalAUtc(fecha, fin, zona).getTime(),
+  };
+}
+
+/**
+ * Si dos franjas comparten algún instante.
+ *
+ * Los extremos no cuentan: terminar a las 12:00 en una sede y empezar a las
+ * 12:00 en otra no es estar en dos lados a la vez.
+ */
+function seSolapan(
+  a: { desde: number; hasta: number },
+  b: { desde: number; hasta: number },
+): boolean {
+  return a.desde < b.hasta && b.desde < a.hasta;
+}
+
+/** Cómo se nombra una franja cuando hay que decir con cuál choca. */
+function etiquetaDeFranja(rule: {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}): string {
+  const dia = NOMBRE_DEL_DIA[((rule.dayOfWeek % 7) + 7) % 7] ?? '?';
+  return `${dia} ${rule.startTime}–${rule.endTime}`;
+}
+
+/**
+ * Si la plantilla dejó de estar vigente antes de la semana que se evalúa.
+ *
+ * Una plantilla vencida no puede chocar con nada que se publique hoy, y
+ * hacerla chocar dejaría trabado a quien cambió de sede el mes pasado.
+ */
+function estaVencida(validTo: Date | undefined, inicioSemana: Date): boolean {
+  return validTo !== undefined && validTo !== null
+    ? validTo.getTime() < inicioSemana.getTime()
+    : false;
 }

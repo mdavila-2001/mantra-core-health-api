@@ -34,6 +34,10 @@ function build() {
   const em: any = {
     transactional: mockFn((cb: any) => cb(tx)),
     count: mockFn().mockResolvedValue(0),
+    // Lectura directa de entidades de otro módulo: hoy la usa el avance del
+    // alta para saber si el profesional tiene recursos agendables. Sin recursos
+    // por defecto, que es el estado de quien recién se registra.
+    find: mockFn().mockResolvedValue([]),
   };
   em.fork = mockFn(() => em);
   const personsRepo = {
@@ -1154,6 +1158,190 @@ describe('ProfilesPractitionersService', () => {
       await expect(
         d.service.getPractitionerSummary('per-x'),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('getOwnOnboarding (TJ-1)', () => {
+    /**
+     * El estado en el que aterriza quien recién se registró: matrícula sin
+     * cargar, sin especialidad, sin foto, sin dónde atender y sin horarios.
+     */
+    function recienRegistrado(d: ReturnType<typeof build>): void {
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        practitionerCode: 'MED-7',
+      });
+    }
+
+    /** Todo cargado: el profesional que ya trabajaba antes del asistente. */
+    function completo(d: ReturnType<typeof build>): void {
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        practitionerCode: 'MED-7',
+        photoFileId: 'file-1',
+      });
+      d.authorizationsRepo.findByPractitioner.mockResolvedValue([
+        { licenseNumber: 'MP-4821' },
+      ]);
+      d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
+        { id: 'sp-1', specialtyConceptId: 'con-cardio' },
+      ]);
+      d.affiliationsRepo.findByPractitioner.mockResolvedValue([{ id: 'af-1' }]);
+      d.em.find.mockResolvedValue([{ id: 'res-1' }]);
+      d.em.count.mockResolvedValue(48);
+    }
+
+    it('una sesión sin persona vinculada no tiene alta que consultar', async () => {
+      const d = build();
+
+      await expect(d.service.getOwnOnboarding(actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+    });
+
+    /**
+     * 422 y no 404: que una cuenta administrativa o un paciente pregunten por
+     * el alta de profesional es un caso normal, no un recurso perdido.
+     */
+    it('una cuenta sin perfil profesional responde 422, no 404', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({
+        personId: 'per-1',
+      });
+      d.practitionersRepo.findById.mockResolvedValue(null);
+
+      await expect(d.service.getOwnOnboarding(actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+    });
+
+    it('quien recién se registra aterriza en sus datos profesionales', async () => {
+      const d = build();
+      recienRegistrado(d);
+
+      const avance = await d.service.getOwnOnboarding(actor);
+
+      expect(avance.practitionerProfileId).toBe('pp-1');
+      expect(avance.steps).toHaveLength(5);
+      expect(avance.firstIncomplete).toBe('professional-data');
+      expect(avance.steps[0].missing).toEqual(['license-number', 'specialty']);
+      expect(avance.steps.every((paso) => !paso.complete)).toBe(true);
+    });
+
+    /**
+     * El criterio de aceptación del prompt: abandonar a mitad y volver mañana
+     * retoma donde quedó, con lo anterior persistido — y sin que nadie haya
+     * guardado en qué paso iba.
+     */
+    it('con matrícula, especialidad y foto retoma en «dónde atendés»', async () => {
+      const d = build();
+      recienRegistrado(d);
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'pp-1',
+        photoFileId: 'file-1',
+      });
+      d.authorizationsRepo.findByPractitioner.mockResolvedValue([
+        { licenseNumber: 'MP-4821' },
+      ]);
+      d.specialtiesRepo.findAllByPractitioner.mockResolvedValue([
+        { id: 'sp-1' },
+      ]);
+
+      const avance = await d.service.getOwnOnboarding(actor);
+
+      expect(avance.firstIncomplete).toBe('organizations');
+      expect(avance.steps[0].complete).toBe(true);
+      expect(avance.steps[1].complete).toBe(true);
+      expect(avance.steps[2].missing).toEqual(['affiliation']);
+    });
+
+    /**
+     * Consultorio propio: no hay institución a la cual afiliarse, y el recurso
+     * agendable que crea el asistente de agenda alcanza. Sin este «o», quien
+     * atiende particular quedaría trabado para siempre en el paso 3.
+     */
+    it('un recurso propio cumple «dónde atendés» sin ninguna afiliación', async () => {
+      const d = build();
+      recienRegistrado(d);
+      d.em.find.mockResolvedValue([{ id: 'res-1' }]);
+
+      const avance = await d.service.getOwnOnboarding(actor);
+
+      const donde = avance.steps.find((paso) => paso.key === 'organizations');
+      expect(donde?.complete).toBe(true);
+      expect(donde?.missing).toEqual([]);
+    });
+
+    /**
+     * Tener el recurso no es tener agenda: mientras no haya cupos generados, lo
+     * que falta es publicarlos, y el faltante lo dice con esa palabra.
+     */
+    it('con recurso y sin cupos, lo que falta son los cupos', async () => {
+      const d = build();
+      recienRegistrado(d);
+      d.em.find.mockResolvedValue([{ id: 'res-1' }]);
+      d.em.count.mockResolvedValue(0);
+
+      const avance = await d.service.getOwnOnboarding(actor);
+
+      const agenda = avance.steps.find((paso) => paso.key === 'schedule');
+      expect(agenda?.missing).toEqual(['slots']);
+    });
+
+    it('sin ningún recurso, lo que falta es la agenda entera', async () => {
+      const d = build();
+      recienRegistrado(d);
+
+      const avance = await d.service.getOwnOnboarding(actor);
+
+      const agenda = avance.steps.find((paso) => paso.key === 'schedule');
+      expect(agenda?.missing).toEqual(['published-schedule']);
+    });
+
+    /**
+     * Los profesionales que ya estaban completos antes de que el asistente
+     * existiera no ven nada: `done` es lo que apaga el aviso, y se llega sin
+     * migrar una sola fila.
+     */
+    it('un profesional ya completo responde «done»', async () => {
+      const d = build();
+      completo(d);
+
+      const avance = await d.service.getOwnOnboarding(actor);
+
+      expect(avance.firstIncomplete).toBe('done');
+      expect(avance.steps.every((paso) => paso.complete)).toBe(true);
+      expect(avance.steps.at(-1)?.key).toBe('review');
+    });
+
+    /**
+     * Los cupos se cuentan sólo sobre los recursos del profesional. Sin esta
+     * acotación, la agenda de cualquier colega daría por publicada la propia.
+     */
+    it('los cupos se cuentan sólo sobre los recursos propios', async () => {
+      const d = build();
+      completo(d);
+
+      await d.service.getOwnOnboarding(actor);
+
+      const [, filtro] = d.em.count.mock.calls.at(-1) as [unknown, any];
+      expect(filtro).toEqual({ resourceId: { $in: ['res-1'] } });
+    });
+
+    /** Sin recursos no se pregunta por cupos: la consulta ya se sabe vacía. */
+    it('sin recursos no consulta cupos', async () => {
+      const d = build();
+      recienRegistrado(d);
+
+      await d.service.getOwnOnboarding(actor);
+
+      expect(d.em.count).not.toHaveBeenCalled();
     });
   });
 });
