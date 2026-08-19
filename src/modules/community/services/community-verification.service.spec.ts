@@ -151,7 +151,11 @@ describe('CommunityVerificationService', () => {
       const activo = sello();
       const d = build({ profile, badges: [activo] });
 
-      const res = await d.service.applyRevoked(d.tx as any, 'sujeto-1', 'admin');
+      const res = await d.service.applyRevoked(
+        d.tx as any,
+        'sujeto-1',
+        'admin',
+      );
 
       expect(res.revoked).toBe(1);
       // PENDIENTE diría «nunca se verificó», que es falso, y la pantalla no

@@ -592,6 +592,23 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
       expect(res.items[0].nextAvailableDate).toBe('2026-08-20');
     });
 
+    it('el día viene del repositorio y se sirve tal cual, sin recortarlo dos veces', async () => {
+      const d = build();
+      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.agendaByPractitioner.mockResolvedValue(
+        new Map([
+          [
+            perfilCompleto.targetId,
+            { hasAgenda: true, nextAvailableDate: '2026-08-21' },
+          ],
+        ]),
+      );
+
+      const res = await d.service.search({});
+
+      expect(res.items[0].nextAvailableDate).toBe('2026-08-21');
+    });
+
     it('con agenda pero sin huecos, se ofrece la agenda y no una fecha inventada', async () => {
       const d = build();
       d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);

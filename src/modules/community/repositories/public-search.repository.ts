@@ -437,14 +437,24 @@ export class PublicSearchRepository {
                   WHERE sr.resource_ref_id = s.practitioner_profile_id
                     AND bs.start_at >= now()
                     AND bs.remaining_capacity > 0
-                    AND bs.status_concept_id = s.status_concept_id) AS next_slot
+                    AND bs.status_concept_id = ?) AS next_slot
            FROM scheduling.practitioner_schedules s
           WHERE s.practitioner_profile_id IN (?)
             AND s.status_concept_id = ?
             AND (s.valid_from IS NULL OR s.valid_from <= CURRENT_DATE)
             AND (s.valid_to IS NULL OR s.valid_to >= CURRENT_DATE)
           GROUP BY s.practitioner_profile_id, s.status_concept_id`,
-      [practitionerProfileIds, CONCEPTS.STATE_ACTIVE],
+      [
+        // El hueco se filtra por `SLOT_OPEN` y NO por el estado genérico
+        // `ACTIVE`: `bookable_slots` tiene su propia máquina de estados
+        // (`SLOT_OPEN` / `SLOT_BOOKED`), así que compararlo contra `ACTIVE` no
+        // habría casado con **ningún** hueco y `nextAvailableDate` habría
+        // salido siempre en nulo, en silencio. El parámetro va primero porque
+        // la subconsulta aparece antes en el SQL.
+        CONCEPTS.SLOT_OPEN,
+        practitionerProfileIds,
+        CONCEPTS.STATE_ACTIVE,
+      ],
       'all',
     );
 
