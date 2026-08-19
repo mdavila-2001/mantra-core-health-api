@@ -42,6 +42,11 @@
  * consultorio y una tanda de pacientes y citas más.
  * Para volver a cero, `yarn smoke` trunca la base y vuelve a sembrar el admin.
  */
+// El `.env` del repo manda: la API del stack provisiona el administrador con
+// BOOTSTRAP_ADMIN_EMAIL/PASSWORD de ese archivo, y sin cargarlo este script caía a
+// sus defaults y el login moría con 401 en toda máquina que no exportara las
+// variables a mano. Mismo patrón que los demás scripts de tools/ que tocan el stack.
+import 'dotenv/config';
 import { writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -290,6 +295,11 @@ const doctors = [];
 const patients = [];
 /** Citas confirmadas, con el estado al que se las llevó. */
 const bookings = [];
+// Declarada acá y no donde se resuelve (más abajo): `writeReport()` corre también
+// en el camino de error, y si la corrida muere antes de crear la práctica, una
+// `const` posterior está en zona muerta temporal y el reporte revienta con
+// ReferenceError en vez de escribirse.
+let practiceId = null;
 /** Historias clínicas completas (atención + receta + nota). */
 let historias = 0;
 /** Episodio abierto por paciente: `profileId → episodeId`. */
@@ -580,7 +590,7 @@ const practice = await call(
     expect: [200, 201],
   },
 );
-const practiceId = practice.ok ? practice.body.id : null;
+practiceId = practice.ok ? practice.body.id : null;
 
 if (practiceId) {
   for (const [siteIndex, sede] of SEDES.entries()) {
@@ -1304,7 +1314,12 @@ for (const doctor of doctors) {
         'POST',
         `/scheduling/bookings/${bookingId}/cancel`,
         {
-          body: { cancelledBy: 'PATIENT', isNoShow: false },
+          body: {
+            cancelledBy: 'PATIENT',
+            isNoShow: false,
+            // Obligatorio desde la corrección #14: la otra parte lo lee en el detalle.
+            reasonText: 'No voy a poder asistir en ese horario',
+          },
           expect: [200, 201],
         },
       );
@@ -1315,7 +1330,11 @@ for (const doctor of doctors) {
         'POST',
         `/scheduling/bookings/${bookingId}/cancel`,
         {
-          body: { cancelledBy: 'PROVIDER', isNoShow: false },
+          body: {
+            cancelledBy: 'PROVIDER',
+            isNoShow: false,
+            reasonText: 'Reprogramación del consultorio por agenda del médico',
+          },
           expect: [200, 201],
         },
       );
@@ -1326,7 +1345,11 @@ for (const doctor of doctors) {
         'POST',
         `/scheduling/bookings/${bookingId}/cancel`,
         {
-          body: { cancelledBy: 'PROVIDER', isNoShow: true },
+          body: {
+            cancelledBy: 'PROVIDER',
+            isNoShow: true,
+            reasonText: 'El paciente no se presentó a la consulta',
+          },
           expect: [200, 201],
         },
       );
@@ -1361,7 +1384,12 @@ if (cancelada) {
     'POST',
     `/scheduling/bookings/${cancelada.bookingId}/cancel`,
     {
-      body: { cancelledBy: 'PATIENT' },
+      body: {
+        cancelledBy: 'PATIENT',
+        // Cuerpo válido a propósito: si la validación lo rechazara con 400, el caso
+        // nunca llegaría a la máquina de estados, que es lo que se quiere probar.
+        reasonText: 'no debería poder cancelarse dos veces',
+      },
       expect: [409, 422],
     },
   );
