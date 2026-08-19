@@ -209,6 +209,9 @@ export class ProfilesPractitionersService {
         em.find(SchedulableResources, { resourceRefId: practitionerProfileId }),
       ]);
 
+    const tieneFoto =
+      perfil.photoFileId !== undefined && perfil.photoFileId !== null;
+
     const faltaEnDatos: string[] = [];
     if (!matriculas.some((fila) => fila.licenseNumber.trim() !== '')) {
       faltaEnDatos.push('license-number');
@@ -223,8 +226,12 @@ export class ProfilesPractitionersService {
       },
       {
         key: 'photo',
-        complete: perfil.photoFileId !== undefined,
-        missing: perfil.photoFileId === undefined ? ['photo'] : [],
+        // `!== undefined` no alcanza: la columna es nullable y MikroORM la
+        // hidrata como `null`, así que un profesional SIN foto daba el paso por
+        // cumplido —«Tu foto: completado» con `photo_file_id` en NULL, visto en
+        // pantalla—. Se comprueba la ausencia real, que son los dos valores.
+        complete: tieneFoto,
+        missing: tieneFoto ? [] : ['photo'],
       },
       {
         // Vale una afiliación **o** una agenda propia: un profesional que
