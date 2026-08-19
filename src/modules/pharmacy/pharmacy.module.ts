@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { PharmacyController } from './controllers';
+import { PharmacyController, PharmacyReadController } from './controllers';
 import {
   PharmaciesService,
   PharmacySitesService,
@@ -9,6 +9,7 @@ import {
   PharmacyPricingService,
   PharmacyIntegrationService,
   PharmacyCatalogService,
+  PharmacyReadService,
 } from './services';
 import {
   PharmaciesRepository,
@@ -20,6 +21,7 @@ import {
   PharmacyProductPricesRepository,
   PharmacyIntegrationConnectionsRepository,
   PharmacyExternalProductMappingsRepository,
+  PharmacyReadRepository,
 } from './repositories';
 
 /**
@@ -30,7 +32,7 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [PharmacyController],
+  controllers: [PharmacyController, PharmacyReadController],
   providers: [
     // Repositorios
     PharmaciesRepository,
@@ -42,6 +44,7 @@ import {
     PharmacyProductPricesRepository,
     PharmacyIntegrationConnectionsRepository,
     PharmacyExternalProductMappingsRepository,
+    PharmacyReadRepository,
     // Servicios
     PharmaciesService,
     PharmacySitesService,
@@ -49,6 +52,10 @@ import {
     PharmacyPricingService,
     PharmacyIntegrationService,
     PharmacyCatalogService,
+    PharmacyReadService,
   ],
+  // La cara de lectura se exporta para que el inventario (módulo 25) componga
+  // disponibilidad sin duplicar los finders de publicación y precios.
+  exports: [PharmacyReadRepository],
 })
 export class PharmacyModule {}
