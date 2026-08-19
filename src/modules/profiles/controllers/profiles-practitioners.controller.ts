@@ -41,6 +41,7 @@ import {
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
   SetPractitionerPhotoDto,
+  PractitionerOnboardingDto,
 } from '../dto';
 
 /**
@@ -78,6 +79,36 @@ export class ProfilesPractitionersController {
    * Va declarado antes que cualquier `practitioners/:profileId`: Nest resuelve
    * las rutas por orden de declaración y un parámetro capturaría `me`.
    */
+  /**
+   * TJ-1: en qué paso del alta está el profesional que consulta.
+   *
+   * **Sin `@Roles`, por lo mismo que el resumen propio**: el sujeto sale de la
+   * sesión y no hay parámetro que apunte a otro, así que lo único que se puede
+   * pedir es el avance de uno mismo. Y tampoco lleva
+   * `@RequiresVerifiedIdentity`: esta es, precisamente, la pantalla donde el
+   * profesional se entera de qué le falta para completarse.
+   *
+   * Responde **422** si la sesión no tiene perfil profesional —una cuenta
+   * administrativa, un paciente—: es un caso normal, no un recurso perdido.
+   *
+   * Va antes de cualquier `practitioners/:profileId` por la misma razón que sus
+   * hermanas: Nest resuelve por orden de declaración y un parámetro capturaría
+   * `me`.
+   */
+  @Get('practitioners/me/onboarding')
+  @ApiOperation({
+    summary: 'Consultar el avance del alta profesional propia',
+    description:
+      'El paso se deriva de los datos que ya existen (matrícula, especialidad, ' +
+      'foto, dónde atiende, horarios publicados): no hay contador persistido, ' +
+      'así que retomar el alta recalcula y aterriza donde corresponde.',
+  })
+  getOwnOnboarding(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    return this.practitionersService.getOwnOnboarding(actor);
+  }
+
   @Get('practitioners/me/summary')
   @ApiOperation({
     summary: 'Consultar el perfil profesional propio (trayectoria y actividad)',

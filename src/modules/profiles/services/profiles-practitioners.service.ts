@@ -24,6 +24,12 @@ import { AuthzEffectiveRolesService } from '../../authz/services';
 // contar cuatro números ataría `profiles` a dos módulos enteros.
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
+// Misma licencia que las cuentas de actividad: se importan las ENTIDADES de
+// `scheduling` y no su servicio, y lo único que se hace con ellas es `em.count`
+// filtrando por el perfil del propio actor. No sale ni una fila de agenda de
+// nadie, y `profiles` no queda atado al módulo entero para responder «¿ya
+// publicó horarios?».
+import { BookableSlots, SchedulableResources } from '../../scheduling/entities';
 import { PROF } from '../profiles.concepts';
 import {
   PersonsRepository,
@@ -54,6 +60,10 @@ import {
   UpdateOwnPractitionerProfileDto,
   ListPractitionersResponseDto,
   SetPractitionerPhotoDto,
+  PractitionerOnboardingDto,
+  ONBOARDING_STEP_KEYS,
+  type OnboardingMissingKey,
+  type OnboardingStepKey,
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
 import { ProfileOwnershipService } from './profile-ownership.service';
@@ -66,6 +76,20 @@ import { ProfileOwnershipService } from './profile-ownership.service';
  * Todas las escrituras son `em.transactional` con `flush` padre-antes-de-hijo,
  * porque las FK son columnas uuid planas y MikroORM no ordena inserts.
  */
+/**
+ * Las dos formas de `resourceRefType` que apuntan a un perfil profesional.
+ *
+ * Copia deliberada de la que usa `scheduling`: la constante se repite en cada
+ * servicio que la necesita porque es el vocabulario de un dato de texto libre,
+ * no una regla compartida, y exportarla desde `scheduling` ataría `profiles` al
+ * módulo entero para leer dos cadenas. Si algún día se agrega un tercer alias,
+ * se agrega donde ya están las otras cinco copias y también acá.
+ */
+const TABLAS_DE_PERFIL_PROFESIONAL: readonly string[] = [
+  'practitioner_profiles',
+  'health_practitioner_profiles',
+];
+
 @Injectable()
 export class ProfilesPractitionersService {
   /**
@@ -1144,6 +1168,134 @@ export class ProfilesPractitionersService {
       );
       return toAffiliation(affiliation);
     });
+  }
+
+  /**
+   * TJ-1: en qué punto del alta está el profesional que consulta.
+   *
+   * ## Por qué no hay columna de «paso actual»
+   *
+   * Porque el paso se deriva de los hechos: si tiene matrícula, si declaró una
+   * especialidad, si subió su foto, si dijo dónde atiende y si publicó
+   * horarios. Guardar además un contador crearía una segunda verdad sobre los
+   * mismos datos, y las dos se separan al primer descuido —alguien sube la foto
+   * desde el perfil y el contador sigue diciendo «paso 2»—.
+   *
+   * Derivar tiene dos consecuencias que se buscaron: retomar sale gratis
+   * (volver a entrar recalcula), y los profesionales dados de alta antes de que
+   * esta pantalla existiera aparecen completos sin migrar una sola fila.
+   *
+   * ## Qué cuenta como cumplido
+   *
+   * - `professional-data`: al menos una autorización jurisdiccional con número
+   *   de matrícula, y al menos una especialidad declarada.
+   * - `photo`: `photo_file_id` cargado.
+   * - `organizations`: al menos una afiliación institucional **o** al menos un
+   *   recurso agendable propio. El «o» no es laxitud: quien atiende en su
+   *   consultorio particular no tiene a quién afiliarse, y exigirle una
+   *   afiliación lo dejaría trabado para siempre en este paso.
+   * - `schedule`: al menos un cupo generado sobre alguno de sus recursos. Se
+   *   cuentan todos los cupos y no sólo los futuros a propósito: si venciera,
+   *   un alta ya terminada volvería a mostrarse incompleta sola, y el aviso de
+   *   agenda vencida es otro asunto —el de #123— con su propia superficie.
+   * - `review`: las cuatro anteriores.
+   *
+   * ## Por qué 422 y no 404 cuando no hay perfil profesional
+   *
+   * Porque el recurso pedido —el avance del alta— no está «perdido»: la sesión
+   * simplemente no es de un profesional, que es un caso normal (una cuenta
+   * administrativa, un paciente) y no un error de dirección.
+   *
+   * @param actor - La sesión que consulta, que es también el sujeto.
+   * @returns Las cinco etapas y en cuál hay que aterrizar.
+   */
+  async getOwnOnboarding(
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    const em = this.em.fork();
+
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene una persona vinculada',
+      );
+    }
+
+    const practitioner = await this.practitionersRepo.findById(
+      em,
+      link.personId,
+    );
+    if (!practitioner) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional: el alta de profesional no aplica',
+        { personId: link.personId },
+      );
+    }
+
+    const profileId = practitioner.profileId;
+
+    const [licenses, specialties, affiliations, resources] = await Promise.all([
+      this.authorizationsRepo.findByPractitioner(em, profileId),
+      this.specialtiesRepo.findAllByPractitioner(em, profileId),
+      this.affiliationsRepo.findByPractitioner(em, profileId),
+      em.find(
+        SchedulableResources,
+        {
+          resourceRefType: { $in: [...TABLAS_DE_PERFIL_PROFESIONAL] },
+          resourceRefId: profileId,
+        },
+        { fields: ['id'] },
+      ),
+    ]);
+
+    const resourceIds = resources.map((resource) => resource.id);
+    // Sin recursos no se pregunta por cupos: `$in: []` es una consulta que ya
+    // se sabe vacía.
+    const slots =
+      resourceIds.length === 0
+        ? 0
+        : await em.count(BookableSlots, { resourceId: { $in: resourceIds } });
+
+    const tieneMatricula = licenses.some(
+      (license) => (license.licenseNumber ?? '').trim().length > 0,
+    );
+    const tieneEspecialidad = specialties.length > 0;
+    const tieneDondeAtender = affiliations.length > 0 || resourceIds.length > 0;
+    const tieneHorarios = slots > 0;
+
+    const faltantes: Record<OnboardingStepKey, OnboardingMissingKey[]> = {
+      'professional-data': [
+        ...(tieneMatricula ? [] : (['license-number'] as const)),
+        ...(tieneEspecialidad ? [] : (['specialty'] as const)),
+      ],
+      photo: practitioner.photoFileId ? [] : ['photo'],
+      organizations: tieneDondeAtender ? [] : ['affiliation'],
+      schedule: tieneHorarios
+        ? []
+        : resourceIds.length === 0
+          ? ['schedule']
+          : ['slots'],
+      review: [],
+    };
+
+    const steps = ONBOARDING_STEP_KEYS.map((key) => ({
+      key,
+      // `review` no tiene datos propios: se cumple cuando se cumplen las otras
+      // cuatro, y por eso su lista de faltantes está siempre vacía.
+      complete:
+        key === 'review'
+          ? ONBOARDING_STEP_KEYS.every(
+              (otra) => otra === 'review' || faltantes[otra].length === 0,
+            )
+          : faltantes[key].length === 0,
+      missing: faltantes[key],
+    }));
+
+    return {
+      practitionerProfileId: profileId,
+      steps,
+      firstIncomplete: steps.find((step) => !step.complete)?.key ?? 'done',
+    };
   }
 }
 

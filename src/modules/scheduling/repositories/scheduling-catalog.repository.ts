@@ -8,7 +8,7 @@ import {
   AvailabilityExceptions,
   BookableSlots,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 
 /**
  * Describe el contrato estructural de create resource data.
@@ -310,6 +310,77 @@ export class SchedulingCatalogRepository {
     id: string,
   ): Promise<SchedulableResources | null> {
     return em.findOne(SchedulableResources, { id });
+  }
+
+  /**
+   * Los recursos agendables que apuntan a una misma referencia.
+   *
+   * Es lo que permite mirar a un profesional entero y no a una de sus sedes:
+   * un médico que atiende en tres lugares tiene tres recursos, y sus franjas se
+   * pisan entre sí aunque cada recurso, por separado, sea impecable.
+   *
+   * Acepta varias formas de `resourceRefType` porque es texto libre y en los
+   * datos conviven dos alias de la misma tabla.
+   *
+   * No lleva filtro de tenant a propósito, y no es un descuido: la referencia
+   * al perfil profesional es un alcance **más** estrecho que el tenant —es una
+   * persona—, y acotar además por tenant dejaría fuera justamente el caso que
+   * esta lectura existe para encontrar, el del médico que atiende en dos
+   * organizaciones distintas.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param refTypes - Alias aceptados de la tabla referenciada.
+   * @param refId - Identificador de la fila referenciada.
+   * @returns Los recursos que apuntan a esa fila.
+   */
+  findResourcesByRef(
+    em: EntityManager,
+    refTypes: readonly string[],
+    refId: string,
+  ): Promise<SchedulableResources[]> {
+    return em.find(SchedulableResources, {
+      resourceRefType: { $in: [...refTypes] },
+      resourceRefId: refId,
+    });
+  }
+
+  /**
+   * Las plantillas publicadas de varios recursos, en una sola lectura.
+   *
+   * Sólo las publicadas: un borrador no ocupa la agenda de nadie todavía, y
+   * hacerlo chocar impediría preparar la agenda de la sede nueva antes de
+   * mudarse.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceIds - Recursos consultados.
+   * @returns Sus plantillas publicadas.
+   */
+  findPublishedTemplatesByResources(
+    em: EntityManager,
+    resourceIds: readonly string[],
+  ): Promise<ScheduleTemplates[]> {
+    if (resourceIds.length === 0) return Promise.resolve([]);
+    return em.find(ScheduleTemplates, {
+      resourceId: { $in: [...resourceIds] },
+      statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
+    });
+  }
+
+  /**
+   * Las franjas de varias plantillas, en una sola lectura.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param scheduleTemplateIds - Plantillas consultadas.
+   * @returns Sus franjas.
+   */
+  findRulesByTemplates(
+    em: EntityManager,
+    scheduleTemplateIds: readonly string[],
+  ): Promise<ScheduleRules[]> {
+    if (scheduleTemplateIds.length === 0) return Promise.resolve([]);
+    return em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: [...scheduleTemplateIds] },
+    });
   }
 
   /**

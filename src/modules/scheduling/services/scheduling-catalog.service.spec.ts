@@ -43,6 +43,12 @@ function buildCatalog() {
     findSlotsByTemplateInRange: mockFn(),
     findSlotsByResourceInRange: mockFn().mockResolvedValue([]),
     findOpenSlotsInWindow: mockFn(),
+    // La comprobación de solapamientos (TJ-1). Por defecto el profesional no
+    // tiene ninguna otra agenda publicada, que es el caso de quien publica la
+    // primera.
+    findResourcesByRef: mockFn().mockResolvedValue([]),
+    findPublishedTemplatesByResources: mockFn().mockResolvedValue([]),
+    findRulesByTemplates: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new SchedulingCatalogService(
@@ -622,6 +628,286 @@ describe('SchedulingCatalogService', () => {
 
       expect(res.blockedSlots).toBe(0);
       expect(d.catalogRepo.findOpenSlotsInWindow).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * TJ-1: nadie puede estar en dos sedes a la vez.
+   *
+   * Cada recurso, por separado, tenía franjas impecables —el servicio sólo
+   * comprobaba que cada una empezara antes de terminar—, así que un médico
+   * publicaba «lunes 9 a 12» en su consultorio y «lunes 9 a 12» en la clínica y
+   * quedaba con dos pacientes citados a la misma hora, sin ninguna señal hasta
+   * que los dos llegaran.
+   */
+  describe('createTemplate · franjas solapadas del mismo profesional (TJ-1)', () => {
+    const HPID = 'hp-propio';
+    const profesional = {
+      id: 'user-med',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: HPID,
+      tenantIds: [TENANT],
+    };
+    const CONSULTORIO = RESOURCE;
+    const CLINICA = '33333333-3333-3333-3333-333333333333';
+
+    /** El recurso sobre el que se publica, con su zona. */
+    function conRecurso(
+      d: ReturnType<typeof buildCatalog>,
+      zona = 'UTC',
+    ): void {
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: CONSULTORIO,
+        resourceRefType: 'health_practitioner_profiles',
+        resourceRefId: HPID,
+        timeZone: zona,
+      });
+      d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-nueva' });
+      d.catalogRepo.createRule.mockReturnValue({ id: 'rule-1' });
+    }
+
+    /** Una agenda ya publicada en la otra sede del mismo profesional. */
+    function conAgendaEnLaClinica(
+      d: ReturnType<typeof buildCatalog>,
+      rule: { dayOfWeek: number; startTime: string; endTime: string },
+      zona = 'UTC',
+      validTo?: Date,
+    ): void {
+      d.catalogRepo.findResourcesByRef.mockResolvedValue([
+        {
+          id: CLINICA,
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: HPID,
+          timeZone: zona,
+        },
+      ]);
+      d.catalogRepo.findPublishedTemplatesByResources.mockResolvedValue([
+        { id: 'tpl-clinica', resourceId: CLINICA, validTo },
+      ]);
+      d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+        { scheduleTemplateId: 'tpl-clinica', ...rule },
+      ]);
+    }
+
+    /** El criterio de aceptación del prompt, literal. */
+    it('lunes 9–12 en dos sedes distintas se rechaza con 422', async () => {
+      const d = buildCatalog();
+      conRecurso(d);
+      conAgendaEnLaClinica(d, {
+        dayOfWeek: 1,
+        startTime: '09:00:00',
+        endTime: '12:00:00',
+      });
+
+      await expect(
+        d.service.createTemplate(
+          CONSULTORIO,
+          {
+            name: 'Semana tipo',
+            rules: [
+              { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
+            ],
+          } as never,
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.catalogRepo.createTemplate).not.toHaveBeenCalled();
+    });
+
+    it('el rechazo dice cuál franja choca', async () => {
+      const d = buildCatalog();
+      conRecurso(d);
+      conAgendaEnLaClinica(d, {
+        dayOfWeek: 1,
+        startTime: '11:00:00',
+        endTime: '15:00:00',
+      });
+
+      const error = await d.service
+        .createTemplate(
+          CONSULTORIO,
+          {
+            name: 'Semana tipo',
+            rules: [
+              { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
+            ],
+          } as never,
+          profesional as never,
+        )
+        .catch((e: unknown) => e as any);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(JSON.stringify(error.getResponse?.() ?? {})).toContain('lunes');
+    });
+
+    /**
+     * Tocarse en el extremo no es solaparse: terminar a las 12:00 en una sede y
+     * empezar a las 12:00 en otra es un horario apretado, no imposible.
+     */
+    it('franjas que se tocan en el extremo pasan', async () => {
+      const d = buildCatalog();
+      conRecurso(d);
+      conAgendaEnLaClinica(d, {
+        dayOfWeek: 1,
+        startTime: '12:00:00',
+        endTime: '16:00:00',
+      });
+
+      await d.service.createTemplate(
+        CONSULTORIO,
+        {
+          name: 'Semana tipo',
+          rules: [{ dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' }],
+        } as never,
+        profesional as never,
+      );
+
+      expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
+    });
+
+    it('la misma hora en otro día de la semana no choca', async () => {
+      const d = buildCatalog();
+      conRecurso(d);
+      conAgendaEnLaClinica(d, {
+        dayOfWeek: 2,
+        startTime: '09:00:00',
+        endTime: '12:00:00',
+      });
+
+      await d.service.createTemplate(
+        CONSULTORIO,
+        {
+          name: 'Semana tipo',
+          rules: [{ dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' }],
+        } as never,
+        profesional as never,
+      );
+
+      expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
+    });
+
+    /**
+     * Dos horas de pared iguales en zonas distintas son dos instantes
+     * distintos: a las nueve de La Paz son las diez en São Paulo. Comparar los
+     * textos daría un choque que no existe.
+     */
+    it('la misma hora de pared en zonas distintas no choca si los instantes no se pisan', async () => {
+      const d = buildCatalog();
+      conRecurso(d, 'America/La_Paz');
+      conAgendaEnLaClinica(
+        d,
+        { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
+        'America/Sao_Paulo',
+      );
+
+      await d.service.createTemplate(
+        CONSULTORIO,
+        {
+          name: 'Semana tipo',
+          rules: [{ dayOfWeek: 1, startTime: '05:00:00', endTime: '07:00:00' }],
+        } as never,
+        profesional as never,
+      );
+
+      expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
+    });
+
+    /** Y sí chocan cuando comparten instante, aunque las horas difieran. */
+    it('horas de pared distintas en zonas distintas chocan si comparten instante', async () => {
+      const d = buildCatalog();
+      conRecurso(d, 'America/La_Paz');
+      conAgendaEnLaClinica(
+        d,
+        { dayOfWeek: 1, startTime: '10:00:00', endTime: '13:00:00' },
+        'America/Sao_Paulo',
+      );
+
+      await expect(
+        d.service.createTemplate(
+          CONSULTORIO,
+          {
+            name: 'Semana tipo',
+            rules: [
+              { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
+            ],
+          } as never,
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('dos franjas del mismo envío que se pisan se rechazan sin consultar nada', async () => {
+      const d = buildCatalog();
+      conRecurso(d);
+
+      await expect(
+        d.service.createTemplate(
+          CONSULTORIO,
+          {
+            name: 'Semana tipo',
+            rules: [
+              { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
+              { dayOfWeek: 1, startTime: '11:00:00', endTime: '13:00:00' },
+            ],
+          } as never,
+          profesional as never,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.catalogRepo.findResourcesByRef).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Una plantilla que venció el mes pasado no puede chocar con nada que se
+     * publique hoy; hacerla chocar dejaría trabado a quien cambió de sede.
+     */
+    it('una plantilla vencida no bloquea', async () => {
+      const d = buildCatalog();
+      conRecurso(d);
+      conAgendaEnLaClinica(
+        d,
+        { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
+        'UTC',
+        new Date('2020-01-01T00:00:00.000Z'),
+      );
+
+      await d.service.createTemplate(
+        CONSULTORIO,
+        {
+          name: 'Semana tipo',
+          rules: [{ dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' }],
+        } as never,
+        profesional as never,
+      );
+
+      expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
+    });
+
+    /**
+     * Una sala o un equipo no son una persona: no tienen «la misma agenda en
+     * otra parte», así que no se sale a buscarla.
+     */
+    it('un recurso que no es un profesional no consulta agendas hermanas', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: CONSULTORIO,
+        resourceRefType: 'care_spaces',
+        resourceRefId: 'sala-1',
+        timeZone: 'UTC',
+      });
+      d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-nueva' });
+      d.catalogRepo.createRule.mockReturnValue({ id: 'rule-1' });
+
+      await d.service.createTemplate(
+        CONSULTORIO,
+        {
+          name: 'Semana tipo',
+          rules: [{ dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' }],
+        } as never,
+        { id: 'user-adm', roles: ['SCHEDULING_ADMIN'] } as never,
+      );
+
+      expect(d.catalogRepo.findResourcesByRef).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createTemplate).toHaveBeenCalled();
     });
   });
 });
