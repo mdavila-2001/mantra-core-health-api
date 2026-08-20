@@ -479,6 +479,26 @@ pasada. Al volverse 422 reservar el pasado, **catorce pruebas ajenas al cambio s
 rojas**. Ahora el cupo es relativo a `Date.now()` y tiene un gemelo `cupoVencido()`. Una fecha
 fija en un fixture se pudre sola y el día que el reloj la pasa, rompe cosas que nadie tocó.
 
+### La auditoría, en verde
+
+`yarn e2e:auditoria` con `E2E_API_URL=http://localhost:3000` (por defecto apunta al 3005 y
+saltea las 20 en silencio — vale anotarlo, porque una corrida «sin fallos» puede ser una
+corrida que no midió nada):
+
+```
+✓  2 [P10] un cupo del pasado no se puede retener          ← A-02
+✓  4 [P09] la disponibilidad no ofrece huecos del pasado   ← A-03
+   11 passed · 2 failed · 7 skipped
+```
+
+Los dos rojos restantes **no son de esta noche**: `[P04] quien se registra con un correo puede
+entrar con ese correo` es A-05 (explícitamente fuera del reparto) y `[P00.4] el motivo de
+consulta` es A-01 — ver el hallazgo de abajo. **Ningún verde se cayó.**
+
+> **Ojo con el limitador.** `/iam/auth/login` corta a 10 por minuto y por IP, y la suite se
+> saltea **entera** cuando lo encuentra caliente. Si volvés de una tanda de pruebas manuales,
+> esperá un minuto o vas a leer «20 skipped» como si estuviera todo bien.
+
 ### Lo que NO se tocó
 
 `generate-slots` (regenerar y limpiar es el horizonte rodante, carril propio) · el modelo · los
