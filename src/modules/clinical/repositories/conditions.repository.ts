@@ -44,9 +44,17 @@ export interface CreateConditionData {
    */
   lateralityConceptId?: string;
   /**
+   * Identificador asociado a clinical course concept.
+   */
+  clinicalCourseConceptId?: string;
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   onsetAt?: Date;
+  /**
+   * Valor de expected resolution at mantenido por la instancia.
+   */
+  expectedResolutionAt?: Date;
   /**
    * Identificador asociado a recorded by user.
    */
@@ -131,7 +139,9 @@ export class ConditionsRepository {
         verificationStatusConceptId: data.verificationStatusConceptId,
         severityConceptId: data.severityConceptId,
         lateralityConceptId: data.lateralityConceptId,
+        clinicalCourseConceptId: data.clinicalCourseConceptId,
         onsetAt: data.onsetAt,
+        expectedResolutionAt: data.expectedResolutionAt,
         recordedByUserId: data.recordedByUserId,
         ...createdBy(data.actorUserId),
       },

@@ -19,6 +19,7 @@ import {
 } from '../services';
 import {
   AllergyIntoleranceResponseDto,
+  ChangeConditionClinicalStatusDto,
   ConditionResponseDto,
   CreateAllergyIntoleranceDto,
   CreateConditionDto,
@@ -71,6 +72,18 @@ export class ClinicalRecordsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ConditionResponseDto> {
     return this.conditionsService.create(dto, actor);
+  }
+
+  /** Patch v4.0.8: transiciona el estado clínico de un diagnóstico ya registrado. */
+  @Post('conditions/:id/change-status')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Cambiar el estado clínico de una condición' })
+  changeConditionStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ChangeConditionClinicalStatusDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ConditionResponseDto> {
+    return this.conditionsService.changeClinicalStatus(id, dto, actor);
   }
 
   /** UC-08-09. */

@@ -45,10 +45,22 @@ export class ConditionItemDto {
   encounterId?: string;
 
   /**
+   * Identificador asociado a clinical course concept (Patch v4.0.8).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  clinicalCourseConceptId?: string;
+
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   onsetAt?: Date;
+
+  /**
+   * Fecha esperada de resolución o próxima revisión (Patch v4.0.8).
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  expectedResolutionAt?: Date;
 
   /**
    * Valor de resolved at mantenido por la instancia.
