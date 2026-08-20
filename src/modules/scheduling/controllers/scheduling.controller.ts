@@ -35,6 +35,7 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  TemplateListDto,
   TemplateResponseDto,
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
@@ -184,6 +185,29 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TemplateResponseDto> {
     return this.catalogService.createTemplate(id, dto, actor);
+  }
+
+  /**
+   * UC-41-02 (lectura): las plantillas publicadas de un recurso.
+   *
+   * Vive junto a su POST hermano porque son las dos caras del mismo hecho. Sin
+   * esta lectura, publicar un horario era escribirlo en un papel y tirarlo:
+   * `scheduling` no tenía forma de volver a leer una plantilla, y por eso
+   * «Mi agenda» no podía existir.
+   *
+   * Un recurso sin plantillas devuelve `[]` con 200, no 404: existe y todavía
+   * no publicó horario.
+   */
+  @Get('resources/:id/templates')
+  // Mismo alcance que el POST: el servicio verifica que el recurso sea del
+  // actor (`assertRecursoDelActor`), así que un profesional sólo lee las suyas.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Listar las plantillas de agenda de un recurso' })
+  listTemplates(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TemplateListDto> {
+    return this.catalogService.listTemplates(id, actor);
   }
 
   /** UC-41-03. */

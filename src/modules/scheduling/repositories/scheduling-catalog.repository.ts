@@ -410,6 +410,49 @@ export class SchedulingCatalogRepository {
   }
 
   /**
+   * Las plantillas de un recurso, de la más reciente a la más vieja.
+   *
+   * El orden importa: la que gobierna hoy es la última publicada, y es la que
+   * la tarjeta del médico tiene que mostrar primero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceId - Recurso cuyas plantillas se leen.
+   * @returns Sus plantillas.
+   */
+  findTemplatesByResource(
+    em: EntityManager,
+    resourceId: string,
+  ): Promise<ScheduleTemplates[]> {
+    return em.find(
+      ScheduleTemplates,
+      { resourceId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Las franjas de varias plantillas, en una sola consulta.
+   *
+   * Se piden en lote y no una por plantilla: un recurso con seis plantillas
+   * haría seis viajes para pintar una tarjeta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param templateIds - Plantillas cuyas franjas se leen.
+   * @returns Las franjas, ordenadas por día y hora.
+   */
+  findRulesByTemplates(
+    em: EntityManager,
+    templateIds: readonly string[],
+  ): Promise<ScheduleRules[]> {
+    if (templateIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      ScheduleRules,
+      { scheduleTemplateId: { $in: [...templateIds] } },
+      { orderBy: { dayOfWeek: 'ASC', startTime: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create rule.
    *
    * @param em - Contexto de persistencia o transacción activa.

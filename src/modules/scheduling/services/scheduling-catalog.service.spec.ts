@@ -27,7 +27,12 @@ const RESOURCE = '22222222-2222-2222-2222-222222222222';
  */
 function buildCatalog() {
   const tx = { flush: mockFn() };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  // `fork()` además de `transactional`: las lecturas del servicio —listSlots y
+  // listTemplates— no abren transacción, piden un contexto propio.
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const catalogRepo = {
     createResource: mockFn(),
     findResourceById: mockFn(),
@@ -40,6 +45,8 @@ function buildCatalog() {
     findPolicyById: mockFn(),
     createTemplate: mockFn(),
     findTemplateById: mockFn(),
+    findTemplatesByResource: mockFn().mockResolvedValue([]),
+    findRulesByTemplates: mockFn().mockResolvedValue([]),
     createRule: mockFn(),
     findRulesByTemplate: mockFn(),
     createException: mockFn(),
@@ -340,6 +347,156 @@ describe('SchedulingCatalogService', () => {
       await expect(
         d.service.createPolicy(dto, actor as any),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('listTemplates (UC-41-02, lectura) — MAC-4', () => {
+    /**
+     * Es la lectura que faltaba: hasta MAC-4, `scheduling` sólo tenía los dos
+     * POST de plantilla, así que quien publicaba un horario no podía volver a
+     * verlo. Sin esto no existe «Mi agenda».
+     */
+    const medico = {
+      id: 'user-2',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'perfil-1',
+    };
+
+    it('devuelve las plantillas del recurso con sus franjas agrupadas', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+        { id: 'tpl-1', name: 'Horario', statusConceptId: 'c', slotMinutes: 30 },
+        { id: 'tpl-2', name: 'Viejo', statusConceptId: 'c' },
+      ]);
+      d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+        {
+          scheduleTemplateId: 'tpl-1',
+          dayOfWeek: 1,
+          startTime: '09:00:00',
+          endTime: '13:00:00',
+        },
+        {
+          scheduleTemplateId: 'tpl-2',
+          dayOfWeek: 4,
+          startTime: '14:00:00',
+          endTime: '18:00:00',
+        },
+      ]);
+
+      const res = await d.service.listTemplates(RESOURCE, actor);
+
+      expect(res.count).toBe(2);
+      expect(res.items[0].rules).toEqual([
+        { dayOfWeek: 1, startTime: '09:00:00', endTime: '13:00:00' },
+      ]);
+      expect(res.items[1].rules).toHaveLength(1);
+    });
+
+    it('pide las franjas de TODAS las plantillas en una sola consulta', async () => {
+      // Un recurso con seis plantillas haría seis viajes si se pidieran de a
+      // una, para pintar una tarjeta.
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+        { id: 'tpl-1', name: 'A', statusConceptId: 'c' },
+        { id: 'tpl-2', name: 'B', statusConceptId: 'c' },
+      ]);
+
+      await d.service.listTemplates(RESOURCE, actor);
+
+      expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledTimes(1);
+      expect(d.catalogRepo.findRulesByTemplates).toHaveBeenCalledWith(
+        expect.anything(),
+        ['tpl-1', 'tpl-2'],
+      );
+    });
+
+    it('un recurso sin plantillas devuelve lista vacía, no 404', async () => {
+      // El recurso existe y todavía no publicó horario: es el estado normal
+      // recién creada la agenda, no un error.
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+
+      const res = await d.service.listTemplates(RESOURCE, actor);
+
+      expect(res).toEqual({ items: [], count: 0 });
+    });
+
+    it('una columna anulable vuelve como null y no revienta ni se cuela', async () => {
+      // Encontrado probando contra la base, no leyendo el diff: MikroORM
+      // devuelve `null` —no `undefined`— para las columnas anulables sin
+      // completar, y una guarda `=== undefined` las deja pasar. `validTo` en
+      // null llegaba a `.toISOString()` y el endpoint entero daba 500. Es el
+      // mismo defecto que el paso de la foto del alta (#165).
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+        {
+          id: 'tpl-1',
+          name: 'Horario',
+          statusConceptId: 'c',
+          slotMinutes: null,
+          validFrom: null,
+          validTo: null,
+          bookingPolicyId: null,
+        },
+      ]);
+      d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+        {
+          scheduleTemplateId: 'tpl-1',
+          dayOfWeek: 1,
+          startTime: '09:00:00',
+          endTime: '13:00:00',
+          slotMinutes: null,
+          capacityPerSlot: null,
+        },
+      ]);
+
+      const res = await d.service.listTemplates(RESOURCE, actor);
+
+      // Ni presentes en null ni reventando: simplemente ausentes.
+      expect(res.items[0]).toEqual({
+        id: 'tpl-1',
+        name: 'Horario',
+        statusConceptId: 'c',
+        rules: [{ dayOfWeek: 1, startTime: '09:00:00', endTime: '13:00:00' }],
+      });
+    });
+
+    it('un recurso inexistente sí es 404', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue(null);
+
+      await expect(
+        d.service.listTemplates(RESOURCE, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('el profesional lee las plantillas de SU recurso', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        resourceRefType: 'practitioner_profiles',
+        resourceRefId: 'perfil-1',
+      });
+
+      await expect(
+        d.service.listTemplates(RESOURCE, medico),
+      ).resolves.toHaveProperty('count', 0);
+    });
+
+    it('otro profesional pidiendo esas plantillas recibe 403', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        resourceRefType: 'practitioner_profiles',
+        resourceRefId: 'perfil-DE-OTRO',
+      });
+
+      await expect(
+        d.service.listTemplates(RESOURCE, medico),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 

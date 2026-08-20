@@ -374,6 +374,88 @@ export class CreateTemplateDto {
 }
 
 /**
+ * Una franja de una plantilla, como la lee la pantalla del médico.
+ *
+ * Va la hora de pared tal como se declaró —`09:00:00`—, no un instante: la
+ * regla dice «los lunes de nueve a una», y convertirla a UTC acá obligaría a
+ * elegir un lunes concreto para poder hacerlo.
+ */
+export class TemplateRuleDto {
+  /** Día de la semana, 0 = domingo. */
+  @ApiProperty({ minimum: 0, maximum: 6 })
+  dayOfWeek!: number;
+
+  /** Hora de inicio, de pared. */
+  @ApiProperty({ example: '09:00:00' })
+  startTime!: string;
+
+  /** Hora de fin, de pared. */
+  @ApiProperty({ example: '13:00:00' })
+  endTime!: string;
+
+  /** Duración de cada turno, si la franja la declara. */
+  @ApiProperty({ required: false })
+  slotMinutes?: number;
+
+  /** Pacientes por turno, si la franja lo declara. */
+  @ApiProperty({ required: false })
+  capacityPerSlot?: number;
+}
+
+/**
+ * Una plantilla publicada, con sus franjas.
+ *
+ * Es la lectura que faltaba: hasta ahora `scheduling` sólo tenía los dos POST
+ * de plantilla, así que quien publicaba un horario no podía volver a verlo
+ * nunca más —y el «nombre de la plantilla» que el alta pedía era una etiqueta
+ * a ciegas—.
+ */
+export class TemplateDetailDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Nombre con el que se publicó. */
+  @ApiProperty()
+  name!: string;
+
+  /** Las franjas, ordenadas por día y hora. */
+  @ApiProperty({ type: [TemplateRuleDto] })
+  rules!: TemplateRuleDto[];
+
+  /** Duración por defecto de la plantilla, si la declara. */
+  @ApiProperty({ required: false })
+  slotMinutes?: number;
+
+  /** Desde cuándo rige. */
+  @ApiProperty({ required: false, format: 'date-time' })
+  validFrom?: string;
+
+  /** Hasta cuándo rige; ausente es «hasta nuevo aviso». */
+  @ApiProperty({ required: false, format: 'date-time' })
+  validTo?: string;
+
+  /** La política de reserva que referencia, si tiene. */
+  @ApiProperty({ required: false, format: 'uuid' })
+  bookingPolicyId?: string;
+
+  /** Estado de la plantilla. */
+  @ApiProperty({ format: 'uuid' })
+  statusConceptId!: string;
+}
+
+/** Las plantillas de un recurso. */
+export class TemplateListDto {
+  /** Las plantillas publicadas, de la más reciente a la más vieja. */
+  @ApiProperty({ type: [TemplateDetailDto] })
+  items!: TemplateDetailDto[];
+
+  /** Cuántas son. */
+  @ApiProperty()
+  count!: number;
+}
+
+/**
  * Define el contrato validado para template response.
  */
 export class TemplateResponseDto {
