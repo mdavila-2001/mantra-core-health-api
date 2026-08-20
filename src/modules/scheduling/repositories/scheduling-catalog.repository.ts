@@ -672,6 +672,32 @@ export class SchedulingCatalogRepository {
     });
   }
 
+  /**
+   * Las excepciones de un recurso que tocan una ventana.
+   *
+   * Se cruza por solape y no por contención: un bloqueo de tres días que
+   * empieza el mes pasado y termina el 2 afecta al mes que se está mirando, y
+   * pedir sólo las que empiezan dentro lo dejaría afuera.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param resourceId - Recurso cuyas excepciones se leen.
+   * @param from - Inicio de la ventana.
+   * @param to - Fin de la ventana.
+   * @returns Las excepciones que se solapan, cronológicamente.
+   */
+  findExceptionsByResourceInRange(
+    em: EntityManager,
+    resourceId: string,
+    from: Date,
+    to: Date,
+  ): Promise<AvailabilityExceptions[]> {
+    return em.find(
+      AvailabilityExceptions,
+      { resourceId, startAt: { $lt: to }, endAt: { $gt: from } },
+      { orderBy: { startAt: 'ASC' } },
+    );
+  }
+
   /** Slots del recurso que se solapan con una excepción de no disponibilidad. */
   findOpenSlotsInWindow(
     em: EntityManager,

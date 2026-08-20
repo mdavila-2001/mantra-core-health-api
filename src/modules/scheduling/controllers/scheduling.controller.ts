@@ -35,6 +35,7 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  AvailabilityExceptionListDto,
   TemplateListDto,
   TemplateResponseDto,
   GenerateSlotsDto,
@@ -230,6 +231,43 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<GenerateSlotsResponseDto> {
     return this.catalogService.generateSlots(id, dto, actor);
+  }
+
+  /**
+   * UC-41-04 (lectura): las excepciones de un recurso en una ventana.
+   *
+   * El hueco gemelo del `GET` de plantillas: se podían crear excepciones y no
+   * leerlas. Sin esto, el calendario del médico no puede distinguir un día
+   * **bloqueado** de un día **sin agenda** —los dos aparecen sin cupos—, y ésa
+   * es justamente la diferencia que hay que mostrarle.
+   */
+  @Get('resources/:id/exceptions')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar las excepciones de disponibilidad de un recurso',
+  })
+  @ApiQuery({
+    name: 'from',
+    required: true,
+    description: 'Inicio de la ventana (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'to',
+    required: true,
+    description: 'Fin de la ventana (ISO 8601)',
+  })
+  listExceptions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AvailabilityExceptionListDto> {
+    return this.catalogService.listExceptions(
+      id,
+      new Date(from),
+      new Date(to),
+      actor,
+    );
   }
 
   /** UC-41-04. */
