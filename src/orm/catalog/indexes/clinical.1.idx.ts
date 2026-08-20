@@ -56,6 +56,7 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['conditions', 'ix_conditions_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_severity_concept_id', ['severity_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_laterality_concept_id', ['laterality_concept_id'], false, 'btree'],
+  ['conditions', 'ix_conditions_clinical_course_concept_id', ['clinical_course_concept_id'], false, 'btree'],
   ['conditions', 'ix_conditions_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
   ['conditions', 'ix_conditions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['conditions', 'ix_conditions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
@@ -186,5 +187,4 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['observation_components', 'ix_observation_components_data_absent_reason_concept_id', ['data_absent_reason_concept_id'], false, 'btree'],
   ['observation_components', 'ix_observation_components_interpretation_concept_id', ['interpretation_concept_id'], false, 'btree'],
   ['observation_components', 'ix_observation_components_created_by_user_id', ['created_by_user_id'], false, 'btree'],
-  ['observation_components', 'ix_observation_components_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
 ];
