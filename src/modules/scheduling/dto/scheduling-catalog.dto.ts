@@ -456,6 +456,50 @@ export class TemplateListDto {
 }
 
 /**
+ * Una excepción de disponibilidad, como la lee el calendario del médico.
+ *
+ * Existe para que un día bloqueado **no se vea igual que un día sin agenda**:
+ * los dos aparecen sin cupos, pero uno es «no atiendo los miércoles» y el otro
+ * «ese miércoles no atiendo, y por esto». El motivo es la diferencia.
+ */
+export class AvailabilityExceptionDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Tipo de excepción, como concepto. */
+  @ApiProperty({ format: 'uuid' })
+  exceptionTypeConceptId!: string;
+
+  /** Comienzo del bloqueo. */
+  @ApiProperty({ format: 'date-time' })
+  startAt!: string;
+
+  /** Fin del bloqueo. */
+  @ApiProperty({ format: 'date-time' })
+  endAt!: string;
+
+  /** Por qué, si se declaró. Lo lee el profesional, no el paciente. */
+  @ApiProperty({ required: false })
+  reason?: string;
+
+  /** `true` cuando la excepción ABRE disponibilidad en vez de cerrarla. */
+  @ApiProperty({ required: false })
+  isAvailable?: boolean;
+}
+
+/** Las excepciones de un recurso en una ventana. */
+export class AvailabilityExceptionListDto {
+  /** Las excepciones, de la más próxima a la más lejana. */
+  @ApiProperty({ type: [AvailabilityExceptionDto] })
+  items!: AvailabilityExceptionDto[];
+
+  /** Cuántas son. */
+  @ApiProperty()
+  count!: number;
+}
+
+/**
  * Define el contrato validado para template response.
  */
 export class TemplateResponseDto {

@@ -17,6 +17,7 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  AvailabilityExceptionListDto,
   TemplateListDto,
   TemplateResponseDto,
   TemplateRuleDto,
@@ -789,6 +790,64 @@ export class SchedulingCatalogService {
         ? {}
         : { bookingPolicyId: plantilla.bookingPolicyId }),
       statusConceptId: plantilla.statusConceptId,
+    }));
+
+    return { items, count: items.length };
+  }
+
+  /**
+   * UC-41-04 (lectura): las excepciones de un recurso en una ventana.
+   *
+   * Es el hueco gemelo del `GET` de plantillas: se podían **crear** excepciones
+   * y no leerlas. Sin esta lectura, el calendario del médico no puede
+   * distinguir un día bloqueado de un día sin agenda —los dos aparecen sin
+   * cupos—, y esa diferencia es justamente lo que hay que mostrar: uno es «no
+   * atiendo los miércoles» y el otro «ese miércoles no atiendo, y por esto».
+   *
+   * @param resourceId - Recurso cuyas excepciones se leen.
+   * @param from - Inicio de la ventana.
+   * @param to - Fin de la ventana.
+   * @param actor - Quien consulta; sólo el dueño del recurso o el catálogo.
+   * @returns Las excepciones que se solapan con la ventana.
+   */
+  async listExceptions(
+    resourceId: string,
+    from: Date,
+    to: Date,
+    actor: AuthenticatedUser,
+  ): Promise<AvailabilityExceptionListDto> {
+    if (!(from < to)) {
+      throw new PreconditionFailedException(
+        'La ventana debe empezar antes de terminar',
+        { from: from.toISOString(), to: to.toISOString() },
+      );
+    }
+
+    const em = this.em.fork();
+    const resource = await this.catalogRepo.findResourceById(em, resourceId);
+    if (!resource) {
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
+    }
+    this.assertRecursoDelActor(resource, actor);
+
+    const filas = await this.catalogRepo.findExceptionsByResourceInRange(
+      em,
+      resourceId,
+      from,
+      to,
+    );
+
+    const items = filas.map((fila) => ({
+      id: fila.id,
+      exceptionTypeConceptId: fila.exceptionTypeConceptId,
+      startAt: fila.startAt.toISOString(),
+      endAt: fila.endAt.toISOString(),
+      // `== null` y no `=== undefined`: una columna anulable sin completar
+      // vuelve como `null`, y la guarda estricta la dejaría pasar (#174).
+      ...(fila.reason == null ? {} : { reason: fila.reason }),
+      ...(fila.isAvailable == null ? {} : { isAvailable: fila.isAvailable }),
     }));
 
     return { items, count: items.length };

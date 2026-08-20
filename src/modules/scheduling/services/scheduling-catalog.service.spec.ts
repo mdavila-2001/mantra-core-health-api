@@ -47,6 +47,7 @@ function buildCatalog() {
     findTemplateById: mockFn(),
     findTemplatesByResource: mockFn().mockResolvedValue([]),
     findRulesByTemplates: mockFn().mockResolvedValue([]),
+    findExceptionsByResourceInRange: mockFn().mockResolvedValue([]),
     createRule: mockFn(),
     findRulesByTemplate: mockFn(),
     createException: mockFn(),
@@ -496,6 +497,97 @@ describe('SchedulingCatalogService', () => {
 
       await expect(
         d.service.listTemplates(RESOURCE, medico),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+  });
+
+  describe('listExceptions (UC-41-04, lectura) — MAC-5', () => {
+    /**
+     * El hueco gemelo del GET de plantillas: se podían crear excepciones y no
+     * leerlas. Sin esta lectura, el calendario del médico no puede distinguir
+     * un día bloqueado de un día sin agenda — los dos aparecen sin cupos.
+     */
+    const DESDE = new Date('2026-09-01T00:00:00.000Z');
+    const HASTA = new Date('2026-10-01T00:00:00.000Z');
+
+    it('devuelve las excepciones con su motivo', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+        {
+          id: 'exc-1',
+          exceptionTypeConceptId: 'tipo-1',
+          startAt: new Date('2026-09-10T13:00:00.000Z'),
+          endAt: new Date('2026-09-10T21:00:00.000Z'),
+          reason: 'Congreso',
+        },
+      ]);
+
+      const res = await d.service.listExceptions(RESOURCE, DESDE, HASTA, actor);
+
+      expect(res.count).toBe(1);
+      expect(res.items[0]).toMatchObject({ id: 'exc-1', reason: 'Congreso' });
+    });
+
+    it('cruza por solape y no por contención', async () => {
+      // Un bloqueo que empieza el mes pasado y termina el 2 afecta al mes que
+      // se mira: pedir sólo los que empiezan dentro lo dejaría afuera.
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+
+      await d.service.listExceptions(RESOURCE, DESDE, HASTA, actor);
+
+      expect(
+        d.catalogRepo.findExceptionsByResourceInRange,
+      ).toHaveBeenCalledWith(expect.anything(), RESOURCE, DESDE, HASTA);
+    });
+
+    it('sin motivo declarado, la clave no viaja en null', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+      d.catalogRepo.findExceptionsByResourceInRange.mockResolvedValue([
+        {
+          id: 'exc-1',
+          exceptionTypeConceptId: 'tipo-1',
+          startAt: new Date('2026-09-10T13:00:00.000Z'),
+          endAt: new Date('2026-09-10T21:00:00.000Z'),
+          reason: null,
+          isAvailable: null,
+        },
+      ]);
+
+      const res = await d.service.listExceptions(RESOURCE, DESDE, HASTA, actor);
+
+      expect(res.items[0]).toEqual({
+        id: 'exc-1',
+        exceptionTypeConceptId: 'tipo-1',
+        startAt: '2026-09-10T13:00:00.000Z',
+        endAt: '2026-09-10T21:00:00.000Z',
+      });
+    });
+
+    it('una ventana al revés es 422, no una lista vacía', async () => {
+      const d = buildCatalog();
+
+      await expect(
+        d.service.listExceptions(RESOURCE, HASTA, DESDE, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('otro profesional pidiéndolas recibe 403', async () => {
+      const d = buildCatalog();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: RESOURCE,
+        resourceRefType: 'practitioner_profiles',
+        resourceRefId: 'perfil-DE-OTRO',
+      });
+
+      await expect(
+        d.service.listExceptions(RESOURCE, DESDE, HASTA, {
+          id: 'user-2',
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: 'perfil-1',
+        }),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });

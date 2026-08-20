@@ -607,6 +607,49 @@ export class SchedulingBookingsRepository {
    * @param bookingIds - Citas de la página.
    * @returns Cita → instante del que se movió.
    */
+  /**
+   * Los nombres de varios pacientes, en una consulta.
+   *
+   * En lote y con SQL directo: el nombre vive en la **persona** y no en el
+   * perfil —la misma persona puede ser paciente y profesional, y duplicarlo
+   * sería tener dos verdades—, y resolverlo por cita sería una consulta por
+   * fila para pintar una lista.
+   *
+   * `patient_profiles.profile_id` apunta **directo a `persons.id`**, sin tabla
+   * puente: verificado contra la base, porque la cadena que parecía natural
+   * —pasar por `person_profiles`— devuelve cero filas.
+   *
+   * **Este método no decide quién puede ver un nombre**, sólo lo busca. La
+   * regla vive en la proyección, junto a la del motivo de consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileIds - Perfiles cuyos nombres se buscan.
+   * @returns Los nombres hallados, por perfil; los que no tienen no aparecen.
+   */
+  async findPatientNames(
+    em: EntityManager,
+    patientProfileIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const nombres = new Map<string, string>();
+    if (patientProfileIds.length === 0) return nombres;
+
+    const filas = await em
+      .getConnection()
+      .execute<{ profileId: string; displayName: string }[]>(
+        `SELECT pp.profile_id AS "profileId", pe.display_name AS "displayName"
+           FROM profiles.patient_profiles pp
+           JOIN profiles.persons pe ON pe.id = pp.profile_id
+          WHERE pp.profile_id IN (?)
+            AND pe.display_name IS NOT NULL`,
+        [[...patientProfileIds]],
+      );
+
+    for (const fila of filas) {
+      nombres.set(fila.profileId, fila.displayName);
+    }
+    return nombres;
+  }
+
   async latestRescheduleOrigins(
     em: EntityManager,
     bookingIds: readonly string[],
