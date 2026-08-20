@@ -35,6 +35,8 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  AvailabilityExceptionListDto,
+  TemplateListDto,
   TemplateResponseDto,
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
@@ -186,6 +188,29 @@ export class SchedulingController {
     return this.catalogService.createTemplate(id, dto, actor);
   }
 
+  /**
+   * UC-41-02 (lectura): las plantillas publicadas de un recurso.
+   *
+   * Vive junto a su POST hermano porque son las dos caras del mismo hecho. Sin
+   * esta lectura, publicar un horario era escribirlo en un papel y tirarlo:
+   * `scheduling` no tenía forma de volver a leer una plantilla, y por eso
+   * «Mi agenda» no podía existir.
+   *
+   * Un recurso sin plantillas devuelve `[]` con 200, no 404: existe y todavía
+   * no publicó horario.
+   */
+  @Get('resources/:id/templates')
+  // Mismo alcance que el POST: el servicio verifica que el recurso sea del
+  // actor (`assertRecursoDelActor`), así que un profesional sólo lee las suyas.
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({ summary: 'Listar las plantillas de agenda de un recurso' })
+  listTemplates(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TemplateListDto> {
+    return this.catalogService.listTemplates(id, actor);
+  }
+
   /** UC-41-03. */
   @Post('templates/:id/generate-slots')
   // `PRACTITIONER` entra acotado a sí mismo: el servicio verifica que el
@@ -206,6 +231,43 @@ export class SchedulingController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<GenerateSlotsResponseDto> {
     return this.catalogService.generateSlots(id, dto, actor);
+  }
+
+  /**
+   * UC-41-04 (lectura): las excepciones de un recurso en una ventana.
+   *
+   * El hueco gemelo del `GET` de plantillas: se podían crear excepciones y no
+   * leerlas. Sin esto, el calendario del médico no puede distinguir un día
+   * **bloqueado** de un día **sin agenda** —los dos aparecen sin cupos—, y ésa
+   * es justamente la diferencia que hay que mostrarle.
+   */
+  @Get('resources/:id/exceptions')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar las excepciones de disponibilidad de un recurso',
+  })
+  @ApiQuery({
+    name: 'from',
+    required: true,
+    description: 'Inicio de la ventana (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'to',
+    required: true,
+    description: 'Fin de la ventana (ISO 8601)',
+  })
+  listExceptions(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AvailabilityExceptionListDto> {
+    return this.catalogService.listExceptions(
+      id,
+      new Date(from),
+      new Date(to),
+      actor,
+    );
   }
 
   /** UC-41-04. */

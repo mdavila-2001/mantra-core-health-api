@@ -17,7 +17,10 @@ import {
   CreateBookingPolicyDto,
   BookingPolicyResponseDto,
   CreateTemplateDto,
+  AvailabilityExceptionListDto,
+  TemplateListDto,
   TemplateResponseDto,
+  TemplateRuleDto,
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
   CreateExceptionDto,
@@ -712,6 +715,148 @@ export class SchedulingCatalogService {
    * tuya»: la referencia del recurso apunta al perfil del token, aceptando las
    * dos formas de `resourceRefType` que conviven en los datos.
    */
+  /**
+   * UC-41-02 (lectura): las plantillas publicadas de un recurso, con sus franjas.
+   *
+   * Es la lectura que faltaba. Hasta ahora `scheduling` sólo exponía los dos
+   * POST de plantilla, así que quien publicaba un horario no podía volver a
+   * verlo nunca más: por eso «Mi agenda» no existía y el nombre de la plantilla
+   * que el alta pedía era una etiqueta a ciegas.
+   *
+   * Un recurso sin plantillas devuelve una lista vacía, no 404: el recurso
+   * existe y todavía no publicó horario, que es un estado normal recién creada
+   * la agenda.
+   *
+   * @param resourceId - Recurso cuyas plantillas se leen.
+   * @param actor - Quien consulta; sólo el dueño del recurso o el catálogo.
+   * @returns Sus plantillas, de la más reciente a la más vieja.
+   */
+  async listTemplates(
+    resourceId: string,
+    actor: AuthenticatedUser,
+  ): Promise<TemplateListDto> {
+    const em = this.em.fork();
+    const resource = await this.catalogRepo.findResourceById(em, resourceId);
+    if (!resource) {
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
+    }
+    this.assertRecursoDelActor(resource, actor);
+
+    const plantillas = await this.catalogRepo.findTemplatesByResource(
+      em,
+      resourceId,
+    );
+    const franjas = await this.catalogRepo.findRulesByTemplates(
+      em,
+      plantillas.map((plantilla) => plantilla.id),
+    );
+
+    // Se agrupan en memoria porque ya vinieron todas en una consulta: volver a
+    // filtrar por plantilla sería una consulta por fila.
+    const porPlantilla = new Map<string, TemplateRuleDto[]>();
+    for (const franja of franjas) {
+      const lista = porPlantilla.get(franja.scheduleTemplateId) ?? [];
+      lista.push({
+        dayOfWeek: franja.dayOfWeek,
+        startTime: franja.startTime,
+        endTime: franja.endTime,
+        // `== null` a propósito: una columna anulable que nadie completó
+        // vuelve de MikroORM como `null`, no como `undefined`, y compararla
+        // contra `undefined` la deja pasar. Es el mismo defecto que en el paso
+        // de la foto del alta (#165), encontrado igual: probando contra la base
+        // y no leyendo el diff.
+        ...(franja.slotMinutes == null
+          ? {}
+          : { slotMinutes: franja.slotMinutes }),
+        ...(franja.capacityPerSlot == null
+          ? {}
+          : { capacityPerSlot: franja.capacityPerSlot }),
+      });
+      porPlantilla.set(franja.scheduleTemplateId, lista);
+    }
+
+    const items = plantillas.map((plantilla) => ({
+      id: plantilla.id,
+      name: plantilla.name,
+      rules: porPlantilla.get(plantilla.id) ?? [],
+      ...(plantilla.slotMinutes == null
+        ? {}
+        : { slotMinutes: plantilla.slotMinutes }),
+      ...(plantilla.validFrom == null
+        ? {}
+        : { validFrom: plantilla.validFrom.toISOString() }),
+      ...(plantilla.validTo == null
+        ? {}
+        : { validTo: plantilla.validTo.toISOString() }),
+      ...(plantilla.bookingPolicyId == null
+        ? {}
+        : { bookingPolicyId: plantilla.bookingPolicyId }),
+      statusConceptId: plantilla.statusConceptId,
+    }));
+
+    return { items, count: items.length };
+  }
+
+  /**
+   * UC-41-04 (lectura): las excepciones de un recurso en una ventana.
+   *
+   * Es el hueco gemelo del `GET` de plantillas: se podían **crear** excepciones
+   * y no leerlas. Sin esta lectura, el calendario del médico no puede
+   * distinguir un día bloqueado de un día sin agenda —los dos aparecen sin
+   * cupos—, y esa diferencia es justamente lo que hay que mostrar: uno es «no
+   * atiendo los miércoles» y el otro «ese miércoles no atiendo, y por esto».
+   *
+   * @param resourceId - Recurso cuyas excepciones se leen.
+   * @param from - Inicio de la ventana.
+   * @param to - Fin de la ventana.
+   * @param actor - Quien consulta; sólo el dueño del recurso o el catálogo.
+   * @returns Las excepciones que se solapan con la ventana.
+   */
+  async listExceptions(
+    resourceId: string,
+    from: Date,
+    to: Date,
+    actor: AuthenticatedUser,
+  ): Promise<AvailabilityExceptionListDto> {
+    if (!(from < to)) {
+      throw new PreconditionFailedException(
+        'La ventana debe empezar antes de terminar',
+        { from: from.toISOString(), to: to.toISOString() },
+      );
+    }
+
+    const em = this.em.fork();
+    const resource = await this.catalogRepo.findResourceById(em, resourceId);
+    if (!resource) {
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
+    }
+    this.assertRecursoDelActor(resource, actor);
+
+    const filas = await this.catalogRepo.findExceptionsByResourceInRange(
+      em,
+      resourceId,
+      from,
+      to,
+    );
+
+    const items = filas.map((fila) => ({
+      id: fila.id,
+      exceptionTypeConceptId: fila.exceptionTypeConceptId,
+      startAt: fila.startAt.toISOString(),
+      endAt: fila.endAt.toISOString(),
+      // `== null` y no `=== undefined`: una columna anulable sin completar
+      // vuelve como `null`, y la guarda estricta la dejaría pasar (#174).
+      ...(fila.reason == null ? {} : { reason: fila.reason }),
+      ...(fila.isAvailable == null ? {} : { isAvailable: fila.isAvailable }),
+    }));
+
+    return { items, count: items.length };
+  }
+
   private assertRecursoDelActor(
     resource: { resourceRefType: string; resourceRefId: string },
     actor: AuthenticatedUser,

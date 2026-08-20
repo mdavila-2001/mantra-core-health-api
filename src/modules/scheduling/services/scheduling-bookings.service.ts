@@ -1460,6 +1460,17 @@ export class SchedulingBookingsService {
       }
     }
 
+    // Los nombres, en lote y sólo cuando alguien va a poder verlos: si el actor
+    // no es profesional ni titular, la proyección los descartaría igual y la
+    // consulta sería trabajo tirado.
+    const nombres =
+      actor?.practitionerProfileId !== undefined ||
+      actor?.patientProfileId !== undefined
+        ? await this.bookingsRepo.findPatientNames(em, [
+            ...new Set(page.map(({ booking }) => booking.patientProfileId)),
+          ])
+        : new Map<string, string>();
+
     return {
       items: page.map(({ booking, slot }) =>
         this.aBookingItem(
@@ -1472,6 +1483,7 @@ export class SchedulingBookingsService {
             ? duenosDeAgenda.get(booking.resourceId)
             : undefined,
           origenes.get(booking.id),
+          nombres.get(booking.patientProfileId),
         ),
       ),
       count: page.length,
@@ -1588,6 +1600,7 @@ export class SchedulingBookingsService {
     actor?: AuthenticatedUser,
     profesionalDeLaAgenda?: string,
     reprogramadaDesde?: Date,
+    nombreDelPaciente?: string,
   ): BookingItemDto {
     return {
       id: booking.id,
@@ -1611,6 +1624,14 @@ export class SchedulingBookingsService {
       // afirmación distinta y falsa.
       ...(this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
         ? { reasonText: booking.reasonText }
+        : {}),
+      // El nombre viaja con la MISMA regla que el motivo: lo ve el titular y el
+      // profesional que atiende, no la vista de la organización. El médico
+      // necesita saber a quién espera —es el pedido explícito del registro del
+      // cliente— y la organización ya opera con el identificador.
+      ...(nombreDelPaciente !== undefined &&
+      this.puedeVerElMotivo(booking, actor, profesionalDeLaAgenda)
+        ? { patientName: nombreDelPaciente }
         : {}),
       ...(reprogramadaDesde ? { rescheduledFrom: reprogramadaDesde } : {}),
       statusReason: aStatusReason(motivo),
