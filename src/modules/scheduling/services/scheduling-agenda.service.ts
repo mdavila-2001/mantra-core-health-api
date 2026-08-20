@@ -159,6 +159,7 @@ export class SchedulingAgendaService {
         from,
         to,
         onlyAvailable: query.onlyAvailable,
+        ahora: new Date(),
         openStatusConceptId: CONCEPTS.SLOT_OPEN,
       },
       limit,

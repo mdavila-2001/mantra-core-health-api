@@ -116,6 +116,42 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'COND_CONFIRMED',
       display: 'Condition confirmed',
     },
+    /* Estado clínico (HL7 FHIR `Condition.clinicalStatus`), completado más allá
+       de `CONDITION_ACTIVE`: hasta este patch una condición nacía activa y no
+       tenía a dónde ir. `RECURRENCE`/`RELAPSE` son formas de estar activa de
+       nuevo (tras `RESOLVED` o `REMISSION`, respectivamente); no son estados
+       terminales por sí mismos. Ver la máquina de transiciones en
+       `ConditionsService`. */
+    CONDITION_INACTIVE: { code: 'COND_INACTIVE', display: 'Condition inactive' },
+    CONDITION_REMISSION: {
+      code: 'COND_REMISSION',
+      display: 'Condition in remission',
+    },
+    CONDITION_RESOLVED: { code: 'COND_RESOLVED', display: 'Condition resolved' },
+    CONDITION_RECURRENCE: {
+      code: 'COND_RECURRENCE',
+      display: 'Condition recurrence',
+    },
+    CONDITION_RELAPSE: { code: 'COND_RELAPSE', display: 'Condition relapse' },
+    /* Curso clínico: eje distinto del estado. Decide qué transiciones son
+       clínicamente válidas (una condición `CHRONIC` no pasa a `RESOLVED`) y si
+       tiene sentido ofrecer una fecha esperada de resolución. No es un concepto
+       de HL7 `Condition` nuclear (más cercano a la extensión `clinicalCourse`),
+       así que no tiene equivalente FHIR canónico como los demás. */
+    CONDITION_COURSE_ACUTE: { code: 'COND_COURSE_ACUTE', display: 'Acute' },
+    CONDITION_COURSE_CHRONIC: { code: 'COND_COURSE_CHRONIC', display: 'Chronic' },
+    CONDITION_COURSE_SUBACUTE: {
+      code: 'COND_COURSE_SUBACUTE',
+      display: 'Subacute',
+    },
+    CONDITION_COURSE_RECURRENT: {
+      code: 'COND_COURSE_RECURRENT',
+      display: 'Recurrent',
+    },
+    CONDITION_COURSE_UNKNOWN: {
+      code: 'COND_COURSE_UNKNOWN',
+      display: 'Unknown course',
+    },
     CONDITION_CATEGORY_DIAGNOSIS: {
       code: 'COND_DIAGNOSIS',
       display: 'Encounter diagnosis',

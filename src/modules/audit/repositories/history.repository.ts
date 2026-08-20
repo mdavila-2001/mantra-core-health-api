@@ -8,6 +8,7 @@ import {
   ModerationDecisionsHistory,
   MedicationRequestsHistory,
   AppointmentBookingsHistory,
+  ConditionsHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -117,6 +118,15 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   appointment_bookings: {
     entity: AppointmentBookingsHistory,
     sourceField: 'appointmentBookingId',
+    revisionField: 'revisionNo',
+  },
+  // Patch v4.0.8: cubre `ConditionsService.create`/`changeClinicalStatus`. La
+  // entidad `ConditionsHistory` ya existía (generada como el resto de las
+  // `*_history` del modelo canónico); estaba sin usar porque nada del dominio
+  // la registraba ni la llamaba todavía.
+  conditions: {
+    entity: ConditionsHistory,
+    sourceField: 'conditionId',
     revisionField: 'revisionNo',
   },
 };

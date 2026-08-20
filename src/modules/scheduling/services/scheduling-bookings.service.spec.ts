@@ -132,6 +132,16 @@ function build() {
  * @param overrides - Valor de overrides requerido por la operación.
  * @returns Resultado de open slot.
  */
+/**
+ * Un cupo del futuro cercano.
+ *
+ * Es relativo a `Date.now()` y no una fecha del calendario a propósito: desde
+ * que reservar el pasado es 422 (A-02), una fecha fija se pudre sola —el día
+ * que el reloj la pasa, catorce pruebas ajenas al cambio se ponen rojas sin que
+ * nadie haya tocado nada—. {@link cupoVencido} es su gemelo del otro lado.
+ */
+const EN_UNA_HORA = 60 * 60 * 1000;
+
 function openSlot(overrides: Record<string, unknown> = {}) {
   return {
     id: SLOT_ID,
@@ -139,10 +149,18 @@ function openSlot(overrides: Record<string, unknown> = {}) {
     capacity: 2,
     remainingCapacity: 2,
     statusConceptId: CONCEPTS.SLOT_OPEN,
-    startAt: new Date('2026-06-01T10:00:00Z'),
+    startAt: new Date(Date.now() + EN_UNA_HORA),
     scheduleTemplateId: undefined,
     ...overrides,
   };
+}
+
+/** El mismo cupo, pero con el horario ya pasado. */
+function cupoVencido(overrides: Record<string, unknown> = {}) {
+  return openSlot({
+    startAt: new Date(Date.now() - EN_UNA_HORA),
+    ...overrides,
+  });
 }
 
 describe('SchedulingBookingsService', () => {
@@ -153,7 +171,7 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
       d.bookingsRepo.createHold.mockReturnValue({
         id: 'hold-1',
-        expiresAt: new Date('2026-06-01T09:05:00Z'),
+        expiresAt: new Date(Date.now() + EN_UNA_HORA),
       });
 
       const res = await d.service.placeHold(
@@ -207,6 +225,59 @@ describe('SchedulingBookingsService', () => {
       await expect(
         d.service.placeHold(SLOT_ID, {}, actor as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('A-02 · rechaza retener un cupo que ya empezó', async () => {
+      // La auditoría TJ-4 lo encontró devolviendo 201 con holdToken sobre un
+      // hueco de ayer: se podía reservar un turno del pasado.
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(cupoVencido());
+
+      // La frase importa: la lee un paciente, y decirle «anticipación mínima»
+      // sobre un turno de la semana pasada lo manda a buscar un problema que
+      // no tiene.
+      await expect(
+        d.service.placeHold(SLOT_ID, {}, actor as any),
+      ).rejects.toThrow('Ese horario ya pasó.');
+    });
+
+    it('A-02 · el cupo del futuro se sigue pudiendo retener', async () => {
+      // El contrapeso del caso anterior: el corte no puede llevarse puesto el
+      // camino bueno.
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(openSlot());
+      d.bookingsRepo.createHold.mockReturnValue({
+        id: 'hold-1',
+        expiresAt: new Date(Date.now() + EN_UNA_HORA),
+      });
+
+      await expect(
+        d.service.placeHold(SLOT_ID, {}, actor as any),
+      ).resolves.toHaveProperty('holdToken');
+    });
+
+    it('respeta la antelación mínima de la política, no sólo el reloj', async () => {
+      // `min_notice_minutes` ya existía en booking_policies y nadie lo miraba:
+      // un cupo que empieza en diez minutos es futuro, pero si la política pide
+      // treinta de aviso tampoco se puede pedir.
+      const d = build();
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+        openSlot({
+          startAt: new Date(Date.now() + 10 * 60 * 1000),
+          scheduleTemplateId: 'tpl-1',
+        }),
+      );
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        bookingPolicyId: 'pol-1',
+      });
+      d.catalogRepo.findPolicyById.mockResolvedValue({
+        minNoticeMinutes: 30,
+        holdTtlSeconds: 300,
+      });
+
+      await expect(
+        d.service.placeHold(SLOT_ID, {}, actor as any),
+      ).rejects.toThrow('al menos 30 minutos de anticipación');
     });
 
     it('enforces the per-patient active bookings limit from the policy', async () => {

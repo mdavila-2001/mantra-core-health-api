@@ -404,6 +404,105 @@ le suman los tramos nuevos de Pablo, Ender y Marcelo, que es lo que pide la fase
 
 ---
 
+## MAC-1 · Los cupos vencidos dejan de ofrecerse y de reservarse (A-02 / A-03)
+
+**Rama:** `justin/mac1-cupos-vencidos` · **Doc:** §13.3 · **Origen:** auditoría TJ-4.
+
+### El defecto
+
+Dos fichas de la auditoría, con la misma raíz. `GET /scheduling/slots?onlyAvailable=true`
+devolvía **100 de 100 huecos ya vencidos** (A-03), y `POST /scheduling/slots/:id/holds` sobre
+uno de ayer respondía **201 con `holdToken`** (A-02). El código lo tenía documentado sin
+saberlo: el JSDoc de la consulta decía «`onlyAvailable` filtra por capacidad restante y no por
+estado». Faltaba mirar el reloj.
+
+### Qué cambió
+
+**El filtro, en la consulta y no en memoria** (regla del #156). `inicioDeLoReservable(desde,
+ahora)` vive en `scheduling-time.ts` —el módulo del arreglo de H-02— y adelanta el borde
+inferior de la ventana hasta ahora cuando se piden sólo disponibles. Lo usan las **dos**
+consultas que ofrecían vencidos: la de `GET /scheduling/slots` y la de
+`GET /scheduling/resources/:id/slots`, que es la que van a consumir MAC-5 y MAC-6.
+
+**Sin convertir husos, a propósito.** La tarea pedía comparar «en el huso de la sede». No hace
+falta y habría sido un error: `start_at` es `timestamptz`, o sea un instante absoluto, y
+comparar dos instantes da el mismo resultado en cualquier zona. La zona importa al **generar**
+cupos —eso es H-02/#110, otro problema—, no al preguntar si uno ya pasó. Hay un test que lo
+fija escribiendo el mismo instante con dos husos distintos.
+
+**El instante lo aporta el servicio**, no un `new Date()` escondido en el repositorio: la
+consulta queda pura y el `where` es asertable.
+
+**La retención rechaza el pasado** con **422** y no 404 —el cupo existe; lo que no existe es la
+posibilidad—. Y como `booking_policies` ya declaraba `min_notice_minutes` y nadie lo miraba, se
+respeta: un turno que empieza en diez minutos es futuro, pero con una política de treinta
+tampoco se puede pedir. **Dos motivos, dos frases**: «Ese horario ya pasó» contra «hay que
+pedirlo con al menos N minutos de anticipación». La primera versión decía lo segundo para un
+turno de hacía seis días, lo que se vio recién al probarlo contra la API.
+
+**Segundo cinturón en `materializarReserva`**, que cubre confirmar y solicitar a la vez: un
+hold tomado hace rato puede llegar con el horario recién pasado.
+
+### Verificación contra la API viva
+
+```
+--- A-03 · «sólo disponibles» desde hace 7 días ---
+  devueltos 100 · vencidos 0        (la auditoría midió 100 de 100 vencidos)
+
+--- el cupo del pasado sigue siendo consultable (onlyAvailable=false) ---
+  visible: 2026-08-14T09:03:00.000Z
+
+--- A-02 · retener ese cupo vencido ---
+  HTTP 422 · Ese horario ya pasó.
+
+--- el camino bueno: un cupo futuro ---
+  cupo futuro: 2026-08-20T16:30:00.000Z
+  HTTP 201 · holdToken: sí
+```
+
+Consultar el pasado **sigue funcionando** con `onlyAvailable=false`: es lo que necesita la
+vista del día de MAC-6 para mostrar lo ya atendido. Lo que se cerró es ofrecerlo como
+reservable.
+
+### Pruebas
+
+`yarn test src/modules/scheduling/` → **14 suites · 233 pruebas**. Once son nuevas: cuatro del
+helper, tres de A-02 en el servicio y **cuatro del primer spec de repositorio del módulo**
+(`scheduling-agenda.repository.spec.ts`), que aserta el `where` que sale hacia la base — no las
+filas que vuelven, porque filtrar en memoria habría dado el mismo verde y seguido trayendo cien
+filas muertas de Postgres.
+
+### Un arreglo colateral que no es cosmético
+
+El doble del cupo en el spec de bookings fijaba `2026-06-01`, una fecha del calendario ya
+pasada. Al volverse 422 reservar el pasado, **catorce pruebas ajenas al cambio se pusieron
+rojas**. Ahora el cupo es relativo a `Date.now()` y tiene un gemelo `cupoVencido()`. Una fecha
+fija en un fixture se pudre sola y el día que el reloj la pasa, rompe cosas que nadie tocó.
+
+### La auditoría, en verde
+
+`yarn e2e:auditoria` con `E2E_API_URL=http://localhost:3000` (por defecto apunta al 3005 y
+saltea las 20 en silencio — vale anotarlo, porque una corrida «sin fallos» puede ser una
+corrida que no midió nada):
+
+```
+✓  2 [P10] un cupo del pasado no se puede retener          ← A-02
+✓  4 [P09] la disponibilidad no ofrece huecos del pasado   ← A-03
+   11 passed · 2 failed · 7 skipped
+```
+
+Los dos rojos restantes **no son de esta noche**: `[P04] quien se registra con un correo puede
+entrar con ese correo` es A-05 (explícitamente fuera del reparto) y `[P00.4] el motivo de
+consulta` es A-01 — ver el hallazgo de abajo. **Ningún verde se cayó.**
+
+> **Ojo con el limitador.** `/iam/auth/login` corta a 10 por minuto y por IP, y la suite se
+> saltea **entera** cuando lo encuentra caliente. Si volvés de una tanda de pruebas manuales,
+> esperá un minuto o vas a leer «20 skipped» como si estuviera todo bien.
+
+### Lo que NO se tocó
+
+`generate-slots` (regenerar y limpiar es el horizonte rodante, carril propio) · el modelo · los
+DTO · el filtro propio de la pantalla del paciente, si lo tiene: doble cinturón.
 ## MAC-2 · Publicar la agenda: una pantalla, dos decisiones
 
 **Rama:** `justin/mac2-publicar-una-pantalla` · **PR:** front #183 · **Doc:** §6 completo.

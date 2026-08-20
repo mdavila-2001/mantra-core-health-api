@@ -235,6 +235,30 @@ export class SchedulingBookingsService {
         ? await this.resolvePolicy(tx, slot.scheduleTemplateId)
         : null;
 
+      // Un turno que ya empezó no se puede pedir, aunque le quede capacidad: la
+      // agenda dejó de ofrecerlos (A-03) y acá se cierra la puerta directa
+      // (A-02). Es 422 y no 404 a propósito —el cupo existe, lo que no existe
+      // es la posibilidad— y el mensaje lo dice en palabras, porque lo lee un
+      // paciente.
+      const ahora = Date.now();
+      const minutosDeAviso = policy?.minNoticeMinutes ?? 0;
+      const yaPaso = slot.startAt.getTime() <= ahora;
+      const demasiadoSobreLaHora =
+        slot.startAt.getTime() <= ahora + minutosDeAviso * 60_000;
+
+      if (yaPaso || demasiadoSobreLaHora) {
+        // Dos motivos distintos merecen dos frases distintas: a quien pide un
+        // turno de la semana pasada no se le habla de anticipación mínima, y a
+        // quien llega diez minutos tarde para una regla de treinta no se le
+        // dice que «ya pasó» cuando todavía no pasó.
+        throw new PreconditionFailedException(
+          yaPaso
+            ? 'Ese horario ya pasó.'
+            : `Ese turno empieza demasiado pronto: hay que pedirlo con al menos ${minutosDeAviso} minutos de anticipación.`,
+          { slotId, startAt: slot.startAt.toISOString(), minutosDeAviso },
+        );
+      }
+
       if (policy?.maxActivePerPatient && dto.patientProfileId) {
         const active = await this.bookingsRepo.countActiveBookingsForPatient(
           tx,
@@ -426,6 +450,16 @@ export class SchedulingBookingsService {
       if (!slot) {
         throw new ResourceNotFoundException('Slot no encontrado', {
           slotId: hold.bookableSlotId,
+        });
+      }
+      // Segundo cinturón de A-02: el hold ya no se puede tomar sobre un turno
+      // vencido, pero uno tomado hace rato puede llegar acá con el horario
+      // recién pasado. Cubre a la vez confirmar y solicitar, que es por lo que
+      // vive acá y no en cada una.
+      if (slot.startAt.getTime() <= Date.now()) {
+        throw new PreconditionFailedException('Ese horario ya pasó.', {
+          slotId: slot.id,
+          startAt: slot.startAt.toISOString(),
         });
       }
 

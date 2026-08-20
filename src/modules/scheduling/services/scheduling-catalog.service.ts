@@ -518,7 +518,11 @@ export class SchedulingCatalogService {
       resourceId,
       options.from,
       options.to,
-      { onlyAvailable: options.onlyAvailable, limit: options.limit + 1 },
+      {
+        onlyAvailable: options.onlyAvailable,
+        ahora: new Date(),
+        limit: options.limit + 1,
+      },
     );
     const truncated = rows.length > options.limit;
     const page = truncated ? rows.slice(0, options.limit) : rows;

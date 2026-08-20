@@ -156,15 +156,39 @@ Los 12 prompts traían criterios de aceptación que nadie había ejecutado. `yar
 **20 criterios · 8 verdes · 5 rojos · 7 no medibles**. Cada rojo de abajo tiene su salida
 literal; los verdes están en `CARRIL_REPORT-justin.md`.
 
-Regla del carril: **quien mide no arregla en el mismo PR.** Estos cinco están abiertos.
+Regla del carril: **quien mide no arregla en el mismo PR.** De los cinco, **A-02 y A-03 están
+cerrados** por MAC-1 (rama `justin/mac1-cupos-vencidos`, 20/08); los otros tres siguen
+abiertos.
 
 | Ficha | Defecto | Evidencia literal | Prompt |
 |---|---|---|---|
 | **A-01** | **El motivo de consulta viaja a la vista de la organización.** `GET /scheduling/bookings?resourceId=…` devuelve `reasonText` en cada cita. Es la regla 00.4 —los datos clínicos no salen a vistas de organización— y es la más seria de las cinco. | `HTTP 200 · {"items":[{…,"reasonText":"Control de seguimiento programado",…}]}` | P00.4 |
-| **A-02** | **Se puede retener un cupo del pasado.** Un `POST /scheduling/slots/{id}/holds` sobre un hueco ya vencido responde **201** y entrega el `holdToken`. | `HTTP 201 · {"id":"23f220dd-…","holdToken":"2d6a5d1f-…","expiresAt":"2026-08-19T15:01:14.259Z","remainingCapacity":7}` | P10 |
-| **A-03** | **La disponibilidad ofrece huecos vencidos.** `GET /scheduling/slots?onlyAvailable=true` devuelve cupos anteriores a ahora: en la corrida, **100 de 100**. «Sólo disponibles» significa «lo que se puede pedir», y un hueco de ayer no se puede pedir. Es la causa de A-02 aguas arriba: la agenda los ofrece y la reserva los acepta. | `«Sólo disponibles» devolvió 100 huecos ya vencidos, p. ej. 2026-08-18T09:00:00.000Z` | P09 |
+| **A-02** | **CERRADO (MAC-1)** — **Se puede retener un cupo del pasado.** Un `POST /scheduling/slots/{id}/holds` sobre un hueco ya vencido responde **201** y entrega el `holdToken`. | `HTTP 201 · {"id":"23f220dd-…","holdToken":"2d6a5d1f-…","expiresAt":"2026-08-19T15:01:14.259Z","remainingCapacity":7}` | P10 |
+| **A-03** | **CERRADO (MAC-1)** — **La disponibilidad ofrece huecos vencidos.** `GET /scheduling/slots?onlyAvailable=true` devuelve cupos anteriores a ahora: en la corrida, **100 de 100**. «Sólo disponibles» significa «lo que se puede pedir», y un hueco de ayer no se puede pedir. Es la causa de A-02 aguas arriba: la agenda los ofrece y la reserva los acepta. | `«Sólo disponibles» devolvió 100 huecos ya vencidos, p. ej. 2026-08-18T09:00:00.000Z` | P09 |
 | **A-04** | **Crear un grupo lo deja sin dueño.** `POST /community/groups` responde bien, pero `GET /community/groups/{id}/members` devuelve **0 miembros**: nadie puede administrarlo. El criterio del prompt 07 es que crear el grupo y agregar al creador sean un solo hecho. | `El grupo recién creado tiene 0 miembros.` | P07 |
 | **A-05** | **El correo con el que te registrás no sirve para entrar.** `POST /iam/auth/register-patient` pide correo, la pantalla de ingreso lo acepta, y `POST /iam/auth/login` con ese mismo correo responde **401 «Credenciales inválidas»**; con el documento, 200. Si la causa es que falta verificar el correo, el mensaje tiene que decir eso —«credenciales inválidas» manda a la persona a dudar de su contraseña—. | `HTTP 401 · {"code":"UNAUTHENTICATED","message":"Credenciales inválidas",…}` · con documento: `200` | P04 |
+
+### A-02 y A-03 · cerrados el 20/08 por MAC-1
+
+Una sola causa: «disponible» significaba «le queda capacidad» y nunca «todavía se puede
+pedir». La consulta de disponibilidad corta ahora en el instante actual —en las **dos**
+consultas que ofrecían cupos, no sólo en la que midió la auditoría— y la retención rechaza el
+pasado con 422, respetando además el `min_notice_minutes` de la política, que ya existía y
+nadie miraba.
+
+Reverificado contra la API viva:
+
+```
+A-03 · «sólo disponibles» desde hace 7 días → devueltos 100 · vencidos 0   (antes: 100 de 100)
+A-02 · retener un cupo del 2026-08-14        → HTTP 422 · «Ese horario ya pasó.»   (antes: 201)
+        un cupo futuro                       → HTTP 201 · holdToken: sí
+```
+
+Consultar el pasado sigue siendo posible con `onlyAvailable=false`: lo necesita la vista del
+día del médico (MAC-6) para mostrar lo ya atendido. Lo que se cerró es **ofrecerlo como
+reservable**.
+
+Detalle en `CARRIL_REPORT-justin.md`, sección MAC-1.
 
 ### Lo que la auditoría **no pudo medir**, y por qué
 

@@ -9,6 +9,7 @@ import {
   BookableSlots,
 } from '../entities';
 import { createdBy } from '../../../common';
+import { inicioDeLoReservable } from '../scheduling-time';
 
 /**
  * Describe el contrato estructural de create resource data.
@@ -643,13 +644,15 @@ export class SchedulingCatalogRepository {
    *
    * `onlyAvailable` filtra por capacidad restante y no por estado: un slot puede
    * seguir marcado como abierto y tener el cupo tomado por un hold vivo, y
-   * ofrecerlo llevaría al paciente a un 409 al intentar reservarlo.
+   * ofrecerlo llevaría al paciente a un 409 al intentar reservarlo. Con `ahora`
+   * descarta además los que ya empezaron —un turno de ayer no se puede pedir—;
+   * ver {@link inicioDeLoReservable}.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param resourceId - Recurso cuya agenda se consulta.
    * @param from - Inicio de la ventana (inclusive).
    * @param to - Fin de la ventana (exclusive).
-   * @param options - `onlyAvailable` y tope de filas.
+   * @param options - `onlyAvailable`, `ahora` para descartar vencidos y tope de filas.
    * @returns Slots ordenados cronológicamente.
    */
   findSlotsByResourceInRange(
@@ -657,11 +660,16 @@ export class SchedulingCatalogRepository {
     resourceId: string,
     from: Date,
     to: Date,
-    options: { onlyAvailable: boolean; limit: number },
+    options: { onlyAvailable: boolean; limit: number; ahora?: Date },
   ): Promise<BookableSlots[]> {
+    const desde =
+      options.onlyAvailable && options.ahora
+        ? inicioDeLoReservable(from, options.ahora)
+        : from;
+
     const where: Record<string, unknown> = {
       resourceId,
-      startAt: { $gte: from, $lt: to },
+      startAt: { $gte: desde, $lt: to },
     };
     if (options.onlyAvailable) {
       where.remainingCapacity = { $gt: 0 };
