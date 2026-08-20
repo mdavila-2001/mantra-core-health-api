@@ -501,6 +501,71 @@ contrato no permite cerrar la plantilla vieja, y **no hay un solo `PATCH` en tod
 `scheduling`**. Cerrar la anterior necesita una decisión de modelo que no corresponde
 improvisar.
 
+## MAC-5 · El mes de ocupación, y las excepciones en su casa
+
+**Ramas:** `justin/mac5-excepciones-lectura` (API) · `justin/mac5-mi-agenda-mes` (front) ·
+**PRs:** API #175, front #186 · **Doc:** §8.
+
+**El hueco que la tarea preveía, confirmado:** se podían **crear** excepciones y no leerlas —el
+mismo hueco de las plantillas—. Sin esa lectura el calendario no puede distinguir un día
+**bloqueado** de un día **sin agenda**: los dos aparecen sin cupos, y el motivo es toda la
+diferencia.
+
+La solapa «Cómo viene el mes» muestra **ocupación** («6/8»), jamás los turnos. Cinco estados,
+con las distinciones que importan: un día sin cupos dice «no atendés» y no «libre»; un día
+bloqueado muestra su motivo; el bloqueo gana sobre la ocupación.
+
+**No reusa el calendario del paciente como componente** porque pinta otra cosa. Lo que sí
+comparten —la aritmética de la grilla— salió a `shared/date/calendario-mes` con 9 pruebas. La
+tarea sugería un «modo conteo»: es la forma equivocada, sería una bandera que cambia el
+comportamiento.
+
+**Bloquear un día se hace desde el mes**, con motivo obligatorio. Es la fase 5 del alta vieja en
+su lugar natural. Verificado de punta a punta:
+
+```
+martes, 25 de agosto: bloqueado — Vacaciones
+los cupos de ese día, como los ve un paciente → 0
+y en total, incluidos los bloqueados          → 8
+```
+
+Los ocho siguen existiendo; ninguno se ofrece.
+
+## MAC-6 · El día, con huecos, nombres y acciones
+
+**Ramas:** `justin/mac6-nombre-del-paciente` (API) · `justin/mac6-mi-agenda-dia` (front) ·
+**PRs:** API #176, front #187 · **Doc:** §9.
+
+**El costo 2 que la tarea anticipaba era peor de lo previsto:** el DTO no traía el nombre **y un
+médico no puede leer perfiles de paciente** —todas las rutas de `profiles/patients` exigen
+`SECURITY_ADMIN`—. La vista del día era una lista de identificadores. Es el pedido explícito del
+registro del cliente: «nombre completo del paciente».
+
+El nombre viaja con la **misma regla que el motivo** (`puedeVerElMotivo`, de TJ-2), resuelto en
+lote. Verificado:
+
+```
+la DUEÑA de la agenda   → Ana Lucía Flores · Control de presión
+una profesional AJENA   → ni el nombre ni el motivo
+```
+
+La pantalla es **una línea de tiempo con huecos**, no una lista de reservas:
+
+```
+09:00–09:30   Ana Lucía Flores · Control de presión   [Avisar demora] [Cancelar]
+09:30–10:00   — libre —
+```
+
+**Dos hallazgos que sólo aparecen ejecutando:**
+
+1. **`patient_profiles.profile_id` apunta directo a `persons.id`**, sin tabla puente. La cadena
+   que parecía natural devuelve **cero filas**.
+2. **`POST /bookings/:id/check-in` no admite `PRACTITIONER`.** El botón devolvía «Rol
+   insuficiente». **No abrí el rol**: el servicio no comprueba que la cita sea del actor, así
+   que sumarlo dejaría a cualquier profesional marcar la llegada de cualquiera — y la tarea
+   dice no tocar esos endpoints. Se esconde el botón; **un médico solo, sin mostrador, hoy no
+   puede registrar una llegada**. Tarjeta para el equipo.
+
 ## Hallazgos de entorno (bloqueaban a todo el equipo, no sólo a este carril)
 
 ### E-1 · `dist/` estaba obsoleto y le faltaba el módulo `surveys`
