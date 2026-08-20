@@ -124,6 +124,55 @@ tarea suelta**.
 > `obligatoriedad-divergente` sin triar. Ese número es el que hay que usar como referencia
 > hasta que B-8 se cierre.
 
+**B-9 · `clinical.conditions.clinical_course_concept_id` existía sólo en el ORM — CERRADO EN EL
+MODELO el 20/08, PENDIENTE DE APLICAR A LAS BASES VIVAS.** Misma clase que B-7 y B-8, en
+miniatura y con consecuencia inmediata: el PR #171 («Patch v4.0.8: estado clínico y cronicidad»)
+agregó `clinicalCourseConceptId` a `clinical/entities/conditions.entity.ts` y dos value sets al
+`DYNAMIC_ENUM_CATALOG` (`condition-clinical-status`, `condition-clinical-course`), pero la columna
+no estaba declarada en ninguna de las otras tres capas —`diagram_08_clinical.puml`, `SQL/`,
+bóveda—. Evidencia: `grep -rn clinical_course_concept_id` daba **0 aciertos** en las tres,
+mientras que `clinical_status_concept_id`, que sí es del modelo, aparece en todas. Contra una
+base reconstruida es `columna-ausente`: MikroORM la proyecta en el `SELECT` y **toda lectura de
+`clinical.conditions` falla**, no sólo la que use el campo nuevo. El rótulo del PR además chocaba
+con el **v4.0.8 real** (promoción REDESA del 30/07); la promoción va como **v4.1.2**.
+
+Cerrado por el camino canónico (nadie tocó `SQL/` a mano):
+
+1. `.puml` — columna `clinical_course_concept_id : uuid <<FK>>` en la entidad `conditions` y
+   `IX ix_conditions_clinical_course_concept_id` en su `<<INDEX_SET>>` (la convención del módulo
+   es un índice por columna FK; las otras 12 lo tienen).
+2. Bóveda — `SALUD/FK/FK clinical.conditions.clinical_course_concept_id.md` (destino
+   `terminology.catalog_concepts`) + notas de entidad e índice actualizadas.
+3. `python salud-db/gen_ddl.py 08` → el diff contra el respaldo es **exactamente** tres líneas:
+   la columna en `02_tables.sql`, el índice en `04_indexes.sql` y la FK en `90_fk_deferred.sql`.
+   Sin daño colateral (B-3 no se disparó en el módulo 08).
+4. `SQL/patches/2026-08-20_v412_conditions_clinical_course.sql` para bases ya pobladas;
+   `python salud-db/check_ddl_sources.py` → `Fuentes de DDL OK`.
+5. `yarn orm:catalog` — el índice y la FK entraron al catálogo declarativo (ver B-10: la
+   regeneración destapó otra deuda y hubo que acotar el diff).
+
+**Falta para darlo por cerrado del todo:** aplicar el patch a las bases vivas (o
+`rebuild_stack.py --yes`) y reverificar con `ORM_SCHEMA_SYNC=dry-run`. **Nada de esto se pudo
+observar en runtime el 20/08: Docker Desktop estaba apagado**, así que la evidencia es de
+generador y de grep, no de base.
+
+**B-10 · La bóveda no tiene las notas del módulo 65 (`surveys`), y por eso `yarn orm:catalog`
+hoy es destructivo.** Destapado al regenerar el catálogo para B-9. La promoción del 18/08 llegó
+al `.puml`, a `SQL/` y a las entidades, pero **no creó las notas de la bóveda**: hay **0** notas
+`E surveys.*` en `SALUD/Entidades/` y **1 sola** nota `FK surveys.*` de las 36 FKs que el módulo
+declara. Como el generador deriva el número de módulo de las notas de entidad, regenerar:
+
+- devuelve `['surveys', 65, …]` a **`['surveys', null, …]`** en `schemas.catalog.ts` —el `65` que
+  hay en `dev` fue escrito **a mano** sobre un archivo generado (PR de la promoción), justo lo
+  que la política prohíbe—, y
+- emite un `surveys.fk.ts` con **1 de 36** FKs.
+
+En el PR de B-9 esos dos efectos se revirtieron a propósito para no mezclar una regresión con un
+arreglo; el catálogo por lo tanto **no es reproducible hoy**: `yarn orm:catalog` no deja el árbol
+byte a byte idéntico, al revés de lo que documenta `CLAUDE.md`. La salida canónica es escribir
+las notas del módulo 65 en la bóveda (entidades + FKs + `<<INDEX_SET>>`), no volver a editar el
+catálogo a mano. Es trabajo de bóveda, con su propia tarjeta.
+
 ---
 
 ## Defectos funcionales, verificados ejecutando

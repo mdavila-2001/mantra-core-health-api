@@ -40,6 +40,7 @@ export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
   ['care_episodes', 'type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_episodes', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['conditions', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['conditions', 'clinical_course_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['conditions', 'clinical_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['conditions', 'code_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['conditions', 'created_by_user_id', 'iam', 'users', 'id'],
@@ -186,5 +187,4 @@ export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
   ['procedures', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['procedures', 'performer_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['procedures', 'practice_site_id', 'practice', 'practice_sites', 'id'],
-  ['procedures', 'recorder_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
 ];
