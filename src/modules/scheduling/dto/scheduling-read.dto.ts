@@ -293,6 +293,17 @@ export class BookingItemDto {
   reasonText?: string;
 
   /**
+   * Nombre del paciente.
+   *
+   * Viaja con la **misma regla que el motivo de consulta**: lo ve el titular y
+   * el profesional que atiende en esa agenda, y no la vista de la organización.
+   * El médico necesita saber a quién espera —la agenda del día sin nombres es
+   * una lista de identificadores— y la organización ya opera con el perfil.
+   */
+  @ApiPropertyOptional()
+  patientName?: string;
+
+  /**
    * De cuándo se movió, si la cita se reprogramó.
    *
    * Ausente cuando nunca se movió — que es distinto de «se movió y no sé

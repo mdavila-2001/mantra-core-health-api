@@ -58,6 +58,7 @@ function build() {
     // cita se declara reprogramada — que es el caso por defecto de estas pruebas.
 
     latestRescheduleOrigins: mockFn().mockResolvedValue(new Map()),
+    findPatientNames: mockFn().mockResolvedValue(new Map()),
     findBookings: mockFn(),
     countActiveBookingsForPatient: mockFn(),
     recordReschedule: mockFn(),
@@ -1377,6 +1378,90 @@ describe('SchedulingBookingsService', () => {
       const res = await d.service.getBookingById('booking-1');
 
       expect(res.statusReason).toBeUndefined();
+    });
+
+    /** Un actor profesional, dueño o no de la agenda que se consulta. */
+    function medico(perfil: string) {
+      return {
+        id: `u-${perfil}`,
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: perfil,
+      };
+    }
+
+    /** Una página de una cita colgada del recurso `res-1`. */
+    function pagina(ids: readonly string[] = ['booking-1']) {
+      return {
+        rows: ids.map((id) => ({
+          booking: { ...guardada, id, resourceId: 'res-1' },
+          slot: null,
+        })),
+        fetchCapReached: false,
+      };
+    }
+
+    it('MAC-6 · el profesional de la agenda ve el nombre del paciente', async () => {
+      // Sin esto, la vista del día es una lista de identificadores. Es el
+      // pedido explícito del registro del cliente: «nombre completo del
+      // paciente» en el calendario del médico.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+      d.bookingsRepo.findPatientNames.mockResolvedValue(
+        new Map([[PATIENT, 'Marisol Quispe']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(res.items[0].patientName).toBe('Marisol Quispe');
+    });
+
+    it('MAC-6 · un profesional ajeno NO ve el nombre', async () => {
+      // Misma regla que el motivo de consulta: se omite, no se vacía.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina());
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-DE-OTRO',
+      });
+      d.bookingsRepo.findPatientNames.mockResolvedValue(
+        new Map([[PATIENT, 'Marisol Quispe']]),
+      );
+
+      const res = await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-propio') as any,
+      );
+
+      expect(res.items[0].patientName).toBeUndefined();
+      expect(JSON.stringify(res)).not.toContain('Marisol');
+    });
+
+    it('MAC-6 · los nombres se piden UNA vez para toda la página', async () => {
+      // De a uno, una agenda de veinte turnos haría veinte consultas para
+      // pintar una pantalla.
+      const d = build();
+      d.bookingsRepo.findBookings.mockResolvedValue(pagina(['b1', 'b2']));
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        resourceRefId: 'perfil-medico',
+      });
+
+      await d.service.searchBookings(
+        { resourceId: 'res-1', includeCancelled: false },
+        50,
+        medico('perfil-medico') as any,
+      );
+
+      expect(d.bookingsRepo.findPatientNames).toHaveBeenCalledTimes(1);
     });
 
     it('el listado por omisión incluye las pendientes y las completadas', async () => {
