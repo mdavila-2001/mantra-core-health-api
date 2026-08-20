@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager, FilterQuery } from '@mikro-orm/postgresql';
 import { BookableSlots, SchedulableResources } from '../entities';
+import { inicioDeLoReservable } from '../scheduling-time';
 
 /** Filtro de `GET /scheduling/resources`. */
 export interface ListResourcesFilter {
@@ -41,9 +42,15 @@ export interface ListSlotsFilter {
    */
   to: Date;
   /**
-   * Sólo cupos abiertos y con capacidad libre.
+   * Sólo cupos abiertos, con capacidad libre y que todavía no empezaron.
    */
   onlyAvailable?: boolean;
+  /**
+   * Instante contra el que se descartan los cupos vencidos, cuando
+   * `onlyAvailable`. Lo aporta el servicio para que la consulta no dependa de
+   * un reloj escondido.
+   */
+  ahora?: Date;
   /**
    * Identificador del concepto de cupo abierto, cuando `onlyAvailable`.
    */
@@ -87,6 +94,9 @@ export class SchedulingAgendaRepository {
   /**
    * Cupos de la ventana, del más próximo al más lejano.
    *
+   * Con `onlyAvailable` la ventana nunca empieza antes de `ahora`: lo que ya
+   * pasó no se puede reservar, así que ofrecerlo sería mentir.
+   *
    * Se pide `limit + 1` para poder decir si la ventana desborda el tope sin
    * pagar un `count(*)` sobre una tabla que crece con cada generación.
    *
@@ -100,8 +110,13 @@ export class SchedulingAgendaRepository {
     filter: ListSlotsFilter,
     limit: number,
   ): Promise<BookableSlots[]> {
+    const desde =
+      filter.onlyAvailable && filter.ahora
+        ? inicioDeLoReservable(filter.from, filter.ahora)
+        : filter.from;
+
     const where: FilterQuery<BookableSlots> = {
-      startAt: { $gte: filter.from, $lt: filter.to },
+      startAt: { $gte: desde, $lt: filter.to },
     };
     if (filter.resourceId) where.resourceId = filter.resourceId;
     if (filter.scheduleTemplateId) {
