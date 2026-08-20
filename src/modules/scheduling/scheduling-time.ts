@@ -159,3 +159,25 @@ export function diasLocalesQueCoinciden(
 
   return dias;
 }
+
+/**
+ * Límite inferior de una ventana cuando sólo se buscan cupos **reservables**.
+ *
+ * Un hueco de ayer existe y se puede consultar, pero no se puede pedir: cuando
+ * la consulta dice «sólo disponibles», la ventana empieza como muy pronto
+ * ahora. Sin este corte, «disponible» significaba únicamente «le queda
+ * capacidad», y la agenda ofrecía turnos vencidos que la reserva después
+ * aceptaba (A-02/A-03 de la auditoría).
+ *
+ * No hace falta convertir zonas: `start_at` es `timestamptz`, o sea un instante
+ * absoluto, y comparar dos instantes da el mismo resultado en cualquier huso.
+ * La zona de la sede importa al **generar** los cupos —eso es {@link
+ * horaLocalAUtc}—, no al preguntar si uno ya pasó.
+ *
+ * @param desde - Inicio pedido por quien consulta.
+ * @param ahora - Instante actual.
+ * @returns El más tardío de los dos.
+ */
+export function inicioDeLoReservable(desde: Date, ahora: Date): Date {
+  return ahora.getTime() > desde.getTime() ? ahora : desde;
+}
