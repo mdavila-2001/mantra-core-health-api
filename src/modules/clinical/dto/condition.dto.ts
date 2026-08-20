@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsUUID } from 'class-validator';
+import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
 /** Cuerpo de `POST /clinical/conditions` (UC-08-08). */
 export class CreateConditionDto {
@@ -75,6 +75,18 @@ export class CreateConditionDto {
   lateralityConceptId?: string;
 
   /**
+   * Identificador asociado a clinical course concept.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Curso clínico: agudo/crónico/subagudo/recurrente (concept id). Sin declarar es un dato legítimo, no un olvido.',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  clinicalCourseConceptId?: string;
+
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   @ApiPropertyOptional({
@@ -84,6 +96,39 @@ export class CreateConditionDto {
   @IsOptional()
   @IsDateString()
   onsetAt?: string;
+
+  /**
+   * Valor de expected resolution at mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Fecha esperada de resolución o próxima revisión. Sólo tiene sentido en curso agudo/subagudo.',
+    format: 'date-time',
+  })
+  @IsOptional()
+  @IsDateString()
+  expectedResolutionAt?: string;
+}
+
+/** Cuerpo de `POST /clinical/conditions/:id/change-status` (Patch v4.0.8). */
+export class ChangeConditionClinicalStatusDto {
+  /**
+   * Identificador asociado a new clinical status concept.
+   */
+  @ApiProperty({
+    description:
+      'Estado clínico destino (concept id de `condition-clinical-status`)',
+    format: 'uuid',
+  })
+  @IsUUID()
+  newClinicalStatusConceptId!: string;
+
+  /**
+   * Valor de reason text mantenido por la instancia.
+   */
+  @ApiProperty({ description: 'Motivo del cambio de estado (obligatorio)' })
+  @IsString()
+  reasonText!: string;
 }
 
 /** Respuesta tras registrar una condición. */
@@ -119,6 +164,16 @@ export class ConditionResponseDto {
     nullable: true,
   })
   verificationStatus!: string | null;
+
+  /**
+   * Valor de clinical course mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Curso clínico (concept id)',
+    format: 'uuid',
+    nullable: true,
+  })
+  clinicalCourse!: string | null;
 
   /**
    * Fecha y hora en que se creó el registro.
