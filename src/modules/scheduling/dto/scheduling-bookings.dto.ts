@@ -268,6 +268,23 @@ export class BookingDecisionResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   occurredAt!: string;
+
+  /**
+   * Las solicitudes del paciente que este «sí» dejó sin efecto.
+   *
+   * Al aceptar, las pendientes que chocan con la hora confirmada se cancelan
+   * solas (regla 2 de choques): el paciente no puede estar en dos lugares, y
+   * dejarlas vivas retenía cupos esperando una respuesta que ya no importa.
+   * Vacío cuando nada chocaba — que es el caso de siempre.
+   *
+   * Solo lo llena `accept`; en `reject` no existe la situación.
+   */
+  @ApiProperty({
+    type: [String],
+    required: false,
+    description: 'Citas pendientes canceladas automáticamente por chocar con la aceptada',
+  })
+  desplazadas?: string[];
 }
 
 /** Cuerpo de `POST /scheduling/bookings/{id}/reschedule` (UC-41-08). */
