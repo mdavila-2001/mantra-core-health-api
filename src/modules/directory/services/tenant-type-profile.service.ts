@@ -215,6 +215,8 @@ export class TenantTypeProfileService {
         tenantId,
         carrierCode: input.payer.carrierCode,
         legalName: input.legalName,
+        sigla: input.payer.sigla,
+        address: input.payer.address,
         regulatorIdentifier: input.payer.regulatorIdentifier,
         jurisdictionConceptId: input.payer.jurisdictionConceptId,
         verificationStatusConceptId: INS.VERIFY_PENDING,

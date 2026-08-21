@@ -60,6 +60,10 @@ function build() {
   const publicProfiles = {
     projectOrganization: mockFn().mockResolvedValue('pub-1'),
   };
+  // Por defecto no hay carrier que editar; los tests PAYER lo sobrescriben.
+  const catalogRepo = {
+    findCarrierByTenantId: mockFn(() => Promise.resolve(null)),
+  };
   const service = new DirectoryTenantsService(
     em as any,
     tenantsRepo,
@@ -68,6 +72,7 @@ function build() {
     typeProfile as any,
     tenantAdmin as any,
     publicProfiles as any,
+    catalogRepo as any,
     logger as any,
   );
   return {
@@ -78,6 +83,7 @@ function build() {
     branchesRepo,
     tenantAdmin,
     publicProfiles,
+    catalogRepo,
   };
 }
 
@@ -352,6 +358,59 @@ describe('DirectoryTenantsService', () => {
         d.service.updateTenant('ten-x', { tradeName: 'X' } as any, actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.tenantAdmin.assertCanAdminister).not.toHaveBeenCalled();
+    });
+
+    /**
+     * TP-1 + sigla/dirección: el panel propio de una aseguradora edita su
+     * sigla, dirección y NIT (`regulatorIdentifier`) desde acá.
+     */
+    it('con bloque `payer` y carrier existente, actualiza sólo lo que viene', async () => {
+      const d = build();
+      conOrganizacion(d);
+      const carrier = {
+        sigla: 'OLD',
+        address: 'Dirección vieja',
+        regulatorIdentifier: 'OLD-NIT',
+      };
+      d.catalogRepo.findCarrierByTenantId.mockResolvedValue(carrier);
+
+      await d.service.updateTenant(
+        'ten-1',
+        { payer: { sigla: 'BUPA', address: 'Av. Siempre Viva 742' } } as any,
+        actor,
+      );
+
+      expect(carrier.sigla).toBe('BUPA');
+      expect(carrier.address).toBe('Av. Siempre Viva 742');
+      // No vino en el cuerpo: no se toca.
+      expect(carrier.regulatorIdentifier).toBe('OLD-NIT');
+    });
+
+    it('con bloque `payer` pero sin carrier asociado, no rompe el resto del update', async () => {
+      const d = build();
+      const tenant = conOrganizacion(d);
+      d.catalogRepo.findCarrierByTenantId.mockResolvedValue(null);
+
+      await expect(
+        d.service.updateTenant(
+          'ten-1',
+          {
+            tradeName: 'Clínica del Centro',
+            payer: { sigla: 'BUPA' },
+          } as any,
+          actor,
+        ),
+      ).resolves.toBeDefined();
+      expect(tenant.tradeName).toBe('Clínica del Centro');
+    });
+
+    it('sin bloque `payer`, no consulta el catálogo de aseguradoras', async () => {
+      const d = build();
+      conOrganizacion(d);
+
+      await d.service.updateTenant('ten-1', { tradeName: 'X' } as any, actor);
+
+      expect(d.catalogRepo.findCarrierByTenantId).not.toHaveBeenCalled();
     });
   });
 

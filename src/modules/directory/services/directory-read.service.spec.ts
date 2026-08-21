@@ -10,7 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ForbiddenException } from '@nestjs/common';
 import { DirectoryReadService } from './directory-read.service';
-import { DIR } from '../directory.concepts';
+import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
 import { ResourceNotFoundException } from '../../../common';
 
 const actor = { id: 'u1', roles: ['STAFF'] } as any;
@@ -39,6 +39,10 @@ function build() {
     findByMembership: mockFn(() => Promise.resolve([])),
   };
   const tenantAdmin = { assertCanRead: mockFn(() => Promise.resolve()) };
+  // Por defecto no hay carrier que leer; los tests PAYER lo sobrescriben.
+  const catalogRepo = {
+    findCarrierByTenantId: mockFn(() => Promise.resolve(null)),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new DirectoryReadService(
@@ -48,6 +52,7 @@ function build() {
     branchesRepo as any,
     branchMembershipsRepo as any,
     tenantAdmin as any,
+    catalogRepo as any,
     logger as any,
   );
   return {
@@ -57,6 +62,7 @@ function build() {
     branchesRepo,
     branchMembershipsRepo,
     tenantAdmin,
+    catalogRepo,
   };
 }
 
@@ -331,6 +337,67 @@ describe('DirectoryReadService.listMemberships', () => {
       const salida = await d.service.listMyTenants(actor);
 
       expect(salida.items[0].canAdminister).toBe(false);
+    });
+
+    /**
+     * TP-1 + sigla/dirección: el panel propio de la aseguradora necesita ver
+     * sus datos mínimos (código, NIT, sigla, dirección) sin pedirle el id del
+     * carrier al actor.
+     */
+    it('para un tenant PAYER, incluye los datos de su aseguradora', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-payer', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-payer',
+        code: 'ASE-1',
+        legalName: 'Aseguradora X',
+        tenantTypeConceptId: TENANT_TYPE_CONCEPT_BY_CODE.PAYER,
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      d.catalogRepo.findCarrierByTenantId.mockResolvedValue({
+        carrierCode: 'CAR-1',
+        regulatorIdentifier: 'APS-4821',
+        sigla: 'ASX',
+        address: 'Av. Siempre Viva 742',
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0].payer).toEqual({
+        carrierCode: 'CAR-1',
+        regulatorIdentifier: 'APS-4821',
+        sigla: 'ASX',
+        address: 'Av. Siempre Viva 742',
+      });
+    });
+
+    it('para un tenant que no es PAYER, no incluye el bloque `payer`', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([
+        { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        code: 'CLIN-1',
+        legalName: 'Clínica del Centro SRL',
+        tenantTypeConceptId: 'tt-provider',
+        statusConceptId: 'st-1',
+        verificationStatusConceptId: 'vr-1',
+        legalEntityTypeConceptId: 'le-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const salida = await d.service.listMyTenants(actor);
+
+      expect(salida.items[0]).not.toHaveProperty('payer');
+      expect(d.catalogRepo.findCarrierByTenantId).not.toHaveBeenCalled();
     });
 
     it('sólo pide las membresías ACTIVAS del actor', async () => {

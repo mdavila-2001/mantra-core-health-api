@@ -114,7 +114,12 @@ describe('TenantTypeProfileService', () => {
           legalName: 'Clínica Z',
           countryConceptId: 'country-1',
           jurisdictionConceptId: 'jur-1',
-          payer: { carrierCode: 'C1', regulatorIdentifier: 'R1' },
+          payer: {
+            carrierCode: 'C1',
+            regulatorIdentifier: 'R1',
+            sigla: 'C1',
+            address: 'Calle Falsa 123',
+          },
         }),
       ).toThrow(PreconditionFailedException);
     });
@@ -135,7 +140,12 @@ describe('TenantTypeProfileService', () => {
         service.assertProfileMatchesType({
           tenantType: 'PAYER',
           legalName: 'Aseguradora X',
-          payer: { carrierCode: 'C1', regulatorIdentifier: 'R1' },
+          payer: {
+            carrierCode: 'C1',
+            regulatorIdentifier: 'R1',
+            sigla: 'C1',
+            address: 'Calle Falsa 123',
+          },
         }),
       ).not.toThrow();
 
@@ -222,6 +232,8 @@ describe('TenantTypeProfileService', () => {
           payer: {
             carrierCode: 'C1',
             regulatorIdentifier: 'R1',
+            sigla: 'C1',
+            address: 'Calle Falsa 123',
             jurisdictionConceptId: 'jur-payer',
           },
         }),
@@ -242,6 +254,8 @@ describe('TenantTypeProfileService', () => {
           payer: {
             carrierCode: 'CAR-1',
             regulatorIdentifier: 'APS-4821',
+            sigla: 'ASX',
+            address: 'Av. Siempre Viva 742',
             jurisdictionConceptId: 'jur-1',
           },
         },
@@ -255,6 +269,8 @@ describe('TenantTypeProfileService', () => {
           tenantId: 'tenant-1',
           carrierCode: 'CAR-1',
           regulatorIdentifier: 'APS-4821',
+          sigla: 'ASX',
+          address: 'Av. Siempre Viva 742',
           // Declarar que se es aseguradora no equivale a serlo: lo contrasta la
           // plataforma, igual que con el tenant y con la matrícula del médico.
           verificationStatusConceptId: INS.VERIFY_PENDING,
