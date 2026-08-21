@@ -183,6 +183,12 @@ export class MedicationRequestItemDto {
   patientInstructionsText?: string;
 
   /**
+   * Condición que motiva la prescripción — para qué es la receta (Patch v4.1.6).
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  indicationConditionId?: string;
+
+  /**
    * Valor de signed at mantenido por la instancia.
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
