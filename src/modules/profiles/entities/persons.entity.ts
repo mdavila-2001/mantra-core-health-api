@@ -142,6 +142,29 @@ export class Persons {
   preferredLanguageConceptId?: string;
 
   /**
+   * Ocupación (miembro de `VS_SEGIP_OCCUPATION`), buscable con lupa
+   * (SALUD/Arquitectura/alovida-backlog-procesos.md, T-02).
+   */
+  @Property({
+    fieldName: 'occupation_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  occupationConceptId?: string;
+
+  /**
+   * Ocupación en texto libre, para cuando no está en el catálogo (T-02:
+   * "con una entrada libre al final para lo que no esté"). Sólo tiene sentido
+   * sin `occupationConceptId`; el catálogo gana cuando ambos vienen.
+   */
+  @Property({
+    fieldName: 'occupation_free_text',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  occupationFreeText?: string;
+
+  /**
    * Identificador asociado a merge survivor person.
    */
   @Property({

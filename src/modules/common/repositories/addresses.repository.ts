@@ -28,6 +28,15 @@ export interface CreateAddressData {
    */
   countryConceptId: string;
   /**
+   * Municipio boliviano (miembro de `VS_BO_MUNICIPALITY`).
+   */
+  municipalityConceptId?: string;
+  /**
+   * Identificador asociado a administrative area concept (departamento,
+   * miembro de `VS_BO_DEPARTMENT`).
+   */
+  administrativeAreaConceptId?: string;
+  /**
    * Identificador asociado a use concept.
    */
   useConceptId?: string;
@@ -60,6 +69,8 @@ export class AddressesRepository {
         city: data.city,
         postalCode: data.postalCode,
         countryConceptId: data.countryConceptId,
+        municipalityConceptId: data.municipalityConceptId,
+        administrativeAreaConceptId: data.administrativeAreaConceptId,
         useConceptId: data.useConceptId,
         typeConceptId: data.typeConceptId,
         ...createdBy(data.actorUserId),
