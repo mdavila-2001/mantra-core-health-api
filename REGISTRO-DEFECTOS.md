@@ -293,6 +293,29 @@ Quedan **25 módulos** en esa situación; el siguiente grande es `procedures_per
 
 ## Pruebas y verificación
 
+- **F-30 · La suite `tutorial.engine.spec.ts` del front falla ENTERA (18/18) en `dev`.**
+  Medido con `git stash`: no es de ningún carril reciente. El motor y el spec entraron juntos
+  en `dde4600` (14/08), un commit rotulado «wip: snapshot del working tree» que nunca se
+  verificó en verde, y **ninguno de los dos se tocó desde entonces**. No es deriva de
+  contrato: cada firma que el spec invoca existe con esa forma, no usa el catálogo real de
+  tutoriales (fabrica los suyos) y la única ruta que toca —`/dashboard`— sigue declarada. Que
+  caigan los 18 de 18 mientras `tutorial-overlay.spec.ts` —misma inyección— pasa, apunta a
+  **fallo de nivel suite** (hook o error no capturado), no a aserciones. Sospecha principal:
+  el `afterEach` con `localStorage.clear()`, único hook que los specs hermanos sanos no
+  tienen, y el mismo gotcha jsdom por el que `theme.service.spec` inyecta un `Storage` falso.
+  Se cierra leyendo el primer error de una corrida acotada a ese archivo — es idéntico en los
+  18 y decide entre las tres causas. **No tocar las aserciones**: describen el motor correcto.
+- **F-31 · «Tu organización» se ofrece a sesiones sin ninguna membresía** (2 fallas en
+  `navigation.service.spec.ts`, front). TP-1 declaró la entrada **sin `roles` a propósito** y
+  el motivo es correcto: el permiso que importa —owner/admin/staff— es una fila de
+  `tenant_memberships`, no un rol del token, y filtrar por rol global dejaría fuera a la
+  recepcionista, que es de quien es la pantalla. Pero el efecto colateral es que **un
+  paciente sin nada ve el rótulo «Administración»**, que es exactamente lo que esos dos tests
+  fueron escritos para impedir. No hay agujero de seguridad (el guard y la API mandan igual).
+  El dato que faltaba ya viaja en el token: el claim `tenants`. Se cierra con un
+  `requiresTenant` en `AppSection` filtrado dentro de `isVisibleTo` —para que el guard y el
+  registro de tutoriales, que preguntan por la misma función, queden coherentes solos—, no
+  actualizando los `toEqual`: consagrarlos borraría la regla que protegen.
 - **1 falla unitaria preexistente**: `local-disk-file-storage.adapter.spec.ts`, timeout.
 - **4 fallas de integración preexistentes**: `vademecum` (falta un patch de seed) e
   `identity-verification-cycle` (concept id).
