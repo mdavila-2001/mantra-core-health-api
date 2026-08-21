@@ -53,9 +53,13 @@ export class FormsInstancesService {
         dto.resourceTypeConceptId ?? FORMS.RESOURCE_TYPE_PATIENT;
       const schemaVersion = dto.schemaVersion ?? 1;
 
+      // El duplicado se busca por recurso y versión, SIN el tipo: un mismo
+      // encuentro no puede tener dos instancias de la misma versión aunque una
+      // vieja quedara tipada como paciente (era el default silencioso antes de
+      // que existiera `RESOURCE_TYPE_ENCOUNTER`). Con el tipo en la clave, el
+      // 409 se saltearía justo en las bases que ya tienen esas filas.
       const dup = await this.instancesRepo.findByResourceAndVersion(
         tx,
-        resourceTypeConceptId,
         dto.resourceId,
         schemaVersion,
       );
