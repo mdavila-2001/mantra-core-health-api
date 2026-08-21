@@ -14,6 +14,12 @@
 #     Para relocalizar a una carpeta del host, ver el bloque comentado al final.
 #   - Los scripts de docker/db-init/*.sh DEBEN quedar con fin de línea LF; eso lo
 #     garantiza .gitattributes (`*.sh text eol=lf`) para los que trabajan en Windows.
+#   - Arranque recomendado: `yarn docker:up` (no `docker compose up -d` a
+#     secas). Purga sola la caché de build vieja antes de levantar el stack
+#     (`scripts/docker-prune.sh`, idempotente y sin costo si no hay nada que
+#     purgar) — así ninguna máquina que corra el proyecto acumula los ~20 GB
+#     de caché muerta que se juntaron acá. Reconstruir la imagen de la API
+#     pasa por el mismo filtro con `yarn docker:api:refresh`.
 # =========================================================================
 name: ${COMPOSE_PROJECT_NAME:-mantra-redesa}
 
