@@ -931,6 +931,33 @@ describe('SchedulingCatalogService', () => {
       ]);
     }
 
+    it('el mensaje dice CUÁL agenda y CUÁNDO, no sólo que hay un choque', async () => {
+      // El detalle viajaba en `details` y el traductor de errores del front lo
+      // descarta, así que la persona leía «se superpone con esa franja» y no
+      // tenía forma de saber contra qué. Con varias agendas por médico en los
+      // datos sembrados, publicar se volvía un callejón sin salida.
+      const d = buildCatalog();
+      conRecurso(d);
+      conAgendaEnLaClinica(d, {
+        dayOfWeek: 1,
+        startTime: '08:00:00',
+        endTime: '18:00:00',
+      });
+
+      await expect(
+        d.service.createTemplate(
+          CONSULTORIO,
+          {
+            name: 'Mañanas',
+            rules: [
+              { dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' },
+            ],
+          },
+          profesional,
+        ),
+      ).rejects.toThrow(/Clínica del centro.*[Ll]unes 08:00:00–18:00:00/);
+    });
+
     /** El criterio de aceptación del prompt, literal. */
     it('lunes 9–12 en dos sedes distintas se rechaza con 422', async () => {
       const d = buildCatalog();

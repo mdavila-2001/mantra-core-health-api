@@ -673,8 +673,15 @@ export class SchedulingCatalogService {
 
       const choque = nuevas.find((nueva) => seSolapan(nueva, existente));
       if (choque) {
+        // El mensaje dice CUÁL agenda y CUÁNDO, no sólo que hay un choque.
+        // Antes era «Ya tenés una agenda publicada que se superpone con esa
+        // franja» y el detalle viajaba en `details`, que el traductor de
+        // errores del front descarta: la persona leía que no podía publicar
+        // y no tenía forma de saber contra qué. Con varias agendas por
+        // médico en los datos sembrados, eso es un callejón sin salida.
         throw new PreconditionFailedException(
-          'Ya tenés una agenda publicada que se superpone con esa franja',
+          `Ya tenés «${otra.resourceName}» el ${existente.etiqueta}, que se cruza con este ` +
+            'horario. Cambiá el horario o el día, o editá esa otra agenda.',
           {
             dayOfWeek: otra.rule.dayOfWeek,
             nueva: choque.etiqueta,
