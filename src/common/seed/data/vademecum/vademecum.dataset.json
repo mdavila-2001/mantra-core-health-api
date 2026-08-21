@@ -683,31 +683,21 @@
       "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "Bleeding",
-        "Skin necrosis",
-        "Purple toe syndrome"
-      ]
+      "value_json": ["Bleeding", "Skin necrosis", "Purple toe syndrome"]
     },
     {
       "id": "d8a0cb5f-4297-5456-9e21-e39e519c8bcd",
       "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Active bleeding",
-        "Pregnancy",
-        "Severe hepatic disease"
-      ]
+      "value_json": ["Active bleeding", "Pregnancy", "Severe hepatic disease"]
     },
     {
       "id": "d9cf4d2c-2fad-5d68-83c7-5e5c04ff347c",
       "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet"
-      ]
+      "value_json": ["oral tablet"]
     },
     {
       "id": "a50757ec-a3bb-295c-8d44-a0e1084348fd",
@@ -725,19 +715,14 @@
       "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "INR",
-        "Signs of bleeding"
-      ]
+      "value_json": ["INR", "Signs of bleeding"]
     },
     {
       "id": "7e0f33ab-b244-57f3-8746-94b487e65242",
       "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral"
-      ]
+      "value_json": ["oral"]
     },
     {
       "id": "cb1e88c3-d01a-52b2-a731-da12e569dd88",
@@ -751,13 +736,7 @@
       "concept_id": "f0e9e850-ea9c-5e64-a230-309e486a647a",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "1 mg",
-        "2 mg",
-        "2.5 mg",
-        "5 mg",
-        "10 mg"
-      ]
+      "value_json": ["1 mg", "2 mg", "2.5 mg", "5 mg", "10 mg"]
     },
     {
       "id": "c9c51f88-ad76-59ee-88e8-397ceaec7c96",
@@ -794,9 +773,7 @@
       "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "powder for solution for injection"
-      ]
+      "value_json": ["powder for solution for injection"]
     },
     {
       "id": "9b762e1c-6e9a-3fe0-b6ef-314016170513",
@@ -815,20 +792,14 @@
       "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Signs of hypersensitivity",
-        "Renal and hepatic function"
-      ]
+      "value_json": ["Signs of hypersensitivity", "Renal and hepatic function"]
     },
     {
       "id": "d128cc16-5d2d-508b-b80a-4a9e4f792d39",
       "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "intravenous",
-        "intramuscular"
-      ]
+      "value_json": ["intravenous", "intramuscular"]
     },
     {
       "id": "df317d81-7573-508c-a242-253e3614e412",
@@ -842,12 +813,7 @@
       "concept_id": "9460d438-5066-52f2-a1a3-5e2c14daa6fd",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "250 mg",
-        "500 mg",
-        "1 g",
-        "2 g"
-      ]
+      "value_json": ["250 mg", "500 mg", "1 g", "2 g"]
     },
     {
       "id": "c075839c-e06c-524b-bbe1-6ae4daa13598",
@@ -861,60 +827,42 @@
       "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "Peripheral edema",
-        "Flushing",
-        "Headache",
-        "Dizziness"
-      ]
+      "value_json": ["Peripheral edema", "Flushing", "Headache", "Dizziness"]
     },
     {
       "id": "711ddf72-ebab-5975-8737-a1f9dd023eb4",
       "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Cardiogenic shock",
-        "Severe aortic stenosis"
-      ]
+      "value_json": ["Cardiogenic shock", "Severe aortic stenosis"]
     },
     {
       "id": "2dec1f71-c0b3-5c89-ab00-e957be6fa497",
       "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet"
-      ]
+      "value_json": ["oral tablet"]
     },
     {
       "id": "6eb3c179-bba1-507c-b398-b9b8559b56d6",
       "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
       "property_code": "indications",
       "data_type": "json",
-      "value_json": [
-        "Hypertension",
-        "Chronic stable angina"
-      ]
+      "value_json": ["Hypertension", "Chronic stable angina"]
     },
     {
       "id": "8f0b2340-995b-5be4-8022-6114b79b8901",
       "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Blood pressure",
-        "Edema"
-      ]
+      "value_json": ["Blood pressure", "Edema"]
     },
     {
       "id": "63342196-09c1-5300-b0b6-46e9454ab1f9",
       "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral"
-      ]
+      "value_json": ["oral"]
     },
     {
       "id": "19b5d859-bb58-5d91-97e6-0ad71e392917",
@@ -928,11 +876,7 @@
       "concept_id": "04606240-e89a-53b3-ac81-60b9044db839",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "2.5 mg",
-        "5 mg",
-        "10 mg"
-      ]
+      "value_json": ["2.5 mg", "5 mg", "10 mg"]
     },
     {
       "id": "0d569c3a-b98e-5c95-a59a-890ed5b00a23",
@@ -946,11 +890,7 @@
       "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "Bleeding",
-        "Thrombocytopenia",
-        "Injection site hematoma"
-      ]
+      "value_json": ["Bleeding", "Thrombocytopenia", "Injection site hematoma"]
     },
     {
       "id": "bf8a6f8e-94f6-5e73-a202-2c7ebd241c6c",
@@ -967,9 +907,7 @@
       "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "prefilled syringe solution for injection"
-      ]
+      "value_json": ["prefilled syringe solution for injection"]
     },
     {
       "id": "d8d19d38-e47a-52f0-b5d4-2f378e7edf4b",
@@ -998,10 +936,7 @@
       "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "subcutaneous",
-        "intravenous"
-      ]
+      "value_json": ["subcutaneous", "intravenous"]
     },
     {
       "id": "e43074cf-980e-5884-ad30-8f50b5b1f440",
@@ -1015,12 +950,7 @@
       "concept_id": "1c45cd99-815b-562e-8d17-723f2fa3ac1c",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "40 mg",
-        "60 mg",
-        "80 mg",
-        "100 mg"
-      ]
+      "value_json": ["40 mg", "60 mg", "80 mg", "100 mg"]
     },
     {
       "id": "df474087-bf4a-546c-8228-66c245f62334",
@@ -1034,30 +964,21 @@
       "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "Nephrotoxicity",
-        "Ototoxicity",
-        "Neuromuscular blockade"
-      ]
+      "value_json": ["Nephrotoxicity", "Ototoxicity", "Neuromuscular blockade"]
     },
     {
       "id": "e20152c4-e422-5f2a-9cd4-71a2b18aa30d",
       "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Hypersensitivity to aminoglycosides",
-        "Myasthenia gravis"
-      ]
+      "value_json": ["Hypersensitivity to aminoglycosides", "Myasthenia gravis"]
     },
     {
       "id": "ee28231c-e4de-53fe-88af-8d66bfab9a5d",
       "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "solution for injection"
-      ]
+      "value_json": ["solution for injection"]
     },
     {
       "id": "b126a0c0-f06e-5dd7-930a-56e59dbedd83",
@@ -1086,10 +1007,7 @@
       "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "intravenous",
-        "intramuscular"
-      ]
+      "value_json": ["intravenous", "intramuscular"]
     },
     {
       "id": "fa668f19-58c6-5904-920b-1443533f03fe",
@@ -1103,11 +1021,7 @@
       "concept_id": "52eac36a-e5f5-5609-a8d7-74e251121575",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "40 mg/mL",
-        "80 mg",
-        "120 mg"
-      ]
+      "value_json": ["40 mg/mL", "80 mg", "120 mg"]
     },
     {
       "id": "d938e8d7-e542-5711-9cae-b5b249ac2303",
@@ -1133,10 +1047,7 @@
       "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Hypersensitivity to PPIs",
-        "Concomitant rilpivirine"
-      ]
+      "value_json": ["Hypersensitivity to PPIs", "Concomitant rilpivirine"]
     },
     {
       "id": "ae9bd150-a271-55e2-8a3c-b670f2c31761",
@@ -1165,20 +1076,14 @@
       "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Magnesium (long-term)",
-        "Reassess need periodically"
-      ]
+      "value_json": ["Magnesium (long-term)", "Reassess need periodically"]
     },
     {
       "id": "c860c8d6-a074-541c-a41c-3665bfddb9a2",
       "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral",
-        "intravenous"
-      ]
+      "value_json": ["oral", "intravenous"]
     },
     {
       "id": "b9ed0b40-59c3-8e59-a51a-ea74b4947d9b",
@@ -1192,11 +1097,7 @@
       "concept_id": "6b103f8d-4c19-59d1-907e-9df1227f825b",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "10 mg",
-        "20 mg",
-        "40 mg"
-      ]
+      "value_json": ["10 mg", "20 mg", "40 mg"]
     },
     {
       "id": "de158008-fe3f-5b68-b0ef-a28ded35acdf",
@@ -1210,21 +1111,14 @@
       "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "Tremor",
-        "Tachycardia",
-        "Palpitations",
-        "Hypokalemia"
-      ]
+      "value_json": ["Tremor", "Tachycardia", "Palpitations", "Hypokalemia"]
     },
     {
       "id": "9b1c1362-35fd-56c8-91d7-49729c48f596",
       "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Hypersensitivity to salbutamol"
-      ]
+      "value_json": ["Hypersensitivity to salbutamol"]
     },
     {
       "id": "82a111a7-22c6-5f3c-af62-165952c5ef68",
@@ -1264,10 +1158,7 @@
       "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "inhalation",
-        "oral"
-      ]
+      "value_json": ["inhalation", "oral"]
     },
     {
       "id": "9305032f-0364-5957-b355-a59542077e37",
@@ -1281,11 +1172,7 @@
       "concept_id": "9d6551bf-eeca-5436-8862-e3ada816cad6",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "100 mcg/actuation",
-        "2.5 mg/2.5 mL",
-        "5 mg/mL"
-      ]
+      "value_json": ["100 mcg/actuation", "2.5 mg/2.5 mL", "5 mg/mL"]
     },
     {
       "id": "1fa69a11-440e-5d8c-a669-0f293245e6e1",
@@ -1322,40 +1209,28 @@
       "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet"
-      ]
+      "value_json": ["oral tablet"]
     },
     {
       "id": "d91fd391-cc16-5471-aeba-ac4020d2db47",
       "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
       "property_code": "indications",
       "data_type": "json",
-      "value_json": [
-        "Hypertension",
-        "Diabetic nephropathy",
-        "Heart failure"
-      ]
+      "value_json": ["Hypertension", "Diabetic nephropathy", "Heart failure"]
     },
     {
       "id": "f8337a0f-7419-790c-84c5-900d44c8b184",
       "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Serum potassium",
-        "Renal function",
-        "Blood pressure"
-      ]
+      "value_json": ["Serum potassium", "Renal function", "Blood pressure"]
     },
     {
       "id": "1b5ce56f-019c-542c-9972-5a3e34ad8f58",
       "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral"
-      ]
+      "value_json": ["oral"]
     },
     {
       "id": "c5ff6a65-c996-55a0-91b3-57b874426b8b",
@@ -1369,11 +1244,7 @@
       "concept_id": "d2167327-b864-5567-8e20-13772714fad9",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "25 mg",
-        "50 mg",
-        "100 mg"
-      ]
+      "value_json": ["25 mg", "50 mg", "100 mg"]
     },
     {
       "id": "b0737e35-38fc-56f9-a4c9-5db1b154cbf3",
@@ -1387,10 +1258,7 @@
       "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "Hepatotoxicity in overdose",
-        "Rare skin reactions"
-      ]
+      "value_json": ["Hepatotoxicity in overdose", "Rare skin reactions"]
     },
     {
       "id": "2efd8c25-d20c-175b-80d1-2d45e1d7490b",
@@ -1419,31 +1287,21 @@
       "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
       "property_code": "indications",
       "data_type": "json",
-      "value_json": [
-        "Mild to moderate pain",
-        "Fever"
-      ]
+      "value_json": ["Mild to moderate pain", "Fever"]
     },
     {
       "id": "f8664772-73ac-522c-845b-430d280b36cc",
       "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Total daily dose",
-        "Liver function in high-risk patients"
-      ]
+      "value_json": ["Total daily dose", "Liver function in high-risk patients"]
     },
     {
       "id": "085af959-595d-5195-9578-dffd0c4dd11f",
       "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral",
-        "rectal",
-        "intravenous"
-      ]
+      "value_json": ["oral", "rectal", "intravenous"]
     },
     {
       "id": "ab0f5ddb-086b-59a2-a02c-51fa81709ea8",
@@ -1457,11 +1315,7 @@
       "concept_id": "4f65a291-89bd-5522-8e92-a02edf0dd957",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "500 mg",
-        "650 mg",
-        "1 g"
-      ]
+      "value_json": ["500 mg", "650 mg", "1 g"]
     },
     {
       "id": "f1178981-80d8-5e67-8e7d-544ee01ad146",
@@ -1487,55 +1341,35 @@
       "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Anuria",
-        "Severe hypokalemia",
-        "Severe hyponatremia"
-      ]
+      "value_json": ["Anuria", "Severe hypokalemia", "Severe hyponatremia"]
     },
     {
       "id": "a99aad03-d933-5bda-aa09-d5e09c6f3288",
       "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet",
-        "oral solution",
-        "solution for injection"
-      ]
+      "value_json": ["oral tablet", "oral solution", "solution for injection"]
     },
     {
       "id": "21c93d54-8243-54c9-8d81-41b60b351849",
       "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
       "property_code": "indications",
       "data_type": "json",
-      "value_json": [
-        "Edema",
-        "Heart failure",
-        "Hypertension"
-      ]
+      "value_json": ["Edema", "Heart failure", "Hypertension"]
     },
     {
       "id": "9ec418a1-62b3-526f-93b0-0641ff2a83c7",
       "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Electrolytes",
-        "Renal function",
-        "Fluid balance"
-      ]
+      "value_json": ["Electrolytes", "Renal function", "Fluid balance"]
     },
     {
       "id": "678658ec-2462-500d-aef2-36ea19c984f8",
       "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral",
-        "intravenous",
-        "intramuscular"
-      ]
+      "value_json": ["oral", "intravenous", "intramuscular"]
     },
     {
       "id": "c9bea503-1b8e-55ac-8d75-ebfd85dbf88e",
@@ -1549,12 +1383,7 @@
       "concept_id": "4fa33a90-177c-5474-9414-ec09e88fb194",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "20 mg",
-        "40 mg",
-        "80 mg",
-        "10 mg/mL"
-      ]
+      "value_json": ["20 mg", "40 mg", "80 mg", "10 mg/mL"]
     },
     {
       "id": "c7d850c5-db95-5c27-ad0a-5ec0a7f42e9e",
@@ -1579,49 +1408,35 @@
       "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "eGFR below 30 mL/min/1.73m2",
-        "Metabolic acidosis"
-      ]
+      "value_json": ["eGFR below 30 mL/min/1.73m2", "Metabolic acidosis"]
     },
     {
       "id": "763c7289-5027-5ea2-a664-54b5b8716c2e",
       "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet",
-        "extended-release tablet"
-      ]
+      "value_json": ["oral tablet", "extended-release tablet"]
     },
     {
       "id": "ff2d4fd2-1bbd-5400-b55f-1c9c1a5b127e",
       "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
       "property_code": "indications",
       "data_type": "json",
-      "value_json": [
-        "Type 2 diabetes mellitus"
-      ]
+      "value_json": ["Type 2 diabetes mellitus"]
     },
     {
       "id": "889787c7-332e-5546-9160-6972ab047759",
       "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Renal function",
-        "HbA1c",
-        "Vitamin B12 (long-term)"
-      ]
+      "value_json": ["Renal function", "HbA1c", "Vitamin B12 (long-term)"]
     },
     {
       "id": "2b543a3f-d0f2-55ee-b32a-a6727c446042",
       "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral"
-      ]
+      "value_json": ["oral"]
     },
     {
       "id": "65010365-5109-5bc7-9e6c-9a69ef885406",
@@ -1635,11 +1450,7 @@
       "concept_id": "531c84f1-a6fc-5044-92a5-228970533b8e",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "500 mg",
-        "850 mg",
-        "1000 mg"
-      ]
+      "value_json": ["500 mg", "850 mg", "1000 mg"]
     },
     {
       "id": "fe28ffa0-452e-51cf-a634-3e9b25ba6d21",
@@ -1653,21 +1464,14 @@
       "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "Diarrhea",
-        "Rash",
-        "Nausea",
-        "Hypersensitivity reactions"
-      ]
+      "value_json": ["Diarrhea", "Rash", "Nausea", "Hypersensitivity reactions"]
     },
     {
       "id": "eaa3da2c-0021-50b9-aeaa-84775c74462f",
       "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Hypersensitivity to penicillins"
-      ]
+      "value_json": ["Hypersensitivity to penicillins"]
     },
     {
       "id": "d0458ccc-c244-1438-b740-5e4242d88f26",
@@ -1707,9 +1511,7 @@
       "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral"
-      ]
+      "value_json": ["oral"]
     },
     {
       "id": "d788165b-9dfc-5ecf-889a-c9e62e364f6f",
@@ -1723,11 +1525,7 @@
       "concept_id": "17e9892e-090d-57e2-89c4-fea98c61d860",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "250 mg",
-        "500 mg",
-        "875 mg"
-      ]
+      "value_json": ["250 mg", "500 mg", "875 mg"]
     },
     {
       "id": "159efb70-332a-5a9d-a6ad-bf52bac6af1e",
@@ -1741,12 +1539,7 @@
       "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
       "property_code": "adverse_effects",
       "data_type": "json",
-      "value_json": [
-        "QT prolongation",
-        "Diarrhea",
-        "Nausea",
-        "Hepatotoxicity"
-      ]
+      "value_json": ["QT prolongation", "Diarrhea", "Nausea", "Hepatotoxicity"]
     },
     {
       "id": "6cef3696-470e-85dd-bbcc-f6d50f5a7114",
@@ -1785,20 +1578,14 @@
       "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "QT interval in at-risk patients",
-        "Liver function"
-      ]
+      "value_json": ["QT interval in at-risk patients", "Liver function"]
     },
     {
       "id": "b6c58872-7ceb-5a97-b2ea-7febe60446aa",
       "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral",
-        "intravenous"
-      ]
+      "value_json": ["oral", "intravenous"]
     },
     {
       "id": "c3eb01dd-72dd-5f9a-895c-8f40bb923ac3",
@@ -1812,11 +1599,7 @@
       "concept_id": "b384ee6d-41c3-8648-9ad4-de400d97245b",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "250 mg",
-        "500 mg",
-        "600 mg"
-      ]
+      "value_json": ["250 mg", "500 mg", "600 mg"]
     },
     {
       "id": "1014bf7f-40c0-5984-9d29-2a3720eb542e",
@@ -1853,9 +1636,7 @@
       "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Hypersensitivity to glycopeptides"
-      ]
+      "value_json": ["Hypersensitivity to glycopeptides"]
     },
     {
       "id": "dc2d62b1-fa1c-5402-bbd0-91bbf1128aa1",
@@ -1883,21 +1664,14 @@
       "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Trough serum levels",
-        "Serum creatinine"
-      ]
+      "value_json": ["Trough serum levels", "Serum creatinine"]
     },
     {
       "id": "001168b4-bfce-5530-9de8-ddc28c5e0bbd",
       "concept_id": "d7662f9c-4333-7445-a736-e13d7043a6b2",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "intravenous",
-        "oral",
-        "ophthalmic"
-      ]
+      "value_json": ["intravenous", "oral", "ophthalmic"]
     },
     {
       "id": "06f5d0fc-5e77-524a-b3f7-af260c91a769",
@@ -1963,43 +1737,28 @@
       "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet",
-        "oral suspension",
-        "solution for infusion"
-      ]
+      "value_json": ["oral tablet", "oral suspension", "solution for infusion"]
     },
     {
       "id": "80c492ce-32a0-55f1-b3ec-ea730387e611",
       "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
       "property_code": "indications",
       "data_type": "json",
-      "value_json": [
-        "Pain",
-        "Inflammation",
-        "Fever"
-      ]
+      "value_json": ["Pain", "Inflammation", "Fever"]
     },
     {
       "id": "c9896f97-3cc0-5c91-b39d-0d02b1cb2c8b",
       "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
       "property_code": "monitoring",
       "data_type": "json",
-      "value_json": [
-        "Renal function",
-        "Blood pressure",
-        "GI symptoms"
-      ]
+      "value_json": ["Renal function", "Blood pressure", "GI symptoms"]
     },
     {
       "id": "e74db939-cdcb-5648-8197-5e296e4918a9",
       "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral",
-        "intravenous"
-      ]
+      "value_json": ["oral", "intravenous"]
     },
     {
       "id": "ff9c1b51-9bd0-5a35-b958-810777052af3",
@@ -2013,12 +1772,7 @@
       "concept_id": "6b9d91d3-30dc-5ded-856f-7f1a1aed7a0f",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "200 mg",
-        "400 mg",
-        "600 mg",
-        "800 mg"
-      ]
+      "value_json": ["200 mg", "400 mg", "600 mg", "800 mg"]
     },
     {
       "id": "9c3f6f47-ae58-5970-96e8-9a91730d07cc",
@@ -2043,30 +1797,21 @@
       "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
       "property_code": "contraindications",
       "data_type": "json",
-      "value_json": [
-        "Active liver disease",
-        "Pregnancy",
-        "Breastfeeding"
-      ]
+      "value_json": ["Active liver disease", "Pregnancy", "Breastfeeding"]
     },
     {
       "id": "cf28dd91-f6d2-28cd-abe6-e34e696ad142",
       "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet"
-      ]
+      "value_json": ["oral tablet"]
     },
     {
       "id": "a1dc9e08-5857-5683-b63a-102474c91d26",
       "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
       "property_code": "indications",
       "data_type": "json",
-      "value_json": [
-        "Hypercholesterolemia",
-        "Cardiovascular risk reduction"
-      ]
+      "value_json": ["Hypercholesterolemia", "Cardiovascular risk reduction"]
     },
     {
       "id": "f9a1d957-323a-50e1-a4c4-d8f525a52506",
@@ -2084,9 +1829,7 @@
       "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral"
-      ]
+      "value_json": ["oral"]
     },
     {
       "id": "51890d6b-7763-55ca-a7be-291c9cfe8a98",
@@ -2100,12 +1843,7 @@
       "concept_id": "78ae3c76-fad6-570f-bef0-221fce0178af",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "10 mg",
-        "20 mg",
-        "40 mg",
-        "80 mg"
-      ]
+      "value_json": ["10 mg", "20 mg", "40 mg", "80 mg"]
     },
     {
       "id": "2e9e31d4-0b94-5cce-b9a2-e60c11705627",
@@ -2141,11 +1879,7 @@
       "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
       "property_code": "dose_forms",
       "data_type": "json",
-      "value_json": [
-        "oral tablet",
-        "oral suspension",
-        "solution for infusion"
-      ]
+      "value_json": ["oral tablet", "oral suspension", "solution for infusion"]
     },
     {
       "id": "39c1e5e6-e454-5d34-8936-e0579798d214",
@@ -2174,10 +1908,7 @@
       "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
       "property_code": "routes",
       "data_type": "json",
-      "value_json": [
-        "oral",
-        "intravenous"
-      ]
+      "value_json": ["oral", "intravenous"]
     },
     {
       "id": "7d9a721e-513a-5ad4-a3ff-b3f998b4e78f",
@@ -2191,11 +1922,7 @@
       "concept_id": "2c1fe7bd-e0bd-5c38-8adb-ec1a5c924a32",
       "property_code": "strengths",
       "data_type": "json",
-      "value_json": [
-        "250 mg",
-        "500 mg",
-        "750 mg"
-      ]
+      "value_json": ["250 mg", "500 mg", "750 mg"]
     },
     {
       "id": "66d8b335-e00c-577a-a168-c4da49e70897",

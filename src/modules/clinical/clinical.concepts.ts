@@ -324,6 +324,116 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     MEDICATION_SALBUTAMOL: { code: 'R03AC02', display: 'Salbutamol' },
     MEDICATION_LORATADINA: { code: 'R06AX13', display: 'Loratadina' },
 
+    /* --- vademécum esencial (LINAME / lista modelo OMS) ------------------------
+       Los doce de arriba eran un mínimo para poder ejercitar la receta. Éstos
+       llevan el catálogo a la práctica ambulatoria real: son los que un médico
+       de primer nivel prescribe casi todos los días.
+
+       El criterio de selección es la **lista de medicamentos esenciales** —la
+       LINAME boliviana, alineada con la lista modelo de la OMS—, agrupada por
+       acción terapéutica. No es el vademécum comercial completo: no hay marcas
+       ni presentaciones, porque el modelo prescribe por principio activo.
+
+       Nombres en **DCI en castellano** (denominación común internacional) y
+       códigos **ATC de la OMS**, los mismos que ya usaban los doce originales.
+       Cada uno lleva su definición en `terminology-designations.es.ts`: sin ella
+       el glosario lo mostraría mudo, y su prueba de cobertura falla. */
+
+    /* Analgesia, fiebre e inflamación */
+    MEDICATION_ACIDO_ACETILSALICILICO: {
+      code: 'N02BA01',
+      display: 'Ácido acetilsalicílico',
+    },
+    MEDICATION_DICLOFENACO: { code: 'M01AB05', display: 'Diclofenaco' },
+    MEDICATION_NAPROXENO: { code: 'M01AE02', display: 'Naproxeno' },
+    MEDICATION_TRAMADOL: { code: 'N02AX02', display: 'Tramadol' },
+    MEDICATION_MORFINA: { code: 'N02AA01', display: 'Morfina' },
+
+    /* Antibióticos */
+    MEDICATION_AMOXICILINA_CLAVULANICO: {
+      code: 'J01CR02',
+      display: 'Amoxicilina con ácido clavulánico',
+    },
+    MEDICATION_BENCILPENICILINA: {
+      code: 'J01CE01',
+      display: 'Bencilpenicilina',
+    },
+    MEDICATION_CEFTRIAXONA: { code: 'J01DD04', display: 'Ceftriaxona' },
+    MEDICATION_CLARITROMICINA: { code: 'J01FA09', display: 'Claritromicina' },
+    MEDICATION_CIPROFLOXACINO: { code: 'J01MA02', display: 'Ciprofloxacino' },
+    MEDICATION_COTRIMOXAZOL: {
+      code: 'J01EE01',
+      display: 'Sulfametoxazol con trimetoprima',
+    },
+    MEDICATION_DOXICICLINA: { code: 'J01AA02', display: 'Doxiciclina' },
+    MEDICATION_GENTAMICINA: { code: 'J01GB03', display: 'Gentamicina' },
+    MEDICATION_METRONIDAZOL: { code: 'J01XD01', display: 'Metronidazol' },
+    MEDICATION_NITROFURANTOINA: { code: 'J01XE01', display: 'Nitrofurantoína' },
+
+    /* Antifúngicos y antiparasitarios */
+    MEDICATION_FLUCONAZOL: { code: 'J02AC01', display: 'Fluconazol' },
+    MEDICATION_ALBENDAZOL: { code: 'P02CA03', display: 'Albendazol' },
+    MEDICATION_MEBENDAZOL: { code: 'P02CA01', display: 'Mebendazol' },
+
+    /* Corazón, presión y circulación */
+    MEDICATION_AMLODIPINO: { code: 'C08CA01', display: 'Amlodipino' },
+    MEDICATION_ATENOLOL: { code: 'C07AB03', display: 'Atenolol' },
+    MEDICATION_BISOPROLOL: { code: 'C07AB07', display: 'Bisoprolol' },
+    MEDICATION_FUROSEMIDA: { code: 'C03CA01', display: 'Furosemida' },
+    MEDICATION_HIDROCLOROTIAZIDA: {
+      code: 'C03AA03',
+      display: 'Hidroclorotiazida',
+    },
+    MEDICATION_ESPIRONOLACTONA: { code: 'C03DA01', display: 'Espironolactona' },
+    MEDICATION_SIMVASTATINA: { code: 'C10AA01', display: 'Simvastatina' },
+    MEDICATION_DIGOXINA: { code: 'C01AA05', display: 'Digoxina' },
+    MEDICATION_WARFARINA: { code: 'B01AA03', display: 'Warfarina' },
+
+    /* Diabetes, tiroides y hormonas */
+    MEDICATION_INSULINA_NPH: {
+      code: 'A10AC01',
+      display: 'Insulina isófana (NPH)',
+    },
+    MEDICATION_INSULINA_RAPIDA: {
+      code: 'A10AB01',
+      display: 'Insulina humana rápida',
+    },
+    MEDICATION_GLIBENCLAMIDA: { code: 'A10BB01', display: 'Glibenclamida' },
+    MEDICATION_LEVOTIROXINA: { code: 'H03AA01', display: 'Levotiroxina' },
+    MEDICATION_PREDNISONA: { code: 'H02AB07', display: 'Prednisona' },
+    MEDICATION_DEXAMETASONA: { code: 'H02AB02', display: 'Dexametasona' },
+
+    /* Estómago e intestino */
+    MEDICATION_METOCLOPRAMIDA: { code: 'A03FA01', display: 'Metoclopramida' },
+    MEDICATION_SALES_REHIDRATACION: {
+      code: 'A07CA01',
+      display: 'Sales de rehidratación oral',
+    },
+
+    /* Respiratorio y alergia */
+    MEDICATION_CETIRIZINA: { code: 'R06AE07', display: 'Cetirizina' },
+    MEDICATION_BUDESONIDA: { code: 'R03BA02', display: 'Budesonida' },
+    MEDICATION_IPRATROPIO: {
+      code: 'R03BB01',
+      display: 'Bromuro de ipratropio',
+    },
+
+    /* Sistema nervioso */
+    MEDICATION_DIAZEPAM: { code: 'N05BA01', display: 'Diazepam' },
+    MEDICATION_CLONAZEPAM: { code: 'N03AE01', display: 'Clonazepam' },
+    MEDICATION_CARBAMAZEPINA: { code: 'N03AF01', display: 'Carbamazepina' },
+    MEDICATION_ACIDO_VALPROICO: { code: 'N03AG01', display: 'Ácido valproico' },
+    MEDICATION_FENITOINA: { code: 'N03AB02', display: 'Fenitoína' },
+    MEDICATION_FLUOXETINA: { code: 'N06AB03', display: 'Fluoxetina' },
+    MEDICATION_SERTRALINA: { code: 'N06AB06', display: 'Sertralina' },
+    MEDICATION_AMITRIPTILINA: { code: 'N06AA09', display: 'Amitriptilina' },
+    MEDICATION_HALOPERIDOL: { code: 'N05AD01', display: 'Haloperidol' },
+
+    /* Vitaminas, minerales y otros */
+    MEDICATION_SULFATO_FERROSO: { code: 'B03AA07', display: 'Sulfato ferroso' },
+    MEDICATION_ACIDO_FOLICO: { code: 'B03BB01', display: 'Ácido fólico' },
+    MEDICATION_ALOPURINOL: { code: 'M04AA01', display: 'Alopurinol' },
+
     /* --- vía de administración ------------------------------------------------
        Éstas sí son una enumeración cerrada de verdad, y las seis cubren la
        práctica ambulatoria. Los códigos siguen la vía de administración de HL7
