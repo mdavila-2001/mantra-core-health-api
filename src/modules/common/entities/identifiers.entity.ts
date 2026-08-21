@@ -59,6 +59,18 @@ export class Identifiers {
   issuerCountryConceptId?: string;
 
   /**
+   * Departamento boliviano que emitió el documento (miembro de
+   * `VS_BO_DEPARTMENT`), para no confundir cédulas homónimas de distinto
+   * departamento (SALUD/Arquitectura/alovida-backlog-procesos.md, T-01).
+   */
+  @Property({
+    fieldName: 'issuer_administrative_area_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  issuerAdministrativeAreaConceptId?: string;
+
+  /**
    * Identificador asociado a assigner tenant.
    */
   @Property({ fieldName: 'assigner_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

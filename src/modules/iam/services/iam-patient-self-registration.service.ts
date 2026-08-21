@@ -238,6 +238,13 @@ export class IamPatientSelfRegistrationService {
           (dto.sexAtBirth
             ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
             : undefined),
+        // El catálogo gana sobre el texto libre: si ambos vienen, el texto
+        // libre sólo tenía sentido para cuando el paciente no encontró la
+        // suya en el catálogo (T-02).
+        occupationConceptId: dto.occupationConceptId,
+        occupationFreeText: dto.occupationConceptId
+          ? undefined
+          : dto.occupationFreeText,
         actorUserId: user.id,
       });
       await tx.flush();
@@ -282,6 +289,8 @@ export class IamPatientSelfRegistrationService {
         value: dto.nationalId,
         useConceptId: CONCEPTS.USE_OFFICIAL,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
+        issuerAdministrativeAreaConceptId:
+          dto.issuerAdministrativeAreaConceptId,
         actorUserId: user.id,
       });
 
