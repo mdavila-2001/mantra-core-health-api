@@ -128,6 +128,17 @@ export class CreateMedicationRequestDto {
   @IsOptional()
   @IsDateString()
   validTo?: string;
+
+  /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3)',
+  })
+  @IsOptional()
+  @IsString()
+  patientInstructionsText?: string;
 }
 
 /** Cuerpo de `POST /clinical/medication-records` (UC-08-11). */
@@ -316,6 +327,16 @@ export class EditMedicationRequestDraftDto {
   @IsOptional()
   @IsDateString()
   validTo?: string;
+
+  /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description: 'Indicaciones al paciente impresas en la receta (Patch v4.1.3)',
+  })
+  @IsOptional()
+  @IsString()
+  patientInstructionsText?: string;
 }
 
 /** Cuerpo de `POST /clinical/medication-requests/:id/invalidate`. */

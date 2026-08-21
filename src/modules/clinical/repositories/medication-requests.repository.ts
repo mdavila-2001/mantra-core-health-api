@@ -68,6 +68,10 @@ export interface CreateMedicationRequestData {
    */
   validTo?: Date;
   /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  patientInstructionsText?: string;
+  /**
    * Valor de issued at mantenido por la instancia.
    */
   issuedAt?: Date;
@@ -176,6 +180,7 @@ export class MedicationRequestsRepository {
         unitConceptId: data.unitConceptId,
         validFrom: data.validFrom,
         validTo: data.validTo,
+        patientInstructionsText: data.patientInstructionsText,
         issuedAt: data.issuedAt,
         statusReasonText: data.statusReasonText,
         replacesRequestId: data.replacesRequestId,

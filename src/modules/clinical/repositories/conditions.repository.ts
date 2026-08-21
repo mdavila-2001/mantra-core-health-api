@@ -56,6 +56,10 @@ export interface CreateConditionData {
    */
   expectedResolutionAt?: Date;
   /**
+   * Valor de note text mantenido por la instancia.
+   */
+  noteText?: string;
+  /**
    * Identificador asociado a recorded by user.
    */
   recordedByUserId?: string;
@@ -142,6 +146,7 @@ export class ConditionsRepository {
         clinicalCourseConceptId: data.clinicalCourseConceptId,
         onsetAt: data.onsetAt,
         expectedResolutionAt: data.expectedResolutionAt,
+        noteText: data.noteText,
         recordedByUserId: data.recordedByUserId,
         ...createdBy(data.actorUserId),
       },

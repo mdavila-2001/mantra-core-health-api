@@ -108,6 +108,17 @@ export class CreateConditionDto {
   @IsOptional()
   @IsDateString()
   expectedResolutionAt?: string;
+
+  /**
+   * Valor de note text mantenido por la instancia.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Hallazgos y justificación clínica (narrativa libre de quien registra; Patch v4.1.3)',
+  })
+  @IsOptional()
+  @IsString()
+  noteText?: string;
 }
 
 /** Cuerpo de `POST /clinical/conditions/:id/change-status` (Patch v4.0.8). */

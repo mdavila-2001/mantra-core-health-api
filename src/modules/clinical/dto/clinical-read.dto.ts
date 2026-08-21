@@ -69,6 +69,12 @@ export class ConditionItemDto {
   resolvedAt?: Date;
 
   /**
+   * Hallazgos y justificación clínica (Patch v4.1.3).
+   */
+  @ApiPropertyOptional()
+  noteText?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @ApiProperty({ type: String, format: 'date-time' })
@@ -169,6 +175,12 @@ export class MedicationRequestItemDto {
    */
   @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
   validTo?: Date;
+
+  /**
+   * Indicaciones al paciente impresas en la receta (Patch v4.1.3).
+   */
+  @ApiPropertyOptional()
+  patientInstructionsText?: string;
 
   /**
    * Valor de signed at mantenido por la instancia.
