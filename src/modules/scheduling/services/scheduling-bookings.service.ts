@@ -1222,6 +1222,8 @@ export class SchedulingBookingsService {
         bookingId: booking.id,
         statusConceptId: SCHED.BOOKING_IN_PROGRESS,
         occurredAt: new Date().toISOString(),
+        // Empezar la atención no desplaza nada: la regla 2 es de `accept`.
+        desplazadas: [],
       };
     });
   }
@@ -1267,6 +1269,8 @@ export class SchedulingBookingsService {
         bookingId: booking.id,
         statusConceptId: SCHED.BOOKING_COMPLETED,
         occurredAt: new Date().toISOString(),
+        // Ídem: completar tampoco desplaza. Ver `accept`.
+        desplazadas: [],
       };
     });
   }
