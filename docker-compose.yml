@@ -464,6 +464,12 @@ services:
   clamav:
     image: clamav/clamav:1.4
     restart: always
+    # Opt-in: `docker compose up`/`yarn docker:up` normales NO lo levantan.
+    # ~1 GB de RAM y ~300s de arranque para cargar firmas es caro para el
+    # día a día de dev cuando la mayoría de las sesiones no tocan subida de
+    # archivos. Para probar ese camino: `docker compose --profile
+    # malware-scan up -d worker-files` (arrastra a clamav por depends_on).
+    profiles: ["malware-scan"]
     environment:
       # El contenedor trae la base de firmas horneada; freshclam la actualiza
       # después, en segundo plano. Sin esto, el primer arranque se queda
@@ -603,10 +609,20 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    # Mismo profile que `clamav` (ver su comentario): sin este worker nadie
+    # escanea, pero eso es exactamente lo que hace `MALWARE_SCAN_ENABLED=false`
+    # en el resto de la app -las versiones quedan en SCAN_PENDING, no rompe
+    # nada-, así que no hace falta pagar el arranque de clamav para el dev
+    # de todos los días.
+    profiles: ["malware-scan"]
     command: ["node", "dist/src/worker-files.js"]
     environment:
       <<: *app-env
-      MALWARE_SCAN_ENABLED: ${MALWARE_SCAN_ENABLED:-true}
+      # El default acá DEBE coincidir con `malware-scan.env.ts` (false):
+      # estaba en `true`, contradiciendo tanto el código como `.env.example`,
+      # y forzaba a levantar clamav siempre aunque nadie fuera a escanear
+      # nada.
+      MALWARE_SCAN_ENABLED: ${MALWARE_SCAN_ENABLED:-false}
       CLAMD_HOST: ${CLAMD_HOST:-clamav}
       CLAMD_PORT: ${CLAMD_PORT:-3310}
     deploy:
