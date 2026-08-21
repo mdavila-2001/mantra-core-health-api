@@ -14,6 +14,7 @@ import {
 } from '../repositories';
 import { OpenInstanceDto, FormInstanceResponseDto, OkResultDto } from '../dto';
 import { FORMS } from '../forms.concepts';
+import { Encounters } from '../../clinical/entities';
 
 /**
  * Ciclo de vida de la instancia de formulario: apertura para un recurso
@@ -39,6 +40,30 @@ export class FormsInstancesService {
     this.logger.setContext(FormsInstancesService.name);
   }
 
+  /**
+   * De qué es el recurso sobre el que se abre la instancia, cuando el cliente
+   * no lo dice.
+   *
+   * Lo resuelve el servidor y no el cliente a propósito: el tipo es un
+   * `concept_id`, y un frontend que lo mandara tendría que llevar ese uuid
+   * escrito —que es justo lo que la regla de terminología prohíbe—. Acá el dato
+   * se sabe sin adivinar: si el `resourceId` es un encuentro, la instancia es
+   * de un encuentro.
+   *
+   * El default histórico era paciente por ser el único tipo declarado, así que
+   * las fichas por especialidad —que se abren SOBRE la consulta— quedaban
+   * diciendo algo que no eran.
+   */
+  private async tipoDelRecurso(
+    tx: EntityManager,
+    resourceId: string,
+  ): Promise<string> {
+    const encuentro = await tx.findOne(Encounters, { id: resourceId });
+    return encuentro === null
+      ? FORMS.RESOURCE_TYPE_PATIENT
+      : FORMS.RESOURCE_TYPE_ENCOUNTER;
+  }
+
   /** UC-09-07: abre una instancia de formulario para un recurso. */
   async openInstance(
     dto: OpenInstanceDto,
@@ -50,7 +75,8 @@ export class FormsInstancesService {
     );
     return this.em.transactional(async (tx) => {
       const resourceTypeConceptId =
-        dto.resourceTypeConceptId ?? FORMS.RESOURCE_TYPE_PATIENT;
+        dto.resourceTypeConceptId ??
+        (await this.tipoDelRecurso(tx, dto.resourceId));
       const schemaVersion = dto.schemaVersion ?? 1;
 
       // El duplicado se busca por recurso y versión, SIN el tipo: un mismo
