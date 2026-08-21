@@ -13,6 +13,7 @@ import { PersonAccountLinksRepository } from '../profiles/repositories';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
 import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
+import { WsJwtGuard } from '../../common';
 import {
   CommunitySocialController,
   CommunityMessagingController,
@@ -55,6 +56,7 @@ import {
   CommunityVerificationService,
   CommunityProfileStatsService,
 } from './services';
+import { CommunityMessagingGateway } from './gateways';
 import {
   PublicProfilesRepository,
   PostsRepository,
@@ -145,9 +147,14 @@ import {
     PublicSearchRepository,
     VerifiedBadgesRepository,
     PersonAccountLinksRepository,
+    // Auth del gateway WS — `WsJwtGuard` no es un `APP_GUARD` (los gateways no
+    // pasan por el pipeline HTTP de guards), así que hay que proveerlo acá
+    // explícitamente para que `CommunityMessagingGateway` pueda inyectarlo.
+    WsJwtGuard,
     // Servicios de escritura
     CommunitySocialService,
     CommunityMessagingService,
+    CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     CommunityModerationService,
     CommunityReviewsService,

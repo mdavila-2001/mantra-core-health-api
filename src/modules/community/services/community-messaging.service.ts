@@ -10,6 +10,10 @@ import {
 } from '../../../common';
 import { ConversationsRepository, BlocksRepository } from '../repositories';
 import { CommunityMessageNotificationsService } from './community-message-notifications.service';
+// Import directo del archivo (no del barrel `../gateways`): rompe el ciclo
+// barrel↔barrel con `CommunityMessagingGateway`, que a su vez necesita
+// `CommunityVisibilityService` de este mismo paquete `services/`.
+import { CommunityMessagingGateway } from '../gateways/community-messaging.gateway';
 import { COMM } from '../community.concepts';
 import {
   CreateConversationDto,
@@ -34,6 +38,7 @@ export class CommunityMessagingService {
    * @param conversationsRepo - Valor de conversations repo requerido por la operación.
    * @param blocksRepo - Valor de blocks repo requerido por la operación.
    * @param messageNotifications - Aviso in-app del carril P1.
+   * @param gateway - Empuje en tiempo real por WebSocket.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -41,6 +46,7 @@ export class CommunityMessagingService {
     private readonly conversationsRepo: ConversationsRepository,
     private readonly blocksRepo: BlocksRepository,
     private readonly messageNotifications: CommunityMessageNotificationsService,
+    private readonly gateway: CommunityMessagingGateway,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingService.name);
@@ -69,7 +75,7 @@ export class CommunityMessagingService {
     dto: CreateConversationDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    return this.em.transactional(async (tx) => {
+    const resultado = await this.em.transactional(async (tx) => {
       const esDirectaDeDos =
         dto.conversationType !== 'GROUP' &&
         dto.participantProfileIds.length === 2;
@@ -83,7 +89,7 @@ export class CommunityMessagingService {
           COMM.CONVERSATION_DIRECT,
           CONCEPTS.STATE_ACTIVE,
         );
-        if (existente) return { id: existente.id };
+        if (existente) return { id: existente.id, creada: false };
       }
 
       const conversation = this.conversationsRepo.createConversation(tx, {
@@ -107,8 +113,17 @@ export class CommunityMessagingService {
         });
       }
       await tx.flush();
-      return { id: conversation.id };
+      return { id: conversation.id, creada: true };
     });
+
+    // Fuera de la transacción y sólo si de verdad nació una conversación: la
+    // reutilizada no es una novedad para nadie, avisarla sería un badge de
+    // «conversación nueva» sobre un hilo que ya conocían.
+    if (resultado.creada) {
+      this.gateway.emitNewConversation(resultado.id, dto.participantProfileIds);
+    }
+
+    return { id: resultado.id };
   }
 
   /** UC-19-06: envía un mensaje directo; actualiza contadores de la conversación. */
@@ -205,6 +220,12 @@ export class CommunityMessagingService {
       return {
         id: message.id,
         conversationId,
+        senderProfileId: message.senderProfileId,
+        replyToMessageId: message.replyToMessageId ?? null,
+        contentTypeConceptId: message.contentTypeConceptId,
+        bodyText: message.bodyText ?? null,
+        attachmentFileId: message.attachmentFileId ?? null,
+        isEdited: false,
         sentAt: now,
         // Los destinatarios viajan fuera del DTO para no tener que releerlos
         // después del commit: ya se recorrieron acá para los recibos.
@@ -226,6 +247,25 @@ export class CommunityMessagingService {
       actor.id,
     );
 
+    // Empuje en vivo por WS — mismo criterio que la notificación: después del
+    // commit, y `emitMessage` no lanza. Se arma el payload explícito (sin
+    // `destinatarios`, que es un detalle interno de este método) para no
+    // filtrar por WS un campo que el contrato REST tampoco expone.
+    this.gateway.emitMessage(
+      {
+        id: enviado.id,
+        conversationId: enviado.conversationId,
+        senderProfileId: enviado.senderProfileId,
+        replyToMessageId: enviado.replyToMessageId,
+        contentTypeConceptId: enviado.contentTypeConceptId,
+        bodyText: enviado.bodyText,
+        attachmentFileId: enviado.attachmentFileId,
+        isEdited: enviado.isEdited,
+        sentAt: enviado.sentAt,
+      },
+      enviado.destinatarios,
+    );
+
     return {
       id: enviado.id,
       conversationId: enviado.conversationId,
@@ -239,7 +279,7 @@ export class CommunityMessagingService {
     dto: MarkReadDto,
     actor: AuthenticatedUser,
   ): Promise<ReadReceiptResponseDto> {
-    return this.em.transactional(async (tx) => {
+    const resultado = await this.em.transactional(async (tx) => {
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
         conversationId,
@@ -289,5 +329,15 @@ export class CommunityMessagingService {
 
       return { receiptsRecorded: 1, lastReadMessageId: messageId };
     });
+
+    if (resultado.lastReadMessageId) {
+      this.gateway.emitRead({
+        conversationId,
+        profileId: dto.recipientProfileId,
+        lastReadMessageId: resultado.lastReadMessageId,
+      });
+    }
+
+    return resultado;
   }
 }
