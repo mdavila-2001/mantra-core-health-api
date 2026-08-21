@@ -404,6 +404,267 @@ le suman los tramos nuevos de Pablo, Ender y Marcelo, que es lo que pide la fase
 
 ---
 
+## MAC-1 · Los cupos vencidos dejan de ofrecerse y de reservarse (A-02 / A-03)
+
+**Rama:** `justin/mac1-cupos-vencidos` · **Doc:** §13.3 · **Origen:** auditoría TJ-4.
+
+### El defecto
+
+Dos fichas de la auditoría, con la misma raíz. `GET /scheduling/slots?onlyAvailable=true`
+devolvía **100 de 100 huecos ya vencidos** (A-03), y `POST /scheduling/slots/:id/holds` sobre
+uno de ayer respondía **201 con `holdToken`** (A-02). El código lo tenía documentado sin
+saberlo: el JSDoc de la consulta decía «`onlyAvailable` filtra por capacidad restante y no por
+estado». Faltaba mirar el reloj.
+
+### Qué cambió
+
+**El filtro, en la consulta y no en memoria** (regla del #156). `inicioDeLoReservable(desde,
+ahora)` vive en `scheduling-time.ts` —el módulo del arreglo de H-02— y adelanta el borde
+inferior de la ventana hasta ahora cuando se piden sólo disponibles. Lo usan las **dos**
+consultas que ofrecían vencidos: la de `GET /scheduling/slots` y la de
+`GET /scheduling/resources/:id/slots`, que es la que van a consumir MAC-5 y MAC-6.
+
+**Sin convertir husos, a propósito.** La tarea pedía comparar «en el huso de la sede». No hace
+falta y habría sido un error: `start_at` es `timestamptz`, o sea un instante absoluto, y
+comparar dos instantes da el mismo resultado en cualquier zona. La zona importa al **generar**
+cupos —eso es H-02/#110, otro problema—, no al preguntar si uno ya pasó. Hay un test que lo
+fija escribiendo el mismo instante con dos husos distintos.
+
+**El instante lo aporta el servicio**, no un `new Date()` escondido en el repositorio: la
+consulta queda pura y el `where` es asertable.
+
+**La retención rechaza el pasado** con **422** y no 404 —el cupo existe; lo que no existe es la
+posibilidad—. Y como `booking_policies` ya declaraba `min_notice_minutes` y nadie lo miraba, se
+respeta: un turno que empieza en diez minutos es futuro, pero con una política de treinta
+tampoco se puede pedir. **Dos motivos, dos frases**: «Ese horario ya pasó» contra «hay que
+pedirlo con al menos N minutos de anticipación». La primera versión decía lo segundo para un
+turno de hacía seis días, lo que se vio recién al probarlo contra la API.
+
+**Segundo cinturón en `materializarReserva`**, que cubre confirmar y solicitar a la vez: un
+hold tomado hace rato puede llegar con el horario recién pasado.
+
+### Verificación contra la API viva
+
+```
+--- A-03 · «sólo disponibles» desde hace 7 días ---
+  devueltos 100 · vencidos 0        (la auditoría midió 100 de 100 vencidos)
+
+--- el cupo del pasado sigue siendo consultable (onlyAvailable=false) ---
+  visible: 2026-08-14T09:03:00.000Z
+
+--- A-02 · retener ese cupo vencido ---
+  HTTP 422 · Ese horario ya pasó.
+
+--- el camino bueno: un cupo futuro ---
+  cupo futuro: 2026-08-20T16:30:00.000Z
+  HTTP 201 · holdToken: sí
+```
+
+Consultar el pasado **sigue funcionando** con `onlyAvailable=false`: es lo que necesita la
+vista del día de MAC-6 para mostrar lo ya atendido. Lo que se cerró es ofrecerlo como
+reservable.
+
+### Pruebas
+
+`yarn test src/modules/scheduling/` → **14 suites · 233 pruebas**. Once son nuevas: cuatro del
+helper, tres de A-02 en el servicio y **cuatro del primer spec de repositorio del módulo**
+(`scheduling-agenda.repository.spec.ts`), que aserta el `where` que sale hacia la base — no las
+filas que vuelven, porque filtrar en memoria habría dado el mismo verde y seguido trayendo cien
+filas muertas de Postgres.
+
+### Un arreglo colateral que no es cosmético
+
+El doble del cupo en el spec de bookings fijaba `2026-06-01`, una fecha del calendario ya
+pasada. Al volverse 422 reservar el pasado, **catorce pruebas ajenas al cambio se pusieron
+rojas**. Ahora el cupo es relativo a `Date.now()` y tiene un gemelo `cupoVencido()`. Una fecha
+fija en un fixture se pudre sola y el día que el reloj la pasa, rompe cosas que nadie tocó.
+
+### La auditoría, en verde
+
+`yarn e2e:auditoria` con `E2E_API_URL=http://localhost:3000` (por defecto apunta al 3005 y
+saltea las 20 en silencio — vale anotarlo, porque una corrida «sin fallos» puede ser una
+corrida que no midió nada):
+
+```
+✓  2 [P10] un cupo del pasado no se puede retener          ← A-02
+✓  4 [P09] la disponibilidad no ofrece huecos del pasado   ← A-03
+   11 passed · 2 failed · 7 skipped
+```
+
+Los dos rojos restantes **no son de esta noche**: `[P04] quien se registra con un correo puede
+entrar con ese correo` es A-05 (explícitamente fuera del reparto) y `[P00.4] el motivo de
+consulta` es A-01 — ver el hallazgo de abajo. **Ningún verde se cayó.**
+
+> **Ojo con el limitador.** `/iam/auth/login` corta a 10 por minuto y por IP, y la suite se
+> saltea **entera** cuando lo encuentra caliente. Si volvés de una tanda de pruebas manuales,
+> esperá un minuto o vas a leer «20 skipped» como si estuviera todo bien.
+
+### Lo que NO se tocó
+
+`generate-slots` (regenerar y limpiar es el horizonte rodante, carril propio) · el modelo · los
+DTO · el filtro propio de la pantalla del paciente, si lo tiene: doble cinturón.
+## MAC-2 · Publicar la agenda: una pantalla, dos decisiones
+
+**Rama:** `justin/mac2-publicar-una-pantalla` · **PR:** front #183 · **Doc:** §6 completo.
+
+Cinco pasos y veinticinco campos pasan a una pantalla. Se pregunta *qué días atendés y en qué
+horario* y *cuánto dura una consulta*.
+
+**El contrato no cambió**: los mismos cuatro POST, en el mismo orden, con los mismos campos. Hay
+specs que lo fijan payload por payload, incluido que la identidad que el backend comprueba
+—`resourceType`, `resourceRefType`, `resourceRefId`— viaja igual **aunque no se pregunte**.
+
+| Antes | Ahora |
+|---|---|
+| 4 campos técnicos | Los sabe el sistema. **No se muestran deshabilitados: no se muestran** |
+| «Nombre de la plantilla», obligatorio | Derivado — no existía `GET` de plantillas, era una etiqueta a ciegas |
+| Política con `code`/`name` obligatorios | **La UI era más estricta que el contrato** (`@IsOptional()`). Opt-in real |
+| Duración y capacidad, dos veces | Una. Preguntarlo dos veces sólo servía para que no coincidieran |
+| Ventana de `generate-slots` | Calculada: hoy → `min(hoy+3 meses, fin)` |
+| Fase 5: inventar una excepción | Se fue. Bloquear un día es MAC-5 |
+
+**Verificado en el navegador y contra la base.** Dos clics —martes, publicar—:
+
+```
+ name                   | cupos | primero    | ultimo     | dias
+ Agenda de Lucia Ortiz  |  104  | 2026-08-25 | 2026-11-17 | Tue
+```
+
+Y con una médica que ya tenía agenda, el 422 de solape se lee **«Ya tenés una agenda publicada
+que se superpone con esa franja»**, no como JSON.
+
+**Lunar preexistente que ahora se ve más:** si el POST de la plantilla falla, el recurso ya
+quedó creado y sin horario. No lo introduce este cambio —el asistente por fases hacía lo
+mismo—, pero publicar es un clic y se llega más rápido.
+
+## MAC-3 · La vista previa: los turnos se ven antes de publicar
+
+**Rama:** `justin/mac3-vista-previa` · **PR:** front #184 · **Doc:** §6.1–6.2, §14.
+
+Las **dos verificaciones que la tarea exige antes de escribir código**, hechas contra la API
+viva:
+
+**1 · H-02 está muerto.** Plantilla 9:00–12:00 en zona `America/La_Paz`:
+
+```
+ utc               | la_paz | hasta_local
+ 2026-08-21 13:00  | 09:00  | 10:00
+ 2026-08-21 14:00  | 10:00  | 11:00
+ 2026-08-21 15:00  | 11:00  | 12:00
+```
+
+**2 · El backend TRUNCA.** Franja 9:00–16:00 con turnos de 90 minutos (420/90 = 4,67):
+
+```
+ 09:00 → 10:30 · 10:30 → 12:00 · 12:00 → 13:30 · 13:30 → 15:00
+ VEREDICTO: 4 cupos → TRUNCA
+```
+
+Cuatro, no cinco. Como trunca, el resto se muestra como **información y no como pregunta**: no
+hay nada que decidir.
+
+`calcularTurnos` es TypeScript puro con 9 casos de prueba. La pantalla dice «Lunes: 4 turnos
+09:00 · 10:30 · 12:00 · 13:30» y «Te queda libre de 15:00 a 16:00 (60 min)» — idéntico a los
+cupos que la API generó, verificado lado a lado.
+
+## MAC-4 · El GET de plantillas + «Mi agenda»
+
+**Ramas:** `justin/mac4-plantillas-patron` (API) · `justin/mac4-mi-agenda` (front) ·
+**PRs:** API #174, front #185 · **Doc:** §7, §13.1.
+
+**El hueco, confirmado:** en todo `scheduling` los únicos endpoints de plantilla eran los dos
+POST. El médico publicaba un horario y no podía volver a verlo nunca más.
+
+`GET /scheduling/resources/:id/templates` con la misma autorización que su POST hermano.
+Verificado en vivo: devuelve la plantilla que el asistente nuevo publicó en el navegador
+—«Horario de Agenda de Lucia Ortiz», martes 09:00–13:00, cada 30 min— y otra profesional
+pidiéndola recibe **403**.
+
+La pantalla «Mi agenda» la lee y la dice en palabras: «Martes de 09:00 a 13:00 · consultas de
+30 min», «Tenés turnos abiertos hasta el 17/11/2026» — la misma fecha que devuelve la base.
+Trae el **aviso de agotamiento** con su botón: es el parche manual del horizonte rodante,
+porque sin él una agenda se vacía en silencio.
+
+**Dos defectos encontrados ejecutando, no leyendo:**
+
+1. **MikroORM devuelve `null`, no `undefined`**, para columnas anulables sin completar. Mis
+   guardas `=== undefined` las dejaban pasar y `validTo: null` llegaba a `.toISOString()`: **el
+   endpoint entero daba 500**. Mismo defecto que el paso de la foto del alta (#165), encontrado
+   de la misma forma.
+2. **`GET /scheduling/slots` rechaza ventanas de más de 92 días** con 422. Yo pedía un año. Y
+   como el fallo de esa lectura se traga a propósito, la tarjeta funcionaba perfecta y el aviso
+   **no aparecía nunca**. Se vio en la pestaña de red, no en las pruebas.
+
+**Lo que quedó afuera, con motivo:** «Editar» precargando el alta. La tarea manda frenar si el
+contrato no permite cerrar la plantilla vieja, y **no hay un solo `PATCH` en todo
+`scheduling`**. Cerrar la anterior necesita una decisión de modelo que no corresponde
+improvisar.
+
+## MAC-5 · El mes de ocupación, y las excepciones en su casa
+
+**Ramas:** `justin/mac5-excepciones-lectura` (API) · `justin/mac5-mi-agenda-mes` (front) ·
+**PRs:** API #175, front #186 · **Doc:** §8.
+
+**El hueco que la tarea preveía, confirmado:** se podían **crear** excepciones y no leerlas —el
+mismo hueco de las plantillas—. Sin esa lectura el calendario no puede distinguir un día
+**bloqueado** de un día **sin agenda**: los dos aparecen sin cupos, y el motivo es toda la
+diferencia.
+
+La solapa «Cómo viene el mes» muestra **ocupación** («6/8»), jamás los turnos. Cinco estados,
+con las distinciones que importan: un día sin cupos dice «no atendés» y no «libre»; un día
+bloqueado muestra su motivo; el bloqueo gana sobre la ocupación.
+
+**No reusa el calendario del paciente como componente** porque pinta otra cosa. Lo que sí
+comparten —la aritmética de la grilla— salió a `shared/date/calendario-mes` con 9 pruebas. La
+tarea sugería un «modo conteo»: es la forma equivocada, sería una bandera que cambia el
+comportamiento.
+
+**Bloquear un día se hace desde el mes**, con motivo obligatorio. Es la fase 5 del alta vieja en
+su lugar natural. Verificado de punta a punta:
+
+```
+martes, 25 de agosto: bloqueado — Vacaciones
+los cupos de ese día, como los ve un paciente → 0
+y en total, incluidos los bloqueados          → 8
+```
+
+Los ocho siguen existiendo; ninguno se ofrece.
+
+## MAC-6 · El día, con huecos, nombres y acciones
+
+**Ramas:** `justin/mac6-nombre-del-paciente` (API) · `justin/mac6-mi-agenda-dia` (front) ·
+**PRs:** API #176, front #187 · **Doc:** §9.
+
+**El costo 2 que la tarea anticipaba era peor de lo previsto:** el DTO no traía el nombre **y un
+médico no puede leer perfiles de paciente** —todas las rutas de `profiles/patients` exigen
+`SECURITY_ADMIN`—. La vista del día era una lista de identificadores. Es el pedido explícito del
+registro del cliente: «nombre completo del paciente».
+
+El nombre viaja con la **misma regla que el motivo** (`puedeVerElMotivo`, de TJ-2), resuelto en
+lote. Verificado:
+
+```
+la DUEÑA de la agenda   → Ana Lucía Flores · Control de presión
+una profesional AJENA   → ni el nombre ni el motivo
+```
+
+La pantalla es **una línea de tiempo con huecos**, no una lista de reservas:
+
+```
+09:00–09:30   Ana Lucía Flores · Control de presión   [Avisar demora] [Cancelar]
+09:30–10:00   — libre —
+```
+
+**Dos hallazgos que sólo aparecen ejecutando:**
+
+1. **`patient_profiles.profile_id` apunta directo a `persons.id`**, sin tabla puente. La cadena
+   que parecía natural devuelve **cero filas**.
+2. **`POST /bookings/:id/check-in` no admite `PRACTITIONER`.** El botón devolvía «Rol
+   insuficiente». **No abrí el rol**: el servicio no comprueba que la cita sea del actor, así
+   que sumarlo dejaría a cualquier profesional marcar la llegada de cualquiera — y la tarea
+   dice no tocar esos endpoints. Se esconde el botón; **un médico solo, sin mostrador, hoy no
+   puede registrar una llegada**. Tarjeta para el equipo.
+
 ## Hallazgos de entorno (bloqueaban a todo el equipo, no sólo a este carril)
 
 ### E-1 · `dist/` estaba obsoleto y le faltaba el módulo `surveys`

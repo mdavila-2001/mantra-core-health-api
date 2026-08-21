@@ -428,6 +428,106 @@ export class SchedulingBookingsRepository {
     return { rows: inWindow, fetchCapReached };
   }
 
+  /**
+   * La agenda de una organización: las citas de sus recursos en una ventana.
+   *
+   * ## El filtro de tenant va acá, no en el servicio
+   *
+   * `tenantId` entra en el `where` de la consulta y no se comprueba después
+   * sobre las filas devueltas. Es la lección del #156 —la cola de moderación se
+   * armaba sin filtro y un moderador veía las denuncias de todas las clínicas—
+   * y es también lo que exige el guardrail que hoy es gate duro del CI.
+   *
+   * La diferencia no es de estilo. Filtrar después significa que la base ya
+   * leyó las filas ajenas y que **cualquier camino que se saltee ese paso las
+   * expone**: un `map` antes del filtro, un log que imprima el resultado
+   * crudo, un `catch` que devuelva lo que había. Filtrando en la consulta esas
+   * filas nunca existieron.
+   *
+   * ## Por qué recibe los recursos ya resueltos
+   *
+   * El filtro por profesional se traduce a «los recursos de este profesional en
+   * esta organización», y esa resolución es del servicio. Acá llegan ids que ya
+   * fueron acotados al tenant, así que la consulta es doblemente estrecha: por
+   * `tenant_id` y por recurso.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Organización, ventana y recursos a los que acotar.
+   * @param limit - Tope de filas.
+   * @returns Las citas con su cupo, en orden cronológico.
+   */
+  async findTenantAgenda(
+    em: EntityManager,
+    filters: {
+      /** La organización dueña de la agenda. Obligatoria: es el perímetro. */
+      tenantId: string;
+      /** Inicio de la ventana. */
+      from: Date;
+      /** Fin de la ventana. */
+      to: Date;
+      /** Recursos a los que acotar; vacío = todos los de la organización. */
+      resourceIds?: readonly string[];
+      /** Estados a incluir. */
+      statusConceptIds?: readonly string[];
+    },
+    limit: number,
+  ): Promise<{ booking: AppointmentBookings; slot: BookableSlots | null }[]> {
+    // Un filtro por recursos vacío no es «todos»: es «ninguno». Pasa cuando se
+    // pide la agenda de un profesional que no tiene recursos en esta
+    // organización, y devolver todo sería exactamente la fuga que este método
+    // existe para evitar.
+    if (filters.resourceIds?.length === 0) return [];
+
+    const where: Record<string, unknown> = {
+      tenantId: filters.tenantId,
+    };
+    if (filters.resourceIds && filters.resourceIds.length > 0) {
+      where.resourceId = { $in: [...filters.resourceIds] };
+    }
+    if (filters.statusConceptIds && filters.statusConceptIds.length > 0) {
+      where.statusConceptId = { $in: [...filters.statusConceptIds] };
+    }
+
+    // Se traen más de `limit` porque el instante vive en el cupo y no en la
+    // cita: no se sabe cuántas caen en la ventana hasta resolverlos. El mismo
+    // criterio que `findBookings`, con el mismo motivo.
+    const bookings = await em.find(AppointmentBookings, where, {
+      orderBy: { createdAt: 'DESC' },
+      limit: Math.max(limit * 20, 500),
+    });
+
+    const slotIds = bookings
+      .map((booking) => booking.bookableSlotId)
+      .filter((id): id is string => Boolean(id));
+    const slots =
+      slotIds.length > 0
+        ? await em.find(BookableSlots, { id: { $in: slotIds } })
+        : [];
+    const slotById = new Map(slots.map((slot) => [slot.id, slot]));
+
+    return (
+      bookings
+        .map((booking) => ({
+          booking,
+          slot: booking.bookableSlotId
+            ? (slotById.get(booking.bookableSlotId) ?? null)
+            : null,
+        }))
+        // Sin cupo no hay instante contra el que comparar: queda fuera en vez de
+        // colarse con fecha desconocida.
+        .filter(
+          (
+            fila,
+          ): fila is { booking: AppointmentBookings; slot: BookableSlots } =>
+            fila.slot !== null &&
+            fila.slot.startAt >= filters.from &&
+            fila.slot.startAt < filters.to,
+        )
+        .sort((a, b) => a.slot.startAt.getTime() - b.slot.startAt.getTime())
+        .slice(0, limit)
+    );
+  }
+
   /** Citas vigentes del paciente: la política limita cuántas puede tener a la vez. */
   countActiveBookingsForPatient(
     em: EntityManager,
@@ -490,6 +590,102 @@ export class SchedulingBookingsRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * La última reprogramación de cada cita, con el instante del que se movió.
+   *
+   * Devuelve el **instante original**, no el id del cupo: la tarjeta dice
+   * «reprogramada desde el 20/08 a las 15:30», y resolver ese cupo desde el
+   * front obligaría a una petición por cita para pintar una línea de texto.
+   *
+   * Sólo la última: una cita movida tres veces le interesa a la auditoría, no
+   * a quien mira su turno — ahí la pregunta es «¿esto cambió?», y la respuesta
+   * útil es de dónde viene ahora.
+   *
+   * @param em - Contexto de persistencia.
+   * @param bookingIds - Citas de la página.
+   * @returns Cita → instante del que se movió.
+   */
+  /**
+   * Los nombres de varios pacientes, en una consulta.
+   *
+   * En lote y con SQL directo: el nombre vive en la **persona** y no en el
+   * perfil —la misma persona puede ser paciente y profesional, y duplicarlo
+   * sería tener dos verdades—, y resolverlo por cita sería una consulta por
+   * fila para pintar una lista.
+   *
+   * `patient_profiles.profile_id` apunta **directo a `persons.id`**, sin tabla
+   * puente: verificado contra la base, porque la cadena que parecía natural
+   * —pasar por `person_profiles`— devuelve cero filas.
+   *
+   * **Este método no decide quién puede ver un nombre**, sólo lo busca. La
+   * regla vive en la proyección, junto a la del motivo de consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileIds - Perfiles cuyos nombres se buscan.
+   * @returns Los nombres hallados, por perfil; los que no tienen no aparecen.
+   */
+  async findPatientNames(
+    em: EntityManager,
+    patientProfileIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const nombres = new Map<string, string>();
+    if (patientProfileIds.length === 0) return nombres;
+
+    const filas = await em
+      .getConnection()
+      .execute<{ profileId: string; displayName: string }[]>(
+        `SELECT pp.profile_id AS "profileId", pe.display_name AS "displayName"
+           FROM profiles.patient_profiles pp
+           JOIN profiles.persons pe ON pe.id = pp.profile_id
+          WHERE pp.profile_id IN (?)
+            AND pe.display_name IS NOT NULL`,
+        [[...patientProfileIds]],
+      );
+
+    for (const fila of filas) {
+      nombres.set(fila.profileId, fila.displayName);
+    }
+    return nombres;
+  }
+
+  async latestRescheduleOrigins(
+    em: EntityManager,
+    bookingIds: readonly string[],
+  ): Promise<Map<string, Date>> {
+    if (bookingIds.length === 0) return new Map();
+
+    const filas = await em.find(
+      BookingReschedules,
+      { bookingId: { $in: [...bookingIds] } },
+      { orderBy: { recordedAt: 'DESC' } },
+    );
+    if (filas.length === 0) return new Map();
+
+    // La primera de cada cita es la más reciente: vienen ordenadas.
+    const ultimaPorCita = new Map<string, BookingReschedules>();
+    for (const fila of filas) {
+      if (!ultimaPorCita.has(fila.bookingId)) {
+        ultimaPorCita.set(fila.bookingId, fila);
+      }
+    }
+
+    const cupos = await em.find(BookableSlots, {
+      id: {
+        $in: [...new Set([...ultimaPorCita.values()].map((f) => f.fromSlotId))],
+      },
+    });
+    const inicioPorCupo = new Map(cupos.map((cupo) => [cupo.id, cupo.startAt]));
+
+    const salida = new Map<string, Date>();
+    for (const [bookingId, fila] of ultimaPorCita) {
+      const inicio = inicioPorCupo.get(fila.fromSlotId);
+      // Sin el cupo original no se afirma nada: mejor no decir «reprogramada»
+      // que decirlo sin poder decir desde cuándo.
+      if (inicio) salida.set(bookingId, inicio);
+    }
+    return salida;
   }
 
   /**

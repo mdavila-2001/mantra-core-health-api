@@ -48,6 +48,57 @@ export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
       display: 'Profile visible only to authenticated sessions',
     },
 
+    // --- Sellos de verificación (P13) ---
+    //
+    // El sello «Verificado» no lo pone nadie a mano: lo emite el puente desde
+    // `identity_assurance` cuando el caso de verificación llega a
+    // `CASE_VERIFIED` contra una autoridad. Estos conceptos son los que hacen
+    // que el sello diga **qué** se verificó y **cómo**, en vez de ser un
+    // booleano sin procedencia.
+    BADGE_TYPE_LICENSE_VERIFIED: {
+      code: 'BADGE_TYPE_LICENSE_VERIFIED',
+      display: 'Practitioner licence verified against the issuing authority',
+    },
+    BADGE_TYPE_ORGANIZATION_VERIFIED: {
+      code: 'BADGE_TYPE_ORGANIZATION_VERIFIED',
+      display: 'Institution identity verified against the registry',
+    },
+    /** Verificación automática contra la fuente. Es el camino normal. */
+    BADGE_METHOD_AUTHORITY_CHECK: {
+      code: 'BADGE_METHOD_AUTHORITY_CHECK',
+      display: 'Verified against an external authority',
+    },
+    /**
+     * Alta manual de un `SECURITY_ADMIN`. Existe porque una autoridad puede
+     * estar caída o no tener API, no para saltarse la verificación: queda
+     * auditada en `audit.verified_badges_history` y **el sello dice que fue
+     * manual**, que es lo que permite auditarlo después.
+     */
+    BADGE_METHOD_MANUAL_ADMIN: {
+      code: 'BADGE_METHOD_MANUAL_ADMIN',
+      display: 'Granted manually by a security administrator',
+    },
+    /**
+     * Movimientos del sello en `audit.verified_badges_history`.
+     *
+     * El disparador de base ya anotaba la operación genérica (`INSERT`,
+     * `UPDATE`), que dice que la fila cambió pero no qué significó: un `UPDATE`
+     * sobre un sello puede ser una renovación o una revocación, y son cosas
+     * opuestas para quien audita. Estos conceptos son esa intención.
+     */
+    BADGE_HISTORY_OP_GRANTED: {
+      code: 'BADGE_HISTORY_OP_GRANTED',
+      display: 'Badge granted',
+    },
+    BADGE_HISTORY_OP_RENEWED: {
+      code: 'BADGE_HISTORY_OP_RENEWED',
+      display: 'Badge renewed after re-verification',
+    },
+    BADGE_HISTORY_OP_REVOKED: {
+      code: 'BADGE_HISTORY_OP_REVOKED',
+      display: 'Badge revoked or expired',
+    },
+
     // --- Posts ---
     POST_TYPE_TEXT: { code: 'POST_TYPE_TEXT', display: 'Text post' },
     POST_TYPE_POLL: { code: 'POST_TYPE_POLL', display: 'Poll post' },

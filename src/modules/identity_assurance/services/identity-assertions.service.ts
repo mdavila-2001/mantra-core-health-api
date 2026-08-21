@@ -15,6 +15,7 @@ import {
   IdentityFraudSignalsRepository,
 } from '../repositories';
 import { RevokeAssertionDto, AssertionRevokedResponseDto } from '../dto';
+import { IdentityVerificationEffectsService } from './identity-verification-effects.service';
 
 /**
  * UC-27-11: revocación de una aserción de identidad. Única mutación permitida en
@@ -37,6 +38,7 @@ export class IdentityAssertionsService {
     private readonly assertionsRepo: IdentityAssertionsRepository,
     private readonly casesRepo: IdentityVerificationCasesRepository,
     private readonly fraudRepo: IdentityFraudSignalsRepository,
+    private readonly effects: IdentityVerificationEffectsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityAssertionsService.name);
@@ -85,6 +87,11 @@ export class IdentityAssertionsService {
       }
       kase.statusConceptId = IDA.CASE_REVOKED;
       touch(kase, actor.id);
+
+      // P13: el sello público cae con la aserción. Va en la misma transacción
+      // porque una aserción revocada con el perfil todavía luciendo
+      // «Verificado» es exactamente el estado que este carril hace imposible.
+      await this.effects.applyRevoked(tx, kase, actor.id, 'REVOKED');
 
       if (dto.raiseFraudSignal) {
         if (!dto.fraudSignalTypeConceptId || !dto.fraudSeverityConceptId) {

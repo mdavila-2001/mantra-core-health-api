@@ -24,4 +24,7 @@ export * from './read-polls.dto';
 export * from './read-reviews.dto';
 export * from './read-moderation.dto';
 export * from './public-search.dto';
+export * from './search-index.dto';
+export * from './verification.dto';
+export * from './profile-stats.dto';
 export * from './group-wall.dto';

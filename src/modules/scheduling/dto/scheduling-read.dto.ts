@@ -293,6 +293,28 @@ export class BookingItemDto {
   reasonText?: string;
 
   /**
+   * Nombre del paciente.
+   *
+   * Viaja con la **misma regla que el motivo de consulta**: lo ve el titular y
+   * el profesional que atiende en esa agenda, y no la vista de la organización.
+   * El médico necesita saber a quién espera —la agenda del día sin nombres es
+   * una lista de identificadores— y la organización ya opera con el perfil.
+   */
+  @ApiPropertyOptional()
+  patientName?: string;
+
+  /**
+   * De cuándo se movió, si la cita se reprogramó.
+   *
+   * Ausente cuando nunca se movió — que es distinto de «se movió y no sé
+   * desde cuándo». Es el instante ORIGINAL, no el id del cupo: la tarjeta dice
+   * «reprogramada desde el 20/08 a las 15:30», y resolverlo en la pantalla
+   * costaría una petición por cita para pintar una línea.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  rescheduledFrom?: Date;
+
+  /**
    * Por qué la cita está como está, cuando el último cambio lo explicó.
    *
    * Es la mitad que le faltaba a la cancelación y a la reprogramación

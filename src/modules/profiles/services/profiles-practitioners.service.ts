@@ -16,6 +16,10 @@ import {
 // Verificar la matrícula es lo que habilita a ejercer; el rol con el que se
 // ejerce lo custodia `authz`.
 import { AuthzEffectiveRolesService } from '../../authz/services';
+import {
+  MAX_SPECIALTIES_PER_PRACTITIONER,
+  MedicalSpecialtyCatalogService,
+} from './medical-specialty-catalog.service';
 // Lectura de SÓLO CONTEO sobre otros módulos, para la actividad del perfil.
 // Se importan las entidades y no sus servicios a propósito: lo único que se
 // hace con ellas es `em.count(...)` filtrando por el usuario que creó la fila,
@@ -25,6 +29,7 @@ import { AuthzEffectiveRolesService } from '../../authz/services';
 import { ClinicalNoteHeaders, DocumentRecords } from '../../chart/entities';
 import { Encounters, MedicationRequests } from '../../clinical/entities';
 import { PROF } from '../profiles.concepts';
+import type { OnboardingStepDto, PractitionerOnboardingDto } from '../dto';
 import {
   PersonsRepository,
   PersonProfilesRepository,
@@ -36,7 +41,13 @@ import {
   PractitionerAffiliationsRepository,
   PersonAccountLinksRepository,
 } from '../repositories';
-import type { PractitionerAffiliations } from '../entities';
+import { PractitionerAffiliations } from '../entities';
+// Misma licencia que las cuentas de actividad: se importan las ENTIDADES de
+// `scheduling` y no su servicio, y lo único que se hace con ellas es contar
+// filtrando por el perfil del propio actor. No sale ni una fila de agenda de
+// nadie, y `profiles` no queda atado al módulo entero para responder «¿ya
+// publicó horarios?».
+import { BookableSlots, SchedulableResources } from '../../scheduling/entities';
 import {
   CreatePractitionerDto,
   PractitionerResponseDto,
@@ -57,6 +68,7 @@ import {
 } from '../dto';
 import { AttachableFileService } from '../../common/services';
 import { ProfileOwnershipService } from './profile-ownership.service';
+import { ProfilesAffiliationsService } from './profiles-affiliations.service';
 
 /**
  * Casos de uso de la fuerza laboral de salud (regla GENERALIST): onboarding
@@ -109,10 +121,14 @@ export class ProfilesPractitionersService {
     private readonly languagesRepo: PractitionerLanguagesRepository,
     private readonly affiliationsRepo: PractitionerAffiliationsRepository,
     private readonly ownership: ProfileOwnershipService,
+    // TP-2: con qué estado nace un vínculo y cuáles se le pueden mostrar a un
+    // tercero se deciden en un solo lugar.
+    private readonly affiliations: ProfilesAffiliationsService,
     private readonly attachableFiles: AttachableFileService,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly effectiveRoles: AuthzEffectiveRolesService,
     private readonly verificationBypass: VerificationBypassService,
+    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -164,6 +180,139 @@ export class ProfilesPractitionersService {
     }
 
     return this.buildSummary(em, link.personId, actor.id);
+  }
+
+  /**
+   * En qué punto del alta está el profesional de la sesión.
+   *
+   * ## Por qué se calcula y no se guarda
+   *
+   * El asistente necesita saber «por dónde iba», y la tentación es una columna
+   * `onboarding_step`. No hace falta y sería peor: crearía un segundo estado
+   * que puede contradecir al primero —alguien carga su foto desde el perfil y
+   * el contador sigue diciendo que le falta— y obligaría a migrar a todos los
+   * profesionales que ya existen.
+   *
+   * Derivándolo de los datos, retomar sale gratis y los profesionales de antes
+   * aparecen completos sin tocar una fila.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las cinco etapas y la primera incompleta.
+   */
+  async getOwnOnboarding(
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerOnboardingDto> {
+    const em = this.em.fork();
+
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene una persona vinculada',
+      );
+    }
+    const perfil = await this.practitionersRepo.findById(em, link.personId);
+    if (!perfil) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene perfil profesional',
+        { personId: link.personId },
+      );
+    }
+    const practitionerProfileId = perfil.profileId;
+
+    const [matriculas, especialidades, afiliaciones, recursos] =
+      await Promise.all([
+        this.authorizationsRepo.findByPractitioner(em, practitionerProfileId),
+        this.specialtiesRepo.findAllByPractitioner(em, practitionerProfileId),
+        em.find(PractitionerAffiliations, { practitionerProfileId }),
+        // La agenda propia: el recurso de scheduling que apunta a este perfil.
+        // Se mira desde acá y no se le pide al otro módulo porque es una
+        // pregunta de este —«¿ya publicó?»— y `resource_ref_id` es su vínculo.
+        em.find(SchedulableResources, { resourceRefId: practitionerProfileId }),
+      ]);
+
+    // Tener el recurso no es tener agenda. El asistente crea el recurso en su
+    // primer paso, así que darlo por «horarios publicados» daba por completa el
+    // alta de alguien a quien todavía no se le puede pedir turno — que es
+    // exactamente lo que este paso existe para evitar. Se cuentan todos los
+    // cupos y no sólo los futuros: si vencieran, un alta ya terminada volvería
+    // a mostrarse incompleta sola, y la agenda vencida es otro aviso, con su
+    // propia superficie.
+    const cupos =
+      recursos.length === 0
+        ? 0
+        : await em.count(BookableSlots, {
+            resourceId: { $in: recursos.map((recurso) => recurso.id) },
+          });
+
+    const tieneFoto =
+      perfil.photoFileId !== undefined && perfil.photoFileId !== null;
+
+    const faltaEnDatos: string[] = [];
+    if (!matriculas.some((fila) => fila.licenseNumber.trim() !== '')) {
+      faltaEnDatos.push('license-number');
+    }
+    if (especialidades.length === 0) faltaEnDatos.push('specialty');
+
+    const pasos: OnboardingStepDto[] = [
+      {
+        key: 'professional-data',
+        complete: faltaEnDatos.length === 0,
+        missing: faltaEnDatos,
+      },
+      {
+        key: 'photo',
+        // `!== undefined` no alcanza: la columna es nullable y MikroORM la
+        // hidrata como `null`, así que un profesional SIN foto daba el paso por
+        // cumplido —«Tu foto: completado» con `photo_file_id` en NULL, visto en
+        // pantalla—. Se comprueba la ausencia real, que son los dos valores.
+        complete: tieneFoto,
+        missing: tieneFoto ? [] : ['photo'],
+      },
+      {
+        // Vale una afiliación **o** una agenda propia: un profesional que
+        // atiende en su propio consultorio no está afiliado a nadie, y pedirle
+        // una afiliación lo dejaría trabado en un paso que no le corresponde.
+        key: 'organizations',
+        complete: afiliaciones.length > 0 || recursos.length > 0,
+        missing:
+          afiliaciones.length > 0 || recursos.length > 0 ? [] : ['affiliation'],
+      },
+      {
+        key: 'schedule',
+        complete: cupos > 0,
+        missing:
+          cupos > 0
+            ? []
+            : recursos.length === 0
+              ? ['published-schedule']
+              : ['slots'],
+      },
+    ];
+
+    // La revisión no pide nada propio: está cumplida cuando lo están las cuatro
+    // anteriores. Se declara igual para que la pantalla dibuje cinco pasos.
+    const previosCompletos = pasos.every((paso) => paso.complete);
+    pasos.push({
+      key: 'review',
+      complete: previosCompletos,
+      missing: previosCompletos ? [] : ['previous-steps'],
+    });
+
+    const primerIncompleto = pasos.find((paso) => !paso.complete);
+
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.onboarding',
+        firstIncomplete: primerIncompleto?.key ?? 'done',
+      },
+      'Calculando el avance del alta del profesional',
+    );
+
+    return {
+      practitionerProfileId,
+      steps: pasos,
+      firstIncomplete: primerIncompleto?.key ?? 'done',
+    };
   }
 
   /**
@@ -388,8 +537,21 @@ export class ProfilesPractitionersService {
         [],
         { profileId, pieza: 'idiomas' },
       ),
+      // TP-2: el titular ve su trayectoria entera —incluida la solicitud que
+      // mandó y todavía nadie aceptó, que si no no sabría que la mandó—; quien
+      // mira la ficha de un colega ve sólo los vínculos aprobados. Decir que
+      // alguien trabaja en una clínica que no lo aceptó es afirmar algo falso,
+      // y era lo que esta lectura hacía.
+      //
+      // Va envuelta como las otras cinco (F-18): las dos correcciones son
+      // independientes —una elige QUÉ vínculos se ven, la otra impide que esa
+      // lectura tumbe la ficha entera— y quedarse con una sola habría
+      // reintroducido el defecto de la otra.
       this.sinTumbarLaFicha(
-        () => this.affiliationsRepo.findByPractitioner(em, profileId),
+        () =>
+          subjectUserId === undefined
+            ? this.affiliations.visiblesDeTerceros(em, profileId)
+            : this.affiliationsRepo.findByPractitioner(em, profileId),
         [],
         { profileId, pieza: 'afiliaciones' },
       ),
@@ -823,6 +985,12 @@ export class ProfilesPractitionersService {
         clinicalInterpretationAllowed: true,
         actorUserId: actor.id,
       });
+      await this.declareSpecialties(
+        tx,
+        personId,
+        dto.specialtyConceptIds ?? [],
+        actor,
+      );
       await tx.flush();
 
       this.logger.info(
@@ -1014,6 +1182,59 @@ export class ProfilesPractitionersService {
   }
 
   /** UC-05-06: agrega una especialidad con credencial de soporte verificada. */
+  /**
+   * Deja declaradas las especialidades que vinieron con el alta.
+   *
+   * Va **dentro de la transacción del registro** y no como llamadas sueltas
+   * después: es la regla 11 del modelo —el alta de un profesional es atómica—,
+   * y además es lo único que permite elegir la especialidad al registrarse, que
+   * es cuando la persona la tiene presente. Si una no pertenece al catálogo, el
+   * alta entera se rechaza: registrar a medias a un profesional con una
+   * especialidad inventada es peor que pedirle que la corrija.
+   *
+   * La primera de la lista queda como principal. No hay «cuál es la principal»
+   * en el alta a propósito: quien se registra ordena sus especialidades, y la
+   * primera es la que da la respuesta obvia a «¿de qué sos?».
+   *
+   * @param tx - La transacción del alta.
+   * @param profileId - El perfil profesional recién creado.
+   * @param specialtyConceptIds - Los conceptos declarados, ya sin repetidos.
+   * @param actor - Quién registra, para la autoría de las filas.
+   */
+  private async declareSpecialties(
+    tx: EntityManager,
+    profileId: string,
+    specialtyConceptIds: readonly string[],
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (specialtyConceptIds.length === 0) return;
+
+    const unicas = [...new Set(specialtyConceptIds)];
+    if (unicas.length > MAX_SPECIALTIES_PER_PRACTITIONER) {
+      throw new PreconditionFailedException(
+        `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
+        { declaradas: unicas.length },
+      );
+    }
+
+    const ahora = new Date();
+    for (const [orden, specialtyConceptId] of unicas.entries()) {
+      await this.specialtyCatalog.assertIsMedicalSpecialty(
+        tx,
+        specialtyConceptId,
+      );
+      this.specialtiesRepo.create(tx, {
+        practitionerProfileId: profileId,
+        specialtyConceptId,
+        isPrimary: orden === 0,
+        boardCertified: false,
+        verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+        validFrom: ahora,
+        actorUserId: actor.id,
+      });
+    }
+  }
+
   async addSpecialty(
     profileId: string,
     dto: AddSpecialtyDto,
@@ -1055,8 +1276,35 @@ export class ProfilesPractitionersService {
         }
       }
 
-      const specialtyConceptId =
-        dto.specialtyConceptId ?? PROF.SPECIALTY_GENERAL;
+      // Omitir la especialidad ya no cae en «medicina general»: ese concepto
+      // venía de un catálogo paralelo de la API que NINGUNA fila usa, así que
+      // el default escribía en silencio una especialidad fuera del catálogo del
+      // modelo. Si no se dice cuál, no hay especialidad que registrar.
+      const specialtyConceptId = dto.specialtyConceptId;
+      if (specialtyConceptId === undefined) {
+        throw new PreconditionFailedException('Falta indicar la especialidad', {
+          profileId,
+        });
+      }
+      await this.specialtyCatalog.assertIsMedicalSpecialty(
+        tx,
+        specialtyConceptId,
+      );
+
+      // El tope es del registro del cliente, y se cuenta sobre las VIGENTES:
+      // una especialidad dada de baja no debería ocupar un lugar para siempre.
+      const vigentes = await this.specialtiesRepo.findAllByPractitioner(
+        tx,
+        profileId,
+      );
+      const activas = vigentes.filter((especialidad) => !especialidad.validTo);
+      if (activas.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
+        throw new PreconditionFailedException(
+          `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
+          { profileId, activas: activas.length },
+        );
+      }
+
       const duplicate = await this.specialtiesRepo.findActive(
         tx,
         profileId,
@@ -1186,6 +1434,26 @@ export class ProfilesPractitionersService {
         );
       }
 
+      // TP-2: y pedir dos veces atender en la MISMA sede es lo mismo, aunque el
+      // cargo o la fecha se escriban distinto. `findSame` compara institución,
+      // cargo e inicio —sirve para no cargar dos veces la misma línea del
+      // currículum—, y con eso solo, reenviar el formulario con una coma de
+      // diferencia dejaba dos solicitudes para la misma sede en la bandeja de
+      // la organización.
+      if (dto.practiceSiteId) {
+        const yaPedida = await this.affiliationsRepo.findByPractitionerAndSite(
+          tx,
+          profileId,
+          dto.practiceSiteId,
+        );
+        if (yaPedida) {
+          throw new ConflictException('Ya pediste vincularte a esa sede', {
+            practiceSiteId: dto.practiceSiteId,
+            statusConceptId: yaPedida.statusConceptId,
+          });
+        }
+      }
+
       const affiliation = this.affiliationsRepo.create(tx, {
         practitionerProfileId: profileId,
         organizationName,
@@ -1196,7 +1464,19 @@ export class ProfilesPractitionersService {
           dto.affiliationTypeConceptId ?? PROF.AFFILIATION_TYPE_EMPLOYMENT,
         startDate,
         endDate,
-        statusConceptId: PROF.AFFILIATION_ACTIVE,
+        // TP-2: un vínculo a una sede ajena nace **pendiente**, no activo.
+        //
+        // Hasta acá, declarar una afiliación la daba por cierta en el acto:
+        // cualquiera podía decirse parte de una clínica y el sistema lo
+        // publicaba en su trayectoria y en su perfil, sin que nadie de esa
+        // clínica se enterara siquiera. Sin sede sigue naciendo activa —eso es
+        // historial laboral y no hay a quién pedirle permiso—, y con una sede
+        // propia también, porque pedirse permiso a uno mismo no es una regla.
+        statusConceptId: await this.affiliations.estadoInicial(
+          tx,
+          dto.practiceSiteId,
+          actor,
+        ),
         actorUserId: actor.id,
       });
       await tx.flush();

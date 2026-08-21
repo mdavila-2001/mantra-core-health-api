@@ -6,10 +6,10 @@ Agrupa los componentes relacionados con **state** y mantiene cohesionada esta re
 
 ### Archivos
 
-| Archivo | Responsabilidad |
-| --- | --- |
-| `booking-state-machine.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `booking-state-machine.ts` | Implementación o recurso de soporte de esta carpeta. |
+| Archivo                         | Responsabilidad                                      |
+| ------------------------------- | ---------------------------------------------------- |
+| `booking-state-machine.spec.ts` | Pruebas unitarias del componente homónimo.           |
+| `booking-state-machine.ts`      | Implementación o recurso de soporte de esta carpeta. |
 
 ## Criterios de mantenimiento
 

@@ -56,7 +56,8 @@ const ORIGIN = 'clinical-forms';
  *
  * ## Las especialidades se siembran acá
  *
- * `terminology` sólo traía `profiles:SPECIALTY_GENERAL`, y sin concepto no hay
+ * `terminology` no trae ningún concepto de especialidad —el catálogo real,
+ * `VS_MEDICAL_SPECIALTY`, lo siembra el paquete del modelo—, y sin concepto no hay
  * `specialty_concept_id` al que colgar una plantilla. Los conceptos de
  * especialidad que el catálogo necesita se materializan en este mismo servicio
  * —no en `terminology-seed.service.ts`, que en esta ronda lo tiene tomado otro
