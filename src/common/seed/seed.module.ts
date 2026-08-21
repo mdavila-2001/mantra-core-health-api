@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TerminologyModule } from '../../modules/terminology/terminology.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import {
   CatalogConcepts,
@@ -75,6 +76,12 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
  */
 @Module({
   imports: [
+    // El seeder de fichas por especialidad (2d2711b2) inyecta
+    // ValueSetsRepository, que vive en terminology y su módulo ya exporta. Sin
+    // este import Nest no resolvía la dependencia y LA API ENTERA se caía al
+    // arrancar, en bucle: sin arranque no hay login ni registro ni nada.
+    // Tomado de #194, para poder verificar el seeder contra el contenedor.
+    TerminologyModule,
     MikroOrmModule.forFeature([
       TerminologySources,
       CodeSystems,
