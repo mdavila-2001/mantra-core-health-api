@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
 
-/** Los once seeds de la cadena, en el orden en que el orquestador los corre. */
+/** Los doce seeds de la cadena, en el orden en que el orquestador los corre. */
 const PASOS = [
   'terminology',
   'dynamicEnums',
   'glossary',
+  'boGeography',
   'vademecum',
   'messaging',
   'audioAssets',
@@ -29,7 +30,7 @@ function loggerFalso() {
 }
 
 /**
- * Arma el orquestador con los once seeds mockeados.
+ * Arma el orquestador con los doce seeds mockeados.
  *
  * @param fallan - Nombres de los seeds que deben lanzar en esta corrida.
  */
@@ -54,6 +55,7 @@ function armar(fallan: Paso[] = []) {
     dobles.terminology as never,
     dobles.dynamicEnums as never,
     dobles.glossary as never,
+    dobles.boGeography as never,
     dobles.messaging as never,
     dobles.audioAssets as never,
     dobles.vademecum as never,
@@ -106,14 +108,14 @@ describe('SeedBootstrapService', () => {
   });
 
   describe('run', () => {
-    it('corre los once seeds y los resume', async () => {
+    it('corre los doce seeds y los resume', async () => {
       const { service } = armar();
 
       const summary = await service.run();
 
-      expect(summary.ok).toBe(11);
+      expect(summary.ok).toBe(12);
       expect(summary.failed).toBe(0);
-      expect(summary.steps).toHaveLength(11);
+      expect(summary.steps).toHaveLength(12);
     });
 
     it('deja registro de cada paso aunque no haya insertado nada', async () => {
@@ -127,7 +129,7 @@ describe('SeedBootstrapService', () => {
       const pasosLogueados = logger.info.mock.calls.filter(
         ([contexto]) => (contexto as { event?: string }).event === 'seed.step',
       );
-      expect(pasosLogueados).toHaveLength(11);
+      expect(pasosLogueados).toHaveLength(12);
       for (const [contexto] of pasosLogueados) {
         expect(contexto).toMatchObject({ inserted: 0, failed: false });
         expect((contexto as { tookMs: number }).tookMs).toBeGreaterThanOrEqual(
@@ -143,13 +145,13 @@ describe('SeedBootstrapService', () => {
 
       expect(dobles.clinicalForms.run).toHaveBeenCalledTimes(1);
       expect(summary.failed).toBe(1);
-      expect(summary.ok).toBe(10);
+      expect(summary.ok).toBe(11);
       expect(summary.steps.find((paso) => paso.failed)?.name).toBe(
         'glosario médico',
       );
     });
 
-    it('si falla el catálogo de conceptos, los diez dependientes ni se intentan', async () => {
+    it('si falla el catálogo de conceptos, los once dependientes ni se intentan', async () => {
       const { service, dobles, logger } = armar(['terminology']);
 
       const summary = await service.run();
