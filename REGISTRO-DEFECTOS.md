@@ -156,6 +156,18 @@ Cerrado por el camino canónico (nadie tocó `SQL/` a mano):
 observar en runtime el 20/08: Docker Desktop estaba apagado**, así que la evidencia es de
 generador y de grep, no de base.
 
+**Adenda (2026-08-20, misma tarde): la promoción estaba INCOMPLETA — v4.1.2 cerró la mitad de
+B-9.** El PR #171 metió **dos** columnas solo-ORM en `conditions.entity.ts`, no una:
+`expectedResolutionAt` (`expected_resolution_at : timestamptz`, nullable) entró en el **mismo
+commit `ddff9d0f`** (`git log -S expectedResolutionAt`) y quedó fuera de la promoción. Con ella
+ausente en `.puml`/`SQL/`, aplicar el patch v4.1.2 **no alcanzaba**: el ORM la proyecta en el
+`SELECT` y toda lectura de `clinical.conditions` seguía siendo `columna-ausente`. Cerrada por el
+camino canónico como parte de **v4.1.3** junto con `conditions.note_text` y
+`medication_requests.patient_instructions_text` (diff de generador de exactamente 3 líneas, todas
+en `02_tables.sql`; sin FK ni índice ni `orm:catalog`). Patch para bases vivas:
+`SQL/patches/2026-08-20_v413_clinical_notes_and_expected_resolution.sql` — aplica el mismo
+pendiente de runtime que el de v4.1.2, y los dos se verifican juntos con el mismo `dry-run`.
+
 **B-10 · La bóveda no tiene las notas del módulo 65 (`surveys`), y por eso `yarn orm:catalog`
 hoy es destructivo.** Destapado al regenerar el catálogo para B-9. La promoción del 18/08 llegó
 al `.puml`, a `SQL/` y a las entidades, pero **no creó las notas de la bóveda**: hay **0** notas
