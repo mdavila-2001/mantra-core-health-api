@@ -88,6 +88,15 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'JURISDICTION_NATIONAL',
       display: 'National jurisdiction',
     },
+    // SEDES (Servicio Departamental de Salud) es una autorización departamental,
+    // no nacional: un médico que ejerce en Santa Cruz puede tener las dos —su
+    // matrícula del Ministerio de Salud/Colegio y, aparte, su registro ante el
+    // SEDES de la gobernación—, así que es una segunda fila de
+    // `jurisdiction_authorizations`, no un reemplazo de la nacional.
+    JURISDICTION_SEDES_SANTA_CRUZ: {
+      code: 'JURISDICTION_SEDES_SANTA_CRUZ',
+      display: 'SEDES — Gobernación Autónoma Departamental de Santa Cruz',
+    },
     AUTH_PENDING: { code: 'AUTH_PENDING', display: 'Authorization pending' },
     AUTH_ACTIVE: { code: 'AUTH_ACTIVE', display: 'Authorization active' },
     AUTH_EXPIRED: { code: 'AUTH_EXPIRED', display: 'Authorization expired' },

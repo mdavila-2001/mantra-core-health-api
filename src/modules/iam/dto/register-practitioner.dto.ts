@@ -153,6 +153,19 @@ export class RegisterPractitionerDto {
   regulatoryAuthority?: string;
 
   /**
+   * Fecha de inscripción de la matrícula (ISO `YYYY-MM-DD`). Es el `valid_from`
+   * de la autorización jurisdiccional: sin esto la única forma de declararla era
+   * agregar una segunda autorización después del alta.
+   */
+  @ApiPropertyOptional({
+    description: 'Fecha de inscripción de la matrícula (ISO)',
+    format: 'date',
+  })
+  @IsOptional()
+  @IsISO8601()
+  licenseIssueDate?: string;
+
+  /**
    * Título profesional visible (p. ej. "Dra.", "Lic.").
    */
   @ApiPropertyOptional({ maxLength: 100 })
@@ -177,6 +190,20 @@ export class RegisterPractitionerDto {
     message: 'El documento sólo admite letras, dígitos, punto y guion',
   })
   nationalId?: string;
+
+  /**
+   * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`): la
+   * terminación LP/CB/SC/... que evita confundir cédulas homónimas de
+   * departamentos distintos (backlog T-01, ya resuelto para el paciente).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
+  })
+  @IsOptional()
+  @IsUUID()
+  issuerAdministrativeAreaConceptId?: string;
 
   /**
    * Teléfono de contacto profesional.
