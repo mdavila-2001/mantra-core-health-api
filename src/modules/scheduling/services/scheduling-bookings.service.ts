@@ -73,6 +73,28 @@ const CHANNEL_CONCEPT: Readonly<Record<BookingChannel, string>> = {
   PHONE: CONCEPTS.CHANNEL_PHONE,
 };
 
+/**
+ * El motivo con el que se cancela una solicitud desplazada.
+ *
+ * Queda en el historial y es lo que el paciente lee: una cita que desaparece
+ * sin explicación se siente como un plantón, y acá la explicación existe —otro
+ * médico le dijo que sí primero—.
+ */
+const MOTIVO_DESPLAZADA =
+  'Se canceló automáticamente: te confirmaron otro turno a la misma hora.';
+
+/**
+ * Estados en los que una solicitud está esperando respuesta.
+ *
+ * Son las que una aceptación ajena puede desplazar: todavía no las comprometió
+ * nadie. Una confirmada NO entra acá a propósito — ver
+ * {@link SchedulingBookingsService.cancelarPendientesQueChocan}.
+ */
+const PENDING_BOOKING_STATES: readonly string[] = [
+  SCHED.BOOKING_REQUESTED,
+  SCHED.BOOKING_PENDING_CONFIRMATION,
+];
+
 /** Estados en los que una cita sigue ocupando cupo. */
 const ACTIVE_BOOKING_STATES: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
@@ -461,6 +483,34 @@ export class SchedulingBookingsService {
           slotId: slot.id,
           startAt: slot.startAt.toISOString(),
         });
+      }
+
+      // REGLA 1: no se puede pedir un turno encima de uno YA ACEPTADO.
+      //
+      // Pedirle a varios médicos a la misma hora es legítimo mientras ninguno
+      // haya dicho que sí —es cómo se consigue turno—, pero una vez que hay uno
+      // confirmado, el paciente ya tiene dónde estar. Reservar otro encima es
+      // comprometerse a estar en dos lugares a la vez, y el que se queda
+      // esperando es el médico.
+      const yaComprometido =
+        await this.bookingsRepo.findPatientBookingsOverlapping(
+          tx,
+          plan.patientProfileId,
+          slot.startAt,
+          slot.endAt ?? slot.startAt,
+          ACTIVE_BOOKING_STATES,
+        );
+      if (yaComprometido.length > 0) {
+        const choque = yaComprometido[0];
+        throw new PreconditionFailedException(
+          `Ya tenés un turno confirmado ese día a esa hora${
+            choque.resourceName ? ` en «${choque.resourceName}»` : ''
+          }. Cancelalo primero si querés cambiarlo por éste.`,
+          {
+            bookingId: choque.id,
+            startAt: choque.startAt,
+          },
+        );
       }
 
       // CAN-APT-001: se congela la política de cancelación vigente en el momento
@@ -978,17 +1028,129 @@ export class SchedulingBookingsService {
         });
       }
 
+      // REGLA 2: aceptar una desplaza a las otras que chocan.
+      const desplazadas = await this.cancelarPendientesQueChocan(
+        tx,
+        booking,
+        actor,
+      );
+
       return {
         bookingId: booking.id,
         statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
         occurredAt: confirmedAt.toISOString(),
+        desplazadas,
       };
     });
 
     // Fuera de la transacción a propósito (P8): un aviso que falla no puede
     // deshacer una cita que ya se confirmó. Ver `ports/agenda-notice.port.ts`.
     await this.avisarCambio(bookingId, 'ACCEPTED', undefined, 'PROVIDER');
+    // Y un aviso por cada solicitud que este «sí» dejó sin efecto: el
+    // paciente las pidió y tiene que enterarse de que ya no van, aunque él
+    // no haya hecho nada. Uno por uno, porque cada una es de otro médico.
+    for (const id of resultado.desplazadas) {
+      await this.avisarCambio(id, 'CANCELLED', MOTIVO_DESPLAZADA, 'PROVIDER');
+    }
     return resultado;
+  }
+
+  /**
+   * Cancela las solicitudes del paciente que chocan con la que se acaba de
+   * aceptar.
+   *
+   * ## Por qué existe
+   *
+   * Pedirle turno a varios médicos para la misma hora es cómo se consigue
+   * turno: nadie sabe cuál va a decir que sí. Pero en cuanto uno acepta, las
+   * demás dejaron de ser posibles —el paciente no puede estar en dos lados— y
+   * si nadie las cierra quedan pendientes ocupando cupo, esperando una
+   * respuesta que ya no importa, y bloqueando esos huecos para otra persona.
+   *
+   * ## Por qué sólo las PENDIENTES
+   *
+   * Una confirmada no se toca jamás desde acá: si el paciente ya tenía un
+   * turno aceptado a esa hora, esta aceptación no debería haber ocurrido —la
+   * regla 1 lo impide al pedir—, y cancelar automáticamente algo que otro
+   * médico ya comprometió sería decidir por él. Ese caso se resuelve hablando,
+   * no con una regla.
+   *
+   * ## Por qué el cupo se libera
+   *
+   * Porque la solicitud lo estaba reteniendo. Dejarlo tomado castigaría al
+   * siguiente paciente por una cita que ya no va a existir.
+   *
+   * @param tx - Transacción en curso; va dentro de la misma que confirma.
+   * @param aceptada - La cita que se acaba de confirmar.
+   * @param actor - Quien aceptó.
+   * @returns Los identificadores de las que se cancelaron.
+   */
+  private async cancelarPendientesQueChocan(
+    tx: EntityManager,
+    aceptada: AppointmentBookings,
+    actor: AuthenticatedUser,
+  ): Promise<string[]> {
+    const slot = await this.bookingsRepo.findSlotById(
+      tx,
+      aceptada.bookableSlotId,
+    );
+    if (!slot) return [];
+
+    const chocan = await this.bookingsRepo.findPatientBookingsOverlapping(
+      tx,
+      aceptada.patientProfileId,
+      slot.startAt,
+      slot.endAt ?? slot.startAt,
+      PENDING_BOOKING_STATES,
+      aceptada.id,
+    );
+
+    const canceladas: string[] = [];
+    for (const otra of chocan) {
+      const booking = await this.bookingsRepo.findBookingByIdForUpdate(
+        tx,
+        otra.id,
+      );
+      if (!booking) continue;
+
+      const previo = booking.statusConceptId;
+      this.bookingsRepo.createCancellation(tx, {
+        bookingId: booking.id,
+        reasonConceptId: CONCEPTS.CANCEL_BY_PROVIDER,
+        cancelledByUserId: actor.id,
+        isNoShow: false,
+        cancelledAt: new Date(),
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        actorUserId: actor.id,
+      });
+
+      booking.statusConceptId = CONCEPTS.BOOKING_CANCELLED;
+      touch(booking, actor.id);
+      await this.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: previo,
+        toStateConceptId: CONCEPTS.BOOKING_CANCELLED,
+        reasonText: MOTIVO_DESPLAZADA,
+        actorKind: 'PROVIDER',
+      });
+
+      // El cupo vuelve a estar libre: lo retenía una solicitud que ya no va.
+      const suSlot = await this.bookingsRepo.findSlotForUpdate(
+        tx,
+        booking.bookableSlotId,
+      );
+      if (suSlot) {
+        suSlot.remainingCapacity += 1;
+        if (suSlot.statusConceptId === CONCEPTS.SLOT_HELD) {
+          suSlot.statusConceptId = CONCEPTS.SLOT_OPEN;
+        }
+        touch(suSlot, actor.id);
+      }
+
+      canceladas.push(booking.id);
+    }
+
+    return canceladas;
   }
 
   /**
