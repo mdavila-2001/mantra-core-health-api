@@ -274,10 +274,7 @@ export class ClinicalFormsSeedService {
     for (const form of STANDARD_FORMS) {
       // Las que el modelo ya declara no se acuñan: se usan las suyas.
       if (delModelo.has(form.specialty.code)) continue;
-      porId.set(
-        this.specialtyConceptIdAcunado(form.specialty),
-        form.specialty,
-      );
+      porId.set(this.specialtyConceptIdAcunado(form.specialty), form.specialty);
     }
 
     const ids = [...porId.keys()];

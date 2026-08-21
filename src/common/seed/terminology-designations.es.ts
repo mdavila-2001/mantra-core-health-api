@@ -991,6 +991,478 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
 
+  // --- Estado y curso de un diagnóstico (patch de cronicidad) --------------
+  [
+    CLIN.CONDITION_ACTIVE,
+    {
+      display: 'Activo',
+      definition: 'El diagnóstico está vigente: la persona lo tiene ahora.',
+    },
+  ],
+  [
+    CLIN.CONDITION_INACTIVE,
+    {
+      display: 'Inactivo',
+      definition:
+        'El diagnóstico ya no está dando síntomas, pero no se declaró resuelto.',
+    },
+  ],
+  [
+    CLIN.CONDITION_REMISSION,
+    {
+      display: 'En remisión',
+      definition:
+        'Los síntomas cedieron. La enfermedad puede volver, así que se sigue controlando.',
+    },
+  ],
+  [
+    CLIN.CONDITION_RESOLVED,
+    {
+      display: 'Resuelto',
+      definition: 'La enfermedad terminó y no se espera que vuelva.',
+    },
+  ],
+  [
+    CLIN.CONDITION_RECURRENCE,
+    {
+      display: 'Recurrencia',
+      definition: 'Volvió después de haberse resuelto.',
+    },
+  ],
+  [
+    CLIN.CONDITION_RELAPSE,
+    {
+      display: 'Recaída',
+      definition: 'Volvió durante la remisión, antes de darse por resuelto.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_ACUTE,
+    {
+      display: 'Agudo',
+      definition: 'Empezó de golpe y dura poco tiempo.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_CHRONIC,
+    {
+      display: 'Crónico',
+      definition: 'Dura meses o años y se convive con él.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_SUBACUTE,
+    {
+      display: 'Subagudo',
+      definition: 'Entre agudo y crónico: ni de golpe ni de años.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_RECURRENT,
+    {
+      display: 'Recurrente',
+      definition: 'Aparece y desaparece por episodios.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_UNKNOWN,
+    {
+      display: 'Curso desconocido',
+      definition: 'No hay datos para decir cómo evoluciona.',
+    },
+  ],
+
+  // --- Vademécum esencial (DCI/ATC; nombre y definición en castellano) -----
+  [
+    CLIN.MEDICATION_ACIDO_ACETILSALICILICO,
+    {
+      display: 'Ácido acetilsalicílico',
+      definition:
+        'Calma el dolor, baja la fiebre y, en dosis baja, hace la sangre menos espesa para prevenir infartos.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_DICLOFENACO,
+    {
+      display: 'Diclofenaco',
+      definition:
+        'Antiinflamatorio potente para dolor de articulaciones, golpes y cólicos. Irrita el estómago.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_NAPROXENO,
+    {
+      display: 'Naproxeno',
+      definition:
+        'Antiinflamatorio de efecto prolongado: sirve para dolores que duran todo el día.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_TRAMADOL,
+    {
+      display: 'Tramadol',
+      definition:
+        'Analgésico fuerte para dolor moderado o intenso que no cede con los comunes.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_MORFINA,
+    {
+      display: 'Morfina',
+      definition:
+        'Analgésico opioide para dolor intenso, como el del cáncer o el postoperatorio.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_AMOXICILINA_CLAVULANICO,
+    {
+      display: 'Amoxicilina con ácido clavulánico',
+      definition:
+        'Antibiótico de amplio espectro. El clavulánico vence a bacterias que resisten la amoxicilina sola.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_BENCILPENICILINA,
+    {
+      display: 'Bencilpenicilina',
+      definition:
+        'Penicilina inyectable, la de siempre para infecciones por estreptococo y sífilis.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_CEFTRIAXONA,
+    {
+      display: 'Ceftriaxona',
+      definition:
+        'Antibiótico inyectable de amplio espectro para infecciones graves.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_CLARITROMICINA,
+    {
+      display: 'Claritromicina',
+      definition:
+        'Antibiótico para infecciones respiratorias y para erradicar el Helicobacter pylori.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_CIPROFLOXACINO,
+    {
+      display: 'Ciprofloxacino',
+      definition: 'Antibiótico para infecciones urinarias e intestinales.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_COTRIMOXAZOL,
+    {
+      display: 'Sulfametoxazol con trimetoprima',
+      definition:
+        'Antibiótico combinado para infecciones urinarias y respiratorias. También previene neumonías en personas inmunodeprimidas.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_DOXICICLINA,
+    {
+      display: 'Doxiciclina',
+      definition:
+        'Antibiótico para infecciones respiratorias, de piel y transmitidas por garrapatas.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_GENTAMICINA,
+    {
+      display: 'Gentamicina',
+      definition:
+        'Antibiótico inyectable para infecciones graves. Exige vigilar el riñón y el oído.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_METRONIDAZOL,
+    {
+      display: 'Metronidazol',
+      definition:
+        'Trata infecciones por bacterias sin oxígeno y parásitos como la amebiasis y la giardiasis.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_NITROFURANTOINA,
+    {
+      display: 'Nitrofurantoína',
+      definition:
+        'Antibiótico que se concentra en la orina: es de elección en la cistitis.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_FLUCONAZOL,
+    {
+      display: 'Fluconazol',
+      definition:
+        'Antifúngico para candidiasis, tanto vaginal como de boca o esófago.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ALBENDAZOL,
+    {
+      display: 'Albendazol',
+      definition: 'Antiparasitario de dosis única para lombrices intestinales.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_MEBENDAZOL,
+    {
+      display: 'Mebendazol',
+      definition:
+        'Antiparasitario para oxiuros y otras lombrices intestinales.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_AMLODIPINO,
+    {
+      display: 'Amlodipino',
+      definition:
+        'Baja la presión relajando las arterias. Puede hinchar los tobillos.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ATENOLOL,
+    {
+      display: 'Atenolol',
+      definition: 'Betabloqueante: baja la presión y enlentece el pulso.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_BISOPROLOL,
+    {
+      display: 'Bisoprolol',
+      definition: 'Betabloqueante para hipertensión e insuficiencia cardíaca.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_FUROSEMIDA,
+    {
+      display: 'Furosemida',
+      definition:
+        'Diurético potente: saca líquido cuando hay hinchazón o el corazón falla.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_HIDROCLOROTIAZIDA,
+    {
+      display: 'Hidroclorotiazida',
+      definition:
+        'Diurético suave, de los primeros para tratar la presión alta.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ESPIRONOLACTONA,
+    {
+      display: 'Espironolactona',
+      definition:
+        'Diurético que conserva el potasio. Se usa en insuficiencia cardíaca y cirrosis.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_SIMVASTATINA,
+    {
+      display: 'Simvastatina',
+      definition: 'Baja el colesterol para prevenir infartos y derrames.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_DIGOXINA,
+    {
+      display: 'Digoxina',
+      definition:
+        'Fortalece el latido y controla el pulso en la fibrilación auricular.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_WARFARINA,
+    {
+      display: 'Warfarina',
+      definition:
+        'Anticoagulante oral: evita trombos. Exige control periódico de la sangre.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_INSULINA_NPH,
+    {
+      display: 'Insulina isófana (NPH)',
+      definition:
+        'Insulina de acción intermedia: cubre la glucemia durante varias horas.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_INSULINA_RAPIDA,
+    {
+      display: 'Insulina humana rápida',
+      definition:
+        'Insulina de acción corta, para acompañar las comidas o corregir una subida.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_GLIBENCLAMIDA,
+    {
+      display: 'Glibenclamida',
+      definition:
+        'Pastilla para la diabetes tipo 2: hace que el páncreas suelte más insulina.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_LEVOTIROXINA,
+    {
+      display: 'Levotiroxina',
+      definition:
+        'Reemplaza la hormona tiroidea cuando la tiroides trabaja de menos.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_PREDNISONA,
+    {
+      display: 'Prednisona',
+      definition:
+        'Corticoide oral: desinflama con fuerza en asma, alergias y enfermedades autoinmunes.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_DEXAMETASONA,
+    {
+      display: 'Dexametasona',
+      definition: 'Corticoide potente y prolongado, para inflamación grave.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_METOCLOPRAMIDA,
+    {
+      display: 'Metoclopramida',
+      definition:
+        'Corta las náuseas y los vómitos, y ayuda a que el estómago se vacíe.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_SALES_REHIDRATACION,
+    {
+      display: 'Sales de rehidratación oral',
+      definition:
+        'Repone agua y sales en la diarrea. Es el tratamiento que salva vidas en la deshidratación.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_CETIRIZINA,
+    {
+      display: 'Cetirizina',
+      definition: 'Antihistamínico para alergia, con poco sueño.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_BUDESONIDA,
+    {
+      display: 'Budesonida',
+      definition:
+        'Corticoide inhalado: desinflama el bronquio y previene las crisis de asma.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_IPRATROPIO,
+    {
+      display: 'Bromuro de ipratropio',
+      definition:
+        'Broncodilatador inhalado, sobre todo en la enfermedad pulmonar crónica.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_DIAZEPAM,
+    {
+      display: 'Diazepam',
+      definition: 'Calma la ansiedad, relaja el músculo y corta convulsiones.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_CLONAZEPAM,
+    {
+      display: 'Clonazepam',
+      definition: 'Controla convulsiones y crisis de pánico.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_CARBAMAZEPINA,
+    {
+      display: 'Carbamazepina',
+      definition:
+        'Antiepiléptico, y también para el dolor del nervio trigémino.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ACIDO_VALPROICO,
+    {
+      display: 'Ácido valproico',
+      definition:
+        'Antiepiléptico de amplio espectro. No se usa en el embarazo.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_FENITOINA,
+    {
+      display: 'Fenitoína',
+      definition: 'Antiepiléptico clásico para convulsiones tónico-clónicas.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_FLUOXETINA,
+    {
+      display: 'Fluoxetina',
+      definition:
+        'Antidepresivo: levanta el ánimo y sirve en la ansiedad. Tarda semanas en hacer efecto.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_SERTRALINA,
+    {
+      display: 'Sertralina',
+      definition:
+        'Antidepresivo para depresión, ansiedad y estrés postraumático.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_AMITRIPTILINA,
+    {
+      display: 'Amitriptilina',
+      definition:
+        'Antidepresivo antiguo, hoy más usado para dolor de nervios y migraña.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_HALOPERIDOL,
+    {
+      display: 'Haloperidol',
+      definition:
+        'Antipsicótico para alucinaciones, delirio y agitación grave.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_SULFATO_FERROSO,
+    {
+      display: 'Sulfato ferroso',
+      definition:
+        'Hierro para tratar la anemia. Oscurece la deposición, que es normal.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ACIDO_FOLICO,
+    {
+      display: 'Ácido fólico',
+      definition:
+        'Vitamina esencial en el embarazo: previene malformaciones del tubo neural.',
+    },
+  ],
+  [
+    CLIN.MEDICATION_ALOPURINOL,
+    {
+      display: 'Alopurinol',
+      definition: 'Baja el ácido úrico para prevenir ataques de gota.',
+    },
+  ],
+
   // --- Vías de administración (HL7 FHIR route-codes) ----------------------
   [
     CLIN.MEDICATION_ROUTE_ORAL,
