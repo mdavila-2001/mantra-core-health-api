@@ -352,6 +352,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   ID_TYPE_MRN: def('common:id-type:mrn', 'MRN', 'Medical record number'),
   ID_TYPE_PASSPORT: def('common:id-type:passport', 'PASSPORT', 'Passport'),
+  // Registro tributario de una organización (el NIT boliviano). Lo referencia el
+  // paquete de seeds para el NIT de las aseguradoras (v4.1.4); acá debe existir
+  // con la misma clave o el id determinista no coincidiría entre ambos lados.
+  ID_TYPE_TAX: def('common:id-type:tax', 'TAX_ID', 'Tax identification number'),
   USE_OFFICIAL: def('common:use:official', 'OFFICIAL', 'Official'),
   USE_SECONDARY: def('common:use:secondary', 'SECONDARY', 'Secondary'),
 
