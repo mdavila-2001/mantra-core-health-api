@@ -5,6 +5,7 @@ import { AuthzPlatformPermissionsSeedService } from './authz-platform-permission
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
+import { BoGeographySeedService } from './bo-geography-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
@@ -78,6 +79,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param terminology - Catálogo padre de todos los conceptos.
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
+   * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
    * @param messaging - Datos estructurales de mensajería.
    * @param audioAssets - Colas y plantillas de audio.
    * @param vademecum - Catálogo de medicamentos para prescribir.
@@ -92,6 +94,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly terminology: TerminologySeedService,
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly glossary: GlossarySeedService,
+    private readonly boGeography: BoGeographySeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
     private readonly vademecum: VademecumSeedService,
@@ -142,7 +145,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     const steps: SeedStepResult[] = [];
 
     // El catálogo de conceptos no es un paso más: es la precondición de los
-    // otros nueve. Si falla, seguir sería sembrar contra FKs que no existen —y
+    // otros diez. Si falla, seguir sería sembrar contra FKs que no existen —y
     // el error real quedaría sepultado bajo nueve fallos derivados.
     const catalogo = await this.runStep('catálogo de conceptos', () =>
       this.terminology.run(),
@@ -154,7 +157,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       this.logger.error(
         { event: 'seed.aborted', ...resumen },
         'Seeds estructurales omitidos: el catálogo de terminología no quedó ' +
-          'disponible, así que los nueve seeds dependientes ni se intentaron.',
+          'disponible, así que los diez seeds dependientes ni se intentaron.',
       );
       return resumen;
     }
@@ -173,6 +176,16 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     // motor de terminología antes de los dominios operativos.
     steps.push(
       await this.runStep('glosario médico', () => this.glossary.run()),
+    );
+    // Mismo motivo que el glosario: materializa un conjunto de valores sobre el
+    // catálogo que el paso anterior acaba de sembrar (`SEED.codeSystemVersionId`
+    // para los conceptos, `CONCEPTS.LANG_ES` para sus designaciones). Va acá y
+    // no más abajo porque el registro público —la primera pantalla que ve
+    // cualquiera— lee `VS_BO_DEPARTMENT` para su desplegable de departamentos.
+    steps.push(
+      await this.runStep('departamentos de Bolivia', () =>
+        this.boGeography.run(),
+      ),
     );
     // Mismo motivo que el glosario: amplía el motor de terminología con un code
     // system propio. Depende del catálogo de conceptos por los idiomas de cada
