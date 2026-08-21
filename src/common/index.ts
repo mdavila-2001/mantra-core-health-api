@@ -12,6 +12,8 @@ export { AuthTokenModule } from './auth/auth-token.module';
 export { TokenService } from './auth/token.service';
 export type { IssuedTokens, TokenDisplayData } from './auth/token.service';
 export { JwtAuthGuard } from './auth/jwt-auth.guard';
+export { WsJwtGuard } from './auth/ws-jwt.guard';
+export type { AuthenticatedSocketData } from './auth/ws-jwt.guard';
 export { RolesGuard } from './auth/roles.guard';
 export { CurrentUser } from './auth/current-user.decorator';
 export { Public } from './auth/public.decorator';

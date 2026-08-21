@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityMessagingReadService } from './community-messaging-read.service';
 import { ResourceNotFoundException } from '../../../common';
+import { COMM } from '../community.concepts';
 
 const actor = { id: 'user-1', roles: ['USER'] } as any;
 
@@ -27,6 +28,10 @@ function build() {
     findActiveParticipant: mockFn().mockResolvedValue({ id: 'part-1' }),
     findParticipants: mockFn().mockResolvedValue([]),
     listMessagesPage: mockFn().mockResolvedValue([]),
+    // Por defecto no hay conversación (o no es DIRECT): el doble check queda
+    // en `null`, que es lo que ven las pruebas que no lo ejercitan.
+    findConversationById: mockFn().mockResolvedValue(null),
+    findMessageById: mockFn().mockResolvedValue(null),
   };
   // Carril P2: la bandeja nombra al otro lado. Por defecto no hay perfiles
   // que resolver, que es lo que ven las pruebas que no miran los nombres.
@@ -130,6 +135,46 @@ describe('CommunityMessagingReadService', () => {
       expect(res.items).toHaveLength(1);
       expect(res.items[0].id).toBe('m-2');
       expect(res.nextCursor).not.toBeNull();
+    });
+
+    /* --- Doble check ✓✓: hasta dónde leyó el peer -------------------------- */
+
+    it('resuelve peerReadUpTo en una directa cuando el peer ya marcó leído', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'c-1',
+        conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
+      });
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p-1' },
+        { participantProfileId: 'p-2', lastReadMessageId: 'm-5' },
+      ]);
+      const leidoHasta = new Date('2026-08-01T12:00:00Z');
+      d.conversationsRepo.findMessageById.mockResolvedValue({
+        id: 'm-5',
+        sentAt: leidoHasta,
+      });
+
+      const res = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+      });
+
+      expect(res.peerReadUpTo).toEqual(leidoHasta);
+    });
+
+    it('peerReadUpTo es null en un grupo (no hay "el otro lado")', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'c-1',
+        conversationTypeConceptId: COMM.CONVERSATION_GROUP,
+      });
+
+      const res = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+      });
+
+      expect(res.peerReadUpTo).toBeNull();
+      expect(d.conversationsRepo.findMessageById).not.toHaveBeenCalled();
     });
   });
 });
