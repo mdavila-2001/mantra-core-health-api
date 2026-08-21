@@ -268,6 +268,23 @@ export class BookingDecisionResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   occurredAt!: string;
+
+  /**
+   * Las solicitudes del paciente que este «sí» dejó sin efecto (regla 2 del
+   * choque de turnos): aceptar una cancela las pendientes que se superponen.
+   *
+   * Vacío es lo normal —la mayoría de las aceptaciones no desplazan nada—, y
+   * por eso viene siempre, en vez de omitirse: quien consume distingue «no
+   * desplazó ninguna» de «esta respuesta no lo cuenta». El servicio ya lo
+   * devolvía; faltaba declararlo acá, así que no salía en el contrato OpenAPI
+   * y el `accept` respondía con un campo que su propio tipo negaba.
+   */
+  @ApiProperty({
+    type: [String],
+    format: 'uuid',
+    description: 'Citas pendientes que quedaron canceladas por chocar con ésta',
+  })
+  desplazadas!: readonly string[];
 }
 
 /** Cuerpo de `POST /scheduling/bookings/{id}/reschedule` (UC-41-08). */
