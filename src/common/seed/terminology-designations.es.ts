@@ -46,21 +46,26 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  * | Medicamentos (`N02BE01`, …) | **DCI/ATC** — la denominación común internacional en español de la OMS. Ya estaban en castellano |
  * | Unidades (`UNIT_mg`, …) | **UCUM**, con el nombre de la unidad en castellano |
  * | Vías de administración, severidad, lateralidad, categoría | **HL7 FHIR** (`route-codes`, `condition-severity`, `condition-category`), traducidos siguiendo el uso de la edición española de SNOMED CT |
+ * | Estado y curso clínico de la condición | **HL7 FHIR** (`condition-clinical`, `condition-course`), con la misma referencia — la distinción recidiva/recaída es la de la edición española de SNOMED CT |
  * | Género, sexo al nacer | **HL7 FHIR AdministrativeGender**, con la distinción género/sexo que exige el propio modelo |
  * | Todo lo operativo (estados, roles, vínculos) | Vocabulario del propio sistema. No hay estándar externo: la traducción es de este proyecto y se escribió en lenguaje llano, que es lo que el glosario promete |
  *
  * ## Cobertura, dicha en voz alta
  *
- * Cubre los **145 conceptos que componen los 52 conjuntos de valores** de
+ * Cubre los **155 conceptos que componen los 53 conjuntos de valores** de
  * `DYNAMIC_ENUM_CATALOG` — es decir, todo lo que el glosario puede llegar a
  * mostrar hoy navegando por etiquetas. El catálogo interno completo es mayor
  * (estados de auditoría, tipos de evento, cosas que ningún conjunto de valores
  * ofrece y que nadie ve en pantalla): esos quedan sin designación `ES` a
  * propósito, y la lectura los devuelve con su rótulo original marcados como no
  * traducidos, nunca en blanco. `terminology-designations.es.spec.ts` fija que la
- * cobertura de los 145 sea completa, de modo que añadir un concepto a un
+ * cobertura de los 155 sea completa, de modo que añadir un concepto a un
  * conjunto de valores sin traducirlo rompe la prueba en vez de aparecer en
  * inglés en producción.
+ *
+ * El número sube cuando sube: los cinco del curso clínico y los seis del estado
+ * clínico de la condición entraron con el conjunto que los ofrece, y llegaron
+ * acá porque esa prueba se puso roja — que es exactamente para lo que está.
  */
 
 /** El nombre y la explicación de un concepto en castellano. */
@@ -1240,6 +1245,104 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     {
       display: 'Bilateral',
       definition: 'Afecta los dos lados del cuerpo.',
+    },
+  ],
+  // --- Estado clínico de la condición (HL7 condition-clinical) ---
+  //
+  // Los seis del ciclo de vida. «Recidiva» y «recaída» son distintas y en el
+  // uso corriente se confunden, así que la definición las separa en vez de
+  // dejarlo al nombre: la primera vuelve después de estar resuelta, la segunda
+  // vuelve después de haber mejorado sin llegar a resolverse.
+  [
+    CLIN.CONDITION_ACTIVE,
+    {
+      display: 'Activa',
+      definition: 'La condición está presente ahora y da síntomas o signos.',
+    },
+  ],
+  [
+    CLIN.CONDITION_RECURRENCE,
+    {
+      display: 'Recidiva',
+      definition:
+        'Volvió a aparecer después de haberse dado por resuelta. Es un episodio nuevo de algo que ya había terminado.',
+    },
+  ],
+  [
+    CLIN.CONDITION_RELAPSE,
+    {
+      display: 'Recaída',
+      definition:
+        'Volvió a empeorar después de haber mejorado, sin que se hubiera llegado a resolver. Es el mismo episodio, que retrocede.',
+    },
+  ],
+  [
+    CLIN.CONDITION_INACTIVE,
+    {
+      display: 'Inactiva',
+      definition:
+        'Ya no da síntomas, pero tampoco se declara resuelta: sigue en la historia porque puede volver.',
+    },
+  ],
+  [
+    CLIN.CONDITION_REMISSION,
+    {
+      display: 'En remisión',
+      definition:
+        'Los síntomas cedieron y el seguimiento continúa. No es alta: se sigue controlando por si reaparece.',
+    },
+  ],
+  [
+    CLIN.CONDITION_RESOLVED,
+    {
+      display: 'Resuelta',
+      definition:
+        'Terminó y no se espera que vuelva. Queda registrada como antecedente.',
+    },
+  ],
+  // --- Curso clínico de la condición ---
+  //
+  // Eje distinto del estado: una condición crónica puede estar activa o en
+  // remisión, y una aguda puede estar resuelta. El corte agudo/subagudo/crónico
+  // es de duración, no de gravedad.
+  [
+    CLIN.CONDITION_COURSE_ACUTE,
+    {
+      display: 'Aguda',
+      definition:
+        'Aparece de golpe y dura poco, con una resolución esperable en días o semanas.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_CHRONIC,
+    {
+      display: 'Crónica',
+      definition:
+        'Dura en el tiempo y no se espera que se resuelva. Se convive con ella y se controla.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_SUBACUTE,
+    {
+      display: 'Subaguda',
+      definition:
+        'Entre las dos: ni el arranque brusco de la aguda ni la permanencia de la crónica. Semanas o pocos meses.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_RECURRENT,
+    {
+      display: 'Recurrente',
+      definition:
+        'Va y viene en episodios separados, con períodos sin síntomas entre uno y otro.',
+    },
+  ],
+  [
+    CLIN.CONDITION_COURSE_UNKNOWN,
+    {
+      display: 'Curso desconocido',
+      definition:
+        'Todavía no hay datos para decir si es aguda o crónica. Se deja dicho en vez de suponerlo.',
     },
   ],
 ];
