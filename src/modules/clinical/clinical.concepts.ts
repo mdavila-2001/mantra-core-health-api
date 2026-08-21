@@ -122,12 +122,18 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
        nuevo (tras `RESOLVED` o `REMISSION`, respectivamente); no son estados
        terminales por sí mismos. Ver la máquina de transiciones en
        `ConditionsService`. */
-    CONDITION_INACTIVE: { code: 'COND_INACTIVE', display: 'Condition inactive' },
+    CONDITION_INACTIVE: {
+      code: 'COND_INACTIVE',
+      display: 'Condition inactive',
+    },
     CONDITION_REMISSION: {
       code: 'COND_REMISSION',
       display: 'Condition in remission',
     },
-    CONDITION_RESOLVED: { code: 'COND_RESOLVED', display: 'Condition resolved' },
+    CONDITION_RESOLVED: {
+      code: 'COND_RESOLVED',
+      display: 'Condition resolved',
+    },
     CONDITION_RECURRENCE: {
       code: 'COND_RECURRENCE',
       display: 'Condition recurrence',
@@ -139,7 +145,10 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
        de HL7 `Condition` nuclear (más cercano a la extensión `clinicalCourse`),
        así que no tiene equivalente FHIR canónico como los demás. */
     CONDITION_COURSE_ACUTE: { code: 'COND_COURSE_ACUTE', display: 'Acute' },
-    CONDITION_COURSE_CHRONIC: { code: 'COND_COURSE_CHRONIC', display: 'Chronic' },
+    CONDITION_COURSE_CHRONIC: {
+      code: 'COND_COURSE_CHRONIC',
+      display: 'Chronic',
+    },
     CONDITION_COURSE_SUBACUTE: {
       code: 'COND_COURSE_SUBACUTE',
       display: 'Subacute',

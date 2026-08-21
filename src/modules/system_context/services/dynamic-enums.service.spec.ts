@@ -137,7 +137,11 @@ describe('DynamicEnumsService', () => {
 
       const res = await d.service.draftVersion(
         DEFINITION,
-        { valueSetVersionId: VALUE_SET_VERSION, schemaVersion: '1.0.0', options: OPTIONS },
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
         actor,
       );
 
@@ -153,7 +157,15 @@ describe('DynamicEnumsService', () => {
       const d = build();
       wire(d);
 
-      await d.service.draftVersion(DEFINITION, { valueSetVersionId: VALUE_SET_VERSION, schemaVersion: '1.0.0', options: OPTIONS }, actor);
+      await d.service.draftVersion(
+        DEFINITION,
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
+        actor,
+      );
 
       expect(d.contextRepo.createEnumOption).toHaveBeenNthCalledWith(
         2,
@@ -177,13 +189,24 @@ describe('DynamicEnumsService', () => {
         orden.push('flush');
         return Promise.resolve();
       });
-      const crearOpcion = d.contextRepo.createEnumOption.getMockImplementation();
-      d.contextRepo.createEnumOption.mockImplementation((...args: unknown[]) => {
-        orden.push('option');
-        return crearOpcion?.(...args) ?? { id: 'o-1' };
-      });
+      const crearOpcion =
+        d.contextRepo.createEnumOption.getMockImplementation();
+      d.contextRepo.createEnumOption.mockImplementation(
+        (...args: unknown[]) => {
+          orden.push('option');
+          return crearOpcion?.(...args) ?? { id: 'o-1' };
+        },
+      );
 
-      await d.service.draftVersion(DEFINITION, { valueSetVersionId: VALUE_SET_VERSION, schemaVersion: '1.0.0', options: OPTIONS }, actor);
+      await d.service.draftVersion(
+        DEFINITION,
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
+        actor,
+      );
 
       expect(orden[0]).toBe('flush');
       expect(orden).toContain('option');
@@ -198,7 +221,11 @@ describe('DynamicEnumsService', () => {
 
       const res = await d.service.draftVersion(
         DEFINITION,
-        { valueSetVersionId: VALUE_SET_VERSION, schemaVersion: '1.0.0', options: OPTIONS },
+        {
+          valueSetVersionId: VALUE_SET_VERSION,
+          schemaVersion: '1.0.0',
+          options: OPTIONS,
+        },
         actor,
       );
 
@@ -264,7 +291,11 @@ describe('DynamicEnumsService', () => {
       await expect(
         d.service.draftVersion(
           DEFINITION,
-          { valueSetVersionId: VALUE_SET_VERSION, schemaVersion: '1.0.0', options: OPTIONS } as any,
+          {
+            valueSetVersionId: VALUE_SET_VERSION,
+            schemaVersion: '1.0.0',
+            options: OPTIONS,
+          } as any,
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
@@ -277,7 +308,11 @@ describe('DynamicEnumsService', () => {
       await expect(
         d.service.draftVersion(
           DEFINITION,
-          { valueSetVersionId: VALUE_SET_VERSION, schemaVersion: '1.0.0', options: OPTIONS } as any,
+          {
+            valueSetVersionId: VALUE_SET_VERSION,
+            schemaVersion: '1.0.0',
+            options: OPTIONS,
+          } as any,
           actor as any,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
