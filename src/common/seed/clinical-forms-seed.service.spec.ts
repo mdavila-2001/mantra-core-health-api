@@ -8,7 +8,10 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import {
+  ClinicalFormsSeedService,
+  CODIGO_TRANSVERSAL,
+} from './clinical-forms-seed.service';
 import { STANDARD_FORMS } from './data/clinical-forms/catalog';
 import { CHART_TEMPLATE_PROVENANCE_FIELD_CODE } from '../../modules/chart/dto';
 import { deterministicId } from '../constants/concepts';
@@ -104,7 +107,7 @@ const ESPECIALIDADES = new Set(
  */
 const ESPECIALIDADES_DEL_MODELO = new Map(
   [...ESPECIALIDADES]
-    .filter((codigo) => codigo !== 'TRANSVERSAL')
+    .filter((codigo) => codigo !== CODIGO_TRANSVERSAL)
     .map((codigo) => [codigo, `vs-${codigo.toLowerCase()}`] as const),
 );
 
@@ -291,7 +294,7 @@ describe('catálogo de formularios estándar', () => {
   });
 
   it('cubre los cuatro transversales y las especialidades del reclamo', () => {
-    expect(ESPECIALIDADES).toContain('TRANSVERSAL');
+    expect(ESPECIALIDADES).toContain(CODIGO_TRANSVERSAL);
     for (const especialidad of [
       'CARDIOLOGIA',
       'PEDIATRIA',

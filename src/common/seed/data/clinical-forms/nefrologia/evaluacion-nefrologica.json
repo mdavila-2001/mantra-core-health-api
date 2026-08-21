@@ -1,0 +1,35 @@
+{
+  "code": "NEFRO_EVALUACION_BASE",
+  "name": "Evaluación nefrológica",
+  "specialty": { "code": "NEFROLOGIA", "display": "Nefrología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato genitourinario",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el interrogatorio dirigido de diuresis, edemas y hematuria, el antecedente de litiasis, la presión arterial registrada en consulta y la referencia a estudios de función renal previos."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
+    { "code": "edemas", "name": "Edemas (localización y evolución)", "dataType": "text", "required": false },
+    { "code": "diuresis", "name": "Diuresis referida", "dataType": "text", "required": false },
+    { "code": "nicturia", "name": "Nicturia", "dataType": "boolean", "required": false },
+    { "code": "hematuria", "name": "Hematuria", "dataType": "boolean", "required": false },
+    { "code": "espuma_en_la_orina", "name": "Espuma en la orina", "dataType": "boolean", "required": false },
+    { "code": "dolor_lumbar", "name": "Dolor lumbar", "dataType": "text", "required": false },
+    { "code": "antecedente_de_litiasis", "name": "Antecedente de litiasis renal", "dataType": "text", "required": false },
+    { "code": "antecedentes_de_hipertension_o_diabetes", "name": "Antecedentes de hipertensión o diabetes", "dataType": "text", "required": false },
+    { "code": "medicacion_nefrotoxica", "name": "Medicación potencialmente nefrotóxica en uso", "dataType": "text", "required": false },
+    { "code": "presion_arterial_sistolica", "name": "Presión arterial sistólica (mmHg)", "dataType": "integer", "required": true },
+    { "code": "presion_arterial_diastolica", "name": "Presión arterial diastólica (mmHg)", "dataType": "integer", "required": true },
+    { "code": "peso", "name": "Peso (kg)", "dataType": "decimal", "required": false },
+    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": false },
+    { "code": "funcion_renal_previa", "name": "Función renal previa registrada", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+  ]
+}

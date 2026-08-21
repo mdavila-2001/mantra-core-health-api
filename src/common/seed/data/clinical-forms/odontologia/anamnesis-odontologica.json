@@ -1,0 +1,35 @@
+{
+  "code": "ODONTO_ANAMNESIS",
+  "name": "Anamnesis y antecedentes odontológicos",
+  "specialty": { "code": "ODONTOLOGIA", "display": "Odontología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Oral health surveys: basic methods — 5th edition (cuestionario de salud bucodental)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241548649",
+    "license": "Publicación OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
+    "sourceVersion": "5.ª edición, 2013",
+    "retrievedAt": "2026-08-14",
+    "note": "La estructura del cuestionario de antecedentes médicos y de las molestias bucales viene del cuestionario de salud bucodental de la OMS. Son agregados propios, tomados de la práctica de consultorio, los ítems de problemas con la anestesia, el bruxismo y la última visita dental. Los antecedentes que no tienen ítem propio —asma, enfermedades infecciosas, tratamientos previos y hábitos de higiene— se anotan en prosa en «Detalle de antecedentes»: la ficha es de admisión y se mantiene corta a propósito. No repite el odontograma, que vive en otra plantilla."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "alergia_a_medicamentos", "name": "Alergia a medicamentos", "dataType": "boolean", "required": false },
+    { "code": "consume_medicamentos", "name": "Consume medicamentos", "dataType": "boolean", "required": false },
+    { "code": "problemas_con_anestesia", "name": "Problemas con la anestesia", "dataType": "boolean", "required": false },
+    { "code": "problemas_de_sangrado", "name": "Problemas de sangrado", "dataType": "boolean", "required": false },
+    { "code": "enfermedad_cardiovascular", "name": "Enfermedad cardiovascular", "dataType": "boolean", "required": false },
+    { "code": "hipertension_arterial", "name": "Hipertensión arterial", "dataType": "boolean", "required": false },
+    { "code": "diabetes", "name": "Diabetes", "dataType": "boolean", "required": false },
+    { "code": "embarazo", "name": "Embarazo", "dataType": "boolean", "required": false },
+    { "code": "fuma", "name": "Fuma", "dataType": "boolean", "required": false },
+    { "code": "detalle_de_antecedentes", "name": "Detalle de antecedentes", "dataType": "text", "required": false },
+    { "code": "molestia_o_dolor_bucal", "name": "Molestia o dolor bucal", "dataType": "boolean", "required": false },
+    { "code": "sangrado_de_encias", "name": "Sangrado de encías", "dataType": "boolean", "required": false },
+    { "code": "movilidad_dentaria", "name": "Movilidad dentaria", "dataType": "boolean", "required": false },
+    { "code": "bruxismo", "name": "Bruxismo", "dataType": "boolean", "required": false },
+    { "code": "ultima_visita_dental", "name": "Última visita dental", "dataType": "date", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "plan_de_tratamiento", "name": "Plan de tratamiento", "dataType": "text", "required": false }
+  ]
+}

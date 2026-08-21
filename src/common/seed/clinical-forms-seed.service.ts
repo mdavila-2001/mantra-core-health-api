@@ -43,7 +43,7 @@ const VALUE_SET_ESPECIALIDADES = 'VS_MEDICAL_SPECIALTY';
  * modelo. Conservan su concepto acuñado acá: no se autoseleccionan por
  * especialidad, y el selector del bloque clínico los deja siempre a mano.
  */
-const CODIGO_TRANSVERSAL = 'TRANSVERSAL';
+export const CODIGO_TRANSVERSAL = 'TRANSVERSAL';
 
 /**
  * Siembra el **contenido** del catálogo de formularios clínicos: la versión
@@ -274,10 +274,7 @@ export class ClinicalFormsSeedService {
     for (const form of STANDARD_FORMS) {
       // Las que el modelo ya declara no se acuñan: se usan las suyas.
       if (delModelo.has(form.specialty.code)) continue;
-      porId.set(
-        this.specialtyConceptIdAcunado(form.specialty),
-        form.specialty,
-      );
+      porId.set(this.specialtyConceptIdAcunado(form.specialty), form.specialty);
     }
 
     const ids = [...porId.keys()];
