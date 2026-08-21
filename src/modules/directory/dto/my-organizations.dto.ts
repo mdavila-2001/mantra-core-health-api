@@ -1,12 +1,47 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 import { TenantDetailResponseDto } from './directory-read.dto';
+
+/**
+ * Datos propios de la aseguradora (`PAYER`), expuestos en la lectura de la
+ * organización.
+ *
+ * Sólo aparece cuando el tenant es de tipo `PAYER`: lo resuelve el servicio
+ * de lectura, no este DTO.
+ */
+export class PayerOrganizationProfileDto {
+  /**
+   * Código interno de la aseguradora dentro de la plataforma.
+   */
+  @ApiProperty({ description: 'Código de la aseguradora' })
+  carrierCode!: string;
+
+  /**
+   * Identificador ante el regulador de seguros (registro, matrícula, NIT).
+   */
+  @ApiProperty({ description: 'Identificador ante el regulador de seguros' })
+  regulatorIdentifier!: string;
+
+  /**
+   * Sigla con la que se conoce a la aseguradora.
+   */
+  @ApiProperty({ description: 'Sigla de la aseguradora' })
+  sigla!: string;
+
+  /**
+   * Dirección de la aseguradora.
+   */
+  @ApiProperty({ description: 'Dirección de la aseguradora' })
+  address!: string;
+}
 
 /**
  * Una organización del actor, con qué puede hacer en ella.
@@ -52,6 +87,15 @@ export class MyOrganizationDto extends TenantDetailResponseDto {
     description: 'Verdadero cuando la plataforma verificó la organización',
   })
   isVerified!: boolean;
+
+  /**
+   * Datos propios de la aseguradora. Presente sólo si el tenant es `PAYER`.
+   */
+  @ApiPropertyOptional({ type: PayerOrganizationProfileDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PayerOrganizationProfileDto)
+  payer?: PayerOrganizationProfileDto;
 }
 
 /**
@@ -72,6 +116,40 @@ export class MyOrganizationsResponseDto {
   /** Sus organizaciones, de la más recientemente creada a la más antigua. */
   @ApiProperty({ type: [MyOrganizationDto] })
   items!: MyOrganizationDto[];
+}
+
+/**
+ * Datos propios de la aseguradora editables desde `PATCH /tenants/{tenantId}`.
+ *
+ * `carrierCode` no está acá: no es editable por esta vía.
+ */
+export class UpdatePayerProfileDto {
+  /**
+   * Sigla con la que se conoce a la aseguradora.
+   */
+  @ApiPropertyOptional({ maxLength: 20, example: 'BUPA' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  sigla?: string;
+
+  /**
+   * Dirección de la aseguradora.
+   */
+  @ApiPropertyOptional({ maxLength: 300 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  address?: string;
+
+  /**
+   * Identificador ante el regulador de seguros (registro, matrícula, NIT).
+   */
+  @ApiPropertyOptional({ maxLength: 100 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  regulatorIdentifier?: string;
 }
 
 /**
@@ -132,4 +210,14 @@ export class UpdateTenantDto {
   @IsOptional()
   @IsUUID()
   currencyConceptId?: string;
+
+  /**
+   * Datos propios de la aseguradora. Sólo aplica si el tenant es `PAYER`;
+   * si el tenant no tiene aseguradora asociada, este bloque se ignora.
+   */
+  @ApiPropertyOptional({ type: UpdatePayerProfileDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UpdatePayerProfileDto)
+  payer?: UpdatePayerProfileDto;
 }

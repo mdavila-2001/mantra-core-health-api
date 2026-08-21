@@ -44,6 +44,20 @@ export class RegisterPatientDto {
   nationalId!: string;
 
   /**
+   * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`): la
+   * terminación LP/CB/SC/... que evita confundir cédulas homónimas de
+   * departamentos distintos (backlog T-01).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Departamento emisor del documento (catálogo VS_BO_DEPARTMENT)',
+  })
+  @IsOptional()
+  @IsUUID()
+  issuerAdministrativeAreaConceptId?: string;
+
+  /**
    * Valor de password mantenido por la instancia.
    */
   @ApiProperty({ minLength: 8, maxLength: 200 })
@@ -144,6 +158,31 @@ export class RegisterPatientDto {
     message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
   })
   phone?: string;
+
+  /**
+   * Ocupación, miembro de `VS_SEGIP_OCCUPATION` (backlog T-02).
+   */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Ocupación del catálogo (VS_SEGIP_OCCUPATION)',
+  })
+  @IsOptional()
+  @IsUUID()
+  occupationConceptId?: string;
+
+  /**
+   * Ocupación en texto libre, para cuando no está en el catálogo. Se ignora
+   * si viene `occupationConceptId`.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description:
+      'Ocupación en texto libre, para cuando no está en el catálogo',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  occupationFreeText?: string;
 
   /**
    * Género administrativo por código legible.

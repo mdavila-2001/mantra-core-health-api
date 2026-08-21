@@ -90,6 +90,7 @@ export class MedicationsService {
       unitConceptId: request.unitConceptId,
       validFrom: request.validFrom ?? null,
       validTo: request.validTo ?? null,
+      patientInstructionsText: request.patientInstructionsText ?? null,
       issuedAt: request.issuedAt ?? null,
       statusReasonText: request.statusReasonText ?? null,
     };
@@ -162,6 +163,7 @@ export class MedicationsService {
         unitConceptId: dto.unitConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
+        patientInstructionsText: dto.patientInstructionsText,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -215,6 +217,8 @@ export class MedicationsService {
       if (dto.validFrom !== undefined)
         request.validFrom = new Date(dto.validFrom);
       if (dto.validTo !== undefined) request.validTo = new Date(dto.validTo);
+      if (dto.patientInstructionsText !== undefined)
+        request.patientInstructionsText = dto.patientInstructionsText;
       touch(request, actor.id);
       await tx.flush();
 
@@ -468,6 +472,7 @@ export class MedicationsService {
         unitConceptId: dto.unitConceptId ?? original.unitConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : original.validFrom,
         validTo: dto.validTo ? new Date(dto.validTo) : original.validTo,
+        patientInstructionsText: original.patientInstructionsText,
         replacesRequestId: original.id,
         actorUserId: actor.id,
       });
@@ -550,6 +555,7 @@ export class MedicationsService {
         unitConceptId: source.unitConceptId,
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
+        patientInstructionsText: source.patientInstructionsText,
         renewedFromRequestId: source.id,
         actorUserId: actor.id,
       });

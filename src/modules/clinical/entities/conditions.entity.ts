@@ -133,6 +133,12 @@ export class Conditions {
   recordedByUserId?: string;
 
   /**
+   * Valor de note text mantenido por la instancia.
+   */
+  @Property({ fieldName: 'note_text', columnType: 'text', nullable: true })
+  noteText?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

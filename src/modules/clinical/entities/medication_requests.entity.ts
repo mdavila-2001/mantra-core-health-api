@@ -127,6 +127,16 @@ export class MedicationRequests {
   validTo?: Date;
 
   /**
+   * Valor de patient instructions text mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'patient_instructions_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  patientInstructionsText?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

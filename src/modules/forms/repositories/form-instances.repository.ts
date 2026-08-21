@@ -56,12 +56,10 @@ export class FormInstancesRepository {
    */
   findByResourceAndVersion(
     em: EntityManager,
-    resourceTypeConceptId: string,
     resourceId: string,
     schemaVersion: number,
   ): Promise<FormInstances | null> {
     return em.findOne(FormInstances, {
-      resourceTypeConceptId,
       resourceId,
       schemaVersion,
     });

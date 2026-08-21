@@ -37,6 +37,19 @@ const TIPOS_ADMITIDOS = [
 ] as const satisfies readonly TechnicalDataType[];
 
 /**
+ * Los campos `json` que SÍ se admiten, por código.
+ *
+ * `json` no está entre los tipos generales por el mismo motivo de siempre: el
+ * bloque clínico no sabe dibujar un objeto arbitrario y el campo quedaría en
+ * pantalla sin poder completarse. La excepción es para los que tienen un
+ * control dedicado que sabe leer y escribir su forma — hoy, el odontograma
+ * FDI, cuyo valor es el mapa `{ "11": "1", … }` de pieza a estado OMS. Es una
+ * lista blanca y no una puerta abierta: agregar un código acá obliga a que
+ * exista el control que lo dibuja.
+ */
+const CODIGOS_JSON_CON_CONTROL = ['odontograma_fdi'] as const;
+
+/**
  * La ficha de catálogo de un formulario: de dónde salió.
  *
  * Es lo que el cliente pidió cuando dijo «catalogado», y lo que evita que el
@@ -74,8 +87,14 @@ export interface StandardFormSpecialty {
   display: string;
 }
 
-/** Tipo de dato admitido en un formulario del catálogo. */
-export type StandardFormDataType = (typeof TIPOS_ADMITIDOS)[number];
+/**
+ * Tipo de dato admitido en un formulario del catálogo.
+ *
+ * Los generales, más `json` para los campos de
+ * {@link CODIGOS_JSON_CON_CONTROL} — los que tienen un control dedicado que
+ * sabe dibujar su forma.
+ */
+export type StandardFormDataType = (typeof TIPOS_ADMITIDOS)[number] | 'json';
 
 /** Un campo del esquema, tal como lo acepta `POST /charts/templates`. */
 export interface StandardFormField {
@@ -126,7 +145,13 @@ type RawForm = Omit<StandardFormDefinition, 'fields'> & {
  */
 function validar(form: RawForm): StandardFormDefinition {
   const fields = form.fields.map((field) => {
-    if (!(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)) {
+    const conControl =
+      field.dataType === 'json' &&
+      (CODIGOS_JSON_CON_CONTROL as readonly string[]).includes(field.code);
+    if (
+      !conControl &&
+      !(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)
+    ) {
       throw new Error(
         `Formulario ${form.code}: el campo "${field.code}" declara el tipo ` +
           `"${field.dataType}", que no está entre los admitidos ` +

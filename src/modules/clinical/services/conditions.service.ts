@@ -163,6 +163,7 @@ export class ConditionsService {
         expectedResolutionAt: dto.expectedResolutionAt
           ? new Date(dto.expectedResolutionAt)
           : undefined,
+        noteText: dto.noteText,
         recordedByUserId: actor.id,
         actorUserId: actor.id,
       });

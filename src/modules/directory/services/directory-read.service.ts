@@ -15,7 +15,8 @@ import {
   TenantsRepository,
 } from '../repositories';
 import { TenantAdministrationService } from './tenant-administration.service';
-import { DIR } from '../directory.concepts';
+import { CatalogRepository } from '../../insurance/repositories';
+import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
 import type {
   ListBranchAssignmentsResponseDto,
   ListBranchesResponseDto,
@@ -61,6 +62,7 @@ export class DirectoryReadService {
    * @param branchesRepo - Acceso a `directory.branches`.
    * @param branchMembershipsRepo - Acceso a `directory.branch_memberships`.
    * @param tenantAdmin - Comprobación de alcance por organización.
+   * @param catalogRepo - Acceso a `insurance.insurance_carriers`, para el bloque `payer`.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -70,6 +72,7 @@ export class DirectoryReadService {
     private readonly branchesRepo: BranchesRepository,
     private readonly branchMembershipsRepo: BranchMembershipsRepository,
     private readonly tenantAdmin: TenantAdministrationService,
+    private readonly catalogRepo: CatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryReadService.name);
@@ -216,6 +219,24 @@ export class DirectoryReadService {
       // error del que pregunta: se omite en vez de romperle el panel.
       if (!tenant) continue;
 
+      // Los datos propios de la aseguradora sólo aplican a un tenant PAYER: el
+      // resto no tiene fila en `insurance.insurance_carriers` que leer.
+      let payer: MyOrganizationDto['payer'];
+      if (tenant.tenantTypeConceptId === TENANT_TYPE_CONCEPT_BY_CODE.PAYER) {
+        const carrier = await this.catalogRepo.findCarrierByTenantId(
+          em,
+          tenant.id,
+        );
+        if (carrier) {
+          payer = {
+            carrierCode: carrier.carrierCode,
+            regulatorIdentifier: carrier.regulatorIdentifier ?? '',
+            sigla: carrier.sigla ?? '',
+            address: carrier.address ?? '',
+          };
+        }
+      }
+
       items.push({
         id: tenant.id,
         code: tenant.code,
@@ -239,6 +260,7 @@ export class DirectoryReadService {
         ),
         isVerified:
           tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED,
+        ...(payer ? { payer } : {}),
       });
     }
 
