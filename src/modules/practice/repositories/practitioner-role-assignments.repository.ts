@@ -130,6 +130,56 @@ export class PractitionerRoleAssignmentsRepository {
   }
 
   /**
+   * Todas las vinculaciones de un profesional, en cualquier organización y
+   * cualquier estado (pendiente, activa, suspendida, rechazada o finalizada).
+   *
+   * A diferencia de {@link findCurrentWithSite}, que resuelve "dónde atiende
+   * hoy" para la agenda, esta lectura es la del propio profesional revisando
+   * "en qué organizaciones estoy y cómo estoy en cada una" (Carril 18, spec
+   * líneas 1619-1664): incluye lo pendiente de aprobación y lo histórico.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional consultado.
+   * @returns Sus vinculaciones, de la más reciente a la más antigua.
+   */
+  findByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<PractitionerRoleAssignments[]> {
+    return em.find(
+      PractitionerRoleAssignments,
+      { practitionerProfileId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Vinculaciones ACTIVE y vigentes (`valid_to IS NULL`) de un profesional,
+   * en cualquier organización y con o sin sede declarada.
+   *
+   * A diferencia de {@link findCurrentWithSite} (que exige sede, porque lo
+   * usa la agenda para resolver "dónde"), esta lectura la usa `accounting`
+   * (Carril 18) sólo para comprobar pertenencia — un profesional puede tener
+   * una vinculación válida sin sede asignada todavía.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional consultado.
+   * @param activeStatusConceptId - Concepto de vinculación activa.
+   * @returns Sus vinculaciones activas vigentes.
+   */
+  findActiveByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+    activeStatusConceptId: string,
+  ): Promise<PractitionerRoleAssignments[]> {
+    return em.find(PractitionerRoleAssignments, {
+      practitionerProfileId,
+      statusConceptId: activeStatusConceptId,
+      validTo: null,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

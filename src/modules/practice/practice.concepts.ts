@@ -18,6 +18,42 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'PR_TYPE_CLINIC',
       display: 'Clinic practice type',
     },
+    // Carril 18 — tipos de organización de la spec (líneas 1623-1633): hospitales,
+    // clínicas (ya existía), consultorios, centros médicos, laboratorios, centros
+    // de diagnóstico, universidades, fundaciones, aseguradoras. `typeConceptId` es
+    // un FK abierto al catálogo, así que sumar valores no toca el esquema.
+    PRACTICE_TYPE_HOSPITAL: {
+      code: 'PR_TYPE_HOSPITAL',
+      display: 'Hospital practice type',
+    },
+    PRACTICE_TYPE_OFFICE: {
+      code: 'PR_TYPE_OFFICE',
+      display: 'Medical office (consultorio) practice type',
+    },
+    PRACTICE_TYPE_MEDICAL_CENTER: {
+      code: 'PR_TYPE_MED_CENTER',
+      display: 'Medical center practice type',
+    },
+    PRACTICE_TYPE_LABORATORY: {
+      code: 'PR_TYPE_LAB',
+      display: 'Laboratory practice type',
+    },
+    PRACTICE_TYPE_DIAGNOSTIC_CENTER: {
+      code: 'PR_TYPE_DIAG_CENTER',
+      display: 'Diagnostic center practice type',
+    },
+    PRACTICE_TYPE_UNIVERSITY: {
+      code: 'PR_TYPE_UNIVERSITY',
+      display: 'University practice type',
+    },
+    PRACTICE_TYPE_FOUNDATION: {
+      code: 'PR_TYPE_FOUNDATION',
+      display: 'Foundation practice type',
+    },
+    PRACTICE_TYPE_INSURER: {
+      code: 'PR_TYPE_INSURER',
+      display: 'Insurer practice type',
+    },
     PRACTICE_ACTIVE: { code: 'PR_ACTIVE', display: 'Practice active' },
 
     // --- practice_sites --------------------------------------------------------
@@ -93,6 +129,23 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
     ROLE_ASSIGNMENT_ENDED: {
       code: 'ROLE_ASG_ENDED',
       display: 'Role assignment ended',
+    },
+    // Carril 18 — ciclo de vida completo de la vinculación profesional-organización
+    // (spec línea 1655: "una organización apruebe, rechace, suspenda o finalice la
+    // vinculación"). Antes solo existían ACTIVE/ENDED porque el alta era siempre
+    // inmediata y administrada por SECURITY_ADMIN; el auto-servicio del profesional
+    // necesita un estado intermedio y sus salidas.
+    ROLE_ASSIGNMENT_PENDING: {
+      code: 'ROLE_ASG_PENDING',
+      display: 'Role assignment pending organization approval',
+    },
+    ROLE_ASSIGNMENT_REJECTED: {
+      code: 'ROLE_ASG_REJECTED',
+      display: 'Role assignment rejected by organization',
+    },
+    ROLE_ASSIGNMENT_SUSPENDED: {
+      code: 'ROLE_ASG_SUSPENDED',
+      display: 'Role assignment suspended by organization',
     },
 
     // --- practitioner_support_assignments --------------------------------------

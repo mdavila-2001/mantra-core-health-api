@@ -7,3 +7,4 @@ export * from './subledger.dto';
 export * from './asset.dto';
 export * from './liability.dto';
 export * from './exchange-rate.dto';
+export * from './practitioner-entry.dto';
