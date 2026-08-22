@@ -13,107 +13,22 @@
     "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes epidemiológicos, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la descripción del patrón febril, el foco clínico probable, los antecedentes de viajes y exposiciones, el estado de vacunación y los tratamientos antimicrobianos previos."
   },
   "fields": [
-    {
-      "code": "motivo_consulta",
-      "name": "Motivo de consulta",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "tiempo_de_enfermedad",
-      "name": "Tiempo de enfermedad",
-      "dataType": "string",
-      "required": true
-    },
-    {
-      "code": "fiebre",
-      "name": "Fiebre",
-      "dataType": "boolean",
-      "required": false
-    },
-    {
-      "code": "patron_febril",
-      "name": "Patrón febril descrito",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "temperatura",
-      "name": "Temperatura registrada (°C)",
-      "dataType": "decimal",
-      "required": false
-    },
-    {
-      "code": "sintomas_acompanantes",
-      "name": "Síntomas acompañantes",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "foco_clinico_probable",
-      "name": "Foco clínico probable",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "viajes_recientes",
-      "name": "Viajes recientes",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "exposiciones_de_riesgo",
-      "name": "Exposiciones de riesgo (animales, agua, contactos)",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "contacto_con_caso_similar",
-      "name": "Contacto con caso similar",
-      "dataType": "boolean",
-      "required": false
-    },
-    {
-      "code": "estado_de_vacunacion",
-      "name": "Estado de vacunación referido",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "antimicrobianos_previos",
-      "name": "Tratamientos antimicrobianos previos",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "condiciones_de_inmunosupresion",
-      "name": "Condiciones de inmunosupresión conocidas",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "examen_fisico",
-      "name": "Examen físico",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "examenes_previos",
-      "name": "Exámenes y cultivos previos revisados",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "diagnostico",
-      "name": "Diagnóstico",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "conducta",
-      "name": "Conducta",
-      "dataType": "text",
-      "required": false
-    }
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_enfermedad", "name": "Tiempo de enfermedad", "dataType": "string", "required": true },
+    { "code": "fiebre", "name": "Fiebre", "dataType": "boolean", "required": false },
+    { "code": "patron_febril", "name": "Patrón febril descrito", "dataType": "text", "required": false },
+    { "code": "temperatura", "name": "Temperatura registrada (°C)", "dataType": "decimal", "required": false },
+    { "code": "sintomas_acompanantes", "name": "Síntomas acompañantes", "dataType": "text", "required": false },
+    { "code": "foco_clinico_probable", "name": "Foco clínico probable", "dataType": "text", "required": false },
+    { "code": "viajes_recientes", "name": "Viajes recientes", "dataType": "text", "required": false },
+    { "code": "exposiciones_de_riesgo", "name": "Exposiciones de riesgo (animales, agua, contactos)", "dataType": "text", "required": false },
+    { "code": "contacto_con_caso_similar", "name": "Contacto con caso similar", "dataType": "boolean", "required": false },
+    { "code": "estado_de_vacunacion", "name": "Estado de vacunación referido", "dataType": "text", "required": false },
+    { "code": "antimicrobianos_previos", "name": "Tratamientos antimicrobianos previos", "dataType": "text", "required": false },
+    { "code": "condiciones_de_inmunosupresion", "name": "Condiciones de inmunosupresión conocidas", "dataType": "text", "required": false },
+    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": true },
+    { "code": "examenes_previos", "name": "Exámenes y cultivos previos revisados", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
   ]
 }

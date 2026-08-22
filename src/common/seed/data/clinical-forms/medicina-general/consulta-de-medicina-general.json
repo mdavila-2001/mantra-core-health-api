@@ -13,113 +13,23 @@
     "note": "De la norma salen la estructura común de la consulta ambulatoria: motivo, tiempo de evolución, relato de la enfermedad actual, antecedentes personales y familiares, funciones biológicas, examen físico general y por aparatos, diagnóstico y conducta. Son agregados propios de la ficha el desglose de los signos vitales en campos separados (presión, frecuencia cardíaca, temperatura, peso y talla) para poder registrarlos como valores numéricos."
   },
   "fields": [
-    {
-      "code": "motivo_consulta",
-      "name": "Motivo de consulta",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "tiempo_de_evolucion",
-      "name": "Tiempo de evolución",
-      "dataType": "string",
-      "required": true
-    },
-    {
-      "code": "enfermedad_actual",
-      "name": "Relato de la enfermedad actual",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "antecedentes_personales",
-      "name": "Antecedentes personales patológicos",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "antecedentes_familiares",
-      "name": "Antecedentes familiares",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "medicacion_habitual",
-      "name": "Medicación habitual",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "alergias",
-      "name": "Alergias conocidas",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "funciones_biologicas",
-      "name": "Funciones biológicas (apetito, sed, sueño, orina, deposiciones)",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "presion_arterial",
-      "name": "Presión arterial (mmHg)",
-      "dataType": "string",
-      "required": false
-    },
-    {
-      "code": "frecuencia_cardiaca",
-      "name": "Frecuencia cardíaca (lpm)",
-      "dataType": "integer",
-      "required": false
-    },
-    {
-      "code": "temperatura",
-      "name": "Temperatura (°C)",
-      "dataType": "decimal",
-      "required": false
-    },
-    {
-      "code": "peso",
-      "name": "Peso (kg)",
-      "dataType": "decimal",
-      "required": false
-    },
-    {
-      "code": "talla",
-      "name": "Talla (cm)",
-      "dataType": "decimal",
-      "required": false
-    },
-    {
-      "code": "examen_fisico_general",
-      "name": "Examen físico general",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "examen_por_aparatos",
-      "name": "Examen por aparatos y sistemas",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "examenes_auxiliares",
-      "name": "Exámenes auxiliares solicitados",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "diagnostico",
-      "name": "Diagnóstico",
-      "dataType": "text",
-      "required": true
-    },
-    {
-      "code": "conducta",
-      "name": "Conducta",
-      "dataType": "text",
-      "required": false
-    }
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "tiempo_de_evolucion", "name": "Tiempo de evolución", "dataType": "string", "required": true },
+    { "code": "enfermedad_actual", "name": "Relato de la enfermedad actual", "dataType": "text", "required": true },
+    { "code": "antecedentes_personales", "name": "Antecedentes personales patológicos", "dataType": "text", "required": false },
+    { "code": "antecedentes_familiares", "name": "Antecedentes familiares", "dataType": "text", "required": false },
+    { "code": "medicacion_habitual", "name": "Medicación habitual", "dataType": "text", "required": false },
+    { "code": "alergias", "name": "Alergias conocidas", "dataType": "text", "required": false },
+    { "code": "funciones_biologicas", "name": "Funciones biológicas (apetito, sed, sueño, orina, deposiciones)", "dataType": "text", "required": false },
+    { "code": "presion_arterial", "name": "Presión arterial (mmHg)", "dataType": "string", "required": false },
+    { "code": "frecuencia_cardiaca", "name": "Frecuencia cardíaca (lpm)", "dataType": "integer", "required": false },
+    { "code": "temperatura", "name": "Temperatura (°C)", "dataType": "decimal", "required": false },
+    { "code": "peso", "name": "Peso (kg)", "dataType": "decimal", "required": false },
+    { "code": "talla", "name": "Talla (cm)", "dataType": "decimal", "required": false },
+    { "code": "examen_fisico_general", "name": "Examen físico general", "dataType": "text", "required": false },
+    { "code": "examen_por_aparatos", "name": "Examen por aparatos y sistemas", "dataType": "text", "required": false },
+    { "code": "examenes_auxiliares", "name": "Exámenes auxiliares solicitados", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
   ]
 }
