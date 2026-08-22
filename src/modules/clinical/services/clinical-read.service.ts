@@ -208,6 +208,7 @@ export class ClinicalReadService {
         validFrom: row.validFrom,
         validTo: row.validTo,
         patientInstructionsText: row.patientInstructionsText,
+        indicationConditionId: row.indicationConditionId,
         signedAt: row.signedAt,
         issuedAt: row.issuedAt,
         createdAt: row.createdAt,

@@ -32,31 +32,32 @@ const CONDITION_HISTORY_ENTITY = 'conditions';
  * terminales: por eso salen de ellas las mismas transiciones que de `ACTIVE`.
  * `RESOLVED` es terminal salvo `RECURRENCE` explícita; nunca automática.
  */
-const CLINICAL_STATUS_TRANSITIONS: Readonly<Record<string, readonly string[]>> = {
-  [CLIN.CONDITION_ACTIVE]: [
-    CLIN.CONDITION_INACTIVE,
-    CLIN.CONDITION_REMISSION,
-    CLIN.CONDITION_RESOLVED,
-  ],
-  [CLIN.CONDITION_RECURRENCE]: [
-    CLIN.CONDITION_INACTIVE,
-    CLIN.CONDITION_REMISSION,
-    CLIN.CONDITION_RESOLVED,
-  ],
-  [CLIN.CONDITION_RELAPSE]: [
-    CLIN.CONDITION_ACTIVE,
-    CLIN.CONDITION_INACTIVE,
-    CLIN.CONDITION_REMISSION,
-    CLIN.CONDITION_RESOLVED,
-  ],
-  [CLIN.CONDITION_INACTIVE]: [CLIN.CONDITION_ACTIVE, CLIN.CONDITION_RESOLVED],
-  [CLIN.CONDITION_REMISSION]: [
-    CLIN.CONDITION_ACTIVE,
-    CLIN.CONDITION_INACTIVE,
-    CLIN.CONDITION_RELAPSE,
-  ],
-  [CLIN.CONDITION_RESOLVED]: [CLIN.CONDITION_RECURRENCE],
-};
+const CLINICAL_STATUS_TRANSITIONS: Readonly<Record<string, readonly string[]>> =
+  {
+    [CLIN.CONDITION_ACTIVE]: [
+      CLIN.CONDITION_INACTIVE,
+      CLIN.CONDITION_REMISSION,
+      CLIN.CONDITION_RESOLVED,
+    ],
+    [CLIN.CONDITION_RECURRENCE]: [
+      CLIN.CONDITION_INACTIVE,
+      CLIN.CONDITION_REMISSION,
+      CLIN.CONDITION_RESOLVED,
+    ],
+    [CLIN.CONDITION_RELAPSE]: [
+      CLIN.CONDITION_ACTIVE,
+      CLIN.CONDITION_INACTIVE,
+      CLIN.CONDITION_REMISSION,
+      CLIN.CONDITION_RESOLVED,
+    ],
+    [CLIN.CONDITION_INACTIVE]: [CLIN.CONDITION_ACTIVE, CLIN.CONDITION_RESOLVED],
+    [CLIN.CONDITION_REMISSION]: [
+      CLIN.CONDITION_ACTIVE,
+      CLIN.CONDITION_INACTIVE,
+      CLIN.CONDITION_RELAPSE,
+    ],
+    [CLIN.CONDITION_RESOLVED]: [CLIN.CONDITION_RECURRENCE],
+  };
 
 /**
  * UC-08-08: registro de condiciones/diagnósticos (activa + confirmada), y
@@ -175,11 +176,16 @@ export class ConditionsService {
         entityId: condition.id,
         tenantId: condition.custodianTenantId,
       });
-      await this.historyRepo.append(tx, CONDITION_HISTORY_ENTITY, condition.id, {
-        operationConceptId: AUD.OPERATION_INSERT,
-        dataSnapshot: this.snapshot(condition),
-        changedByUserId: actor.id,
-      });
+      await this.historyRepo.append(
+        tx,
+        CONDITION_HISTORY_ENTITY,
+        condition.id,
+        {
+          operationConceptId: AUD.OPERATION_INSERT,
+          dataSnapshot: this.snapshot(condition),
+          changedByUserId: actor.id,
+        },
+      );
 
       this.logger.info(
         { operation: 'clinical.condition.create', conditionId: condition.id },
@@ -259,11 +265,16 @@ export class ConditionsService {
         entityId: condition.id,
         tenantId: condition.custodianTenantId,
       });
-      await this.historyRepo.append(tx, CONDITION_HISTORY_ENTITY, condition.id, {
-        operationConceptId: AUD.OPERATION_UPDATE,
-        dataSnapshot: this.snapshot(condition),
-        changedByUserId: actor.id,
-      });
+      await this.historyRepo.append(
+        tx,
+        CONDITION_HISTORY_ENTITY,
+        condition.id,
+        {
+          operationConceptId: AUD.OPERATION_UPDATE,
+          dataSnapshot: this.snapshot(condition),
+          changedByUserId: actor.id,
+        },
+      );
 
       this.logger.info(
         {

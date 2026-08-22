@@ -9,3 +9,4 @@ export * from './care-gaps.repository';
 export * from './immunization-schedules.repository';
 export * from './virtual-encounters.repository';
 export * from './reference-ranges.repository';
+export * from './prescription-favorites.repository';

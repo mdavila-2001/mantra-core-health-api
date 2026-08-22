@@ -1,0 +1,34 @@
+{
+  "code": "ONCO_EVALUACION_BASE",
+  "name": "Evaluación oncológica",
+  "specialty": { "code": "ONCOLOGIA", "display": "Oncología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, examen físico y notas de evolución",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "sourceVersion": "V.02",
+    "retrievedAt": "2026-08-14",
+    "note": "De la norma se transcribe la estructura común de la consulta: motivo, tiempo de evolución, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad el diagnóstico oncológico y su fecha, el estadio registrado como texto libre, los tratamientos oncológicos recibidos, el estado funcional ECOG como número y la pérdida de peso."
+  },
+  "fields": [
+    { "code": "motivo_consulta", "name": "Motivo de consulta", "dataType": "text", "required": true },
+    { "code": "diagnostico_oncologico_conocido", "name": "Diagnóstico oncológico conocido", "dataType": "string", "required": false },
+    { "code": "fecha_del_diagnostico", "name": "Fecha del diagnóstico", "dataType": "date", "required": false },
+    { "code": "estadio_clinico", "name": "Estadio clínico", "dataType": "string", "required": false },
+    { "code": "tratamientos_oncologicos_recibidos", "name": "Tratamientos oncológicos recibidos", "dataType": "text", "required": false },
+    { "code": "fecha_del_ultimo_tratamiento", "name": "Fecha del último tratamiento", "dataType": "date", "required": false },
+    { "code": "estado_funcional_ecog", "name": "Estado funcional ECOG (0 a 4)", "dataType": "integer", "required": false },
+    { "code": "sintomas_actuales", "name": "Síntomas actuales", "dataType": "text", "required": true },
+    { "code": "dolor", "name": "Dolor", "dataType": "boolean", "required": false },
+    { "code": "perdida_de_peso", "name": "Pérdida de peso", "dataType": "boolean", "required": false },
+    { "code": "peso_actual_kg", "name": "Peso actual (kg)", "dataType": "decimal", "required": false },
+    { "code": "medicacion_actual", "name": "Medicación actual", "dataType": "text", "required": false },
+    { "code": "antecedentes_familiares_oncologicos", "name": "Antecedentes familiares oncológicos", "dataType": "text", "required": false },
+    { "code": "examen_fisico", "name": "Examen físico", "dataType": "text", "required": true },
+    { "code": "estudios_complementarios", "name": "Estudios complementarios", "dataType": "text", "required": false },
+    { "code": "diagnostico", "name": "Diagnóstico", "dataType": "text", "required": true },
+    { "code": "conducta", "name": "Conducta", "dataType": "text", "required": false }
+  ]
+}

@@ -5,3 +5,4 @@ export * from './order-sets.service';
 export * from './referrals.service';
 export * from './care-gaps.service';
 export * from './virtual-encounters.service';
+export * from './prescription-favorites.service';

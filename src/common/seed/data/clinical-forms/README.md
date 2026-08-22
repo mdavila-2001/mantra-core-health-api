@@ -22,6 +22,30 @@ donde el equipo guarde los adjuntos. Un formulario clínico guardado como imagen
 formulario: es un adjunto. Lo que sirve —y lo que este directorio contiene— es la transcripción a
 campos, que es lo que el motor captura.
 
+## Cobertura (v4.1.6 · 2026-08-21)
+
+**43 formularios**: 4 transversales —que sirven para cualquier consulta— y 39 repartidos entre las
+**36 especialidades** de `VS_MEDICAL_SPECIALTY`, que quedan **todas cubiertas**. Antes eran 15
+sobre 9 especialidades: a un neurólogo, a un nutricionista o a un radiólogo el selector no le
+ofrecía nada suyo.
+
+Tres criterios que se aplicaron al escribir las 28 nuevas y que conviene respetar al agregar más:
+
+- **La base común es la NT 022 del MINSA**, que ya sostenía 8 de las fichas originales: la
+  estructura de toda historia clínica (motivo, evolución, examen dirigido, diagnóstico, conducta)
+  sale de ahí, y cada ficha declara en su `note` qué ítems son agregado propio de la disciplina.
+  No se incorporó ninguna fuente nueva.
+- **Las escalas van como campo libre, nunca como catálogo.** ASA, ECOG, Mallampati o el dolor
+  0-10 se registran como `string`/`integer`: un value set nuevo es vocabulario del modelo y entra
+  por el pipeline canónico, no por un `.json` de contenido.
+- **Emergencia no promete tiempos.** `EMERG_ATENCION_BASE` registra prioridad como texto libre y
+  **no** enumera niveles de triage ni compromete tiempos de atención: es una decisión de producto
+  que nadie tomó (regla 6 del diagnóstico del documento ecosistémico).
+
+Las tres fichas de **informe** (radiología, patología, laboratorio) respetan igual el molde
+—empiezan en `motivo_consulta`, cierran en `diagnostico`— aunque ahí signifiquen «indicación del
+estudio» y «conclusión»: el motor y el selector no distinguen tipos de ficha.
+
 ## Agregar un formulario
 
 1. Crear `<especialidad>/<formulario>.json` con la forma de `StandardFormDefinition`.

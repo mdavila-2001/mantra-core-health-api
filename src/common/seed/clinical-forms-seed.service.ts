@@ -43,7 +43,7 @@ const VALUE_SET_ESPECIALIDADES = 'VS_MEDICAL_SPECIALTY';
  * modelo. Conservan su concepto acuñado acá: no se autoseleccionan por
  * especialidad, y el selector del bloque clínico los deja siempre a mano.
  */
-const CODIGO_TRANSVERSAL = 'TRANSVERSAL';
+export const CODIGO_TRANSVERSAL = 'TRANSVERSAL';
 
 /**
  * Siembra el **contenido** del catálogo de formularios clínicos: la versión
