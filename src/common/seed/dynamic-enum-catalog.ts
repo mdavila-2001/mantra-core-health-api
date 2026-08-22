@@ -321,8 +321,11 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   {
     code: 'jurisdiction',
     name: 'Jurisdicción',
-    description: 'Ámbito territorial de la licencia para ejercer.',
-    concepts: [PROF.JURISDICTION_NATIONAL],
+    description:
+      'Ámbito territorial de la licencia para ejercer. SEDES Santa Cruz es ' +
+      'departamental y se suma a la nacional, no la reemplaza: un profesional ' +
+      'puede declarar las dos como autorizaciones separadas.',
+    concepts: [PROF.JURISDICTION_NATIONAL, PROF.JURISDICTION_SEDES_SANTA_CRUZ],
     defaultConceptId: PROF.JURISDICTION_NATIONAL,
     targets: ['profiles.jurisdiction_authorizations.jurisdiction_concept_id'],
   },

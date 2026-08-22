@@ -379,6 +379,9 @@ export class IamPractitionerSelfRegistrationService {
         licenseNumber: dto.licenseNumber,
         regulatoryAuthority: dto.regulatoryAuthority,
         stateConceptId: PROF.AUTH_PENDING,
+        validFrom: dto.licenseIssueDate
+          ? new Date(dto.licenseIssueDate)
+          : undefined,
         actorUserId: user.id,
       });
       const credential = this.professionalCredentialsRepo.create(tx, {
@@ -417,6 +420,8 @@ export class IamPractitionerSelfRegistrationService {
           value: dto.nationalId,
           useConceptId: CONCEPTS.USE_OFFICIAL,
           stateConceptId: CONCEPTS.STATE_ACTIVE,
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
           actorUserId: user.id,
         });
       }
